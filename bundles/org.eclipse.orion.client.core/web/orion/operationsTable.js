@@ -123,7 +123,11 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 			} catch(error) {
 				//it is not JSON, just continue;
 			}
-			return {Message: status.Message || status, Severity: status.Severity};
+			var ret = {Message: status.Message || status, Severity: status.Severity};
+			if(status.DetailedMessage && status.DetailedMessage !== ret.Message){
+				ret.DetailedMessage = status.DetailedMessage;
+			}
+			return ret;
 		};
 		
 		OperationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -167,7 +171,10 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 				break;
 			case 2:
 				var result =  this.parseProgressResult(item.Result);
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: result.Message || item.Message});
+				var message = result.Message || item.Message;
+				if(result.DetailedMessage && result.DetailedMessage!=="")
+					message += ": " + result.DetailedMessage;
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: message});
 				break;
 			case 3:
 				if(item.Created && parseInt(item.Created)>0){
