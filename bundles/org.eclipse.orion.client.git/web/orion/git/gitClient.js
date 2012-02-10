@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -491,7 +491,7 @@ eclipse.GitService = (function() {
 			});
 			return clientDeferred;
 		},
-		doGitLog : function(gitLogURI, onLoad, onError) {
+		doGitLog : function(gitLogURI, onLoad, onError, message) {
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrGet({
@@ -502,7 +502,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Getting git log", onLoad);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, message ? message : "Generating git log", onLoad);
 				},
 				error : function(error, ioArgs) {
 					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError, dojo.xhrGet);
