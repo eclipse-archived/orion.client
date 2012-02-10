@@ -1827,37 +1827,82 @@ var exports = {};
 		});
 		commandService.addCommand(applyPatchCommand, "object");
 		
+		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", "Commit name:")], true);
+		
 		var openCommitCommand = new mCommands.Command({
 			name : "Open Commit",
 			tooltip: "Open the commit with the given name",
 			id : "eclipse.orion.git.openCommitCommand",
 			imageClass: "git-sprite-apply_patch",
 			spriteClass: "gitCommandSprite",
+			parameters: openCommitParameters,
 			callback: function(data) {
-				var repository;
+				var findCommitLocation = function (repositories, commitName, deferred) {
+					if (deferred == null)
+						deferred = new dojo.Deferred();
+					
+					if (repositories.length > 0) {
+						serviceRegistry.getService("orion.git.provider").doGitLog(
+							"/gitapi/commit/" + data.parameters.valueFor("commitName") + repositories[0].ContentLocation + "?page=1&pageSize=1", null, null, "Looking for the commit").then(
+							function(resp){
+								deferred.callback(resp.Children[0].Location);
+							},
+							function(error) {
+								findCommitLocation(repositories.slice(1), commitName, deferred);
+							}
+						);
+					} else {
+						deferred.errback();
+					}
+					
+					return deferred;
+				};
+				
+				var openCommit = function(repositories) {
+					if (data.parameters.optionsRequested) {
+						new orion.git.widgets.OpenCommitDialog(
+							{repositories: repositories, serviceRegistry: serviceRegistry, commitName: data.parameters.valueFor("commitName")}
+						).show();
+					} else {
+						serviceRegistry.getService("orion.page.message").setProgressMessage("Looking for the commit");
+						findCommitLocation(repositories, data.parameters.valueFor("commitName")).then(
+							function(commitLocation){
+								if(commitLocation !== null){
+									var commitPageURL = "/git/git-commit.html#" + commitLocation + "?page=1&pageSize=1";
+									window.open(commitPageURL);
+								}
+							}, function () {
+								var display = [];
+								display.Severity = "warning";
+								display.HTML = false;
+								display.Message = "No commits found";
+								serviceRegistry.getService("orion.page.message").setProgressResult(display);
+							}
+						);
+					}	
+				};
+
 				if (data.items.Type === "Clone") {
-					repository = data.items;
-					new orion.git.widgets.OpenCommitDialog(
-						{repository: repository, serviceRegistry: serviceRegistry}
-					).show();
-				} else {
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					gitService.getGitClone(data.items.CloneLocation).then(
+					var repositories = [data.items];
+					openCommit(repositories);
+				} else if (data.items.CloneLocation){
+					serviceRegistry.getService("orion.git.provider").getGitClone(data.items.CloneLocation).then(
 						function(jsonData){
-							repository = jsonData.Children[0];
-							new orion.git.widgets.OpenCommitDialog(
-								{repository: repository, serviceRegistry: serviceRegistry}
-							).show();
+							var repositories = jsonData.Children;
+							openCommit(repositories);
 						}
 					);
+				} else {
+					var repositories = data.items;
+					openCommit(repositories);
 				}
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Clone" || item.CloneLocation;
+				return item.Type === "Clone" || item.CloneLocation || (item.length > 1 && item[0].Type === "Clone") ;
 			}
 		});
 		commandService.addCommand(openCommitCommand, "dom");
-		
+
 		var mapToGithubCommand = new mCommands.Command({
 			name : "Go to github",
 			tooltip: "Go to the associated github repository",
