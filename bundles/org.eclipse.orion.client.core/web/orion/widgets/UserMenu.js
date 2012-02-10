@@ -211,7 +211,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				}else if(authService.login){
 					var a = dojo.create("a", {innerHTML: "Sign In",
 						title: "Sign In",
-						style: "margin-right: 0px",
+						style: "margin-right: 0px"
 					}, dojo.byId('userInfo'), "only");
 					
 					dojo.connect(a, "onmouseover", a, function() {
