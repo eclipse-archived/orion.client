@@ -11,29 +11,15 @@
 /*global dojo dijit widgets orion console define*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/widgets/ServiceCarousel'], function(require, dojo, dijit, mUtil) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/ServiceCarousel'], function(require, dojo, dijit, mUtil, mCommands) {
 	
 	dojo.declare("orion.widgets.PluginList", [dijit._Widget, dijit._Templated], {
 	
 		templateString: '<div>' + 
 							'<div class="pluginwrapper">' +
 								'<div class="pluginTitle" data-dojo-attach-point="pluginTitle"></div>' +
-								'<div class="additions" data-dojo-attach-point="pluginControl" data-dojo-attach-event="onclick:addNewPlugins">Add Plugins</div>' +
 					        '</div>' +
 					        '<div class="displaytable">' +
-								'<div data-dojo-attach-point="pluginDialog" class="interactionClosed">' +
-									'<table id="dev-table" width="100%">' +
-										'<tr>' +
-											'<td>' +
-												'<input data-dojo-attach-point="pluginUrlEntry" type="url" data-dojo-attach-event="onfocus:pluginURLFocus, onblur:pluginURLBlur" value="Type a plugin url here ..." name="user_url" style="width:400px;color:#AAA;"/>' +
-												'<button data-dojo-attach-event="onclick:installHandler">Load this plugin</button>' +
-											'</td>' +
-											'<td align="right">' +
-												'<button id="update-extensions-now" data-dojo-attach-event="onclick:reloadPlugins">Re-load all</button>' +
-											'</td>' +
-										'</tr>' +
-									'</table>' +
-								'</div>' +
 								'<div class="plugin-settings">' +
 									'<list data-dojo-attach-point="pluginSettingsList"></list>' +
 								'</div>' +
@@ -69,6 +55,67 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 					    
 					    
 		postCreate: function(){
+			// set up the toolbar level commands
+			var installPluginCommand = new mCommands.Command({
+				name: "Install",
+				tooltip: "Install a plugin by specifying its URL",
+				id: "orion.installPlugin",
+				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', 'Plugin URL:', '')], false),
+				callback: dojo.hitch(this, function(data) {
+					if (data.parameters) {
+						var location = data.parameters.valueFor('url');
+						if (location) {
+							this.installHandler(location);
+						}
+					}
+				})
+			});
+			this.commandService.addCommand(installPluginCommand, "dom");
+			this.commandService.registerCommandContribution("orion.installPlugin", 1, this.toolbarID, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url"));
+			var reloadAllPluginsCommand = new mCommands.Command({
+				name: "Reload all",
+				tooltip: "Reload all installed plugins",
+				id: "orion.reloadAllPlugins",
+				callback: dojo.hitch(this, function() {
+					this.reloadPlugins();
+				})
+			});
+			this.commandService.addCommand(reloadAllPluginsCommand, "dom");
+			// register these with the toolbar and render them.  Rendering is normally done by our outer page, but since
+			// we might have been created after the page first loaded, we have to do this ourselves.
+			this.commandService.registerCommandContribution("orion.reloadAllPlugins", 2, this.toolbarID);
+			this.commandService.renderCommands(this.toolbarID, "dom", this, this, "button");
+			
+			var reloadPluginCommand = new mCommands.Command({
+				name: "Reload",
+				tooltip: "Reload the plugin",
+				id: "orion.reloadPlugin",
+				imageClass: "core-sprite-refresh",
+				visibleWhen: function(items) {  // we expect a URL
+					return typeof items === "string";
+				},
+				callback: dojo.hitch(this, function(data) {
+					this.reloadPlugin(data.items);
+				})
+			});			
+			this.commandService.addCommand(reloadPluginCommand, "object");
+			this.commandService.registerCommandContribution("orion.reloadPlugin", 1);
+
+			// now we register commands that are appropriate at the object (row) level
+			var uninstallPluginCommand = new mCommands.Command({
+				name: "Delete",
+				tooltip: "Delete this plugin from the configuration",
+				imageClass: "core-sprite-delete",
+				id: "orion.uninstallPlugin",
+				visibleWhen: function(items) {  // we expect a URL
+					return typeof items === "string";
+				},
+				callback: dojo.hitch(this, function(data) {
+					this.removePlugin(data.items);
+				})
+			});			
+			this.commandService.addCommand(uninstallPluginCommand, "object");
+			this.commandService.registerCommandContribution("orion.uninstallPlugin", 2);
 			this.addRows();
 		},
 		
@@ -118,29 +165,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 				dojo.create( "div", null, detailsView );
 				var description = dojo.create( "span", { "class":"plugin-description", innerHTML: "A plugin for Eclipse Orion" }, detailsView );
 				dojo.create( "a", { "class":"plugin-link", href: location, innerHTML: "Plugin Link" }, detailsView ); 
-				
-				var removeButton = dojo.create( "button", { "id":location, "class":"plugin-delete", innerHTML: "Remove", 'onclick': dojo.hitch( this, "removePlugin" ) }, container );	
-				
+				var commandSpan = dojo.create( "span", {id: "actions"+p, "class": "plugin-commands"}, container );
+				this.commandService.renderCommands(commandSpan, "object", location, this, "tool");
 				var serviceContainer = dojo.create("div", {'class':'plugin-service-item'}, list);
 				
 				new orion.widgets.ServiceCarousel({serviceData:serviceData}, serviceContainer );		
 			}	                
 		},
-		
-		addNewPlugins: function(){
-			if( this.pluginDialogState === false ){		
-				dojo.removeClass( this.pluginDialog, "interactionClosed" );
-				dojo.addClass( this.pluginDialog, "interactionOpen" );
-				this.pluginControl.innerHTML = "Hide Dialog";
-				this.pluginDialogState = true;
-			}else{
-				dojo.removeClass( this.pluginDialog, "interactionOpen" );
-				dojo.addClass( this.pluginDialog, "interactionClosed" );
-				this.pluginControl.innerHTML = "Add Plugins";
-				this.pluginDialogState = false;
-			} 
-		},
-		
+				
 		pluginURLFocus: function(){
 			this.pluginUrlEntry.value = '';
 			dojo.style( this.pluginUrlEntry, "color", "" );
@@ -154,7 +186,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 		},
 		
 		addPlugin: function( plugin ){
-			this.pluginUrlEntry.value="";
 			this.statusService.setMessage("Installed " + plugin.getLocation(), 5000);
 			this.settings.preferences.getPreferences("/plugins").then(function(plugins) {
 				plugins.put(this.newPluginUrl, true);
@@ -168,14 +199,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 			this.statusService.setErrorMessage(error);
 		},
 		
-		installHandler: function(){
-			this.newPluginUrl = this.pluginUrlEntry.value;
-			if (/^\S+$/.test(dojo.trim(this.newPluginUrl))) {
-				this.statusService.setMessage("Installing " + this.newPluginUrl + "...");
-				if( this.settings.pluginRegistry.getPlugin(this.newPluginUrl) ){
+		installHandler: function(newPluginUrl){
+			if (/^\S+$/.test(dojo.trim(newPluginUrl))) {
+				this.statusService.setMessage("Installing " + newPluginUrl + "...");
+				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
 					this.statusService.setErrorMessage("Already installed");
 				} else {
-					this.settings.pluginRegistry.installPlugin(this.newPluginUrl).then( dojo.hitch( this, 'addPlugin' ), dojo.hitch( this, 'pluginError' ) );
+					this.settings.pluginRegistry.installPlugin(newPluginUrl).then( dojo.hitch( this, 'addPlugin' ), dojo.hitch( this, 'pluginError' ) );
 				}
 			}
 		},
@@ -184,6 +214,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
 			this.statusService.setMessage( "Reloaded " + settingsPluginList.length + " plugin" + ( settingsPluginList.length===1 ? "": "s") + ".", 5000 );
 			this.addRows();
+		},
+		
+		/* reloads a single plugin */
+		reloadPlugin: function(url) {
+			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
+			for( var p = 0; p < settingsPluginList.length; p++ ){
+				if( settingsPluginList[p].getLocation() === url ){
+					settingsPluginList[p].update();
+					this.statusService.setMessage("Reloaded " + url, 5000);
+					break;
+				}
+			}
 		},
 		
 		/* reloads all of the plugins - sometimes useful for reaffirming plugin initialization */
@@ -209,28 +251,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 			d.then( dojo.hitch( this, "reloaded" ) );
 		},
 		
-		forceRemove: function(decision){
-			if( decision === true ){		
+		forceRemove: function(url){
+			var settings = this.settings;
+			var statusService = this.statusService;
 			
-				var settings = this.settings;
-				var statusService = this.statusService;
-				
-				var settingsPluginList = settings.pluginRegistry.getPlugins();
-			
-				for( var p = 0; p < settingsPluginList.length; p++ ){
-					if( settingsPluginList[p].getLocation() === event.srcElement.id ){
-						settingsPluginList[p].uninstall();
-	
-						this.pluginUrlEntry.value="";
-						statusService.setMessage("Uninstalled " + event.srcElement.id, 5000);
-						settings.preferences.getPreferences("/plugins").then(function(plugins) {
-							plugins.remove(event.srcElement.id);
-						}); // this will force a sync
-						
-						this.addRows();
-						
-						break;
-					}
+			var settingsPluginList = settings.pluginRegistry.getPlugins();
+		
+			for( var p = 0; p < settingsPluginList.length; p++ ){
+				if( settingsPluginList[p].getLocation() === url ){
+					settingsPluginList[p].uninstall();
+					statusService.setMessage("Uninstalled " + url, 5000);
+					settings.preferences.getPreferences("/plugins").then(function(plugins) {
+						plugins.remove(url);
+					}); // this will force a sync
+					
+					this.addRows();
+					
+					break;
 				}
 			}
 		},
@@ -238,16 +275,17 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'orion/
 		
 		/* removePlugin - removes a plugin by url */
 
-		removePlugin: function( event ){
+		removePlugin: function( url ){
 
 			/* 	The id of the source element is programmed with the
 				url of the plugin to remove. */
 				
 			// TODO: Should be internationalized
 				
-			var confirmMessage = "Are you sure you want to uninstall '" + event.srcElement.id + "'?";
-			
-			this.dialogService.confirm( confirmMessage, dojo.hitch( this, 'forceRemove' ) );
+			var confirmMessage = "Are you sure you want to uninstall '" + url + "'?";
+			if (window.confirm(confirmMessage)) {
+				this.forceRemove(url);
+			}
 		}
 	});
 });

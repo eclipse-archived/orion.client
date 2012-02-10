@@ -363,14 +363,9 @@ list>*,grid>* {
 	max-width:200px;
 }
 
-.plugin-delete {
+.plugin-commands {
 	float: right;
 	position: relative;
-	background: white;
-	color: #666;
-	border: solid 1px #999;
-	border-radius: 2px;
-	font-size: 0.9em;
 }
 
 .plugin-action-area {
