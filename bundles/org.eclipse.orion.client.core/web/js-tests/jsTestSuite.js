@@ -37,11 +37,11 @@ require(requireJSConfig);
 
 var ORION_TYPE = 'orion test case';
 var ORION_UI_TYPE = 'orion ui test case';
-function OrionTestCase(uri) {
-	return TestCase(uri, null, ORION_TYPE);
+function OrionTestCase(name, uri) {
+	return TestCase(name, {uri: uri}, ORION_TYPE);
 }
-function OrionUITestCase(uri) {
-	return TestCase(uri, null, ORION_UI_TYPE);
+function OrionUITestCase(name, uri) {
+	return TestCase(name, {uri: uri}, ORION_UI_TYPE);
 }
 
 jstestdriver.pluginRegistrar.register({
@@ -61,7 +61,8 @@ jstestdriver.pluginRegistrar.register({
 			return false;
 		}
 
-		var testURI = config.getTestCaseInfo().getTestCaseName();
+		var testCaseName = config.getTestCaseInfo().getTestCaseName();
+		var testURI = config.getTestCaseInfo().getTemplate().prototype.uri;
 
 		require(['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/DeferredList'], function (dojo, mServiceregistry, mPluginregistry) {
 			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
@@ -73,7 +74,7 @@ jstestdriver.pluginRegistrar.register({
 				for (var i = 0; i < references.length; i++) {
 					var service = loaderServiceRegistry.getService(references[i]);
 					service.addEventListener("testDone", function (testName, testResult) {
-						onTestDone(new jstestdriver.TestResult(testURI, testName, testResult.result ? "passed" : "failed", testResult.message || "", "", testResult.elapsed));
+						onTestDone(new jstestdriver.TestResult(testCaseName, testName, testResult.result ? "passed" : "failed", testResult.message || "", "", testResult.elapsed));
 					});
 					testRunDeferreds.push(service.run());
 				}
@@ -83,7 +84,7 @@ jstestdriver.pluginRegistrar.register({
 					onComplete();
 				});
 			}, function () {
-				onTestDone(new jstestdriver.TestResult(testURI, "", "error", "failed to load test", "", 0));
+				onTestDone(new jstestdriver.TestResult(testCaseName, "testSuiteLoader", "error", "failed to load " + testURI, "", 0));
 				loaderPluginRegistry.shutdown();
 				onComplete();
 			});
@@ -93,18 +94,19 @@ jstestdriver.pluginRegistrar.register({
 });
 
 // list your test cases here....
-OrionTestCase("/js-tests/commonjs-unittesting/test.html");
-OrionTestCase("/js-tests/compare/test.html");
-OrionTestCase("/js-tests/serviceRegistry/test.html");
-OrionTestCase("/js-tests/preferences/test.html");
-OrionTestCase("/js-tests/pluginRegistry/test.html");
-OrionTestCase("/js-tests/testRunAsynch/test.html");
-OrionTestCase("/js-tests/editor/test.html");
-OrionTestCase("/js-tests/textview/test.html");
-OrionTestCase("/js-tests/jsContentAssist/test.html");
-OrionTestCase("/js-tests/contentTypes/test.html");
-//OrionTestCase("/js-tests/searchRendering/test.html");
-//OrionUITestCase("/js-tests/textview/test-performance.html");
+OrionTestCase("commonjs-unittesting", "/js-tests/commonjs-unittesting/test.html");
+OrionTestCase("compare", "/js-tests/compare/test.html");
+OrionTestCase("serviceRegistry", "/js-tests/serviceRegistry/test.html");
+OrionTestCase("preferences", "/js-tests/preferences/test.html");
+OrionTestCase("pluginRegistry", "/js-tests/pluginRegistry/test.html");
+OrionTestCase("testRunAsynch", "/js-tests/testRunAsynch/test.html");
+OrionTestCase("editor", "/js-tests/editor/test.html");
+OrionTestCase("textview", "/js-tests/textview/test.html");
+OrionTestCase("jsContentAssist", "/js-tests/jsContentAssist/test.html");
+OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
+
+//OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
+//OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");
 
 
 
