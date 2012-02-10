@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window widgets eclipse:true serviceRegistry dojo */
+/*global window widgets eclipse:true serviceRegistry define */
 /*browser:true*/
 define(['require', 'dojo', 'orion/commands', 'orion/util',
         'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 
@@ -1911,11 +1911,15 @@ var exports = {};
 			tooltip: "Show this repository at GitHub",
 			id : "orion.git.gotoGithub",
 			hrefCallback : function(data) {
-				var url = data.items.GitUrl;
-				return "https://github.com/" + url.substring(url.indexOf(':')+1, url.lastIndexOf('.'));
+				//url format should include github.com/username/reponame.git or github.com:username/reponame.git
+				var url = /github\.com.*\.git/.exec(data.items.GitUrl)[0];
+				//convert : to / if needed
+				url = url.replace(':', '/');
+				return "https://" + url.substring(0, url.length-4);
 			},
 			visibleWhen : function(item) {
-				return item.GitUrl && item.GitUrl.indexOf("git@github.com") === 0;
+				//url format should include github.com/username/reponame.git or github.com:username/reponame.git
+				return item.GitUrl && /github\.com.*\.git/.exec(item.GitUrl);
 			}
 		});
 		commandService.addCommand(mapToGithubCommand, "dom");
