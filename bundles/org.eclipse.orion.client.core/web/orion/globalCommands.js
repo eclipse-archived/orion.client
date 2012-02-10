@@ -77,15 +77,15 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			var menuButton = new dijit.form.DropDownButton({
 				id: "logins",
 				dropDown: userMenu,
-				title: "Options",
+				label: "Options", 
+				showLabel: false,
 				alt: "Options"
-		        });
-		        dojo.addClass(menuButton.domNode, "commandImage");
-		        dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
-		        if(menuButton.valueNode)
-		        	dojo.destroy(menuButton.valueNode);
+			});
+			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
+			if(menuButton.valueNode) {
+		        dojo.destroy(menuButton.valueNode);
 			}
-		
+		}
 		
 		for(var i=0; i<authServices.length; i++){
 			var servicePtr = authServices[i];
