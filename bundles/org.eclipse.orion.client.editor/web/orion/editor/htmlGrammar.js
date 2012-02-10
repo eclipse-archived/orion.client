@@ -29,10 +29,16 @@ define("orion/editor/htmlGrammar", [], function() {
 			"scopeName": "source.html",
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 			"patterns": [
-				// TODO unicode?
 				{
-					"match": "<!(doctype|DOCTYPE)[^>]+>",
-					"name": "entity.name.tag.doctype.html"
+					"begin": "<!(doctype|DOCTYPE)",
+					"end": ">",
+					"contentName": "entity.name.tag.doctype.html",
+					"beginCaptures": {
+						"0": { "name": "entity.name.tag.doctype.html" }
+					},
+					"endCaptures": {
+						"0": { "name": "entity.name.tag.doctype.html" }
+					}
 				},
 				{
 					"begin": "<!--",
@@ -58,6 +64,7 @@ define("orion/editor/htmlGrammar", [], function() {
 				{ "include": "#attrName" },
 				{ "include": "#qString" },
 				{ "include": "#qqString" },
+				{ "include": "#entity" },
 				// TODO attrName, qString, qqString should be applied first while inside a tag
 				{ // startDelimiter + slash + tagName + endDelimiter
 					"match": "</[A-Za-z0-9_\\-:]+>",
@@ -79,6 +86,10 @@ define("orion/editor/htmlGrammar", [], function() {
 				"qString": { // single quoted string
 					"match": "(')[^']+(\')",
 					"name": "string.quoted.single.html"
+				},
+				"entity": {
+					"match": "&[A-Za-z0-9]+;",
+					"name": "constant.character.entity.html"
 				}
 			}
 		};

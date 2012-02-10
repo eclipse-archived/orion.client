@@ -45,8 +45,11 @@ var exports = {};
 		}
 		
 		if (selectionToolbarId) {
-			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "button", true);
+			var selectionTools = dojo.byId(selectionToolbarId);
+			if (selectionTools) {
+				dojo.empty(selectionToolbarId);
+				commandService.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+			}
 		}
 
 		// Stuff we do only the first time
@@ -56,7 +59,7 @@ var exports = {};
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button", true);
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
 				}
 			});
 		}
@@ -882,9 +885,11 @@ var exports = {};
 
 		var rebaseCommand = new mCommands.Command({
 			name : "Rebase",
-			tooltip: "Remove your commits from the active branch, start the active branch again based on the latest state of the selected branch " +
-					"and apply each commit again to the updated active branch.",
+			tooltip: "Rebase your commits by removing them from the active branch, starting the active branch again based on the latest state of the selected branch " +
+					"and applying each commit again to the updated active branch.",
 			id : "eclipse.orion.git.rebase",
+			imageClass: "git-sprite-rebase",
+			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = data.items;
 				serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN", function(jsonData){
@@ -945,9 +950,9 @@ var exports = {};
 				);
 			},
 			visibleWhen : function(item) {
-				this.tooltip = "Remove your commits from the active branch, " +
-					"start the active branch again based on the latest state of '" + item.Name + "' " + 
-					"and apply each commit again to the updated active branch.";
+				this.tooltip = "Rebase your commits by removing them from the active branch, " +
+					"starting the active branch again based on the latest state of '" + item.Name + "' " + 
+					"and applying each commit again to the updated active branch.";
 
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
@@ -1248,6 +1253,8 @@ var exports = {};
 			name : "Reset",
 			tooltip: "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
 			id : "eclipse.orion.git.resetIndex",
+			imageClass: "git-sprite-reset",
+			spriteClass: "gitCommandSprite",
 			callback: function(data) {
 				var item = data.items;
 				if(confirm("The content of your active branch will be replaced with " + item.Name + ". " +

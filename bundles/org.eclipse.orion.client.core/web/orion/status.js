@@ -6,7 +6,7 @@
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: IBM Corporation - _initial API and implementation
  *******************************************************************************/
 /*global define window Image */
  
@@ -28,15 +28,35 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		this.notificationContainerDomId = notificationContainerDomId;
 		this.domId = domId;
 		this.progressDomId = progressDomId || domId;
+		this._hookedClose = false;
 	}
  
 	StatusReportingService.prototype = /** @lends orion.status.StatusReportingService.prototype */ {
+	
+		_init: function() {
+			// this is a cheat, all dom ids should be passed in
+			var closeButton = dojo.byId("closeNotifications");
+			if (closeButton && !this._hookedClose) {
+				dojo.connect(closeButton, "onclick", this, function() {
+					this.setProgressMessage("");
+					dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+				});	
+				// onClick events do not register for spans when using the keyboard
+				dojo.connect(closeButton, "onkeypress", this, function(e) {
+					if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
+						this.setProgressMessage("");
+						dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+					}				
+				});
+			}
+		},
 		/**
 		 * Displays a status message to the user.
 		 * @param {String} msg Message to display.
 		 * @param [Number] timeout Optional time to display the message before hiding it.
 		 */
 		setMessage : function(msg, timeout) {
+			this._init();
 			dojo.place(window.document.createTextNode(msg), this.domId, "only");
 			if (typeof(timeout) === "number") {
 				var that = this;
@@ -58,6 +78,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
+			this._init();
 			//could be: responseText from xhrGet, dojo deferred error object, or plain string
 			var status = st.responseText || st.message || st;
 			//accept either a string or a JSON representation of an IStatus
@@ -92,7 +113,10 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 * @param {String} message The progress message to display. 
 		 */
 		setProgressMessage : function(message) {
-			dojo.place(window.document.createTextNode(message), this.progressDomId, "only");
+			this._init();
+			var image = dojo.create("span", {"class": "progressNormalImage"});
+			dojo.place(image, this.progressDomId, "only");
+			dojo.place(window.document.createTextNode(message), this.progressDomId, "last");
 			dojo.addClass(this.notificationContainerDomId, "progressNormal");
 			if (message.length > 0) {
 				dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
@@ -117,6 +141,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			} catch(error) {
 				//it is not JSON, just continue;
 			}
+			this._init();
 			var msg = status.Message || status;
 			var imageClass = "progressInfoImage";
 			var extraClass = "progressInfo";
@@ -131,7 +156,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					removedClasses = "progressInfo progressError progressNormal";
 					break;
 				case "Error":
-					imageClass = "progressErrorImage"
+					imageClass = "progressErrorImage";
 					alt = "error";
 					extraClass="progressError";
 					removedClasses = "progressWarning progressInfo progressNormal";
@@ -139,17 +164,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				}
 			}
 			var image = dojo.create("span", {"class": imageClass});
-			dojo.style(image, "opacity", "0.7");
-			dojo.connect(image, "onmouseover", this, function() {
-				dojo.style(image, "opacity", "1");
-			});
-			dojo.connect(image, "onmouseout", this, function() {
-				dojo.style(image, "opacity", "0.7");
-			});
-			dojo.connect(image, "onclick", this, function() {
-				this.setProgressMessage("");
-				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
-			});
 			dojo.place(image, this.progressDomId, "only");
 			if (status.HTML) { // msg is HTML to be inserted directly
 				dojo.place(msg, this.progressDomId, "last");

@@ -23,8 +23,11 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		var commandService = registry.getService("orion.page.command");
 		commandService.renderCommands(toolbar, "dom", item, explorer, "button");
 		if (selectionToolbarId) {
-			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "button");
+			var selectionTools = dojo.byId(selectionToolbarId);
+			if (selectionTools) {
+				dojo.empty(selectionTools);
+				commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
+			}
 		}
 
 		
@@ -35,7 +38,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "button");
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
 				}
 			});
 		}

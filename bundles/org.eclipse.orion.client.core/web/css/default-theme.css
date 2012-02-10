@@ -12,6 +12,10 @@
 	color: blue;
 }
 
+.constant-character-entity {
+	font-style: normal;
+}
+
 .entity {
 	color: #3f7f7f;
 }

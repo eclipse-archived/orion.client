@@ -637,12 +637,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 										showLabel:  group.title !== "*",
 										dropDown: newMenu
 								        });
-									dojo.addClass(menuButton.domNode, "commandLink");
+									dojo.addClass(menuButton.domNode, "commandMenu");
 									dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-									var overclass = null;
 									if (group.title === "*") {
-										dojo.addClass(menuButton.domNode, "textless");
-										overclass = "textlessOver";
 										new CommandTooltip({
 											connectId: [menuButton.domNode],
 											label: "Actions menu",
@@ -651,7 +648,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 											commandService: this
 										});
 									}
-									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass, overclass);
+									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = renderType + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
