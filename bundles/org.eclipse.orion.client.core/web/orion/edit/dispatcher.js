@@ -78,6 +78,7 @@ define(['orion/edit/dispatcher'], function() {
 					this._wireServiceMethod(serviceReference, service, method, textView, type);
 				}
 			}
+			this._initService(service, textView);
 		},
 		_wireServiceMethod: function(serviceReference, service, serviceMethod, textView, type) {
 			//console.log("  Add listener " + type + " for " + serviceReference.getServiceId());
@@ -105,6 +106,24 @@ define(['orion/edit/dispatcher'], function() {
 		_onServiceAdded: function(serviceReference, service) {
 			if (serviceReference.getName() === "orion.edit.model") {
 				this._wireServiceReference(serviceReference);
+			}
+		},
+		// Editor content may've changed before we got a chance to hook up listeners for interested services.
+		// So dispatch a 'Changing' event that brings the service's empty model up to speed with the editor content.
+		_initService: function(service, textView) {
+			var onModelChanging = service.onModelChanging;
+			if (typeof onModelChanging === "function") {
+				var model = textView.getModel(), text = model.getText();
+				var event = {
+					type: "Changing",
+					text: text,
+					start: 0,
+					removedCharCount: 0,
+					addedCharCount: text.length,
+					removedLineCount: 0,
+					addedLineCount: model.getLineCount()
+				};
+				onModelChanging.call(service, event);
 			}
 		}
 	};
