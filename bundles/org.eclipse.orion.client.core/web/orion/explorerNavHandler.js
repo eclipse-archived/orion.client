@@ -27,9 +27,7 @@ exports.ExplorerNavHandler = (function() {
 	 */
 	function ExplorerNavHandler(explorer, options) {
 		this.explorer = explorer;
-		this.renderer = this.explorer.renderer;
 		this.model = this.explorer.model;
-		this.myTree = this.explorer.myTree;
 		
 	    this._listeners = [];
 		
@@ -38,8 +36,8 @@ exports.ExplorerNavHandler = (function() {
 		   						 	return this.isExpanded(model);
 		   						 }),
 		   						 
-		   			isExpandable: this.renderer.isExpandable ? dojo.hitch(this, function(model) {
-					 				return this.renderer.isExpandable(model);
+		   			isExpandable: this.explorer.renderer.isExpandable ? dojo.hitch(this, function(model) {
+					 				return this.explorer.renderer.isExpandable(model);
 								 }) : dojo.hitch(this, function(model) {
 					 				return this.isExpandable(model);
 								 }),				   						 
@@ -119,14 +117,14 @@ exports.ExplorerNavHandler = (function() {
 			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){
 				return this.explorer.keyEventListeningDiv();
 			}
-			return this.myTree._parent;
+			return this.explorer.myTree._parent;
 		},
 		
 		isExpandable: function(model){
 			if(!model){
 				return false;
 			}
-			var expandImage = dojo.byId(this.renderer.expandCollapseImageId(this.model.getId(model)));
+			var expandImage = dojo.byId(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
 			return expandImage ? true: false;
 		},
 		
@@ -134,10 +132,12 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				return false;
 			}
-			return this.myTree.isExpanded(this.model.getId(model));
+			return this.explorer.myTree.isExpanded(this.model.getId(model));
 		},
 		
 		refreshModel: function(model, noReset){
+		    var parentDiv = this._getEventListeningDiv();
+		    parentDiv.focus();
 			this.topIterationNodes = [];
 			this.model = model;
 			if(this.model.getTopIterationNodes){
@@ -214,15 +214,15 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_checkRow: function(model, toggle) {
-			if(this.renderer._useCheckboxSelection){
+			if(this.explorer.renderer._useCheckboxSelection){
 				var tableRow = this.getRowDiv(model);
 				if(!tableRow){
 					return;
 				}
-				var checkBox  = dojo.byId(this.renderer.getCheckBoxId(tableRow.id));
+				var checkBox  = dojo.byId(this.explorer.renderer.getCheckBoxId(tableRow.id));
 				var checked = toggle ? !checkBox.checked : true;
 				if(checked !== checkBox.checked){
-					this.renderer.onCheck(tableRow, checkBox, checked, true);
+					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true);
 				}
 			}
 		},
@@ -231,7 +231,7 @@ exports.ExplorerNavHandler = (function() {
 			if (rowDiv.offsetWidth === 0 || rowDiv.offsetHeight === 0) {
 				return false;
 			}
-		    var parentNode = this.myTree._parent;
+		    var parentNode = this.explorer.myTree._parent;
 			var parentRect = parentNode.getClientRects()[0],
 			rects = rowDiv.getClientRects(),
 			on_top = function(r) {
@@ -283,7 +283,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if(this.isExpandable(curModel)){
 				if(this.isExpanded(curModel)){
-					this.myTree.collapse(curModel);
+					this.explorer.myTree.collapse(curModel);
 					e.preventDefault();
 					return true;
 				}
@@ -304,7 +304,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if(this.isExpandable(curModel)){
 				if(!this.isExpanded(curModel)){
-					this.myTree.expand(curModel);
+					this.explorer.myTree.expand(curModel);
 					e.preventDefault();
 					return false;
 				}
@@ -319,12 +319,12 @@ exports.ExplorerNavHandler = (function() {
 		
 		//Enter key simulates a href call if the current row has an href link rendered. The render has to provide the getRowActionElement function that returns the href DIV.
 		onEnter: function(e) {
-			if(this.renderer.getRowActionElement){
+			if(this.explorer.renderer.getRowActionElement){
 				var curModel = this._modelIterator.cursor();
 				if(!curModel){
 					return;
 				}
-				var div = this.renderer.getRowActionElement(this.model.getId(curModel));
+				var div = this.explorer.renderer.getRowActionElement(this.model.getId(curModel));
 				if(div.href){
 					if(e.ctrlKey){
 						window.open(div.href);
