@@ -206,10 +206,6 @@ a:hover {
 	height: 24px;  /* breathing room */
 }
 
-.selectionTools {
-	vertical-align: middle;
-}
-
 .selectionCheckmark {
 	background-position: 0 0;
 	width: 16px; height: 16px; 

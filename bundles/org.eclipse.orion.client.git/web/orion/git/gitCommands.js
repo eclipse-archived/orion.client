@@ -45,8 +45,11 @@ var exports = {};
 		}
 		
 		if (selectionToolbarId) {
-			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			commandService.renderCommands(selectionTools, "dom", null, explorer, "button", true);
+			var selectionTools = dojo.byId(selectionToolbarId);
+			if (selectionTools) {
+				dojo.empty(selectionToolbarId);
+				commandService.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+			}
 		}
 
 		// Stuff we do only the first time
@@ -56,7 +59,7 @@ var exports = {};
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button", true);
+					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
 				}
 			});
 		}

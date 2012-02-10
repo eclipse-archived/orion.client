@@ -44,6 +44,12 @@
     border-radius: 2px;
 }
 
+.commandMenu {
+	display: inline-block;
+	vertical-align: baseline;
+	margin: 3px;
+}
+
 .commandMenuItem {
 	border: 0;
 	padding: 0;
@@ -148,9 +154,10 @@
     margin: 0;
 }
 
-.nihilo .dijitDropDownButton, .nihilo .dijitComboButton {
+.nihilo .dijitButtonNode, .nihilo .dijitButtonContentsHover {
 	vertical-align: baseline;
 	margin: 0;
+	border: 1px solid transparent;  /* so that border coming on doesn't cause a jump */
 }
 
 .nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
@@ -159,31 +166,23 @@
 }
 
 .nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
-    background-color: #f8f8f8;
+	background-color: #e6e6e6 !important;
+	background-image: none !important;
+	border: 1px solid #808080;
     color: black;
-}
-.nihilo .dijitButtonActive, .nihilo .dijitButtonActive .dijitButtonNode, .nihilo .dijitToggleButtonActive .dijitButtonNode, .nihilo .dijitDropDownButtonActive .dijitButtonNode, .nihilo .dijitComboButtonActive .dijitButtonContents, .nihilo .dijitStackController .dijitToggleButtonChecked .dijitButtonNode {
-    border: 1px solid #eba600;
-    background-color: #e3e3e3;
+    border-radius: 2px;
 }
 
 .nihilo .dijitDropDownButtonFocused {
     opacity: 1.0 !important;
 }
 
-.nihilo .textless .dijitArrowButtonInner {
+.nihilo .dijitArrowButtonInner {
 	background-position: 0px 0px; 
 	width: 16px; height: 16px; 
 	background: url(../images/menu.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
-}
-
-/* this keeps the default gray hover from happening for menu node */
-.nihilo .textless .dijitButtonNode {
-    color: black;
-    background-color: transparent;
-    margin: 1px;
 }
 
 .nihilo .dijitTooltip {
