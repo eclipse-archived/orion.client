@@ -4,6 +4,9 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
+	/*global eclipse window*/
+	var VERSION = "0.4";
+
 	function qualifyURL(url){
 	    var a = document.createElement('a');
 	    a.href = url; // set string url
@@ -30,6 +33,11 @@
 			name: "Repositories",
 			id: "orion.repositories",
 			href: qualifyURL("../git/git-repository.html#")
+		});
+		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			name: "Get Plugins",
+			id: "orion.plugins.get",
+			href: "http://mamacdon.github.com/#?target=" + qualifyURL("../settings/settings.html") + "&version=" + VERSION
 		});
 		
 		// Commands that we contribute so it can show up in related links
