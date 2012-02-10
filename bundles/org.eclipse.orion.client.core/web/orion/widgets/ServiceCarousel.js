@@ -39,27 +39,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			this.inherited(arguments);
 		},
 		
-		setRailsWidth: function(){
-			var railsBox = dojo.marginBox( this.rails );
-			
-			var gaps = 170; // TODO: Write the marginSize calls to build this up
-			
-			var listwidth = railsBox.w - gaps;
-			
-			dojo.style( this.listContainer, "width", listwidth + 'px' );
-		},
-		
 		postCreate: function(){
 			var railsBox = dojo.marginBox( this.domNode.parentNode );
-			this.setRailsWidth();
 			this.addData( this.serviceData );
 			this.serviceLabel.innerHTML = "Services [" + this.serviceData.length +"]";
 			dojo.style( this.domNode, "width", railsBox.w - 63 + 'px' );
 			
-			this.box = dojo.marginBox( this.rails );
-			
+			this.box = dojo.marginBox( this.rails );			
 			dojo.removeClass( this.rails, "serviceRailsVisible" );
-				dojo.addClass( this.rails, "serviceRailsHidden" );
+			dojo.addClass( this.rails, "serviceRailsHidden" );
 		},
 		
 		showServices: function(){
@@ -92,8 +80,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 		
 		showButtons: function(){
 			
-			dojo.style( this.leftbutton, "visibility", "visible" );
-			dojo.style( this.rightbutton, "visibility", "visible" );
+			
+			if(	this.serviceData.length > 1 && this.pointer > 0 ){
+				dojo.style( this.leftbutton, "visibility", "visible" );
+			}else{
+				dojo.style( this.leftbutton, "visibility", "hidden" );
+			}
+			
+			if( this.serviceData.length > 1 && this.pointer < this.serviceData.length -1 ){
+				dojo.style( this.rightbutton, "visibility", "visible" );
+			}else{
+				dojo.style( this.rightbutton, "visibility", "hidden" );
+			}
 
 			var sze = dojo.marginBox( this.rails );
 	
@@ -111,12 +109,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 		},
 		
 		slideRight: function(){
-		
-			this.pointer = this.pointer+1;
-			
+
 			this.box = dojo.marginBox( this.rails );
 		
-			if( this.pointer < this.serviceData.length ){
+			if( this.pointer < this.serviceData.length -1 ){
+		
+				this.pointer = this.pointer+1;
 		
 				for( var count=0; count < this.pointer; count++ ){
 					dojo.style( this.listContainer.childNodes[0].childNodes[count], "display", "none" );
@@ -124,6 +122,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			
 				dojo.marginBox( this.rails, this.box );
 			}
+			
+			this.showButtons();
+
 		},
 		
 		slideLeft: function(){
@@ -134,6 +135,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 				this.pointer = this.pointer-1;
 				dojo.style( this.listContainer.childNodes[0].childNodes[this.pointer], "display", "" );
 			}
+			
+			this.showButtons();
 			
 			dojo.marginBox( this.rails, this.box );
 		},

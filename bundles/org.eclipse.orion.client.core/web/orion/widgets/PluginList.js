@@ -21,7 +21,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					        '</div>' +
 					        '<div class="displaytable">' +
 								'<div class="plugin-settings">' +
-									'<list data-dojo-attach-point="pluginSettingsList"></list>' +
+									'<list style="overflow:hidden;" data-dojo-attach-point="pluginSettingsList"></list>' +
 								'</div>' +
 							'</div>' +
 					    '</div>',
@@ -50,6 +50,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			last = last.split( ".html" )[0];
 			last = last.replace( /([a-z])([A-Z])/, "$1 $2");
 			last = wordToUpper( last );
+			last = last.replace( 'plugin', '' );
+			last = last.replace( 'Plugin', '' );
 			return last;
 		},
 					    

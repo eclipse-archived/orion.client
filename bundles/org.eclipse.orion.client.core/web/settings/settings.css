@@ -483,6 +483,7 @@ list>*,grid>* {
 	overflow:hidden;
 	-webkit-user-select: none;
 	transition:height 1s;
+	width:700px;
 	-moz-transition:height 1s; /* Firefox 4 */
 	-webkit-transition:height 1s; /* Safari and Chrome */
 	-o-transition:height 1s;
@@ -499,6 +500,7 @@ list>*,grid>* {
 	visibility:hidden;
 	height:0px;
 	transition:height 1s;
+	width:700px;
 	-moz-transition:height 1s; /* Firefox 4 */
 	-webkit-transition:height 1s; /* Safari and Chrome */
 	-o-transition:height 1s;
@@ -561,6 +563,7 @@ list>*,grid>* {
 	overflow:hidden;
 	padding-left:0px;
 	margin-left:0px;
+	width:600px;
 }
 
 .listEntry{

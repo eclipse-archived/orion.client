@@ -31,8 +31,11 @@ define(['require', 'dojo', 'orion/commands'],
 			var service = registry.getService("orion.page.command");
 			service.renderCommands(toolbar, "dom", item, explorer, "button");  
 			if (selectionToolbarId) {
-				var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-				service.renderCommands(selectionTools, "dom", null, explorer, "button");
+				var selectionTools = dojo.byId(selectionToolbarId);
+				if (selectionTools) {
+					dojo.empty(selectionToolbarId);
+					service.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+				}
 			}
 
 			// Stuff we do only the first time
