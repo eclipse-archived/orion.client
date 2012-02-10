@@ -30,8 +30,15 @@ define("orion/editor/htmlGrammar", [], function() {
 			"uuid": "3B5C76FB-EBB5-D930-F40C-047D082CE99B",
 			"patterns": [
 				{
-					"match": "<!(doctype|DOCTYPE)[^>]+>",
-					"name": "entity.name.tag.doctype.html"
+					"begin": "<!(doctype|DOCTYPE)",
+					"end": ">",
+					"contentName": "entity.name.tag.doctype.html",
+					"beginCaptures": {
+						"0": { "name": "entity.name.tag.doctype.html" }
+					},
+					"endCaptures": {
+						"0": { "name": "entity.name.tag.doctype.html" }
+					}
 				},
 				{
 					"begin": "<!--",
