@@ -38,7 +38,7 @@ define(['require'],
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
 		'<div id="extras" class="layoutRight pageNav">' +
 			'<div id="globalActions" class="pageNav"></div>' +
-			'<span id="pageFavorite" tabindex: "0", role: "button" class="imageSprite core-sprite-makeFavorite"></span>' +
+			'<span id="pageFavorite" tabindex: "0" role: "button" class="imageSprite core-sprite-favorite_sml"></span>' +
 		'</div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
 		'<div id="location" class="layoutBlock currentLocation"></div>' +
@@ -70,7 +70,7 @@ define(['require'],
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
-				// still need to hook it up and get correct icon  '<div class="layoutRight core-sprite-delete imageSprite" id="close"></div>' +
+				'<div class="layoutRight"><span tabindex: "0" role: "button" class="layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
 			'<span id="pageParameterArea" class="slide">' +
