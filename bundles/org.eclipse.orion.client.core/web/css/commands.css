@@ -98,7 +98,6 @@
 .core-sprite-diff-border-sel{ background-position: 0 -195px; width: 46px; height: 1px; } 
 .core-sprite-diff-border{ background-position: 0 -246px; width: 46px; height: 1px; } 
 .core-sprite-edit{ background-position: 0 -297px; width: 16px; height: 16px; } 
-.core-sprite-error{ background-position: 0 -363px; width: 16px; height: 16px; } 
 .core-sprite-expandAll{ background-position: 0 -429px; width: 16px; height: 16px; } 
 .core-sprite-exportzip{ background-position: 0 -495px; width: 16px; height: 16px; } 
 .core-sprite-file{ background-position: 0 -561px; width: 16px; height: 16px; } 
@@ -106,7 +105,6 @@
 .core-sprite-gear{ background-position: 0 -693px; width: 16px; height: 16px; } 
 .core-sprite-help{ background-position: 0 -759px; width: 16px; height: 16px; } 
 .core-sprite-importzip{ background-position: 0 -825px; width: 16px; height: 16px; } 
-.core-sprite-info{ background-position: 0 -891px; width: 16px; height: 16px; } 
 .core-sprite-leftarrow{ background-position: 0 -957px; width: 16px; height: 16px; } 
 .core-sprite-link{ background-position: 0 -1023px; width: 16px; height: 16px; } 
 .core-sprite-makeFavorite{ background-position: 0 -1089px; width: 16px; height: 16px; } 
@@ -129,12 +127,17 @@
 .core-sprite-transferin{ background-position: -173px -320px; width: 16px; height: 16px; } 
 .core-sprite-transferout{ background-position: -173px -386px; width: 16px; height: 16px; } 
 .core-sprite-twistie_partOpen{ background-position: -173px -584px; width: 16px; height: 16px; } 
-.core-sprite-warning{ background-position: -173px -650px; width: 16px; height: 16px; } 
 
 /* TODO temporary sprite hacks */
 .core-sprite-options{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/more.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .core-sprite-ok{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/ok.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .core-sprite-sep{ background-position: 0 0; width: 1px; height: 16px; background: url(../images/sep.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle;} 
+.core-sprite-error{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/error.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-info{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/info.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-warning{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/warning.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-close{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/close.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-progress{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/progress.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-favorite_sml{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/favorite_sml.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 
 
 

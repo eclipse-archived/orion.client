@@ -428,8 +428,8 @@ a:hover {
 }
 
 .progressInfo {
-	background-color: #e4f6fb;
-	border: 1px solid #b8dae6;
+	background-color: #e4f0fb;
+	border: 1px solid #b8cfe6;
 }
 
 .progressWarning {
@@ -443,8 +443,8 @@ a:hover {
 }
 
 .progressNormal {
-	background-color: #f7fff7;
-	border: 1px solid #1a863a;
+	background-color: #efefef;
+	border: 1px solid #cfcfcf;
 }
 
 .progressErrorImage {
@@ -474,6 +474,15 @@ a:hover {
 	vertical-align: middle;
 } 
 
+.progressNormalImage {
+	background-position: 0 0; 
+	width: 16px; 
+	height: 16px; 
+	background: url(../images/progress.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle;
+} 
+
 .progressPane {
 	vertical-align: bottom;
 	margin-right: 8px;
@@ -493,11 +502,11 @@ a:hover {
 }
 
 .progressPane_error {
-	background: url(../images/progress_error.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background: url(../images/error.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_warning {
-	background: url(../images/progress_warning.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background: url(../images/warning.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_empty {
