@@ -88,9 +88,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			}
 		}); 
 		if (selectionToolbarId) {
-			var selectionTools = dojo.create("span", {id: selectionToolbarId}, toolbar, "last");
-			dojo.addClass(selectionTools, "selectionTools");
-			service.renderCommands(selectionTools, "dom", null, explorer, "button"); // true would force icons to text
+			var selectionTools = dojo.byId(selectionToolbarId);
+			if (selectionTools) {
+				dojo.empty(selectionToolbarId);
+				service.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+			}
 		}
 		
 		// Stuff we do only the first time

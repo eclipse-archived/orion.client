@@ -64,6 +64,7 @@ define(['require'],
 
 	var toolbarHTMLFragment = 
 		'<div class="layoutLeft pageActions" id="pageActions"></div>' +
+		'<div class="layoutLeft pageActions" id="selectionTools"></div>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
 		'<div class="layoutRight status" id="statusPane"></div>' +
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
