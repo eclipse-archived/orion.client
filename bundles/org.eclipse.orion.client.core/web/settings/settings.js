@@ -18,6 +18,7 @@ var preferencesCorePreferences;
 var preferenceDialogService;
 var settingsCore;
 var selectedCategory;   
+var itemToIndexMap = {};
 var newPluginDialog = false;
 var commandService;
 var pluginWidget = null;
@@ -197,16 +198,17 @@ function updateToolbar(id) {
 
  
 function displaySettings( id ){
+	var settingsIndex = itemToIndexMap[id];
 
 	var tableNode = dojo.byId( 'table' );
 	
 	dojo.empty( tableNode );
 	
-	var category = initialSettings[id].category;
+	var category = initialSettings[settingsIndex].category;
 
 	dojo.create( "h1", { id: category, innerHTML: category }, tableNode );
 	
-	var subcategory = initialSettings[id].subcategory;
+	var subcategory = initialSettings[settingsIndex].subcategory;
 	
 	for( var sub = 0; sub < subcategory.length; sub++ ){	
 			
@@ -228,19 +230,21 @@ function displaySettings( id ){
 	
 }	
 
-function addCategory( item ){
+function addCategory( item, index ){
 	var navbar = dojo.byId( 'navbar' );	
 	dojo.create("li", item, navbar );
+	itemToIndexMap[item.id] = index;
 }
 
 function addPlugins(){
 
-	var item = { id: initialSettings.length, 
+	var item = { id: "plugins",
 				 innerHTML: "Plugins", 
 				 "class": 'navbar-item',
-				 onClick: 'showPlugins(event)' };
+				 onClick: 'showPlugins("plugins")'
+				};
 					
-	addCategory( item );
+	addCategory( item, initialSettings.length );
 }
 
 
@@ -251,14 +255,14 @@ function addPlugins(){
 	settings cases should follow more of the JSEditor
 	pattern. */
 
-function showPlugins( event ){
+function showPlugins( id ){
 
 	if( selectedCategory ){
 		dojo.removeClass( selectedCategory, "navbar-item-selected" );
 	}
 	
-	if( event ){
-		selectedCategory = event.currentTarget;
+	if( id ){
+		selectedCategory = dojo.byId(id);
 	}
 	
 	dojo.addClass( selectedCategory, "navbar-item-selected" );
@@ -277,35 +281,58 @@ function showPlugins( event ){
 }
 
   
-function selectCategory( event ){
+function selectCategory( id ){
 
 	if( selectedCategory ){
 		dojo.removeClass( selectedCategory, "navbar-item-selected" );
 	}
 	
-	selectedCategory = event.currentTarget;
+	selectedCategory = dojo.byId(id);
 	dojo.addClass( selectedCategory, "navbar-item-selected" );
-	updateToolbar(selectedCategory.id);
-	displaySettings( selectedCategory.id );
+	updateToolbar(id);
+	displaySettings(id);
 }
 
-function drawUserInterface( settings ){
+function showById(id) {
+	updateToolbar(id);
+	if (id === "plugins") {
+		showPlugins(id);
+	} else {
+		selectCategory(id);
+	}
+}
+
+function processHash() {
+
+	var hash = dojo.hash();
+	var cat = "plugins";
+	if (hash) {
+		cat = hash.split("?");
+		if (cat.length > 0) {
+			cat = cat[0];
+			if (itemToIndexMap[cat] === undefined) {
+				cat = "plugins";
+			}
+		}
+	}
+	showById(cat);
+	commandService.processURL(window.location.href);
+}
+
+function drawUserInterface( settings ) {
 
 	for( var count = 0; count < settings.length; count++ ){
-
-		var item = { id: count, 
-					 innerHTML: settings[count].category, 
+		var itemId = settings[count].category.replace(/\s/g, "").toLowerCase();
+		var item = { innerHTML: settings[count].category, 
+					 id: itemId,
 					 "class": 'navbar-item',
-					 onClick: 'selectCategory(event)' };
+					 onClick: 'selectCategory("'+itemId+'")'};
 		
-		addCategory( item );
+		addCategory( item, count );
 	}
 				
 	addPlugins();
-	
-	var nav = dojo.byId( 'navbar' );
-	
-	selectCategory({currentTarget: nav.childNodes[1]});
+	processHash();
 	
 	/* Adjusting width of mainNode - the css class is shared 
 	   so tailoring it for the preference apps */
@@ -392,6 +419,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			preferencesStatusService.setMessage("Loading...");		
 			manageDefaultData( preferences, initialSettings );			
 			drawUserInterface( initialSettings );	
+			dojo.subscribe("/dojo/hashchange", this, function() {
+				processHash();
+			});
 			preferencesStatusService.setMessage("");
 		});
 	});
