@@ -1904,15 +1904,15 @@ var exports = {};
 		commandService.addCommand(openCommitCommand, "dom");
 
 		var mapToGithubCommand = new mCommands.Command({
-			name : "Go to github",
-			tooltip: "Go to the associated github repository",
+			name : "Show in GitHub",
+			tooltip: "Show this repository at GitHub",
 			id : "orion.git.gotoGithub",
 			hrefCallback : function(data) {
-				var item = data.items;
-				return item.GitUrl.substr(0, item.GitUrl.lastIndexOf('.'));
+				var url = data.items.GitUrl;
+				return "https://github.com/" + url.substring(url.indexOf(':')+1, url.lastIndexOf('.'));
 			},
 			visibleWhen : function(item) {
-				return item.GitUrl && item.GitUrl.indexOf("https://github.com") === 0;
+				return item.GitUrl && item.GitUrl.indexOf("git@github.com") === 0;
 			}
 		});
 		commandService.addCommand(mapToGithubCommand, "dom");

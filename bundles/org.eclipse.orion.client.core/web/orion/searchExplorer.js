@@ -604,7 +604,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 				var lineTd = dojo.create( "td", { noWrap: true}, lineDiv );
 				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd));
 			} else {
-				dojo.create( "td", { noWrap: true, innerHTML: detailModel.context[i].context}, lineDiv );
+				dojo.create( "td", { noWrap: true, innerHTML: detailModel.context[i].context + "&nbsp"}, lineDiv );
 			}
 		}
 		return tableNode;
@@ -1338,10 +1338,24 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		var tableNode = this.renderer.generateContextTip(model);
 	    that.contextTipDialog.attr("content", tableNode);
 		//var pos = dojo.position(modelLinkId, true);
-        dijit.popup.open({
+ 	    var aroundNode = dojo.byId(modelLinkId);
+	    var orient = {'TR':'TL', 'TR':'TL'};
+	    if(aroundNode){
+		    var parentNode = this.myTree._parent;
+			var parentRect = parentNode.getClientRects()[0];
+			var rects = aroundNode.getClientRects();
+			for (var i = 0, l = rects.length; i < l; i++) {
+				var r = rects[i];
+				if((r.bottom + 100) > parentRect.bottom){
+				    orient = {'TR':'BL', 'TR':'BL'};
+					break;
+				}
+			}
+	    }
+	    dijit.popup.open({
         	popup: that.contextTipDialog,
-	        around: dojo.byId(modelLinkId),
-	        orient: {'TR':'TL', 'TR':'TL'}
+	        around: aroundNode,
+	        orient: orient
 	    });
 	};
 	
