@@ -24,6 +24,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 		this.fileService = fileService;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
+		this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService);
 	}
 
 	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
@@ -47,10 +48,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 					}
 				}
 			}
-			if(this.explorer && this.explorer.navHandler){
-				this.explorer.navHandler.removeListeners();
-			}
-			this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService, resultLocation,  resultsNode, query, jsonData.response.numFound);
+			this.explorer.setResult(resultsNode, resultLocation, query, jsonData.response.numFound);
 			this.explorer.startUp();
 		},
 

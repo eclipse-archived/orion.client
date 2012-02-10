@@ -795,23 +795,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	 * Creates a new search result explorer.
 	 * @name orion.SearchResultExplorer
 	 */
-	function SearchResultExplorer(registry, commandService, resultLocation,  parentNode, queryStr, totalNumber){
-		this.parentNode = parentNode;
+	function SearchResultExplorer(registry, commandService){
 		this.registry = registry;
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
-		this.checkbox = false;
 		this.defaulRows = 40;
-		this.renderer = new SearchResultRenderer({checkbox: false}, this);
-		this.totalNumber = totalNumber;
-		this.numberOnPage = resultLocation.length;
-		this.queryStr = queryStr;
-		var that = this;
-		this.model = new SearchResultModel(registry, this.fileClient, resultLocation, queryStr, 
-						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
-		this._replaceStr = this.model.queryObj.replace;
 		this.declareCommands();
 	}
+	
 	SearchResultExplorer.prototype = new mExplorer.Explorer();
 	
 	/**
@@ -819,6 +810,35 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	 * @param {Object} item
 	 */
 	SearchResultExplorer.prototype.onchange = function(item) {
+	};
+	
+	SearchResultExplorer.prototype.setResult = function(parentNode, resultLocation, queryStr, totalNumber) {
+		var that = this;
+		this.parentNode = parentNode;
+		this.queryStr = queryStr;
+		this.totalNumber = totalNumber;
+		this.numberOnPage = resultLocation.length;
+		this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, queryStr, 
+						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
+		this._replaceStr = this.model.queryObj.replace;
+		if(this.model.replaceMode()){
+			this.checkbox = true;
+			this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
+				  getCheckedFunc: function(item){return that.getItemChecked(item);},
+				  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
+		} else {
+			this.checkbox = false;
+			this.renderer = new SearchResultRenderer({checkbox: false}, this);
+		}
+		
+		this._reporting = false;
+		this._uiFactory = null;
+		this._currentPreviewModel = null;
+		this._currentReplacedContents = null;
+		this._popUpContext = false;
+		this.timerRunning -= false;
+		this._timer = null;
+		this.twoWayCompareContainer = null;
 	};
 	
 	/* one-time setup of commands */
@@ -886,7 +906,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
-			tooltip: !this.model.replaceMode() ? "Show previous page of search result" : "Replace previous page",
+			tooltip: "Show previous page of search result",
 			id : "orion.search.prevPage",
 			hrefCallback : function() {
 				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
@@ -901,7 +921,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		});
 		var nextPage = new mCommands.Command({
 			name : "Next Page >",
-			tooltip: !this.model.replaceMode() ? "Show next page of search result" : "Replace next page",
+			tooltip: "Show next page of search result",
 			id : "orion.search.nextPage",
 			hrefCallback : function() {
 				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
@@ -1131,8 +1151,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
-		this._replaceStr = replaceStr;
-		this.checkbox = true;
 		this.initCommands();
 
 		dojo.empty(this.getParentDivId());
@@ -1143,13 +1161,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		
 		this.reportStatus("Preparing preview...");	
 		var that = this;
-		this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
-													  getCheckedFunc: function(item){return that.getItemChecked(item);},
-													  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
 		this.createTree(this._uiFactory.getMatchDivID(), this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
 		this.hookUpNavHandler();
-		this.navHandler.cursorOn();
+		this.gotoCurrent(this.restoreLocationStatus());
 		this.reportStatus("");	
+		this.loadOneFileMetaData(0, function(){that.refreshIndex();});
+
 	};
 	
 	SearchResultExplorer.prototype.getItemChecked = function(item) {
@@ -1208,22 +1225,13 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		}
 		var uiFactory = this._uiFactory;
 		var fileItem = this.model.fileModel(this.navHandler.currentModel());
-		dojo.empty(uiFactory.getCompareDivID());
+		this._currentPreviewModel = fileItem;
 		if(!updating || !this._currentReplacedContents){
 			this._currentReplacedContents = [];
 		}
 		var that = this;
 		this.model.getFileContent(fileItem, function(fileItem){
 			that.model.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr); 
-			var uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
-				parentDivID: uiFactory.getCompareDivID(),
-				showTitle: true,
-				leftTitle: "Replaced File (" + fileItem.name + ")",
-				rightTitle: "Original File (" + fileItem.name + ")",
-				showLineStatus: false
-			});
-			uiFactoryCompare.buildUI();
-
 			// Diff operations
 			var fType = that._getContentType(fileItem);
 			dojo.when(fType, function(fType) {
@@ -1237,8 +1245,26 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 					baseFileContent: fileItem.contents.join(that.model._lineDelimiter),
 					newFileContent: that._currentReplacedContents.join(that.model._lineDelimiter)
 				};
-				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactoryCompare, options);
-				that.twoWayCompareContainer.startup();
+				if(!that.twoWayCompareContainer){
+					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+						parentDivID: uiFactory.getCompareDivID(),
+						showTitle: true,
+						leftTitle: "Replaced File (" + fileItem.name + ")",
+						rightTitle: "Original File (" + fileItem.name + ")",
+						showLineStatus: false
+					});
+					that.uiFactoryCompare.buildUI();
+					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, that.uiFactoryCompare, options);
+					that.twoWayCompareContainer.startup();
+				} else {
+					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
+					dojo.place(document.createTextNode("Replaced File (" + fileItem.name + ")"), that.uiFactoryCompare.getTitleDivId(true), "only");
+					dojo.empty(that.uiFactoryCompare.getTitleDivId());
+					dojo.place(document.createTextNode("Original File (" + fileItem.name + ")"), that.uiFactoryCompare.getTitleDivId(), "only");
+					that.twoWayCompareContainer.setOptions(options);
+					that.twoWayCompareContainer.setEditor();
+				}
+				window.setTimeout(function(){that.renderer.focus();}, 100);
 			});
 		});
 	};
@@ -1443,19 +1469,33 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		return false;
 	};
 	
+	SearchResultExplorer.prototype.onReplaceCursorChanged = function(prevModel, currentModel){
+		var that = this;
+		if(!this.model.sameFile(this._currentPreviewModel, currentModel)){
+			this.buildPreview();
+		}
+		if(currentModel.type === "detail"){
+			if(!currentModel.newMatches){
+				that.renderer.focus();
+				return;
+			}
+			this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber-1, currentModel.matches[currentModel.matchNumber-1], 
+					currentModel.newMatches[currentModel.matchNumber-1], this.model.queryObj.inFileQuery.searchStrLength,
+					function(){that.renderer.focus();});
+			window.setTimeout(function(){that.renderer.focus();}, 300);
+		}
+	};	
+	
 	SearchResultExplorer.prototype.onCursorChanged = function(prevModel, currentModel){
 		this.renderer.replaceDetailIcon(prevModel, "none");	
 		this.model.storeStatus(currentModel);
 		var that = this;
 		if(this.model.replaceMode()){
-			if(!this.model.sameFile(prevModel, currentModel)){
-				this.buildPreview();
-			}
-			if(currentModel.type === "detail"){
-				this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber-1, currentModel.matches[currentModel.matchNumber-1], 
-						currentModel.newMatches[currentModel.matchNumber-1], this.model.queryObj.inFileQuery.searchStrLength,
-						function(){that.renderer.focus();});
-				that.renderer.focus();
+			if(!this._timer){
+				this._timer = window.setTimeout(function(){that.onReplaceCursorChanged(prevModel, currentModel);that.timerRunning = false;that._timer = null;}, 500);
+			} else if (this.timerRunning){
+				window.clearTimeOut(this._timer);
+				this._timer = window.setTimeout(function(){that.onReplaceCursorChanged(prevModel, currentModel);that.timerRunning = false;that._timer = null;}, 500);
 			}
 		} else if(currentModel.type === "detail"){
 			if(this._popUpContext){
@@ -1512,6 +1552,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		        }
 		    });
 			this.initCommands();
+			dojo.empty(this.getParentDivId());
 			this.createTree(this.getParentDivId()/*this.parentNode*/, this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
 			this.hookUpNavHandler();
 		
@@ -1520,8 +1561,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
 		} else {
 			that.replacePreview(that._replaceStr);
-			this.gotoCurrent();
-			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
 		}
 	};
 	
@@ -1603,16 +1642,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		}
 	};
 	
-	SearchResultExplorer.prototype.findUIParentChain = function(targetNode, parentChain)	{
-		parentChain.push(targetNode);
-		var id = this.model.getId(targetNode);
-		var uiNode = dojo.byId(id);
-		if(uiNode){
-			return parentChain;
-		}
-		this.findUIParentChain(targetNode.parent, parentChain);
-	};
-	
 	SearchResultExplorer.prototype.getParentDivId = function(secondLevel){
 		if(!this.model.replaceMode() || !secondLevel){
 			return this.parentNode.id;
@@ -1621,29 +1650,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		}
 	};
 	
-	SearchResultExplorer.prototype.visible = function(element) {
-		if (element.offsetWidth === 0 || element.offsetHeight === 0) {
-			return false;
-		}
-		// FIXME shouldn't know this id, should be passed in
-		var parentNode = dojo.byId(this.getParentDivId(true));
-		var parentRect = parentNode.getClientRects()[0],
-		rects = element.getClientRects(),
-		on_top = function(r) {
-			var x = (r.left + r.right)/2, y = (r.top + r.bottom)/2;
-		    // document.elementFromPoint(x, y) === element; TODO: what is this ???
-		};
-		
-		for (var i = 0, l = rects.length; i < l; i++) {
-			var r = rects[i],
-		    in_viewport = (r.top >= parentRect.top && r.top <= parentRect.bottom && r.bottom >= parentRect.top && r.bottom <= parentRect.bottom);
-		    if (in_viewport /*&& on_top(r)*/) {
-				return true;
-		    }
-		}
-		return false;
-	};
-		
 	SearchResultExplorer.prototype.gotoCurrent = function(cachedItem) {
 		var modelToExpand = null;
 		var detailIndex = "none";
