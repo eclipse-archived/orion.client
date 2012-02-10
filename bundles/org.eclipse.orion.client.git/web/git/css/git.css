@@ -114,3 +114,5 @@
 .git-sprite-pull{ background-position: 0 0; width: 16px; height: 16px;  background: url(../images/pull.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .git-sprite-diff{ background-position: 0 0; width: 16px; height: 16px;  background: url(../images/diff.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .git-sprite-commit{ background-position: 0 0; width: 16px; height: 16px;  background: url(../images/commit.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.git-sprite-rebase{ background-position: 0 0; width: 16px; height: 16px;  background: url(../images/rebase.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.git-sprite-reset{ background-position: 0 0; width: 16px; height: 16px;  background: url(../images/reset.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
