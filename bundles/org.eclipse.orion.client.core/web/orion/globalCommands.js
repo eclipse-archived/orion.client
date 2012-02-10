@@ -82,6 +82,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		        });
 		        dojo.addClass(menuButton.domNode, "commandImage");
 		        dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
+		        if(menuButton.valueNode)
+		        	dojo.destroy(menuButton.valueNode);
 			}
 		
 		
