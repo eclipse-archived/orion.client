@@ -673,7 +673,31 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode();
+				return that.model.replaceMode() && !that._reporting;
+			}
+		});
+	
+		var hideCompareCommand = new mCommands.Command({
+			name: "Hide Compare",
+			tooltip: "Hide compare view of changes",
+			id: "orion.globalSearch.hideCompare",
+			callback: function(data) {
+				that.toggleCompare(false);
+			},
+			visibleWhen : function(item) {
+				return that.model.replaceMode() && !that._reporting && that._uiFactory;
+			}
+		});
+	
+		var showCompareCommand = new mCommands.Command({
+			name: "Show Compare",
+			tooltip: "Show compare view of changes",
+			id: "orion.globalSearch.showCompare",
+			callback: function(data) {
+				that.toggleCompare(true);
+			},
+			visibleWhen : function(item) {
+				return that.model.replaceMode() && !that._reporting && !that._uiFactory;
 			}
 		});
 	
@@ -692,12 +716,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this._commandService.addCommand(saveResultsCommand, "dom");
 		this._commandService.addCommand(previewCurrentPageCommand, "dom");
 		this._commandService.addCommand(searchAgainCommand, "dom");
+		this._commandService.addCommand(hideCompareCommand, "dom");
+		this._commandService.addCommand(showCompareCommand, "dom");
 		this._commandService.addCommand(replaceAllCommand, "dom");
 		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
 		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
 		this._commandService.registerCommandContribution("orion.previewCurrentPage", 2, "pageActions", "orion.searchActions.unlabeled");
 		this._commandService.registerCommandContribution("orion.globalSearch.searchAgain", 3, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 4, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.hideCompare", 4, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.showCompare", 5, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 6, "pageActions", "orion.searchActions.unlabeled");
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -735,7 +763,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			id: "orion.search.nextResult",
 			groupId: "orion.searchGroup",
 			visibleWhen : function(item) {
-				return !that.model.replaceMode();
+				return !that._reporting;
 			},
 			callback : function() {
 				that.gotoNext(true, true);
@@ -746,7 +774,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			id: "orion.search.prevResult",
 			groupId: "orion.searchGroup",
 			visibleWhen : function(item) {
-				return !that.model.replaceMode();
+				return !that._reporting;
 			},
 			callback : function() {
 				that.gotoNext(false, true);
@@ -945,23 +973,44 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		});
 	};
 	
-	SearchResultExplorer.prototype.replacePreview = function(replaceStr) {
-		this.initCommands();
+	SearchResultExplorer.prototype.toggleCompare = function(show) {
+		this.replacePreview(false, show);
+	};
+	
+	SearchResultExplorer.prototype.replacePreview = function(init, comparing) {
 
 		dojo.empty(this.getParentDivId());
-		this._uiFactory = new mSearchFeatures.SearchUIFactory({
-			parentDivID: this.getParentDivId()
-		});
-		this._uiFactory.buildUI();
-		
-		this.reportStatus("Preparing preview...");	
+		if(comparing){
+			this._uiFactory = new mSearchFeatures.SearchUIFactory({
+				parentDivID: this.getParentDivId()
+			});
+			this._uiFactory.buildUI();
+			this.twoWayCompareContainer = null;
+			this._currentPreviewModel = null;
+		} else {
+			if(this._uiFactory){
+				this._uiFactory.destroy();
+			}
+			this._uiFactory = null;
+			this.twoWayCompareContainer = null;
+			this._currentPreviewModel = null;
+		}
+		this.initCommands();
+		if(init){
+			this.reportStatus("Preparing preview...");	
+		}
 		var that = this;
-		this.createTree(this._uiFactory.getMatchDivID(), this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
-		this.hookUpNavHandler();
-		this.gotoCurrent(this.restoreLocationStatus());
-		this.reportStatus("");	
-		this.loadOneFileMetaData(0, function(){that.refreshIndex();});
+		this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
 
+		if(init){
+			this.hookUpNavHandler();
+			this.gotoCurrent(this.restoreLocationStatus());
+			this.reportStatus("");	
+			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
+		} else {
+			this.hookUpNavHandler();
+			this.gotoCurrent(this.restoreLocationStatus());
+		}
 	};
 	
 	SearchResultExplorer.prototype.getItemChecked = function(item) {
@@ -1014,6 +1063,9 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	SearchResultExplorer.prototype.buildPreview = function(updating) {
+		if(!this._uiFactory){
+			return;
+		}
 		if(this.model.indexedFileItems.length === 0){
 			return;
 		}
@@ -1115,7 +1167,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 
 		dojo.empty("pageNavigationActions");
 		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "button");
-		if(this.model.replaceMode()){
+		if(this.model.replaceMode() || this._reporting){
 			mUtil.forceLayout("pageNavigationActions");
 			return;
 		}
@@ -1128,13 +1180,23 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			id : "globalSearchOptMenu"
 		});
 		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: "Sort by Name",
-			checked: that.model.sortByName,
-			onChange : function(checked) {
-				that.sortWithName(checked);
-			}
-		}));
+		if(!this.model.replaceMode()){
+			newMenu.addChild(new dijit.CheckedMenuItem({
+				label: "Sort by Name",
+				checked: that.model.sortByName,
+				onChange : function(checked) {
+					that.sortWithName(checked);
+				}
+			}));
+		} else {
+			newMenu.addChild(new dijit.CheckedMenuItem({
+				label: "Compare changes",
+				checked: true,
+				onChange : function(checked) {
+					that.toggleCompare(checked);
+				}
+			}));
+		}
 		var menuButton = new dijit.form.DropDownButton({
 			label : "Options",
 			dropDown : newMenu
@@ -1275,8 +1337,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			}
 			this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber-1, currentModel.matches[currentModel.matchNumber-1], 
 					currentModel.newMatches[currentModel.matchNumber-1], this.model.queryObj.inFileQuery.searchStrLength,
-					function(){that.renderer.focus();});
-			window.setTimeout(function(){that.renderer.focus();}, 300);
+					function(){window.setTimeout(function(){that.renderer.focus();}, 200);});
+			window.setTimeout(function(){that.renderer.focus();}, 0);
 		}
 	};	
 	
@@ -1284,7 +1346,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this.renderer.replaceDetailIcon(prevModel, "none");	
 		this.model.storeStatus(currentModel);
 		var that = this;
-		if(this.model.replaceMode()){
+		if(this.model.replaceMode() ){
+			if(!this._uiFactory){
+				return;
+			}
 			if(!this._timer){
 				this._timer = window.setTimeout(function(){that.onReplaceCursorChanged(prevModel, currentModel);that.timerRunning = false;that._timer = null;}, 500);
 			} else if (this.timerRunning){
@@ -1354,7 +1419,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			this.reportStatus("");	
 			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
 		} else {
-			that.replacePreview(that._replaceStr);
+			that.replacePreview(true, true);
 		}
 	};
 	
@@ -1440,7 +1505,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		if(!this.model.replaceMode() || !secondLevel){
 			return this.parentNode.id;
 		} else {
-			return this._uiFactory.getMatchDivID();
+			return this._uiFactory ? this._uiFactory.getMatchDivID() : this.parentNode.id;
 		}
 	};
 	
