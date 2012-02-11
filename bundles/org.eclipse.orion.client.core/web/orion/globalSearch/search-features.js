@@ -43,6 +43,14 @@ orion.SearchUIFactory = (function() {
 			topWidget.startup();
 		},
 		
+		destroy: function(){
+			this._topWidgetId = this._parentDivID + "_topWidget";
+			var topWidget = dijit.byId(this._topWidgetId);
+			if(topWidget){
+				topWidget.destroyRecursive();
+			}
+		},
+		
 		getMatchDivID: function(){
 			return this._matchWidgetId;
 		},
