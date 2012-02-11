@@ -564,10 +564,12 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
 					var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
 					var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
-					var annotation = annotations.next();
-					if (annotation) {
+					while (annotations.hasNext()) {
+						var annotation = annotations.next();
+						if (!this.isAnnotationTypeVisible(annotation.type)) { continue; }
 						var model = editor.getModel();
 						editor.onGotoLine(model.getLineAtOffset(lineStart), annotation.start - lineStart, annotation.end - lineStart);
+						break;
 					}
 				};
 				
