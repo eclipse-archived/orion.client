@@ -51,6 +51,15 @@ exports.ExplorerNavHandler = (function() {
 	    var parentDiv = this._getEventListeningDiv();
 	    parentDiv.focus();
 		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) {
+            if (e.target) {// Firefox,  Chrome and Safari
+                if(e.target !== parentDiv){
+    				return true;
+    			}
+            } else if (e.srcElement){// Internet Explorer
+                if(e.srcElement !== parentDiv){
+    				return true;
+    			}
+            }
 			if(this.explorer.preventDefaultFunc && this.explorer.preventDefaultFunc(e, this._modelIterator.cursor())){
 				return true;
 			}
@@ -136,8 +145,6 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		refreshModel: function(model, noReset){
-		    var parentDiv = this._getEventListeningDiv();
-		    parentDiv.focus();
 			this.topIterationNodes = [];
 			this.model = model;
 			if(this.model.getTopIterationNodes){
