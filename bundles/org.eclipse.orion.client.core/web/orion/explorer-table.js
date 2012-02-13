@@ -237,6 +237,10 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 		var self = this;
 		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 			mUtil.processNavigatorParent(parent, children);
+			//If a key board navigator is hooked up, we need to sync up the model
+			if(self.navHandler){
+				self.navHandler.refreshModel(self.model);
+			}
 			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImageClass, self.renderer._collapseImageClass);
 		});
 	};
