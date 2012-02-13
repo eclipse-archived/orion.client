@@ -271,11 +271,11 @@ function showPlugins( id ){
 	
 	dojo.empty( tableNode );
 	
-	var settingsPluginList = settingsCore.pluginRegistry.getPlugins();
-	
 	if( pluginWidget ){
 		pluginWidget.destroyRecursive(true);
 	}
+	
+	updateToolbar(id);
 	
 	pluginWidget = new orion.widgets.PluginList( {  settings: settingsCore, statusService: preferencesStatusService, dialogService:preferenceDialogService, commandService: commandService, toolbarID: "pageActions" }, tableNode );
 }
@@ -346,42 +346,35 @@ function drawUserInterface( settings ) {
 function manageDefaultData( preferences, settings ){
 
 	// var example = [ { "subcategory":"Font", [ { "label":"Family", "value":"serif" }, {"label":"Size", "value":"10pt"}, {"label":"Line Height", "value":"12pt"} ] ];
+	
+	for( var count = 0; count < settings.length; count++ ){
+	
+		var category = settings[count].category;
+		
+		if( !localStorage.getItem( category ) ){
+	
+			var subcategories = [];
+		
+			var subcategory = settings[count].subcategory;
 
-	// preferences.getPreferences('OrionPluginDefaults').then( function(prefs){
-	
-		for( var count = 0; count < settings.length; count++ ){
-		
-			var category = settings[count].category;
+			for( var sub = 0; sub < subcategory.length; sub++ ){	
 			
-			if( !localStorage.getItem( category ) ){
-		
-			// if( prefs.get( category ) === undefined ){
+				var elements = [];
 			
-				var subcategories = [];
-			
-				var subcategory = settings[count].subcategory;
-	
-				for( var sub = 0; sub < subcategory.length; sub++ ){	
-				
-					var elements = [];
-				
-					for( var item = 0; item < subcategory[sub].items.length; item++ ){
-						
-						var element = {};					
-						element.label = subcategory[sub].items[item].label;
-						element.value = subcategory[sub].items[item].setting;						
-						elements.push( element );
-					}
+				for( var item = 0; item < subcategory[sub].items.length; item++ ){
 					
-					subcategories.push( { "label":subcategory[sub].label, "data":elements } );
+					var element = {};					
+					element.label = subcategory[sub].items[item].label;
+					element.value = subcategory[sub].items[item].setting;						
+					elements.push( element );
 				}
 				
-				localStorage.setItem( category, JSON.stringify( subcategories ) );
-
-				// prefs.put( category, subcategories );
+				subcategories.push( { "label":subcategory[sub].label, "data":elements } );
 			}
-		}	
-	// });
+			
+			localStorage.setItem( category, JSON.stringify( subcategories ) );
+		}
+	}	
 }
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient', 'orion/fileClient',
