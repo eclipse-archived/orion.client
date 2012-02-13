@@ -23,7 +23,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 		openIcon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAMCAYAAAC5tzfZAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wCCQ46NddkXU4AAAFuSURBVCjPXZG/q9NwFMU/5yYQOhVKoF1SDK9OOjl1URxcQl+G5/LgLeJf4K7wRjdBxMXRxcFR6TfZ3e3iUGe3DKXYQSEk10GjwbPdy+X8uEdVVVEUBVVVJcBt4MrdHwI3gG/u/lHSO3f/vNlsfoQQEEBd19O+799IunR3JAHg7gxw92Bmj4uiaLTdbifAe0nnkvDfl+IfxvMnSUUs6Q5wLom+7+m6TmMFSYrjeFjcdfd7MfBozLjb7WiaBjPD3ZlOp6zXa8VxPNh9YsCDgdTMmM/nHI9H9vs9TdOQpilRFI3cct+A7+PgWZaxXC5JkoQsy8jznP/w04Aw2JNEFEXkec5isWC1WjGZTIZvDrk+KIRwC/jyJzQAfd9zOByYzWZ/s42wNklfgZejXtzMSNMUMxsrALx1952G46qqnrr7tZklQ8EjhRZ40XXddVmWrdV1jSROp9Nz4MzdL4BX7h6A18ClpJtt2z4ry7INIfAL982ks01Z8EgAAAAASUVORK5CYII=",
 	
 		templateString:'<div class="plugin-service-item"><div class="serviceContainerClosed" data-dojo-attach-point="serviceLabel" data-dojo-attach-event="onclick:showServices">Services</div>' +
-					   '<div class="serviceRailsVisible" data-dojo-attach-point="rails"  data-dojo-attach-event="onmouseenter:showButtons,onmouseleave:hideButtons">' +
+					   '<div class="serviceRailsHidden" data-dojo-attach-point="rails"  data-dojo-attach-event="onmouseenter:showButtons,onmouseleave:hideButtons">' +
 		                  '<div class="leftButtonArea" data-dojo-attach-point="leftbutton">' +
 		                    '<span class="carouselControl" data-dojo-attach-event="onclick:slideLeft">&lt;</span>' +
 		                  '</div>' +
@@ -44,19 +44,28 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			this.addData( this.serviceData );
 			this.serviceLabel.innerHTML = "Services [" + this.serviceData.length +"]";
 			dojo.style( this.domNode, "width", railsBox.w - 63 + 'px' );
-			
-			this.box = dojo.marginBox( this.rails );			
+		},
+		
+		show: function(){
+			dojo.removeClass( this.rails, "serviceRailsHidden" );
+			dojo.addClass( this.rails, "serviceRailsVisible" );
+			dojo.removeClass( this.serviceLabel, "serviceContainerClosed" );
+			dojo.addClass( this.serviceLabel, "serviceContainerOpen" );
+			this.serviceState = true; 
+		},
+		
+		hide: function(){
+			dojo.removeClass( this.serviceLabel, "serviceContainerOpen" );
+			dojo.addClass( this.serviceLabel, "serviceContainerClosed" );
 			dojo.removeClass( this.rails, "serviceRailsVisible" );
 			dojo.addClass( this.rails, "serviceRailsHidden" );
+			this.serviceState = false; 
 		},
 		
 		showServices: function(){
 			if( this.serviceState === false ){
 
-				dojo.removeClass( this.rails, "serviceRailsHidden" );
-				dojo.addClass( this.rails, "serviceRailsVisible" );
-				dojo.removeClass( this.serviceLabel, "serviceContainerClosed" );
-				dojo.addClass( this.serviceLabel, "serviceContainerOpen" );
+				this.show();
 				
 				if( this.box ){
 					dojo.marginBox( this.rails, this.box );
@@ -64,17 +73,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 					this.box = dojo.marginBox( this.rails );
 				}
 				
-				this.serviceState = true; 
-				
-			
 			}else{
 				dojo.marginBox( this.rails, { h:0 } );
-
-				dojo.removeClass( this.serviceLabel, "serviceContainerOpen" );
-				dojo.addClass( this.serviceLabel, "serviceContainerClosed" );
-				dojo.removeClass( this.rails, "serviceRailsVisible" );
-				dojo.addClass( this.rails, "serviceRailsHidden" );
-				this.serviceState = false; 
+				this.hide();
 			}
 		},
 		
@@ -124,7 +125,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			}
 			
 			this.showButtons();
-
 		},
 		
 		slideLeft: function(){
@@ -189,6 +189,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			for( itemCount=0;itemCount<services.length;itemCount++ ){
 				this.createServiceTable( services[itemCount], this.testlist );
 			}
+		},
+		
+		startup: function(){
+			this.inherited(arguments);
 		}
 	});
 });
