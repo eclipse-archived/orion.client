@@ -3834,6 +3834,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.margin = "0px";
 			viewDiv.style.MozOutline = "none";
 			viewDiv.style.outline = "none";
+			viewDiv.setAttribute("role", "application");
 			body.appendChild(viewDiv);
 				
 			var scrollDiv = frameDocument.createElement("DIV");
@@ -3898,6 +3899,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!isPad) {
 				clientDiv.contentEditable = "true";
 			}
+			clientDiv.setAttribute("role", "textbox");
+			clientDiv.setAttribute("aria-multiline", "true");
 			var metrics = this._metrics = this._calculateMetrics();
 			if (isIE) {
 				body.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px";
