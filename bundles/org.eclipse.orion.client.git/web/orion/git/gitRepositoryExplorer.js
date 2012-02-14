@@ -56,7 +56,6 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
-		console.info("item changed: " + parent + " " + children);
 		this.redisplayClonesList();
 	};
 	
@@ -95,7 +94,8 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayCommits(repositories[0]);
 					that.displayBranches(repositories[0]);
 					that.displayTags(repositories[0]);
-					that.displayRemotes(repositories[0]);	
+					that.displayRemotes(repositories[0]);
+					that.displayConfig(repositories[0]);
 				} else if (resp.Children[0].Type === "Clone"){
 					var repositories = resp.Children;
 					
@@ -128,6 +128,19 @@ exports.GitRepositoryExplorer = (function() {
 							
 							that.displayRepositories(repositories, "mini", true);
 							that.displayTags(repositories[0], "full");
+						}, function () {
+							dojo.hitch(that, that.handleError)(error);
+						}
+					);
+				} else if (resp.Children[0].Type === "Config"){
+					that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then(
+						function(resp){
+							var repositories = resp.Children;
+							
+							that.initTitleBar(repositories[0], "Configuration");
+							
+							that.displayRepositories(repositories, "mini", true);
+							that.displayConfig(repositories[0], "full");
 						}, function () {
 							dojo.hitch(that, that.handleError)(error);
 						}
@@ -992,6 +1005,89 @@ exports.GitRepositoryExplorer = (function() {
 
 		var actionsArea = dojo.create( "div", {"id":"remoteActionsArea", "class":"git-action-area" }, horizontalBox );
 		this.commandService.renderCommands(actionsArea, "object", remote, this, "tool");	
+
+	};
+	
+	// Git Config
+	
+	GitRepositoryExplorer.prototype.displayConfig = function(repository, mode){
+		
+		var configLocation = repository.ConfigLocation;
+	
+		var that = this;
+		
+		var tableNode = dojo.byId( 'table' );
+
+		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"configSectionHeader"}, tableNode );
+		
+		dojo.create( "div", { id: "configSectionTitle", "class":"layoutLeft", innerHTML: "Configuration" + (mode === "full" ? "" : " (user.*)") }, titleWrapper );
+		dojo.create( "div", { id: "configSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+		dojo.create( "div", { id: "viewAllConfigSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+
+		var parentId = "configSectionHeader";
+		
+		var slideout = 
+			'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+				'<span id="' + parentId + 'slideOut" class="slide">' +
+				   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+				   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+				'</span>' +
+			'</div>';
+	
+	
+		dojo.place( slideout, titleWrapper );
+		
+		
+		
+		var content =	
+			'<div class="git-table">' +
+				'<div class="plugin-settings">' +
+					'<list id="configNode" class="plugin-settings-list"></list>' +
+				'</div>' +
+			'</div>';
+		
+		dojo.place( content, tableNode );
+				
+		this.registry.getService("orion.git.provider").getGitCloneConfig(configLocation).then(
+			function(resp){
+				var configurationEntries = resp.Children;
+				
+				if (mode !== "full" && configurationEntries.length !== 0){
+					that.commandService.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "viewAllConfigSectionActionsArea");
+					that.commandService.renderCommands(dojo.byId("viewAllConfigSectionActionsArea"), "dom", 
+						{"ViewAllLink":"/git/git-repository.html#" + configLocation, "ViewAllLabel":"View All", "ViewAllTooltip":"View all configuration entries"}, that, "button");
+				}
+				
+				if (mode === "full"){
+					that.commandService.registerCommandContribution("eclipse.orion.git.addConfigEntryCommand", 1000, "configSectionActionsArea");
+					that.commandService.renderCommands(dojo.byId("configSectionActionsArea"), "dom", repository, this, "button");
+				}
+				
+				if (configurationEntries.length === 0){
+					dojo.byId("configSectionTitle").innerHTML = "No Configuration";
+					return;
+				}
+				
+				for(var i=0; i<configurationEntries.length ;i++){
+					if (mode === "full" || configurationEntries[i].Key.indexOf("user.") !== -1)
+						that.renderConfigEntry(configurationEntries[i], i);
+				};
+			}, function(error){
+				dojo.hitch(that, that.handleError)(error);
+			}
+		);
+	};
+	
+	GitRepositoryExplorer.prototype.renderConfigEntry = function(configEntry, index){
+		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("configNode") );
+		var horizontalBox = dojo.create( "div", null, extensionListItem );
+		
+		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
+		dojo.create( "span", { "class":"gitMainDescription", innerHTML: configEntry.Key }, detailsView );
+		dojo.create( "span", { "class":"gitSecondaryDescription", "style":"margin-left:20px", innerHTML: configEntry.Value}, detailsView );
+
+		var actionsArea = dojo.create( "div", {"id":"configActionsArea", "class":"git-action-area" }, horizontalBox );
+		this.commandService.renderCommands(actionsArea, "object", configEntry, this, "tool");
 
 	};
 	

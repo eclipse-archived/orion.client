@@ -70,6 +70,8 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("eclipse.orion.git.rebase", 1000);
 	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 1000);
 	commandService.registerCommandContribution("eclipse.removeRemote", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.deleteConfigEntryCommand", 1000);
+	commandService.registerCommandContribution("eclipse.orion.git.editConfigEntryCommand", 1000);
 	
 	// add commands specific for the page	
 	var viewAllCommand = new mCommands.Command({
@@ -86,10 +88,7 @@ mBootstrap.startup().then(function(core) {
 		}
 	});
 	commandService.addCommand(viewAllCommand, "dom");
-	
-//	// render commands
-//	mGitCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", {});
-	
+		
 	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 	commandService.processURL(window.location.href);
 	
