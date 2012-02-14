@@ -529,7 +529,10 @@ orion.GitLogTableRenderer = (function() {
 		},
 			
 		modifyHeader: function(location){
-			dojo.place(document.createTextNode("Recent commits on " + location), this._type + "_header", "only");
+			//We should make sure that the header DIV still exist because sometimes the whole remote mini log is emptied.
+			if(dojo.byId(this._type + "_header")){
+				dojo.place(document.createTextNode("Recent commits on " + location), this._type + "_header", "only");
+			}
 		},
 		
 		renderAction:function(){
