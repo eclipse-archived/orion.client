@@ -556,14 +556,18 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				openResourceDialog(searcher, serviceRegistry, editor);
 			}});
 			
-		// We need a mod key binding in the editor, for now use the old one (ctrl-shift-r)
+		// set binding in editor and a general one for other pages
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("r", true, true, false), "Find File Named...");
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), "Find File Named...");
 			editor.getTextView().setAction("Find File Named...", function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
 				});
 		}
+		
+		commandService.addCommand(openResourceCommand, "global");
+		commandService.registerCommandContribution("eclipse.openResource", 100, "globalActions", null, true, new mCommands.CommandKeyBinding('f', true, true));
+
 		
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
@@ -593,11 +597,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim");
 			editor.getTextView().setAction("Toggle Trim", toggleBanner.callback);
 		}
-		
-		// We are using 't' for the non-editor binding because of git-hub's use of t for similar function
-		commandService.addCommand(openResourceCommand, "global");
-		commandService.registerCommandContribution("eclipse.openResource", 100, "globalActions", null, true, new mCommands.CommandKeyBinding('t'));
-		
+				
 		var keyAssistNode = dojo.byId("keyAssist");
 		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
 			if (e.charOrCode === dojo.keys.ESCAPE) {
@@ -662,7 +662,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		commandService.addCommand(keyAssistCommand, "global");
 		commandService.registerCommandContribution("eclipse.keyAssist", 100, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('L', true, true), "Show Keys");
+			var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, !isMac, true, false, isMac), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
 		
