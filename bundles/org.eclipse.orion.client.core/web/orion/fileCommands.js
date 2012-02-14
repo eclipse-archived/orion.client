@@ -539,9 +539,15 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			imageClass: "core-sprite-move_up",
 			id: "eclipse.upFolder",
 			callback: function(data) {
-				var parents = forceSingleItem(data.items).Parents;
-				if (parents && parents.length > 0) {
-					window.document.location="#" + parents[0].ChildrenLocation;
+				var item = forceSingleItem(data.items);
+				var parents = item.Parents;
+				if (parents) {
+					if (parents.length > 0) {
+						window.document.location="#" + parents[0].ChildrenLocation;
+					} else {
+						// move to file system root
+						window.document.location="#";
+					}
 				}
 			},
 			visibleWhen: function(item) {
