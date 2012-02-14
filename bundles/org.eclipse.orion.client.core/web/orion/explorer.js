@@ -394,6 +394,14 @@ exports.ExplorerRenderer = (function() {
 			return rowId+"__expand";
 		},
 		
+		updateExpandVisuals: function(tableRow, isExpanded) {
+			var expandImage = dojo.byId(this.expandCollapseImageId(tableRow.id));
+			if (expandImage) {
+				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
+				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
+			}
+		},
+		
 		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
 			dojo.addClass(expandImage, this._collapseImageClass);

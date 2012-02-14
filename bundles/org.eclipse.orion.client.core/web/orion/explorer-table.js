@@ -241,7 +241,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 			if(self.navHandler){
 				self.navHandler.refreshModel(self.model);
 			}
-			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children, self.renderer.expandCollapseImageId(self.model.getId(parent)), self.renderer._expandImageClass, self.renderer._collapseImageClass);
+			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
 		});
 	};
 		
