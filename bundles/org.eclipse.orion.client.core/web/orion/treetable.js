@@ -146,9 +146,12 @@ define(['dojo'], function(dojo) {
 					if (row && (forceExpand || row._expanded)) {
 						row._expanded = true;
 						this._removeChildRows(parentId);
+						this._renderer.updateExpandVisuals(row, true);
 						if(children){
 							this._generateChildren(children, row._depth+1, row, "after");
 							this._rowsChanged();
+							// TODO this should go away
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=371543
 							if (imageId && classToAdd) {
 								var node = dojo.byId(imageId);
 								dojo.addClass(node, classToAdd);
@@ -163,6 +166,8 @@ define(['dojo'], function(dojo) {
 								tree._rowsChanged();
 							});
 						}
+					} else {
+						this._renderer.updateExpandVisuals(row, false);
 					}
 				} else {
 					// the item wasn't found.  We could refresh the root here, but for now
@@ -229,6 +234,7 @@ define(['dojo'], function(dojo) {
 				}
 				row._expanded = true;
 				var tree = this;
+				this._renderer.updateExpandVisuals(row, true);
 				var children = this._treeModel.getChildren(row._item, function(children) {
 					tree._generateChildren(children, row._depth+1, row, "after");
 					tree._rowsChanged();
@@ -279,6 +285,7 @@ define(['dojo'], function(dojo) {
 					return;
 				}
 				row._expanded = false;
+				this._renderer.updateExpandVisuals(row, false);
 				this._removeChildRows(id);
 				this._rowsChanged();
 			}
