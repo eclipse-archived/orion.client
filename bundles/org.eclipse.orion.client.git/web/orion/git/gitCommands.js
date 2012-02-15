@@ -838,8 +838,9 @@ var exports = {};
 						display.Severity = "Ok";
 						display.HTML = false;
 						display.Message = result.jsonData.Result;
-					}
-					else if(result.jsonData){
+						
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					} else if(result.jsonData){
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 
 						display.Severity = "Warning";
@@ -860,7 +861,6 @@ var exports = {};
 							+ statusLocation + "\">Git Status page</a>.<span>";
 					}
 
-					dojo.hitch(explorer, explorer.changedItem)(item);
 					progressService.setProgressResult(display);
 				}, function (error, ioArgs) {
 						var display = [];
@@ -901,6 +901,8 @@ var exports = {};
 						display.Severity = "Ok";
 						display.HTML = false;
 						display.Message = jsonData.Result;
+						
+						dojo.hitch(explorer, explorer.changedItem)(item);
 					}
 					// handle special cases
 					else if (jsonData.Result == "STOPPED") {
@@ -943,7 +945,7 @@ var exports = {};
 							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					} 
-					dojo.hitch(explorer, explorer.changedItem)(item);
+
 					serviceRegistry.getService("orion.page.message").setProgressResult(display);
 					}, 
 					displayErrorOnStatus
