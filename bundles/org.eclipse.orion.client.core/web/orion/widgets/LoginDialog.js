@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -26,6 +26,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		
 		postCreate : function() {
 			this.inherited(arguments);
+			var _self = this;
+
+			dojo.addClass(this.closeLink, "imageSprite");
+			dojo.addClass(this.closeLink, "core-sprite-close");
+			
+			dojo.connect(this.closeLink, "onmouseover", this.closeLink, function() {
+				_self.closeLink.style.cursor = "pointer";
+			});
+			dojo.connect(this.closeLink, "onmouseout", this.closeLink, function() {
+				_self.closeLink.style.cursor = "default";
+			});
+			
+			dojo.connect(this.closeLink, "onclick", function() {dojo.hitch(_self, _self.closeDialog)();});
 		},
 	
 		setPendingAuthentication: function(services){
@@ -138,9 +151,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 					return function(){authService.logout().then(dojo.hitch(_self, function(){
 						this.addUserItem(i, authService, this.authenticatedServices[i].label);
 						if(this.isSingleService()){
-							if(dijit.popup.hide)
-								dijit.popup.hide(this); //close doesn't work on FF
-							dijit.popup.close(this);
+							this.closeDialog();
 						}
 						localStorage.removeItem(i);
 						}));};
@@ -275,8 +286,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	    img.src = null; // no server request
 		return url.match(re)[1].toString();
 		},
-	_onBlur: function(){
-		this.inherited(arguments);
+	closeDialog: function(){
 		if(dijit.popup.hide)
 			dijit.popup.hide(this); //close doesn't work on FF
 		dijit.popup.close(this);

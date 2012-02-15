@@ -1,16 +1,26 @@
 
 <div>
-	<div class="dijitTooltipContainer" role="presentation" style="width: 300px; padding-left: 0; padding-right: 0; padding-top: 0.5em; padding-bottom: 0.45em">
+	<div class="dijitTooltipContainer" role="presentation" style="width: 300px; padding-left: 0; padding-right: 0; padding-top: 0; padding-bottom: 0.45em">
 		<div class="dijitTooltipContents dijitTooltipFocusNode" role="dialog"
 			dojoattachpoint="containerNode" style="padding: 0">
-			<h2 dojoAttachPoint="emptyListInfo" class="LoginWindowLeft">No authentication required.</h2>
-			<table dojoAttachPoint="authenticated" style="display: none; width: 100%;">
-			 <tbody dojoAttachPoint="authenticatedList">
-			</tbody>
-			
-			<table dojoAttachPoint="otherUnauthenticated" style="display: none; width: 100%;">
-			 <tbody dojoAttachPoint="otherUnauthenticatedList">
-			</tbody>
+			<table style="width: 100%;">
+				<tr>
+					<td style="text-align: left; vertical-align: top;">
+						<h2 dojoAttachPoint="emptyListInfo" class="LoginWindowLeft">No authentication required.</h2>
+						<table dojoAttachPoint="authenticated" style="display: none; width: 100%;">
+							<tbody dojoAttachPoint="authenticatedList">
+							</tbody>
+						</table>
+						<table dojoAttachPoint="otherUnauthenticated" style="display: none; width: 100%;">
+							<tbody dojoAttachPoint="otherUnauthenticatedList">
+							</tbody>
+						</table>
+					</td>
+					<td style="text-align: right; vertical-align: top; padding-right: 2px; margin: 0">
+						<span dojoAttachPoint="closeLink" role="button" title="Close"></span>
+					</td>
+				</tr>
+			</table>
 		</div>
 	</div>
 	<div class="dijitTooltipConnector" role="presentation"></div>
