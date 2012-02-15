@@ -224,8 +224,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		},
 		
 		hashChanged: function(editor) {	
-			if (this.shouldGoToURI(editor, dojo.hash())) {
-				selection.setSelections(dojo.hash());
+			if (this.shouldGoToURI(editor, "#" + dojo.hash())) {
+				selection.setSelections("#" + dojo.hash());
 			} else {
 				// we are staying at our previous location
 				dojo.hash(this.lastFilePath);
@@ -235,7 +235,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		shouldGoToURI: function(editor, fileURI) {
 			if (editor.isDirty()) {
 				var oldStripped = PageUtil.matchResourceParameters("#" + this.lastFilePath).resource;
-				var newStripped = PageUtil.matchResourceParameters("#" + fileURI).resource;
+				var newStripped = PageUtil.matchResourceParameters(fileURI).resource;
 				if (oldStripped !== newStripped) {
 					return window.confirm("There are unsaved changes.  Do you still want to navigate away?");
 				}
