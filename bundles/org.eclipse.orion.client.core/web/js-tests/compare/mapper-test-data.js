@@ -1302,6 +1302,33 @@ exports.mapperTestCases = [
 	  [[0,2,-1],[1,1,0],[3,2,9],[1,1,0],[2,0,13],[2,2,0]],
 	  //description  
 	  "input file has new line at end --> remove line 1,2 ;change 4,5 ; add 6-1,6-2"]
+	,
+	/***************************************************************************/
+	/****************************   change last line by adding one charactor **************/
+	/***************************************************************************/
+    /***********  input file has no new line at end*******************/
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=368250 
+	[ 
+	  //input file 
+	  "line 1\n" + 
+	  "line 2" 
+	  , 
+	  //diff
+	  "@@ -1,4 +1,4 @@\n" + 
+	  " line 1\n" + 
+	  "-line 2\n" + 
+	  "\\ No newline at end of file\n" + 
+	  "+line 22\n" + 
+	  "\\ No newline at end of file\n" + 
+	  "", 
+	  //output file
+	  "line 1\n" + 
+	  "line 22" 
+	  , 
+	  //mapper
+	  [[1,1,0],[1,1,5]],
+	  //description  
+	  "input file has no new line at end --> change last line by adding one charactor"]
 ];
 
 return exports;	

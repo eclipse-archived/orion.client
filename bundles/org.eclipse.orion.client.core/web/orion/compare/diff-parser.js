@@ -187,7 +187,7 @@ orion.DiffParser = (function() {
 						} else {
 							this._nNewLineAtEnd = false;
 						}		
-						if(i > startNo ){
+						if(i > startNo && this._diffContents[i-1][this._diffContents[i-1].length-1] === "\r"){
 							this._diffContents[i-1] = this._diffContents[i-1].substring(0 , this._diffContents[i-1].length-1);
 						}
 						continue;
