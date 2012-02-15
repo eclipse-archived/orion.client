@@ -849,6 +849,7 @@ var exports = {};
 							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					} else if(result.error) {
+						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
 						display.Severity = "Error";
 						if(result.error.responseText && JSON.parse(result.error.responseText)){
 							var resp = JSON.parse(result.error.responseText);
@@ -1546,13 +1547,9 @@ var exports = {};
 							refreshStatusCallBack();
 							progressService.setProgressResult(display);
 						} else if (result.jsonData){
-							var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
-							
 							display.Severity = "Warning";
 							display.HTML = true;
-							display.Message = "<span>" + result.jsonData.Result
-								+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
-								+ statusLocation +"\">Git Status page</a>.<span>";
+							display.Message = "<span>" + result.jsonData.Result+"<span>";
 
 							progressService.setProgressResult(display);
 						} else if (result.error) {
@@ -1564,21 +1561,16 @@ var exports = {};
 								display.Message = result.error.message;
 							}
 							display.HTML = true;
-							display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
-								+ statusLocation + "\">Git Status page</a>.<span>";
+							display.Message ="<span>" + display.Message + "<span>";
 							
 							progressService.setProgressResult(display);
 						}
 					}, function (error, ioArgs) {
 						var display = [];
 						
-						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
-						
 						display.Severity = "Error";
 						display.HTML = true;
-						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage
-						+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
-						+ statusLocation +"\">Git Status page</a>.<span>";
+						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage +"</span>";
 						
 						progressService.setProgressResult(display);
 					});
