@@ -933,10 +933,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				} else {
 					image = addImageToElement(this, element, name);
 					// ensure there is accessible text describing this image
-					var label = this.name || this.tooltip;
-					if (label) {
-						dojo.attr(element, "aria-label", label);
-					}
+					this._addAccessibleLabel(element);
 				}
 				this._hookCallback(element, context);
 				var overClass = image ? "commandImageOver" : "commandButtonOver";
@@ -982,6 +979,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					// TODO we need a way to force a button contribution to look like a tool.  This is a very rare case.
 					addImageToElement(this, element, name);
 					overClass = "commandImageOver";
+					// ensure there is accessible text describing this image
+					this._addAccessibleLabel(element);
 				}
 				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
 			}
@@ -1097,6 +1096,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 					}					
 				}				
 			});
+		},
+		
+		/*
+		 * stateless helper
+		 */
+		_addAccessibleLabel: function(element) {
+			var label = this.name || this.tooltip;
+			if (label) {
+				dojo.attr(element, "aria-label", label);
+			}
 		},
 		
 		/*
