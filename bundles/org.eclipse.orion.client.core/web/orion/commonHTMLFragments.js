@@ -38,7 +38,7 @@ define(['require'],
 		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
 		'<div id="extras" class="layoutRight pageNav">' +
 			'<div id="globalActions" class="pageNav"></div>' +
-			'<span id="pageFavorite" tabindex: "0" role: "button" class="imageSprite core-sprite-favorite_sml"></span>' +
+			'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="imageSprite core-sprite-favorite_sml"></span>' +
 		'</div>' +
 		'<div id="dimension" class="layoutBlock dimension"></div>' +
 		'<div id="location" class="layoutBlock currentLocation"></div>' +
