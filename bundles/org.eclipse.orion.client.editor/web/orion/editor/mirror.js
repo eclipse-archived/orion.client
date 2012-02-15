@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 /*jslint browser:true*/
-define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTarget) {
+define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview/eventTarget"], function(messages, mEventTarget) {
 	// TODO this affects indentation, which we don't support. Should be a parameter.
 	var tabSize = 4;
 	
@@ -675,6 +675,7 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 	}
 
 	var LINESTYLE_OVERSHOOT = 20;
+	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 
 	CodeMirrorStyler.prototype = /** @lends orion.mirror.CodeMirrorStyler.prototype */ {
 		/** @private */
@@ -733,15 +734,41 @@ define("orion/editor/mirror", ["orion/textview/eventTarget"], function(mEventTar
 				modeApplier.highlight(lineIndex, Math.min(lineIndex + LINESTYLE_OVERSHOOT, lineCount - 1), true /*don't dispatch*/);
 				style = modeApplier.getLineStyle(lineIndex);
 			}
+			var model = this.textView.getModel();
 			if (style) {
 				// Now we have a style for the line. It may not be correct in the case where lineIndex is at the end of a large
 				// buffer. But in that case, the highlight job kicked off by ModelChanged will eventually reach it and fix it up.
 				var rangesAndErrors = modeApplier.toStyleRangesAndErrors(style, lineIndex);
 				if (rangesAndErrors) {
 					e.ranges = rangesAndErrors[0];
-
-					// TODO: deal with error annotations in rangesAndErrors[1]
-					// We should use code from aSyncStyler here
+					var annotationModel = this.annotationModel;
+					if (annotationModel) {
+						var toRemove = [], toAdd = [];
+						var errors = rangesAndErrors[1];
+						if (errors) {
+							for (var i=0; i < errors.length; i++) {
+								var error = errors[i];
+								if (error.style.styleClass === "cm-error") {
+									toAdd.push({
+										start: error.start,
+										end: error.end,
+										type: HIGHLIGHT_ERROR_ANNOTATION,
+										title: messages.syntaxError,
+										html: "<div class='annotationHTML error'></div>",
+										rangeStyle: {styleClass: "annotationRange error"}
+										});
+								}
+							}
+						}
+						var annos = annotationModel.getAnnotations(model.getLineStart(lineIndex), model.getLineEnd(lineIndex));
+						while (annos.hasNext()) {
+							var anno = annos.next();
+							if (anno.type === HIGHLIGHT_ERROR_ANNOTATION) {
+								toRemove.push(anno);
+							}
+						}
+						annotationModel.replaceAnnotations(toRemove, toAdd);
+					}
 				}
 			}
 		},
