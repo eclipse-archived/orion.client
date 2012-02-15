@@ -9,13 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- /*global eclipse:true dojo document console define*/
+ /*global eclipse:true dojo document console define window dijit*/
 
 
 define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
-		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable',
-        'dojo/hash', 'dojo/parser'],
-        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mTreetable) {
+		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable', "orion/URITemplate", 
+		"orion/PageUtil",
+        'dojo/hash', 'dojo/parser','dijit/form/Button'],
+        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
+            mTreetable, URITemplate, mPageUtil) {
 	
 
 function UnitTestModel(root) {
@@ -78,6 +80,21 @@ UnitTestRenderer.prototype = {
 			div = dojo.create("div", null, col, "only");
 			dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
 			dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
+
+			// create a link to rerun the test:
+			var browserURL = window.location.toString();
+			var testlink = browserURL.split('#')[0]+"#";
+			var testfile = mPageUtil.matchResourceParameters(window.location.toString()).resource;
+			var hreflink = new URITemplate(testlink+"{+resource,params*}").expand({resource: testfile, params: {"test":item.Name}});
+			var button = new dijit.form.Button({
+				label: "rerun",
+					onClick: function(){
+						window.location.href = hreflink;
+						window.location.reload(true);
+					}
+			});
+			dojo.place(button.domNode,div,"last");
+			
 			if (!item.result && !item.logged) {
 				console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
 				item.logged =true;
@@ -104,8 +121,13 @@ dojo.addOnLoad(function() {
 		// global banner
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 		
-		function runTests(fileURI) {
-			//console.log("installing non-persistent plugin: " + fileURI);
+		function runTests(testSelectionURI) {
+			// testSelectionURI specifies a test file and optionally a specific test
+			// e.g. "foo/mytests.html,test=testThisSpecificThing"
+			var matched = mPageUtil.matchResourceParameters("#" + testSelectionURI);
+			var specificTest = matched.test;
+			var fileURI = matched.resource;
+			// console.log("installing non-persistent plugin: " + fileURI);
 			var testOverview = dojo.byId("test-overview");
 			dojo.empty(testOverview);
 			var testTree = dojo.byId("test-tree");
@@ -171,9 +193,15 @@ dojo.addOnLoad(function() {
 					root.children.push({"Name":name, result: obj.result, message: obj.message, stack: obj.stack, millis: millis});
 					myTree.refresh(root, root.children);
 				});	
-				service.run().then(function(result) {
-					testPluginRegistry.shutdown();
-				});
+				if (specificTest) {
+					service.run(specificTest).then(function(result) {
+						testPluginRegistry.shutdown();
+					});
+				} else {
+					service.run().then(function(result) {
+						testPluginRegistry.shutdown();
+					});
+				}
 			}, function(error) {
 				dojo.create("img", {src: require.toUrl("images/unit_test/testfail.gif")}, testTree, "first");
 				dojo.place(document.createTextNode(error), testTree, "last");
