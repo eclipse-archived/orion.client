@@ -165,15 +165,15 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/c
 			var detailsView = dojo.create( "div", null, horizontalBox );
 			
 			var commitMessages = this._splitCommitMessage(commit.Message);
-			
+
 			var div = dojo.create( "div", null, detailsView );
-			dojo.create( "span", { "class":"gitMainDescription", innerHTML: commitMessages[0] }, div );
-			
+			var mainCommitMessage = dojo.create( "span", { "class":"gitMainDescription"}, div );
+			this.registry.getService("orion.core.textlink").addLinks(commitMessages[0], mainCommitMessage);
 			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			
 			if (commitMessages[1] !== null){
-				div = dojo.create( "pre", null, detailsView );
-				dojo.place(document.createTextNode(commitMessages[1]), div);
+				var secondaryCommitMessage = dojo.create( "pre", null, detailsView );
+				this.registry.getService("orion.core.textlink").addLinks(commitMessages[1], secondaryCommitMessage);
 				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			}
 						
