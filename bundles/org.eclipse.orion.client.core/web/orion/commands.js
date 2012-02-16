@@ -85,20 +85,58 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 				window.clearTimeout(this._showTimer);
 				delete this._showTimer;
 			}
+			// added this flag
+			this.polling = false;
 			this.close();
+			
 		}, 
 		
+		_onHover: function(/*DomNode*/ target){
+			// Override to register for notification when parent node disappears
+			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
+			this.inherited(arguments);
+			this.polling = true;
+			this.pollForMissingTarget();
+		},
+		
+		pollForMissingTarget: function() {
+			if (!this.polling) {
+				return;
+			}
+			window.setTimeout(dojo.hitch(this, function() {
+				// see if our target node is still in the document
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
+				if (this._stillInDocument(this._connectNode)) {
+					this.pollForMissingTarget();
+				} else {
+					this.polling = false;
+					this.close();
+				}
+			}), 1000);
+		},
+		
+		_stillInDocument: function(node) {
+			// we can't check dojo.byId(node.id) because we could have another node by the same id, common when
+			// emptying a command parent and rerendering commands.  You'll end up with the same id.  This is precisely
+			// the case we are trying to correct in	https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
+			// parent nodes are also still hooked up.  So we have to walk up all the way the parent chain to see if
+			// indeed our parent node is the document.
+			while (node) {
+		        if (node === window.document) {
+		            return true;
+		        }
+		        node = node.parentNode;
+			}
+			// parent chain stopped before getting to document.
+			return false;
+		},
+				
 		postMixInProperties: function() {
 			this.inherited(arguments);
 			if (this.options.commandParent) {
 				if (dijit.byId(this.options.commandParent.id)) {
 					// this is a menu
 					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();}));
-				} else {
-					if (this.options.commandService) {
-						this.options.commandService.whenHidden(this.options.commandParent, 
-							dojo.hitch(this, function() {this.close();}));
-					}
 				}				
 			}
 		}
