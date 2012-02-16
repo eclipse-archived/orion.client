@@ -107,6 +107,7 @@
 .git-sprite-tags{ background-position: 0 -1452px; width: 16px; height: 16px; }
 
 /* TODO make sprites.  These are temporary sprite hacks */
+.git-sprite-branch_active{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/branch_active.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .git-sprite-cherry_pick{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/cherry_pick.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .git-sprite-apply_patch{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/apply_patch.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
 .git-sprite-log{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/log.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
