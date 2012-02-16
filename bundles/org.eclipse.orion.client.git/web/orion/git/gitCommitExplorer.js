@@ -162,29 +162,22 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/c
 			
 		    var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, list );
 			var horizontalBox = dojo.create( "div", null, extensionListItem );
-			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
+			var detailsView = dojo.create( "div", null, horizontalBox );
 			
-			var cut = false;
-			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-			if (commitMessage0.length > 80){
-				cut = true;
-				commitMessage0 = commitMessage0.substring(0, 80);
-			};
+			var commitMessages = this._splitCommitMessage(commit.Message);
 			
 			var div = dojo.create( "div", null, detailsView );
-			dojo.create( "span", { "class":"gitMainDescription", innerHTML: commitMessage0 + (cut ? "..." : "") }, div );
+			dojo.create( "span", { "class":"gitMainDescription", innerHTML: commitMessages[0] }, div );
 			
 			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			
-			var commitMessage1 = commit.Message.substring(commitMessage0.length, commit.Message.length);
-			
-			if (commitMessage1.trim().length > 0){
+			if (commitMessages[1] !== null){
 				div = dojo.create( "pre", null, detailsView );
-				dojo.place(document.createTextNode(cut ? "..." + commitMessage1 : commitMessage1.trim()), div);
+				dojo.place(document.createTextNode(commitMessages[1]), div);
 				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			}
 						
-			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, detailsView );
+			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: "commit: " + commit.Name}, detailsView );
 			
 			if (commit.Parents && commit.Parents.length > 0){
 				dojo.create( "div", null, detailsView );
@@ -209,12 +202,35 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/c
 			}
 			
 			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
+				innerHTML: "authored by " + commit.AuthorName + " (" + commit.AuthorEmail
 				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
 			
 			dojo.create( "div", null, detailsView );
 			dojo.create( "span", { "class":"gitSecondaryDescription", 
 				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, detailsView );
+		};
+		
+		GitCommitExplorer.prototype._splitCommitMessage = function(commitMessage){
+			var cut = false;
+			var mainMessageMaxLength = 100;
+			
+			var commitMessage0 = commitMessage.split(/(\r?\n|$)/)[0].trim();
+			if (commitMessage0.length > mainMessageMaxLength){
+				var cutPoint = commitMessage0.indexOf(" ", mainMessageMaxLength - 10);
+				commitMessage0 = commitMessage0.substring(0, (cutPoint !== -1 ? cutPoint : mainMessageMaxLength));
+				cut = true;
+			};
+			
+			var commitMessage1 = commitMessage.substring(commitMessage0.length + 1, commitMessage.length).trim();
+			if (commitMessage1.length > 0){
+				commitMessage1 = (cut ? "..." + commitMessage1 : commitMessage1);
+			} else {
+				commitMessage1 = null;
+			}
+			
+			commitMessage0 += (cut ? "..." : "");
+			
+			return [commitMessage0, commitMessage1];
 		};
 		
 		// Git diffs
