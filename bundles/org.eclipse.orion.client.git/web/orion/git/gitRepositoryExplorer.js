@@ -497,9 +497,13 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.renderBranch = function(branch, index){
 		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("branchNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
-		
+
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: branch.Name + (branch.Current ? " (Active)" : "") }, detailsView );
+
+		if (branch.Current)
+			dojo.create( "span", { "class":"git-decor-icon git-sprite-branch_active" }, detailsView );
+		
+		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : ""), innerHTML: branch.Name }, detailsView );
 		dojo.create( "div", null, detailsView );
 		
 		var commit = branch.Commit.Children[0];

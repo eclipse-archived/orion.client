@@ -100,3 +100,8 @@
     overflow-x: hidden;
     width: 100%;
 }
+
+.activeBranch {
+	color: #B10015;
+	font-weight: bold;
+}
