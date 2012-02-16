@@ -356,7 +356,7 @@ a:hover {
 
 .auxpane {
 	border: 0;
-	border-top: 1px solid #d5d5d5;
+	border-top: 1px solid #e4e4e4;
     background: #f8f8f8;
     overflow-x: auto;
     min-width: 200px;
@@ -406,7 +406,7 @@ a:hover {
 }
 
 .mainpane {
-	border-top: 1px solid #d5d5d5;
+	border-top: 1px solid #ebebeb;
     background: #FFFFFF;
 	overflow: auto;
 }
@@ -561,12 +561,12 @@ a:hover {
 }
 
 .titleArea {
-	margin: 0;
-	border: 0;
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7'); /* IE */
-	background: -webkit-gradient(linear, left top, left bottom, from(#fffff), to(#f7f7f7)); 
-	background: -moz-linear-gradient(top,  #fffff,  #f7f7f7); 
-	border-bottom: 1px solid #d5d5d5;
+    margin: 0;
+    border: 0;
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7'); /* IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f7f7f7));
+    background: -moz-linear-gradient(top,  #ffffff,  #f7f7f7);
+    border-bottom: 1px solid #bfbfbf;
 }
 
 .paneHeading {
