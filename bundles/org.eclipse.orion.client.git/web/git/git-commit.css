@@ -110,4 +110,6 @@ pre {
     background-color: #fdfdfd;
     border: 1px solid #ebebeb;
     font-family: Courier,"Courier New";
+    white-space: pre-wrap;
+    width: 60%
 }
