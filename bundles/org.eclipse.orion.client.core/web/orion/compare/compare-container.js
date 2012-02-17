@@ -898,6 +898,9 @@ exports.InlineCompareContainer = (function() {
 			this._textView.setText("");
 			
 			this._textView.getModel().init(result.mapper , result.diffArray);
+			if(input === ""){
+				input = " ";
+			}
 			this._textView.setText(input);
 			this._annotation.init(result.mapper ,this._textView);
 		}
