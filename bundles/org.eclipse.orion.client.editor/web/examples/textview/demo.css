@@ -1,5 +1,8 @@
 @import "../../orion/textview/tooltip.css";
 @import "../../orion/textview/annotations.css";
+@import "./themes/default.css";
+@import "./themes/orion.css";
+@import "./themes/dark.css";
 
 .button {
 	color: teal;
