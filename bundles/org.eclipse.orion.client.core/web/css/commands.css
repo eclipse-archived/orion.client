@@ -27,7 +27,7 @@
 }
 
 .commandButton {
-	color: #808080;
+	color: #222222;
 	border: 1px solid transparent;
 	margin: 3px;
 	padding: 2px;
@@ -129,15 +129,15 @@
 .core-sprite-twistie_partOpen{ background-position: -173px -584px; width: 16px; height: 16px; } 
 
 /* TODO temporary sprite hacks */
-.core-sprite-options{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/more.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-ok{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/ok.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-sep{ background-position: 0 0; width: 1px; height: 16px; background: url(../images/sep.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle;} 
-.core-sprite-error{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/error.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-info{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/info.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-warning{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/warning.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-close{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/close.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-progress{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/progress.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
-.core-sprite-favorite_sml{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/favorite_sml.gif) no-repeat top left; display: inline-block; margin: 1px; vertical-align: middle; }
+.core-sprite-options{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/more.gif) no-repeat center; display: inline-block; vertical-align: middle; }
+.core-sprite-ok{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/ok.gif) no-repeat center; display: inline-block; vertical-align: middle; }
+.core-sprite-sep{ background-position: 0 0; width: 1px; height: 16px; background: url(../images/sep.gif) no-repeat center; display: inline-block; vertical-align: middle;} 
+.core-sprite-error{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/error.gif) no-repeat center; display: inline-block;  vertical-align: middle; }
+.core-sprite-info{ background-position: 0 0; width: 16px; height: 16px; background: url(../images/info.gif) no-repeat center; display: inline-block; vertical-align: middle; }
+.core-sprite-warning{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/warning.gif) no-repeat center; display: inline-block; vertical-align: middle; }
+.core-sprite-close{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/close.gif) no-repeat center; display: inline-block; vertical-align: middle; cursor: pointer;}
+.core-sprite-progress{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/progress.gif) no-repeat center; display: inline-block; vertical-align: middle; }
+.core-sprite-favorite_sml{  background-position: 0 0; width: 16px; height: 16px; background: url(../images/favorite_sml.gif) no-repeat center; display: inline-block; vertical-align: middle; }
 
 
 

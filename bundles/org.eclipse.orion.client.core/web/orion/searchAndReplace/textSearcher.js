@@ -153,7 +153,7 @@ orion.TextSearcher = (function() {
 					label : "Options",
 					dropDown : newMenu
 				});
-				dojo.addClass(menuButton.domNode, "commandImage");
+				dojo.addClass(menuButton.domNode, "parametersMenu");
 				dojo.place(menuButton.domNode, optionTd, "last");
 			});
 		},
