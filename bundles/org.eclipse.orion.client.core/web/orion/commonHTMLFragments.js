@@ -40,8 +40,8 @@ define(['require'],
 			'<div id="globalActions" class="pageNav"></div>' +
 			'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="imageSprite core-sprite-favorite_sml"></span>' +
 		'</div>' +
-		'<div id="dimension" class="layoutBlock dimension"></div>' +
-		'<div id="location" class="layoutBlock currentLocation"></div>' +
+		'<div id="dimension" class="clear dimension"></div>' +
+		'<div id="location" class="clear currentLocation"></div>' +
 	'</div>';
 	// END TOP BANNER FRAGMENT
 	

@@ -106,11 +106,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
 					var dismiss = this._activeElements.dismissArea || this._activeElements.parameterArea;
-					var spacer = dojo.create("span", null, dismiss, "last");
-					dojo.addClass(spacer, "dismiss");
 					close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, dismiss, "last");
 					dojo.addClass(close, "imageSprite");
-					dojo.addClass(close, "core-sprite-delete");
+					dojo.addClass(close, "core-sprite-close");
 					dojo.addClass(close, "dismiss");
 					close.title = "Close";
 					dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
@@ -215,7 +213,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}
 					dojo.connect(field, "onkeypress", keyHandler);
 				});
-				var spacer;
 				var parentDismiss = parameterArea;
 				var finish = function (collector) {
 					collector._collectAndCall(commandInvocation, parameterArea);
@@ -224,13 +221,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 
 				if (commandInvocation.parameters.options) {
 					commandInvocation.parameters.optionsRequested = false;
-					spacer = dojo.create("span", null, parentDismiss, "last");
-					dojo.addClass(spacer, "dismiss");
 					
 					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
-					dojo.addClass(options, "core-sprite-options");
+					dojo.place(window.document.createTextNode("More"), options, "last");
 					dojo.addClass(options, "dismiss");
-					options.title = "More options...";
 					dojo.connect(options, "onclick", dojo.hitch(this, function() {
 						commandInvocation.parameters.optionsRequested = true;
 						finish(this);
@@ -248,8 +242,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				dojo.addClass(spacer, "dismiss");
 
 				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
-				ok.title = "Submit";
-				dojo.addClass(ok, "core-sprite-ok");
+				dojo.place(window.document.createTextNode("Submit"), ok, "last");
 				dojo.addClass(ok, "dismiss");
 				dojo.connect(ok, "onclick", dojo.hitch(this, function() {
 					finish(this);
@@ -265,7 +258,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				dojo.addClass(spacer, "dismiss");
 				var close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, parentDismiss, "last");
 				dojo.addClass(close, "imageSprite");
-				dojo.addClass(close, "core-sprite-delete");
+				dojo.addClass(close, "core-sprite-close");
 				dojo.addClass(close, "dismiss");
 				close.title = "Close";
 				dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
