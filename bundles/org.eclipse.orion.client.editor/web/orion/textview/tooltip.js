@@ -113,18 +113,15 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				if (!this._contentsView) {
 					this._emptyModel = new mTextModel.TextModel("");
 					//TODO need hook into setup.js (or editor.js) to create a text view (and styler)
-					var newView = this._contentsView = new mTextView.TextView({
-						model: this._emptyModel,
-						parent: this._viewParent,
-						tabSize: 4,
-						sync: true,
-						stylesheet: ["/orion/textview/tooltip.css", "/orion/textview/rulers.css",
-							"/examples/textview/textstyler.css", "/css/default-theme.css"]
-					});
-					//TODO this is need to avoid IE from getting focus
+					var view = this._view;
+					var options = view.getOptions();
+					options.model = this._emptyModel;
+					options.parent = this._viewParent;
+					options.themeClass = "tooltip";
+					var newView = this._contentsView = new mTextView.TextView(options);
+					//TODO this is need to avoid Firefox from getting focus
 					newView._clientDiv.contentEditable = false;
 					//TODO need to find a better way of sharing the styler for multiple views
-					var view = this._view;
 					var listener = {
 						onLineStyle: function(e) {
 							view.onLineStyle(e);
@@ -139,6 +136,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				//TODO always make the width larger than the size of the scrollbar to avoid bug in updatePage
 				contentsDiv.style.width = (size.width + 20) + "px";
 				contentsDiv.style.height = size.height + "px";
+				this._contentsView.update();
 			} else {
 				return;
 			}

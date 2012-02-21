@@ -18,8 +18,4 @@
 
 @import "../css/commands.css";
 
-@import "../orion/textview/tooltip.css";
-
-@import "../orion/textview/annotations.css";
-
-@import "../examples/textview/themes/default.css";
+@import "../orion/editor/editor.css";

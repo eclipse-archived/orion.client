@@ -57,6 +57,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var splitArea = dijit.byId("topContainer"),
 		outlineDomNode = dojo.byId("outline"),
 		editorDomNode = dojo.byId("editor"),
+		mainPane = dijit.byId("mainPane"),
 		searchFloat = dojo.byId("searchFloat");
 
 	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
@@ -64,15 +65,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
 	var textViewFactory = function() {
-		return new mTextView.TextView({
+		var textView = new mTextView.TextView({
 			parent: editorDomNode,
 			model: new mProjectionTextModel.ProjectionTextModel(new mTextModel.TextModel()),
-			stylesheet: [require.toUrl("orion/textview/textview.css"), require.toUrl("orion/textview/rulers.css"),
-			             require.toUrl("examples/textview/textstyler.css"), require.toUrl("css/default-theme.css"),
-			             require.toUrl("orion/textview/annotations.css")],
 			tabSize: 4,
 			readonly: isReadOnly
 		});
+		dojo.connect(mainPane, "resize", dojo.hitch(this, function (e){
+			textView.resize();
+		}));
+		return textView;
 	};
 	
 	var dispatcher;
