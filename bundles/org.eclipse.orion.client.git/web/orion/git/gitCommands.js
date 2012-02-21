@@ -117,12 +117,13 @@ var exports = {};
 
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
 		var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
-					title: title,
-					serviceRegistry: serviceRegistry,
-					func: func,
-					errordata: options.errordata,
-					failedOperation: options.failedOperation
-				});		
+			title: title,
+			serviceRegistry: serviceRegistry,
+			func: func,
+			errordata: options.errordata,
+			failedOperation: options.failedOperation
+		});
+		
 		credentialsDialog.startup();
 		credentialsDialog.show();
 		if(options.failedOperation){
@@ -192,6 +193,108 @@ var exports = {};
 					options.failedOperation = jsonData.failedOperation;
 				}
 				dojo.hitch(this, exports.handleKnownHostsError)(serviceRegistry, jsonData.JsonData, options, callee);
+				return;
+			}
+		default:
+			var display = [];
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try {
+				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			
+			serviceRegistry.getService("orion.page.message").setProgressResult(display);
+			break;
+		}
+			
+	};
+		
+	exports.gatherSshCredentials = function(serviceRegistry, data, errorData, title){
+		var def = new dojo.Deferred();
+
+		var triggerCallback = function(sshObject){
+			serviceRegistry.getService("orion.net.ssh").getKnownHosts().then(function(knownHosts){
+				def.callback({
+					knownHosts: knownHosts,
+					gitSshUsername: sshObject.gitSshUsername,
+					gitSshPassword: sshObject.gitSshPassword,
+					gitPrivateKey: sshObject.gitPrivateKey,
+					gitPassphrase: sshObject.gitPassphrase
+				});
+			});
+		};
+
+		// if this is a known hosts error, show a prompt always
+		if (errorData && errorData.HostKey) {
+			if(confirm("Would you like to add " + errorData.KeyType + " key for host " + errorData.Host
+					+ " to continue operation? Key fingerpt is " + errorData.HostFingerprint + ".")){
+				var sshService = serviceRegistry.getService("orion.net.ssh");
+				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then(
+					function(){
+						triggerCallback({ gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""});
+					}
+				);					
+			}
+			return def;
+		}
+
+		// try to gather creds from the slideout first
+		if (data) {
+			var sshUser =  data.parameters ? data.parameters.valueFor("sshuser") : "";
+			var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	
+			triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""});
+			return def;
+		}
+		
+		// use the old creds dialog
+		var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+			title: title,
+			serviceRegistry: serviceRegistry,
+			func: triggerCallback,
+			errordata: errorData
+		});
+		
+		credentialsDialog.startup();
+		credentialsDialog.show();
+
+		return def;
+	};
+	
+	exports.handleProgressServiceResponse2 = function(jsonData, serviceRegistry, callback, sshCallback){
+		if(jsonData && jsonData.status){
+			jsonData = translateResponseToStatus(jsonData);
+		}
+		if(!jsonData || !jsonData.HttpCode){
+			if(callback){
+				callback(jsonData);
+			}
+			return;
+		}
+		switch (jsonData.HttpCode) {
+		case 200:
+		case 201:
+		case 202:
+			if(callback){
+				callback(jsonData.Result);
+			}
+			return;
+		case 401:
+			if (jsonData.failedOperation){
+				var progressService = serviceRegistry.getService("orion.page.progress");
+				dojo.hitch(progressService, progressService.removeOperation)(jsonData.failedOperation.Location, jsonData.failedOperation.Id);
+			}
+			sshCallback(jsonData);
+			return;
+		case 400:
+			if(jsonData.JsonData && jsonData.JsonData.HostKey){
+				if (jsonData.failedOperation){
+					var progressService = serviceRegistry.getService("orion.page.progress");
+					dojo.hitch(progressService, progressService.removeOperation)(jsonData.failedOperation.Location, jsonData.failedOperation.Id);
+				}
+				sshCallback(jsonData);	
 				return;
 			}
 		default:
@@ -692,63 +795,82 @@ var exports = {};
 		});
 		commandService.addCommand(openGitCommit, "object");
 
-		var gitAuthParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-
 		var fetchCommand = new mCommands.Command({
 			name: "Fetch",
 			tooltip: "Fetch from the remote",
 			imageClass: "git-sprite-fetch",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.fetch",
-			parameters: gitAuthParameters,
 			callback: function(data) {
 				var item = data.items;
 				var path = item.Location;
-				exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options) {
-					var func = arguments.callee;
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					gitService.doFetch(path, false, null,
-							options.gitSshUsername,
-							options.gitSshPassword,
-							options.knownHosts,
-							options.gitPrivateKey,
-							options.gitPassphrase).then(function(jsonData, secondArg) {
-						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-							dojo.xhrGet({
-								url: path,
-								headers: {
-									"Orion-Version": "1"
-								},
-								postData: dojo.toJson({
-									"GitSshUsername": options.gitSshUsername,
-									"GitSshPassword": options.gitSshPassword,
-									"GitSshPrivateKey": options.gitPrivateKey,
-									"GitSshPassphrase": options.gitPassphrase,
-									"GitSshKnownHost": options.knownHosts
-								}),
-								handleAs: "json",
-								timeout: 5000,
-								load: function(jsonData, secondArg) {
-									return jsonData;
-								},
-								error: function(error, ioArgs) {
-									console.error("HTTP status code: ", ioArgs.xhr.status);
-									return error;
+
+				var doOperation = function(commandInvocation, errorData){
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
+						function(options) {
+							var gitService = serviceRegistry.getService("orion.git.provider");
+							gitService.doFetch(path, false, null,
+									options.gitSshUsername,
+									options.gitSshPassword,
+									options.knownHosts,
+									options.gitPrivateKey,
+									options.gitPassphrase).then(
+								function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+											gitService.getGitRemote(path).then(
+												function(jsonData){
+													var remoteJsonData = jsonData;
+													if (explorer.parentId === "explorer-tree") {
+														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, "Getting git incoming changes", function(loadScopedCommitsList) {
+															explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
+															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
+														});
+													}
+													dojo.hitch(explorer, explorer.changedItem)(item);
+												}, displayErrorOnStatus
+											);
+										}, function () {
+											if (jsonData.JsonData.HostKey){
+												doOperation(commandInvocation, jsonData.JsonData);
+											} else if (commandInvocation){
+												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+												commandInvocation.parameters.errorData = jsonData.JsonData;
+												commandService._collectParameters(commandInvocation);
+											} else {
+												doOperation(null, jsonData.JsonData);
+											}
+										}
+									);
+								}, function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+										
+										}, function (jsonData) {
+											if (jsonData.JsonData.HostKey){
+												doOperation(commandInvocation, jsonData.JsonData);
+											} else if (commandInvocation){
+												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+												commandInvocation.parameters.errorData = jsonData.JsonData;
+												commandService._collectParameters(commandInvocation);
+											} else {
+												doOperation(null, jsonData.JsonData);
+											}
+										}
+									);
 								}
-							}).then(function(remoteJsonData) {
-								if (explorer.parentId === "explorer-tree") {
-									gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, "Getting git incoming changes", function(loadScopedCommitsList) {
-											explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
-											explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
-									});
-								}
-								dojo.hitch(explorer, explorer.changedItem)(item);
-							}, displayErrorOnStatus);
-						}, func, "Fetch Git Repository");
-					}, function(jsonData, secondArg) {
-						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
-					});
-				});
+							);
+						}
+					);
+				};
+				
+				if (data.parameters && data.parameters.optionsRequested){
+					doOperation(null, data.parameters.errorData);
+					data.parameters.optionsRequested = false;
+					data.parameters.errorData = null;
+				} else {
+					doOperation(data);
+				}
 			},
 			visibleWhen: function(item) {
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
@@ -761,54 +883,78 @@ var exports = {};
 			name : "Force Fetch",
 			tooltip: "Fetch from the remote branch into your remote tracking branch overriding its current content",
 			id : "eclipse.orion.git.fetchForce",
-			parameters: gitAuthParameters,
-			callback: function(data) {
+			callback: function(data) {			
+				if(!confirm("You're going to override content of the remote tracking branch. This can cause the branch to lose commits.\n\nAre you sure?"))
+					return;
+				
 				var item = data.items;
-				if(confirm("You're going to override content of the remote tracking branch. This can cause the branch to lose commits.\n\nAre you sure?")) {
-					var path = item.Location;
-					exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options) {
-						var func = arguments.callee;
-						var gitService = serviceRegistry.getService("orion.git.provider");
-						gitService.doFetch(path, true, null,
-								options.gitSshUsername,
-								options.gitSshPassword,
-								options.knownHosts,
-								options.gitPrivateKey,
-								options.gitPassphrase).then(function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-								dojo.xhrGet({
-									url: path,
-									headers: {
-										"Orion-Version": "1"
-									},
-									postData: dojo.toJson({
-										"GitSshUsername": options.gitSshUsername,
-										"GitSshPassword": options.gitSshPassword,
-										"GitSshPrivateKey": options.gitPrivateKey,
-										"GitSshPassphrase": options.gitPassphrase,
-										"GitSshKnownHost": options.knownHosts
-									}),
-									handleAs: "json",
-									timeout: 5000,
-									load: function(jsonData, secondArg) {
-										return jsonData;
-									},
-									error: function(error, ioArgs) {
-										console.error("HTTP status code: ", ioArgs.xhr.status);
-										return error;
-									}
-								}).then(function(remoteJsonData) {
-									if (explorer.parentId === "explorer-tree")
-										gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, "Getting git incoming changes", function(scopedCommitsJsonData, secondArg) {
-												explorer.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-												explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
-										});
-								}, displayErrorOnStatus);
-							}, func, "Fetch Git Repository");
-						}, function(jsonData, secondArg) {
-							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Fetch Git Repository");
-						});
-					});
+				var path = item.Location;
+
+				var doOperation = function(commandInvocation, errorData){
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
+						function(options) {
+							var gitService = serviceRegistry.getService("orion.git.provider");
+							gitService.doFetch(path, true, null,
+									options.gitSshUsername,
+									options.gitSshPassword,
+									options.knownHosts,
+									options.gitPrivateKey,
+									options.gitPassphrase).then(
+								function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+											gitService.getGitRemote(path).then(
+												function(jsonData){
+													var remoteJsonData = jsonData;
+													if (explorer.parentId === "explorer-tree") {
+														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id, "Getting git incoming changes", function(loadScopedCommitsList) {
+															explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
+															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true);
+														});
+													}
+													dojo.hitch(explorer, explorer.changedItem)(item);
+												}, displayErrorOnStatus
+											);
+										}, function () {
+											if (jsonData.JsonData.HostKey){
+												doOperation(commandInvocation, jsonData.JsonData);
+											} else if (commandInvocation){
+												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+												commandInvocation.parameters.errorData = jsonData.JsonData;
+												commandService._collectParameters(commandInvocation);
+											} else {
+												doOperation(null, jsonData.JsonData);
+											}
+										}
+									);
+								}, function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+										
+										}, function (jsonData) {
+											if (jsonData.JsonData.HostKey){
+												doOperation(commandInvocation, jsonData.JsonData);
+											} else if (commandInvocation){
+												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+												commandInvocation.parameters.errorData = jsonData.JsonData;
+												commandService._collectParameters(commandInvocation);
+											} else {
+												doOperation(null, jsonData.JsonData);
+											}
+										}
+									);
+								}
+							);
+						}
+					);
+				};
+				
+				if (data.parameters && data.parameters.optionsRequested){
+					doOperation(null, data.parameters.errorData);
+					data.parameters.optionsRequested = false;
+					data.parameters.errorData = null;
+				} else {
+					doOperation(data);
 				}
 			},
 			visibleWhen : function(item) {
@@ -969,68 +1115,134 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.push",
-			parameters: gitAuthParameters,
 			callback: function(data) {
+				
 				var item = data.items;
-					var path = dojo.hash();
-					if (item.toRef) {
-						item = item.toRef;
-					}
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					if (item.RemoteLocation.length == 1 && item.RemoteLocation[0].Children.length == 1) {
-						exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(
-								function(options) {
-									var func = arguments.callee;
-									gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, false, null,
-											"Pushing remote: " + path,
-											options.gitSshUsername, options.gitSshPassword,
-											options.knownHosts, options.gitPrivateKey, options.gitPassphrase).then(function(remoteJsonData) {
-										exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
-											if (!jsonData || !jsonData.HttpCode)
-												dojo.query(".treeTableRow").forEach(function(node, i) {
+				var path = dojo.hash();
+				if (item.toRef) {
+					item = item.toRef;
+				}
+
+				var doOperation = function(commandInvocation, errorData){
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
+						function(options) {
+							
+							var gitService = serviceRegistry.getService("orion.git.provider");
+							if (item.RemoteLocation.length == 1 && item.RemoteLocation[0].Children.length == 1) {
+								gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, false, null,
+										"Pushing remote: " + path,
+										options.gitSshUsername, options.gitSshPassword,
+										options.knownHosts, options.gitPrivateKey, options.gitPassphrase).then(
+									function(jsonData){
+										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+											function() {
+												if (!jsonData || !jsonData.HttpCode)
+													dojo.query(".treeTableRow").forEach(function(node, i) {
 													dojo.toggleClass(node, "outgoingCommitsdRow", false);
 												});
-											dojo.hitch(explorer, explorer.changedItem)({});
-										}, func, "Push Git Repository");
+												dojo.hitch(explorer, explorer.changedItem)({});
+											}, function () {
+												if (jsonData.JsonData.HostKey){
+													doOperation(commandInvocation, jsonData.JsonData);
+												} else if (commandInvocation){
+													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+													commandInvocation.parameters.errorData = jsonData.JsonData;
+													commandService._collectParameters(commandInvocation);
+												} else {
+													doOperation(null, jsonData.JsonData);
+												}
+											}
+										);
 									}, function(jsonData, secondArg) {
-										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
-									});
-								});
-					} else {
-						var remotes = item.RemoteLocation;
-
-						var dialog = new orion.git.widgets.RemotePrompterDialog({
-							title: "Choose Branch",
-							serviceRegistry: serviceRegistry,
-							gitClient: gitService,
-							treeRoot: {
-								Children: remotes
-							},
-							hideNewBranch: true,
-							func: dojo.hitch(this, function(targetBranch, remote) {
-								exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(
-										function(options) {
-											var func = arguments.callee;
-											gitService.doPush(targetBranch.Location, "HEAD", true, false, null,
+										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+											function() {
+											
+											}, function (jsonData) {
+												if (jsonData.JsonData.HostKey){
+													doOperation(commandInvocation, jsonData.JsonData);
+												} else if (commandInvocation){
+													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+													commandInvocation.parameters.errorData = jsonData.JsonData;
+													commandService._collectParameters(commandInvocation);
+												} else {
+													doOperation(null, jsonData.JsonData);
+												}
+											}
+										);
+									}	
+								);			
+							} else {
+								var remotes = item.RemoteLocation;
+								
+								var dialog = new orion.git.widgets.RemotePrompterDialog({
+									title: "Choose Branch",
+									serviceRegistry: serviceRegistry,
+									gitClient: gitService,
+									treeRoot: {
+										Children: remotes
+									},
+									hideNewBranch: true,
+									func: dojo.hitch(this, 
+										function(targetBranch, remote) {
+											gitService.doPush(targetBranch.Location, "HEAD", true, true, null,
 													"Pushing remote: " + remote.Name,
 													options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-													options.gitPrivateKey, options.gitPassphrase).then(function(remoteJsonData) {
-												exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
-													if (!jsonData || !jsonData.HttpCode)
-														dojo.query(".treeTableRow").forEach(function(node, i) {
-															dojo.toggleClass(node, "outgoingCommitsdRow", false);
-														});
-													dojo.hitch(explorer, explorer.changedItem)({});
-												}, func, "Push Git Repository");
-											}, function(jsonData, secondArg) {
-												exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Clone Git Repository");
-											});
-										});
-							})
-						});
-						dialog.startup();
-						dialog.show();
-					}
+													options.gitPrivateKey, options.gitPassphrase).then(
+												function(jsonData){
+													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+														function() {
+															if (!jsonData || !jsonData.HttpCode)
+																dojo.query(".treeTableRow").forEach(function(node, i) {
+																dojo.toggleClass(node, "outgoingCommitsdRow", false);
+															});
+															dojo.hitch(explorer, explorer.changedItem)({});
+														}, function () {
+															if (jsonData.JsonData.HostKey){
+																doOperation(commandInvocation, jsonData.JsonData);
+															} else if (commandInvocation){
+																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+																commandInvocation.parameters.errorData = jsonData.JsonData;
+																commandService._collectParameters(commandInvocation);
+															} else {
+																doOperation(null, jsonData.JsonData);
+															}
+														}
+													);
+												}, function(jsonData, secondArg) {
+													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+														function() {
+														
+														}, function (jsonData) {
+															if (jsonData.JsonData.HostKey){
+																doOperation(commandInvocation, jsonData.JsonData);
+															} else if (commandInvocation){
+																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+																commandInvocation.parameters.errorData = jsonData.JsonData;
+																commandService._collectParameters(commandInvocation);
+															} else {
+																doOperation(null, jsonData.JsonData);
+															}
+														}
+													);
+												}
+											);
+										}
+									)
+								});
+								dialog.startup();
+								dialog.show();	
+							}
+						}
+					);
+				};
+				
+				if (data.parameters && data.parameters.optionsRequested){
+					doOperation(null, data.parameters.errorData);
+					data.parameters.optionsRequested = false;
+					data.parameters.errorData = null;
+				} else {
+					doOperation(data);
+				}
 			},
 			visibleWhen : function(item) {
 				if (item.toRef)
@@ -1050,64 +1262,135 @@ var exports = {};
 			imageClass: "git-sprite-push",
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.orion.git.pushForce",
-			parameters: gitAuthParameters,
 			callback: function(data) {
+				if(!confirm("You're going to override content of the remote branch. This can cause the remote repository to lose commits.\n\nAre you sure?"))
+					return;
+				
 				var item = data.items;
-				if(confirm("You're going to override content of the remote branch. This can cause the remote repository to lose commits.\n\nAre you sure?")) {
-					var path = dojo.hash();
-					if(item.toRef){
-						item = item.toRef;
-					}
-					var gitService = serviceRegistry.getService("orion.git.provider");
-					if(item.RemoteLocation.length==1 && item.RemoteLocation[0].Children.length==1){
-						exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options){
-							var func = arguments.callee;
-							gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, true, null,
-									"Pushing remote: " + path,
-									options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-									options.gitPrivateKey, options.gitPassphrase).then(function(remoteJsonData){
-								exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-										function(jsonData){
-									if (!jsonData || !jsonData.HttpCode)
-										dojo.query(".treeTableRow").forEach(function(node, i) {
-											dojo.toggleClass(node, "outgoingCommitsdRow", false);
-										});
-								}, func, "Push Git Repository");
-							}, function(jsonData, secondArg) {
-								exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Push Git Repository");
-							});
-						});
-					} else {
-						var remotes = item.RemoteLocation;
-						var dialog = new orion.git.widgets.RemotePrompterDialog({
-							title: "Choose Branch",
-							serviceRegistry: serviceRegistry,
-							gitClient: gitService,
-							treeRoot: {Children: remotes},
-							hideNewBranch: true,
-							func: dojo.hitch(this, function(targetBranch, remote) {
-								exports.getDefaultSshOptions(serviceRegistry, data.parameters).then(function(options){
-									var func = arguments.callee;
-									gitService.doPush(targetBranch.Location, "HEAD", true, true, null,
-											"Pushing remote: " + remote,
-											options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-											options.gitPrivateKey, options.gitPassphrase).then(function(remoteJsonData){
-										exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry,
-												function(jsonData){
-											if (!jsonData || !jsonData.HttpCode)
-												dojo.query(".treeTableRow").forEach(function(node, i) {
+				var path = dojo.hash();
+				if (item.toRef) {
+					item = item.toRef;
+				}
+
+				var doOperation = function(commandInvocation, errorData){
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
+						function(options) {
+							
+							var gitService = serviceRegistry.getService("orion.git.provider");
+							if (item.RemoteLocation.length == 1 && item.RemoteLocation[0].Children.length == 1) {
+								gitService.doPush(item.RemoteLocation[0].Children[0].Location, "HEAD", true, true, null,
+										"Pushing remote: " + path,
+										options.gitSshUsername, options.gitSshPassword,
+										options.knownHosts, options.gitPrivateKey, options.gitPassphrase).then(
+									function(jsonData){
+										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+											function() {
+												if (!jsonData || !jsonData.HttpCode)
+													dojo.query(".treeTableRow").forEach(function(node, i) {
 													dojo.toggleClass(node, "outgoingCommitsdRow", false);
 												});
-										}, func, "Push Git Repository");
+												dojo.hitch(explorer, explorer.changedItem)({});
+											}, function () {
+												if (jsonData.JsonData.HostKey){
+													doOperation(commandInvocation, jsonData.JsonData);
+												} else if (commandInvocation){
+													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+													commandInvocation.parameters.errorData = jsonData.JsonData;
+													commandService._collectParameters(commandInvocation);
+												} else {
+													doOperation(null, jsonData.JsonData);
+												}
+											}
+										);
 									}, function(jsonData, secondArg) {
-										exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Pushing remote: " + remote);
-									});
+										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+											function() {
+											
+											}, function (jsonData) {
+												if (jsonData.JsonData.HostKey){
+													doOperation(commandInvocation, jsonData.JsonData);
+												} else if (commandInvocation){
+													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+													commandInvocation.parameters.errorData = jsonData.JsonData;
+													commandService._collectParameters(commandInvocation);
+												} else {
+													doOperation(null, jsonData.JsonData);
+												}
+											}
+										);
+									}	
+								);			
+							} else {
+								var remotes = item.RemoteLocation;
+								
+								var dialog = new orion.git.widgets.RemotePrompterDialog({
+									title: "Choose Branch",
+									serviceRegistry: serviceRegistry,
+									gitClient: gitService,
+									treeRoot: {
+										Children: remotes
+									},
+									hideNewBranch: true,
+									func: dojo.hitch(this, 
+										function(targetBranch, remote) {
+											gitService.doPush(targetBranch.Location, "HEAD", true, true, null,
+													"Pushing remote: " + remote.Name,
+													options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+													options.gitPrivateKey, options.gitPassphrase).then(
+												function(jsonData){
+													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+														function() {
+															if (!jsonData || !jsonData.HttpCode)
+																dojo.query(".treeTableRow").forEach(function(node, i) {
+																dojo.toggleClass(node, "outgoingCommitsdRow", false);
+															});
+															dojo.hitch(explorer, explorer.changedItem)({});
+														}, function () {
+															if (jsonData.JsonData.HostKey){
+																doOperation(commandInvocation, jsonData.JsonData);
+															} else if (commandInvocation){
+																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+																commandInvocation.parameters.errorData = jsonData.JsonData;
+																commandService._collectParameters(commandInvocation);
+															} else {
+																doOperation(null, jsonData.JsonData);
+															}
+														}
+													);
+												}, function(jsonData, secondArg) {
+													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+														function() {
+														
+														}, function (jsonData) {
+															if (jsonData.JsonData.HostKey){
+																doOperation(commandInvocation, jsonData.JsonData);
+															} else if (commandInvocation){
+																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+																commandInvocation.parameters.errorData = jsonData.JsonData;
+																commandService._collectParameters(commandInvocation);
+															} else {
+																doOperation(null, jsonData.JsonData);
+															}
+														}
+													);
+												}
+											);
+										}
+									)
 								});
-							})
-						});
-						dialog.startup();
-						dialog.show();
-					}
+								dialog.startup();
+								dialog.show();	
+							}
+						}
+					);
+				};
+				
+				if (data.parameters && data.parameters.optionsRequested){
+					doOperation(null, data.parameters.errorData);
+					data.parameters.optionsRequested = false;
+					data.parameters.errorData = null;
+				} else {
+					doOperation(data);
 				}
 			},
 			visibleWhen : function(item) {
