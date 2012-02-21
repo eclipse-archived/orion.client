@@ -15,7 +15,7 @@ define(function(){
 
 	function matchResourceParameters(optURIText) {
 		optURIText = optURIText || window.location.toString();
-		var result = {};
+		var result = {resource:""};
 		var hashIndex = optURIText.indexOf("#");
 		if (hashIndex !== -1) {
 			var text = optURIText.substring(hashIndex + 1);
