@@ -1,15 +1,7 @@
-.view {
+.tooltip .view {
 	color: InfoText;
 	background-color: InfoBackground;
 	padding: 0px;
-}
-
-.viewContainer {
-	font-family: monospace;
-	font-size: 10pt;
-}
-
-.viewContent {
 }
 
 /* Styles for the view tooltips */

@@ -211,7 +211,7 @@ orion.CompareOverviewRuler = (function() {
 			style.width = "14px";
 		} else {
 			if (lineIndex !== -1) {
-				result = {styleClass: "ruler_annotation_breakpoint_overview"} || {};
+				result = {styleClass: "annotationOverview breakpoint"} || {};
 			} else {
 				result = {};
 			}
@@ -273,7 +273,7 @@ orion.TwoWayCompareOverviewRuler = (function() {
 			style.width = "14px";
 		} else {
 			if (lineIndex !== -1) {
-				result = {styleClass: "ruler_annotation_breakpoint_overview"} || {};
+				result = {styleClass: "annotationOverview breakpoint"} || {};
 			} else {
 				result = {};
 			}

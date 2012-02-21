@@ -22,6 +22,8 @@
 
 @import "css/git.css";
 
+@import "../orion/compare/editor.css";
+
 .git-decor-icon {
 	float: left;
 	position: relative;

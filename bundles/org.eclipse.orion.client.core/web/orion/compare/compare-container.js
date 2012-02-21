@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window*/
+/*global define window dijit */
 /*jslint browser:true devel:true */
 define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/compare/compare-2way-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
@@ -457,7 +457,7 @@ exports.TwoWayCompareContainer = (function() {
 		this._editorRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
 		this._textViewRight = this._editorRight.getTextView();
 		var that = this;
-		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler_overview"} , that._compareMatchRenderer.getAnnotation(),
+		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , that._compareMatchRenderer.getAnnotation(),
 				                    function(lineIndex, ruler){that._compareMatchRenderer.matchPositionFromAnnotation(lineIndex);});
 		this._textViewRight.addRuler(overview);
 		this._compareMatchRenderer.setOverviewRuler(overview);
@@ -540,6 +540,7 @@ exports.TwoWayCompareContainer = (function() {
 	
 	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
 		var editorContainerDomNode = dojo.byId(parentDivId);
+		var editorContainer = dijit.byId(parentDivId);
 		var that = this;
 		
 		var model = new mTextModel.TextModel(content , delim);
@@ -549,7 +550,6 @@ exports.TwoWayCompareContainer = (function() {
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: readOnly,
-				stylesheet: [ require.toUrl("orion/compare/editor.css"), require.toUrl("css/default-theme.css") ],
 				tabSize: 4
 			});
 			view.addEventListener("Load", function(){
@@ -561,6 +561,9 @@ exports.TwoWayCompareContainer = (function() {
 					that.onLoad();
 				}
 			});
+			dojo.connect(editorContainer, "resize", dojo.hitch(this, function (e){
+				textView.resize();
+			}));
 			return view;
 		};
 			
@@ -622,7 +625,7 @@ exports.TwoWayCompareContainer = (function() {
 			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
 		}
 			
-		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"}));
+		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}));
 
 		textView.addEventListener("Selection", function() {
 			var lineIndex = textView.getModel().getLineAtOffset(textView.getCaretOffset());
@@ -769,19 +772,23 @@ exports.InlineCompareContainer = (function() {
 
 	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileObj){
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
+		var editorContainer = dijit.byId(this._editorDivId);
 		var that = this;
 		
 		var model = new mTextModel.TextModel(content, delim);
 		var compareModel = new mCompareModel.CompareTextModel(model, {mapper:mapper , columnIndex:0} , new mCompareModel.DiffLineFeeder(diffArray ,delim));
 
 		var textViewFactory = function() {
-			return new mTextView.TextView({
+			var textView = new mTextView.TextView({
 				parent: editorContainerDomNode,
 				model: compareModel,
 				readonly: true,
-				stylesheet: require.toUrl("orion/compare/editor.css") ,
 				tabSize: 4
 			});
+			dojo.connect(editorContainer, "resize", dojo.hitch(this, function (e){
+				textView.resize();
+			}));
+			return textView;
 		};
 			
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
@@ -809,10 +816,10 @@ exports.InlineCompareContainer = (function() {
 			
 		var textView = editor.getTextView();
 			
-		this._rulerOrigin = new mRulers.LineNumberCompareRuler(1,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
-		this._rulerNew = new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler_lines"}, {styleClass: "ruler_lines_odd"}, {styleClass: "ruler_lines_even"});
+		this._rulerOrigin = new mRulers.LineNumberCompareRuler(1,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
+		this._rulerNew = new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
 		var that = this;
-		this._overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler_overview"} , that._annotation,
+		this._overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , that._annotation,
 				function(lineIndex, ruler){
 					that._annotation.matchPositionFromAnnotation(lineIndex);
 					that.positionAnnotation(lineIndex);

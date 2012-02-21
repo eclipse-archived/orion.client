@@ -14,46 +14,49 @@
 /*globals define window document setTimeout */
 
 
-function clearConsole () {
-	var console = window.document.getElementById('console');
-	if (!console) { return; }
-	while (console.hasChildNodes()) { console.removeChild(console.lastChild); }
-}
-
-function showConsole () {
-	var console = window.document.getElementById('console');
-	if (!console) { return; }
-	var consoleCol = window.document.getElementById('consoleCol');
-	var consoleHeader = window.document.getElementById('consoleHeader');
-	var consoleActions = window.document.getElementById('consoleActions');
-	consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "block";
-}
-
-function hideConsole () {
-	var console = window.document.getElementById('console');
-	if (!console) { return; }
-	var consoleCol = window.document.getElementById('consoleCol');
-	var consoleHeader = window.document.getElementById('consoleHeader');
-	var consoleActions = window.document.getElementById('consoleActions');
-	consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "none";
-}
-
-function log (text) {
-	var console = window.document.getElementById('console');
-	if (!console) { return; }
-	showConsole();
-	for (var n = 1; n < arguments.length; n++) {
-		text += " ";
-		text += arguments[n];
-	}
-	console.appendChild(document.createTextNode(text));
-	console.appendChild(document.createElement("br"));
-	console.scrollTop = console.scrollHeight;
-}
-
 define(['examples/textview/demoSetup', 'tests/textview/test-performance'],   
  
 function(mSetup, mTestPerformance) {
+
+	function clearConsole () {
+		var console = window.document.getElementById('console');
+		if (!console) { return; }
+		while (console.hasChildNodes()) { console.removeChild(console.lastChild); }
+	}
+	
+	function showConsole () {
+		var console = window.document.getElementById('console');
+		if (!console) { return; }
+		var consoleCol = window.document.getElementById('consoleCol');
+		var consoleHeader = window.document.getElementById('consoleHeader');
+		var consoleActions = window.document.getElementById('consoleActions');
+		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "block";
+		if (mSetup.view) { mSetup.view.resize(); }
+	}
+	
+	function hideConsole () {
+		var console = window.document.getElementById('console');
+		if (!console) { return; }
+		var consoleCol = window.document.getElementById('consoleCol');
+		var consoleHeader = window.document.getElementById('consoleHeader');
+		var consoleActions = window.document.getElementById('consoleActions');
+		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "none";
+		if (mSetup.view) { mSetup.view.resize(); }
+	}
+	
+	function log (text) {
+		var console = window.document.getElementById('console');
+		if (!console) { return; }
+		showConsole();
+		for (var n = 1; n < arguments.length; n++) {
+			text += " ";
+			text += arguments[n];
+		}
+		console.appendChild(document.createTextNode(text));
+		console.appendChild(document.createElement("br"));
+		console.scrollTop = console.scrollHeight;
+	}
+	window.log = log;
 
 	var bCreateJava = document.getElementById("createJavaSample");
 	var bCreateJS = document.getElementById("createJavaScriptSample");
@@ -130,9 +133,18 @@ function(mSetup, mTestPerformance) {
 	}
 	
 	function createBidiTextSample() {
-		var lines = [];
-		lines.push("Hello \u0644\u0645\u0646\u0647");
-		return setupView(lines.join("\r\n"), null);
+//		var lines = [];
+//		lines.push("Hello \u0644\u0645\u0646\u0647");
+//		return setupView(lines.join("\r\n"), null);
+
+		log("test1");
+		if (mSetup.p.style.display === "none") {
+			mSetup.p.style.display = "block";
+		} else {
+			mSetup.p.style.display = "none";
+		}
+		mSetup.view._updateStyle();
+		mSetup.view.update();	
 	}
 	
 	function createLoad() {
@@ -142,6 +154,13 @@ function(mSetup, mTestPerformance) {
 
 	function test() {
 		log("test");
+		if (mSetup.p.parentNode) {
+			mSetup.pp.removeChild(mSetup.p);
+		} else {
+			mSetup.pp.appendChild(mSetup.p);
+		}
+		mSetup.view._updateStyle();
+		mSetup.view.update();
 	}
 	
 	function performanceTest() {
