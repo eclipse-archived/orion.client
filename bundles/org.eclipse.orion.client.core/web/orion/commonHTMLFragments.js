@@ -27,7 +27,7 @@ define(['require'],
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
-		'<div id="userMenu" class="layoutRight"></div>' +
+		'<div id="userMenu" class="layoutRight textless"></div>' +
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
 	'</div>' +
