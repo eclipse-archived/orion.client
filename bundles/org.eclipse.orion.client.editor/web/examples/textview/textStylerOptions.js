@@ -73,16 +73,22 @@ define("examples/textview/textStylerOptions", [], function() {
 			}	
 			var size = this._getSetting("Font", "Size");
 			var color = this._getSetting("Font", "Color");
+			var background = this._getSetting("Font", "Background");
 			result.push("." + theme + " {");
 			result.push("\tfont-family: " + family + ";");
 			result.push("\tfont-size: " + size + ";");
 			result.push("\tcolor: " + color + ";");
+			result.push("\tbackground-color: " + background + ";");
 			result.push("}");
 			
 			//view
-			color = this._getSetting("Font", "Background");
 			result.push("." + theme + " .view {");
-			result.push("\tbackground-color: " + color + ";");
+			result.push("\tbackground-color: " + background + ";");
+			result.push("}");
+
+			//ruler
+			result.push("." + theme + " .ruler {");
+			result.push("\tbackground-color: " + background + ";");
 			result.push("}");
 
 			var _this = this;
