@@ -24,7 +24,7 @@
 		
 		var a = document.createElement("a");
 		a.className = "browse-button";
-		a.href = "http://orionhub.org/git/git-repository.html#?openGitCommit=" + shaValue;
+		a.href = "http://orionhub.org/git/git-repository.html#,openGitCommit=" + shaValue;
 		a.title = "Open in Orion";
 		a.innerHTML = "Open in Orion";
 		a.style.marginLeft = "10px";

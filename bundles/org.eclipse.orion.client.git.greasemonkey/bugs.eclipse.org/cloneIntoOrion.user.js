@@ -91,7 +91,7 @@
 	var gitRepoUrl = map[product + "_" + component];
 	if (gitRepoUrl) {
 		var a = document.createElement("a");
-		a.href = "http://orionhub.org/git/git-repository.html?cloneGitRepository=" + gitRepoUrl;
+		a.href = "http://orionhub.org/git/git-repository.html#,cloneGitRepository=" + gitRepoUrl;
 		a.target = "_blank";
 		a.appendChild(document.createTextNode("Clone into Orion"));
 		var span = document.createElement("span");

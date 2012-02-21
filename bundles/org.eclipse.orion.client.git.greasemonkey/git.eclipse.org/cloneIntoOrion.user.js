@@ -30,7 +30,7 @@
 			contentTableRows = document.getElementById("cgit").children[2].children[0].children[0].children;
 		for (var i = contentTableRows.length - 3; i < contentTableRows.length; i++) {
 			var gitRepoUrl = contentTableRows[i].children[0].textContent;
-			contentTableRows[i].children[0].innerHTML = "<a href='http://orionhub.org/git/git-repository.html?cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
+			contentTableRows[i].children[0].innerHTML = "<a href='http://orionhub.org/git/git-repository.html#,cloneGitRepository=" + gitRepoUrl + "' target='_blank'>" + gitRepoUrl + "</a>";
 		}
 	}
 

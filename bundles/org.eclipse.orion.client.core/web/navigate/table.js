@@ -14,10 +14,10 @@
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/contentTypes',
+        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mNavOutliner,
-				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
@@ -49,7 +49,8 @@ dojo.addOnLoad(function(){
 				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools"});
 		
 		function refresh() {
-			explorer.loadResourceList(dojo.hash(), false, function() {
+			var pageParams = PageUtil.matchResourceParameters();
+			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
 			});
 		}
