@@ -181,11 +181,21 @@
 }
 
 .nihilo .dijitArrowButtonInner {
-	background-position: 0px 0px; 
+	background-position: 0 0;
+	width: 5px; height: 3px; 
+	background: url(../images/menu_twistie.gif) no-repeat top left; 
+	display: inline-block; 
+	vertical-align: middle; 
+}
+
+.nihilo .textless .dijitArrowButtonInner {
+	background-position: 0 0;
 	width: 16px; height: 16px; 
 	background: url(../images/menu.gif) no-repeat top left; 
 	display: inline-block; 
 	vertical-align: middle; 
+	margin-left: 2px;
+	margin-right: 2px;
 }
 
 .nihilo .dijitTooltip {

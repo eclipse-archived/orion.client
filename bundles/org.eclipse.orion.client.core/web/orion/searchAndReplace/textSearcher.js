@@ -241,7 +241,7 @@ orion.TextSearcher = (function() {
 			var that = this;
 			var findNextCommand = new mCommands.Command({
 				tooltip : "Go to next",
-				image : require.toUrl("images/move_down.gif"),
+				imageClass : "core-sprite-move_down",
 				id : "orion.search.findNext",
 				groupId : "orion.searchGroup",
 				callback : function() {
@@ -251,7 +251,7 @@ orion.TextSearcher = (function() {
 
 			var findPrevCommand = new mCommands.Command({
 				tooltip : "Go to previous",
-				image : require.toUrl("images/move_up.gif"),
+				imageClass : "core-sprite-move_up",
 				id : "orion.search.findPrev",
 				groupId : "orion.searchGroup",
 				callback : function() {

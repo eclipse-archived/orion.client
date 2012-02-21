@@ -512,22 +512,27 @@ a:hover {
 }
 
 .progressPane_operations {
-	background: url(../images/progress_none.png) no-repeat center;  /* TODO move icon to sprite*/
+	margin-top: 4px;
+	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_running {
+	margin-top: 4px;
 	background: url(../images/progress_running.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_error {
+	margin-top: 4px;
 	background: url(../images/error.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_warning {
+	margin-top: 4px;
 	background: url(../images/warning.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_empty {
+	margin-top: 4px;
 	background: inherit;
 }
 
