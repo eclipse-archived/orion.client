@@ -111,7 +111,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				(contentsDiv = this._htmlParent).appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
 				if (!this._contentsView) {
-					this._emptyModel = new mTextModel.TextModel("");
+					var emptyModel = this._emptyModel = new mTextModel.TextModel("");
 					//TODO need hook into setup.js (or editor.js) to create a text view (and styler)
 					var view = this._view;
 					var options = view.getOptions();
@@ -124,6 +124,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 					//TODO need to find a better way of sharing the styler for multiple views
 					var listener = {
 						onLineStyle: function(e) {
+							if (newView.getModel() === emptyModel) { return; }
 							view.onLineStyle(e);
 						}
 					};
@@ -194,8 +195,13 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				} else {
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
-					newModel.addProjection({start: annotation.end, end: newModel.getCharCount()});
-					newModel.addProjection({start: 0, end: lineStart});
+					var charCount = baseModel.getCharCount();
+					if (annotation.end !== charCount) {
+						newModel.addProjection({start: annotation.end, end: charCount});
+					}
+					if (lineStart > 0) {
+						newModel.addProjection({start: 0, end: lineStart});
+					}
 					return newModel;
 				}
 			} else {
