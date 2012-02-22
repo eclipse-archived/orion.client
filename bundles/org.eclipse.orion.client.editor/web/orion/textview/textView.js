@@ -4575,6 +4575,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				self._updatePage();
 			}, 0);
 		},
+		_resetLineWidth: function() {
+			var clientDiv = this._clientDiv;
+			if (clientDiv) {
+				var child = clientDiv.firstChild;
+				while (child) {
+					child.lineWidth = undefined;
+					child = child.nextSibling;
+				}
+			}
+		},
 		_reset: function() {
 			this._maxLineIndex = -1;
 			this._maxLineWidth = 0;
@@ -5116,6 +5126,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (!init) {
 				this.redrawLines();
+				this._resetLineWidth();
 			}
 		},
 		_setThemeClass: function (themeClass, init) {
@@ -5679,6 +5690,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (!init) {
 				this.redraw();
+				this._resetLineWidth();
 			}
 		}
 	};//end prototype
