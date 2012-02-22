@@ -985,7 +985,7 @@ orion.GitStatusController = (function() {
 			
 			var checkoutCommand = new mCommands.Command({
 				name: "Checkout",
-				tooltip: "Discard the selected unstaged change",
+				tooltip: "Checkout the file, discarding the unstaged change",
 				imageClass: "git-sprite-checkout",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitCheckout",
@@ -1037,7 +1037,7 @@ orion.GitStatusController = (function() {
 			
 			var checkoutAllCommand = new mCommands.Command({
 				name: "Checkout",
-				tooltip: "Discard all the selected changes",
+				tooltip: "Checkout all the selected files, discarding all changes",
 				imageClass: "git-sprite-checkout",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitCheckoutAll",
@@ -1110,7 +1110,7 @@ orion.GitStatusController = (function() {
 
 			var resetChangesCommand = new mCommands.Command({
 				name: "Reset",
-				tooltip: "Discard all staged and unstaged changes",
+				tooltip: "Reset the branch, discarding all staged and unstaged changes",
 				imageClass: "git-sprite-refresh",
 				spriteClass: "gitCommandSprite",
 				id: "orion.gitResetChanges",
