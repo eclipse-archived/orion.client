@@ -232,6 +232,7 @@ exports.ExplorerRenderer = (function() {
 		this._init(options);
 		this._expandImageClass = "core-sprite-twistie_open";
 		this._collapseImageClass = "core-sprite-twistie_closed";
+		this._twistieSpriteClass = "modelDecorationSprite";
 	}
 	ExplorerRenderer.prototype = {
 	
@@ -269,14 +270,14 @@ exports.ExplorerRenderer = (function() {
 				var checkColumn = document.createElement('td');
 				var check = document.createElement("span");
 				check.id = this.getCheckBoxId(tableRow.id);
-				dojo.addClass(check, "selectionCheckmark");
+				dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite");
 				check.itemId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
 					if(this._highlightSelection){
 						dojo.toggleClass(tableRow, "checkedRow", check.checked);
 					}
-					dojo.toggleClass(check, "selectionCheckmarkChecked", check.checked);
+					dojo.toggleClass(check, "core-sprite-check_on", check.checked);
 				}
 				checkColumn.appendChild(check);
 				dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
@@ -296,7 +297,7 @@ exports.ExplorerRenderer = (function() {
 			if(this._highlightSelection && tableRow){
 				dojo.toggleClass(tableRow, "checkedRow", checked);
 			}
-			dojo.toggleClass(checkBox, "selectionCheckmarkChecked", checked);
+			dojo.toggleClass(checkBox, "core-sprite-check_on", checked);
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
@@ -334,7 +335,7 @@ exports.ExplorerRenderer = (function() {
 						var check = dojo.byId(this.getCheckBoxId(tableRow.id));
 						if (check) {
 							check.checked = true;
-							dojo.addClass(check, "selectionCheckmarkChecked");
+							dojo.addClass(check, "core-sprite-check_on");
 						}
 					}
 				}
@@ -402,8 +403,9 @@ exports.ExplorerRenderer = (function() {
 			}
 		},
 		
-		getExpandImage: function(tableRow, placeHolder, /* optional */ decorateImageClass, /* optional */ spriteClass){
+		getExpandImage: function(tableRow, placeHolder, /* optional extra decoration */ decorateImageClass, /* optional sprite class for extra decoration */ spriteClass){
 			var expandImage = dojo.create("span", {id: this.expandCollapseImageId(tableRow.id)}, placeHolder, "last");
+			dojo.addClass(expandImage, this._twistieSpriteClass);
 			dojo.addClass(expandImage, this._collapseImageClass);
 			if (decorateImageClass) {
 				var decorateImage = dojo.create("span", null, placeHolder, "last");
@@ -438,7 +440,7 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".selectionCheckmarkChecked").forEach(dojo.hitch(this, function(node) {
+			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
 				var row = node.parentNode.parentNode;
 				selected.push(this.tableTree.getItem(row));
 			}));
@@ -447,7 +449,7 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelectedIds: function() {
 			var selected = [];
-			dojo.query(".selectionCheckmarkChecked").forEach(dojo.hitch(this, function(node) {
+			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
 				var row = node.parentNode.parentNode;
 				selected.push(row.id);
 			}));
