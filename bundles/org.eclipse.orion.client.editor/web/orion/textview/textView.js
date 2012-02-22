@@ -1189,6 +1189,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 		},
+		resize: function() {
+			this._handleResize(null);
+		},
 		/**
 		 * Associates an application defined handler to an action name.
 		 * <p>
@@ -1516,15 +1519,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		showSelection: function() {
 			return this._showCaret(true);
 		},
-		update: function(sync) {
+		update: function(styleChanged, sync) {
+			if (styleChanged) {
+				this._updateStyle();
+			}
 			if (sync === undefined || sync) {
 				this._updatePage();
 			} else {
 				this._queueUpdatePage();
 			}
-		},
-		resize: function() {
-			this._handleResize(null);
 		},
 		
 		/**************************************** Event handlers *********************************/
@@ -2397,7 +2400,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._touchCurrentX = touch.pageX;
 				this._touchCurrentY = touch.pageY;
 				var interval = 100;
-				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < interval) {
+				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*2)) {
 					this._vScrollDiv.style.display = "block";
 					this._hScrollDiv.style.display = "block";
 					var self = this;
@@ -5106,10 +5109,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var clientDiv = this._clientDiv;
 			if (isOpera) {
 				if (clientDiv) { clientDiv.style.OTabSize = this._tabSize+""; }
-				return;
 			} else if (isFirefox >= 4) {
 				if (clientDiv) {  clientDiv.style.MozTabSize = this._tabSize+""; }
-				return;
 			} else if (this._tabSize !== 8) {
 				this._customTabSize = this._tabSize;
 			}
@@ -5234,7 +5235,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
-			if (!this._clientDiv || !this._isInDOM()/* || !this._hasFocus*/) { return; }
+			if (!this._clientDiv || !this._isInDOM() || !this._hasFocus) { return; }
 			var selection = this._getSelection();
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
