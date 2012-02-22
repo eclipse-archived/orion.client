@@ -114,7 +114,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 */
 		setProgressMessage : function(message) {
 			this._init();
-			var image = dojo.create("span", {"class": "progressNormalImage"});
+			var image = dojo.create("span", {"class": "imageSprite core-sprite-progress"});
 			dojo.place(image, this.progressDomId, "only");
 			dojo.place(window.document.createTextNode(message), this.progressDomId, "last");
 			dojo.addClass(this.notificationContainerDomId, "progressNormal");
@@ -143,20 +143,20 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			}
 			this._init();
 			var msg = status.Message || status;
-			var imageClass = "progressInfoImage";
+			var imageClass = "imageSprite core-sprite-info";
 			var extraClass = "progressInfo";
 			var removedClasses = "progressWarning progressError progressNormal";
 			var alt = "info";
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning":
-					imageClass = "progressWarningImage";
+					imageClass = "imageSprite core-sprite-warning";
 					alt = "warning";
 					extraClass="progressWarning";
 					removedClasses = "progressInfo progressError progressNormal";
 					break;
 				case "Error":
-					imageClass = "progressErrorImage";
+					imageClass = "imageSprite core-sprite-error";
 					alt = "error";
 					extraClass="progressError";
 					removedClasses = "progressWarning progressInfo progressNormal";

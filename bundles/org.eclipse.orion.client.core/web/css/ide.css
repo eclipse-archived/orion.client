@@ -465,42 +465,6 @@ a:hover {
 	border: 1px solid #cfcfcf;
 }
 
-.progressErrorImage {
-	background-position: 0 0; 
-	width: 16px; 
-	height: 16px; 
-	background: url(../images/error.gif) no-repeat top left; 
-	display: inline-block; 
-	vertical-align: middle;
-} 
-
-.progressErrorWarning {
-	background-position: 0 0; 
-	width: 16px; 
-	height: 16px; 
-	background: url(../images/warning.gif) no-repeat top left; 
-	display: inline-block; 
-	vertical-align: middle;
-} 
-
-.progressInfoImage {
-	background-position: 0 0; 
-	width: 16px; 
-	height: 16px; 
-	background: url(../images/info.gif) no-repeat top left; 
-	display: inline-block; 
-	vertical-align: middle;
-} 
-
-.progressNormalImage {
-	background-position: 0 0; 
-	width: 16px; 
-	height: 16px; 
-	background: url(../images/progress.gif) no-repeat top left; 
-	display: inline-block; 
-	vertical-align: middle;
-} 
-
 .progressPane {
 	vertical-align: bottom;
 	margin-right: 8px;
@@ -513,22 +477,30 @@ a:hover {
 
 .progressPane_operations {
 	margin-top: 4px;
-	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background-image: url(../images/core_sprites.png);
+	background-position: -96px -328px; 
+	width: 16px; height: 16px; 
 }
 
+/* we don't sprite an animated gif */
 .progressPane_running {
 	margin-top: 4px;
-	background: url(../images/progress_running.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background: url(../images/progress_running.gif) no-repeat center;  
+	width: 16px; height: 16px;
 }
 
 .progressPane_error {
 	margin-top: 4px;
-	background: url(../images/error.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background-image: url(../images/core_sprites.png);
+	background-position: 0 -561px; 
+	width: 16px; height: 16px;
 }
 
 .progressPane_warning {
 	margin-top: 4px;
-	background: url(../images/warning.gif) no-repeat center;  /* TODO move icon to sprite*/
+	background-image: url(../images/core_sprites.png);
+	background-position: -96px -1440px; 
+	width: 16px; height: 16px;
 }
 
 .progressPane_empty {
