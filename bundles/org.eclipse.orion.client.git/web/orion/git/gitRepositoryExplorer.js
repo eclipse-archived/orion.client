@@ -147,7 +147,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				}
-				
+				that.commandService.processURL(window.location.href);
 				progressService.setProgressMessage("");
 			}, function(error){
 				dojo.hitch(that, that.handleError)(error);
