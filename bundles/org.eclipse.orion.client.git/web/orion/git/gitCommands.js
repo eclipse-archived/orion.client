@@ -375,7 +375,7 @@ var exports = {};
 
 		var checkoutTagCommand = new mCommands.Command({
 			name: "Checkout",
-			tooltip: "Create a local branch corresponding with the current tag.",
+			tooltip: "Checkout the current tag, creating a local branch based on its contents.",
 			imageClass: "git-sprite-checkout",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.checkoutTag",
@@ -419,7 +419,7 @@ var exports = {};
 
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
-			tooltip: "Make the branch or corresponding local branch active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
+			tooltip: "Checkout the branch or corresponding local branch and make it active. If the remote tracking branch does not have a corresponding local branch, the local branch will be created first.",
 			imageClass: "git-sprite-checkout",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.checkoutBranch",
@@ -2301,8 +2301,8 @@ var exports = {};
 		commandService.addCommand(mapToGithubCommand, "dom");
 
 		var mapToEclipseOrgCommand = new mCommands.Command({
-			name : "Go to eclipse.org",
-			tooltip: "Go to the associated eclipse.org git repository",
+			name : "Show in eclipse.org",
+			tooltip: "Show this repository at eclipse.org",
 			id : "orion.git.gotoEclipseGit",
 			hrefCallback : function(data) {
 				var item = data.items;
