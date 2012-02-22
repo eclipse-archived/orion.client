@@ -277,14 +277,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	}
 	SearchResultRenderer.prototype = new mExplorer.SelectionRenderer();
 	
+	// TODO:  this should be handled outside of here in a common select all command
+	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
 	SearchResultRenderer.prototype.initCheckboxColumn = function(tableNode){	
 		if (this._useCheckboxSelection) {
 			var th = document.createElement('th');
 			var check = document.createElement("span");
-			dojo.addClass(check, "selectionCheckmark");
+			dojo.addClass(check, "selectionCheckmarkSprite core-sprite-check");
 			if(this.getCheckedFunc){
 				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
-				dojo.toggleClass(check, "selectionCheckmarkChecked", check.checked);
+				dojo.toggleClass(check, "core-sprite-check_on", check.checked);
 			}
 			th.appendChild(check);
 			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {

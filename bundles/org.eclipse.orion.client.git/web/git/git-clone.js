@@ -11,11 +11,11 @@
 
 /*global dojo dijit window eclipse serviceRegistry:true widgets alert*/
 /*browser:true*/
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
+define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/PageUtil',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/git-clone-details', 'orion/git/git-clones-explorer', 'orion/git/gitCommands',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, mFileClient, mOperationsClient,
+		function(dojo, mBootstrap, mStatus, mProgress, mCommands, PageUtil, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitCloneDetails, mGitClonesExplorer, mGitCommands) {
 
 	mBootstrap.startup().then(function(core) {
@@ -106,11 +106,15 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 				// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 				commandService.processURL(window.location.href);
 		
-				explorer.displayClonesList(dojo.hash());
+				var pageParams = PageUtil.matchResourceParameters();
+				if (pageParams.resource) {
+		
+				explorer.displayClonesList(pageParams.resource);
 					
 				//every time the user manually changes the hash, we need to load the workspace with that name
 				dojo.subscribe("/dojo/hashchange", explorer, function() {
-				   explorer.displayClonesList(dojo.hash());
+					pageParams = PageUtil.matchResourceParameters();
+					explorer.displayClonesList(pageParams.resource);
 				});
 	
 			}

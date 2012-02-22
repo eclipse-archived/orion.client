@@ -116,7 +116,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 						dojo.addClass(image, "thumbnail");
 					} else {	
 						var fileIcon = dojo.create("span", null, link, "last");
-						dojo.addClass(fileIcon, "core-sprite-file_model");
+						dojo.addClass(fileIcon, "core-sprite-file_model modelDecorationSprite");
 					}
 			}
 		}

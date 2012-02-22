@@ -804,6 +804,22 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var path = item.Location;
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						doOperation(commandInvocation, jsonData.JsonData);
+					} else if (commandInvocation){
+						if (jsonData.JsonData.User)
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						else
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						
+						commandInvocation.parameters.errorData = jsonData.JsonData;
+						commandService._collectParameters(commandInvocation);
+					} else {
+						doOperation(null, jsonData.JsonData);
+					}
+				};
 
 				var doOperation = function(commandInvocation, errorData){
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
@@ -830,16 +846,8 @@ var exports = {};
 													dojo.hitch(explorer, explorer.changedItem)(item);
 												}, displayErrorOnStatus
 											);
-										}, function () {
-											if (jsonData.JsonData.HostKey){
-												doOperation(commandInvocation, jsonData.JsonData);
-											} else if (commandInvocation){
-												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-												commandInvocation.parameters.errorData = jsonData.JsonData;
-												commandService._collectParameters(commandInvocation);
-											} else {
-												doOperation(null, jsonData.JsonData);
-											}
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
 										}
 									);
 								}, function(jsonData, secondArg) {
@@ -847,15 +855,7 @@ var exports = {};
 										function() {
 										
 										}, function (jsonData) {
-											if (jsonData.JsonData.HostKey){
-												doOperation(commandInvocation, jsonData.JsonData);
-											} else if (commandInvocation){
-												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-												commandInvocation.parameters.errorData = jsonData.JsonData;
-												commandService._collectParameters(commandInvocation);
-											} else {
-												doOperation(null, jsonData.JsonData);
-											}
+											handleResponse(jsonData, commandInvocation);
 										}
 									);
 								}
@@ -889,6 +889,22 @@ var exports = {};
 				
 				var item = data.items;
 				var path = item.Location;
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						doOperation(commandInvocation, jsonData.JsonData);
+					} else if (commandInvocation){
+						if (jsonData.JsonData.User)
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						else
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						
+						commandInvocation.parameters.errorData = jsonData.JsonData;
+						commandService._collectParameters(commandInvocation);
+					} else {
+						doOperation(null, jsonData.JsonData);
+					}
+				};
 
 				var doOperation = function(commandInvocation, errorData){
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
@@ -915,16 +931,8 @@ var exports = {};
 													dojo.hitch(explorer, explorer.changedItem)(item);
 												}, displayErrorOnStatus
 											);
-										}, function () {
-											if (jsonData.JsonData.HostKey){
-												doOperation(commandInvocation, jsonData.JsonData);
-											} else if (commandInvocation){
-												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-												commandInvocation.parameters.errorData = jsonData.JsonData;
-												commandService._collectParameters(commandInvocation);
-											} else {
-												doOperation(null, jsonData.JsonData);
-											}
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
 										}
 									);
 								}, function(jsonData, secondArg) {
@@ -932,15 +940,7 @@ var exports = {};
 										function() {
 										
 										}, function (jsonData) {
-											if (jsonData.JsonData.HostKey){
-												doOperation(commandInvocation, jsonData.JsonData);
-											} else if (commandInvocation){
-												commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-												commandInvocation.parameters.errorData = jsonData.JsonData;
-												commandService._collectParameters(commandInvocation);
-											} else {
-												doOperation(null, jsonData.JsonData);
-											}
+											handleResponse(jsonData, commandInvocation);
 										}
 									);
 								}
@@ -1122,6 +1122,22 @@ var exports = {};
 				if (item.toRef) {
 					item = item.toRef;
 				}
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						doOperation(commandInvocation, jsonData.JsonData);
+					} else if (commandInvocation){
+						if (jsonData.JsonData.User)
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						else
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						
+						commandInvocation.parameters.errorData = jsonData.JsonData;
+						commandService._collectParameters(commandInvocation);
+					} else {
+						doOperation(null, jsonData.JsonData);
+					}
+				};
 
 				var doOperation = function(commandInvocation, errorData){
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
@@ -1136,21 +1152,16 @@ var exports = {};
 									function(jsonData){
 										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 											function() {
-												if (!jsonData || !jsonData.HttpCode)
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-													dojo.toggleClass(node, "outgoingCommitsdRow", false);
-												});
-												dojo.hitch(explorer, explorer.changedItem)({});
-											}, function () {
-												if (jsonData.JsonData.HostKey){
-													doOperation(commandInvocation, jsonData.JsonData);
-												} else if (commandInvocation){
-													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-													commandInvocation.parameters.errorData = jsonData.JsonData;
-													commandService._collectParameters(commandInvocation);
+												if (explorer.parentId === "explorer-tree") {
+													if (!jsonData || !jsonData.HttpCode)
+														dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
 												} else {
-													doOperation(null, jsonData.JsonData);
+													dojo.hitch(explorer, explorer.changedItem)();
 												}
+											}, function (jsonData) {
+												handleResponse(jsonData, commandInvocation);
 											}
 										);
 									}, function(jsonData, secondArg) {
@@ -1158,15 +1169,7 @@ var exports = {};
 											function() {
 											
 											}, function (jsonData) {
-												if (jsonData.JsonData.HostKey){
-													doOperation(commandInvocation, jsonData.JsonData);
-												} else if (commandInvocation){
-													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-													commandInvocation.parameters.errorData = jsonData.JsonData;
-													commandService._collectParameters(commandInvocation);
-												} else {
-													doOperation(null, jsonData.JsonData);
-												}
+												handleResponse(jsonData, commandInvocation);
 											}
 										);
 									}	
@@ -1191,21 +1194,16 @@ var exports = {};
 												function(jsonData){
 													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 														function() {
-															if (!jsonData || !jsonData.HttpCode)
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																dojo.toggleClass(node, "outgoingCommitsdRow", false);
-															});
-															dojo.hitch(explorer, explorer.changedItem)({});
-														}, function () {
-															if (jsonData.JsonData.HostKey){
-																doOperation(commandInvocation, jsonData.JsonData);
-															} else if (commandInvocation){
-																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-																commandInvocation.parameters.errorData = jsonData.JsonData;
-																commandService._collectParameters(commandInvocation);
+															if (explorer.parentId === "explorer-tree") {
+																if (!jsonData || !jsonData.HttpCode)
+																	dojo.query(".treeTableRow").forEach(function(node, i) {
+																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
+																});
 															} else {
-																doOperation(null, jsonData.JsonData);
+																dojo.hitch(explorer, explorer.changedItem)();
 															}
+														}, function (jsonData) {
+															handleResponse(jsonData, commandInvocation);
 														}
 													);
 												}, function(jsonData, secondArg) {
@@ -1213,15 +1211,7 @@ var exports = {};
 														function() {
 														
 														}, function (jsonData) {
-															if (jsonData.JsonData.HostKey){
-																doOperation(commandInvocation, jsonData.JsonData);
-															} else if (commandInvocation){
-																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-																commandInvocation.parameters.errorData = jsonData.JsonData;
-																commandService._collectParameters(commandInvocation);
-															} else {
-																doOperation(null, jsonData.JsonData);
-															}
+															handleResponse(jsonData, commandInvocation);
 														}
 													);
 												}
@@ -1271,6 +1261,22 @@ var exports = {};
 				if (item.toRef) {
 					item = item.toRef;
 				}
+				
+				var handleResponse = function(jsonData, commandInvocation){
+					if (jsonData.JsonData.HostKey){
+						doOperation(commandInvocation, jsonData.JsonData);
+					} else if (commandInvocation){
+						if (jsonData.JsonData.User)
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						else
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+						
+						commandInvocation.parameters.errorData = jsonData.JsonData;
+						commandService._collectParameters(commandInvocation);
+					} else {
+						doOperation(null, jsonData.JsonData);
+					}
+				};
 
 				var doOperation = function(commandInvocation, errorData){
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
@@ -1285,21 +1291,16 @@ var exports = {};
 									function(jsonData){
 										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 											function() {
-												if (!jsonData || !jsonData.HttpCode)
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-													dojo.toggleClass(node, "outgoingCommitsdRow", false);
-												});
-												dojo.hitch(explorer, explorer.changedItem)({});
-											}, function () {
-												if (jsonData.JsonData.HostKey){
-													doOperation(commandInvocation, jsonData.JsonData);
-												} else if (commandInvocation){
-													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-													commandInvocation.parameters.errorData = jsonData.JsonData;
-													commandService._collectParameters(commandInvocation);
+												if (explorer.parentId === "explorer-tree") {
+													if (!jsonData || !jsonData.HttpCode)
+														dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
 												} else {
-													doOperation(null, jsonData.JsonData);
+													dojo.hitch(explorer, explorer.changedItem)();
 												}
+											}, function (jsonData) {
+												handleResponse(jsonData, commandInvocation);
 											}
 										);
 									}, function(jsonData, secondArg) {
@@ -1307,15 +1308,7 @@ var exports = {};
 											function() {
 											
 											}, function (jsonData) {
-												if (jsonData.JsonData.HostKey){
-													doOperation(commandInvocation, jsonData.JsonData);
-												} else if (commandInvocation){
-													commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-													commandInvocation.parameters.errorData = jsonData.JsonData;
-													commandService._collectParameters(commandInvocation);
-												} else {
-													doOperation(null, jsonData.JsonData);
-												}
+												handleResponse(jsonData, commandInvocation);
 											}
 										);
 									}	
@@ -1340,21 +1333,16 @@ var exports = {};
 												function(jsonData){
 													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 														function() {
-															if (!jsonData || !jsonData.HttpCode)
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																dojo.toggleClass(node, "outgoingCommitsdRow", false);
-															});
-															dojo.hitch(explorer, explorer.changedItem)({});
-														}, function () {
-															if (jsonData.JsonData.HostKey){
-																doOperation(commandInvocation, jsonData.JsonData);
-															} else if (commandInvocation){
-																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-																commandInvocation.parameters.errorData = jsonData.JsonData;
-																commandService._collectParameters(commandInvocation);
+															if (explorer.parentId === "explorer-tree") {
+																if (!jsonData || !jsonData.HttpCode)
+																	dojo.query(".treeTableRow").forEach(function(node, i) {
+																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
+																});
 															} else {
-																doOperation(null, jsonData.JsonData);
+																dojo.hitch(explorer, explorer.changedItem)();
 															}
+														}, function (jsonData) {
+															handleResponse(jsonData, commandInvocation);
 														}
 													);
 												}, function(jsonData, secondArg) {
@@ -1362,15 +1350,7 @@ var exports = {};
 														function() {
 														
 														}, function (jsonData) {
-															if (jsonData.JsonData.HostKey){
-																doOperation(commandInvocation, jsonData.JsonData);
-															} else if (commandInvocation){
-																commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
-																commandInvocation.parameters.errorData = jsonData.JsonData;
-																commandService._collectParameters(commandInvocation);
-															} else {
-																doOperation(null, jsonData.JsonData);
-															}
+															handleResponse(jsonData, commandInvocation);
 														}
 													);
 												}
