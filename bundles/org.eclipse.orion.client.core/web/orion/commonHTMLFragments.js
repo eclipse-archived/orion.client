@@ -27,7 +27,7 @@ define(['require'],
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
-		'<div id="userMenu" class="layoutRight"></div>' +
+		'<div id="userMenu" class="layoutRight textless"></div>' +
 		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
 		'<div class="layoutRight primaryNav">|</div>' +
 	'</div>' +
@@ -40,8 +40,8 @@ define(['require'],
 			'<div id="globalActions" class="pageNav"></div>' +
 			'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="imageSprite core-sprite-favorite_sml"></span>' +
 		'</div>' +
-		'<div id="dimension" class="layoutBlock dimension"></div>' +
-		'<div id="location" class="layoutBlock currentLocation"></div>' +
+		'<div id="dimension" class="clear dimension"></div>' +
+		'<div id="location" class="clear currentLocation"></div>' +
 	'</div>';
 	// END TOP BANNER FRAGMENT
 	

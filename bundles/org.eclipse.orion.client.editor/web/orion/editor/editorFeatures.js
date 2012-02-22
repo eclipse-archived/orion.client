@@ -664,7 +664,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, true), messages.addBlockComment);
+			var isMac = navigator.platform.indexOf("Mac") !== -1;
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !isMac, false, isMac), messages.addBlockComment);
 			this.textView.setAction(messages.addBlockComment, function() {
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -688,7 +689,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 				return true;
 			}.bind(this));
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, true), messages.removeBlockComment);
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !isMac, false, isMac), messages.removeBlockComment);
 			this.textView.setAction(messages.removeBlockComment, function() {
 				var editor = this.editor;
 				var model = editor.getModel();

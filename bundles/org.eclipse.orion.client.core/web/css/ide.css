@@ -74,6 +74,10 @@ a:hover {
 	margin: 0;
 }
 
+.clear {
+	clear: both;
+}
+
 .footerBlock {
 	float: left;
 	margin: 4px;
@@ -167,6 +171,14 @@ a:hover {
 	vertical-align: middle;
 }
 
+.parametersMenu {
+	cursor: pointer;
+	padding: 1px;
+	font-size: 8pt;
+	margin-left: 8px;
+	vertical-align: middle;
+}
+
 .parametersDismiss {
 	color: #404040;
 	vertical-align: middle;
@@ -174,11 +186,16 @@ a:hover {
 
 .dismiss {
 	border: 1px solid transparent;
+	cursor: pointer;
+	padding: 1px;
+	font-size: 8pt;
+	margin-left: 8px;
+	vertical-align: middle;
 }
 .dismiss:hover {
-	background-color: #ffeecc;
-    border: 1px solid #ffcc66;
-    border-radius: 3px;
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
+    border-radius: 2px;
 }
 
 .parameterInput {
@@ -495,22 +512,27 @@ a:hover {
 }
 
 .progressPane_operations {
-	background: url(../images/progress_none.png) no-repeat center;  /* TODO move icon to sprite*/
+	margin-top: 4px;
+	background: url(../images/progress_none.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_running {
+	margin-top: 4px;
 	background: url(../images/progress_running.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_error {
+	margin-top: 4px;
 	background: url(../images/error.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_warning {
+	margin-top: 4px;
 	background: url(../images/warning.gif) no-repeat center;  /* TODO move icon to sprite*/
 }
 
 .progressPane_empty {
+	margin-top: 4px;
 	background: inherit;
 }
 
@@ -518,14 +540,14 @@ a:hover {
 	vertical-align: middle;
 	min-height: 32px;
 	width: 100%;
-	color: #808080;
+	color: #222222;
 }
 
 .auxToolbar {
     background: #f8f8f8;
  	min-height: 32px;
 	width: 100%;
-	color: #808080;
+	color: #222222;
 }
 
 .mainToolbar {
@@ -649,6 +671,7 @@ a:hover {
 	border: 1px solid #a6a6a6;
 	font-size: 8pt;
 	min-width: 15em;
+	margin-top: 2px;
 }
 
 .nihilo .dijitButtonNode {

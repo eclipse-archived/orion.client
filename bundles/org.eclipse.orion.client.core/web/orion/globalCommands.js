@@ -663,7 +663,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		commandService.registerCommandContribution("eclipse.keyAssist", 100, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
 		if (editor) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1;
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, !isMac, true, false, isMac), "Show Keys");
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), "Show Keys");
 			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
 		}
 		
