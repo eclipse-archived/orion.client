@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(require, dojo, mExplorer, mUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(require, dojo, mExplorer, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -60,8 +60,9 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.redisplayClonesList = function(){
-		if (dojo.hash()) {
-			this.displayRepository(dojo.hash());
+		var pageParams = PageUtil.matchResourceParameters();
+		if (pageParams.resource) {
+			this.displayRepository(pageParams.resource);
 		} else {
 			var path = this.defaultPath;
 			var relativePath = mUtil.makeRelative(path);
