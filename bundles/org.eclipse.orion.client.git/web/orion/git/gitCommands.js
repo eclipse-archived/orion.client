@@ -1152,11 +1152,14 @@ var exports = {};
 									function(jsonData){
 										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 											function() {
-												if (!jsonData || !jsonData.HttpCode)
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-													dojo.toggleClass(node, "outgoingCommitsdRow", false);
-												});
-												dojo.hitch(explorer, explorer.changedItem)({});
+												if (explorer.parentId === "explorer-tree") {
+													if (!jsonData || !jsonData.HttpCode)
+														dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
+												} else {
+													dojo.hitch(explorer, explorer.changedItem)();
+												}
 											}, function (jsonData) {
 												handleResponse(jsonData, commandInvocation);
 											}
@@ -1191,11 +1194,14 @@ var exports = {};
 												function(jsonData){
 													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 														function() {
-															if (!jsonData || !jsonData.HttpCode)
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																dojo.toggleClass(node, "outgoingCommitsdRow", false);
-															});
-															dojo.hitch(explorer, explorer.changedItem)({});
+															if (explorer.parentId === "explorer-tree") {
+																if (!jsonData || !jsonData.HttpCode)
+																	dojo.query(".treeTableRow").forEach(function(node, i) {
+																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
+																});
+															} else {
+																dojo.hitch(explorer, explorer.changedItem)();
+															}
 														}, function (jsonData) {
 															handleResponse(jsonData, commandInvocation);
 														}
@@ -1285,11 +1291,14 @@ var exports = {};
 									function(jsonData){
 										exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 											function() {
-												if (!jsonData || !jsonData.HttpCode)
-													dojo.query(".treeTableRow").forEach(function(node, i) {
-													dojo.toggleClass(node, "outgoingCommitsdRow", false);
-												});
-												dojo.hitch(explorer, explorer.changedItem)({});
+												if (explorer.parentId === "explorer-tree") {
+													if (!jsonData || !jsonData.HttpCode)
+														dojo.query(".treeTableRow").forEach(function(node, i) {
+														dojo.toggleClass(node, "outgoingCommitsdRow", false);
+													});
+												} else {
+													dojo.hitch(explorer, explorer.changedItem)();
+												}
 											}, function (jsonData) {
 												handleResponse(jsonData, commandInvocation);
 											}
@@ -1324,11 +1333,14 @@ var exports = {};
 												function(jsonData){
 													exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 														function() {
-															if (!jsonData || !jsonData.HttpCode)
-																dojo.query(".treeTableRow").forEach(function(node, i) {
-																dojo.toggleClass(node, "outgoingCommitsdRow", false);
-															});
-															dojo.hitch(explorer, explorer.changedItem)({});
+															if (explorer.parentId === "explorer-tree") {
+																if (!jsonData || !jsonData.HttpCode)
+																	dojo.query(".treeTableRow").forEach(function(node, i) {
+																	dojo.toggleClass(node, "outgoingCommitsdRow", false);
+																});
+															} else {
+																dojo.hitch(explorer, explorer.changedItem)();
+															}
 														}, function (jsonData) {
 															handleResponse(jsonData, commandInvocation);
 														}
