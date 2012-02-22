@@ -223,12 +223,22 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 		},
 		
-		hashChanged: function(editor) {	
-			if (this.shouldGoToURI(editor, "#" + dojo.hash())) {
-				selection.setSelections("#" + dojo.hash());
+		hashChanged: function(editor) {
+			var oldHash = this._lastHash || this.getInput();
+			var oldInput = this.getInput();
+			selection.setSelections("#" + dojo.hash()); // may prompt, change input, or both
+			var newHash = dojo.hash();
+			var newInput = this.getInput();
+			var inputChanged = PageUtil.matchResourceParameters("#" + oldInput).resource !== PageUtil.matchResourceParameters("#" + newInput).resource;
+			var hashMatchesInput = PageUtil.matchResourceParameters("#" + newInput).resource === PageUtil.matchResourceParameters("#" + newHash).resource;
+			if (!inputChanged && !hashMatchesInput) {
+				dojo.hash(this._lastHash);
+			} else if (inputChanged) {
+				dojo.hash(newHash);
+				this._lastHash = newHash;
 			} else {
-				// we are staying at our previous location
-				dojo.hash(this.lastFilePath);
+				// Input didn't change and input matches hash, just remember the current hash
+				this._lastHash = newHash;
 			}
 		},
 		
