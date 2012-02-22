@@ -502,7 +502,7 @@ exports.GitRepositoryExplorer = (function() {
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 
 		if (branch.Current)
-			dojo.create( "span", { "class":"git-decor-icon git-sprite-branch_active" }, detailsView );
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch_active" }, detailsView );
 		
 		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : ""), innerHTML: branch.Name }, detailsView );
 		dojo.create( "div", null, detailsView );
