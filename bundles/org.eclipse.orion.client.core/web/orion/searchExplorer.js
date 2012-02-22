@@ -847,7 +847,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			    }
 			}),
 			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
+				console.error("Error loading file metadata: status " + error.status);
+				//If we can't load file meta data we have to stale the file.
+				item.stale = true;
+				this.renderer.staleFileElement(item);
 				if(index === (this.model.indexedFileItems.length-1)){
 			    	if(onComplete){
 			    		onComplete();
