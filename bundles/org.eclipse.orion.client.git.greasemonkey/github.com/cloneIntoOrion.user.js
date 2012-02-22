@@ -38,12 +38,12 @@
 
 		var span = document.createElement("span");
 		span.innerHTML = "Clone into";
-		span.style["background-repeat"] = "no-repeat";
-		span.style["background-position"] = "right 2px";
-		span.style["padding-left"] = "2px";
-		span.style["padding-right"] = "45px";
-		span.style["background-image"] = orionSmallGif;
-		span.style["margin-right"] = "5px";
+		span.style.backgroundRepeat = "no-repeat";
+		span.style.backgroundPosition = "right 2px";
+		span.style.paddingLeft = "2px";
+		span.style.paddingRight = "45px";
+		span.style.backgroundImage = orionSmallGif;
+		span.style.marginRight = "5px";
 
 		a.appendChild(span);
 		li.appendChild(a);
