@@ -11,7 +11,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil){
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil){
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
@@ -1334,21 +1334,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 		 */
 		match: function (url) {
 			//ensure this is only the hash portion
-			var hashSegments = url.split('#');
-			var postHash = hashSegments[hashSegments.length - 1];
-			var postQuerySegments = postHash.split('?');
-			if (postQuerySegments.length > 1) {
-				// Split on "&"
-				var segments = postQuerySegments[1].split('&');
-				for (var i=0; i<segments.length; i++) {
-					var subsegments = segments[i].split('=');
-					if (subsegments[0] === this.token) {
-						if (subsegments.length > 1) {
-							this.parameterValue = subsegments[1];
-						}
-						return this;
-					}
-				}  
+			var params = PageUtil.matchResourceParameters(url);
+			if (typeof params[this.token] !== "undefined") {
+				this.parameterValue = params[this.token];
+				return this;
 			}
 			return null;
 		}

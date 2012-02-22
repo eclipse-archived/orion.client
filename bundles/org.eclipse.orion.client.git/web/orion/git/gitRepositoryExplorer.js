@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(require, dojo, mExplorer, mUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
+define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(require, dojo, mExplorer, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -60,8 +60,9 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.redisplayClonesList = function(){
-		if (dojo.hash()) {
-			this.displayRepository(dojo.hash());
+		var pageParams = PageUtil.matchResourceParameters();
+		if (pageParams.resource) {
+			this.displayRepository(pageParams.resource);
 		} else {
 			var path = this.defaultPath;
 			var relativePath = mUtil.makeRelative(path);
@@ -146,7 +147,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				}
-				
+				that.commandService.processURL(window.location.href);
 				progressService.setProgressMessage("");
 			}, function(error){
 				dojo.hitch(that, that.handleError)(error);
@@ -501,7 +502,7 @@ exports.GitRepositoryExplorer = (function() {
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 
 		if (branch.Current)
-			dojo.create( "span", { "class":"git-decor-icon git-sprite-branch_active" }, detailsView );
+			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch_active" }, detailsView );
 		
 		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : ""), innerHTML: branch.Name }, detailsView );
 		dojo.create( "div", null, detailsView );

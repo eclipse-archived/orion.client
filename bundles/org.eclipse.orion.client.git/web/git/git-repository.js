@@ -12,11 +12,11 @@
 var eclipse;
 /*global define document dojo dijit serviceRegistry:true */
 /*browser:true*/
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/commands', 'orion/dialogs', 'orion/selection', 
+define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
         'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links',
 	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mBootstrap, mStatus, mProgress, mUtil, mCommands, mDialogs, mSelection, 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mUtil, PageUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
 
@@ -95,8 +95,9 @@ mBootstrap.startup().then(function(core) {
 	fileClient.loadWorkspace().then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
-			if (dojo.hash()) {
-				explorer.displayRepository(dojo.hash());
+			var pageParams = PageUtil.matchResourceParameters();
+			if (pageParams.resource) {
+				explorer.displayRepository(pageParams.resource);
 			} else {
 				var path = workspace.Location;
 				var relativePath = mUtil.makeRelative(path);
@@ -115,8 +116,9 @@ mBootstrap.startup().then(function(core) {
 		fileClient.loadWorkspace().then(
 			function(workspace){
 				explorer.setDefaultPath(workspace.Location);
-				if (dojo.hash()) {
-					explorer.displayRepository(dojo.hash());
+				var pageParams = PageUtil.matchResourceParameters();
+				if (pageParams.resource) {
+					explorer.displayRepository(pageParams.resource);
 				} else {
 					var path = workspace.Location;
 					var relativePath = mUtil.makeRelative(path);

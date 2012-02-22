@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -10,6 +10,8 @@
  *		John Arthorne (IBM Corporation) - initial API and implementation
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  ******************************************************************************/
+ 
+ /*global define eclipse */
 define(['dojo'], function(dojo) {
 
 
@@ -26,7 +28,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
 				dojo.empty(selectionTools);
-				commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
+				commandService.renderCommands(selectionTools, "dom", null, explorer, "button");
 			}
 		}
 
