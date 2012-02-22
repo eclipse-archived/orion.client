@@ -11,7 +11,7 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation 
  ******************************************************************************/
 
-/*global window define localStorage*/
+/*global window document define localStorage*/
 
 define("examples/textview/textStylerOptions", [], function() {
 
@@ -117,23 +117,8 @@ define("examples/textview/textStylerOptions", [], function() {
 		_updateStylesheet: function () {
 			if (localStorage.getItem("JavaScript Editor")) {
 				var view = this._view;
-				var options = {stylesheet:null, themeClass:null};
+				var options = {themeClass:null};
 				view.getOptions(options);
-				var userCSS = "/* Orion Editor User Preference CSS (key) */";
-				var stylesheet = options.stylesheet;
-				if (!stylesheet) {
-					stylesheet = [];
-				}
-				if (!(stylesheet instanceof Array)) {
-					stylesheet = [stylesheet];
-				}
-				for (var i = 0; i < stylesheet.length; i++) {
-					var sheet = stylesheet[i];
-					if (sheet.indexOf(userCSS) === 0) {
-						stylesheet.splice(i, 1);
-						break;
-					}
-				}
 				var userTheme = "userTheme";
 				var theme = options.themeClass;
 				if (theme) {
@@ -143,11 +128,18 @@ define("examples/textview/textStylerOptions", [], function() {
 				} else {
 					theme = userTheme;
 				}
-				
-				stylesheet.push(userCSS + this._getStyleSheet(userTheme));
-				options.stylesheet = stylesheet;
+				options.themeClass = theme;
+				if  (this._stylesheet) {
+					this._stylesheet.parentNode.removeChild(this._stylesheet);
+					this._stylesheet = null;
+				}
+				var stylesheet = this._stylesheet = document.createElement("STYLE");
+				stylesheet.appendChild(document.createTextNode(this._getStyleSheet(userTheme)));
+				var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+				head.appendChild(stylesheet);
 				options.themeClass = theme;
 				view.setOptions(options);
+				view.update(true);
 			}
 		},
 		_onLoad: function (e) {
