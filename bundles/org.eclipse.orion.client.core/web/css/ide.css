@@ -224,58 +224,20 @@ a:hover {
 	height: 24px;  /* breathing room */
 }
 
-.selectionCheckmark {
-	background-position: 0 0;
-	width: 16px; height: 16px; 
-	background: url(../images/check.gif) no-repeat center; 
+.selectionCheckmarkSprite {
 	display: inline-block; 
 	vertical-align: middle; 
+	background-image: url(../images/core_sprites.png);
 	padding: 4px;
 	padding-left: 8px;
 	padding-right: 8px;
 	margin-right: 4px;
 }
 
-.selectionCheckmarkChecked {
-	background-position: 0 0; 
-	width: 16px; height: 16px; 
-	background: url(../images/check_on.gif) no-repeat center; 
+.modelDecorationSprite { 
 	display: inline-block; 
 	vertical-align: middle; 
-	padding: 4px;
-	padding-left: 8px;
-	padding-right: 8px;
-	margin-right: 4px;
-}
-
-.core-sprite-twistie_closed { 
-	background-position: 0 0; 
-	width: 16px; height: 16px; 
-	background: url(../images/twistie_closed.gif) no-repeat center;
-	display: inline-block; 
-	vertical-align: middle; 
-	padding-left: 8px;
-	padding-right: 8px;
-	margin-right: 8px;
-}
-
-.core-sprite-twistie_open { 
-	background-position: 0 0; 
-	width: 16px; height: 16px; 
-	background: url(../images/twistie_open.gif) no-repeat center;
-	display: inline-block; 
-	vertical-align: middle; 
-	padding-left: 8px;
-	padding-right: 8px;
-	margin-right: 8px;
-}
-	
-.core-sprite-file_model { 	
-	background-position: 0 0; 
-	width: 16px; height: 16px; 
-	background: url(../images/file_model.gif) no-repeat center; 
-	display: inline-block; 
-	vertical-align: middle; 
+	background-image: url(../images/core_sprites.png);
 	padding-left: 8px;
 	padding-right: 8px;
 	margin-right: 8px;
@@ -283,7 +245,7 @@ a:hover {
 
 /* less hit-area since we aren't worried about touch */
 @media all and (min-device-width: 1025px) {
-	.core-sprite-twistie_open, .core-sprite-twistie_closed, .core-sprite-file_model { 	
+	.modelDecorationSprite { 	
 		padding: 0;
 		padding-left: 4px;
 		padding-right: 4px;
@@ -291,7 +253,7 @@ a:hover {
 		margin-right: 2px;
 	}
 	
-	.selectionCheckmark, .selectionCheckmarkChecked { 	
+	.selectionCheckmarkSprite { 	
 		padding: 0;
 		padding-left: 2px;
 		padding-right: 2px;
