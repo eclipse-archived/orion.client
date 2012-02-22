@@ -1,6 +1,4 @@
 @import "./themes/default.css";
-@import "./themes/orion.css";
-@import "./themes/dark.css";
 
 .button {
 	color: teal;
