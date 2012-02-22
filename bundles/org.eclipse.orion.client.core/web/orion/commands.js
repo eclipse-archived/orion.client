@@ -678,6 +678,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu', 'dijit/form/Drop
 									dojo.addClass(menuButton.domNode, "commandMenu");
 									dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 									if (group.title === "*") {
+										dojo.addClass(menuButton.domNode, "textless");
 										new CommandTooltip({
 											connectId: [menuButton.domNode],
 											label: "Actions menu",

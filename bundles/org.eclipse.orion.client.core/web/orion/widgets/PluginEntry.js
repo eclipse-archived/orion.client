@@ -65,6 +65,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			last = wordToUpper( last );
 			last = last.replace( 'plugin', '' );
 			last = last.replace( 'Plugin', '' );
+			
+			if( last === '' ){
+				last = location;
+			}
+			
 			return last;
 		},
 		
