@@ -32,6 +32,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
+	var loadedThemes = [];
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
 	var breakpointType = "orion.annotation.breakpoint";
@@ -56,8 +57,19 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	
 	function loadTheme(theme) {
 		if (theme) {
-			var uri = require.toUrl("examples/textview/themes/" + theme + ".css");
-			//load theme css
+			for (var i=0; i<loadedThemes.length; i++) {
+				if (theme === loadedThemes[i]) {
+					return;
+				}
+			}
+			loadedThemes.push(theme);
+			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
+				var stylesheet = document.createElement("STYLE");
+				stylesheet.appendChild(document.createTextNode(cssText));
+				var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+				head.appendChild(stylesheet);
+				view.update(true);
+			});
 		}
 	}
 	
@@ -77,11 +89,6 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 		}
 		options = options || {};
 		loadTheme(options.themeClass);
-//		var p = exports.p = document.getElementById("divParent");
-//		var pp = exports.pp = p.parentNode;
-//		options.parent = p;
-//		pp.removeChild(p);
-//		p.style.display = "none";
 		options.parent = options.parent || "divParent";
 		options.model = viewModel;
 		exports.view = view = new mTextView.TextView(options);
