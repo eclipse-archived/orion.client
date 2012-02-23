@@ -10,10 +10,10 @@
  ******************************************************************************/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/selection',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
+	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog',
 	        'orion/profile/widgets/ResetPasswordDialog'], 
-			function(require, dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mSelection, mSearchClient, mGlobalCommands, mUsersList, mUsersUtil) {
+			function(require, dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -23,7 +23,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			dojo.parser.parse();
 		
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var selection = new mSelection.Selection(serviceRegistry);
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
