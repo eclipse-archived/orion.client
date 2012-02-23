@@ -163,10 +163,18 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=372182
-			// use a timeout so rendering is non-blocking.  But we need to set a height on the parent span
-			// to reduce ripple everywhere else
-			dojo.style(span, {height: "28px", display: "inline-block"});
+			// use a timeout so rendering is non-blocking.  
+			// TOTAL HACK...insert a temporary drop down button to get the layout the same, then remove it when
+			// we have the real menu.
+			var menuButton = new dijit.form.DropDownButton({
+				label: "Actions",
+				showLabel:  false
+			});
+			dojo.addClass(menuButton.domNode, "commandMenu textless");
+			dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
+			dojo.place(menuButton.domNode, span, "last");
 			window.setTimeout(dojo.hitch(this, function() {
+				menuButton.destroyRecursive();
 				this.commandService.renderCommands(span, "object", item, this.explorer, "tool", false);
 			}), 0);
 			return col;
