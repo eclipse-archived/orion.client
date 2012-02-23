@@ -70,7 +70,7 @@ define(['require'],
 		'<div class="layoutRight pageActions" id="pageNavigationActions"></div>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
-				'<div class="layoutRight"><span tabindex: "0" role: "button" class="layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>' +
+				'<div class="layoutRight"><span tabindex="0" role="button" aria-label="Close notification" class="layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>' +
 		'</div>' +
 		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
 			'<span id="pageParameterArea" class="slide">' +
