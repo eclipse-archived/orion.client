@@ -266,6 +266,7 @@ exports.DiffStyler = (function() {
 				this._textView = textView;
 			if(this._textView && !this._textView.getModel().isMapperEmpty())
 				this._textView.addEventListener("LineStyle", this._lineStyleListener = dojo.hitch(this, this._onLineStyle));
+			this._textView.redrawLines();
 		},
 		
 		_onLineStyle: function(lineStyleEvent){
