@@ -26,6 +26,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		this.registry= options.serviceRegistry;
 		this._commandService = options.commandService;
 		this._fileService = options.fileService;
+		if(!this._fileService){
+			console.error("No file service on search client");
+		}
 	}
 	Searcher.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
 		/**
