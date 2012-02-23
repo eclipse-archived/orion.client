@@ -4447,6 +4447,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._maxLineIndex = -1;
 			this._ignoreSelect = true;
 			this._ignoreFocus = false;
+			this._hasFocus = false;
 			this._columnX = -1;
 			this._dragOffset = -1;
 
@@ -5247,7 +5248,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
-			if (!this._clientDiv || !this._isInDOM() || !this._hasFocus) { return; }
+			if (!this._clientDiv || !this._isInDOM() || (!isIE && !this._hasFocus)) { return; }
 			var selection = this._getSelection();
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
