@@ -1828,6 +1828,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (this._doAction(e)) {
 				if (e.preventDefault) {
 					e.preventDefault(); 
+					e.stopPropagation(); 
 				} else {
 					e.cancelBubble = true;
 					e.returnValue = false;

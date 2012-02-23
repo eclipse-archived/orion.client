@@ -169,9 +169,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				evt = evt || window.event;
 				// bindings are ignored if we are in a text field.
 				var tagType = evt.target.nodeName.toLowerCase();
-				if (evt.target.contentEditable === "true") {
-					return;
-				}
 				if (tagType === 'input') {
 					var inputType = evt.target.type.toLowerCase();
 					// Any HTML5 input type that involves typing text should be ignored
