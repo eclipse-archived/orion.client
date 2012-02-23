@@ -1543,7 +1543,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			 * Prevent clicks outside of the view from taking focus 
 			 * away the view.
 			 */
-			var topNode = this._clientDiv;
+			var topNode = this._overlayDiv || this._clientDiv;
 			var temp = e.target ? e.target : e.srcElement;
 			while (temp) {
 				if (topNode === temp) {
