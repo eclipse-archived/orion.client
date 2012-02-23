@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
 define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
@@ -162,7 +162,13 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
-			this.explorer.registry.getService("orion.page.command").renderCommands(span, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=372182
+			// use a timeout so rendering is non-blocking.  But we need to set a height on the parent span
+			// to reduce ripple everywhere else
+			dojo.style(span, {height: "28px", display: "inline-block"});
+			window.setTimeout(dojo.hitch(this, function() {
+				this.commandService.renderCommands(span, "object", item, this.explorer, "tool", false);
+			}), 0);
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
