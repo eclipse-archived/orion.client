@@ -1,6 +1,6 @@
 .tooltip .view {
-	color: InfoText;
-	background-color: InfoBackground;
+	color: InfoText !important;
+	background-color: InfoBackground !important;
 	padding: 0px;
 }
 

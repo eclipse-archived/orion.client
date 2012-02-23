@@ -117,7 +117,16 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 					var options = view.getOptions();
 					options.model = this._emptyModel;
 					options.parent = this._viewParent;
-					options.themeClass = "tooltip";
+					var tooltipTheme = "tooltip";
+					var theme = options.themeClass;
+					if (theme) {
+						theme = theme.replace(tooltipTheme, "");
+						if (theme) { theme = " " + theme; }
+						theme = tooltipTheme + theme;
+					} else {
+						theme = tooltipTheme;
+					}
+					options.themeClass = theme;
 					var newView = this._contentsView = new mTextView.TextView(options);
 					//TODO this is need to avoid Firefox from getting focus
 					newView._clientDiv.contentEditable = false;
