@@ -22,12 +22,12 @@
 
 .keyword-control {
 	font-weight: bold;
-	font-color: #7f074;
+	color: #7f074;
 }
 
 .keyword-other {
 	font-weight: bold;
-	font-color: darkred;
+	color: darkred;
 	text-decoration: underline;
 }
 
