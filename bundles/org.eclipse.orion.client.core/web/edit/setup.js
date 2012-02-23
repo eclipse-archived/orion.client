@@ -490,11 +490,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			 return "There are unsaved changes.";
 		}
 	};
-	
-	// Set up the border container
-	splitArea.setToggleCallback(function() {
-		editor.getTextView().redrawLines();
-	});
 			
 	// Ctrl+o handler for toggling outline 
 	document.onkeydown = function (evt){
