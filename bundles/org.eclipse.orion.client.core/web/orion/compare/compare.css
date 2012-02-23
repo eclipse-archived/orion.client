@@ -1,4 +1,36 @@
-@import "editor.css";
+@import "../../orion/editor/editor.css";
+
+.diffNormal {
+	background: #DDDDDD;
+}
+
+.diffConflict {
+	background: #EEB4B4;
+}
+
+.diffNormalSelect {
+	background: #BBBBBB;
+}
+
+.diffConflictSelect {
+	background: #F08080;
+}
+
+.diffInlineAddedSelect {
+	background: #00B400;
+}
+
+.diffInlineAdded {
+	background: #99EE99;
+}
+
+.diffInlineRemovedSelect {
+	background: #B44040;
+}
+
+.diffInlineRemoved {
+	background: #EE9999;
+}
 
 .fileNameCheckedRow {
 	background-color: #FFFFCC !important;

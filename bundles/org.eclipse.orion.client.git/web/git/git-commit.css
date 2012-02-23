@@ -20,9 +20,9 @@
 
 @import "../css/commands.css";
 
-@import "css/git.css";
+@import "../orion/compare/compare.css";
 
-@import "../orion/compare/editor.css";
+@import "css/git.css";
 
 .git-decor-icon {
 	float: left;
