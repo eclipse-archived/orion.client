@@ -2105,7 +2105,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
 			var x = e.clientX + scroll.x - viewRect.left - viewPad.left;
-			var y = e.clientY + scroll.y - viewRect.top;
+			var y = e.clientY + scroll.y;
 			return {
 				type: type,
 				event: e,
