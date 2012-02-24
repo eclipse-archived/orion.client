@@ -64,10 +64,16 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			}
 			loadedThemes.push(theme);
 			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
-				var stylesheet = document.createElement("STYLE");
-				stylesheet.appendChild(document.createTextNode(cssText));
-				var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
-				head.appendChild(stylesheet);
+				var stylesheet;
+				if (document.createStyleSheet) {
+					stylesheet = document.createStyleSheet();
+					stylesheet.cssText = cssText;
+				} else {
+					stylesheet = document.createElement("STYLE");
+					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					stylesheet.appendChild(document.createTextNode(cssText));
+					head.appendChild(stylesheet);
+				}
 				view.update(true);
 			});
 		}

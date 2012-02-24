@@ -1539,11 +1539,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._ignoreBlur = true;
 			}
 			
-			/*
-			 * Prevent clicks outside of the view from taking focus 
-			 * away the view.
-			 */
+			/* Prevent clicks outside of the client div from taking focus away. */
 			var topNode = this._overlayDiv || this._clientDiv;
+			/* Use view div on IE 8 otherwise it is not possible to scroll. */
+			if (isIE < 9) { topNode = this._viewDiv; }
 			var temp = e.target ? e.target : e.srcElement;
 			while (temp) {
 				if (topNode === temp) {
@@ -1588,14 +1587,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* the overflow selection at the end of some lines does not get redrawn.
 			* The fix is to create a DOM element in the body to force a redraw.
 			*/
-//			if (isIE < 9) {
-//				if (!this._getSelection().isEmpty()) {
-//					var child = document.createElement("DIV");
-//					var body = document.body;
-//					body.appendChild(child);
-//					body.removeChild(child);
-//				}
-//			}
+			if (isIE < 9) {
+				if (!this._getSelection().isEmpty()) {
+					var child = document.createElement("DIV");
+					var rootDiv = this._rootDiv;
+					rootDiv.appendChild(child);
+					rootDiv.removeChild(child);
+				}
+			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
 					var color = isIE ? "transparent" : "#AFAFAF";
@@ -2014,15 +2013,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseMove: function (e) {
 			if (!e) { e = window.event; }
+			var inClient = this._isClientDiv(e);
 			if (this.isListening("MouseMove")) {
-				var topNode = this._overlayDiv || this._clientDiv;
-				var temp = e.target ? e.target : e.srcElement;
-				while (temp) {
-					if (topNode === temp) {
-						this.onMouseMove(this._createMouseEvent("MouseMove", e));
-						break;
-					}
-					temp = temp.parentNode;
+				if (inClient){
+					this.onMouseMove(this._createMouseEvent("MouseMove", e));
 				}
 			}
 			if (this._dropTarget) {
@@ -2062,7 +2056,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._setGrab(null);
 					return true;
 				}
-				if (!this._isMouseDown && e.button === 1 && (this._clickCount & 1) !== 0) {
+				if (!this._isMouseDown && e.button === 1 && (this._clickCount & 1) !== 0 && inClient) {
 					this._clickCount = 2;
 					return this._handleMouse(e, this._clickCount);
 				}
@@ -2093,18 +2087,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			} else {
 				this._endAutoScroll();
 				this._setSelectionTo(x, y, true);
-				/*
-				* Feature in IE. IE does redraw the selection background right
-				* away after the selection changes because of mouse move events.
-				* The fix is to call getBoundingClientRect() on the
-				* body element to force the selection to be redraw. Some how
-				* calling this method forces a redraw.
-				*/
-//				if (isIE) {
-//					var body = document.body;
-//					body.getBoundingClientRect();
-//				}
 			}
+		},
+		_isClientDiv: function(e) {
+			var topNode = this._overlayDiv || this._clientDiv;
+			var temp = e.target ? e.target : e.srcElement;
+			while (temp) {
+				if (topNode === temp) {
+					return true;
+				}
+				temp = temp.parentNode;
+			}
+			return false;
 		},
 		_createMouseEvent: function(type, e) {
 			var scroll = this._getScroll();
@@ -2121,14 +2115,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseUp: function (e) {
 			if (!e) { e = window.event; }
+			var left = e.which ? e.button === 0 : e.button === 1;
 			if (this.isListening("MouseUp")) {
-				this.onMouseUp(this._createMouseEvent("MouseUp", e));
+				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
+					this.onMouseUp(this._createMouseEvent("MouseUp", e));
+				}
 			}
 			if (this._linksVisible) {
 				return;
 			}
-			var left = e.which ? e.button === 0 : e.button === 1;
-			if (left) {
+			if (left && this._isMouseDown) {
 				if (this._dragOffset !== -1) {
 					var selection = this._getSelection();
 					selection.extend(this._dragOffset);
@@ -2770,6 +2766,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/************************************ Internals ******************************************/
 		_applyStyle: function(style, node, reset) {
 			if (reset) {
+				node.className = "";
 				var attrs = node.attributes;
 				for (var i= attrs.length; i-->0;) {
 					if (attrs[i].specified) {
@@ -4348,7 +4345,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
 			var topNode = this._overlayDiv || clientDiv;
-			var grabNode = isIE ? clientDiv : window;
+			var grabNode = isIE ? document : window;
 			handlers.push({target: window, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e);}});
