@@ -370,11 +370,10 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		var styler = makeStyler(view, mTestGrammars.SampleGrammar);
 		view.setText("fizzer");
 		
-		// expect fi[z][z]er
+		// expect fi[zz]er
 		var invalidScopeName = mTestGrammars.SampleGrammar.repository.badZ.name;
 		assertLineScope(view, styler, 0, [
-				[2, 3, invalidScopeName], // z
-				[3, 4, invalidScopeName]  // z
+				[2, 4, invalidScopeName] // z
 			]);
 	});
 	
@@ -831,8 +830,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"]
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"]
 		]);
 		
 		/*
@@ -842,8 +840,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"],
 			[12, 13, "comment.block.mylang", "b"]
 		]);
 		
@@ -854,8 +851,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"],
 			[12, 13, "comment.block.mylang", "b"],
 			[13, 16, "punctuation.definition.comment.mylang", "-->"]
 			// x is ignored
@@ -1374,13 +1370,11 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[11, 12, "punctuation.definition.array.end", "]"]
 		]);
 		assertLineScope(view, styler, 4, [
-			[0, 1, "punctuation.definition.array.begin", "["],
-			[1, 2, "punctuation.definition.array.begin", "["],
+			[0, 2, "punctuation.definition.array.begin", "[["],
 			[2, 3, "punctuation.definition.array.end", "]"],
 			[3, 4, "punctuation.array.separator", ","],
 			[5, 6, "punctuation.definition.array.begin", "["],
-			[6, 7, "punctuation.definition.array.end", "]"],
-			[7, 8, "punctuation.definition.array.end", "]"]
+			[6, 8, "punctuation.definition.array.end", "]]"]
 		]);
 	});
 	
