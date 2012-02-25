@@ -198,8 +198,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clientDiv.style.width = clientWidth;
 			}
 			var viewPadding = this._getViewPadding();
-			w += viewPadding.right - viewPadding.left;
-			h += viewPadding.bottom - viewPadding.top;
+			w += viewPadding.right + viewPadding.left;
+			h += viewPadding.bottom + viewPadding.top;
 			return {width: w, height: h};
 		},
 		/**
