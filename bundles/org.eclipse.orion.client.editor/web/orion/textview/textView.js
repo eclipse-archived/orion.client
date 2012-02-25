@@ -1553,12 +1553,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (e.preventDefault) { e.preventDefault(); }
 			if (e.stopPropagation){ e.stopPropagation(); }
 			if (!isW3CEvents) {
-				/* In IE 8 is not possible to prevent the default handler from running
-				*  during mouse down event using usual API. The workaround is to use
-				*  setCapture/releaseCapture. 
+				/*
+				* In IE 8 is not possible to prevent the default handler from running
+				* during mouse down event using usual API. The workaround is to give
+				* focus back to the client div.
 				*/ 
-				topNode.setCapture();
-				setTimeout(function() { topNode.releaseCapture(); }, 0);
+				var self = this;
+				setTimeout(function() {
+					self._clientDiv.focus();
+				}, 0);
 			}
 		},
 		_handleRootMouseUp: function (e) {
@@ -1664,6 +1667,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._ignoreBlur = false;
 				}, 0);
 			}
+			log("here");
 			if (this.isListening("DragStart") && this._dragOffset !== -1) {
 				this._isMouseDown = false;
 				this.onDragStart(this._createMouseEvent("DragStart", e));
