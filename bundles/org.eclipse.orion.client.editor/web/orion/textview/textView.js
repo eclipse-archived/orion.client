@@ -3404,7 +3404,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
 
 			var rootDiv = document.createElement("DIV");
-			rootDiv.className = "viewContainer";
 			this._rootDiv = rootDiv;
 			rootDiv.tabIndex = -1;
 			rootDiv.style.position = "absolute";
@@ -3412,7 +3411,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			parent.appendChild(rootDiv);
 			
 			var leftDiv = document.createElement("DIV");
-			leftDiv.className = "viewLeftRuler";
+			leftDiv.className = "textviewLeftRuler";
 			this._leftDiv = leftDiv;
 			leftDiv.tabIndex = -1;
 			leftDiv.style.overflow = "hidden";
@@ -3429,7 +3428,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = document.createElement("DIV");
-			viewDiv.className = "view";
+			viewDiv.className = "textview";
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
 			viewDiv.style.overflow = "auto";
@@ -3443,7 +3442,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rootDiv.appendChild(viewDiv);
 			
 			var rightDiv = document.createElement("DIV");
-			rightDiv.className = "viewRightRuler";
+			rightDiv.className = "textviewRightRuler";
 			this._rightDiv = rightDiv;
 			rightDiv.tabIndex = -1;
 			rightDiv.style.overflow = "hidden";
@@ -3494,7 +3493,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._setFullSelection(this._fullSelection, true);
 
 			var clientDiv = document.createElement("DIV");
-			clientDiv.className = "viewContent";
+			clientDiv.className = "textviewContent";
 			this._clientDiv = clientDiv;
 			clientDiv.style.whiteSpace = "pre";
 			clientDiv.style.position = "absolute";
@@ -5133,7 +5132,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
-			var viewContainerClass = "viewContainer";
+			var viewContainerClass = "textviewContainer";
 			if (this._themeClass) { viewContainerClass += " " + this._themeClass; }
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
