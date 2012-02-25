@@ -107,7 +107,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			}
 			if (typeof contents === "string") {
 				(contentsDiv = this._htmlParent).innerHTML = contents;
-			} else if (contents instanceof Node) {
+			} else if (this._isNode(contents)) {
 				(contentsDiv = this._htmlParent).appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
 				if (!this._contentsView) {
@@ -245,6 +245,10 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				}
 			}
 			return value || defaultValue;
+		},
+		_isNode: function (obj) {
+			return typeof Node === "object" ? obj instanceof Node :
+				obj && typeof obj === "object" && typeof obj.nodeType === "number" && typeof obj.nodeName === "string";
 		}
 	};
 	return {Tooltip: Tooltip};
