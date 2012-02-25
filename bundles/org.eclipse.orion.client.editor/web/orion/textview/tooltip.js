@@ -105,48 +105,55 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			if (contents instanceof Array) {
 				contents = this._getAnnotationContents(contents);
 			}
+			function addTheme(options) {
+				var tooltipTheme = "tooltip";
+				var theme = options.themeClass;
+				if (theme) {
+					theme = theme.replace(tooltipTheme, "");
+					if (theme) { theme = " " + theme; }
+					theme = tooltipTheme + theme;
+				} else {
+					theme = tooltipTheme;
+				}
+				options.themeClass = theme;
+			}
 			if (typeof contents === "string") {
 				(contentsDiv = this._htmlParent).innerHTML = contents;
 			} else if (this._isNode(contents)) {
 				(contentsDiv = this._htmlParent).appendChild(contents);
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
-				if (!this._contentsView) {
+				var contentsView = this._contentsView, view = this._view, options;
+				if (!contentsView) {
 					var emptyModel = this._emptyModel = new mTextModel.TextModel("");
 					//TODO need hook into setup.js (or editor.js) to create a text view (and styler)
-					var view = this._view;
-					var options = view.getOptions();
+					options = view.getOptions();
 					options.model = this._emptyModel;
 					options.parent = this._viewParent;
-					var tooltipTheme = "tooltip";
-					var theme = options.themeClass;
-					if (theme) {
-						theme = theme.replace(tooltipTheme, "");
-						if (theme) { theme = " " + theme; }
-						theme = tooltipTheme + theme;
-					} else {
-						theme = tooltipTheme;
-					}
-					options.themeClass = theme;
-					var newView = this._contentsView = new mTextView.TextView(options);
+					addTheme(options);
+					contentsView = this._contentsView = new mTextView.TextView(options);
 					//TODO this is need to avoid Firefox from getting focus
-					newView._clientDiv.contentEditable = false;
+					contentsView._clientDiv.contentEditable = false;
 					//TODO need to find a better way of sharing the styler for multiple views
 					var listener = {
 						onLineStyle: function(e) {
-							if (newView.getModel() === emptyModel) { return; }
+							if (contentsView.getModel() === emptyModel) { return; }
 							view.onLineStyle(e);
 						}
 					};
-					newView.addEventListener("LineStyle", listener.onLineStyle);
+					contentsView.addEventListener("LineStyle", listener.onLineStyle);
+				} else {
+					options = {themeClass: null};
+					view.getOptions(options);
+					addTheme(options);
+					contentsView.setOptions(options);
 				}
-				var contentsView = this._contentsView;
 				contentsView.setModel(contents);
 				var size = contentsView.computeSize();
-				contentsDiv = this._viewParent;
 				//TODO always make the width larger than the size of the scrollbar to avoid bug in updatePage
+				contentsDiv = this._viewParent;
 				contentsDiv.style.width = (size.width + 20) + "px";
 				contentsDiv.style.height = size.height + "px";
-				this._contentsView.update();
+				contentsView.resize();
 			} else {
 				return;
 			}
