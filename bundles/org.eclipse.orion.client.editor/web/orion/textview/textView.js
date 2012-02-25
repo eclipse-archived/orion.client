@@ -1667,7 +1667,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._ignoreBlur = false;
 				}, 0);
 			}
-			log("here");
 			if (this.isListening("DragStart") && this._dragOffset !== -1) {
 				this._isMouseDown = false;
 				this.onDragStart(this._createMouseEvent("DragStart", e));
