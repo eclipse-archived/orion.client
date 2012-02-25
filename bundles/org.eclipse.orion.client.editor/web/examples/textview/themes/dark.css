@@ -1,15 +1,15 @@
 .dark {
-	background-color: black;
 	color: gray;
 	font-size: 12pt;
 }
 
-.dark .view {
-	background-color: black;
+.dark .textview {
+	background-color: #202020;
 }
 
 .dark .ruler {
-	background-color: black;
+	color: white;
+	background-color: #505050;
 }
 
 .dark .token_doc_comment {

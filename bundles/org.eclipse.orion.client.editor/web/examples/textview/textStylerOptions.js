@@ -74,7 +74,7 @@ define("examples/textview/textStylerOptions", [], function() {
 			result.push("}");
 			
 			//view
-			result.push("." + theme + " .view {");
+			result.push("." + theme + " .textview {");
 			result.push("\tbackground-color: " + background + ";");
 			result.push("}");
 
