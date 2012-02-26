@@ -107,8 +107,6 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 				commandService.processURL(window.location.href);
 		
 				var pageParams = PageUtil.matchResourceParameters();
-				if (pageParams.resource) {
-		
 				explorer.displayClonesList(pageParams.resource);
 					
 				//every time the user manually changes the hash, we need to load the workspace with that name
