@@ -120,7 +120,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
-						if(e.keyCode === dojo.keys.ENTER) {
+						if(e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {
 							this.close();
 						}
 					}));
@@ -234,7 +234,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) {
-						if(e.keyCode === dojo.keys.ENTER) {			
+						if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {			
 							commandInvocation.parameters.optionsRequested = true;
 							finish(this);
 						}
@@ -249,7 +249,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) {
-					if(e.keyCode === dojo.keys.ENTER) {
+					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						finish(this);
 					}
 				}));
@@ -264,7 +264,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
-					if(e.keyCode === dojo.keys.ENTER) {
+					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						localClose();
 					}
 				}));
