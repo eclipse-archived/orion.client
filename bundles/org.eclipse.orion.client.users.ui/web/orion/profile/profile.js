@@ -293,8 +293,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 					var tableListItem = dojo.create( "div", { "class":"sectionTableItem"}, dojo.byId(content.sections[i].id) );
 					
 					var data = content.sections[i].data[j];
-
-					var label = dojo.create("label", {"for": data.id}, tableListItem);
+					var label = dojo.create("label", {"for": data.props.id}, tableListItem);
 					dojo.create( "span", {style: "min-width:150px; display:inline-block", innerHTML: data.label }, label );				
 					var input = this.createFormElem(data, label);
 					dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}}));
