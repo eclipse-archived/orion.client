@@ -5104,8 +5104,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					selDiv2.style.background = rgb;
 					selDiv3.style.background = rgb;
 					if (!this._insertedSelRule) {
-						var styleSheet = document.styleSheets[0];
-//						styleSheet.insertRule("::-moz-selection {background: " + rgb + "; }", 0);
+						var stylesheet = document.createElement("STYLE");
+						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+						stylesheet.appendChild(document.createTextNode("::-moz-selection {background: " + rgb + "; }"));
+						head.insertBefore(stylesheet, head.firstChild);
 						this._insertedSelRule = true;
 					}
 				}
