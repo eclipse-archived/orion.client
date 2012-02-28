@@ -1159,7 +1159,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			});
 			// onClick events do not register for spans when using the keyboard
 			dojo.connect(domNode, "onkeypress", this, function(e) {
-				if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
+				if (e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {						
 					context.commandService._invoke(context);					
 				}				
 			});
