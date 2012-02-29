@@ -149,12 +149,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * @name orion.commands.CommandService
 	 */
 	function CommandService(options) {
-		this._domScope = {};
-		this._objectScope = {};
-		this._globalScope = {};
-		this._namedGroups = {};
-		this._ungrouped = {};
-		this._topics = {};
+		this._commandList = {};
+		this._contributionsByDomNode = {};
 		this._activeBindings = {};
 		this._urlBindings = {};
 		this._init(options);
@@ -271,9 +267,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		findCommand: function(commandId) {
-			return this._objectScope[commandId] || 
-						this._domScope[commandId] || 
-						this._globalScope[commandId];
+			return this._commandList[commandId];
 		}, 
 		
 		/**
@@ -412,48 +406,35 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		/** 
-		 * Add a command at a particular scope.
+		 * Add a command to the command service.  Nothing will be shown in the UI
+		 * until this command is referenced in a contribution.
 		 * @param {Command} the command being added.
-		 * @param {String} scope The scope to which the command applies.  "global"
-		 *  commands apply across the page, "dom" level commands apply only when the 
-		 *  specified dom element is rendering commands, and "object" scope applies 
-		 *  to particular objects being displayed in widgets such as lists or trees.
-		 * @param {String} topic (optional).  A topic describing the command that can be used 
-		 *  to assemble lists of commands that relate to each other.
 		 */
-		addCommand: function(command, scope, topic) {
-			switch (scope) {
-			case "dom":
-				this._domScope[command.id] = command;
-				break;
-			case "object":
-				this._objectScope[command.id] = command;
-				break;
-			case "global":
-				this._globalScope[command.id] = command;
-				break;
-			default:
-				throw "unrecognized command scope " + scope;
-			}
+		addCommand: function(command) {
+			this._commandList[command.id] = command;
 		},
 		
 		/**
 		 * Registers a command group and specifies visual information about the group.
-		 * @param {String} groupId The id of the group, must be unique.  Also used for dom node id
-		 * @param {Number} position The relative position of the group within its parent, optional.
+		 * @param {String} scopeId The id of a DOM element in which the group should be visible.  Required.
+		 *  When commands are rendered for a particular element, the group will be shown only if its scopeId
+		 *  matches the id being rendered.
+		 * @param {String} groupId The id of the group, must be unique.  May be used for a dom node id of
+		 *  the element representing the group
+		 * @param {Number} position The relative position of the group within its parent.  Required.
 		 * @param {String} title The title of the group, optional
 		 * @param {String} parentPath The path of parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
-		 * @param {String} scopeId The id of a DOM element related to the command's scope.  Optional.
-		 *  For example, if the scope is "dom" level, the scopeId describes which dom id to which this
-		 *  command should be added
 		 */	
 		 
-		addCommandGroup: function(groupId, position, title, parentPath, scopeId) {
-			var parentTable = this._namedGroups;
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath) {
+			if (!this._contributionsByDomNode[scopeId]) {
+				this._contributionsByDomNode[scopeId] = {};
+			}
+			var parentTable = this._contributionsByDomNode[scopeId];
 			if (parentPath) {
-				parentTable = this._createEntryForPath(parentPath);		
+				parentTable = this._createEntryForPath(parentTable, parentPath);		
 			} 
 			if (parentTable[groupId]) {
 				// update existing group definition if info has been supplied
@@ -463,18 +444,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				if (position) {
 					parentTable[groupId].position = position;
 				}
-				if (scopeId) {
-					parentTable[groupId].scopeId = scopeId;
-				}
 			} else {
 				// create new group definition
-				parentTable[groupId] = {title: title, position: position, children: {}, scopeId: scopeId};
-				parentTable.sortedCommands = null;
+				parentTable[groupId] = {title: title, position: position, children: {}};
+				parentTable.sortedContributions = null;
 			}
 		},
 		
-		_createEntryForPath: function(parentPath) {
-			var parentTable = this._namedGroups;
+		_createEntryForPath: function(parentTable, parentPath) {
 			if (parentPath) {
 				var segments = parentPath.split("/");
 				for (var i = 0; i < segments.length; i++) {
@@ -493,10 +470,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		/**
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
-		 * @param {String} commandId the id of the command
-		 * @param {Number} position the relative position of the command within its parent
-		 * @param {String} scopeId The id related to the scope.  Depending on the scope,
-		 *  this might be the id of the page or of a dom element.
+		 * @param {String} scopeId The id of a DOM element in which the command should be visible.  Required.
+		 *  When commands are rendered for a particular element, the command will be shown only if its scopeId
+		 *  matches the id being rendered.
+		 * @param {String} commandId the id of the command.  Required.
+		 * @param {Number} position the relative position of the command within its parent.  Required.
 		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
@@ -504,23 +482,22 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * @param {orion.commands.CommandKeyBinding} keyBinding a keyBinding for the command.  Optional.
 		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
-		registerCommandContribution: function(commandId, position, scopeId, parentPath, bindingOnly, keyBinding, urlBinding) {
-			var parentTable;
-			if (!scopeId && !parentPath) {
-				parentTable = this._ungrouped;
-			} else {
-				// first ensure the parentPath is represented
-				parentTable = this._createEntryForPath(parentPath);
+		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
+			if (!this._contributionsByDomNode[scopeId]) {
+				this._contributionsByDomNode[scopeId] = {};
 			}
+			var parentTable = this._contributionsByDomNode[scopeId];
+			if (parentPath) {
+				parentTable = this._createEntryForPath(parentTable, parentPath);		
+			} 
 			
 			// store the contribution
-			parentTable[commandId] = {scopeId: scopeId, position: position};
+			parentTable[commandId] = {position: position};
 			
 			var command;
 			// add to the bindings table now
 			if (keyBinding) {
-				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a key binding
-				 command = this._domScope[commandId] || this._globalScope[commandId];
+				command = this._commandList[commandId];
 				if (command) {
 					this._activeBindings[commandId] = {command: command, keyBinding: keyBinding, bindingOnly: bindingOnly};
 				}
@@ -528,14 +505,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			
 			// add to the url key table
 			if (urlBinding) {
-				// look for global or dom scope, since we wouldn't be able to ascertain an item scope for a URL binding
-				command = this._domScope[commandId] || this._globalScope[commandId];
+				command = this._commandList[commandId];
 				if (command) {
 					this._urlBindings[commandId] = {command: command, urlBinding: urlBinding, bindingOnly: bindingOnly};
 				}
 			}
 			// get rid of sort cache because we have a new contribution
-			parentTable.sortedCommands = null;
+			parentTable.sortedContributions = null;
 		},
 		
 		_isLastChildSeparator: function(parent, style) {
@@ -551,57 +527,40 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 
 		/**
 		 * Render the commands that are appropriate for the given scope.
+		 * @param {String} scopeId The id describing the scope for which we are rendering commands.  Required.
+		 *  Only contributions made to this scope will be rendered.
 		 * @param {DOMElement} parent The element in which commands should be rendered.  If commands have been
 		 *  previously rendered into this element, it is up to the caller to empty any previously generated content.
-		 * @param {String} scope The scope to which the command applies.  "dom" level 
-		 *  commands apply only when a specified dom element is rendering commands.
-		 *  "object" scope applies to particular objects/items displayed in widgets
-		 *  such as list or trees.  "global" commands always apply.
 		 * @param {Object} items An item or array of items to which the command applies.  Optional.  If not
 		 *  items are specified and a selection service was specified at creation time, then the selection
 		 *  service will be used to determine which items are involved. 
 		 * @param {Object} handler The object that should perform the command
 		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
-		 *  a button-like image or text element in the dom.  "menu" will render a push button menu containing
+		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render a push button menu containing
 		 *  the commands.
-		 * @param {Boolean} forceText When true, always use text and not the icon when showing the command, regardless of the
-		 *  specified renderType.  
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
-		 * @param {String} activeCommandClass (optional) class to use when a command becomes active by focus or hover
-		 * @param {String} inactiveCommandClass (optional) class to use when a command becomes inactive by lost focus or blur
 		 */	
-		renderCommands: function(parent, scope, items, handler, renderType, forceText, userData, activeCommandClass, inactiveCommandClass) {
+		renderCommands: function(scopeId, parent, items, handler, renderType, userData) {
+			if (typeof(scopeId) !== "string") {
+				throw "a scope id for rendering must be specified";
+			}
 			if (typeof(parent) === "string") {
 				parent = dojo.byId(parent);
 			}
 			if (!parent) { 
 				throw "no parent"; 
-			} else if (!parent.id || parent.id === "") {
-				window.console.log("renderCommands: " + scope + "," + renderType + ">> WARNING: command parent must have an id");
 			}
 
 			if (!items) {
 				var cmdService = this;
 				if (this._selection) {
 					this._selection.getSelections(function(selections) {
-						cmdService.renderCommands(parent, scope, selections, handler, renderType, forceText, userData, activeCommandClass, inactiveCommandClass);
+						cmdService.renderCommands(scopeId, parent, selections, handler, renderType, userData);
 					});
 				}
 				return;
 			} 
-			var refCommands;
-			if (scope === "object") {
-				refCommands = this._objectScope;
-				// render unnamed/ungrouped item scopes first
-				this._render(this._ungrouped, parent, scope, items, handler, renderType, forceText, userData, refCommands, activeCommandClass, inactiveCommandClass);
-			} else if (scope === "dom") {
-				refCommands = this._domScope;
-			} else if (scope === "global") {
-				refCommands = this._globalScope;
-			} else {
-				throw "Unrecognized command scope " + scope;
-			}
-			this._render(this._namedGroups, parent, scope, items, handler, renderType, forceText, userData, refCommands, activeCommandClass, inactiveCommandClass);
+			this._render(this._contributionsByDomNode[scopeId], parent, items, handler, renderType, userData);
 			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 			if (renderType === "tool" || renderType === "button") {
 				if (this._isLastChildSeparator(parent, renderType)) {
@@ -614,36 +573,34 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					child.destroy();
 				}
 			}
-			if (scope === "dom" || scope === "global") {
-				mUtil.forceLayout(parent);
-			}
+			// TODO should the caller have to do this?
+			mUtil.forceLayout(parent);
 		},
 		
-		_render: function(commandItems, parent, scope, items, handler, renderType, forceText, userData, commandList, activeCommandClass, inactiveCommandClass) {
+		_render: function(contributions, parent, items, handler, renderType, userData) {
 			// sort the items
-			var positionOrder = commandItems.sortedCommands;
-			if (!positionOrder) {
-				positionOrder = [];
-				for (var key in commandItems) {
-					var item = commandItems[key];
-					if (item && typeof(item.position) === "number") {
-						item.id = key;
-						positionOrder.push(item);
+			var sortedByPosition = contributions.sortedContributions;
+			if (!sortedByPosition) {
+				sortedByPosition = [];
+				for (var key in contributions) {
+				    if (!contributions.hasOwnProperty || contributions.hasOwnProperty(key)) {
+						var item = contributions[key];
+						if (item && typeof(item.position) === "number") {
+							item.id = key;
+							sortedByPosition.push(item);
+						}
 					}
 				}
-				positionOrder.sort(function(a,b) {
+				sortedByPosition.sort(function(a,b) {
 					return a.position-b.position;
 				});
-				commandItems.sortedCommands = positionOrder;
+				contributions.sortedContributions = sortedByPosition;
 			}
-			// now traverse the command items and render as we go
-			for (var i = 0; i < positionOrder.length; i++) {
-				var image, id, menuButton, invocation;
-				if (positionOrder[i].children) {
-					var group = positionOrder[i];
-					if (group.scopeId && parent.id !== group.scopeId) {
-						continue;
-					}
+			// now traverse the sorted contributions and render as we go
+			for (var i = 0; i < sortedByPosition.length; i++) {
+				var id, menuButton, invocation;
+				if (sortedByPosition[i].children) {
+					var group = sortedByPosition[i];
 					var children;
 					if (renderType === "tool" || renderType === "button") {
 						if (group.title) {
@@ -651,10 +608,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							var newMenu= new dijit.Menu({
 								style: "display: none;"
 							});
-							// if commands are scoped to the dom, we'll need to identify a menu with the dom id of its original parent
+							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children
-							this._render(positionOrder[i].children, newMenu, scope, items, handler, "menu", forceText, userData, commandList, activeCommandClass); 
+							this._render(sortedByPosition[i].children, newMenu, items, handler, "menu", userData); 
 							// special post-processing when we've created a menu in an image bar.
 							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
 							children = newMenu.getChildren();
@@ -687,15 +644,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 											commandService: this
 										});
 									}
-									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode, activeCommandClass, inactiveCommandClass);
+									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
 									dojo.place(menuButton.domNode, parent, "last");
 								} else {
 									id = renderType + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 									invocation = new CommandInvocation(this, handler, items, userData, menuCommand);
 									if (renderType === "button") {
-										menuCommand._addButton(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
+										menuCommand._addButton(parent, id, invocation);
 									} else {
-										menuCommand._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);
+										menuCommand._addTool(parent, id, invocation);
 									}
 								}
 							}
@@ -705,7 +662,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, forceText, userData, commandList, activeCommandClass, inactiveCommandClass); 
+							this._render(sortedByPosition[i].children, parent, items, handler, renderType, userData); 
 
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -719,7 +676,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(positionOrder[i].children, subMenu, scope, items, handler, renderType, forceText, userData, commandList, activeCommandClass, inactiveCommandClass); 
+							this._render(sortedByPosition[i].children, subMenu, items, handler, renderType, userData); 
 							if (subMenu.getChildren().length > 0) {
 								parent.addChild(new dijit.PopupMenuItem({
 									label: group.title,
@@ -733,7 +690,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(positionOrder[i].children, parent, scope, items, handler, renderType, forceText, userData, commandList, activeCommandClass, inactiveCommandClass); 
+							this._render(sortedByPosition[i].children, parent, items, handler, renderType, userData); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -744,32 +701,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					}
 				} else {
 					// processing atomic commands
-					var command = commandList[positionOrder[i].id];
+					var command = this._commandList[sortedByPosition[i].id];
 					var render = command ? true : false;
 					var keyBinding = null;
 					var urlBinding = null;
 					if (command) {
-						if (scope === "dom" || scope === "global") {
-							if (renderType === "tool" || renderType === "button") {
-								render = parent.id === positionOrder[i].scopeId;
-							} else if (renderType=== "menu") {
-								render = parent.eclipseScopeId === positionOrder[i].scopeId;
-							} else {
-								render = false;
-							}
-						} else if (scope === "object") {
-							// if there is a scope id on the contribution it's not supposed to show up here
-							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=368699
-							render = !positionOrder[i].scopeId;
-						} 
-						var checkBinding = render && (scope === "global" || scope === "dom");
-						
 						invocation = new CommandInvocation(this, handler, items, userData, command);
 						invocation.domParent = parent;
-						
 						var enabled = render && (command.visibleWhen ? command.visibleWhen(items) : true);
 						// ensure that keybindings are bound to the current handler, items, and user data
-						if (checkBinding && this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
+						if (this._activeBindings[command.id] && this._activeBindings[command.id].keyBinding) {
 							keyBinding = this._activeBindings[command.id];
 							if (enabled) {
 								keyBinding.invocation = invocation;
@@ -783,7 +724,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						}
 						
 						// same for url bindings
-						if (checkBinding && this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
+						if (this._urlBindings[command.id] && this._urlBindings[command.id].urlBinding) {
 							urlBinding = this._urlBindings[command.id];
 							if (enabled) {
 								urlBinding.invocation = invocation;
@@ -834,12 +775,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						} else {
 							if (renderType === "tool") {
 								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addTool(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);	
+								command._addTool(parent, id, invocation);	
 							} else if (renderType === "button") {
 								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addButton(parent, forceText, id, invocation, activeCommandClass, inactiveCommandClass);	
+								command._addButton(parent, id, invocation);	
 							} else if (renderType === "menu") {
-								command._addMenuItem(parent, invocation, activeCommandClass, inactiveCommandClass);
+								command._addMenuItem(parent, invocation);
 							}
 						}
 					} 
@@ -847,24 +788,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 		},
 		
-		/**
-		 * Registers a function that should be called when the specified DOM element is hidden.
-		 * 
-		 * @param {String|DOMElement} domElementOrId the element containing the rendered commands.  This should
-		 *  be a DOM element in which commands are being rendered.
-		 * @param {Function} onHide a function to be called when the dom element is hidden
-		 */
-		whenHidden: function(domElementOrId, onHide) {
-			var id = typeof domElementOrId === "string" ? domElementOrId : domElementOrId.id;
-			if (!this.hidden) {
-				this.hidden = {};
-			}
-			if (this.hidden[id]) {
-				this.hidden[id].push(onHide);
-			} else {
-				this.hidden[id] = [onHide];
-			}
-		},
 				
 		/**
 		 * Add a dom node appropriate for using a separator between different groups
@@ -955,7 +878,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is an image button.  If there is no image button, use bolded text button.
 		 */
-		_addTool: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
+		_addTool: function(parent, name, context) {
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
@@ -965,7 +888,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				}
 			} else {
 				element = dojo.create("span", {tabindex: "0", role: "button"});
-				if (forceText || !this.hasImage()) {
+				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
 					dojo.place(text, element, "last");
 					dojo.addClass(element, "commandMissingImageButton commandButton");
@@ -975,8 +898,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					this._addAccessibleLabel(element);
 				}
 				this._hookCallback(element, context);
-				var overClass = image ? "commandImageOver" : "commandButtonOver";
-				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
+				this._setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			
 
 			}
 			context.domNode = element;
@@ -998,7 +920,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is a text button.  If there is no name, use an image.
 		 */
-		_addButton: function(parent, forceText, name, context, activeCommandClass, inactiveCommandClass) {
+		_addButton: function(parent, name, context) {
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
@@ -1021,7 +943,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					// ensure there is accessible text describing this image
 					this._addAccessibleLabel(element);
 				}
-				this._setupActivateVisuals(element, element, activeCommandClass, inactiveCommandClass, overClass);			
+				this._setupActivateVisuals(element, element, overClass);			
 			}
 			element.id = name;
 			if (this.tooltip) {
@@ -1150,30 +1072,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		/*
 		 * stateless helper
 		 */
-		_setupActivateVisuals: function(domNode, focusNode, activeCommandClass, inactiveCommandClass, overClass) {
-			if (inactiveCommandClass) {
-				dojo.addClass(domNode, inactiveCommandClass);
-			}
+		_setupActivateVisuals: function(domNode, focusNode, overClass) {
 			var makeActive = function() {
 				if (overClass) {
 					dojo.addClass(this, overClass);
-				}
-				if (activeCommandClass) {
-					dojo.addClass(this, activeCommandClass);
-				}
-				if (inactiveCommandClass) {
-					dojo.removeClass(this, inactiveCommandClass);
 				}
 			};
 			var makeInactive = function() {
 				if (overClass) {
 					dojo.removeClass(this, overClass);
-				}
-				if (activeCommandClass) {
-					dojo.removeClass(this, activeCommandClass);
-				}
-				if (inactiveCommandClass) {
-					dojo.addClass(this, inactiveCommandClass);
 				}
 			};
 			dojo.connect(domNode, "onmouseover", domNode, makeActive);
@@ -1417,7 +1324,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		hasParameters: function() {
-			return !(this.parameterTable === null);
+			return this.parameterTable !== null;
 		},
 		/**
 		 * Returns the CommandParameter with the given name, or <code>null</code> if there is no parameter

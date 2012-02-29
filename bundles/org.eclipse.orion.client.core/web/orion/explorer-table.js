@@ -58,6 +58,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.commandService = commandService;
 		this.contentTypeService = contentTypeService;
 		this.openWithCommands = null;
+		this.actionScopeId = "fileFolderCommands";
 		this._init(options);
 	}
 	FileRenderer.prototype = new mExplorer.SelectionRenderer(); 
@@ -175,7 +176,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			dojo.place(menuButton.domNode, span, "last");
 			window.setTimeout(dojo.hitch(this, function() {
 				menuButton.destroyRecursive();
-				this.commandService.renderCommands(span, "object", item, this.explorer, "tool", false);
+				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
 			}), 0);
 			return col;
 		case 1:
