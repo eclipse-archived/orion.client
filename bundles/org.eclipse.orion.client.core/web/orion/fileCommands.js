@@ -82,7 +82,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			lastItemLoaded.Location = item.Location;
 		}
 
-		service.renderCommands(toolbar, "dom", item, explorer, "button").then(function() {
+		service.renderCommands(toolbar.id, toolbar, item, explorer, "button").then(function() {
 			if (lastItemLoaded.Location) {
 				service.processURL(window.location.href);
 			}
@@ -91,7 +91,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
 				dojo.empty(selectionToolbarId);
-				service.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+				service.renderCommands(selectionToolbarId, selectionToolbarId, "dom", null, explorer, "button"); 
 			}
 		}
 		
@@ -103,7 +103,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "button");
+					registry.getService("orion.page.command").renderCommands(selectionTools.id, selectionTools, selections, explorer, "button");
 				}
 			});
 		}
@@ -325,7 +325,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					); 
 				})
 			});
-		commandService.addCommand(renameCommand, "object");
+		commandService.addCommand(renameCommand);
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
@@ -377,8 +377,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					})
 				);	
 			}});
-		commandService.addCommand(deleteCommand, "object");
-		commandService.addCommand(deleteCommand, "dom");
+		commandService.addCommand(deleteCommand);
 	
 		var downloadCommand = new mCommands.Command({
 			name: "Export as zip",
@@ -391,7 +390,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			hrefCallback: function(data) {
 				return forceSingleItem(data.items).ExportLocation;
 			}});
-		commandService.addCommand(downloadCommand, "object");
+		commandService.addCommand(downloadCommand);
 		
 		function getNewItemName(item, domId, defaultName, onDone) {
 			var refNode, name, tempNode;
@@ -450,8 +449,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
-		commandService.addCommand(newFileCommand, "dom");
-		commandService.addCommand(newFileCommand, "object");
+		commandService.addCommand(newFileCommand);
 		
 		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')], false);
 
@@ -480,8 +478,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	
-		commandService.addCommand(newFolderCommand, "dom");
-		commandService.addCommand(newFolderCommand, "object");
+		commandService.addCommand(newFolderCommand);
 		
 		var newProjectCommand = new mCommands.Command({
 			name: "New Folder",
@@ -507,7 +504,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				item = forceSingleItem(item);
 				return item.Location && mUtil.isAtRoot(item.Location);}});
 	
-		commandService.addCommand(newProjectCommand, "dom");
+		commandService.addCommand(newProjectCommand);
 		
 		var linkProjectCommand = new mCommands.Command({
 			name: "Link Folder",
@@ -531,7 +528,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Location && mUtil.isAtRoot(item.Location);}});
-		commandService.addCommand(linkProjectCommand, "dom");
+		commandService.addCommand(linkProjectCommand);
 		
 		var goUpCommand = new mCommands.Command({
 			name: "Go Up",
@@ -553,7 +550,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Parents;}});
-		commandService.addCommand(goUpCommand, "dom");
+		commandService.addCommand(goUpCommand);
 
 					
 		var importCommand = new mCommands.Command({
@@ -573,8 +570,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
-		commandService.addCommand(importCommand, "object");
-		commandService.addCommand(importCommand, "dom");
+		commandService.addCommand(importCommand);
 	
 		var importSFTPCommand = new mCommands.Command({
 			name : "SFTP from...",
@@ -602,8 +598,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
-		commandService.addCommand(importSFTPCommand, "object");
-		commandService.addCommand(importSFTPCommand, "dom");
+		commandService.addCommand(importSFTPCommand);
 	
 		var exportSFTPCommand = new mCommands.Command({
 			name : "SFTP to...",
@@ -628,8 +623,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
-		commandService.addCommand(exportSFTPCommand, "object");
-		commandService.addCommand(exportSFTPCommand, "dom");
+		commandService.addCommand(exportSFTPCommand);
 		
 		var copyCommand = new mCommands.Command({
 			name : "Copy to",
@@ -640,8 +634,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			},
 			visibleWhen: oneOrMoreFilesOrFolders 
 		});
-		commandService.addCommand(copyCommand, "dom");
-		commandService.addCommand(copyCommand, "object");
+		commandService.addCommand(copyCommand);
 		
 		var moveCommand = new mCommands.Command({
 			name : "Move to",
@@ -652,8 +645,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			},
 			visibleWhen: oneOrMoreFilesOrFolders
 			});
-		commandService.addCommand(moveCommand, "dom");
-		commandService.addCommand(moveCommand, "object");
+		commandService.addCommand(moveCommand);
 		
 		var bufferedSelection = [];
 		var copyToBufferCommand = new mCommands.Command({
@@ -666,7 +658,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					});
 				}
 			});
-		commandService.addCommand(copyToBufferCommand, "dom");
+		commandService.addCommand(copyToBufferCommand);
 			
 		var pasteFromBufferCommand = new mCommands.Command({
 				name: "Paste Items",
@@ -700,7 +692,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					}
 				}
 			});
-		commandService.addCommand(pasteFromBufferCommand, "dom");
+		commandService.addCommand(pasteFromBufferCommand);
 		
 	};
 	
@@ -772,31 +764,31 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var openWithGroupCreated = false;
 				if (commandInfo.forceSingleItem || commandInfo.href) {
 					// single items go in the local actions column, grouped in their own unnamed group to get a separator
-					commandService.addCommand(command, "object");
+					commandService.addCommand(command);
 					if (!extensionGroupCreated) {
 						extensionGroupCreated = true;
-						commandService.addCommandGroup("eclipse.fileCommandExtensions", 1000, null, fileGroup);
+						commandService.addCommandGroup("fileFolderCommands", "eclipse.fileCommandExtensions", 1000, null, fileGroup);
 					}
 					if (!openWithGroupCreated) {
 						openWithGroupCreated = true;
-						commandService.addCommandGroup("eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
+						commandService.addCommandGroup("fileFolderCommands", "eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
 					}
 					
 					if (commandInfo.isEditor) {
-						commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
+						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
 					} else {
-						commandService.registerCommandContribution(command.id, i, null, fileGroup + "/eclipse.fileCommandExtensions");
+						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions");
 					}
 				} else {  
 					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
 					// TODO would we also want to add these to the menu above so that they are available for single selections?  
 					// For now we do not do this to reduce clutter, but we may revisit this.
-					commandService.addCommand(command, "dom");
+					commandService.addCommand(command);
 					if (!selectionGroupCreated) {
 						selectionGroupCreated = true;
-						commandService.addCommandGroup("eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
+						commandService.addCommandGroup(selectionToolbarId, "eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
 					}
-					commandService.registerCommandContribution(command.id, i, selectionToolbarId, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+					commandService.registerCommandContribution(selectionToolbarId, command.id, i, selectionGroup + "/eclipse.bulkFileCommandExtensions");
 				}
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();

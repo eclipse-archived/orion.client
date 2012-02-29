@@ -361,7 +361,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 			dojo.addClass(id, "paneHeading");
 		}
 		if (commandService) {
-			commandService.renderCommands(dojo.byId(commandId), "dom", handler, handler, "button");
+			commandService.renderCommands(commandId, dojo.byId(commandId), handler, handler, "button");
 		}
 		return dojo.byId(id);
 	}

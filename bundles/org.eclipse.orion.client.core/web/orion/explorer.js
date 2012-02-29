@@ -256,7 +256,11 @@ exports.ExplorerRenderer = (function() {
 				dojo.addClass(actionsColumn, columnClass);
 			}
 			// contact the command service to render appropriate commands here.
-			commandService.renderCommands(actionsColumn, "object", item, this.explorer, renderType, false, null, "commandActiveItem", "commandInactiveItem");
+			if (this.actionScopeId) {
+				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType);
+			} else {
+				window.console.log("Warning, no action scope was specified.  No commands rendered.");
+			}
 			return actionsColumn;
 		},
 		initCheckboxColumn: function(tableNode){
@@ -482,7 +486,7 @@ exports.ExplorerRenderer = (function() {
 				
 				dojo.empty(actionsWrapper);
 				// contact the command service to render appropriate commands here.
-				registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", node._item, this.explorer, "tool");
+				registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool");
 			});
 		},
 		
