@@ -91,7 +91,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
 				dojo.empty(selectionToolbarId);
-				service.renderCommands(selectionToolbarId, selectionToolbarId, "dom", null, explorer, "button"); 
+				service.renderCommands(selectionToolbarId, selectionToolbarId, null, explorer, "button"); 
 			}
 		}
 		
@@ -749,6 +749,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		}
 		dojo.when(getContentTypesMap(), dojo.hitch(this, function() {
 			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesMapCache));
+			var extensionGroupCreated = false;
+			var selectionGroupCreated = false;
+			var openWithGroupCreated = false;
 		
 			for (i=0; i < fileCommands.length; i++) {
 				var commandInfo = fileCommands[i].properties;
@@ -759,9 +762,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					command.isEditor = commandInfo.isEditor;
 				}
 				
-				var extensionGroupCreated = false;
-				var selectionGroupCreated = false;
-				var openWithGroupCreated = false;
 				if (commandInfo.forceSingleItem || commandInfo.href) {
 					// single items go in the local actions column, grouped in their own unnamed group to get a separator
 					commandService.addCommand(command);

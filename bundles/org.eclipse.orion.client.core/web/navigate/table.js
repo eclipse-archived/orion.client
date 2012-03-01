@@ -79,7 +79,6 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("fileFolderCommands", "eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
 		commandService.addCommandGroup("fileFolderCommands", "eclipse.newResources", 101, null, "eclipse.fileGroup");
 		commandService.addCommandGroup("pageActions", "eclipse.fileGroup.unlabeled", 100);
-		commandService.addCommandGroup("fileFolderCommands", "eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
 		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 200);
 		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 		// commands that don't appear but have keybindings
