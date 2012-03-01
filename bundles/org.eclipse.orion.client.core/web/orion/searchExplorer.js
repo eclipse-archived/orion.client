@@ -668,7 +668,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		});
 		
 		var replaceAllCommand = new mCommands.Command({
-			name: "Commit",
+			name: "Apply Changes",
 			tooltip: "Replace all selected matches",
 			id: "orion.globalSearch.replaceAll",
 			callback: function(data) {
