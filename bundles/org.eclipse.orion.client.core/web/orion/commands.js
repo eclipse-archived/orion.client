@@ -13,6 +13,26 @@
  
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil){
 
+	/*
+	 * stateless helper function
+	 */
+	function _setupActivateVisuals(domNode, focusNode, overClass) {
+		var makeActive = function() {
+			if (overClass) {
+				dojo.addClass(this, overClass);
+			}
+		};
+		var makeInactive = function() {
+			if (overClass) {
+				dojo.removeClass(this, overClass);
+			}
+		};
+		dojo.connect(domNode, "onmouseover", domNode, makeActive);
+		dojo.connect(focusNode, "onfocus", domNode, makeActive);
+		dojo.connect(domNode, "onmouseout", domNode, makeInactive);
+		dojo.connect(focusNode, "onblur", domNode, makeInactive);
+	}
+
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
 	 * Note:  when retrieving parameters for a command invocation, clients should always use <code>commandInvocation.parameters</code>
@@ -602,68 +622,75 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				if (sortedByPosition[i].children) {
 					var group = sortedByPosition[i];
 					var children;
+					var childContributions = sortedByPosition[i].children;
+					var commandService = this;
 					if (renderType === "tool" || renderType === "button") {
 						if (group.title) {
-							// we need a named menu button, but first let's see if we actually have content
+							// We need a named menu button.  We used to first render into the menu and only 
+							// add a menu button in the dom when we knew it was needed.  For performance, though, we need
+							// to be asynchronous in traversing children, so we will add the menu and only remove it
+							// if it turns out we didn't need it.  
+							// If we wait until the end of asynch processing to add the menu button, the order will
+							// not be right, and we could have css ripple.  The down side to this approach is that a dropdown
+							// could appear and then not be needed.  It would be dangerous to assume that null items or an empty
+							// item array always mean "don't render" since some commands ignore the items.  It seems the best we
+							// can do is add it as not visible (thus reserving space) and make it visible when needed.   This could
+							// still cause ripple but helps with cases like the "More" menu which is always last.
+							
 							var newMenu= new dijit.Menu({
 								style: "display: none;"
 							});
+							menuButton = new dijit.form.DropDownButton({
+								label: group.title === "*" ? "Actions" : group.title, // TODO undocumented hack
+								showLabel:  group.title !== "*",
+								style: "visibility: hidden;",
+								dropDown: newMenu
+						        });
+							dojo.addClass(menuButton.domNode, "commandMenu");
+							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
+							if (group.title === "*") {
+								dojo.addClass(menuButton.domNode, "textless");
+								new CommandTooltip({
+									connectId: [menuButton.domNode],
+									label: "Actions menu",
+									position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+									commandParent: parent,
+									commandService: this
+								});
+							}
+							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
+							dojo.place(menuButton.domNode, parent, "last");
 							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
-							// render the children
-							this._render(sortedByPosition[i].children, newMenu, items, handler, "menu", userData); 
-							// special post-processing when we've created a menu in an image bar.
-							// we want to get rid of a trailing separator in the menu first, and then decide if a menu is necessary
-							children = newMenu.getChildren();
-							if (this._isLastChildSeparator(newMenu, "menu")) {
-								var trailingSep = children[children.length-1];
-								newMenu.removeChild(trailingSep);
-								trailingSep.destroy();
+							// render the children asynchronously
+							window.setTimeout(dojo.hitch(this, function() {
+								commandService._render(childContributions, newMenu, items, handler, "menu", userData); 
+								// special post-processing when we've created a menu in an image bar.  We want to get rid 
+								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								children = newMenu.getChildren();
-							}
-							// now decide if we needed the menu or not
-							if (children.length > 0) {
-								// we don't need a menu to contain the command if there is only one item.
-								var needMenu = children.length > 1;
-								var menuCommand = children[0].eclipseCommand;
-								if (needMenu) {
-									menuButton = new dijit.form.DropDownButton({
-										label: group.title === "*" ? "Actions" : group.title, // TODO undocumented hack
-										showLabel:  group.title !== "*",
-										dropDown: newMenu
-								        });
-									dojo.addClass(menuButton.domNode, "commandMenu");
-									dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-									if (group.title === "*") {
-										dojo.addClass(menuButton.domNode, "textless");
-										new CommandTooltip({
-											connectId: [menuButton.domNode],
-											label: "Actions menu",
-											position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
-											commandParent: parent,
-											commandService: this
-										});
-									}
-									menuCommand._setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
-									dojo.place(menuButton.domNode, parent, "last");
-								} else {
-									id = renderType + menuCommand.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-									invocation = new CommandInvocation(this, handler, items, userData, menuCommand);
-									if (renderType === "button") {
-										menuCommand._addButton(parent, id, invocation);
-									} else {
-										menuCommand._addTool(parent, id, invocation);
-									}
+								if (this._isLastChildSeparator(newMenu, "menu")) {
+									var trailingSep = children[children.length-1];
+									newMenu.removeChild(trailingSep);
+									trailingSep.destroy();
+									children = newMenu.getChildren();
 								}
-							}
-						} else {
+								// now determine if we actually needed the menu or not
+								if (children.length === 0) {
+									menuButton.destroyRecursive();
+								} else {
+									dojo.style(menuButton.domNode, "visibility", "visible");
+								}
+							}), 0);
+						} else {  
+							// rendering a group using a separator on each end. We do it synchronously because order matters with
+							// non grouped items.
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
-							this._render(sortedByPosition[i].children, parent, items, handler, renderType, userData); 
-
+							commandService._render(childContributions, parent, items, handler, renderType, userData); 
+	
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
 								var lastRendered = parent.childNodes[parent.childNodes.length - 1];
@@ -676,21 +703,32 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						// group within a menu
 						if (group.title) {
 							var subMenu = new dijit.Menu();
-							this._render(sortedByPosition[i].children, subMenu, items, handler, renderType, userData); 
-							if (subMenu.getChildren().length > 0) {
-								parent.addChild(new dijit.PopupMenuItem({
-									label: group.title,
-									popup: subMenu
-								}));
-							}
-						} else {
+							// popup menu placeholder must be added synchronously to respect order.
+							// We will remove it if it ends up empty
+							var groupPopup = new dijit.PopupMenuItem({
+								label: group.title,
+								popup: subMenu
+							});
+							parent.addChild(groupPopup);
+							// asynchronously populate the menu
+							window.setTimeout(dojo.hitch(this, function() {
+								commandService._render(childContributions, subMenu, items, handler, renderType, userData); 
+								if (subMenu.getChildren().length === 0) {
+									groupPopup.set("label", "removeme");
+									parent.removeChild(groupPopup);
+									groupPopup.destroyRecursive();
+								}
+							}), 0);
+						} else {  
+							// menu items with leading and trailing separators
 							// don't render a separator if there is nothing preceding, or if the last thing was a separator
 							var menuSep;
 							if (parent.getChildren().length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								menuSep = new dijit.MenuSeparator();
 								parent.addChild(menuSep);
 							}
-							this._render(sortedByPosition[i].children, parent, items, handler, renderType, userData); 
+							// synchronously render the children since order matters
+							commandService._render(childContributions, parent, items, handler, renderType, userData); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -898,7 +936,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					this._addAccessibleLabel(element);
 				}
 				this._hookCallback(element, context);
-				this._setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			
+				_setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			
 
 			}
 			context.domNode = element;
@@ -943,7 +981,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					// ensure there is accessible text describing this image
 					this._addAccessibleLabel(element);
 				}
-				this._setupActivateVisuals(element, element, overClass);			
+				_setupActivateVisuals(element, element, overClass);			
 			}
 			element.id = name;
 			if (this.tooltip) {
@@ -1069,25 +1107,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 		},
 		
-		/*
-		 * stateless helper
-		 */
-		_setupActivateVisuals: function(domNode, focusNode, overClass) {
-			var makeActive = function() {
-				if (overClass) {
-					dojo.addClass(this, overClass);
-				}
-			};
-			var makeInactive = function() {
-				if (overClass) {
-					dojo.removeClass(this, overClass);
-				}
-			};
-			dojo.connect(domNode, "onmouseover", domNode, makeActive);
-			dojo.connect(focusNode, "onfocus", domNode, makeActive);
-			dojo.connect(domNode, "onmouseout", domNode, makeInactive);
-			dojo.connect(focusNode, "onblur", domNode, makeInactive);
-		},
 		/**
 		 * Populate the specified menu with choices using the choiceCallback.
 		 * Used internally by the command service.  Not intended to be overridden or called

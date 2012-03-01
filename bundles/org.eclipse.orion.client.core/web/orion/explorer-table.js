@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number', 'dijit/form/DropDownButton'],
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
 		function(require, dojo, dijit, mUtil, mExplorer, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**
@@ -163,21 +163,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=372182
-			// use a timeout so rendering is non-blocking.  
-			// TOTAL HACK...insert a temporary drop down button to get the layout the same, then remove it when
-			// we have the real menu.
-			var menuButton = new dijit.form.DropDownButton({
-				label: "Actions",
-				showLabel:  false
-			});
-			dojo.addClass(menuButton.domNode, "commandMenu textless");
-			dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-			dojo.place(menuButton.domNode, span, "last");
-			window.setTimeout(dojo.hitch(this, function() {
-				menuButton.destroyRecursive();
-				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
-			}), 0);
+			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
