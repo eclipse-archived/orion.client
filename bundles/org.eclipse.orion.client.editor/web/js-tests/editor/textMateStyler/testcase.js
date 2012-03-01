@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,8 +12,8 @@
 /*jslint laxbreak:true regexp:false*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMateStyler", "./testGrammars"],
-		function(dojo, assert, mTextView, mTextMateStyler, mTestGrammars) {
+define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler", "./testGrammars"],
+		function(dojo, assert, mMockTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
 	// TODO: run tests with both Windows and Linux delimiters since a few cases have failed with
@@ -27,7 +27,8 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	function makeTest(testBody, doTearDown) {
 		function createTextView() {
 			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"], sync: true};
-			return new mTextView.TextView(options);
+			//return new mTextView.TextView(options);
+			return new mMockTextView.MockTextView(options);
 		}
 		
 		/** Called after each test to remove view from DOM */
@@ -141,7 +142,6 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	
 	/**
 	 * Fails if the currently-displayed styles for the line at <tt>lineIndex</tt> don't match the expected <tt>scopeRegions</tt>.
-	 * WARNING: uses internal methods of TextView, may break
 	 * @param {Array} scopeRegions Each element of scopeRegions is an Array with the elements:
 	 *   [0] {Number} start Line-relative index
 	 *   [1] {Number} end Line-relative index
@@ -150,24 +150,22 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	 */
 	function assertLineScope(view, styler, lineIndex, scopeRegions) {
 		var lineStart = view.getModel().getLineStart(lineIndex);
-		var lineNode = view._getLineNode(lineIndex),
-		    spans = lineNode.childNodes,
-		    charNum = 0,
-		    styleRanges = [];
-		for (var i=0; i < spans.length; i++) {
-			var child = spans[i];
-			var ignoreChars = typeof child.ignoreChars === "number" ? child.ignoreChars : 0;
-			var length = child.textContent.length - ignoreChars;
-			var styleClass = child.className;
-			if (length > 0 /*omit ignored*/ && styleClass !== "" /*omit unstyled*/) {
-				styleRanges.push({
-					start: lineStart + charNum,
-					end: lineStart + charNum + length,
-					style: { styleClass: styleClass }
-				});
-			}
-			charNum += length;
-		}
+		var lineStyle = view._getLineStyle(lineIndex);
+		var styleRanges = (lineStyle && lineStyle.ranges) || [];
+//		for (var i=0; i < ranges.length; i++) {
+//			var child = ranges[i];
+//			var ignoreChars = typeof child.ignoreChars === "number" ? child.ignoreChars : 0;
+//			var length = child.textContent.length - ignoreChars;
+//			var styleClass = child.className;
+//			if (length > 0 /*omit ignored*/ && styleClass !== "" /*omit unstyled*/) {
+//				styleRanges.push({
+//					start: lineStart + charNum,
+//					end: lineStart + charNum + length,
+//					style: { styleClass: styleClass }
+//				});
+//			}
+//			charNum += length;
+//		}
 		assertStylesMatchScopes(view, styler, lineIndex, styleRanges, scopeRegions);
 	}
 	

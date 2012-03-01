@@ -101,6 +101,7 @@ OrionTestCase("preferences", "/js-tests/preferences/test.html");
 OrionTestCase("pluginRegistry", "/js-tests/pluginRegistry/test.html");
 OrionTestCase("testRunAsynch", "/js-tests/testRunAsynch/test.html");
 OrionTestCase("editor", "/js-tests/editor/test.html");
+OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/textview/test.html");
 OrionTestCase("jsContentAssist", "/js-tests/jsContentAssist/test.html");
 OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
