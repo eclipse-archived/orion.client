@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others. 
+ * Copyright (c) 2011, 2012 IBM Corporation and others. 
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/git/git-clones-explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
+define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
 
 /**
 * @param options {{
