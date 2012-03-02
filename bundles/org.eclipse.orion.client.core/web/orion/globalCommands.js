@@ -188,7 +188,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			toolbar = dojo.byId("pageNavigationActions");
 			if (toolbar) {	
 				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar.id, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text
+				commandService.renderCommands(toolbar.id, toolbar, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text
 			}
 		}
 	}

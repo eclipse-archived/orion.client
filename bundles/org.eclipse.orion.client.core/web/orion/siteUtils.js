@@ -103,7 +103,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				return item.HostingStatus;
 			},
 			hrefCallback: function(data) { return generateEditSiteHref(data.items);}});
-		commandService.addCommand(editCommand, "object");
+		commandService.addCommand(editCommand);
 		
 		var startCommand = new mCommands.Command({
 			name: "Start",
@@ -121,8 +121,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
 				progressService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
 			}});
-		commandService.addCommand(startCommand, "object");
-		commandService.addCommand(startCommand, "dom");
+		commandService.addCommand(startCommand);
 		
 		var stopCommand = new mCommands.Command({
 			name: "Stop",
@@ -140,8 +139,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
 				progressService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
 			}});
-		commandService.addCommand(stopCommand, "object");
-		commandService.addCommand(stopCommand, "dom");
+		commandService.addCommand(stopCommand);
 		
 		var deleteCommand = new mCommands.Command({
 			name: "Delete",
@@ -159,7 +157,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 						}
 					});
 			}});
-		commandService.addCommand(deleteCommand, "object");
+		commandService.addCommand(deleteCommand);
 	}
 
 	var siteUtils = {};

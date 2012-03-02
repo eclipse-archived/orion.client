@@ -505,6 +505,9 @@ exports.ExplorerRenderer = (function() {
 				if (options.decorateAlternatingLines === false) {
 					this._decorateAlternatingLines = false;
 				}
+				if (!this.actionScopeId) {
+					this.actionScopeId = options.actionScopeId;
+				}
 			}
 		},
 		

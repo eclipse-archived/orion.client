@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010,2011 IBM Corporation and others.
+ * Copyright (c) 2010,2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -580,21 +580,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				}
 				return;
 			} 
-			this._render(this._contributionsByDomNode[scopeId], parent, items, handler, renderType, userData);
-			// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-			if (renderType === "tool" || renderType === "button") {
-				if (this._isLastChildSeparator(parent, renderType)) {
-					parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
+			var contributions = this._contributionsByDomNode[scopeId];
+			if (contributions) {
+				this._render(this._contributionsByDomNode[scopeId], parent, items, handler, renderType, userData);
+				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
+				if (renderType === "tool" || renderType === "button") {
+					if (this._isLastChildSeparator(parent, renderType)) {
+						parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
+					}
+				} else if (renderType=== "menu") {
+					if (this._isLastChildSeparator(parent, renderType)) {
+						var child = parent.getChildren()[parent.getChildren().length-1];
+						parent.removeChild(child);
+						child.destroy();
+					}
 				}
-			} else if (renderType=== "menu") {
-				if (this._isLastChildSeparator(parent, renderType)) {
-					var child = parent.getChildren()[parent.getChildren().length-1];
-					parent.removeChild(child);
-					child.destroy();
-				}
+				// TODO should the caller have to do this?
+				mUtil.forceLayout(parent);
 			}
-			// TODO should the caller have to do this?
-			mUtil.forceLayout(parent);
 		},
 		
 		_render: function(contributions, parent, items, handler, renderType, userData) {

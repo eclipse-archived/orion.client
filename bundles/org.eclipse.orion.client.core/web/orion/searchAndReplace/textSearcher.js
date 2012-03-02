@@ -279,18 +279,18 @@ orion.TextSearcher = (function() {
 				}
 			});
 
-			this._commandService.addCommand(findNextCommand, "dom");
-			this._commandService.addCommand(findPrevCommand, "dom");
-			this._commandService.addCommand(replaceCommand, "dom");
-			this._commandService.addCommand(replaceAllCommand, "dom");
+			this._commandService.addCommand(findNextCommand);
+			this._commandService.addCommand(findPrevCommand);
+			this._commandService.addCommand(replaceCommand);
+			this._commandService.addCommand(replaceAllCommand);
 
 			// Register command contributions
-			this._commandService.registerCommandContribution("orion.search.findNext", 1, "localSearchFindCommands");
-			this._commandService.registerCommandContribution("orion.search.findPrev", 2, "localSearchFindCommands");
-			this._commandService.registerCommandContribution("orion.search.replace", 1, "localSearchReplaceCommands");
-			this._commandService.registerCommandContribution("orion.search.replaceAll", 2, "localSearchReplaceCommands");
-			this._commandService.renderCommands("localSearchFindCommands", "dom", that, that, "button");
-			this._commandService.renderCommands("localSearchReplaceCommands", "dom", that, that, "button");
+			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findNext", 1);
+			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findPrev", 2);
+			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replace", 1);
+			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replaceAll", 2);
+			this._commandService.renderCommands("localSearchFindCommands", "localSearchFindCommands", that, that, "button");
+			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchFindCommands", that, that, "button");
 		},
 
 		/**

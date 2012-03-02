@@ -48,8 +48,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					}
 				})
 			});
-			this.commandService.addCommand(installPluginCommand, "dom");
-			this.commandService.registerCommandContribution("orion.installPlugin", 1, this.toolbarID, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url"));
+			this.commandService.addCommand(installPluginCommand);
+			this.commandService.registerCommandContribution(this.toolbarID, "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url"));
 			var reloadAllPluginsCommand = new mCommands.Command({
 				name: "Reload all",
 				tooltip: "Reload all installed plugins",
@@ -58,11 +58,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					this.reloadPlugins();
 				})
 			});
-			this.commandService.addCommand(reloadAllPluginsCommand, "dom");
+			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar and render them.  Rendering is normally done by our outer page, but since
 			// we might have been created after the page first loaded, we have to do this ourselves.
-			this.commandService.registerCommandContribution("orion.reloadAllPlugins", 2, this.toolbarID);
-			this.commandService.renderCommands(this.toolbarID, "dom", this, this, "button");
+			this.commandService.registerCommandContribution(this.toolbarID, "orion.reloadAllPlugins", 2);
+			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button");
 			
 			var reloadPluginCommand = new mCommands.Command({
 				name: "Reload",
@@ -76,8 +76,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					this.reloadPlugin(data.items);
 				})
 			});			
-			this.commandService.addCommand(reloadPluginCommand, "object");
-			this.commandService.registerCommandContribution("orion.reloadPlugin", 1);
+			this.commandService.addCommand(reloadPluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.reloadPlugin", 1);
 
 			// now we register commands that are appropriate at the object (row) level
 			var uninstallPluginCommand = new mCommands.Command({
@@ -92,8 +92,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					this.removePlugin(data.items);
 				})
 			});			
-			this.commandService.addCommand(uninstallPluginCommand, "object");
-			this.commandService.registerCommandContribution("orion.uninstallPlugin", 2);
+			this.commandService.addCommand(uninstallPluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2);
 			this.addRows();
 		},
 		

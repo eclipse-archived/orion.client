@@ -21,7 +21,7 @@ exports.GitRepositoryExplorer = (function() {
 	 * Creates a new Git repository explorer.
 	 * @class Git repository explorerpadd
 	 */
-	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId){
+	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.linkService = linkService;
@@ -30,6 +30,7 @@ exports.GitRepositoryExplorer = (function() {
 		this.parentId = parentId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
+		this.actionScopeId = actionScopeId;
 		this.checkbox = false;
 	}
 	
@@ -353,7 +354,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", repository, this, "tool");
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool");
 	};
 	
 	// Git status
@@ -410,7 +411,7 @@ exports.GitRepositoryExplorer = (function() {
 			+ staged + " file(s) to commit."}, detailsView );
 				
 		var actionsArea = dojo.create( "div", {"id":"statusActionsArea", "class":"git-action-area"}, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", repository, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool");	
 	};
 	
 	// Git branches
@@ -477,13 +478,13 @@ exports.GitRepositoryExplorer = (function() {
 				dojo.style(dojo.byId("branchSectionProgress"), "visibility", "hidden");
 				
 				if (mode !== "full" && branches.length !== 0){
-					that.commandService.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "branchSectionActionsArea");
-					that.commandService.renderCommands(dojo.byId("branchSectionActionsArea"), "dom", 
+					that.commandService.registerCommandContribution("branchSectionActionsArea", "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands("branchSectionActionsArea", dojo.byId("branchSectionActionsArea"),
 						{"ViewAllLink":"/git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all local and remote tracking branches"}, that, "button");
 				}
 				
-				that.commandService.registerCommandContribution("eclipse.addBranch", 2000, "branchSectionActionsArea");
-				that.commandService.renderCommands(dojo.byId("branchSectionActionsArea"), "dom", repository, this, "button");
+				that.commandService.registerCommandContribution("branchSectionActionsArea", "eclipse.addBranch", 2000);
+				that.commandService.renderCommands("branchSectionActionsArea", dojo.byId("branchSectionActionsArea"), repository, this, "button");
 				
 				for(var i=0; i<branches.length;i++){
 					branches[i].ParentLocation = branchLocation;
@@ -518,7 +519,7 @@ exports.GitRepositoryExplorer = (function() {
 			+ " by " + commit.AuthorName}, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", branch, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, branch, this, "tool");	
 	};
 	
 	// Git remote branches
@@ -602,7 +603,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", remoteBranch, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, remoteBranch, this, "tool");	
 	};
 
 	// Git commits
@@ -656,20 +657,20 @@ exports.GitRepositoryExplorer = (function() {
 				
 				dojo.byId("commitSectionTitle").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
 				
-				that.commandService.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "commitSectionActionsArea");
-				that.commandService.renderCommands(dojo.byId("commitSectionActionsArea"), "dom", 
+				that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.repositories.viewAllCommand", 10);
+				that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), 
 					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "button");
 						
 				if (tracksRemoteBranch){
-					that.commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "commitSectionActionsArea");
-					that.commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "commitSectionActionsArea");
-					that.commandService.registerCommandContribution("eclipse.orion.git.rebase", 100, "commitSectionActionsArea");
-					that.commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 100, "commitSectionActionsArea");
-					that.commandService.renderCommands(dojo.byId("commitSectionActionsArea"), "dom", currentBranch.RemoteLocation[0].Children[0], that, "button"); 
+					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.fetch", 100);
+					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.merge", 100);
+					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.rebase", 100);
+					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.resetIndex", 100);
+					that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), currentBranch.RemoteLocation[0].Children[0], that, "button"); 
 				};
 				
-				that.commandService.registerCommandContribution("eclipse.orion.git.push", 100, "commitSectionActionsArea");
-				that.commandService.renderCommands(dojo.byId("commitSectionActionsArea"), "dom", currentBranch, that, "button"); 
+				that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.push", 100);
+				that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), currentBranch, that, "button"); 
 				
 				if (currentBranch.RemoteLocation[0] == null){
 					dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
@@ -798,7 +799,7 @@ exports.GitRepositoryExplorer = (function() {
 			+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", commit, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	
 	};
 
 	// Git tags
@@ -854,8 +855,8 @@ exports.GitRepositoryExplorer = (function() {
 				dojo.style(dojo.byId("tagSectionProgress"), "visibility", "hidden");
 				
 				if (mode !== "full" && tags.length !== 0){
-					that.commandService.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "viewAllTagSectionActionsArea");
-					that.commandService.renderCommands(dojo.byId("viewAllTagSectionActionsArea"), "dom", 
+					that.commandService.registerCommandContribution("viewAllTagSectionActionsArea", "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands("viewAllTagSectionActionsArea", dojo.byId("viewAllTagSectionActionsArea"),
 						{"ViewAllLink":"/git/git-repository.html#" + tagLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all tags"}, that, "button");
 				}
 
@@ -931,7 +932,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 
 		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", tag, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool");	
 	};
 	
 	// Git Remotes
@@ -966,8 +967,8 @@ exports.GitRepositoryExplorer = (function() {
 	
 		dojo.place( slideout, titleWrapper );
 		
-		this.commandService.registerCommandContribution("eclipse.addRemote", 2000, "remoteSectionActionsArea");
-		this.commandService.renderCommands(dojo.byId("remoteSectionActionsArea"), "dom", repository, this, "button");
+		this.commandService.registerCommandContribution("remoteSectionActionsArea", "eclipse.addRemote", 2000);
+		this.commandService.renderCommands("remoteSectionActionsArea", dojo.byId("remoteSectionActionsArea"), repository, this, "button");
 		
 		var content =	
 			'<div class="git-table">' +
@@ -1009,7 +1010,7 @@ exports.GitRepositoryExplorer = (function() {
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: remote.GitUrl}, detailsView );
 
 		var actionsArea = dojo.create( "div", {"id":"remoteActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", remote, this, "tool");	
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, remote, this, "tool");	
 
 	};
 	
@@ -1058,14 +1059,14 @@ exports.GitRepositoryExplorer = (function() {
 				var configurationEntries = resp.Children;
 				
 				if (mode !== "full" && configurationEntries.length !== 0){
-					that.commandService.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10, "viewAllConfigSectionActionsArea");
-					that.commandService.renderCommands(dojo.byId("viewAllConfigSectionActionsArea"), "dom", 
+					that.commandService.registerCommandContribution("viewAllConfigSectionActionsArea", "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands("viewAllConfigSectionActionsArea", dojo.byId("viewAllConfigSectionActionsArea"),
 						{"ViewAllLink":"/git/git-repository.html#" + configLocation, "ViewAllLabel":"View All", "ViewAllTooltip":"View all configuration entries"}, that, "button");
 				}
 				
 				if (mode === "full"){
-					that.commandService.registerCommandContribution("eclipse.orion.git.addConfigEntryCommand", 1000, "configSectionActionsArea");
-					that.commandService.renderCommands(dojo.byId("configSectionActionsArea"), "dom", repository, this, "button");
+					that.commandService.registerCommandContribution("configSectionActionsArea", "eclipse.orion.git.addConfigEntryCommand", 1000);
+					that.commandService.renderCommands("configSectionActionsArea", dojo.byId("configSectionActionsArea"), repository, this, "button");
 				}
 				
 				if (configurationEntries.length === 0){
@@ -1092,7 +1093,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "span", { "class":"gitSecondaryDescription", "style":"margin-left:20px", innerHTML: configEntry.Value}, detailsView );
 
 		var actionsArea = dojo.create( "div", {"id":"configActionsArea", "class":"git-action-area" }, horizontalBox );
-		this.commandService.renderCommands(actionsArea, "object", configEntry, this, "tool");
+		this.commandService.renderCommands(this.actionScopeId, actionsArea, configEntry, this, "tool");
 
 	};
 	

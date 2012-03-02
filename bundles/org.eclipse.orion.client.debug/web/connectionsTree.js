@@ -81,7 +81,7 @@ define(['require', 'dojo'], function(require, dojo) {
 						{id: tableRow.id + "actionswrapper"},
 						actionColumn,
 						"only");
-					this._commandService.renderCommands(actionsWrapper, "object", item, {}, "button");	
+					this._commandService.renderCommands("connectionCommands", actionsWrapper, item, {}, "button");	
 				}
 				dojo.place(labelColumn, tableRow, "last");
 				dojo.place(actionColumn, tableRow, "last");
