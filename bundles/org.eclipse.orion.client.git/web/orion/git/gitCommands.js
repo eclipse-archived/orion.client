@@ -11,8 +11,7 @@
 
 /*global window widgets eclipse:true serviceRegistry define */
 /*browser:true*/
-define(['require', 'dojo', 'orion/commands', 'orion/util',
-        'orion/git/widgets/CloneGitRepositoryDialog', 'orion/git/widgets/InitGitRepositoryDialog', 
+define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog'], 
         function(require, dojo, mCommands, mUtil) {
