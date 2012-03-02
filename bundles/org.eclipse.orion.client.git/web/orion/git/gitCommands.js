@@ -33,13 +33,13 @@ var exports = {};
 			throw "could not find toolbar " + toolbarId;
 		}
 		var commandService = registry.getService("orion.page.command");
-		commandService.renderCommands(toolbar, "dom", item, explorer, "button"); 
+		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); 
 		
 		if (pageNavId) {
 			var pageNav = dojo.byId(pageNavId);
 			if (pageNav) {
 				dojo.empty(pageNav);
-				commandService.renderCommands(pageNav, "dom", item, explorer, "button", true);  
+				commandService.renderCommands(pageNavId, pageNav, item, explorer, "button", true);  
 			}
 		}
 		
@@ -47,7 +47,7 @@ var exports = {};
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
 				dojo.empty(selectionToolbarId);
-				commandService.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); 
 			}
 		}
 
@@ -58,7 +58,7 @@ var exports = {};
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionTools, "dom", selections, explorer, "button");
+					commandService.renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button");
 				}
 			});
 		}
@@ -370,7 +370,7 @@ var exports = {};
 				return false;
 				}
 			});
-		commandService.addCommand(linkRepoCommand, "object");
+		commandService.addCommand(linkRepoCommand);
 
 		var checkoutTagCommand = new mCommands.Command({
 			name: "Checkout",
@@ -414,7 +414,7 @@ var exports = {};
 				return item.Type === "Tag";
 			}
 		});
-		commandService.addCommand(checkoutTagCommand, "object");
+		commandService.addCommand(checkoutTagCommand);
 
 		var checkoutBranchCommand = new mCommands.Command({
 			name: "Checkout",
@@ -462,7 +462,7 @@ var exports = {};
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
 			}
 		});
-		commandService.addCommand(checkoutBranchCommand, "object");
+		commandService.addCommand(checkoutBranchCommand);
 
 		var branchNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
 
@@ -503,8 +503,7 @@ var exports = {};
 				return (item.GroupNode && item.Name === "Branches") || (item.Type === "Clone" && explorer.parentId === "artifacts");
 			}
 		});
-		commandService.addCommand(addBranchCommand, "object");
-		commandService.addCommand(addBranchCommand, "dom");
+		commandService.addCommand(addBranchCommand);
 
 		var removeBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Branch"
@@ -526,7 +525,7 @@ var exports = {};
 				return item.Type === "Branch" && !item.Current;
 			}
 		});
-		commandService.addCommand(removeBranchCommand, "object");
+		commandService.addCommand(removeBranchCommand);
 
 		var removeRemoteBranchCommand = new mCommands.Command({
 			name: "Delete", // "Delete Remote Branch",
@@ -556,7 +555,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch";
 			}
 		});
-		commandService.addCommand(removeRemoteBranchCommand, "object");
+		commandService.addCommand(removeRemoteBranchCommand);
 
 		var addRemoteParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:'), 
 		                                                               new mCommands.CommandParameter('url', 'url', 'Url:')], false);
@@ -600,8 +599,7 @@ var exports = {};
 				return (item.GroupNode && item.Name === "Remotes") ||  (item.Type === "Clone" && explorer.parentId === "artifacts");
 			}
 		});
-		commandService.addCommand(addRemoteCommand, "object");
-		commandService.addCommand(addRemoteCommand, "dom");
+		commandService.addCommand(addRemoteCommand);
 
 		var removeRemoteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Remote",
@@ -620,7 +618,7 @@ var exports = {};
 				return item.Type === "Remote";
 			}
 		});
-		commandService.addCommand(removeRemoteCommand, "object");
+		commandService.addCommand(removeRemoteCommand);
 
 		var pullCommand = new mCommands.Command({
 			name : "Pull",
@@ -675,7 +673,7 @@ var exports = {};
 				return item.Type === "Clone";
 			}
 		});
-		commandService.addCommand(pullCommand, "object");
+		commandService.addCommand(pullCommand);
 
 		var openGitLog = new mCommands.Command({
 			name : "Git Log",
@@ -693,7 +691,7 @@ var exports = {};
 				return item.Type === "Branch" || item.Type === "RemoteTrackingBranch";
 			}
 		});
-		commandService.addCommand(openGitLog, "object");
+		commandService.addCommand(openGitLog);
 
 		var openGitLogAll = new mCommands.Command({
 			name : "Git Log",
@@ -711,7 +709,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(openGitLogAll, "object");
+		commandService.addCommand(openGitLogAll);
 
 		var openGitStatus = new mCommands.Command({
 			name : "Git Status",
@@ -728,7 +726,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(openGitStatus, "object");
+		commandService.addCommand(openGitStatus);
 
 		var openCloneContent = new mCommands.Command({
 			name : "Show in Navigator",
@@ -743,7 +741,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(openCloneContent, "object");
+		commandService.addCommand(openCloneContent);
 
 		var compareGitCommits = new mCommands.Command({
 			name : "Compare With Each Other",
@@ -766,7 +764,7 @@ var exports = {};
 				return false;
 			}
 		});
-		commandService.addCommand(compareGitCommits, "dom");
+		commandService.addCommand(compareGitCommits);
 
 		var compareWithWorkingTree = new mCommands.Command({
 			name : "Compare With Working Tree",
@@ -780,7 +778,7 @@ var exports = {};
 				return item.Type === "Commit" && !explorer.isDirectory;
 			}
 		});
-		commandService.addCommand(compareWithWorkingTree, "object");
+		commandService.addCommand(compareWithWorkingTree);
 
 		var openGitCommit = new mCommands.Command({
 			name : "Open",
@@ -792,7 +790,7 @@ var exports = {};
 				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory;
 			}
 		});
-		commandService.addCommand(openGitCommit, "object");
+		commandService.addCommand(openGitCommit);
 
 		var fetchCommand = new mCommands.Command({
 			name: "Fetch",
@@ -875,8 +873,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
 			}
 		});
-		commandService.addCommand(fetchCommand, "dom");
-		commandService.addCommand(fetchCommand, "object");
+		commandService.addCommand(fetchCommand);
 
 		var fetchForceCommand = new mCommands.Command({
 			name : "Force Fetch",
@@ -960,8 +957,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
 			}
 		});
-		commandService.addCommand(fetchForceCommand, "dom");
-		commandService.addCommand(fetchForceCommand, "object");
+		commandService.addCommand(fetchForceCommand);
 
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
@@ -1026,8 +1022,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-		commandService.addCommand(mergeCommand, "dom");
-		commandService.addCommand(mergeCommand, "object");
+		commandService.addCommand(mergeCommand);
 
 		var rebaseCommand = new mCommands.Command({
 			name : "Rebase",
@@ -1105,8 +1100,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-		commandService.addCommand(rebaseCommand, "dom");
-		commandService.addCommand(rebaseCommand, "object");
+		commandService.addCommand(rebaseCommand);
 
 		var pushCommand = new mCommands.Command({
 			name : "Push All",
@@ -1242,8 +1236,7 @@ var exports = {};
 					return item.Type === "Branch" && item.Current && item.RemoteLocation;
 			}
 		});
-		commandService.addCommand(pushCommand, "dom");
-		commandService.addCommand(pushCommand, "object");
+		commandService.addCommand(pushCommand);
 
 		var pushForceCommand = new mCommands.Command({
 			name : "Force Push All",
@@ -1378,8 +1371,7 @@ var exports = {};
 					return item.RepositoryPath === "" && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation;
 			}
 		});
-		commandService.addCommand(pushForceCommand, "dom");
-		commandService.addCommand(pushForceCommand, "object");
+		commandService.addCommand(pushForceCommand);
 
 		var switchToRemote = new mCommands.Command({
 			name : "Switch to Remote",
@@ -1392,7 +1384,7 @@ var exports = {};
 				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation && item.toRef.RemoteLocation.length===1 && item.toRef.RemoteLocation[0].Children.length===1;
 			}
 		});
-		commandService.addCommand(switchToRemote, "dom");
+		commandService.addCommand(switchToRemote);
 
 		var previousLogPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -1408,7 +1400,7 @@ var exports = {};
 				return false;
 			}
 		});
-		commandService.addCommand(previousLogPage, "dom");
+		commandService.addCommand(previousLogPage);
 
 		var nextLogPage = new mCommands.Command({
 			name : "Next Page >",
@@ -1424,7 +1416,7 @@ var exports = {};
 				return false;
 			}
 		});
-		commandService.addCommand(nextLogPage, "dom");
+		commandService.addCommand(nextLogPage);
 
 		var switchToCurrentLocal = new mCommands.Command({
 			name : "Switch to Active Local",
@@ -1475,7 +1467,7 @@ var exports = {};
 				return false;
 			}
 		});
-		commandService.addCommand(switchToCurrentLocal, "dom");
+		commandService.addCommand(switchToCurrentLocal);
 
 		var pushToCommand = new mCommands.Command({
 			name : "Push to...",
@@ -1511,8 +1503,7 @@ var exports = {};
 				return false && item.Type === "Branch" && item.Current; //TODO when committing to anothe branch is ready remofe "false &&"
 			}
 		});
-		commandService.addCommand(pushToCommand, "dom");
-		commandService.addCommand(pushToCommand, "object");
+		commandService.addCommand(pushToCommand);
 
 		var resetIndexCommand = new mCommands.Command({
 			name : "Reset",
@@ -1549,7 +1540,7 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch";
 			}
 		});
-		commandService.addCommand(resetIndexCommand, "object");
+		commandService.addCommand(resetIndexCommand);
 
 		var tagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
 
@@ -1586,8 +1577,7 @@ var exports = {};
 				return item.Type === "Commit";
 			}
 		});
-		commandService.addCommand(addTagCommand, "object");
-		commandService.addCommand(addTagCommand, "dom");
+		commandService.addCommand(addTagCommand);
 
 		var removeTagCommand = new mCommands.Command({
 			name: "Delete",
@@ -1606,7 +1596,7 @@ var exports = {};
 				return item.Type === "Tag";
 			}
 		});
-		commandService.addCommand(removeTagCommand, "object");
+		commandService.addCommand(removeTagCommand);
 
 		var cherryPickCommand = new mCommands.Command({
 			name : "Cherry-Pick",
@@ -1696,8 +1686,7 @@ var exports = {};
 				return item.Type === "Commit";
 			}
 		});
-		commandService.addCommand(cherryPickCommand, "object");
-		commandService.addCommand(cherryPickCommand, "dom");
+		commandService.addCommand(cherryPickCommand);
 	};
 
 	exports.createStatusCommands = function(serviceRegistry, commandService, refreshStatusCallBack, cmdBaseNumber, navigator) {
@@ -1781,9 +1770,8 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch";
 			}
 		});
-		commandService.addCommand(fetchCommand, "object");
-		commandService.addCommand(fetchCommand, "dom");
-		commandService.registerCommandContribution("eclipse.orion.git.fetch", cmdBaseNumber+1);	
+		commandService.addCommand(fetchCommand);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetch", cmdBaseNumber+1);	
 
 		var mergeCommand = new mCommands.Command({
 			name : "Merge",
@@ -1841,9 +1829,8 @@ var exports = {};
 				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
 			}
 		});
-		commandService.addCommand(mergeCommand, "object");
-		commandService.addCommand(mergeCommand, "dom");
-		commandService.registerCommandContribution("eclipse.orion.git.merge", cmdBaseNumber+2);	
+		commandService.addCommand(mergeCommand);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.merge", cmdBaseNumber+2);	
 
 		var pushCommand = new mCommands.Command({
 			name : "Push",
@@ -1914,9 +1901,8 @@ var exports = {};
 				return item.Type === "LocalBranch" ;
 			}
 		});
-		commandService.addCommand(pushCommand, "object");
-		commandService.addCommand(pushCommand, "dom");
-		commandService.registerCommandContribution("eclipse.orion.git.push", cmdBaseNumber+3);
+		commandService.addCommand(pushCommand);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.push", cmdBaseNumber+3);
 	};
 
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
@@ -1964,7 +1950,7 @@ var exports = {};
 				}
 			}
 		});
-		commandService.addCommand(addConfigEntryCommand, "dom");
+		commandService.addCommand(addConfigEntryCommand);
 		
 		var editConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('value', 'text', 'Value:')], false);
 		
@@ -1989,7 +1975,7 @@ var exports = {};
 				return (item.Key && item.Value && item.Location);
 			}
 		});
-		commandService.addCommand(editConfigEntryCommand, "object");
+		commandService.addCommand(editConfigEntryCommand);
 		
 		var deleteConfigEntryCommand = new mCommands.Command({
 			name: "Delete",
@@ -2011,7 +1997,7 @@ var exports = {};
 				return (item.Key && item.Value && item.Location);
 			}
 		});
-		commandService.addCommand(deleteConfigEntryCommand, "object");
+		commandService.addCommand(deleteConfigEntryCommand);
 		
 		//
 		
@@ -2069,7 +2055,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(cloneGitRepositoryCommand, "dom");
+		commandService.addCommand(cloneGitRepositoryCommand);
 
 		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", "New folder:")], true);
 		
@@ -2113,7 +2099,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(initGitRepositoryCommand, "dom");
+		commandService.addCommand(initGitRepositoryCommand);
 
 		var deleteCommand = new mCommands.Command({
 			name: "Delete", // "Delete Repository"
@@ -2161,8 +2147,7 @@ var exports = {};
 				
 			}
 		});
-		commandService.addCommand(deleteCommand, "object");
-		commandService.addCommand(deleteCommand, "dom");
+		commandService.addCommand(deleteCommand);
 
 		var applyPatchCommand = new mCommands.Command({
 			name : "Apply Patch",
@@ -2183,7 +2168,7 @@ var exports = {};
 				return item.Type === "Clone" ;
 			}
 		});
-		commandService.addCommand(applyPatchCommand, "object");
+		commandService.addCommand(applyPatchCommand);
 		
 		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", "Commit name:")], true);
 		
@@ -2259,7 +2244,7 @@ var exports = {};
 				return item.Type === "Clone" || item.CloneLocation || (item.length > 1 && item[0].Type === "Clone") ;
 			}
 		});
-		commandService.addCommand(openCommitCommand, "dom");
+		commandService.addCommand(openCommitCommand);
 
 		var mapToGithubCommand = new mCommands.Command({
 			name : "Show in GitHub",
@@ -2277,7 +2262,7 @@ var exports = {};
 				return item.GitUrl && /github\.com.*\.git/.exec(item.GitUrl);
 			}
 		});
-		commandService.addCommand(mapToGithubCommand, "dom");
+		commandService.addCommand(mapToGithubCommand);
 
 		var mapToEclipseOrgCommand = new mCommands.Command({
 			name : "Show in eclipse.org",
@@ -2295,7 +2280,7 @@ var exports = {};
 				return item.GitUrl && item.GitUrl.indexOf("git.eclipse.org/gitroot") > -1;
 			}
 		});
-		commandService.addCommand(mapToEclipseOrgCommand, "dom");
+		commandService.addCommand(mapToEclipseOrgCommand);
 	};
 }());
 return exports;	

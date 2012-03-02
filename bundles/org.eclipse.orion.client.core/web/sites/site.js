@@ -100,10 +100,10 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			
 			mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService, 
 					/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
-			commandService.registerCommandContribution("eclipse.site.start", 1, "pageActions");
-			commandService.registerCommandContribution("eclipse.site.stop", 2, "pageActions");
-			commandService.registerCommandContribution("eclipse.site.convert", 3, "pageActions");
-			commandService.registerCommandContribution("eclipse.site.save", 4, "pageActions");
+			commandService.registerCommandContribution("pageActions", "eclipse.site.start", 1);
+			commandService.registerCommandContribution("pageActions", "eclipse.site.stop", 2);
+			commandService.registerCommandContribution("pageActions", "eclipse.site.convert", 3);
+			commandService.registerCommandContribution("pageActions", "eclipse.site.save", 4);
 		});
 	});
 });

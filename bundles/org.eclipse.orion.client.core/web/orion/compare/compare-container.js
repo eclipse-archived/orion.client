@@ -500,17 +500,17 @@ exports.TwoWayCompareContainer = (function() {
 			callback : function() {
 				that.copyToLeft();;
 			}});
-		this._commandService.addCommand(prevDiffCommand, "dom");
-		this._commandService.addCommand(nextDiffCommand, "dom");
-		this._commandService.addCommand(copyToLeftCommand, "dom");
+		this._commandService.addCommand(prevDiffCommand);
+		this._commandService.addCommand(nextDiffCommand);
+		this._commandService.addCommand(copyToLeftCommand);
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.compare.prevDiff", 3, commandSpanId);
-		this._commandService.registerCommandContribution("orion.compare.nextDiff", 2, commandSpanId);
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 3);
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 2);
 		if (!this._readonly) {
-			this._commandService.registerCommandContribution("orion.compare.copyToLeft", 1, commandSpanId);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 1);
 		}
-		this._commandService.renderCommands(commandSpanId, "dom", that, that, "button");
+		this._commandService.renderCommands(commandSpanId, commandSpanId, that, that, "button");
 	};
 	
 	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap, onScroll, onLoad){	
@@ -711,7 +711,7 @@ exports.InlineCompareContainer = (function() {
 				dojo.style("fileNameInViewer", "color", "#6d6d6d");
 				that._statusService.setProgressMessage("");
 				dojo.empty("compare_rightContainerCommands");
-				that._commandService.renderCommands("compare_rightContainerCommands", "dom", that, that, "button");
+				that._commandService.renderCommands("compare_rightContainerCommands", "compare_rightContainerCommands", that, that, "button");
 			};
 		}
 		

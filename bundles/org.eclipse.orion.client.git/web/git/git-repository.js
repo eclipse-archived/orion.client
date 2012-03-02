@@ -40,7 +40,7 @@ mBootstrap.startup().then(function(core) {
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
-	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
+	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands");
 	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 	
 	// define commands
@@ -48,30 +48,30 @@ mBootstrap.startup().then(function(core) {
 	mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
 
 	// define the command contributions - where things appear, first the groups
-	commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
-	commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup", false, null, new mCommands.URLBinding("cloneGitRepository", "url"));
-	commandService.registerCommandContribution("eclipse.initGitRepository", 101, "pageActions", "eclipse.gitGroup");
-	commandService.registerCommandContribution("eclipse.orion.git.openCommitCommand", 102, "pageActions", "eclipse.gitGroup", true, 
+	commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
+	commandService.registerCommandContribution("pageActions", "eclipse.cloneGitRepository", 100, "eclipse.gitGroup", false, null, new mCommands.URLBinding("cloneGitRepository", "url"));
+	commandService.registerCommandContribution("pageActions", "eclipse.initGitRepository", 101, "eclipse.gitGroup");
+	commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, 
 		new mCommands.CommandKeyBinding('h', true, true), new mCommands.URLBinding("openGitCommit", "commitName"));
 	
 	// object contributions
-	commandService.registerCommandContribution("eclipse.openCloneContent", 100);
-	commandService.registerCommandContribution("eclipse.openGitStatus", 100);
-	commandService.registerCommandContribution("eclipse.openGitLog", 100);
-	commandService.registerCommandContribution("eclipse.orion.git.pull", 1000);
-	commandService.registerCommandContribution("eclipse.removeBranch", 1000);
-	commandService.registerCommandContribution("eclipse.checkoutTag", 1000);
-	commandService.registerCommandContribution("eclipse.removeTag", 1000);
-	commandService.registerCommandContribution("eclipse.checkoutBranch", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.applyPatch", 1000);
-	commandService.registerCommandContribution("eclipse.git.deleteClone", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.fetch", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.merge", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.rebase", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.resetIndex", 1000);
-	commandService.registerCommandContribution("eclipse.removeRemote", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.deleteConfigEntryCommand", 1000);
-	commandService.registerCommandContribution("eclipse.orion.git.editConfigEntryCommand", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.openGitStatus", 100);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.openGitLog", 100);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.pull", 200);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeBranch", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.checkoutTag", 200);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.checkoutBranch", 200);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.applyPatch", 300);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.git.deleteClone", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.fetch", 500);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.merge", 600);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.rebase", 700);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.resetIndex", 800);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeRemote", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000);
+	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 200);
 	
 	// add commands specific for the page	
 	var viewAllCommand = new mCommands.Command({
@@ -87,7 +87,7 @@ mBootstrap.startup().then(function(core) {
 			return item.ViewAllLabel && item.ViewAllTooltip && item.ViewAllLink;
 		}
 	});
-	commandService.addCommand(viewAllCommand, "dom");
+	commandService.addCommand(viewAllCommand);
 		
 	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 	commandService.processURL(window.location.href);

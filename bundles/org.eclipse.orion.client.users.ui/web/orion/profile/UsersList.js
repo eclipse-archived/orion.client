@@ -16,16 +16,17 @@ var eclipse = eclipse || {};
 
 eclipse.UsersList = (function(){
 	
-	function UsersList(serviceRegistry, selection, searcher, parentId, toolbarId, selectionToolsId) {
+	function UsersList(serviceRegistry, selection, searcher, parentId, toolbarId, selectionToolsId, actionScopeId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.searcher = searcher;
 		this.parentId = parentId;
 		this.toolbarId = toolbarId;
 		this.selectionToolsId = selectionToolsId;
+		this.actionScopeId = actionScopeId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.UsersRenderer({checkbox: this.checkbox, cachePrefix: "UsersNavigator"}, this);
+		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, checkbox: this.checkbox, cachePrefix: "UsersNavigator"}, this);
 	};
 	UsersList.prototype = new mExplorer.Explorer();
 	

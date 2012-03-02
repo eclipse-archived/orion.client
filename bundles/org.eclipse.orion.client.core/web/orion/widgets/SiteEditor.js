@@ -107,10 +107,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					return true;
 				},
 				choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, projects)});
-			this._commandService.addCommand(addMappingCommand, "dom");
+			this._commandService.addCommand(addMappingCommand);
 			var toolbarId = this.addMappingToolbar.id;
-			this._commandService.registerCommandContribution("eclipse.site.mappings.add", 1, toolbarId);
-			this._commandService.renderCommands(this.addMappingToolbar, "dom", this.mappings, this, "button");
+			this._commandService.registerCommandContribution(toolbarId, "eclipse.site.mappings.add", 1);
+			this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
 			
 			var convertCommand = new mCommands.Command({
 				name: "Convert to Self-Hosting",
@@ -122,7 +122,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					return !!item.Location && !this.isSelfHosting(projects);
 				}),
 				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
-			this._commandService.addCommand(convertCommand, "dom");
+			this._commandService.addCommand(convertCommand);
 			
 			this._refreshFields();
 		}));
@@ -137,7 +137,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					return !!item.Location /*looks like a site config*/;
 				},
 				callback: dojo.hitch(this, this.onSubmit)});
-		this._commandService.addCommand(saveCommand, "dom");
+		this._commandService.addCommand(saveCommand);
 	},
 	
 	checkOptions: function(options, names) {
@@ -418,7 +418,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		
 		dojo.empty(this._commandsContainer);
-		this._commandService.renderCommands(this._commandsContainer, "dom", this._siteConfiguration, {},
+		this._commandService.renderCommands(this._commandsContainer.id, this._commandsContainer, this._siteConfiguration, {},
 			"button", null, this._siteConfiguration /*userData*/);
 	},
 	

@@ -351,7 +351,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 						dialog.show();
 					}
 				});
-				commandService.addCommand(connectCommand, "dom");
+				commandService.addCommand(connectCommand);
 	
 				var disconnectCommand = new mCommands.Command({
 					name: "Disconnect",
@@ -377,11 +377,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 						}
 					}
 				});
-				commandService.addCommand(disconnectCommand, "object");
+				commandService.addCommand(disconnectCommand);
 	
 				// the following are intentionally commented
-//				commandService.registerCommandContribution("orion.debugConnections.connect", 2, "pageActions");
-//				commandService.registerCommandContribution("orion.debugConnections.disconnect", 1);
+//				commandService.registerCommandContribution("pageActions", "orion.debugConnections.connect", 2);
+//				commandService.registerCommandContribution("connectionCommands", "orion.debugConnections.disconnect", 1);
 				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 				refreshAvailableTabs();
 			});

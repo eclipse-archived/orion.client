@@ -87,18 +87,18 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 						dialog.startup();
 						dialog.show();
 					}});
-				commandService.addCommand(createCommand, "dom");
+				commandService.addCommand(createCommand);
 				
 				// Add commands that deal with individual site configuration (edit, start, stop..)
 				mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService,
 						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 				
 				// Register command contributions
-				commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
-				commandService.registerCommandContribution("eclipse.site.edit", 1);
-				commandService.registerCommandContribution("eclipse.site.start", 2);
-				commandService.registerCommandContribution("eclipse.site.stop", 3);
-				commandService.registerCommandContribution("eclipse.site.delete", 4);
+				commandService.registerCommandContribution("pageActions", "eclipse.sites.create", 1);
+				commandService.registerCommandContribution("siteCommand", "eclipse.site.edit", 1);
+				commandService.registerCommandContribution("siteCommand", "eclipse.site.start", 2);
+				commandService.registerCommandContribution("siteCommand", "eclipse.site.stop", 3);
+				commandService.registerCommandContribution("siteCommand", "eclipse.site.delete", 4);
 				
 				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 			}());

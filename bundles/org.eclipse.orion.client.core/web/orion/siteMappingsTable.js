@@ -143,7 +143,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 		this.renderer = new mSiteMappingsTable.Renderer({
 				checkbox: false, /*TODO make true when we have selection-based commands*/
 				onchange: dojo.hitch(this, this.fieldChanged),
-				siteService: siteService
+				siteService: siteService,
+				actionScopeId: "siteMappingCommand"
 			}, this);
 		this.myTree = null;
 		this.siteConfiguration = siteConfiguration;
@@ -186,8 +187,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.render();
 					this.setDirty(true);
 				})});
-			this.commandService.addCommand(deleteMappingCommand , "object");
-			this.commandService.registerCommandContribution("eclipse.site.mappings.remove", 0);
+			this.commandService.addCommand(deleteMappingCommand);
+			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.remove", 0);
 			
 			var moveUpCommand = new mCommands.Command({
 				name: "Move Up",
@@ -205,8 +206,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.render();
 					this.setDirty(true);
 				})});
-			this.commandService.addCommand(moveUpCommand, "object");
-			this.commandService.registerCommandContribution("eclipse.site.mappings.moveUp", 1);
+			this.commandService.addCommand(moveUpCommand);
+			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.moveUp", 1);
 			
 			var moveDownCommand = new mCommands.Command({
 				name: "Move Down",
@@ -225,8 +226,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.render();
 					this.setDirty(true);
 				})});
-			this.commandService.addCommand(moveDownCommand, "object");
-			this.commandService.registerCommandContribution("eclipse.site.mappings.moveDown", 2);
+			this.commandService.addCommand(moveDownCommand);
+			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.moveDown", 2);
 		},
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);

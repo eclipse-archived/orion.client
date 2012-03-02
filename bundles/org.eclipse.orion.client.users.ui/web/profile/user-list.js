@@ -34,7 +34,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, usersList, usersList);
 			mGlobalCommands.generateDomCommandsInBanner(commandService, usersList);
 		
-			var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools");
+			var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands");
 			
 			var createUserCommand = new mCommands.Command({
 				name: "Create User",
@@ -54,7 +54,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				}
 			});
 			
-			commandService.addCommand(createUserCommand, "dom");
+			commandService.addCommand(createUserCommand);
 				
 			var deleteCommand = new mCommands.Command({
 				name: "Delete User",
@@ -97,8 +97,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					}
 				}
 			});
-			commandService.addCommand(deleteCommand, "object");
-			commandService.addCommand(deleteCommand, "dom");
+			commandService.addCommand(deleteCommand);
 			
 			var changePasswordCommand = new mCommands.Command({
 				name: "Change Password",
@@ -117,19 +116,19 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					return true;
 				}
 			});
-			commandService.addCommand(changePasswordCommand, "object");
+			commandService.addCommand(changePasswordCommand);
 			
 			
 		
 			// define the command contributions - where things appear, first the groups
-			commandService.addCommandGroup("eclipse.usersGroup", 100, null, null, "pageActions");
-			commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
+			commandService.addCommandGroup("pageActions", "eclipse.usersGroup", 100);
+			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 			
-			commandService.registerCommandContribution("eclipse.createUser", 1, "pageActions", "eclipse.usersGroup");
+			commandService.registerCommandContribution("pageActions", "eclipse.createUser", 1, "eclipse.usersGroup");
 			
-			commandService.registerCommandContribution("eclipse.deleteUser", 1);
-			commandService.registerCommandContribution("eclipse.changePassword", 2);
-			commandService.registerCommandContribution("eclipse.deleteUser", 1, "selectionTools", "eclipse.selectionGroup");
+			commandService.registerCommandContribution("userCommands", "eclipse.deleteUser", 1);
+			commandService.registerCommandContribution("userCommands", "eclipse.changePassword", 2);
+			commandService.registerCommandContribution("selectionTools", "eclipse.deleteUser", 1, "eclipse.selectionGroup");
 			
 		
 			usersList.loadUsers();

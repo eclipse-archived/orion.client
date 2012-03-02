@@ -103,7 +103,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			this.pluginTitle.innerHTML = name;
 			this.pluginLink.href = location;
 			this.commandSpan.id = name;
-			this.commandService.renderCommands(this.commandSpan, "object", location, this, "tool");
+			this.commandService.renderCommands("pluginCommand", this.commandSpan, location, this, "tool");
 			this.carousel = new orion.widgets.ServiceCarousel({serviceData:this.serviceDescriptions}, this.serviceContainer );
 			this.carousel.startup();
 		}
