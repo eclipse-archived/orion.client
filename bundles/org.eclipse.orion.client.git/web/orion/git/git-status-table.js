@@ -1543,7 +1543,7 @@ orion.GitStatusController = (function() {
 					that._stagingConflict = true;
 					that._stagingName = itemModel.name;
 				}
-				paths.push(itemModel.path);
+				paths.push(itemModel.name);
 			}
 			that._registry.getService("orion.git.provider").stageMultipleFiles(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
 				that.getGitStatus(that._url);
@@ -1601,7 +1601,7 @@ orion.GitStatusController = (function() {
 			var paths = [];
 			for ( var i = 0; i < selection.length; i++) {
 				var itemModel = selection[i].modelItem;
-				paths.push(itemModel.path);
+				paths.push(itemModel.name);
 			}
 			that._registry.getService("orion.git.provider").unstage(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
 				that.getGitStatus(that._url);
