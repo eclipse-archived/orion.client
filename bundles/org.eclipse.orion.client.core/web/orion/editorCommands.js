@@ -117,7 +117,11 @@ exports.EditorCommandFactory = (function() {
 				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, "orion.editorActions.unlabeled", false, new mCommands.CommandKeyBinding('s', true));
 	
 				// page navigation commands (go to line)
-				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], false);
+				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], false,
+																		function() {
+																			var line = editor.getModel().getLineAtOffset(editor.getCaretOffset()) + 1;
+																			return [new mCommands.CommandParameter('line', 'number', 'Line:', line.toString())];
+																		});
 				
 				var gotoLineCommand =  new mCommands.Command({
 					name: "Go to Line",
