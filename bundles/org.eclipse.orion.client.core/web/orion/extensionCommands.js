@@ -279,8 +279,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	
 	extensionCommandUtils.getOpenWithCommands = function(commandService) {
 		var openWithCommands = [];
-		for (var commandId in commandService._objectScope) {
-			var command = commandService._objectScope[commandId];
+		for (var commandId in commandService._commandList) {
+			var command = commandService._commandList[commandId];
 			if (command.isEditor) {
 				openWithCommands.push(command);
 			}
