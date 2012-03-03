@@ -1600,10 +1600,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
-					var color = isIE ? "transparent" : "#AFAFAF";
+					var color = "transparent";
 					this._selDiv1.style.background = color;
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
+					var sel = window.getSelection();
+					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 				}
 			}
 			if (!this._ignoreFocus) {
@@ -1994,7 +1996,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				} else {
 					this._clickCount = 1;
 				}
-				if (this._handleMouse(e) && (isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
+				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
 					}
@@ -2825,6 +2827,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var parent = this._clientDiv;
 			var c = " ";
 			var line = document.createElement("DIV");
+			line.style.lineHeight = "normal";
 			var model = this._model;
 			var lineText = model.getLine(0);
 			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0};
@@ -4483,13 +4486,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_isLinkURL: function(string) {
 			return string.toLowerCase().lastIndexOf(".css") === string.length - 4;
 		},
-		_isInDOM: function() {
-			var temp = this._parent;
-			while (temp.parentNode) {
-				temp = temp.parentNode;
-			}
-			return !!temp.body;
-		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
 				return;
@@ -4788,88 +4784,89 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_setDOMFullSelection: function(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd) {
+			if (!this._selDiv1) { return; }
+			var selDiv = this._selDiv1;
+			selDiv.style.width = "0px";
+			selDiv.style.height = "0px";
+			selDiv = this._selDiv2;
+			selDiv.style.width = "0px";
+			selDiv.style.height = "0px";
+			selDiv = this._selDiv3;
+			selDiv.style.width = "0px";
+			selDiv.style.height = "0px";
+			if (startNode === endNode && startOffset === endOffset) { return; }
 			var model = this._model;
-			if (this._selDiv1) {
-				var startLineBounds, l;
-				startLineBounds = this._getLineBoundingClientRect(startNode);
-				if (startOffset === 0) {
-					l = startLineBounds.left;
+			var viewPad = this._getViewPadding();
+			var clientRect = this._clientDiv.getBoundingClientRect();
+			var viewRect = this._viewDiv.getBoundingClientRect();
+			var left = viewRect.left + viewPad.left;
+			var right = clientRect.right;
+			var top = viewRect.top + viewPad.top;
+			var bottom = clientRect.bottom;
+			var hd = 0, vd = 0;
+			if (this._clipDiv) {
+				var clipRect = this._clipDiv.getBoundingClientRect();
+				hd = clipRect.left - this._clipDiv.scrollLeft;
+				vd = clipRect.top;
+			} else {
+				var rootpRect = this._rootDiv.getBoundingClientRect();
+				hd = rootpRect.left;
+				vd = rootpRect.top;
+			}
+			var startLineBounds, l;
+			startLineBounds = this._getLineBoundingClientRect(startNode);
+			if (startOffset === 0) {
+				l = startLineBounds.left;
+			} else {
+				if (startOffset >= startLineEnd) {
+					l = startLineBounds.right;
 				} else {
-					if (startOffset >= startLineEnd) {
-						l = startLineBounds.right;
-					} else {
-						this._ignoreDOMSelection = true;
-						l = this._getBoundsAtOffset(model.getLineStart(startNode.lineIndex) + startOffset).left;
-						this._ignoreDOMSelection = false;
-					}
+					this._ignoreDOMSelection = true;
+					l = this._getBoundsAtOffset(model.getLineStart(startNode.lineIndex) + startOffset).left;
+					this._ignoreDOMSelection = false;
 				}
-			
-				var selDiv = this._selDiv1;
-				selDiv.style.width = "0px";
-				selDiv.style.height = "0px";
-				selDiv = this._selDiv2;
-				selDiv.style.width = "0px";
-				selDiv.style.height = "0px";
-				selDiv = this._selDiv3;
-				selDiv.style.width = "0px";
-				selDiv.style.height = "0px";
-				if (!(startNode === endNode && startOffset === endOffset)) {
-					var viewPad = this._getViewPadding();
-					var clientRect = this._clientDiv.getBoundingClientRect();
-					var viewRect = this._viewDiv.getBoundingClientRect();
-					var left = viewRect.left + viewPad.left;
-					var right = clientRect.right;
-					var top = viewRect.top + viewPad.top;
-					var bottom = clientRect.bottom;
-					var hd = 0, vd = 0;
-					if (this._clipDiv) {
-						var clipRect = this._clipDiv.getBoundingClientRect();
-						hd = clipRect.left - this._clipDiv.scrollLeft;
-						vd = clipRect.top;
-					}
-					var r;
-					var endLineBounds = this._getLineBoundingClientRect(endNode);
-					if (endOffset === 0) {
-						r = endLineBounds.left;
-					} else {
-						if (endOffset >= endLineEnd) {
-							r = endLineBounds.right;
-						} else {
-							this._ignoreDOMSelection = true;
-							r = this._getBoundsAtOffset(model.getLineStart(endNode.lineIndex) + endOffset).left;
-							this._ignoreDOMSelection = false;
-						}
-					}
-					var sel1Div = this._selDiv1;
-					var sel1Left = Math.min(right, Math.max(left, l));
-					var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
-					var sel1Right = right;
-					var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
-					sel1Div.style.left = (sel1Left - hd) + "px";
-					sel1Div.style.top = (sel1Top - vd) + "px";
-					sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
-					sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px";
-					if (startNode === endNode) {
-						sel1Right = Math.min(r, right);
-						sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
-					} else {
-						var sel3Left = left;
-						var sel3Top = Math.min(bottom, Math.max(top, endLineBounds.top));
-						var sel3Right = Math.min(right, Math.max(left, r));
-						var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
-						var sel3Div = this._selDiv3;
-						sel3Div.style.left = (sel3Left - hd) + "px";
-						sel3Div.style.top = (sel3Top - vd) + "px";
-						sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px";
-						sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px";
-						if (sel3Top - sel1Bottom > 0) {
-							var sel2Div = this._selDiv2;
-							sel2Div.style.left = (left - hd)  + "px";
-							sel2Div.style.top = (sel1Bottom - vd) + "px";
-							sel2Div.style.width = Math.max(0, right - left) + "px";
-							sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px";
-						}
-					}
+			}
+			var r;
+			var endLineBounds = this._getLineBoundingClientRect(endNode);
+			if (endOffset === 0) {
+				r = endLineBounds.left;
+			} else {
+				if (endOffset >= endLineEnd) {
+					r = endLineBounds.right;
+				} else {
+					this._ignoreDOMSelection = true;
+					r = this._getBoundsAtOffset(model.getLineStart(endNode.lineIndex) + endOffset).left;
+					this._ignoreDOMSelection = false;
+				}
+			}
+			var sel1Div = this._selDiv1;
+			var sel1Left = Math.min(right, Math.max(left, l));
+			var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
+			var sel1Right = right;
+			var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
+			sel1Div.style.left = (sel1Left - hd) + "px";
+			sel1Div.style.top = (sel1Top - vd) + "px";
+			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
+			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px";
+			if (startNode === endNode) {
+				sel1Right = Math.min(r, right);
+				sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
+			} else {
+				var sel3Left = left;
+				var sel3Top = Math.min(bottom, Math.max(top, endLineBounds.top));
+				var sel3Right = Math.min(right, Math.max(left, r));
+				var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
+				var sel3Div = this._selDiv3;
+				sel3Div.style.left = (sel3Left - hd) + "px";
+				sel3Div.style.top = (sel3Top - vd) + "px";
+				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px";
+				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px";
+				if (sel3Top - sel1Bottom > 0) {
+					var sel2Div = this._selDiv2;
+					sel2Div.style.left = (left - hd)  + "px";
+					sel2Div.style.top = (sel1Bottom - vd) + "px";
+					sel2Div.style.width = Math.max(0, right - left) + "px";
+					sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px";
 				}
 			}
 		},
@@ -5016,7 +5013,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isWebkit) {
 				this._fullSelection = true;
 			}
-			var parent = this._clipDiv || this._scrollDiv;
+			var parent = this._clipDiv || this._rootDiv;
 			if (!parent) {
 				return;
 			}
@@ -5036,12 +5033,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				return;
 			}
 			
-			if (!this._selDiv1 && ((this._fullSelection && !isWebkit))) {
+			if (!this._selDiv1 && (this._fullSelection && !isWebkit)) {
 				this._hightlightRGB = "Highlight";
 				var selDiv1 = document.createElement("DIV");
 				this._selDiv1 = selDiv1;
-				selDiv1.id = "selDiv1";
-				selDiv1.style.position = this._clipDiv ? "absolute" : "fixed";
+				selDiv1.style.position = "absolute";
 				selDiv1.style.borderWidth = "0px";
 				selDiv1.style.margin = "0px";
 				selDiv1.style.padding = "0px";
@@ -5054,8 +5050,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				parent.appendChild(selDiv1);
 				var selDiv2 = document.createElement("DIV");
 				this._selDiv2 = selDiv2;
-				selDiv2.id = "selDiv2";
-				selDiv2.style.position = this._clipDiv ? "absolute" : "fixed";
+				selDiv2.style.position = "absolute";
 				selDiv2.style.borderWidth = "0px";
 				selDiv2.style.margin = "0px";
 				selDiv2.style.padding = "0px";
@@ -5068,8 +5063,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				parent.appendChild(selDiv2);
 				var selDiv3 = document.createElement("DIV");
 				this._selDiv3 = selDiv3;
-				selDiv3.id = "selDiv3";
-				selDiv3.style.position = this._clipDiv ? "absolute" : "fixed";
+				selDiv3.style.position = "absolute";
 				selDiv3.style.borderWidth = "0px";
 				selDiv3.style.margin = "0px";
 				selDiv3.style.padding = "0px";
@@ -5249,7 +5243,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
-			if (!this._clientDiv || !this._isInDOM() || (!isIE && !this._hasFocus)) { return; }
+			if (!this._clientDiv || !this._hasFocus) { return; }
 			var selection = this._getSelection();
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
@@ -5690,6 +5684,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var metrics = this._metrics = this._calculateMetrics();
 			if (isIE) {
 				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px";
+			} else {
+				this._rootDiv.style.lineHeight = "normal";
 			}
 			if (!init) {
 				this.redraw();
