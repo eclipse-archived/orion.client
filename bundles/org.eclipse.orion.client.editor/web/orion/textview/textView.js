@@ -726,8 +726,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		* Returns if the view is loaded.
 		* <p>
 		* @returns {Boolean} <code>true</code> if the view is loaded.
-		*
-		* @see #onLoad
 		*/
 		isLoaded: function () {
 			return !!this._clientDiv;
@@ -848,24 +846,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		onLineStyle: function(lineStyleEvent) {
 			return this.dispatchEvent(lineStyleEvent);
-		},
-		/**
-		 * @class This is the event sent when the text view has loaded its contents.
-		 * <p>
-		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onLoad}
-		 * </p>		 
-		 * @name orion.textview.LoadEvent
-		 */
-		/**
-		 * This event is sent when the text view has loaded its contents.
-		 *
-		 * @event
-		 * @param {orion.textview.LoadEvent} loadEvent the event
-		 */
-		onLoad: function(loadEvent) {
-			return this.dispatchEvent(loadEvent);
 		},
 		/**
 		 * @class This is the event sent when the text in the model has changed.
@@ -1026,24 +1006,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		onVerify: function(verifyEvent) {
 			return this.dispatchEvent(verifyEvent);
-		},
-		/**
-		 * @class This is the event sent when the text view has unloaded its contents.
-		 * <p>
-		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onLoad}
-		 * </p>		 
-		 * @name orion.textview.UnloadEvent
-		 */
-		/**
-		 * This event is sent when the text view has unloaded its contents.
-		 *
-		 * @event
-		 * @param {orion.textview.UnloadEvent} unloadEvent the event
-		 */
-		onUnload: function(unloadEvent) {
-			return this.dispatchEvent(unloadEvent);
 		},
 		/**
 		 * @class This is the event sent when the text view is focused.
@@ -3568,7 +3530,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._createRuler(rulers[i]);
 			}
 			this._updatePage();
-			this.onLoad({type: "Load"});
 		},
 		_defaultOptions: function() {
 			return {
@@ -3630,7 +3591,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._overlayDiv = null;
 			this._leftDiv = null;
 			this._rightDiv = null;
-			this.onUnload({type: "Unload"});
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
