@@ -4354,6 +4354,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: window, type: "resize", handler: function(e) { return self._handleResize(e);}});
 			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return self._handleBlur(e);}});
 			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e);}});
+			handlers.push({target: viewDiv, type: "focus", handler: function(e) { clientDiv.focus(); }});
 			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
 			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
 			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}});
