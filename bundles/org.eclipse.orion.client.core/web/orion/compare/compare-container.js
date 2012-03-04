@@ -553,17 +553,15 @@ exports.TwoWayCompareContainer = (function() {
 				readonly: readOnly,
 				tabSize: 4
 			});
-			view.addEventListener("Load", function(){
-				that._viewLoadedCounter++;
-				if(that._viewLoadedCounter === 2){				
-					that._compareMatchRenderer.matchPositionFromAnnotation(-1);
-				}
-				if(that.onLoad){
-					that.onLoad();
-				}
-			});
+			that._viewLoadedCounter++;
+			if(that._viewLoadedCounter === 2){				
+				that._compareMatchRenderer.matchPositionFromAnnotation(-1);
+			}
+			if(that.onLoad){
+				that.onLoad();
+			}
 			dojo.connect(editorContainer, "resize", dojo.hitch(this, function (e){
-				textView.resize();
+				view.resize();
 			}));
 			return view;
 		};
