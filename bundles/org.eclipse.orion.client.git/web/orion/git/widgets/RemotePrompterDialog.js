@@ -11,7 +11,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mGitClonesExplorer) {
+define(['dojo', 'dijit', 'orion/util', 'orion/explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mExplorer) {
 
 /**
 * @param options {{
@@ -48,9 +48,8 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	
 	loadRemoteChildren: function(item) {
 		this.treeRoot = item;
-		var myTreeModel = new mGitClonesExplorer.GitClonesModel(this.gitClient, null, this.gitClient.getGitClone, this.treeRoot);
-		this.createTree(myTreeModel);		
-		var root = this.treeRoot;
+		var myTreeModel = new GitClonesModel(this.gitClient, null, this.gitClient.getGitClone, this.treeRoot);
+		this.createTree(myTreeModel);
 	},
 	
 	createTree : function(myTreeModel){
@@ -135,4 +134,118 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 		delete this.options.func; //prevent performing this action twice (IE)
 	}
 });
+
+var GitClonesModel = function() {
+	/**
+	 * Creates a new Git repository model
+	 * @name orion.git.widgets.GitClonesModel
+	 */
+	function GitClonesModel(gitClient, rootPath, fetchItems, root) {
+		//TODO: Consolidate with eclipse.TreeModel
+		this.gitClient = gitClient;
+		this.rootPath = rootPath;
+		this.fetchItems = fetchItems;
+		this.root = root ? root : null;
+	}
+	GitClonesModel.prototype = new mExplorer.ExplorerModel(); 
+	
+	GitClonesModel.prototype.getRoot = function(onItem){
+		if(this.root){
+			onItem(this.root);
+			return;
+		}
+		this.fetchItems(this.rootPath).then(
+			dojo.hitch(this, function(item){
+				this.root = item;
+				onItem(item);
+			})
+		);
+	};
+	
+	GitClonesModel.prototype.mayHaveChildren = function (item){
+		if (item.children || item.Children) {
+			return true;
+		}
+		else if (item.BranchLocation && item.RemoteLocation){
+			return true;
+		}
+		else if (item.GroupNode){
+			return true;
+		}
+		else if (item.Type === "Remote"){
+			return true;
+		}
+		return false;
+	};
+
+	GitClonesModel.prototype.getIdentity = function(/* item */ item){
+		var result;
+		if(item.Location){
+			result = item.Location;
+			// remove all non valid chars to make a dom id. 
+			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+		} else {
+			result = "ROOT";
+		}
+		return result;
+	};
+
+	GitClonesModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+			// the parent already has the children fetched
+		parentItem.children = [];
+		
+		if (parentItem.Children) {
+			for(var i=0; i<parentItem.Children.length; i++){
+				parentItem.Children[i].parent = parentItem;
+				parentItem.children[i] = parentItem.Children[i];
+			}
+			onComplete(parentItem.Children);
+		}
+		else if (parentItem.BranchLocation && parentItem.RemoteLocation){
+					parentItem.children = [ {
+						GroupNode : "true",
+						Location : parentItem.BranchLocation,
+						Name : "Branches",
+						parent : parentItem
+					}, {
+						GroupNode : "true",
+						Location : parentItem.RemoteLocation,
+						BranchLocation : parentItem.BranchLocation,
+						Name : "Remotes",
+						parent : parentItem
+					}, {
+						GroupNode: "true",
+						Location: parentItem.TagLocation,
+						Name: "Tags",
+						parent: parentItem
+					} ]; 
+			onComplete(parentItem.children);
+		}
+		else if (parentItem.GroupNode){
+			this.gitClient.getGitBranch(parentItem.Location).then( 
+				dojo.hitch(this, function(children) {
+					parentItem.children = children.Children;
+					for(var i=0; i<children.Children.length; i++){
+						children.Children[i].parent = parentItem;
+					}
+					onComplete(children.Children);
+				})
+			);
+		}
+		else if (parentItem.Type === "Remote"){
+			this.gitClient.getGitBranch(parentItem.Location).then( 
+				dojo.hitch(this, function(children) {
+					parentItem.children = children.Children;
+					for(var i=0; i<children.Children.length; i++){
+						children.Children[i].parent = parentItem;
+					}
+					onComplete(children.Children);
+				})
+			);
+		}
+	};
+
+	return GitClonesModel;
+}();
+
 });
