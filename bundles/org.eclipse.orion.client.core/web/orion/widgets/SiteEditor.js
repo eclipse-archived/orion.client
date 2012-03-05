@@ -465,6 +465,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		return this._siteConfiguration;
 	},
 	
+	getResource: function() {
+		return this._siteConfiguration && this._siteConfiguration.Location;
+	},
+
 	/**
 	 * Callback when 'save' is clicked.
 	 * @Override
