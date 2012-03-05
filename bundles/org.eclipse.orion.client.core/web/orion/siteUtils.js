@@ -12,7 +12,8 @@
 /*global define */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, dojo, mCommands, mUtil) {
+define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
+	function(require, dojo, mCommands, mUtil, URITemplate) {
 	/**
 	 * This class contains utility methods for dealing with sites.
 	 * @name orion.siteUtils
@@ -27,56 +28,9 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 	 */
 	function generateEditSiteHref(site) {
 		var base = require.toUrl("sites/site.html");
-		return base + "#" + mUtil.makeRelative(site.Location);
-	}
-	
-	/**
-	 * Parses the state of the site page from a hash value.
-	 * @param {String} hash The hash string.
-	 * @returns {Object} An object having the properties:<ul>
-	 * <li>{@link String} <code>site</code> The location URL of the site being edited.</li>
-	 * <li>{@link String} <code>action</code> Optional, currently unused</li>
-	 * <li>{@link String} <code>actionDetails</code> Optional, currently unused</li>
-	 * </ul>
-	 * @name orion.siteUtils#parseStateFromHash
-	 * @function
-	 */
-	function parseStateFromHash(hash) {
-		var obj = dojo.queryToObject(hash);
-		var state = dojo.mixin({}, obj);
-		// Find the property name that represents the site
-		for (var prop in obj) {
-			if (obj.hasOwnProperty(prop)) {
-				if (obj[prop] === "" && prop !== "action" && prop !== "actionDetails") {
-					state.site = prop;
-					delete state[prop];
-				}
-			}
-		}
-		return state;
-	}
-	
-	/**
-	 * Converts the state of the site page into a hash string.
-	 * @param {String} siteLocation The location URL of the site configuration being edited.
-	 * @param [String] action Currently unused
-	 * @param [String] actionDetails Currently unused
-	 * @returns {String} Hash string representing the new state.
-	 * @name orion.siteUtils#stateToHash
-	 * @function
-	 */
-	function stateToHash(siteLocation, action, actionDetails) {
-		var obj = {};
-		if (siteLocation) {
-			obj[siteLocation] = "";
-		}
-		if (action) {
-			obj.action = action;
-		}
-		if (actionDetails) {
-			obj.actionDetails = actionDetails;
-		}
-		return dojo.objectToQuery(obj);
+		return new URITemplate(base + "#{,resource,params*}").expand({
+			resource: mUtil.makeRelative(site.Location)
+		});
 	}
 	
 	/**
@@ -162,8 +116,6 @@ define(['require', 'dojo', 'orion/commands', 'orion/util'], function(require, do
 
 	var siteUtils = {};
 	siteUtils.generateEditSiteHref = generateEditSiteHref;
-	siteUtils.parseStateFromHash = parseStateFromHash;
-	siteUtils.stateToHash = stateToHash;
 	siteUtils.createSiteCommands = createSiteCommands;
 	
 	//return the module exports

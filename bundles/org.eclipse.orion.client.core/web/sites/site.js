@@ -9,16 +9,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define dojo dijit orion window*/
+/*global confirm define dojo dijit orion window*/
 /*jslint browser:true*/
 
 /*
  * Glue code for site.html
  */
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	        'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
-	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-			function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
+	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
+	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteUtils, mSiteTree, mTreeTable, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -55,14 +55,17 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			};
 			
 			var onHashChange = function() {
-				var hash = dojo.hash();
-				var state = mSiteUtils.parseStateFromHash(hash);
+				var params = PageUtil.matchResourceParameters();
+				var resource = params.resource;
 				var editor = dijit.byId("site-editor");
-				if (state.site /* && site is not already loaded */) {
-					editor.load(state.site).then(
-						function() {
-							updateTitle();
-						});
+				if (resource && resource !== editor.getResource()) {
+					var doit = !editor.isDirty() || confirm("There are unsaved changes. Do you still want to navigate away?");
+					if (doit) {
+						editor.load(resource).then(
+							function() {
+								updateTitle();
+							});
+					}
 				}
 			};
 			dojo.subscribe("/dojo/hashchange", null, onHashChange);
