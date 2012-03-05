@@ -380,13 +380,11 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 
 	_setSiteConfiguration: function(siteConfiguration) {
-		this._detachListeners(this._siteConfiguration);
+		this._detachListeners();
 		this._siteConfiguration = siteConfiguration;
 		this._fetchProjects(siteConfiguration);
 		this._refreshFields();
-		setTimeout(dojo.hitch(this, function() {
-			this._attachListeners(this._siteConfiguration);
-		}), 0);
+		this.setDirty(false);
 	},
 	
 	setDirty: function(value) {
@@ -397,7 +395,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 	
 	isDirty: function() {
-		return this._isDirty || this.mappings.isDirty();
+		return this._isDirty;
 	},
 	
 	_refreshFields: function() {
@@ -420,6 +418,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		dojo.empty(this._commandsContainer);
 		this._commandService.renderCommands(this._commandsContainer.id, this._commandsContainer, this._siteConfiguration, {},
 			"button", null, this._siteConfiguration /*userData*/);
+
+		setTimeout(dojo.hitch(this, function() {
+			this._attachListeners(this._siteConfiguration);
+		}), 0);
 	},
 	
 	/**
@@ -427,7 +429,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	 * @param site {SiteConfiguration}
 	 */
 	_attachListeners: function(site) {
-		this._modelListeners = [];
+		this._detachListeners();
+		this._modelListeners = this._modelListeners || [];
 		
 		var editor = this;
 		function bindText(widget, modelField) {
@@ -443,11 +446,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		bindText(this.name, "Name");
 		bindText(this.hostHint, "HostHint");
 		
-		this._modelListeners.push(dojo.connect(this.mappings, "setDirty", this, function(value) {
-				if (value) {
-					this.setDirty(true);
-				}
-			}));
+		this._modelListeners.push(dojo.connect(this.mappings, "setDirty", this, function(dirty) {
+			this.setDirty(dirty);
+		}));
 	},
 	
 	_detachListeners: function() {
@@ -455,6 +456,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			for (var i=0; i < this._modelListeners.length; i++) {
 				dojo.disconnect(this._modelListeners[i]);
 			}
+			this._modelListeners.splice(0);
 		}
 	},
 	
@@ -485,7 +487,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						editor.setDirty(false);
 						return { Result: "Saved \"" + updatedSiteConfig.Name + "\"." };
 					});
 			this._busyWhile(deferred, "Saving...");
