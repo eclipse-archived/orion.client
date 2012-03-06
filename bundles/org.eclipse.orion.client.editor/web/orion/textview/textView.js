@@ -1566,8 +1566,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._selDiv1.style.background = color;
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
-					var sel = window.getSelection();
-					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+					if (window.getSelection) {
+						var sel = window.getSelection();
+						if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+					}
 				}
 			}
 			if (!this._ignoreFocus) {
@@ -2339,6 +2341,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = window.getSelection();
 			var start = this._getModelOffset(selection.anchorNode, selection.anchorOffset);
 			var end = this._getModelOffset(selection.focusNode, selection.focusOffset);
+			if (start === undefined || end === undefined) {
+			    return;
+			}
 			this._setSelection(new Selection(start, end), false, false, false);
 		},
 		_handleTouchStart: function (e) {
@@ -4962,15 +4967,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setFullSelection: function(fullSelection, init) {
 			this._fullSelection = fullSelection;
-			
-			/* 
-			* Bug in IE 8. For some reason, during scrolling IE does not reflow the elements
-			* that are used to compute the location for the selection divs. This causes the
-			* divs to be placed at the wrong location. The fix is to disabled full selection for IE8.
-			*/
-			if (isIE < 9) {
-				this._fullSelection = false;
-			}
 			if (isWebkit) {
 				this._fullSelection = true;
 			}
