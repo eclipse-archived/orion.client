@@ -208,7 +208,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 	 * @param {orion.searchClient.Searcher} options.searcher
 	 * @param {orion.fileClient.FileClient} options.fileClient
 	 * @param {orion.commands.CommandService} options.commandService
-	 * @param {orion.file.ContentTypeService} options.contentTypeService
+	 * @param {orion.core.ContentTypeService} options.contentTypeService
 	 * @param {String} options.parentId
 	 * @param {String} options.breadcrumbId
 	 * @param {String} options.toolbarId
