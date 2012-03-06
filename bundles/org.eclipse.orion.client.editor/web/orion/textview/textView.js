@@ -607,7 +607,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var scroll = this._getScroll();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
-			var lineIndex = this._getYToLine(y - scroll.y);
+			var lineIndex = this._getYToLine(y - scroll.y + viewRect.top + viewPad.top);
 			x += -scroll.x + viewRect.left + viewPad.left;
 			var offset = this._getXToOffset(lineIndex, x);
 			return offset;
@@ -2074,7 +2074,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
 			var x = e.clientX + scroll.x - viewRect.left - viewPad.left;
-			var y = e.clientY + scroll.y;
+			var y = e.clientY + scroll.y - viewRect.top - viewPad.top;
 			return {
 				type: type,
 				event: e,
