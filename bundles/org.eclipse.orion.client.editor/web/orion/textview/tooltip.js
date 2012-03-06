@@ -31,7 +31,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			if (this._domNode) { return; }
 			this._document = document;
 			var domNode = this._domNode = document.createElement("DIV");
-			domNode.className = "viewTooltip";
+			domNode.className = "textviewTooltip";
 			var viewParent = this._viewParent = document.createElement("DIV");
 			domNode.appendChild(viewParent);
 			var htmlParent = this._htmlParent = document.createElement("DIV");

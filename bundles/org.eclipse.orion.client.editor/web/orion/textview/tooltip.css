@@ -5,7 +5,7 @@
 }
 
 /* Styles for the view tooltips */
-.viewTooltip {
+.textviewTooltip {
 	font-family: monospace;
 	font-size: 10pt;
 	background-color: InfoBackground;
@@ -18,7 +18,7 @@
 	overflow: hidden;
 	white-space: pre;
 }
-.viewTooltip em {
+.textviewTooltip em {
 	font-style: normal;
 	font-weight: bold;
 }
