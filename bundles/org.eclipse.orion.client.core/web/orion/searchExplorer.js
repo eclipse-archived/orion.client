@@ -1064,7 +1064,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	SearchResultExplorer.prototype._getContentType = function(fileItem){
-		return this.registry.getService("orion.file.contenttypes").getFilenameContentType(fileItem.name);
+		return this.registry.getService("orion.core.contenttypes").getFilenameContentType(fileItem.name);
 	};
 	
 	SearchResultExplorer.prototype.buildPreview = function(updating) {

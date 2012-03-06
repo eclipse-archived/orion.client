@@ -742,7 +742,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		}
 		
 		function getContentTypesMap() {
-			return contentTypesMapCache || serviceRegistry.getService("orion.file.contenttypes").getContentTypesMap().then(function(map) {
+			return contentTypesMapCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypesMap().then(function(map) {
 				contentTypesMapCache = map;
 				return contentTypesMapCache;
 			});

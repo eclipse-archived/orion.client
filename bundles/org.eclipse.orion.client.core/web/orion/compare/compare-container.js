@@ -224,7 +224,7 @@ exports.DefaultDiffProvider = (function() {
 		
 		_getContentType: function(fileURL){
 			var filename = this._resolveFileName(fileURL);
-			return this.serviceRegistry.getService("orion.file.contenttypes").getFilenameContentType(filename);
+			return this.serviceRegistry.getService("orion.core.contenttypes").getFilenameContentType(filename);
 		},
 		
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
