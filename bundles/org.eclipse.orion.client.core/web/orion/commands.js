@@ -415,7 +415,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		
 		/**
 		 * Show the keybindings that are registered with the command service inside the specified domNode.
-		 * @param {DOMElement} the dom node where the key bindings should be shown.
+		 * @param targetNode {DOMElement} the dom node where the key bindings should be shown.
 		 */
 		showKeyBindings: function(targetNode) {
 			for (var binding in this._activeBindings) {
@@ -428,7 +428,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		/** 
 		 * Add a command to the command service.  Nothing will be shown in the UI
 		 * until this command is referenced in a contribution.
-		 * @param {Command} the command being added.
+		 * @param command {Command} the command being added.
 		 */
 		addCommand: function(command) {
 			this._commandList[command.id] = command;
@@ -887,7 +887,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 *  sprite itself.  Optional.
 	 * @param {Function} options.visibleWhen A callback that returns a boolean to indicate whether the command should be visible
 	 *  given a particular set of items that are selected.  Optional, defaults to always visible.
-	 * @param {ParametersDescription} options.parameters A description of parameters that should be collected before invoking
+	 * @param {orion.commands.ParametersDescription} options.parameters A description of parameters that should be collected before invoking
 	 *  the command.
 	 * @param {Image} options.image the image that may be used to represent the callback.  A text link will be shown in lieu
 	 *  of an image if no image is supplied.  Optional.
@@ -1248,7 +1248,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * @param {String} parameterName the name of the parameter being specified in the value of the query 
 	 * 
 	 * @name orion.commands.URLBinding
-	 * 
+	 * @class
 	 */
 	function URLBinding (token, parameterName) {
 		this.token = token;
@@ -1278,11 +1278,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 *
 	 * @param {String} name the name of the parameter
 	 * @param {String} type the type of the parameter, one of the HTML5 input types
-	 * @param {String} label the (optional) label that should be used when showing the parameter
-	 * @param {String} value the (optional) default value for the parameter
+	 * @param {String} [label] the (optional) label that should be used when showing the parameter
+	 * @param {String} [value] the (optional) default value for the parameter
 	 * 
 	 * @name orion.commands.CommandParameter
-	 * 
+	 * @class
 	 */
 	function CommandParameter (name, type, label, value) {
 		this.name = name;
@@ -1308,7 +1308,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * before calling a command callback.  The command is expected to provide UI for optional parameter, when the user has
 	 * signalled a desire to provide optional information.
 	 *
-	 * @param {Array} parameters an array of CommandParameters that are required
+	 * @param {orion.commands.CommandParameter[]} parameters an array of CommandParameters that are required
 	 * @param {Boolean} [options] specifies whether additional, optional parameters can be specified
 	 * @param {Function} [getParameters] a function used to define the parameters just before the command is invoked.  This is used
 	 *			when a particular invocation of the command will change the parameters.  Any stored parameters will be ignored, and
@@ -1316,7 +1316,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 *          that the command should not try to obtain parameters before invoking the command's callback.  The function will be passed
 	 *          the CommandInvocation as a parameter.
 	 * @name orion.commands.ParametersDescription
-	 * 
+	 * @class
 	 */
 	function ParametersDescription (parameters, options, getParameters) {
 		this._storeParameters(parameters);
@@ -1390,7 +1390,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		/**
 		 * Evaluate the specified function for each parameter.
 		 *
-		 * @param {Function} a function which operates on a provided command parameter
+		 * @param {Function} func a function which operates on a provided command parameter
 		 *
 		 */
 		forEach: function(func) {
