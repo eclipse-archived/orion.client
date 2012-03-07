@@ -1353,7 +1353,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * by that name.
 		 *
 		 * @param {String} name the name of the parameter
-		 * @returns {CommandParameter} the parameter with the given name
+		 * @returns {orion.command.CommandParameter} the parameter with the given name
 		*/
 		parameterNamed: function(name) {
 			return this.parameterTable[name];
