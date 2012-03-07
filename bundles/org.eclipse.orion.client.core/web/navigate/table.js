@@ -72,57 +72,46 @@ dojo.addOnLoad(function(){
 				var splitArea = dijit.byId("eclipse.navigate-table");
 				splitArea.toggle();}
 		});
-		commandService.addCommand(toggleOutlineCommand, "dom");
+		commandService.addCommand(toggleOutlineCommand);
 				
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("eclipse.fileGroup", 100, "*");  // TODO: '*' is a total undocumented hack
-		commandService.addCommandGroup("eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
-		commandService.addCommandGroup("eclipse.newResources", 101, null, "eclipse.fileGroup");
-		commandService.addCommandGroup("eclipse.fileGroup.unlabeled", 100, null, null, "pageActions");
-		commandService.addCommandGroup("eclipse.fileGroup.openWith", 100, "Open With", "eclipse.fileGroup");
-		commandService.addCommandGroup("eclipse.gitGroup", 200, null, null, "pageActions");
-		commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
+		commandService.addCommandGroup("fileFolderCommands", "eclipse.fileGroup", 100, "*");  // TODO: '*' is a total undocumented hack
+		commandService.addCommandGroup("fileFolderCommands", "eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
+		commandService.addCommandGroup("fileFolderCommands", "eclipse.newResources", 101, null, "eclipse.fileGroup");
+		commandService.addCommandGroup("pageActions", "eclipse.fileGroup.unlabeled", 100);
+		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 200);
+		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("eclipse.toggleSplitter", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('o', true));
-		commandService.registerCommandContribution("eclipse.copySelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('c', true));
-		commandService.registerCommandContribution("eclipse.pasteSelections", 1, "pageActions", null, true, new mCommands.CommandKeyBinding('v', true));
+		commandService.registerCommandContribution("pageActions", "eclipse.toggleSplitter", 1, null, true, new mCommands.CommandKeyBinding('o', true));
+		commandService.registerCommandContribution("pageActions", "eclipse.copySelections", 1, null, true, new mCommands.CommandKeyBinding('c', true));
+		commandService.registerCommandContribution("pageActions", "eclipse.pasteSelections", 1, null, true, new mCommands.CommandKeyBinding('v', true));
 		
-		// commands appearing directly in local actions column.  Currently we are putting everything in the menu.
-		// commandService.registerCommandContribution("eclipse.makeFavorite", 1);
-
 		// commands appearing in nav tool bar
-		commandService.registerCommandContribution("eclipse.openResource", 500, "pageActions");
-		// commands appearing in local actions menu
+		commandService.registerCommandContribution("pageActions", "eclipse.openResource", 500);
 		
-		// favorites is special cased because it's only been defined at the global level and we need to contribute it here
-		var faveCommand = commandService.findCommand("orion.makeFavorite");
-		if (faveCommand) {
-			commandService.addCommand(faveCommand, "object");
-			commandService.registerCommandContribution("orion.makeFavorite", 1, null, "eclipse.fileGroup");
-		}
-		commandService.registerCommandContribution("eclipse.renameResource", 2, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.copyFile", 3, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.moveFile", 4, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.deleteFile", 5, null, "eclipse.fileGroup");
-		commandService.registerCommandContribution("eclipse.importCommand", 1, null, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("eclipse.downloadFile", 2, null, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("eclipse.importSFTPCommand", 3, null, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("eclipse.exportSFTPCommand", 4, null, "eclipse.fileGroup/eclipse.importExportGroup");
+		// favorites has been defined at the global level and we need to contribute it here
+		commandService.registerCommandContribution("fileFolderCommands", "orion.makeFavorite", 1, "eclipse.fileGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.renameResource", 2, "eclipse.fileGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.copyFile", 3, "eclipse.fileGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.moveFile", 4, "eclipse.fileGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.deleteFile", 5, "eclipse.fileGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.importCommand", 1, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.downloadFile", 2, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.importSFTPCommand", 3, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.exportSFTPCommand", 4, "eclipse.fileGroup/eclipse.importExportGroup");
 		// new file and new folder in the actions column uses the labeled group
-		commandService.registerCommandContribution("eclipse.newFile", 1, null, "eclipse.fileGroup/eclipse.newResources");
-		commandService.registerCommandContribution("eclipse.newFolder", 2, null, "eclipse.fileGroup/eclipse.newResources");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFile", 1, "eclipse.fileGroup/eclipse.newResources");
+		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFolder", 2, "eclipse.fileGroup/eclipse.newResources");
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
-		commandService.registerCommandContribution("eclipse.newFile", 1, "pageActions", "eclipse.fileGroup.unlabeled");
-		commandService.registerCommandContribution("eclipse.newFolder", 2, "pageActions", "eclipse.fileGroup.unlabeled", false, null, new mCommands.URLBinding("newFolder", "name"));
-		commandService.registerCommandContribution("eclipse.upFolder", 3, "pageActions", "eclipse.fileGroup.unlabeled", false, new mCommands.CommandKeyBinding(38, false, false, true));
-		commandService.registerCommandContribution("eclipse.newProject", 3, "pageActions", "eclipse.fileGroup.unlabeled");
-		commandService.registerCommandContribution("eclipse.linkProject", 4, "pageActions", "eclipse.fileGroup.unlabeled");
+		commandService.registerCommandContribution("pageActions", "eclipse.newFile", 1, "eclipse.fileGroup.unlabeled");
+		commandService.registerCommandContribution("pageActions", "eclipse.newFolder", 2, "eclipse.fileGroup.unlabeled", false, null, new mCommands.URLBinding("newFolder", "name"));
+		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, "eclipse.fileGroup.unlabeled", false, new mCommands.CommandKeyBinding(38, false, false, true));
+		commandService.registerCommandContribution("pageActions", "eclipse.newProject", 3, "eclipse.fileGroup.unlabeled");
+		commandService.registerCommandContribution("pageActions", "eclipse.linkProject", 4, "eclipse.fileGroup.unlabeled");
 		// selection based command contributions in nav toolbar
-		commandService.registerCommandContribution("eclipse.copyFile", 1, "selectionTools", "eclipse.selectionGroup");
-		commandService.registerCommandContribution("eclipse.moveFile", 2, "selectionTools", "eclipse.selectionGroup");
-		commandService.registerCommandContribution("eclipse.deleteFile", 3, "selectionTools", "eclipse.selectionGroup");
-		// git contributions
-		// commandService.registerCommandContribution("eclipse.cloneGitRepository", 100, "pageActions", "eclipse.gitGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 1, "eclipse.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 2, "eclipse.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 3, "eclipse.selectionGroup");
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
 

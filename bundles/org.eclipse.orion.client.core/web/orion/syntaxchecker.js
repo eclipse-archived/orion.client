@@ -22,7 +22,7 @@ var SyntaxChecker = (function () {
 		/* Looks up applicable validator services, calls validators, passes result to the marker service. */
 		checkSyntax: function (contentType, title, message, contents) {
 			function getValidators(registry, contentType) {
-				var contentTypeService = registry.getService("orion.file.contenttypes");
+				var contentTypeService = registry.getService("orion.core.contenttypes");
 				function getFilteredValidator(registry, validator, contentType) {
 					var contentTypeIds = validator.getProperty("contentType");
 					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {

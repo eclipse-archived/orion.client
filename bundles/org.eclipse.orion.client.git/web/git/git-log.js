@@ -43,7 +43,7 @@ var serviceRegistry;
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
 
 			// Commit navigator
-			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions");
+			var navigator = new mGitCommitNavigator.GitCommitNavigator(serviceRegistry, selection, null, "explorer-tree", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions", "itemLevelCommands");
 			
 			mGlobalCommands.setPageCommandExclusions(["eclipse.git.remote", "eclipse.git.log"]);
 			// global commands
@@ -53,30 +53,30 @@ var serviceRegistry;
 			mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools");
 			
 			// define the command contributions - where things appear, first the groups
-			commandService.addCommandGroup("eclipse.gitGroup.nav", 200, "More");
-			commandService.addCommandGroup("eclipse.gitGroup.page", 100, null, null, "pageActions");
-			commandService.addCommandGroup("eclipse.selectionGroup", 500, "More actions", null, "selectionTools");
+			commandService.addCommandGroup("itemLevelCommands", "eclipse.gitGroup.nav", 200, "More");
+			commandService.addCommandGroup("pageActions", "eclipse.gitGroup.page", 100);
+			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 			
 			// commands appearing directly in local actions column
-			commandService.registerCommandContribution("eclipse.openGitCommit", 1);
-			commandService.registerCommandContribution("eclipse.compareWithWorkingTree", 2);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.openGitCommit", 1);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.compareWithWorkingTree", 2);
 		
 			// selection based command contributions in nav toolbar
-			commandService.registerCommandContribution("eclipse.compareGitCommits", 1, "selectionTools", "eclipse.selectionGroup");
+			commandService.registerCommandContribution("selectionTools", "eclipse.compareGitCommits", 1, "eclipse.selectionGroup");
 			
 			// git contributions
-			commandService.registerCommandContribution("eclipse.orion.git.fetch", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.fetchForce", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.merge", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.switchToCurrentLocal", 100, "pageActions", "eclipse.gitGroup.page");	
-			commandService.registerCommandContribution("eclipse.orion.git.push", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.pushForce", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.switchToRemote", 100, "pageActions", "eclipse.gitGroup.page");
-			commandService.registerCommandContribution("eclipse.orion.git.addTag", 3);
-			commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 3);
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.fetch", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.fetchForce", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.merge", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.switchToCurrentLocal", 100, "eclipse.gitGroup.page");	
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.push", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushForce", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.switchToRemote", 100, "eclipse.gitGroup.page");
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 3);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.cherryPick", 3);
 			// page navigation actions
-			commandService.registerCommandContribution("eclipse.orion.git.previousLogPage", 1, "pageNavigationActions");
-			commandService.registerCommandContribution("eclipse.orion.git.nextLogPage", 2, "pageNavigationActions");
+			commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.previousLogPage", 1);
+			commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.nextLogPage", 2);
 
 			loadResource(navigator, searcher, commandService);
 		

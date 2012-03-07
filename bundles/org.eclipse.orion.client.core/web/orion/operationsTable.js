@@ -13,14 +13,15 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 	var exports = {};
 
 	exports.OperationsExplorer = (function() {
-		function OperationsExplorer(registry, selection, parentId, toolbarId, selectionToolsId) {
+		function OperationsExplorer(registry, selection, parentId, toolbarId, selectionToolsId, actionScopeId) {
 			this.parentId = parentId;
 			this.registry = registry;
 			this.selection = selection;
 			this.toolbarId = toolbarId;
 			this.selectionToolsId = selectionToolsId;
 			this.checkbox = true;
-			this.renderer = new exports.OperationsRenderer({checkbox: true}, this);
+			this.actionScopeId = actionScopeId;
+			this.renderer = new exports.OperationsRenderer({actionScopeId: this.actionScopeId, checkbox: true}, this);
 		};
 
 		OperationsExplorer.prototype = new mExplorer.Explorer();
@@ -64,7 +65,7 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 					var operationToDelete = operationsToMerge.DeletedChildren[j]; 
 					for(var i=0; i<this.operations.Children.length; i++){
 						var operation = this.operations.Children[i];
-						if(operationToDelete == operation.Id){
+						if(operationToDelete === operation.Id){
 							this.operations.Children.splice(i, 1);
 							break;
 						}

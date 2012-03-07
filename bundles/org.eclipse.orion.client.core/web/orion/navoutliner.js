@@ -103,19 +103,21 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			}
 		});
 		var commandService = this._registry.getService("orion.page.command");
-		// register commands with object scope
-		commandService.addCommand(deleteFaveCommand, "object");
-		commandService.addCommand(renameFaveCommand, "object");
-		commandService.addCommand(renameSearchCommand, "object");	
-		commandService.addCommand(deleteSearchCommand, "object");	
-		commandService.addCommand(addFaveURLCommand, "dom");		
-		// declare the contribution to the ui
-		commandService.addCommandGroup("orion.favorites", 100, "*");
-		commandService.registerCommandContribution("eclipse.renameFave", 1, null, "orion.favorites");
-		commandService.registerCommandContribution("eclipse.deleteFave", 2, null, "orion.favorites");
-		commandService.registerCommandContribution("eclipse.renameSearch", 1, null, "orion.favorites");	
-		commandService.registerCommandContribution("eclipse.deleteSearch", 2, null, "orion.favorites");
-		commandService.registerCommandContribution("eclipse.addExternalFave", 1, "faveCommands");		
+		// register commands 
+		commandService.addCommand(deleteFaveCommand);
+		commandService.addCommand(renameFaveCommand);
+		commandService.addCommand(renameSearchCommand);	
+		commandService.addCommand(deleteSearchCommand);	
+		commandService.addCommand(addFaveURLCommand);		
+		// declare the individual item contributions to the ui
+		commandService.addCommandGroup("favoriteCommands", "orion.favorites", 100, "*");
+		commandService.registerCommandContribution("favoriteCommands", "eclipse.renameFave", 1, "orion.favorites");
+		commandService.registerCommandContribution("favoriteCommands", "eclipse.deleteFave", 2, "orion.favorites");
+		commandService.addCommandGroup("searchCommands", "orion.search", 100, "*");
+		commandService.registerCommandContribution("searchCommands", "eclipse.renameSearch", 1, "orion.search");	
+		commandService.registerCommandContribution("searchCommands", "eclipse.deleteSearch", 2, "orion.search");
+		// to the section heading
+		commandService.registerCommandContribution("faveCommands", "eclipse.addExternalFave", 1);		
 
 		var favoritesService = this._registry.getService("orion.core.favorite");
 		if (favoritesService) {
@@ -239,7 +241,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
 				dojo.place(window.document.createTextNode(fave.name), link, "only");
 				actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-				this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", fave, this, "tool", false, j);
+				this._registry.getService("orion.page.command").renderCommands("favoriteCommands", actionsWrapper, fave, this, "tool", j);
 				dojo.place(tr, tbody, "last");
 			}
 			dojo.place(navOutlineTable, this._parent, "last");
@@ -266,7 +268,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					link = dojo.create("a", {id:id, href: href}, col1, "only");
 					dojo.place(window.document.createTextNode(search.name), link, "only");
 					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-					this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", search, this, "tool", false, k);
+					this._registry.getService("orion.page.command").renderCommands("searchCommands", actionsWrapper, search, this, "tool", k);
 					dojo.place(tr, tbody, "last");
 				}
 				dojo.place(navOutlineTable, this._parent, "last");

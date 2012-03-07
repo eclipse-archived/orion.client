@@ -3174,6 +3174,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._applyStyle(e.style, lineDiv, div);
 				if (div) { div._trim = null; }
 				lineDiv.viewStyle = e.style;
+				lineDiv.setAttribute("role", "presentation");
 			}
 			lineDiv.lineIndex = lineIndex;
 			var ranges = [];

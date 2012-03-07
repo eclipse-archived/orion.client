@@ -101,6 +101,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		
 		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
 		var fileCommands = [];
+		// TODO: should not be necessary to do this here, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+		var nonHash = window.location.href.split('#')[0];
+		var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+
 		for (var i=0; i < editors.length; i++) {
 			var editor = editors[i];
 			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
@@ -125,8 +129,14 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						forceSingleItem: true,
 						isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
 					};
+
 				// Pretend that this is a real service
-				var fakeService = { run: dojo.hitch(uriTemplate, uriTemplate.expand) };
+				var fakeService = { 
+					run: dojo.hitch(uriTemplate, function(data) {
+						data.OrionHome = hostName;  //  https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+						return window.decodeURIComponent(this.expand(data));
+					})
+				};
 				fileCommands.push({properties: properties, service: fakeService});
 			}
 		}
@@ -279,8 +289,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	
 	extensionCommandUtils.getOpenWithCommands = function(commandService) {
 		var openWithCommands = [];
-		for (var commandId in commandService._objectScope) {
-			var command = commandService._objectScope[commandId];
+		for (var commandId in commandService._commandList) {
+			var command = commandService._commandList[commandId];
 			if (command.isEditor) {
 				openWithCommands.push(command);
 			}

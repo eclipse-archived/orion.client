@@ -11,9 +11,9 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
-	        'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/status', 'orion/progress',
+	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress',
 	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mGlobalCommands, mStatus, mProgress) {
+			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -24,7 +24,8 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			dojo.parser.parse();
 	
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService});
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");

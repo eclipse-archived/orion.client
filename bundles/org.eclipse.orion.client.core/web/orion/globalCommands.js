@@ -176,7 +176,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			dojo.empty(toolbar);
 			// The render call may be synch (when called by page glue code that created the service)
 			// or asynch (when called after getting a service reference).
-			var retn = commandService.renderCommands(toolbar, "dom", item || handler, handler, "button");
+			var retn = commandService.renderCommands(toolbar.id, toolbar, item || handler, handler, "button");
 			if (retn && retn.then) {
 				retn.then(function() {commandService.processURL(window.location.href);});
 			} else {
@@ -188,7 +188,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			toolbar = dojo.byId("pageNavigationActions");
 			if (toolbar) {	
 				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar, "dom", navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text
+				commandService.renderCommands(toolbar.id, toolbar, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text
 			}
 		}
 	}
@@ -335,7 +335,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			// need to have some item associated with the command
 			var item = dojo.isArray(pageItem) ? pageItem[0] : pageItem;
 			item = item || handler || {};
-			commandService.renderCommands(globalTools, "global", item, handler, "tool");
+			commandService.renderCommands(globalTools.id, globalTools, item, handler, "tool");
 		}
 	}
 	
@@ -529,7 +529,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					favService.hasFavorite(item.ChildrenLocation || item.Location).then(doAdd(item));
 				}
 			}});
-		commandService.addCommand(favoriteCommand, "dom");
+		commandService.addCommand(favoriteCommand);
 	
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
 			var favoriteService = serviceRegistry.getService("orion.core.favorite");
@@ -565,10 +565,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				});
 		}
 		
-		commandService.addCommand(openResourceCommand, "global");
-		commandService.registerCommandContribution("eclipse.openResource", 100, "globalActions", null, true, new mCommands.CommandKeyBinding('f', true, true));
+		commandService.addCommand(openResourceCommand);
+		commandService.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new mCommands.CommandKeyBinding('f', true, true));
 
-		
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
 			name: "Toggle banner and footer",
@@ -590,8 +589,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				}
 				return true;
 			}});
-		commandService.addCommand(toggleBanner, "global");
-		commandService.registerCommandContribution("orion.toggleTrim", 100, "globalActions", null, true, new mCommands.CommandKeyBinding("m", true, true));
+		commandService.addCommand(toggleBanner);
+		commandService.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new mCommands.CommandKeyBinding("m", true, true));
 		
 		if (editor) {
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim");
@@ -659,8 +658,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				}
 				return true;
 			}});
-		commandService.addCommand(keyAssistCommand, "global");
-		commandService.registerCommandContribution("eclipse.keyAssist", 100, "globalActions", null, true, new mCommands.CommandKeyBinding(191, false, true));
+		commandService.addCommand(keyAssistCommand);
+		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true));
 		if (editor) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), "Show Keys");
@@ -670,31 +669,6 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		userMenu.setKeyAssist(keyAssistCommand.callback);
 		
 		renderGlobalCommands(commandService, handler, pageItem);
-		
-		// provide free "open with" object level unless already done
-		var index = dojo.indexOf(exclusions, "eclipse.openWith");
-		if (index < 0) {
-			var contentTypeService = serviceRegistry.getService("orion.file.contenttypes");
-			if (contentTypeService) {
-				contentTypeService.getContentTypesMap().then(function(map) {
-					var openWithCommands = mExtensionCommands._createOpenWithCommands(serviceRegistry, map);
-					for (var i=0; i<openWithCommands.length; i++) {
-						var commandInfo = openWithCommands[i].properties;
-						var service = openWithCommands[i].service;
-						var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, true);
-						var command = new mCommands.Command(commandOptions);
-						command.isEditor = commandInfo.isEditor;
-						var openWithGroupCreated = false;
-						commandService.addCommand(command, "object");
-						if (!openWithGroupCreated) {
-							openWithGroupCreated = true;
-							commandService.addCommandGroup("eclipse.openWith", 1000, "Open With");
-						}
-						commandService.registerCommandContribution(command.id, i, null, "eclipse.openWith");
-					}
-				});
-			}
-		}
 		
 		generateUserInfo(serviceRegistry);
 		

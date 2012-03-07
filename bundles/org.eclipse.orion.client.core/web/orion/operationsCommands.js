@@ -29,12 +29,12 @@ define(['require', 'dojo', 'orion/commands'],
 				throw "could not find toolbar " + toolbarId;
 			}
 			var service = registry.getService("orion.page.command");
-			service.renderCommands(toolbar, "dom", item, explorer, "button");  
+			service.renderCommands(toolbarId, toolbar, item, explorer, "button");  
 			if (selectionToolbarId) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
-					dojo.empty(selectionToolbarId);
-					service.renderCommands(selectionToolbarId, "dom", null, explorer, "button"); 
+					dojo.empty(selectionTools);
+					service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); 
 				}
 			}
 
@@ -45,7 +45,7 @@ define(['require', 'dojo', 'orion/commands'],
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").renderCommands(selectionTools, "dom", selections, explorer, "button");
+						registry.getService("orion.page.command").renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button");
 					}
 				});
 			}
@@ -67,7 +67,7 @@ define(['require', 'dojo', 'orion/commands'],
 					return true;
 				}
 			});
-			commandService.addCommand(removeCompletedOperationsCommand, "dom");
+			commandService.addCommand(removeCompletedOperationsCommand);
 			
 			var removeOperationCommand = new mCommands.Command({
 				name : "Remove",
@@ -95,8 +95,7 @@ define(['require', 'dojo', 'orion/commands'],
 					return true;
 				}
 			});
-			commandService.addCommand(removeOperationCommand, "object");
-			commandService.addCommand(removeOperationCommand, "dom");
+			commandService.addCommand(removeOperationCommand);
 			
 			var cancelOperationCommand = new mCommands.Command({
 				name : "Cancel",
@@ -121,8 +120,7 @@ define(['require', 'dojo', 'orion/commands'],
 					return true;
 				}
 			});
-			commandService.addCommand(cancelOperationCommand, "object");
-			commandService.addCommand(cancelOperationCommand, "dom");
+			commandService.addCommand(cancelOperationCommand);
 		};
 	
 	}());	

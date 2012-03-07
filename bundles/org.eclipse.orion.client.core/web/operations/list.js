@@ -28,20 +28,20 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 				
-			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools");
+			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools", "operationItems");
 			
 			// global commands
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 			mOperationsCommands.createOperationsCommands(serviceRegistry, commandService, operationsTable, operationsClient);
 			
-			commandService.addCommandGroup("eclipse.taskGroup.unlabeled", 100, null, null, "pageActions");
-			commandService.addCommandGroup("eclipse.selectionGroup", 500, "More", null, "selectionTools");
+			commandService.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100);
+			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 			
-			commandService.registerCommandContribution("eclipse.removeCompletedOperations", 1, "pageActions", "eclipse.taskGroup.unlabeled");
-			commandService.registerCommandContribution("eclipse.removeOperation", 1);
-			commandService.registerCommandContribution("eclipse.removeOperation", 1, "selectionTools", "eclipse.selectionGroup");
-			commandService.registerCommandContribution("eclipse.cancelOperation", 2);
-			commandService.registerCommandContribution("eclipse.cancelOperation", 2, "selectionTools", "eclipse.selectionGroup");
+			commandService.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled");
+			commandService.registerCommandContribution("operationItems", "eclipse.removeOperation", 1);
+			commandService.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1, "eclipse.selectionGroup");
+			commandService.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2);
+			commandService.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup");
 			
 			function displayError(error){
 				var display = [];

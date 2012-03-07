@@ -18,7 +18,7 @@
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
+	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
@@ -69,36 +69,37 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				};
 				var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 				
+				var workspaces = serviceRegistry.getService("orion.core.file").loadWorkspaces();
 				var createCommand = new mCommands.Command({
 					name : "Create Site",
 					tooltip: "Create a new site configuration",
 					image : require.toUrl("images/add.gif"),
-					id: "eclipse.sites.create",
-					groupId: "eclipse.sitesGroup",
-					callback : function() {
-						var dialog = new orion.widgets.NewSiteDialog({
-							title: "Create Site Configuration",
-							serviceRegistry: serviceRegistry,
-							func: function(name, workspace) {
-								siteService.createSiteConfiguration(name, workspace).then(function(site) {
+					id: "orion.site.create",
+					groupId: "orion.sitesGroup",
+					parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')], false),
+					callback : function(data) {
+						var name = data.parameters && data.parameters.valueFor('name');
+						dojo.when(workspaces, function(workspaces) {
+					        var workspaceId = workspaces && workspaces[0] && workspaces[0].Id;
+					        if (workspaceId && name) {
+						        siteService.createSiteConfiguration(name, workspaceId).then(function(site) {
 									window.location = mSiteUtils.generateEditSiteHref(site);
 								}, errorHandler);
-							}});
-						dialog.startup();
-						dialog.show();
+					        }
+						});
 					}});
-				commandService.addCommand(createCommand, "dom");
+				commandService.addCommand(createCommand);
 				
 				// Add commands that deal with individual site configuration (edit, start, stop..)
 				mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService,
 						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 				
 				// Register command contributions
-				commandService.registerCommandContribution("eclipse.sites.create", 1, "pageActions");
-				commandService.registerCommandContribution("eclipse.site.edit", 1);
-				commandService.registerCommandContribution("eclipse.site.start", 2);
-				commandService.registerCommandContribution("eclipse.site.stop", 3);
-				commandService.registerCommandContribution("eclipse.site.delete", 4);
+				commandService.registerCommandContribution("pageActions", "orion.site.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
+				commandService.registerCommandContribution("siteCommand", "orion.site.edit", 1);
+				commandService.registerCommandContribution("siteCommand", "orion.site.start", 2);
+				commandService.registerCommandContribution("siteCommand", "orion.site.stop", 3);
+				commandService.registerCommandContribution("siteCommand", "orion.site.delete", 4);
 				
 				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 			}());

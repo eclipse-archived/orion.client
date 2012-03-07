@@ -15,13 +15,13 @@ define(['orion/edit/dispatcher'], function() {
 	 * @class Forwards events from an {@link orion.editor.Editor} to interested services.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry 
 	 * @param {orion.editor.Editor} editor
-	 * @param {orion.file.ContentType} contentType
+	 * @param {orion.core.ContentType} contentType
 	 */
 	function Dispatcher(serviceRegistry, editor, contentType) {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
 		this.contentType = contentType;
-		this.contentTypeService = serviceRegistry.getService("orion.file.contenttypes");
+		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
 		this.serviceReferences = {};
 
 		var self = this;

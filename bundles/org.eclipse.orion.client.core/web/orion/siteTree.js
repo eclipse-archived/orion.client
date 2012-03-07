@@ -9,32 +9,26 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo eclipse:true */
+/*global define dojo */
 /*jslint browser:true devel:true*/
 
 define(['dojo', 'orion/siteUtils'], function(dojo, mSiteUtils) {
 
-var eclipse = {};
-eclipse.sites = {};
+var exports = {};
 
-/**
- * @name eclipse.sites
- * @namespace Namespace for code related to creating, managing, and displaying site configurations.
- */
-
-eclipse.sites.SiteTreeModel = (function() {
+exports.SiteTreeModel = (function() {
 	/**
-	 * @name eclipse.sites.SiteTreeModel
+	 * @name orion.sites.SiteTreeModel
 	 * @class Tree model for powering a tree of site configurations.
-	 * @param {eclipse.sites.SiteService} siteService
-	 * @see eclipse.TableTree
+	 * @param {orion.sites.SiteService} siteService
+	 * @see orion.treetable.TableTree
 	 */
 	function SiteTreeModel(siteService, id) {
 		this._siteService = siteService;
 		this._root = {};
 		this._id = id;
 	}
-	SiteTreeModel.prototype = /** @lends eclipse.sites.SiteTreeModel.prototype */{
+	SiteTreeModel.prototype = /** @lends orion.sites.SiteTreeModel.prototype */{
 		getRoot: function(/**function*/ onItem) {
 			onItem(this._root);
 		},
@@ -59,17 +53,17 @@ eclipse.sites.SiteTreeModel = (function() {
 	return SiteTreeModel;
 }());
 
-eclipse.sites.SiteRenderer = (function() {
+exports.SiteRenderer = (function() {
 	/**
-	 * @name eclipse.sites.SiteRenderer
+	 * @name orion.sites.SiteRenderer
 	 * @class A renderer for the site configuration tree.
-	 * @see eclipse.TableTree
-	 * @param {eclipse.CommandService} commandService
+	 * @see orion.treetable.TableTree
+	 * @param {orion.commands.CommandService} commandService
 	 */
 	function SiteRenderer (commandService) {
 		this._commandService = commandService;
 	}
-	SiteRenderer.prototype = /** @lends eclipse.sites.SiteRenderer.prototype */{
+	SiteRenderer.prototype = /** @lends orion.sites.SiteRenderer.prototype */{
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			
@@ -113,7 +107,7 @@ eclipse.sites.SiteRenderer = (function() {
 			var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
 			
 			// contact the command service to render appropriate commands here.
-			this._commandService.renderCommands(actionsWrapper, "object", item, {} /*handler*/, "tool");
+			this._commandService.renderCommands("siteCommand", actionsWrapper, item, {} /*handler*/, "tool");
 			
 			dojo.place(siteConfigCol, tableRow, "last");
 			dojo.place(statusCol, tableRow, "last");
@@ -135,6 +129,6 @@ eclipse.sites.SiteRenderer = (function() {
 	return SiteRenderer;
 }());
 
-return eclipse.sites;
+return exports;
 });
 

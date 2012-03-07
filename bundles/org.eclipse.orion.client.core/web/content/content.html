@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html style="height: 100%">
 	<head>
 		<meta charset="UTF-8">
-		<title>Site Configurations</title>
-		<link rel="stylesheet" type="text/css" href="sites.css" />
+		<title>Plugin Content</title>
+		<link rel="stylesheet" type="text/css" href="content.css" />
     	<script type="text/javascript" src="../requirejs/require.js"></script>
 		<script type="text/javascript">
 		require({
@@ -34,17 +34,18 @@
 			  }
 			});
 		
-		require(["./sites"]);
+		require(["./content"]);
 		</script>
 	</head>
-<body style="visibility:hidden" class="nihilo">
-	<div id="orion.sites" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+   <body class="nihilo" style="width: 100%; height: 100%; visibility:hidden;">
+	<div id="orion.delegatedContent" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
 		<div id="centerPane" dojoType="dijit.layout.BorderContainer" gutters="false" region="center" design="headline" liveSplitters="false" splitter="false">
 			<div class="toolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
 			</div>
-			<div class="mainpane" id="site-table" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
+			<div id="delegatedContent" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
+				<div>Loading content from plugin...</div>
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
