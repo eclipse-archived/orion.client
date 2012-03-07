@@ -2,8 +2,10 @@
 <html>
 <head>
 <!-- standard scripts -->
-	<script type="text/javascript" src="../../../requirejs/require.js"></script>
-	<script type="text/javascript">
+	<script src="../../../orion/plugin.js"></script>
+	<script src="../../../requirejs/require.js"></script>
+	<script>
+	/*global require window*/
 	require({
 		  baseUrl: '../../..',
 		  packages: [
@@ -33,7 +35,7 @@
 		});
 	
 	window.onload = function() {
-		require(["orion/test","./testcase-textMateStyler"], function(test, testcase) {
+		require(["orion/test","./testcase"], function(test, testcase) {
 			test.run(testcase);			
 		});
 	};
@@ -41,8 +43,6 @@
 	<title>TEST: TextMateStyler</title>
 </head>
 <body>
-	<div style="padding-bottom:1em;">This file runs tests for the TextMate styler.</div>
-	
 	<div id="editorDiv"></div>
 </body>
 </html>
