@@ -176,8 +176,7 @@ eclipse.DAVFileServiceImpl= (function() {
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
 	 */
-	function DAVFileServiceImpl(name, location) {
-		this._rootName = name;
+	function DAVFileServiceImpl(location) {
 		this._rootLocation = location;		
 	}
 	
@@ -186,15 +185,9 @@ eclipse.DAVFileServiceImpl= (function() {
 		_createParents: function(location) {
 			var result = [];
 			if (location.indexOf(this._rootLocation) === -1 || this._rootLocation === location) {
-				return result;
+				return null;
 			}
-			
-			result.push({
-				Name: this._rootName,
-				Location: this._rootLocation,
-				ChildrenLocation: this._rootLocation
-			});
-			
+		
 			var tail = location.substring(this._rootLocation.length);
 			if (tail[tail.length - 1] === "/") {
 				tail = tail.substring(0, tail.length - 1);
@@ -279,7 +272,10 @@ eclipse.DAVFileServiceImpl= (function() {
 				while (childrenResponses.length !== 0) {
 					result.Children.push(createFile(childrenResponses.shift()));
 				}
-				result.Parents = that._createParents(location);
+				var parents = that._createParents(location);
+				if (parents !== null) {
+					result.Parents = parents;
+				}
 				return result;
 			});
 		},
@@ -416,7 +412,10 @@ eclipse.DAVFileServiceImpl= (function() {
 					var multistatus = parseDAV_multistatus(response.responseText);
 					var locationResponse = multistatus.response[0];
 					var result = createFile(locationResponse);
-					result.Parents = that._createParents(location);
+					var parents = that._createParents(location);
+					if (parents !== null) {
+						result.Parents = parents;
+					}
 					return result;
 				});
 			}
@@ -498,7 +497,7 @@ eclipse.DAVFileServiceImpl= (function() {
 		DAVFileServiceImpl.prototype.readBlob = function(location) {
 			return _call2("GET", location).then(function(response) {
 				if (window.WebKitBlobBuilder) { // webkit works better with blobs, FF with ArrayBuffers
-					var builder = new BlobBuilder();
+					var builder = new window.BlobBuilder();
 					builder.append(response.response);
 					return builder.getBlob();
 				}
@@ -513,7 +512,7 @@ eclipse.DAVFileServiceImpl= (function() {
 			}
 			
 			if (!contents.type) { // webkit works better with blobs, FF with ArrayBuffers
-				var builder = new BlobBuilder();
+				var builder = new window.BlobBuilder();
 				if (contents) {
 					builder.append(contents);
 				}

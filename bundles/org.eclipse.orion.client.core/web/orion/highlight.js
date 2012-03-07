@@ -17,8 +17,8 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @param {orion.file.ContentTypeService} contentTypeService
-	 * @param {orion.file.ContentType} contentType
+	 * @param {orion.core.ContentTypeService} contentTypeService
+	 * @param {orion.core.ContentType} contentType
 	 * @param {orion.textview.TextView} textView
 	 * @param {orion.textview.AnnotationModel} annotationModel
 	 * @param {String} [fileName] Deprecated.
@@ -111,7 +111,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	 * @name orion.highlight.SyntaxHighlighter
 	 * @class
 	 * @description 
-	 * <p>Requires service {@link orion.file.ContentTypeService}</p>
+	 * <p>Requires service {@link orion.core.ContentTypeService}</p>
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry Registry to look up highlight providers from.
 	 */
 	function SyntaxHighlighter(serviceRegistry) {
@@ -120,7 +120,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	}
 	SyntaxHighlighter.prototype = /** @lends orion.highlight.SyntaxHighlighter.prototype */ {
 		/**
-		 * @param {orion.file.ContentType} contentType
+		 * @param {orion.core.ContentType} contentType
 		 * @param {orion.textview.TextView} textView
 		 * @param {orion.textview.AnnotationModel} annotationModel
 		 * @param {String} [fileName] <i>Deprecated.</i> For backwards compatibility only, service-contributed highlighters
@@ -135,7 +135,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 				this.styler = null;
 			}
 			var self = this;
-			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.file.contenttypes"),
+			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contenttypes"),
 				fileContentType, textView, annotationModel, fileName).then(
 					function(styler) {
 						self.styler = styler;

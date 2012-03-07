@@ -57,7 +57,7 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 					return true;
 				},
 				choiceCallback: dojo.hitch(this, this._menuCallback)});
-			this._commandService.addCommand(switchOutlineCommand, "dom");
+			this._commandService.addCommand(switchOutlineCommand);
 		},
 		outlineChanged: function(outlinerService, title, contents) {
 			var self = this;
@@ -108,8 +108,8 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 				this.menuNode = dojo.create("div", {id: "switchOutlineMenu"}, this._parent, "last");
 			}
 			if (outlineProviders.length > 1) {
-				this._commandService.registerCommandContribution("eclipse.edit.outline.switch", 1, this.menuNode.id);
-				this._commandService.renderCommands(this.menuNode, "dom", null, this, "button");
+				this._commandService.registerCommandContribution(this.menuNode.id, "eclipse.edit.outline.switch", 1);
+				this._commandService.renderCommands(this.menuNode.id, this.menuNode, null, this, "button");
 			}
 		},
 		_renderElement: function(/**DOMNode*/ parentNode, /**Object*/ element, title) {

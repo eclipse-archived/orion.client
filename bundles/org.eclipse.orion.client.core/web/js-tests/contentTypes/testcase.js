@@ -93,7 +93,7 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 				filename: ['build.xml']
 			} ];
 		mockRegistry = new MockServiceRegistry();
-		mockRegistry._registerServiceProvider("orion.file.contenttype", {}, {
+		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
 				contentTypes: basicTypes
 			});
 		contentTypeService = new contentTypesModule.ContentTypeService(mockRegistry);
@@ -200,7 +200,7 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 			'extends': 'orion.test.ct4'
 		};
 		var mockRegistry = new MockServiceRegistry();
-		mockRegistry._registerServiceProvider("orion.file.contenttype", {}, {
+		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {
 			contentTypes: [ bad ]
 		});
 		var contentTypeService = new contentTypesModule.ContentTypeService(mockRegistry);

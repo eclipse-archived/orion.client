@@ -9,11 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
-		function(require, dojo, mUtil, mExplorer, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands){
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+		function(require, dojo, dijit, mUtil, mExplorer, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -58,6 +58,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 		this.commandService = commandService;
 		this.contentTypeService = contentTypeService;
 		this.openWithCommands = null;
+		this.actionScopeId = "fileFolderCommands";
 		this._init(options);
 	}
 	FileRenderer.prototype = new mExplorer.SelectionRenderer(); 
@@ -162,7 +163,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
-			this.explorer.registry.getService("orion.page.command").renderCommands(span, "object", item, this.explorer, "tool", false, null, "commandActiveItem", "commandInactiveItem");
+			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
@@ -207,7 +208,7 @@ define(['require', 'dojo', 'orion/util', 'orion/explorer', 'orion/explorerNavHan
 	 * @param {orion.searchClient.Searcher} options.searcher
 	 * @param {orion.fileClient.FileClient} options.fileClient
 	 * @param {orion.commands.CommandService} options.commandService
-	 * @param {orion.file.ContentTypeService} options.contentTypeService
+	 * @param {orion.core.ContentTypeService} options.contentTypeService
 	 * @param {String} options.parentId
 	 * @param {String} options.breadcrumbId
 	 * @param {String} options.toolbarId

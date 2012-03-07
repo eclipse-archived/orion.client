@@ -21,7 +21,7 @@ exports.GitCommitNavigator = (function() {
 	 * @name orion.git.GitCommitNavigator
 	 * @class A table-based git commit navigator
 	 */
-	function GitCommitNavigator(serviceRegistry, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId) {
+	function GitCommitNavigator(serviceRegistry, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId, actionScopeId) {
 		this.registry = serviceRegistry;
 		this.selection = selection;
 		this.checkbox = options != null ? options.checkbox : true;
@@ -31,10 +31,11 @@ exports.GitCommitNavigator = (function() {
 		this.toolbarId = toolbarId;
 		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
+		this.actionScopeId = actionScopeId || options.actionScopeId;
 		this.isDirectory = true;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new exports.GitCommitRenderer({cachePrefix: "GitCommitsNavigator", minimal: this.minimal}, this);
+		this.renderer = new exports.GitCommitRenderer({actionScopeId: this.actionScopeId, cachePrefix: "GitCommitsNavigator", minimal: this.minimal}, this);
 	}
 	
 	GitCommitNavigator.prototype = new mExplorer.Explorer();

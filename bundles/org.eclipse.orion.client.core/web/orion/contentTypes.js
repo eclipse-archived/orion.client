@@ -11,8 +11,12 @@
  *******************************************************************************/
 /*global define */
 define([], function() {
+	var SERVICE_ID = "orion.core.contenttypes";
+	var EXTENSION_ID = "orion.core.contenttype";
+	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility
+
 	/**
-	 * @name orion.file.ContentType
+	 * @name orion.core.ContentType
 	 * @class Represents a content type known to Orion.
 	 * @property {String} id Unique identifier of this ContentType.
 	 * @property {String} name User-readable name of this ContentType.
@@ -44,9 +48,9 @@ define([], function() {
 	}
 
 	/**
-	 * @name orion.file.ContentTypeService
-	 * @class A service for querying {@link orion.file.ContentType}s.
-	 * @description A service for querying {@link orion.file.ContentType}s. Clients should request the <code>"orion.file.contenttypes"</code>
+	 * @name orion.core.ContentTypeService
+	 * @class A service for querying {@link orion.core.ContentType}s.
+	 * @description A service for querying {@link orion.core.ContentType}s. Clients should request the <code>"orion.core.contenttypes"</code>
 	 * service from the {@link orion.serviceregistry.ServiceRegistry} rather than instantiate this class directly. This constructor is 
 	 * intended for use only by page initialization code.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to use for looking up registered content types
@@ -58,7 +62,8 @@ define([], function() {
 				if (obj === null || typeof obj === "undefined") { return []; }
 				return (obj instanceof Array) ? obj : [obj];
 			}
-			var serviceReferences = serviceRegistry.getServiceReferences("orion.file.contenttype");
+			var serviceReferences = serviceRegistry.getServiceReferences(EXTENSION_ID).concat(
+					serviceRegistry.getServiceReferences(OLD_EXTENSION_ID));
 			var contentTypes = {};
 			for (var i=0; i < serviceReferences.length; i++) {
 				var serviceRef = serviceReferences[i], types = array(serviceRef.getProperty("contentTypes"));
@@ -81,12 +86,12 @@ define([], function() {
 		
 		this.serviceRegistry = serviceRegistry;
 		this.map = buildMap(serviceRegistry);
-		serviceRegistry.registerService("orion.file.contenttypes", this);
+		serviceRegistry.registerService(SERVICE_ID, this);
 	}
-	ContentTypeService.prototype = /** @lends orion.file.ContentTypeService.prototype */ {
+	ContentTypeService.prototype = /** @lends orion.core.ContentTypeService.prototype */ {
 		/**
 		 * Gets all the ContentTypes in the registry.
-		 * @returns {orion.file.ContentType[]} An array of all registered ContentTypes.
+		 * @returns {orion.core.ContentType[]} An array of all registered ContentTypes.
 		 */
 		getContentTypes: function() {
 			var map = this.getContentTypesMap();
@@ -100,7 +105,7 @@ define([], function() {
 		},
 		/**
 		 * Gets a map of all ContentTypes.
-		 * @return {Object} A map whose keys are ContentType IDs and values are the {@link orion.file.ContentType} having that ID.
+		 * @return {Object} A map whose keys are ContentType IDs and values are the {@link orion.core.ContentType} having that ID.
 		 */
 		getContentTypesMap: function() {
 			return this.map;
@@ -108,7 +113,7 @@ define([], function() {
 		/**
 		 * Looks up the ContentType for a file or search result, given the metadata.
 		 * @param {Object} fileMetadata Metadata for a file or search result.
-		 * @returns {orion.file.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
+		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFileContentType: function(fileMetadata) {
 			return getFilenameContentType.call(this, fileMetadata.Name);
@@ -116,7 +121,7 @@ define([], function() {
 		/**
 		 * Looks up the ContentType, given a filename.
 		 * @param {String} filename The filename.
-		 * @returns {orion.file.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
+		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFilenameContentType: function(filename) {
 			return getFilenameContentType.call(this, filename);
@@ -124,15 +129,15 @@ define([], function() {
 		/**
 		 * Gets a ContentType by ID.
 		 * @param {String} id The ContentType ID.
-		 * @returns {orion.file.ContentType} The ContentType having the given ID, or <code>null</code>.
+		 * @returns {orion.core.ContentType} The ContentType having the given ID, or <code>null</code>.
 		 */
 		getContentType: function(id) {
 			return this.map[id] || null;
 		},
 		/**
 		 * Determines whether a ContentType is an extension of another.
-		 * @param {orion.file.ContentType|String} contentTypeA ContentType or ContentType ID.
-		 * @param {orion.file.ContentType|String} contentTypeB ContentType or ContentType ID.
+		 * @param {orion.core.ContentType|String} contentTypeA ContentType or ContentType ID.
+		 * @param {orion.core.ContentType|String} contentTypeB ContentType or ContentType ID.
 		 * @returns {Boolean} Returns <code>true</code> if <code>contentTypeA</code> equals <code>contentTypeB</code>,
 		 *  or <code>contentTypeA</code> descends from <code>contentTypeB</code>.
 		 */
@@ -153,8 +158,8 @@ define([], function() {
 		},
 		/**
 		 * Similar to {@link #isExtensionOf}, but works on an array of contentTypes.
-		 * @param {orion.file.ContentType|String} contentType ContentType or ContentType ID.
-		 * @param {orion.file.ContentType[]|String[]} contentTypes Array of ContentTypes or ContentType IDs.
+		 * @param {orion.core.ContentType|String} contentType ContentType or ContentType ID.
+		 * @param {orion.core.ContentType[]|String[]} contentTypes Array of ContentTypes or ContentType IDs.
 		 * @returns {Boolean} <code>true</code> if <code>contentType</code> equals or descends from any of the
 		 * ContentTypes in <code>contentTypes</code>.
 		 */

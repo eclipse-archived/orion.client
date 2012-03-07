@@ -318,7 +318,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 				}
 				
 				dojo.empty(this.pageActionsPlaceholder);
-				this.commandService.addCommandGroup("eclipse.profileActionsGroup", 100, null, null, this.pageActionsPlaceholder.id);
+				this.commandService.addCommandGroup(this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup", 100);
 				for(var i=0; i<content.actions.length; i++){
 					var info = content.actions[i];
 					var commandOptions = {
@@ -329,10 +329,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 							callback: dojo.hitch(profile, function(action){this.fire(action);}, info.action)
 					};
 					var command = new mCommands.Command(commandOptions);
-					this.commandService.addCommand(command, "dom");					
-					this.commandService.registerCommandContribution(info.id, i, this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup");
+					this.commandService.addCommand(command);					
+					this.commandService.registerCommandContribution(this.pageActionsPlaceholder.id, info.id, i, "eclipse.profileActionsGroup");
 				}
-				this.commandService.renderCommands(this.pageActionsPlaceholder, "dom", {}, {}, "button");
+				this.commandService.renderCommands(this.pageActionsPlaceholder.id, this.pageActionsPlaceholder, {}, {}, "button");
 				
 			}
 			

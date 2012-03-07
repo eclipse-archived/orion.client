@@ -668,7 +668,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		});
 		
 		var replaceAllCommand = new mCommands.Command({
-			name: "Commit",
+			name: "Apply Changes",
 			tooltip: "Replace all selected matches",
 			id: "orion.globalSearch.replaceAll",
 			callback: function(data) {
@@ -715,19 +715,19 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			}
 		});
 	
-		this._commandService.addCommand(saveResultsCommand, "dom");
-		this._commandService.addCommand(previewCurrentPageCommand, "dom");
-		this._commandService.addCommand(searchAgainCommand, "dom");
-		this._commandService.addCommand(hideCompareCommand, "dom");
-		this._commandService.addCommand(showCompareCommand, "dom");
-		this._commandService.addCommand(replaceAllCommand, "dom");
-		this._commandService.addCommandGroup("orion.searchActions.unlabeled", 200, null, null, "pageActions");
-		this._commandService.registerCommandContribution("orion.saveSearchResults", 1, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.previewCurrentPage", 2, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.searchAgain", 3, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.hideCompare", 4, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.showCompare", 5, "pageActions", "orion.searchActions.unlabeled");
-		this._commandService.registerCommandContribution("orion.globalSearch.replaceAll", 6, "pageActions", "orion.searchActions.unlabeled");
+		this._commandService.addCommand(saveResultsCommand);
+		this._commandService.addCommand(previewCurrentPageCommand);
+		this._commandService.addCommand(searchAgainCommand);
+		this._commandService.addCommand(hideCompareCommand);
+		this._commandService.addCommand(showCompareCommand);
+		this._commandService.addCommand(replaceAllCommand);
+		this._commandService.addCommandGroup("pageActions", "orion.searchActions.unlabeled", 200);
+		this._commandService.registerCommandContribution("pageActions", "orion.saveSearchResults", 1, "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("pageActions","orion.previewCurrentPage", 2, "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.searchAgain", 3, "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.hideCompare", 4, "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.showCompare", 5, "orion.searchActions.unlabeled");
+		this._commandService.registerCommandContribution("pageActions", "orion.globalSearch.replaceAll", 6, "orion.searchActions.unlabeled");
 
 		var previousPage = new mCommands.Command({
 			name : "< Previous Page",
@@ -803,20 +803,20 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			callback : function() {
 				that.collapseAll();
 		}});
-		this._commandService.addCommand(previousPage, "dom");
-		this._commandService.addCommand(nextPage, "dom");
-		this._commandService.addCommand(nextResultCommand, "dom");
-		this._commandService.addCommand(prevResultCommand, "dom");
-		this._commandService.addCommand(expandAllCommand, "dom");
-		this._commandService.addCommand(collapseAllCommand, "dom");
+		this._commandService.addCommand(previousPage);
+		this._commandService.addCommand(nextPage);
+		this._commandService.addCommand(nextResultCommand);
+		this._commandService.addCommand(prevResultCommand);
+		this._commandService.addCommand(expandAllCommand);
+		this._commandService.addCommand(collapseAllCommand);
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.search.nextResult", 1, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.prevResult", 2, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.expandAll", 3, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.collapseAll", 4, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.prevPage", 5, "pageNavigationActions");
-		this._commandService.registerCommandContribution("orion.search.nextPage", 6, "pageNavigationActions");
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextResult", 1);
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevResult", 2);
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.expandAll", 3);
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.collapseAll", 4);
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevPage", 5);
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 6);
 	};
 	
 	SearchResultExplorer.prototype.loadOneFileMetaData =  function(index, onComplete){
@@ -847,7 +847,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			    }
 			}),
 			dojo.hitch(this, function(error) {
-				console.error("Error loading file metadata: " + error.message);
+				console.error("Error loading file metadata: status " + error.status);
+				//If we can't load file meta data we have to stale the file.
+				item.stale = true;
+				this.renderer.staleFileElement(item);
 				if(index === (this.model.indexedFileItems.length-1)){
 			    	if(onComplete){
 			    		onComplete();
@@ -911,11 +914,11 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			}
 		});
 
-		this._commandService.addCommand(innerReplaceAllCommand, "dom");
+		this._commandService.addCommand(innerReplaceAllCommand);
 
 		// Register command contributions
-		this._commandService.registerCommandContribution("orion.globalSearch.innerReplaceAll", 1, "globalSearchReplaceCommands");
-		this._commandService.renderCommands("globalSearchReplaceCommands", "dom", this, this, "button");
+		this._commandService.registerCommandContribution("globalSearchReplaceCommands", "orion.globalSearch.innerReplaceAll", 1);
+		this._commandService.renderCommands("globalSearchReplaceCommands", "globalSearchReplaceCommands", this, this, "button");
 	};
 	
 	SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex){
@@ -1061,7 +1064,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	SearchResultExplorer.prototype._getContentType = function(fileItem){
-		return this.registry.getService("orion.file.contenttypes").getFilenameContentType(fileItem.name);
+		return this.registry.getService("orion.core.contenttypes").getFilenameContentType(fileItem.name);
 	};
 	
 	SearchResultExplorer.prototype.buildPreview = function(updating) {
@@ -1165,10 +1168,10 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
 		dojo.empty("pageActions");
-		this._commandService.renderCommands("pageActions", "dom", that, that, "button");
+		this._commandService.renderCommands("pageActions", "pageActions", that, that, "button");
 
 		dojo.empty("pageNavigationActions");
-		this._commandService.renderCommands("pageNavigationActions", "dom", that, that, "button");
+		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button");
 		if(this.model.replaceMode() || this._reporting){
 			mUtil.forceLayout("pageNavigationActions");
 			return;

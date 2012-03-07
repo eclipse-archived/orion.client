@@ -242,8 +242,8 @@ orion.GitStatusContentRenderer = (function() {
 			dojo.addClass(actionCol, "statusAction");
 			actionCol.noWrap= true;
 			var actionsWrapper = dojo.create("span", {id: row.id+"actionsWrapper"}, actionCol, "only");
-			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", {type: "fileItem", object: itemModel, rowId:row.id}, this, "tool");
-			this._registry.getService("orion.page.command").renderCommands(actionsWrapper, "object", itemModel, this, "tool");
+			this._registry.getService("orion.page.command").renderCommands("itemLevelCommands", actionsWrapper, {type: "fileItem", object: itemModel, rowId:row.id}, this, "tool");
+			this._registry.getService("orion.page.command").renderCommands("itemLevelCommands", actionsWrapper, itemModel, this, "tool");
 			if(this._controller._model.isStaged(itemModel.type)){
 				this._controller.hasStaged = true;
 			} else {
@@ -279,14 +279,14 @@ orion.GitStatusTableRenderer = (function() {
 			// TODO this is done here 
 			var commandService = this._registry.getService("orion.page.command");
 			if (this._type === "stagedItems") {
-				commandService.registerCommandContribution("orion.gitUnstage", 1, id);
-				commandService.registerCommandContribution("orion.gitUnstageAll", 2, id);
+				commandService.registerCommandContribution(id, "orion.gitUnstage", 1);
+				commandService.registerCommandContribution(id, "orion.gitUnstageAll", 2);
 			} else {
-				commandService.registerCommandContribution("orion.gitStage", 1, id);
-				commandService.registerCommandContribution("orion.gitCheckout", 2, id);
-				commandService.registerCommandContribution("orion.gitStageAll", 3, id);	
-				commandService.registerCommandContribution("orion.gitCheckoutAll", 4, id);	
-				commandService.registerCommandContribution("orion.gitSavePatch", 5, id);
+				commandService.registerCommandContribution(id, "orion.gitStage", 1);
+				commandService.registerCommandContribution(id, "orion.gitCheckout", 2);
+				commandService.registerCommandContribution(id, "orion.gitStageAll", 3);	
+				commandService.registerCommandContribution(id, "orion.gitCheckoutAll", 4);	
+				commandService.registerCommandContribution(id, "orion.gitSavePatch", 5);
 			}
 		
 			dojo.addClass(this._cmdSpan, "paneHeadingCommands");
@@ -320,7 +320,7 @@ orion.GitStatusTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: self._type}, this, "button");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan.id, self._cmdSpan, {type: self._type}, this, "button");
 		}
 	};
 	return GitStatusTableRenderer;
@@ -398,7 +398,7 @@ orion.GitRebaseZoneRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: "rebase"}, this, "button");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan.id, self._cmdSpan, {type: "rebase"}, this, "button");
 		},
 		
 		show:function(){
@@ -453,8 +453,8 @@ orion.GitCommitterAndAuthorZoneRenderer = (function() {
 			dojo.place(document.createTextNode(""), this._cmdSpanHide, "only");
 			var self = this;
 			var service = this._registry.getService("orion.page.command");
-			service.renderCommands(self._cmdSpanShow, "dom", {type: "personIdentShow"}, this, "button");
-			service.renderCommands(self._cmdSpanHide, "dom", {type: "personIdentHide"}, this, "button");
+			service.renderCommands(self._cmdSpanShow.id, self._cmdSpanShow, {type: "personIdentShow"}, this, "button");
+			service.renderCommands(self._cmdSpanHide.id, self._cmdSpanHide, {type: "personIdentHide"}, this, "button");
 		},
 		
 		setDefaultPersonIdent:function(name, email) {
@@ -507,12 +507,12 @@ orion.GitLogTableRenderer = (function() {
 			this._cmdSpan = dojo.create("span", {"id": id}, this._type + "commands", "last");
 			var commandService = this._registry.getService("orion.page.command");
 			if (this._type === "gitRemote") {
-				commandService.registerCommandContribution("orion.openGitRemote", 1, id);	
-				commandService.registerCommandContribution("eclipse.orion.git.fetch", 2, idAdditional);	
-				commandService.registerCommandContribution("eclipse.orion.git.merge", 3, idAdditional);	
+				commandService.registerCommandContribution(id, "orion.openGitRemote", 1);	
+				commandService.registerCommandContribution(idAdditional, "eclipse.orion.git.fetch", 2);	
+				commandService.registerCommandContribution(idAdditional, "eclipse.orion.git.merge", 3);	
 			} else {
-				commandService.registerCommandContribution("orion.openGitLog", 1, id);	
-				commandService.registerCommandContribution("eclipse.orion.git.push", 2, idAdditional);	
+				commandService.registerCommandContribution(id, "orion.openGitLog", 1);	
+				commandService.registerCommandContribution(idAdditional, "eclipse.orion.git.push", 2);	
 			}
 			dojo.addClass(this._cmdSpan, "statusLogCmd paneHeadingCommands");
 			this._logContentId = this._parentId + "_" + this._type + "_content";
@@ -538,13 +538,13 @@ orion.GitLogTableRenderer = (function() {
 		renderAction:function(){
 			dojo.place(document.createTextNode(""), this._cmdSpan, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan, "dom", {type: self._type , model: self._controller._model, branch: self._controller._curBranch}, this, "button");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpan.id, self._cmdSpan, {type: self._type , model: self._controller._model, branch: self._controller._curBranch}, this, "button");
 		},
 		
 		renderAdditionalAction:function(item){
 			dojo.place(document.createTextNode(""), this._cmdSpanAdditional, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional, "dom", item, this, "button");
+			this._registry.getService("orion.page.command").renderCommands(self._cmdSpanAdditional.id, self._cmdSpanAdditional, item, this, "button");
 		}
 	};
 	return GitLogTableRenderer;
@@ -726,7 +726,7 @@ orion.GitStatusController = (function() {
 			var toolbar = dojo.byId( "pageActions");
 			dojo.place(document.createTextNode(""), toolbar, "only");
 			var self = this;
-			this._registry.getService("orion.page.command").renderCommands(toolbar, "dom", {type: "global"}, this, "button", true);
+			this._registry.getService("orion.page.command").renderCommands(toolbar.id, toolbar, {type: "global"}, this, "button", true);
 		},
 		
 		_processCloneInfo:function(){
@@ -844,8 +844,14 @@ orion.GitStatusController = (function() {
 					retDeffered.callback();
 					return;
 				}
-		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, minimal: true}, this._remoteTableRenderer.getLogContentId());    
-				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
+		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, actionScopeId: "itemLevelCommands", minimal: true}, this._remoteTableRenderer.getLogContentId());    
+				if(dojo.byId(this._remoteTableRenderer.getLogContentId())){
+					//If the remote section is rendered before, we need to empty the contents
+					dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
+				} else {
+					//If the remote section is not rendered before, we need to create the empty frame there
+					this._remoteTableRenderer.render(true);
+				}
 				// refresh the commit list for the remote
 				var path = this._curBranch.RemoteLocation[0].Children[0].Location + "?page=1&pageSize=5";
 				dojo.xhrGet({
@@ -1196,40 +1202,37 @@ orion.GitStatusController = (function() {
 			
 			var commandService = this._registry.getService("orion.page.command");
 			// register commands with object scope
-			commandService.addCommand(sbsCompareCommand, "object");
-			commandService.addCommand(stageCommand, "object");	
-			commandService.addCommand(stageCommand, "dom");	
-			commandService.addCommand(checkoutCommand, "object");
-			commandService.addCommand(checkoutCommand, "dom");
-			commandService.addCommand(stageAllCommand, "dom");
-			commandService.addCommand(checkoutAllCommand, "dom");
-			commandService.addCommand(savePatchCommand, "dom");
-			commandService.addCommand(unstageAllCommand, "dom");
-			commandService.addCommand(unstageCommand, "object");
-			commandService.addCommand(unstageCommand, "dom");
-			commandService.addCommand(resetChangesCommand, "dom");
-			commandService.addCommand(rebaseContinueCommand, "dom");
-			commandService.addCommand(rebaseSkipCommand, "dom");
-			commandService.addCommand(rebaseAbortCommand, "dom");
-			commandService.addCommand(resetChangesCommand, "dom");
-			commandService.addCommand(showCommitterAndAuthorPanel, "dom");
-			commandService.addCommand(hideCommitterAndAuthorPanel, "dom");
-			commandService.addCommand(openGitLog, "dom");	
-			commandService.addCommand(openGitRemote, "dom");	
+			commandService.addCommand(sbsCompareCommand);
+			commandService.addCommand(stageCommand);	
+			commandService.addCommand(checkoutCommand);
+			commandService.addCommand(stageAllCommand);
+			commandService.addCommand(checkoutAllCommand);
+			commandService.addCommand(savePatchCommand);
+			commandService.addCommand(unstageAllCommand);
+			commandService.addCommand(unstageCommand);
+			commandService.addCommand(resetChangesCommand);
+			commandService.addCommand(rebaseContinueCommand);
+			commandService.addCommand(rebaseSkipCommand);
+			commandService.addCommand(rebaseAbortCommand);
+			commandService.addCommand(resetChangesCommand);
+			commandService.addCommand(showCommitterAndAuthorPanel);
+			commandService.addCommand(hideCommitterAndAuthorPanel);
+			commandService.addCommand(openGitLog);	
+			commandService.addCommand(openGitRemote);	
 			
 			// object level contributions
-			commandService.registerCommandContribution("orion.gitStage", 100);
-			commandService.registerCommandContribution("orion.gitCheckout", 101);	
-			commandService.registerCommandContribution("orion.gitUnstage", 102);	
-			commandService.registerCommandContribution("orion.sbsCompare", 103);	
+			commandService.registerCommandContribution("itemLevelCommands", "orion.gitStage", 100);
+			commandService.registerCommandContribution("itemLevelCommands", "orion.gitCheckout", 101);	
+			commandService.registerCommandContribution("itemLevelCommands", "orion.gitUnstage", 102);	
+			commandService.registerCommandContribution("itemLevelCommands", "orion.sbsCompare", 103);	
 			
 			// dom level contributions for commands with known ids.
-			commandService.registerCommandContribution("orion.gitResetChanges", 1 , "pageActions");
-			commandService.registerCommandContribution("orion.gitRebaseContinue", 2, "rebaseActions");
-			commandService.registerCommandContribution("orion.gitRebaseSkip", 3, "rebaseActions");	
-			commandService.registerCommandContribution("orion.gitRebaseAbort", 4, "rebaseActions");
-			commandService.registerCommandContribution("orion.showCommitterAndAuthor", 1, "personIdentShow");
-			commandService.registerCommandContribution("orion.hideCommitterAndAuthor", 2, "personIdentHide");
+			commandService.registerCommandContribution("pageActions", "orion.gitResetChanges", 1);
+			commandService.registerCommandContribution("rebaseActions", "orion.gitRebaseContinue", 2);
+			commandService.registerCommandContribution("rebaseActions", "orion.gitRebaseSkip", 3);	
+			commandService.registerCommandContribution("rebaseActions", "orion.gitRebaseAbort", 4);
+			commandService.registerCommandContribution("personIdentShow", "orion.showCommitterAndAuthor", 1);
+			commandService.registerCommandContribution("personIdentHide", "orion.hideCommitterAndAuthor", 2);
 			
 			// dynamically generated sections register their commands once the id of tool area is computed
 		},
@@ -1260,13 +1263,13 @@ orion.GitStatusController = (function() {
 					that._inlineCompareContainer.prevDiff();
 			}});
 			
-			this._commandService.addCommand(prevDiffCommand, "dom");
-			this._commandService.addCommand(nextDiffCommand, "dom");
+			this._commandService.addCommand(prevDiffCommand);
+			this._commandService.addCommand(nextDiffCommand);
 				
 			// Register command contributions
-			this._commandService.registerCommandContribution("orion.compare.prevDiff", 2, "compare_rightContainerCommands");
-			this._commandService.registerCommandContribution("orion.compare.nextDiff", 1, "compare_rightContainerCommands");
-			this._commandService.renderCommands("compare_rightContainerCommands", "dom", self, self, "button");
+			this._commandService.registerCommandContribution("compare_rightContainerCommands", "orion.compare.prevDiff", 2);
+			this._commandService.registerCommandContribution("compare_rightContainerCommands", "orion.compare.nextDiff", 1);
+			this._commandService.renderCommands("compare_rightContainerCommands", "compare_rightContainerCommands", self, self, "button");
 		},
 		
 		startTimer: function(){
@@ -1543,7 +1546,7 @@ orion.GitStatusController = (function() {
 					that._stagingConflict = true;
 					that._stagingName = itemModel.name;
 				}
-				paths.push(itemModel.path);
+				paths.push(itemModel.name);
 			}
 			that._registry.getService("orion.git.provider").stageMultipleFiles(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
 				that.getGitStatus(that._url);
@@ -1601,7 +1604,7 @@ orion.GitStatusController = (function() {
 			var paths = [];
 			for ( var i = 0; i < selection.length; i++) {
 				var itemModel = selection[i].modelItem;
-				paths.push(itemModel.path);
+				paths.push(itemModel.name);
 			}
 			that._registry.getService("orion.git.provider").unstage(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
 				that.getGitStatus(that._url);

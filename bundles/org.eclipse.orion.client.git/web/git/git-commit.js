@@ -34,13 +34,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 
 		// ...
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry});
 		var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
 		var gitClient = new mGitClient.GitService(serviceRegistry);
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 
-		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions"/*, "selectionTools"*/);
+		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands");
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 
 		// define commands
@@ -48,12 +48,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
 
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("eclipse.gitGroup", 100, null, null, "pageActions");
-		commandService.registerCommandContribution("eclipse.orion.git.cherryPick", 100, "pageActions", "eclipse.gitGroup");
-		commandService.registerCommandContribution("eclipse.orion.git.openCommitCommand", 102, "pageActions", "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true));
+		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup");
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true));
 
 		// object contributions
-		commandService.registerCommandContribution("eclipse.removeTag", 1000);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000);
 		
 		var showDiffCommand = new mCommands.Command({
 			name: "Compare",
@@ -69,10 +69,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			}
 		});		
 
-		commandService.addCommand(showDiffCommand, "object");
-		commandService.registerCommandContribution("eclipse.orion.git.diff.showFullCompare", 1000);
+		commandService.addCommand(showDiffCommand);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showFullCompare", 1000);
 		
-		var showDiffCommand = new mCommands.Command({
+		showDiffCommand = new mCommands.Command({
 			name: "Working Directory Version",
 			tooltip: "View the working directory version of the file",
 			imageClass: "git-sprite-open_compare",
@@ -86,8 +86,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			}
 		});		
 
-		commandService.addCommand(showDiffCommand, "object");
-		commandService.registerCommandContribution("eclipse.orion.git.diff.showCurrent", 2000);	
+		commandService.addCommand(showDiffCommand);
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000);	
 
 		explorer.display(dojo.hash());
 
