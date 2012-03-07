@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -12,8 +12,8 @@
 /*jslint laxbreak:true regexp:false*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMateStyler", "./testGrammars"],
-		function(dojo, assert, mTextView, mTextMateStyler, mTestGrammars) {
+define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler", "./testGrammars"],
+		function(dojo, assert, mMockTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
 	// TODO: run tests with both Windows and Linux delimiters since a few cases have failed with
@@ -26,8 +26,9 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	 */
 	function makeTest(testBody, doTearDown) {
 		function createTextView() {
-			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test-textMateStyler.css"], sync: true};
-			return new mTextView.TextView(options);
+			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"], sync: true};
+			//return new mTextView.TextView(options);
+			return new mMockTextView.MockTextView(options);
 		}
 		
 		/** Called after each test to remove view from DOM */
@@ -73,7 +74,8 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		for (var i=0; i < a.length; i++) {
 			var item = a[i];
 			var j = b.indexOf(item);
-			if (j === -1 || (sameOrder && i !== j)) { return false; }		}
+			if (j === -1 || (sameOrder && i !== j)) { return false; }
+		}
 		return true;
 	}
 	
@@ -141,7 +143,6 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	
 	/**
 	 * Fails if the currently-displayed styles for the line at <tt>lineIndex</tt> don't match the expected <tt>scopeRegions</tt>.
-	 * WARNING: uses internal methods of TextView, may break
 	 * @param {Array} scopeRegions Each element of scopeRegions is an Array with the elements:
 	 *   [0] {Number} start Line-relative index
 	 *   [1] {Number} end Line-relative index
@@ -150,24 +151,22 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 	 */
 	function assertLineScope(view, styler, lineIndex, scopeRegions) {
 		var lineStart = view.getModel().getLineStart(lineIndex);
-		var lineNode = view._getLineNode(lineIndex),
-		    spans = lineNode.childNodes,
-		    charNum = 0,
-		    styleRanges = [];
-		for (var i=0; i < spans.length; i++) {
-			var child = spans[i];
-			var ignoreChars = typeof child.ignoreChars === "number" ? child.ignoreChars : 0;
-			var length = child.textContent.length - ignoreChars;
-			var styleClass = child.className;
-			if (length > 0 /*omit ignored*/ && styleClass !== "" /*omit unstyled*/) {
-				styleRanges.push({
-					start: lineStart + charNum,
-					end: lineStart + charNum + length,
-					style: { styleClass: styleClass }
-				});
-			}
-			charNum += length;
-		}
+		var lineStyle = view._getLineStyle(lineIndex);
+		var styleRanges = (lineStyle && lineStyle.ranges) || [];
+//		for (var i=0; i < ranges.length; i++) {
+//			var child = ranges[i];
+//			var ignoreChars = typeof child.ignoreChars === "number" ? child.ignoreChars : 0;
+//			var length = child.textContent.length - ignoreChars;
+//			var styleClass = child.className;
+//			if (length > 0 /*omit ignored*/ && styleClass !== "" /*omit unstyled*/) {
+//				styleRanges.push({
+//					start: lineStart + charNum,
+//					end: lineStart + charNum + length,
+//					style: { styleClass: styleClass }
+//				});
+//			}
+//			charNum += length;
+//		}
 		assertStylesMatchScopes(view, styler, lineIndex, styleRanges, scopeRegions);
 	}
 	
@@ -370,11 +369,10 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		var styler = makeStyler(view, mTestGrammars.SampleGrammar);
 		view.setText("fizzer");
 		
-		// expect fi[z][z]er
+		// expect fi[zz]er
 		var invalidScopeName = mTestGrammars.SampleGrammar.repository.badZ.name;
 		assertLineScope(view, styler, 0, [
-				[2, 3, invalidScopeName], // z
-				[3, 4, invalidScopeName]  // z
+				[2, 4, invalidScopeName] // z
 			]);
 	});
 	
@@ -831,8 +829,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"]
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"]
 		]);
 		
 		/*
@@ -842,8 +839,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"],
 			[12, 13, "comment.block.mylang", "b"]
 		]);
 		
@@ -854,8 +850,7 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		assertLineScope(view, styler, 0, [
 			[0, 4, "punctuation.definition.comment.mylang", "<!--"],
 			[4, 5, "comment.block.mylang", "a"],
-			[5, 8, "punctuation.definition.comment.mylang", "-->"],
-			[8, 12, "punctuation.definition.comment.mylang", "<!--"],
+			[5, 12, "punctuation.definition.comment.mylang", "--><!--"],
 			[12, 13, "comment.block.mylang", "b"],
 			[13, 16, "punctuation.definition.comment.mylang", "-->"]
 			// x is ignored
@@ -911,7 +906,8 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 		changeLine(view, "-", 1, 2, 2);
 		assertLine0Scope();
 		assertLineScope(view, styler, 1, [ /* no scope on line 1 */ ]);
-				/*
+		
+		/*
 		<!--a-->
 		<!--
 		*/
@@ -1374,13 +1370,11 @@ define(["dojo", "orion/assert", "orion/textview/textView", "orion/editor/textMat
 			[11, 12, "punctuation.definition.array.end", "]"]
 		]);
 		assertLineScope(view, styler, 4, [
-			[0, 1, "punctuation.definition.array.begin", "["],
-			[1, 2, "punctuation.definition.array.begin", "["],
+			[0, 2, "punctuation.definition.array.begin", "[["],
 			[2, 3, "punctuation.definition.array.end", "]"],
 			[3, 4, "punctuation.array.separator", ","],
 			[5, 6, "punctuation.definition.array.begin", "["],
-			[6, 7, "punctuation.definition.array.end", "]"],
-			[7, 8, "punctuation.definition.array.end", "]"]
+			[6, 8, "punctuation.definition.array.end", "]]"]
 		]);
 	});
 	
