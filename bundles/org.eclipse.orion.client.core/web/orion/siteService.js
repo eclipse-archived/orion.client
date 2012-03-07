@@ -14,22 +14,17 @@
 
 define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth) {
 
-/**
- * Service id used for registering the site service with the service registry.
- * @name orion.siteService#SITE_SERVICE_NAME
- * @constant
- * @see orion.serviceregistry.ServiceRegistry#registerService
- */
-var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
+// Service id used for registering or obtaining the site service.
+var SERVICE_ID = "orion.sites";
 
 /**
- * @name orion.siteService.SiteConfiguration
+ * @name orion.sites.SiteConfiguration
  * @class Interface for an in-memory representation of a site configuration resource. Objects of
- * this interface are used as parameters, and returned by, methods of the  {@link orion.siteService.SiteService}
+ * this interface are used as parameters, and returned by, methods of the  {@link orion.sites.SiteService}
  * API.
  */
 	/**#@+
-		@fieldOf orion.siteService.SiteConfiguration.prototype
+		@fieldOf orion.sites.SiteConfiguration.prototype
 	*/
 	/**
 	 * The name of the site configuration.
@@ -67,14 +62,13 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 	/**
 	 * Constructs a new SiteService.
 	 * 
-	 * @name orion.siteService.SiteService
+	 * @name orion.sites.SiteService
 	 * @class Defines and implements a service that provides access to the server API for managing site 
 	 * configurations.
-	 * @requires auth.js
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to register ourself with.
 	 */
 	function SiteService(serviceRegistry) {
-		this._serviceRegistration = serviceRegistry.registerService(SITE_SERVICE_NAME, this);
+		this._serviceRegistration = serviceRegistry.registerService(SERVICE_ID, this);
 		
 		var baseUrl = this.getContext();
 		var fileReferences = serviceRegistry.getServiceReferences("orion.core.file");
@@ -87,12 +81,12 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 		}
 	}
 	
-	SiteService.prototype = /** @lends orion.siteService.SiteService.prototype */ {
+	SiteService.prototype = /** @lends orion.sites.SiteService.prototype */ {
 		/**
 		 * Retrieves all site configurations defined by the logged-in user.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
 		 * argument {@link Array} on success, where each element of the array is a
-		 * {@link eclipse.sites.SiteConfiguration}.
+		 * {@link orion.sites.SiteConfiguration}.
 		 */
 		getSiteConfigurations: function() {
 			return this._doServiceCall("getSiteConfigurations", arguments);
@@ -100,9 +94,9 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 		
 		/**
 		 * Loads an individual site configuration from the given location.
-		 * @param {String} Location URL of a site configuration resource.
+		 * @param {String} locationUrl Location URL of a site configuration resource.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * loaded {@link eclipse.sites.SiteConfiguration} on success.
+		 * loaded {@link orion.sites.SiteConfiguration} on success.
 		 */
 		loadSiteConfiguration: function(locationUrl) {
 			return this._doServiceCall("loadSiteConfiguration", arguments);
@@ -115,7 +109,7 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 		 * @param {Array} [mappings]
 		 * @param {String} [hostHint] 
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the 
-		 * created {@link eclipse.sites.SiteConfiguration} on success.
+		 * created {@link orion.sites.SiteConfiguration} on success.
 		 */
 		createSiteConfiguration: function(name, workspace, mappings, hostHint) {
 			return this._doServiceCall("createSiteConfiguration", arguments);
@@ -124,10 +118,10 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 		/**
 		 * Edits an existing site configuration.
 		 * @param {String} locationUrl Location of the site configuration resource to be updated.
-		 * @param {eclipse.sites.SiteConfiguration} updatedSiteConfig A representation of the updated site.
+		 * @param {orion.sites.SiteConfiguration} updatedSiteConfig A representation of the updated site.
 		 * Properties that are not changing may be omitted.
 		 * @returns {dojo.Deferred} A deferred for the result. Will be resolved with the updated
-		 * {@link eclipse.sites.SiteConfiguration} on success.
+		 * {@link orion.sites.SiteConfiguration} on success.
 		 */
 		updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
 			return this._doServiceCall("updateSiteConfiguration", arguments);
@@ -314,7 +308,7 @@ var SITE_SERVICE_NAME = "org.eclipse.orion.sites.siteManagement";
 
 	//return module exports
 	return {
-		SITE_SERVICE_NAME: SITE_SERVICE_NAME,
+		SERVICE_ID: SERVICE_ID,
 		SiteService: SiteService
 	};
 });
