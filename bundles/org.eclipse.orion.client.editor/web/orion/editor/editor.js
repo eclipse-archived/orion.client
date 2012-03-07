@@ -587,10 +587,10 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				};
 			
 				this._annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
+				this._overviewRuler.addAnnotationType(this.searchType);
 				this._annotationRuler.addAnnotationType(this.errorType);
 				this._annotationRuler.addAnnotationType(this.warningType);
 				this._annotationRuler.addAnnotationType(this.taskType);
-				this._overviewRuler.addAnnotationType(this.searchType);
 				this._overviewRuler.addAnnotationType(this.errorType);
 				this._overviewRuler.addAnnotationType(this.warningType);
 				this._overviewRuler.addAnnotationType(this.taskType);
