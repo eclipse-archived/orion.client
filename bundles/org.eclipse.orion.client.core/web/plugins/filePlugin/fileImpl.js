@@ -319,7 +319,8 @@ eclipse.FileServiceImpl= (function() {
 		 */		
 		write: function(location, contents, args) {
 			var headerData = {
-					"Orion-Version": "1"
+					"Orion-Version": "1",
+					"Content-Type": "text/plain;charset=UTF-8"
 				};
 			if (args && args.ETag) {
 				headerData["If-Match"] = args.ETag;
