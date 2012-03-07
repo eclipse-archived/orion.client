@@ -845,7 +845,13 @@ orion.GitStatusController = (function() {
 					return;
 				}
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, actionScopeId: "itemLevelCommands", minimal: true}, this._remoteTableRenderer.getLogContentId());    
-				dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
+				if(dojo.byId(this._remoteTableRenderer.getLogContentId())){
+					//If the remote section is rendered before, we need to empty the contents
+					dojo.place(document.createTextNode(""), this._remoteTableRenderer.getLogContentId(), "only");
+				} else {
+					//If the remote section is not rendered before, we need to create the empty frame there
+					this._remoteTableRenderer.render(true);
+				}
 				// refresh the commit list for the remote
 				var path = this._curBranch.RemoteLocation[0].Children[0].Location + "?page=1&pageSize=5";
 				dojo.xhrGet({
