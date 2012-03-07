@@ -74,8 +74,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					name : "Create Site",
 					tooltip: "Create a new site configuration",
 					image : require.toUrl("images/add.gif"),
-					id: "eclipse.sites.create",
-					groupId: "eclipse.sitesGroup",
+					id: "orion.site.create",
+					groupId: "orion.sitesGroup",
 					parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')], false),
 					callback : function(data) {
 						var name = data.parameters && data.parameters.valueFor('name');
@@ -95,11 +95,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
 				
 				// Register command contributions
-				commandService.registerCommandContribution("pageActions", "eclipse.sites.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
-				commandService.registerCommandContribution("siteCommand", "eclipse.site.edit", 1);
-				commandService.registerCommandContribution("siteCommand", "eclipse.site.start", 2);
-				commandService.registerCommandContribution("siteCommand", "eclipse.site.stop", 3);
-				commandService.registerCommandContribution("siteCommand", "eclipse.site.delete", 4);
+				commandService.registerCommandContribution("pageActions", "orion.site.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
+				commandService.registerCommandContribution("siteCommand", "orion.site.edit", 1);
+				commandService.registerCommandContribution("siteCommand", "orion.site.start", 2);
+				commandService.registerCommandContribution("siteCommand", "orion.site.stop", 3);
+				commandService.registerCommandContribution("siteCommand", "orion.site.delete", 4);
 				
 				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 			}());

@@ -36,7 +36,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 	/**
 	 * Creates & adds commands that act on an individual site configuration.
 	 * @param {eclipse.CommandService} commandService
-	 * @param {eclipse.sites.SiteService} siteService
+	 * @param {orion.sites.SiteService} siteService
 	 * @param {eclipse.ProgressService} progressService
 	 * @param {eclipse.DialogService} dialogService
 	 * @param {Function} startCallback
@@ -52,7 +52,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 			name: "Edit",
 			tooltip: "Edit the site configuration",
 			imageClass: "core-sprite-edit",
-			id: "eclipse.site.edit",
+			id: "orion.site.edit",
 			visibleWhen: function(item) {
 				return item.HostingStatus;
 			},
@@ -63,7 +63,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 			name: "Start",
 			tooltip: "Start the site",
 			imageClass: "core-sprite-start",
-			id: "eclipse.site.start",
+			id: "orion.site.start",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},
@@ -81,7 +81,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 			name: "Stop",
 			tooltip: "Stop the site",
 			imageClass: "core-sprite-stop",
-			id: "eclipse.site.stop",
+			id: "orion.site.stop",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "started";
 			},
@@ -99,7 +99,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 			name: "Delete",
 			tooltip: "Delete the site configuration",
 			imageClass: "core-sprite-delete",
-			id: "eclipse.site.delete",
+			id: "orion.site.delete",
 			visibleWhen: function(item) {
 				return item.HostingStatus && item.HostingStatus.Status === "stopped";
 			},

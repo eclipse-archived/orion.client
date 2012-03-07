@@ -21,9 +21,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/siteM
  * @name orion.widgets.SiteEditor
  * @class Editor for an individual site configuration.
  * @param {Object} options Options bag for creating the widget.
- * @param {eclipse.FileClient} options.fileClient
- * @param {eclipse.SiteService} options.siteService
- * @param {mCommands.CommandService} options.commandService
+ * @param {orion.fileClient.FileClient} options.fileClient
+ * @param {orion.sites.SiteService} options.siteService
+ * @param {orion.commands.CommandService} options.commandService
  * @param {String} [options.location] Optional URL of a site configuration to load in editor
  * upon creation.
  */
@@ -102,21 +102,21 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				name: "Add",
 				tooltip: "Add a directory mapping to the site configuration",
 				imageClass: "core-sprite-add",
-				id: "eclipse.site.mappings.add",
+				id: "orion.site.mappings.add",
 				visibleWhen: function(item) {
 					return true;
 				},
 				choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, projects)});
 			this._commandService.addCommand(addMappingCommand);
 			var toolbarId = this.addMappingToolbar.id;
-			this._commandService.registerCommandContribution(toolbarId, "eclipse.site.mappings.add", 1);
+			this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1);
 			this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
 			
 			var convertCommand = new mCommands.Command({
 				name: "Convert to Self-Hosting",
 				tooltip: "Enable the site configuration to launch an Orion server running your local client code",
 				imageClass: "core-sprite-add",
-				id: "eclipse.site.convert",
+				id: "orion.site.convert",
 				visibleWhen: dojo.hitch(this, function(item) {
 					// Only applies to SiteConfiguration objects
 					return !!item.Location && !this.isSelfHosting(projects);
@@ -132,7 +132,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				name: "Save",
 				tooltip: "Save the site configuration",
 				imageClass: "core-sprite-save",
-				id: "eclipse.site.save",
+				id: "orion.site.save",
 				visibleWhen: function(item) {
 					return !!item.Location /*looks like a site config*/;
 				},

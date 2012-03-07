@@ -176,7 +176,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			var deleteMappingCommand = new mCommands.Command({
 				name: "Delete",
 				imageClass: "core-sprite-delete",
-				id: "eclipse.site.mappings.remove",
+				id: "orion.site.mappings.remove",
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
 					return item.Source && item.Target;
@@ -188,12 +188,12 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(deleteMappingCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.remove", 0);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.remove", 0);
 			
 			var moveUpCommand = new mCommands.Command({
 				name: "Move Up",
 				imageClass: "core-sprite-move_up",
-				id: "eclipse.site.mappings.moveUp",
+				id: "orion.site.mappings.moveUp",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
@@ -207,12 +207,12 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(moveUpCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.moveUp", 1);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveUp", 1);
 			
 			var moveDownCommand = new mCommands.Command({
 				name: "Move Down",
 				imageClass: "core-sprite-move_down",
-				id: "eclipse.site.mappings.moveDown",
+				id: "orion.site.mappings.moveDown",
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
@@ -227,7 +227,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(moveDownCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "eclipse.site.mappings.moveDown", 2);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveDown", 2);
 		},
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);
