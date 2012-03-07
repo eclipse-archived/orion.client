@@ -136,13 +136,6 @@ function(mSetup, mTestPerformance) {
 		var lines = [];
 		lines.push("Hello \u0644\u0645\u0646\u0647");
 		return setupView(lines.join("\r\n"), null);
-//		log("test1");
-//		if (mSetup.p.style.display === "none") {
-//			mSetup.p.style.display = "block";
-//		} else {
-//			mSetup.p.style.display = "none";
-//		}
-//		mSetup.view.update(true);	
 	}
 	
 	function createLoad() {
@@ -152,12 +145,6 @@ function(mSetup, mTestPerformance) {
 
 	function test() {
 		log("test");
-//		if (mSetup.p.parentNode) {
-//			mSetup.pp.removeChild(mSetup.p);
-//		} else {
-//			mSetup.pp.appendChild(mSetup.p);
-//		}
-//		mSetup.view.update(true);
 	}
 	
 	function performanceTest() {
