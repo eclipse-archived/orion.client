@@ -79,6 +79,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		matchingBracketType: "orion.annotation.matchingBracket",
 		currentLineType: "orion.annotation.currentLine",
 		highlightErrorType: "orion.annotation.highlightError",
+		searchType: "orion.annotation.search",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -230,7 +231,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		 * @param {function} callBack A call back function that is used after the move animation is done
 		 * @private
 		 */
-		moveSelection: function(start, end, callBack) {
+		moveSelection: function(start, end, callBack, focus) {
 			end = end || start;
 			var textView = this._textView;
 			this.setSelection(start, end, false);
@@ -251,7 +252,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					},
 					onEnd: function() {
 						textView.showSelection();
-						textView.focus();
+						if (focus === undefined || focus) {
+							textView.focus();
+						}
 						if(callBack) {
 							callBack();
 						}
@@ -260,7 +263,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				a.play();
 			} else {
 				textView.showSelection();
-				textView.focus();
+				if (focus === undefined || focus) {
+					textView.focus();
+				}
 				if(callBack) {
 					callBack();
 				}
@@ -441,6 +446,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			if (this._annotationFactory) {
 				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
+				this._annotationStyler.addAnnotationType(this.searchType);
 				this._annotationStyler.addAnnotationType(this.errorType);
 				this._annotationStyler.addAnnotationType(this.warningType);
 				this._annotationStyler.addAnnotationType(this.matchingBracketType);
@@ -581,6 +587,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				};
 			
 				this._annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
+				this._overviewRuler.addAnnotationType(this.searchType);
 				this._annotationRuler.addAnnotationType(this.errorType);
 				this._annotationRuler.addAnnotationType(this.warningType);
 				this._annotationRuler.addAnnotationType(this.taskType);

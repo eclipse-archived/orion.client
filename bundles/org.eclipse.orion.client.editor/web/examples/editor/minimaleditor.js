@@ -22,12 +22,6 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 	var textViewFactory = function() {
 		return new mTextView.TextView({
 			parent: editorDomNode,
-			stylesheet: [
-				require.toUrl("orion/textview/textview.css"),
-				require.toUrl("orion/textview/rulers.css"),
-				require.toUrl("orion/textview/annotations.css"),
-				require.toUrl("examples/textview/textstyler.css")
-			],
 			tabSize: 4
 		});
 	};

@@ -44,6 +44,10 @@ orion.OrionTextSearchAdaptor = (function() {
 		
 		adaptCloseToolBar: function(){
 			this._editor.getTextView().focus();
+			var annotationModel = this._editor.getAnnotationModel();
+			if (annotationModel) {
+				annotationModel.removeAnnotations("orion.annotation.search");
+			}
 		},
 		
 		adaptReplaceAllStart: function(){
@@ -70,7 +74,21 @@ orion.OrionTextSearchAdaptor = (function() {
 				if(!noStatus) {
 					this._editor.reportStatus("");
 				}
-				this._editor.moveSelection(startIndex, endIndex, callBack);
+				var annotationModel = this._editor.getAnnotationModel();
+				if (annotationModel) {
+					annotationModel.removeAnnotations("orion.annotation.search");
+					annotationModel.addAnnotation({
+						type: "orion.annotation.search",
+						start: startIndex,
+						end: endIndex,
+						title: "Search",
+						style: {styleClass: "annotation searchCurrent"},
+						html: "<div class='annotationHTML searchCurrent'></div>",
+						overviewStyle: {styleClass: "annotationOverview searchCurrent"},
+						rangeStyle: {styleClass: "annotationRange searchCurrent"}
+					});
+				}
+				this._editor.moveSelection(startIndex, endIndex, callBack, false);
 			}
 		},
 		

@@ -32,6 +32,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
+	var loadedThemes = [];
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
 	var breakpointType = "orion.annotation.breakpoint";
@@ -54,31 +55,34 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	}
 	exports.getFile = getFile;
 	
-	function addTheme(stylesheet, theme) {
+	function loadTheme(theme) {
 		if (theme) {
-			if (typeof stylesheet === "string") {
-				stylesheet = [stylesheet];
+			for (var i=0; i<loadedThemes.length; i++) {
+				if (theme === loadedThemes[i]) {
+					return;
+				}
 			}
-			var uri = require.toUrl("examples/textview/themes/" + theme + ".css");
-			for (var i = 0; i < stylesheet.length; i++) {
-				if (stylesheet[i] === uri) { break; }
-			}
-			if (i === stylesheet.length) {
-				stylesheet.push(uri);
-				return stylesheet;
-			}
+			loadedThemes.push(theme);
+			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
+				var stylesheet;
+				if (document.createStyleSheet) {
+					stylesheet = document.createStyleSheet();
+					stylesheet.cssText = cssText;
+				} else {
+					stylesheet = document.createElement("STYLE");
+					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					stylesheet.appendChild(document.createTextNode(cssText));
+					head.appendChild(stylesheet);
+				}
+				view.update(true);
+			});
 		}
-		return undefined;
 	}
 	
 	function checkView(options) {
-		var stylesheet;
 		if (view) {
 			if (options) {
-				stylesheet = addTheme(view.getOptions("stylesheet"), options.themeClass);
-				if (stylesheet) {
-					options.stylesheet = stylesheet;
-				}
+				loadTheme(options.themeClass);
 				view.setOptions(options);
 			}
 			return view;
@@ -90,22 +94,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			viewModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 		}
 		options = options || {};
-		if (options.stylesheet) {
-			if (typeof options.stylesheet === "string") {
-				options.stylesheet =  require.toUrl(options.stylesheet);
-			} else {
-				for (var i = 0; i < options.stylesheet.length; i++) {
-					options.stylesheet[i] =  require.toUrl(options.stylesheet[i]);
-				}
-			}
-		} else {
-			options.stylesheet =  require.toUrl("examples/textview/themes/default.css");
-		}
-		
-		stylesheet = addTheme(options.stylesheet, options.themeClass);
-		if (stylesheet) {
-			options.stylesheet = stylesheet;
-		}
+		loadTheme(options.themeClass);
 		options.parent = options.parent || "divParent";
 		options.model = viewModel;
 		exports.view = view = new mTextView.TextView(options);

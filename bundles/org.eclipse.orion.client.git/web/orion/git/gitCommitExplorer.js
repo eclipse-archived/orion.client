@@ -282,7 +282,7 @@ define(['dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/c
 			var diffItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("diffNode") );
 			var diffHorizontalBox = dojo.create( "div", null, diffItem );
 			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px"}, diffHorizontalBox );
+			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;"}, diffHorizontalBox );
 
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			

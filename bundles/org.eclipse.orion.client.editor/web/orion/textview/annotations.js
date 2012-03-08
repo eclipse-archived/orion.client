@@ -655,7 +655,7 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 		},
 		_onLineStyle: function (e) {
 			var annotationModel = this._annotationModel;
-			var viewModel = this._view.getModel();
+			var viewModel = e.textView.getModel();
 			var baseModel = annotationModel.getTextModel();
 			var start = e.lineStart;
 			var end = e.lineStart + e.lineText.length;
