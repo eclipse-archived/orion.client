@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(require, dojo, dijit, mUtil) {
+define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(require, dojo, dijit, mCommands, mUtil) {
 	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
 		widgetsInTemplate: false,
 		id: "userMenu",
@@ -186,11 +186,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 				var displayName = userName;
 				if(displayName.length > 40)
 					displayName = displayName.substring(0, 30) + "...";
-				dojo.create("a", {innerHTML: displayName,
-						href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location,
-						title: "View profile of " + userName,
-						style: "margin-right: 0px"
-					}, dojo.byId('userInfo'), "only");
+				var profileLink = dojo.create("a", {innerHTML: displayName,
+									  href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location,
+									  "aria-label": "View profile of " + userName,
+									  style: "margin-right: 0px"
+								  }, dojo.byId('userInfo'), "only");
+				new mCommands.CommandTooltip({
+					connectId: [profileLink],
+					label: "View profile of " + userName,
+					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+				});
 			}else if(this.isSingleService() && !jsonData){
 				if(authService.getAuthForm){
 					dojo.hitch(this, function(key){
@@ -202,7 +207,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 							}
 							dojo.create("a", {innerHTML: "Sign In",
 								href: loginForm,
-								title: "Sign In",
 								style: "margin-right: 0px",
 								target: "_blank"
 							}, dojo.byId('userInfo'), "only");
@@ -210,7 +214,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/Menu'], function(requir
 					})(key);
 				}else if(authService.login){
 					var a = dojo.create("a", {innerHTML: "Sign In",
-						title: "Sign In",
 						style: "margin-right: 0px"
 					}, dojo.byId('userInfo'), "only");
 					

@@ -117,6 +117,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			this.inherited(arguments);
 			this.polling = true;
 			this.pollForMissingTarget();
+			
+			// Override the dijit default ARIA role of alert, which causes undesirable behaviour.
+			window.setTimeout(function() {
+				if(dijit._masterTT) {
+					dojo.removeAttr(dijit._masterTT.containerNode, "role");
+				}
+			}, this.showDelay + 1);
 		},
 		
 		pollForMissingTarget: function() {
@@ -650,11 +657,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								dropDown: newMenu
 						        });
 							dojo.addClass(menuButton.domNode, "commandMenu");
+							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
 							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 							if (group.title === "*") {
 								dojo.addClass(menuButton.domNode, "textless");
 								new CommandTooltip({
-									connectId: [menuButton.domNode],
+									connectId: [menuButton.focusNode],
 									label: "Actions menu",
 									position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
 									commandParent: parent,
