@@ -251,6 +251,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var hostPrefix = "http://localhost" + ":" + "8080" + context;
 		return [
 			{ Source: "/",
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/index.html"
+			},
+			{ Source: "/",
 			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
 			},
 			{ Source: "/",
