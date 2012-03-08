@@ -18,7 +18,7 @@
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/URITemplate', 'orion/PageUtil', 
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/NewSiteDialog'], 
+	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, 
 			mGlobalCommands, mBreadcrumbs, URITemplate, PageUtil) {
 
@@ -54,7 +54,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 						if (info.saveToken) {
 							// save tokens would typically have special characters such as '?' or '&' in them so we can't use
 							// the URI template to parse them.  Not sure how we could best express this.  For now we have the plugin
-							// specify a token that signifies the start of the URl and possible terminators
+							// specify a token that signifies the start of the URI and possible terminators.  A better way to do this might
+							// be to let the plugin specify a regex or a template of the content URI so that we could grab things like hostname,
+							// path, parameters, etc.
 							var tokens = dojo.isArray(info.saveToken) ? info.saveToken : [info.saveToken];
 							var parameterStart = dojo.hash().indexOf(",");
 							if (parameterStart >= 0) {
@@ -75,10 +77,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 										}
 										if (contentURL && contentURL.length > 0) {
 											dojo.place("<p>Content plugin <b>" + info.name + "</b> has saved data at <a href='" + contentURL + "'>" + contentURL + "</a>." +
-											"<p>It is cool that we know this, but now we need a way to read the blob at this URL and save back to fileClient.  See <a href='https://bugs.eclipse.org/bugs/show_bug.cgi?id=373443'>Bug 373443</a></p>" +
-											"<p>Once we are able to save the data, not clear where you would go from this page.  You could use the breadcrumb, main nav links, related pages, browser history," +
-											" etc., to get back to your next task.</p>" +
-											"<p>This area probably just tells you that the save was successful and then lets you click a link to keep editing?..ie..reload the page to return to the original editor.</p>", 
+											"<p>We will be able to save this back when <a href='https://bugs.eclipse.org/bugs/show_bug.cgi?id=373443'>Bug 373443</a> is implemented.</p>",
 											"orion.saveRequest" ,"only");
 										}
 										break;
