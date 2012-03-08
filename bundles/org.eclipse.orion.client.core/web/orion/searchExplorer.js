@@ -1206,7 +1206,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			label : "Options",
 			dropDown : newMenu
 		});
-		dojo.addClass(menuButton.domNode, "commandImage");
+		dojo.addClass(menuButton.domNode, "commandMenu");
 		dojo.place(menuButton.domNode, "pageNavigationActions", "last");
 		mUtil.forceLayout("pageNavigationActions");
 	};

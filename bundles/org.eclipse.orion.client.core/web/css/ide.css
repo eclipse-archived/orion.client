@@ -147,10 +147,13 @@ a:hover {
 .pageActions {
 	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	min-height: 30px;
+	margin-top: 4px;
 }
 
+/* 4px margin used by toolbar, plus 4px of border/padding */
 .status {
-	padding-top: 6px;
+	padding-top: 8px;
+	vertical-align: baseline;
 }
 
 /* marker for finding section and main toolbars */
@@ -159,6 +162,8 @@ a:hover {
 
 .sectionActions {
 	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	margin-top: 2px;
+	vertical-align: baseline;
 }
 
 .pageNavigationActions {
@@ -523,6 +528,12 @@ a:hover {
     background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f7f7f7));
     background: -moz-linear-gradient(top,  #ffffff,  #f7f7f7);
     border-bottom: 1px solid #bfbfbf;
+}
+
+.paneTitle {
+	padding-top: 2px;
+	padding-left: 2px;
+	vertical-align: baseline;
 }
 
 .paneHeading {
