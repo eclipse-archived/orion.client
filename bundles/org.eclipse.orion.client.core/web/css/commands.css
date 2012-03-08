@@ -4,14 +4,34 @@
    display: inline-block;
 }
 
+/* spacing for commands in a list */
+.commandList {
+	padding: 0;
+	margin-left: 0;
+	margin-right: 0;
+	list-style-type: none;
+	vertical-align: baseline;
+}
+
+.commandList li {
+	float: left;
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+/* for commands not in a list we add margins for backward compatibility */
+.commandMargins {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
 .commandImage {
 	border: 1px solid transparent;
 	background-color: transparent;
-	margin: 3px;
-	padding: 2px;
 	vertical-align: baseline;
 	cursor: pointer;
 	display: inline-block;
+	padding: 1px;
 }
 
 .commandImageOver {
@@ -28,13 +48,12 @@
 .commandButton {
 	color: #222222;
 	border: 1px solid transparent;
-	margin: 3px;
-	padding: 2px;
 	background-color: transparent;
 	text-align: center;
 	vertical-align: baseline;
     cursor: pointer;
     display: inline-block;
+    padding: 1px;
 }
 
 .commandButtonOver {
@@ -46,7 +65,7 @@
 .commandMenu {
 	display: inline-block;
 	vertical-align: baseline;
-	margin: 3px;
+	margin: 0;
 }
 
 .commandMenuItem {
@@ -56,10 +75,9 @@
 }
 
 .commandLink {
-	margin: 4px;
-	padding: 2px;
 	display: inline-block;
 	vertical-align: baseline;
+	padding: 2px;  /* other commands have 1px plus a border, so we need 2 */
 }
 
 .commandSeparator {

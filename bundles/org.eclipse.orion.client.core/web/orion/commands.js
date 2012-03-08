@@ -657,6 +657,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								dropDown: newMenu
 						        });
 							dojo.addClass(menuButton.domNode, "commandMenu");
+							var menuParent = parent;
+							if (parent.nodeName.toLowerCase() === "ul") {
+								menuParent = dojo.create("li", {}, parent);
+							} else {
+								dojo.addClass(menuButton.domNode, "commandMargins");
+							}
 							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
 							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 							if (group.title === "*") {
@@ -670,7 +676,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								});
 							}
 							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
-							dojo.place(menuButton.domNode, parent, "last");
+							dojo.place(menuButton.domNode, menuParent, "last");
 							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
@@ -961,6 +967,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					commandService: context.commandService
 				});
 			}
+			if (parent.nodeName.toLowerCase() === "ul") {
+				parent = dojo.create("li", {}, parent);
+			} else {
+				dojo.addClass(element, "commandMargins");
+			}
 			dojo.place(element, parent, "last");
 		},
 	
@@ -1006,6 +1017,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 			context.domParent = parent;
 			context.domNode = element;
+			if (parent.nodeName.toLowerCase() === "ul") {
+				parent = dojo.create("li", {}, parent);
+			} else {
+				dojo.addClass(element, "commandMargins");
+			}
 			dojo.place(element, parent, "last");
 		},
 		_addMenuItem: function(parent, context) {
