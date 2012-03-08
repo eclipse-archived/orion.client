@@ -111,12 +111,18 @@ mSiteMappingsTable.Renderer = (function() {
 				dojo.xhrGet({
 					url: location,
 					headers: { "Orion-Version": "1" },
-					handleAs: "json"
+					handleAs: "text"
 				}).then(
-					function(children) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-folder" title="Workspace folder ' + href + '"/></a>';
+					function(object) {
+						try {
+							object = dojo.fromJson(object);
+						} catch(e) {}
+						var isDirectory = (typeof object === "object" && object.Directory);
+						var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
+						var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
+						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
 					}, function(error) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace folder not found: ' + href + '"/></a>';
+						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
 					});
 			} else {
 				href = mUtil.safeText(target);
