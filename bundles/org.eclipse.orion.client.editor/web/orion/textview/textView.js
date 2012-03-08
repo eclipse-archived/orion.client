@@ -3407,7 +3407,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.top = "0px";
 			viewDiv.style.borderWidth = "0px";
 			viewDiv.style.margin = "0px";
-			viewDiv.style.MozOutline = "none";
 			viewDiv.style.outline = "none";
 			viewDiv.setAttribute("role", "application");
 			rootDiv.appendChild(viewDiv);
@@ -3471,7 +3470,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.style.borderWidth = "0px";
 			clientDiv.style.margin = "0px";
 			clientDiv.style.padding = "0px";
-			clientDiv.style.MozOutline = "none";
 			clientDiv.style.outline = "none";
 			clientDiv.style.zIndex = "1";
 			if (isPad) {
@@ -4999,7 +4997,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv1.style.borderWidth = "0px";
 				selDiv1.style.margin = "0px";
 				selDiv1.style.padding = "0px";
-				selDiv1.style.MozOutline = "none";
 				selDiv1.style.outline = "none";
 				selDiv1.style.background = this._hightlightRGB;
 				selDiv1.style.width = "0px";
@@ -5012,7 +5009,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv2.style.borderWidth = "0px";
 				selDiv2.style.margin = "0px";
 				selDiv2.style.padding = "0px";
-				selDiv2.style.MozOutline = "none";
 				selDiv2.style.outline = "none";
 				selDiv2.style.background = this._hightlightRGB;
 				selDiv2.style.width = "0px";
@@ -5025,7 +5021,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv3.style.borderWidth = "0px";
 				selDiv3.style.margin = "0px";
 				selDiv3.style.padding = "0px";
-				selDiv3.style.MozOutline = "none";
 				selDiv3.style.outline = "none";
 				selDiv3.style.background = this._hightlightRGB;
 				selDiv3.style.width = "0px";
