@@ -79,12 +79,19 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				dropDown: userMenu,
 				label: "Options", 
 				showLabel: false,
-				alt: "Options"
 			});
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
 			if(menuButton.valueNode) {
 		        dojo.destroy(menuButton.valueNode);
 			}
+			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) {
+				dojo.removeAttr(menuButton.titleNode, "title");
+			}
+			new mCommands.CommandTooltip({
+				connectId: [menuButton.focusNode],
+				label: "Options",
+				position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+			});
 		}
 		
 		for(var i=0; i<authServices.length; i++){
