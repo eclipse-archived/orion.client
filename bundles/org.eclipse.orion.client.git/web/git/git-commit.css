@@ -20,6 +20,8 @@
 
 @import "../css/commands.css";
 
+@import "../orion/compare/compare.css";
+
 @import "css/git.css";
 
 .git-decor-icon {

@@ -32,13 +32,6 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var textViewFactory = function() {
 		return new mTextView.TextView({
 			parent: editorDomNode,
-			stylesheet: [
-				require.toUrl("orion/textview/textview.css"),
-				require.toUrl("orion/textview/rulers.css"),
-				require.toUrl("orion/textview/annotations.css"),
-				require.toUrl("examples/editor/htmlStyles.css"),
-				require.toUrl("examples/textview/textstyler.css")
-			],
 			tabSize: 4
 		});
 	};

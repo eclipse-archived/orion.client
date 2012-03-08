@@ -26,7 +26,7 @@ define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler"
 	 */
 	function makeTest(testBody, doTearDown) {
 		function createTextView() {
-			var options = {parent: "editorDiv", readonly: true, stylesheet: ["test.css"], sync: true};
+			var options = {parent: "editorDiv", readonly: true};
 			//return new mTextView.TextView(options);
 			return new mMockTextView.MockTextView(options);
 		}
@@ -74,7 +74,8 @@ define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler"
 		for (var i=0; i < a.length; i++) {
 			var item = a[i];
 			var j = b.indexOf(item);
-			if (j === -1 || (sameOrder && i !== j)) { return false; }		}
+			if (j === -1 || (sameOrder && i !== j)) { return false; }
+		}
 		return true;
 	}
 	
@@ -905,7 +906,8 @@ define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler"
 		changeLine(view, "-", 1, 2, 2);
 		assertLine0Scope();
 		assertLineScope(view, styler, 1, [ /* no scope on line 1 */ ]);
-				/*
+		
+		/*
 		<!--a-->
 		<!--
 		*/

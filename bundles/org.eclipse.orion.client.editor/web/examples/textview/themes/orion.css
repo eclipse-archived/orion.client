@@ -1,13 +1,8 @@
 .orion {
-	background-coXXlor: #ffd400;
 	color: black;
 }
 
-.orion .viewContainer {
-	background-color: #ededed;
-}
-
-.orion .view {
+.orion .textview {
 	background-color: #ffd400;
 }
 
