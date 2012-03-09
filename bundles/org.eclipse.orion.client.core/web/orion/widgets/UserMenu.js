@@ -194,7 +194,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				new mCommands.CommandTooltip({
 					connectId: [profileLink],
 					label: "View profile of " + userName,
-					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+					position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands
 				});
 			}else if(this.isSingleService() && !jsonData){
 				if(authService.getAuthForm){
