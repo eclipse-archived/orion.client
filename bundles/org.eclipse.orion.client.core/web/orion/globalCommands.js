@@ -78,7 +78,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				id: "logins",
 				dropDown: userMenu,
 				label: "Options", 
-				showLabel: false,
+				showLabel: false
 			});
 			dojo.addClass(menuButton.domNode, "commandMenu");
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
@@ -91,7 +91,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			new mCommands.CommandTooltip({
 				connectId: [menuButton.focusNode],
 				label: "Options",
-				position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands
 			});
 		}
 		
