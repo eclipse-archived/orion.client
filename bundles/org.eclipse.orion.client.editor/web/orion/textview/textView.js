@@ -3379,6 +3379,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rootDiv.tabIndex = -1;
 			rootDiv.style.position = "absolute";
 			rootDiv.style.overflow = "hidden";
+			rootDiv.setAttribute("role", "application");
 			parent.appendChild(rootDiv);
 			
 			var leftDiv = document.createElement("DIV");
@@ -3408,7 +3409,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.borderWidth = "0px";
 			viewDiv.style.margin = "0px";
 			viewDiv.style.outline = "none";
-			viewDiv.setAttribute("role", "application");
 			rootDiv.appendChild(viewDiv);
 			
 			var rightDiv = document.createElement("DIV");
