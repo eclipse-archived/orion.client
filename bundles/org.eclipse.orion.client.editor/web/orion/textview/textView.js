@@ -3391,6 +3391,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			leftDiv.style.WebkitUserSelect = "none";
 			leftDiv.style.position = "absolute";
 			leftDiv.style.cursor = "default";
+			leftDiv.setAttribute("aria-hidden", "true");
 			var table = document.createElement("TABLE");
 			leftDiv.appendChild(table);
 			table.cellPadding = "0px";
@@ -3420,6 +3421,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.style.WebkitUserSelect = "none";
 			rightDiv.style.position = "absolute";
 			rightDiv.style.cursor = "default";
+			rightDiv.setAttribute("aria-hidden", "true");
 			table = document.createElement("TABLE");
 			rightDiv.appendChild(table);
 			table.cellPadding = "0px";
