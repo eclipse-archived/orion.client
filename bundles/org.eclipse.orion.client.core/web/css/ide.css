@@ -74,6 +74,14 @@ a:hover {
 	margin: 0;
 }
 
+.spacingLeft {
+	margin-left: 5px;
+}
+
+.spacingRight {
+	margin-right: 5px;
+}
+
 .clear {
 	clear: both;
 }
@@ -140,8 +148,6 @@ a:hover {
 .pageNav {
 	color: #808080;
 	font-size: 8pt;
-	margin-right: 6px;
-	margin-left: 6px;
 }
 
 .pageActions {
