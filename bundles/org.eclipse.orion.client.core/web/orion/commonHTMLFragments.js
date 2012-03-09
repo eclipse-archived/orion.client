@@ -27,18 +27,20 @@ define(['require'],
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
 		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
-		'<div id="userMenu" class="layoutRight textless"></div>' +
-		'<div id="userInfo" class="layoutRight primaryNav"></div>' +
-		'<div class="layoutRight primaryNav">|</div>' +
+		'<div class="layoutRight">' +
+			'<div class="layoutLeft primaryNav">|</div>' +
+			'<div id="userInfo" class="layoutLeft primaryNav"></div>' +
+			'<div id="userMenu" class="spacingLeft layoutLeft textless"></div>' +
+		'</div>' +
 	'</div>' +
 	//Title area
 	'<div id="titleArea" class="layoutBlock titleArea">' +
 		'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
-		'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutRight searchbox">' +
-		'<div id="relatedLinks" class="layoutRight pageNav"></div>' +
-		'<div id="extras" class="layoutRight pageNav">' +
-			'<div id="globalActions" class="pageNav"></div>' +
-			'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="imageSprite core-sprite-favorite_sml"></span>' +
+		'<div class="layoutRight pageNav">' +
+			'<div id="globalActions" class="spacingLeft layoutLeft"></div>' +
+			'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' +
+			'<div id="relatedLinks" class="spacingLeft layoutLeft"></div>' +
+			'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox">' +
 		'</div>' +
 		'<div id="dimension" class="clear dimension"></div>' +
 		'<div id="location" class="clear currentLocation"></div>' +

@@ -80,6 +80,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				label: "Options", 
 				showLabel: false,
 			});
+			dojo.addClass(menuButton.domNode, "commandMenu");
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
 			if(menuButton.valueNode) {
 		        dojo.destroy(menuButton.valueNode);
@@ -244,6 +245,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				label: "Related pages",
 				dropDown: linksMenu
 			});
+			dojo.addClass(menuButton.domNode, "commandMenu");
 			dojo.place(menuButton.domNode, domNode, "only");
 			mUtil.forceLayout(domNode);
 		}	
@@ -330,6 +332,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				label: "Related pages",
 				dropDown: menu
 			});
+			dojo.addClass(menuButton.domNode, "commandMenu");
 			dojo.place(menuButton.domNode, related, "only");
 		}	
 		mUtil.forceLayout(related);
