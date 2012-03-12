@@ -1731,7 +1731,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_handleFocus: function (e) {
 			if (!e) { e = window.event; }
 			this._hasFocus = true;
-			this._updateDOMSelection();
+			if (isPad && this._lastTouchOffset !== undefined) {
+				this.setCaretOffset(this._lastTouchOffset, true);
+				this._lastTouchOffset = undefined;
+			} else {
+				this._updateDOMSelection();
+			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
 					var color = this._hightlightRGB;
@@ -2358,8 +2363,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var touches = e.touches;
 			if (touches.length === 1) {
 				var touch = touches[0];
-				this._touchStartX = touch.pageX;
-				this._touchStartY = touch.pageY;
+				this._touchStartX = touch.clientX;
+				this._touchStartY = touch.clientY;
+				this._lastTouchOffset = this._getXToOffset(this._getYToLine(touch.clientY), touch.clientX);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
 			}
