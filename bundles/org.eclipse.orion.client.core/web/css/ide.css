@@ -658,6 +658,7 @@ a:hover {
 	max-width: 650px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
+	z-index: 10;
 }
 
 .keyAssistFloat {
