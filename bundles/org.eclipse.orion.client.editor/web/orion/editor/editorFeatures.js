@@ -164,7 +164,12 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), messages.findNext);
 			this.textView.setAction(messages.findNext, function() {
 				if (this._searcher){
-					this._searcher.findNext(true);
+					var selection = this.textView.getSelection();
+					if(selection.start < selection.end) {
+						this._searcher.findNext(true, this.textView.getText(selection.start, selection.end));
+					} else {
+						this._searcher.findNext(true);
+					}
 					return true;
 				}
 				return false;
@@ -173,7 +178,12 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true, true), messages.findPrevious);
 			this.textView.setAction(messages.findPrevious, function() {
 				if (this._searcher){
-					this._searcher.findNext(false);
+					var selection = this.textView.getSelection();
+					if(selection.start < selection.end) {
+						this._searcher.findNext(false, this.textView.getText(selection.start, selection.end));
+					} else {
+						this._searcher.findNext(false);
+					}
 					return true;
 				}
 				return false;
