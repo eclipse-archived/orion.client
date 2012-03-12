@@ -12,7 +12,7 @@
  *		Mihai Sucan (Mozilla Foundation) - fix for Bug#334583 Bug#348471 Bug#349485 Bug#350595 Bug#360726 Bug#361180 Bug#362835 Bug#362428 Bug#362286 Bug#354270 Bug#361474 Bug#363945 Bug#366312 Bug#370584
  ******************************************************************************/
 
-/*global window document navigator setTimeout clearTimeout setInterval clearInterval XMLHttpRequest define DOMException */
+/*global window document navigator setTimeout clearTimeout setInterval clearInterval define */
 
 define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
 
@@ -208,7 +208,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * <ul>
 		 *   <li>"document" - relative to document, the origin is the top-left corner of first line</li>
 		 *   <li>"page" - relative to html page that contains the text view</li>
-		 *   <li>"view" - relative to text view, the origin is the top-left corner of the view container</li>
 		 * </ul>
 		 * </p>
 		 * <p>All methods in the view that take or return a position are in the document coordinate space.</p>
@@ -723,12 +722,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return false;
 		},
 		/**
-		* Returns if the view is loaded.
+		* Returns if the view is destroyed.
 		* <p>
-		* @returns {Boolean} <code>true</code> if the view is loaded.
+		* @returns {Boolean} <code>true</code> if the view is destroyed.
 		*/
-		isLoaded: function () {
-			return !!this._clientDiv;
+		isDestroyed: function () {
+			return !this._clientDiv;
 		},
 		/** 
 		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view. 
@@ -1152,6 +1151,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		resize: function() {
+			if (!this._clientDiv) { return; }
 			this._handleResize(null);
 		},
 		/**
@@ -1482,6 +1482,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return this._showCaret(true);
 		},
 		update: function(styleChanged, sync) {
+			if (!this._clientDiv) { return; }
 			if (styleChanged) {
 				this._updateStyle();
 			}
