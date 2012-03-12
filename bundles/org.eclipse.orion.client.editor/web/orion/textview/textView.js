@@ -2262,8 +2262,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var clientHeight = this._getClientHeight ();
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
+				var viewRect = this._viewDiv.getBoundingClientRect();
 				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * scrollButtonHeight;
-				lineIndex = Math.floor((e.clientY - scrollButtonHeight) * lineCount / trackHeight);
+				lineIndex = Math.floor(((e.clientY - viewRect.top) - scrollButtonHeight) * lineCount / trackHeight);
 				if (!(0 <= lineIndex && lineIndex < lineCount)) {
 					lineIndex = undefined;
 				}
