@@ -49,6 +49,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
 	var platformDelimiter = isWindows ? "\r\n" : "\n";
+	var scrollButtonHeight = isPad ? 0 : 17;
 	
 	/** 
 	 * Constructs a new Selection object.
@@ -2258,12 +2259,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			var ruler = element ? element._ruler : null;
 			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") {
-				var buttonHeight = isPad ? 0 : 17;
 				var clientHeight = this._getClientHeight ();
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
-				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
-				lineIndex = Math.floor((e.clientY - buttonHeight) * lineCount / trackHeight);
+				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * scrollButtonHeight;
+				lineIndex = Math.floor((e.clientY - scrollButtonHeight) * lineCount / trackHeight);
 				if (!(0 <= lineIndex && lineIndex < lineCount)) {
 					lineIndex = undefined;
 				}
@@ -5585,11 +5585,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 					if (frag.firstChild) { div.insertBefore(frag, child); }
 				} else {
-					var buttonHeight = isPad ? 0 : 17;
 					var clientHeight = this._getClientHeight ();
 					var lineCount = this._model.getLineCount ();
 					var contentHeight = lineHeight * lineCount;
-					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * buttonHeight;
+					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * scrollButtonHeight;
 					var divHeight;
 					if (contentHeight < trackHeight) {
 						divHeight = lineHeight;
@@ -5611,7 +5610,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							annotation = annotations[prop];
 							this._applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute";
-							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
+							lineDiv.style.top = scrollButtonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
 							if (annotation.html) {
 								lineDiv.innerHTML = annotation.html;
 							}
@@ -5623,7 +5622,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					} else if (div._oldTrackHeight !== trackHeight) {
 						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
 						while (lineDiv) {
-							lineDiv.style.top = buttonHeight + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
+							lineDiv.style.top = scrollButtonHeight + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
 							lineDiv = lineDiv.nextSibling;
 						}
 					}
