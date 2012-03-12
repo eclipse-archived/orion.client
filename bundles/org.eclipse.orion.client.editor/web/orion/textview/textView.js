@@ -2368,10 +2368,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var touches = e.touches;
 			if (touches.length === 1) {
 				var touch = touches[0];
-				this._touchCurrentX = touch.pageX;
-				this._touchCurrentY = touch.pageY;
-				var interval = 100;
-				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*2)) {
+				this._touchCurrentX = touch.clientX;
+				this._touchCurrentY = touch.clientY;
+				var interval = 10;
+				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*20)) {
 					this._vScrollDiv.style.display = "block";
 					this._hScrollDiv.style.display = "block";
 					var self = this;
@@ -2394,8 +2394,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							} else {
 								deltaX = self._touchSpeedX * interval;
 								deltaY = self._touchSpeedY * interval;
-								self._touchSpeedX *= 0.9;
-								self._touchSpeedY *= 0.9;
+								self._touchSpeedX *= 0.95;
+								self._touchSpeedY *= 0.95;
 							}
 						}
 						self._scrollView(deltaX, deltaY);
@@ -3588,7 +3588,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._selDiv1 = null;
 			this._selDiv2 = null;
 			this._selDiv3 = null;
-			this._insertedSelRule = false;
 			this._clipboardDiv = null;
 			this._rootDiv = null;
 			this._scrollDiv = null;
@@ -3599,6 +3598,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._overlayDiv = null;
 			this._leftDiv = null;
 			this._rightDiv = null;
+			this._vScrollDiv = null;
+			this._hScrollDiv = null;
+			this._insertedSelRule = false;
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
