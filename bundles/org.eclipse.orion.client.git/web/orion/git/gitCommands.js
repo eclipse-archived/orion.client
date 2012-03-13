@@ -464,7 +464,7 @@ var exports = {};
 		});
 		commandService.addCommand(checkoutBranchCommand);
 
-		var branchNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
+		var branchNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')]);
 
 		var addBranchCommand = new mCommands.Command({
 			name: "New Branch",
@@ -558,7 +558,7 @@ var exports = {};
 		commandService.addCommand(removeRemoteBranchCommand);
 
 		var addRemoteParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:'), 
-		                                                               new mCommands.CommandParameter('url', 'url', 'Url:')], false);
+		                                                               new mCommands.CommandParameter('url', 'url', 'Url:')]);
 		
 		var addRemoteCommand = new mCommands.Command({
 			name: "New Remote",
@@ -807,12 +807,12 @@ var exports = {};
 						doOperation(commandInvocation, jsonData.JsonData);
 					} else if (commandInvocation){
 						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						
 						commandInvocation.parameters.errorData = jsonData.JsonData;
-						commandService._collectParameters(commandInvocation);
+						commandService.collectParameters(commandInvocation);
 					} else {
 						doOperation(null, jsonData.JsonData);
 					}
@@ -891,12 +891,12 @@ var exports = {};
 						doOperation(commandInvocation, jsonData.JsonData);
 					} else if (commandInvocation){
 						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						
 						commandInvocation.parameters.errorData = jsonData.JsonData;
-						commandService._collectParameters(commandInvocation);
+						commandService.collectParameters(commandInvocation);
 					} else {
 						doOperation(null, jsonData.JsonData);
 					}
@@ -1121,12 +1121,12 @@ var exports = {};
 						doOperation(commandInvocation, jsonData.JsonData);
 					} else if (commandInvocation){
 						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						
 						commandInvocation.parameters.errorData = jsonData.JsonData;
-						commandService._collectParameters(commandInvocation);
+						commandService.collectParameters(commandInvocation);
 					} else {
 						doOperation(null, jsonData.JsonData);
 					}
@@ -1259,12 +1259,12 @@ var exports = {};
 						doOperation(commandInvocation, jsonData.JsonData);
 					} else if (commandInvocation){
 						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], true);
+							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", "SSH User Name:"), new mCommands.CommandParameter("sshpassword", "password", "SSH Password:")], {hasOptionalParameters: true});
 						
 						commandInvocation.parameters.errorData = jsonData.JsonData;
-						commandService._collectParameters(commandInvocation);
+						commandService.collectParameters(commandInvocation);
 					} else {
 						doOperation(null, jsonData.JsonData);
 					}
@@ -1542,7 +1542,7 @@ var exports = {};
 		});
 		commandService.addCommand(resetIndexCommand);
 
-		var tagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')], false);
+		var tagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:')]);
 
 		var addTagCommand = new mCommands.Command({
 			name : "Tag",
@@ -1930,7 +1930,7 @@ var exports = {};
 		// Git repository configuration
 		
 		var addConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('key', 'text', 'Key:'), 
-		                                                               new mCommands.CommandParameter('value', 'text', 'Value:')], false);
+		                                                               new mCommands.CommandParameter('value', 'text', 'Value:')]);
 		
 		var addConfigEntryCommand = new mCommands.Command({
 			name: "New Configuration Entry",
@@ -1952,7 +1952,7 @@ var exports = {};
 		});
 		commandService.addCommand(addConfigEntryCommand);
 		
-		var editConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('value', 'text', 'Value:')], false);
+		var editConfigParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('value', 'text', 'Value:')]);
 		
 		var editConfigEntryCommand = new mCommands.Command({
 			name: "Edit",
@@ -2001,7 +2001,7 @@ var exports = {};
 		
 		//
 		
-		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", "Repository URL:")], true);
+		var cloneParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "url", "Repository URL:")], {hasOptionalParameters: true});
 
 		function forceSingleItem(item) {
 			if (dojo.isArray(item)) {
@@ -2057,7 +2057,7 @@ var exports = {};
 		});
 		commandService.addCommand(cloneGitRepositoryCommand);
 
-		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", "New folder:")], true);
+		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", "New folder:")], {hasOptionalParameters: true});
 		
 		var initGitRepositoryCommand = new mCommands.Command({
 			name : "Init Repository",
@@ -2170,7 +2170,7 @@ var exports = {};
 		});
 		commandService.addCommand(applyPatchCommand);
 		
-		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", "Commit name:")], true);
+		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", "Commit name:")], {hasOptionalParameters: true});
 		
 		var openCommitCommand = new mCommands.Command({
 			name : "Open Commit",

@@ -38,7 +38,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				name: "Install",
 				tooltip: "Install a plugin by specifying its URL",
 				id: "orion.installPlugin",
-				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', 'Plugin URL:', '')], false),
+				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', 'Plugin URL:', '')]),
 				callback: dojo.hitch(this, function(data) {
 					if (data.parameters) {
 						var location = data.parameters.valueFor('url');

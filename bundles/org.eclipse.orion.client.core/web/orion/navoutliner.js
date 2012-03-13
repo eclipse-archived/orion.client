@@ -45,7 +45,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			tooltip: "Add link as favorite",
 			imageClass: "core-sprite-add",
 			id: "eclipse.addExternalFave",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "text", 'URL:', '')], false),
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "text", 'URL:', '')]),
 			callback: dojo.hitch(this, function(data) {
 				if (data.parameters) {
 					var newText = data.parameters.valueFor('url');
