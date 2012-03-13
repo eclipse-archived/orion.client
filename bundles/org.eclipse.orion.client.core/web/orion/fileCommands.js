@@ -423,7 +423,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			}
 		}
 		
-		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')], false);
+		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')]);
 		
 		var newFileCommand =  new mCommands.Command({
 			name: "New File",
@@ -451,7 +451,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
 		commandService.addCommand(newFileCommand);
 		
-		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')], false);
+		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')]);
 
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",

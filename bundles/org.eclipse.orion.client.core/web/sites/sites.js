@@ -76,7 +76,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					image : require.toUrl("images/add.gif"),
 					id: "orion.site.create",
 					groupId: "orion.sitesGroup",
-					parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')], false),
+					parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')]),
 					callback : function(data) {
 						var name = data.parameters && data.parameters.valueFor('name');
 						dojo.when(workspaces, function(workspaces) {
