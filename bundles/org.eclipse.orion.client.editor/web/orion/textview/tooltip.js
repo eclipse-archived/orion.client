@@ -77,7 +77,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				var self = this;
 				self._showTimeout = setTimeout(function() {
 					self.show(true);
-				}, 1000);
+				}, 500);
 			}
 		},
 		show: function(autoHide) {
