@@ -35,10 +35,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
-	 * Note:  when retrieving parameters for a command invocation, clients should always use <code>commandInvocation.parameters</code>
+	 * It represents a unique invocation of a command by the user.  Each time a user invokes a command (by click, keystroke, URL),
+	 * a new invocation is passed to the client.
+	 * Note:  When retrieving parameters from a command invocation, clients should always use <code>commandInvocation.parameters</code>
 	 * rather than obtaining the parameter object originally specified for the command (<code>commandInvocation.command.parameters</code>).
-	 * This ensures that the parameter values for the actual invocation are used vs. any default parameters that may have been
-	 * specified originally.
+	 * This ensures that the parameter values for a unique invocation are used vs. any default parameters that may have been
+	 * specified originally.  Similarly, if a client wishes to store data that will preserved across multiple invocations of a command,
+	 * that data can be stored in the original parameters description and a reference maintained by the client.
 	 * 
 	 * @name orion.commands.CommandInvocation
 	 * 
@@ -62,7 +65,22 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 */
 		collectsParameters: function() {
 			return this.commandService && this.commandService.collectsParameters();
+		},
+	
+		/**
+		 * Makes and returns a (shallow) copy of this command invocation.
+		 */
+		makeCopy: function() {
+			var copy =  new CommandInvocation(this.commandService, this.handler, this.items, this.userData, this.command);
+			copy.domNode = this.domNode;
+			copy.domParent = this.domParent;
+			// we want a copy of our parameters, not the original command parameters.
+			if (this.parameters) {
+				copy.parameters = this.parameters.makeCopy();
+			}
+			return copy;
 		}
+
 	};
 	CommandInvocation.prototype.constructor = CommandInvocation;
 
@@ -251,12 +269,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								return;
 							} else if (command.callback) {
 								stop(event);
-								window.setTimeout(dojo.hitch(this, function() {
-									if (invocation.parameters && this.collectsParameters()) {
-										this._collectParameters(invocation);
-									} else {
-										command.callback.call(invocation.handler || window, invocation);
-									}	
+								window.setTimeout(dojo.hitch(this, function() {	
+									this._invoke(invocation);
 								}), 0);
 								return;
 							}
@@ -284,7 +298,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						if (invocation && invocation.parameters && command.callback) {
 							invocation.parameters.setValue(match.parameterName, match.parameterValue);
 							window.setTimeout(dojo.hitch(this, function() {
-								this._collectParameters(invocation);
+								this._invoke(invocation);
 							}), 0);
 							return;
 						}
@@ -311,7 +325,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			if (binding && binding.command) {
 				if (binding.command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._collectParameters(binding.invocation);
+						this._invoke(binding.invocation);
 					}), 0);
 				}
 			}
@@ -351,11 +365,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *
 		 * @param {DOMElement} node the dom node that is displaying the command, or a node in the parameter collector area
 		 * @param {Function} fillFunction a function that will fill the parameter area
+		 * @param {Function} onClose a function that will be called when the user closes the collector
 		 */
-		openParameterCollector: function(node, fillFunction) {
+		openParameterCollector: function(node, fillFunction, onClose) {
 			if (this._parameterCollector) {
 				this._parameterCollector.close();
-				this._parameterCollector.open(node, fillFunction);
+				this._parameterCollector.open(node, fillFunction, onClose);
 			}
 		},
 		
@@ -382,42 +397,81 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			return this._parameterCollector;
 		},
 		
-		_collectParameters: function(commandInvocation) {
-			var collected = false;
-			if (this._parameterCollector) {
-				commandInvocation.parameters.updateParameters(commandInvocation);
-				collected = commandInvocation.parameters.hasParameters() ? this._parameterCollector.collectParameters(commandInvocation) : false;
-			}
-			if (!collected && commandInvocation.parameters.hasParameters()) {
-				// if parameter collection has been set up, we should have some default collection using
-				// tooltip dialogs.
-				var tooltipDialog = new dijit.TooltipDialog({
-					onBlur: function() {dijit.popup.close(tooltipDialog);}
-				});		
-				var parameterArea = dojo.create("div");
-				var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-					dijit.popup.close(tooltipDialog);})(parameterArea);
-				tooltipDialog.set("content", parameterArea);
-				var menu = dijit.byId(commandInvocation.domParent.id);
-				var pos;
-				if (menu) {
-					pos = dojo.position(menu.eclipseScopeId, true);
+		/*
+		 * Invoke the specified command, collecting parameters if necessary.  This is used inside the framework
+		 * when the user invokes a command.
+		 */
+		_invoke: function(commandInvocation) {
+			return this._collectAndInvoke(commandInvocation.makeCopy(), false);
+		},
+		
+	
+		/*
+		 * This method is the actual implementation for collecting parameters and invoking a callback.
+		 * "forceCollect" specifies whether we should always collect parameters or consult the parameters description to see if we should.
+		 */
+		_collectAndInvoke: function(commandInvocation, forceCollect) {
+			if (commandInvocation) {
+				// Establish whether we should be trying to collect parameters. 
+				if (this._parameterCollector && commandInvocation.parameters && commandInvocation.parameters.hasParameters() && 
+					(forceCollect || commandInvocation.parameters.shouldCollectParameters())) {
+					var collecting = false;
+					commandInvocation.parameters.updateParameters(commandInvocation);
+					collecting = this._parameterCollector.collectParameters(commandInvocation);
+				
+					// The parameter collector cannot collect.  We will do a default implementation using a tooltip dialog.
+					if (!collecting) {
+						var tooltipDialog = new dijit.TooltipDialog({
+							onBlur: function() {dijit.popup.close(tooltipDialog);}
+						});		
+						var parameterArea = dojo.create("div");
+						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
+							dijit.popup.close(tooltipDialog);})(parameterArea);
+						tooltipDialog.set("content", parameterArea);
+						var menu = dijit.byId(commandInvocation.domParent.id);
+						var pos;
+						if (menu) {
+							pos = dojo.position(menu.eclipseScopeId, true);
+						} else {
+							pos = dojo.position(commandInvocation.domNode, true);
+						}
+						if (pos.x && pos.y && pos.w) {
+							dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
+							window.setTimeout(function() {
+								focusNode.focus();
+								focusNode.select();
+							}, 0);
+							collecting = true;
+						}
+					}
+					if (!collecting) {
+						// We have failed, so let's get rid of the parameters and just call the callback
+						commandInvocation.parameters = null;
+						commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
+					}
 				} else {
-					pos = dojo.position(commandInvocation.domNode, true);
+					// We should not be trying to collect parameters, just call the callback.
+					commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 				}
-				if (pos.x && pos.y && pos.w) {
-					dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
-					window.setTimeout(function() {
-						focusNode.focus();
-						focusNode.select();
-					}, 0);
-					collected = true;
-				}
+			} else {
+				window.console.log("Client attempted to invoke command without an available (rendered) command invocation");
 			}
-			if (!collected) {
-				commandInvocation.parameters = null;
-				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
-			}
+		},
+		
+		/**
+		 * Collect the parameters specified in the given command invocation.  If parameters are
+		 * collected successfully, invoke the command's callback. This method is used by clients who want to 
+		 * control the timing of parameter collection.  For example, if a command must be executed before it can
+		 * be determined what parameters are known, the client can try the command in the callback and then call
+		 * this function if parameters are needed.  In this case, clients typically configure the parameters description
+		 * options with "options.clientWillCollect" set to true.
+		 *
+		 * {@link orion.commands.ParametersDescription}
+		 *
+		 * @param {orion.commands.CommandInvocation} the current invocation of the command 
+		 */
+		collectParameters: function(commandInvocation) {
+			this._collectAndInvoke(commandInvocation, true); 
 		},
 		
 		/**
@@ -1054,15 +1108,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					}
 				}
 			} else if (this.callback) {
-				if (this.parameters && context.collectsParameters()) {
-					menuitem.onClick = dojo.hitch(this, function() {
-						context.commandService._collectParameters(context);
-					});
-				} else {
-					menuitem.onClick = dojo.hitch(this, function() {
-						this.callback.call(context.handler, context);
-					});
-				}
+				menuitem.onClick = dojo.hitch(this, function() {
+					context.commandService._invoke(context);
+				});
 			}
 			
 			// we may need to refer back to the command.  
@@ -1104,22 +1152,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 */
 		_hookCallback: function(domNode, context) {
 			dojo.connect(domNode, "onclick", this, function() {
-				// collect parameters in advance if specified
-				if (this.parameters && context.collectsParameters()) {
-					context.commandService._collectParameters(context);
-				} else if (this.callback) {
-					this.callback.call(context.handler, context);
-				}
+				context.commandService._invoke(context);
 			});
 			// onClick events do not register for spans when using the keyboard
 			dojo.connect(domNode, "onkeypress", this, function(e) {
 				if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
-				// collect parameters in advance if specified						
-					if (this.parameters && context.collectsParameters()) {							
-						context.commandService._collectParameters(context);						
-					} else if (this.callback) {
-						this.callback.call(context.handler, context);						
-					}					
+					context.commandService._invoke(context);					
 				}				
 			});
 		},
@@ -1333,7 +1371,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * signalled a desire to provide optional information.
 	 *
 	 * @param {orion.commands.CommandParameter[]} parameters an array of CommandParameters that are required
-	 * @param {Boolean} [options] specifies whether additional, optional parameters can be specified
+	 * @param {Object} options The parameters description options object.
+	 * @param {Boolean} options.hasOptionalParameters specifies whether there are additional optional parameters
+	 *			that could be collected.  If true, then the collector will show an affordance for invoking an 
+	 *			additional options collector and the client can use the optionsRequested flag to determine whether
+	 *			additional parameters should be shown.  Default is false.
+	 * @param {Boolean} options.clientCollect specifies whether the client will collect the parameters in its
+	 *			callback.  Default is false, which means the callback will not be called until an attempt has
+	 *			been made to collect parameters.
 	 * @param {Function} [getParameters] a function used to define the parameters just before the command is invoked.  This is used
 	 *			when a particular invocation of the command will change the parameters.  Any stored parameters will be ignored, and
 	 *          replaced with those returned by this function.  If no parameters (empty array or null) are returned, then it is assumed
@@ -1344,7 +1389,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 */
 	function ParametersDescription (parameters, options, getParameters) {
 		this._storeParameters(parameters);
-		this.options = options;
+		this._hasOptionalParameters = options && options.hasOptionalParameters;
+		this._clientCollect = options && options.clientCollect;
+		this._options = options;  // saved for making a copy
 		this.optionsRequested = false;
 		this.getParameters = getParameters;
 	}
@@ -1369,9 +1416,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 		},
 		
+		/**
+		 * Returns a boolean indicating whether any parameters have been specified.
+		 *
+		 * @returns {Boolean} whether there are parameters to collect.
+		 */
 		hasParameters: function() {
 			return this.parameterTable !== null;
 		},
+		
+		/**
+		 * Returns a boolean indicating whether a collector should try to collect parameters.  If there
+		 * are no parameters specified, or the client is expecting to collect them, this will return
+		 * <code>false</code>.
+		 *
+		 * @returns {Boolean} indicating whether the caller should attempt to collect the parameters.
+		 */
+		shouldCollectParameters: function() {
+			return !this._clientCollect && this.hasParameters();
+		},
+				
 		/**
 		 * Returns the CommandParameter with the given name, or <code>null</code> if there is no parameter
 		 * by that name.
@@ -1436,7 +1500,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
 				parameters.push(newParm);
 			});
-			return new ParametersDescription(parameters, this.options, this.getParameters);
+			return new ParametersDescription(parameters, this._options, this.getParameters);
+		 },
+		 /**
+		  * Return a boolean indicating whether additional optional parameters are available.
+		  */
+		 hasOptionalParameters: function() {
+			return this._hasOptionalParameters;
 		 }
 	};
 	ParametersDescription.prototype.constructor = ParametersDescription;
