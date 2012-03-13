@@ -47,6 +47,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					dojo.removeClass(this._activeElements.commandNode, "activeCommand");
 				}
 				mUtil.forceLayout(this._activeElements.parameterContainer);
+				if (this._activeElements.onClose) {
+					this._activeElements.onClose();
+				}
 				if (this._oldFocusNode) {
 					this._oldFocusNode.focus();
 					this._oldFocusNode = null;
@@ -88,11 +91,11 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		 * Open a parameter collector and return the dom node where parameter 
 		 * information should be inserted
 		 *
-		 * @param {DOMElement} commandNode the node containing the triggering command
-		 * @param {String} id the id of parent node containing the triggering command
+		 * @param {String|DOMElement} commandNode the node containing the triggering command
 		 * @param {Function} fillFunction a function that will fill the parameter area
+		 * @param {Function} onClose a function that will be called when the parameter area is closed
 		 */
-		open: function(commandNode, fillFunction) {
+		open: function(commandNode, fillFunction, onClose) {
 			if (typeof commandNode === "string") {
 				commandNode = dojo.byId(commandNode);
 			}
@@ -101,6 +104,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			// determine  the closest parameter container to the command.
 			this._activeElements = this._findParameterElements(commandNode);
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer && this._activeElements.parameterContainer) {
+				this._activeElements.onClose = onClose;
 				var focusNode = fillFunction(this._activeElements.parameterArea);
 				var close = dojo.query("#closebox", this._activeElements.parameterArea);
 				if (close.length === 0) {
@@ -112,12 +116,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					dojo.addClass(close, "dismiss");
 					close.title = "Close";
 					dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
-						this.close(this._activeElements);
+						this.close();
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
 						if(e.keyCode === dojo.keys.ENTER) {
-							this.close(this._activeElements);
+							this.close();
 						}
 					}));
 				}
@@ -181,9 +185,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				var localClose = dojo.hitch(this, function() {
 					if (closeFunction) {
 						closeFunction();
-					} else {
-						this.close(commandInvocation.domNode);
-					}
+					} 
+					this.close();
 				});
 				var keyHandler = dojo.hitch(this, function(event) {
 					if (event.keyCode === dojo.keys.ENTER) {
@@ -219,7 +222,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					localClose();
 				};
 
-				if (commandInvocation.parameters.options) {
+				if (commandInvocation.parameters.hasOptionalParameters()) {
 					commandInvocation.parameters.optionsRequested = false;
 					
 					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
@@ -238,9 +241,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 				}
 				// OK and cancel buttons
-				spacer = dojo.create("span", null, parentDismiss, "last");
-				dojo.addClass(spacer, "dismiss");
-
 				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
 				dojo.place(window.document.createTextNode("Submit"), ok, "last");
 				dojo.addClass(ok, "dismiss");
@@ -254,8 +254,6 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}
 				}));
 				
-				spacer = dojo.create("span", null, parentDismiss, "last");
-				dojo.addClass(spacer, "dismiss");
 				var close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, parentDismiss, "last");
 				dojo.addClass(close, "imageSprite");
 				dojo.addClass(close, "core-sprite-close");
