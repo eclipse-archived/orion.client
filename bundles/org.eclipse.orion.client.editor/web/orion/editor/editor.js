@@ -79,7 +79,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		matchingBracketType: "orion.annotation.matchingBracket",
 		currentLineType: "orion.annotation.currentLine",
 		highlightErrorType: "orion.annotation.highlightError",
-		searchType: "orion.annotation.search",
+		currentSearchType: "orion.annotation.currentSearch",
+		matchingSearchType: "orion.annotation.matchingSearch",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -446,7 +447,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			if (this._annotationFactory) {
 				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
-				this._annotationStyler.addAnnotationType(this.searchType);
+				this._annotationStyler.addAnnotationType(this.currentSearchType);
+				this._annotationStyler.addAnnotationType(this.matchingSearchType);
 				this._annotationStyler.addAnnotationType(this.errorType);
 				this._annotationStyler.addAnnotationType(this.warningType);
 				this._annotationStyler.addAnnotationType(this.matchingBracketType);
@@ -587,7 +589,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				};
 			
 				this._annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
-				this._overviewRuler.addAnnotationType(this.searchType);
+				this._overviewRuler.addAnnotationType(this.currentSearchType);
+				this._overviewRuler.addAnnotationType(this.matchingSearchType);
 				this._annotationRuler.addAnnotationType(this.errorType);
 				this._annotationRuler.addAnnotationType(this.warningType);
 				this._annotationRuler.addAnnotationType(this.taskType);
