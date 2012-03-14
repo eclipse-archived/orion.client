@@ -129,11 +129,11 @@
 	border: 1px solid black;
 }
 .annotationOverview.searchCurrent {
-	background-color: orange;
+	background-color: #53D1FF;
 	border: 1px solid black;
 }
 .annotationOverview.searchMatch {
-	background-color: yellow;
+	background-color: #C3E1FF;
 	border: 1px solid black;
 }
 
@@ -168,10 +168,10 @@
 	outline: 1px solid red;
 }
 .annotationRange.searchCurrent {
-	background-color: orange;
+	background-color: #53D1FF;
 }
 .annotationRange.searchMatch {
-	background-color: yellow;
+	background-color: #C3E1FF;
 }
 
 /* Styles for lines of text */
