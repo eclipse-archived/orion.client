@@ -90,9 +90,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 		this._incrementalFindIgnoreSelection = false;
 		this._incrementalFindPrefix = "";
 		this._searcher =  searcher;
-		if(this._searcher) {
-			this._searcher.getAdaptor().setEditor(this.editor);
-		}
 		this._lastEditLocation = null;
 		this.init();
 	}
