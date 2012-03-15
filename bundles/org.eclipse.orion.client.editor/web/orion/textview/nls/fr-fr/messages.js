@@ -10,11 +10,13 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
- /*global define*/
- 
- define("orion/textview/nls/fr-fr/messages", {
+
+/*global define*/
+
+define("orion/textview/nls/fr-fr/messages", {
     "multipleAnnotations": "Annotations multiples:",
     "line": "Ligne: {0}",
+	"currentLine": "Ligne Courant",
     "matchingBracket": "Crochet Correspondant",
     "currentBracket": "Crochet Courant"
 });

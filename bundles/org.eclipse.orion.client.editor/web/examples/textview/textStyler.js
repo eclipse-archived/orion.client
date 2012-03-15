@@ -522,7 +522,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 			if (!viewModel.getBaseModel) { return; }
 			var annotationModel = this.annotationModel;
 			if (!annotationModel) { return; }
-			annotationModel.removeAnnotations("orion.annotation.folding");
+			annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
 			var add = [];
 			var baseModel = viewModel.getBaseModel();
 			var comments = this.comments;
@@ -541,9 +541,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 			if (startLine === endLine) {
 				return null;
 			}
-			return new mAnnotations.FoldingAnnotation(viewModel, "orion.annotation.folding", start, end,
-				"<div class='annotationHTML expanded'></div>", {styleClass: "annotation expanded"}, 
-				"<div class='annotationHTML collapsed'></div>", {styleClass: "annotation collapsed"});
+			return new (mAnnotations.AnnotationType.getType(mAnnotations.AnnotationType.ANNOTATION_FOLDING))(start, end, viewModel);
 		},
 		_computeTasks: function(type, commentStart, commentEnd) {
 			if (!this.detectTasks) { return; }
@@ -554,7 +552,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 			if (viewModel.getBaseModel) { baseModel = viewModel.getBaseModel(); }
 			var annotations = annotationModel.getAnnotations(commentStart, commentEnd);
 			var remove = [];
-			var annotationType = "orion.annotation.task";
+			var annotationType = mAnnotations.AnnotationType.ANNOTATION_TASK;
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
 				if (annotation.type === annotationType) {
@@ -572,16 +570,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 					if (type !== SINGLELINE_COMMENT) {
 						end = Math.min(end, commentEnd - this.commentEnd.length);
 					}
-					add.push({
-						start: tokenStart,
-						end: end,
-						type: annotationType,
-						title: baseModel.getText(tokenStart, end),
-						style: {styleClass: "annotation task"},
-						html: "<div class='annotationHTML task'></div>",
-						overviewStyle: {styleClass: "annotationOverview task"},
-						rangeStyle: {styleClass: "annotationRange task"}
-					});
+					add.push(mAnnotations.AnnotationType.createAnnotation(annotationType, tokenStart, end, baseModel.getText(tokenStart, end)));
 				}
 			}
 			annotationModel.replaceAnnotations(remove, add);
@@ -959,24 +948,10 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				}
 				var bracket = this._findMatchingBracket(model, mapCaret);
 				if (bracket !== -1) {
-					add = [{
-						start: bracket,
-						end: bracket + 1,
-						type: "orion.annotation.matchingBracket",
-						title:  messages.matchingBracket,
-						html: "<div class='annotationHTML matchingBracket'></div>",
-						overviewStyle: {styleClass: "annotationOverview matchingBracket"},
-						rangeStyle: {styleClass: "annotationRange matchingBracket"}
-					},
-					{
-						start: mapCaret,
-						end: mapCaret + 1,
-						type: "orion.annotation.currentBracket",
-						title: messages.currentBracket,
-						html: "<div class='annotationHTML currentBracket'></div>",
-						overviewStyle: {styleClass: "annotationOverview currentBracket"},
-						rangeStyle: {styleClass: "annotationRange currentBracket"}
-					}];
+					add = [
+						mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET, bracket, bracket + 1),
+						mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET, mapCaret, mapCaret + 1)
+					];
 				}
 			}
 			this._bracketAnnotations = add;
@@ -1054,7 +1029,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				var annotation;
 				while (iter.hasNext()) {
 					annotation = iter.next();
-					if (annotation.type === "orion.annotation.folding") {
+					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
 						all.push(annotation);
 						for (i = 0; i < newComments.length; i++) {
 							if (annotation.start === newComments[i].start && annotation.end === newComments[i].end) {

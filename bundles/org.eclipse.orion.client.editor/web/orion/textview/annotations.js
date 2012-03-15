@@ -13,7 +13,7 @@
 
 /*global define */
 
-define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mEventTarget) {
+define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion/textview/eventTarget'], function(messages, mEventTarget) {
 	/**
 	 * @class This object represents a decoration attached to a range of text. Annotations are added to a
 	 * <code>AnnotationModel</code> which is attached to a <code>TextModel</code>.
@@ -37,31 +37,27 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	/**
 	 * Constructs a new folding annotation.
 	 * 
-	 * @param {orion.textview.ProjectionTextModel} projectionModel The projection text model.
-	 * @param {String} type The annotation type.
 	 * @param {Number} start The start offset of the annotation in the text model.
 	 * @param {Number} end The end offset of the annotation in the text model.
-	 * @param {String} expandedHTML The HTML displayed for this annotation when it is expanded.
-	 * @param {orion.textview.Style} expandedStyle The style information for the annotation when it is expanded.
-	 * @param {String} collapsedHTML The HTML displayed for this annotation when it is collapsed.
-	 * @param {orion.textview.Style} collapsedStyle The style information for the annotation when it is collapsed.
+	 * @param {orion.textview.ProjectionTextModel} projectionModel The projection text model.
 	 * 
 	 * @class This object represents a folding annotation.
 	 * @name orion.textview.FoldingAnnotation
 	 */
-	function FoldingAnnotation (projectionModel, type, start, end, expandedHTML, expandedStyle, collapsedHTML, collapsedStyle) {
-		this.type = type;
+	function FoldingAnnotation (start, end, projectionModel) {
 		this.start = start;
 		this.end = end;
 		this._projectionModel = projectionModel;
-		this._expandedHTML = this.html = expandedHTML;
-		this._expandedStyle = this.style = expandedStyle;
-		this._collapsedHTML = collapsedHTML;
-		this._collapsedStyle = collapsedStyle;
+		this.html = this._expandedHTML;
+		this.style = this._expandedStyle;
 		this.expanded = true;
 	}
 	
 	FoldingAnnotation.prototype = /** @lends orion.textview.FoldingAnnotation.prototype */ {
+		_expandedHTML: "<div class='annotationHTML expanded'></div>",
+		_expandedStyle: {styleClass: "annotation expanded"}, 
+		_collapsedHTML: "<div class='annotationHTML collapsed'></div>",
+		_collapsedStyle: {styleClass: "annotation collapsed"},
 		/**
 		 * Collapses the annotation.
 		 */
@@ -89,11 +85,143 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 			this._projectionModel.removeProjection(this._projection);
 		}
 	};
+	 
+	/**
+	 * @class This object represents a regitry of annotation types.
+	 * @name orion.textview.AnnotationType
+	 */
+	function AnnotationType() {
+	}
+	
+	/**
+	 * Error annotation type.
+	 */
+	AnnotationType.ANNOTATION_ERROR = "orion.annotation.error";
+	/**
+	 * Warning annotation type.
+	 */
+	AnnotationType.ANNOTATION_WARNING = "orion.annotation.warning";
+	/**
+	 * Task annotation type.
+	 */
+	AnnotationType.ANNOTATION_TASK = "orion.annotation.task";
+	/**
+	 * Breakpoint annotation type.
+	 */
+	AnnotationType.ANNOTATION_BREAKPOINT = "orion.annotation.breakpoint";
+	/**
+	 * Bookmark annotation type.
+	 */
+	AnnotationType.ANNOTATION_BOOKMARK = "orion.annotation.bookmark";
+	/**
+	 * Folding annotation type.
+	 */
+	AnnotationType.ANNOTATION_FOLDING = "orion.annotation.folding";
+	/**
+	 * Curent bracket annotation type.
+	 */
+	AnnotationType.ANNOTATION_CURRENT_BRACKET = "orion.annotation.currentBracket";
+	/**
+	 * Matching bracket annotation type.
+	 */
+	AnnotationType.ANNOTATION_MATCHING_BRACKET = "orion.annotation.matchingBracket";
+	/**
+	 * Current line annotation type.
+	 */
+	AnnotationType.ANNOTATION_CURRENT_LINE = "orion.annotation.currentLine";
+	/**
+	 * Current search annotation type.
+	 */
+	AnnotationType.ANNOTATION_CURRENT_SEARCH = "orion.annotation.currentSearch";
+	/**
+	 * Matching search annotation type.
+	 */
+	AnnotationType.ANNOTATION_MATCHING_SEARCH = "orion.annotation.matchingSearch";
+	
+	/** @private */
+	var annotationTypes = {};
+	
+	/**
+	 * Register an annotation type.
+	 *
+	 * @param {String} type The annotation type (for example, orion.annotation.error).
+	 * @param {Object|Function} properties The common annotation properties of the registered
+	 *		annotation type. All annotations create with this annotation type will expose these
+	 *		properties.	 */
+	AnnotationType.registerType = function(type, properties) {
+		var constructor = properties;
+		if (typeof constructor !== "function") {
+			constructor = function(start, end, title) {
+				this.start = start;
+				this.end = end;
+				if (title) { this.title = title; }
+			};
+			constructor.prototype = properties;
+		}
+		constructor.prototype.type = type;
+		annotationTypes[type] = constructor;
+		return type;
+	};
+	
+	/**
+	 * Creates an annotation of a given type with the specified start end end offsets.
+	 *
+	 * @param {String} type The annotation type (for example, orion.annotation.error).
+	 * @param {Number} start The start offset of the annotation in the text model.
+	 * @param {Number} end The end offset of the annotation in the text model.
+	 * @param {String} [title] The text description for the annotation if different then the type description.
+	 * @return {orion.textview.Annotation} the new annotation
+	 */
+	AnnotationType.createAnnotation = function(type, start, end, title) {
+		return new (this.getType(type))(start, end, title);
+	};
+	
+	/**
+	 * Gets the registered annotation type with specified type. The returned
+	 * value is a constructor that can be used to create annotations of the
+	 * speficied type.  The constructor takes the start and end offsets of
+	 * the annotation.
+	 *
+	 * @param {String} type The annotation type (for example, orion.annotation.error).
+	 * @return {Function} The annotation type constructor ( i.e function(start, end, title) ).
+	 */
+	AnnotationType.getType = function(type) {
+		return annotationTypes[type];
+	};
+	
+	/** @private */
+	function registerType(type, lineStyling) {
+		var index = type.lastIndexOf('.');
+		var suffix = type.substring(index + 1);
+		var properties = {
+			title: messages[suffix],
+			style: {styleClass: "annotation " + suffix},
+			html: "<div class='annotationHTML " + suffix + "'></div>",
+			overviewStyle: {styleClass: "annotationOverview " + suffix}
+		};
+		if (lineStyling) {
+			properties.lineStyle = {styleClass: "annotationLine " + suffix};
+		} else {
+			properties.rangeStyle = {styleClass: "annotationRange " + suffix};
+		}
+		AnnotationType.registerType(type, properties);
+	}
+	registerType(AnnotationType.ANNOTATION_ERROR);
+	registerType(AnnotationType.ANNOTATION_WARNING);
+	registerType(AnnotationType.ANNOTATION_TASK);
+	registerType(AnnotationType.ANNOTATION_BREAKPOINT);
+	registerType(AnnotationType.ANNOTATION_BOOKMARK);
+	registerType(AnnotationType.ANNOTATION_CURRENT_BRACKET);
+	registerType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
+	registerType(AnnotationType.ANNOTATION_CURRENT_SEARCH);
+	registerType(AnnotationType.ANNOTATION_MATCHING_SEARCH);
+	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
+	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
 	
 	/** 
 	 * Constructs a new AnnotationTypeList object.
 	 * 
-	 * @class 
+	 * @class This represents an interface of prioritized annotation types.
 	 * @name orion.textview.AnnotationTypeList
 	 */
 	function AnnotationTypeList () {
@@ -687,6 +815,7 @@ define("orion/textview/annotations", ['orion/textview/eventTarget'], function(mE
 	
 	return {
 		FoldingAnnotation: FoldingAnnotation,
+		AnnotationType: AnnotationType,
 		AnnotationTypeList: AnnotationTypeList,
 		AnnotationModel: AnnotationModel,
 		AnnotationStyler: AnnotationStyler

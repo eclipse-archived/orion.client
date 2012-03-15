@@ -10,9 +10,14 @@
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
 /*global define*/
-define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages'], function(messages) {
+define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
 	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
+	mAnnotations.AnnotationType.registerType(HIGHLIGHT_ERROR_ANNOTATION, {
+		title: messages.syntaxError,
+		html: "<div class='annotationHTML error'></div>",
+		rangeStyle: {styleClass: "annotationRange error"}
+	});
 
 	function isRelevant(serviceReference) {
 		return serviceReference.getName() === SERVICE_NAME && serviceReference.getProperty("type") === "highlighter";
@@ -158,14 +163,7 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages'], function(
 					if (errors) {
 						for (var j=0; j < errors.length; j++) {
 							var err = errors[j];
-							toAdd.push({
-								start: err.start + lineStart,
-								end: err.end + lineStart,
-								type: HIGHLIGHT_ERROR_ANNOTATION,
-								title: messages.syntaxError,
-								html: "<div class='annotationHTML error'></div>",
-								rangeStyle: {styleClass: "annotationRange error"}
-								});
+							toAdd.push(mAnnotations.AnnotationType.createAnnotation(HIGHLIGHT_ERROR_ANNOTATION, err.start + lineStart, err.end + lineStart));
 						}
 					}
 				}

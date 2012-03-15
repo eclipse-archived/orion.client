@@ -10,19 +10,28 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
- /*global define*/
- 
- define("orion/textview/nls/messages", {
-    "root": {
-        "multipleAnnotations": "Multiple annotations:",
-        "line": "Line: {0}",
-        "matchingBracket": "Matching Bracket",
-        "currentBracket": "Current Bracket",
-        "formatMessage": function(msg) {
+
+/*global define*/
+
+define("orion/textview/nls/messages", {
+	"root": {
+		"multipleAnnotations": "Multiple annotations:",
+		"line": "Line: {0}",
+		"breakpoint": "Breakpoint",
+		"bookmark": "Bookmark",
+		"task": "Task",
+		"error": "Error",
+		"warning": "Warning",
+		"matchingSearch": "Matching Search",
+		"currentSearch": "Current Search",
+		"currentLine": "Current Line",
+		"matchingBracket": "Matching Bracket",
+		"currentBracket": "Current Bracket",
+		"formatMessage": function(msg) {
 			var args = arguments;
 			return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
 		}
-    },
-    "pt-br": true,
-    "fr-fr": true
+	},
+	"pt-br": true,
+	"fr-fr": true
 });

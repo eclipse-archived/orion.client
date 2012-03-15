@@ -26,7 +26,7 @@ define(["require",
 		"orion/editor/htmlGrammar",
 		"examples/textview/textStyler"],   
  
-function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	var exports = {};
 	var view = null;
@@ -35,14 +35,8 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 	var loadedThemes = [];
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
-	var breakpointType = "orion.annotation.breakpoint";
-	var bookmarkType = "orion.annotation.bookmark";
-	var errorType = "orion.annotation.error";
-	var warningType = "orion.annotation.warning";
-	var taskType = "orion.annotation.task";
-	var currentBracketType = "orion.annotation.currentBracket";
-	var matchingBracketType = "orion.annotation.matchingBracket";
-	
+	var AnnotationType = mAnnotations.AnnotationType;
+		
 	function getFile(file) {
 		try {
 			var objXml = new XMLHttpRequest();
@@ -119,7 +113,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			return true;
 		});
 
-		var annotationModel = view.annotationModel = new mAnnotationModel.AnnotationModel(baseModel);
+		var annotationModel = view.annotationModel = new mAnnotations.AnnotationModel(baseModel);
 		/* Example: Adding a keyBinding and action*/
 		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll");
 		view.setAction("collapseAll", function() {
@@ -128,7 +122,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			view.setRedraw(false);
 			while (iter.hasNext()) {
 				var a = iter.next();
-				if (a.type === "orion.annotation.folding") {
+				if (a.type === AnnotationType.ANNOTATION_FOLDING) {
 					a.collapse();
 					annotationModel.modifyAnnotation(a);
 				}
@@ -144,7 +138,7 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			view.setRedraw(false);
 			while (iter.hasNext()) {
 				var a = iter.next();
-				if (a.type === "orion.annotation.folding") {
+				if (a.type === AnnotationType.ANNOTATION_FOLDING) {
 					a.expand();
 					annotationModel.modifyAnnotation(a);
 				}
@@ -156,11 +150,11 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 
 		/* Adding the Rulers */
 		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
-		annotationRuler.addAnnotationType(breakpointType);
-		annotationRuler.addAnnotationType(bookmarkType);
-		annotationRuler.addAnnotationType(errorType);
-		annotationRuler.addAnnotationType(warningType);
-		annotationRuler.addAnnotationType(taskType);
+		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_BREAKPOINT);
+		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_BOOKMARK);
+		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_ERROR);
+		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_WARNING);
+		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_TASK);
 		annotationRuler.setMultiAnnotation({html: "<div class='annotationHTML multiple'></div>"});
 		annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
 		annotationRuler.onDblClick =  function(lineIndex, e) {
@@ -175,16 +169,16 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			var type;
 			if (isMac ? e.metaKey : e.ctrlKey) {
 				if (e.shiftKey && e.altKey) {
-					type = warningType;
+					type = AnnotationType.ANNOTATION_WARNING;
 				} else if (e.altKey) {
-					type = errorType;
+					type = AnnotationType.ANNOTATION_ERROR;
 				} else if (e.shiftKey) {
-					type = bookmarkType;
+					type = AnnotationType.ANNOTATION_BOOKMARK;
 				} else {
-					type = taskType;
+					type = AnnotationType.ANNOTATION_TASK;
 				}
 			} else {
-				type = breakpointType;
+				type = AnnotationType.ANNOTATION_BREAKPOINT;
 			}
 			var annotations = annotationModel.getAnnotations(start, end);
 			var annotation, temp;
@@ -197,75 +191,27 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 			if (annotation) {
 				annotationModel.removeAnnotation(annotation);
 			} else {
-				if (isMac ? e.metaKey : e.ctrlKey) {
-					if (e.shiftKey && e.altKey) {
-						annotation = {
-							type: warningType,
-							title: "Warning: " + model.getLine(lineIndex),
-							style: {styleClass: "annotation warning"},
-							html: "<div class='annotationHTML warning'></div>",
-							overviewStyle: {styleClass: "annotationOverview warning"},
-							rangeStyle: {styleClass: "annotationRange warning"}
-						};
-					} else if (e.altKey) {
-						annotation = {
-							type: errorType,
-							title: "Error: " + model.getLine(lineIndex),
-							style: {styleClass: "annotation error"},
-							html: "<div class='annotationHTML error'></div>",
-							overviewStyle: {styleClass: "annotationOverview error"},
-							rangeStyle: {styleClass: "annotationRange error"}
-						};
-					} else if (e.shiftKey) {
-						annotation = {
-							type: bookmarkType,
-							title: "Bookmark: " + model.getLine(lineIndex),
-							style: {styleClass: "annotation bookmark"},
-							html: "<div class='annotationHTML bookmark'></div>",
-							overviewStyle: {styleClass: "annotationOverview bookmark"},
-							rangeStyle: {styleClass: "annotationRange bookmark"}
-						};
-					} else {
-						annotation = {
-							type: taskType,
-							title: "Todo: " + model.getLine(lineIndex),
-							style: {styleClass: "annotation task"},
-							html: "<div class='annotationHTML task'></div>",
-							overviewStyle: {styleClass: "annotationOverview task"},
-							rangeStyle: {styleClass: "annotationRange task"}
-						};
-					}
-				} else {
-					annotation = {
-						type: breakpointType,
-						title: "Breakpoint: " + model.getLine(lineIndex),
-						style: {styleClass: "annotation breakpoint"},
-						html: "<div class='annotationHTML breakpoint'></div>",
-						overviewStyle: {styleClass: "annotationOverview breakpoint"},
-						rangeStyle: {styleClass: "annotationRange breakpoint"}
-					};
-				}
-				annotation.start = start;
-				annotation.end = end;
+				annotation = AnnotationType.createAnnotation(type, start, end);
+				annotation.title += ": " + model.getLine(lineIndex);
 				annotationModel.addAnnotation(annotation);
 			}
 		};
 		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
 		linesRuler.onDblClick = annotationRuler.onDblClick;
 		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
-		overviewRuler.addAnnotationType(breakpointType);
-		overviewRuler.addAnnotationType(bookmarkType);
-		overviewRuler.addAnnotationType(errorType);
-		overviewRuler.addAnnotationType(warningType);
-		overviewRuler.addAnnotationType(taskType);
-		overviewRuler.addAnnotationType(matchingBracketType);
-		overviewRuler.addAnnotationType(currentBracketType);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_BREAKPOINT);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_BOOKMARK);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_ERROR);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_WARNING);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_TASK);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
+		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_CURRENT_BRACKET);
 		
 		view.addRuler(annotationRuler);
 		view.addRuler(linesRuler);
 		if (foldingEnabled) {
 			var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
-			foldingRuler.addAnnotationType("orion.annotation.folding");
+			foldingRuler.addAnnotationType(AnnotationType.ANNOTATION_FOLDING);
 			view.addRuler(foldingRuler);
 		}
 		view.addRuler(overviewRuler);
@@ -292,10 +238,10 @@ function(require, mKeyBinding, mTextModel, mAnnotationModel, mProjectionTextMode
 				styler = new mTextMateStyler.TextMateStyler(view, new mHtmlGrammar.HtmlGrammar());
 				break;
 		}
-		annotationStyler = new mAnnotationModel.AnnotationStyler(view, view.annotationModel);
-		annotationStyler.addAnnotationType(taskType);
-		annotationStyler.addAnnotationType(matchingBracketType);
-		annotationStyler.addAnnotationType(currentBracketType);
+		annotationStyler = new mAnnotations.AnnotationStyler(view, view.annotationModel);
+		annotationStyler.addAnnotationType(AnnotationType.ANNOTATION_TASK);
+		annotationStyler.addAnnotationType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
+		annotationStyler.addAnnotationType(AnnotationType.ANNOTATION_CURRENT_BRACKET);
 		view.setText(text);
 		return view;
 	}
