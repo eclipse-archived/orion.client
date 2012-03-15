@@ -37,6 +37,12 @@ orion.TextSearcher = (function() {
 		this.timerRunning = false;
 		this._searchOnRange = false;
 		this._lastSearchString = "";
+		var that = this;
+		this._listeners = {
+			onEditorFocus: function(e) {
+				that.removeCurrentAnnotation(e);
+			}
+		};
 		this.setOptions(options);
 	}
 	TextSearcher.prototype = {
@@ -135,15 +141,6 @@ orion.TextSearcher = (function() {
 						that.setOptions({wrapSearch: checked});
 					}
 				}));
-				/*
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Whole word",
-					checked: that._wholeWord,
-					onChange : function(checked) {
-						that.setOptions({wholeWord: checked});
-					}
-				}));
-				*/
 				newMenu.addChild(new dijit.CheckedMenuItem({
 					label: "Incremental search",
 					checked: that._incremental,
@@ -183,8 +180,8 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyUp: function(evt){
-			if(this._incremental && !this._keyUpHandled && !dojo.isIE){
-				var targetElement = evt.target;//document.getElementById("localSearchFindWith")
+			if(this._incremental && !this._keyUpHandled){
+				var targetElement = evt.target;
 				this.findNext(true, true, null, true, targetElement);
 			}
 			this._keyUpHandled = false;
@@ -216,7 +213,7 @@ orion.TextSearcher = (function() {
 				}
 				evt.cancelBubble = true;
 				if(!fromSearch)
-					this.replace(dojo.isIE? null: function(){evt.target.focus();});
+					this.replace();
 				this._keyUpHandled = fromSearch;
 				return false;
 			}
@@ -232,7 +229,7 @@ orion.TextSearcher = (function() {
 			if(this.visible()){
 				this._commandService.closeParameterCollector();
 			}
-			//this._editor.getTextView().removeEventListener("Focus", this.removeCurrentAnnotation);
+			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus);
 			this._editor.getTextView().focus();
 			var annotationModel = this._editor.getAnnotationModel();
 			if (annotationModel) {
@@ -251,7 +248,7 @@ orion.TextSearcher = (function() {
 		buildToolBar : function(defaultSearchStr) {
 			this._keyUpHandled = true;
 			var that = this;
-			//this._editor.getTextView().addEventListener("Focus", this.removeCurrentAnnotation);
+			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus);
 			var findDiv = document.getElementById("localSearchFindWith");
 			if (this.visible()) {
 				if(defaultSearchStr.length > 0){
@@ -450,7 +447,7 @@ orion.TextSearcher = (function() {
 			var startPos = this.getSearchStartIndex(incremental ? true : !next);
 			
 			if(this.visible()){
-				return this.findOnce(searchAll, searchStr ? searchStr : findTextDiv.value, startPos, /*(focusBackDiv && !dojo.isIE) ? function(){focusBackDiv.focus();} :*/ null);
+				return this.findOnce(searchAll, searchStr ? searchStr : findTextDiv.value, startPos);
 			} else if(this._lastSearchString && this._lastSearchString.length > 0){
 				var retVal = this._prepareFind(searchStr ? searchStr : this._lastSearchString, startPos);
 				return this._doFind(false, retVal.text, retVal.searchStr, retVal.startIndex, !next, this._wrapSearch);
