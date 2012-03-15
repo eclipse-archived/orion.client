@@ -199,9 +199,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				});
 				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
-						dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+						dojo.create("label", {innerHTML: parm.label, "for": parm.name + "parameterCollector"}, parameterArea, "last");
 					} 
-					var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+					var field = dojo.create("input", {type: parm.type, id: parm.name + "parameterCollector"}, parameterArea, "last");
 					dojo.addClass(field, "parameterInput");
 					// we define special classes for some parameter types
 					dojo.addClass(field, "parameterInput"+parm.type);
