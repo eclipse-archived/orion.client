@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo', 'orion/editor/regex'], function(require, dojo, mRegex) {
+define(['require', 'dojo', 'orion/editor/regex', 'orion/util'], function(require, dojo, mRegex, mUtil) {
 
 var orion = orion || {};
 
@@ -337,7 +337,7 @@ orion.searchUtils.generateMatchContext = function(contextAroundLength, fileConte
 };
 
 orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
-	var fileContents = fileContentText.split(lineDelim);
+	var fileContents = mUtil.splitFile(fileContentText);
 	if(replacing){
 		fileModelNode.contents = fileContents;
 	}
