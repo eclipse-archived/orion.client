@@ -385,6 +385,46 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		}
 	}
 	
+	/**
+	 * Split file contents into lines. It also handles the mixed line endings with "\n", "\r" and "\r\n".
+	 *
+	 * @param {String} text The file contetns.
+	 * @returns {Array} Split file lines. 
+	 * @name orion.util#splitFile
+	 * @function
+	 */
+	function splitFile(text) {
+		var cr = 0, lf = 0, index = 0, start = 0;
+		var splitLines = [];
+		while (true) {
+			if (cr !== -1 && cr <= index) { 
+				cr = text.indexOf("\r", index); 
+			}
+			if (lf !== -1 && lf <= index) { 
+				lf = text.indexOf("\n", index); 
+			}
+			if (lf === -1 && cr === -1) {
+				break; 
+			}
+			var offset = 1;
+			if (cr !== -1 && lf !== -1) {
+				if (cr + 1 === lf) {
+					offset = 2;
+					index = lf + 1;
+				} else {
+					index = (cr < lf ? cr : lf) + 1;
+				}
+			} else if (cr !== -1) {
+				index = cr + 1;
+			} else {
+				index = lf + 1;
+			}
+			splitLines.push(text.substring(start, index - offset));
+			start = index;
+		}
+		return splitLines;
+	}
+	
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
@@ -401,6 +441,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		safeText: safeText,
 		setText: setText,
 		createPaneHeading: createPaneHeading,
-		forceLayout: forceLayout
+		forceLayout: forceLayout,
+		splitFile: splitFile
 	};
 });
