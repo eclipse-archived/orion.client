@@ -12,7 +12,7 @@
  /*global define window */
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip'], function(messages, mKeyBinding, mEventTarget, mTooltip) {
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations) {
 
 	/**
 	 * @name orion.editor.util
@@ -71,16 +71,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
-		errorType: "orion.annotation.error",
-		warningType: "orion.annotation.warning",
-		taskType: "orion.annotation.task",
-		foldingType: "orion.annotation.folding",
-		currentBracketType: "orion.annotation.currentBracket",
-		matchingBracketType: "orion.annotation.matchingBracket",
-		currentLineType: "orion.annotation.currentLine",
 		highlightErrorType: "orion.annotation.highlightError",
-		currentSearchType: "orion.annotation.currentSearch",
-		matchingSearchType: "orion.annotation.matchingSearch",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -149,7 +140,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			var annotations = annotationModel.getAnnotations(offset, offset + 1);
 			while (annotations.hasNext()) {
 				var annotation = annotations.next();
-				if (annotation.type === "orion.annotation.folding") {
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_FOLDING) {
 					if (annotation.expand) {
 						annotation.expand();
 						annotationModel.modifyAnnotation(annotation);
@@ -425,15 +416,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						start = model.mapOffset(start);
 						end = model.mapOffset(end);
 					}
-					this._currentLineAnnotation = {
-						start: start,
-						end: end,
-						type: this.currentLineType,
-						title: messages.currentLine,
-						html: "<div class='annotationHTML currentLine'></div>",
-						overviewStyle: {styleClass: "annotationOverview currentLine"},
-						lineStyle: {styleClass: "annotationLine currentLine"}
-					};
+					var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
+					this._currentLineAnnotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
 					add = [this._currentLineAnnotation];
 				}
 				annotationModel.replaceAnnotations(remove, add);
@@ -447,13 +431,13 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			if (this._annotationFactory) {
 				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
-				this._annotationStyler.addAnnotationType(this.currentSearchType);
-				this._annotationStyler.addAnnotationType(this.matchingSearchType);
-				this._annotationStyler.addAnnotationType(this.errorType);
-				this._annotationStyler.addAnnotationType(this.warningType);
-				this._annotationStyler.addAnnotationType(this.matchingBracketType);
-				this._annotationStyler.addAnnotationType(this.currentBracketType);
-				this._annotationStyler.addAnnotationType(this.currentLineType);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
+				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 				this._annotationStyler.addAnnotationType(this.highlightErrorType);
 			}
 		},
@@ -589,17 +573,17 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				};
 			
 				this._annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
-				this._overviewRuler.addAnnotationType(this.currentSearchType);
-				this._overviewRuler.addAnnotationType(this.matchingSearchType);
-				this._annotationRuler.addAnnotationType(this.errorType);
-				this._annotationRuler.addAnnotationType(this.warningType);
-				this._annotationRuler.addAnnotationType(this.taskType);
-				this._overviewRuler.addAnnotationType(this.errorType);
-				this._overviewRuler.addAnnotationType(this.warningType);
-				this._overviewRuler.addAnnotationType(this.taskType);
-				this._overviewRuler.addAnnotationType(this.matchingBracketType);
-				this._overviewRuler.addAnnotationType(this.currentBracketType);
-				this._overviewRuler.addAnnotationType(this.currentLineType);
+				this._annotationRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
+				this._annotationRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
+				this._annotationRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
+				this._overviewRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
 				textView.addRuler(this._annotationRuler);
 				textView.addRuler(this._overviewRuler);
 			}
@@ -644,7 +628,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
 			while (annotations.hasNext()) {
 				annotation = annotations.next();
-				if (annotation.type === this.errorType || annotation.type === this.warningType) {
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_ERROR || annotation.type === mAnnotations.AnnotationType.ANNOTATION_WARNING) {
 					remove.push(annotation);
 				}
 			}
@@ -658,16 +642,10 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						var lineIndex = problem.line - 1;
 						var lineStart = model.getLineStart(lineIndex);
 						var severity = problem.severity;
-						annotation = {
-							type: this[severity + "Type"],
-							start: lineStart + problem.start - 1,
-							end: lineStart + problem.end,
-							title: escapedDescription,
-							html: "<div class='" + "annotationHTML" + " " + severity + "'></div>",
-							style: {styleClass: "annotation" + " " + severity},
-							overviewStyle: {styleClass: "annotationOverview" + " " + severity},
-							rangeStyle: {styleClass: "annotationRange" + " " + severity}
-						};
+						var type = severity === "error" ? mAnnotations.AnnotationType.ANNOTATION_ERROR : mAnnotations.AnnotationType.ANNOTATION_WARNING;
+						var start = lineStart + problem.start - 1;
+						var end = lineStart + problem.end;
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
 						add.push(annotation);
 					}
 				}

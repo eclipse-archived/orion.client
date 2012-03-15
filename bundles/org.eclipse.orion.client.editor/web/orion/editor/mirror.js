@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define */
 /*jslint browser:true*/
-define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview/eventTarget"], function(messages, mEventTarget) {
+define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview/eventTarget", "orion/textview/annotations"], function(messages, mEventTarget, mAnnotations) {
 	// TODO this affects indentation, which we don't support. Should be a parameter.
 	var tabSize = 4;
 	
@@ -676,6 +676,11 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview
 
 	var LINESTYLE_OVERSHOOT = 20;
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
+	mAnnotations.AnnotationType.registerType(HIGHLIGHT_ERROR_ANNOTATION, {
+		title: messages.syntaxError,
+		html: "<div class='annotationHTML error'></div>",
+		rangeStyle: {styleClass: "annotationRange error"}
+	});
 
 	CodeMirrorStyler.prototype = /** @lends orion.mirror.CodeMirrorStyler.prototype */ {
 		/** @private */
@@ -749,14 +754,7 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/textview
 							for (var i=0; i < errors.length; i++) {
 								var error = errors[i];
 								if (error.style.styleClass === "cm-error") {
-									toAdd.push({
-										start: error.start,
-										end: error.end,
-										type: HIGHLIGHT_ERROR_ANNOTATION,
-										title: messages.syntaxError,
-										html: "<div class='annotationHTML error'></div>",
-										rangeStyle: {styleClass: "annotationRange error"}
-										});
+									toAdd.push(mAnnotations.AnnotationType.createAnnotation(HIGHLIGHT_ERROR_ANNOTATION, error.start, error.end));
 								}
 							}
 						}

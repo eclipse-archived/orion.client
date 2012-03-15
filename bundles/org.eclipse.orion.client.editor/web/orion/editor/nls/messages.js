@@ -10,39 +10,39 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
- /*global define*/
- 
- define("orion/editor/nls/messages", {
-    "root": {
-        "currentLine": "Current Line",
-        "incrementalFind": "Incremental find: {0}",
-        "incrementalFindNotFound": "Incremental find: {0} (not found)",
-        "find": "Find...",
-        "findNext": "Find Next Occurrence",
-        "findPrevious": "Find Previous Occurrence",
-        "incrementalFindKey": "Incremental Find",
-        "indentLines": "Indent Lines",
-        "unindentLines": "Unindent Lines",
-        "moveLinesUp": "Move Lines Up",
-        "moveLinesDown": "Move Lines Down",
-        "copyLinesUp": "Copy Lines Up",
-        "copyLinesDown": "Copy Lines Down",
-        "deleteLines": "Delete Lines",
-        "gotoLine": "Goto Line...",
-        "gotoLinePrompty": "Goto Line:",
-        "lastEdit": "Last Edit Location",
-        "toggleLineComment": "Toggle Line Comment",
-        "addBlockComment": "Add Block Comment",
-        "removeBlockComment": "Remove Block Comment",
-        "linkedModeEntered": "Linked Mode entered",
-        "linkedModeExited": "Linked Mode exited",
-        "syntaxError": "Syntax Error",
-        "contentAssist": "Content Assist",
+
+/*global define*/
+
+define("orion/editor/nls/messages", {
+	"root": {
+		"incrementalFind": "Incremental find: {0}",
+		"incrementalFindNotFound": "Incremental find: {0} (not found)",
+		"find": "Find...",
+		"findNext": "Find Next Occurrence",
+		"findPrevious": "Find Previous Occurrence",
+		"incrementalFindKey": "Incremental Find",
+		"indentLines": "Indent Lines",
+		"unindentLines": "Unindent Lines",
+		"moveLinesUp": "Move Lines Up",
+		"moveLinesDown": "Move Lines Down",
+		"copyLinesUp": "Copy Lines Up",
+		"copyLinesDown": "Copy Lines Down",
+		"deleteLines": "Delete Lines",
+		"gotoLine": "Goto Line...",
+		"gotoLinePrompty": "Goto Line:",
+		"lastEdit": "Last Edit Location",
+		"toggleLineComment": "Toggle Line Comment",
+		"addBlockComment": "Add Block Comment",
+		"removeBlockComment": "Remove Block Comment",
+		"linkedModeEntered": "Linked Mode entered",
+		"linkedModeExited": "Linked Mode exited",
+		"syntaxError": "Syntax Error",
+		"contentAssist": "Content Assist",
 		"lineColumn": "Line {0} : Col {1}",
-        "formatMessage": function(msg) {
+		"formatMessage": function(msg) {
 			var args = arguments;
 			return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
 		}
-    },
-    "pt-br": true
+	},
+	"pt-br": true
 });
