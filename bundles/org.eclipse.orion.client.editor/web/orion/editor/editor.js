@@ -19,6 +19,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 	 * @class Basic helper functions used by <code>orion.editor</code>.
 	 */
 	var util;
+	
+	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 
 	/**
 	 * @name orion.editor.Editor
@@ -71,7 +73,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
-		highlightErrorType: "orion.annotation.highlightError",
 		
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
@@ -438,7 +439,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
-				this._annotationStyler.addAnnotationType(this.highlightErrorType);
+				this._annotationStyler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 			}
 		},
 		
