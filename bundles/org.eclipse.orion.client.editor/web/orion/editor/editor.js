@@ -193,7 +193,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					textView.annotationModel = this._annotationModel;
 					
 					this._foldingRuler = this._foldingRulerFactory.createFoldingRuler(this._annotationModel);
-					this._foldingRuler.addAnnotationType(this.foldingType);
+					this._foldingRuler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_FOLDING);
 					textView.addRuler(this._foldingRuler);
 				}
 			} else {
