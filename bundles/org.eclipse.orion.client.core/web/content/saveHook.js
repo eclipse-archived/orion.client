@@ -13,27 +13,15 @@
 /*jslint browser:true*/
 
 /*
- * Glue code for content.html
+ * Save hook for verifying that the user wants to save the content from a visual plugin.
  */
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/URITemplate', 'orion/PageUtil', 
-	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, 
-			mGlobalCommands, mBreadcrumbs, URITemplate, PageUtil) {
+define(['require', 'dojo', 'orion/bootstrap', 'orion/PageUtil', 'dojo/parser'], 
+			function(require, dojo, mBootstrap, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
-			var preferences = core.preferences;
-			// Register services
-			var dialogService = new mDialogs.DialogService(serviceRegistry);
-			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			// parse the URL to determine what should be saved.
 			var params = PageUtil.matchResourceParameters(window.location.href);
@@ -76,9 +64,18 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 											}
 										}
 										if (contentURL && contentURL.length > 0) {
-											dojo.place("<p>Content plugin <b>" + info.name + "</b> has saved data at <a href='" + contentURL + "'>" + contentURL + "</a>." +
-											"<p>We will be able to save this back when <a href='https://bugs.eclipse.org/bugs/show_bug.cgi?id=373443'>Bug 373443</a> is implemented.</p>",
+											dojo.place("<p>Content plugin <b>" + info.name + "</b> has saved data at <a href='" + contentURL + "'>" + contentURL + "</a></p>" +
+											"<p>Click <b>Save</b> to store this file into Orion.</p>" +
+											"<button id='saveButton'>Save</button>",
 											"orion.saveRequest" ,"only");
+											var button = dojo.byId("saveButton");
+											var nonHash = window.location.href.split('#')[0];
+											// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+											var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+											dojo.connect(button, "onclick", function() {
+												// post a message to the same domain (intended for our outer window)
+												window.parent.postMessage(JSON.stringify({shellService: true, sourceLocation: contentURL}), hostName);
+											});
 										}
 										break;
 									}
