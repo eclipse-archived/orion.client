@@ -313,7 +313,7 @@ eclipse.FileServiceImpl= (function() {
 		 * Writes the contents or metadata of the file at the given location.
 		 *
 		 * @param {String} location The location of the file to set contents for
-		 * @param {String|Object} contents The content string, or metadata object to write
+		 * @param {String|Object} contents The content string, object describing the location of content, or a metadata object to write
 		 * @param {String|Object} args Additional arguments used during write operation (i.e. ETag) 
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
@@ -340,9 +340,17 @@ eclipse.FileServiceImpl= (function() {
 				},
 				failOk: true
 			};
-			//some different header for putting metadata
+						
+			// check if we have raw contents or something else
 			if (typeof contents !== "string") {
-				xhrArgs.url = location + "?parts=meta";
+				// look for remote content
+				if (contents.sourceLocation) {
+					xhrArgs.url = location + "?source=" + contents.sourceLocation;
+					xhrArgs.putData = null;
+				} else {
+					// assume we are putting metadata
+					xhrArgs.url = location + "?parts=meta";
+				}
 			}
 			return dojo.xhrPut(xhrArgs);
 		},
