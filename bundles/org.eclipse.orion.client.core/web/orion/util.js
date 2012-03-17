@@ -386,6 +386,44 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	}
 	
 	/**
+	 * Utility method for saving file contents to a specified location
+	 */
+	function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
+		var etag = targetMetadata.ETag;
+		var args = { "ETag" : etag };
+		fileClient.write(targetMetadata.Location, contents, args).then(
+			function(result) {
+				if (afterSave) {
+					afterSave();
+				}
+			},
+			/* error handling */
+			function(error) {
+				// expected error - HTTP 412 Precondition Failed 
+				// occurs when file is out of sync with the server
+				if (error.status === 412) {
+					var forceSave = window.confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+					if (forceSave) {
+						// repeat save operation, but without ETag 
+						fileClient.write(targetMetadata.Location, contents).then(
+							function(result) {
+									targetMetadata.ETag = result.ETag;
+									if (afterSave) {
+										afterSave();
+									}
+							}
+						);
+					}
+				}
+				// unknown error
+				else {
+					error.log = true;
+				}
+			}
+		);
+	}
+	
+	/**
 	 * Split file contents into lines. It also handles the mixed line endings with "\n", "\r" and "\r\n".
 	 *
 	 * @param {String} text The file contetns.
@@ -442,6 +480,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		setText: setText,
 		createPaneHeading: createPaneHeading,
 		forceLayout: forceLayout,
+		saveFileContents: saveFileContents,
 		splitFile: splitFile
 	};
 });
