@@ -847,3 +847,40 @@ a:hover {
 #test-tree {
 	margin: 8px;
 }
+
+
+
+.uploadContainer{
+	padding:20px;
+	font-weight:bold;
+}
+
+.dottedOutline{
+	border: #DDD 4px dashed;
+	border-radius: 2px;
+	padding:50px;
+	height:300px;
+	width: 300px;
+}
+
+.floatingSection{
+	color: #DDD;
+}
+
+.uploadInstruction{
+	font-size: 18pt;
+	color: #CCC;
+	padding: 0 0 100px;
+	text-align:center;
+}
+
+.tipInstruction{
+	font-size: 12pt;
+	color: #CCC;
+	padding: 0 0 100px;
+	text-align:center;
+}
+
+.uploadBrowser{
+	left:50px;
+}
