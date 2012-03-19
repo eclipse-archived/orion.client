@@ -4,7 +4,7 @@
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011.">
 	<meta http-equiv="Content-Language" content="en-us">
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<title>Orion User Profile</title>
+	<title>User Profile</title>
 	<link rel="stylesheet" type="text/css" href="user-profile.css" />
     	<script type="text/javascript" src="../requirejs/require.js"></script>
 		<script type="text/javascript">
@@ -43,16 +43,14 @@
 	<div id="orion.profile" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" gutters="false" liveSplitters="false" splitter="false">
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" gutters="false" splitter="false">
 			<div class="toolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
 			</div>
-			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">	
-				<table><tr>
-				<td id="profileContent" class="mainPadding">
-					<div>Loading user profile...</div>
-				</td>	
-				</tr>
-				</table>	
+			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">		
+				<div id="mainNode" class="settings mainPadding">
+					<div id="table" class="displayTable" style="padding-bottom: 20px;">
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">

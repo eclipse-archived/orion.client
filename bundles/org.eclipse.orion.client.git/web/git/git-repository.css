@@ -23,34 +23,9 @@
 
 @import "../css/commands.css";
 
+@import "../css/sections.css";
+
 @import "css/git.css";
-
-.git-decor-icon {
-	float: left;
-	position: relative;
-	height: 16px;
-	vertical-align: text-top;
-	width: 16px;
-	padding-right: 10px;
-}
-
-.git-action-area {
-	float: right;
-	position: relative;
-	color: #666;
-	font-size: 0.9em;
-}
-
-.git-list-item {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	width: 100%;
-}
-
-.git-table {
-	padding-top: 10px;
-	padding-left: 10px;
-}
 
 .tag-description {
 	font-size: 13px;
@@ -68,32 +43,11 @@
 	border-bottom: 1px solid #e6e6e6;
 }
 
-.sectionWrapper {
-	margin-top: 15px;
-	padding-top: 5px;
-	padding-left: 5px;
-    border: 1px solid #e6e6e6;
-    background: #f8f8f8;
-}
-
 .stretch {
 	float: left;
 	position: relative;
 	white-space:normal;
 	max-width:700px;
-}
-
-.sectionTitle {
-    color: #666666;
-    float: left;
-    font-size: 1.1em;
-    font-weight: bold;
-    margin: 0;
-    margin-top: 9px;
-}
-
-.sectionProgress {
-    text-decoration: blink;
 }
 
 .plugin-settings {

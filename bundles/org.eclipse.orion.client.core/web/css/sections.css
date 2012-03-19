@@ -1,0 +1,38 @@
+.sectionIcon {
+	float: left;
+	position: relative;
+	height: 16px;
+	vertical-align: text-top;
+	width: 16px;
+	padding-right: 10px;
+}
+
+.sectionTable {
+	padding-top: 10px;
+	padding-left: 10px;
+}
+
+.sectionTableItem {
+	padding-top: 5px;
+	padding-bottom: 5px;
+	width: 100%;
+}
+
+.sectionTableItemActions {
+	float: right;
+	position: relative;
+	color: #666;
+	font-size: 0.9em;
+}
+
+.sectionWrapper {
+	margin-top: 15px;
+	padding-top: 5px;
+	padding-left: 5px;
+    border: 1px solid #e6e6e6;
+    background: #f8f8f8;
+}
+
+.sectionProgress {
+    text-decoration: blink;
+}
