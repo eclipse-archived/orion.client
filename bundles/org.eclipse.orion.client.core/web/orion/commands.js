@@ -208,7 +208,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			this._selection = options.selection;
 			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){
 				evt = evt || window.event;
-				// bindings are ignored if we are in a text field.
+				// bindings are ignored if we are in a text field or editor
+				if (evt.target.contentEditable === "true") {
+					return;
+				}
 				var tagType = evt.target.nodeName.toLowerCase();
 				if (tagType === 'input') {
 					var inputType = evt.target.type.toLowerCase();
