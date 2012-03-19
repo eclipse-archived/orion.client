@@ -15,9 +15,9 @@
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/PluginEntry'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(require, dojo, dijit, mUtil, mCommands) {
 	
-	dojo.declare("orion.widgets.PluginList", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], {
 	
 		templateString: '<div>' + 
 							'<div class="pluginwrapper">' +
@@ -105,7 +105,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			this.pluginTitle.innerHTML = "Plugins [" + pluginList.length +"]";
 
 			for( var p = 0; p < pluginList.length; p++ ){
-				var pluginEntry = new orion.widgets.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
+				var pluginEntry = new orion.widgets.plugin.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
 				list.appendChild( pluginEntry.domNode );
 				pluginEntry.startup();
 			}	                

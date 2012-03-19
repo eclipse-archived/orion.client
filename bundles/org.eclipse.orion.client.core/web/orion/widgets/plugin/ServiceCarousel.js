@@ -13,7 +13,7 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/fx'], function(require, dojo, dijit, mUtil) {
 	
-	dojo.declare("orion.widgets.ServiceCarousel", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.plugin.ServiceCarousel", [dijit._Widget, dijit._Templated], {
 	
 		serviceState: false,
 		pointer: 0,
@@ -166,20 +166,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 				
 				var value = data.items[itemCount].value;
 				
-				var row = dojo.create("td", null, row);
+				var cell = dojo.create("td", null, row);
 				
 				if( typeof value === 'object' ){
 				
 					var debugData = { title:data.service, item:data.items[itemCount].item, value: value };
 
-					dojo.create("span", { 'class':'objectLink', 'title':'click here, then check javascript console to drill down', 'onclick': dojo.hitch( this, 'consoleOutput', debugData ), 'innerHTML':'JavaScript Object' }, row );
+					dojo.create("span", { 'class':'objectLink', 'title':'click here, then check javascript console to drill down', 'onclick': dojo.hitch( this, 'consoleOutput', debugData ), 'innerHTML':'JavaScript Object' }, cell );
 				}else{
 					row.innerHTML = value;
 				}
 			}
 			
-			 dojo.create( "div", { "innerHTML":data.service, "class":"listTitle" }, entry );
-
+			dojo.create( "div", { "innerHTML":data.service, "class":"listTitle" }, entry );
 		},
           
 		addData: function(services){
