@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites', 'orion/URITemplate', 'orion/PageUtil',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu'], 
-        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites){
+        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, URITemplate, PageUtil){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -412,6 +412,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			//     required attribute: href - the URL for the navigation link
 			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
 			var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
+			var params = PageUtil.matchResourceParameters(window.location.href);
+			var nonHash = window.location.href.split('#')[0];
+			// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+			var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+			var locationObject = {OrionHome: hostName, Location: params.resource};
 			for (var i=0; i<navLinks.length; i++) {
 				var info = {};
 				var propertyNames = navLinks[i].getPropertyNames();
@@ -419,7 +424,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}
 				if (info.href && info.name) {
-					var link = dojo.create("a", {href: info.href}, primaryNav, "last");
+					var uriTemplate = new URITemplate(info.href);
+					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					var link = dojo.create("a", {href: expandedHref}, primaryNav, "last");
 					text = document.createTextNode(info.name);
 					dojo.place(text, link, "only");
 				}
