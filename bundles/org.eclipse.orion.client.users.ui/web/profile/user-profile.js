@@ -34,7 +34,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var profile = new mProfile.Profile({
 				registry: serviceRegistry,
 				pluginRegistry: pluginRegistry,
-				profilePlaceholder: dojo.byId('profileContent'),
+				profilePlaceholder: dojo.byId('table'),
 				commandService: commandService,
 				pageActionsPlaceholder: dojo.byId('pageActions'),
 				usersClient: usersClient

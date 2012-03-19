@@ -289,7 +289,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"repositorySectionHeader"}, tableNode );
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-repository" }, titleWrapper );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-repository" }, titleWrapper );
 		dojo.create( "div", { id: "repositorySectionTitle", "class":"layoutLeft", innerHTML: (mode === "full" ? "Repositories" : "Repository") }, titleWrapper );
 		dojo.create( "div", { id: "repositorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 				
@@ -299,7 +299,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="repositoryNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -317,7 +317,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, mode, links){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((length == 1) ? "" : ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow"))}, dojo.byId("repositoryNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((length == 1) ? "" : ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow"))}, dojo.byId("repositoryNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"stretch" }, horizontalBox );
@@ -353,7 +353,7 @@ exports.GitRepositoryExplorer = (function() {
 				innerHTML: ((commitsState > 0 ) ? commitsState + " commit(s) to push." : "Nothing to push.")}, detailsView );
 		}
 		
-		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool");
 	};
 	
@@ -373,7 +373,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", { id: "workingDirectorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="workingDirectoryNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -392,7 +392,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.renderStatus = function(repository, status){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("workingDirectoryNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("workingDirectoryNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
@@ -410,7 +410,7 @@ exports.GitRepositoryExplorer = (function() {
 			innerHTML: unstaged + " file(s) to stage and "
 			+ staged + " file(s) to commit."}, detailsView );
 				
-		var actionsArea = dojo.create( "div", {"id":"statusActionsArea", "class":"git-action-area"}, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"statusActionsArea", "class":"sectionTableItemActions"}, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool");	
 	};
 	
@@ -445,7 +445,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"branchSectionHeader"}, tableNode );
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch" }, titleWrapper );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-branch" }, titleWrapper );
 		dojo.create( "div", { id: "branchSectionTitle", "class":"layoutLeft", innerHTML: "Branches" }, titleWrapper );
 		dojo.create( "div", { id: "branchSectionProgress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "branchSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
@@ -464,7 +464,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.place( slideout, titleWrapper );
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="branchNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -497,13 +497,13 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.renderBranch = function(branch, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("branchNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("branchNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 
 		if (branch.Current)
-			dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch_active" }, detailsView );
+			dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-branch_active" }, detailsView );
 		
 		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : ""), innerHTML: branch.Name }, detailsView );
 		dojo.create( "div", null, detailsView );
@@ -518,7 +518,7 @@ exports.GitRepositoryExplorer = (function() {
 			+ "last modified " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})
 			+ " by " + commit.AuthorName}, detailsView );
 		
-		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, branch, this, "tool");	
 	};
 	
@@ -534,13 +534,13 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"remoteBranchSectionHeader"}, tableNode );
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-branch" }, titleWrapper );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-branch" }, titleWrapper );
 		dojo.create( "div", { id: "remoteBranchSectionTitle", "class":"layoutLeft", innerHTML: "Remote Branches" }, titleWrapper );
 		dojo.create( "div", { id: "remoteBranchSectionProgress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "remoteBranchSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="remoteBranchNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -595,14 +595,14 @@ exports.GitRepositoryExplorer = (function() {
 	};
 			
 	GitRepositoryExplorer.prototype.renderRemoteBranch = function(remoteBranch, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("remoteBranchNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("remoteBranchNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox );
 		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: remoteBranch.Name }, detailsView );
 		dojo.create( "div", null, detailsView );
 		
-		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, remoteBranch, this, "tool");	
 	};
 
@@ -634,7 +634,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.place( slideout, titleWrapper );
 
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="commitNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -722,7 +722,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderNoCommit = function(){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item" }, dojo.byId("commitNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("commitNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
@@ -734,12 +734,12 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit");
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite " + imgSpriteName}, horizontalBox );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox );
 		
 		if (commit.AuthorImage) {
 			var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox);
@@ -798,7 +798,7 @@ exports.GitRepositoryExplorer = (function() {
 			innerHTML: " (SHA " + commit.Name + ") by " + commit.AuthorName 
 			+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
 		
-		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	
 	};
 
@@ -832,13 +832,13 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"tagSectionHeader"}, tableNode );
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-tag" }, titleWrapper );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-tag" }, titleWrapper );
 		dojo.create( "div", { id: "tagSectionTitle", "class":"layoutLeft", innerHTML: ("Tags" + (mode === "full" ? "" : " (5 most recent)")) }, titleWrapper );
 		dojo.create( "div", { id: "tagSectionProgress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "viewAllTagSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="tagNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -876,7 +876,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 			
 	GitRepositoryExplorer.prototype.renderTag = function(tag, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("tagNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("tagNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
@@ -931,7 +931,7 @@ exports.GitRepositoryExplorer = (function() {
 				
 		}
 
-		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool");	
 	};
 	
@@ -949,7 +949,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"remoteSectionHeader"}, tableNode );
 		
-		dojo.create( "span", { "class":"git-decor-icon gitImageSprite git-sprite-remote" }, titleWrapper );
+		dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-remote" }, titleWrapper );
 		dojo.create( "div", { id: "remoteSectionTitle", "class":"layoutLeft", innerHTML: "Remotes" }, titleWrapper );
 		dojo.create( "div", { id: "remoteSectionProgress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, titleWrapper );
 		dojo.create( "div", { id: "remoteSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
@@ -971,7 +971,7 @@ exports.GitRepositoryExplorer = (function() {
 		this.commandService.renderCommands("remoteSectionActionsArea", dojo.byId("remoteSectionActionsArea"), repository, this, "button");
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="remoteNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -1000,7 +1000,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderRemote = function(remote, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("remoteNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("remoteNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
@@ -1009,7 +1009,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", null, detailsView );
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: remote.GitUrl}, detailsView );
 
-		var actionsArea = dojo.create( "div", {"id":"remoteActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"remoteActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, remote, this, "tool");	
 
 	};
@@ -1046,7 +1046,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		
 		var content =	
-			'<div class="git-table">' +
+			'<div class="sectionTable">' +
 				'<div class="plugin-settings">' +
 					'<list id="configNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -1085,14 +1085,14 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderConfigEntry = function(configEntry, index){
-		var extensionListItem = dojo.create( "div", { "class":"git-list-item " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("configNode") );
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("configNode") );
 		var horizontalBox = dojo.create( "div", null, extensionListItem );
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
 		dojo.create( "span", { "class":"gitMainDescription", innerHTML: configEntry.Key }, detailsView );
 		dojo.create( "span", { "class":"gitSecondaryDescription", "style":"margin-left:20px", innerHTML: configEntry.Value}, detailsView );
 
-		var actionsArea = dojo.create( "div", {"id":"configActionsArea", "class":"git-action-area" }, horizontalBox );
+		var actionsArea = dojo.create( "div", {"id":"configActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, configEntry, this, "tool");
 
 	};
