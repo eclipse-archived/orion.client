@@ -7,3 +7,13 @@
 @import "../css/ide.css";
 
 @import "../css/commands.css";
+
+.testSuccess {
+	line-height: 20px;	
+}
+
+.testFailure {
+	line-height: 20px;	
+	font-weight: bold;
+	color: #FF0000;
+}

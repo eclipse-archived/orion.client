@@ -12,11 +12,11 @@
  /*global eclipse:true dojo document console define window dijit*/
 
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
+define(['require', 'dojo', 'dijit', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
 		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable', "orion/URITemplate", 
 		"orion/PageUtil",
         'dojo/hash', 'dojo/parser','dijit/form/Button'],
-        function(require, dojo, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
+        function(require, dojo, dijit, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
             mTreetable, URITemplate, mPageUtil) {
 	
 
@@ -58,10 +58,11 @@ UnitTestRenderer.prototype = {
 	},
 	
 	render: function(item, tableRow) {
+		
 		tableRow.cellSpacing = "8px";
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
-		var col, div, link;
+		var col, div, link, button;
 		if (item.Directory) {
 			col = document.createElement('td');
 			tableRow.appendChild(col);
@@ -78,15 +79,37 @@ UnitTestRenderer.prototype = {
 			col = document.createElement('td');
 			tableRow.appendChild(col);
 			div = dojo.create("div", null, col, "only");
+			div.className = (item.result? "testSuccess" : "testFailure");
+			dojo.attr(div, "id", item.Name);
 			dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
 			dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
 
+			
+			if (!item.result) {
+				var msg = "[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : "");
+				
+				// display failure message in a tooltip dialog
+				button = new dijit.form.DropDownButton({
+					label: "[Show Failure]",
+					dropDown: new dijit.TooltipDialog({
+						connectId: [item.Name],
+						// TODO we should make this prettier
+						content: "<pre>" + msg + "</pre>"
+					})
+				});
+				dojo.place(button.domNode, div, "last");
+				if (!item.logged) {
+					console.log(msg);
+					item.logged =true;
+				}
+			}
+			
 			// create a link to rerun the test:
 			var browserURL = window.location.toString();
 			var testlink = browserURL.split('#')[0]+"#";
 			var testfile = mPageUtil.matchResourceParameters(window.location.toString()).resource;
 			var hreflink = new URITemplate(testlink+"{+resource,params*}").expand({resource: testfile, params: {"test":item.Name}});
-			var button = new dijit.form.Button({
+			button = new dijit.form.Button({
 				label: "rerun",
 					onClick: function(){
 						window.location.href = hreflink;
@@ -94,11 +117,6 @@ UnitTestRenderer.prototype = {
 					}
 			});
 			dojo.place(button.domNode,div,"last");
-			
-			if (!item.result && !item.logged) {
-				console.log("[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""));
-				item.logged =true;
-			}
 		}
 		
 		var resultColumn = document.createElement('td');
