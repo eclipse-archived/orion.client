@@ -518,7 +518,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		qParams.location = item.parentLocation;
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
-		link = dojo.create("a", {className: "navlink", href: href}, spanHolder, "last");
+		var link = dojo.create("a", {className: "navlink", href: href}, spanHolder, "last");
 		link.title = "Search again in this folder with \"" + this.explorer.model.queryObj.searchStrTitle + "\"";
 		var that = this;
 		dojo.connect(link, "onclick", link, function() {
@@ -588,6 +588,96 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	SearchResultRenderer.prototype.constructor = SearchResultRenderer;
 	
+	
+	function SearchReportRenderer(options, explorer){
+		this._init(options);
+		this.options = options;
+		this.explorer = explorer;
+	};
+	
+	SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
+	
+	SearchReportRenderer.prototype.getCellHeaderElement = function(col_no){
+		switch(col_no){
+			case 0: 
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Files replaced</h2>"});
+				break;
+			case 1: 
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
+				break;
+		}
+	};
+	
+	SearchReportRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		switch(col_no){
+		case 0:
+			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
+			var div = dojo.create("div", null, col, "only");
+			var span = dojo.create("span", { className: "primaryColumn"}, div, "last");
+
+			dojo.place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only");
+			dojo.connect(span, "onclick", span, function() {
+				window.open(item.model.linkLocation);
+			});
+			dojo.connect(span, "onmouseover", span, function() {
+				span.style.cursor ="pointer";
+			});
+			dojo.connect(span, "onmouseout", span, function() {
+				span.style.cursor ="default";
+			});
+			
+			var operationIcon = dojo.create("span", null, div, "first");
+			dojo.addClass(operationIcon, "imageSprite");
+			
+			if(item.status){
+				switch (item.status) {
+					case "warning":
+						dojo.addClass(operationIcon, "core-sprite-warning");
+						return col;
+					case "failed":
+						dojo.addClass(operationIcon, "core-sprite-error");
+						return col;
+					case "pass":
+						dojo.addClass(operationIcon, "core-sprite-ok");
+						return col;
+				}
+			}
+			return col;
+		case 1:
+			var statusMessage;
+			if(item.status){
+				switch (item.status) {
+					case "warning":
+						statusMessage = item.message;
+						break;
+					case "failed":
+						statusMessage = item.message;
+						break;
+					case "pass":
+						statusMessage = item.matchesReplaced + " out of " + item.model.totalMatches + " matches replaced.";
+						break;
+				}
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: statusMessage});
+			}
+		}
+	};
+	
+	SearchReportRenderer.prototype.constructor = SearchReportRenderer;
+	
+	function SearchReportExplorer(parentId, reportList){
+		this.parentId = parentId;
+		this.reportList = reportList;
+		this.renderer = new SearchReportRenderer({checkbox: false}, this);
+	}
+	SearchReportExplorer.prototype = new mExplorer.Explorer();
+	
+	SearchReportExplorer.prototype.report = function() {
+		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList));
+	};
+
+	SearchReportExplorer.prototype.constructor = SearchReportExplorer;
+
+
 	/**
 	 * Creates a new search result explorer.
 	 * @name orion.SearchResultExplorer
@@ -1379,13 +1469,15 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		if(!this.navHandler){
 			var options = {
 					preventDefaultFunc: dojo.hitch(this, function(event, model) {
-						return this.preventDefaultFunc(modelToExpand, detailIndex);
+						return this.preventDefaultFunc(event, model);
 					}),
 					onCursorChanged: dojo.hitch(this, function(prevModel, currentModel) {
 						this.onCursorChanged(prevModel, currentModel);
 					}) 
 			};
 			this.navHandler = new mNavHandler.ExplorerNavHandler(this, options);
+		} else {
+			this.navHandler.focus();
 		}
 		this.navHandler.refreshModel(this.model);
 	};
@@ -1540,96 +1632,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	
 	SearchResultExplorer.prototype.constructor = SearchResultExplorer;
 
-	
-	function SearchReportExplorer(parentId, reportList){
-		this.parentId = parentId;
-		this.reportList = reportList;
-		this.renderer = new SearchReportRenderer({checkbox: false}, this);
-	}
-	SearchReportExplorer.prototype = new mExplorer.Explorer();
-	
-	SearchReportExplorer.prototype.report = function() {
-		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this.reportList));
-	};
-
-	SearchReportExplorer.prototype.constructor = SearchReportExplorer;
-
-	
-	function SearchReportRenderer(options, explorer){
-		this._init(options);
-		this.options = options;
-		this.explorer = explorer;
-	};
-	
-	SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
-	
-	SearchReportRenderer.prototype.getCellHeaderElement = function(col_no){
-		switch(col_no){
-			case 0: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Files replaced</h2>"});
-				break;
-			case 1: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
-				break;
-		}
-	};
-	
-	SearchReportRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		switch(col_no){
-		case 0:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
-			var div = dojo.create("div", null, col, "only");
-			var span = dojo.create("span", { className: "primaryColumn"}, div, "last");
-
-			dojo.place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only");
-			dojo.connect(span, "onclick", span, function() {
-				window.open(item.model.linkLocation);
-			});
-			dojo.connect(span, "onmouseover", span, function() {
-				span.style.cursor ="pointer";
-			});
-			dojo.connect(span, "onmouseout", span, function() {
-				span.style.cursor ="default";
-			});
-			
-			var operationIcon = dojo.create("span", null, div, "first");
-			dojo.addClass(operationIcon, "imageSprite");
-			
-			if(item.status){
-				switch (item.status) {
-					case "warning":
-						dojo.addClass(operationIcon, "core-sprite-warning");
-						return col;
-					case "failed":
-						dojo.addClass(operationIcon, "core-sprite-error");
-						return col;
-					case "pass":
-						dojo.addClass(operationIcon, "core-sprite-ok");
-						return col;
-				}
-			}
-			return col;
-		case 1:
-			var statusMessage;
-			if(item.status){
-				switch (item.status) {
-					case "warning":
-						statusMessage = item.message;
-						break;;
-					case "failed":
-						statusMessage = item.message;
-						break;;
-					case "pass":
-						statusMessage = item.matchesReplaced + " out of " + item.model.totalMatches + " matches replaced.";
-						break;
-				}
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: statusMessage});
-			}
-		}
-	};
-	
-	SearchReportRenderer.prototype.constructor = SearchReportRenderer;
-	
 	//return module exports
 	return {
 		SearchResultExplorer: SearchResultExplorer
