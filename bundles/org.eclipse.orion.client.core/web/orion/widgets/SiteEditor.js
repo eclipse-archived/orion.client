@@ -490,9 +490,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						return { Result: "Saved \"" + updatedSiteConfig.Name + "\"." };
+						return updatedSiteConfig;
 					});
-			this._busyWhile(deferred, "Saving...");
+			this._busyWhile(deferred);
 			return true;
 		} else {
 			return false;
