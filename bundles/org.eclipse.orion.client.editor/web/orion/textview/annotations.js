@@ -728,36 +728,43 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 				ranges = [];
 			}
 			var mergedStyle;
-			if (ranges.length === 0) {
+			for (var i=0; i<ranges.length; i++) {
+				var range = ranges[i];
+				if (styleRange.end <= range.start) { break; }
+				if (styleRange.start >= range.end) { continue; }
+				mergedStyle = this._mergeStyle({}, range.style);
+				mergedStyle = this._mergeStyle(mergedStyle, styleRange.style);
+				if (styleRange.start <= range.start && styleRange.end >= range.end) {
+					ranges[i] = {start: styleRange.start, end: range.end, style: mergedStyle};
+					if (styleRange.end > range.end) {
+						styleRange = {start: range.end, end: styleRange.end, style: styleRange.style};
+					} else {
+						styleRange = null;
+					}
+				} else if (styleRange.start > range.start && styleRange.end < range.end) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.start, style: range.style},
+						{start: styleRange.start, end: styleRange.end, style: mergedStyle},
+						{start: styleRange.end, end: range.end, style: range.style});
+					styleRange = null;
+					i += 2;
+				} else if (styleRange.start > range.start) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.start, style: range.style},
+						{start: styleRange.start, end: range.end, style: mergedStyle});
+					styleRange = {start: range.end, end: styleRange.end, style: styleRange.style};
+					i += 1;
+				} else if (styleRange.end < range.end) {
+					ranges.splice(i, 1,
+						{start: range.start, end: styleRange.end, style: mergedStyle},
+						{start: styleRange.end, end: range.end, style: range.style});
+					styleRange = null;
+					i += 1;
+				}
+			}
+			if (styleRange) {
 				mergedStyle = this._mergeStyle({}, styleRange.style);
 				ranges.push({start: styleRange.start, end: styleRange.end, style: mergedStyle});
-			} else {
-				for (var i=0; i<ranges.length; i++) {
-					var range = ranges[i];
-					if (styleRange.end <= range.start) { break; }
-					if (styleRange.start >= range.end) { continue; }
-					mergedStyle = this._mergeStyle({}, range.style);
-					mergedStyle = this._mergeStyle(mergedStyle, styleRange.style);
-					if (styleRange.start <= range.start && styleRange.end >= range.end) {
-						ranges[i] = {start: range.start, end: range.end, style: mergedStyle};
-					} else if (styleRange.start > range.start && styleRange.end < range.end) {
-						ranges.splice(i, 1,
-							{start: range.start, end: styleRange.start, style: range.style},
-							{start: styleRange.start, end: styleRange.end, style: mergedStyle},
-							{start: styleRange.end, end: range.end, style: range.style});
-						i += 2;
-					} else if (styleRange.start > range.start) {
-						ranges.splice(i, 1,
-							{start: range.start, end: styleRange.start, style: range.style},
-							{start: styleRange.start, end: range.end, style: mergedStyle});
-						i += 1;
-					} else if (styleRange.end < range.end) {
-						ranges.splice(i, 1,
-							{start: range.start, end: styleRange.end, style: mergedStyle},
-							{start: styleRange.end, end: range.end, style: range.style});
-						i += 1;
-					}
-				}
 			}
 			return ranges;
 		},

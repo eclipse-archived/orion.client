@@ -28,6 +28,7 @@ tests["test subtest"] = {
 tests["test basic asynch"] = function() {
 	var d = new dojo.Deferred();
 	setTimeout(function(){
+		assert.ok(true);
 		d.resolve();
 	}, 100);
 	return d;
@@ -62,6 +63,33 @@ tests["test expected asynch failure"] = function() {
 		assert.equal(failures, 1);
 	});
 };
+
+tests["test basic asynch2"] = function() {
+	var d = new dojo.Deferred();
+	setTimeout(function(){
+		d.resolve();
+	}, 100);
+	return d.then(function() {
+		assert.ok(true);
+	});
+};
+
+tests["test expected asynch2 failure"] = function() {
+	var d = new dojo.Deferred();
+	setTimeout(function(){
+		d.resolve();
+	}, 100);
+	return d.then(function() {
+		throw "expected";
+	}).then (function() {
+		assert.ok(false); // unexpected, should be an error
+	}, function() {
+		assert.ok(true); // expected, catch the error and continue
+	});
+};
+
+
+
 
 tests["test basic list"] = function() {
 	var listTests = {
