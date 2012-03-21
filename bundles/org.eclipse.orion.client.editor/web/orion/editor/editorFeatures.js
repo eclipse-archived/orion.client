@@ -109,13 +109,15 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					if (match && match.length > 0) {
 						prefix = self._incrementalFindPrefix += e.text;
 						self.editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
-						var ignoreCase = prefix.toLowerCase() === prefix;
 						var searchStart = editor.getSelection().start;
-						var result = editor.doFind(prefix, searchStart, ignoreCase);
+						var result = editor.getModel().find({
+							string: prefix,
+							start: searchStart,
+							caseInsensitive: prefix.toLowerCase() === prefix}).next();
 						if (result) {
 							self._incrementalFindSuccess = true;
 							self._incrementalFindIgnoreSelection = true;
-							editor.moveSelection(result.index, result.index+result.length);
+							editor.moveSelection(result.start, result.end);
 							self._incrementalFindIgnoreSelection = false;
 						} else {
 							editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
@@ -190,20 +192,18 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					var prefix = this._incrementalFindPrefix;
 					if (prefix.length !== 0) {
 						var result;
-						if (this._searcher) {
-							result = this._searcher.findNext(true, prefix);
-						} else {
-							var searchStart = 0;
-							if (this._incrementalFindSuccess) {
-								searchStart = editor.getSelection().start + 1;
-							}
-							var caseInsensitive = prefix.toLowerCase() === prefix;
-							result = editor.doFind(prefix, searchStart, caseInsensitive);
+						var searchStart = 0;
+						if (this._incrementalFindSuccess) {
+							searchStart = editor.getSelection().start + 1;
 						}
+						result = editor.getModel().find({
+							string: prefix,
+							start: searchStart,
+							caseInsensitive: prefix.toLowerCase() === prefix}).next();
 						if (result) {
 							this._incrementalFindSuccess = true;
 							this._incrementalFindIgnoreSelection = true;
-							editor.moveSelection(result.index, result.index + result.length);
+							editor.moveSelection(result.start, result.end);
 							this._incrementalFindIgnoreSelection = false;
 							editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
 						} else {
@@ -228,13 +228,15 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 						return true;
 					}
 					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
-					var caretOffset = editor.getCaretOffset();
-					var model = editor.getModel();
-					var index = model.getText().lastIndexOf(prefix, caretOffset - prefix.length - 1);
-					if (index !== -1) {
+					var result = editor.getModel().find({
+						string: prefix,
+						start: editor.getCaretOffset() - prefix.length - 1,
+						reverse: true,
+						caseInsensitive: prefix.toLowerCase() === prefix}).next();
+					if (result) {
 						this._incrementalFindSuccess = true;
 						this._incrementalFindIgnoreSelection = true;
-						editor.moveSelection(index,index+prefix.length);
+						editor.moveSelection(result.start,result.end);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
 						editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
@@ -498,11 +500,15 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 				} else {
 					start = model.getCharCount() - 1;
 				}
-				var index = model.getText().lastIndexOf(prefix, start);
-				if (index !== -1) {
+				var result = editor.getModel().find({
+					string: prefix,
+					start: start,
+					reverse: true,
+					caseInsensitive: prefix.toLowerCase() === prefix}).next();
+				if (result) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					editor.moveSelection(index, index + prefix.length);
+					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
 					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
 				} else {
@@ -520,16 +526,18 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					return false;
 				}
 				var editor = this.editor;
-				var model = editor.getModel();
 				var start = 0;
 				if (this._incrementalFindSuccess) {
 					start = editor.getSelection().start + 1;
 				}
-				var index = model.getText().indexOf(prefix, start);
-				if (index !== -1) {
+				var result = editor.getModel().find({
+					string: prefix,
+					start: start,
+					caseInsensitive: prefix.toLowerCase() === prefix}).next();
+				if (result) {
 					this._incrementalFindSuccess = true;
 					this._incrementalFindIgnoreSelection = true;
-					editor.moveSelection(index, index+prefix.length);
+					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
 					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
 				} else {
