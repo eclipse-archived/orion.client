@@ -620,8 +620,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  service will be used to determine which items are involved. 
 		 * @param {Object} handler The object that should perform the command
 		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
-		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render a push button menu containing
-		 *  the commands.
+		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  The caller
+		 *  must supply the parent menu.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 */	
 		renderCommands: function(scopeId, parent, items, handler, renderType, userData) {
