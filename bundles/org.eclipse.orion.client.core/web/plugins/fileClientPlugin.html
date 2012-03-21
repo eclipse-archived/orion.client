@@ -33,9 +33,14 @@
 			}
 			
 			function makeParentRelative(location) {
+			
+			try {
 				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
 					return location.substring(parent.location.href.indexOf(parent.location.host)+parent.location.host.length);
 				}
+			} catch (e){
+			//skip
+			}
 				return location;
 			}
 
