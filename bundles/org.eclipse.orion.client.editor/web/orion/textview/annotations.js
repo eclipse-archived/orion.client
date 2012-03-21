@@ -728,7 +728,7 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 				ranges = [];
 			}
 			var mergedStyle;
-			for (var i=0; i<ranges.length; i++) {
+			for (var i=0; i<ranges.length && styleRange; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
 				if (styleRange.start >= range.end) { continue; }
