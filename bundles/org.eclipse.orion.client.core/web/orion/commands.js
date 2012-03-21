@@ -1257,7 +1257,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
 	 * 
 	 * @name orion.commands.CommandKeyBinding
-	 * 
+	 * @class
 	 */
 	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
 		if (typeof(keyCode) === "string") {
