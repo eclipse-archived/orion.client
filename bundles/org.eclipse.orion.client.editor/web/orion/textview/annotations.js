@@ -727,15 +727,16 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 			if (!ranges) {
 				ranges = [];
 			}
+			var mergedStyle;
 			if (ranges.length === 0) {
-				var mergedStyle = this._mergeStyle({}, styleRange.style);
+				mergedStyle = this._mergeStyle({}, styleRange.style);
 				ranges.push({start: styleRange.start, end: styleRange.end, style: mergedStyle});
 			} else {
 				for (var i=0; i<ranges.length; i++) {
 					var range = ranges[i];
 					if (styleRange.end <= range.start) { break; }
 					if (styleRange.start >= range.end) { continue; }
-					var mergedStyle = this._mergeStyle({}, range.style);
+					mergedStyle = this._mergeStyle({}, range.style);
 					mergedStyle = this._mergeStyle(mergedStyle, styleRange.style);
 					if (styleRange.start <= range.start && styleRange.end >= range.end) {
 						ranges[i] = {start: range.start, end: range.end, style: mergedStyle};
