@@ -420,7 +420,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		
 		dojo.empty(this._commandsContainer);
 		this._commandService.renderCommands(this._commandsContainer.id, this._commandsContainer, this._siteConfiguration, {},
-			"button", null, this._siteConfiguration /*userData*/);
+			"button", this._siteConfiguration /*userData*/);
 
 		setTimeout(dojo.hitch(this, function() {
 			this._attachListeners(this._siteConfiguration);

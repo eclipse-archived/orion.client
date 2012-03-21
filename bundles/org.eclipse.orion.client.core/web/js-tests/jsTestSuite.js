@@ -105,6 +105,7 @@ OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/textview/test.html");
 OrionTestCase("jsContentAssist", "/js-tests/jsContentAssist/test.html");
 OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
+OrionTestCase("commands", "/js-tests/commands/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");

@@ -203,6 +203,83 @@ define(["orion/assert", 'orion/textview/textModel', 'orion/textview/annotations'
 		assertEquals(":15d:", ("Line 2 is a very, very, very long line that spans many words"), content.getLine(1));
 		assertEquals(":15e:", ("Line 3"), content.getLine(2));
 	};
+	
+	tests.testFindTextModel = function() {
+		var content = new mTextModel.TextModel();
+		
+					   //0123 4567890123 4
+		content.setText("This\nis a test\r");
+		var iter, match, i;
+		
+		iter = content.find({string: "is"});
+		match = iter.next();
+		assertEquals(":1a:", match.start, 2);
+		assertEquals(":1b:", match.end, 4);
+		match = iter.next();
+		assertEquals(":1c:", match.start, 5);
+		assertEquals(":1d:", match.end, 7);
+		match = iter.next();
+		assertEquals(":1e:", match, null);
+
+		iter = content.find({string: "is", wrap: true});
+		for (i=0; i<10; i++) {
+			match = iter.next();
+			assertEquals(":2a:", match.start, 2);
+			assertEquals(":2b:", match.end, 4);
+			match = iter.next();
+			assertEquals(":2c:", match.start, 5);
+			assertEquals(":2d:", match.end, 7);
+		}
+
+		iter = content.find({string: "Is", caseInsensitive: true});
+		match = iter.next();
+		assertEquals(":3a:", match.start, 2);
+		assertEquals(":3b:", match.end, 4);
+		match = iter.next();
+		assertEquals(":3c:", match.start, 5);
+		assertEquals(":3d:", match.end, 7);
+		match = iter.next();
+		assertEquals(":3e:", match, null);
+		
+		iter = content.find({string: "Is", caseInsensitive: false});
+		match = iter.next();
+		assertEquals(":4c:", match, null);
+
+		iter = content.find({string: "Is", caseInsensitive: true, start: 3});
+		match = iter.next();
+		assertEquals(":4a:", match.start, 5);
+		assertEquals(":4b:", match.end, 7);
+		match = iter.next();
+		assertEquals(":4c:", match, null);
+
+		iter = content.find({string: "Is", caseInsensitive: true, start: 3, wrap: true});
+		for (i=0; i<10; i++) {
+			match = iter.next();
+			assertEquals(":5a:", match.start, 5);
+			assertEquals(":5b:", match.end, 7);
+			match = iter.next();
+			assertEquals(":5c:", match.start, 2);
+			assertEquals(":5d:", match.end, 4);
+		}
+
+		iter = content.find({string: "Is", caseInsensitive: true, start: 3, reverse: true});
+		match = iter.next();
+		assertEquals(":6a:", match.start, 2);
+		assertEquals(":6b:", match.end, 4);
+		match = iter.next();
+		assertEquals(":6c:", match, null);
+
+		iter = content.find({string: "Is", caseInsensitive: true, start: 3, wrap: true, reverse: true});
+		for (i=0; i<10; i++) {
+			match = iter.next();
+			assertEquals(":5a:", match.start, 2);
+			assertEquals(":5b:", match.end, 4);
+			match = iter.next();
+			assertEquals(":5c:", match.start, 5);
+			assertEquals(":5d:", match.end, 7);
+		}
+
+	};
 
 	return tests;		
 });
