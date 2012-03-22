@@ -727,44 +727,32 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 			if (!ranges) {
 				ranges = [];
 			}
-			var mergedStyle;
-			for (var i=0; i<ranges.length && styleRange; i++) {
+			var mergedStyle, i;
+			for (i=0; i<ranges.length && styleRange; i++) {
 				var range = ranges[i];
 				if (styleRange.end <= range.start) { break; }
 				if (styleRange.start >= range.end) { continue; }
 				mergedStyle = this._mergeStyle({}, range.style);
 				mergedStyle = this._mergeStyle(mergedStyle, styleRange.style);
-				if (styleRange.start <= range.start && styleRange.end >= range.end) {
-					ranges[i] = {start: styleRange.start, end: range.end, style: mergedStyle};
-					if (styleRange.end > range.end) {
-						styleRange = {start: range.end, end: styleRange.end, style: styleRange.style};
-					} else {
-						styleRange = null;
-					}
-				} else if (styleRange.start > range.start && styleRange.end < range.end) {
-					ranges.splice(i, 1,
-						{start: range.start, end: styleRange.start, style: range.style},
-						{start: styleRange.start, end: styleRange.end, style: mergedStyle},
-						{start: styleRange.end, end: range.end, style: range.style});
-					styleRange = null;
-					i += 2;
-				} else if (styleRange.start > range.start) {
-					ranges.splice(i, 1,
-						{start: range.start, end: styleRange.start, style: range.style},
-						{start: styleRange.start, end: range.end, style: mergedStyle});
-					styleRange = {start: range.end, end: styleRange.end, style: styleRange.style};
-					i += 1;
-				} else if (styleRange.end < range.end) {
-					ranges.splice(i, 1,
-						{start: range.start, end: styleRange.end, style: mergedStyle},
-						{start: styleRange.end, end: range.end, style: range.style});
-					styleRange = null;
-					i += 1;
+				var args = [];
+				args.push(i, 1);
+				if (styleRange.start < range.start) {
+					args.push({start: styleRange.start, end: range.start, style: styleRange.style});
 				}
+				args.push({start: Math.max(range.start, styleRange.start), end: Math.min(range.end, styleRange.end), style: mergedStyle});
+				if (styleRange.end < range.end) {
+					args.push({start: styleRange.end, end: range.end, style: range.style});
+				}
+				if (styleRange.end > range.end) {
+					styleRange = {start: range.end, end: styleRange.end, style: styleRange.style};
+				} else {
+					styleRange = null;
+				}
+				Array.prototype.splice.apply(ranges, args);
 			}
 			if (styleRange) {
 				mergedStyle = this._mergeStyle({}, styleRange.style);
-				ranges.push({start: styleRange.start, end: styleRange.end, style: mergedStyle});
+				ranges.splice(i, 0, {start: styleRange.start, end: styleRange.end, style: mergedStyle});
 			}
 			return ranges;
 		},
