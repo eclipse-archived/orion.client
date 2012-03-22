@@ -113,7 +113,11 @@ define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEve
 						var match = null;
 						re.lastIndex = 0;
 						while (true) {
+							lastIndex = re.lastIndex;
 							result = re.exec(text);
+							if (lastIndex === re.lastIndex) {
+								return null;
+							}
 							if (result) {
 								if (result.index < start) {
 									match = {start: result.index + offset, end: re.lastIndex + offset};
@@ -139,6 +143,9 @@ define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEve
 						while (true) {
 							lastIndex = re.lastIndex;
 							result = re.exec(text);
+							if (lastIndex === re.lastIndex) {
+								return null;
+							}
 							if (result) {
 								return {start: result.index + offset, end: re.lastIndex + offset};
 							}
