@@ -75,24 +75,42 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 							}
 							// this is ripe for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349531
 							document.title = info.name;
-							fileClient.read(locationObject.Location, true).then(function(metadata) {
-								dojo.empty("location");
-								if (metadata) {
-									locationObject.Name = metadata.Name;
-									fileMetadata = metadata;
-									mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
-									searcher.setLocationByMetaData(metadata, {index: "first"});
-									var root = fileClient.fileServiceName(metadata.Location);
-									new mBreadcrumbs.BreadCrumbs({
-										container: "location", 
-										resource: metadata,
-										firstSegmentName: root
-									});
-								}
+							
+							function makeIFrame() {
 								var uriTemplate = new URITemplate(info.uriTemplate);
 								var href = uriTemplate.expand(locationObject);
 								dojo.place('<iframe id="' + id + '" type="text/html" width="100%" height="100%" frameborder="0" src="'+ href + '"></iframe>', "delegatedContent", "only");
-							});
+
+							}
+							
+							// TODO should we have the plugin specify whether it needs a Location?
+							// If there is metadata, we want to fill in the location object with the name.
+							if (locationObject.Location && locationObject.Location.length > 0) {
+								fileClient.read(locationObject.Location, true).then(
+									function(metadata) {
+										dojo.empty("location");
+										if (metadata) {
+											locationObject.Name = metadata.Name;
+											fileMetadata = metadata;
+											mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
+											searcher.setLocationByMetaData(metadata, {index: "first"});
+											var root = fileClient.fileServiceName(metadata.Location);
+											new mBreadcrumbs.BreadCrumbs({
+												container: "location", 
+												resource: metadata,
+												firstSegmentName: root
+											});
+											makeIFrame();
+										}
+						
+									},  
+									// TODO couldn't read metadata, try to make iframe anyway.
+									function() {
+										makeIFrame();
+									});
+							} else {
+								makeIFrame();
+							}
 							break;
 						}
 					}
