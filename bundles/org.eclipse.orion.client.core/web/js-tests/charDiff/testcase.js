@@ -18,8 +18,8 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 	/**
 	 * Basic test function.
 	 */
-	function testCharDiff(oldString, newString,expetedMap) {
-		var map = adapter.adaptCharDiff(oldString, newString);
+	function testCharDiff(oldString, newString, expetedMap, word) {
+		var map =  adapter.adaptCharDiff(oldString, newString, word);
 		assert.deepEqual(map, expetedMap);
 	}
 	/* 
@@ -42,7 +42,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 1, 0, 0]
 			];
-		testCharDiff(oldString, newString,expetedMap);
+		var expetedMapWord =
+			[[0, 4, 0, 3]
+			];
+		testCharDiff(oldString, newString, expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -56,7 +60,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 3, 0, 0]
 			];
+		var expetedMapWord =
+			[[0, 6, 0, 3]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -70,7 +78,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[12, 15, 12, 12]
 			];
+		var expetedMapWord =
+			[[12, 15, 12, 12]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -90,7 +102,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[19, 21, 19, 19]
 			];
+		var expetedMapWord =
+			[[16, 21, 16, 19]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -104,7 +120,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 0, 0, 1]
 			];
+		var expetedMapWord =
+			[[0, 2, 0, 3]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -118,7 +138,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 0, 0, 3]
 			];
+		var expetedMapWord =
+			[[0, 0, 0, 3]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -132,7 +156,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[9, 9, 9, 12]
 			];
+		var expetedMapWord =
+			[[8, 9, 8, 12]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -152,7 +180,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[29, 29, 29, 31]
 			];
+		var expetedMapWord =
+			[[28, 29, 28, 31]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 
@@ -167,7 +199,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 1, 0, 1]
 			];
+		var expetedMapWord =
+			[[0, 3, 0, 3]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -181,7 +217,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[0, 3, 0, 3]
 			];
+		var expetedMapWord =
+			[[0, 3, 0, 3]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -195,7 +235,11 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[8, 11, 8, 11]
 			];
+		var expetedMapWord =
+			[[8, 11, 8, 11]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -209,7 +253,39 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var expetedMap =
 			[[4, 6, 4, 7]
 			];
+		var expetedMapWord =
+			[[4, 6, 4, 7]
+			];
 		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
+	};
+
+	/**
+	 * Test Changing two none continue chars in one word.
+	 */
+	tests.testChangingThreeCharsToTwo = function() {
+		var oldString =  
+		 	   "foo bar bar\n" + 
+			   "bar foo bar\n" + 
+			   "bar bar foo\n" + 
+			   "bar bar bar\n"; 
+		var newString =  
+		 	   "foo bar bar\n" + 
+			   "bar bor bar\n" + 
+			   "bar fao foo\n" + 
+			   "bar bar bar\n"; 
+		var expetedMap =
+			[[16, 17, 16, 17],
+			 [18, 19, 18, 19],
+			 [28, 29, 28, 29],
+			 [30, 31, 30, 31]
+			];
+		var expetedMapWord =
+			[[16, 19, 16, 19],
+			 [28, 31, 28, 31]
+			];
+		testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
@@ -219,17 +295,23 @@ define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, a
 		var oldString =  
 		 	   "foo bar bar\n" + 
 			   "bar foo bar\n" + 
-			   "bar bar foo\n" + 
-			   "bar bar bar\n"; 
+			   "bar bar foo\n"; 
 		var newString =  
 		 	   "foo foo bar\n" + 
 			   "bar foo bar\n" + 
-			   "foo bar ba\n" + 
-			   "bar bar bar\n"; 
+			   "foo bar ba\n"; 
 		var expetedMap =
 			[[4, 7, 4, 7],
+			 [24, 27, 24, 27],
+			 [34, 34, 32, 35]
+			];
+		var expetedMapWord =
+			[[4, 7, 4, 7],
+			 [24, 27, 24, 27],
 			 [32, 34, 32, 35]
 			];
+		//testCharDiff(oldString, newString,expetedMap);
+		testCharDiff(oldString, newString, expetedMapWord, true);
 	};
 
 	/**
