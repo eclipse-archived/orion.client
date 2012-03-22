@@ -120,7 +120,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
-						if(e.keyCode === dojo.keys.ENTER) {
+						if(e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {
 							this.close();
 						}
 					}));
@@ -199,9 +199,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				});
 				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
-						dojo.place(document.createTextNode(parm.label), parameterArea, "last");
+						dojo.create("label", {innerHTML: parm.label, "for": parm.name + "parameterCollector"}, parameterArea, "last");
 					} 
-					var field = dojo.create("input", {type: parm.type}, parameterArea, "last");
+					var field = dojo.create("input", {type: parm.type, id: parm.name + "parameterCollector"}, parameterArea, "last");
 					dojo.addClass(field, "parameterInput");
 					// we define special classes for some parameter types
 					dojo.addClass(field, "parameterInput"+parm.type);
@@ -234,7 +234,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) {
-						if(e.keyCode === dojo.keys.ENTER) {			
+						if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {			
 							commandInvocation.parameters.optionsRequested = true;
 							finish(this);
 						}
@@ -249,7 +249,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) {
-					if(e.keyCode === dojo.keys.ENTER) {
+					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						finish(this);
 					}
 				}));
@@ -264,7 +264,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
-					if(e.keyCode === dojo.keys.ENTER) {
+					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						localClose();
 					}
 				}));

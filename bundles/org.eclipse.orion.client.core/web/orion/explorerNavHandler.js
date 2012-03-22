@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['orion/treeModelIterator'], function(mTreeModelIterator){
+define(['dojo', 'orion/treeModelIterator'], function(dojo, mTreeModelIterator){
 
 var exports = {};
 
@@ -120,6 +120,13 @@ exports.ExplorerNavHandler = (function() {
 					dojo.disconnect(this._listeners[i]);
 				}
 			}
+		},
+		
+		focus: function(){
+		    var parentDiv = this._getEventListeningDiv();
+		    if(parentDiv){
+				parentDiv.focus();
+		    }
 		},
 		
 		_getEventListeningDiv: function(){
@@ -240,11 +247,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 		    var parentNode = this.explorer.myTree._parent;
 			var parentRect = parentNode.getClientRects()[0],
-			rects = rowDiv.getClientRects(),
-			on_top = function(r) {
-				var x = (r.left + r.right)/2, y = (r.top + r.bottom)/2;
-			    // document.elementFromPoint(x, y) === element; TODO: what is this ???
-			};
+			rects = rowDiv.getClientRects();
 			for (var i = 0, l = rects.length; i < l; i++) {
 				var r = rects[i];
 			    var in_viewport = (r.top >= parentRect.top && r.top <= parentRect.bottom && r.bottom >= parentRect.top && r.bottom <= parentRect.bottom);

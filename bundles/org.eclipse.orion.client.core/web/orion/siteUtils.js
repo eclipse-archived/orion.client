@@ -73,7 +73,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 				newItem.HostingStatus = { Status: "started" };
 				
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
-				progressService.showWhile(deferred, "Starting...").then(startCallback, errorCallback);
+				progressService.showWhile(deferred).then(startCallback, errorCallback);
 			}});
 		commandService.addCommand(startCommand);
 		
@@ -91,7 +91,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/URITemplate'],
 				newItem.HostingStatus = { Status: "stopped" };
 				
 				var deferred = siteService.updateSiteConfiguration(data.items.Location, newItem);
-				progressService.showWhile(deferred, "Stopping " + data.items.Name + "...").then(stopCallback, errorCallback);
+				progressService.showWhile(deferred).then(stopCallback, errorCallback);
 			}});
 		commandService.addCommand(stopCommand);
 		

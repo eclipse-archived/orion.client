@@ -34,15 +34,15 @@ orion.JSDiffAdapter = (function() {
 			var diff = JsDiff.diffLines(oldStr, newStr);
 			var map = [];
 			var changContents = [];
-			linesAdded = 0;
-			linesRemoved = 0;
-			changeIndex = -1;
+			var linesAdded = 0;
+			var linesRemoved = 0;
+			var changeIndex = -1;
 			var oFileLineCounter = 0;
 			var previousDelim = true;
 		    for (var i = 0; i < diff.length; i++) {
 		    	var current = diff[i];
 		        //var lines = current.lines || current.value.replace(/\n$/, "").split("\n");
-		        lines = current.lines || current.value.split("\n");
+		        var lines = current.lines || current.value.split("\n");
 		        var currentLineNumber = lines.length;
 		        var startNumber = 0;
 		        if(lines.length > 1 && lines[lines.length-1] === ""){
@@ -104,6 +104,42 @@ orion.JSDiffAdapter = (function() {
         	}
        	
          	return {mapper:map, changContents: {array:changContents , index:0}};
+		},
+		
+		adaptCharDiff : function(oldStr, newStr) {
+			var diff = JsDiff.diffChars(oldStr, newStr);
+			var map = [];
+			var oldStart = 0;
+			var newStart = 0;
+			var charsAdded = 0;
+			var charsRemoved = 0;
+			for ( var i = 0; i < diff.length; i++) {
+				var current = diff[i];
+				if (!current.added && !current.removed) {
+					if (charsAdded > 0 || charsRemoved > 0) {
+						map
+								.push([ newStart,
+										newStart + charsAdded,
+										oldStart,
+										oldStart + charsRemoved ]);
+						newStart += charsAdded;
+						oldStart += charsRemoved;
+						charsAdded = 0;
+						charsRemoved = 0;
+					}
+					newStart += current.value.length;
+					oldStart += current.value.length;
+				} else if (current.added) {
+					charsAdded += current.value.length;
+				} else {
+					charsRemoved += current.value.length;
+				}
+			}
+			if (charsAdded > 0 || charsRemoved > 0) {
+				map.push([ newStart, newStart + charsAdded,
+						oldStart, oldStart + charsRemoved ]);
+			}
+			return map;
 		}
 	};
 	return JSDiffAdapter;

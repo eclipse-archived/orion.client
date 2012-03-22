@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define console */
 
-define(["dojo"], function(dojo){
+define(["dojo"], function(dojo) {
 
 	/**
 	 * Creates a new service reference.
@@ -22,19 +22,21 @@ define(["dojo"], function(dojo){
 	 * @param {String} name The service name
 	 * @param {Object} properties A JSON object containing the service's declarative properties
 	 */
+
 	function ServiceReference(serviceId, name, properties) {
 		this.serviceId = serviceId;
 		this.name = name;
 		this.properties = properties;
 	}
-	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */ {
+	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */
+	{
 		/**
 		 * Returns the symbolic id of this service.
 		 */
 		getServiceId: function() {
 			return this.serviceId;
 		},
-		
+
 		/**
 		 * Returns the name of the service this reference provides.
 		 */
@@ -74,19 +76,21 @@ define(["dojo"], function(dojo){
 	 * @param {String} serviceReference A reference to the service
 	 * @param {Object} internalRegistry A JSON object containing the service's declarative properties
 	 */
+
 	function ServiceRegistration(serviceId, serviceReference, internalRegistry) {
 		this.serviceId = serviceId;
 		this.serviceReference = serviceReference;
 		this.internalRegistry = internalRegistry;
 	}
-	ServiceRegistration.prototype = /** @lends orion.serviceregistry.ServiceRegistration.prototype */ {
+	ServiceRegistration.prototype = /** @lends orion.serviceregistry.ServiceRegistration.prototype */
+	{
 		/**
 		 * Unregister this service registration.
 		 */
 		unregister: function() {
 			this.internalRegistry.unregisterService(this.serviceId);
 		},
-	
+
 		/**
 		 * Dispatches an event to this service.
 		 * @param {String} eventName The name of the service event
@@ -94,7 +98,7 @@ define(["dojo"], function(dojo){
 		dispatchEvent: function(eventName) {
 			this.internalRegistry.dispatchEvent.apply(this.internalRegistry, [this.serviceId, eventName].concat(Array.prototype.slice.call(arguments, 1)));
 		},
-		
+
 		/**
 		 * Returns a reference to this registered service.
 		 */
@@ -103,6 +107,22 @@ define(["dojo"], function(dojo){
 		}
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
+
+	function _createServiceCall(internalRegistry, serviceId, implementation, methodName) {
+		return function() {
+			if (internalRegistry.isRegistered(serviceId)) {
+				var d = new dojo.Deferred();
+				try {
+					var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
+					dojo.when(result, dojo.hitch(d, d.resolve), dojo.hitch(d, d.reject), dojo.hitch(d, d.progress));
+				} catch (e) {
+					d.reject(e);
+				}
+				return d;
+			}
+			throw new Error("Service was unregistered");
+		};
+	}
 
 	/**
 	 * Creates a new service instance.
@@ -113,33 +133,21 @@ define(["dojo"], function(dojo){
 	 * @param {Object} implementation An object implementing the service contract
 	 * @param {orion.serviceregistry.ServiceRegistry} internalRegistry A JSON object containing the service's declarative properties
 	 */
+
 	function Service(serviceId, implementation, internalRegistry) {
-		this.serviceId= serviceId;
+		this.serviceId = serviceId;
 		this.implementation = implementation;
 		this.internalRegistry = internalRegistry;
 		var method;
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {
-				this[method] = function(methodName) {
-					return function() {
-						if (internalRegistry.isRegistered(serviceId)) {
-							var d = new dojo.Deferred();
-							try {
-								var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-								dojo.when(result, dojo.hitch(d, d.resolve), dojo.hitch(d, d.reject), dojo.hitch(d, d.progress));
-							} catch (e) {
-								d.reject(e);
-							}
-							return d;
-						}
-						throw new Error("Service was unregistered");
-					};
-				}(method);
+				this[method] = _createServiceCall(internalRegistry, serviceId, implementation, method);
 			}
 		}
 	}
-	
-	Service.prototype = /** @lends orion.serviceregistry.Service.prototype */ {
+
+	Service.prototype = /** @lends orion.serviceregistry.Service.prototype */
+	{
 
 		/**
 		 * Adds a listener to this service for a particular event.
@@ -149,7 +157,7 @@ define(["dojo"], function(dojo){
 		addEventListener: function(eventName, listener) {
 			this.internalRegistry.addEventListener(this.serviceId, eventName, listener);
 		},
-		
+
 		/**
 		 * Stops a listener from listening to a particular event on this service.
 		 * @param {String} eventName The name of the event to listen for
@@ -160,7 +168,7 @@ define(["dojo"], function(dojo){
 		}
 	};
 	Service.prototype.constructor = Service;
-	
+
 
 	/**
 	 * Creates an Event Target
@@ -168,11 +176,13 @@ define(["dojo"], function(dojo){
 	 * @name orion.serviceregistry.EventTarget
 	 * @class Base for creating an Orion event target
 	 */
+
 	function EventTarget() {
 		this._namedlisteners = {};
-	}	
+	}
 
-	EventTarget.prototype = /** @lends orion.serviceregistry.EventTarget.prototype */{
+	EventTarget.prototype = /** @lends orion.serviceregistry.EventTarget.prototype */
+	{
 		/**
 		 * Dispatches a named event along with an arbitrarary set of parameters
 		 * @param {String} eventName The event name
@@ -180,13 +190,13 @@ define(["dojo"], function(dojo){
 		dispatchEvent: function(eventName) {
 			var listeners = this._namedlisteners[eventName];
 			if (listeners) {
-				for ( var i = 0; i < listeners.length; i++) {
+				for (var i = 0; i < listeners.length; i++) {
 					try {
 						var args = Array.prototype.slice.call(arguments, 1);
 						listeners[i].apply(null, args);
 					} catch (e) {
 						console.log(e); // for now, probably should dispatch an
-										// ("error", e)
+						// ("error", e)
 					}
 				}
 			}
@@ -210,7 +220,7 @@ define(["dojo"], function(dojo){
 		removeEventListener: function(eventName, listener) {
 			var listeners = this._namedlisteners[eventName];
 			if (listeners) {
-				for ( var i = 0; i < listeners.length; i++) {
+				for (var i = 0; i < listeners.length; i++) {
 					if (listeners[i] === listener) {
 						if (listeners.length === 1) {
 							delete this._namedlisteners[eventName];
@@ -233,62 +243,63 @@ define(["dojo"], function(dojo){
 	 * @name orion.serviceregistry.ServiceRegistry
 	 * @class The Orion service registry
 	 */
+
 	function ServiceRegistry() {
 		this._entries = [];
 		this._namedReferences = {};
 		this._serviceEventTarget = new EventTarget();
 		var that = this;
 		this.internalRegistry = {
-				isRegistered: function(serviceId) {
-					return that._entries[serviceId] ? true: false;
-				},
-				unregisterService: function(serviceId) {
-					var entry = that._entries[serviceId];
-					if (entry) {
-						var reference = entry.reference;
-						var namedReferences = that._namedReferences[reference.getName()];
-						for (var i = 0; i < namedReferences.length; i++) {
-							if (namedReferences[i] === reference) {
-								if(namedReferences.length === 1) {
-									delete that._namedReferences[reference.getName()];
-								} else {
-									namedReferences.splice(i,1);
-								}
-								break;
+			isRegistered: function(serviceId) {
+				return that._entries[serviceId] ? true : false;
+			},
+			unregisterService: function(serviceId) {
+				var entry = that._entries[serviceId];
+				if (entry) {
+					var reference = entry.reference;
+					var namedReferences = that._namedReferences[reference.getName()];
+					for (var i = 0; i < namedReferences.length; i++) {
+						if (namedReferences[i] === reference) {
+							if (namedReferences.length === 1) {
+								delete that._namedReferences[reference.getName()];
+							} else {
+								namedReferences.splice(i, 1);
 							}
+							break;
 						}
-						that._entries[serviceId] = null;
-						that._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
-					}				
-				},
-				dispatchEvent: function(serviceId, eventName) {
-					var entry = that._entries[serviceId];
-					if (entry) {
-						entry.eventTarget.dispatchEvent.apply(entry.eventTarget, [eventName].concat(Array.prototype.slice.call(arguments, 2)));
-					}				
-				},
-				addEventListener: function(serviceId, eventName, listener) {
-					var entry = that._entries[serviceId];
-					if (entry) {
-						entry.eventTarget.addEventListener(eventName, listener);
-					}		
-				},
-				removeEventListener: function(serviceId, eventName, listener) {
-					var entry = that._entries[serviceId];
-					if (entry) {
-						entry.eventTarget.removeEventListener(eventName, listener);
-					}		
+					}
+					that._entries[serviceId] = null;
+					that._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
 				}
+			},
+			dispatchEvent: function(serviceId, eventName) {
+				var entry = that._entries[serviceId];
+				if (entry) {
+					entry.eventTarget.dispatchEvent.apply(entry.eventTarget, [eventName].concat(Array.prototype.slice.call(arguments, 2)));
+				}
+			},
+			addEventListener: function(serviceId, eventName, listener) {
+				var entry = that._entries[serviceId];
+				if (entry) {
+					entry.eventTarget.addEventListener(eventName, listener);
+				}
+			},
+			removeEventListener: function(serviceId, eventName, listener) {
+				var entry = that._entries[serviceId];
+				if (entry) {
+					entry.eventTarget.removeEventListener(eventName, listener);
+				}
+			}
 		};
 	}
-	ServiceRegistry.prototype = /** @lends orion.serviceregistry.ServiceRegistry.prototype */ {
+	ServiceRegistry.prototype = /** @lends orion.serviceregistry.ServiceRegistry.prototype */
+	{
 
 		/**
 		 * Returns the service with the given name or reference.
 		 * @param {String|orion.serviceregistry.ServiceReference} nameOrServiceReference The service name or a service reference
-		 * @param timeout The amount of time in milliseconds to wait for this reference to arrive before failing.
 		 */
-		getService: function(nameOrServiceReference, timeout) {
+		getService: function(nameOrServiceReference) {
 			var service;
 			if (typeof nameOrServiceReference === 'string') {
 				if (this._namedReferences[nameOrServiceReference]) {
@@ -304,7 +315,7 @@ define(["dojo"], function(dojo){
 			}
 			return service;
 		},
-		
+
 		/**
 		 * Returns all references to the service with the given name
 		 * @param {String} name The name of the service to return
@@ -332,10 +343,14 @@ define(["dojo"], function(dojo){
 			var serviceId = this._entries.length;
 			var reference = new ServiceReference(serviceId, name, properties);
 			var service = new Service(serviceId, implementation, this.internalRegistry);
-			
+
 			this._namedReferences[name] = this._namedReferences[name] || [];
 			this._namedReferences[name].push(reference);
-			this._entries.push({reference: reference, service: service, eventTarget: new EventTarget()});
+			this._entries.push({
+				reference: reference,
+				service: service,
+				eventTarget: new EventTarget()
+			});
 			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service);
 			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
 		},
@@ -348,7 +363,7 @@ define(["dojo"], function(dojo){
 		addEventListener: function(eventName, listener) {
 			this._serviceEventTarget.addEventListener(eventName, listener);
 		},
-		
+
 		/**
 		 * Removes a listener for events on this registry
 		 * @param {String} eventName The name of the event to stop listening for
@@ -356,7 +371,7 @@ define(["dojo"], function(dojo){
 		 */
 		removeEventListener: function(eventName, listener) {
 			this._serviceEventTarget.removeEventListener(eventName, listener);
-		}	
+		}
 	};
 	ServiceRegistry.prototype.constructor = ServiceRegistry;
 
