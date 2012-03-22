@@ -17,6 +17,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/siteM
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
 		function(require, dojo, dijit, mUtil, mCommands, mSiteMappingsTable) {
 
+var AUTOSAVE_INTERVAL = 8000;
+
 /**
  * @name orion.widgets.SiteEditor
  * @class Editor for an individual site configuration.
@@ -50,6 +52,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	
 	_isDirty: false,
 	
+	_autoSaveTimer: null,
+
 	constructor: function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
@@ -94,7 +98,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			return focused || hostish.test(this.hostHint.get("value"));
 		}));
 		
-		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.onSubmit);
+		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.save);
 		
 		dojo.when(this._projects, dojo.hitch(this, function(projects) {
 			// Register command used for adding mapping
@@ -125,6 +129,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			this._commandService.addCommand(convertCommand);
 			
 			this._refreshFields();
+
+			this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 		}));
 		
 		// Save command
@@ -136,7 +142,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				visibleWhen: function(item) {
 					return !!item.Location /*looks like a site config*/;
 				},
-				callback: dojo.hitch(this, this.onSubmit)});
+				callback: dojo.hitch(this, this.save)});
 		this._commandService.addCommand(saveCommand);
 	},
 	
@@ -218,7 +224,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					var path = this._siteService.makeRelativeFilePath(folder.Location);
 					this.mappings.deleteAllMappings();
 					this.mappings.addMappings(this.getSelfHostingMappings(path));
-					this.onSubmit(); // save
+					this.save();
 				}
 			}),
 			title: "Choose Orion Source Folder",
@@ -392,9 +398,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	
 	setDirty: function(value) {
 		this._isDirty = value;
-		if (!value) {
-			this.mappings.setDirty(false);
-		}
 	},
 	
 	isDirty: function() {
@@ -437,13 +440,15 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		
 		var editor = this;
 		function bindText(widget, modelField) {
-			// Bind widget's onChange to site[modelField]
-			var handle = dojo.connect(widget, "onChange", editor, function(/**Event*/ e) {
+			function commitWidgetValue() {
 				var value = widget.get("value");
+				var oldValue = site[modelField];
 				site[modelField] = value;
-				this.setDirty(true);
-			});
-			editor._modelListeners.push(handle);
+				var isChanged = oldValue !== value;
+				editor.setDirty(isChanged || editor.isDirty());
+			}
+			editor._modelListeners.push(dojo.connect(widget, "onChange", commitWidgetValue));
+			editor._modelListeners.push(dojo.connect(widget, "onKeyUp", commitWidgetValue));
 		}
 		
 		bindText(this.name, "Name");
@@ -479,7 +484,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	 * @Override
 	 * @returns True to allow save to proceed, false to prevent it.
 	 */
-	onSubmit: function(/** Event */ e) {
+	save: function(/** Event */ e) {
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
 			var editor = this;
@@ -498,19 +503,20 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			return false;
 		}
 	},
-	
+
+	autoSave: function() {
+		if (this.isDirty()) {
+			this.save();
+		}
+		setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
+	},
+
 	_busyWhile: function(deferred, msg) {
-		dojo.forEach(this.getDescendants(), function(widget) {
-			widget.set("disabled", true);
-		});
 		deferred.then(dojo.hitch(this, this._onSuccess), dojo.hitch(this, this._onError));
 		this.progressService.showWhile(deferred, msg);
 	},
 	
 	_onSuccess: function(deferred) {
-		dojo.forEach(this.getDescendants(), function(widget) {
-			widget.set("disabled", false);
-		});
 		this.onSuccess(deferred);
 	},
 	
