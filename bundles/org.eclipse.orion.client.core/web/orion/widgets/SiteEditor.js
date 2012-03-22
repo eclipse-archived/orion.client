@@ -420,7 +420,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		
 		dojo.empty(this._commandsContainer);
 		this._commandService.renderCommands(this._commandsContainer.id, this._commandsContainer, this._siteConfiguration, {},
-			"button", null, this._siteConfiguration /*userData*/);
+			"button", this._siteConfiguration /*userData*/);
 
 		setTimeout(dojo.hitch(this, function() {
 			this._attachListeners(this._siteConfiguration);
@@ -490,9 +490,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 					function(updatedSiteConfig) {
 						editor._setSiteConfiguration(updatedSiteConfig);
-						return { Result: "Saved \"" + updatedSiteConfig.Name + "\"." };
+						return updatedSiteConfig;
 					});
-			this._busyWhile(deferred, "Saving...");
+			this._busyWhile(deferred);
 			return true;
 		} else {
 			return false;

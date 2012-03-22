@@ -95,7 +95,11 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				locationName = this._fileService.fileServiceName(meta && meta.Location);
 			}
 			var searchInputDom = dojo.byId("search");
+			if(!locationName){
+				locationName = "";
+			}
 			if(searchInputDom && searchInputDom.placeholder){
+				searchInputDom.value = "";
 				if(locationName.length > 23){
 					searchInputDom.placeholder = "Search " + locationName.substring(0, 20) + "...";
 				} else {
