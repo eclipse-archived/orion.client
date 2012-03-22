@@ -106,8 +106,8 @@ orion.JSDiffAdapter = (function() {
          	return {mapper:map, changContents: {array:changContents , index:0}};
 		},
 		
-		adaptCharDiff : function(oldStr, newStr) {
-			var diff = JsDiff.diffChars(oldStr, newStr);
+		adaptCharDiff : function(oldStr, newStr, word) {
+			var diff = word ? JsDiff.diffWords(oldStr, newStr) : JsDiff.diffChars(oldStr, newStr);
 			var map = [];
 			var oldStart = 0;
 			var newStart = 0;
