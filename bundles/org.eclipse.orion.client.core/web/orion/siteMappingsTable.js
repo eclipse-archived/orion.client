@@ -180,8 +180,55 @@ mSiteMappingsTable.MappingsTable = (function() {
 					return this.createMappingObject(mapping.Source, mapping.Target);
 				}));
 				// Build visuals
+				this.saveFocus();
 				this.createTree(this.parentId, new mSiteMappingsTable.Model(null, fetchItems, this.siteConfiguration.Mappings));
+				setTimeout(dojo.hitch(this, this.restoreFocus), 0);
 			}));
+		},
+		saveFocus: function() {
+			var focus = document.activeElement;
+			if (focus && focus.tagName === "INPUT") {
+				var cell, row;
+				for (var elem = focus.parentNode; elem; elem = elem.parentNode) {
+					if (elem.tagName === "TD") {
+						cell = elem;
+					}
+					if (dojo.hasClass(elem, "treeTableRow")) {
+						row = elem;
+						break;
+					}
+				}
+				if (row && cell) {
+					var rows = dojo.query(".treeTableRow", this.parentId);
+					for (var i=0; i < rows.length; i++) {
+						if (rows[i] === row) {
+							this.focusedRow = i;
+							this.focusedCell = dojo.query("td", row).indexOf(cell);
+							break;
+						}
+					}
+				} else {
+					this.focusedRow = -1;
+					this.focusedCell = -1;
+				}
+			}
+		},
+		restoreFocus: function() {
+			if (this.focusedRow !== -1 && this.focusedCell !== -1) {
+				var rows = dojo.query(".treeTableRow", this.parentId);
+				var row = rows[this.focusedRow];
+				if (row) {
+					var cell = dojo.query("td", row)[this.focusedCell];
+					if (cell) {
+						var input = dojo.query("input", cell)[0];
+						if (input && input.focus) {
+							input.focus();
+						}
+					}
+				}
+			}
+			this.focusedRow = -1;
+			this.focusedCell = -1;
 		},
 		render: function() {
 			this.changedItem(this.siteConfiguration.Mappings, this.siteConfiguration.Mappings);
