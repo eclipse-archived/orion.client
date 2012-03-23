@@ -407,9 +407,15 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	_refreshFields: function() {
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
-		
-		this.mappings = new mSiteMappingsTable.MappingsTable(this.serviceRegistry, this._siteService, null, this.mappingsPlaceholder.id, this._siteConfiguration, this._projects);
-		this.mappings.startup();
+
+		if (!this.mappings) {
+			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
+					siteService: this._siteService, selection: null, parentId: this.mappingsPlaceholder.id,
+					siteConfiguration: this._siteConfiguration, projects: this._projects /**dojo.Deferred*/
+				});
+		} else {
+			this.mappings._setSiteConfiguration(this._siteConfiguration);
+		}
 
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") {
