@@ -15,7 +15,7 @@ define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore',
 
 dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
 	widgetsInTemplate : true,
-	
+
 	templateString: '<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">' +
 						'<div data-dojo-attach-point="titleBar" class="dijitDialogTitleBar">' +
 							'<span data-dojo-attach-point="titleNode" class="dijitDialogTitle" id="${id}_title"></span>' +
@@ -30,7 +30,7 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 										'<div class="uploadInstruction">Drag a File or Zip here</div>' + 
 										'<div class="tipInstruction">or if you prefer</div>' + 
 										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' +
-										
+
 										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="Browse..." >' +
 										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' +
 										'</form>' +
@@ -39,31 +39,31 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 							'</div>' +
 						'</div>' + 
 					'</div>',
-					
+
 
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
 	},
-	
+
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = "Import a file or zip";
 	},
-	
+
 	handleReadyState: function(state){	
 		if( this.req.readyState === 4 ){
 			this.hide();
 			this.options.func();
 		}
 	},
-	
+
 	/* This upload works for the drag and dropped files */
-	
+
 	uploadDroppedFiles: function(file) {
 		// Use native XMLHttpRequest instead of XhrGet since dojo 1.5 does not allow to send binary data as per docs
 		this.req = new XMLHttpRequest();
-		
+
 		this.req.open('post', this.options.importLocation + '?fnc=upl', true);
 		this.req.setRequestHeader("Cache-Control", "no-cache");
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
@@ -73,9 +73,9 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 		this.req.onreadystatechange = dojo.hitch( this, 'handleReadyState' );
 		this.req.send(file);
 	},
-	
+
 	/* upload from form input */
-	
+
 	upload: function(files){
 
 		if(files){
@@ -84,36 +84,32 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 			this.importloader.upload(files);
 		}		
 	},
-	
+
 	handleFiles: function(files){
-		
+
 		this.importloader.form[0].files = files;
-		
+
 		for( var f=0; f< files.length; files++ ){
 			this.uploadDroppedFiles(files[f]);
 		}
 	},
-	
+
 	dragEnter: function(evt){
-		console.log( 'dragEnter' );
 		evt.stopPropagation();
 		evt.preventDefault();
 	},
-		
+
 	dragExit: function(evt){
-		console.log( 'dragExit' );
 		evt.stopPropagation();
 		evt.preventDefault();
 	},
-	
+
 	dragOver: function(evt){
-		console.log( 'dragover' );
 		evt.stopPropagation();
 		evt.preventDefault();
 	},
-	
+
 	drop: function(evt){	
-		console.log( 'drop' );
 		evt.stopPropagation();
  
 		var files = evt.dataTransfer.files;
@@ -123,29 +119,31 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 			this.handleFiles(files);
 		}
 	},
-	
+
 	postCreate : function() {
 		this.inherited(arguments);
-		
+
 		dojo.style( this.importloader.domNode, "left", '100px' );
 		dojo.style( this.titleBar, "padding", '10px 10px 10px' );
-		
+
 		this.importloader.force = 'iframe';
-		
+		this.importloader.preventDefault = function(){};
+		this.importloader.stopPropagation = function(){};
+
 		this.importform.action = this.options.importLocation;
 		this.importloader.url = this.options.importLocation;
-		
+
 		dojo.connect(this.importloader, "onChange", dojo.hitch(this, function(dataArray) {
-			console.log( 'onchange' );
-			this.upload();
+			var uploadData = { preventDefault: function(){}, stopPropagation: function(){} };
+			this.importloader.upload(uploadData);
 		}));
-		
+
 		dojo.connect(this.importloader, "onError", dojo.hitch(this, function(dataArray) {
 			setTimeout(dojo.hitch(this, function(){
 				this.hide();
 			}), 2000);		
 		}));
-	
+
 		dojo.connect(this.importloader, "onComplete", dojo.hitch(this, function(dataArray) {
 			setTimeout(dojo.hitch(this, function(){
 				this.hide();
