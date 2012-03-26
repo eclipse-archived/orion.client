@@ -48,6 +48,15 @@ orion.TextSearcher = (function() {
 		_createActionTable : function() {
 			var that = this;
 			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) {
+	
+				// create the command span for Find
+				var span = document.createElement('span');
+				dojo.addClass(span, "parameters");
+				span.id = "localSearchFindCommands";
+				parentDiv.appendChild(span);
+				// td.noWrap = true;
+	
+				// create the input box for searc hterm
 				var searchStringDiv = document.createElement('input');
 				searchStringDiv.type = "text";
 				searchStringDiv.name = "Find:";
@@ -60,14 +69,7 @@ orion.TextSearcher = (function() {
 					return that._handleKeyDown(evt,true);
 				};
 				parentDiv.appendChild(searchStringDiv);
-	
-				// create the command span for Find
-				var span = document.createElement('span');
-				dojo.addClass(span, "parameters");
-				span.id = "localSearchFindCommands";
-				parentDiv.appendChild(span);
-				// td.noWrap = true;
-	
+				
 				// create replace text
 				var replaceStringDiv = document.createElement('input');
 				replaceStringDiv.type = "text";
@@ -278,7 +280,7 @@ orion.TextSearcher = (function() {
 			}, 10);				
 
 			var findNextCommand = new mCommands.Command({
-				tooltip : "Go to next",
+				tooltip : "Find next match",
 				imageClass : "core-sprite-move_down",
 				id : "orion.search.findNext",
 				groupId : "orion.searchGroup",
@@ -288,7 +290,7 @@ orion.TextSearcher = (function() {
 			});
 
 			var findPrevCommand = new mCommands.Command({
-				tooltip : "Go to previous",
+				tooltip : "Find previous match",
 				imageClass : "core-sprite-move_up",
 				id : "orion.search.findPrev",
 				groupId : "orion.searchGroup",
@@ -328,7 +330,7 @@ orion.TextSearcher = (function() {
 			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replace", 1);
 			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replaceAll", 2);
 			this._commandService.renderCommands("localSearchFindCommands", "localSearchFindCommands", that, that, "button");
-			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchFindCommands", that, that, "button");
+			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchReplaceCommands", that, that, "button");
 		},
 
 		setOptions : function(options) {
@@ -432,7 +434,6 @@ orion.TextSearcher = (function() {
 				}
 				return null;
 			}
-			var searchAll = this._lastSearchString !== searchStr;
 			this._lastSearchString = searchStr;
 			var result = editor.getModel().find({
 				string: searchStr,
@@ -458,7 +459,7 @@ orion.TextSearcher = (function() {
 							annotationModel.addAnnotation(mAnnotations.AnnotationType.createAnnotation(type, result.start, result.end));
 						}
 					}
-					if(searchAll && this._showAllOccurrence){
+					if(this._showAllOccurrence){
 						if(this._timer){
 							window.clearTimeout(this._timer);
 						}
