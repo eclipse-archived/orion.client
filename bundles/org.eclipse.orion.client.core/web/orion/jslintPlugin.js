@@ -192,10 +192,10 @@ window.onload = function() {
 	
 	var provider = new eclipse.PluginProvider();
 	provider.registerServiceProvider("orion.edit.validator", validationService, {
-		contentType: ["text.javascript", "text.html"]
+		contentType: ["application/javascript", "text/html"]
 	});
 	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
-		contentType: ["text.javascript", "text.html"],	// TODO separate out HTML outline
+		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
 		name: "Flat outline",
 		id: "orion.edit.outliner.jslint"
 	});

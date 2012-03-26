@@ -97,12 +97,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		function isImage(contentType) {
 			switch (contentType && contentType.id) {
-				case "image.jpeg":
-				case "image.png":
-				case "image.gif":
-				case "image.ico":
-				case "image.tiff":
-				case "image.svg":
+				case "image/jpeg":
+				case "image/png":
+				case "image/gif":
+				case "image/ico":
+				case "image/tiff":
+				case "image/svg":
 					return true;
 			}
 			return false;
@@ -110,12 +110,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		
 		function addImageToLink(contentType, link) {
 			switch (contentType && contentType.id) {
-				case "image.jpeg":
-				case "image.png":
-				case "image.gif":
-				case "image.ico":
-				case "image.tiff":
-				case "image.svg":
+				case "image/jpeg":
+				case "image/png":
+				case "image/gif":
+				case "image/ico":
+				case "image/tiff":
+				case "image/svg":
 					var thumbnail = dojo.create("img", {src: item.Location}, link, "last");
 					dojo.addClass(thumbnail, "thumbnail");
 					break;

@@ -77,18 +77,18 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 		var mockRegistry, contentTypeService, basicTypes;
 		basicTypes = [
 			{
-				id: 'orion.test.ct0',
+				id: 'orion/test0',
 				name: 'Basic 0'
 			}, {
-				id: 'orion.test.ct1',
+				id: 'orion/test1',
 				name: 'Basic 1',
-				'extends' : 'orion.test.ct0'
+				'extends' : 'orion/test0'
 			}, {
-				id: 'orion.test.ct2',
+				id: 'orion/test2',
 				name: 'Basic 2',
 				extension: ['xml', 'txt']
 			}, {
-				id: 'orion.test.ct3',
+				id: 'orion/test3',
 				name: 'Basic 3',
 				filename: ['build.xml']
 			} ];
@@ -195,9 +195,9 @@ define(['orion/assert', 'orion/contentTypes', 'orion/serviceregistry'], function
 
 	tests.test_isExtensionOf2 = function() {
 		var bad = {
-			id: 'orion.test.ct4',
+			id: 'orion/test4',
 			name: 'Bad',
-			'extends': 'orion.test.ct4'
+			'extends': 'orion/test4'
 		};
 		var mockRegistry = new MockServiceRegistry();
 		mockRegistry._registerServiceProvider("orion.core.contenttype", {}, {

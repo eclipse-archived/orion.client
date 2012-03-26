@@ -17,73 +17,73 @@ window.onload = function() {
 	provider.registerServiceProvider("orion.core.contenttype", {}, {
 		contentTypes:
 			// Text types
-			[{	id: "text.plain",
+			[{	id: "text/plain",
 				name: "Text",
 				extension: ["txt"],
 				image: "../images/file_model.gif"
 			},
-			{	id: "text.html",
-				"extends": "text.plain",
+			{	id: "text/html",
+				"extends": "text/plain",
 				name: "HTML",
 				extension: ["html", "htm"],
 				image: "../images/wtp/html.gif"
 			},
-			{	id: "text.css",
-				"extends": "text.plain",
+			{	id: "text/css",
+				"extends": "text/plain",
 				name: "CSS",
 				extension: ["css"],
 				image: "../images/wtp/stylesheet.gif"
 			},
-			{	id: "text.javascript",
-				"extends": "text.plain",
+			{	id: "application/javascript",
+				"extends": "text/plain",
 				name: "JavaScript",
 				extension: ["js"],
 				image: "../images/wtp/javascript.gif"
 			},
-			{	id: "text.json",
-				"extends": "text.plain",
+			{	id: "application/json",
+				"extends": "text/plain",
 				name: "JSON",
 				extension: ["json"],
 				image: "../images/wtp/json.gif"
 			},
-			{	id: "text.xml",
-				"extends": "text.plain",
+			{	id: "text/xml",
+				"extends": "text/plain",
 				name: "XML",
 				extension: ["xml"],
 				image: "../images/wtp/xmlfile.gif"
 			},
-			{	id: "text.java",
-				"extends": "text.plain",
+			{	id: "text/x-java-source",
+				"extends": "text/plain",
 				name: "Java",
 				extension: ["java"]
 			},
 			// Image types
-			{	id: "image.gif",
+			{	id: "image/gif",
 				name: "GIF",
 				extension: ["gif"],
 				image: "../images/wtp/image.gif"
 			},
-			{	id: "image.jpeg",
+			{	id: "image/jpeg",
 				name: "JPG",
 				extension: ["jpg", "jpeg", "jpe"],
 				image: "../images/wtp/image.gif"
 			},
-			{	id: "image.ico",
+			{	id: "image/ico",
 				name: "ICO",
 				extension: ["ico"],
 				image: "../images/wtp/image.gif"
 			},
-			{	id: "image.png",
+			{	id: "image/png",
 				name: "PNG",
 				extension: ["png"],
 				image: "../images/wtp/image.gif"
 			},
-			{	id: "image.tiff",
+			{	id: "image/tiff",
 				name: "TIFF",
 				extension: ["tif", "tiff"],
 				image: "../images/wtp/image.gif"
 			},
-			{	id: "image.svg",
+			{	id: "image/svg",
 				name: "SVG",
 				extension: ["svg"],
 				image: "../images/wtp/image.gif"
@@ -98,7 +98,7 @@ window.onload = function() {
 	
 	provider.registerServiceProvider("orion.navigate.openWith", {}, {
 			editor: "orion.editor",
-			contentType: ["text.plain", "text.html", "text.css", "text.javascript", "text.json", "text.xml", "text.java"]});
+			contentType: ["text/plain", "text/html", "text/css", "application/javascript", "application/json", "text/xml", "text/x-java-source"]});
 	
 	provider.registerServiceProvider("orion.navigate.openWith.default", {}, {
 			editor: "orion.editor"});
@@ -107,23 +107,23 @@ window.onload = function() {
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new orion.editor.CssContentAssistProvider(),
 		{	name: "CSS content assist",
-			contentType: ["text.css"]
+			contentType: ["text/css"]
 		});
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new orion.editor.JavaScriptContentAssistProvider(),
 		{	name: "JavaScript content assist",
-			contentType: ["text.javascript"]
+			contentType: ["application/javascript"]
 		});
 	provider.registerServiceProvider("orion.edit.contentAssist",
 		new orion.editor.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
-			contentType: ["text.html"]
+			contentType: ["text/html"]
 		});
 	
 	// Register syntax highlighting
 	provider.registerServiceProvider("orion.edit.highlighter", {},
 		{	type: "grammar",
-			contentType: ["text.html"],
+			contentType: ["text/html"],
 			grammar: new orion.editor.HtmlGrammar()
 		});
 	
