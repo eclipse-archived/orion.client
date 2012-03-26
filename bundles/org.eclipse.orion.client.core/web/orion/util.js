@@ -463,6 +463,11 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		return splitLines;
 	}
 	
+	function formatMessage(msg) {
+		var args = arguments;
+		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
+	}
+	
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
@@ -481,6 +486,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		createPaneHeading: createPaneHeading,
 		forceLayout: forceLayout,
 		saveFileContents: saveFileContents,
-		splitFile: splitFile
+		splitFile: splitFile,
+		formatMessage: formatMessage
 	};
 });

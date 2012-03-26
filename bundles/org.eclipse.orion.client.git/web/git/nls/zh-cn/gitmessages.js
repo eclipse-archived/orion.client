@@ -1,0 +1,1 @@
+define("git/nls/zh-cn/gitmessages", ({	"Compare":"比较",	"View the side-by-side compare":"查看边侧的比较"}));

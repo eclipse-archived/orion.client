@@ -14,8 +14,8 @@
 /*global define*/
 
 define("orion/editor/nls/pt-br/messages", {
-	"incrementalFind": "Localiza\u00E7\u00E3o Incremental: {0}",
-	"incrementalFindNotFound": "Localiza\u00E7\u00E3o Incremental: {0} (n\u00E3o encontrado)",
+	"incrementalFind": "Localiza\u00E7\u00E3o Incremental: ${0}",
+	"incrementalFindNotFound": "Localiza\u00E7\u00E3o Incremental: ${0} (n\u00E3o encontrado)",
 	"find": "Localizar...",
 	"findNext": "Localizar pr\u00F3ximo",
 	"findPrevious": "Localizar Anterior",
@@ -37,5 +37,5 @@ define("orion/editor/nls/pt-br/messages", {
 	"linkedModeExited": "Modo Vinculado Terminado",
 	"syntaxError": "Erro de Sintaxe",
 	"contentAssist": "Assist\u00EAncia de conte\u00FAdo",
-	"lineColumn": "Linha {0} : Col {1}"
+	"lineColumn": "Linha ${0} : Col ${1}"
 });
