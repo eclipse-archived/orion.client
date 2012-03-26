@@ -14,6 +14,25 @@
 
 define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
 
+	var Promise = (function() {
+		function Promise() {
+		}
+		Promise.prototype.then = function(callback) {
+			this.callback = callback;
+			if (this.result) {
+				var promise = this;
+				setTimeout(function() { promise.callback(promise.result); }, 0);
+			}
+		};
+		Promise.prototype.done = function(result) {
+			this.result = result;
+			if (this.callback) {
+				this.callback(this.result);
+			}
+		};
+		return Promise;
+	}());
+
 	/**
 	 * @name orion.editor.ContentAssist
 	 * @class A key mode for {@link orion.editor.Editor} that displays content assist suggestions.
@@ -36,11 +55,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	function ContentAssist(editor, contentAssistId) {
 		this.editor = editor;
 		this.textView = editor.getTextView();
-		this.contentAssistPanel = document.getElementById(contentAssistId);
+		this.contentAssistPanel = typeof contentAssistId === "string" ? document.getElementById(contentAssistId) : contentAssistId;
 		this.active = false;
 		this.prefix = "";
 		
-		this.filteredProviders = [];
+		this.providers = [];
 		
 		this.proposals = [];
 		var self = this;
@@ -244,16 +263,16 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				selection.offset = offset;
 
 				/**
-				 * Each element of the keywords array returned by content assist providers may be either:
+				 * Each element of the proposals array returned by content assist providers may be either:
 				 * - String: a simple string proposal
 				 * - Object: must have a property "proposal" giving the proposal string. May also have other fields, which 
 				 * can trigger linked mode behavior in the editor.
 				 */
-				this.getKeywords(this.prefix, buffer, selection).then(
-					function(keywords) {
+				this.getProposals(this.prefix, buffer, selection).then(
+					function(proposals) {
 						this.proposals = [];
-						for (var i = 0; i < keywords.length; i++) {
-							var proposal = keywords[i];
+						for (var i = 0; i < proposals.length; i++) {
+							var proposal = proposals[i];
 							if (proposal === null || proposal === undefined) {
 								continue;
 							}
@@ -329,71 +348,52 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			return typeof str === "string" && str.substr(0, this.prefix.length) === this.prefix;
 		},
 		/**
-		 * @param {String} prefix A prefix against which content assist proposals should be evaluated.
+		 * @param {String} prefix A prefix against which content assist proposals will be evaluated.
 		 * @param {String} buffer The entire buffer being edited.
 		 * @param {orion.textview.Selection} selection The current selection from the Editor.
-		 * @returns {Object} A promise that will provide the keywords.
+		 * @returns {Object} A promise that will provide the proposals.
 		 */
-		getKeywords: function(prefix, buffer, selection) {
-			var keywords = [],
+		getProposals: function(prefix, buffer, selection) {
+			var proposals = [],
 			    numComplete = 0,
-			    promise = new this.Promise(),
-			    filteredProviders = this.filteredProviders;
-			function collectKeywords(result) {
+			    promise = new Promise(),
+			    providers = this.providers;
+			function collectProposals(result) {
 				if (result) {
-					keywords = keywords.concat(result);
+					proposals = proposals.concat(result);
 				}
-				if (++numComplete === filteredProviders.length) {
-					promise.done(keywords);
+				if (++numComplete === providers.length) {
+					promise.done(proposals);
 				}
 			}
 			function errback() {
-				if (++numComplete === filteredProviders.length) {
-					promise.done(keywords);
+				if (++numComplete === providers.length) {
+					promise.done(proposals);
 				}
 			}
 			
-			for (var i=0; i < filteredProviders.length; i++) {
-				var provider = filteredProviders[i];
-				//prefer computeProposals but support getKeywords for backwards compatibility
-				var proposalsFunc = provider.getKeywords;
+			for (var i=0; i < providers.length; i++) {
+				var provider = providers[i];
+				//prefer computeProposals but support getProposals for backwards compatibility
+				var proposalsFunc = provider.getProposals;
 				if (typeof provider.computeProposals === "function") {
 					proposalsFunc = provider.computeProposals;
 				}
-				var keywordsPromise = proposalsFunc.apply(provider, [prefix, buffer, selection]);
-				if (keywordsPromise && keywordsPromise.then) {
-					keywordsPromise.then(collectKeywords, errback);
+				var proposalsPromise = proposalsFunc.apply(provider, [prefix, buffer, selection]);
+				if (proposalsPromise && proposalsPromise.then) {
+					proposalsPromise.then(collectProposals, errback);
 				} else {
-					collectKeywords(keywordsPromise);
+					collectProposals(proposalsPromise);
 				}
 			}
 			return promise;
 		},
-		/** @private */
-		Promise: (function() {
-			function Promise() {
-			}
-			Promise.prototype.then = function(callback) {
-				this.callback = callback;
-				if (this.result) {
-					var promise = this;
-					setTimeout(function() { promise.callback(promise.result); }, 0);
-				}
-			};
-			Promise.prototype.done = function(result) {
-				this.result = result;
-				if (this.callback) {
-					this.callback(this.result);
-				}
-			};
-			return Promise;
-		}()),
 		/**
 		 * Sets the content assist providers that we will consult to obtain proposals.
-		 * @param {Object[]} providers The providers. See {@link orion.contentAssist.CssContentAssistProvider} for an example.
+		 * @param {Object[]} providers The providers.
 		 */
 		setProviders: function(providers) {
-			this.filteredProviders = providers;
+			this.providers = providers.slice(0);
 		}
 	};
 	mEventTarget.EventTarget.addMixin(ContentAssist.prototype);
