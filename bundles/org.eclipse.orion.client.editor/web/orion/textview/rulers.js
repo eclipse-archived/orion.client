@@ -11,7 +11,7 @@
 
 /*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip'], function(messages, mAnnotations, mTooltip) {
+define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/util'], function(messages, mAnnotations, mTooltip, mUtil) {
 
 	/**
 	 * Constructs a new ruler. 
@@ -554,7 +554,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 				var lineStart = model.getLineStart(mapLine);
 				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
 			}
-			return messages.formatMessage(messages.line, mapLine + 1);
+			return mUtil.formatMessage(messages.line, mapLine + 1);
 		}
 		return Ruler.prototype._getTooltipContents.call(this, lineIndex, annotations);
 	};

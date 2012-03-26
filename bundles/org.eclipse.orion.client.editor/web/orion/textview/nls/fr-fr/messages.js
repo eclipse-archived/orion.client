@@ -15,7 +15,7 @@
 
 define("orion/textview/nls/fr-fr/messages", {
     "multipleAnnotations": "Annotations multiples:",
-    "line": "Ligne: {0}",
+    "line": "Ligne: ${0}",
 	"currentLine": "Ligne Courant",
     "matchingBracket": "Crochet Correspondant",
     "currentBracket": "Crochet Courant"

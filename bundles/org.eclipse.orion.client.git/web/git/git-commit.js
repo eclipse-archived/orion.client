@@ -12,11 +12,11 @@
 var eclipse;
 /*global define document dojo dijit serviceRegistry:true */
 /*browser:true*/
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
 	'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links', 'orion/contentTypes',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'],
-	function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
+	function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
 		mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
 		mGitCommitExplorer, mGitCommands, mGitClient, mLinks, mContentTypes) {
 
@@ -56,8 +56,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000);
 		
 		var showDiffCommand = new mCommands.Command({
-			name: "Compare",
-			tooltip: "View the side-by-side compare",
+			name: messages["Compare"],
+			tooltip: messages["View the side-by-side compare"],
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.diff.showFullCompare",
@@ -73,8 +73,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showFullCompare", 1000);
 		
 		showDiffCommand = new mCommands.Command({
-			name: "Working Directory Version",
-			tooltip: "View the working directory version of the file",
+			name: messages["Working Directory Version"],
+			tooltip: messages["View the working directory version of the file"],
 			imageClass: "git-sprite-open_compare",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.diff.showCurrent",

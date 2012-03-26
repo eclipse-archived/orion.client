@@ -13,8 +13,8 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/textview/undoStack', 'orion/textview/keyBinding',
-	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex'],
-function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex) {
+	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/textDND', 'orion/editor/regex', 'orion/util'],
+function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRegex, mUtil) {
 
 	function UndoFactory() {
 	}
@@ -108,7 +108,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					var match = prefix.match(new RegExp("^" + mRegex.escape(txt), "i"));
 					if (match && match.length > 0) {
 						prefix = self._incrementalFindPrefix += e.text;
-						self.editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
+						self.editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, prefix));
 						var searchStart = editor.getSelection().start;
 						var result = editor.getModel().find({
 							string: prefix,
@@ -120,7 +120,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 							editor.moveSelection(result.start, result.end);
 							self._incrementalFindIgnoreSelection = false;
 						} else {
-							editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
+							editor.reportStatus(mUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error");
 							self._incrementalFindSuccess = false;
 						}
 						e.text = null;
@@ -205,9 +205,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 							this._incrementalFindIgnoreSelection = true;
 							editor.moveSelection(result.start, result.end);
 							this._incrementalFindIgnoreSelection = false;
-							editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
+							editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, prefix));
 						} else {
-							editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
+							editor.reportStatus(mUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error");
 							this._incrementalFindSuccess = false;
 						}
 					}
@@ -227,7 +227,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 						this.toggleIncrementalFind();
 						return true;
 					}
-					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, prefix));
 					var result = editor.getModel().find({
 						string: prefix,
 						start: editor.getCaretOffset() - prefix.length - 1,
@@ -239,7 +239,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 						editor.moveSelection(result.start,result.end);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
-						editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
+						editor.reportStatus(mUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error");
 					}
 					return true;
 				}
@@ -450,7 +450,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 		toggleIncrementalFind: function() {
 			this._incrementalFindActive = !this._incrementalFindActive;
 			if (this._incrementalFindActive) {
-				this.editor.reportStatus(messages.formatMessage(messages.incrementalFind, this._incrementalFindPrefix));
+				this.editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, this._incrementalFindPrefix));
 				this.textView.addEventListener("Verify", this._incrementalFindListener.onVerify);
 				this.textView.addEventListener("Selection", this._incrementalFindListener.onSelection);
 			} else {
@@ -510,9 +510,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					this._incrementalFindIgnoreSelection = true;
 					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
-					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, prefix));
 				} else {
-					editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
+					editor.reportStatus(mUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error");
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -539,9 +539,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					this._incrementalFindIgnoreSelection = true;
 					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
-					editor.reportStatus(messages.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(mUtil.formatMessage(messages.incrementalFind, prefix));
 				} else {
-					editor.reportStatus(messages.formatMessage(messages.incrementalFindNotFound, prefix), "error");
+					editor.reportStatus(mUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error");
 					this._incrementalFindSuccess = false;
 				}
 				return true;

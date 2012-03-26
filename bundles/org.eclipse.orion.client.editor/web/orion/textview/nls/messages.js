@@ -16,7 +16,7 @@
 define("orion/textview/nls/messages", {
 	"root": {
 		"multipleAnnotations": "Multiple annotations:",
-		"line": "Line: {0}",
+		"line": "Line: ${0}",
 		"breakpoint": "Breakpoint",
 		"bookmark": "Bookmark",
 		"task": "Task",
@@ -26,11 +26,7 @@ define("orion/textview/nls/messages", {
 		"currentSearch": "Current Search",
 		"currentLine": "Current Line",
 		"matchingBracket": "Matching Bracket",
-		"currentBracket": "Current Bracket",
-		"formatMessage": function(msg) {
-			var args = arguments;
-			return msg.replace(/\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
-		}
+		"currentBracket": "Current Bracket"
 	},
 	"pt-br": true,
 	"fr-fr": true
