@@ -57,7 +57,6 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.textView = editor.getTextView();
 		this.contentAssistPanel = typeof contentAssistId === "string" ? document.getElementById(contentAssistId) : contentAssistId;
 		this.active = false;
-		this.prefix = "";
 		
 		this.providers = [];
 		
@@ -156,10 +155,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			this.ignoreNextChange = true;
 			this.cancel();
+
+			var offset = this.textView.getCaretOffset();
 			var data = {
 				proposal: proposal,
-				start: this.textView.getCaretOffset() - this.prefix.length,
-				end: this.textView.getCaretOffset()
+				start: offset,
+				end: offset
 			};
 			this.dispatchEvent({type: "accept", data: data });
 			return true;
@@ -236,59 +237,23 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.contentAssistPanel.onclick = null;
 			} else {
 				var offset = event ? (event.start + event.addedCharCount) : this.textView.getCaretOffset();
-				var index = offset;
-				var c;
-				while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
-					index--;
-				}
-				
-				// Show all proposals
-//				if (index === offset) {
-//					return;
-//				}
-				this.prefix = this.textView.getText(index, offset);
-				
-				var buffer = this.textView.getText(),
-				    selection = this.textView.getSelection();
-
-				/**
-				 * Bug/feature: The selection returned by the textView doesn't seem to be updated before notifying the listeners
-				 * of onModelChanged. If content assist is triggered by Ctrl+Space, the start/end position of the selection
-				 * (i.e. the caret position) is correct. But if the user then starts to type some text (in order to filter the
-				 * the completion proposals list by a prefix) - i.e. onModelChanged listeners are notified and, in turn,
-				 * this method - the selection is not up-to-date. Because of that, I just did a simple hack of adding the offset
-				 * field for selection, which is computed above and is always correct. The selection is passed to the content
-				 * assist providers.
-				 */
-				selection.offset = offset;
-
 				/**
 				 * Each element of the proposals array returned by content assist providers may be either:
 				 * - String: a simple string proposal
 				 * - Object: must have a property "proposal" giving the proposal string. May also have other fields, which 
 				 * can trigger linked mode behavior in the editor.
 				 */
-				this.getProposals(this.prefix, buffer, selection).then(
+				this.getProposals(offset).then(
 					function(proposals) {
-						this.proposals = [];
-						for (var i = 0; i < proposals.length; i++) {
-							var proposal = proposals[i];
-							if (proposal === null || proposal === undefined) {
-								continue;
-							}
-							if (this.matchesPrefix(proposal) || this.matchesPrefix(proposal.proposal)) {
-								this.proposals.push(proposal);
-							}
-						}
+						this.proposals = proposals;
 						if (this.proposals.length === 0) {
 							this.cancel();
 							return;
 						}
-						
 						var caretLocation = this.textView.getLocationAtOffset(offset);
 						caretLocation.y += this.textView.getLineHeight();
 						this.contentAssistPanel.innerHTML = "";
-						for (i = 0; i < this.proposals.length; i++) {
+						for (var i = 0; i < this.proposals.length; i++) {
 							this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.contentAssistPanel);
 						}
 						this.textView.convert(caretLocation, "document", "page");
@@ -321,6 +286,14 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 		},
 		/** @private */
+		getPrefixStart: function(end) {
+			var index = end, c;
+			while (index > 0 && ((97 <= (c = this.textView.getText(index - 1, index).charCodeAt(0)) && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57))) { //LETTER OR UNDERSCORE OR NUMBER
+				index--;
+			}
+			return index;
+		},
+		/** @private */
 		createDiv: function(proposal, isSelected, parent) {
 			var div = document.createElement("div");
 			if (isSelected) {
@@ -343,17 +316,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			//by default return the straight proposal text
 			return proposal.proposal;
 		},
-		/** @private */
-		matchesPrefix: function(str) {
-			return typeof str === "string" && str.substr(0, this.prefix.length) === this.prefix;
-		},
 		/**
-		 * @param {String} prefix A prefix against which content assist proposals will be evaluated.
-		 * @param {String} buffer The entire buffer being edited.
-		 * @param {orion.textview.Selection} selection The current selection from the Editor.
+		 * @param {String} offset The caret offset.
 		 * @returns {Object} A promise that will provide the proposals.
 		 */
-		getProposals: function(prefix, buffer, selection) {
+		getProposals: function(offset) {
 			var proposals = [],
 			    numComplete = 0,
 			    promise = new Promise(),
@@ -371,7 +338,23 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 					promise.done(proposals);
 				}
 			}
-			
+			var textView = this.textView, textModel = textView.getModel();
+			/**
+			 * Bug/feature: The selection returned by the textView doesn't seem to be updated before notifying the listeners
+			 * of onModelChanged. If content assist is triggered by Ctrl+Space, the start/end position of the selection
+			 * (i.e. the caret position) is correct. But if the user then starts to type some text (in order to filter the
+			 * the completion proposals list by a prefix) - i.e. onModelChanged listeners are notified and, in turn,
+			 * this method - the selection is not up-to-date. Because of that, I just did a simple hack of adding the offset
+			 * field for selection, which is computed above and is always correct. The selection is passed to the content
+			 * assist providers.
+			 */
+			// TODO: fix the selection start & end here
+			var buffer = textView.getText();
+			var context = {
+				line: textModel.getLine(textModel.getLineAtOffset(offset)),
+				prefix: textView.getText(this.getPrefixStart(offset), offset),
+				selection: textView.getSelection()
+			};
 			for (var i=0; i < providers.length; i++) {
 				var provider = providers[i];
 				//prefer computeProposals but support getProposals for backwards compatibility
@@ -379,7 +362,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				if (typeof provider.computeProposals === "function") {
 					proposalsFunc = provider.computeProposals;
 				}
-				var proposalsPromise = proposalsFunc.apply(provider, [prefix, buffer, selection]);
+				var proposalsPromise = proposalsFunc.apply(provider, [buffer, offset, context]);
 				if (proposalsPromise && proposalsPromise.then) {
 					proposalsPromise.then(collectProposals, errback);
 				} else {

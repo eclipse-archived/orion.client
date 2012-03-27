@@ -751,45 +751,41 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 		 */
 		contentAssistProposalAccepted: function(event) {
 			/**
-			 * The event.proposal may be either a simple string or an object with this shape:
+			 * The event.proposal is an object with this shape:
 			 * {   proposal: "[proposal string]", // Actual text of the proposal
+			 *     description: "diplay string", // Optional
 			 *     positions: [{
 			 *         offset: 10, // Offset of start position of parameter i
 			 *         length: 3  // Length of parameter string for parameter i
 			 *     }], // One object for each parameter; can be null
-			 *     escapePosition: 19 // Offset that caret will be placed at after exiting Linked Mode; can be null
+			 *     escapePosition: 19 // Optional; offset that caret will be placed at after exiting Linked Mode.
 			 * }
 			 * Offsets are relative to the text buffer.
 			 */
-			var proposalInfo = event.data.proposal;
-			var proposal;
-			if (typeof proposalInfo === "string") {
-				proposal = proposalInfo;
-			} else if (typeof proposalInfo.proposal === "string") {
-				proposal = proposalInfo.proposal;
-			}
-			this.textView.setText(proposal, event.data.start, event.data.end);
+			var proposal = event.data.proposal;
+			var proposalText = proposal.proposal;
+			this.textView.setText(proposalText, event.data.start, event.data.end);
 			
 			//if the proposal specifies linked positions, build the model and enter linked mode
-			if (proposalInfo.positions && this.linkedMode) {
+			if (proposal.positions && this.linkedMode) {
 				var positionGroups = [];
-				for (var i = 0; i < proposalInfo.positions.length; ++i) {
+				for (var i = 0; i < proposal.positions.length; ++i) {
 					positionGroups[i] = {
 						positions: [{
-							offset: proposalInfo.positions[i].offset,
-							length: proposalInfo.positions[i].length
+							offset: proposal.positions[i].offset,
+							length: proposal.positions[i].length
 						}]
 					};
 				}
 
 				var linkedModeModel = {
 					groups: positionGroups,
-					escapePosition: proposalInfo.escapePosition
+					escapePosition: proposal.escapePosition
 				};
 				this.linkedMode.enterLinkedMode(linkedModeModel);
-			} else if (proposalInfo.escapePosition) {
+			} else if (proposal.escapePosition) {
 				//we don't want linked mode, but there is an escape position, so just set cursor position
-				this.textView.setCaretOffset(proposalInfo.escapePosition);
+				this.textView.setCaretOffset(proposal.escapePosition);
 			}
 			return true;
 		},
