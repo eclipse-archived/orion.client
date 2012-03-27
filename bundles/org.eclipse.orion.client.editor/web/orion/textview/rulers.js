@@ -11,7 +11,7 @@
 
 /*global define setTimeout clearTimeout setInterval clearInterval Node */
 
-define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/util'], function(messages, mAnnotations, mTooltip, mUtil) {
+define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/textview/util'], function(messages, mAnnotations, mTooltip, mUtil) {
 
 	/**
 	 * Constructs a new ruler. 
