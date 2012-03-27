@@ -13,10 +13,12 @@
 
 /*global window document define localStorage*/
 
-define("examples/textview/textStylerOptions", [], function() {
+define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBootstrap) {
 
 	var CATEGORY = "JavaScript Editor";
 	var USER_THEME = "userTheme";
+	
+	var preferences;
 
 	/**
 	 * Constructs ...
@@ -24,6 +26,7 @@ define("examples/textview/textStylerOptions", [], function() {
 	 * Working with local storage for initial settings proof of concept
 	 */
 	function TextStylerOptions (styler) {
+	
 		this._styler = styler;
 		this._view = this._styler.view;
 		var self = this;
@@ -32,9 +35,16 @@ define("examples/textview/textStylerOptions", [], function() {
 				self._onStorage(e);
 			}
 		};
+		
+		var stylerOptions = this;
+		
 		if (this._view) {
-			this._updateStylesheet();
-			window.addEventListener("storage", this._listener.onStorage, false);
+			mBootstrap.startup().then(function(core ) {
+				preferences = core.preferences;
+				stylerOptions.preferences = preferences;
+				stylerOptions._updateStylesheet(preferences);
+				stylerOptions.storageKey = preferences.listenForChangedSettings( stylerOptions._listener.onStorage );
+			});
 		}
 	}
 	
@@ -53,20 +63,20 @@ define("examples/textview/textStylerOptions", [], function() {
 			}
 			return value;
 		}, 
-		_getStyleSheet: function (subcategories, theme) {
+		_getStyleSheet: function (subcategories, theme, sUtil) {
 			var result = [];
 			result.push("");
 			
 			//view container
-			var family = this._getSetting(subcategories, "Font", "Family").toLowerCase();
+			var family = this.preferences.getSetting(subcategories, "Font", "Family").toLowerCase();
 			if(family === "sans serif"){
 				family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
 			}else{
 				family = 'monospace';
 			}	
-			var size = this._getSetting(subcategories, "Font", "Size");
-			var color = this._getSetting(subcategories, "Font", "Color");
-			var background = this._getSetting(subcategories, "Font", "Background");
+			var size = this.preferences.getSetting(subcategories, "Font", "Size");
+			var color = this.preferences.getSetting(subcategories, "Font", "Color");
+			var background = this.preferences.getSetting(subcategories, "Font", "Background");
 			result.push("." + theme + " {");
 			result.push("\tfont-family: " + family + ";");
 			result.push("\tfont-size: " + size + ";");
@@ -88,8 +98,8 @@ define("examples/textview/textStylerOptions", [], function() {
 			function defineRule(token, settingName) {
 				var className = styler.getClassNameForToken(token);
 				if (className) {
-					var color = _this._getSetting(subcategories, settingName, "Color");
-					var weight = _this._getSetting(subcategories, settingName, "Weight").toLowerCase();
+					var color = preferences.getSetting(subcategories, settingName, "Color");
+					var weight = preferences.getSetting(subcategories, settingName, "Weight").toLowerCase();
 					result.push("." + theme + " ." + className +  " {");
 					result.push("\tcolor: " + color + ";");
 					result.push("\tfont-weight: " + weight + ";");
@@ -107,34 +117,41 @@ define("examples/textview/textStylerOptions", [], function() {
 			return result.join("\n");//easier for debuggin 
 		},
 		_onStorage: function (e) {
-			if (e.key === CATEGORY) {
-				this._updateStylesheet();
+			if( e.key === this.storageKey ){
+				this._updateStylesheet( this.preferences );
 			}
 		},
-		_updateStylesheet: function () {
-			var storage = localStorage.getItem(CATEGORY);
-			if (!storage) { return; }			if (this._stylesheet) {
-				this._stylesheet.parentNode.removeChild(this._stylesheet);
-				this._stylesheet = null;
-			}
-			var stylesheet = this._stylesheet = document.createElement("STYLE");
-			stylesheet.appendChild(document.createTextNode(this._getStyleSheet(JSON.parse(storage), USER_THEME)));
-			var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
-			head.appendChild(stylesheet);
-			var view = this._view;
-			var options = {themeClass:null};
-			view.getOptions(options);
-			var theme = options.themeClass;
-			if (theme) {
-				theme = theme.replace(USER_THEME, "");
-				if (theme) { theme += " "; }
-				theme += USER_THEME;
-			} else {
-				theme = USER_THEME;
-			}
-			options.themeClass = theme;
-			view.setOptions(options);
-			view.update(true);
+		_updateStylesheet: function (preferences, sUtil) {
+
+			var storage;
+			var stylerOptions = this;
+			
+			preferences.getPreferences('/settings', 2).then( function(prefs){		
+				storage = JSON.parse( prefs.get(CATEGORY) );	
+				if (!storage) { return; }
+				if (stylerOptions._stylesheet) {
+					stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
+					stylerOptions._stylesheet = null;
+				}
+				var stylesheet = stylerOptions._stylesheet = document.createElement("STYLE");
+				stylesheet.appendChild(document.createTextNode(stylerOptions._getStyleSheet( storage, USER_THEME, sUtil)));
+				var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+				head.appendChild(stylesheet);
+				var view = stylerOptions._view;
+				var options = {themeClass:null};
+				view.getOptions(options);
+				var theme = options.themeClass;
+				if (theme) {
+					theme = theme.replace(USER_THEME, "");
+					if (theme) { theme += " "; }
+					theme += USER_THEME;
+				} else {
+					theme = USER_THEME;
+				}
+				options.themeClass = theme;
+				view.setOptions(options);
+				view.update(true);
+			} );
 		}
 	};
 	return {TextStylerOptions: TextStylerOptions};

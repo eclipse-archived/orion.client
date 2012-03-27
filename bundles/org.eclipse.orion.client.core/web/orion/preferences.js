@@ -425,6 +425,11 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	PreferencesService.USER_SCOPE = 4;
 	
 	PreferencesService.prototype = /** @lends orion.preferences.PreferencesService.prototype */ {
+	
+		listenForChangedSettings: function( callback ){
+			window.addEventListener("storage", callback, false);
+			return "/orion/preferences/local/settings";
+		},
 		
 		/**
 		 * Retrieves the preferences of the given node name.
@@ -451,6 +456,26 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				return preferences;
 			});
 			return promise;
+		},
+		
+		/* Helper function - given a settings JSON structure, this function
+		   can pick out a setting from the standard settings structure */
+
+		getSetting: function(subcategories, subcategory, element){
+		
+			var value;
+			
+			for(var sub = 0; sub < subcategories.length; sub++){
+				if(subcategories[sub].label === subcategory){
+					for(var item = 0; item < subcategories[sub].data.length; item++){
+						if(subcategories[sub].data[item].label === element){
+							value = subcategories[sub].data[item].value;
+							break;
+						}
+					}
+				}
+			}
+			return value;
 		}
 	};
 	return {
