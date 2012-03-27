@@ -54,12 +54,11 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns a string of all the whitespace at the start of the current line.
 	 * @param {String} buffer The document
-	 * @param {Object} selection The current selection
-	 * @param {Integer} selection.offset The current selection offset
+	 * @param {Integer} offset The current selection offset
 	 */
-	function leadingWhitespace(buffer, selection) {
+	function leadingWhitespace(buffer, offset) {
 		var whitespace = "";
-		var offset = selection.offset-1;
+		offset = offset-1;
 		while (offset > 0) {
 			var c = buffer.charAt(offset--);
 			if (c === '\n' || c === '\r') {
@@ -97,8 +96,8 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Attempts to infer the type of the receiver of a function.
 	 */
-	function inferType(prefix, buffer, selection) {
-		var line = prefixLine(prefix, buffer, selection.offset);
+	function inferType(prefix, buffer, offset) {
+		var line = prefixLine(prefix, buffer, offset);
 		//Note: we already know at this point the line ends with a dot
 		//if the last character is a quote and there is an odd number of quotes on the line, then we have a string literal
 		if (line.length > 1 && (line.charAt(line.length-2) === "\"" || line.charAt(line.length-2) === "'")) {
@@ -106,6 +105,15 @@ define("orion/editor/jsContentAssist", [], function() {
 		}
 		//we failed to infer the type
 		return null;
+	}
+
+	/** 
+	 * Removes prefix from string.
+	 * @param {String} prefix
+	 * @param {String} string
+	 */
+	function chop(prefix, string) {
+		return string.substring(prefix.length);
 	}
 	
 	/**
@@ -117,10 +125,10 @@ define("orion/editor/jsContentAssist", [], function() {
 	 * property is not specified it is assumed to be a function.
 	 * @param objectName {String} The name of the object associated with these functions
 	 * @param prefix {String} The content assist prefix
-	 * @param selection {Object} The current editor buffer selection
+	 * @param offset {Number} The buffer offset for which content assist was invoked.
 	 * @param proposals {Array} The current array of proposal objects.
 	 */
-	function addPropertyProposals(properties, objectName, prefix, selection, proposals) {
+	function addPropertyProposals(properties, objectName, prefix, offset, proposals) {
 		var text, description, positions, endOffset;
 		for (var i = 0; i < properties.length; i++) {
 			var name = properties[i].name;
@@ -133,13 +141,13 @@ define("orion/editor/jsContentAssist", [], function() {
 				//don't use linked mode for functions with no arguments
 				text = name + (properties[i].field ? "" : "()");
 				description = text + " - " + objectName;
-				proposals.push({proposal: text, description: description});
+				proposals.push({proposal: chop(prefix, text), description: description});
 				continue;
 			}
 			text = name + "(";
 			//add linked mode position for each function argument
 			positions = [];
-			endOffset = selection.offset + name.length+1 - prefix.length;
+			endOffset = offset + name.length+1 - prefix.length;
 			for (var argIndex = 0; argIndex < args.length; argIndex++) {
 				positions.push({offset: endOffset, length: args[argIndex].length});
 				endOffset += args[argIndex].length+2;//add extra for comma and space
@@ -152,23 +160,23 @@ define("orion/editor/jsContentAssist", [], function() {
 			text += ")";
 			description = text + " - " + objectName;
 			endOffset--;//no comma after last argument
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 	}
 
 	/**
 	 * Returns proposals for completion on members of an object
 	 */
-	function getMemberProposals(prefix, buffer, selection) {
+	function getMemberProposals(prefix, buffer, offset) {
 		var proposals = [];
 
-		var type = inferType(prefix, buffer, selection);
+		var type = inferType(prefix, buffer, offset);
 		if (type === "String") {
-			addPropertyProposals(stringProps, "String", prefix, selection, proposals);
+			addPropertyProposals(stringProps, "String", prefix, offset, proposals);
 		}
 		
 		//properties common to all objects
-		addPropertyProposals(objectProps, "Object", prefix, selection, proposals);
+		addPropertyProposals(objectProps, "Object", prefix, offset, proposals);
 
 		return proposals;
 	}
@@ -176,11 +184,11 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns proposals for javascript templates
 	 */
-	function getTemplateProposals(prefix, buffer, selection) {
+	function getTemplateProposals(prefix, buffer, offset) {
 		//any returned positions need to be offset based on current cursor position and length of prefix
-		var startOffset = selection.offset-prefix.length;
+		var startOffset = offset-prefix.length;
 		var proposals = [];
-		var whitespace = leadingWhitespace(buffer, selection);
+		var whitespace = leadingWhitespace(buffer, offset);
 		//common vars for each proposal
 		var text, description, positions, endOffset;
 		if ("if".indexOf(prefix) === 0) {
@@ -189,13 +197,13 @@ define("orion/editor/jsContentAssist", [], function() {
 			description = "if - if statement";
 			positions = [{offset: startOffset+4, length: 9}];
 			endOffset = startOffset+whitespace.length+18;//after indentation inside if body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 			//if/else statement
 			text = "if (condition) {\n" + whitespace + "\t\n" + whitespace + "} else {\n" + whitespace + "\t\n" + whitespace + "}";
 			description = "if - if else statement";
 			positions = [{offset: startOffset+4, length: 9}];
 			endOffset = startOffset+whitespace.length+18;//after indentation inside if body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 		if ("for".indexOf(prefix) === 0) {
 			//for loop
@@ -203,14 +211,14 @@ define("orion/editor/jsContentAssist", [], function() {
 			description = "for - iterate over array";
 			positions = [{offset: startOffset+9, length: 1}, {offset: startOffset+20, length: 5}];
 			endOffset = startOffset+whitespace.length+42;//after indentation inside for loop body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 			//for ... in statement
 			text = "for (var property in object) {\n" + whitespace + "\tif (object.hasOwnProperty(property)) {\n" + 
 				whitespace + "\t\t\n" + whitespace + "\t}\n" + whitespace + '}';
 			description = "for..in - iterate over properties of an object";
 			positions = [{offset: startOffset+9, length: 8}, {offset: startOffset+21, length: 6}];
 			endOffset = startOffset+(2*whitespace.length)+73;//after indentation inside if statement body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 		//while loop
 		if ("while".indexOf(prefix) === 0) {
@@ -218,7 +226,7 @@ define("orion/editor/jsContentAssist", [], function() {
 			description = "while - while loop with condition";
 			positions = [{offset: startOffset+7, length: 9}];
 			endOffset = startOffset+whitespace.length+21;//after indentation inside while loop body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 		//do/while loop
 		if ("do".indexOf(prefix) === 0) {
@@ -226,7 +234,7 @@ define("orion/editor/jsContentAssist", [], function() {
 			description = "do - do while loop with condition";
 			positions = [{offset: startOffset+16, length: 9}];
 			endOffset = startOffset+whitespace.length+6;//after indentation inside do/while loop body
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 		//switch statement
 		if ("switch".indexOf(prefix) === 0) {
@@ -235,7 +243,7 @@ define("orion/editor/jsContentAssist", [], function() {
 			description = "switch - switch case statement";
 			positions = [{offset: startOffset+8, length: 10}, {offset: startOffset + 28, length: 6}];
 			endOffset = startOffset+(2*whitespace.length)+38;//after indentation inside first case statement
-			proposals.push({proposal: text, description: description, positions: positions, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, positions: positions, escapePosition: endOffset});
 		}
 		if ("try".indexOf(prefix) === 0) {
 			//try..catch statement
@@ -248,7 +256,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				"} finally {\n" + whitespace + "}";
 			description = "try - try..catch statement with finally block";
 			endOffset = startOffset+whitespace.length+7;//after indentation inside try statement
-			proposals.push({proposal: text, description: description, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, escapePosition: endOffset});
 		}
 		return proposals;
 	}
@@ -256,7 +264,7 @@ define("orion/editor/jsContentAssist", [], function() {
 	/**
 	 * Returns proposals for javascript keywords.
 	 */
-	function getKeyWordProposals(prefix, buffer, selection) {
+	function getKeyWordProposals(prefix, buffer, offset) {
 		var keywords = ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
 			"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
 			"var", "void", "while", "with"];
@@ -266,7 +274,7 @@ define("orion/editor/jsContentAssist", [], function() {
 		var proposals = [];
 		for (var i = 0; i < keywords.length; i++) {
 			if (keywords[i].indexOf(prefix) === 0) {
-				proposals.push(keywords[i]);
+				proposals.push({proposal: chop(prefix, keywords[i]), description: keywords[i] });
 			}
 		}
 		return proposals;
@@ -442,7 +450,7 @@ define("orion/editor/jsContentAssist", [], function() {
 				for (i = 0; i < args.length; i++) {
 					var arg = args[i].trim();
 					if (arg.indexOf(prefix) === 0) {
-						proposals.push(arg);
+						proposals.push({proposal: chop(prefix, arg), description: arg});
 					}
 				}
 			}
@@ -459,7 +467,7 @@ define("orion/editor/jsContentAssist", [], function() {
 		var variables = collectVariables(block);
 		for (i = 0; i < variables.length; i++) {
 			if (variables[i].indexOf(prefix) === 0) {
-				proposals.push(variables[i]);
+				proposals.push({proposal: chop(prefix, variables[i]), description: variables[i]});
 			}
 		}
 		//recurse on parent closure
@@ -502,20 +510,20 @@ define("orion/editor/jsContentAssist", [], function() {
 
 	JavaScriptContentAssistProvider.prototype = /** @lends orion.editor.JavaScriptContentAssistProvider.prototype */
 	{
-		computeProposals: function(prefix, buffer, selection) {
+		computeProposals: function(buffer, offset, context) {
+			var prefix = context.prefix;
 			var proposals = [];
-
-			if (selection.offset > 0) {
+			if (offset > 0) {
 				//if the character preceding the prefix is a '.' character, then we are completing an object member
-				var precedingChar = buffer.charAt(selection.offset - prefix.length - 1);
+				var precedingChar = buffer.charAt(offset - prefix.length - 1);
 				if (precedingChar === '.') {
-					return getMemberProposals(prefix, buffer, selection);
+					return getMemberProposals(prefix, buffer, offset);
 				}
 			}
 			//we are not completing on an object member, so suggest templates and keywords
-			proposals = proposals.concat(getFunctionProposals(prefix, buffer, selection.offset-prefix.length));
-			proposals = proposals.concat(getTemplateProposals(prefix, buffer, selection));
-			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, selection));
+			proposals = proposals.concat(getFunctionProposals(prefix, buffer, offset-prefix.length));
+			proposals = proposals.concat(getTemplateProposals(prefix, buffer, offset));
+			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, offset));
 			return proposals;
 		}
 	};

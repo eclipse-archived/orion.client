@@ -27,9 +27,9 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 	 * @param {Object} selection The current selection
 	 * @param {Integer} selection.offset The current selection offset
 	 */
-	leadingWhitespace: function(buffer, selection) {
+	leadingWhitespace: function(buffer, offset) {
 		var whitespace = "";
-		var offset = selection.offset-1;
+		offset = offset-1;
 		while (offset > 0) {
 			var c = buffer.charAt(offset--);
 			if (c === '\n' || c === '\r') {
@@ -47,7 +47,11 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 		}
 		return whitespace;
 	},
-	computeProposals: function(prefix, buffer, selection) {
+	computeProposals: function(buffer, offset, context) {
+		function removePrefix(string) {
+			return string.substring(context.prefix.length);
+		}
+
 		var proposals = [];
 		//template - simple html document
 		if (buffer.length === 0) {
@@ -64,12 +68,13 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 				"\t\t</p>\n" +
 				"\t</body>\n" +
 				"</html>";
-			proposals.push({proposal: text, description: "Simple HTML document", escapePosition: selection.offset+152});
+			proposals.push({proposal: text, description: "Simple HTML document", escapePosition: offset+152});
 			return proposals;
 		}
 
+		var prefix = context.prefix;
 		//only offer HTML element proposals if the character preceeding the prefix is the start of an HTML element
-		var precedingChar = buffer.charAt(selection.offset-prefix.length-1);
+		var precedingChar = buffer.charAt(offset-prefix.length-1);
 		if (precedingChar !== '<') {
 			return proposals;
 		}
@@ -84,8 +89,8 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 			if (element.indexOf(prefix) === 0) {
 				proposalText = element + "></" + element + ">";
 				//exit position is the end of the opening element tag, so we need to substract the prefix already typed
-				exitOffset = selection.offset+element.length-prefix.length+1;
-				proposals.push({proposal: proposalText, description: "<" + proposalText, escapePosition: exitOffset});
+				exitOffset = offset+element.length-prefix.length+1;
+				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
 			}
 		}
 		
@@ -95,14 +100,14 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 			"hgroup","iframe","legend","map","menu","nav","noframes","noscript","optgroup","p","pre",
 			"ruby","script","section","select","span","style","tbody","textarea","tfoot","th","thead",
 			"tr","video"];
-		var whitespace = this.leadingWhitespace(buffer, selection);
+		var whitespace = this.leadingWhitespace(buffer, offset);
 		for (i = 0; i < multiLineElements.length; i++) {
 			element = multiLineElements[i];
 			if (element.indexOf(prefix) === 0) {
 				proposalText = element + ">\n" + whitespace + "\t\n" + whitespace + "</" + element + ">";
 				//exit position is the end of the opening element tag, so we need to substract the prefix already typed
-				exitOffset = selection.offset+element.length-prefix.length + whitespace.length + 3;
-				proposals.push({proposal: proposalText, description: "<" + proposalText, escapePosition: exitOffset});
+				exitOffset = offset+element.length-prefix.length + whitespace.length + 3;
+				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
 			}
 		}
 
@@ -113,8 +118,8 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 			if (element.indexOf(prefix) === 0) {
 				proposalText = element + "/>";
 				//exit position is the end of the element, so we need to substract the prefix already typed
-				exitOffset = selection.offset+element.length-prefix.length+2;
-				proposals.push({proposal: proposalText, description: "<" + proposalText, escapePosition: exitOffset});
+				exitOffset = offset+element.length-prefix.length+2;
+				proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: exitOffset});
 			}
 		}
 
@@ -122,11 +127,11 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 		//image
 		if ("img".indexOf(prefix) === 0) {
 			proposalText = "img src=\"\" alt=\"Image\"/>";
-			proposals.push({proposal: proposalText, description: "<" + proposalText, escapePosition: selection.offset+9-prefix.length});
+			proposals.push({proposal: removePrefix(proposalText), description: "<" + proposalText, escapePosition: offset+9-prefix.length});
 		}
 		//anchor
 		if (prefix === 'a') {
-			proposals.push({proposal: "a href=\"\"></a>", description: "<a></a> - HTML anchor element", escapePosition: selection.offset+7});
+			proposals.push({proposal: removePrefix("a href=\"\"></a>"), description: "<a></a> - HTML anchor element", escapePosition: offset+7});
 		}
 		
 		//lists should also insert first element
@@ -134,30 +139,30 @@ HTMLContentAssistProvider.prototype = /** @lends orion.contentAssist.HTMLContent
 			proposalText = "ul>\n" + whitespace + "\t<li></li>\n" + whitespace + "</ul>";
 			description = "<ul> - unordered list";
 			//exit position inside first list item
-			exitOffset = selection.offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: proposalText, description: description, escapePosition: exitOffset});
+			exitOffset = offset-prefix.length + whitespace.length + 9;
+			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
 		}
 		if ("ol".indexOf(prefix) === 0) {
 			proposalText = "ol>\n" + whitespace + "\t<li></li>\n" + whitespace + "</ol>";
 			description = "<ol> - ordered list";
 			//exit position inside first list item
-			exitOffset = selection.offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: proposalText, description: description, escapePosition: exitOffset});
+			exitOffset = offset-prefix.length + whitespace.length + 9;
+			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
 		}
 		if ("dl".indexOf(prefix) === 0) {
 			proposalText = "dl>\n" + whitespace + "\t<dt></dt>\n" + whitespace + "\t<dd></dd>\n" + whitespace + "</dl>";
 			description = "<dl> - definition list";
 			//exit position inside first definition term
-			exitOffset = selection.offset-prefix.length + whitespace.length + 9;
-			proposals.push({proposal: proposalText, description: description, escapePosition: exitOffset});
+			exitOffset = offset-prefix.length + whitespace.length + 9;
+			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
 		}
 		if ("table".indexOf(prefix) === 0) {
 			proposalText = "table>\n" + whitespace + "\t<tr>\n" + whitespace + "\t\t<td></td>\n" + 
 				whitespace + "\t</tr>\n" + whitespace + "</table>";
 			description = "<table> - basic HTML table";
 			//exit position inside first table data
-			exitOffset = selection.offset-prefix.length + (whitespace.length*2) + 19;
-			proposals.push({proposal: proposalText, description: description, escapePosition: exitOffset});
+			exitOffset = offset-prefix.length + (whitespace.length*2) + 19;
+			proposals.push({proposal: removePrefix(proposalText), description: description, escapePosition: exitOffset});
 		}
 
 		return proposals;
