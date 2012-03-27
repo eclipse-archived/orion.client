@@ -374,6 +374,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		// this needs to come from somewhere but I'm not going to do a separate get for it
 		
 		var text;
+		
+		var target = "_self";
+		
 		var parent = dojo.byId(parentId);
 		if (!parent) {
 			throw "could not find banner parent, id was " + parentId;
@@ -426,7 +429,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				if (info.href && info.name) {
 					var uriTemplate = new URITemplate(info.href);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
-					var link = dojo.create("a", {href: expandedHref}, primaryNav, "last");
+					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last");
 					text = document.createTextNode(info.name);
 					dojo.place(text, link, "only");
 				}
@@ -706,6 +709,36 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		dojo.subscribe("/dojo/hashchange", commandService, function() {
 			commandService.processURL(window.location.href);
 		});
+		
+		function setTarget(target){
+			target = target;
+			
+			dojo.query(".targetSelector").forEach(function(node, index, arr){
+    			node.target = target;
+  			});	
+		}
+		
+		function readTargetPreference(){
+		
+			prefsService.getPreferences('/settings', 2).then( function(prefs){	
+					
+				var storage = JSON.parse( prefs.get("General") );
+				
+				if(storage){
+					var target = prefsService.getSetting( storage, "Navigation", "Links" );
+					
+					if( target === "Open in new tab" ){
+						target = "_blank";
+					}else{
+						target = "_self";
+					}
+					
+					setTarget( target );
+				}
+			});
+		}
+		
+		readTargetPreference();
 	}
 	
 	//return the module exports

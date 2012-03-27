@@ -99,9 +99,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		showPlugins: function(id) {
 		
 			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		
-				var navigate = prefs.get("JavaScript Editor");	
-				
-				console.log( navigate );
+				var navigate = prefs.get("JavaScript Editor");					
 			} );
 
 			if (this.selectedCategory) {
