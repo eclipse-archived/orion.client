@@ -60,6 +60,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.openWithCommands = null;
 		this.actionScopeId = "fileFolderCommands";
 		this._init(options);
+		this.target = "_self";
 	}
 	FileRenderer.prototype = new mExplorer.SelectionRenderer(); 
 	
@@ -83,6 +84,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		if(this.explorer.navHandler){
 			this.explorer.navHandler.cursorOn(model);
 		}
+	};
+	
+	FileRenderer.prototype.setTarget = function(target){
+		this.target = target;
+		
+		dojo.query(".targetSelector").forEach(function(node, index, arr){
+    		node.target = target;
+  		});
 	};
 	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -158,8 +167,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
 					href = this.defaultEditor.hrefCallback({items: item});
 				}				
-				// link with file image and name
-				link = dojo.create("a", {className: "navlink", id: tableRow.id+"NameColumn", href: href}, span, "last");
+
+				link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameColumn", href: href, target:this.target}, span, "last");
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
@@ -229,6 +238,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.model = null;
 		this.myTree = null;
 		this.renderer = new FileRenderer({checkbox: true, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
+		this.preferences = options.preferences;
+		this.setTarget();
+		this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) );
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
@@ -263,6 +275,35 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			} else if(this.treeRoot.Parents[0].ChildrenLocation){
 				window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation;
 			}
+		}
+	};
+	
+	FileExplorer.prototype.setTarget = function(){
+	
+		var preferences = this.preferences;	
+		var renderer = this.renderer;
+	
+		this.preferences.getPreferences('/settings', 2).then( function(prefs){	
+				
+			var storage = JSON.parse( prefs.get("General") );
+			
+			if(storage){
+				var target = preferences.getSetting( storage, "Navigation", "Links" );
+				
+				if( target === "Open in new tab" ){
+					target = "_blank";
+				}else{
+					target = "_self";
+				}
+				
+				renderer.setTarget( target );
+			}
+		});
+	};
+	
+	FileExplorer.prototype.onStorage = function (e) {
+		if( e.key === this.storageKey ){
+			this.setTarget();
 		}
 	};
 	

@@ -46,7 +46,7 @@ dojo.addOnLoad(function(){
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, searcher: searcher, 
 				fileClient: fileClient, commandService: commandService, contentTypeService: contentTypeService,
-				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools"});
+				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools", preferences: preferences});
 		
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();

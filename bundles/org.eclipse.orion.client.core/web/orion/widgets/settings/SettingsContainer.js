@@ -19,7 +19,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], {
 
 		constructor: function() {		
-			this.inputBuilder = new orion.widgets.settings.InputBuilder();
+			
 		},
 
 		postCreate: function() {
@@ -27,6 +27,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 			this.toolbar = dojo.byId( this.pageActions );
 			this.manageDefaultData(this.initialSettings);
 			this.drawUserInterface(this.initialSettings);
+			this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
 			dojo.subscribe("/dojo/hashchange", this, "processHash");
 		},
 		
@@ -96,6 +97,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 	pattern. */
 
 		showPlugins: function(id) {
+		
+			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		
+				var navigate = prefs.get("JavaScript Editor");	
+				
+				console.log( navigate );
+			} );
 
 			if (this.selectedCategory) {
 				dojo.removeClass(this.selectedCategory, "navbar-item-selected");
@@ -148,41 +155,52 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 			dojo.style(this.mainNode, "maxWidth", "700px");
 			dojo.style(this.mainNode, "minWidth", "500px");
 		},
+		
+		handleError: function( error ){
+			console.log( error );
+			
+			
+		},
 
 		manageDefaultData: function(settings) {
+		
+			this.preferences.getPreferences('/settings', 2).then(function(prefs){
 
 			// var example = [ { "subcategory":"Font", [ { "label":"Family", "value":"serif" }, {"label":"Size", "value":"10pt"}, {"label":"Line Height", "value":"12pt"} ] ];
-			for (var count = 0; count < settings.length; count++) {
+				for (var count = 0; count < settings.length; count++) {
+	
+					var category = settings[count].category;
 
-				var category = settings[count].category;
-
-				if (!localStorage.getItem(category)) {
-
-					var subcategories = [];
-
-					var subcategory = settings[count].subcategory;
-
-					for (var sub = 0; sub < subcategory.length; sub++) {
-
-						var elements = [];
-
-						for (var item = 0; item < subcategory[sub].items.length; item++) {
-
-							var element = {};
-							element.label = subcategory[sub].items[item].label;
-							element.value = subcategory[sub].items[item].setting;
-							elements.push(element);
+						var cat = prefs.get( category );
+						
+						if( cat === undefined ){
+						
+							var subcategories = [];
+		
+							var subcategory = settings[count].subcategory;
+		
+							for (var sub = 0; sub < subcategory.length; sub++) {
+		
+								var elements = [];
+		
+								for (var item = 0; item < subcategory[sub].items.length; item++) {
+		
+									var element = {};
+									element.label = subcategory[sub].items[item].label;
+									element.value = subcategory[sub].items[item].setting;
+									elements.push(element);
+								}
+		
+								subcategories.push({
+									"label": subcategory[sub].label,
+									"data": elements
+								});
+							}
+			
+							prefs.put( category, JSON.stringify(subcategories) );	
 						}
-
-						subcategories.push({
-							"label": subcategory[sub].label,
-							"data": elements
-						});
 					}
-
-					localStorage.setItem(category, JSON.stringify(subcategories));
-				}
-			}
+			} );
 		},
 
 
@@ -197,8 +215,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		   will need to be correlated with a selected language - will refer to dojo possibly. 'label' is
 		   the key for the storage field */
 
-		initialSettings: [{
-			"category": "JavaScript Editor",
+initialSettings: [
+			{"category": "General",
+				"subcategory": [{ "ui": "Navigation", "label": "Navigation",
+				"items": [{ "ui": "Links", "label": "Links", "input": "combo", "values": [{"label": "Open in same tab"}, {"label": "Open in new tab"}], "setting": "Open in new tab" } ] }
+				]
+			},
+			{"category": "JavaScript Editor",
 			"subcategory": [{
 				"ui": "Font",
 				"label": "Font",
@@ -271,7 +294,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 					"setting": "Normal"
 				}]
 			},
-
 			{
 				"ui": "Comments",
 				"label": "Comment Types",
@@ -294,7 +316,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 					"setting": "Normal"
 				}]
 			},
-
 			{
 				"ui": "Keywords",
 				"label": "Keyword Types",
@@ -320,4 +341,3 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 	});
 });
-

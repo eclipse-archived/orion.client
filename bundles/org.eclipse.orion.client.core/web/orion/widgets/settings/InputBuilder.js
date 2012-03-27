@@ -17,99 +17,120 @@
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widgets/settings/Select", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit, mUtil, mCommands) {
 
 	dojo.declare("orion.widgets.settings.InputBuilder", null, {
+	
+		constructor: function( preferences ){
+			this.preferences = preferences;
+		},
 		
 		setStorageItem: function(category, subCategory, element, value, ui) {
+		
+			this.preferences.getPreferences('/settings', 2).then(function(prefs){
 
-			var subcategories = JSON.parse(localStorage.getItem(category));
-
-			for (var sub = 0; sub < subcategories.length; sub++) {
-				if (subcategories[sub].label === subCategory) {
-					for (var item = 0; item < subcategories[sub].data.length; item++) {
-						if (subcategories[sub].data[item].label === element) {
-							subcategories[sub].data[item].value = value;
-							subcategories[sub].data[item].ui = ui;
-							localStorage.setItem(category, JSON.stringify(subcategories));
-							break;
+				var subcategories = JSON.parse ( prefs.get( category ) );
+	
+				for (var sub = 0; sub < subcategories.length; sub++) {
+					if (subcategories[sub].label === subCategory) {
+						for (var item = 0; item < subcategories[sub].data.length; item++) {
+							if (subcategories[sub].data[item].label === element) {
+								subcategories[sub].data[item].value = value;
+								subcategories[sub].data[item].ui = ui;
+								
+								prefs.put( category, JSON.stringify(subcategories) );
+								
+								break;
+							}
 						}
 					}
 				}
-			}
+			});
 		},
 
 		getStorageItem: function(category, subCategory, element) {
 
-			var subcategories = JSON.parse(localStorage.getItem(category));
-
 			var value;
+			
+			var deferred = new dojo.Deferred();
 
-			for (var sub = 0; sub < subcategories.length; sub++) {
-				if (subcategories[sub].label === subCategory) {
-					for (var item = 0; item < subcategories[sub].data.length; item++) {
-						if (subcategories[sub].data[item].label === element) {
-							value = subcategories[sub].data[item].value;
-							break;
+//			var subcategories = JSON.parse(localStorage.getItem(category));
+			
+			this.preferences.getPreferences('/settings', 2).then(function(prefs){
+					var subcategories = JSON.parse( prefs.get( category ) );
+					
+					for (var sub = 0; sub < subcategories.length; sub++) {
+					if (subcategories[sub].label === subCategory) {
+						for (var item = 0; item < subcategories[sub].data.length; item++) {
+							if (subcategories[sub].data[item].label === element) {
+								value = subcategories[sub].data[item].value;
+								deferred.resolve(value);
+								break;
+							}
 						}
 					}
 				}
-			}
+			});
 
-			return value;
+			return deferred;
 		},
 
 		processInputType: function(category, label, item, node, ui) {
-
-			var setting = this.getStorageItem(category, label, item.label);
-			
-			var picker = dojo.create("div", null, node);
-
-			switch (item.input) {
-
-			case "combo":
-
-				var options = [];
-
-				for (var count = 0; count < item.values.length; count++) {
-
-					var comboLabel = item.values[count].label;
-
-					var set = {
-						value: comboLabel,
-						innerHTML: comboLabel
-					};		
-					
-					if (comboLabel === setting) {
-						set.selected = 'selected';
-					}
-
-					options.push(set);
-				}
-				
-				new orion.widgets.settings.Select({ 
-					category:category, 
-					item:label, 
-					element:item.label, 
-					ui:ui, 
-					options:options,
-					setStorageItem: dojo.hitch( this, 'setStorageItem' )												
-				}, picker );
-
-				break;
-
-			case "color":
-
-				new orion.widgets.settings.ColorPicker({
-					label: "   ",
-					name: item.label,
-					category:category,
-					item:label,
-					setting: setting,
-					setStorageItem: dojo.hitch( this, 'setStorageItem' )
-				}, picker);
-
-				break;
-			}
-		}
 		
-	});
+			var picker = dojo.create("div", null, node);
+			
+			var builder = this;
+
+			this.getStorageItem(category, label, item.label).then(
+							
+
+			function(setting){
+			
+				switch (item.input) {
+
+					case "combo":
+		
+						var options = [];
+		
+						for (var count = 0; count < item.values.length; count++) {
+		
+							var comboLabel = item.values[count].label;
+		
+							var set = {
+								value: comboLabel,
+								innerHTML: comboLabel
+							};		
+							
+							if (comboLabel === setting) {
+								set.selected = 'selected';
+							}
+		
+							options.push(set);
+						}
+						
+						new orion.widgets.settings.Select({ 
+							category:category, 
+							item:label, 
+							element:item.label, 
+							ui:ui, 
+							options:options,
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												
+						}, picker );
+		
+						break;
+		
+					case "color":
+		
+						new orion.widgets.settings.ColorPicker({
+							label: "   ",
+							name: item.label,
+							category:category,
+							item:label,
+							setting: setting,
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' )
+						}, picker);
+		
+						break;
+					}
+				});
+			} 
+		});
 });
 
