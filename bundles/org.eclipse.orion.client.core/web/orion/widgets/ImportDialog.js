@@ -150,6 +150,15 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 				this.options.func();
 			}), 2000);		
 		}));
+		
+		// Stop the dialog from submitting if trying to activate the upload button with a keyboard.
+		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=370969
+		
+		dojo.connect(this.importloader, "onKeyPress", function(evt) {
+			if(evt.keyCode === dojo.keys.ENTER) {
+				evt.stopPropagation();
+			}
+		});
 	}
 });
 });
