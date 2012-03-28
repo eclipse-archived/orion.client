@@ -243,12 +243,12 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testDoubleQuoteStringLiteralWithPrefix= function() {
 		var result = getKeywords("\"Hello\".to@@@");
-		assertProposal("LowerCase", result);
-		assertProposal("LocaleLowerCase", result);
-		assertProposal("UpperCase", result);
-		assertProposal("LocaleUpperCase", result);
-		assertProposal("String", result);
-		assertProposal("LocaleString", result);
+		assertProposal("toLowerCase".substr(2), result);
+		assertProposal("toLocaleLowerCase".substr(2), result);
+		assertProposal("toUpperCase".substr(2), result);
+		assertProposal("toLocaleUpperCase".substr(2), result);
+		assertProposal("toString".substr(2), result);
+		assertProposal("toLocaleString".substr(2), result);
 		assertNoProposal("valueOf", result);
 		assertNoProposal("propertyIsEnumerable", result);
 		assertNoProposal("trim", result);
@@ -259,7 +259,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testSimpleFunctionArgs = function() {
 		var result = getKeywords("var x = function(abracadabra,blort) { \n ab@@@");
-		assertProposal("racadabra", result);
+		assertProposal("abracadabra".substr(2), result);
 		assertNoProposal("blort", result);
 	};
 
@@ -288,7 +288,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testVariableInCurrentClosure = function() {
 		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus;\n ab@@@");
-		assertProposal("racadabra", result);
+		assertProposal("abracadabra".substr(2), result);
 		assertProposal("acus", result);
 	};
 
@@ -297,7 +297,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testVariableInFunctionWithStringContainingFunction = function() {
 		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus = \"function() {\";\n ab@@@");
-		assertProposal("racadabra", result);
+		assertProposal("abracadabra".substr(2), result);
 		assertProposal("acus", result);
 	};
 
@@ -306,7 +306,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testRegexContainingFunction = function() {
 		var result = getKeywords("var abacus;\n function x(block) {\n var ant = /^function[\\s(]/;\n } \n a@@@");
-		assertProposal("bacus", result);
+		assertProposal("abacus".substr(1), result);
 		assertNoProposal("ant", result);
 	};
 
@@ -325,7 +325,7 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	tests.testVariableInFunctionWithRegexContainingFunction = function() {
 		var result = getKeywords("var x = function(abracadabra,blort){\nvar abacus = /function(){/;\n ab@@@");
-		assertProposal("racadabra", result);
+		assertProposal("abracadabra".substr(2), result);
 		assertProposal("acus", result);
 	};
 
