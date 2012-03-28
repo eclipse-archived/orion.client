@@ -481,8 +481,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				this._textDND = this._textDNDFactory.createTextDND(this, this._undoStack);
 			}
 			if (this._contentAssistFactory) {
-				this._contentAssist = this._contentAssistFactory(this);
-				this._keyModes.push(this._contentAssist);
+				var contentAssistMode = this._contentAssistFactory.createContentAssistMode(this);
+				this._keyModes.push(contentAssistMode);
+				this._contentAssist = contentAssistMode.getContentAssist();
 			}
 			
 			var editor = this, textView = this._textView;

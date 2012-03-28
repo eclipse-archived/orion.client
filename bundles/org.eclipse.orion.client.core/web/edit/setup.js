@@ -372,30 +372,31 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	};
 	
 	// Content Assist
-	var contentAssistFactory = null;
-	if (!isReadOnly) {
-		contentAssistFactory = function(editor) {
-			var contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-			contentAssist.addEventListener("show", function(event) {
-				// Filter the providers to be used by content assist
-				var fileContentType = inputManager.getContentType();
-				var fileName = editor.getTitle();
-				var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
-				var providers = [];
-				for (var i=0; i < serviceReferences.length; i++) {
-					var serviceReference = serviceReferences[i],
-					    contentTypeIds = serviceReference.getProperty("contentType"),
-					    pattern = serviceReference.getProperty("pattern"); // backwards compatibility
-					if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
-							(pattern && new RegExp(pattern).test(fileName))) {
-						providers.push(serviceRegistry.getService(serviceReference));
+	var contentAssistFactory = isReadOnly ? null
+		: {
+			createContentAssistMode: function(editor) {
+				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+				contentAssist.addEventListener("Activating", function(event) {
+					// Content assist is about to be activated; set its providers.
+					var fileContentType = inputManager.getContentType();
+					var fileName = editor.getTitle();
+					var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.contentAssist");
+					var providers = [];
+					for (var i=0; i < serviceReferences.length; i++) {
+						var serviceReference = serviceReferences[i],
+						    contentTypeIds = serviceReference.getProperty("contentType"),
+						    pattern = serviceReference.getProperty("pattern"); // backwards compatibility
+						if ((contentTypeIds && contentTypeService.isSomeExtensionOf(fileContentType, contentTypeIds)) || 
+								(pattern && new RegExp(pattern).test(fileName))) {
+							providers.push(serviceRegistry.getService(serviceReference));
+						}
 					}
-				}
-				contentAssist.setProviders(providers);
-			});
-			return contentAssist;
+					contentAssist.setProviders(providers);
+				});
+				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist");
+				return new mContentAssist.ContentAssistMode(contentAssist, widget);
+			}
 		};
-	}
 
 	var statusReporter =  function(message, type, isAccessible) {
 		if (type === "progress") {
