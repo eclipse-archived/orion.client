@@ -216,7 +216,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 initialSettings: [
 			{"category": "General",
 				"subcategory": [{ "ui": "Navigation", "label": "Navigation",
-				"items": [{ "ui": "Links", "label": "Links", "input": "combo", "values": [{"label": "Open in same tab"}, {"label": "Open in new tab"}], "setting": "Open in new tab" } ] }
+				"items": [{ "ui": "Links", "label": "Links", "input": "combo", "values": [{"label": "Open in same tab"}, {"label": "Open in new tab"}], "setting": "Open in same tab" } ] }
 				]
 			},
 			{"category": "JavaScript Editor",
