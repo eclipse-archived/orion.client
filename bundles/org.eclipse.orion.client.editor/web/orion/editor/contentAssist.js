@@ -57,9 +57,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.textView = editor.getTextView();
 		this.contentAssistPanel = typeof contentAssistId === "string" ? document.getElementById(contentAssistId) : contentAssistId;
 		this.active = false;
-		
 		this.providers = [];
-		
 		this.proposals = [];
 		var self = this;
 		this.contentAssistListener = {
@@ -70,12 +68,21 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				if (self.ignoreNextChange) {
 					self.cancel();
 				} else {
-					self.showContentAssist(true, event);
+					// Start waiting for selection
+					self.expectingSelection = event;
 				}
 				self.ignoreNextChange = false;
 			},
 			onScroll: function(event) {
 				self.cancel();
+			},
+			onSelection: function(event) {
+				if (self.expectingSelection) {
+					self.showContentAssist(true);
+				} else {
+					self.cancel();
+				}
+				self.expectingSelection = false;
 			},
 			onMouseUp: function(event) {
 				// ignore the event if this is a click inside of the contentAssistPanel
@@ -215,9 +222,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		/**
 		 * @param {Boolean} enable
-		 * @param {orion.textview.ModelChangedEvent} [event]
 		 */
-		showContentAssist: function(enable, event) {
+		showContentAssist: function(enable) {
 			if (!this.contentAssistPanel) {
 				return;
 			}
@@ -228,21 +234,16 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				if (this.listenerAdded) {
 					this.textView.removeEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
 					this.textView.removeEventListener("ModelChanged", this.contentAssistListener.onModelChanged);
-					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll);
 					this.textView.removeEventListener("MouseUp", this.contentAssistListener.onMouseUp);
+					this.textView.removeEventListener("Selection", this.contentAssistListener.onSelection);
+					this.textView.removeEventListener("Scroll", this.contentAssistListener.onScroll);
 					this.listenerAdded = false;
 				}
 				this.active = false;
 				this.contentAssistPanel.style.display = "none";
 				this.contentAssistPanel.onclick = null;
 			} else {
-				var offset = event ? (event.start + event.addedCharCount) : this.textView.getCaretOffset();
-				/**
-				 * Each element of the proposals array returned by content assist providers may be either:
-				 * - String: a simple string proposal
-				 * - Object: must have a property "proposal" giving the proposal string. May also have other fields, which 
-				 * can trigger linked mode behavior in the editor.
-				 */
+				var offset = this.textView.getCaretOffset();
 				this.getProposals(offset).then(
 					function(proposals) {
 						this.proposals = proposals;
@@ -276,8 +277,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 						if (!this.listenerAdded) {
 							this.textView.addEventListener("ModelChanging", this.contentAssistListener.onModelChanging);
 							this.textView.addEventListener("ModelChanged", this.contentAssistListener.onModelChanged);
-							this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll);
 							this.textView.addEventListener("MouseUp", this.contentAssistListener.onMouseUp);
+							this.textView.addEventListener("Selection", this.contentAssistListener.onSelection);
+							this.textView.addEventListener("Scroll", this.contentAssistListener.onScroll);
 						}
 						this.listenerAdded = true;
 						this.contentAssistPanel.onclick = this.click.bind(this);
@@ -339,16 +341,6 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				}
 			}
 			var textView = this.textView, textModel = textView.getModel();
-			/**
-			 * Bug/feature: The selection returned by the textView doesn't seem to be updated before notifying the listeners
-			 * of onModelChanged. If content assist is triggered by Ctrl+Space, the start/end position of the selection
-			 * (i.e. the caret position) is correct. But if the user then starts to type some text (in order to filter the
-			 * the completion proposals list by a prefix) - i.e. onModelChanged listeners are notified and, in turn,
-			 * this method - the selection is not up-to-date. Because of that, I just did a simple hack of adding the offset
-			 * field for selection, which is computed above and is always correct. The selection is passed to the content
-			 * assist providers.
-			 */
-			// TODO: fix the selection start & end here
 			var buffer = textView.getText();
 			var context = {
 				line: textModel.getLine(textModel.getLineAtOffset(offset)),
