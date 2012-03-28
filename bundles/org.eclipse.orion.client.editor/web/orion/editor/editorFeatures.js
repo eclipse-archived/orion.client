@@ -576,9 +576,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 		this.contentAssist = contentAssist;
 		this.linkedMode = linkedMode;
 		if (this.contentAssist) {
-			this.contentAssist.addEventListener("accept", this.contentAssistProposalAccepted.bind(this));
+			this.contentAssist.addEventListener("ProposalApplied", this.contentAssistProposalApplied.bind(this));
 		}
-		
 		this.init();
 	}
 	SourceCodeActions.prototype = {
@@ -746,10 +745,11 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			}.bind(this));
 		},
 		/**
-		 * Called when a content assist proposal has been accepted. Inserts the proposal into the
+		 * Called when a content assist proposal has been applied. Inserts the proposal into the
 		 * document. Activates Linked Mode if applicable for the selected proposal.
+		 * @param {orion.editor.ContentAssist#ProposalAppliedEvent} event
 		 */
-		contentAssistProposalAccepted: function(event) {
+		contentAssistProposalApplied: function(event) {
 			/**
 			 * The event.proposal is an object with this shape:
 			 * {   proposal: "[proposal string]", // Actual text of the proposal
@@ -763,8 +763,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			 * Offsets are relative to the text buffer.
 			 */
 			var proposal = event.data.proposal;
-			var proposalText = proposal.proposal;
-			this.textView.setText(proposalText, event.data.start, event.data.end);
 			
 			//if the proposal specifies linked positions, build the model and enter linked mode
 			if (proposal.positions && this.linkedMode) {

@@ -37,9 +37,12 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	};
 
 	var contentAssist;
-	var contentAssistFactory = function(editor) {
-		contentAssist = new mContentAssist.ContentAssist(editor, "contentassist");
-		return contentAssist;
+	var contentAssistFactory = {
+		createContentAssistMode: function(editor) {
+			contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+			var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist");
+			return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
+		}
 	};
 	var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 	var jsContentAssistProvider = new mJSContentAssist.JavaScriptContentAssistProvider();
@@ -142,7 +145,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
 	editor.highlightAnnotations();
-	contentAssist.addEventListener("show", function() {
+	contentAssist.addEventListener("Activating", function() {
 		if (/\.css$/.test(contentName)) {
 			contentAssist.setProviders([cssContentAssistProvider]);
 		} else if (/\.js$/.test(contentName)) {
