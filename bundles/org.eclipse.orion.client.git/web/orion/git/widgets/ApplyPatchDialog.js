@@ -62,6 +62,15 @@ dojo.declare("orion.git.widgets.ApplyPatchDialog", [ dijit.Dialog, orion.widgets
 				this.hide();
 			}), 2000);		
 		}));
+		
+		// Stop the dialog from submitting if trying to activate the upload button with a keyboard.
+		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=370969
+		
+		dojo.connect(dijit.byId("applyPatchDialog.uploader"), "onKeyPress", function(evt) {
+			if(evt.keyCode === dojo.keys.ENTER) {
+				evt.stopPropagation();
+			}
+		});
 	}
 });
 });
