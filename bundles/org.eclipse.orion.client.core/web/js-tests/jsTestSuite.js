@@ -103,6 +103,7 @@ OrionTestCase("testRunAsynch", "/js-tests/testRunAsynch/test.html");
 OrionTestCase("editor", "/js-tests/editor/test.html");
 OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/textview/test.html");
+OrionTestCase("contentAssist", "/js-tests/editor/contentAssist/test.html");
 OrionTestCase("jsContentAssist", "/js-tests/jsContentAssist/test.html");
 OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");

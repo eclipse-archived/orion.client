@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="../../../requirejs/require.js"></script>
+	<script>
+	/*global require window*/
+	require({
+		  baseUrl: '../../../',
+		  packages: [
+		    {
+		      name: 'dojo',
+		      location: 'org.dojotoolkit/dojo',
+		      main: 'lib/main-browser',
+		      lib: '.'
+		    }
+		  ],
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n'
+		  }
+		});
+
+	window.onload = function() {
+		require(["orion/test","./testcase", "orion/plugin"], function(test, testcase) {
+			test.run(testcase);
+		});
+	};
+	</script>
+</head>
+<body>
+</body>
+</html>
