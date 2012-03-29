@@ -3482,6 +3482,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.style.padding = "0px";
 			clientDiv.style.outline = "none";
 			clientDiv.style.zIndex = "1";
+			clientDiv.style.WebkitUserSelect = "text";
 			clientDiv.setAttribute("spellcheck", "false");
 			if (isPad) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent";
