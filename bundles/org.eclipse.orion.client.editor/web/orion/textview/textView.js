@@ -4381,6 +4381,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isIE) {
 				handlers.push({target: leftDiv, type: "selectstart", handler: function() {return false;}});
 			}
+			handlers.push({target: leftDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }});
 			handlers.push({target: leftDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: leftDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: leftDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }});
@@ -4389,6 +4390,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isIE) {
 				handlers.push({target: rightDiv, type: "selectstart", handler: function() {return false;}});
 			}
+			handlers.push({target: rightDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }});
 			handlers.push({target: rightDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: rightDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }});
 			handlers.push({target: rightDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }});
