@@ -250,7 +250,7 @@ define("orion/editor/jsContentAssist", [], function() {
 			text = "try {\n" + whitespace + "\t\n" + whitespace + "} catch (err) {\n" + whitespace + "}";
 			description = "try - try..catch statement";
 			endOffset = startOffset+whitespace.length+7;//after indentation inside try statement
-			proposals.push({proposal: text, description: description, escapePosition: endOffset});
+			proposals.push({proposal: chop(prefix, text), description: description, escapePosition: endOffset});
 			//try..catch..finally statement
 			text = "try {\n" + whitespace + "\t\n" + whitespace + "} catch (err) {\n" + whitespace +
 				"} finally {\n" + whitespace + "}";
@@ -268,9 +268,6 @@ define("orion/editor/jsContentAssist", [], function() {
 		var keywords = ["break", "case", "catch", "continue", "debugger", "default", "delete", "do", "else", "finally", 
 			"for", "function", "if", "in", "instanceof", "new", "return", "switch", "this", "throw", "try", "typeof", 
 			"var", "void", "while", "with"];
-		if (prefix.length === 0) {
-			return keywords;
-		}
 		var proposals = [];
 		for (var i = 0; i < keywords.length; i++) {
 			if (keywords[i].indexOf(prefix) === 0) {
