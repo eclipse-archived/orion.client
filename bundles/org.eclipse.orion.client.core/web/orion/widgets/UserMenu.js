@@ -9,6 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global define window eclipse localStorage*/
+
 define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(require, dojo, dijit, mCommands, mUtil) {
 	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
 		widgetsInTemplate: false,
@@ -112,19 +114,43 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			}
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("settings/settings.html") + ">Settings</a>",
-				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("settings/settings.html");},
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
+				 onKeyDown: function(evt){
+					if(evt.keyCode === 13 || evt.keyCode === 32) {
+						if(evt.ctrlKey) {
+							window.open(require.toUrl("settings/settings.html"));
+						} else {
+							window.location=require.toUrl("settings/settings.html");
+						}
+					}
+				 },
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("operations/list.html") + ">Background Operations</a>",
-				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("operations/list.html");},
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
+				 onKeyDown: function(evt){
+					if(evt.keyCode === 13 || evt.keyCode === 32) {
+						if(evt.ctrlKey) {
+							window.open(require.toUrl("operations/list.html"));
+						} else {
+							window.location=require.toUrl("operations/list.html");
+						}
+					}
+				 },
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
 			 this.addChild(new dijit.MenuSeparator());
 			this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("help/index.jsp") + ">Help</a>",
-				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("help/index.jsp");},
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
+				 onKeyDown: function(evt){
+					if(evt.keyCode === 13 || evt.keyCode === 32) {
+						if(evt.ctrlKey) {
+							window.open(require.toUrl("help/index.jsp"));
+						} else {
+							window.location=require.toUrl("help/index.jsp");
+						}
+					}
+				 },
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
 			if(this.keyAssistFunction){
 				this.addChild(new dijit.MenuItem({
@@ -135,8 +161,16 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			
 			this.addChild(new dijit.MenuItem({
 				 label: "<a href='"+require.toUrl("help/about.html") + "'>About Orion</a>",
-				 onKeyDown: function(evt){if(evt.keyCode===13) window.location=require.toUrl("help/about.html");},
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
+				 onKeyDown: function(evt){
+					if(evt.keyCode === 13 || evt.keyCode === 32) {
+						if(evt.ctrlKey) {
+							window.open(require.toUrl("help/about.html"));
+						} else {
+							window.location=require.toUrl("help/about.html");
+						}
+					}
+				 },
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
 			
 		},
