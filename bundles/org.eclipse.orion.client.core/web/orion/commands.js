@@ -484,7 +484,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		showKeyBindings: function(targetNode) {
 			for (var binding in this._activeBindings) {
 				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
-					dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last");
+					dojo.place("<span role='listitem'>"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last");
 				}
 			}
 		},
@@ -1087,7 +1087,20 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				labelType: this.hrefCallback ? "html" : "text",
 				label: this.name,
 				iconClass: this.imageClass,
-				hrefCallback: !!this.hrefCallback
+				hrefCallback: !!this.hrefCallback,
+				onKeyDown: function(evt) {
+					if(this.hrefCallback && (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE)) {
+						var link = dojo.query("a", this.domNode)[0];
+						if(link) { 
+							if(evt.ctrlKey) {
+								window.open(link);
+							} else {
+								window.location=link;
+							}
+						}
+						return;
+					}
+				}
 			});
 			if (this.tooltip) {
 				new CommandTooltip({
