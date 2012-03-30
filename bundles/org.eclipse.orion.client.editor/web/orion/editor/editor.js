@@ -85,9 +85,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * @private
 		 */
-		reportStatus: function(message, type) {
+		reportStatus: function(message, type, isAccessible) {
 			if (this._statusReporter) {
-				this._statusReporter(message, type);
+				this._statusReporter(message, type, isAccessible);
 			} else {
 				window.alert(type === "error" ? "ERROR: " + message : message);
 			}

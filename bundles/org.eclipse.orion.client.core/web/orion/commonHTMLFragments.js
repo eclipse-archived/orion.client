@@ -68,7 +68,7 @@ define(['require'],
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' +
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-		'<div class="layoutRight status" id="statusPane"></div>' +
+		'<div class="layoutRight status" id="statusPane" aria-live="off"></div>' +
 		'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +

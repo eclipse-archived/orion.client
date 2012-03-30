@@ -397,13 +397,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		};
 	}
 
-	var statusReporter =  function(message, type) {
+	var statusReporter =  function(message, type, isAccessible) {
 		if (type === "progress") {
 			statusReportingService.setProgressMessage(message);
 		} else if (type === "error") {
 			statusReportingService.setErrorMessage(message);
 		} else {
-			statusReportingService.setMessage(message);
+			statusReportingService.setMessage(message, null, isAccessible);
 		}
 	};
 	var annotationFactory = new mEditorFeatures.AnnotationFactory();

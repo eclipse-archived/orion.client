@@ -933,7 +933,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 				return true;
 			}.bind(this));
 
-			this.editor.reportStatus(messages.linkedModeEntered);
+			this.editor.reportStatus(messages.linkedModeEntered, null, true);
 		},
 		isActive: function() {
 			return this.linkedModeActive;
@@ -957,7 +957,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 			
 			this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
 
-			this.editor.reportStatus(messages.linkedModeExited);
+			this.editor.reportStatus(messages.linkedModeExited, null, true);
 		},
 		/**
 		 * Updates the selection in the textView for given Linked Mode position.
