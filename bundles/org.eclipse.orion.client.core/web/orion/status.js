@@ -54,10 +54,24 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 * Displays a status message to the user.
 		 * @param {String} msg Message to display.
 		 * @param [Number] timeout Optional time to display the message before hiding it.
+		 * @param [Boolean] isAccessible Optional, if <code>true</code>, a screen reader will read this message.
+		 * Otherwise defaults to the domNode default.
 		 */
-		setMessage : function(msg, timeout) {
+		setMessage : function(msg, timeout, isAccessible) {
 			this._init();
-			dojo.place(window.document.createTextNode(msg), this.domId, "only");
+			if(typeof(isAccessible) === "boolean") {
+				var that = this;
+				var node = dojo.byId(this.domId);
+				// this is kind of a hack; when there is good screen reader support for aria-busy,
+				// this should be done by toggling that instead
+				var readSetting = dojo.attr(node, "aria-live");
+				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off");
+				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 40);
+				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 150);
+			}
+			else { 
+				dojo.place(window.document.createTextNode(msg), this.domId, "only"); 
+			}
 			if (typeof(timeout) === "number") {
 				var that = this;
 				window.setTimeout(function() {
