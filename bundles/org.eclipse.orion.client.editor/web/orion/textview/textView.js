@@ -158,14 +158,30 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	
 	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
 		/**
-		 * Adds a ruler to the text view.
+		 * Adds a ruler to the text view at the specified position.
+		 * <p>
+		 * The position is relative to the ruler location.
+		 * </p>
 		 *
 		 * @param {orion.textview.Ruler} ruler the ruler.
+		 * @param {Number} [index=length] the ruler index.
 		 */
-		addRuler: function (ruler) {
-			this._rulers.push(ruler);
+		addRuler: function (ruler, index) {
 			ruler.setView(this);
-			this._createRuler(ruler);
+			var rulers = this._rulers;
+			if (index !== undefined) {
+				var i, sideIndex;
+				for (i = 0, sideIndex=0; i < rulers.length && sideIndex < index; i++) {
+					if (ruler.getLocation() === rulers[i].getLocation()) {
+						sideIndex++;
+					}
+				}
+				rulers.splice(sideIndex, 0, ruler);
+				index = sideIndex;
+			} else {
+				rulers.push(ruler);
+			}
+			this._createRuler(ruler, index);
 			this._updatePage();
 		},
 		computeSize: function() {
@@ -3363,7 +3379,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return child;
 		},
-		_createRuler: function(ruler) {
+		_createRuler: function(ruler, index) {
 			if (!this._clientDiv) { return; }
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
@@ -3372,7 +3388,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			div.rulerChanged = true;
 			div.style.position = "relative";
 			var row = rulerParent.firstChild.rows[0];
-			var index = row.cells.length;
+			var length = row.cells.length;
+			var index = index === undefined || index < 0 || index > length ? length : index;
 			var cell = row.insertCell(index);
 			cell.vAlign = "top";
 			cell.appendChild(div);
