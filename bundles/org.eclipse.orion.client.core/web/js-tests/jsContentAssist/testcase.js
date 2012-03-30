@@ -35,6 +35,12 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		return assist.computeProposals(buffer, cursor, context);
 	}
 	
+	function print(proposals) {
+		return proposals.map(function(proposal) {
+			return proposal.proposal.replace(/\n/g, "\\n").replace(/\t/g, "\\t");
+		});
+	}
+
 	/**
 	 * Asserts that a given proposal is present in a list of actual proposals. The test just ensures that an actual
 	 * proposal starts with the expected value.
@@ -43,15 +49,33 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	 */
 	function assertProposal(expectedProposal, actualProposals) {
 		for (var i = 0; i < actualProposals.length; i++) {
-			if (typeof(actualProposals[i]) === "string" && actualProposals[i].indexOf(expectedProposal) === 0) {
-				return;
-			}
 			if (typeof(actualProposals[i].proposal) === "string" && actualProposals[i].proposal.indexOf(expectedProposal) === 0) {
 				return;
 			}
 		}
 		//we didn't find it, so fail
-		assert.fail("Expected to find proposal \'" + expectedProposal + "\' in: " + actualProposals);
+		assert.fail("Expected to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
+	}
+
+	/**
+	 * Asserts that a proposal is present in a list of actual proposals. The test ensures that some actual proposal contains
+	 * all the required words and none of the prohibited words.
+	 */
+	function assertProposalMatching(/*String[]*/ required, /*String[]*/ prohibited, actualProposals) {
+		function matches(text, word) {
+			return text.indexOf(word) !== -1;
+		}
+		for (var i = 0; i < actualProposals.length; i++) {
+			var proposal = actualProposals[i];
+			if (typeof proposal.proposal !== "string") {
+				continue;
+			}
+			var matchesProposal = matches.bind(null, proposal.proposal);
+			if (required.every(matchesProposal) && !prohibited.some(matchesProposal)) {
+				return;
+			}
+		}
+		assert.fail("Expected to find proposal matching all of '" + required.join("','") + "' and none of '" + prohibited.join("','") + "' in: " + print(actualProposals));
 	}
 
 	/**
@@ -60,10 +84,10 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 	function assertNoProposal(expectedProposal, actualProposals) {
 		for (var i = 0; i < actualProposals.length; i++) {
 			if (typeof(actualProposals[i]) === "string" && actualProposals[i].indexOf(expectedProposal) === 0) {
-				assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + actualProposals);
+				assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
 			}
 			if (typeof(actualProposals[i].proposal) === "string" && actualProposals[i].proposal.indexOf(expectedProposal) === 0) {
-				assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + actualProposals);
+				assert.fail("Did not expect to find proposal \'" + expectedProposal + "\' in: " + print(actualProposals));
 			}
 		}
 		//we didn't find it, so pass
@@ -154,10 +178,14 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertNoProposal("toString", result);
 		assertProposal("for", result);
 		assertProposal("while", result);
+		assertProposalMatching(["while", "(condition)"], ["do"], result); // while (condition) with no 'do'
 		assertProposal("switch", result);
+		assertProposalMatching(["switch", "case"], [], result); // switch..case
 		assertProposal("try", result);
 		assertProposal("if", result);
+		assertProposalMatching(["if", "(condition)"], [], result); // if (condition)
 		assertProposal("do", result);
+		assertProposalMatching(["do", "while"], [], result); // do..while
 	};
 
 	/**
@@ -170,6 +198,8 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		assertProposal("throw".substr(1), result);
 		assertProposal("try".substr(1), result);
 		assertProposal("typeof".substr(1), result);
+		assertProposalMatching(["try {".substr(1), "catch ("], ["finally"], result); // try..catch with no finally
+		assertProposalMatching(["try {".substr(1), "catch (", "finally"], [], result); // try..catch..finally
 	};
 
 	/**
@@ -179,6 +209,8 @@ define(["dojo", "orion/assert", "orion/editor/jsContentAssist"], function(dojo, 
 		var result = getKeywords("function x(a) {\n f@@@");
 		assertNoProposal("toString", result);
 		assertProposal("for".substr(1), result);
+		assertProposalMatching(["for".substr(1), "in"], [], result);
+		assertProposalMatching(["for".substr(1), "array"], [], result);
 		assertNoProposal("while", result);
 		assertNoProposal("switch", result);
 		assertNoProposal("try", result);
