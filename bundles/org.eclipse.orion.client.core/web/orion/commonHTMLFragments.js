@@ -25,7 +25,7 @@ define(['require'],
 	var topHTMLFragment =
 	//Top row:  Logo + discovery links + user
 	'<div id="staticBanner" class="layoutBlock topRowBanner">' +
-		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
+		'<a id="home" class="layoutLeft logo" href="' + require.toUrl("index.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 		'<div id="primaryNav" class="layoutLeft primaryNav"></div>' +
 		'<div class="layoutRight">' +
 			'<div class="layoutLeft primaryNav">|</div>' +
@@ -68,7 +68,7 @@ define(['require'],
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' +
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' +
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
-		'<div class="layoutRight status" id="statusPane" aria-live="off"></div>' +
+		'<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>' +
 		'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
