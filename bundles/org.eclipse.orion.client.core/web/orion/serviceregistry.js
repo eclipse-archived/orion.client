@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define console */
 
-define(["dojo"], function(dojo) {
+define(["orion/Deferred"], function(Deferred) {
 
 	/**
 	 * Creates a new service reference.
@@ -110,15 +110,21 @@ define(["dojo"], function(dojo) {
 
 	function _createServiceCall(internalRegistry, serviceId, implementation, methodName) {
 		return function() {
+			var d;
 			if (internalRegistry.isRegistered(serviceId)) {
-				var d = new dojo.Deferred();
 				try {
 					var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-					dojo.when(result, dojo.hitch(d, d.resolve), dojo.hitch(d, d.reject), dojo.hitch(d, d.progress));
+					if (result && typeof result.then === "function") {
+						return result;
+					} else {
+						d = new Deferred();
+						d.resolve(result);
+					}
 				} catch (e) {
-					d.reject(e);
+						d = new Deferred();
+						d.reject(e);
 				}
-				return d;
+				return d.promise;
 			}
 			throw new Error("Service was unregistered");
 		};
