@@ -739,6 +739,9 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 				if (styleRange.start < range.start) {
 					args.push({start: styleRange.start, end: range.start, style: styleRange.style});
 				}
+				if (styleRange.start > range.start) {
+					args.push({start: range.start, end: styleRange.start, style: range.style});
+				}
 				args.push({start: Math.max(range.start, styleRange.start), end: Math.min(range.end, styleRange.end), style: mergedStyle});
 				if (styleRange.end < range.end) {
 					args.push({start: styleRange.end, end: range.end, style: range.style});
