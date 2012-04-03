@@ -92,16 +92,17 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 	// Scanner constants
 	var UNKOWN = 1;
 	var KEYWORD = 2;
-	var STRING = 3;
-	var SINGLELINE_COMMENT = 4;
-	var MULTILINE_COMMENT = 5;
-	var DOC_COMMENT = 6;
-	var WHITE = 7;
-	var WHITE_TAB = 8;
-	var WHITE_SPACE = 9;
-	var HTML_MARKUP = 10;
-	var DOC_TAG = 11;
-	var TASK_TAG = 12;
+	var NUMBER = 3;
+	var STRING = 4;
+	var SINGLELINE_COMMENT = 5;
+	var MULTILINE_COMMENT = 6;
+	var DOC_COMMENT = 7;
+	var WHITE = 8;
+	var WHITE_TAB = 9;
+	var WHITE_SPACE = 10;
+	var HTML_MARKUP = 11;
+	var DOC_TAG = 12;
+	var TASK_TAG = 13;
 
 	// Styles 
 	var singleCommentStyle = {styleClass: "token_singleline_comment"};
@@ -111,6 +112,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 	var tasktagStyle = {styleClass: "token_task_tag"};
 	var doctagStyle = {styleClass: "token_doc_tag"};
 	var stringStyle = {styleClass: "token_string"};
+	var numberStyle = {styleClass: "token_number"};
 	var keywordStyle = {styleClass: "token_keyword"};
 	var spaceStyle = {styleClass: "token_space"};
 	var tabStyle = {styleClass: "token_tab"};
@@ -136,7 +138,6 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 			return this.offset - this.startOffset;
 		},
 		_default: function(c) {
-			var keywords = this.keywords;
 			switch (c) {
 				case 32: // SPACE
 				case 9: // TAB
@@ -160,12 +161,34 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 					return c;
 				default:
 					var isCSS = this.isCSS;
-					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
-						var off = this.offset - 1;
+					var off = this.offset - 1;
+					if (48 <= c && c <= 57) {
+						var floating = false, exponential = false, hex = false, firstC = c;
 						do {
 							c = this._read();
-						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (0x2d === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
+							if (c === 46 /* dot */ && !floating) {
+								floating = true;
+							} else if (c === 101 /* e */ && !exponential) {
+								floating = exponential = true;
+								c = this._read();
+								if (c !== 45 /* MINUS */) {
+									this._unread(c);
+								}
+							} else if (c === 120 /* x */ && firstC === 48 && (this.offset - off === 2)) {
+								floating = exponential = hex = true;
+							} else if (!(48 <= c && c <= 57 || (hex && ((65 <= c && c <= 70) || (97 <= c && c <= 102))))) { //NUMBER DIGIT or HEX
+								break;
+							}
+						} while(true);
 						this._unread(c);
+						return NUMBER;
+					}
+					if ((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (45 /* DASH */ === c && isCSS)) { //LETTER OR UNDERSCORE OR NUMBER
+						do {
+							c = this._read();
+						} while((97 <= c && c <= 122) || (65 <= c && c <= 90) || c === 95 || (48 <= c && c <= 57) || (45 /* DASH */ === c && isCSS));  //LETTER OR UNDERSCORE OR NUMBER
+						this._unread(c);
+						var keywords = this.keywords;
 						if (keywords.length > 0) {
 							var word = this.text.substring(off, this.offset);
 							//TODO slow
@@ -454,6 +477,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				case "tasktag": return tasktagStyle.styleClass;
 				case "doctag": return doctagStyle.styleClass;
 				case "string": return stringStyle.styleClass;
+				case "number": return numberStyle.styleClass;
 				case "keyword": return keywordStyle.styleClass;
 				case "space": return spaceStyle.styleClass;
 				case "tab": return tabStyle.styleClass;
@@ -635,6 +659,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				var style = null;
 				switch (token) {
 					case KEYWORD: style = keywordStyle; break;
+					case NUMBER: style = numberStyle; break;
 					case STRING:
 						if (this.whitespacesVisible) {
 							this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
