@@ -177,6 +177,7 @@
     color: black;
     font-family: sans-serif;
     margin: 0;
+    outline: none;
 }
 
 .nihilo .dijitButtonNode, .nihilo .dijitButtonContentsHover {
