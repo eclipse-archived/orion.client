@@ -72,6 +72,10 @@ button {
 	padding: 0;
 }
 
+.navbar:focus {
+	outline: none
+}
+
 .navbar-item {
 	border-bottom: 1px solid transparent;
 	border-top: 1px solid transparent;
