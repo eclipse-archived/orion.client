@@ -21,7 +21,7 @@
 		});
 
 	window.onload = function() {
-		require(["orion/test","./testcase", "orion/plugin"], function(test, testcase) {
+		require(["../../../orion/plugin.js", "orion/test","./testcase"], function(plugin, test, testcase) {
 			test.run(testcase);
 		});
 	};
