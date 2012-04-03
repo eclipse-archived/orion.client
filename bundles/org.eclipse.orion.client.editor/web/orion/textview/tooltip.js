@@ -169,12 +169,24 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				var textEnd = baseModel.getLineEnd(baseModel.getLineAtOffset(end), true);
 				return baseModel.getText(textStart, textEnd);
 			}
-			var title;
+			function getAnnotationHTML(annotation) {
+				var title = annotation.title;
+				if (title === "") { return null; }
+				var result = "<div>";
+				if (annotation.html) {
+					result += annotation.html + "&nbsp;";
+				}
+				if (!title) {
+					title = getText(annotation.start, annotation.end);
+				}
+				title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+				result += "<span style='vertical-align:middle;'>" + title + "</span><div>";
+				return result;
+			}
 			if (annotations.length === 1) {
 				annotation = annotations[0];
-				if (annotation.title) {
-					title = annotation.title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					return "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
+				if (annotation.title !== undefined) {
+					return getAnnotationHTML(annotation);
 				} else {
 					var newModel = new mProjectionTextModel.ProjectionTextModel(baseModel);
 					var lineStart = baseModel.getLineStart(baseModel.getLineAtOffset(annotation.start));
@@ -191,12 +203,10 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 				var tooltipHTML = "<div><em>" + messages.multipleAnnotations + "</em></div>";
 				for (var i = 0; i < annotations.length; i++) {
 					annotation = annotations[i];
-					title = annotation.title;
-					if (!title) {
-						title = getText(annotation.start, annotation.end);
+					var html = getAnnotationHTML(annotation);
+					if (html) {
+						tooltipHTML += html;
 					}
-					title = title.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-					tooltipHTML += "<div>" + annotation.html + "&nbsp;<span style='vertical-align:middle;'>" + title + "</span><div>";
 				}
 				return tooltipHTML;
 			}
