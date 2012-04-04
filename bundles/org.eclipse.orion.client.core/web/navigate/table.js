@@ -14,10 +14,10 @@
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes',
+        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes', 'orion/siteService', 'orion/siteCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mNavOutliner,
-				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes, mSiteService, mSiteCommands) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
@@ -31,6 +31,7 @@ dojo.addOnLoad(function(){
 		new mSsh.SshService(serviceRegistry);
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+		new mSiteService.SiteService(serviceRegistry);
 		
 		// Git operations
 		//new eclipse.GitService(serviceRegistry);
@@ -99,6 +100,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.downloadFile", 2, "eclipse.fileGroup/eclipse.importExportGroup");
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.importSFTPCommand", 3, "eclipse.fileGroup/eclipse.importExportGroup");
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.exportSFTPCommand", 4, "eclipse.fileGroup/eclipse.importExportGroup");
+		commandService.registerCommandContribution("fileFolderCommands", "orion.site.viewon", 5, "eclipse.fileGroup");
 		// new file and new folder in the actions column uses the labeled group
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFile", 1, "eclipse.fileGroup/eclipse.newResources");
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFolder", 2, "eclipse.fileGroup/eclipse.newResources");
@@ -114,6 +116,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 3, "eclipse.selectionGroup");
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
+		mSiteCommands.createSiteCommands(serviceRegistry);
 
 		// when new item is fetched, display it in the page title
 		dojo.connect(explorer, "onchange", function(item) {

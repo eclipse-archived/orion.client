@@ -17,9 +17,9 @@
  */
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 
+	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteTree, mTreeTable) {
+			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteCommands, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -42,7 +42,6 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
 			
 			// Create the visuals
-			var model;
 			var treeWidget;
 			(function() {
 				statusService.setMessage("Loading...");
@@ -61,39 +60,24 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			
 			(function() {
 				// Reloads the table view after doing a command
-				var refresher = function() {
+				var refresh = function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						statusService.setMessage("");
 						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
 					});
 				};
 				var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
-				
-				var workspaces = serviceRegistry.getService("orion.core.file").loadWorkspaces();
-				var createCommand = new mCommands.Command({
-					name : "Create Site",
-					tooltip: "Create a new site configuration",
-					image : require.toUrl("images/add.gif"),
-					id: "orion.site.create",
-					groupId: "orion.sitesGroup",
-					parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')]),
-					callback : function(data) {
-						var name = data.parameters && data.parameters.valueFor('name');
-						dojo.when(workspaces, function(workspaces) {
-					        var workspaceId = workspaces && workspaces[0] && workspaces[0].Id;
-					        if (workspaceId && name) {
-						        siteService.createSiteConfiguration(name, workspaceId).then(function(site) {
-									window.location = mSiteUtils.generateEditSiteHref(site);
-								}, errorHandler);
-					        }
-						});
-					}});
-				commandService.addCommand(createCommand);
-				
-				// Add commands that deal with individual site configuration (edit, start, stop..)
-				mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService,
-						/*start*/ refresher, /*stop*/ refresher, /*delete*/ refresher, errorHandler);
-				
+				var goToUrl = function(url) {
+					window.location = url;
+				};
+				mSiteCommands.createSiteCommands(serviceRegistry, {
+					createCallback: goToUrl,
+					startCallback: refresh,
+					stopCallback: refresh,
+					deleteCallback: refresh,
+					errorCallback: errorHandler
+				});
+
 				// Register command contributions
 				commandService.registerCommandContribution("pageActions", "orion.site.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
 				commandService.registerCommandContribution("siteCommand", "orion.site.edit", 1);
