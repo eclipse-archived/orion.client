@@ -11,7 +11,7 @@
 
 /*global define */
 
-define(['orion/compare/compareUtils'], function(mCompareUtils) {
+define(['orion/compare/compareUtils', 'orion/compare/diffTreeNavigator'], function(mCompareUtils, mDiffTreeNavigator) {
 var orion = orion || {};
 
 orion.CompareRuler = (function() {
@@ -143,15 +143,10 @@ orion.CompareAnnotation =  (function() {
 			this._currentAnnotationIndex = 0;
 		},
 		
-		getCurrentAnnotationIndex: function(){
+		getCurrentDiffBlockIndex: function(){
 			return this._currentAnnotationIndex;
 		},
-		
-		getCurrentMapperIndex: function(){
-			var annotations = this._editor.getModel().getAnnotations();
-			return annotations.length === 0 ? -1 : annotations[this._currentAnnotationIndex][1];
-		},
-		
+
 		matchPositionFromAnnotation: function(index){
 			var annotaionIndex = index;
 			if(index === -1){
@@ -190,72 +185,6 @@ orion.CompareAnnotation =  (function() {
 	return CompareAnnotation;
 }()); 
 
-/**
- * Creates a new compare overview ruler for the compare editor.
- * @class The compare overview ruler is used by the compare editor to 
- * render lines matching differences between two editors
- * @name orion.compare.rulers.CompareOverviewRuler
- */
-orion.CompareOverviewRuler = (function() {
-	function CompareOverviewRuler (rulerLocation, rulerStyle) {
-		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
-	}
-	CompareOverviewRuler.prototype = new orion.CompareRuler();
-	CompareOverviewRuler.prototype.getStyle = function(lineIndex) {
-		var result, style;
-		if (lineIndex === undefined) {
-			result = this._rulerStyle || {};
-			style = result.style || (result.style = {});
-			style.lineHeight = "1px";
-			style.fontSize = "1px";
-			style.width = "14px";
-		} else {
-			if (lineIndex !== -1) {
-				result = {styleClass: "annotationOverview breakpoint"} || {};
-			} else {
-				result = {};
-			}
-			style = result.style || (result.style = {});
-			style.cursor = "pointer";
-			style.width = "8px";
-			//style.height = "3px";
-			style.left = "2px";
-			
-			var model = this._editor.getModel();
-			if(lineIndex >= 0 && model.getAnnotationH){
-				var anH = model.getAnnotationH(lineIndex);
-				var lC = model.getLineCount();
-				var clientArea = this._editor.getClientArea();
-				var height =  Math.floor(clientArea.height*anH/lC);
-				if (height < 2)
-					height = 2;
-				style.height = height +"px";
-			} else {
-				style.height = "3px";
-			}
-		}
-		return result;
-	};
-	CompareOverviewRuler.prototype.getHTML = function(lineIndex) {
-		return "&nbsp;";
-	};
-	CompareOverviewRuler.prototype.onClick = function(lineIndex, e) {
-		if (lineIndex === undefined) { return; }
-		var lineHeight = this._editor.getLineHeight();
-		var clientArea = this._editor.getClientArea();
-		var lines = Math.floor(clientArea.height / lineHeight/3);
-		this._editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
-	};
-	CompareOverviewRuler.prototype._onModelChanged = function(e) {
-		var model = this._editor.getModel();
-		var lineCount = model.getLineCount();
-		if(lineCount > 0)
-			this._editor.redrawLines(0, 1, this);
-	};
-	return CompareOverviewRuler;
-}());
-
-
 orion.TwoWayCompareOverviewRuler = (function() {
 	function TwoWayCompareOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
 		this._compareAnnotaion = compareAnnotaion;
@@ -284,24 +213,52 @@ orion.TwoWayCompareOverviewRuler = (function() {
 			style.left = "2px";
 			
 			var model = this._editor.getModel();
-			if(lineIndex >= 0 && model.getAnnotationH){
-				var annotationIndex = mCompareUtils.getAnnotationIndex(model.getAnnotations(), lineIndex);
+			if(lineIndex >= 0 ){
+				var diffBlocks;
+				if(this._diffNavigator){
+					diffBlocks = this._diffNavigator.getFeeder().getDiffBlocks();
+				} else if (model.getAnnotations){
+					diffBlocks = model.getAnnotations();
+				} else {
+					return null;
+				}
+				
+				var annotationIndex = mCompareUtils.getAnnotationIndex(diffBlocks, lineIndex);
 				if (annotationIndex === -1) return null;
-				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(model.getAnnotations(), annotationIndex);
-				var conflict = mCompareUtils.isMapperConflict(model.getMapper(), mapperIndex);
+				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(diffBlocks, annotationIndex);
+				var mapper;
+				if(this._diffNavigator){
+					mapper = this._diffNavigator.getMapper();
+				} else if (model.getMapper){
+					mapper = model.getMapper();
+				} else {
+					return null;
+				}
+				var conflict = mCompareUtils.isMapperConflict(mapper, mapperIndex);
 				if(conflict)
 					style.border = "1px #FF0000 solid";
-				if(annotationIndex === this._compareAnnotaion.getCurrentAnnotationIndex())
-					style.backgroundColor = conflict ? "red" :"blue";
-				var anH = model.getAnnotationH(annotationIndex);
-				var lC = model.getAnnotationLineCount();
+				var anH, lC;
+				if(this._diffNavigator){
+					if(annotationIndex === this._diffNavigator.getCurrentBlockIndex())
+						style.backgroundColor = conflict ? "red" :"blue";
+					anH = this._diffNavigator.getFeeder().getDiffBlockH(annotationIndex);
+					lC = this._diffNavigator.getFeeder().getAnnotationLineCount();
+				} else {
+					if(annotationIndex === this._compareAnnotaion.getCurrentDiffBlockIndex())
+						style.backgroundColor = conflict ? "red" :"blue";
+					anH = model.getAnnotationH(annotationIndex);
+					lC = model.getAnnotationLineCount();
+				}
+				if(anH < 0){
+					return null;
+				}
 				var clientArea = this._editor.getClientArea();
 				var height =  Math.floor(clientArea.height*anH/lC);
 				if (height < 2)
 					height = 2;
 				style.height = height +"px";
 			} else {
-				style.height = "3px";
+				return style.height = "3px";
 			}
 		}
 		return result;
@@ -329,30 +286,34 @@ orion.CompareMatchRenderer =  (function() {
 		this._canvasDiv = canvasDiv;
 		this._mapper = undefined;
 		this._initialized = false;
-		this._annotation = new orion.CompareAnnotation();
 	}
 
 	CompareMatchRenderer.prototype =  {
-		
-		init: function(mapper , leftEditor , rightEditor ){
+		init: function(mapper , leftEditor , rightEditor, charDiff ){
 			this._initialized = true;
+			this._initing = true;
 			this._mapper = mapper;
 			this._leftEditor = leftEditor;
 			this._rightEditor = rightEditor;
-			this._annotation.init(mapper , rightEditor);
+			this._leftTextView = leftEditor.getTextView();
+			this._rightTextView = rightEditor.getTextView();
+			var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), this._mapper, 1);
+			var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), this._mapper, 0);
+			this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator(this._rightEditor, this._leftEditor, rFeeder, lFeeder, charDiff);
+			this._overviewRuler._diffNavigator = this._diffNavigator;
 			this.render();
 		},
 		
-		getAnnotation: function(){
-			return this._annotation;
+		getDiffNavigator: function(){
+			return this._diffNavigator;
 		},
 		
-		getCurrentAnnotationIndex: function(){
-			return this._annotation.getCurrentAnnotationIndex();
+		getCurrentDiffBlockIndex: function(){
+			return this._diffNavigator.getCurrentBlockIndex();
 		},
 		
 		getCurrentMapperIndex: function(){
-			return this._annotation.getCurrentMapperIndex();
+			return this._diffNavigator.getCurrentMapperIndex();
 		},
 		
 		setOverviewRuler: function(overview){
@@ -374,57 +335,77 @@ orion.CompareMatchRenderer =  (function() {
 		},
 		
 		matchPositionFrom: function(fromLeft){
-			var baseEditor = fromLeft ? this._leftEditor : this._rightEditor;
-			var matchEditor = fromLeft ? this._rightEditor : this._leftEditor;
+			var baseEditor = fromLeft ? this._leftTextView : this._rightTextView;
+			var matchEditor = fromLeft ? this._rightTextView : this._leftTextView;
 			var topLine = baseEditor.getTopIndex();
 			var bottomLine = baseEditor.getBottomIndex();
 			var matchLine = mCompareUtils.matchMapper(this._mapper , fromLeft ? 0: 1 , topLine , bottomLine);
 			matchEditor.setTopIndex(matchLine);
 		},
 
-		matchPositionFromAnnotation: function(index){
+		matchPositionFromAnnotation: function(lineIndex){
 			if(!this._initialized){
 				return;
 			}
-			this._annotation.matchPositionFromAnnotation(index);
-			this.positionAnnotation(this._annotation.getCurrentAnnotationIndex());
+			if(this._diffNavigator){
+				var diffblockIndex;
+				if(lineIndex < 0){
+					diffblockIndex = 0;
+				} else {
+					diffblockIndex = mCompareUtils.getAnnotationIndex(this._diffNavigator.getFeeder().getDiffBlocks(), lineIndex);
+				}
+				this._diffNavigator.gotoBlock(diffblockIndex);
+				this.positionDiffBlock(diffblockIndex);
+			}
 		},
 		
-		positionAnnotation: function(annotationIndex){
-			var annotations = this._rightEditor.getModel().getAnnotations();
-			if(annotations.length === 0)
+		positionDiffBlock: function(annotationIndex){
+			var diffBlocks = this._diffNavigator.getFeeder().getDiffBlocks();
+			if(diffBlocks.length === 0)
 				return;
-			this._setEditorPosition(this._rightEditor , annotations[annotationIndex][0]);
-			var lineIndexL = this._leftEditor.getModel().getLineIndexFromMapper(annotations[annotationIndex][1]);
-			this._setEditorPosition(this._leftEditor , lineIndexL);
-			this._leftEditor.redrawRange();
-			this._rightEditor.redrawRange();
-			var drawLine = this._rightEditor.getTopIndex() ;
-			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+			this._setEditorPosition(this._rightTextView , diffBlocks[annotationIndex][0]);
+			var lineIndexL = mCompareUtils.lookUpLineIndex(this._diffNavigator.getMapper(), 0, diffBlocks[annotationIndex][1]);
+			this._setEditorPosition(this._leftTextView , lineIndexL);
+			this._leftTextView.redrawRange();
+			this._rightTextView.redrawRange();
+			var drawLine = this._rightTextView.getTopIndex() ;
+			this._rightTextView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
 		},
 		
-		gotoDiff: function(annotationIndex){
-			this._annotation.gotoDiff(annotationIndex);
-			var drawLine = this._rightEditor.getTopIndex() ;
-			this._leftEditor.redrawRange();
-			this._rightEditor.redrawRange();
-			this._rightEditor.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+		gotoChange: function(caretPosition, textView){
+			if(this._diffNavigator.gotoChange(caretPosition, textView)){
+				var drawLine = this._rightTextView.getTopIndex() ;
+				this._rightTextView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+				this.render();
+			}
 		},
-		
+
 		nextDiff: function(){
-			this._annotation.nextDiff();
-			this.positionAnnotation(this._annotation.getCurrentAnnotationIndex());
+			this._diffNavigator.iterateOnBlock(true, true);
+			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
 			this.render();
 		},
 		
 		prevDiff: function(){
-			this._annotation.prevDiff();
-			this.positionAnnotation(this._annotation.getCurrentAnnotationIndex());
+			this._diffNavigator.iterateOnBlock(false, true);
+			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
+			this.render();
+		},
+		
+		nextChange: function(){
+			this._diffNavigator.iterateOnChange(true);
+			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
+			this.render();
+		},
+		
+		prevChange: function(){
+			this._diffNavigator.iterateOnChange(false);
+			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
 			this.render();
 		},
 		
 		getMapperTextRange: function(editor , mapperIndex , mapperColumnIndex){
-			var startLine = editor.getModel().getLineIndexFromMapper(mapperIndex);
+			var startLine = mCompareUtils.lookUpLineIndex(this._diffNavigator.getMapper(), mapperIndex, mapperIndex);
 			var endLine = startLine + this._mapper[mapperIndex][mapperColumnIndex] - 1;
 			var start =  editor.getModel().getLineStart(startLine);
 			var end =  editor.getModel().getLineEnd(endLine,true);
@@ -432,15 +413,11 @@ orion.CompareMatchRenderer =  (function() {
 		},
 	
 		copyToLeft: function(){
-			var mapperIndex = this.getCurrentMapperIndex();
-			//if(this._mapper[mapperIndex][1] === 0)
-			//	return;
-			var textRangeR = this.getMapperTextRange(this._rightEditor , mapperIndex , 1);
-			var textRangeL = this.getMapperTextRange(this._leftEditor , mapperIndex , 0);
-			var textR = this._rightEditor.getText(textRangeR.start , textRangeR.end);
-			this._leftEditor.setText(textR , textRangeL.start , textRangeL.end);
-			this._leftEditor.redrawRange();
-			this._rightEditor.redrawRange();
+			var currentDiff = this._diffNavigator.iterator.cursor();
+			if(currentDiff){
+				var textR = this._rightTextView.getText(currentDiff.oldA.start , currentDiff.oldA.end);
+				this._leftTextView.setText(textR , currentDiff.newA.start , currentDiff.newA.end);
+			}
 		},
 	
 		render: function(){
@@ -452,12 +429,12 @@ orion.CompareMatchRenderer =  (function() {
 			context.lineWidth   = 1;
 			context.beginPath();
 			
-			var leftTop = this._leftEditor.getTopIndex();
-			var leftBottom = this._leftEditor.getBottomIndex();
-			var rightTop = this._rightEditor.getTopIndex();
-			var rightBottom = this._rightEditor.getBottomIndex();
-			this._leftLineH = this._leftEditor.getLineHeight();
-			this._rightLineH = this._rightEditor.getLineHeight();
+			var leftTop = this._leftTextView.getTopIndex();
+			var leftBottom = this._leftTextView.getBottomIndex();
+			var rightTop = this._rightTextView.getTopIndex();
+			var rightBottom = this._rightTextView.getBottomIndex();
+			this._leftLineH = this._leftTextView.getLineHeight();
+			this._rightLineH = this._rightTextView.getLineHeight();
 		
 			var curLeftIndex = 0;
 			var curRightIndex = 0;
@@ -480,12 +457,8 @@ orion.CompareMatchRenderer =  (function() {
 		
 		_renderCurve: function (mapperIndex , leftStart , rightStart , canvas , context , leftTop , leftBottom , rightTop , rightBottom){
 			var mapperItem = this._mapper[mapperIndex];
-			/*
-			var leftMiddle =  (leftStart + (mapperItem[0]/2) - leftTop) * this._leftLineH;
-			var rightMiddle = (rightStart + (mapperItem[1]/2) - rightTop) * this._rightLineH ;
-			*/
-			var leftMiddle =  this._leftEditor.getLinePixel(leftStart + (mapperItem[0]/2)) + (mapperItem[0]%2)*this._leftLineH/3 - this._leftEditor.getTopPixel();
-			var rightMiddle =  this._rightEditor.getLinePixel(rightStart + (mapperItem[1]/2)) + (mapperItem[1]%2)*this._rightLineH/3- this._rightEditor.getTopPixel();
+			var leftMiddle =  this._leftTextView.getLinePixel(leftStart + (mapperItem[0]/2)) + (mapperItem[0]%2)*this._leftLineH/3 - this._leftTextView.getTopPixel();
+			var rightMiddle =  this._rightTextView.getLinePixel(rightStart + (mapperItem[1]/2)) + (mapperItem[1]%2)*this._rightLineH/3- this._rightTextView.getTopPixel();
 			
 			var w =  canvas.parentNode.clientWidth;
 			
@@ -510,13 +483,14 @@ orion.CompareMatchRenderer =  (function() {
 		onChanged: function(e) {
 			if(e.removedLineCount === e.addedLineCount)
 				return;
+			if(!this._initing){
+				mCompareUtils.updateMapper(this._mapper , 0 , this._leftTextView.getModel().getLineAtOffset(e.start) , e.removedLineCount, e.addedLineCount);
+			}
+			this._initing = false;
 			if(e.removedLineCount > 0 || e.addedLineCount > 0)
 				this.render();
-			
 		}
-		
 	};
-	
 	return CompareMatchRenderer;
 }()); 
 

@@ -117,11 +117,10 @@ orion.JSDiffAdapter = (function() {
 				var current = diff[i];
 				if (!current.added && !current.removed) {
 					if (charsAdded > 0 || charsRemoved > 0) {
-						map
-								.push([ newStart,
-										newStart + charsAdded,
-										oldStart,
-										oldStart + charsRemoved ]);
+						map.push([ newStart,
+								   newStart + charsAdded,
+								   oldStart,
+								   oldStart + charsRemoved ]);
 						newStart += charsAdded;
 						oldStart += charsRemoved;
 						charsAdded = 0;

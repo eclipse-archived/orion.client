@@ -1,0 +1,149 @@
+@import "../../orion/editor/editor.css";
+
+.diffNormal {
+	background: #DDDDDD;
+}
+
+.diffConflict {
+	background: #EEB4B4;
+}
+
+.diffNormalSelect {
+	background: #BBBBBB;
+}
+
+.diffConflictSelect {
+	background: #F08080;
+}
+
+.diffInlineAddedSelect {
+	background: #00B400;
+}
+
+.diffInlineAdded {
+	background: #99EE99;
+}
+
+.diffInlineRemovedSelect {
+	background: #B44040;
+}
+
+.diffInlineRemoved {
+	background: #EE9999;
+}
+
+.fileNameCheckedRow {
+	background-color: #FFFFCC !important;
+	color: white;
+}
+
+.fileNameSelectedRow {
+	background-color: #6d6d6d !important;
+}
+
+.fileNameNormalRow {
+	color: #0000FF;
+}
+
+.compareCanvas {
+	background: #EEEEEE;
+	border: 0px;
+}
+
+.compareEditorParent {
+	width:100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.canvasContainer {
+	width:44px;
+	height:100%;
+	overflow: hidden;
+}
+
+.titleContainer {
+	width:100%;
+	height:30px;
+	overflow: hidden;
+	background: #EEEEEE;
+}
+
+.statusContainer {
+	width:100%;
+	height:30px;
+	overflow: hidden;
+}
+
+.borderContainer {
+	width:100%;
+	height: 100%;
+}
+
+.leftBorder {
+	width:50%;
+	height: 100%;
+}
+
+.rightBorder {
+	height: 100%;
+}
+
+/*** Styles for diff annotations ***/
+
+/* Styles for normal diff blocks */
+.annotationRange.addedBlockDiff {
+	background-color: #EFFFEF;
+}
+
+.annotationRange.currentAddedBlockDiff {
+	background-color: #D2FFD2;
+}
+
+.annotationRange.deletedBlockDiff {
+	background-color: #FFEFEF;
+}
+
+.annotationRange.currentDeletedBlockDiff {
+	background-color: #FFD2D2;
+}
+
+/* Styles for empty diff blocks , it draws one line on top of the line in the editor */
+.annotationRange.blockDiffTopOnly {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAPSURBVBhXY6yvr2cYHAAAzPsBf2hZ98wAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-x;
+ 	background-position: left top
+}
+
+.annotationRange.currentBlockDiffTopOnly {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2AYNAAAAIsAAR6L5FUAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-x;
+ 	background-position: left top
+}
+
+/* Styles for conflicting diff blocks */
+.annotationRange.blockDiffConflict {
+	background-color: #FFFFCA;
+}
+
+.annotationRange.currentBlockDiffConflict {
+	background-color: #FFFF5B;
+}
+
+/* Styles for diff words added */
+.annotationRange.addedWordDiff {
+	background-color: #99EE99;
+}
+
+.annotationRange.currentAddedWordDiff {
+	background-color: #00B400;
+}
+
+/* Styles for diff words deleted */
+.annotationRange.deletedWordDiff {
+	background-color: #EE9999;
+}
+
+.annotationRange.currentDeletedWordDiff {
+	background-color: #B44040;
+}
