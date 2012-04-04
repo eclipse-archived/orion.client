@@ -2610,18 +2610,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
+			var x = this._columnX;
+			var scrollX = this._getScroll().x;
+			if (x === -1 || args.wholeLine || (args.select && isIE)) {
+				var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
+				x = this._getOffsetToX(offset) + scrollX;
+			}
 			if (lineIndex + 1 < model.getLineCount()) {
-				var scrollX = this._getScroll().x;
-				var x = this._columnX;
-				if (x === -1 || args.wholeLine || (args.select && isIE)) {
-					var offset = args.wholeLine ? model.getLineEnd(lineIndex + 1) : caret;
-					x = this._getOffsetToX(offset) + scrollX;
-				}
 				selection.extend(this._getXToOffset(lineIndex + 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;
+			} else {
+				if (args.select) {
+					selection.extend(model.getCharCount());
+					this._setSelection(selection, true, true);
+				}
 			}
+			this._columnX = x;
 			return true;
 		},
 		_doLineUp: function (args) {
@@ -2629,18 +2634,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
 			var lineIndex = model.getLineAtOffset(caret);
+			var x = this._columnX;
+			var scrollX = this._getScroll().x;
+			if (x === -1 || args.wholeLine || (args.select && isIE)) {
+				var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
+				x = this._getOffsetToX(offset) + scrollX;
+			}
 			if (lineIndex > 0) {
-				var scrollX = this._getScroll().x;
-				var x = this._columnX;
-				if (x === -1 || args.wholeLine || (args.select && isIE)) {
-					var offset = args.wholeLine ? model.getLineStart(lineIndex - 1) : caret;
-					x = this._getOffsetToX(offset) + scrollX;
-				}
 				selection.extend(this._getXToOffset(lineIndex - 1, x - scrollX));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
-				this._columnX = x;
+			} else {
+				if (args.select) {
+					selection.extend(0);
+					this._setSelection(selection, true, true);
+				}
 			}
+			this._columnX = x;
 			return true;
 		},
 		_doPageDown: function (args) {
