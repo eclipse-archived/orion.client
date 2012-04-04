@@ -12,7 +12,7 @@
 
 /*global define setTimeout addEventListener document console localStorage */
 
-define(["dojo", "orion/serviceregistry", "dojo/DeferredList"], function(dojo, mServiceregistry){
+define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(Deferred, mServiceregistry){
 var eclipse = eclipse || {};
 
 /**
@@ -24,7 +24,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	var _self = this;
 	
 	var _channel = null;
-	var _deferredLoad = new dojo.Deferred();
+	var _deferredLoad = new Deferred();
 	var _deferredUpdate = null;
 	var _loaded = false;
 	
@@ -50,19 +50,16 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	function _createServiceProxy(service) {
 		var serviceProxy = {};
 		if (service.methods) {
-			for (var i = 0; i < service.methods.length; i++) {
-				var method = service.methods[i];
-				serviceProxy[method] = function(methodName) {
-					return function() {
-						var params = Array.prototype.slice.call(arguments);
-						var d = new dojo.Deferred();
-						_self._load().then( function() {
-							_callService(service.serviceId, methodName, params, d);
-						});
-						return d.promise;
-					};
-				}(method);
-			}
+			service.methods.forEach(function(method) {
+				serviceProxy[method] = function() {
+					var params = Array.prototype.slice.call(arguments);
+					var d = new Deferred();
+					_self._load().then(function() {
+						_callService(service.serviceId, method, params, d);
+					});
+					return d.promise;
+				};
+			});
 		}
 		return serviceProxy;
 	}
@@ -70,15 +67,15 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	function _parseData() {
 		var services = data.services;
 		if (services) {
-			for(var i = 0; i < services.length; i++) {
-				var service = services[i];
+			services.forEach(function(service) {
 				var serviceProxy = _createServiceProxy(service);
 				_serviceRegistrations[service.serviceId] = internalRegistry.registerService(service.type, serviceProxy, service.properties);
-			}
+			});
 		}	
 	}
 	
 	function _responseHandler(message) {
+		var serviceRegistration, deferred;
 		try {
 			if (message.method) {
 				if ("plugin" === message.method) {
@@ -108,16 +105,16 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						_deferredUpdate = null;
 					}
 				} else if ("dispatchEvent" === message.method){
-					var serviceRegistration = _serviceRegistrations[message.serviceId];
+					serviceRegistration = _serviceRegistrations[message.serviceId];
 					serviceRegistration.dispatchEvent.apply(serviceRegistration, message.params);		
 				} else if ("progress" === message.method){
-					var deferred = _deferredResponses[String(message.requestId)];
-					deferred.progress.apply(deferred, message.params);	
+					deferred = _deferredResponses[String(message.requestId)];
+					deferred.update.apply(deferred, message.params);	
 				} else {
 					throw new Error("Bad response method: " + message.method);
 				}		
 			} else {
-				var deferred = _deferredResponses[String(message.id)];
+				deferred = _deferredResponses[String(message.id)];
 				delete _deferredResponses[String(message.id)];
 				if (message.error) {
 					deferred.reject(message.error);
@@ -194,7 +191,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		
 		var updatePromise;
 		if (_deferredUpdate === null) {
-			_deferredUpdate = new dojo.Deferred();
+			_deferredUpdate = new Deferred();
 			updatePromise = _deferredUpdate;
 			internalRegistry.disconnect(_channel);
 			_channel = internalRegistry.connect(url, _responseHandler);
@@ -204,7 +201,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				}
 			}, 15000);
 		}
-		return _deferredUpdate;
+		return _deferredUpdate.promise;
 	};
 	
 	this._load = function(isInstall) {
@@ -238,22 +235,22 @@ eclipse.Plugin = function(url, data, internalRegistry) {
  * @name orion.pluginregistry.PluginRegistry
  */
 eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
-	var _self = this;
 	var _storage = opt_storage || localStorage || {};
 	var _plugins = [];
 	var _channels = [];
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
 
 	addEventListener("message", function(event) {
-		for (var i = 0, source = event.source; i < _channels.length; i++) {
-			if (source === _channels[i].target) {
-				if (typeof _channels[i].useStructuredClone === "undefined") {
-					_channels[i].useStructuredClone = typeof event.data !== "string";
+		var source = event.source;
+		_channels.some(function(channel){
+			if (source === channel.target) {
+				if (typeof channel.useStructuredClone === "undefined") {
+					channel.useStructuredClone = typeof event.data !== "string";
 				}
-				_channels[i].handler(_channels[i].useStructuredClone ? event.data : JSON.parse(event.data));
-				break;
+				channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
+				return true; // e.g. break
 			}
-		}
+		});
 	}, false);
 	
 	function _normalizeURL(location) {
@@ -276,7 +273,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	}
 
 	var internalRegistry = {
-			registerService: dojo.hitch(serviceRegistry, serviceRegistry.registerService),
+			registerService: serviceRegistry.registerService.bind(serviceRegistry),
 			connect: function(url, handler) {
 
 				var iframe = document.createElement("iframe");
@@ -325,14 +322,15 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	};
 	
 	function _getPlugin(url) {
+		var result = null;
 		url = _normalizeURL(url);
-		for (var i = 0, l = _plugins.length; i < l; i++) {
-			var plugin = _plugins[i];
+		_plugins.some(function(plugin){
 			if (url === plugin.getLocation()) {
-				return plugin;
+				result = plugin;
+				return true;
 			}
-		}
-		return null;
+		});
+		return result;
 	}
 	
 	/**
@@ -343,8 +341,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	 */
 	this.startup = function(pluginURLs) {	
 		var installList = [];
-		for(var i = 0; i < pluginURLs.length; ++i) {
-			var pluginURL = pluginURLs[i];
+		pluginURLs.forEach(function(pluginURL) {
 			pluginURL = _normalizeURL(pluginURL);
 			var key = "plugin." + pluginURL;
 			var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
@@ -359,8 +356,26 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				_plugins.push(plugin);
 				installList.push(plugin._load(false)); // _load(false) because we want to ensure the plugin is updated
 			}
+		});
+		
+		var d = new Deferred();
+		var count = installList.length;
+		if (count === 0) {
+			d.resolve();
+		} else {
+			installList.forEach(function (promise) {
+				promise.then(function() {
+					if (--count === 0) {
+						d.resolve();
+					}
+				}, function() {
+					if (--count === 0) {
+						d.resolve();
+					}
+				});
+			});
 		}
-		return new dojo.DeferredList(installList);
+		return d.promise;
 	};
 	
 	/**
@@ -369,13 +384,13 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	 * @function 
 	 */
 	this.shutdown = function() {
-		for (var i = 0; i < _channels.length; i++) {
+		_channels.forEach(function(channel) {
 			try {
-				document.body.removeChild(_channels[i].iframe);
+				document.body.removeChild(channel.iframe);
 			} catch(e) {
 				// best effort
 			}
-		}
+		});
 	};
 	
 	/**
@@ -387,7 +402,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	 */
 	this.installPlugin = function(url, opt_data) {
 		url = _normalizeURL(url);
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		var plugin = _getPlugin(url);
 		if (plugin) {
 			if(plugin.getData()) {
@@ -429,11 +444,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	 */
 	this.getPlugins = function() {
 		var result =[];
-		for (var i = 0; i < _plugins.length; i++) {
-			if (_plugins[i].getData()) {
-				result.push(_plugins[i]);
+		_plugins.forEach(function(plugin) {
+			if (plugin.getData()) {
+				result.push(plugin);
 			}
-		}
+		});
 		return result;
 	};
 

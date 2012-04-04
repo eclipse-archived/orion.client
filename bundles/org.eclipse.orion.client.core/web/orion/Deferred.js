@@ -98,7 +98,7 @@ define(function() {
 			queueNotification(notify);
 		};
 
-		this.update = function(progress) {
+		this.update = this.progress = this.notify = function(progress) {
 			var listener = head;
 			while (listener) {
 				if (listener.update) {
