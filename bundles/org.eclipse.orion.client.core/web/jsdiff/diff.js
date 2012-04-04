@@ -152,7 +152,7 @@ var JsDiff = (function() {
   
   var CharDiff = new fbDiff();
   
-  var WordDiff = new fbDiff(true);
+  var WordDiff = new fbDiff(false);
   WordDiff.tokenize = function(value) {
     return removeEmpty(value.split(/(\s+|\b)/));
   };

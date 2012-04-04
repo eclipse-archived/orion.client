@@ -11,11 +11,11 @@
  *******************************************************************************/
 /*global define window dijit */
 /*jslint browser:true devel:true */
-define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/compare/compare-2way-model', 'orion/editor/contentAssist',
+define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight'], 
-		function(require, dojo, mDiffParser, mRulers, mCompareModel, mTwoWayCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mGapModel , mCommands, mTextModel, mTextView, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight) {
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator'], 
+		function(require, dojo, mDiffParser, mRulers, mCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+				mGapModel , mCommands, mTextModel, mTextView, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator) {
 
 var exports = {};
 
@@ -26,6 +26,7 @@ exports.CompareContainer = (function() {
 	CompareContainer.prototype = {
 		_clearOptions: function(){
 			this._readonly = undefined;
+			this._charDiff = undefined;
 			this._hasConflicts = undefined;
 			this._diffProvider = undefined;
 			this._complexURL = undefined;
@@ -48,6 +49,7 @@ exports.CompareContainer = (function() {
 				this._mapper = options.mapper ? options.mapper : this._mapper;
 				
 				this._readonly = (options.readonly !== undefined ||  options.readonly !== null) ? options.readonly : this._readonly;
+				this._charDiff = (options.charDiff !== undefined ||  options.charDiff !== null) ? options.charDiff : this._charDiff;
 				this._hasConflicts = (options.hasConflicts !== undefined ||  options.hasConflicts !== null) ? options.hasConflicts : this._hasConflicts;
 				this._diffProvider = options.diffProvider ? options.diffProvider : this._diffProvider;
 				this._complexURL = options.complexURL ?  options.complexURL : this._complexURL;
@@ -213,12 +215,6 @@ exports.DefaultDiffProvider = (function() {
 		//TODO : get the file name from file service
 		_resolveFileName: function(fileURL){
 			var fileName = fileURL.split("?")[0];
-			/*
-			var indexOfSlash = fileName.lastIndexOf("/");
-			if (indexOfSlash !== -1) {
-				return fileName.substring(indexOfSlash + 1);
-			}
-			*/
 			return fileName;
 		},
 		
@@ -251,71 +247,16 @@ exports.DefaultDiffProvider = (function() {
 	return DefaultDiffProvider;
 }());
 
-//Diff block styler , this will always be called after the text styler
-exports.DiffStyler = (function() {
-	function DiffStyler(compareMatchRenderer, textView){
-		this._compareMatchRenderer = compareMatchRenderer;
-		this._textView = textView;
-	}	
-	DiffStyler.prototype = {
-		highlight: function(textView) {
-			if (this._textView) {
-				this._textView.removeEventListener("LineStyle", this._lineStyleListener);
-			}
-			if(textView)
-				this._textView = textView;
-			if(this._textView && !this._textView.getModel().isMapperEmpty())
-				this._textView.addEventListener("LineStyle", this._lineStyleListener = dojo.hitch(this, this._onLineStyle));
-			this._textView.redrawLines();
-		},
-		
-		_onLineStyle: function(lineStyleEvent){
-			var textView = this._textView;
-			var lineIndex = lineStyleEvent.lineIndex;
-			var lineTypeWrapper =  textView.getModel().getLineType(lineIndex);
-			var lineType = lineTypeWrapper.type;
-			var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(textView.getModel().getAnnotations(), lineTypeWrapper.mapperIndex).current;
-			var conflict = mCompareUtils.isMapperConflict(textView.getModel().getMapper(), lineTypeWrapper.mapperIndex);
-			//https://bugs.eclipse.org/bugs/show_bug.cgi?id=349227 : we were using border style as the line below.Changing to back ground color and image.
-			//lineStyleEvent.style = {style: {backgroundColor: "#EEEEEE" , borderTop: "1px #AAAAAA solid" , borderLeft: borderStyle , borderRight: borderStyle}};
-			
-			var selected = (annotationIndex === this._compareMatchRenderer.getCurrentAnnotationIndex());
-			if(lineType === "top-only") {
-				
-				var backgroundImg;
-				if(selected){
-					backgroundImg = "url('" + require.toUrl("images/diff-border-sel.png") + "')";
-				} else {
-					backgroundImg = "url('" + require.toUrl("images/diff-border.png") + "')";
-				}
-				lineStyleEvent.style = {style: {backgroundImage: backgroundImg, backgroundRepeat:"repeat-x"}};
-			} else if (lineType !== "unchanged"){
-				var backgroundClass;
-				if(selected){
-					backgroundClass = conflict ?  "diffConflictSelect" : "diffNormalSelect";
-				} else {
-					backgroundClass = conflict ?  "diffConflict" : "diffNormal";
-				}
-				lineStyleEvent.style = {styleClass : backgroundClass}; 
-			}
-		}
-		
-	};
-	return DiffStyler;
-}());
-
 //the wrapper to order the text and diff styler so that we can always have diff highlighted on top of text syntax
 exports.TwoWayCompareStyler = (function() {
 	function TwoWayCompareStyler(registry, compareMatchRenderer){
 		this._syntaxHighlither = new Highlight.SyntaxHighlighter(registry);
-		this._diffHighlither = new exports.DiffStyler(compareMatchRenderer);
 	}	
 	TwoWayCompareStyler.prototype = {
-		highlight: function(fileName, contentType, editorWidget) {
+		highlight: function(fileName, contentType, editorWidget, diffBlockFeeder) {
 			var self = this;
 			this._syntaxHighlither.setup(contentType, editorWidget, null /* TODO AnnotationModel */, fileName).then(
 				function() {
-					self._diffHighlither.highlight(editorWidget);
 				});
 		}
 	};
@@ -452,19 +393,19 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype = new exports.CompareContainer();
 	
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
-		this._editorLeft = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this._readonly ,createLineStyler , this._newFile);
-		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._editorLeft , null, null, null, true);
-		this._textViewLeft = this._editorLeft.getTextView();
-		this._editorRight = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
-		this._textViewRight = this._editorRight.getTextView();
+		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this._readonly ,createLineStyler , this._newFile);
+		mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._leftEditor , null, null, null, true);
+		this._leftTextView = this._leftEditor.getTextView();
+		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
+		this._rightTextView = this._rightEditor.getTextView();
 		var that = this;
-		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , that._compareMatchRenderer.getAnnotation(),
+		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , null,
 				                    function(lineIndex, ruler){that._compareMatchRenderer.matchPositionFromAnnotation(lineIndex);});
-		this._textViewRight.addRuler(overview);
+		this._rightTextView.addRuler(overview);
 		this._compareMatchRenderer.setOverviewRuler(overview);
 		var that = this;
 		window.onbeforeunload = function() {
-			if (that._editorLeft.isDirty()) {
+			if (that._leftEditor.isDirty()) {
 				return "There are unsaved changes.";
 			}
 		};
@@ -477,6 +418,14 @@ exports.TwoWayCompareContainer = (function() {
 			return;
 		}
 		var that = this;
+		var copyToLeftCommand = new mCommands.Command({
+			tooltip : "Copy current change from right to left",
+			imageClass : "core-sprite-leftarrow",
+			id: "orion.compare.copyToLeft",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				that.copyToLeft();;
+		}});
 		var nextDiffCommand = new mCommands.Command({
 			tooltip : "Go to next diff",
 			imageClass : "core-sprite-move_down",
@@ -493,24 +442,36 @@ exports.TwoWayCompareContainer = (function() {
 			callback : function() {
 				that.prevDiff();
 		}});
-		var copyToLeftCommand = new mCommands.Command({
-			tooltip : "Copy current change from right to left",
-			imageClass : "core-sprite-leftarrow",
-			id: "orion.compare.copyToLeft",
+		var nextChangeCommand = new mCommands.Command({
+			tooltip : "Go to next change",
+			imageClass : "core-sprite-move_down",
+			id: "orion.compare.nextChange",
 			groupId: "orion.compareGroup",
 			callback : function() {
-				that.copyToLeft();;
-			}});
-		this._commandService.addCommand(prevDiffCommand);
-		this._commandService.addCommand(nextDiffCommand);
+				that.nextChange();
+		}});
+		var prevChangeCommand = new mCommands.Command({
+			tooltip : "Go to previous change",
+			imageClass : "core-sprite-move_up",
+			id: "orion.compare.prevChange",
+			groupId: "orion.compareGroup",
+			callback : function() {
+				that.prevChange();
+		}});
 		this._commandService.addCommand(copyToLeftCommand);
+		this._commandService.addCommand(nextDiffCommand);
+		this._commandService.addCommand(prevDiffCommand);
+		this._commandService.addCommand(nextChangeCommand);
+		this._commandService.addCommand(prevChangeCommand);
 			
 		// Register command contributions
-		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 3);
-		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 2);
 		if (!this._readonly) {
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 1);
 		}
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 2);
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 3);
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 4);
+		this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 5);
 		this._commandService.renderCommands(commandSpanId, commandSpanId, that, that, "button");
 	};
 	
@@ -521,10 +482,14 @@ exports.TwoWayCompareContainer = (function() {
 		if(!this.onLoad){
 			this.onLoad = onLoad;
 		}
-		var offsetRight = this._textViewRight.getModel().getLineStart(lineNumber) + match.startIndex;
-		this._editorRight.moveSelection(offsetRight, offsetRight + (match.length ? match.length : defaultGap));
-		var offsetLeft = this._textViewLeft.getModel().getLineStart(lineNumber) + newMatch.startIndex;
-		this._editorLeft.moveSelection(offsetLeft, offsetLeft + (newMatch.length ? newMatch.length : defaultGap));
+		var offsetRight = this._rightTextView.getModel().getLineStart(lineNumber) + match.startIndex;
+		this._rightEditor.moveSelection(offsetRight, offsetRight + (match.length ? match.length : defaultGap));
+		var offsetLeft = this._leftTextView.getModel().getLineStart(lineNumber) + newMatch.startIndex;
+		this._leftEditor.moveSelection(offsetLeft, offsetLeft + (newMatch.length ? newMatch.length : defaultGap));
+	};
+	
+	TwoWayCompareContainer.prototype.copyToLeft = function(){	
+		this._compareMatchRenderer.copyToLeft();
 	};
 	
 	TwoWayCompareContainer.prototype.nextDiff = function(){	
@@ -535,8 +500,12 @@ exports.TwoWayCompareContainer = (function() {
 		this._compareMatchRenderer.prevDiff();
 	};
 	
-	TwoWayCompareContainer.prototype.copyToLeft = function(){	
-		this._compareMatchRenderer.copyToLeft();
+	TwoWayCompareContainer.prototype.nextChange = function(){	
+		this._compareMatchRenderer.nextChange();
+	};
+	
+	TwoWayCompareContainer.prototype.prevChange = function(){	
+		this._compareMatchRenderer.prevChange();
 	};
 	
 	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
@@ -544,12 +513,11 @@ exports.TwoWayCompareContainer = (function() {
 		var editorContainer = dijit.byId(parentDivId);
 		var that = this;
 		
-		var model = new mTextModel.TextModel(content , delim);
-		var compareModel = new mTwoWayCompareModel.TwoWayCompareModel(model, {mapper:mapper, columnIndex:columnIndex } );
+		var textModel = new mTextModel.TextModel(content , delim);
 		var textViewFactory = function() {
 			var view = new mTextView.TextView({
 				parent: editorContainerDomNode,
-				model: compareModel,
+				model: textModel,
 				readonly: readOnly,
 				tabSize: 4
 			});
@@ -604,10 +572,11 @@ exports.TwoWayCompareContainer = (function() {
 			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(that._registry, that._commandService, "pageActions");
+		var annotationFactory = new mEditorFeatures.AnnotationFactory();
 		var editor = new mEditor.Editor({
 			textViewFactory: textViewFactory,
 			undoStackFactory: undoStackFactory,
-			//annotationFactory: annotationFactory,
+			annotationFactory: annotationFactory,
 			//lineNumberRulerFactory: new exports.LineNumberRulerFactory(),
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
@@ -616,6 +585,7 @@ exports.TwoWayCompareContainer = (function() {
 		});
 				
 		editor.installTextView();
+		editor.setOverviewRulerVisible(false);
 		if(!readOnly){
 			var inputManager = this._inputManager;
 			editor.addEventListener("DirtyChanged", function(evt) {
@@ -626,17 +596,18 @@ exports.TwoWayCompareContainer = (function() {
 		var textView = editor.getTextView();
 		if(createLineStyler && fileObj && typeof(fileObj.Name) === "string"  && typeof(fileObj.Type) === "string"){
 			editor.setInput(fileObj.Name);
-			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
+			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor, this._compareMatchRenderer.getDiffNavigator() ? this._compareMatchRenderer.getDiffNavigator().getFeeder() : null);
 		}
 			
 		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}));
 
 		textView.addEventListener("Selection", function() {
-			var lineIndex = textView.getModel().getLineAtOffset(textView.getCaretOffset());
-			var mapperIndex = mCompareUtils.lookUpMapper(textView.getModel().getMapper() , columnIndex , lineIndex).mapperIndex;
-			var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(textView.getModel().getAnnotations(), mapperIndex);
-			if(annotationIndex.current !== -1)
-				that._compareMatchRenderer.gotoDiff(annotationIndex.current);
+			
+			if(that._compareMatchRenderer._diffNavigator.autoSelecting){
+				return;
+			}
+			var caretPos = textView.getCaretOffset();
+			that._compareMatchRenderer.gotoChange(caretPos, textView);
 		}); 
 		
 		if(columnIndex === 0){
@@ -675,27 +646,29 @@ exports.TwoWayCompareContainer = (function() {
 			output = result.output;
 		}
 		var that = this;
-		this._compareMatchRenderer.init(result.mapper ,this._textViewLeft , this._textViewRight);
-		if(!this._editorLeft){
+		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
-			this._textViewLeft.getModel().init(result.mapper);
-			this._textViewRight.getModel().init(result.mapper);
-			this._textViewLeft.redrawRange();
-			this._textViewRight.redrawRange();
+			this._compareMatchRenderer.init(result.mapper ,this._leftEditor , this._rightEditor, this._charDiff);
+			this._leftTextView.redrawRange();
+			this._rightTextView.redrawRange();
 		}else {
+			this._compareMatchRenderer.init(result.mapper ,this._leftEditor , this._rightEditor, this._charDiff);
 			this._inputManager.filePath = this._newFile.URL;
-			this._textViewLeft.getModel().init(result.mapper);
-			this._textViewRight.getModel().init(result.mapper);
 			
-			this._editorRight.setInput(this._baseFile.Name, null, input);
-			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._textViewRight);
+			this._rightEditor.setInput(this._baseFile.Name, null, input);
+			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._rightTextView, this._compareMatchRenderer.getDiffNavigator().getFeeder());
+			this._rightEditor.highlightAnnotations();
+			this._rightEditor.setAnnotationRulerVisible(false);
 			
-			this._editorLeft.setInput(this._newFile.Name, null, output);
-			this._highlighter[0].highlight(this._newFile.Name, this._newFile.Type, this._textViewLeft);
+			this._leftEditor.setInput(this._newFile.Name, null, output);
+			this._highlighter[0].highlight(this._newFile.Name, this._newFile.Type, this._leftTextView, this._compareMatchRenderer.getDiffNavigator().getFeeder(true));
+			this._leftEditor.highlightAnnotations();
+			this._leftEditor.setAnnotationRulerVisible(false);
 			if(!this._readonly)
-				this._inputManager.setInput(this._newFile.URL , this._editorLeft);
+				this._inputManager.setInput(this._newFile.URL , this._leftEditor);
 		}
+		this._compareMatchRenderer.getDiffNavigator().renderAnnotations();
 		if(this._viewLoadedCounter > 1){
 			this._compareMatchRenderer.matchPositionFromAnnotation(-1);
 		}
@@ -860,12 +833,12 @@ exports.InlineCompareContainer = (function() {
 		
 		var annotationIndex = mCompareUtils.getAnnotationIndexByMapper(this._textView.getModel().getAnnotations(), lineTypeWrapper.mapperIndex).current;
 		if(lineType === "added") {
-			if(annotationIndex === this._annotation.getCurrentAnnotationIndex())
+			if(annotationIndex === this._annotation.getCurrentDiffBlockIndex())
 				lineStyleEvent.style = {styleClass: "diffInlineAddedSelect"};
 			else
 				lineStyleEvent.style = {styleClass: "diffInlineAdded"};
 		} else if (lineType === "removed"){
-			if(annotationIndex === this._annotation.getCurrentAnnotationIndex())
+			if(annotationIndex === this._annotation.getCurrentDiffBlockIndex())
 				lineStyleEvent.style = {styleClass: "diffInlineRemovedSelect"};
 			else
 				lineStyleEvent.style = {styleClass: "diffInlineRemoved"};
@@ -920,7 +893,7 @@ exports.InlineCompareContainer = (function() {
 	
 	InlineCompareContainer.prototype.nextDiff = function(){	
 		this._annotation.nextDiff();
-		this.positionAnnotation(this._textView.getModel().getAnnotations()[this._annotation.getCurrentAnnotationIndex()][0]);
+		this.positionAnnotation(this._textView.getModel().getAnnotations()[this._annotation.getCurrentDiffBlockIndex()][0]);
 	};
 	
 	InlineCompareContainer.prototype.setConflicting =  function(conflicting){	
@@ -929,7 +902,7 @@ exports.InlineCompareContainer = (function() {
 	
 	InlineCompareContainer.prototype.prevDiff = function(){	
 		this._annotation.prevDiff();
-		this.positionAnnotation(this._textView.getModel().getAnnotations()[this._annotation.getCurrentAnnotationIndex()][0]);
+		this.positionAnnotation(this._textView.getModel().getAnnotations()[this._annotation.getCurrentDiffBlockIndex()][0]);
 	};
 	
 	InlineCompareContainer.prototype.positionAnnotation = function(lineIndex){	

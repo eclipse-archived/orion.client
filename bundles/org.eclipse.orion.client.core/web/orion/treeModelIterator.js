@@ -140,6 +140,20 @@ exports.TreeModelIterator = (function() {
 			return false;
 		},
 		
+		_getTopLevelParent: function(model){
+			if(this.topLevel(model)){
+				return model;
+			}
+			var parent = model.parent;
+			while(parent){
+				if(this.topLevel(parent)){
+					return parent;
+				}
+				parent = parent.parent;
+			}
+			return null;
+		},
+		
 		_onCollapse: function(model){
 			if(this._expanded(model.parent)){
 				return model;
@@ -176,6 +190,20 @@ exports.TreeModelIterator = (function() {
 		 */
 		iterate: function(forward, forceExpand) {
 			return forward ? this._forward(forceExpand) : this._backward(forceExpand);
+		},
+		
+		/**
+		 * Iterate from the current cursor only on the top level children
+		 * @param {boolean} forward the iteration direction. If true then iterate to next, otherwise previous.
+		 * @param {boolean} roundTrip the round trip flag. If true then iterate to the beginning at bottom or end at beginning.
+		 */
+		iterateOnTop: function(forward, roundTrip) {
+			var topSibling = this._findSibling(this._getTopLevelParent(this.cursor()), forward);
+			if(topSibling){
+				this.setCursor(topSibling);
+			} else if(roundTrip && this.firstLevelChildren.length > 0) {
+				this.setCursor(forward ? this.firstLevelChildren[0] : this.firstLevelChildren[this.firstLevelChildren.length - 1]);
+			}
 		},
 		
 		/**
@@ -224,7 +252,7 @@ exports.TreeModelIterator = (function() {
 			return this._prevCursor;
 		}
 	};
-	return TreeModelIterator
+	return TreeModelIterator;
 }());
 
 return exports;
