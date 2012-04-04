@@ -126,31 +126,37 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 			var storage;
 			var stylerOptions = this;
 			
-			preferences.getPreferences('/settings', 2).then( function(prefs){		
-				storage = JSON.parse( prefs.get(CATEGORY) );	
-				if (!storage) { return; }
-				if (stylerOptions._stylesheet) {
-					stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
-					stylerOptions._stylesheet = null;
+			preferences.getPreferences('/settings', 2).then( function(prefs){	
+			
+				var data = prefs.get(CATEGORY);
+				
+				if( data !== undefined ){
+			
+					storage = JSON.parse( prefs.get(CATEGORY) );	
+					if (!storage) { return; }
+					if (stylerOptions._stylesheet) {
+						stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
+						stylerOptions._stylesheet = null;
+					}
+					var stylesheet = stylerOptions._stylesheet = document.createElement("STYLE");
+					stylesheet.appendChild(document.createTextNode(stylerOptions._getStyleSheet( storage, USER_THEME, sUtil)));
+					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					head.appendChild(stylesheet);
+					var view = stylerOptions._view;
+					var options = {themeClass:null};
+					view.getOptions(options);
+					var theme = options.themeClass;
+					if (theme) {
+						theme = theme.replace(USER_THEME, "");
+						if (theme) { theme += " "; }
+						theme += USER_THEME;
+					} else {
+						theme = USER_THEME;
+					}
+					options.themeClass = theme;
+					view.setOptions(options);
+					view.update(true);
 				}
-				var stylesheet = stylerOptions._stylesheet = document.createElement("STYLE");
-				stylesheet.appendChild(document.createTextNode(stylerOptions._getStyleSheet( storage, USER_THEME, sUtil)));
-				var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
-				head.appendChild(stylesheet);
-				var view = stylerOptions._view;
-				var options = {themeClass:null};
-				view.getOptions(options);
-				var theme = options.themeClass;
-				if (theme) {
-					theme = theme.replace(USER_THEME, "");
-					if (theme) { theme += " "; }
-					theme += USER_THEME;
-				} else {
-					theme = USER_THEME;
-				}
-				options.themeClass = theme;
-				view.setOptions(options);
-				view.update(true);
 			} );
 		}
 	};

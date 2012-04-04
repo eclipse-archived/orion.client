@@ -284,19 +284,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		var renderer = this.renderer;
 	
 		this.preferences.getPreferences('/settings', 2).then( function(prefs){	
-				
-			var storage = JSON.parse( prefs.get("General") );
+		
+			var data = prefs.get("General");
 			
-			if(storage){
-				var target = preferences.getSetting( storage, "Navigation", "Links" );
+			if( data !== undefined ){
+					
+				var storage = JSON.parse( data );
 				
-				if( target === "Open in new tab" ){
-					target = "_blank";
-				}else{
-					target = "_self";
+				if(storage){
+					var target = preferences.getSetting( storage, "Navigation", "Links" );
+					
+					if( target === "Open in new tab" ){
+						target = "_blank";
+					}else{
+						target = "_self";
+					}
+					
+					renderer.setTarget( target );
 				}
-				
-				renderer.setTarget( target );
 			}
 		});
 	};

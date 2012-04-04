@@ -714,26 +714,31 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			target = target;
 			
 			dojo.query(".targetSelector").forEach(function(node, index, arr){
-    			node.target = target;
+				node.target = target;
   			});	
 		}
 		
 		function readTargetPreference(){
 		
 			prefsService.getPreferences('/settings', 2).then( function(prefs){	
+			
+				var data = prefs.get("General");
 					
-				var storage = JSON.parse( prefs.get("General") );
-				
-				if(storage){
-					var target = prefsService.getSetting( storage, "Navigation", "Links" );
+				if( data !== undefined ){
 					
-					if( target === "Open in new tab" ){
-						target = "_blank";
-					}else{
-						target = "_self";
+					var storage = JSON.parse( data );
+					
+					if(storage){
+						var target = prefsService.getSetting( storage, "Navigation", "Links" );
+						
+						if( target === "Open in new tab" ){
+							target = "_blank";
+						}else{
+							target = "_self";
+						}
+						
+						setTarget( target );
 					}
-					
-					setTarget( target );
 				}
 			});
 		}
