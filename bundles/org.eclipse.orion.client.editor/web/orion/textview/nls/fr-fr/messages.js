@@ -13,7 +13,7 @@
 
 /*global define*/
 
-define("orion/textview/nls/fr-fr/messages", {
+define({
     "multipleAnnotations": "Annotations multiples:",
     "line": "Ligne: ${0}",
 	"currentLine": "Ligne Courant",
