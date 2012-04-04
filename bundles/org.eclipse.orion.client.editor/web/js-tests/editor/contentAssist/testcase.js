@@ -18,35 +18,44 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	var tests = {};
 
 	/**
-	 * Wraps a test body (returning a promise) to ensure a test failure if the promise doesn't resolve.
-	 * This is convenient for asserting that some content assist API method gets called eventually.
+	 * Wraps a test body to ensure a test failure if the promise doesn't resolve. This is convenient for asserting 
+	 * that some content assist API method gets called eventually.
+	 * @param {Function} func The test body (must return a promise).
+	 * @returns {Promise}
 	 */
 	function createTestWithTimeout(func) {
-		var wrapper = new Deferred();
-		var inner = func();
-		if (inner !== null && typeof inner !== 'undefined' && inner.then) {
-			inner.then(
-				function(result) {
-					wrapper.resolve(result);
-				}, function(err) {
-					wrapper.reject(err);
-				});
-			setTimeout(function() {
-				if (inner.fired === -1) {
-					var testName = '';
-					for (testName in tests) {
-						if (tests.hasOwnProperty(testName)) {
-							if (tests[testName] === func) {
-								break;
+		return function() {
+			var wrapper = new Deferred();
+			var inner = func();
+			var innerPromiseFired = false;
+			try {
+				inner = func();
+				setTimeout(function() {
+					if (!innerPromiseFired) {
+						var testName = '';
+						for (testName in tests) {
+							if (tests.hasOwnProperty(testName)) {
+								if (tests[testName] === func) {
+									break;
+								}
 							}
 						}
+						wrapper.reject('Timed out: ' + testName);
 					}
-					wrapper.reject('Timed out: ' + testName);
-					assert.ok(false, 'Timed out: ' + testName);
-				}
-			}, 3000);
-		}
-		return wrapper;
+				}, 3000);
+				inner.then(
+					function(result) {
+						innerPromiseFired = true;
+						wrapper.resolve(result);
+					}, function(err) {
+						innerPromiseFired = true;
+						wrapper.reject(err);
+					});
+			} catch (e) {
+				wrapper.reject(e);
+			}
+			return wrapper;
+		};
 	}
 
 	function withData(func) {
