@@ -55,10 +55,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 			for (var sub = 0; sub < subcategory.length; sub++) {
 
 				var section = dojo.create("section", {
-					id: subcategory[sub].label
+					id: subcategory[sub].label, 
+					role: "region", 
+					"aria-labelledby": subcategory[sub].label.replace(/ /g,"") + "-header"
 				}, this.table);
 
 				dojo.create("h3", {
+					id: subcategory[sub].label.replace(/ /g,"") + "-header",
 					innerHTML: subcategory[sub].ui
 				}, section);
 

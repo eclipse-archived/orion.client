@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document */
+/*global define dijit console document Image */
 
 define(['require', 'dojo', 'orion/explorer', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
 		function(require, dojo, mExplorer, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
@@ -299,7 +299,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="repositorySectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="repositoryNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -373,7 +373,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", { id: "workingDirectorySectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="workingDirectorySectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="workingDirectoryNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -464,7 +464,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.place( slideout, titleWrapper );
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="branchSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="branchNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -540,7 +540,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", { id: "remoteBranchSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="remoteBranchSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="remoteBranchNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -634,7 +634,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.place( slideout, titleWrapper );
 
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="commitSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="commitNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -838,7 +838,7 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.create( "div", { id: "viewAllTagSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="tagSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="tagNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -971,7 +971,7 @@ exports.GitRepositoryExplorer = (function() {
 		this.commandService.renderCommands("remoteSectionActionsArea", dojo.byId("remoteSectionActionsArea"), repository, this, "button");
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="remoteSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="remoteNode" class="plugin-settings-list"></list>' +
 				'</div>' +
@@ -1046,7 +1046,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		
 		var content =	
-			'<div class="sectionTable">' +
+			'<div class="sectionTable" role="region" aria-labelledby="configSectionTitle">' +
 				'<div class="plugin-settings">' +
 					'<list id="configNode" class="plugin-settings-list"></list>' +
 				'</div>' +
