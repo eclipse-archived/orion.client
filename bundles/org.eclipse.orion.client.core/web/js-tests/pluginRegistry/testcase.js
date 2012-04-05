@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
+/*global define Worker*/
 
 
 define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], function(assert, mServiceregistry, mPluginregistry) {
@@ -32,6 +32,31 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry"], functi
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			assert.equal(pluginRegistry.getPlugins().length, 1);
+			assert.equal(serviceRegistry.getServiceReferences().length, 1);		
+			
+			plugin.uninstall();
+			
+			assert.equal(pluginRegistry.getPlugins().length, 0);
+			assert.equal(serviceRegistry.getServiceReferences().length, 0);
+			pluginRegistry.shutdown();
+		});
+		return promise;
+	};
+	
+		tests["test install worker plugin"] = function() {
+		if (typeof(Worker) === "undefined") {
+			return;
+		}
+		
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
+		
+		var promise = pluginRegistry.installPlugin("testPlugin.js").then(function(plugin) {
 			assert.equal(pluginRegistry.getPlugins().length, 1);
 			assert.equal(serviceRegistry.getServiceReferences().length, 1);		
 			

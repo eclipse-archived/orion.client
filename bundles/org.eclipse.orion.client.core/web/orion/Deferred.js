@@ -9,6 +9,18 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
+
+(function() {
+	var global = this;
+	if (!global.define) {
+		global.define = function(f) {
+			global.orion = global.orion || {};
+			global.orion.Deferred = f();
+			delete global.define;
+		};
+	}
+}());
+
 define(function() {
 	var head, tail, remainingHead, remainingTail, running = false;
 
