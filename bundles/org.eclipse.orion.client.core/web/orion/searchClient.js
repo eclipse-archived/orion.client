@@ -194,7 +194,10 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						
 						function doAppend(domElement, resource) {
 							var path = resource.folderName ? resource.folderName : resource.path;
-							domElement.appendChild(document.createTextNode(' - ' + path + ' '));
+							var pathNode = document.createElement('span');
+							pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
+							pathNode.appendChild(document.createTextNode(' - ' + path + ' '));
+							domElement.appendChild(pathNode);
 						}
 						
 						function appendPath(domElement, resource) {
@@ -220,6 +223,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 					dojo.empty(resultsNode);
 					if (resources && resources.length > 0) {
 						var table = document.createElement('table');
+						table.setAttribute('role', 'presentation');
 						for (var i=0; i < resources.length; i++) {
 							var resource = resources[i];
 							var col;
@@ -256,6 +260,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							}
 		
 							resourceLink.setAttribute('href', loc);
+							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''));
 							dojo.style(resourceLink, "verticalAlign", "middle");
 							col.appendChild(resourceLink);
 							appendPath(col, resource);
