@@ -1,4 +1,13 @@
-define("git/nls/pl/gitmessages", ({
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ ******************************************************************************/
+define({
 	"Compare":"Porównaj",
 	"View the side-by-side compare":"Otwórz porównanie stron",
 	"Working Directory Version":"Wersja bierząca",
@@ -16,4 +25,4 @@ define("git/nls/pl/gitmessages", ({
 	"Tags:": "Tagi:",
 	"No Tags": "Brak Tagów",
 	"Diffs": "Różnice"
-}));
+});

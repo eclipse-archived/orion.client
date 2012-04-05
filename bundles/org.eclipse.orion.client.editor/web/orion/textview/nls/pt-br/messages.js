@@ -13,7 +13,7 @@
 
 /*global define*/
 
-define("orion/textview/nls/pt-br/messages", {
+define({
 	"multipleAnnotations": "M\u00FAltiplas anota\u00E7\u00F5es:",
 	"line": "Linha: ${0}",
 	"breakpoint": "Breakpoint",

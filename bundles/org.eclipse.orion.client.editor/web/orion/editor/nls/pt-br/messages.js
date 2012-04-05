@@ -13,7 +13,7 @@
 
 /*global define*/
 
-define("orion/editor/nls/pt-br/messages", {
+define({
 	"incrementalFind": "Localiza\u00E7\u00E3o Incremental: ${0}",
 	"incrementalFindNotFound": "Localiza\u00E7\u00E3o Incremental: ${0} (n\u00E3o encontrado)",
 	"find": "Localizar...",
