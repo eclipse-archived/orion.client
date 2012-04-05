@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global window addEventListener removeEventListener self*/
+/*global window ArrayBuffer addEventListener removeEventListener self*/
 
 /**
  * @private Don't jsdoc this.
@@ -37,7 +37,14 @@ eclipse.PluginProvider = function(metadata) {
 
 	function _publish(message) {
 		if (_target) {
-				_target.postMessage((window.ArrayBuffer ? message : JSON.stringify(message)), "*");	
+			if (typeof(ArrayBuffer) === "undefined") {
+				message = JSON.stringify(message);
+			}
+			if (_target === self) {
+				_target.postMessage(message);
+			} else {
+				_target.postMessage(message, "*");
+			}
 		}
 	}
 	
@@ -131,7 +138,7 @@ eclipse.PluginProvider = function(metadata) {
 			return;
 		}
 
-		if (!window) {
+		if (typeof(window) === "undefined") {
 			_target = self;
 		} else if (window !== window.parent) {
 			_target = window.parent;

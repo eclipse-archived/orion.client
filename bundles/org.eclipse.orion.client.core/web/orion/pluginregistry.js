@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout addEventListener document console localStorage */
+/*global define setTimeout addEventListener document console localStorage Worker*/
 
 define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(Deferred, mServiceregistry){
 var eclipse = eclipse || {};
@@ -275,26 +275,46 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	var internalRegistry = {
 			registerService: serviceRegistry.registerService.bind(serviceRegistry),
 			connect: function(url, handler) {
-
-				var iframe = document.createElement("iframe");
-		        iframe.id = url;
-		        iframe.name = url;
-		        if (!opt_visible) {
-			        iframe.style.display = "none";
-			        iframe.style.visibility = "hidden";
-		        }
-		        iframe.src = url;
-		        document.body.appendChild(iframe);
-		        var channel = {iframe: iframe, target: iframe.contentWindow, handler: handler, url: url};
-		        _channels.push(channel);
-		        return channel;
+				var channel = {
+					handler: handler,
+					url: url
+				};
+				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") {
+					var worker = new Worker(url);
+					worker.onmessage = function(event) {
+							if (typeof channel.useStructuredClone === "undefined") {
+								channel.useStructuredClone = typeof event.data !== "string";
+							}
+							channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
+					};
+					channel.target = worker;
+					channel.close = function() {
+						worker.terminate();
+					};
+				} else {
+					var iframe = document.createElement("iframe");
+					iframe.id = url;
+					iframe.name = url;
+					if (!opt_visible) {
+						iframe.style.display = "none";
+						iframe.style.visibility = "hidden";
+					}
+					iframe.src = url;
+					document.body.appendChild(iframe);
+					channel.target = iframe.contentWindow;
+					channel.close = function() {
+						document.body.removeChild(iframe);
+					};
+				}
+				_channels.push(channel);
+				return channel;
 			},
 			disconnect: function(channel) {
 				for (var i = 0; i < _channels.length; i++) {
 					if (channel === _channels[i]) {
 						_channels.splice(i,1);
 						try {
-							document.body.removeChild(channel.iframe);
+							channel.close();
 						} catch(e) {
 							// best effort
 						}
@@ -386,7 +406,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	this.shutdown = function() {
 		_channels.forEach(function(channel) {
 			try {
-				document.body.removeChild(channel.iframe);
+				channel.close();
 			} catch(e) {
 				// best effort
 			}
