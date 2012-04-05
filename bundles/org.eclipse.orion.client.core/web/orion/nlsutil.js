@@ -10,11 +10,6 @@
  *******************************************************************************/
 define([], function() {
 	
-	function formatMessage(msg) {
-		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
-	}
-	
 	function urlExists(url)
 	{
 		var http = new XMLHttpRequest();
@@ -51,7 +46,6 @@ define([], function() {
 	
 	//return module exports
 	return {
-		formatMessage: formatMessage,
 		getNlsBundle: getNlsBundle
 	};
 });
