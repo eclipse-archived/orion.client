@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -276,7 +276,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 				dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft", innerHTML: content.sections[i].name }, titleWrapper );
 
 				var content2 =	
-					'<div class="sectionTable">' +
+					'<div class="sectionTable" role="region" aria-labelledby="' + content.sections[i].id + "_SectionTitle" + '">' +
 						'<list id="' + content.sections[i].id + '"></list>' +
 					'</div>';
 				
