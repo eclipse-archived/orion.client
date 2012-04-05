@@ -331,6 +331,15 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		enter: function() {
 			var proposal = this.proposals[this.selectedIndex] || null;
 			return this.contentAssist.apply(proposal);
+		},
+		tab: function() {
+			if (this.widget) {
+				this.widget.createAccessible(this);
+				this.widget.parentNode.focus();
+				return true;
+			} else {
+				return false;
+			}
 		}
 	};
 
@@ -382,14 +391,31 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.textView.focus();
 		},
 		/** @private */
-		createDiv: function(proposal, isSelected, parent) {
+		createDiv: function(proposal, isSelected, parent, itemIndex) {
 			var div = document.createElement("div");
+			div.id = "contentoption" + itemIndex;
+			div.setAttribute("role", "option");
 			if (isSelected) {
 				div.className = "selected";
+				this.parentNode.setAttribute("aria-activedescendant", div.id);
 			}
 			var textNode = document.createTextNode(proposal);
 			div.appendChild(textNode, div);
 			parent.appendChild(div);
+		},
+		/** @private */
+		createAccessible: function(mode) {
+			if(!this._isAccessible) {
+				this.parentNode.addEventListener("keydown", function(evt) {
+					evt.preventDefault();
+					if(evt.keyCode === 27) {return mode.cancel(); }
+					else if(evt.keyCode === 38) { return mode.lineUp(); }
+					else if(evt.keyCode === 40) { return mode.lineDown(); }
+					else if(evt.keyCode === 13) { return mode.enter(); }
+					return false;
+				});
+			}
+			this._isAccessible = true;
 		},
 		/** @private */
 		getDisplayString: function(proposal) {
@@ -433,6 +459,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				}
 				if (child === node) {
 					child.className = "selected";
+					this.parentNode.setAttribute("aria-activedescendant", child.id);
 					child.focus();
 					if (child.offsetTop < this.parentNode.scrollTop) {
 						child.scrollIntoView(true);
@@ -454,7 +481,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			caretLocation.y += this.textView.getLineHeight();
 			this.parentNode.innerHTML = "";
 			for (var i = 0; i < this.proposals.length; i++) {
-				this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.parentNode);
+				this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.parentNode, i);
 			}
 			this.textView.convert(caretLocation, "document", "page");
 			this.parentNode.style.position = "absolute";
@@ -475,6 +502,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.parentNode.onclick = this.onClick.bind(this);
 		},
 		hide: function() {
+			if(document.activeElement === this.parentNode) {
+				this.textView.focus();
+			}
 			this.parentNode.style.display = "none";
 			this.parentNode.onclick = null;
 		}
