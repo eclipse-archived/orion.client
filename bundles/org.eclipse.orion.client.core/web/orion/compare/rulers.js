@@ -413,6 +413,9 @@ orion.CompareMatchRenderer =  (function() {
 		},
 	
 		copyToLeft: function(){
+			if(!this._diffNavigator.iterator){
+				return;
+			}
 			var currentDiff = this._diffNavigator.iterator.cursor();
 			if(currentDiff){
 				var textR = this._rightTextView.getText(currentDiff.oldA.start , currentDiff.oldA.end);
