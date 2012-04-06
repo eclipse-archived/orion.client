@@ -32,8 +32,7 @@
 				name : "toRGB",
 				tooltip : "Converts n,n,n decimal to #RRGGBB for use in CSS",
 				id : "org.eclipse.orion.client.core.toRGB",
-				// TODO do we have a way to specify css AND html?
-				validationProperties: {"Name":"*.css"},  
+				contentType: ["text/css", "text/html"],
 				key : [ "b", true, true ]
 			};
 			provider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProps);
