@@ -740,7 +740,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		/**
 		* Returns if the view is destroyed.
-		* <p>
 		* @returns {Boolean} <code>true</code> if the view is destroyed.
 		*/
 		isDestroyed: function () {
