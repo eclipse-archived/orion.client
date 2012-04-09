@@ -42,19 +42,17 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/PageUtil', 'dojo/parser'],
 						if (info.saveToken) {
 							// save tokens would typically have special characters such as '?' or '&' in them so we can't use
 							// the URI template to parse them.  Not sure how we could best express this.  For now we have the plugin
-							// specify a token that signifies the start of the URI and possible terminators.  A better way to do this might
-							// be to let the plugin specify a regex or a template of the content URI so that we could grab things like hostname,
-							// path, parameters, etc.
+							// specify one or more tokens that signify the start of the URI and its terminator.  
 							var tokens = dojo.isArray(info.saveToken) ? info.saveToken : [info.saveToken];
 							var parameterStart = dojo.hash().indexOf(",");
 							if (parameterStart >= 0) {
 								var parameterString = dojo.hash().substring(parameterStart);
 								for (var i=0; i<tokens.length; i++) {
-									var index = parameterString.indexOf(info.saveToken[i]);
+									var index = parameterString.indexOf(info.saveToken[i].token);
 									if (index >= 0) {
-										var contentURL = parameterString.substring(index+info.saveToken[i].length);
-										if (info.saveTokenTerminator) {
-											var terminators = dojo.isArray(info.saveTokenTerminator) ? info.saveTokenTerminator : [info.saveTokenTerminator];
+										var contentURL = parameterString.substring(index+info.saveToken[i].token.length);
+										if (info.saveToken[i].terminator) {
+											var terminators = dojo.isArray(info.saveToken[i].terminator) ? info.saveToken[i].terminator : [info.saveToken[i].terminator];
 											for (var j=0; j<terminators.length; j++) {
 												var ending = contentURL.indexOf(terminators[j]);
 												if (ending >= 0) {
