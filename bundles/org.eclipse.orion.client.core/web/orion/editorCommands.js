@@ -168,11 +168,13 @@ exports.EditorCommandFactory = (function() {
 				//        optional attribute: tooltip - the tooltip to use for the command
 				//        optional attribute: key - an array with values to pass to the orion.textview.KeyBinding constructor
 				//        optional attribute: img - a URL to an image for the action
-				//        optional attribute: validationProperties - an object containing key/value pairs for validating the
-				//          the resource metadata to determine whether the command is valid for the given resource.
-				//          Wildcards are supported.  For example the validation property
-				//				{"Git":"*", "Directory":"false"}
-				//              specifies that the property "Git" must be present, and that the property "Directory" must be false.
+				//      optional attribute: contentType - an array of content types for which this command is valid
+				//      optional attribute: validationProperties - an array of validation properties used to read the resource
+				//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
+				//          supported as values in addition to specific values.
+				//          For example the validation property
+				//				[{source: "Git"}, {source: "Directory", match:"true"}]
+				//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
 				// run - the implementation of the action (function).
 				//        arguments passed to run: (selectedText, fullText, selection, resourceName)
 				//          selectedText (string) - the currently selected text in the editor

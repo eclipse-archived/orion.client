@@ -276,14 +276,20 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 			}
 			if (info.id) {
-				var command;
+				var command = null;
 				// exclude anything in the list of exclusions
 				var position = dojo.indexOf(exclusions, info.id);
 				if (position < 0) {
-					// We first look for it in the command service.  
-					command = commandService.findCommand(info.id);
+					// First see if we have a uriTemplate and name, which is enough to build a command internally.
+					if (info.name && info.uriTemplate) {
+						command = new mCommands.Command(mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, true));
+					}
+					// If we couldn't compose one, see if one is already registered.
 					if (!command) {
-						// if it's not there look for it in orion.navigate.command and create it
+						command = commandService.findCommand(info.id);
+					}
+					// If it's not registered look for it in orion.navigate.command and create it
+					if (!command) {
 						var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
 						for (var j=0; j<commandsReferences.length; j++) {
 							var id = commandsReferences[j].getProperty("id");
@@ -318,7 +324,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 								}), 0);
 							}
 						}
-					}
+					} 
 				}
 			} 
 		}
@@ -412,7 +418,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			// info - information about the navigation link (object).
 			//     required attribute: name - the name of the navigation link
 			//     required attribute: id - the id of the navigation link
-			//     required attribute: href - the URL for the navigation link
+			//     required attribute: uriTemplate - the URL for the navigation link
 			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
 			var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
 			var params = PageUtil.matchResourceParameters(window.location.href);
@@ -426,8 +432,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}
-				if (info.href && info.name) {
-					var uriTemplate = new URITemplate(info.href);
+				if (info.uriTemplate && info.name) {
+					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last");
 					text = document.createTextNode(info.name);
