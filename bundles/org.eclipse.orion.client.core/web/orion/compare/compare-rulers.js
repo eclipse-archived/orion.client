@@ -185,14 +185,14 @@ orion.CompareAnnotation =  (function() {
 	return CompareAnnotation;
 }()); 
 
-orion.TwoWayCompareOverviewRuler = (function() {
-	function TwoWayCompareOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
+orion.CompareOverviewRuler = (function() {
+	function CompareOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
 		this._compareAnnotaion = compareAnnotaion;
 		this._onClick = onClick;
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
-	TwoWayCompareOverviewRuler.prototype = new orion.CompareRuler();
-	TwoWayCompareOverviewRuler.prototype.getStyle = function(lineIndex) {
+	CompareOverviewRuler.prototype = new orion.CompareRuler();
+	CompareOverviewRuler.prototype.getStyle = function(lineIndex) {
 		var result, style;
 		if (lineIndex === undefined) {
 			result = this._rulerStyle || {};
@@ -263,33 +263,33 @@ orion.TwoWayCompareOverviewRuler = (function() {
 		}
 		return result;
 	};
-	TwoWayCompareOverviewRuler.prototype.getHTML = function(lineIndex) {
+	CompareOverviewRuler.prototype.getHTML = function(lineIndex) {
 		return "&nbsp;";
 	};
-	TwoWayCompareOverviewRuler.prototype.onClick = function(lineIndex, e) {
+	CompareOverviewRuler.prototype.onClick = function(lineIndex, e) {
 		if (lineIndex === undefined) { return; }
 		this._onClick(lineIndex , this);
 	};
-	TwoWayCompareOverviewRuler.prototype._onModelChanged = function(e) {
+	CompareOverviewRuler.prototype._onModelChanged = function(e) {
 		var model = this._editor.getModel();
 		var lineCount = model.getLineCount();
 		if(lineCount > 0)
 			this._editor.redrawLines(0, 1, this);
 	};
-	return TwoWayCompareOverviewRuler;
+	return CompareOverviewRuler;
 }());
 
 
-orion.CompareMatchRenderer =  (function() {
+orion.CompareCurveRuler =  (function() {
 
-	function CompareMatchRenderer(canvasDiv) {
+	function CompareCurveRuler(canvasDiv) {
 		this._canvasDiv = canvasDiv;
 		this._mapper = undefined;
 		this._initialized = false;
 	}
 
-	CompareMatchRenderer.prototype =  {
-		init: function(mapper , leftEditor , rightEditor, charDiff ){
+	CompareCurveRuler.prototype =  {
+		init: function(mapper , leftEditor , rightEditor, diffNavigator ){
 			this._initialized = true;
 			this._initing = true;
 			this._mapper = mapper;
@@ -297,41 +297,8 @@ orion.CompareMatchRenderer =  (function() {
 			this._rightEditor = rightEditor;
 			this._leftTextView = leftEditor.getTextView();
 			this._rightTextView = rightEditor.getTextView();
-			var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), this._mapper, 1);
-			var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), this._mapper, 0);
-			this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator(this._rightEditor, this._leftEditor, rFeeder, lFeeder, charDiff);
-			this._overviewRuler._diffNavigator = this._diffNavigator;
+			this._diffNavigator = diffNavigator;
 			this.render();
-		},
-		
-		getDiffNavigator: function(){
-			return this._diffNavigator;
-		},
-		
-		getCurrentDiffBlockIndex: function(){
-			return this._diffNavigator.getCurrentBlockIndex();
-		},
-		
-		getCurrentMapperIndex: function(){
-			return this._diffNavigator.getCurrentMapperIndex();
-		},
-		
-		setOverviewRuler: function(overview){
-			this._overviewRuler =  overview;
-		},
-
-		_setEditorPosition: function (editor , lineIndex){
-			var lineHeight = editor.getLineHeight();
-			var clientArea = editor.getClientArea();
-			var lines = Math.floor(clientArea.height / lineHeight/3);
-			editor.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
-		},
-		
-		_findBaseLine: function(editor){
-			var lineHeight = editor.getLineHeight();
-			var clientArea = editor.getClientArea();
-			var lines = Math.floor(clientArea.height / lineHeight/3);
-			return editor.getTopIndex() + lines;
 		},
 		
 		matchPositionFrom: function(fromLeft){
@@ -343,75 +310,6 @@ orion.CompareMatchRenderer =  (function() {
 			matchEditor.setTopIndex(matchLine);
 		},
 
-		matchPositionFromAnnotation: function(lineIndex){
-			if(!this._initialized){
-				return;
-			}
-			if(this._diffNavigator){
-				var diffblockIndex;
-				if(lineIndex < 0){
-					diffblockIndex = 0;
-				} else {
-					diffblockIndex = mCompareUtils.getAnnotationIndex(this._diffNavigator.getFeeder().getDiffBlocks(), lineIndex);
-				}
-				this._diffNavigator.gotoBlock(diffblockIndex);
-				this.positionDiffBlock(diffblockIndex);
-			}
-		},
-		
-		positionDiffBlock: function(annotationIndex){
-			var diffBlocks = this._diffNavigator.getFeeder().getDiffBlocks();
-			if(diffBlocks.length === 0)
-				return;
-			this._setEditorPosition(this._rightTextView , diffBlocks[annotationIndex][0]);
-			var lineIndexL = mCompareUtils.lookUpLineIndex(this._diffNavigator.getMapper(), 0, diffBlocks[annotationIndex][1]);
-			this._setEditorPosition(this._leftTextView , lineIndexL);
-			this._leftTextView.redrawRange();
-			this._rightTextView.redrawRange();
-			var drawLine = this._rightTextView.getTopIndex() ;
-			this._rightTextView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
-		},
-		
-		gotoChange: function(caretPosition, textView){
-			if(this._diffNavigator.gotoChange(caretPosition, textView)){
-				var drawLine = this._rightTextView.getTopIndex() ;
-				this._rightTextView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
-				this.render();
-			}
-		},
-
-		nextDiff: function(){
-			this._diffNavigator.iterateOnBlock(true, true);
-			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
-			this.render();
-		},
-		
-		prevDiff: function(){
-			this._diffNavigator.iterateOnBlock(false, true);
-			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
-			this.render();
-		},
-		
-		nextChange: function(){
-			this._diffNavigator.iterateOnChange(true);
-			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
-			this.render();
-		},
-		
-		prevChange: function(){
-			this._diffNavigator.iterateOnChange(false);
-			this.positionDiffBlock(this._diffNavigator.getCurrentBlockIndex());
-			this.render();
-		},
-		
-		getMapperTextRange: function(editor , mapperIndex , mapperColumnIndex){
-			var startLine = mCompareUtils.lookUpLineIndex(this._diffNavigator.getMapper(), mapperIndex, mapperIndex);
-			var endLine = startLine + this._mapper[mapperIndex][mapperColumnIndex] - 1;
-			var start =  editor.getModel().getLineStart(startLine);
-			var end =  editor.getModel().getLineEnd(endLine,true);
-			return {start:start,end:end};
-		},
-	
 		copyToLeft: function(){
 			if(!this._diffNavigator.iterator){
 				return;
@@ -465,7 +363,7 @@ orion.CompareMatchRenderer =  (function() {
 			
 			var w =  canvas.parentNode.clientWidth;
 			
-			if(mapperIndex === this.getCurrentMapperIndex()){
+			if(mapperIndex === this._diffNavigator.getCurrentMapperIndex()){
 				context.stroke();
 				context.strokeStyle = '#000'; 
 				context.lineWidth   = 1;
@@ -494,7 +392,7 @@ orion.CompareMatchRenderer =  (function() {
 				this.render();
 		}
 	};
-	return CompareMatchRenderer;
+	return CompareCurveRuler;
 }()); 
 
 return orion;
