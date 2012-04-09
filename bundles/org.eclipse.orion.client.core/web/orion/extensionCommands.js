@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011,2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -22,6 +22,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 * @name orion.extensionCommands
 	 */
 	var extensionCommandUtils  = {};
+	
+	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+	var nonHash = window.location.href.split('#')[0];
+	var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+
+	// Store a content types map once so we can do some synchronous lookups on file content types.
+	var contentTypes;
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
 	    if (item === null || typeof(item) !== 'object') {
@@ -51,30 +58,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				editors.push({
 					id: id,
 					name: serviceRef.getProperty("name"),
-					uriTemplate: new URITemplate(serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate"))
+					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate")
 				});
 			}
 			return editors;
 		}
 
-		function toNamePattern(exts, filenames) {
-			exts = exts.map(function(ext) { return mRegex.escape(ext); });
-			filenames = filenames.map(function(ext) { return mRegex.escape(ext); });
-			var extsPart = exts.length && "(*\\.(" + exts.join("|") + ")$)";
-			var filenamesPart = filenames.length && "(^(" + filenames.join("|") + ")$)";
-			var pattern;
-			if (extsPart && filenamesPart) {
-				pattern = extsPart + "|" + filenamesPart;
-			} else if (extsPart) {
-				pattern = extsPart;
-			} else if (filenamesPart) {
-				pattern = filenamesPart;
-			} else {
-				pattern = null;
-			}
-			// /(*\.(ext1|ext2|...)$)|(^(filename1|filename2|...)$)/
-			return pattern;
-		}
 		function getEditorOpenWith(serviceRegistry, editor) {
 			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
 			var types = [];
@@ -101,144 +90,220 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		
 		var editors = getEditors(), defaultEditor = getDefaultEditor(serviceRegistry);
 		var fileCommands = [];
-		// TODO: should not be necessary to do this here, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-		var nonHash = window.location.href.split('#')[0];
-		var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 
 		for (var i=0; i < editors.length; i++) {
 			var editor = editors[i];
 			var isDefaultEditor = (defaultEditor && defaultEditor.editor === editor.id);
 			var editorContentTypes = getEditorOpenWith(serviceRegistry, editor);
 			if (editorContentTypes.length) {
-				var exts = [], filenames = [];
-				for (var j=0; j < editorContentTypes.length; j++) {
-					var contentType = contentTypesMap[editorContentTypes[j]];
-					if (contentType) {
-						exts = exts.concat(contentType.extension);
-						filenames = filenames.concat(contentType.filename);	
-					}
-				}
-				var uriTemplate = editor.uriTemplate;
-				var validationProperties = { Directory: false, Name: toNamePattern(exts, filenames) };
 				var properties = {
-						name: editor.name || editor.id,
-						id: "eclipse.openWithCommand." + editor.id,
-						tooltip: editor.name,
-						validationProperties: validationProperties,
-						href: true,
-						forceSingleItem: true,
-						isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
-					};
-
-				// Pretend that this is a real service
-				var fakeService = { 
-					run: dojo.hitch(uriTemplate, function(data) {
-						data.OrionHome = hostName;  //  https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-						return window.decodeURIComponent(this.expand(data));
-					})
+					name: editor.name || editor.id,
+					id: "eclipse.openWithCommand." + editor.id,
+					tooltip: editor.name,
+					contentType: editorContentTypes,
+					uriTemplate: editor.uriTemplate,
+					forceSingleItem: true,
+					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
 				};
-				fileCommands.push({properties: properties, service: fakeService});
+				fileCommands.push({properties: properties, service: {}});
 			}
 		}
 		return fileCommands;
 	};
 	
-	extensionCommandUtils._makeValidationFunction = function(info, validationItemConverter) {
-		function getPattern(wildCard){
-			var pattern = '^';
-	        for (var i = 0; i < wildCard.length; i++ ) {
-	                var c = wildCard.charAt(i);
-	                switch (c) {
-	                        case '?':
-	                                pattern += '.';
-	                                break;
-	                        case '*':
-	                                pattern += '.*';
-	                                break;
-	                        default:
-	                                pattern += c;
-	                }
-	        }
-	        pattern += '$';
-        
-        return new RegExp(pattern);
-		}
-		
-		function matchSinglePattern(item, keyWildCard, valueWildCard){
-			var keyPattern, key;
-			if(keyWildCard.indexOf(":")>=0){
-				keyPattern = getPattern(keyWildCard.substring(0, keyWildCard.indexOf(":")));
-				var keyLastSegments = keyWildCard.substring(keyWildCard.indexOf(":")+1);
-				for(key in item){
-					if(keyPattern.test(key)){
-						if(matchSinglePattern(item[key], keyLastSegments, valueWildCard)){
-							return true;
-						}
+	/**
+	 * Create a validator for a given set of service properties.  The validator should be able to 
+	 * validate a given item using the "contentType" and "validationProperties" service properties.
+	 */
+	extensionCommandUtils._makeValidator = function(info, serviceRegistry, validationItemConverter) {
+		function checkItem(item, key, value, validationProperty) {
+			// item has the specified property
+			if (item[key]) {
+				validationProperty.itemCached = item;
+				if (!value) {  // value doesn't matter, just the presence of the property is enough
+					if (validationProperty.variableName) {
+						validationProperty.variableValue = item[key];
 					}
-				}
-			}
-			
-			keyPattern = getPattern(keyWildCard);
-			for(key in item){
-				if(keyPattern.test(key)){
-					if(typeof(valueWildCard)==='string'){
-						var valuePattern = getPattern(valueWildCard);
-						if(valuePattern.test(item[key])){
+					return true;
+				} else if (typeof(value) === 'string') {  // the value is a regular expression that should match some string
+					if (!typeof(item[key] === 'string')) {
+						// can't pattern match on a non-string
+						return false;
+					}
+					if (validationProperty.variableName) {
+						var patternMatch = new RegExp(value).exec(item[key]);
+						if (patternMatch) {
+							var firstMatch = patternMatch[0];
+							if (validationProperty.variableMatchPosition === "before") {
+								validationProperty.variableValue = item[key].substring(0, patternMatch.index);
+							} else if (validationProperty.variableMatchPosition === "after") {
+								validationProperty.variableValue = item[key].substring(patternMatch.index + firstMatch.length);
+							} else {
+								validationProperty.variableValue = firstMatch;
+							}
+							// now look for replacements
+							if (validationProperty.replacements) {
+								for (var i=0; i<validationProperty.replacements.length; i++) {
+									var invalid = false;
+									if (validationProperty.replacements[i].pattern) {	
+										var from = validationProperty.replacements[i].pattern;
+										var to = validationProperty.replacements[i].replacement || "";
+										validationProperty.variableValue = validationProperty.variableValue.replace(new RegExp(from), to);
+									} else {
+										invalid = true;
+									}
+									if (invalid) {
+										window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]);
+									}
+								}
+							}
 							return true;
 						}
-					}else{
-						if(valueWildCard===item[key]){
-							return true;
+					} else {
+						return new RegExp(value).test(item[key]);
+					}
+				} else {
+					if (item[key] === value) {
+						if (validationProperty.variableName) {
+							validationProperty.variableValue = item[key];
 						}
+						return true;
 					}
 				}
 			}
 			return false;
 		}
 		
-		function validateSingleItem(item, validationProperties){
-			for(var keyWildCard in validationProperties){
-				var matchFound = matchSinglePattern(item, keyWildCard, validationProperties[keyWildCard]);
-				if(!matchFound){
+		function matchSinglePattern(item, propertyName, validationProperty){
+			var value = validationProperty.match;
+			var key, keyLastSegments;
+			if (propertyName.indexOf("|") >= 0) {
+				// the pipe means that any one of the piped properties can match
+				key = propertyName.substring(0, propertyName.indexOf("|"));
+				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1);
+				// if key matches, we can stop.  No match is not a failure, look in the next segments.
+				if (matchSinglePattern(item, key, validationProperty)) {
+					return true;
+				} else {
+					return matchSinglePattern(item, keyLastSegments, validationProperty);
+				}
+			} else if (propertyName.indexOf(":") >= 0) {
+				// the colon is used to drill into a property
+				key = propertyName.substring(0, propertyName.indexOf(":"));
+				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1);
+				// must have key and then check the next value
+				if (item[key]) {
+					return matchSinglePattern(item[key], keyLastSegments, validationProperty);
+				} else {
 					return false;
 				}
+			} else {
+				// we are checking a single property
+				return checkItem(item, propertyName, value, validationProperty);
 			}
-			return true;
 		}
 		
-		return dojo.hitch(info, function(items){
+		function validateSingleItem(item, validator){
+			// first validation properties
+			if (validator.info.validationProperties) {
+				for (var i=0; i<validator.info.validationProperties.length; i++) {
+					var validationProperty = validator.info.validationProperties[i];
+					if (validationProperty.source) {
+						var matchFound = matchSinglePattern(item, validationProperty.source, validationProperty);
+						if (!matchFound){
+							return false;
+						} 
+					} else {
+						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified.");
+						return false;
+					}
+				}
+			}
+			// now content types
+			if (validator.info.contentType && contentTypes) {
+				var foundMatch = false;
+				var contentType = mContentTypes.getFilenameContentType(item.Name, contentTypes);
+				if (contentType) {
+					for (var i=0; i<validator.info.contentType.length; i++) {
+						if (contentType.id === validator.info.contentType[i]) {
+							foundMatch = true;
+							break;
+						}
+					}
+				}
+				return foundMatch;
+			} else {	
+				return true;
+			}
+		}
+	
+		var validator = {info: info};
+		validator.validationFunction =  dojo.hitch(validator, function(items){
 			if (typeof validationItemConverter === "function") {
 				items = validationItemConverter(items);
 			}
-			if(dojo.isArray(items)){
-				if ((this.forceSingleItem || this.href) && items.length !== 1) {
+			if (dojo.isArray(items)){
+				if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
 					return false;
 				}
-				if(!this.forceSingleItem && items.length < 1){
+				if (items.length < 1){
 					return false;
 				}
-			} else{
+			} else {
 				items = [items];
 			}
 			
-			if(!this.validationProperties){
-				return true;
-			}
-			
 			for(var i in items){
-				if(!validateSingleItem(items[i], this.validationProperties)){
+				if(!validateSingleItem(items[i], this)){
 					return false;
 				}
 			}
 			return true;
-			
 		});
+		validator.generatesURI = dojo.hitch(validator, function() {
+			return !!this.info.uriTemplate;
+		});
+		
+		validator.getURI = dojo.hitch(validator, function(item) {
+			if (this.info.uriTemplate) {
+				var variableExpansions = {};
+				// we need the properties of the item
+				for (var property in item){
+					if(item.hasOwnProperty(property)){
+						variableExpansions[property] = item[property];
+					}
+				}
+				// now we need the variable expansions collected during validation.  
+				if (this.info.validationProperties) {
+					for (var i=0; i<this.info.validationProperties.length; i++) {
+						var validationProperty = this.info.validationProperties[i];
+						if (validationProperty.source && validationProperty.variableName) {
+							// we may have just validated this item.  If so, we don't need to recompute the variable value.
+							var alreadyCached = validationProperty.itemCached === item && validationProperty.variableValue;
+							if (!alreadyCached) {
+								matchSinglePattern(item, validationProperty.source, validationProperty);
+							}
+							variableExpansions[validationProperty.variableName] = validationProperty.variableValue;
+						}
+					}
+				}
+				// special properties.  Should already be in metadata.  See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+				variableExpansions.OrionHome = orionHome;
+				var uriTemplate = new URITemplate(this.info.uriTemplate);
+				return window.decodeURIComponent(uriTemplate.expand(variableExpansions));
+			} 
+			return null;
+		});
+		return validator;
 	};
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
 	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
-
-		
+		if (!contentTypes) {
+			serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) {
+				contentTypes = ct;
+			});
+		}
 		var commandOptions = {
 			name: info.name,
 			image: info.image,
@@ -246,19 +311,14 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			tooltip: info.tooltip,
 			isEditor: info.isEditor
 		};
-		
-		commandOptions.visibleWhen = extensionCommandUtils._makeValidationFunction(info, validationItemConverter);
+		var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, validationItemConverter);
+		commandOptions.visibleWhen = validator.validationFunction;
 		
 		if (createNavigateCommandCallback) {
-			if (info.href) {
-				commandOptions.hrefCallback = dojo.hitch(info, function(data){
+			if (validator.generatesURI()) {
+				commandOptions.hrefCallback = dojo.hitch(validator, function(data){
 					var item = dojo.isArray(data.items) ? data.items[0] : data.items;
-					var shallowItemClone = extensionCommandUtils._cloneItemWithoutChildren(item);
-					if(serviceOrReference.run) {
-						return serviceOrReference.run(shallowItemClone);
-					} else if (serviceRegistry) {
-						return serviceRegistry.getService(serviceOrReference).run(shallowItemClone);
-					}
+					return this.getURI(item);
 				});
 			} else {
 				commandOptions.callback = dojo.hitch(info, function(data){

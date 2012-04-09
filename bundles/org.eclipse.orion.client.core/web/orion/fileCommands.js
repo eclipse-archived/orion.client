@@ -707,22 +707,22 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		//		required attribute: name - the name of the command
 		//		required attribute: id - the id of the command
 		//		optional attribute: tooltip - the tooltip to use for the command
-		//        optional attribute: image - a URL to an image for the command
-		//        optional attribute: href - if true, then the service returns an href when it runs
-		//        optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
+		//      optional attribute: image - a URL to an image for the command
+		//      optional attribute: uriTemplate - a URI template that can be expanded to generate a URI appropriate for the item.
+		//      optional attribute: forceSingleItem - if true, then the service is only invoked when a single item is selected
 		//			and the item parameter to the run method is guaranteed to be a single item vs. an array.  When this is not true, 
 		//			the item parameter to the run method may be an array of items.
-		//        optional attribute: validationProperties - an object containing key/value pairs for validating the
-		//          the resource metadata to determine whether the command is valid for the given resource.
-		//          Wildcards are supported.  For example the validation property
-		//				{"Git":"*", "Directory":"true"}
+		//      optional attribute: contentType - an array of content types for which this command is valid
+		//      optional attribute: validationProperties - an array of validation properties used to read the resource
+		//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
+		//          supported as values in addition to specific values.
+		//          For example the validation property
+		//				[{source: "Git"}, {source: "Directory", match:"true"}]
 		//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
 		// run - the implementation of the command (function).
 		//        arguments passed to run: (itemOrItems)
 		//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
-		//        the return value of the run function will be used as follows:
-		//          if info.href is true, the return value should be an href and the window location will be replaced with the href
-		//			if info.href is not true, the run function is assumed to perform all necessary action and the return is not used.
+		//        the run function is assumed to perform all necessary action and the return is not used.
 		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
 		
 		var fileCommands = [];
@@ -762,7 +762,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					command.isEditor = commandInfo.isEditor;
 				}
 				
-				if (commandInfo.forceSingleItem || commandInfo.href) {
+				if (commandInfo.forceSingleItem || commandInfo.uriTemplate) {
 					// single items go in the local actions column, grouped in their own unnamed group to get a separator
 					commandService.addCommand(command);
 					if (!extensionGroupCreated) {

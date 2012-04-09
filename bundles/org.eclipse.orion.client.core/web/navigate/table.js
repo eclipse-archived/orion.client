@@ -59,7 +59,7 @@ dojo.addOnLoad(function(){
 		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
 							
 		// global commands
-		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromFileMetadata"]);
+		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]);
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools");
