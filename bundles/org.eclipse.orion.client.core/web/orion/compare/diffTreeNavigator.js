@@ -26,10 +26,10 @@ exports.DiffTreeNavigator = (function() {
 	 * @param {list} firstLevelChildren The first level children of the tree root, each item has children and parent property recursively.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
 	 */
-	function DiffTreeNavigator(oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, charDiff) {
+	function DiffTreeNavigator(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler) {
 		this._root = {type: "root", children: []};
-		this._charDiff = charDiff;
-		this.initEditor(oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder);
+		this._initialized = false;
+		this.initAll(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler);
 	}
 	
 	/**
@@ -207,15 +207,28 @@ exports.DiffTreeNavigator = (function() {
 	
 	DiffTreeNavigator.prototype = /** @lends orion.DiffTreeNavigator.DiffTreeNavigator.prototype */ {
 		
-		initEditor: function(oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder){
+		initAll: function(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, overviewRuler, curveRuler){
+			if(!charOrWordDiff){
+				this._charOrWordDiff = "word";
+			} else {
+				this._charOrWordDiff = charOrWordDiff;
+			}
+			if(oldEditor){
+				this._initialized = true;
+			}
 			this.editorWrapper = [{editor: oldEditor, diffFeeder: oldDiffBlockFeeder},
 			                      {editor: newEditor, diffFeeder: newDiffBlockFeeder}];
+			this._curveRuler = curveRuler;
+			this._overviewRuler = overviewRuler;
+			if(this._overviewRuler){
+				this._overviewRuler._diffNavigator = this;
+			}
 		},
 			
 		initMapper: function(mapper){
 			if(mapper){
 				for(var i = 0; i < this.editorWrapper.length; i++){
-					this.editorWrapper[i].diffFeeder.init(this.editorWrapper[i].getTextView().getModel(), mapper);
+					this.editorWrapper[i].diffFeeder.init(this.editorWrapper[i].editor.getTextView().getModel(), mapper);
 				}
 			}
 		},
@@ -439,7 +452,7 @@ exports.DiffTreeNavigator = (function() {
 			var startOld = 0;
 			var startNew = 0;
 			if(textOld && textNew){
-				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text/*old*/, textNew.text/*new*/, true);
+				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text, textNew.text, this._charOrWordDiff === "word");
 				startNew = textNew.start;
 				startOld = textOld.start;
 			} else {
@@ -489,6 +502,82 @@ exports.DiffTreeNavigator = (function() {
 					diffBlockAnnotaionArray.push(annotation);
 				}
 			}
+		},
+		
+		/* Navigation APIs */
+		_updateOverviewRuler: function(){
+			if(this._overviewRuler){
+				var drawLine = this.editorWrapper[0].editor.getTextView().getTopIndex() ;
+				this.editorWrapper[0].editor.getTextView().redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
+			}
+		},
+		
+		_updateCurveRuler: function(){
+			if(this._curveRuler){
+				this._curveRuler.render();
+			}
+		},
+		
+		_setTextViewPosition: function (textView , lineIndex){
+			var lineHeight = textView.getLineHeight();
+			var clientArea = textView.getClientArea();
+			var lines = Math.floor(clientArea.height / lineHeight/3);
+			textView.setTopIndex((lineIndex - lines) > 0 ? lineIndex - lines : 0);
+		},
+
+		_positionDiffBlock: function(){
+			var blockIndex = this.getCurrentBlockIndex();
+			var diffBlocks = this.getFeeder().getDiffBlocks();
+			if(diffBlocks.length === 0)
+				return;
+			this._setTextViewPosition(this.editorWrapper[0].editor.getTextView() , diffBlocks[blockIndex][0]);
+			if(this.editorWrapper[0].editor !== this.editorWrapper[1].editor){
+				var lineIndexL = mCompareUtils.lookUpLineIndex(this.getMapper(), 0, diffBlocks[blockIndex][1]);
+				this._setTextViewPosition(this.editorWrapper[1].editor.getTextView() , lineIndexL);
+			}
+			this._updateOverviewRuler();
+			this._updateCurveRuler();
+		},
+		
+		matchPositionFromOverview: function(lineIndex){
+			if(!this._initialized){
+				return;
+			}
+			var diffblockIndex;
+			if(lineIndex < 0){
+				diffblockIndex = 0;
+			} else {
+				diffblockIndex = mCompareUtils.getAnnotationIndex(this.getFeeder().getDiffBlocks(), lineIndex);
+			}
+			this.gotoBlock(diffblockIndex);
+			this._positionDiffBlock();
+		},
+		
+		gotoDiff: function(caretPosition, textView){
+			if(this.gotoChange(caretPosition, textView)){
+				this._updateOverviewRuler();
+				this._updateCurveRuler();
+			}
+		},
+
+		nextDiff: function(){
+			this.iterateOnBlock(true, true);
+			this._positionDiffBlock();
+		},
+		
+		prevDiff: function(){
+			this.iterateOnBlock(false, true);
+			this._positionDiffBlock();
+		},
+		
+		nextChange: function(){
+			this.iterateOnChange(true);
+			this._positionDiffBlock();
+		},
+		
+		prevChange: function(){
+			this.iterateOnChange(false);
+			this._positionDiffBlock();
 		}
 	};
 	return DiffTreeNavigator;
