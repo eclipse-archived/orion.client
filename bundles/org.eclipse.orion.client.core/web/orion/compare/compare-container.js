@@ -601,8 +601,12 @@ exports.TwoWayCompareContainer = (function() {
 			
 		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}));
 
-		textView.addEventListener("Selection", function() {
-			
+		textView.addEventListener("Selection", function(evt) {
+			if(evt.newValue){
+				if(evt.newValue.start !== evt.newValue.end){
+					return;
+				}
+			}
 			if(that._compareMatchRenderer._diffNavigator.autoSelecting){
 				return;
 			}
