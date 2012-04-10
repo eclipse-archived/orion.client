@@ -696,7 +696,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		
 	};
 	
-	var contentTypesMapCache;
+	var contentTypesCache;
 
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
@@ -730,7 +730,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		for (i=0; i<commandsReferences.length; i++) {
 			// Exclude any navigation commands themselves, since we are the navigator.
 			var id = commandsReferences[i].getProperty("id");
-			if (id !== "orion.navigateFromFileMetadata") {
+			if (id !== "orion.navigateFromMetadata") {
 				var impl = serviceRegistry.getService(commandsReferences[i]);
 				var info = {};
 				var propertyNames = commandsReferences[i].getPropertyNames();
@@ -741,14 +741,14 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			}
 		}
 		
-		function getContentTypesMap() {
-			return contentTypesMapCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypesMap().then(function(map) {
-				contentTypesMapCache = map;
-				return contentTypesMapCache;
+		function getContentTypes() {
+			return contentTypesCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) {
+				contentTypesCache = ct;
+				return contentTypesCache;
 			});
 		}
-		dojo.when(getContentTypesMap(), dojo.hitch(this, function() {
-			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesMapCache));
+		dojo.when(getContentTypes(), dojo.hitch(this, function() {
+			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache));
 			var extensionGroupCreated = false;
 			var selectionGroupCreated = false;
 			var openWithGroupCreated = false;
@@ -756,7 +756,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			for (i=0; i < fileCommands.length; i++) {
 				var commandInfo = fileCommands[i].properties;
 				var service = fileCommands[i].service;
- 				var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, true);
+				var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
 				var command = new mCommands.Command(commandOptions);
 				if (commandInfo.isEditor) {
 					command.isEditor = commandInfo.isEditor;
