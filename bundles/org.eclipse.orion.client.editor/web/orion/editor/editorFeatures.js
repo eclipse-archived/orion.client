@@ -276,6 +276,14 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTextDND, mRe
 					editor.setSelection(lineStart === selection.start ? selection.start : selection.start + text.length, selection.end + ((lastLine - firstLine + 1) * text.length));
 					return true;
 				}
+				
+				var keyModes = editor.getKeyModes();
+				for (var j = 0; j < keyModes.length; j++) {
+					if (keyModes[j].isActive()) {
+						return keyModes[j].tab();
+					}
+				}
+				
 				return false;
 			}.bind(this));
 	
