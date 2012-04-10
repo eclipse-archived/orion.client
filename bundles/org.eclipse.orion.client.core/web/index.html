@@ -3,7 +3,7 @@
 	<head>
 		<title>Welcome to Orion</title>
 		<link rel="stylesheet" type="text/css" href="index.css" />
-    	<script type="text/javascript" src="requirejs/require.js"></script>
+		<script type="text/javascript" src="requirejs/require.js"></script>
 		<script type="text/javascript">
 		require({
 		  baseUrl: '',
@@ -31,11 +31,12 @@
 		  ],
 		  paths: {
 			  text: 'requirejs/text',
-			  i18n: 'requirejs/i18n'	    
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'
 		  }
 		});
 		
-		require(["./index"]);
+		require(["index.js"]);
 		</script>
 </head>
 	<body style="height: 100%; visibility:hidden" class="nihilo">
