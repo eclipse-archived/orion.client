@@ -26,9 +26,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 	var nonHash = window.location.href.split('#')[0];
 	var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-
-	// Store a content types map once so we can do some synchronous lookups on file content types.
-	var contentTypes;
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
 	    if (item === null || typeof(item) !== 'object') {
@@ -49,7 +46,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 * Converts "orion.navigate.openWith" service contributions into orion.navigate.command that open the appropriate editors.
 	 * @returns {Object[]} The "open with" fileCommands
 	 */
-	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypesMap) {
+	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypes) {
 		function getEditors() {
 			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor");
 			var editors = [];
@@ -115,16 +112,16 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 * Create a validator for a given set of service properties.  The validator should be able to 
 	 * validate a given item using the "contentType" and "validationProperties" service properties.
 	 */
-	extensionCommandUtils._makeValidator = function(info, serviceRegistry, validationItemConverter) {
+	extensionCommandUtils._makeValidator = function(info, serviceRegistry, contentTypes, validationItemConverter) {
 		function checkItem(item, key, value, validationProperty) {
+			var valid = false;
+			var value;
 			// item has the specified property
 			if (item[key]) {
 				validationProperty.itemCached = item;
 				if (!value) {  // value doesn't matter, just the presence of the property is enough
-					if (validationProperty.variableName) {
-						validationProperty.variableValue = item[key];
-					}
-					return true;
+					value = item[key];
+					valid = true;
 				} else if (typeof(value) === 'string') {  // the value is a regular expression that should match some string
 					if (!typeof(item[key] === 'string')) {
 						// can't pattern match on a non-string
@@ -135,41 +132,43 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						if (patternMatch) {
 							var firstMatch = patternMatch[0];
 							if (validationProperty.variableMatchPosition === "before") {
-								validationProperty.variableValue = item[key].substring(0, patternMatch.index);
+								value = item[key].substring(0, patternMatch.index);
 							} else if (validationProperty.variableMatchPosition === "after") {
-								validationProperty.variableValue = item[key].substring(patternMatch.index + firstMatch.length);
+								value = item[key].substring(patternMatch.index + firstMatch.length);
 							} else {
-								validationProperty.variableValue = firstMatch;
+								value = firstMatch;
 							}
-							// now look for replacements
-							if (validationProperty.replacements) {
-								for (var i=0; i<validationProperty.replacements.length; i++) {
-									var invalid = false;
-									if (validationProperty.replacements[i].pattern) {	
-										var from = validationProperty.replacements[i].pattern;
-										var to = validationProperty.replacements[i].replacement || "";
-										validationProperty.variableValue = validationProperty.variableValue.replace(new RegExp(from), to);
-									} else {
-										invalid = true;
-									}
-									if (invalid) {
-										window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]);
-									}
-								}
-							}
-							return true;
+							valid = true;
 						}
 					} else {
 						return new RegExp(value).test(item[key]);
 					}
 				} else {
 					if (item[key] === value) {
-						if (validationProperty.variableName) {
-							validationProperty.variableValue = item[key];
-						}
-						return true;
+						value = item[key];
+						valid = true;
 					}
 				}
+				// now store any variable values and look for replacements
+				if (validationProperty.variableName) {
+					validationProperty.variableValue = value;
+					if (validationProperty.replacements) {
+						for (var i=0; i<validationProperty.replacements.length; i++) {
+							var invalid = false;
+							if (validationProperty.replacements[i].pattern) {	
+								var from = validationProperty.replacements[i].pattern;
+								var to = validationProperty.replacements[i].replacement || "";
+								validationProperty.variableValue = validationProperty.variableValue.replace(new RegExp(from), to);
+							} else {
+								invalid = true;
+							}
+							if (invalid) {
+								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]);
+							}
+						}
+					}
+				}
+				return valid;
 			}
 			return false;
 		}
@@ -203,7 +202,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			}
 		}
 		
-		function validateSingleItem(item, validator){
+		function validateSingleItem(item, contentTypes, validator){
 			// first validation properties
 			if (validator.info.validationProperties) {
 				for (var i=0; i<validator.info.validationProperties.length; i++) {
@@ -254,7 +253,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			}
 			
 			for(var i in items){
-				if(!validateSingleItem(items[i], this)){
+				if(!validateSingleItem(items[i], contentTypes, this)){
 					return false;
 				}
 			}
@@ -298,12 +297,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	};
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
-	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
-		if (!contentTypes) {
-			serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) {
-				contentTypes = ct;
-			});
-		}
+	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, contentTypesMap, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
 		var commandOptions = {
 			name: info.name,
 			image: info.image,
@@ -311,7 +305,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			tooltip: info.tooltip,
 			isEditor: info.isEditor
 		};
-		var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, validationItemConverter);
+		var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, contentTypesMap, validationItemConverter);
 		commandOptions.visibleWhen = validator.validationFunction;
 		
 		if (createNavigateCommandCallback) {
