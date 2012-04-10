@@ -30,11 +30,12 @@
 			  ],
 			  paths: {
 				  text: 'requirejs/text',
-				  i18n: 'requirejs/i18n'	    
+				  i18n: 'requirejs/i18n',
+				  domReady: 'requirejs/domReady'	    
 			  }
 			});
 		
-		require(["./site"]);
+		require(["site.js"]);
 		</script>
 <body style="visibility:hidden" class="nihilo">
 	<div id="eclipse.edit-site" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">

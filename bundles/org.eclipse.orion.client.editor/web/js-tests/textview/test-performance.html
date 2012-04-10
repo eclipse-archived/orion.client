@@ -29,12 +29,13 @@
 		  ],
 		  paths: {
 			  text: 'requirejs/text',
-			  i18n: 'requirejs/i18n'	    
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'	    
 		  }
 		});
 	
 	window.onload = function() {
-		require(["orion/test","./test-performance", 'dojo'], function(test, performanceTest, dojo) {
+		require(["orion/test","test-performance.js", 'dojo'], function(test, performanceTest, dojo) {
 			test.run(performanceTest);		
 		});
 	};

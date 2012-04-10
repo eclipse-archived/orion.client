@@ -32,11 +32,12 @@
 			  ],
 			  paths: {
 				  text: 'requirejs/text',
-				  i18n: 'requirejs/i18n'	    
+				  i18n: 'requirejs/i18n',
+			      domReady: 'requirejs/domReady'	    
 			  }
 			});
 		
-		require(["./user-profile"]);
+		require(["user-profile.js"]);
 		</script>
 </head>
 <body style="height: 100%; visibility:hidden" class="nihilo">
