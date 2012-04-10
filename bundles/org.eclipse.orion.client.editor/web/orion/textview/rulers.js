@@ -325,8 +325,6 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 			if (info.anchor === "right") {
 				info.x += rect.width;
 			}
-			info.maxWidth = rect.width;
-			info.maxHeight = rect.height - (rect.y - view._parent.getBoundingClientRect().top);
 			return info;
 		},
 		/** @ignore */

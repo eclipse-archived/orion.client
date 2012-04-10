@@ -22,15 +22,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 		closedIcon: "data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAAwAAAANCAYAAACdKY9CAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wCCQ46FewKfYYAAAF4SURBVCjPbZEvyFNhGMV/590ciANhjNs2nC66osHiJ8b9cdVgN4uKyWbRaDGZBIvwYRB2723WBUEEy5igYeZxYQzd7t2x7IUFn/bAOec55zxK05TxeEyWZZds3wEeAXeBP8An4I3tr5PJZJemKQLIsiyxfQ6c8f95V1XVw+l0utdsNrsInEsaA5akE6Btx/3Vfr9/HiTdOIIBKMsS29gGOCU/bTQanWD7QVQry1Lz+ZzFYsFutyOEgCQkGbhg+1Zd0vRIkG2KomC5XLJarej3+3S7XUII8dJZHehIihaQxHq9ZrvdUhQFzWaTdrvNEXO1DvwCrkSjh8OBJEnodrv0ej1arVZMD/CjLumj7SexoSRJGAwGdDodarVaBFqSbH9WlmU3gS9RHSCEgG1iw8fW/gLXAvDd9gfbhBAIIThmOf4hZnux2Wx+CyDP88tVVb2XdC9mOVUHXo9Go8eSCFmWMRwOC+A+cBt4C/y0/c32S+C6pGeSyPOcfyAyt4A7QPcNAAAAAElFTkSuQmCC",
 		openIcon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAMCAYAAAC5tzfZAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB9wCCQ46NddkXU4AAAFuSURBVCjPXZG/q9NwFMU/5yYQOhVKoF1SDK9OOjl1URxcQl+G5/LgLeJf4K7wRjdBxMXRxcFR6TfZ3e3iUGe3DKXYQSEk10GjwbPdy+X8uEdVVVEUBVVVJcBt4MrdHwI3gG/u/lHSO3f/vNlsfoQQEEBd19O+799IunR3JAHg7gxw92Bmj4uiaLTdbifAe0nnkvDfl+IfxvMnSUUs6Q5wLom+7+m6TmMFSYrjeFjcdfd7MfBozLjb7WiaBjPD3ZlOp6zXa8VxPNh9YsCDgdTMmM/nHI9H9vs9TdOQpilRFI3cct+A7+PgWZaxXC5JkoQsy8jznP/w04Aw2JNEFEXkec5isWC1WjGZTIZvDrk+KIRwC/jyJzQAfd9zOByYzWZ/s42wNklfgZejXtzMSNMUMxsrALx1952G46qqnrr7tZklQ8EjhRZ40XXddVmWrdV1jSROp9Nz4MzdL4BX7h6A18ClpJtt2z4ry7INIfAL982ks01Z8EgAAAAASUVORK5CYII=",
 	
-		templateString:'<div class="plugin-service-item"><div class="serviceContainerClosed" data-dojo-attach-point="serviceLabel" data-dojo-attach-event="onclick:showServices">Services</div>' +
-					   '<div class="serviceRailsHidden" data-dojo-attach-point="rails"  data-dojo-attach-event="onmouseenter:showButtons,onmouseleave:hideButtons">' +
-		                  '<div class="leftButtonArea" data-dojo-attach-point="leftbutton">' +
+		templateString:'<div class="plugin-service-item" tabindex="-1"><div class="serviceContainerClosed" data-dojo-attach-point="serviceLabel" data-dojo-attach-event="onclick:showServices,onkeypress:onServiceClick" tabindex="0" role="button" aria-pressed="false">Services</div>' +
+					   '<div class="serviceRailsHidden" data-dojo-attach-point="rails"  data-dojo-attach-event="onmouseenter:showButtons,onmouseleave:hideButtons,onfocus:showButtons,onblur:hideButtons, onkeypress:handleKeypress" tabindex="0" role="group">' +
+		                  '<div class="leftButtonArea" data-dojo-attach-point="leftbutton" role="presentation">' +
 		                    '<span class="carouselControl" data-dojo-attach-event="onclick:slideLeft">&lt;</span>' +
 		                  '</div>' +
-		                  '<div class="listContainer" data-dojo-attach-point="listContainer" >' +
+		                  '<div class="listContainer" data-dojo-attach-point="listContainer" role="presentation">' +
 							'<ul class="serviceList" data-dojo-attach-point="testlist"></ul>' +
 		                  '</div>' +
-		                  '<div class="rightButtonArea" data-dojo-attach-point="rightbutton">' + 
+		                  '<div class="rightButtonArea" data-dojo-attach-point="rightbutton" role="presentation">' + 
 							'<span class="carouselControl" data-dojo-attach-event="onclick:slideRight">&gt;</span>' + 
 		                  '</div>' +
 		               '</div></div>',
@@ -76,6 +76,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 			}else{
 				dojo.marginBox( this.rails, { h:0 } );
 				this.hide();
+			}
+		},
+		
+		onServiceClick: function(evt){
+			if( evt.keyCode === dojo.keys.ENTER || evt.charCode === dojo.keys.SPACE ) {
+				this.showServices();
+				if( this.serviceState === false ){
+					dojo.attr(evt.target, "aria-pressed", "true");
+				}else{
+					dojo.attr(evt.target, "aria-pressed", "false");
+				}
+				evt.preventDefault();
 			}
 		},
 		
@@ -187,6 +199,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/f
 
 			for( itemCount=0;itemCount<services.length;itemCount++ ){
 				this.createServiceTable( services[itemCount], this.testlist );
+			}
+		},
+		
+		handleKeypress: function(evt) {
+			if( evt.keyCode === dojo.keys.LEFT_ARROW && dojo.style(this.leftbutton, "visibility") !== "hidden" ) {
+				this.slideLeft();
+			}
+			else if( evt.keyCode === dojo.keys.RIGHT_ARROW && dojo.style(this.rightbutton, "visibility") !== "hidden" ) {
+				this.slideRight();
 			}
 		},
 		

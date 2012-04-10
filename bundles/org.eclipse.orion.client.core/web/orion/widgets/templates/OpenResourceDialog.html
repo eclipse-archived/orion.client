@@ -9,12 +9,12 @@
 		<div style="display:table" role="search">
 			<div style="display:table-row">
 				<div style="display:table-cell; padding:5;">
-					<label for="resourceName" style="padding-right:10">${selectFile}</label>
+					<label for="findfileSearchBox" style="padding-right:10">${selectFile}</label>
 				</div>
 			</div>
 			<div style="display:table-row">
 				<div style="display:table-cell; padding:5;">
-					<input type="text" dojoType="dijit.form.TextBox" dojoAttachPoint="resourceName" 
+					<input id="findfileSearchBox" type="text" dojoType="dijit.form.TextBox" dojoAttachPoint="resourceName" 
 						placeHolder="${searchPlaceHolder}"
 						intermediateChanges="true" style="width:30em;">
 				</div>
@@ -23,7 +23,7 @@
 				<div dojoAttachPoint="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>
 			</div>
 			<div style="display:table-row">
-				<div dojoAttachPoint="results" style="max-height:400px; height:auto; overflow-y:auto;"></div>
+				<div dojoAttachPoint="results" style="max-height:400px; height:auto; overflow-y:auto;" aria-live="off"></div>
 			</div>
 			<div style="display:table-row">
 				<div dojoAttachPoint="statusbar" style="display:table-cell;"></div>

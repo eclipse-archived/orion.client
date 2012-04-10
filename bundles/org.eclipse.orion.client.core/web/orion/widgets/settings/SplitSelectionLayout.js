@@ -24,11 +24,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 							'<div data-dojo-type="dijit.layout.BorderContainer" style="height:100%;" data-dojo-props="design:\'heading\', gutters:false, liveSplitters:false">' + 
 								'<div class="auxpane" id="categories" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:\'leading\', splitter:false"  style="width: 150px;">' + 
 									'<div id="categoryNode">' + '<h1 id="content-title">Categories</h1>' + 
-										'<ul class="navbar" data-dojo-attach-point="navbar"></ul>' + 
+										'<ul class="navbar" data-dojo-attach-point="navbar" role="tablist" aria-labelledby="content-title"></ul>' + 
 									'</div>' + 
 								'</div>' +
-								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'" >' + 
-									'<div data-dojo-attach-point="mainNode" class="settings">' + 
+								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'">' + 
+									'<div data-dojo-attach-point="mainNode" class="settings" role="tabpanel">' + 
 									'<div data-dojo-attach-point="table" class="displayTable">' + 
 								'</div>' + 
 							'</div>' + 
@@ -86,10 +86,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 			if (this.selectedCategory) {
 				dojo.removeClass(this.selectedCategory, "navbar-item-selected");
+				dojo.attr(this.selectedCategory, "aria-selected", "false");
+				this.selectedCategory.tabIndex = -1;
 			}
 
 			this.selectedCategory = dojo.byId(id);
 			dojo.addClass(this.selectedCategory, "navbar-item-selected");
+			dojo.attr(this.selectedCategory, "aria-selected", "true");
+			dojo.attr(this.mainNode, "aria-labelledby", id);
+			this.selectedCategory.tabIndex = 0;
+			this.selectedCategory.focus();
 			this.updateToolbar(id);
 			this.displaySettings(id);
 		},
@@ -103,11 +109,31 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 					innerHTML: settings[count].category,
 					id: itemId,
 					"class": 'navbar-item',
+					role: "tab",
+					tabindex: -1,
+					"aria-selected": "false",
 					onclick: dojo.hitch( this, "selectCategory", itemId )
 				};
 
 				this.addCategory(item, count);
 			}
+			
+			var that = this;
+			dojo.connect(this.navbar, "onkeypress", function(evt) {
+				if (evt.keyCode === dojo.keys.LEFT_ARROW || evt.keyCode === dojo.keys.UP_ARROW) {
+					if (that.selectedCategory.previousSibling) {
+						var click = document.createEvent("MouseEvents");
+						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+						that.selectedCategory.previousSibling.dispatchEvent(click);
+					}
+				} else if (evt.keyCode === dojo.keys.RIGHT_ARROW || evt.keyCode === dojo.keys.DOWN_ARROW) {
+					if (that.selectedCategory.nextSibling) {
+						var click = document.createEvent("MouseEvents");
+						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+						that.selectedCategory.nextSibling.dispatchEvent(click);
+					}
+				}
+			});
 		}
 	});
 });

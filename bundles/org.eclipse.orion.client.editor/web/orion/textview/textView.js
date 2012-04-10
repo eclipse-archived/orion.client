@@ -740,7 +740,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		/**
 		* Returns if the view is destroyed.
-		* <p>
 		* @returns {Boolean} <code>true</code> if the view is destroyed.
 		*/
 		isDestroyed: function () {
@@ -3399,7 +3398,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			div.style.position = "relative";
 			var row = rulerParent.firstChild.rows[0];
 			var length = row.cells.length;
-			var index = index === undefined || index < 0 || index > length ? length : index;
+			index = index === undefined || index < 0 || index > length ? length : index;
 			var cell = row.insertCell(index);
 			cell.vAlign = "top";
 			cell.appendChild(div);

@@ -776,6 +776,10 @@ a:hover {
 	width: 300px;
 }
 
+.contentassist:focus {
+	border: 2px solid #666;
+}
+
 .contentassist .selected {
 	background-color: #DDD;
 }

@@ -12,7 +12,7 @@
 /*jslint laxbreak:true regexp:false*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "../mockTextView", "orion/editor/textMateStyler", "./testGrammars"],
+define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "testGrammars.js"],
 		function(dojo, assert, mMockTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	

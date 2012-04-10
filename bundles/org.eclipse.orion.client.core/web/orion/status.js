@@ -66,8 +66,8 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				// this should be done by toggling that instead
 				var readSetting = dojo.attr(node, "aria-live");
 				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off");
-				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 40);
-				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 150);
+				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 100);
+				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 200);
 			}
 			else { 
 				dojo.place(window.document.createTextNode(msg), this.domId, "only"); 

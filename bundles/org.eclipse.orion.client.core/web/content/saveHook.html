@@ -30,11 +30,12 @@
 			  ],
 			  paths: {
 				  text: 'requirejs/text',
-				  i18n: 'requirejs/i18n'	    
+				  i18n: 'requirejs/i18n',
+				  domReady: 'requirejs/domReady'    
 			  }
 			});
 		
-		require(["./saveHook"]);
+		require(["saveHook.js"]);
 		</script>
 	</head>
    <body class="nihilo" style="width: 100%; height: 100%; visibility:hidden;">

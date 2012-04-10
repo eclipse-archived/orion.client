@@ -36,13 +36,13 @@
 		
 		  paths: {
 		    text: 'requirejs/text',
-		    i18n: 'requirejs/i18n'
+		    i18n: 'requirejs/i18n',
+			domReady: 'requirejs/domReady'
 		  }
 		});
 		
-		require(["./git-repository"]);
-		</script>	 	
- 	
+		require(["git-repository.js"]);
+		</script>
 </head>
 <body style="height: 100%; visibility:hidden" class="nihilo">
 	<div id="orion.repository" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
