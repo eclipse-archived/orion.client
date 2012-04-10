@@ -651,15 +651,15 @@ exports.TwoWayCompareContainer = (function() {
 		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
-			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			this._diffNavigator.initMapper(result.mapper);
+			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			this._leftTextView.redrawRange();
 			this._rightTextView.redrawRange();
 		}else {
-			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), result.mapper, 1);
 			var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), result.mapper, 0);
 			this._diffNavigator.initAll(this._charDiff ? "char" : "word", this._rightEditor, this._leftEditor, rFeeder, lFeeder, this._overviewRuler, this._curveRuler);
+			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			this._inputManager.filePath = this._newFile.URL;
 			this._rightEditor.setInput(this._baseFile.Name, null, input);
 			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._rightTextView);
