@@ -78,9 +78,9 @@ exports.GitRepositoryExplorer = (function() {
 	
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
 		var that = this;
+		this.loadingDeferred = new dojo.Deferred();
 		var progressService = this.registry.getService("orion.page.message");
-
-		progressService.setProgressMessage("Loading...");
+		progressService.showWhile(this.loadingDeferred, "Loading...");
 		this.registry.getService("orion.git.provider").getGitClone(location).then(
 			function(resp){
 				
@@ -312,6 +312,7 @@ exports.GitRepositoryExplorer = (function() {
 				for(var i=0; i<repositories.length;i++){
 					that.renderRepository(repositories[i], i, repositories.length, mode, links);
 				}
+				that.loadingDeferred.callback(); //TODO this may be placed better
 			}
 		);
 	};
