@@ -292,8 +292,18 @@ orion.GitStatusTableRenderer = (function() {
 			}
 		
 			dojo.addClass(this._cmdSpan, "paneHeadingCommands");
+			this._messageId =  this._parentId + "_" + this._type + "_message";
+			dojo.create("section", {id:this._messageId, role: "region", "aria-labelledby": this._type + "_header"}, this._parentId, "last");
 			this._statusContentId = this._parentId + "_" + this._type;
 			dojo.create("section", {id:this._statusContentId, role: "region", "aria-labelledby": this._type + "_header"}, this._parentId, "last");
+		},
+		
+		setLoadingMessage: function(message){
+			if(message){
+				dojo.place(document.createTextNode(message), this._messageId, "only");
+			}else{
+				dojo.empty(this._messageId);
+			}
 		},
 		
 		select: function(selected){
@@ -643,6 +653,10 @@ orion.GitStatusController = (function() {
 		};
 	}
 	GitStatusController.prototype = {
+		setLoadingStatusMessage: function(message){
+			dojo.hitch(this._unstagedTableRenderer, this._unstagedTableRenderer.setLoadingMessage(message));
+			dojo.hitch(this._stagedTableRenderer, this._stagedTableRenderer.setLoadingMessage(message));
+		},
 		loadStatus: function(jsonData){
 			this._staging = false;
 			this._model.init(jsonData);
@@ -652,6 +666,7 @@ orion.GitStatusController = (function() {
 		_processStatus: function(){
 			this.initViewer();
 			this._model.selectedFileId = null;
+			this.setLoadingStatusMessage();
 			this._loadBlock(this._unstagedContentRenderer , this._model.interestedUnstagedGroup);
 			this._loadBlock(this._stagedContentRenderer , this._model.interestedStagedGroup);
 			this._stagedTableRenderer.disable(!this.hasStaged);
@@ -1464,12 +1479,13 @@ orion.GitStatusController = (function() {
 			this._initializing = (initializing ? true : false);
 			if (this._initializing) {
 				this._cloneInfo = undefined;
-				this._statusService.setProgressMessage("Loading status...");
 			}
 			var self = this;
-			self._registry.getService("orion.git.provider").getGitStatus(url, function(jsonData, secondArg) {
+			self.setLoadingStatusMessage("Loading status...");
+			self._registry.getService("orion.git.provider").getGitStatus(url).then(function(jsonData, secondArg) {
 				self.loadStatus(jsonData);
 			}, function(response, ioArgs) {
+				self.setLoadingStatusMessage();
 				self.handleServerErrors(response, ioArgs);
 			});
 		},
