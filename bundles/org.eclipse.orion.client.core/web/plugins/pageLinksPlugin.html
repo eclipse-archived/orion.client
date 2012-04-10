@@ -40,7 +40,8 @@
 			tooltip: "Go to the navigator",
 			validationProperties: [{
 				source: "ChildrenLocation|ContentLocation",
-				variableName: "NavigatorLocation"
+				variableName: "NavigatorLocation",
+				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 			}],
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
