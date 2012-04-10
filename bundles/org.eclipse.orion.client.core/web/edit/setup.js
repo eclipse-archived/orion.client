@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -256,6 +256,46 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		}
 	};	
 	
+	var tabHandler = {
+		handlers: [],
+		
+		addHandler: function(handler) {
+			this.handlers.push(handler);
+		},
+		
+		cancel: function() {
+			return false;
+		},
+	
+		isActive: function() {
+			for (var i=0; i<this.handlers.length; i++) {
+				if (this.handlers[i].isActive()) {
+					return true;
+				}
+			}
+			return false;
+		},
+	
+		lineUp: function() {
+			return false;
+		},
+		lineDown: function() {
+			return false;
+		},
+		enter: function() {
+			return false;
+		},
+		tab: function() {
+			var handled = false;
+			for (var i=0; i<this.handlers.length; i++) {
+				if (this.handlers[i].isActive()) {
+					return this.handlers[i].tab();
+				}
+				
+			}
+		}
+	};
+	
 	var escHandler = {
 		handlers: [],
 		
@@ -290,10 +330,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		},
 		enter: function() {
 			return false;
+		},
+		tab: function() {
+			return false;
 		}
 	};
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+		
+		keyModeStack.push(tabHandler);
 		
 		// Create keybindings for generic editing, no dependency on the service model
 		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(editor, commandService, undoStack));
@@ -334,8 +379,26 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
 					if (e.charOrCode === dojo.keys.ESCAPE) {
 						searchFloat.style.display = "none";
+						if(dojo.query("a", searchFloat).indexOf(document.activeElement) !== -1) {
+							editor.getTextView().focus();
+						}
 					}
 				}));
+				
+				var searchFloatTabHandler = {
+					isActive: function() {
+						return searchFloat.style.display === "block";
+					},
+					
+					tab: function() {
+						if (this.isActive()) {
+							dojo.query("a",searchFloat)[0].focus();
+							return true;
+						}
+						return false;
+					}
+				};
+				tabHandler.addHandler(searchFloatTabHandler);
 				
 				var searchFloatEscHandler = {
 					isActive: function() {

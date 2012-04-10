@@ -92,41 +92,41 @@
 /*** Styles for diff annotations ***/
 
 /* Styles for normal diff blocks */
-.annotationRange.addedBlockDiff {
+.annotationLine.addedBlockDiff {
 	background-color: #EFFFEF;
 }
 
-.annotationRange.currentAddedBlockDiff {
+.annotationLine.currentAddedBlockDiff {
 	background-color: #D2FFD2;
 }
 
-.annotationRange.deletedBlockDiff {
+.annotationLine.deletedBlockDiff {
 	background-color: #FFEFEF;
 }
 
-.annotationRange.currentDeletedBlockDiff {
+.annotationLine.currentDeletedBlockDiff {
 	background-color: #FFD2D2;
 }
 
 /* Styles for empty diff blocks , it draws one line on top of the line in the editor */
-.annotationRange.blockDiffTopOnly {
+.annotationLine.blockDiffTopOnly {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAPSURBVBhXY6yvr2cYHAAAzPsBf2hZ98wAAAAASUVORK5CYII=");
  	background-repeat: repeat-x;
  	background-position: left top
 }
 
-.annotationRange.currentBlockDiffTopOnly {
+.annotationLine.currentBlockDiffTopOnly {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2AYNAAAAIsAAR6L5FUAAAAASUVORK5CYII=");
  	background-repeat: repeat-x;
  	background-position: left top
 }
 
 /* Styles for conflicting diff blocks */
-.annotationRange.blockDiffConflict {
+.annotationLine.blockDiffConflict {
 	background-color: #FFFFCA;
 }
 
-.annotationRange.currentBlockDiffConflict {
+.annotationLine.currentBlockDiffConflict {
 	background-color: #FFFF5B;
 }
 
@@ -146,4 +146,28 @@
 
 .annotationRange.currentDeletedWordDiff {
 	background-color: #B44040;
+}
+
+.annotationRange.emptyDeletedWordDiffLeft {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-y;
+ 	background-position: left top
+}
+
+.annotationRange.emptyDeletedWordDiffRight {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-y;
+ 	background-position: right top
+}
+
+.annotationRange.emptyAddedWordDiffLeft {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY1Ta6MMAA0xwFpAx3DgAFVsBQ9NZ03UAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-y;
+ 	background-position: left top
+}
+
+.annotationRange.emptyAddedWordDiffRight {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY1Ta6MMAA0xwFpAx3DgAFVsBQ9NZ03UAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-y;
+ 	background-position: right top
 }

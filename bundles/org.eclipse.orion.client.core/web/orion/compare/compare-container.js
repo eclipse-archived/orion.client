@@ -11,10 +11,10 @@
  *******************************************************************************/
 /*global define window dijit */
 /*jslint browser:true devel:true */
-define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/rulers', 'orion/compare/compare-inline-model', 'orion/editor/contentAssist',
+define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/compare/compare-inline-model', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/compare/gap-model' , 'orion/commands',
         'orion/textview/textModel','orion/textview/textView', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator'], 
-		function(require, dojo, mDiffParser, mRulers, mCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+		function(require, dojo, mDiffParser, mCompareRulers, mCompareModel, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
 				mGapModel , mCommands, mTextModel, mTextView, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator) {
 
 var exports = {};
@@ -22,6 +22,7 @@ var exports = {};
 exports.CompareContainer = (function() {
 	function CompareContainer () {
 		this._diffParser = new mDiffParser.DiffParser();
+		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word");
 	}
 	CompareContainer.prototype = {
 		_clearOptions: function(){
@@ -247,20 +248,18 @@ exports.DefaultDiffProvider = (function() {
 	return DefaultDiffProvider;
 }());
 
-//the wrapper to order the text and diff styler so that we can always have diff highlighted on top of text syntax
-exports.TwoWayCompareStyler = (function() {
-	function TwoWayCompareStyler(registry, compareMatchRenderer){
+exports.CompareStyler = (function() {
+	function CompareStyler(registry){
 		this._syntaxHighlither = new Highlight.SyntaxHighlighter(registry);
 	}	
-	TwoWayCompareStyler.prototype = {
-		highlight: function(fileName, contentType, editorWidget, diffBlockFeeder) {
-			var self = this;
-			this._syntaxHighlither.setup(contentType, editorWidget, null /* TODO AnnotationModel */, fileName).then(
-				function() {
-				});
+	CompareStyler.prototype = {
+		highlight: function(fileName, contentType, editorWidget) {
+			this._syntaxHighlither.setup(contentType, editorWidget, 
+										 null, //passing an AnnotationModel allows the styler to use it to annotate tasks/comment folding/etc, but we do not really need this in compare editor
+										 fileName);
 		}
 	};
-	return TwoWayCompareStyler;
+	return CompareStyler;
 }());
 
 exports.TwoWayCompareContainer = (function() {
@@ -384,10 +383,10 @@ exports.TwoWayCompareContainer = (function() {
 			this._inputManager.onSetTitle = this._onSetTitle;	
 		}
 		
-		this._compareMatchRenderer = new mRulers.CompareMatchRenderer(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
+		this._curveRuler = new mCompareRulers.CompareCurveRuler(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
 		this._highlighter = [];
-		this._highlighter.push( new exports.TwoWayCompareStyler(this._registry, this._compareMatchRenderer));//left side styler
-		this._highlighter.push( new exports.TwoWayCompareStyler(this._registry, this._compareMatchRenderer));//right side styler
+		this._highlighter.push( new exports.CompareStyler(this._registry));//left side styler
+		this._highlighter.push( new exports.CompareStyler(this._registry));//right side styler
 		this.initEditorContainers("\n" , "fetching..." , "fetching..." , []);
 	}
 	TwoWayCompareContainer.prototype = new exports.CompareContainer();
@@ -399,10 +398,9 @@ exports.TwoWayCompareContainer = (function() {
 		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this._baseFile);
 		this._rightTextView = this._rightEditor.getTextView();
 		var that = this;
-		var overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , null,
-				                    function(lineIndex, ruler){that._compareMatchRenderer.matchPositionFromAnnotation(lineIndex);});
-		this._rightTextView.addRuler(overview);
-		this._compareMatchRenderer.setOverviewRuler(overview);
+		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null,
+				                    function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
+		this._rightTextView.addRuler(this._overviewRuler);
 		var that = this;
 		window.onbeforeunload = function() {
 			if (that._leftEditor.isDirty()) {
@@ -489,23 +487,23 @@ exports.TwoWayCompareContainer = (function() {
 	};
 	
 	TwoWayCompareContainer.prototype.copyToLeft = function(){	
-		this._compareMatchRenderer.copyToLeft();
+		this._curveRuler.copyToLeft();
 	};
 	
 	TwoWayCompareContainer.prototype.nextDiff = function(){	
-		this._compareMatchRenderer.nextDiff();
+		this._diffNavigator.nextDiff();
 	};
 	
 	TwoWayCompareContainer.prototype.prevDiff = function(){	
-		this._compareMatchRenderer.prevDiff();
+		this._diffNavigator.prevDiff();
 	};
 	
 	TwoWayCompareContainer.prototype.nextChange = function(){	
-		this._compareMatchRenderer.nextChange();
+		this._diffNavigator.nextChange();
 	};
 	
 	TwoWayCompareContainer.prototype.prevChange = function(){	
-		this._compareMatchRenderer.prevChange();
+		this._diffNavigator.prevChange();
 	};
 	
 	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
@@ -523,7 +521,7 @@ exports.TwoWayCompareContainer = (function() {
 			});
 			that._viewLoadedCounter++;
 			if(that._viewLoadedCounter === 2){				
-				that._compareMatchRenderer.matchPositionFromAnnotation(-1);
+				that._diffNavigator.matchPositionFromOverview(-1);
 			}
 			if(that.onLoad){
 				that.onLoad();
@@ -596,28 +594,32 @@ exports.TwoWayCompareContainer = (function() {
 		var textView = editor.getTextView();
 		if(createLineStyler && fileObj && typeof(fileObj.Name) === "string"  && typeof(fileObj.Type) === "string"){
 			editor.setInput(fileObj.Name);
-			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor, this._compareMatchRenderer.getDiffNavigator() ? this._compareMatchRenderer.getDiffNavigator().getFeeder() : null);
+			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
 		}
 			
-		textView.addRuler(new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}));
+		textView.addRuler(new mCompareRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}));
 
-		textView.addEventListener("Selection", function() {
-			
-			if(that._compareMatchRenderer._diffNavigator.autoSelecting){
+		textView.addEventListener("Selection", function(evt) {
+			if(evt.newValue){
+				if(evt.newValue.start !== evt.newValue.end){
+					return;
+				}
+			}
+			if(that._diffNavigator.autoSelecting){
 				return;
 			}
 			var caretPos = textView.getCaretOffset();
-			that._compareMatchRenderer.gotoChange(caretPos, textView);
+			that._diffNavigator.gotoDiff(caretPos, textView);
 		}); 
 		
 		if(columnIndex === 0){
 			textView.getModel().addEventListener("Changed", function(e) {
-				that._compareMatchRenderer.onChanged(e);
+				that._curveRuler.onChanged(e);
 			});
 			textView.addEventListener("Scroll", function(scrollEvent) {
-				if(that._compareMatchRenderer){
-					that._compareMatchRenderer.matchPositionFrom(true);
-					that._compareMatchRenderer.render();
+				if(that._curveRuler){
+					that._curveRuler.matchPositionFrom(true);
+					that._curveRuler.render();
 				}
 				if(that.onScroll){
 					that.onScroll();
@@ -625,8 +627,8 @@ exports.TwoWayCompareContainer = (function() {
 			}); 
 		} else {
 			textView.addEventListener("Scroll", function(scrollEvent) {
-				if(that._compareMatchRenderer){
-					that._compareMatchRenderer.render();
+				if(that._curveRuler){
+					that._curveRuler.render();
 				}
 			}); 
 		}
@@ -649,28 +651,30 @@ exports.TwoWayCompareContainer = (function() {
 		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
 		} else if (onsave) {
-			this._compareMatchRenderer.init(result.mapper ,this._leftEditor , this._rightEditor, this._charDiff);
+			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
+			this._diffNavigator.initMapper(result.mapper);
 			this._leftTextView.redrawRange();
 			this._rightTextView.redrawRange();
 		}else {
-			this._compareMatchRenderer.init(result.mapper ,this._leftEditor , this._rightEditor, this._charDiff);
+			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
+			var rFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._rightTextView.getModel(), result.mapper, 1);
+			var lFeeder = new mDiffTreeNavigator.TwoWayDiffBlockFeeder(this._leftTextView.getModel(), result.mapper, 0);
+			this._diffNavigator.initAll(this._charDiff ? "char" : "word", this._rightEditor, this._leftEditor, rFeeder, lFeeder, this._overviewRuler, this._curveRuler);
 			this._inputManager.filePath = this._newFile.URL;
-			
 			this._rightEditor.setInput(this._baseFile.Name, null, input);
-			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._rightTextView, this._compareMatchRenderer.getDiffNavigator().getFeeder());
+			this._highlighter[1].highlight(this._baseFile.Name, this._baseFile.Type, this._rightTextView);
 			this._rightEditor.highlightAnnotations();
 			this._rightEditor.setAnnotationRulerVisible(false);
-			
 			this._leftEditor.setInput(this._newFile.Name, null, output);
-			this._highlighter[0].highlight(this._newFile.Name, this._newFile.Type, this._leftTextView, this._compareMatchRenderer.getDiffNavigator().getFeeder(true));
+			this._highlighter[0].highlight(this._newFile.Name, this._newFile.Type, this._leftTextView);
 			this._leftEditor.highlightAnnotations();
 			this._leftEditor.setAnnotationRulerVisible(false);
 			if(!this._readonly)
 				this._inputManager.setInput(this._newFile.URL , this._leftEditor);
 		}
-		this._compareMatchRenderer.getDiffNavigator().renderAnnotations();
+		this._diffNavigator.renderAnnotations();
 		if(this._viewLoadedCounter > 1){
-			this._compareMatchRenderer.matchPositionFromAnnotation(-1);
+			this._diffNavigator.matchPositionFromOverview(-1);
 		}
 	};
 	return TwoWayCompareContainer;
@@ -713,7 +717,7 @@ exports.InlineCompareContainer = (function() {
 			};
 		}
 		
-		this._annotation = new mRulers.CompareAnnotation();
+		this._annotation = new mCompareRulers.CompareAnnotation();
 		this._editorDivId = editorDivId;
 		this.initEditorContainers("" , "\n" , [],[]);
 		this.hasContent = false;
@@ -793,10 +797,10 @@ exports.InlineCompareContainer = (function() {
 			
 		var textView = editor.getTextView();
 			
-		this._rulerOrigin = new mRulers.LineNumberCompareRuler(1,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
-		this._rulerNew = new mRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
+		this._rulerOrigin = new mCompareRulers.LineNumberCompareRuler(1,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
+		this._rulerNew = new mCompareRulers.LineNumberCompareRuler(0,"left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
 		var that = this;
-		this._overview  = new mRulers.TwoWayCompareOverviewRuler("right", {styleClass: "ruler overview"} , that._annotation,
+		this._overview  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , that._annotation,
 				function(lineIndex, ruler){
 					that._annotation.matchPositionFromAnnotation(lineIndex);
 					that.positionAnnotation(lineIndex);
@@ -825,6 +829,7 @@ exports.InlineCompareContainer = (function() {
 		this._textView = this._editor.getTextView();
 	};
 	
+	//TODO remove the line styler, use the diff navigator
 	InlineCompareContainer.prototype._onLineStyle = function(lineStyleEvent){
 		var lineIndex = lineStyleEvent.lineIndex;
 		var lineStart = lineStyleEvent.lineStart;

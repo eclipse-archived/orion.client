@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define(['dojo','orion/bootstrap', './setup'], function(dojo, mBootstrap, mSetup) {
+define(['dojo','orion/bootstrap', 'setup.js'], function(dojo, mBootstrap, mSetup) {
 	dojo.addOnLoad(function(){
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;

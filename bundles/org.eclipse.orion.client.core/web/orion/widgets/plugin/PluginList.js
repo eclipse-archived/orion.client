@@ -124,7 +124,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		},
 		
 		addPlugin: function( plugin ){
-			this.statusService.setMessage("Installed " + plugin.getLocation(), 5000);
+			this.statusService.setMessage("Installed " + plugin.getLocation(), 5000, true);
 			this.settings.preferences.getPreferences("/plugins").then(function(plugins) {
 				plugins.put(plugin.getLocation(), true);
 			}); // this will force a sync
@@ -139,7 +139,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		
 		installHandler: function(newPluginUrl){
 			if (/^\S+$/.test(dojo.trim(newPluginUrl))) {
-				this.statusService.setMessage("Installing " + newPluginUrl + "...");
+				this.statusService.setMessage("Installing " + newPluginUrl + "...", null, true);
 				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
 					this.statusService.setErrorMessage("Already installed");
 				} else {
@@ -150,7 +150,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		
 		reloaded: function(){
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			this.statusService.setMessage( "Reloaded " + settingsPluginList.length + " plugin" + ( settingsPluginList.length===1 ? "": "s") + ".", 5000 );
+			this.statusService.setMessage( "Reloaded " + settingsPluginList.length + " plugin" + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true );
 			this.addRows();
 		},
 		
@@ -160,7 +160,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			for( var p = 0; p < settingsPluginList.length; p++ ){
 				if( settingsPluginList[p].getLocation() === url ){
 					settingsPluginList[p].update();
-					this.statusService.setMessage("Reloaded " + url, 5000);
+					this.statusService.setMessage("Reloaded " + url, 5000, true);
 					break;
 				}
 			}
@@ -198,7 +198,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			for( var p = 0; p < settingsPluginList.length; p++ ){
 				if( settingsPluginList[p].getLocation() === url ){
 					settingsPluginList[p].uninstall();
-					statusService.setMessage("Uninstalled " + url, 5000);
+					statusService.setMessage("Uninstalled " + url, 5000, true);
 					settings.preferences.getPreferences("/plugins").then(function(plugins) {
 						plugins.remove(url);
 					}); // this will force a sync

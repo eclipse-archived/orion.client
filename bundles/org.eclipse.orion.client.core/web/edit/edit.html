@@ -33,11 +33,12 @@
 			  ],
 			  paths: {
 				  text: 'requirejs/text',
-				  i18n: 'requirejs/i18n'	    
+				  i18n: 'requirejs/i18n',
+				  domReady: 'requirejs/domReady'    
 			  }
 			});
 			
-			require(["./edit"]);
+			require(["edit.js"]);
 		</script>
     </head>
 
@@ -67,6 +68,6 @@
 		</div>
 	</div>
 	
-	<div id="contentassist" class="contentassist"></div>
+	<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
 </body>
 </html>
