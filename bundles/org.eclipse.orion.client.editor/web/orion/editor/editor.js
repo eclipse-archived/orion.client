@@ -13,12 +13,7 @@
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
 define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, mUtil) {
-
-	/**
-	 * @name orion.editor.util
-	 * @class Basic helper functions used by <code>orion.editor</code>.
-	 */
-	var util;
+	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 
@@ -348,7 +343,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			if (linePixel < topPixel || linePixel > bottomPixel) {
 				var height = bottomPixel - topPixel;
 				var target = Math.max(0, linePixel- Math.floor((linePixel<topPixel?3:1)*height / 4));
-				var a = new util.Animation({
+				var a = new Animation({
 					node: textView,
 					duration: 300,
 					curve: [topPixel, target],
@@ -818,94 +813,90 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 	mEventTarget.EventTarget.addMixin(Editor.prototype);
 
 	/**
-	 * @name orion.editor.util
-	 * @class Basic helper functions used by <code>orion.editor</code>.
+	 * @class
+	 * @private
+	 * @name orion.editor.Animation
+	 * @description Creates an animation.
+	 * @param {Object} options Options controlling the animation.
+	 * @param {Array} options.curve Array of 2 values giving the start and end points for the animation.
+	 * @param {Number} [options.duration=350] Duration of the animation, in milliseconds.
+	 * @param {Function} [options.easing]
+	 * @param {Function} [options.onAnimate]
+	 * @param {Function} [options.onEnd]
+	 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
 	 */
-	util = {
+	Animation = (function() {
+		function Animation(options) {
+			this.options = options;
+		}
 		/**
-		 * @class
-		 * @private
-		 * @name orion.editor.Animation
-		 * @description Creates an animation.
-		 * @param {Object} options Options controlling the animation.
-		 * @param {Array} options.curve Array of 2 values giving the start and end points for the animation.
-		 * @param {Number} [options.duration=350] Duration of the animation, in milliseconds.
-		 * @param {Function} [options.easing]
-		 * @param {Function} [options.onAnimate]
-		 * @param {Function} [options.onEnd]
-		 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
+		 * Plays this animation.
+		 * @methodOf orion.editor.Animation.prototype
+		 * @name play
 		 */
-		Animation: (function() {
-			function Animation(options) {
-				this.options = options;
-			}
-			/**
-			 * Plays this animation.
-			 * @methodOf orion.editor.Animation.prototype
-			 * @name play
-			 */
-			Animation.prototype.play = function() {
-				var duration = (typeof this.options.duration === "number") ? this.options.duration : 350,
-				    rate = (typeof this.options.rate === "number") ? this.options.rate : 20,
-				    easing = this.options.easing || this.defaultEasing,
-				    onAnimate = this.options.onAnimate || function() {},
-				    onEnd = this.options.onEnd || function () {},
-				    start = this.options.curve[0],
-				    end = this.options.curve[1],
-				    range = (end - start);
-				var propertyValue,
-				    interval,
-				    startedAt = -1;
-				
-				function onFrame() {
-					startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
-					var now = new Date().getTime(),
-					    percentDone = (now - startedAt) / duration;
-					if (percentDone < 1) {
-						var eased = easing(percentDone);
-						propertyValue = start + (eased * range);
-						onAnimate(propertyValue);
-					} else {
-						clearInterval(interval);
-						onEnd();
-					}
+		Animation.prototype.play = function() {
+			var duration = (typeof this.options.duration === "number") ? this.options.duration : 350,
+			    rate = (typeof this.options.rate === "number") ? this.options.rate : 20,
+			    easing = this.options.easing || this.defaultEasing,
+			    onAnimate = this.options.onAnimate || function() {},
+			    onEnd = this.options.onEnd || function () {},
+			    start = this.options.curve[0],
+			    end = this.options.curve[1],
+			    range = (end - start);
+			var propertyValue,
+			    interval,
+			    startedAt = -1;
+
+			function onFrame() {
+				startedAt = (startedAt === -1) ? new Date().getTime() : startedAt;
+				var now = new Date().getTime(),
+				    percentDone = (now - startedAt) / duration;
+				if (percentDone < 1) {
+					var eased = easing(percentDone);
+					propertyValue = start + (eased * range);
+					onAnimate(propertyValue);
+				} else {
+					clearInterval(interval);
+					onEnd();
 				}
-				interval = setInterval(onFrame, rate);
-			};
-			Animation.prototype.defaultEasing = function(x) {
-				return Math.sin(x * (Math.PI / 2));
-			};
-			return Animation;
-		}()),
-		
-		/**
-		 * @private
-		 * @param context Value to be used as the returned function's <code>this</code> value.
-		 * @param [arg1, arg2, ...] Fixed argument values that will prepend any arguments passed to the returned function when it is invoked.
-		 * @returns {Function} A function that always executes this function in the given <code>context</code>.
-		 */
-		bind: function(context) {
-			var fn = this,
-			    fixed = Array.prototype.slice.call(arguments, 1);
-			if (fixed.length) {
-				return function() {
-					return arguments.length
-						? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments)))
-						: fn.apply(context, fixed);
-				};
 			}
+			interval = setInterval(onFrame, rate);
+		};
+		Animation.prototype.defaultEasing = function(x) {
+			return Math.sin(x * (Math.PI / 2));
+		};
+		return Animation;
+	}());
+
+	/**
+	 * @private
+	 * @param context Value to be used as the returned function's <code>this</code> value.
+	 * @param [arg1, arg2, ...] Fixed argument values that will prepend any arguments passed to the returned function when it is invoked.
+	 * @returns {Function} A function that always executes this function in the given <code>context</code>.
+	 */
+	function bind(context) {
+		var fn = this,
+		    fixed = Array.prototype.slice.call(arguments, 1);
+		if (fixed.length) {
 			return function() {
-				return arguments.length ? fn.apply(context, arguments) : fn.call(context);
+				return arguments.length
+					? fn.apply(context, fixed.concat(Array.prototype.slice.call(arguments)))
+					: fn.apply(context, fixed);
 			};
 		}
-	};
-	
+		return function() {
+			return arguments.length ? fn.apply(context, arguments) : fn.call(context);
+		};
+	}
+
 	if (!Function.prototype.bind) {
-		Function.prototype.bind = util.bind;
+		Function.prototype.bind = bind;
 	}
 
 	return {
 		Editor: Editor,
-		util: util
+		util: {
+			bind: bind
+		}
 	};
 });
