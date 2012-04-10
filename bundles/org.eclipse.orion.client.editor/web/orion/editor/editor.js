@@ -148,6 +148,15 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		},
 		
 		/**
+		 * Returns the editor's key modes.
+		 *
+		 * @returns {Array} the editor key modes.
+		 */
+		getKeyModes: function() {
+			return this._keyModes;
+		},
+		
+		/**
 		 * Returns <code>true</code> if the editor is dirty; <code>false</code> otherwise.
 		 * @returns {Boolean} 
 		 */
@@ -557,15 +566,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				for (var i=0; i<this._keyModes.length; i++) {
 					if (this._keyModes[i].isActive()) {
 						return this._keyModes[i].enter();
-					}
-				}
-				return false;
-			}.bind(this));
-			
-			textView.setAction("tab", function() {	
-				for (var i=0; i<this._keyModes.length; i++) {
-					if (this._keyModes[i].isActive()) {
-						return this._keyModes[i].tab();
 					}
 				}
 				return false;
