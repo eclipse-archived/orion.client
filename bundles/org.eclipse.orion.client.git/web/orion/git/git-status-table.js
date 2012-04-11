@@ -1497,7 +1497,7 @@ orion.GitStatusController = (function() {
 				self._stagingName = itemModel.name;
 			} else
 				self._stagingConflict = false;
-			self._registry.getService("orion.git.provider").stage(location, function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").stage(location).then(function(jsonData, secondArg) {
 				self.getGitStatus(self._url);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
@@ -1544,7 +1544,7 @@ orion.GitStatusController = (function() {
 				that._stagingConflict = true;
 				that._stagingName = itemModel.name;
 			}
-			that._registry.getService("orion.git.provider").stage(itemModel.indexURI, function(jsonData, secondArg) {
+			that._registry.getService("orion.git.provider").stage(itemModel.indexURI).then(function(jsonData, secondArg) {
 				if (index === (selection.length - 1)) {
 					that.getGitStatus(that._url);
 				} else {
@@ -1566,7 +1566,7 @@ orion.GitStatusController = (function() {
 				}
 				paths.push(itemModel.name);
 			}
-			that._registry.getService("orion.git.provider").stageMultipleFiles(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
+			that._registry.getService("orion.git.provider").stageMultipleFiles(that._model.items.IndexLocation, paths).then(function(jsonData, secondArg) {
 				that.getGitStatus(that._url);
 			}, function(response, ioArgs) {
 				that.handleServerErrors(response, ioArgs);
@@ -1576,7 +1576,7 @@ orion.GitStatusController = (function() {
 		checkout: function(itemNameList){
 			var self = this;
 			var location = this._model.items.CloneLocation;
-			self._registry.getService("orion.git.provider").checkoutPath(location, itemNameList, function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").checkoutPath(location, itemNameList).then(function(jsonData, secondArg) {
 				self.getGitStatus(self._url);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
@@ -1601,7 +1601,7 @@ orion.GitStatusController = (function() {
 		
 		unstage: function(itemModel){
 			var self = this;
-			self._registry.getService("orion.git.provider").unstage(self._model.items.IndexLocation, [itemModel.name], function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").unstage(self._model.items.IndexLocation, [itemModel.name]).then(function(jsonData, secondArg) {
 				self.getGitStatus(self._url);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
@@ -1610,7 +1610,7 @@ orion.GitStatusController = (function() {
 		
 		unstageAll: function(resetParam){
 			var self = this;
-			self._registry.getService("orion.git.provider").unstageAll(self._model.items.IndexLocation, resetParam, function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").unstageAll(self._model.items.IndexLocation, resetParam).then(function(jsonData, secondArg) {
 				self.getGitStatus(self._url);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
@@ -1624,7 +1624,7 @@ orion.GitStatusController = (function() {
 				var itemModel = selection[i].modelItem;
 				paths.push(itemModel.name);
 			}
-			that._registry.getService("orion.git.provider").unstage(that._model.items.IndexLocation, paths, function(jsonData, secondArg) {
+			that._registry.getService("orion.git.provider").unstage(that._model.items.IndexLocation, paths).then(function(jsonData, secondArg) {
 				that.getGitStatus(that._url);
 			}, function(response, ioArgs) {
 				that.handleServerErrors(response, ioArgs);
@@ -1636,7 +1636,7 @@ orion.GitStatusController = (function() {
 			var messageArea = document.getElementById("commitMessage");
 			messageArea.value = "";
 			self._statusService.setProgressMessage("Committing...");
-			self._registry.getService("orion.git.provider").commitAll(location, message, body, function(jsonData, secondArg) {
+			self._registry.getService("orion.git.provider").commitAll(location, message, body).then(function(jsonData, secondArg) {
 				self.getGitStatus(self._url, true);
 			}, function(response, ioArgs) {
 				self.handleServerErrors(response, ioArgs);
