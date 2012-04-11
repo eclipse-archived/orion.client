@@ -166,18 +166,26 @@ var SERVICE_ID = "orion.sites";
 					timeout: 15000
 				});
 			},
-			createSiteConfiguration: function(name, workspace, mappings, hostHint) {
+			/**
+			 * @param {String} name
+			 * @param {String} workspaceId
+			 * @param {Object} [mappings]
+			 * @param {String} [hostHint]
+			 * @param {String} [status]
+			 */
+			createSiteConfiguration: function(name, workspaceId, mappings, hostHint, hostingStatus) {
 				function hostify(name) {
 					return name.replace(/ /g, "-").replace(/[^A-Za-z0-9-_]/g, "").toLowerCase();
 				}
 				var toCreate = {
 						Name: name,
-						Workspace: workspace,
+						Workspace: workspaceId,
 						HostHint: hostify(name)
 					};
 				if (mappings) { toCreate.Mappings = mappings; }
 				if (hostHint) { toCreate.HostHint = hostHint; }
-				
+				if (hostingStatus) { toCreate.HostingStatus = hostingStatus; }
+
 				//NOTE: require.toURL needs special logic here to handle "site"
 				var siteUrl = require.toUrl("site._");
 				siteUrl = siteUrl.substring(0,siteUrl.length-2);

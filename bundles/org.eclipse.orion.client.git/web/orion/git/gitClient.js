@@ -75,7 +75,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 15000,
 				load : function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, gitRepoUrl ? "Cloning repository: " + gitRepoUrl : "Initializing repository: " + gitName);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error : function(error, ioArgs) {
 					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
@@ -94,7 +94,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Removing repository");
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error : function(error, ioArgs) {
 					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
@@ -102,7 +102,7 @@ eclipse.GitService = (function() {
 			});
 			return clientDeferred;
 		},
-		getDiffContent: function(diffURI , onLoad , onError){
+		getDiffContent: function(diffURI){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrGet({
@@ -114,15 +114,15 @@ eclipse.GitService = (function() {
 				handleAs: "text",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Getting git diff", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError, dojo.xhrGet);
+					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, null, null, dojo.xhrGet);
 				}
 			});
 			return clientDeferred;
 		},
-		getDiffFileURI: function(diffURI , onLoad , onError){
+		getDiffFileURI: function(diffURI){
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrGet({
 				url: diffURI , 
@@ -133,15 +133,15 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Getting git diff", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError, dojo.xhrGet);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, null, null, dojo.xhrGet);
 				}
 			});
 			return clientDeferred;
 		},
-		getGitStatus: function(url , onLoad , onError){
+		getGitStatus: function(url){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrGet({
@@ -152,15 +152,15 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Getting git status", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError, dojo.xhrGet);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, null, null, dojo.xhrGet);
 				}
 			});
 			return clientDeferred;
 		},
-		stage: function(location , onLoad , onError){
+		stage: function(location){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPut({
@@ -171,15 +171,15 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Staging", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
 		},
-		stageMultipleFiles: function(gitCloneURI, paths , onLoad , onError){
+		stageMultipleFiles: function(gitCloneURI, paths){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPut({
@@ -193,15 +193,15 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Staging", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
 		},
-		unstageAll: function(location , resetParam ,onLoad , onError){
+		unstageAll: function(location , resetParam){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPost({
@@ -213,15 +213,15 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: dojo.toJson({"Reset":resetParam} ),
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Unstaging", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
 		},
-		unstage: function(location , paths ,onLoad , onError){
+		unstage: function(location , paths){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPost({
@@ -233,15 +233,15 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: dojo.toJson({"Path" : paths} ),
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Unstaging", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
 		},
-		checkoutPath: function(gitCloneURI, paths , onLoad , onError){
+		checkoutPath: function(gitCloneURI, paths){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPut({
@@ -256,15 +256,15 @@ eclipse.GitService = (function() {
 				handleAs: "json",
 				timeout: 15000,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Checking out", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					return dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
 		},
-		commitAll: function(location , message , body ,  onLoad , onError){
+		commitAll: function(location , message , body){
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPost({
@@ -276,10 +276,10 @@ eclipse.GitService = (function() {
 				timeout: 15000,
 				postData: body,
 				load: function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Committing", onLoad, onError);
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error: function(error, ioArgs) {
-					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, onLoad, onError);
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
 				}
 			});
 			return clientDeferred;
@@ -333,7 +333,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs, "Getting branch information");
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
 				},
 				error : function(error, ioArgs) {
 					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, null, null, dojo.xhrGet);
