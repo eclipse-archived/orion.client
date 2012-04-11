@@ -85,8 +85,9 @@ orion.LineNumberCompareRuler = (function() {
 	 * @class The line number ruler is used by the compare editor to render line numbers next to the editor
 	 * @name orion.compare.rulers.LineNumberCompareRuler
 	 */
-	function LineNumberCompareRuler (mapperColumnIndex , rulerLocation, rulerStyle, oddStyle, evenStyle) {
+	function LineNumberCompareRuler (diffNavigator, mapperColumnIndex , rulerLocation, rulerStyle, oddStyle, evenStyle) {
 		orion.CompareRuler.call(this, rulerLocation, "page", rulerStyle);
+		this._diffNavigator = diffNavigator;
 		this._oddStyle = oddStyle || {style: {backgroundColor: "white"}};
 		this._evenStyle = evenStyle || {style: {backgroundColor: "white"}};
 		this._numOfDigits = 0;
@@ -102,11 +103,15 @@ orion.LineNumberCompareRuler = (function() {
 	};
 	LineNumberCompareRuler.prototype.getHTML = function(lineIndex) {
 		var model = this._editor.getModel();
+		var diffFeeder = this._diffNavigator.getFeeder(this._mapperColumnIndex === 0);
+		if(!diffFeeder){
+			return "";
+		}
 		if (lineIndex === -1) {
 			return model.getLineCount();
 		} else {
-			if( model.getLineNumber){
-				var realIndex = model.getLineNumber(lineIndex , this._mapperColumnIndex);
+			if( diffFeeder.getLineNumber){
+				var realIndex = diffFeeder.getLineNumber(lineIndex);
 				if(realIndex === -1){
 					return "";
 				}
@@ -129,65 +134,9 @@ orion.LineNumberCompareRuler = (function() {
 	return LineNumberCompareRuler;
 }());
 
-orion.CompareAnnotation =  (function() {
-
-	function CompareAnnotation() {
-		this._currentAnnotationIndex = 0;
-	}
-
-	CompareAnnotation.prototype =  {
-		
-		init: function(mapper , editor ){
-			this._mapper = mapper;
-			this._editor = editor;
-			this._currentAnnotationIndex = 0;
-		},
-		
-		getCurrentDiffBlockIndex: function(){
-			return this._currentAnnotationIndex;
-		},
-
-		matchPositionFromAnnotation: function(index){
-			var annotaionIndex = index;
-			if(index === -1){
-				annotaionIndex = 0;
-			} else {
-				var model =  this._editor.getModel();
-				annotaionIndex = mCompareUtils.getAnnotationIndex(model.getAnnotations(), index);
-			}
-			this._currentAnnotationIndex = annotaionIndex;
-		},
-		
-		gotoDiff: function(annotationIndex){
-			this._currentAnnotationIndex = annotationIndex;
-		},
-		
-		nextDiff: function(){
-			var annotations = this._editor.getModel().getAnnotations();
-			if(annotations.length !== 0 ){
-				if((annotations.length -1) === this._currentAnnotationIndex)
-					this._currentAnnotationIndex = 0;
-				else
-					this._currentAnnotationIndex += 1;
-			}
-		},
-		
-		prevDiff: function(){
-			var annotations = this._editor.getModel().getAnnotations();
-			if(annotations.length !== 0 ){
-				if(0 === this._currentAnnotationIndex)
-					this._currentAnnotationIndex = annotations.length -1;
-				else
-					this._currentAnnotationIndex -= 1;
-			}
-		}
-	};
-	return CompareAnnotation;
-}()); 
-
 orion.CompareOverviewRuler = (function() {
-	function CompareOverviewRuler ( rulerLocation, rulerStyle , compareAnnotaion , onClick) {
-		this._compareAnnotaion = compareAnnotaion;
+	function CompareOverviewRuler ( rulerLocation, rulerStyle , diffNavigator , onClick) {
+		this._diffNavigator = diffNavigator;
 		this._onClick = onClick;
 		orion.CompareRuler.call(this, rulerLocation, "document", rulerStyle);
 	}
@@ -217,8 +166,6 @@ orion.CompareOverviewRuler = (function() {
 				var diffBlocks;
 				if(this._diffNavigator){
 					diffBlocks = this._diffNavigator.getFeeder().getDiffBlocks();
-				} else if (model.getAnnotations){
-					diffBlocks = model.getAnnotations();
 				} else {
 					return null;
 				}
@@ -227,28 +174,16 @@ orion.CompareOverviewRuler = (function() {
 				if (annotationIndex === -1) return null;
 				var mapperIndex = mCompareUtils.getAnnotationMapperIndex(diffBlocks, annotationIndex);
 				var mapper;
-				if(this._diffNavigator){
-					mapper = this._diffNavigator.getMapper();
-				} else if (model.getMapper){
-					mapper = model.getMapper();
-				} else {
-					return null;
-				}
+				mapper = this._diffNavigator.getMapper();
 				var conflict = mCompareUtils.isMapperConflict(mapper, mapperIndex);
-				if(conflict)
+				if(conflict){
 					style.border = "1px #FF0000 solid";
-				var anH, lC;
-				if(this._diffNavigator){
-					if(annotationIndex === this._diffNavigator.getCurrentBlockIndex())
-						style.backgroundColor = conflict ? "red" :"blue";
-					anH = this._diffNavigator.getFeeder().getDiffBlockH(annotationIndex);
-					lC = this._diffNavigator.getFeeder().getAnnotationLineCount();
-				} else {
-					if(annotationIndex === this._compareAnnotaion.getCurrentDiffBlockIndex())
-						style.backgroundColor = conflict ? "red" :"blue";
-					anH = model.getAnnotationH(annotationIndex);
-					lC = model.getAnnotationLineCount();
 				}
+				if(annotationIndex === this._diffNavigator.getCurrentBlockIndex()){
+					style.backgroundColor = conflict ? "red" :"blue";
+				}
+				var anH = this._diffNavigator.getFeeder().getDiffBlockH(annotationIndex);
+				var lC = this._diffNavigator.getFeeder().getOverviewLineCount();
 				if(anH < 0){
 					return null;
 				}
@@ -262,6 +197,9 @@ orion.CompareOverviewRuler = (function() {
 			}
 		}
 		return result;
+	};
+	CompareOverviewRuler.prototype.setDiffNavigator = function(diffNavigator) {
+		this._diffNavigator = diffNavigator;
 	};
 	CompareOverviewRuler.prototype.getHTML = function(lineIndex) {
 		return "&nbsp;";

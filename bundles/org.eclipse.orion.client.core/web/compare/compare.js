@@ -52,6 +52,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 				var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
 				var options = {
 					readonly: readOnly,
+					commandSpanId: "pageNavigationActions",
 					hasConflicts: conflciting,
 					diffProvider: diffProvider,
 					complexURL: dojo.hash()
