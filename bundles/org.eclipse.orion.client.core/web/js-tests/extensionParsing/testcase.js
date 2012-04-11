@@ -17,7 +17,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	 * mock services
 	 */
 	var serviceRegistry = new mServiceregistry.ServiceRegistry();
-	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+	new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	
 	/**
 	 * mock content types cache
@@ -29,15 +29,18 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	 */
 	var item1 = {
 		Name: "Foo",
-		Location: "/file/foo/bar/Foo"
+		User: "John",
+		Location: "/file/foo/bar/Foo",
+		AlternateLocation: "/fileSystem1/foo/bar/Foo.alt"
 	};
-	item1.SubObject = {SecondaryLocation: "/secondary/file/foo/bar/Foo"};
+	item1.SubObject = {SecondaryLocation: "/secondary/foo/bar/Foo"};
 	
 	var item2 = {
 		Name: "Bar",
-		AlternateLocation: "/alternate/file/foo/bar/Bar"
+		User: "John",
+		AlternateLocation: "/fileSystem2/foo/bar/Bar.alt"
 	};
-	item2.SubObject = {SecondaryAlternateLocation: "http://example.com/secondary/alternate/file/foo/bar/Foo.Secondary"};
+	item2.SubObject = {SecondaryAlternateLocation: "http://example.com/secondary/foo/bar/Foo.Secondary"};
 	
 	/**
 	 * helpers
@@ -72,7 +75,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	/**
 	 * Test OR in validation property.
 	 */
-	tests.testSimpleValidationProperty = function() {
+	tests.testSimpleORValidationProperty = function() {
 		var validationProperty = {
 			source: "Location|AlternateLocation"
 		};
@@ -84,7 +87,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	/**
 	 * Test nested validation property.
 	 */
-	tests.testSimpleValidationProperty = function() {
+	tests.testNestedValidationProperty = function() {
 		var validationProperty = {
 			source: "SubObject:SecondaryLocation"
 		};
@@ -96,7 +99,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	/**
 	 * Test combinations of nested properties and OR properties
 	 */
-	tests.testSimpleValidationProperty = function() {
+	tests.testNestedORValidationProperty = function() {
 		var validationProperty = {
 			source: "SubObject:SecondaryLocation|AlternateLocation"
 		};
@@ -116,5 +119,88 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		assert.equal(validator.validationFunction(item1), true);
 		assert.equal(validator.validationFunction(item2), true);
 	};	
+	
+	/**
+	 * Test properties against regular expression patterns.
+	 */
+	tests.testPatternMatchValidationProperty = function() {
+		var validationProperty = {
+			source: "SubObject:SecondaryLocation|AlternateLocation",
+			match: "fileSystem1"
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item1), true);
+		assert.equal(validator.validationFunction(item2), false);
+		validationProperty = {
+			source: "Location|AlternateLocation",
+			match: "/file/"
+		};
+		validator = mExtensionCommands._makeValidator(makeInfo(validationProperty), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item1), true);
+		assert.equal(validator.validationFunction(item2), false);
+		
+		validationProperty.match = ".alt$";
+		validator = mExtensionCommands._makeValidator(makeInfo(validationProperty), serviceRegistry, contentTypesCache);
+		assert.equal(validator.validationFunction(item1), true);
+		assert.equal(validator.validationFunction(item2), true);
+	};
+	
+	tests.testVariableSubstitutions = function() {
+		var validationProperty = {
+			source: "SubObject:SecondaryLocation|AlternateLocation",
+			match: "fileSystem1",
+			variableName: "MyLocation"
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.getURI(item1), item1.AlternateLocation, "variableMatchPosition all");
+		
+		validationProperty.variableMatchPosition = "only";
+		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition only");
+		
+		validationProperty.variableMatchPosition = "before";
+		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		assert.equal(validator.getURI(item1), "/", "variableMatchPosition before");
+		
+		validationProperty.variableMatchPosition = "after";
+		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		assert.equal(validator.getURI(item1), "/foo/bar/Foo.alt", "variableMatchPosition after");
+	};
+	
+	tests.testVariableCaching = function() {
+		var validationProperty = {
+			source: "SubObject:SecondaryLocation|AlternateLocation",
+			match: "fileSystem\\d*",
+			variableName: "MyLocation",
+			variableMatchPosition: "only"
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition only");
+		validationProperty.variableMatchPosition = "all";
+		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition uses cached value for same item");
+		assert.equal(validator.getURI(item2), item2.AlternateLocation, "variableMatchPosition recomputed for different item");
+		assert.equal(validator.getURI(item1), item1.AlternateLocation, "variableMatchPosition is recomputed");
+		
+		validationProperty.variableMatchPosition = "only";  // will recompute since item is different
+		assert.equal(validator.getURI(item2), "fileSystem2", "variableMatchPosition only");
+	};
+	
+	tests.testVariableReplacements = function() {
+		var validationProperty = {
+			source: "AlternateLocation",
+			match: ".alt$",
+			variableMatchPosition: "before",
+			variableName: "MyLocation",
+			replacements: [{pattern: "fileSystem\\d*", replacement: "fs"}]
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{MyLocation}?user={User}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.getURI(item1), "/fs/foo/bar/Foo?user=John");	
+		
+		validationProperty.replacements = [{pattern: "fileSystem\\d*", replacement: "fs"},{pattern: "/foo"}, {pattern: "/bar", replacement: "*"}];
+		validationProperty.itemCached = null;
+		assert.equal(validator.getURI(item1), "/fs*/Foo?user=John");	
+		
+	};
+	
 	return tests;
 });

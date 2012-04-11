@@ -135,8 +135,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 								value = item[key].substring(0, patternMatch.index);
 							} else if (validationProperty.variableMatchPosition === "after") {
 								value = item[key].substring(patternMatch.index + firstMatch.length);
-							} else {
+							} else if (validationProperty.variableMatchPosition === "only") {
 								value = firstMatch;
+							} else {  // "all"
+								value = item[key];
 							}
 							valid = true;
 						}
