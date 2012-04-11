@@ -30,6 +30,8 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			if (this._tooltipDiv) { return; }
 			var tooltipDiv = this._tooltipDiv = document.createElement("DIV");
 			tooltipDiv.className = "textviewTooltip";
+			tooltipDiv.setAttribute("aria-live", "assertive");
+			tooltipDiv.setAttribute("aria-atomic", "true");
 			var tooltipContents = this._tooltipContents = document.createElement("DIV");
 			tooltipDiv.appendChild(tooltipContents);
 			document.body.appendChild(tooltipDiv);
@@ -69,15 +71,20 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 		isVisible: function() {
 			return this._tooltipDiv && this._tooltipDiv.style.visibility === "visible";
 		},
-		setTarget: function(target) {
+		setTarget: function(target, delay) {
 			if (this.target === target) { return; }
 			this._target = target;
 			this.hide();
 			if (target) {
 				var self = this;
-				self._showTimeout = setTimeout(function() {
+				if(delay === 0) {
 					self.show(true);
-				}, 500);
+				}
+				else {
+					self._showTimeout = setTimeout(function() {
+						self.show(true);
+					}, delay ? delay : 500);
+				}
 			}
 		},
 		show: function(autoHide) {

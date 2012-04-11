@@ -30,6 +30,8 @@ define("orion/editor/nls/messages", {
 		"deleteLines": "Delete Lines",
 		"gotoLine": "Goto Line...",
 		"gotoLinePrompty": "Goto Line:",
+		"nextAnnotation": "Next Annotation",
+        "prevAnnotation": "Previous Annotation",
 		"lastEdit": "Last Edit Location",
 		"toggleLineComment": "Toggle Line Comment",
 		"addBlockComment": "Add Block Comment",
@@ -38,7 +40,7 @@ define("orion/editor/nls/messages", {
 		"linkedModeExited": "Linked Mode exited",
 		"syntaxError": "Syntax Error",
 		"contentAssist": "Content Assist",
-		"lineColumn": "Line ${0} : Col ${1}",
+		"lineColumn": "Line ${0} : Col ${1}"
 	},
 	"pt-br": true
 });
