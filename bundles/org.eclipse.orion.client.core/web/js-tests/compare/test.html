@@ -34,10 +34,9 @@
 		});
 	
 	window.onload = function() {
-		require(["orion/test","testcase.js", "testcase-model.js"], function(test, testcase, testcaseModel) {
+		require(["orion/test","testcase.js"], function(test, testcase) {
 			test.run({
-				"test mapper": testcase, 
-				"test model": testcaseModel
+				"test mapper": testcase
 			});		
 		});
 	};

@@ -221,7 +221,7 @@ exports.DiffTreeNavigator = (function() {
 			this._curveRuler = curveRuler;
 			this._overviewRuler = overviewRuler;
 			if(this._overviewRuler){
-				this._overviewRuler._diffNavigator = this;
+				this._overviewRuler.setDiffNavigator(this);
 			}
 		},
 			
@@ -583,9 +583,9 @@ exports.DiffTreeNavigator = (function() {
 	return DiffTreeNavigator;
 }());
 
-exports.TwoWayDiffBlockFeeder = (function() {
+exports.DiffBlockFeeder = (function() {
 	/**
-	 * Creates a new diff block feeder of one side of the two way compare widget.
+	 * Creates a new generic diff block feeder
 	 * Each item in the feeder is represented by a pair of number [lineIndexOfTheTextModel, correspondingMapperIndex]. 
 	 *
 	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
@@ -594,39 +594,10 @@ exports.TwoWayDiffBlockFeeder = (function() {
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
-	function TwoWayDiffBlockFeeder(model, mapper, mapperColumnIndex) {
-	    this._mapperColumnIndex = mapperColumnIndex;
-	    this.init(model, mapper);
+	function DiffBlockFeeder() {
 	}
 	
-	TwoWayDiffBlockFeeder.prototype = /** @lends orion.DiffTreeNavigator.TwoWayDiffBlockFeeder.prototype */ {
-		
-		init: function(model, mapper){
-		    this._textModel = model;
-			this._initing = true;
-			this._diffBlocks = undefined;
-			if(mapper){
-				this._mapper = mapper;
-				this._diffBlocks = [];
-				var curLineindex = 0;//zero based
-				for (var i = 0 ; i < this._mapper.length ; i++){
-					if((this._mapper[i][2] !== 0)){
-						this._diffBlocks.push([curLineindex , i]);
-					}
-					curLineindex += this._mapper[i][this._mapperColumnIndex];
-				}
-			}
-		},
-		
-		getBlockAnnoTypes: function(result){
-			if(this._mapperColumnIndex === 0){
-				result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []});
-			} else {
-				result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
-			}
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
-		},
+	DiffBlockFeeder.prototype = /** @lends orion.DiffTreeNavigator.TwoWayDiffBlockFeeder.prototype */ {
 		
 		getWordAnnoTypes: function(result){
 			if(this._mapperColumnIndex === 0){
@@ -640,16 +611,20 @@ exports.TwoWayDiffBlockFeeder = (function() {
 			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT});
 		},
  
-		getCurrentBlockAnnoType: function(diffBlockIndex){
-			var mapperIndex = this._diffBlocks[diffBlockIndex][1];
-			if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
-				return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
-			} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
-				return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
-			} else if(this._mapperColumnIndex === 0){
-				return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []};
-			} 
-			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []};
+		getCurrentWordAnnoType: function(annoPosition, textModel){
+			if(annoPosition.start === annoPosition.end && textModel){
+				if(this._mapperColumnIndex === 0){
+					return {current: this._repositionEmptyWord(annoPosition, textModel), normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD};
+				} else {
+					return {current: this._repositionEmptyWord(annoPosition, textModel), normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD};
+				}
+			} else {
+				if(this._mapperColumnIndex === 0){
+					return {current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD};
+				} else {
+					return {current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD};
+				}
+			}
 		},
 		
 		_repositionEmptyWord: function(annoPosition, textModel){
@@ -676,22 +651,6 @@ exports.TwoWayDiffBlockFeeder = (function() {
 			return this._mapperColumnIndex === 0 ? DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT : DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT;
 		},
 		
-		getCurrentWordAnnoType: function(annoPosition, textModel){
-			if(annoPosition.start === annoPosition.end && textModel){
-				if(this._mapperColumnIndex === 0){
-					return {current: this._repositionEmptyWord(annoPosition, textModel), normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD};
-				} else {
-					return {current: this._repositionEmptyWord(annoPosition, textModel), normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD};
-				}
-			} else {
-				if(this._mapperColumnIndex === 0){
-					return {current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD};
-				} else {
-					return {current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD};
-				}
-			}
-		},
-		
 		getMapper: function(){
 			return this._mapper;
 		},
@@ -708,8 +667,12 @@ exports.TwoWayDiffBlockFeeder = (function() {
 			return 	(mapperIndex === -1) ? 0 :this._mapper[mapperIndex][this._mapperColumnIndex];
 		},
 		
-		getAnnotationLineCount: function(){
+		getOverviewLineCount: function(){
 			return 	this._textModel.getLineCount();
+		},
+		
+		getLineNumber: function(lineIndex){
+			return lineIndex;
 		},
 		
 		getCharRange: function(blockIndex){
@@ -733,31 +696,152 @@ exports.TwoWayDiffBlockFeeder = (function() {
 			return {start: charRange.start, text: this._textModel.getText(charRange.start, charRange.end)};
 		},
 
-		//To get the line type from a zero based line index  
-		getLineType: function(lineIndex){
-			var mapItem = mCompareUtils.lookUpMapper(this._mapper , this._mapperColumnIndex , lineIndex);
-			if(mapItem.mapperIndex > -1){
-				if(this._mapper[mapItem.mapperIndex][2] !== 0){
-					var mapperLength = this._mapper[mapItem.mapperIndex][this._mapperColumnIndex];
-					if(mapperLength === 0)
-						return {type:"top-only" , mapperIndex:mapItem.mapperIndex};
-					if(mapperLength === 1)
-						return {type:"oneline" , mapperIndex:mapItem.mapperIndex};
-					if(lineIndex === mapItem.startFrom)
-						return {type:"top" , mapperIndex:mapItem.mapperIndex};
-					if(lineIndex === mapItem.startFrom + mapperLength -1)
-						return {type:"bottom" , mapperIndex:mapItem.mapperIndex};
-					return {type:"middle" , mapperIndex:mapItem.mapperIndex};
-				}
-			}
-			return {type:"unchanged" , mapperIndex:mapItem.mapperIndex};
-		},
-			
 		isMapperEmpty: function(){
 			return this._mapper.length === 0;
 		}
 	};
+	return DiffBlockFeeder;
+}());
+
+exports.TwoWayDiffBlockFeeder = (function() {
+	/**
+	 * Creates a new diff block feeder of one side of the two way compare widget.
+	 * Each item in the feeder is represented by a pair of number [lineIndexOfTheTextModel, correspondingMapperIndex]. 
+	 *
+	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
+	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
+	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {array} The mapper generated from the unified diff.
+	 * @param {integer} The column index where the line index can be calculated.
+	 */
+	function TwoWayDiffBlockFeeder(model, mapper, mapperColumnIndex) {
+	    this._mapperColumnIndex = mapperColumnIndex;
+	    this.init(model, mapper);
+	}
+	TwoWayDiffBlockFeeder.prototype = new exports.DiffBlockFeeder(); 
+	TwoWayDiffBlockFeeder.prototype.init = function(model, mapper){
+	    this._textModel = model;
+		this._diffBlocks = undefined;
+		if(mapper){
+			this._mapper = mapper;
+			this._diffBlocks = [];
+			var curLineindex = 0;//zero based
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if((this._mapper[i][2] !== 0)){
+					this._diffBlocks.push([curLineindex , i]);
+				}
+				curLineindex += this._mapper[i][this._mapperColumnIndex];
+			}
+		}
+	};
+	TwoWayDiffBlockFeeder.prototype.getBlockAnnoTypes = function(result){
+		if(this._mapperColumnIndex === 0){
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []});
+		} else {
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
+		}
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
+	};
+	TwoWayDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
+		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
+		if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
+			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
+		} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
+			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
+		} else if(this._mapperColumnIndex === 0){
+			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []};
+		} 
+		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []};
+	};
 	return TwoWayDiffBlockFeeder;
+}());
+
+exports.inlineDiffBlockFeeder = (function() {
+	/**
+	 * Creates a new diff block feeder of one side of the two way compare widget.
+	 * Each item in the feeder is represented by a pair of number [lineIndexOfTheTextModel, correspondingMapperIndex]. 
+	 *
+	 * @name orion.DiffTreeNavigator.inlineDiffBlockFeeder
+	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
+	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {array} The mapper generated from the unified diff.
+	 * @param {integer} The column index where the line index can be calculated.
+	 */
+	function inlineDiffBlockFeeder(mapper, mapperColumnIndex) {
+	    this._mapperColumnIndex = mapperColumnIndex;
+	    this.init(mapper);
+	}
+	inlineDiffBlockFeeder.prototype = new exports.DiffBlockFeeder(); 
+	inlineDiffBlockFeeder.prototype.setModel = function(model){
+	    this._textModel = model;
+	};
+	inlineDiffBlockFeeder.prototype.init = function( mapper){
+		this._diffBlocks = undefined;
+		if(mapper){
+			this._mapper = mapper;
+			this._diffBlocks = [];
+			this._gapBlocks = [];
+			var curLineindex = 0;//zero based
+			var curGapLineindex = 0;//zero based
+			for (var i = 0 ; i < this._mapper.length ; i++){
+				if((this._mapper[i][2] !== 0)){
+					if(this._mapperColumnIndex === 0){//adding block
+						var startLineIndex = curLineindex + this._mapper[i][1];
+						this._diffBlocks.push([startLineIndex , i]);
+						this._gapBlocks.push([startLineIndex , startLineIndex + this._mapper[i][0], curGapLineindex]);
+					} else {
+						this._diffBlocks.push([curLineindex, i]);
+						this._gapBlocks.push([curLineindex, curLineindex + this._mapper[i][1], curGapLineindex]);
+					}
+					curLineindex += this._mapper[i][0] +  this._mapper[i][1];
+				} else {
+					this._gapBlocks.push([curLineindex, curLineindex + this._mapper[i][this._mapperColumnIndex], curGapLineindex]);
+					curLineindex += this._mapper[i][this._mapperColumnIndex];
+				}
+				curGapLineindex += this._mapper[i][this._mapperColumnIndex];
+			}
+		}
+	};
+	inlineDiffBlockFeeder.prototype.getBlockAnnoTypes = function(result){
+		if(this._mapperColumnIndex === 0){
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []});
+		} else {
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
+		}
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
+	};
+	inlineDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
+		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
+		if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
+			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
+		} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
+			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
+		} else if(this._mapperColumnIndex === 0){
+			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []};
+		} 
+		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []};
+	};
+	inlineDiffBlockFeeder.prototype.getDiffBlockH = function(diffBlockIndex){
+		if(!this._diffBlocks){
+			return -1;
+		}
+		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
+		return 	this._mapper[mapperIndex][0] + this._mapper[mapperIndex][1];
+	};
+	inlineDiffBlockFeeder.prototype.getLineNumber = function(lineIndex){
+		for(var i = 0; i < this._gapBlocks.length; i++){
+			if(this._gapBlocks[i][0] !== this._gapBlocks[i][1]){
+				if(lineIndex >= this._gapBlocks[i][0] && lineIndex < this._gapBlocks[i][1]){
+					var delta = lineIndex - this._gapBlocks[i][0];
+					return delta + this._gapBlocks[i][2];
+				}
+			}
+		}
+		return -1;
+	};
+	return inlineDiffBlockFeeder;
 }());
 
 return exports;
