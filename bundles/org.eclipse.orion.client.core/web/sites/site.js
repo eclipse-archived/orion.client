@@ -16,9 +16,9 @@
  * Glue code for site.html
  */
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteUtils', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteUtils, mSiteTree, mTreeTable, PageUtil) {
+	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteCommands, mSiteTree, mTreeTable, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -100,9 +100,11 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			// Hook up commands stuff
 			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
 			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
-			
-			mSiteUtils.createSiteCommands(commandService, siteService, progressService, dialogService, 
-					/*start*/ refresher, /*stop*/ refresher, /*delete*/ null, errorHandler);
+			mSiteCommands.createSiteCommands(serviceRegistry, {
+				startCallback: refresher,
+				stopCallback: refresher,
+				errorCallback: errorHandler
+			});
 			commandService.registerCommandContribution("pageActions", "orion.site.start", 1);
 			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2);
 			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3);

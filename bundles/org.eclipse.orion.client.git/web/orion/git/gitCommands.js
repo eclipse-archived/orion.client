@@ -2018,8 +2018,9 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
-						gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-								options.gitPrivateKey, options.gitPassphrase).then(function(jsonData, secondArg) {
+						serviceRegistry.getService("orion.page.message").showWhile(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts,
+								options.gitPrivateKey, options.gitPassphrase),
+								"Cloning repository: " + gitUrl).then(function(jsonData, secondArg) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 								if (explorer.redisplayClonesList) {
 									dojo.hitch(explorer, explorer.redisplayClonesList)();
@@ -2063,7 +2064,8 @@ var exports = {};
 				var initRepositoryFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
-						gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath).then(function(jsonData, secondArg){
+						serviceRegistry.getService("orion.page.message").showWhile(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath),
+								"Initializing repository: " + name).then(function(jsonData, secondArg){
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
 								if(explorer.redisplayClonesList)
 									dojo.hitch(explorer, explorer.redisplayClonesList)();
@@ -2136,7 +2138,7 @@ var exports = {};
 									dojo.hitch(explorer, explorer.redisplayClonesList)();
 								}
 							},
-							this.displayErrorOnStatus);
+							displayErrorOnStatus);
 				}
 				
 			}

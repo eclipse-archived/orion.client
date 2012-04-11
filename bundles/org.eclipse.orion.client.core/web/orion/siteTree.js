@@ -71,6 +71,7 @@ exports.SiteRenderer = (function() {
 			var thead = dojo.create("thead", null);
 			dojo.create("th", {innerHTML: "Name"}, thead, "last");
 			dojo.create("th", {innerHTML: "Status"}, thead, "last");
+			dojo.create("th", {innerHTML: "URL", className: "urlCol"}, thead, "last");
 			dojo.create("th", {innerHTML: "Actions"}, thead, "last");
 			tableNode.appendChild(thead);
 		},
@@ -80,19 +81,20 @@ exports.SiteRenderer = (function() {
 			
 			var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"});
 			var statusCol = dojo.create("td", {id: tableRow.id + "col2"});
-			var actionCol = dojo.create("td", {id: tableRow.id + "col3"});
+			var urlCol = dojo.create("td", {id: tableRow.id + "col3"});
+			var actionCol = dojo.create("td", {id: tableRow.id + "col4"});
 			
 			// Site config column
 			var href = mSiteUtils.generateEditSiteHref(item);
 			var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last");
 			dojo.place(document.createTextNode(item.Name), nameLink, "last");
 			
-			// Status column
+			// Status, URL columns
 			var status = item.HostingStatus;
 			if (typeof status === "object") {
 				if (status.Status === "started") {
-					dojo.place(document.createTextNode("Started at "), statusCol, "last");
-					var link = dojo.create("a", null, statusCol, "last");
+					dojo.place(document.createTextNode("Started"), statusCol, "last");
+					var link = dojo.create("a", {className: "siteURL"}, urlCol, "last");
 					dojo.place(document.createTextNode(status.URL), link, "only");
 					link.href = status.URL;
 				} else {
@@ -111,6 +113,7 @@ exports.SiteRenderer = (function() {
 			
 			dojo.place(siteConfigCol, tableRow, "last");
 			dojo.place(statusCol, tableRow, "last");
+			dojo.place(urlCol, tableRow, "last");
 			dojo.place(actionCol, tableRow, "last");
 		},
 		rowsChanged: function() {
