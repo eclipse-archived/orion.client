@@ -52,6 +52,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		} else {
 			info.validationProperties = [validationProperty];
 		}
+		info.id = "orion.testData";
 		info.name = "TestExtension";
 		info.uriTemplate = uriTemplate;
 		return info;
@@ -200,6 +201,15 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		validationProperty.itemCached = null;
 		assert.equal(validator.getURI(item1), "/fs*/Foo?user=John");	
 		
+	};
+	
+	tests.testVariableOverwrite = function() {
+		var validationProperty = {
+			source: "AlternateLocation",
+			variableName: "Location",
+		};
+		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{Location}"), serviceRegistry, contentTypesCache);
+		assert.equal(validator.getURI(item1), item1.Location);		
 	};
 	
 	return tests;

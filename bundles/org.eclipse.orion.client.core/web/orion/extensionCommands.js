@@ -284,7 +284,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							if (!alreadyCached) {
 								matchSinglePattern(item, validationProperty.source, validationProperty);
 							}
-							variableExpansions[validationProperty.variableName] = validationProperty.variableValue;
+							if (!item[validationProperty.variableName]) {
+								variableExpansions[validationProperty.variableName] = validationProperty.variableValue;
+							} else {
+								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata.");
+							}
 						}
 					}
 				}
