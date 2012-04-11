@@ -30,6 +30,8 @@ define("orion/editor/nls/messages", {
 		"deleteLines": "Delete Lines",
 		"gotoLine": "Goto Line...",
 		"gotoLinePrompty": "Goto Line:",
+		"nextAnnotation": "Next Annotation",
+        "prevAnnotation": "Previous Annotation",
 		"lastEdit": "Last Edit Location",
 		"toggleLineComment": "Toggle Line Comment",
 		"addBlockComment": "Add Block Comment",
