@@ -256,7 +256,7 @@ exports.GitRepositoryExplorer = (function() {
 									var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 									
 									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-										that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "").then(
+										that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then(
 											function(resp){
 												repositories[0].CommitsToPush = resp.Children.length;
 											}
@@ -686,7 +686,7 @@ exports.GitRepositoryExplorer = (function() {
 				};
 				
 				if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-					that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD", "",
+					that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then(
 						function(resp){
 							dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
 							
@@ -696,7 +696,7 @@ exports.GitRepositoryExplorer = (function() {
 								that.renderCommit(resp.Children[i], true, i);
 							}
 							
-							that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id, "", 
+							that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id).then( 
 								function(resp){	
 									for (var i=0; i<resp.Children.length; i++){
 										that.renderCommit(resp.Children[i], false, i + commitsCount);
@@ -711,7 +711,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				} else {
-					that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20", 
+					that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then( 
 						function(resp){	
 							dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
 						

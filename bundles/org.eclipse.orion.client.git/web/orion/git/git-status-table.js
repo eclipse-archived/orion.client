@@ -676,12 +676,8 @@ orion.GitStatusController = (function() {
 				var commandService = this._registry.getService("orion.page.command");
 				mGitCommands.createStatusCommands(that._registry , commandService , function(){that.getGitStatus(that._url ,true);} , 9 , that);
 				
-				this._renderLogs(false).then(function(){
-					that._renderLogs(true);
-					
-				});
-				
-				
+				this._renderLogs(false);
+				this._renderLogs(true);
 			}
 			
 			this._committerAndAuthorZoneRenderer.renderAction();
@@ -797,8 +793,8 @@ orion.GitStatusController = (function() {
 			var that = this;
 			if (that._initializing) {
 				var path = that._model.items.CloneLocation;
-				gitService = that._registry.getService("orion.git.provider");
-				gitService.getGitClone(path, function(cloneJsonData, secondArd) {
+				var gitService = that._registry.getService("orion.git.provider");
+				gitService.getGitClone(path).then(function(cloneJsonData, secondArd) {
 					that._cloneInfo = cloneJsonData;
 					if(that._cloneInfo.Children.length === 0){
 						that._renderLog = false;
@@ -852,12 +848,10 @@ orion.GitStatusController = (function() {
 			if(!this._renderLog)
 				return;
 
-			var retDeffered = new dojo.Deferred();
 			if (isRemote) {
 				if(!this._curRemote || !this._curBranch || this._curBranch.RemoteLocation.length!==1 || this._curBranch.RemoteLocation[0].Children.length!==1){
 					//We want to empty the mini log section for the tracked remote branch if there is no such 
 					dojo.empty(this._remoteTableRenderer.getLogSectionId());
-					retDeffered.callback();
 					return;
 				}
 		        this._gitCommitNavigatorRem = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, actionScopeId: "itemLevelCommands", minimal: true}, this._remoteTableRenderer.getLogContentId());    
@@ -868,102 +862,61 @@ orion.GitStatusController = (function() {
 					//If the remote section is not rendered before, we need to create the empty frame there
 					this._remoteTableRenderer.render(true);
 				}
+				dojo.place(document.createTextNode("Loading recent commits..."), this._remoteTableRenderer.getLogContentId(), "only");
 				// refresh the commit list for the remote
 				var path = this._curBranch.RemoteLocation[0].Children[0].Location + "?page=1&pageSize=5";
-				dojo.xhrGet({
-					url : path,
-					headers : {
-						"Orion-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 5000,
-					load : function(jsonData, secondArg) {
-						var gitService = that._registry.getService("orion.git.provider");
-						gitService.getLog(jsonData.HeadLocation, jsonData.Id, "Getting git incoming changes", function(scopedCommitsJsonData, secondArg) {
-									that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-									that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData).then(function(){retDeffered.callback();});
-									that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
-						});
-					},
-					error : function(error, ioArgs) {
-						if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-							var currentXHR = this;
-							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-								dojo.xhrGet(currentXHR); // retry GET							
+				var gitService = that._registry.getService("orion.git.provider");
+				gitService.doGitLog(path).then(
+					function(jsonData, secondArg) {
+							var gitService = that._registry.getService("orion.git.provider");
+							dojo.place(document.createTextNode("Getting git incoming changes..."), that._remoteTableRenderer.getLogContentId(), "only");
+							gitService.getLog(jsonData.HeadLocation, jsonData.Id).then(function(scopedCommitsJsonData, secondArg) {
+										that._gitCommitNavigatorRem.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+										that._gitCommitNavigatorRem.loadCommitsList(jsonData.CommitLocation + "?page=1&pageSize=5", jsonData);
+										that._remoteTableRenderer.renderAdditionalAction(that._gitCommitNavigatorRem._lastTreeRoot);
 							});
-						}else{
-							that._gitCommitNavigatorRem.loadCommitsList(path, error).then(function(){retDeffered.callback();});	
-						}
-						console.error("HTTP status code: ", ioArgs.xhr.status);
+					},
+					function(error, ioArgs) {
+							that._gitCommitNavigatorRem.loadCommitsList(path, error);	
+							console.error("HTTP status code: ", ioArgs.xhr.status);
 					}
-				});
+				);
 			} else {
 		        this._gitCommitNavigatorLog = new mGitCommitNavigator.GitCommitNavigator(this._registry, null, {checkbox: false, minimal: true},this._logTableRenderer.getLogContentId());
-		        dojo.place(document.createTextNode(""), this._logTableRenderer.getLogContentId(), "only");
+		        dojo.place(document.createTextNode("Loading recent commits..."), this._logTableRenderer.getLogContentId(), "only");
 				var path = (that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) + "?page=1&pageSize=5";
-				dojo.xhrGet({ //TODO Bug 367352
-					url : path,
-					headers : {
-						"Orion-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 5000,
-					load : function(commitLogJsonData, ioArgs) {
-						
+				var gitService = that._registry.getService("orion.git.provider");
+				gitService.doGitLog(path).then(function(commitLogJsonData, ioArgs) {
 						function renderCommitLogJsonData(commitLogJsonData){
 							if (commitLogJsonData.toRef == null || commitLogJsonData.toRef.RemoteLocation.length!==1 || commitLogJsonData.toRef.RemoteLocation[0].Children.length!==1 || !that._curBranch){
-								that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
+								that._gitCommitNavigatorLog.loadCommitsList((that._curBranch ? that._curBranch.CommitLocation :  that._model.items.CommitLocation) +"?page=1&pageSize=5", {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children});
 								if(that._curRemote && that._curBranch)
 									that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 							}
 							else {
-								dojo.xhrGet({
-									url : commitLogJsonData.toRef.RemoteLocation[0].Children[0].Location,
-									headers : {
-										"Orion-Version" : "1"
-									},
-									handleAs : "json",
-									timeout : 5000,
-									load : function(remoteJsonData, secondArg) {
-										that._registry.getService("orion.git.provider").getLog(remoteJsonData.CommitLocation, "HEAD", "Getting git incoming changes", function(scopedCommitsJsonData) {
+								gitService.getGitRemote(commitLogJsonData.toRef.RemoteLocation[0].Children[0].Location).then(function(remoteJsonData, secondArg) {
+										gitService.getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) {
 												that._gitCommitNavigatorLog.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-												that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
+												that._gitCommitNavigatorLog.loadCommitsList( that._curBranch.CommitLocation +"?page=1&pageSize=5" , {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children});
 												if(that._curRemote)
 													that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
 											
 										});
 									},
-									error : function(error, ioArgs) {
-										console.error("HTTP status code: ", ioArgs.xhr.status);
-										if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-											var currentXHR = this;
-											mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-												dojo.xhrGet(currentXHR); // retry GET							
-											});
-										}else{
-											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children}).then(function(){retDeffered.callback();});
+									function(error, ioArgs) {
+											that._gitCommitNavigatorLog.loadCommitsList(path, {Type:"LocalBranch" ,RemoteLocation: commitLogJsonData.toRef.RemoteLocation, Children: commitLogJsonData.Children});
 											if(that._curRemote && that._curBranch)
 												that._logTableRenderer.renderAdditionalAction(that._gitCommitNavigatorLog._lastTreeRoot);
-										}
-									}
-								});
+										console.error("HTTP status code: ", ioArgs.xhr.status);
+									});
 							}
 						}
-						if(ioArgs.xhr.status===200){
-							renderCommitLogJsonData(commitLogJsonData);
-						} else if (ioArgs.xhr.status===202){
-							var deferred = new dojo.Deferred();
-							deferred.callback(commitLogJsonData);
-							that._registry.getService("orion.page.progress").showWhile(deferred, "Getting git log").then(function(commitLogJsonData){renderCommitLogJsonData(commitLogJsonData.Result.JsonData);});
-						}
-						
+						renderCommitLogJsonData(commitLogJsonData);
 					},
-					error : function(error, ioArgs) {
+					function(error, ioArgs) {
 						console.error("HTTP status code: ", ioArgs.xhr.status);
-					}
-				});
+					});
 			}
-			return retDeffered;
 		},
 		
 		

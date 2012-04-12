@@ -102,7 +102,7 @@ exports.GitCommitNavigator = (function() {
 
 		var doGitLog = function(gitLogURI, onLoad) {
 			var ret = new dojo.Deferred();
-			service.doGitLog(gitLogURI, function(jsonData) {
+			service.doGitLog(gitLogURI).then(function(jsonData) {
 					waitDeferred.callback();
 					if (onLoad)
 						onLoad(jsonData.Children);
