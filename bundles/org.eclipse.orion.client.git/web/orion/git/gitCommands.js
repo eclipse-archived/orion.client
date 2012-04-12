@@ -2241,42 +2241,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(openCommitCommand);
-
-		var mapToGithubCommand = new mCommands.Command({
-			name : "Show in GitHub",
-			tooltip: "Show this repository at GitHub",
-			id : "orion.git.gotoGithub",
-			hrefCallback : function(data) {
-				//url format should include github.com/username/reponame.git or github.com:username/reponame.git
-				var url = /github\.com.*\.git/.exec(data.items.GitUrl)[0];
-				//convert : to / if needed
-				url = url.replace(':', '/');
-				return "https://" + url.substring(0, url.length-4);
-			},
-			visibleWhen : function(item) {
-				//url format should include github.com/username/reponame.git or github.com:username/reponame.git
-				return item.GitUrl && /github\.com.*\.git/.exec(item.GitUrl);
-			}
-		});
-		commandService.addCommand(mapToGithubCommand);
-
-		var mapToEclipseOrgCommand = new mCommands.Command({
-			name : "Show in eclipse.org",
-			tooltip: "Show this repository at eclipse.org",
-			id : "orion.git.gotoEclipseGit",
-			hrefCallback : function(data) {
-				var item = data.items;
-				var token = "git.eclipse.org/gitroot";
-				var found = item.GitUrl.indexOf(token);
-				if (found > -1) {
-					return "http://git.eclipse.org/c" + item.GitUrl.substr(found+token.length, item.GitUrl.length);
-				}
-			},
-			visibleWhen : function(item) {
-				return item.GitUrl && item.GitUrl.indexOf("git.eclipse.org/gitroot") > -1;
-			}
-		});
-		commandService.addCommand(mapToEclipseOrgCommand);
 	};
 }());
 return exports;	

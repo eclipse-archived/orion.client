@@ -69,7 +69,7 @@ window.onload = function() {
 		provider.registerServiceProvider("orion.edit.validator",
 			{	checkSyntax: checkSyntax
 			}, {
-				contentType: ["text.css"]
+				contentType: ["text/css"]
 			});
 
 		// Register outline provider
@@ -85,7 +85,7 @@ window.onload = function() {
 			}, {
 				id: "orion.outline.css.csslint",
 				name: "CSS rule outline",
-				contentType: ["text.css"]
+				contentType: ["text/css"]
 			});
 		provider.connect();
 	} catch (e) {

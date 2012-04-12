@@ -44,14 +44,14 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		function createDefaultStyler(contentType) {
 			var styler = null;
 			switch (contentType && contentType.id) {
-				case "text.javascript":
-				case "text.json":
+				case "application/javascript":
+				case "application/json":
 					styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
 					break;
-				case "text.java":
+				case "text/x-java-source":
 					styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
 					break;
-				case "text.css":
+				case "text/css":
 					styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
 					break;
 			}
