@@ -59,6 +59,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 */
 		setMessage : function(msg, timeout, isAccessible) {
 			this._init();
+			this.currentMessage = msg;
 			if(typeof(isAccessible) === "boolean") {
 				var that = this;
 				var node = dojo.byId(this.domId);
@@ -92,6 +93,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
+			this.currentMessage = st;
 			this._init();
 			//could be: responseText from xhrGet, dojo deferred error object, or plain string
 			var status = st.responseText || st.message || st;
@@ -148,6 +150,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		 * from the Orion server.
 		 */
 		setProgressResult : function(message) {
+			this.currentMessage = message;
 			//could either be responseText from xhrGet or just a string
 			var status = message.responseText || message;
 			//accept either a string or a JSON representation of an IStatus
