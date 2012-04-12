@@ -1595,14 +1595,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
-			if (isFirefox && this._lastMouseButton === 3) {
+			if (isIE && this._lastMouseButton === 3) {
 				// We need to update the DOM selection, because on
 				// right-click the caret moves to the mouse location.
-				// See bug 366312.
-				var timeDiff = e.timeStamp - this._lastMouseTime;
-				if (timeDiff <= this._clickTime) {
-					this._updateDOMSelection();
-				}
+				// See bug 366312 and 376508.
+				this._updateDOMSelection();
 			}
 			if (this.isListening("ContextMenu")) {
 				var evt = this._createMouseEvent("ContextMenu", e);
@@ -1988,6 +1985,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 					e.preventDefault();
 				}
+			}
+			if (isFirefox && this._lastMouseButton === 3) {
+				// We need to update the DOM selection, because on
+				// right-click the caret moves to the mouse location.
+				// See bug 366312 and 376508.
+				this._updateDOMSelection();
 			}
 		},
 		_handleMouseOver: function (e) {
