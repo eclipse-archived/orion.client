@@ -223,7 +223,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	
 	function UserPreferencesProvider(serviceRegistry) {
 		this._currentPromises = {};
-		this._cache = new Cache("/orion/preferences/user", 0);
+		this._cache = new Cache("/orion/preferences/user", 60*60);
 		
 		this._service = null;
 		this.available = function() {
