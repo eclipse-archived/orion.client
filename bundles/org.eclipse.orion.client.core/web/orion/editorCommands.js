@@ -16,11 +16,12 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
-	function(dojo, mCommands, mGlobalCommands, mExtensionCommands, mKeyBinding, mUndoStack) {
+define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
+	function(dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack) {
 
 var exports = {};
 
+var contentTypesCache = null;;
 exports.EditorCommandFactory = (function() {
 	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId) {
 		this.serviceRegistry = serviceRegistry;
@@ -37,7 +38,22 @@ exports.EditorCommandFactory = (function() {
 		 * contribute editor actions.  
 		 */
 		generateEditorCommands: function(editor) {
-		
+			function getContentTypes(serviceRegistry) {
+				if (contentTypesCache) {
+					return contentTypesCache;
+				}
+				var contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+				//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
+				if (!contentTypeService) {
+					contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+					contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+				}
+				return contentTypeService.getContentTypes().then(function(ct) {
+					contentTypesCache = ct;
+					return contentTypesCache;
+				});
+			}
+
 			// KB exists so that we can pass an array (from info.key) rather than actual arguments
 			function createKeyBinding(args) {
 				var keyBinding = new mKeyBinding.KeyBinding();
@@ -168,11 +184,13 @@ exports.EditorCommandFactory = (function() {
 				//        optional attribute: tooltip - the tooltip to use for the command
 				//        optional attribute: key - an array with values to pass to the orion.textview.KeyBinding constructor
 				//        optional attribute: img - a URL to an image for the action
-				//        optional attribute: validationProperties - an object containing key/value pairs for validating the
-				//          the resource metadata to determine whether the command is valid for the given resource.
-				//          Wildcards are supported.  For example the validation property
-				//				{"Git":"*", "Directory":"false"}
-				//              specifies that the property "Git" must be present, and that the property "Directory" must be false.
+				//      optional attribute: contentType - an array of content types for which this command is valid
+				//      optional attribute: validationProperties - an array of validation properties used to read the resource
+				//          metadata to determine whether the command is valid for the given resource.  Regular expression patterns are
+				//          supported as values in addition to specific values.
+				//          For example the validation property
+				//				[{source: "Git"}, {source: "Directory", match:"true"}]
+				//              specifies that the property "Git" must be present, and that the property "Directory" must be true.
 				// run - the implementation of the action (function).
 				//        arguments passed to run: (selectedText, fullText, selection, resourceName)
 				//          selectedText (string) - the currently selected text in the editor
@@ -213,32 +231,34 @@ exports.EditorCommandFactory = (function() {
 						});
 					return new mCommands.Command(options);
 				};
-				for (var i=0; i<actionReferences.length; i++) {
-					var service = this.serviceRegistry.getService(actionReferences[i]);
-					var info = {};
-					var propertyNames = actionReferences[i].getPropertyNames();
-					for (var j = 0; j < propertyNames.length; j++) {
-						info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+				dojo.when(getContentTypes(this.serviceRegistry), dojo.hitch(this, function() {
+					for (var i=0; i<actionReferences.length; i++) {
+						var service = this.serviceRegistry.getService(actionReferences[i]);
+						var info = {};
+						var propertyNames = actionReferences[i].getPropertyNames();
+						for (var j = 0; j < propertyNames.length; j++) {
+							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+						}
+						info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
+						var command = makeCommand(info, service, 
+							mExtensionCommands._createCommandOptions(info, actionReferences[i], this.serviceRegistry, contentTypesCache, false, function(items) {
+								// items is the editor and we care about the file metadata for validation
+								return input.getFileMetadata();
+							}));
+						this.commandService.addCommand(command);
+						this.commandService.registerCommandContribution(this.toolbarId, command.id, i, "orion.editorActions.contributed");
+						// We must regenerate the command toolbar everytime we process an extension because
+						// this is asynchronous and we probably have already populated the toolbar.
+						// In the editor, we generate page level commands to the banner.
+						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
+						if (info.key) {
+							// add it to the editor as a keybinding
+							var textView = editor.getTextView();
+							textView.setKeyBinding(createKeyBinding(info.key), command.id);
+							textView.setAction(command.id, command.callback);
+						}				
 					}
-					info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
-					var command = makeCommand(info, service, 
-						mExtensionCommands._createCommandOptions(info, actionReferences[i], this.serviceRegistry, false, function(items) {
-							// items is the editor and we care about the file metadata for validation
-							return input.getFileMetadata();
-						}));
-					this.commandService.addCommand(command);
-					this.commandService.registerCommandContribution(this.toolbarId, command.id, i, "orion.editorActions.contributed");
-					// We must regenerate the command toolbar everytime we process an extension because
-					// this is asynchronous and we probably have already populated the toolbar.
-					// In the editor, we generate page level commands to the banner.
-					mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
-					if (info.key) {
-						// add it to the editor as a keybinding
-						var textView = editor.getTextView();
-						textView.setKeyBinding(createKeyBinding(info.key), command.id);
-						textView.setAction(command.id, command.callback);
-					}				
-				}
+				}));
 			}
 		}
 	};

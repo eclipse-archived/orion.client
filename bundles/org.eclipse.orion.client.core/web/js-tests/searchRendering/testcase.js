@@ -9,8 +9,8 @@
  *     Andrew Eisenberg - initial API and implementation
  ******************************************************************************/
 /*global define XPathResult DOMParser*/
-define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"], 
-		function(assert, mServiceregistry, mSearchRenderer) {
+define(['dojo', "orion/assert", "orion/serviceregistry", "orion/searchRenderer"], 
+		function(dojo, assert, mServiceregistry, mSearchRenderer) {
 	var tests = {};
 	
 	tests.testEmptyRendererWithQueryName = function() {
@@ -51,7 +51,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/searchRenderer"],
 		});
 		renderer([{
 			name: 'link',
-			path: 'foo/blap.js',
+			path: 'foo/blap.js'
 		}]);
 	};
 	return tests;

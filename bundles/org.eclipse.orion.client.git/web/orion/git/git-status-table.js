@@ -586,7 +586,7 @@ orion.InlineCompareRenderer = (function() {
 			parent.addChild(viewerDiv);
 			if (createCommandSpan) {
 				td = document.createElement('td');
-				td.id = "compare_rightContainerCommands"; // this id should not be known here.  It is decided in compare-container.js
+				td.id = "inlineCompareCommands"; // this id should not be known here.  It is decided in compare-container.js
 				row.appendChild(td);
 				td.noWrap = true;
 				row.align = "right";
@@ -628,7 +628,6 @@ orion.GitStatusController = (function() {
 		}
 		
 		(new orion.InlineCompareRenderer(serviceRegistry ,"viewerZone")).render(true);
-		this._generateInlineCompareCmds();
 		
 		this._unstagedContentRenderer = new orion.GitStatusContentRenderer({useCheckBox:true}, serviceRegistry ,this._unstagedTableRenderer.getStatusContentId(), this);
 		this._unstagedTableRenderer.contentRenderer = this._unstagedContentRenderer;
@@ -638,7 +637,7 @@ orion.GitStatusController = (function() {
 		var diffProvider = new mCompareContainer.DefaultDiffProvider(serviceRegistry);
 		var that = this;
 		var options = {
-				readonly: true,
+				commandSpanId: "inlineCompareCommands",
 				diffProvider: diffProvider
 			};
 			
@@ -1254,41 +1253,6 @@ orion.GitStatusController = (function() {
 			// dynamically generated sections register their commands once the id of tool area is computed
 		},
 
-		_generateInlineCompareCmds: function(){	
-			var that = this;
-			var nextDiffCommand = new mCommands.Command({
-				tooltip : "Next Diff",
-				imageClass : "core-sprite-move_down",
-				id: "orion.compare.nextDiff",
-				groupId: "orion.compareGroup",
-				/*
-				visibleWhen: function(item) {
-					return that._inlineCompareContainer && that._inlineCompareContainer.hasContent;
-				},*/
-				
-				callback : function() {
-					that._inlineCompareContainer.nextDiff();
-			}});
-			var prevDiffCommand = new mCommands.Command({
-				tooltip : "Previous Diff",
-				imageClass : "core-sprite-move_up",
-				id: "orion.compare.prevDiff",
-				groupId: "orion.compareGroup",
-				
-				
-				callback : function() {
-					that._inlineCompareContainer.prevDiff();
-			}});
-			
-			this._commandService.addCommand(prevDiffCommand);
-			this._commandService.addCommand(nextDiffCommand);
-				
-			// Register command contributions
-			this._commandService.registerCommandContribution("compare_rightContainerCommands", "orion.compare.prevDiff", 2);
-			this._commandService.registerCommandContribution("compare_rightContainerCommands", "orion.compare.nextDiff", 1);
-			this._commandService.renderCommands("compare_rightContainerCommands", "compare_rightContainerCommands", self, self, "button");
-		},
-		
 		startTimer: function(){
 			if(!this.timerOn){
 				this.timerOn = true;
@@ -1326,7 +1290,7 @@ orion.GitStatusController = (function() {
 			this.hasUnstaged = false;
 			dojo.place(document.createTextNode("Select a file on the left to compare..."), "fileNameInViewer", "only");
 			dojo.style("fileNameInViewer", "color", "#6d6d6d");
-			dojo.empty("compare_rightContainerCommands");
+			dojo.empty("inlineCompareCommands");
 		},
 
 		_createImgButton: function(enableWaitCursor ,imgParentDiv , imgSrc, imgTitle,onClick){

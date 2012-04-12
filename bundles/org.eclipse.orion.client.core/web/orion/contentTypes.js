@@ -25,7 +25,7 @@ define([], function() {
 	 * @property {String[]} filename Optional; List of filenames characterizing this ContentType.
 	 */
 	
-	function getFilenameContentType(/**String*/ filename) {
+	function getFilenameContentType(/**String*/ filename, contentTypes) {
 		function winner(best, other, filename, extension) {
 			var nameMatch = other.filename.indexOf(filename) >= 0;
 			var extMatch = other.extension.indexOf(extension) >= 0;
@@ -37,7 +37,7 @@ define([], function() {
 			return best;
 		}
 		var extension = filename && filename.split(".").pop();
-		var contentTypes = this.getContentTypes(), best = null;
+		var best = null;
 		for (var i=0; i < contentTypes.length; i++) {
 			var type = contentTypes[i];
 			if (winner(best, type, filename, extension) === type) {
@@ -116,7 +116,7 @@ define([], function() {
 		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFileContentType: function(fileMetadata) {
-			return getFilenameContentType.call(this, fileMetadata.Name);
+			return getFilenameContentType(fileMetadata.Name, this.getContentTypes());
 		},
 		/**
 		 * Looks up the ContentType, given a filename.
@@ -124,7 +124,7 @@ define([], function() {
 		 * @returns {orion.core.ContentType} The ContentType for the file, or <code>null</code> if none could be found.
 		 */
 		getFilenameContentType: function(filename) {
-			return getFilenameContentType.call(this, filename);
+			return getFilenameContentType(filename, this.getContentTypes());
 		},
 		/**
 		 * Gets a ContentType by ID.
@@ -172,5 +172,8 @@ define([], function() {
 			return false;
 		}
 	};
-	return {ContentTypeService: ContentTypeService};
+	return {
+		ContentTypeService: ContentTypeService,
+		getFilenameContentType: getFilenameContentType
+	};
 });

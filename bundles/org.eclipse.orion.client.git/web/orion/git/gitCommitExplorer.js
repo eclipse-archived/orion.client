@@ -276,6 +276,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 
 			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, diff, this, "tool", false);	
+			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox );
 			
 			// add inline compare view
 			
@@ -287,7 +288,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
 			var diffOptions = {
-				readonly: true,
+				commandSpanId: compareActionsArea.id,
 				diffProvider: diffProvider,
 				callback : function(){}
 			};
