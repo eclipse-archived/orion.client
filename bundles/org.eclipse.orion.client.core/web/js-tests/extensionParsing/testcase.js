@@ -156,15 +156,15 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		assert.equal(validator.getURI(item1), item1.AlternateLocation, "variableMatchPosition all");
 		
 		validationProperty.variableMatchPosition = "only";
-		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		validator.itemCached = null;  // reachy.  Need to force recomputation
 		assert.equal(validator.getURI(item1), "fileSystem1", "variableMatchPosition only");
 		
 		validationProperty.variableMatchPosition = "before";
-		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		validator.itemCached = null;  // reachy.  Need to force recomputation
 		assert.equal(validator.getURI(item1), "/", "variableMatchPosition before");
 		
 		validationProperty.variableMatchPosition = "after";
-		validationProperty.itemCached = null;  // reachy.  Need to force recomputation
+		validator.itemCached = null;  // reachy.  Need to force recomputation
 		assert.equal(validator.getURI(item1), "/foo/bar/Foo.alt", "variableMatchPosition after");
 	};
 	
@@ -198,7 +198,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		assert.equal(validator.getURI(item1), "/fs/foo/bar/Foo?user=John");	
 		
 		validationProperty.replacements = [{pattern: "fileSystem\\d*", replacement: "fs"},{pattern: "/foo"}, {pattern: "/bar", replacement: "*"}];
-		validationProperty.itemCached = null;
+		validator.itemCached = null;
 		assert.equal(validator.getURI(item1), "/fs*/Foo?user=John");	
 		
 	};
