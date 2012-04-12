@@ -3564,6 +3564,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.contentEditable = "true";
 			clientDiv.setAttribute("role", "textbox");
 			clientDiv.setAttribute("aria-multiline", "true");
+			clientDiv.setAttribute("aria-readonly", this._readonly ? "true" : "false");
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
 			this._hookEvents();
