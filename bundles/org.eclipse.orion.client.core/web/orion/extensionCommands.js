@@ -241,25 +241,28 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		var validator = {info: info};
 		validator.validationFunction =  dojo.hitch(validator, function(items){
 			if (typeof validationItemConverter === "function") {
-				items = validationItemConverter(items);
+				items = validationItemConverter.call(this, items);
 			}
-			if (dojo.isArray(items)){
-				if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
-					return false;
+			if (items) {
+				if (dojo.isArray(items)){
+					if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
+						return false;
+					}
+					if (items.length < 1){
+						return false;
+					}
+				} else {
+					items = [items];
 				}
-				if (items.length < 1){
-					return false;
+				
+				for(var i in items){
+					if(!validateSingleItem(items[i], contentTypes, this)){
+						return false;
+					}
 				}
-			} else {
-				items = [items];
+				return true;
 			}
-			
-			for(var i in items){
-				if(!validateSingleItem(items[i], contentTypes, this)){
-					return false;
-				}
-			}
-			return true;
+			return false;
 		});
 		validator.generatesURI = dojo.hitch(validator, function() {
 			return !!this.info.uriTemplate;
