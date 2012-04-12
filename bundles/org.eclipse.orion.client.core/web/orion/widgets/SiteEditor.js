@@ -508,7 +508,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 						return updatedSiteConfig;
 					} else {
 						siteConfig.HostingStatus = status;
-						return this._siteConfiguration;
+						return siteConfig;
 					}
 				});
 			this._busyWhile(deferred);
@@ -520,7 +520,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 
 	autoSave: function() {
 		if (this.isDirty()) {
-			this.save(null, false);
+			this.save(false);
 		}
 		setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 	},
