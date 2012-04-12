@@ -31,7 +31,7 @@
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
 			name: "Get Plugins",
 			id: "orion.plugins.get",
-			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION
+			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
 		});
 		
 		provider.registerServiceProvider("orion.page.link.related", null, {
