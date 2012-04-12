@@ -90,27 +90,22 @@ var serviceRegistry;
 
 function loadResource(navigator, searcher, commandService){
 	var path = dojo.hash();
-	dojo.xhrGet({ //TODO Bug 367352
-		url : path,
-		headers : {
-			"Orion-Version" : "1"
-		},
-		handleAs : "json",
-		timeout : 5000,
-		load : function(resource, secondArg) {
-			
-			var loadResource = function(resource){
+	dojo.place(document.createTextNode("Loading git log..."), "explorer-tree", "only");
+	
+	var gitService = serviceRegistry.getService("orion.git.provider");
+	gitService.doGitLog(path).then(
+		 function(resource, secondArg) {
 				//TODO if this were in the scope of the onload above, we would have the right file client instance.  Shouldn't need to
 				// create one each time.
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource, searcher, commandService).then(
 					function(){
 						if (resource.Type === "RemoteTrackingBranch"){
-							var gitService = serviceRegistry.getService("orion.git.provider");
-							gitService.getLog(resource.HeadLocation, resource.Id, "Getting git incoming changes", function(scopedCommitsJsonData) {
+							dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only");
+							gitService.getLog(resource.HeadLocation, resource.Id).then(function(scopedCommitsJsonData) {
 									navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
 									navigator.renderer.setOutgoingCommits([]);
-									gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query, function(jsonData) {
+									gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query).then(function(jsonData) {
 										resource.Children = jsonData.Children;
 										if(jsonData.NextLocation){
 											resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
@@ -122,26 +117,20 @@ function loadResource(navigator, searcher, commandService){
 									});
 							});
 						} else if (resource.toRef){
-							if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1)
-								dojo.xhrGet({
-									url : resource.toRef.RemoteLocation[0].Children[0].Location,
-									headers : {
-										"Orion-Version" : "1"
-									},
-									handleAs : "json",
-									timeout : 5000,
-									load : function(remoteJsonData, secondArg) {
-										var gitService = serviceRegistry.getService("orion.git.provider");
-										gitService.getLog(remoteJsonData.CommitLocation, "HEAD", "Getting git outgoing changes", function(scopedCommitsJsonData) {
+							if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1){
+								gitService.getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location).then(
+									function(remoteJsonData, secondArg) {
+										dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only");
+										gitService.getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) {
 												navigator.renderer.setIncomingCommits([]);
 												navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
 												navigator.loadCommitsList(dojo.hash(), resource);
 										});
 									},
-									error : function(error, ioArgs){
+									function(error, ioArgs){
 										navigator.loadCommitsList(dojo.hash(), resource);
-									}
-								});
+									});
+								}
 							else
 								navigator.loadCommitsList(dojo.hash(), resource);
 						} else {
@@ -149,29 +138,10 @@ function loadResource(navigator, searcher, commandService){
 						}
 					}
 				);
-			};
-			
-			if(secondArg.xhr.status===200){
-				loadResource(resource);
-			} else if(secondArg.xhr.status===202){
-				var deferred = new dojo.Deferred();
-				deferred.callback(resource);
-				serviceRegistry.getService("orion.page.progress").showWhile(deferred, "Getting git log").then(function(resourceData){
-					loadResource(resourceData.Result.JsonData);
-				});
-			}			
 		},
-		error : function(error, ioArgs) {
-			if(ioArgs.xhr.status == 401 || ioArgs.xhr.status == 403){ 
-				var currentXHR = this;
-				mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-					dojo.xhrGet(currentXHR); // retry GET							
-				});
-			}else{
+		function(error, ioArgs) {
 				navigator.loadCommitsList(dojo.hash(), error);	
-			}
-		}
-	});
+		});
 }
 
 function getCloneFileUri(){
@@ -302,7 +272,7 @@ function makeHref(fileClient, seg, location, isRemote) {
 		if (isRemote) {
 			var gitService = serviceRegistry.getService("orion.git.provider");
 			if (metadata.Git) {
-				gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation, function(defaultRemoteBranchJsonData, secondArg) {
+				gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation).then(function(defaultRemoteBranchJsonData, secondArg) {
 					seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1";
 				});
 			}

@@ -103,7 +103,7 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		
 		if (repositories.length > 0) {
 			that.serviceRegistry.getService("orion.git.provider").doGitLog(
-				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1", null, null, "Looking for the commit").then(
+				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1").then(
 				function(resp){
 					deferred.callback(resp.Children[0]);
 				},
