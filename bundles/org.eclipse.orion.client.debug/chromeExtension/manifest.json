@@ -1,6 +1,6 @@
 {
 	"name":"Orion Debug Extension for Chrome",
-	"version":"0.3",
+	"version":"0.4",
 	"content_scripts":[{
 		"matches":["http://*/*", "file://*/*"],
 		"js":["debug.js"]
