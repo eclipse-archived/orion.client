@@ -113,22 +113,21 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 * validate a given item using the "contentType" and "validationProperties" service properties.
 	 */
 	extensionCommandUtils._makeValidator = function(info, serviceRegistry, contentTypes, validationItemConverter) {
-		function checkItem(item, key, value, validationProperty) {
+		function checkItem(item, key, match, validationProperty, validator) {
 			var valid = false;
 			var value;
 			// item has the specified property
 			if (item[key]) {
-				validationProperty.itemCached = item;
-				if (!value) {  // value doesn't matter, just the presence of the property is enough
+				if (!match) {  // value doesn't matter, just the presence of the property is enough
 					value = item[key];
 					valid = true;
-				} else if (typeof(value) === 'string') {  // the value is a regular expression that should match some string
+				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string
 					if (!typeof(item[key] === 'string')) {
 						// can't pattern match on a non-string
 						return false;
 					}
 					if (validationProperty.variableName) {
-						var patternMatch = new RegExp(value).exec(item[key]);
+						var patternMatch = new RegExp(match).exec(item[key]);
 						if (patternMatch) {
 							var firstMatch = patternMatch[0];
 							if (validationProperty.variableMatchPosition === "before") {
@@ -143,24 +142,26 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							valid = true;
 						}
 					} else {
-						return new RegExp(value).test(item[key]);
+						return new RegExp(match).test(item[key]);
 					}
 				} else {
-					if (item[key] === value) {
+					if (item[key] === match) {
 						value = item[key];
 						valid = true;
 					}
 				}
 				// now store any variable values and look for replacements
-				if (validationProperty.variableName) {
-					validationProperty.variableValue = value;
+				if (valid && validationProperty.variableName) {
+					// store the variable values in the validator, keyed by variable name.  Also remember which item this value applies to.
+					validator[validationProperty.variableName] = value;
+					validator.itemCached = item;
 					if (validationProperty.replacements) {
 						for (var i=0; i<validationProperty.replacements.length; i++) {
 							var invalid = false;
 							if (validationProperty.replacements[i].pattern) {	
 								var from = validationProperty.replacements[i].pattern;
 								var to = validationProperty.replacements[i].replacement || "";
-								validationProperty.variableValue = validationProperty.variableValue.replace(new RegExp(from), to);
+								validator[validationProperty.variableName] = validator[validationProperty.variableName].replace(new RegExp(from), to);
 							} else {
 								invalid = true;
 							}
@@ -175,7 +176,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			return false;
 		}
 		
-		function matchSinglePattern(item, propertyName, validationProperty){
+		function matchSinglePattern(item, propertyName, validationProperty, validator){
 			var value = validationProperty.match;
 			var key, keyLastSegments;
 			if (propertyName.indexOf("|") >= 0) {
@@ -183,10 +184,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				key = propertyName.substring(0, propertyName.indexOf("|"));
 				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1);
 				// if key matches, we can stop.  No match is not a failure, look in the next segments.
-				if (matchSinglePattern(item, key, validationProperty)) {
+				if (matchSinglePattern(item, key, validationProperty, validator)) {
 					return true;
 				} else {
-					return matchSinglePattern(item, keyLastSegments, validationProperty);
+					return matchSinglePattern(item, keyLastSegments, validationProperty, validator);
 				}
 			} else if (propertyName.indexOf(":") >= 0) {
 				// the colon is used to drill into a property
@@ -194,13 +195,13 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1);
 				// must have key and then check the next value
 				if (item[key]) {
-					return matchSinglePattern(item[key], keyLastSegments, validationProperty);
+					return matchSinglePattern(item[key], keyLastSegments, validationProperty, validator);
 				} else {
 					return false;
 				}
 			} else {
 				// we are checking a single property
-				return checkItem(item, propertyName, value, validationProperty);
+				return checkItem(item, propertyName, value, validationProperty, validator);
 			}
 		}
 		
@@ -210,7 +211,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				for (var i=0; i<validator.info.validationProperties.length; i++) {
 					var validationProperty = validator.info.validationProperties[i];
 					if (validationProperty.source) {
-						var matchFound = matchSinglePattern(item, validationProperty.source, validationProperty);
+						var matchFound = matchSinglePattern(item, validationProperty.source, validationProperty, validator);
 						if (!matchFound){
 							return false;
 						} 
@@ -241,25 +242,28 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		var validator = {info: info};
 		validator.validationFunction =  dojo.hitch(validator, function(items){
 			if (typeof validationItemConverter === "function") {
-				items = validationItemConverter(items);
+				items = validationItemConverter.call(this, items);
 			}
-			if (dojo.isArray(items)){
-				if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
-					return false;
+			if (items) {
+				if (dojo.isArray(items)){
+					if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
+						return false;
+					}
+					if (items.length < 1){
+						return false;
+					}
+				} else {
+					items = [items];
 				}
-				if (items.length < 1){
-					return false;
+				
+				for (var i=0; i<items.length; i++){
+					if(!validateSingleItem(items[i], contentTypes, this)){
+						return false;
+					}
 				}
-			} else {
-				items = [items];
+				return true;
 			}
-			
-			for(var i in items){
-				if(!validateSingleItem(items[i], contentTypes, this)){
-					return false;
-				}
-			}
-			return true;
+			return false;
 		});
 		validator.generatesURI = dojo.hitch(validator, function() {
 			return !!this.info.uriTemplate;
@@ -280,12 +284,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						var validationProperty = this.info.validationProperties[i];
 						if (validationProperty.source && validationProperty.variableName) {
 							// we may have just validated this item.  If so, we don't need to recompute the variable value.
-							var alreadyCached = validationProperty.itemCached === item && validationProperty.variableValue;
+							var alreadyCached = this.itemCached === item && this[validationProperty.variableName];
 							if (!alreadyCached) {
-								matchSinglePattern(item, validationProperty.source, validationProperty);
+								matchSinglePattern(item, validationProperty.source, validationProperty, this);
 							}
 							if (!item[validationProperty.variableName]) {
-								variableExpansions[validationProperty.variableName] = validationProperty.variableValue;
+								variableExpansions[validationProperty.variableName] = this[validationProperty.variableName];
 							} else {
 								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata.");
 							}
