@@ -912,7 +912,7 @@ exports.InlineCompareContainer = (function() {
 			//Merge the text with diff 
 			var rFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 1);
 			var lFeeder = new mDiffTreeNavigator.inlineDiffBlockFeeder(result.mapper, 0);
-			mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index);
+			mCompareUtils.mergeDiffBlocks(this._textView.getModel(), lFeeder.getDiffBlocks(), result.mapper, result.diffArray.array, result.diffArray.index, this._diffParser._lineDelimiter);
 			rFeeder.setModel(this._textView.getModel());
 			lFeeder.setModel(this._textView.getModel());
 			this._diffNavigator.initAll(this._charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler);
