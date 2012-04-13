@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define([], function() {
+define(['dojo'], function(dojo) {
 
 var orion = orion || {};
 
@@ -192,6 +192,53 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 			oldTextModel.setText(text, startOffset, startOffset);
 		}
 	}
+};
+
+orion.compareUtils.generateCompareHref = function(diffLocation, options) {
+	var base =  require.toUrl("compare/compare.html");
+	var compareParam = "";
+	var diffPosition = "";
+	if(options){
+		if(options.readonly){
+			compareParam = "?readonly";
+		}
+		if(options.conflict){
+			if(compareParam === ""){
+				compareParam = "?conflict";
+			} else {
+				compareParam = compareParam + "&conflict";
+			}
+		}
+		if(options.block && options.block > 0){
+			diffPosition = ",block=" + options.block;
+			if(options.change && options.change > 0){
+				diffPosition = diffPosition + "&change="+ options.change;
+			}
+		}
+	}
+	var tempLink = dojo.create("a", {href: base + compareParam + "#" + diffLocation + diffPosition});
+	return tempLink.href;
+};
+
+orion.compareUtils.parseCompareHash = function(hash) {
+	var diffObj = {complexURL: hash};
+	var diffPosIndex = hash.indexOf(",block=");
+	if(diffPosIndex > 0){
+		diffObj.complexURL = hash.substring(0, diffPosIndex);
+		var diffPosStr = hash.substring(diffPosIndex+1);
+		var splitDiffPosStr = diffPosStr.split("&");
+		for(var i=0; i < splitDiffPosStr.length; i++){
+			var splitParams = splitDiffPosStr[i].split("=");
+			if(splitParams.length === 2){
+				if(splitParams[0] === "block"){
+					diffObj.block = parseInt(splitParams[1]);
+				} else if(splitParams[0] === "change"){
+					diffObj.change = parseInt(splitParams[1]);
+				} 
+			}
+		}
+	} 
+	return diffObj;
 };
 
 return orion.compareUtils;

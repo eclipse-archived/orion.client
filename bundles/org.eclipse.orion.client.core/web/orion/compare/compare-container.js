@@ -115,6 +115,9 @@ exports.CompareContainer = (function() {
 			this._diffURL = undefined;
 			this._diffContent = undefined;
 			
+			this._block = 1;
+			this._change = 0;
+			
 			this._onSave = undefined;
 			this._onSetTitle = undefined;
 		},
@@ -147,6 +150,9 @@ exports.CompareContainer = (function() {
 				this._diffURL = options.diffURL ? options.diffURL : this._diffURL;
 				this._diffContent = options.diffContent ? options.diffContent : this._diffContent;
 				
+				this._block = options.block ? options.block : this._block;
+				this._change = options.change ? options.change : this._change;
+
 				this._onSave = options.onSave ? options.onSave : this._onSave;
 				this._callback = options.callback ? options.callback : this._callback;
 				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
@@ -169,7 +175,18 @@ exports.CompareContainer = (function() {
 				id: "orion.compare.copyToLeft",
 				groupId: "orion.compareGroup",
 				callback : function(data) {
-					data.items.copyToLeft();;
+					data.items.copyToLeft();
+			}});
+			var generateLinkCommand = new mCommands.Command({
+				tooltip : "Generate link of the current diff",
+				imageClass : "core-sprite-link",
+				id: "orion.compare.generateLink",
+				groupId: "orion.compareGroup",
+				visibleWhen: function(item) {
+					return item._complexURL;
+				},
+				callback : function(data) {
+					data.items.generateLink();
 			}});
 			var nextDiffCommand = new mCommands.Command({
 				tooltip : "Next diff block",
@@ -204,6 +221,7 @@ exports.CompareContainer = (function() {
 					data.items.prevChange(data);
 			}});
 			this._commandService.addCommand(copyToLeftCommand);
+			this._commandService.addCommand(generateLinkCommand);
 			this._commandService.addCommand(nextDiffCommand);
 			this._commandService.addCommand(prevDiffCommand);
 			this._commandService.addCommand(nextChangeCommand);
@@ -217,6 +235,7 @@ exports.CompareContainer = (function() {
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 103);
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 104);
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 105);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 106);
 		},
 		
 		renderCommands: function(){
@@ -229,6 +248,17 @@ exports.CompareContainer = (function() {
 			}
 			dojo.empty(commandSpanId);
 			this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button");
+		},
+		
+		generateLink: function(){	
+			var diffPos = this._diffNavigator.getCurrentPosition();
+			var href = mCompareUtils.generateCompareHref(this._complexURL, {
+				readonly: this._readonly,
+				conflict: this._conflict,
+				block: diffPos.block ? diffPos.block : 1, 
+				change: diffPos.change ? diffPos.change : 0 
+			});
+			prompt("Copy the link URL:", href);
 		},
 		
 		nextDiff: function(){	
@@ -696,7 +726,7 @@ exports.TwoWayCompareContainer = (function() {
 		}
 		this._diffNavigator.renderAnnotations();
 		if(this._viewLoadedCounter > 1){
-			this._diffNavigator.matchPositionFromOverview(-1);
+			this._diffNavigator.gotoBlock(this._block-1, this._change-1);
 		}
 	};
 	return TwoWayCompareContainer;
@@ -895,7 +925,7 @@ exports.InlineCompareContainer = (function() {
 			this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
 			this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerOrigin);
 			this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerNew);
-			this._diffNavigator.matchPositionFromOverview(-1);
+			this._diffNavigator.gotoBlock(this._block-1, this._change-1);
 		}
 	};
 	

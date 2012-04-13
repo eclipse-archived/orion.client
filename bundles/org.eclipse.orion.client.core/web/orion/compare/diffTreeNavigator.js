@@ -314,15 +314,20 @@ exports.DiffTreeNavigator = (function() {
 			this.updateCurrentAnnotation(true);
 		},
 		
-		gotoBlock: function(blockIndex){
+		gotoBlock: function(blockIndex, changeIndex){
 			if(!this.iterator){
 				return;
 			}
 			if(blockIndex < 0 || blockIndex >= this._root.children.length || this._root.children.length === 0){
 				blockIndex = 0;
 			}
-			this.iterator.setCursor(this._root.children[blockIndex]);
+			if(changeIndex !== undefined && changeIndex >= 0 && this._root.children[blockIndex].children && changeIndex < this._root.children[blockIndex].children.length){
+				this.iterator.setCursor(this._root.children[blockIndex].children[changeIndex]);
+			} else {
+				this.iterator.setCursor(this._root.children[blockIndex]);
+			}
 			this.updateCurrentAnnotation(false);
+			this._positionDiffBlock();
 		},
 		
 		_hitDiffAnnotation: function(wrapperIndex, caretPosition, textView){
@@ -371,6 +376,18 @@ exports.DiffTreeNavigator = (function() {
 				return cursor.index;
 			} else {
 				return cursor.parent.index;
+			}
+		},
+		
+		getCurrentPosition: function(){
+			if(!this.iterator){
+				return {};
+			}
+			var cursor = this.iterator.cursor();
+			if(cursor.type === "block"){
+				return {block: cursor.index+1};
+			} else {
+				return {block: cursor.parent.index+1, change: cursor.index+1};
 			}
 		},
 		
@@ -464,7 +481,7 @@ exports.DiffTreeNavigator = (function() {
 			this.generateWordDiffAnnotations(1, newAnnotations, startNew, charDiffMap, 0, 1);
 			var pairAnnotations = [];
 			for(var i = 0; i < oldAnnotations.length; i++){
-				pairAnnotations.push({parent: parentObj, type: "word", oldA: oldAnnotations[i], newA: newAnnotations[i]});
+				pairAnnotations.push({parent: parentObj, index: i, type: "word", oldA: oldAnnotations[i], newA: newAnnotations[i]});
 			} 
 			return pairAnnotations;
 		},
@@ -550,7 +567,6 @@ exports.DiffTreeNavigator = (function() {
 				diffblockIndex = mCompareUtils.getAnnotationIndex(this.getFeeder().getDiffBlocks(), lineIndex);
 			}
 			this.gotoBlock(diffblockIndex);
-			this._positionDiffBlock();
 		},
 		
 		gotoDiff: function(caretPosition, textView){
@@ -809,13 +825,16 @@ exports.inlineDiffBlockFeeder = (function() {
 		} else {
 			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
 		}
-		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
+		//We do not want to show the empty line annotation i ninline compare
+		//result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
 		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
 	};
 	inlineDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
 		if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
-			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
+			//We do not want to show the empty line annotation i ninline compare
+			//return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
+			return({current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD});
 		} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
 			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
 		} else if(this._mapperColumnIndex === 0){

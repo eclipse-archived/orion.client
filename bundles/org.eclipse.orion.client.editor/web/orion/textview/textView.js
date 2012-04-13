@@ -1595,14 +1595,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleContextMenu: function (e) {
 			if (!e) { e = window.event; }
-			if (isFirefox && this._lastMouseButton === 3) {
+			if (isIE && this._lastMouseButton === 3) {
 				// We need to update the DOM selection, because on
 				// right-click the caret moves to the mouse location.
-				// See bug 366312.
-				var timeDiff = e.timeStamp - this._lastMouseTime;
-				if (timeDiff <= this._clickTime) {
-					this._updateDOMSelection();
-				}
+				// See bug 366312 and 376508.
+				this._updateDOMSelection();
 			}
 			if (this.isListening("ContextMenu")) {
 				var evt = this._createMouseEvent("ContextMenu", e);
@@ -1988,6 +1985,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 					e.preventDefault();
 				}
+			}
+			if (isFirefox && this._lastMouseButton === 3) {
+				// We need to update the DOM selection, because on
+				// right-click the caret moves to the mouse location.
+				// See bug 366312 and 376508.
+				this._updateDOMSelection();
 			}
 		},
 		_handleMouseOver: function (e) {
@@ -3564,6 +3567,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.contentEditable = "true";
 			clientDiv.setAttribute("role", "textbox");
 			clientDiv.setAttribute("aria-multiline", "true");
+			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
 			this._hookEvents();
@@ -3577,7 +3581,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return {
 				parent: {value: undefined, update: null},
 				model: {value: undefined, update: this.setModel},
-				readonly: {value: false, update: null},
+				readonly: {value: false, update: this._setReadOnly},
 				fullSelection: {value: true, update: this._setFullSelection},
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
@@ -5104,6 +5108,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._updateDOMSelection();
 				}
 			}
+		},
+		_setReadOnly: function (readOnly) {
+			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false");
 		},
 		_setTabSize: function (tabSize, init) {
 			this._tabSize = tabSize;

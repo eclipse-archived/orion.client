@@ -354,6 +354,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this._siteService.loadSiteConfiguration(location).then(
 			dojo.hitch(this, function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
+				this.setDirty(false);
 				deferred.callback(siteConfig);
 			}),
 			function(error) {
@@ -393,7 +394,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this._siteConfiguration = siteConfiguration;
 		this._fetchProjects(siteConfiguration);
 		this._refreshFields();
-		this.setDirty(false);
 	},
 	
 	setDirty: function(value) {
@@ -490,19 +490,27 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	 * @Override
 	 * @returns True to allow save to proceed, false to prevent it.
 	 */
-	save: function(/** Event */ e) {
+	save: function(refreshUI) {
+		refreshUI = typeof refreshUI === "undefined" ? true : refreshUI;
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
-			var editor = this;
-			var siteConfig = editor._siteConfiguration;
+			var siteConfig = this._siteConfiguration;
 			// Omit the HostingStatus field before save since it's likely to be updated from
 			// the sites page, and we don't want to overwrite
+			var status = siteConfig.HostingStatus;
 			delete siteConfig.HostingStatus;
+			var self = this;
 			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
-					function(updatedSiteConfig) {
-						editor._setSiteConfiguration(updatedSiteConfig);
+				function(updatedSiteConfig) {
+					self.setDirty(false);
+					if (refreshUI) {
+						self._setSiteConfiguration(updatedSiteConfig);
 						return updatedSiteConfig;
-					});
+					} else {
+						siteConfig.HostingStatus = status;
+						return siteConfig;
+					}
+				});
 			this._busyWhile(deferred);
 			return true;
 		} else {
@@ -512,7 +520,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 
 	autoSave: function() {
 		if (this.isDirty()) {
-			this.save();
+			this.save(false);
 		}
 		setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 	},
