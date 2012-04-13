@@ -211,8 +211,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (!location) {
 			return location;
 		}
-		var nonHash = window.location.href.split('#')[0];
-		var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+		var hostName = window.location.protocol + "//" + window.location.host;
 		if (location.indexOf(hostName) === 0) {
 			return location.substring(hostName.length);
 		}
@@ -223,8 +222,11 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (!location) {
 			return location;
 		}
-		var nonHash = window.location.href.split('#')[0];
-		var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+		
+		var hostName = window.location.protocol + "//" + window.location.host;
+		if (location.charAt(0) !== "/") {
+			location = "/" + location;
+		}
 		return (hostName + location);
 	}
 	
