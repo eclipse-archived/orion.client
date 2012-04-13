@@ -99,7 +99,7 @@ chrome.extension.onRequest.addListener(
 			}
 		} else if (content.id === REQUEST_ATTACH) {
 			var id = content.data.id;
-			chrome.debugger.attach({tabId: id}, "0.1", function() {
+			chrome.debugger.attach({tabId: id}, "1.0", function() {
 				sendResponse({id: request.id, content: {data: chrome.extension.lastError ? {error: chrome.extension.lastError} : {}}});
 			});
 		} else if (content.id === REQUEST_DETACH) {
