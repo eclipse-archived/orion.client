@@ -443,9 +443,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
 			var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
 			var params = PageUtil.matchResourceParameters(window.location.href);
-			var nonHash = window.location.href.split('#')[0];
 			// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			var hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+			var hostName = window.location.protocol + "//" + window.location.host;
 			var locationObject = {OrionHome: hostName, Location: params.resource};
 			for (var i=0; i<navLinks.length; i++) {
 				var info = {};
