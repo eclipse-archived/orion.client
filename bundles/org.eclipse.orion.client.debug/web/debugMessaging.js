@@ -106,7 +106,7 @@ define(['require', 'dojo'], function(require, dojo) {
 					}
 				});
 			},
-			REQUIRED_VERSION: "0.3"
+			REQUIRED_VERSION: "0.4"
 		};
 		return DebugMessaging;
 	}());

@@ -97,6 +97,7 @@ define(['require', 'dojo'], function(require, dojo) {
 					}
 				});
 			},
+			updateExpandVisuals: function() {},
 			labelColumnIndex: 0
 		};
 		return DebugConnectionRenderer;
