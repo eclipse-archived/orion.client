@@ -92,7 +92,7 @@ define(['require', 'orion/commands', 'orion/siteUtils'],
 			deferred.then(function(site) {
 				// At this point the site is started
 				var a = document.createElement("a");
-				a.href = site.HostingStatus.URL + virtualPath;
+				a.href = site.HostingStatus.URL + virtualPath + (item.Directory ? "/" : "");
 				var url = a.href;
 				if (viewOnCallback) {
 					viewOnCallback(url, site);
