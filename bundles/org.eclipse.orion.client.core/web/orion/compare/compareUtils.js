@@ -176,8 +176,7 @@ orion.compareUtils.isMapperConflict = function(mapper, mapperIndex){
 	return mapper[mapperIndex][3] === 1;
 };
 
-orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex){
-	var lineDelim = oldTextModel.getLineDelimiter();
+orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex, lineDelim){
 	for(var i = 0; i < newDiffBlocks.length; i++){
 		var startLineIndex = newDiffBlocks[i][0];
 		var mapperIndex = newDiffBlocks[i][1];
