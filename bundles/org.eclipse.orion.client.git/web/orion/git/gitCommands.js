@@ -660,30 +660,9 @@ var exports = {};
 							options.gitPrivateKey,
 							options.gitPassphrase), "Pulling : " + path).then(function(jsonData) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-							dojo.xhrGet({
-								url: path,
-								headers: { "Orion-Version": "1"	},
-								postData: dojo.toJson({
-									"GitSshUsername": options.gitSshUsername,
-									"GitSshPassword": options.gitSshPassword,
-									"GitSshPrivateKey": options.gitPrivateKey,
-									"GitSshPassphrase": options.gitPassphrase,
-									"GitSshKnownHost": options.knownHosts
-								}),
-								handleAs: "json",
-								timeout: 5000,
-								load: function(jsonData, secondArg) {
-									return jsonData;
-								},
-								error: function(error, ioArgs) {
-									console.error("HTTP status code: ", ioArgs.xhr.status);
-									return error;
-								}
-							}).then(function(remoteJsonData) {
-								if (item.Type === "Clone") {
-									dojo.hitch(explorer, explorer.changedItem)(item);
-								}
-							}, displayErrorOnStatus);
+							if (item.Type === "Clone") {
+								dojo.hitch(explorer, explorer.changedItem)(item);
+							}
 						}, func, "Pull Git Repository");
 					}, function(jsonData, secondArg) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, "Pull Git Repository");
@@ -1446,23 +1425,15 @@ var exports = {};
 					cloneLocation = obj.JsonData.CloneLocation;
 				}
 				var gitService = serviceRegistry.getService("orion.git.provider");
-				dojo.xhrGet({
-					url : cloneLocation,
-					headers : {
-						"Orion-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 5000,
-					load : function(clone, secondArg) {
-						gitService.getGitClone(clone.Children[0].BranchLocation).then(function(branches){
-							dojo.forEach(branches.Children, function(branch, i) {
-								if (branch.Current == true){
-									clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1");
-									return;
-								}
-							});
-						});
-					}
+				gitService.getGitClone(cloneLocation).then(function(clone, secondArg) {
+					gitService.getGitBranch(clone.Children[0].BranchLocation).then(function(branches){
+						dojo.forEach(branches.Children, function(branch, i) {
+							if (branch.Current == true){
+								clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1");
+								return;
+							}
+						}, displayErrorOnStatus);
+					}, displayErrorOnStatus);
 				});
 				return clientDeferred;
 			},
@@ -1638,20 +1609,7 @@ var exports = {};
 
 							if (explorer.parentId === "explorer-tree") {
 								// refresh commit list
-								dojo.xhrGet({
-									url: path,
-									headers: {
-										"Orion-Version": "1"
-									},
-									handleAs: "json",
-									timeout: 5000,
-									load: function(jsonData, secondArg) {
-										return jsonData;
-									},
-									error: function(error, ioArgs) {
-										console.error("HTTP status code: ", ioArgs.xhr.status);
-									}
-								}).then(function(jsonData) {
+								service.doGitLog(path).then(function(jsonData) {
 									if (jsonData.HeadLocation) {
 										// log view for remote
 										dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only");
@@ -1746,27 +1704,7 @@ var exports = {};
 							options.gitPrivateKey,
 							options.gitPassphrase), "Fetching remote: " + path).then(function(jsonData, secondArg) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-							dojo.xhrGet({
-								url: path,
-								headers: {
-									"Orion-Version": "1"
-								},
-								postData: dojo.toJson({
-									"GitSshUsername": options.gitSshUsername,
-									"GitSshPassword": options.gitSshPassword,
-									"GitSshPrivateKey": options.gitPrivateKey,
-									"GitSshPassphrase": options.gitPassphrase,
-									"GitSshKnownHost": options.knownHosts
-								}),
-								handleAs: "json",
-								timeout: 5000,
-								load: function(jsonData, secondArg) {
-									return jsonData;
-								},
-								error: function(error, ioArgs) {
-									console.error("HTTP status code: ", ioArgs.xhr.status);
-								}
-							}).then(function(remoteJsonData) {
+							gitService.getGitRemote(path).then(function(remoteJsonData) {
 									if(navigator._gitCommitNavigatorRem.parentId)
 										dojo.place(document.createTextNode("Getting git incoming changes..."), navigator._gitCommitNavigatorRem.parentId, "only");
 									gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id).then(function(scopedCommitsJsonData) {
