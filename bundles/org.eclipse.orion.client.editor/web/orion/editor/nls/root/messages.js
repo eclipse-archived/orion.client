@@ -11,7 +11,7 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
+//NLS_CHARSET=UTF-8
 
 define({
 	"incrementalFind": "Incremental find: ${0}",
