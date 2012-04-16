@@ -7,6 +7,9 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
+
+//NLS_CHARSET=UTF-8
+
 define({
 	"Compare":"Compare",
 	"View the side-by-side compare":"View the side-by-side compare",

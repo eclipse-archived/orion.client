@@ -8,7 +8,7 @@
  * 
  ******************************************************************************/
 
-/*global define*/
+//NLS_CHARSET=UTF-8
 
 define( {
 		"Navigator": "Navigator",
