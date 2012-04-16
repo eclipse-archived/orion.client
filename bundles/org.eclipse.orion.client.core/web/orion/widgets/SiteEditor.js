@@ -305,7 +305,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			  Target: hostPrefix + "gitapi"
 			},
 			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.users.ui/web"
+			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.users/web"
 			},
 			{ Source: "/xfer",
 			  Target: hostPrefix + "xfer"
