@@ -13,7 +13,7 @@
 /*global eclipse JSLINT require window*/
 window.onload = function() {
 	function jslint(contents) {
-		JSLINT(contents, {bitwise: false, eqeqeq: true, immed: true, indent: 1, newcap: true, nomen: false,
+		JSLINT(contents, {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, newcap: true, nomen: false,
 				onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false});
 		return JSLINT.data();
 	}
