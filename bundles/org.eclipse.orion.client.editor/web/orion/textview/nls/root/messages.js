@@ -11,19 +11,19 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global define*/
+//NLS_CHARSET=UTF-8
 
-define("orion/textview/nls/pt-br/messages", {
-	"multipleAnnotations": "M\u00FAltiplas anota\u00E7\u00F5es:",
-	"line": "Linha: ${0}",
+define({
+	"multipleAnnotations": "Multiple annotations:",
+	"line": "Line: ${0}",
 	"breakpoint": "Breakpoint",
-	"bookmark": "Favoritos",
-	"task": "Tarefa",
-	"error": "Erro",
-	"warning": "Aviso",
-	"matchingSearch": "Pesquisa Correspondente",
-	"currentSearch": "Pesquisa Corrente",
-	"currentLine": "Linha Currente",
-	"matchingBracket": "Colchete Correspondente",
-	"currentBracket": "Colchete Corrente"
+	"bookmark": "Bookmark",
+	"task": "Task",
+	"error": "Error",
+	"warning": "Warning",
+	"matchingSearch": "Matching Search",
+	"currentSearch": "Current Search",
+	"currentLine": "Current Line",
+	"matchingBracket": "Matching Bracket",
+	"currentBracket": "Current Bracket"
 });

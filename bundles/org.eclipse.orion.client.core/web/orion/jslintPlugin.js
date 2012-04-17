@@ -10,10 +10,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint forin:true regexp:false*/
-/*global define require eclipse JSLINT window*/
+/*global eclipse JSLINT require window*/
 window.onload = function() {
 	function jslint(contents) {
-		JSLINT(contents, {white: false, onevar: false, undef: true, nomen: false, eqeqeq: true, plusplus: false, bitwise: false, regexp: true, newcap: true, immed: true, strict: false, indent: 1});
+		JSLINT(contents, {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, newcap: true, nomen: false,
+				onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false});
 		return JSLINT.data();
 	}
 	

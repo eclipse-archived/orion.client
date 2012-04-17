@@ -3,6 +3,7 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script type="text/javascript" src="../orion/i18n.js"></script>
 	<script>
 	function qualifyURL(url){
 	    var a = document.createElement('a');
@@ -14,34 +15,35 @@
 		var serviceImpl = { /* All data is in properties */ };
 
 		var provider = new eclipse.PluginProvider();
+		var messages = new eclipse.I18nMessages("nls/messages");
 		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/github.png", 
-			name: "Clone a github repository",
+			name: messages["Clone a github repository"],
 			id: "orion.clonegit",
-			description: "Clone a repository from github",
+			description: messages["Clone a repository from github"],
 			steps:[
-				{href: "http://www.github.com", linkName: "github", description: "Go to github and copy the repository URL for the repository you want to clone."},
-				{href: qualifyURL("../git/git-repository.html#"), linkName: "Orion Repositories", description: "Go to the Orion repositories page and select the 'Clone' link at the top left of the page"},
-				{href: "http://wiki.eclipse.org/Orion/How_Tos/Cloning_repository_from_github", linkName: "Orion/GitHub How-To", description: "The how-to provides further information about setting up credentials."}
+				{href: "http://www.github.com", linkName: messages["github"], description: messages["github description"]},
+				{href: qualifyURL("../git/git-repository.html#"), linkName: messages["Orion Repositories"], description: messages["Orion Repositories description"]},
+				{href: "http://wiki.eclipse.org/Orion/How_Tos/Cloning_repository_from_github", linkName: messages["Orion/GitHub How-To"], description: messages["Orion/GitHub How-To description"]}
 			]
 		});
 		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "plugins/images/upload.png",
-			name: "Upload some code!",
+			name: messages["Upload some code!"],
 			id: "orion.upload",
-			description: "Upload a zip file from your computer.",
+			description: messages["Upload a zip file from your computer."],
 			steps:[
-				{href: qualifyURL("../navigate/table.html"), linkName: "Navigator", description: "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu."}
+				{href: qualifyURL("../navigate/table.html"), linkName: messages["Navigator"], description: messages["Navigator description"]}
 			]
 		});
 		provider.registerServiceProvider("orion.help.task", serviceImpl, {
 			image: "http://sfmccourt.github.com/Orion/initializr.png",
-			name: "Generate a web site",
+			name: messages["Generate a web site"],
 			id: "orion.generate",
-			description: "Generate an HTML 5 Website Template using initializr.com",
+			description: messages["Generate a web site description"],
 			steps:[
-				{href: "http://www.initializr.com", linkName: "Initializr", description: "Go to the initializr site, choose the options that you would like, and download the template to your computer."},
-				{href: qualifyURL("../navigate/table.html"), linkName: "Navigator", description: "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."}
+				{href: "http://www.initializr.com", linkName: messages["Initializr"], description: messages["Initializr description"]},
+				{href: qualifyURL("../navigate/table.html"), linkName: messages["Navigator"], description: messages["Navigator description2"]}
 			]
 		});
 		provider.connect();
