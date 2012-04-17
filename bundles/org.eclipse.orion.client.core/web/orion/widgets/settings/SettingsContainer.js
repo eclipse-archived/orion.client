@@ -136,6 +136,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 			this.pluginWidget = new orion.widgets.plugin.PluginList({
 				settings: this.settingsCore,
+				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
