@@ -298,8 +298,9 @@ function setPageTitle(branchName, cloneName, cloneLocation, isRemote, isBranch){
 		title = title + " on <a href='" + require.toUrl("git/git-repository.html") + "#" + cloneLocation + "'>" + cloneName + "</a>";
 	}
 	pageTitle.innerHTML = title;
+	
 	if(branchName){
-		document.title = cloneName ? (branchName + " on " + cloneName) : branchName;
+		document.title = cloneName ? "Log for " + branchName + " on "+ cloneName + " - Git" : "Log for branch " + branchName + " - Git";
 	}
 }
 
