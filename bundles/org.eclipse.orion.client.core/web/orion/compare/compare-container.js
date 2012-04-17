@@ -900,7 +900,7 @@ exports.InlineCompareContainer = (function() {
 		var diff = this._diffContent;
 
 		this.hasContent = true;
-		var result = this.parseMapper(input, output, diff, false, output);
+		var result = this.parseMapper(input, output, diff, this._hasConflicts, output);
 		if(!output){
 			output = result.output;
 		}
