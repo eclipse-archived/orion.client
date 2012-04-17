@@ -251,14 +251,14 @@ exports.DiffTreeNavigator = (function() {
 			this._root.children = [];
 			var oldDiffBlocks = this.editorWrapper[0].diffFeeder.getDiffBlocks();
 			if(!oldDiffBlocks || oldDiffBlocks.length === 0){
-				this.replaceAllAnnotations(0, "block", false, []);
-				this.replaceAllAnnotations(1, "block", false, []);
-				this.replaceAllAnnotations(0, "word", false, []);
-				this.replaceAllAnnotations(1, "word", false, []);
-				this.replaceAllAnnotations(0, "block", true, []);
-				this.replaceAllAnnotations(1, "block", true, []);
-				this.replaceAllAnnotations(0, "word", true, []);
-				this.replaceAllAnnotations(1, "word", true, []);
+				this.replaceAllAnnotations(true, 0, "block", false, []);
+				this.replaceAllAnnotations(true, 1, "block", false, []);
+				this.replaceAllAnnotations(true, 0, "word", false, []);
+				this.replaceAllAnnotations(true, 1, "word", false, []);
+				this.replaceAllAnnotations(true, 0, "block", true, []);
+				this.replaceAllAnnotations(true, 1, "block", true, []);
+				this.replaceAllAnnotations(true, 0, "word", true, []);
+				this.replaceAllAnnotations(true, 1, "word", true, []);
 				return;
 			}
 			var adapter = new mJSDiffAdapter.JSDiffAdapter();
@@ -270,18 +270,18 @@ exports.DiffTreeNavigator = (function() {
 					diffBlockModel.children = children;
 				}
 			}
-			this.replaceAllAnnotations(0, "block", true);
-			this.replaceAllAnnotations(1, "block", true);
-			this.replaceAllAnnotations(0, "word", true);
-			this.replaceAllAnnotations(1, "word", true);
+			this.replaceAllAnnotations(false, 0, "block", true);
+			this.replaceAllAnnotations(false, 1, "block", true);
+			this.replaceAllAnnotations(false, 0, "word", true);
+			this.replaceAllAnnotations(false, 1, "word", true);
 			this.iterator = new mTreeModelIterator.TreeModelIterator(this._root.children);
 		},
 		
-		replaceAllAnnotations: function(wrapperIndex, wordOrBlock, normal, replacingList){
+		replaceAllAnnotations: function(removeExisting, wrapperIndex, wordOrBlock, normal, replacingList){
 			for(var i = 0; i < this.editorWrapper[wrapperIndex].annoTypes.length; i++){
 				if(this.editorWrapper[wrapperIndex].annoTypes[i].type === wordOrBlock){
 					this.replaceDiffAnnotations(this.editorWrapper[wrapperIndex].editor, replacingList ? replacingList : this.editorWrapper[wrapperIndex].annoTypes[i].list, 
-												normal ? this.editorWrapper[wrapperIndex].annoTypes[i].normal : this.editorWrapper[wrapperIndex].annoTypes[i].current);
+												normal ? this.editorWrapper[wrapperIndex].annoTypes[i].normal : this.editorWrapper[wrapperIndex].annoTypes[i].current, removeExisting);
 				}
 			}
 		},
@@ -399,7 +399,7 @@ exports.DiffTreeNavigator = (function() {
 			return this.getFeeder().getDiffBlocks().length === 0 ? -1 : this.getFeeder().getDiffBlocks()[blockIndex][1];
 		},
 		
-		replaceDiffAnnotations: function(editor, overallAnnotations, type){
+		replaceDiffAnnotations: function(editor, overallAnnotations, type, removeExisting){
 			if(!overallAnnotations || !type){
 				return;
 			}
@@ -409,7 +409,7 @@ exports.DiffTreeNavigator = (function() {
 			}
 			var iter = annotationModel.getAnnotations(0, annotationModel.getTextModel().getCharCount());
 			var remove = [];
-			while (iter.hasNext()) {
+			while (removeExisting && iter.hasNext()) {
 				var annotation = iter.next();
 				if (annotation.type === type) {
 					remove.push(annotation);
@@ -419,10 +419,10 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		updateCurrentAnnotation: function(moveSelection, textView){
-			this.replaceAllAnnotations(0, "block", false, []);
-			this.replaceAllAnnotations(1, "block", false, []);
-			this.replaceAllAnnotations(0, "word", false, []);
-			this.replaceAllAnnotations(1, "word", false, []);
+			this.replaceAllAnnotations(true, 0, "block", false, []);
+			this.replaceAllAnnotations(true, 1, "block", false, []);
+			this.replaceAllAnnotations(true, 0, "word", false, []);
+			this.replaceAllAnnotations(true, 1, "word", false, []);
 			if(!this.iterator){
 				return;
 			}
@@ -437,8 +437,8 @@ exports.DiffTreeNavigator = (function() {
 				annoType0 = this.editorWrapper[0].diffFeeder.getCurrentBlockAnnoType(cursor.index);
 				annoType1 = this.editorWrapper[1].diffFeeder.getCurrentBlockAnnoType(cursor.index);
 			}
-			this.replaceDiffAnnotations(this.editorWrapper[0].editor, [new (mAnnotations.AnnotationType.getType(annoType0.current))(annoPosOld.start, annoPosOld.end)], annoType0);
-			this.replaceDiffAnnotations(this.editorWrapper[1].editor, [new (mAnnotations.AnnotationType.getType(annoType1.current))(annoPosNew.start, annoPosNew.end)], annoType1);
+			this.replaceDiffAnnotations(this.editorWrapper[0].editor, [new (mAnnotations.AnnotationType.getType(annoType0.current))(annoPosOld.start, annoPosOld.end)], annoType0, true);
+			this.replaceDiffAnnotations(this.editorWrapper[1].editor, [new (mAnnotations.AnnotationType.getType(annoType1.current))(annoPosNew.start, annoPosNew.end)], annoType1, true);
 			if(moveSelection){
 				this.autoSelecting = true;
 				this.editorWrapper[0].editor.setSelection(cursor.oldA.start, cursor.oldA.end, true);

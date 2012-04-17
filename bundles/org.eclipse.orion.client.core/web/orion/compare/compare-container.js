@@ -105,6 +105,7 @@ exports.CompareContainer = (function() {
 		_clearOptions: function(){
 			this._readonly = undefined;
 			this._charDiff = undefined;
+			this._wordLevelNav = undefined;
 			this._commandSpanId = undefined;
 			this._hasConflicts = undefined;
 			this._diffProvider = undefined;
@@ -132,6 +133,7 @@ exports.CompareContainer = (function() {
 				
 				this._commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this._commandSpanId;
 				this._readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this._readonly;
+				this._wordLevelNav = (options.wordLevelNav !== undefined &&  options.wordLevelNav !== null) ? options.wordLevelNav : this._wordLevelNav;
 				this._charDiff = (options.charDiff !== undefined &&  options.charDiff !== null) ? options.charDiff : this._charDiff;
 				this._hasConflicts = (options.hasConflicts !== undefined &&  options.hasConflicts !== null) ? options.hasConflicts : this._hasConflicts;
 				this._diffProvider = options.diffProvider ? options.diffProvider : this._diffProvider;
@@ -224,8 +226,10 @@ exports.CompareContainer = (function() {
 			this._commandService.addCommand(generateLinkCommand);
 			this._commandService.addCommand(nextDiffCommand);
 			this._commandService.addCommand(prevDiffCommand);
-			this._commandService.addCommand(nextChangeCommand);
-			this._commandService.addCommand(prevChangeCommand);
+			if(this._wordLevelNav){
+				this._commandService.addCommand(nextChangeCommand);
+				this._commandService.addCommand(prevChangeCommand);
+			}
 				
 			// Register command contributions
 			if (!this._readonly) {
@@ -233,8 +237,10 @@ exports.CompareContainer = (function() {
 			}
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 102);
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 103);
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 104);
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 105);
+			if(this._wordLevelNav){
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 104);
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 105);
+			}
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 106);
 		},
 		

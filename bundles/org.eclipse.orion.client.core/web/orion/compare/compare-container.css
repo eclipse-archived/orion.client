@@ -93,19 +93,19 @@
 
 /* Styles for normal diff blocks */
 .annotationLine.addedBlockDiff {
-	background-color: #EFFFEF;
+	background-color: #D2FFD2; /*#EFFFEF;*/
 }
 
 .annotationLine.currentAddedBlockDiff {
-	background-color: #D2FFD2;
+	background-color: #B0FFB0;
 }
 
 .annotationLine.deletedBlockDiff {
-	background-color: #FFEFEF;
+	background-color: #FFD2D2; /*'#FFEFEF;*/
 }
 
 .annotationLine.currentDeletedBlockDiff {
-	background-color: #FFD2D2;
+	background-color: #FFB0B0;
 }
 
 /* Styles for empty diff blocks , it draws one line on top of the line in the editor */
@@ -136,7 +136,7 @@
 }
 
 .annotationRange.currentAddedWordDiff {
-	background-color: #00B400;
+	background-color: #33DD33;
 }
 
 /* Styles for diff words deleted */
@@ -145,9 +145,9 @@
 }
 
 .annotationRange.currentDeletedWordDiff {
-	background-color: #B44040;
+	background-color: #E66868;
 }
-
+/*
 .annotationRange.emptyDeletedWordDiffLeft {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
  	background-repeat: repeat-y;
@@ -156,6 +156,18 @@
 
 .annotationRange.emptyDeletedWordDiffRight {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
+ 	background-repeat: repeat-y;
+ 	background-position: right top
+}
+*/
+.annotationRange.emptyDeletedWordDiffLeft {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAUSURBVBhXY2RgYPgPxAxMIGIwMgCpaAEjILHq8AAAAABJRU5ErkJggg==");
+ 	background-repeat: repeat-y;
+ 	background-position: left top
+}
+
+.annotationRange.emptyDeletedWordDiffRight {
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAUSURBVBhXY2RgYPgPxAxMIGIwMgCpaAEjILHq8AAAAABJRU5ErkJggg==");
  	background-repeat: repeat-y;
  	background-position: right top
 }
