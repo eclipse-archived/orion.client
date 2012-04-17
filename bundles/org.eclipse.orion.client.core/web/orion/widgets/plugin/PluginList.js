@@ -31,6 +31,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 					    '</div>',
 				
 		pluginDialogState: false,
+		
+		includeMaker: false,
+		
+		target: "_self",
 					    
 		postCreate: function(){
 			// set up the toolbar level commands
@@ -62,6 +66,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			// register these with the toolbar and render them.  Rendering is normally done by our outer page, but since
 			// we might have been created after the page first loaded, we have to do this ourselves.
 			this.commandService.registerCommandContribution(this.toolbarID, "orion.reloadAllPlugins", 2);
+			
+			
+			var createPluginCommand = new mCommands.Command({
+				name: "Create",
+				tooltip: "Create a new Orion Plugin",
+				id: "orion.createPlugin",
+				callback: dojo.hitch(this, function(data){
+					this.createPlugin(data.items);
+				})
+			
+			});
+			
+			this.commandService.addCommand(createPluginCommand);
+			
+			if( this.includeMaker === true ){
+				this.commandService.registerCommandContribution(this.toolbarID, "orion.createPlugin", 2);
+			}
+			
 			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button");
 			
 			var reloadPluginCommand = new mCommands.Command({
@@ -95,6 +117,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			this.commandService.addCommand(uninstallPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2);
 			this.addRows();
+			this.setTarget();
+			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) );
 		},
 		
 		addRows: function(){
@@ -121,6 +145,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				this.pluginUrlEntry.value = 'Type a plugin url here ...';
 				dojo.style( this.pluginUrlEntry, "color", "#AAA" );
 			}
+		},
+		
+		createPlugin: function( data ){
+			var path = require.toUrl("settings/maker.html");
+			window.open( path, this.target );
 		},
 		
 		addPlugin: function( plugin ){
@@ -210,6 +239,39 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			}
 		},
 		
+		setTarget: function(){
+	
+			var preferences = this.preferences;	
+			var renderer = this;
+		
+			this.preferences.getPreferences('/settings', 2).then( function(prefs){	
+			
+				var data = prefs.get("General");
+				
+				if( data !== undefined ){
+						
+					var storage = JSON.parse( data );
+					
+					if(storage){
+						var target = preferences.getSetting( storage, "Navigation", "Links" );
+						
+						if( target === "Open in new tab" ){
+							target = "_blank";
+						}else{
+							target = "_self";
+						}
+						
+						renderer.target = target;
+					}
+				}
+			});
+		},
+		
+		onStorage:function (e) {
+			if( e.key === this.storageKey ){
+				this.setTarget();
+			}
+		},
 		
 		/* removePlugin - removes a plugin by url */
 

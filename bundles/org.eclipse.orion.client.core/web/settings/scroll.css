@@ -1,0 +1,280 @@
+@import "../org.dojotoolkit/dojo/resources/dojo.css";
+@import "../org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+@import "../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+@import "../org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+@import "../org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+@import "../css/ide.css";
+@import "../css/breadcrumbs.css";
+@import "../css/commands.css";
+
+html,body {
+	height: 100%;
+}
+
+h1 {
+	position: relative;
+	margin-top: 18px
+}
+
+
+.scrollcontent {
+	position: relative;
+}
+
+.scrollmenubar{
+	width: 1010px;
+	height:40px;
+	border-top:solid 2px whitesmoke;
+	border-bottom: solid 2px whitesmoke ;
+	position: fixed;
+	z-index: 999;
+	clear: both;
+	overflow: hidden;
+	background: white;
+}
+
+.scrollmenu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	padding-left:20px;
+	position: absolute;
+	left: 0;
+}
+
+.scrollmenubar ul {
+	display: block;
+	text-decoration: none;
+}
+
+.scrollmenu li {
+	list-style:none;
+	float: left;
+	margin: 0 1em 0 0;
+	padding: .3em;
+	text-decoration: none;
+	background:white;
+}
+
+.scrollmenuitem{
+	color: #999;
+	padding: .4em;
+	margin-top:1px;
+	text-decoration: none;
+	font-family: sans-serif;
+	font-size: 12px;
+	border-bottom-left-radius: 4px 4px;
+	border-bottom-right-radius: 4px 4px;
+	border-top-left-radius: 4px 4px;
+	border-top-right-radius: 4px 4px;
+	line-height:2em;
+}
+
+
+.scrollmenuitem:hover{
+	background: #E3E3E3;
+	text-decoration: none;
+	color: #999;
+}
+
+.smiSelected{
+	border: 1px dotted #BFBFBF;
+	
+	color: white;
+}
+
+.scrollmenuitem:visited{
+	background: #E3E3E3;
+	color: #999;
+}
+
+.anchor {
+	display: block;
+	height: 0;
+	border: none !important;
+	text-decoration: none !important;
+}
+
+.chapter {
+	position: relative;
+	clear: both;
+	overflow: hidden;
+}
+
+.sectionBlock{
+	border-bottom-left-radius: 20px 20px;
+	border-bottom-right-radius: 20px 20px;
+	border-top-left-radius: 20px 20px;
+	border-top-right-radius: 20px 20px;
+	padding:40px;
+	margin-top:50px;
+	margin-right:50px;
+	margin-left:50px;
+	position: relative;
+	clear: both;
+	overflow: hidden;
+	border: 1px dotted #BFBFBF;
+}
+
+.inner{
+	background: whitesmoke;
+	padding:10px;
+	border-bottom-left-radius: 20px 20px;
+	border-bottom-right-radius: 20px 20px;
+	border-top-left-radius: 20px 20px;
+	border-top-right-radius: 20px 20px;
+}
+
+.circle{
+	width:40px;
+	height:40px;
+	display:block;
+	border-radius:20px;
+	font-size:20px;
+	font-family:sans-serif;
+	font-weight:bolder;
+	color:#fff;
+	line-height:40px;
+	text-align:center;
+	background:#ffd401;
+	position:absolute;
+	margin-left:30px;
+	float:right;
+}
+
+.pluginTitle {
+	position:absolute;
+	float: right;
+	font-family: Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;
+	font-size: 1em;
+	font-weight: bold;
+	color: #666;
+	margin: 0;
+	background: white;
+	padding:10px;
+	margin-left:80px;
+}
+
+.scrollForm{
+	margin: 1em 0;
+	padding-top: 10px;
+	font-size:10px;
+}
+
+.scrollForm fieldset {
+	margin: 0;
+	padding-top: .5em;
+	border: none;
+}
+
+.scrollForm p {
+	clear: both;
+	margin: .5em 0;
+	overflow: hidden;
+}
+
+.scrollForm input {
+	font-size:10px;
+	font-family: sans-serif;
+	width: 500px;
+}
+
+.scrollForm textarea {
+	font-size:10px;
+	font-family: sans-serif;
+	width: 500px;
+	resize: none; 
+}
+
+.scrollForm label {
+	float: left;
+	width: 100px;
+	display: block;
+	text-align: right;
+	margin-right: 10px;
+}
+
+.itemcount{
+	width:14px;
+	height:14px;
+	display:block;
+	border-radius:7px;
+	font-size:9px;
+	font-family:sans-serif;
+	font-weight:bolder;
+	color:#fff;
+	line-height:14px;
+	text-align:center;
+	background:#ffd401;
+	position:absolute;
+	float:right;
+	margin-top:-9px;
+	margin-left:-6px;
+}
+
+.steps{
+	margin:20px;
+	margin-top:0;
+	font-size: 14px;
+	font-family: sans-serif;
+	font-weight: bolder;
+	color: #999;
+	text-align:center;
+	vertical-align:middle;
+}
+
+.nextstep{
+	float: left;
+	width: 100px;
+	height: 50px;
+	margin:10px;
+	padding:20px;
+	border-radius:7px;
+	background: white;
+	border: 1px solid #BBBBBB;
+}
+
+.or{
+	float: left;
+	width: 20px;
+	height: 50px;
+	margin:10px;
+	padding:20px;
+}
+
+.downloadbutton {
+background-color: #91BD09;
+text-align: center;
+width: 150px;
+}
+
+.nextlink{
+	-moz-border-radius: 5px 5px 5px 5px;
+	-webkit-border-radius: 5px 5px 5px 5px;
+	border-radius: 5px 5px 5px 5px;
+	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+	background: url("images/overlay-button.png") repeat-x scroll 0 0 #222;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+	color: white !important;
+	cursor: pointer;
+	font-weight: bold;
+	line-height: 1;
+	overflow: visible;
+	font-size: 17px;
+	padding: 8px 19px 9px;
+	position: relative;
+	text-decoration: none;
+	text-shadow: 0 -1px 1px rgba(0, 0, 0, 0.25);
+	width: auto;
+	margin:10px;
+}
+
+.nextlink:hover {
+-moz-box-shadow: 0 1px 11px rgba(0, 0, 0, 0.45);
+-webkit-box-shadow: 0 1px 11px rgba(0, 0, 0, 0.45);
+box-shadow: 0 1px 11px rgba(0, 0, 0, 0.45);
+}
+
+
