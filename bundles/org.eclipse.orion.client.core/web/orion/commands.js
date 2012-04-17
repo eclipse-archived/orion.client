@@ -261,7 +261,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							if (command.hrefCallback) {
 								stop(event);
 								var href = command.hrefCallback.call(invocation.handler || window, invocation);
-								if (href) {
+								if (href.then){
+									href.then(function(l){
+										window.open(l);
+									});
+								} else {
 									// We assume window open since there's no link gesture to tell us what to do.
 									window.open(href);
 								}
@@ -333,7 +337,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		/**
 		 * Return the selection service that is being used when commands should apply against a selection.
 		 */
-		getSelectionService: function() { 
+		getSelectionService: function() {
 			return this._selection;
 		},
 		
@@ -1109,7 +1113,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			if (this.hrefCallback) {
 				var loc = this.hrefCallback.call(context.handler, context);
 				if (loc) {
-					menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
+					if (loc.then) {
+						loc.then(dojo.hitch(this, function(l) { 
+							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
+						}));
+					} else if (loc) {
+						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
+					} else {
+						return;
+					}
 				}
 			} else if (this.callback) {
 				menuitem.onClick = dojo.hitch(this, function() {
@@ -1139,7 +1151,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			dojo.addClass(element, "commandLink");
 			dojo.place(window.document.createTextNode(this.name), element, "last");
 			var href = this.hrefCallback.call(context.handler, context);
-			if (href) {
+			if (href.then){
+				href.then(function(l){
+					element.href = l;
+				});
+			} else if (href) {
 				element.href = href; 
 			} else {  // no href, we don't want the link
 				return null;
