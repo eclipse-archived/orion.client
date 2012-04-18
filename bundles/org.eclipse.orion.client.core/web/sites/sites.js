@@ -11,15 +11,11 @@
  *******************************************************************************/
 /*global define dojo dijit orion window widgets*/
 /*jslint browser:true*/
-
-/*
- * Glue code for sites.html
- */
-
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService, mSiteUtils, mSiteCommands, mSiteTree, mTreeTable) {
+		'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/siteService', 'orion/siteUtils', 'orion/siteCommands', 'orion/sitesTree',
+		'orion/PageUtil', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteService,
+			mSiteUtils, mSiteCommands, mSitesTree, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -39,54 +35,69 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			
-			// Create the visuals
 			var treeWidget;
-			(function() {
-				statusService.setMessage("Loading...");
-				var renderer = new mSiteTree.SiteRenderer(commandService);
-				dojo.connect(renderer, "rowsChanged", null, function() {
-					statusService.setMessage("");
-				});
-				treeWidget = new mTreeTable.TableTree({
-					id: "site-table-tree",
-					parent: dojo.byId("site-table"),
-					model: new mSiteTree.SiteTreeModel(siteService, "site-table-tree"),
-					showRoot: false,
-					renderer: renderer
-				});
-			}());
-			
-			(function() {
-				// Reloads the table view after doing a command
+			function generateBanner(file) {
+				document.title = file ? "View On Site" : "Site Configurations";
+				mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
+			}
+			function createTree(file) {
+				var tableId = "site-table-tree";
+				var parent = dojo.byId("site-table");
+				if (treeWidget) {
+					dojo.empty(parent);
+				}
+				var options = {
+					id: tableId,
+					parent: parent,
+					serviceRegistry: serviceRegistry
+				};
+				if (file) {
+					options.file = file;
+				}
+				treeWidget = file ? new mSitesTree.ViewOnSiteTree(options) : new mSitesTree.SitesTree(options);
+			}
+			function createCommands(file) {
 				var refresh = function() {
-					siteService.getSiteConfigurations().then(function(siteConfigs) {
-						statusService.setMessage("");
-						treeWidget.refresh("site-table-tree", siteConfigs, true);
-					});
+					treeWidget.refresh();
 				};
 				var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 				var goToUrl = function(url) {
 					window.location = url;
 				};
 				mSiteCommands.createSiteCommands(serviceRegistry, {
+					siteService: siteService,
 					createCallback: goToUrl,
 					startCallback: refresh,
 					stopCallback: refresh,
 					deleteCallback: refresh,
-					errorCallback: errorHandler
+					addAndStartCallback: goToUrl,
+					fileLocation: file
 				});
-
-				// Register command contributions
-				commandService.registerCommandContribution("pageActions", "orion.site.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
+			}
+			function registerCommands(file) {
+				if (!file) {
+					commandService.registerCommandContribution("pageActions", "orion.site.create", 1, null, false, null, new mCommands.URLBinding("createSite", "name"));
+				}
 				commandService.registerCommandContribution("siteCommand", "orion.site.edit", 1);
 				commandService.registerCommandContribution("siteCommand", "orion.site.start", 2);
 				commandService.registerCommandContribution("siteCommand", "orion.site.stop", 3);
 				commandService.registerCommandContribution("siteCommand", "orion.site.delete", 4);
-				
+
+				commandService.registerCommandContribution("viewOnSiteCommand", "orion.site.add-to", 5);
+				commandService.registerCommandContribution("viewOnSiteCommand", "orion.site.view-on-link", 6);
 				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
-			}());
+			}
+
+			dojo.subscribe("/dojo/hashchange", null, function() {
+				var file = PageUtil.matchResourceParameters().viewOnSite;
+				generateBanner(file);
+				createTree(file);
+			});
+			var params = PageUtil.matchResourceParameters();
+			generateBanner(params.viewOnSite);
+			createTree(params.viewOnSite);
+			createCommands(params.viewOnSite);
+			registerCommands(params.viewOnSite);
 		});
 	});
 });

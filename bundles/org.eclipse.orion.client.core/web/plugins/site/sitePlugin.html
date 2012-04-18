@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src='../../requirejs/require.js'></script>
+	<script>
+		/*global eclipse require window*/
+		require({
+		  baseUrl: '../../',
+		  packages: [
+		    {	name: 'dojo',
+				location: 'org.dojotoolkit/dojo',
+				main: 'lib/main-browser',
+				lib: '.'
+		    }
+		  ],
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+
+		require(['../../orion/plugin.js'], function(plugin) {
+			function unqualify(url) {
+				var a = document.createElement('a');
+				a.href = url;
+				url = a.href;
+				try {
+					if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
+						return url.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+					}
+				} catch (e) {}
+				return url;
+			}
+			function filesAndFoldersOnService(filePrefix) {
+				return [
+					{	source: 'Location|Directory'
+					},
+					{	source: 'Location',
+						match: '^' + filePrefix
+					}];
+			}
+			var siteBase = unqualify('../../site');
+			var fileBase = unqualify('../../file');
+//			console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase);
+
+			var provider = new eclipse.PluginProvider();
+
+			provider.registerServiceProvider('orion.navigate.command', null, {
+				id: 'orion.site.viewon',
+				name: 'View on Site',
+				tooltip: 'View this file or folder on a web site hosted by Orion',
+				forceSingleItem: true,
+				validationProperties: filesAndFoldersOnService(fileBase),
+				uriTemplate: '{OrionHome}/sites/sites.html#,viewOnSite={Location}'
+			});
+
+			provider.registerServiceProvider('orion.page.link.related', null, {
+				id: 'orion.site.viewon',
+				name: 'View on Site',
+				tooltip: 'View this file or folder on a web site hosted by Orion',
+				validationProperties: filesAndFoldersOnService(fileBase),
+				uriTemplate: '{OrionHome}/sites/sites.html#,viewOnSite={Location}'
+			});
+
+			provider.connect();
+		});
+	</script>
+</head>
+<body>
+</body>
+</html>

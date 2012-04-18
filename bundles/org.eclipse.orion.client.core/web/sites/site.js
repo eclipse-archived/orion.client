@@ -16,9 +16,9 @@
  * Glue code for site.html
  */
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteCommands', 'orion/PageUtil',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteCommands, mSiteTree, mTreeTable, PageUtil) {
+	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteCommands, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -101,6 +101,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
 			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
 			mSiteCommands.createSiteCommands(serviceRegistry, {
+				siteService: siteService,
 				startCallback: refresher,
 				stopCallback: refresher,
 				errorCallback: errorHandler

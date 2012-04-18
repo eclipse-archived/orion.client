@@ -35,6 +35,15 @@ tr.treeTableRow td:first-child {
 	padding-left: 16px !important;
 }
 
+.treeTableRow {
+	vertical-align: baseline;
+}
+
+.newSiteRow > td {
+	background-color: #f4f4f4;
+	font-weight: bold;
+}
+
 .treetable th {
 	font-weight: bold;
 }
