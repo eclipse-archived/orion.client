@@ -10,20 +10,11 @@
  ******************************************************************************/
 
 /*global console define document window*/
-define(['require', 'orion/commands', 'orion/siteUtils'],
-		function(require, mCommands, mSiteUtils) {
+define(['require', 'orion/commands', 'orion/siteUtils', 'dojo'],
+		function(require, mCommands, mSiteUtils, dojo) {
 	var Command = mCommands.Command;
-	var sitesCache = null;
+	var Deferred = dojo.Deferred;
 	var workspacesCache = null;
-
-	function SitesCache(siteService) {
-		this.sites = [];
-		var self = this;
-		siteService.getSiteConfigurations().then(
-			function(sites) {
-				self.sites = sites;
-			});
-	}
 
 	function WorkspacesCache(fileService) {
 		var promise = null;
@@ -35,82 +26,66 @@ define(['require', 'orion/commands', 'orion/siteUtils'],
 		};
 	}
 
-	function toArray(obj) {
-		return Array.isArray(obj) ? obj : [obj];
+	function makeUrl(site, path, file) {
+		return site.HostingStatus.URL + (path[0] !== "/" ? "/" : "") + path + (file.Directory ? "/" : "");
 	}
 
-	function oneFileOrFolder(items) {
-		items = toArray(items);
-		if (items.length === 0) {
+	function getPathOnSite(siteService, site, fileLocation) {
+		var mappings = site.Mappings, filePath = siteService.makeRelativeFilePath(fileLocation);
+		if (!mappings) {
 			return false;
 		}
-		// Looks like a file object, not a site configuration
-		return items[0].Location && !items[0].Mappings;
+		for (var i=0; i < mappings.length; i++) {
+			var mapping = mappings[i];
+			if (mapping.Target === filePath) {
+				return mapping.Source;
+			}
+		}
+		return null;
 	}
 
-	function makeViewOnSiteChoices(items, userData, serviceRegistry, viewOnCallback) {
+	// TODO move to SiteService?
+	function isFileMapped(siteService, site, fileLocation) {
+		return getPathOnSite(siteService, site, fileLocation) !== null;
+	}
+
+	// TODO move to SiteService?
+	function mapFileOnSite(siteService, site, file) {
 		function insertMappingFor(virtualPath, filePath, mappings) {
-			for (var i=0; i < mappings.length; i++) {
-				var mapping = mappings[i];
-				if (mapping.Target === filePath) {
-					return;
-				}
+			if (!isFileMapped(siteService, site, file.Location)) {
+				mappings.push({Source: virtualPath, Target: filePath, FriendlyPath: virtualPath});
 			}
-			mappings.push({Source: virtualPath, Target: filePath, FriendlyPath: virtualPath});
 		}
-		function err(error) {
-			serviceRegistry.getService("orion.page.progress").setProgressResult(error);
-		}
-		items = toArray(items);
-		var callback = function(site, selectedItems) {
-			selectedItems = Array.isArray(selectedItems) ? selectedItems : [selectedItems];
-			var item = selectedItems[0];
-			var virtualPath = "/" + item.Name;
-			var siteService = serviceRegistry.getService("orion.sites");
-			var deferred;
-			if (!site) {
-				var name = item.Name + " site";
-				deferred = siteService.makeRelativeFilePath(item.Location).then(function(filePath) {
-					var mappings = [];
-					insertMappingFor(virtualPath, filePath, mappings);
-					return workspacesCache.getWorkspaces().then(function(workspaces) {
-						var workspaceId = workspaces[0].Id;
-						return siteService.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"});
-					});
-				});
-			} else {
-				if (site.HostingStatus.Status === "started") {
-					site.HostingStatus.Status = "stopped";
-				}
-				deferred = siteService.makeRelativeFilePath(item.Location).then(function(filePath) {
-					insertMappingFor(virtualPath, filePath, site.Mappings);
-					return siteService.updateSiteConfiguration(site.Location, site).then(function(site) {
-						return siteService.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}});
-					});
-				});
+		var virtualPath = "/" + file.Name;
+		var deferred, filePath;
+		if (!site) {
+			var name = file.Name + " site";
+			filePath = siteService.makeRelativeFilePath(file.Location);
+			var mappings = [];
+			insertMappingFor(virtualPath, filePath, mappings);
+			deferred = workspacesCache.getWorkspaces().then(function(workspaces) {
+				var workspaceId = workspaces[0].Id;
+				return siteService.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"});
+			});
+		} else {
+			if (site.HostingStatus.Status === "started") {
+				site.HostingStatus.Status = "stopped";
 			}
-			deferred.then(function(site) {
-				// At this point the site is started
-				var a = document.createElement("a");
-				a.href = site.HostingStatus.URL + virtualPath + (item.Directory ? "/" : "");
-				var url = a.href;
-				if (viewOnCallback) {
-					viewOnCallback(url, site);
-				} else {
-					window.location = url;
-				}
-			}, err);
-		};
-		var choices = [];
-		for (var i = 0; i < sitesCache.sites.length; i++) {
-			var site = sitesCache.sites[i];
-			choices.push({name: site.Name, callback: callback.bind(null, site)});
+			filePath = siteService.makeRelativeFilePath(file.Location);
+			insertMappingFor(virtualPath, filePath, site.Mappings);
+			deferred = siteService.updateSiteConfiguration(site.Location, site).then(function(site) {
+				return siteService.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}});
+			});
 		}
-		if (choices.length) {
-			choices.push({});	//separator
-		}
-		choices.push({name: "New Site", callback: callback.bind(null, null)});
-		return choices;
+		return deferred.then(function(site) {
+			return makeUrl(site, virtualPath, file);
+		});
+	}
+
+	function isFileAvailable(siteService, site, file) {
+		var fileLocation = (typeof file === "object") ? file.Location : file;
+		var isStarted = site.HostingStatus && site.HostingStatus.Status === "started";
+		return site && fileLocation && isStarted && isFileMapped(siteService, site, fileLocation);
 	}
 
 	/**
@@ -120,15 +95,16 @@ define(['require', 'orion/commands', 'orion/siteUtils'],
 	 * @param {Function} options.startCallback
 	 * @param {Function} options.stopCallback
 	 * @param {Function} options.deleteCallback
-	 * @param {Function} options.viewOnCallback
+	 * @param {Function} options.addAndStartCallback
 	 * @param {Function} options.errorCallback
+	 * @param {Object} [options.fileLocation]
 	 * @name orion.siteCommands#createSiteCommands
 	 * @function
 	 */
 	function createSiteCommands(serviceRegistry, options) {
 		options = options || {};
 		var commandService = serviceRegistry.getService("orion.page.command"),
-		    siteService = serviceRegistry.getService("orion.sites"),
+		    siteService = options.siteService, //serviceRegistry.getService("orion.sites"), // Need synchronous
 		    dialogService = serviceRegistry.getService("orion.page.dialog"),
 		    progressService = serviceRegistry.getService("orion.page.progress");
 		var createCommand = new mCommands.Command({
@@ -214,20 +190,41 @@ define(['require', 'orion/commands', 'orion/siteUtils'],
 			}});
 		commandService.addCommand(deleteCommand);
 
-		var viewOnSiteCommand = new Command({
+		var addAndStartSiteCommand = new Command({
 			name: "View on site",
-			tooltip: "View this file on a web site hosted by Orion",
-			id: "orion.site.viewon",
-			choiceCallback: function(items, userData) {
-				return makeViewOnSiteChoices(items, userData, serviceRegistry, options.viewOnCallback);
+			tooltip: "View the file on this site",
+			id: "orion.site.add-to",
+			imageClass: "core-sprite-add",
+			visibleWhen: function(item) {
+				return !isFileAvailable(siteService, item.SiteConfiguration, options.fileLocation);
 			},
-			visibleWhen: oneFileOrFolder
-			});
-		commandService.addCommand(viewOnSiteCommand);
+			callback: function(data, callback) {
+				var site = data.items.SiteConfiguration;
+				var fileLocation = data.userData;
+				return serviceRegistry.getService("orion.core.file").read(fileLocation, true).then(function(file) {
+					return mapFileOnSite(siteService, site, file);
+				}).then(options.addAndStartCallback, options.errorCallback);
+			}});
+		commandService.addCommand(addAndStartSiteCommand);
 
-		if (!sitesCache) {
-			sitesCache = new SitesCache(siteService);
-		}
+		// Command that generates a href to view the file on the site if it's mapped
+		var viewOnSiteLink = new Command({
+			name: "View",
+			tooltip: "View the file on the site",
+			id: "orion.site.view-on-link",
+			visibleWhen: function(item) {
+				return isFileAvailable(siteService, item.SiteConfiguration, options.fileLocation);
+			},
+			hrefCallback: function(data) {
+				var fileLocation = data.userData;
+				var site = data.items.SiteConfiguration;
+				var path = getPathOnSite(siteService, site, fileLocation);
+				return serviceRegistry.getService("orion.core.file").read(fileLocation, true).then(function(file) {
+					return makeUrl(site, path, file);
+				});
+			}});
+		commandService.addCommand(viewOnSiteLink);
+
 		if (!workspacesCache) {
 			workspacesCache = new WorkspacesCache(serviceRegistry.getService("orion.core.file"));
 		}
