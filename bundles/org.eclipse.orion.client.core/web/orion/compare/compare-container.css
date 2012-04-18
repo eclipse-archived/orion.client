@@ -91,75 +91,83 @@
 
 /*** Styles for diff annotations ***/
 
-/* Styles for normal diff blocks */
+/** Styles for normal diff blocks **/
+
+/* The added block in the new file/left side, lightest green */
 .annotationLine.addedBlockDiff {
 	background-color: #D2FFD2; /*#EFFFEF;*/
 }
 
+/* The current added block in the new file/left side, 2nd lightest green */
 .annotationLine.currentAddedBlockDiff {
 	background-color: #B0FFB0;
 }
 
+/* The deleted block in the old file/right side, lightest red */
 .annotationLine.deletedBlockDiff {
 	background-color: #FFD2D2; /*'#FFEFEF;*/
 }
 
+/* The current deleted block in the old file/right side, 2nd lightest red */
 .annotationLine.currentDeletedBlockDiff {
 	background-color: #FFB0B0;
 }
 
-/* Styles for empty diff blocks , it draws one line on top of the line in the editor */
+/* Style for an empty block, which draws a lighter black line on top of a line to indicate an insertion or deletion */
+/* diff-border.png */
 .annotationLine.blockDiffTopOnly {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAPSURBVBhXY6yvr2cYHAAAzPsBf2hZ98wAAAAASUVORK5CYII=");
  	background-repeat: repeat-x;
  	background-position: left top
 }
 
+/* Style for the current empty block, which draws a darker black line on top of a line to indicate an insertion or deletion */
+/* diff-border-sel.png */
 .annotationLine.currentBlockDiffTopOnly {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAABCAIAAAAuIQuDAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAMSURBVBhXY2AYNAAAAIsAAR6L5FUAAAAASUVORK5CYII=");
  	background-repeat: repeat-x;
  	background-position: left top
 }
 
-/* Styles for conflicting diff blocks */
+/** Styles for conflicting diff blocks **/
+
+/* The conflicting block in both the old file/right side and new file/left side, lighter yellow */
 .annotationLine.blockDiffConflict {
 	background-color: #FFFFCA;
 }
 
+/* The curent conflicting block in both the old file/right side and new file/left side, darker yellow */
 .annotationLine.currentBlockDiffConflict {
 	background-color: #FFFF5B;
 }
 
-/* Styles for diff words added */
+/** Styles for diff words **/
+
+/* The added word in the new file/left side, 3rd lightest green */
 .annotationRange.addedWordDiff {
 	background-color: #99EE99;
 }
 
+/* The current added word in the new file/left side, darkest green */
 .annotationRange.currentAddedWordDiff {
 	background-color: #33DD33;
 }
 
-/* Styles for diff words deleted */
+/* The deleted word in the old file/right side, 3rd lightest red */
 .annotationRange.deletedWordDiff {
 	background-color: #EE9999;
 }
 
+/* The current deleted word in the old file/right side, darkest red */
 .annotationRange.currentDeletedWordDiff {
 	background-color: #E66868;
 }
-/*
-.annotationRange.emptyDeletedWordDiffLeft {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
- 	background-repeat: repeat-y;
- 	background-position: left top
-}
 
-.annotationRange.emptyDeletedWordDiffRight {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY3wro8IAA0xwFpAx3DgAIv4BUUx4I+UAAAAASUVORK5CYII=");
- 	background-repeat: repeat-y;
- 	background-position: right top
-}
-*/
+/* The following 4 styles are for the special annotations when presenting a position between 2 characters, which looks like a caret cursor.
+ * They are all using the same 18X2 PNG on either right or left side of a character.
+ * diff-empty-word-border-black.png
+ */
+
 .annotationRange.emptyDeletedWordDiffLeft {
 	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAUSURBVBhXY2RgYPgPxAxMIGIwMgCpaAEjILHq8AAAAABJRU5ErkJggg==");
  	background-repeat: repeat-y;
@@ -173,13 +181,13 @@
 }
 
 .annotationRange.emptyAddedWordDiffLeft {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY1Ta6MMAA0xwFpAx3DgAFVsBQ9NZ03UAAAAASUVORK5CYII=");
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAUSURBVBhXY2RgYPgPxAxMIGIwMgCpaAEjILHq8AAAAABJRU5ErkJggg==");
  	background-repeat: repeat-y;
  	background-position: left top
 }
 
 .annotationRange.emptyAddedWordDiffRight {
-	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAASCAIAAADzHOivAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAAVSURBVBhXY1Ta6MMAA0xwFpAx3DgAFVsBQ9NZ03UAAAAASUVORK5CYII=");
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAASCAYAAABxYA+/AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsIAAA7CARUoSoAAAAAUSURBVBhXY2RgYPgPxAxMIGIwMgCpaAEjILHq8AAAAABJRU5ErkJggg==");
  	background-repeat: repeat-y;
  	background-position: right top
 }
