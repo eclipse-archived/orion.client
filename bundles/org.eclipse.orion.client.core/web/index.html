@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html style="height: 100%">
+<html style="height: 100%;">
 	<head>
 		<title>Welcome to Orion</title>
 		<link rel="stylesheet" type="text/css" href="index.css" />
-		<script type="text/javascript" src="requirejs/require.js"></script>
+		<script src="requirejs/require.js"></script>
 		<script type="text/javascript">
+		/*global require*/
 		require({
 		  baseUrl: '',
 		
@@ -39,7 +40,7 @@
 		require(["index.js"]);
 		</script>
 </head>
-	<body style="height: 100%; visibility:hidden" class="nihilo">
+	<body style="height: 100%; visibility:hidden;" class="nihilo">
 	
 	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" class="orionPage">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
@@ -50,14 +51,7 @@
 				</div>		
 			</div>-->
 			<div dojoType="dijit.layout.BorderContainer" id="bottom" splitter="false" persist="false" gutters="false" region="center" class="landingPanelContainer">
-				<div dojoType="dijit.layout.ContentPane" id="left" region="left" class="landingPanel" style="width: 33%">
-					<div style="padding: 8px;">
-						<h2 class="landingHeading">Navigator History</h2>
-						<div id="recent">Go to the <a href="/navigate/table.html">Navigator</a> to create and view folders and files.
-						</div>
-					</div>
-				</div>		
-				<div dojoType="dijit.layout.ContentPane" id="right" region="center" class="landingPanel">
+				<div dojoType="dijit.layout.ContentPane" region="center" class="landingPanel">
 					<div style="padding: 8px;">
 						<h2 class="landingHeading">Get Started</h2>
 						<div id="tasks"></div>
