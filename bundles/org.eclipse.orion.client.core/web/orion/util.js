@@ -267,32 +267,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		}); 
 	}
 	
-	function rememberSuccessfulTraversal(item, registry) {
-		if (item.Parents && item.Parents.length === 0) {
-			registry.getService("orion.core.preference").getPreferences("/window/recent").then(function(prefs){
-				var projects = prefs.get("projects");
-				if (typeof projects === "string") {
-					projects = JSON.parse(projects);
-				}
-				var storedProjects = [];
-				if (projects && projects.length && projects.length > 0) {
-					for (var k=0; k<projects.length; k++) {
-						if (projects[k].location !== item.ChildrenLocation && projects[k].name !== item.Name) {
-							storedProjects.push(projects[k]);
-						}
-					}
-					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
-				} else {
-					storedProjects.push({name: item.Name, location: item.ChildrenLocation});
-				}
-				if (storedProjects.length > 5) {
-					storedProjects= storedProjects.slice(-5, storedProjects.length);
-				}
-				prefs.put("projects", storedProjects);
-			});
-		}
-	}
-	
 	/**
 	 * Returns the text contained by a DOM node.
 	 * @param {DomNode} node
@@ -481,7 +455,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,
 		processNavigatorParent: processNavigatorParent,
-		rememberSuccessfulTraversal: rememberSuccessfulTraversal,
 		getText: getText,
 		safeText: safeText,
 		setText: setText,

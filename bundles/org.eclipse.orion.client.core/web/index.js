@@ -29,26 +29,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 				
 			// global commands
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			
-			// Populate recent projects
-			serviceRegistry.getService("orion.core.preference").getPreferences("/window/recent").then(function(prefs){
-				var projects =  prefs.get("projects");
-				if (typeof projects === "string") {
-					projects = JSON.parse(projects);
-				}
-				var recent = dojo.byId("recent");
-				dojo.empty(recent);
-				if (projects && projects.length && projects.length > 0) {
-					for (var i=projects.length-1; i>=0; i--) {
-						if (projects[i].location && projects[i].name) {
-							dojo.place("<a class='landingLink' href='" + require.toUrl("navigate/table.html") + "#" + projects[i].location+"'>"+projects[i].name+"</a><br>", recent, "last");
-						}
-					}
-				} else {
-					dojo.place("<div>Go to the <a href='" + require.toUrl("navigate/table.html") + "#'>Navigator</a> to create or view your projects.</div>", recent, "only");
-				}
-			});
-			
+		
 			// Populate the "get started" tasks
 			
 			// Note that the shape of the "orion.help.task" extension is not in any shape or form that could be considered final.

@@ -362,7 +362,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					for (var i in loadedWorkspace) {
 						this.treeRoot[i] = loadedWorkspace[i];
 					}
-					mUtil.rememberSuccessfulTraversal(this.treeRoot, this.registry);
 					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);	
 					//If current location is not the root, set the search location in the searcher
 					this.searcher.setLocationByMetaData(this.treeRoot);
