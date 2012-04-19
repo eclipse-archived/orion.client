@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script type="text/javascript" src="../orion/i18n.js"></script>
+	<script>
+		window.onload = function() {
+			var provider = new eclipse.PluginProvider();
+			var messages = new eclipse.I18nMessages("nls/messages");
+			var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
+			  {
+			     checkSyntax: function(title, contents) {
+			     
+				     function getExcluded(exlRegExp){
+						var ret = [];
+						var match = exlRegExp.exec(contents);
+						while(match){
+							ret.push(match);
+							match = exlRegExp.exec(contents);
+						}
+						return ret;
+				     }
+			     
+				     function isInExcluded(excluded, match, offset){
+						for(var i=0; i<excluded.length; i++){
+							if((match.index + offset) > excluded[i].index && (match.index + offset) < (excluded[i].index + excluded[i][0].length)){
+								return true;
+							}
+						}
+						return false;
+				     }
+
+				var excluded = getExcluded(new RegExp("/\\x2a((\\x2a[^/]*)|[^*/]|[^*]/)*\\x2a/", "gm"), contents);
+				excluded = excluded.concat(getExcluded(new RegExp("//.*\\r?\\n*", "gm")), contents);
+				excluded = excluded.concat(getExcluded(new RegExp("define\\(\\[[^\\]]*\\]", "gm")), contents);
+				excluded = excluded.concat(getExcluded(new RegExp("messages\\[[^\\]]*\\]", "gmi")), contents);
+			     
+			       var problems = [];
+			       var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g;
+			       var nonnlsRegExp = /\/\/\$NON-NLS-[0-9]+\$/g;
+			       var lines = contents.split(/\r?\n/);
+			       var isBlockComment = false;
+			       for (var i=0; i < lines.length; i++) {
+			         var line = lines[i];
+					var lineOffset = contents.indexOf(line);
+			         var match = stringRegExp.exec(line);
+			         var strings = [];
+			         while (match) {
+						if(!isInExcluded(excluded, match, lineOffset)){
+								strings.push(match);
+							}
+						match = stringRegExp.exec(line);
+			         }
+			         if(strings.length>0){
+				         var nonnls = {};
+				         match = nonnlsRegExp.exec(line);
+				         while(match){
+							nonnls[parseInt(match[0].substring(11, match[0].length-1))] = true;
+							match = nonnlsRegExp.exec(line);
+				         }
+				         
+				         for(var j=0; j<strings.length; j++){
+							if(!nonnls[j]){
+								problems.push({
+					             reason: messages.formatMessage(messages["Non externalized string literal 0"], strings[j][0]),
+					             line: i + 1,
+					             character: strings[j].index + 1,
+					             end: strings[j].index + strings[j][0].length,
+					             severity: "warning" });
+							}
+				         }
+						}
+			         }
+			       var result = { problems: problems };
+			       return result;
+			       }
+			  },
+			  {
+			     contentType: ["application/javascript"],
+			     gosiasValidator: true
+			  });
+			provider.connect();
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>
