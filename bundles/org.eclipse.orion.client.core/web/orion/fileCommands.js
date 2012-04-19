@@ -554,8 +554,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 
 					
 		var importCommand = new mCommands.Command({
-			name : "Import from zip...",
-			tooltip: "Copy files and folders contained in a local zip file",
+			name : "Import local file...",
+			tooltip: "Copy files and folders from your local file system",
 			imageClass: "core-sprite-importzip",
 			id: "eclipse.importCommand",
 			callback : function(data) {
