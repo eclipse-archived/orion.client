@@ -64,11 +64,12 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 		// Use native XMLHttpRequest instead of XhrGet since dojo 1.5 does not allow to send binary data as per docs
 		this.req = new XMLHttpRequest();
 
-		this.req.open('post', this.options.importLocation + '?fnc=upl', true);
-		this.req.setRequestHeader("Cache-Control", "no-cache");
+		this.req.open('post', this.options.importLocation, true);
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		this.req.setRequestHeader("X-File-Name", file.name);
-		this.req.setRequestHeader("X-File-Size", file.size);
+		this.req.setRequestHeader("Slug", file.name);
+		if (file.name.indexOf(".zip") !== file.name.length-4) {
+			this.req.setRequestHeader("X-Xfer-Options", "raw");
+		}
 		this.req.setRequestHeader("Content-Type", file.type);
 		this.req.onreadystatechange = dojo.hitch( this, 'handleReadyState' );
 		this.req.send(file);

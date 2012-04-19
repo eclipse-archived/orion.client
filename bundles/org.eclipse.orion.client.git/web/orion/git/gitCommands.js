@@ -750,11 +750,9 @@ var exports = {};
 			id : "eclipse.compareGitCommits",
 			hrefCallback : function(data) {
 				var item = data.items;
-				var clientDeferred = new dojo.Deferred();
-				serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name).then(function(jsonData, secondArg) {
-					clientDeferred.callback(require.toUrl("compare/compare.html") + "?readonly#" + secondArg.xhr.getResponseHeader("Location"));
+				return serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name).then(function(diffLocation) {
+					return require.toUrl("compare/compare.html") + "?readonly#" + diffLocation;
 				});
-				return clientDeferred;
 			},
 			visibleWhen : function(item) {
 				if(explorer.isDirectory) return false;
