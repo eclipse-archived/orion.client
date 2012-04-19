@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -46,7 +46,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 			//             required attribute: description of the step.  May be manual instructions for the user.  Appears after the href.
 			var taskReferences = serviceRegistry.getServiceReferences("orion.help.task");
 			var taskParent = dojo.byId("tasks");
-			var operationsTable = dojo.create("table", null, taskParent, "only");
+			var operationsTable = dojo.create("table", { role: "presentation" }, taskParent, "only");
 			for (var i=0; i<taskReferences.length; i++) {
 				var info = {};
 				var propertyNames = taskReferences[i].getPropertyNames();
