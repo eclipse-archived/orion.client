@@ -279,16 +279,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			}	
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
 
-			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox );
+			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox, "last" );
+			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox,"last" );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, diff, this, "tool", false);	
-			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox );
 			
 			// add inline compare view
 			
 			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") );
 			var diffHorizontalBox = dojo.create( "div", null, diffItem );
 			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;"}, diffHorizontalBox );
+			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;"}, diffHorizontalBox);
 
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
