@@ -32,5 +32,6 @@ define( {
 		"Generate a web site description":"Generate an HTML 5 Website Template using initializr.com",
 		"Initializr": "Initializr",
 		"Initializr description": "Go to the initializr site, choose the options that you would like, and download the template to your computer.",
-		"Navigator description2": "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated."
+		"Navigator description2": "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated.",
+		"Non externalized string literal 0": "Non externalized string literal ${0}"
 	});
