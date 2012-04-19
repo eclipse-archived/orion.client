@@ -181,6 +181,7 @@ exports.CompareContainer = (function() {
 			}});
 			var generateLinkCommand = new mCommands.Command({
 				tooltip : "Generate link of the current diff",
+				name: "Generate Link",
 				imageClass : "core-sprite-link",
 				id: "orion.compare.generateLink",
 				groupId: "orion.compareGroup",
@@ -232,6 +233,7 @@ exports.CompareContainer = (function() {
 			}
 				
 			// Register command contributions
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 100);
 			if (!this._readonly) {
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 101);
 			}
@@ -241,7 +243,6 @@ exports.CompareContainer = (function() {
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 104);
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 105);
 			}
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 106);
 		},
 		
 		renderCommands: function(){
