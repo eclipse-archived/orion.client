@@ -525,7 +525,7 @@ eclipse.GitService = (function() {
 				handleAs : "json",
 				timeout : 5000,
 				load : function(jsonData, xhrArgs) {
-					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
+					clientDeferred.callback(xhrArgs.xhr.getResponseHeader("Location")); //TODO bug 367344
 				},
 				error : function(error, ioArgs) {
 					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs, dojo.xhrPost);

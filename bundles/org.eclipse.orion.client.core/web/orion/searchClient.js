@@ -62,6 +62,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 					};
 					var token = jsonData.responseHeader.params.q;
 					token= token.substring(token.indexOf("}")+1);
+					//remove field name if present
+					token= token.substring(token.indexOf(":")+1);
 					renderer(transform(jsonData), token);
 				});
 			}
@@ -115,7 +117,6 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		},
 		/**
 		 * Returns a query URL for a search.
-		 * @param {String} searchLocation The base location of the search service
 		 * @param {String} query The text to search for, or null when searching purely on file name
 		 * @param {String} [nameQuery] The name of a file to search for
 		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
@@ -132,7 +133,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					searchStr: "Name:" + this._luceneEscape(nameQuery, true) + wildcard});
+					searchStr: "NameLower:" + this._luceneEscape(nameQuery, true) + wildcard});
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
@@ -144,6 +145,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		 * Escapes all characters in the string that require escaping in Lucene queries.
 		 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
 		 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+		 * @param {String} input The string to perform escaping on
 		 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
 		 * @private
 		 */
@@ -179,8 +181,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				 * Displays links to resources under the given DOM node.
 				 * @param [{name, path, lineNumber, directory, isExternalResource}] resources array of resources.  
 				 *	Both directory and isExternalResource cannot be true at the same time.
-				 * @param Strimg queryName (Optional) a human readable name to display when there are no matches.  If 
-				 *       not used, then there is nothing displayed for no matches
+				 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
+				 *  not used, then there is nothing displayed for no matches
 				 */
 				function render(resources, queryName) {
 				
