@@ -164,46 +164,35 @@
 .core-sprite-twistie_partOpen{ background-position: -96px -1374px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: -96px -1440px; width: 16px; height: 16px; } 
 
-/* dojo theme changes according to graphic designer, primarily menu hovers */
-
-.nihilo .dijitMenu, .nihilo .dijitMenuBar {
-    background-color: #FFFFFF;
-    border: 1px solid #9a9a9a;
-    margin: 0;
-    padding: 0;
+/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
+/* buttons */
+.claro .dijitButton .dijitButtonNode,
+.claro .dijitDropDownButton .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNode,
+.claro .dijitToggleButton .dijitButtonNode {
+  background-color: transparent;
+  background-image: none;
+  box-shadow: none;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  padding: 1px;
+  color: #808080;
+  margin: 0;
 }
 
-.nihilo .dijitMenuItem {
-    color: black;
-    font-family: sans-serif;
-    margin: 0;
-    outline: none;
-}
-
-.nihilo .dijitButtonNode, .nihilo .dijitButtonContentsHover {
-	vertical-align: baseline;
-	margin: 0;
-	border: 1px solid transparent;  /* so that border coming on doesn't cause a jump */
-}
-
-.nihilo .dijitMenuPassive .dijitMenuItemHover, .nihilo .dijitMenuItemSelected {
+/* button hover */
+.claro .dijitButtonHover .dijitButtonNode,
+.claro .dijitDropDownButtonHover .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNodeHover,
+.claro .dijitComboButton .dijitDownArrowButtonHover,
+.claro .dijitToggleButtonHover .dijitButtonNode {
     background-color: #e3e3e3;
     color: black;
-}
-
-.nihilo dijitButtonHover, .nihilo .dijitButtonHover .dijitButtonNode, .nihilo .dijitButtonNodeHover, .nihilo .dijitToggleButtonHover .dijitButtonNode, .nihilo .dijitDropDownButtonHover .dijitButtonNode, .nihilo .dijitButtonContentsHover, .nihilo .dijitUpArrowButtonHover, .nihilo .dijitDownArrowButtonHover {
-	background-color: #e6e6e6 !important;
-	background-image: none !important;
 	border: 1px solid #808080;
-    color: black;
-    border-radius: 2px;
-}
+ }
 
-.nihilo .dijitDropDownButtonFocused {
-    opacity: 1.0 !important;
-}
-
-.nihilo .dijitArrowButtonInner {
+/* arrow buttons*/
+.claro .dijitArrowButtonInner {
 	background-position: 0 -1617px; 
 	width: 5px; height: 3px;
 	background-image: url(../images/core_sprites.png); 
@@ -212,7 +201,7 @@
 	vertical-align: middle; 
 }
 
-.nihilo .textless .dijitArrowButtonInner {
+.claro .textless .dijitArrowButtonInner {
 	background-position: 0 -1551px;	
 	width: 16px; height: 16px; 
 	background-image: url(../images/core_sprites.png);
@@ -222,7 +211,31 @@
 	margin-right: 2px;
 }
 
-.nihilo .dijitTooltip {
+/* menus and menu items */
+
+.claro .dijitMenu {
+   background-color: #FFFFFF;
+   border: 1px solid #9a9a9a;
+}
+
+.claro .dijitMenuItem {
+   outline: none;
+}
+
+.claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
+   background-color: #e3e3e3;
+   color: black;
+   background-image: none;
+}
+
+/* tooltips */
+.claro .dijitTooltip {
 	max-width: 300px;
 	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 }
+
+.claro .dijitTooltipContainer {
+  /* the part with the text */
+  background-color: #ffffff;
+  background-image: none;
+ }
