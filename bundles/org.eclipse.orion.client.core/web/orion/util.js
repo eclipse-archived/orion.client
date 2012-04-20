@@ -418,6 +418,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 				lf = text.indexOf("\n", index); 
 			}
 			if (lf === -1 && cr === -1) {
+				splitLines.push(text.substring(start));
 				break; 
 			}
 			var offset = 1;
