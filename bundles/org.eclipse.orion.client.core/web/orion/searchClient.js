@@ -65,6 +65,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 					//remove field name if present
 					token= token.substring(token.indexOf(":")+1);
 					renderer(transform(jsonData), token);
+				}, function(error) {
+					renderer(null, null, error);
 				});
 			}
 			catch(error){
@@ -183,8 +185,16 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				 *	Both directory and isExternalResource cannot be true at the same time.
 				 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
 				 *  not used, then there is nothing displayed for no matches
+				 * @param {String} [error] A human readable error to display.
 				 */
-				function render(resources, queryName) {
+				function render(resources, queryName, error) {
+					if (error) {
+						dojo.place("<div>Search failed.</div>", resultsNode, "only");
+						if (typeof(onResultReady) === "function") {
+							onResultReady(resultsNode);
+						}
+						return;
+					} 
 				
 					//Helper function to append a path String to the end of a search result dom node 
 					var appendPath = (function() { 
