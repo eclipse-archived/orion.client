@@ -1561,7 +1561,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			return;
 		}
 		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj);
-		qParams.sort = byName ? "Name asc" : "Path asc";
+		qParams.sort = byName ? "NameLower asc" : "Path asc";
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		window.location.href = href;
