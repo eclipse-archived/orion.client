@@ -140,6 +140,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize] The number of spaces in a tab.
+	 * @property {Boolean} [wrapMode] whether or not the view wraps lines.
 	 */
 	/**
 	 * Constructs a new text view.
@@ -182,7 +183,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				rulers.push(ruler);
 			}
 			this._createRuler(ruler, index);
-			this._updatePage();
+			this._update();
 		},
 		computeSize: function() {
 			var w = 0, h = 0;
@@ -515,7 +516,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		getLineHeight: function(lineIndex) {
 			if (!this._clientDiv) { return 0; }
-			return this._getLineHeight();
+			return this._getLineHeight(lineIndex);
 		},
 		/**
 		 * Returns the top pixel position of a given line index relative to the beginning
@@ -532,9 +533,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		getLinePixel: function(lineIndex) {
 			if (!this._clientDiv) { return 0; }
-			lineIndex = Math.min(Math.max(0, lineIndex), this._model.getLineCount());
-			var lineHeight = this._getLineHeight();
-			return lineHeight * lineIndex;
+			return this._getLinePixel(lineIndex);
 		},
 		/**
 		 * Returns the {x, y} pixel location of the top-left corner of the character
@@ -559,7 +558,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
 			var x = this._getOffsetToX(offset) + scroll.x - viewRect.left - viewPad.left;
-			var y = this.getLinePixel(lineIndex);
+			var y = this._getLinePixel(lineIndex);
 			return {x: x, y: y};
 		},
 		/**
@@ -1125,7 +1124,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._maxLineWidth = 0;
 				}
 			}
-			this._queueUpdatePage();
+			this._queueUpdate();
 		},
 		/**
 		 * Redraws the text in the given range.
@@ -1161,7 +1160,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					rulers.splice(i, 1);
 					ruler.setView(null);
 					this._destroyRuler(ruler);
-					this._updatePage();
+					this._update();
 					break;
 				}
 			}
@@ -1341,7 +1340,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._model.addEventListener("Changing", this._modelListener.onChanging);
 			this._model.addEventListener("Changed", this._modelListener.onChanged);
 			this._reset();
-			this._updatePage();
+			this._update();
 		},
 		/**
 		 * Sets the view options for the view.
@@ -1503,9 +1502,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._updateStyle();
 			}
 			if (sync === undefined || sync) {
-				this._updatePage();
+				this._update();
 			} else {
-				this._queueUpdatePage();
+				this._queueUpdate();
 			}
 		},
 		
@@ -2255,6 +2254,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var newWidth = this._parent.clientWidth;
 			var newHeight = this._parent.clientHeight;
 			if (this._parentWidth !== newWidth || this._parentHeight !== newHeight) {
+				if (this._parentWidth !== newWidth) {
+					this._resetLineHeight();
+				}
 				this._parentWidth = newWidth;
 				this._parentHeight = newHeight;
 				/*
@@ -2263,9 +2265,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* inside a resize handler. The fix is to queue the work.
 				*/
 				if (isIE < 9) {
-					this._queueUpdatePage();
+					this._queueUpdate();
 				} else {
-					this._updatePage();
+					this._update();
 				}
 			}
 		},
@@ -2320,7 +2322,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._hScroll = scroll.x;
 				this._vScroll = scroll.y;
 				this._commitIME();
-				this._updatePage(oldY === scroll.y);
+				this._update(oldY === scroll.y);
 				var e = {
 					type: "Scroll",
 					oldValue: {x: oldX, y: oldY},
@@ -2825,6 +2827,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._autoScroll();
 			var self = this;
 			this._autoScrollTimerID = setTimeout(function () {self._autoScrollTimer();}, this._AUTO_SCROLL_RATE);
+		},
+		_calculateLineHeight: function(lineIndex) {
+			var clientDiv = this._clientDiv;
+			var model = this._model;
+			var child = this._getLineNode(lineIndex), dummy = null;
+			if (!child || child.lineChanged || child.lineRemoved) {
+				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
+			}
+			var rect = this._getLineBoundingClientRect(child);
+			var height = this._lineHeight[lineIndex] = rect.bottom - rect.top;
+			if (dummy) { clientDiv.removeChild(dummy); }
+			return height;
 		},
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
@@ -3504,7 +3518,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var clientDiv = document.createElement("DIV");
 			clientDiv.className = "textviewContent";
 			this._clientDiv = clientDiv;
-			clientDiv.style.whiteSpace = "pre";
 			clientDiv.style.position = "absolute";
 			clientDiv.style.borderWidth = "0px";
 			clientDiv.style.margin = "0px";
@@ -3567,6 +3580,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.contentEditable = "true";
 			clientDiv.setAttribute("role", "textbox");
 			clientDiv.setAttribute("aria-multiline", "true");
+			this._setWrapMode(this._wrapMode, true);
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
@@ -3575,7 +3589,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			for (var i=0; i<rulers.length; i++) {
 				this._createRuler(rulers[i]);
 			}
-			this._updatePage();
+			this._update();
 		},
 		_defaultOptions: function() {
 			return {
@@ -3585,6 +3599,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				fullSelection: {value: true, update: this._setFullSelection},
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
+				wrapMode: {value: false, update: this._setWrapMode},
 				themeClass: {value: undefined, update: this._setThemeClass}
 			};
 		},
@@ -3965,7 +3980,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return rect;
 		},
-		_getLineHeight: function() {
+		_getLineHeight: function(lineIndex) {
+			if (lineIndex !== undefined && this._lineHeight) {
+				var lineHeight = this._lineHeight[lineIndex];
+				return lineHeight ? lineHeight : this._calculateLineHeight(lineIndex);
+			}
 			return this._metrics.lineHeight;
 		},
 		_getLineNode: function (lineIndex) {
@@ -3992,6 +4011,19 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				node = node.previousSibling;
 			}
 			return node;
+		},
+		_getLinePixel: function(lineIndex) {
+			lineIndex = Math.min(Math.max(0, lineIndex), this._model.getLineCount());
+			if (this._lineHeight) {
+				var pixel = 0;
+				//TODO [perf] calculate line pixel from top pixel
+				for (var i = 0; i < lineIndex; i++) {
+					pixel += this._getLineHeight(i);
+				}
+				return pixel;
+			}
+			var lineHeight = this._getLineHeight();
+			return lineHeight * lineIndex;
 		},
 		_getOffset: function (offset, unit, direction) {
 			if (unit === "line") {
@@ -4335,8 +4367,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			y -= viewRect.top + viewPad.top;
-			var lineHeight = this._getLineHeight();
-			var lineIndex = Math.floor((y + this._getScroll().y) / lineHeight);
+			var lineHeight, lineIndex = 0;
+			if (this._lineHeight) {
+				//TODO [perf] calculate from top index
+				var h = 0;
+				while (h + (lineHeight = this._getLineHeight(lineIndex)) < y) {
+					h += lineHeight;
+					lineIndex++;
+				}
+			} else {
+				lineHeight = this._getLineHeight();
+				lineIndex = Math.floor((y + this._getScroll().y) / lineHeight);
+			}
 			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
@@ -4568,20 +4610,25 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._maxLineIndex = -1;
 				this._maxLineWidth = 0;
 			}
-			this._updatePage();
+			this._update();
 		},
 		_onModelChanging: function(modelChangingEvent) {
 			modelChangingEvent.type = "ModelChanging";
 			this.onModelChanging(modelChangingEvent);
 			modelChangingEvent.type = "Changing";
 		},
-		_queueUpdatePage: function() {
+		_queueUpdate: function() {
 			if (this._updateTimer) { return; }
 			var self = this;
 			this._updateTimer = setTimeout(function() { 
 				self._updateTimer = null;
-				self._updatePage();
+				self._update();
 			}, 0);
+		},
+		_resetLineHeight: function() {
+			if (this._wrapMode) {
+				this._lineHeight = [];
+			}
 		},
 		_resetLineWidth: function() {
 			var clientDiv = this._clientDiv;
@@ -4637,7 +4684,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			/*
 			* Scrolling is done only by setting the scrollLeft and scrollTop fields in the
-			* view div. This causes an updatePage from the scroll event. In some browsers 
+			* view div. This causes an update from the scroll event. In some browsers 
 			* this event is asynchronous and forcing update page to run synchronously
 			* leads to redraw problems. 
 			* On Chrome 11, the view redrawing at times when holding PageDown/PageUp key.
@@ -5135,6 +5182,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
 		},
+		_setWrapMode: function (wrapMode, init) {
+			var clientDiv = this._clientDiv;
+			if (wrapMode) {
+				clientDiv.style.whiteSpace = "pre-wrap";
+				clientDiv.style.wordWrap = "break-word";
+				this._lineHeight = new Array(this._model.getLineCount());
+			} else {
+				clientDiv.style.whiteSpace = "pre";
+				clientDiv.style.wordWrap = "normal";
+				this._lineHeight = null;
+			}
+			if (!init) {
+				this.redraw();
+				this._resetLineWidth();
+				//TODO reset lines
+			}
+		},
 		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }
 			var model = this._model;
@@ -5282,7 +5346,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			this._setDOMSelection(topNode, topOffset, bottomNode, bottomOffset);
 		},
-		_updatePage: function(hScrollOnly) {
+		_update: function(hScrollOnly) {
 			if (this._redrawCount > 0) { return; }
 			if (this._updateTimer) {
 				clearTimeout(this._updateTimer);
@@ -5367,7 +5431,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* before computing the lines width.  Note that this value is
 				* reset to the appropriate value further down.
 				*/ 
-				if (isWebkit) {
+				if (isWebkit && !this._wrapMode) {
 					clientDiv.style.width = (0x7FFFF).toString() + "px";
 				}
 	
@@ -5377,6 +5441,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					lineWidth = child.lineWidth;
 					if (lineWidth === undefined) {
 						rect = this._getLineBoundingClientRect(child);
+						this._lineHeight[child.lineIndex] = Math.ceil(rect.bottom - rect.top);
 						lineWidth = child.lineWidth = Math.ceil(rect.right - rect.left);
 					}
 					if (lineWidth >= this._maxLineWidth) {
@@ -5423,7 +5488,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* at this point.
 				*/
 				clientWidth = this._getClientWidth();
-				var width = Math.max(this._maxLineWidth, clientWidth);
+				var width = clientWidth;
+				if (!this._wrapMode) {
+					width = Math.max(this._maxLineWidth, width);
+				}
 				/*
 				* Except by IE 8 and earlier, all other browsers are not allocating enough space for the right padding 
 				* in the scrollbar. It is possible this a bug since all other paddings are considered.
@@ -5533,7 +5601,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var ensureCaretVisible = this._ensureCaretVisible;
 			this._ensureCaretVisible = false;
 			if (clientHeight !== this._getClientHeight()) {
-				this._updatePage();
+				this._update();
 				if (ensureCaretVisible) {
 					this._showCaret();
 				}
@@ -5617,7 +5685,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								lineDiv.annotation = annotation;
 							}
 							lineDiv.lineIndex = lineIndex;
-							lineDiv.style.height = lineHeight + "px";
+							lineDiv.style.height = this._getLineHeight(lineIndex) + "px";
 							frag.appendChild(lineDiv);
 						} else {
 							if (frag.firstChild) {
