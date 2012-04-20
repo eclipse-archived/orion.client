@@ -669,7 +669,7 @@ exports.TwoWayCompareContainer = (function() {
 					return;
 				}
 			}
-			if(that._diffNavigator.autoSelecting){
+			if(that._diffNavigator.autoSelecting || !that._diffNavigator.editorWrapper[0].diffFeeder){
 				return;
 			}
 			var caretPos = textView.getCaretOffset();
@@ -811,6 +811,7 @@ exports.InlineCompareContainer = (function() {
 
 	InlineCompareContainer.prototype.destroyEditor = function(){
 		if(this._textView){
+			this._diffNavigator.destroy();
 			this._textView.setText("");
 			this.removeRulers();
 		}
@@ -875,7 +876,7 @@ exports.InlineCompareContainer = (function() {
 					return;
 				}
 			}
-			if(that._diffNavigator.autoSelecting){
+			if(that._diffNavigator.autoSelecting || !that._diffNavigator.editorWrapper[0].diffFeeder){
 				return;
 			}
 			var caretPos = textView.getCaretOffset();

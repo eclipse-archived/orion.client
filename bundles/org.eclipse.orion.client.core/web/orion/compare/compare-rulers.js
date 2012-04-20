@@ -164,7 +164,7 @@ orion.CompareOverviewRuler = (function() {
 			var model = this._editor.getModel();
 			if(lineIndex >= 0 ){
 				var diffBlocks;
-				if(this._diffNavigator){
+				if(this._diffNavigator && this._diffNavigator.getFeeder()){
 					diffBlocks = this._diffNavigator.getFeeder().getDiffBlocks();
 				} else {
 					return null;
