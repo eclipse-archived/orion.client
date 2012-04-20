@@ -233,6 +233,10 @@ exports.DiffTreeNavigator = (function() {
 			}
 		},
 		
+		destroy: function(){
+			this.initAll(this._charOrWordDiff);
+		},
+		
 		renderAnnotations: function(){
 			for(var i = 0; i < this.editorWrapper.length; i++){
 				this.editorWrapper[i].annoTypes = [];
