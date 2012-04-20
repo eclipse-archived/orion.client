@@ -160,9 +160,7 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	postCreate: function(){
 		this.inherited(arguments);
 		this.connect(this.toggleNode, "onmousedown", "_onThumbMouseDown");
-		this.connect(this.toggleNode, "onmouseover", "_onThumbMouseOver");
 		this.connect(this.domNode, "onmouseover", "_onMouseOver");
-		this.connect(this.toggleNode, "onmouseout", "_onThumbMouseOut");
 		this._openStateCookieName = this.container.id + "_" + this.region + "_" + "open";
 	}, 
 
@@ -257,14 +255,6 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		evt.stopPropagation();
 		this._removeFocusVisual(evt);
 		this.container.toggle();
-	},
-	
-	_onThumbMouseOver: function(evt){
-		this.toggleNode.style.backgroundColor='#AAAAAA';
-	},
-	
-	_onThumbMouseOut: function(evt){
-		this.toggleNode.style.backgroundColor='#DDDDDD';
 	},
 	
 	_toggleMe: function(evt){

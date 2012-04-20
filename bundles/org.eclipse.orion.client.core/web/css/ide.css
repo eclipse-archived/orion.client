@@ -357,33 +357,18 @@ a:hover {
 	padding-top: 4px;
 }
 
-.nihilo .dijitBorderContainer {
+.claro .dijitBorderContainer {
 	border: 0;
 	padding: 0;
 }
 
-.nihilo .dijitSplitContainer-child, .nihilo .dijitBorderContainer-child {
-	border: 0;
-	padding: 0;	
-}
-.nihilo .dijitSplitterV .dijitSplitterThumb {	
-	background: #dddddd;
+.claro .dijitContentPane {
+	padding: 0;
+	margin: 0;
+	outline: 0;
 }
 
-.nihilo .dijitSplitterV {
-	background: #dddddd;
-	border-right: 1px solid #bfbfbf;
-}
-
-.nihilo .dijitSplitterH .dijitSplitterThumb {	
-	background: #dddddd;
-}
-
-.nihilo .dijitSplitterH {
-	background: #dddddd;
-}
-
-.nihilo .dijitDialogTitleBar {
+.claro .dijitDialogTitleBar {
     background: white;
     color: black;
     font: 8px;
@@ -391,10 +376,35 @@ a:hover {
     padding: 5px 6px 3px;
 }
 
-.nihilo .dijitTreeRowSelected .dijitTreeLabel {
-	background-color: #fedda7;   /* same color used for command menu hover */
+/* splitters */
+
+.claro .dijitSplitterV, .claro .dijitGutterV {
+  background: #e3e3e3;
+  width: 3px;
+  border: 0;
+  padding: 0;
+  margin: 0;
 }
 
+.claro .dijitSplitterVActive {
+  font-size: 1px;
+  background-color: #cccccc;
+}
+
+.claro .dijitSplitterV .dijitSplitterThumb {	
+  background-color: #bbbbbb;
+  height: 16px;
+  left: 0px;
+  width: 3px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.claro .dijitSplitterVHover .dijitSplitterThumb {
+  background: #a0a0a0;
+}
+ 
 .mainpane {
 	border-top: 1px solid #ebebeb;
     background: #FFFFFF;
@@ -623,14 +633,6 @@ a:hover {
 	font-size: 8pt;
 	min-width: 15em;
 	margin-top: 2px;
-}
-
-.nihilo .dijitButtonNode {
-	background-image: none;
-	background: none;
-	border: 0;
-	padding: 0;
-	height: 20px;
 }
 
 .toolbarButton {
