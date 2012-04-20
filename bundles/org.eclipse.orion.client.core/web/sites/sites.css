@@ -1,14 +1,14 @@
 @import "../org.dojotoolkit/dojo/resources/dojo.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/Tree.css";
+@import "../org.dojotoolkit/dijit/themes/claro/Tree.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 
 @import "../css/ide.css";
 
