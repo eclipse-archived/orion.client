@@ -37,7 +37,7 @@ exports.Explorer = (function() {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
-			dojo.hitch(this.myTree, this.myTree.refreshAndExpand)(parent, children);
+			dojo.hitch(this.myTree, this.myTree.refresh)(parent, children, true);
 		},
 		updateCommands: function(item){
 			// update the commands in the tree if the tree exists.
@@ -418,7 +418,7 @@ exports.ExplorerRenderer = (function() {
 			}
 
 			expandImage.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id, this.expandCollapseImageId(tableRow.id), this._expandImageClass, this._collapseImageClass);
+				this.tableTree.toggle(tableRow.id);
 				var expanded = this.tableTree.isExpanded(tableRow.id);
 				if (expanded) {
 					this._expanded.push(tableRow.id);
@@ -541,7 +541,6 @@ exports.SelectionRenderer = (function(){
 		var thead = document.createElement('thead');
 		var row = document.createElement('tr');
 		dojo.addClass(thead, "navTableHeading");
-		var th, actions, size;
 		if (this._useCheckboxSelection) {
 			row.appendChild(this.initCheckboxColumn(tableNode));
 		}

@@ -90,8 +90,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.target = target;
 		
 		dojo.query(".targetSelector").forEach(function(node, index, arr){
-    		node.target = target;
-  		});
+			node.target = target;
+		});
 	};
 	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -254,7 +254,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			if(self.navHandler){
 				self.navHandler.refreshModel(self.model);
 			}
-			dojo.hitch(self.myTree, self.myTree.refreshAndExpand)(parent, children);
+			dojo.hitch(self.myTree, self.myTree.refresh)(parent, children, true);
 		});
 	};
 		

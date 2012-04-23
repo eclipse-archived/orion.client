@@ -44,6 +44,7 @@ define(['dojo'], function(dojo) {
 	 *   <li>render(item, tr) // generate tds for the row</li>
 	 *   <li>labelColumnIndex() // 0 based index of which td contains the primary label which will be indented</li>
 	 *   <li>rowsChanged // optional, perform any work (such as styling) that should happen after the row content changes</li>
+	 *   <li>updateExpandVisuals(row, isExpanded) // update any expand/collapse visuals for the row based on the specified state</li>
 	 * </ul>
 	 */
 	function TableTree (options) {
@@ -130,7 +131,7 @@ define(['dojo'], function(dojo) {
 			return this._renderer.getSelected();
 		},
 		
-		refresh: function(item, children, /* optional */ forceExpand, /* optional */ imageId, /*optional */ classToAdd, /*optional */ classToRemove) {
+		refresh: function(item, children, /* optional */ forceExpand) {
 			var parentId = this._treeModel.getId(item);
 			var tree;
 			if (parentId === this._id) {  // root of tree
@@ -150,15 +151,6 @@ define(['dojo'], function(dojo) {
 						if(children){
 							this._generateChildren(children, row._depth+1, row, "after");
 							this._rowsChanged();
-							// TODO this should go away
-							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=371543
-							if (imageId && classToAdd) {
-								var node = dojo.byId(imageId);
-								dojo.addClass(node, classToAdd);
-								if (classToRemove) {
-									dojo.removeClass(node, classToRemove);
-								}
-							}
 						} else {
 							tree = this;
 							children = this._treeModel.getChildren(row._item, function(children) {
@@ -177,10 +169,6 @@ define(['dojo'], function(dojo) {
 			}
 		},
 		
-		refreshAndExpand: function(item, children, imageId, classToAdd, classToRemove) {
-			this.refresh(item, children, true, imageId, classToAdd, classToRemove);
-		},
-		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
 			if (typeof(itemOrId) === "string") {  //dom id
 				var node = dojo.byId(itemOrId);
@@ -194,25 +182,16 @@ define(['dojo'], function(dojo) {
 			return itemOrId;  // return what we were given
 		},
 		
-		toggle: function(id, imageId, expandClass, collapseClass) {
+		toggle: function(id) {
 			var row = dojo.byId(id);
 			if (row) {
-				var node;
 				if (row._expanded) {
 					this.collapse(id);
-					if (imageId) {
-						node = dojo.byId(imageId);
-						dojo.addClass(node, collapseClass);
-						dojo.removeClass(node, expandClass);
-					}
+					this._renderer.updateExpandVisuals(row, false);
 				}
 				else {
 					this.expand(id);
-					if (imageId) {
-						node = dojo.byId(imageId);
-						dojo.addClass(node, expandClass);
-						dojo.removeClass(node, collapseClass);
-					}
+					this._renderer.updateExpandVisuals(row, true);
 				}
 			}
 		},
@@ -235,7 +214,7 @@ define(['dojo'], function(dojo) {
 				row._expanded = true;
 				var tree = this;
 				this._renderer.updateExpandVisuals(row, true);
-				var children = this._treeModel.getChildren(row._item, function(children) {
+				this._treeModel.getChildren(row._item, function(children) {
 					tree._generateChildren(children, row._depth+1, row, "after");
 					tree._rowsChanged();
 					if (postExpandFunc) {
@@ -246,7 +225,6 @@ define(['dojo'], function(dojo) {
 		}, 
 		
 		_removeChildRows: function(parentId) {
-			var table = dojo.byId(this._id);
 			// true if we are removing directly from table
 			var foundParent = parentId === this._id;
 			var stop = false;

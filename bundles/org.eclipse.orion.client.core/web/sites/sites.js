@@ -63,7 +63,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				var refresh = function() {
 					siteService.getSiteConfigurations().then(function(siteConfigs) {
 						statusService.setMessage("");
-						treeWidget.refreshAndExpand("site-table-tree", siteConfigs);
+						treeWidget.refresh("site-table-tree", siteConfigs, true);
 					});
 				};
 				var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
