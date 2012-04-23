@@ -1179,12 +1179,16 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 				var options = {
 					readonly: true,
 					hasConflicts: false,
-					baseFileName: fileItem.location,
-					newFileName: fileItem.location,
-					baseFileType: fType,
-					newFileType: fType,
-					baseFileContent: fileItem.contents.join(that.model._lineDelimiter),
-					newFileContent: that._currentReplacedContents.join(that.model._lineDelimiter)
+					baseFile: {
+						Name: fileItem.location,
+						Type: fType,
+						Content: fileItem.contents.join(that.model._lineDelimiter)
+					},
+					newFile: {
+						Name: fileItem.location,
+						Type: fType,
+						Content: that._currentReplacedContents.join(that.model._lineDelimiter)
+					}
 				};
 				if(!that.twoWayCompareContainer){
 					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
