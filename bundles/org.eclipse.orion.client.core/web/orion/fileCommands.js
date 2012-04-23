@@ -161,7 +161,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		function makeMoveCopyTargetChoices(items, userData, isCopy) {
 			items = dojo.isArray(items) ? items : [items];
 			var refreshFunc = function() {
-				this.changedItem(this.treeRoot);
+				this.changedItem(this.treeRoot, true);
 			};
 			var callback = function(selectedItems) {
 				if (!dojo.isArray(selectedItems)) {
@@ -317,7 +317,28 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name, 
 						dojo.hitch(this, function(newText) {
 							fileClient.moveFile(item.Location, item.parent.Location, newText).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}), //refresh the root
+								dojo.hitch(explorer, function(newItem) {
+									var refreshItem;
+									var forceExpand = null;
+									if (item.parent.Projects) {
+										//special case for renaming a project. Use the treeroot as the refresh item.
+										refreshItem = this.treeRoot;
+										forceExpand = this.isExpanded(item) && item;
+									} else {
+										// refresh the parent, which will update the child paths. 
+										// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
+										refreshItem = item.parent;
+										if (item.Directory) {
+											forceExpand = this.isExpanded(item) && newItem;
+										}
+									}
+									// Update the parent
+									this.changedItem(item.parent, true);
+									// If the renamed item was an expanded directory, force an expand.
+									if (forceExpand) {
+										this.changedItem(forceExpand, true);
+									}
+								}), 
 								errorHandler
 							);
 						}), 
@@ -345,7 +366,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 						var refresher = function(item) {
 							count++;
 							if (count === items.length) {
-								explorer.changedItem(item);
+								explorer.changedItem(item, true);
 							}
 						};
 						for (var i=0; i < items.length; i++) {
@@ -436,7 +457,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFile(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}),
+							dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 							errorHandler);
 					}
 				};
@@ -464,7 +485,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var createFunction = function(name) {
 					if (name) {
 						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}),
+							dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 							errorHandler);
 					}
 				};
@@ -562,7 +583,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.ImportDialog({
 					importLocation: item.ImportLocation,
-					func: dojo.hitch(explorer, function() { this.changedItem(item); })
+					func: dojo.hitch(explorer, function() { this.changedItem(item, true); })
 				});
 				dialog.startup();
 				dialog.show();
@@ -586,7 +607,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						progress.showWhile(deferred, "Importing from " + host).then(
 							dojo.hitch(explorer, function() {
-								this.changedItem(this.treeRoot);
+								this.changedItem(this.treeRoot, true);
 							}),
 							errorHandler
 						);//refresh the root
@@ -613,7 +634,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
 						progress.showWhile(deferred, "Exporting from " + host).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot, true);}),
 							errorHandler);//refresh the root
 					}
 				});
@@ -684,7 +705,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 								}
 								if (location) {
 									fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
-										this.changedItem(this.treeRoot);
+										this.changedItem(this.treeRoot, true);
 									}), errorHandler);
 								}
 							}
