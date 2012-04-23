@@ -246,7 +246,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 	FileExplorer.prototype = new mExplorer.Explorer();
 	
 	// we have changed an item on the server at the specified parent node
-	FileExplorer.prototype.changedItem = function(parent) {
+	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
 		var self = this;
 		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 			mUtil.processNavigatorParent(parent, children);
@@ -254,8 +254,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			if(self.navHandler){
 				self.navHandler.refreshModel(self.model);
 			}
-			dojo.hitch(self.myTree, self.myTree.refresh)(parent, children, true);
+			dojo.hitch(self.myTree, self.myTree.refresh)(parent, children, forceExpand);
 		});
+	};
+	
+	FileExplorer.prototype.isExpanded = function(item) {
+		var rowId = this.model.getId(item);
+		return this.renderer.tableTree.isExpanded(rowId);
 	};
 		
 	FileExplorer.prototype.getNameNode = function(item) {
@@ -266,7 +271,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		}
 	};
 		
-	//This is an optional function for explorerNavHandler. It changes the href of the window.locatino to navigate to the parent page.
+	//This is an optional function for explorerNavHandler. It changes the href of the window.location to navigate to the parent page.
 	//The explorerNavHandler hooked up by the explorer will check if this optional function exist and call it when left arrow key hits on a top level item that is aleady collapsed.
 	FileExplorer.prototype.scopeUp = function(){
 		if(this.treeRoot && this.treeRoot.Parents){
