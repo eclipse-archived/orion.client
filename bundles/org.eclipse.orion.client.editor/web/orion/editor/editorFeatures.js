@@ -257,6 +257,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}.bind(this));
 			
 			this.textView.setAction("tab", function() {
+				if(!this.textView.getOptions("tabMode")) { return; }
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -289,6 +290,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), messages.unindentLines);
 			this.textView.setAction(messages.unindentLines, function() {
+				if(!this.textView.getOptions("tabMode")) { return; }
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
