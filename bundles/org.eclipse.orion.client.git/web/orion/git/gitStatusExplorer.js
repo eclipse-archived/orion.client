@@ -114,7 +114,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			},
 			
 			getClass: function(type){
-//				return " gitImageSprite git-sprite-modification "
 				return this.statusTypeMap[type][0];
 			}
 			
@@ -320,29 +319,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			
 			dojo.create( "span", { "class":"sectionIcon " + this._model.getClass(unstagedSortedChange.type) }, detailsView );
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: unstagedSortedChange.path }, detailsView );
-			
-			var that = this;
-			
+
 			var commandService = this.registry.getService("orion.page.command");
-			
-			var stageCommand = new mCommands.Command({
-				name: "Stage",
-				tooltip: "Stage the change",
-				imageClass: "git-sprite-stage",
-				spriteClass: "gitCommandSprite",
-				id: "orion.gitStage",
-				callback: function(data) {
-//					self._statusService.setProgressMessage("Staging...");
-//					self._prepareStage(data.items.rowId, false);
-//					return self.stage(data.items.object.indexURI , data.items.object);
-				},
-				visibleWhen: function(item) {
-					return (item.type === "fileItem" && !that._model.isStaged(item.object.type));
-				}
-			});	
-			
-			commandService.addCommand(stageCommand);
-			commandService.registerCommandContribution("itemLevelCommands", "orion.gitStage", 100);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.stageCommand", 100);
 
 			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: unstagedSortedChange}, this, "tool");
@@ -357,7 +336,25 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"stagedSectionHeader"}, tableNode );
 			
 			dojo.create( "div", { id: "stagedSectionTitle", "class":"layoutLeft", innerHTML: "Staged"}, titleWrapper );
-			dojo.create( "div", { id: "stagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+			var actionsArea = dojo.create( "div", { id: "stagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+			
+			var parentId = "stagedSectionHeader";
+			
+			var slideout = 
+				'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+					'<span id="' + parentId + 'slideOut" class="slide">' +
+					   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
+					   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+					'</span>' +
+				'</div>';
+		
+		
+			dojo.place( slideout, titleWrapper );
+			
+			var commandService = this.registry.getService("orion.page.command");
+			commandService.registerCommandContribution("stagedSectionActionsArea", "eclipse.orion.git.commitCommand", 100);
+			
+			this.commandService.renderCommands("stagedSectionActionsArea", actionsArea, status, this, "tool");
 			
 			var stagedSortedChanges = this._sortBlock(this._model.interestedStagedGroup);
 			
@@ -384,28 +381,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			dojo.create( "span", { "class":"sectionIcon " + this._model.getClass(stagedSortedChange.type) }, detailsView );
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: stagedSortedChange.path }, detailsView );
 			
-			
-			var that = this;
-			
 			var commandService = this.registry.getService("orion.page.command");
-			
-			var unstageCommand = new mCommands.Command({
-				name: "Unstage",
-				tooltip: "Unstage the change",
-				imageClass: "git-sprite-unstage",
-				spriteClass: "gitCommandSprite",
-				id: "orion.gitUnstage",
-				callback: function(data) {
-//					self._statusService.setProgressMessage("Unstaging...");
-//					return self.unstage(data.items.object);
-				},
-				visibleWhen: function(item) {
-					return item.type === "fileItem" && that._model.isStaged(item.object.type);
-				}
-			});	
-			
-			commandService.addCommand(unstageCommand);
-			commandService.registerCommandContribution("itemLevelCommands", "orion.gitUnstage", 100);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.unstageCommand", 100);
 
 			var actionsArea = dojo.create( "div", {"id":"stagedActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: stagedSortedChange}, this, "tool");
