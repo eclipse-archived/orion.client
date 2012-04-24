@@ -137,6 +137,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * @property {orion.textview.TextModel} [model] the text model for the view. If it is not set the view creates an empty {@link orion.textview.TextModel}.
 	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
 	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
+	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view.
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
 	 * @property {String} [themeClass] the CSS class for the view theming.
 	 * @property {Number} [tabSize] The number of spaces in a tab.
@@ -2451,13 +2452,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								if (a.userHandler) {
 									if (!a.userHandler()) {
 										if (a.defaultHandler) {
-											a.defaultHandler();
+											return typeof(a.defaultHandler()) === "boolean";
 										} else {
 											return false;
 										}
 									}
 								} else if (a.defaultHandler) {
-									a.defaultHandler();
+									return typeof(a.defaultHandler()) === "boolean";
 								}
 								break;
 							}
@@ -2758,6 +2759,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return true;
 		},
 		_doTab: function (args) {
+			if(!this._tabMode) { return; }
 			var text = "\t";
 			if (this._expandTab) {
 				var model = this._model;
@@ -2768,6 +2770,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				text = (new Array(spaces + 1)).join(" ");
 			}
 			this._doContent(text);
+			return true;
+		},
+		_doShiftTab: function (args) {
+			if(!this._tabMode) { return; }
+			return true;
+		},
+		_doTabMode: function (args) {
+			this._tabMode = !this._tabMode;
 			return true;
 		},
 		
@@ -3099,9 +3109,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true});
 			bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true});
 			bindings.push({name: "tab",			keyBinding: new KeyBinding(9), predefined: true});
+			bindings.push({name: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true});
 			bindings.push({name: "enter",			keyBinding: new KeyBinding(13), predefined: true});
 			bindings.push({name: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true});
 			bindings.push({name: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true});
+			bindings.push({name: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true});
 			if (isMac) {
 				bindings.push({name: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true});
 				bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true});
@@ -3192,12 +3204,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({unit: "line"});}},
 				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({unit: "line"});}},
 				{name: "tab",			defaultHandler: function() {return self._doTab();}},
+				{name: "shiftTab",			defaultHandler: function() {return self._doShiftTab();}},
 				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
 				{name: "enterNoCursor",	defaultHandler: function() {return self._doEnter({noCursor:true});}},
 				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
 				{name: "copy",			defaultHandler: function() {return self._doCopy();}},
 				{name: "cut",			defaultHandler: function() {return self._doCut();}},
-				{name: "paste",			defaultHandler: function() {return self._doPaste();}}
+				{name: "paste",			defaultHandler: function() {return self._doPaste();}},
+				
+				{name: "toggleTabMode",			defaultHandler: function() {return self._doTabMode();}}
 			];
 		},
 		_createLine: function(parent, div, document, lineIndex, model) {
@@ -3583,6 +3598,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				model: {value: undefined, update: this.setModel},
 				readonly: {value: false, update: this._setReadOnly},
 				fullSelection: {value: true, update: this._setFullSelection},
+				tabMode: { value: true, update: null },
 				tabSize: {value: 8, update: this._setTabSize},
 				expandTab: {value: false, update: null},
 				themeClass: {value: undefined, update: this._setThemeClass}
