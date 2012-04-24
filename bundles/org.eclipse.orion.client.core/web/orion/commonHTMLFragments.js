@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -70,7 +70,7 @@ define(['require'],
 	var toolbarHTMLFragment = 
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' +
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' +
-		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane"></img>' +
+		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar" aria-label="Operations - Press spacebar to show current operations"></img>' +
 		'<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>' +
 		'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>' +
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +

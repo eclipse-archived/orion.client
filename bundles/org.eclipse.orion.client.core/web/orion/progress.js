@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,6 +8,8 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
+
+/*global define window orion dijit console localStorage*/
 
 define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDialog'], function(require, dojo, mGlobalCommands) {
 	
@@ -38,6 +40,11 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				this._operationsDialog = new orion.widgets.OperationsDialog();
 				dojo.connect(this._progressPane, "onclick", dojo.hitch(this, this._openOperationsPopup));
 				var that = this;
+				dojo.connect(this._progressPane, "onkeypress", function(evt) { 
+					if(evt.charOrCode === ' ' || evt.keyCode === dojo.keys.ENTER) {
+						dojo.hitch(that, that._openOperationsPopup)();
+					}
+				});
 				//if operations waren't updated for 5 minutes this means they are out of date and not updated.
 				if(new Date()-this.getLastListUpdate()>300000){
 					this._operationsClient.getRunningOperations().then(function(operationsList){
@@ -158,13 +165,18 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				if(!operations.Children || operations.Children.length==0){
 					this._switchIconTo("progressPane_empty");
 					this._progressPane.title = "Operations";
+					this._progressPane.alt = "Operations";
+					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) {
+						dojo.removeAttr(this._progressPane, "aria-valuetext");
+					}
 					return;
 				}
 				var status = "";
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
-					if(!this._myOperations[operation.Id])
+					if(!this._myOperations[operation.Id]) {
 						continue; //only operations run by this page change status
+					}
 					if(operation.Running==true){
 						status = "running";
 						break;
@@ -175,8 +187,9 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					if(this._lastOperation.Result){
 						switch (this._operationsDialog.parseProgressResult(this._lastOperation.Result).Severity) {
 						case "Warning":
-							if(status!=="error")
+							if(status!=="error") {
 								status="warning";
+							}
 							break;
 						case "Error":
 							status = "error";
@@ -186,18 +199,28 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				switch(status){
 				case "running":
 					this._progressPane.title = "Operations running";
+					this._progressPane.alt = "Operations running";
+					dojo.attr(this._progressPane, "aria-valuetext", "Operations running");
 					this._switchIconTo("progressPane_running");
 					break;
 				case "warning":
 					this._progressPane.title = "Some operations finished with warning";
+					this._progressPane.alt = "Some operations finished with warning";
+					dojo.attr(this._progressPane, "aria-valuetext", "Some operations finished with warning");
 					this._switchIconTo("progressPane_warning");
 					break;
 				case "error":
 					this._progressPane.title = "Some operations finished with error";
+					this._progressPane.alt = "Some operations finished with error";
+					dojo.attr(this._progressPane, "aria-valuetext", "Some operations finished with error");
 					this._switchIconTo("progressPane_error");
 					break;
 				default:
 					this._progressPane.title = "Operations";
+					this._progressPane.alt = "Operations";
+					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) {
+						dojo.removeAttr(this._progressPane, "aria-valuetext");
+					}
 					this._switchIconTo("progressPane_operations");					
 				}
 			},
