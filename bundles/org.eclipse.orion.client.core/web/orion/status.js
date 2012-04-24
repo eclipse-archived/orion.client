@@ -135,9 +135,11 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			dojo.place(image, this.progressDomId, "only");
 			dojo.place(window.document.createTextNode(message), this.progressDomId, "last");
 			dojo.addClass(this.notificationContainerDomId, "progressNormal");
-			if (message.length > 0) {
+			if (message && message.length > 0) {
 				dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
-			} else {
+			} else if(this._progressMonitors && this._progressMonitors.length > 0){
+				this._renderOngoingMonitors();
+			}else{
 				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
 			}
 			mUtil.forceLayout(this.notificationContainerDomId);
@@ -210,9 +212,114 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				});
 			}
 			return deferred;
+		},
+		
+		_lastProgressId: 0,
+		_progressMonitors: {length: 0},
+		
+		/**
+		 * Creates a ProgressMonitor that will be displayed on the status area.
+		 * @param {dojo.Deferred} deferred [optional] that updates this monitor
+		 * @param {String} message [optional] messaged to be shown until deferred is not resolved
+		 * @returns {ProgressMonitor}
+		 */
+		createProgressMonitor: function(deferred, message){
+			return new ProgressMonitor(this, ++this._lastProgressId, deferred, message);
+		},
+		
+		_renderOngoingMonitors: function(){
+			if(this._progressMonitors.length > 0){
+				var msg = "";
+				var isFirst = true;
+				for(var progressMonitorId in this._progressMonitors){
+					if(this._progressMonitors[progressMonitorId].status){
+						if(!isFirst)
+							msg+=", ";
+						msg+=this._progressMonitors[progressMonitorId].status;
+						isFirst = false;
+					}
+				}
+				this.setProgressMessage(msg);
+			} else {
+				this.setProgressMessage("");
+			}
+		},
+		
+		_beginProgressMonitor: function(monitor){
+			this._progressMonitors[monitor.progressId] = monitor;
+			this._progressMonitors.length++;
+			this._renderOngoingMonitors();
+		},
+		
+		_workedProgressMonitor: function(monitor){
+			this._progressMonitors[monitor.progressId] = monitor;
+			this._renderOngoingMonitors();
+		},
+		
+		_doneProgressMonitor: function(monitor){
+			delete this._progressMonitors[monitor.progressId];
+			this._progressMonitors.length--;
+			if(monitor.status){
+				this.setProgressResult(monitor.status);
+			}else{				
+				this._renderOngoingMonitors();
+			}
 		}
+		
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
+	
+	function ProgressMonitor(statusService, progressId, deferred, message){
+		this.statusService = statusService;
+		this.progressId = progressId;
+		if(deferred){
+			this.deferred = deferred;
+			this.begin(message);
+			var that = this;
+			deferred.then(
+					function(response, secondArg){
+						dojo.hitch(that, that.done)();
+					},
+					function(error, secondArg){
+						dojo.hitch(that, that.done)();
+					});
+		}
+	}
+	
+	ProgressMonitor.prototype = new dojo.Deferred();
+	
+	/**
+	 * Starts the progress monitor. Message will be shown in the status area.
+	 * @param {String} message
+	 */
+	ProgressMonitor.prototype.begin = function(message){
+				this.status = message;
+				this.statusService._beginProgressMonitor(this);
+			};
+	/**
+	 * Sets the progress monitor as done. If no status is provided the message will be
+	 * removed from the status.
+	 * @param {String|dojoError|orionError} status [optional] The error to display. Can be a simple String,
+	 * or an error object from a dojo XHR error callback, or the body of an error response 
+	 * from the Orion server.
+	 */
+	ProgressMonitor.prototype.done = function(status){
+				this.status = status;
+				this.statusService._doneProgressMonitor(this);
+				this.callback(status);
+			};
+	/**
+	 * Changes the message in the monitor.
+	 * @param {String} message
+	 */
+	ProgressMonitor.prototype.worked = function(message){
+				this.status = message;
+				this.statusService._workedProgressMonitor(this);
+			};
+	
+	ProgressMonitor.prototype.constructor = ProgressMonitor;
+
 	//return module exports
-	return {StatusReportingService: StatusReportingService};
+	return {StatusReportingService: StatusReportingService,
+			ProgressMonitor: ProgressMonitor};
 });
