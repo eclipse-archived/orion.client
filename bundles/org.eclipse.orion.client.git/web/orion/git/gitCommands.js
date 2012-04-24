@@ -11,10 +11,10 @@
 
 /*global window widgets eclipse:true serviceRegistry define */
 /*browser:true*/
-define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
+define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog'], 
-        function(require, dojo, mCommands, mUtil) {
+        function(require, dojo, mCommands, mUtil, mGitUtil) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2198,6 +2198,122 @@ var exports = {};
 		});
 		commandService.addCommand(openCommitCommand);
 	};
+	
+	
+	
+
+
+	
+	
+	
+	
+	
+	
+	
+	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
+		
+		function displayErrorOnStatus(error) {
+			if (error.status === 401 || error.status === 403)
+				return;
+			
+			var display = [];
+			
+			display.Severity = "Error";
+			display.HTML = false;
+			
+			try {
+				var resp = JSON.parse(error.responseText);
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+			} catch (Exception) {
+				display.Message = error.message;
+			}
+			
+			serviceRegistry.getService("orion.page.message").setProgressResult(display);
+		}
+		
+		var stageCommand = new mCommands.Command({
+			name: "Stage",
+			tooltip: "Stage the change",
+			imageClass: "git-sprite-stage",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.stageCommand",
+			callback: function(data) {
+				var item = data.items;
+				
+				var progressService = serviceRegistry.getService("orion.page.message");
+				
+				progressService.createProgressMonitor(
+					serviceRegistry.getService("orion.git.provider").stage(item.object.indexURI),
+					"Staging changes").deferred.then(
+					function(jsonData){
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					}, displayErrorOnStatus
+				)
+			},
+			visibleWhen: function(item) {
+				return item.type === "fileItem" && !mGitUtil.isStaged(item.object);
+			}
+		});	
+		
+		commandService.addCommand(stageCommand);
+		
+		var unstageCommand = new mCommands.Command({
+			name: "Unstage",
+			tooltip: "Unstage the change",
+			imageClass: "git-sprite-unstage",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.unstageCommand",
+			callback: function(data) {
+				var item = data.items;
+				
+				var progressService = serviceRegistry.getService("orion.page.message");
+				
+				progressService.createProgressMonitor(
+					serviceRegistry.getService("orion.git.provider").unstage(item.object.indexURI, item.object.name),
+					"Unstaging changes").deferred.then(
+					function(jsonData){
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					}, displayErrorOnStatus
+				)
+			},
+			visibleWhen: function(item) {
+				return item.type === "fileItem" && mGitUtil.isStaged(item.object);
+			}
+		});	
+		
+		commandService.addCommand(unstageCommand);
+		
+		var commitMessageParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Commit message')]);
+		
+		var commitCommand = new mCommands.Command({
+			name: "Commit",
+			tooltip: "Commit",
+			id: "eclipse.orion.git.commitCommand",
+			parameters: commitMessageParameters,
+			callback: function(data) {
+				var item = data.items;
+				
+				var body = {};
+				body.Message = data.parameters.valueFor("name");
+				
+				var progressService = serviceRegistry.getService("orion.page.message");
+				
+				progressService.createProgressMonitor(
+					serviceRegistry.getService("orion.git.provider").commitAll(item.CommitLocation, null, dojo.toJson(body)),
+					"Committing changes").deferred.then(
+					function(jsonData){
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					}, displayErrorOnStatus
+				)
+			},
+			visibleWhen: function(item) {
+				return true;
+			}
+		});	
+		
+		commandService.addCommand(commitCommand);
+	};
+	
 }());
 return exports;	
 });
