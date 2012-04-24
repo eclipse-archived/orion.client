@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets*/
+/*global dojo dijit widgets define*/
 /*jslint browser:true*/
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/OperationsDialog.html'], function(require, dojo, dijit, mUtil) {
@@ -74,7 +74,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				var tr = dojo.create("tr");
 				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr);
 				var div = dojo.create("div", null, col, "only");
-				link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last");
+				var link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last");
 
 				dojo.place(document.createTextNode(operation.Name), link, "only");
 				
@@ -87,19 +87,29 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				switch (result.Severity) {
 					case "Warning":
 						dojo.addClass(operationIcon, "core-sprite-warning");
+						dojo.attr(operationIcon, "aria-label", "Operation resulted in a warning.");
 						break;
 					case "Error":
 						dojo.addClass(operationIcon, "core-sprite-error");
+						dojo.attr(operationIcon, "aria-label", "Operation resulted in an error.");
 						break;
 					default:
-						if(operation.Running===true)
+						if(operation.Running===true) {
 							dojo.addClass(operationIcon, "core-sprite-start");
-						else if(operation.Canceled===true)
+							dojo.attr(operationIcon, "aria-label", "Operation is running.");
+						}
+						else if(operation.Canceled===true) {
 							dojo.addClass(operationIcon, "core-sprite-stop");
-						else if(operation.Failed===true)
+							dojo.attr(operationIcon, "aria-label", "Operation is canceled.");
+						}
+						else if(operation.Failed===true) {
 							dojo.addClass(operationIcon, "core-sprite-error");
-						else
-							dojo.addClass(operationIcon, "core-sprite-ok");								
+							dojo.attr(operationIcon, "aria-label", "Operation failed.");
+						}
+						else {
+							dojo.addClass(operationIcon, "core-sprite-ok");
+							dojo.attr(operationIcon, "aria-label", "Operation ok.");
+						}
 				}
 				
 				if(result.Message || operation.Message){
