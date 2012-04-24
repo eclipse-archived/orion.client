@@ -144,18 +144,26 @@ orion.TwoWayCompareUIFactory = (function() {
 		
 		buildUI:function(){
 			this._topWidgetId = this._parentDivID + "_topWidget";
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
+			this.destroy();
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
 			var marginBox = dojo.marginBox(this._parentDivID);
-			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			var styleH = marginBox.h + "px";
+			var styleW = marginBox.w + "px";
+			var styleStr = "height:" + styleH + ";width:" + styleW;
+			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+		
 			topWidget.placeAt(this._parentDivID);
 			topWidget.addChild(leftB);
 			topWidget.addChild(rightB);
 			topWidget.startup();
+		},
+		
+		destroy: function(){
+			var topWidget = dijit.byId(this._topWidgetId);
+			if(topWidget){
+				topWidget.destroyRecursive();
+			}
 		},
 		
 		getEditorParentDivId: function(left){

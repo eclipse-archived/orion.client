@@ -1199,7 +1199,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 						showLineStatus: false
 					});
 					that.uiFactoryCompare.buildUI();
-					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, that.uiFactoryCompare, options);
+					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
 					that.twoWayCompareContainer.startup();
 				} else {
 					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));

@@ -13,9 +13,9 @@
 /*jslint browser:true devel:true */
 define(['require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator'], 
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator'], 
 		function(require, dojo, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
-				mCommands, mTextModel, mTextView, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator) {
+				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator) {
 
 var exports = {};
 
@@ -116,7 +116,7 @@ exports.CompareContainer = (function() {
 			}
 			if(options){
 				//mapper is purely internal option
-				this._mapper = options.mapper ? options.mapper : this._mapper;
+				this.options.mapper = options.mapper ? options.mapper : this.options.mapper;
 				
 				this.options.commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this.options.commandSpanId;
 				this.options.readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this.options.readonly;
@@ -137,6 +137,7 @@ exports.CompareContainer = (function() {
 				
 				this.options.diffURL = options.diffURL ? options.diffURL : this.options.diffURL;
 				this.options.diffContent = options.diffContent ? options.diffContent : this.options.diffContent;
+				this.options.diffArray = options.diffArray ? options.diffArray : this.options.diffArray;
 				
 				this.options.blockNumber = options.blockNumber ? options.blockNumber : this.options.blockNumber;
 				this.options.changeNumber = options.changeNumber ? options.changeNumber : this.options.changeNumber;
@@ -145,14 +146,12 @@ exports.CompareContainer = (function() {
 				this.options.callback = options.callback ? options.callback : this.options.callback;
 				this._errorCallback = options.errorCallback ? options.errorCallback : this._errorCallback;
 				this.options.onSetTitle = options.onSetTitle ? options.onSetTitle : this.options.onSetTitle;
+				this.options.toggler = options.toggler ? options.toggler : this.options.toggler;
 			}
 		},
 		
 		initCommands: function(){	
-			var commandSpanId = this.options.commandSpanId;
-			if(!commandSpanId && this.getDefaultCommandSpanId){
-				commandSpanId = this.getDefaultCommandSpanId();
-			}
+			var commandSpanId = this.getCommandSpanId();
 			if(!commandSpanId){
 				return;
 			}
@@ -164,6 +163,30 @@ exports.CompareContainer = (function() {
 				groupId: "orion.compareGroup",
 				callback : function(data) {
 					data.items.copyToLeft();
+			}});
+			var toggle2InlineCommand = new mCommands.Command({
+				tooltip : "Switch to unified diff",
+				name: "Unified",
+				imageClass : "core-sprite-link",
+				id: "orion.compare.toggle2Inline",
+				groupId: "orion.compareGroup",
+				visibleWhen: function(item) {
+					return item.options.toggler && item.options.toggler.widgetType === "twoWay";
+				},
+				callback : function(data) {
+					data.items.options.toggler.toggle();
+			}});
+			var toggle2TwoWayCommand = new mCommands.Command({
+				tooltip : "Switch to side by side diff",
+				name: "Side by side",
+				imageClass : "core-sprite-link",
+				id: "orion.compare.toggle2TwoWay",
+				groupId: "orion.compareGroup",
+				visibleWhen: function(item) {
+					return item.options.toggler && item.options.toggler.widgetType === "inline";
+				},
+				callback : function(data) {
+					data.items.options.toggler.toggle();
 			}});
 			var generateLinkCommand = new mCommands.Command({
 				tooltip : "Generate link of the current diff",
@@ -210,6 +233,8 @@ exports.CompareContainer = (function() {
 					data.items.prevChange(data);
 			}});
 			this._commandService.addCommand(copyToLeftCommand);
+			this._commandService.addCommand(toggle2TwoWayCommand);
+			this._commandService.addCommand(toggle2InlineCommand);
 			this._commandService.addCommand(generateLinkCommand);
 			this._commandService.addCommand(nextDiffCommand);
 			this._commandService.addCommand(prevDiffCommand);
@@ -219,23 +244,30 @@ exports.CompareContainer = (function() {
 			}
 				
 			// Register command contributions
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 100);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108);
 			if (!this.options.readonly) {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 101);
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109);
 			}
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 102);
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 103);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 110);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 111);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112);
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113);
 			if(this.options.wordLevelNav){
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 104);
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 105);
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114);
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115);
 			}
 		},
 		
-		renderCommands: function(){
+		getCommandSpanId: function(){
 			var commandSpanId = this.options.commandSpanId;
 			if(!commandSpanId && this.getDefaultCommandSpanId){
 				commandSpanId = this.getDefaultCommandSpanId();
 			}
+			return commandSpanId;
+		},
+		
+		renderCommands: function(){
+			var commandSpanId = this.getCommandSpanId();
 			if(!commandSpanId){
 				return;
 			}
@@ -244,7 +276,7 @@ exports.CompareContainer = (function() {
 		},
 		
 		generateLink: function(){	
-			var diffPos = this._diffNavigator.getCurrentPosition();
+			var diffPos = this.getCurrentDiffPos();
 			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
 				readonly: this.options.readonly,
 				conflict: this._conflict,
@@ -252,6 +284,10 @@ exports.CompareContainer = (function() {
 				change: diffPos.change ? diffPos.change : 0 
 			});
 			prompt("Copy the link URL:", href);
+		},
+		
+		getCurrentDiffPos: function(){	
+			return this._diffNavigator.getCurrentPosition();
 		},
 		
 		nextDiff: function(){	
@@ -359,17 +395,27 @@ exports.CompareContainer = (function() {
 		
 		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
-			if(this._mapper){
-				return {delim:delim , mapper:this._mapper, output: output, diffArray:output};
+			if(this.options.mapper && this.options.toggler){
+				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
 			if(output){
 				var adapter = new mJSDiffAdapter.JSDiffAdapter();
 				var maps = adapter.adapt(input, output);
+				if(this.options.toggler){
+					this.options.mapper = maps.mapper;
+					this.options.newFile.Content = output;
+					this.options.diffArray = maps.changContents;
+				}
 				return {delim:delim , mapper:maps.mapper, output: output, diffArray:maps.changContents};
 			} else {
 				this._diffParser.setLineDelim(delim);
 				var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
 				var diffArray = this._diffParser.getDiffArray();
+				if(this.options.toggler){
+					this.options.mapper = result.mapper;
+					this.options.newFile.Content = result.outPutFile;
+					this.options.diffArray = diffArray;
+				}
 				return {delim:delim , mapper:result.mapper, output: result.outPutFile, diffArray:diffArray};
 			}
 		},
@@ -390,12 +436,20 @@ exports.TwoWayCompareContainer = (function() {
 	/**
 	 * Constructs a new side by side compare container. 
 	 */
-	function TwoWayCompareContainer(serviceRegistry, uiFactory, options) {
+	function TwoWayCompareContainer(serviceRegistry, parentDivId, uiFactory, options) {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word");
 		this._registry = serviceRegistry;
 		this._commandService = this._registry.getService("orion.page.command");
 		this._fileClient = this._registry.getService("orion.core.file");
 		this._uiFactory = uiFactory;
+		if(!this._uiFactory){
+			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
+				parentDivID: parentDivId,
+				showTitle: false,
+				showLineStatus: false
+			});
+			this._uiFactory.buildUI();
+		}
 		this._viewLoadedCounter = 0;
 		
 		this.setOptions(options, true);
@@ -685,6 +739,15 @@ exports.TwoWayCompareContainer = (function() {
 		return editor;
 	};
 
+	TwoWayCompareContainer.prototype.destroy = function(){
+		if(this._leftTextView){
+			this._diffNavigator.destroy();
+			this._leftTextView.destroy();
+			this._rightTextView.destroy();
+			this._uiFactory.destroy();
+		}
+	};
+
 	TwoWayCompareContainer.prototype.setEditor = function(onsave){	
 		var input = this.options.baseFile.Content;
 		var output = this.options.newFile.Content;
@@ -804,6 +867,13 @@ exports.InlineCompareContainer = (function() {
 		this.hasContent = false;
 	};
 
+	InlineCompareContainer.prototype.destroy = function(){
+		if(this._textView){
+			this._diffNavigator.destroy();
+			this._textView.destroy();
+		}
+	};
+
 	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileObj){
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var editorContainer = dijit.byId(this._editorDivId);
@@ -901,7 +971,7 @@ exports.InlineCompareContainer = (function() {
 		var diff = this.options.diffContent;
 
 		this.hasContent = true;
-		var result = this.parseMapper(input, output, diff, this.options.hasConflicts, output);
+		var result = this.parseMapper(input, output, diff, this.options.hasConflicts, !this.options.toggler);
 		if(!output){
 			output = result.output;
 		}
@@ -938,49 +1008,42 @@ exports.InlineCompareContainer = (function() {
 }());
 
 exports.toggleableCompareContainer = (function() {
-	function toggleableCompareContainer(serviceRegistry, editorDivId, options ) {
-		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word");
-		this._registry = serviceRegistry;
-		this._commandService = this._registry.getService("orion.page.command");
-		this._fileClient = this._registry.getService("orion.core.file");
-		this._statusService = this._registry.getService("orion.page.message");
-		this.setOptions(options, true);
-		this.setOptions({readonly: true});
-
-		var that = this;
-		if(!this.options.callback){
-			this.options.callback = function(baseFileName, newFileName) {
-				dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only");
-				dojo.style("fileNameInViewer", "color", "#6d6d6d");
-				that._statusService.setProgressMessage("");
-			};
+	function toggleableCompareContainer(serviceRegistry, parentDivId, startWith, options ) {
+		if(options){
+			options.toggler = this;
 		}
-		
-		if(!this._errorCallback){
-			this._errorCallback = function(errorResponse, ioArgs) {
-				var display = [];
-				display.Severity = "Error";
-				display.HTML = false;
-				
-				try{
-					var resp = JSON.parse(errorResponse.responseText);
-					display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
-				}catch(Exception){
-					display.Message =  typeof(errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText;
-				}
-				
-				this._statusService.setProgressResult(display);
-			};
+		if(startWith === "inline"){
+			this.widgetType = "inline";
+			this._widget = new exports.InlineCompareContainer(serviceRegistry, parentDivId, options);
+		} else {
+			this.widgetType = "twoWay";
+			this._widget = new exports.TwoWayCompareContainer(serviceRegistry, parentDivId, null, options);
 		}
-		
-		this.initCommands();
-		this._highlighter = [];
-		this._highlighter.push( new exports.CompareStyler(this._registry));
-		this._editorDivId = editorDivId;
-		this.initEditorContainers("" , "\n" , [],[]);
-		this.hasContent = false;
+		this._parentDivId = parentDivId;
+		this._serviceRegistry = serviceRegistry;
 	}
-	toggleableCompareContainer.prototype = new exports.CompareContainer();
+	toggleableCompareContainer.prototype = {
+		startup: function(onLoadContents){
+			this._widget.startup(false, onLoadContents);
+		},
+		
+		toggle: function(){
+			var options = this._widget.options;
+			var diffPos = this._widget.getCurrentDiffPos();
+			options.blockNumber = diffPos.block;
+			options.changeNumber = diffPos.change;
+			this._widget.destroy();
+			dojo.empty(this._parentDivId);
+			if(this.widgetType === "inline"){
+				this.widgetType = "twoWay";
+				this._widget = new exports.TwoWayCompareContainer(this._serviceRegistry, this._parentDivId, null, options);
+			} else {
+				this.widgetType = "inline";
+				this._widget = new exports.InlineCompareContainer(this._serviceRegistry, this._parentDivId, options);
+			}
+			this._widget.setEditor();
+		}
+	};
 	
 	return toggleableCompareContainer;
 }());

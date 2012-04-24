@@ -288,21 +288,22 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") );
 			var diffHorizontalBox = dojo.create( "div", null, diffItem );
 			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;"}, diffHorizontalBox);
+			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox);
 
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
 			var diffOptions = {
 				commandSpanId: compareActionsArea.id,
 				diffProvider: diffProvider,
+				hasConflicts: false,
+				readonly: true,
+				complexURL: diff.DiffLocation,
 				callback : function(){}
 			};
 			
-			var inlineCompareContainer = new mCompareContainer.InlineCompareContainer(this.registry, "diffArea_" + index, diffOptions);
-			inlineCompareContainer.setOptions({hasConflicts: false, complexURL: diff.DiffLocation});
-			inlineCompareContainer.setDiffTitle("Compare");
+			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions);
 			var that = this;
-			inlineCompareContainer.startup(false, function(){
+			inlineCompareContainer.startup( function(){
 				if(index < (diffs.length -1 )){
 					that.renderDiff(diffs, index+1);
 				}
