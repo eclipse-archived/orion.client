@@ -1,0 +1,55 @@
+@import "../org.dojotoolkit/dojo/resources/dojo.css";
+
+@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
+
+@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
+
+@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
+
+@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
+
+@import "../org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
+
+@import "../settings/settings.css";
+
+@import "../css/ide.css";
+
+@import "../css/breadcrumbs.css";
+
+@import "../css/commands.css";
+
+@import "../css/sections.css";
+
+@import "../orion/compare/compare-container.css";
+
+@import "css/git.css";
+
+.lightTreeTableRow {
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.darkTreeTableRow {
+	border-bottom: 1px solid #e6e6e6;
+}
+
+.stretch {
+	float: left;
+	position: relative;
+	white-space:normal;
+	max-width:700px;
+}
+
+.plugin-settings {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+pre {
+	margin-left: 10px;
+    padding: 15px;
+    background-color: #fdfdfd;
+    border: 1px solid #ebebeb;
+    font-family: Courier,"Courier New";
+    white-space: pre-wrap;
+    width: 60%
+}
