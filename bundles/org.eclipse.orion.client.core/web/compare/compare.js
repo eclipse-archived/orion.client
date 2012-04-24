@@ -57,8 +57,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 					hasConflicts: conflciting,
 					diffProvider: diffProvider,
 					complexURL: diffParams.complexURL,
-					block: diffParams.block,
-					change: diffParams.change
+					blockNumber: diffParams.block,
+					changeNumber: diffParams.change
 				};
 				
 				var twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(serviceRegistry, uiFactory, options);
