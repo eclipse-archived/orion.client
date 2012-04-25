@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,8 +11,8 @@
 /*global define */
 /*jslint browser:true regexp:true */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/explorer'],
-		function(require, dojo, dijit, mUtil, mCommands, mExplorer) {
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
+		function(require, dojo, mUtil, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 
@@ -22,6 +22,7 @@ function mixin(target, source) {
 	}
 }
 
+// FIXME perhaps site service should be in charge of this.0
 function isWorkspacePath(/**String*/ path) {
 	return new RegExp("^/").test(path);
 }
@@ -105,29 +106,23 @@ mSiteMappingsTable.Renderer = (function() {
 		getIsValidCell: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {
 			var target = item.Target;
 			var col = document.createElement("td");
-			var href, result;
+			var href;
 			if (isWorkspacePath(target)) {
-				var location = this.options.siteService.makeFullFilePath(target);
-				href = mUtil.safeText(location);
-				col.innerHTML = "<span class=\"validating\">&#8230;</span>";
-				// TODO: should use fileClient here, but without authentication prompt & without retrying
-				//this._fileClient.fetchChildren(location)
-				dojo.xhrGet({
-					url: location,
-					headers: { "Orion-Version": "1" },
-					handleAs: "text"
-				}).then(
-					function(object) {
-						try {
-							object = dojo.fromJson(object);
-						} catch(e) {}
-						var isDirectory = (typeof object === "object" && object.Directory);
-						var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
-						var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
-					}, function(error) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
-					});
+				var self = this;
+				this.options.siteClient.toFileLocation(target).then(function(loc) {
+					href = mUtil.safeText(loc);
+					col.innerHTML = "<span class=\"validating\">&#8230;</span>";
+					// use file service directly to avoid authentication prompt & retrying
+					self.options.fileClient._getService(loc).read(loc, true).then(
+						function(object) {
+							var isDirectory = object && object.Directory;
+							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
+							var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
+						}, function(error) {
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
+						});
+				});
 			} else {
 				href = mUtil.safeText(target);
 				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="External link to ' + href + '"/></a>';
@@ -147,13 +142,15 @@ mSiteMappingsTable.MappingsTable = (function() {
 		this.registry = options.serviceRegistry;
 		this.commandService = this.registry.getService("orion.page.command");
 		this.registerCommands();
-		this.siteService = options.siteService;
+		this.siteClient = options.siteClient;
 		this.parentId = options.parentId;
 		this.selection = options.selection;
 		this.renderer = new mSiteMappingsTable.Renderer({
 				checkbox: false, /*TODO make true when we have selection-based commands*/
 				onchange: dojo.hitch(this, this.fieldChanged),
-				siteService: options.siteService,
+				siteConfiguration: options.siteConfiguration,
+				siteClient: options.siteClient,
+				fileClient: options.fileClient,
 				actionScopeId: "siteMappingCommand"
 			}, this);
 		this.myTree = null;
@@ -346,7 +343,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 				for (var i=0; i < this.projects.length; i++) {
 					var project = this.projects[i];
 					var name = "/" + project.Name;
-					var location = this.siteService.makeRelativeFilePath(project.Location);
+					// FIXME ASYNC
+					var location = this.siteClient.toInternalForm(project.Location);
 					if (this.pathsMatch(target, location)) {
 						friendlyPath = name + target.substring(location.length);
 						break;
@@ -361,7 +359,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 				for (var i=0; i < this.projects.length; i++) {
 					var project = this.projects[i];
 					var name = "/" + project.Name;
-					var location = this.siteService.makeRelativeFilePath(project.Location);
+					// FIXME ASYNC
+					var location = this.siteClient.toInternalForm(project.Location);
 					if (this.pathsMatch(friendlyPath, name)) {
 						var rest = friendlyPath.substring(name.length);
 						item.Target = location + rest;
