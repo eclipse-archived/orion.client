@@ -50,9 +50,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		mGitCommands.createGitStatusCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
 
 		// define the command contributions - where things appear, first the groups
-		// commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
+		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
 
 		// object contributions
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.resetCommand", 100, "eclipse.gitGroup");
 		
 		// add commands specific for the page	
 		var viewAllCommand = new mCommands.Command({

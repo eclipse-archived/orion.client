@@ -266,6 +266,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 											commitURI:groupData[j].Git.CommitLocation,
 											indexURI:groupData[j].Git.IndexLocation,
 											diffURI:groupData[j].Git.DiffLocation,
+											CloneLocation:this._model.items.CloneLocation,
 											conflicting:this._model.isConflict(renderType)
 						});
 					}
@@ -288,14 +289,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var tableNode = dojo.byId( 'table' );
 	
 			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"unstagedSectionHeader"}, tableNode );
-			
-			dojo.create( "div", { id: "unstagedSectionTitle", "class":"layoutLeft", innerHTML: "Unstaged"}, titleWrapper );
-			dojo.create( "div", { id: "unstagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
-			
+
 			var unstagedSortedChanges = this._sortBlock(this._model.interestedUnstagedGroup);
-						
-			//this.commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.addTag", 2000);
-			//this.commandService.renderCommands("tagSectionActionsArea", dojo.byId("tagSectionActionsArea"), commit, this, "button", false);
+			
+			dojo.create( "div", { id: "unstagedSectionTitle", "class":"layoutLeft", 
+				innerHTML: (unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes")}, titleWrapper );
+			var actionsArea = dojo.create( "div", { id: "unstagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+
+			var commandService = this.registry.getService("orion.page.command");
+			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.stageCommand", 100);
+			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.checkoutCommand", 200);
+			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.showPatchCommand", 300);
+			commandService.renderCommands("unstagedSectionActionsArea", actionsArea, status, this, "button");
 			
 			var content =
 				'<div class="sectionTable">' +
@@ -322,6 +327,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 
 			var commandService = this.registry.getService("orion.page.command");
 			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.stageCommand", 100);
+			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.checkoutCommand", 200);
 
 			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: unstagedSortedChange}, this, "tool");
@@ -335,7 +341,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 
 			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"stagedSectionHeader"}, tableNode );
 			
-			dojo.create( "div", { id: "stagedSectionTitle", "class":"layoutLeft", innerHTML: "Staged"}, titleWrapper );
+			var stagedSortedChanges = this._sortBlock(this._model.interestedStagedGroup);
+			
+			dojo.create( "div", { id: "stagedSectionTitle", "class":"layoutLeft", 
+				innerHTML: (stagedSortedChanges.length > 0 ? "Staged" : "No Staged Changes")}, titleWrapper );
 			var actionsArea = dojo.create( "div", { id: "stagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
 			
 			var parentId = "stagedSectionHeader";
@@ -352,12 +361,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			dojo.place( slideout, titleWrapper );
 			
 			var commandService = this.registry.getService("orion.page.command");
-			commandService.registerCommandContribution("stagedSectionActionsArea", "eclipse.orion.git.commitCommand", 100);
-			
-			this.commandService.renderCommands("stagedSectionActionsArea", actionsArea, status, this, "tool");
-			
-			var stagedSortedChanges = this._sortBlock(this._model.interestedStagedGroup);
-			
+			commandService.registerCommandContribution("stagedSectionActionsArea", "eclipse.orion.git.unstageCommand", 100);
+			commandService.registerCommandContribution("stagedSectionActionsArea", "eclipse.orion.git.commitCommand", 200);
+			commandService.renderCommands("stagedSectionActionsArea", actionsArea, status, this, "button");
+
 			var content =
 				'<div class="sectionTable">' +
 					'<div class="plugin-settings">' +

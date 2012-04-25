@@ -33,8 +33,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		"Conflicting":["gitImageSprite git-sprite-conflict-file", "Conflicting"]	
 	};
 	
-	
-
 	function isStaged(change){
 		for(var i = 0; i < interestedStagedGroup.length ; i++){
 			if(change.type === interestedStagedGroup[i]){
