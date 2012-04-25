@@ -306,7 +306,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 	ProgressMonitor.prototype.done = function(status){
 				this.status = status;
 				this.statusService._doneProgressMonitor(this);
-				this.callback(status);
 			};
 	/**
 	 * Changes the message in the monitor.
