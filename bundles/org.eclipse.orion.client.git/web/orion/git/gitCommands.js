@@ -2297,7 +2297,6 @@ var exports = {};
 				body.Message = data.parameters.valueFor("name");
 				
 				var progressService = serviceRegistry.getService("orion.page.message");
-				
 				progressService.createProgressMonitor(
 					serviceRegistry.getService("orion.git.provider").commitAll(item.CommitLocation, null, dojo.toJson(body)),
 					"Committing changes").deferred.then(
@@ -2310,8 +2309,109 @@ var exports = {};
 				return true;
 			}
 		});	
-		
+
 		commandService.addCommand(commitCommand);
+
+		var resetCommand = new mCommands.Command({
+			name: "Reset",
+			tooltip: "Reset the branch, discarding all staged and unstaged changes",
+			imageClass: "git-sprite-refresh",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.resetCommand",
+			callback: function(data) {
+				var item = data.items;
+				
+				var dialog = serviceRegistry.getService("orion.page.dialog");
+				dialog.confirm("All unstaged and staged changes in the working directory and index will be discarded and cannot be recovered.\n" +
+					"Are you sure you want to continue?",
+					function(doit) {
+						if (!doit) {
+							return;
+						}
+						var progressService = serviceRegistry.getService("orion.page.message");
+						progressService.createProgressMonitor(
+							serviceRegistry.getService("orion.git.provider").unstageAll(item.IndexLocation, "HARD"),
+							"Resetting local changes").deferred.then(
+							function(jsonData){
+								dojo.hitch(explorer, explorer.changedItem)(item);
+							}, displayErrorOnStatus
+						)						
+					}
+				);
+			},
+			
+			visibleWhen: function(item) {
+				// TODO Should check if there are any local changes
+				return /*(self.hasStaged || self.hasUnstaged)*/ true;
+			}
+		});
+
+		commandService.addCommand(resetCommand);
+
+		var checkoutCommand = new mCommands.Command({
+			name: "Checkout",
+			tooltip: "Checkout files, discarding all changes",
+			imageClass: "git-sprite-checkout",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.checkoutCommand",
+			callback: function(data) {				
+				var item = data.items;
+				
+				var dialog = serviceRegistry.getService("orion.page.dialog");
+				dialog.confirm("Your changes to the selected files will be discarded and cannot be recovered.\n" +
+					"Are you sure you want to continue?",
+					function(doit) {
+						if (!doit) {
+							return;
+						}
+						var progressService = serviceRegistry.getService("orion.page.message");
+						progressService.createProgressMonitor(
+							serviceRegistry.getService("orion.git.provider").checkoutPath(item.object.CloneLocation, [item.object.path]),
+							"Resetting local changes").deferred.then(
+							function(jsonData){
+								dojo.hitch(explorer, explorer.changedItem)(item);
+							}, displayErrorOnStatus
+						)						
+					}
+				);
+				
+				
+			},
+			visibleWhen: function(item) {
+//				var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+//				return return_value;
+				
+				return item.type === "fileItem" && !mGitUtil.isStaged(item.object);
+			}
+		});
+
+		commandService.addCommand(checkoutCommand);
+
+		var showPatchCommand = new mCommands.Command({
+			name: "Show Patch",
+			tooltip: "Show workspace changes as a patch",
+			imageClass: "git-sprite-diff",
+			spriteClass: "gitCommandSprite",
+			id: "eclipse.orion.git.showPatchCommand",
+			hrefCallback : function() {
+//				var url = self._curClone.DiffLocation + "?parts=diff";
+//				var selectedItems = self._unstagedContentRenderer.getSelected();
+//				for (var i = 0; i < selectedItems.length; i++) {
+//					url += "&Path=";
+//					url += selectedItems[i].modelItem.path;
+//				}
+//				return url;
+				return "http://elo";
+			},
+			visibleWhen: function(item) {
+//				var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
+//				return return_value;
+				
+				return false;
+			}
+		});
+		
+		commandService.addCommand(showPatchCommand);
 	};
 	
 }());
