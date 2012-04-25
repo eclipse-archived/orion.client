@@ -100,39 +100,45 @@ function loadResource(navigator, searcher, commandService){
 				var fileClient = new mFileClient.FileClient(serviceRegistry);
 				initTitleBar(fileClient, navigator, resource, searcher, commandService).then(
 					function(){
-						if (resource.Type === "RemoteTrackingBranch"){
+						var processRemoteTrackingBranch = function(resource) {
 							dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only");
-							gitService.getLog(resource.HeadLocation, resource.Id).then(function(scopedCommitsJsonData) {
-									navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-									navigator.renderer.setOutgoingCommits([]);
-									gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query).then(function(jsonData) {
-										resource.Children = jsonData.Children;
-										if(jsonData.NextLocation){
-											resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
-										}
-										if(jsonData.PreviousLocation ){
-											resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query;
-										}
-										navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
-									});
+							var newRefEncoded = encodeURIComponent(resource.FullName);
+							gitService.getLog(resource.HeadLocation, newRefEncoded).then(function(scopedCommitsJsonData) {
+								navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+								navigator.renderer.setOutgoingCommits([]);
+								gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query).then(function(jsonData) {
+									resource.Children = jsonData.Children;
+									if(jsonData.NextLocation){
+										resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query;
+									}
+									if(jsonData.PreviousLocation ){
+										resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query;
+									}
+									navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															
+								});
 							});
+						};
+						if (resource.Type === "RemoteTrackingBranch"){
+							processRemoteTrackingBranch(resource);
+						} else if (resource.Type === "Commit" && resource.toRef.Type === "RemoteTrackingBranch"){
+							processRemoteTrackingBranch(resource.toRef);
 						} else if (resource.toRef){
 							if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1){
 								gitService.getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location).then(
 									function(remoteJsonData, secondArg) {
 										dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only");
 										gitService.getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) {
-												navigator.renderer.setIncomingCommits([]);
-												navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-												navigator.loadCommitsList(dojo.hash(), resource);
+											navigator.renderer.setIncomingCommits([]);
+											navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+											navigator.loadCommitsList(dojo.hash(), resource);
 										});
 									},
 									function(error, ioArgs){
 										navigator.loadCommitsList(dojo.hash(), resource);
 									});
-								}
-							else
+							} else {
 								navigator.loadCommitsList(dojo.hash(), resource);
+							}
 						} else {
 							navigator.loadCommitsList(dojo.hash(), resource);
 						}
@@ -140,7 +146,7 @@ function loadResource(navigator, searcher, commandService){
 				);
 		},
 		function(error, ioArgs) {
-				navigator.loadCommitsList(dojo.hash(), error);	
+			navigator.loadCommitsList(dojo.hash(), error);	
 		});
 }
 
@@ -149,11 +155,11 @@ function getCloneFileUri(){
 	if(path.length === 2){
 		path = path[1].split("/");
 		if(path.length > 1){
-			fileURI="";
-			for(var i=0; i<path.length-1; i++){
-				fileURI+= "/" + path[i];
+			fileURI = "";
+			for(var i = 0; i < path.length - 1; i++){
+				fileURI += "/" + path[i];
 			}
-			fileURI+="/" + path[path.length-1].split("?")[0];
+			fileURI += "/" + path[path.length - 1].split("?")[0];
 		}
 	}
 	return fileURI;
@@ -176,54 +182,33 @@ function getHeadFileUri(){
 	return fileURI;
 }
 
-function getRemoteFileURI(){
-	var path = dojo.hash().split("gitapi/remote/");
-	if(path.length === 2){
-		path = path[1].split("/");
-		if(path.length > 2){
-			branch = path[0]+"/"+path[1];
-			fileURI="";
-			for(var i=2; i<path.length-1; i++){
-				//first two segments are a branch name
-				fileURI+= "/" + path[i];
-			}
-			fileURI+="/" + path[path.length-1].split("?")[0];
-		}
-	}
-	return fileURI;
-}
-
 function initTitleBar(fileClient, navigator, item, searcher, commandService){
-	
+
 	var deferred = new dojo.Deferred();
-	
-	var isRemote = (item.Type === "RemoteTrackingBranch");
+
+	var isRemote = (item.toRef && item.toRef.Type === "RemoteTrackingBranch");
 	var isBranch = (item.toRef && item.toRef.Type === "Branch");
-	
+
 	//TODO we are calculating file path from the URL, it should be returned by git API
 	var fileURI;
-	if (isRemote)
-		fileURI = getRemoteFileURI();
-	else if (isBranch)
+	if (isRemote || isBranch)
 		fileURI = getHeadFileUri();
 	else
 		fileURI = getCloneFileUri();
-	
+
 	if(fileURI){
 		fileClient.read(fileURI, true).then(
 			dojo.hitch(this, function(metadata) {
 				mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService); 
 				var branchName;
-				if (isRemote)
-					branchName = item.Name;
-				else if (isBranch)
+				if (isRemote || isBranch)
 					branchName = item.toRef.Name;
 				else
 					branchName = null;
 
 				if(item && item.CloneLocation){
 					var cloneURI = item.CloneLocation;
-					
+
 					serviceRegistry.getService("orion.git.provider").getGitClone(cloneURI).then(function(jsonData){
 						if(jsonData.Children && jsonData.Children.length>0) {
 							setPageTitle(branchName, jsonData.Children[0].Name, jsonData.Children[0].Location, isRemote, isBranch);

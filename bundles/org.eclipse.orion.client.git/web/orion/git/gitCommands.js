@@ -18,7 +18,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'or
 
 /**
  * @namespace The global container for eclipse APIs.
- */ 
+ */
 var exports = {};
 //this function is just a closure for the global "doOnce" flag
 (function() {
@@ -147,7 +147,7 @@ var exports = {};
 		});
 		return def;
 	};
-	
+
 	function translateResponseToStatus(response){
 		var json;
 		try{
@@ -210,7 +210,7 @@ var exports = {};
 		}
 			
 	};
-		
+
 	exports.gatherSshCredentials = function(serviceRegistry, data, title){
 		var def = new dojo.Deferred();
 
@@ -319,7 +319,6 @@ var exports = {};
 		}
 			
 	};
-
 
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
@@ -684,8 +683,6 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			hrefCallback : function(data) {
 				var item = data.items;
-				if (item.Type === "RemoteTrackingBranch")
-					return require.toUrl("git/git-log.html")+"#" + item.Location + "?page=1";
 				return require.toUrl("git/git-log.html")+"#" + item.CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
@@ -867,7 +864,13 @@ var exports = {};
 				);
 			},
 			visibleWhen: function(item) {
-				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
+				if (item.Type === "RemoteTrackingBranch")
+					return true;
+				if (item.Type === "Remote")
+					return true;
+				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+					return true;
+				return false;
 			}
 		});
 		commandService.addCommand(fetchCommand);
@@ -949,7 +952,13 @@ var exports = {};
 				);
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch" || item.Type === "Remote";
+				if (item.Type === "RemoteTrackingBranch")
+					return true;
+				if (item.Type === "Remote")
+					return true;
+				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+					return true;
+				return false;
 			}
 		});
 		commandService.addCommand(fetchForceCommand);
@@ -1014,7 +1023,13 @@ var exports = {};
 				});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "RemoteTrackingBranch" || (item.Type === "Branch" && !item.Current);
+				if (item.Type === "RemoteTrackingBranch")
+					return true;
+				if (item.Type === "Branch" && !item.Current)
+					return true;
+				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+					return true;
+				return false;
 			}
 		});
 		commandService.addCommand(mergeCommand);
@@ -1439,7 +1454,9 @@ var exports = {};
 			visibleWhen : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
 					return true;
-				
+				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+					return true;
+
 				try {
 					var obj = JSON.parse(item.responseText);
 					if (obj.JsonData)
@@ -1447,7 +1464,7 @@ var exports = {};
 				} catch(error) {
 					//it is not JSON, just continue;
 				}
-				
+
 				return false;
 			}
 		});
