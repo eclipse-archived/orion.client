@@ -868,7 +868,7 @@ var exports = {};
 					return true;
 				if (item.Type === "Remote")
 					return true;
-				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch")
 					return true;
 				return false;
 			}
@@ -956,7 +956,7 @@ var exports = {};
 					return true;
 				if (item.Type === "Remote")
 					return true;
-				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch")
 					return true;
 				return false;
 			}
@@ -1027,7 +1027,7 @@ var exports = {};
 					return true;
 				if (item.Type === "Branch" && !item.Current)
 					return true;
-				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch")
 					return true;
 				return false;
 			}
@@ -1454,7 +1454,7 @@ var exports = {};
 			visibleWhen : function(item) {
 				if (item.Type === "RemoteTrackingBranch")
 					return true;
-				if (item.Type === "Commit" && item.toRef.Type === "RemoteTrackingBranch")
+				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch")
 					return true;
 
 				try {
