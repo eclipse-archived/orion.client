@@ -371,7 +371,6 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var tableNode = dojo.byId( 'table' );
 
-		
 		var titleWrapper = new mSection.Section(tableNode, {
 			explorer: this,
 			id: "workingDirectorySection",
@@ -452,7 +451,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<list id="branchNode" class="plugin-settings-list"></list>',
 			commandService: this.commandService
-		}); 
+		});
 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting branches");
@@ -924,7 +923,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<list id="remoteNode" class="plugin-settings-list"></list>',
 			commandService: this.commandService
-		}); 
+		});
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting remotes");
@@ -987,7 +986,7 @@ exports.GitRepositoryExplorer = (function() {
 			slideout: true,
 			content: '<list id="configNode" class="plugin-settings-list"></list>',
 			commandService: this.commandService
-		}); 
+		});
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting confituration");
