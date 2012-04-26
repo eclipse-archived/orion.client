@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['dojo'], function(dojo){
+define(['dojo', 'orion/selection'], function(dojo, mSelection){
 	
 
 	/**
@@ -18,6 +18,7 @@ define(['dojo'], function(dojo){
 	 * @param options.id [required] id of the section header
 	 * @param options.explorer [required] explorer that is the parent of this section
 	 * @param options.title [required] title of the section
+	 * @param options.serviceRegistry [optional] required if selection service is to be used
 	 * @param options.commandService [optional] required if there are any commands in this section
 	 * @param options.iconClass [optional] the class of the icon decorating section, no icon displayed if not provided
 	 * @param options.content [optional] content of the section in HTML. May be set later using setContent()
@@ -25,6 +26,7 @@ define(['dojo'], function(dojo){
 	 * @returns Section object
 	 */
 	function Section(parent, options) {
+		this.id = options.id;
 		this.domNode = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":options.id}, parent );
 		
 		if(options.iconClass){
@@ -49,6 +51,7 @@ define(['dojo'], function(dojo){
 			this.setContent(options.content);
 		}
 		this._explorer = options.explorer;
+		this._serviceRegistry = options.serviceRegistry;
 		this._commandService = options.commandService;
 		this._lastMonitor = 0;
 		this._loading = {};
@@ -62,6 +65,7 @@ define(['dojo'], function(dojo){
 			setTitle: function(title){
 				this.titleNode.innerHTML = title;
 			},
+			
 			/**
 			 * Changes the contents of the section.
 			 * @param content
@@ -69,6 +73,7 @@ define(['dojo'], function(dojo){
 			setContent: function(content){
 				this.content.innerHTML = content;
 			},
+			
 			/**
 			 * Register command to this section
 			 * @param commandId
@@ -81,6 +86,7 @@ define(['dojo'], function(dojo){
 			registerCommandContribution: function(commandId, position, parentPath, bindingOnly, keyBinding, urlBinding){
 				this._commandService.registerCommandContribution(this.actionsNode.id, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding);
 			},
+			
 			/**
 			 * Render commands for this section
 			 * @param items
@@ -90,9 +96,20 @@ define(['dojo'], function(dojo){
 			renderCommands: function(items, renderType, userData){
 				this._commandService.renderCommands(this.actionsNode.id, this.actionsNode, items, this._explorer, renderType, userData);
 			},
+			
 			createProgressMonitor: function(){
 				return new ProgressMonitor(this);
 			},
+			
+			getSelection: function(){
+				if (!this._serviceRegistry)
+					return null;
+					
+				if (!this._selection)
+					this._selection = new mSelection.Selection(this._serviceRegistry, this.id);
+				return this._selection;
+			},
+			
 			_setMonitorMessage: function(monitorId, message){
 				this.progressNode.style.visibility = "visible";
 				this._loading[monitorId] = message;
@@ -105,6 +122,7 @@ define(['dojo'], function(dojo){
 				}
 				this.progressNode.title = progressTitle;
 			},
+			
 			_monitorDone: function(monitorId){
 				delete this._loading[monitorId];
 				var progressTitle = "";
@@ -118,11 +136,12 @@ define(['dojo'], function(dojo){
 				if(progressTitle===""){
 					this.progressNode.style.visibility = "hidden";
 				}
-				
 			}
 	};
 	
 	Section.prototype.constructor = Section;
+	
+	// ProgressMonitor
 	
 	function ProgressMonitor(section){
 		this._section = section;
@@ -134,10 +153,12 @@ define(['dojo'], function(dojo){
 				this.status = message;
 				this._section._setMonitorMessage(this.id, message);
 			},
+			
 			worked: function(message){
 				this.status = message;
 				this._section._setMonitorMessage(this.id, message);
 			},
+			
 			done: function(status){
 				this.status = status;
 				this._section._monitorDone(this.id);
@@ -145,6 +166,6 @@ define(['dojo'], function(dojo){
 	};
 	
 	ProgressMonitor.prototype.constructor = ProgressMonitor;
-	
+
 	return {Section: Section};
 });

@@ -11,9 +11,9 @@
 
 /*global define console document */
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
         'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, dojo, mExplorer, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+		function(messages, dojo, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	
 	var exports = {};
 	
@@ -281,47 +281,75 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			}); 
 			return retValue;
 		},
+		
+		GitStatusExplorer.prototype._createCheckbox = function(itemId, section){
+			var check = document.createElement("span");
+			check.id = itemId;
+			dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite " + section.id);
+
+			if(this.getCheckedFunc){
+				check.checked = this.getCheckedFunc(item);
+				if(this._highlightSelection){
+					dojo.toggleClass(tableRow, "checkedRow", check.checked);
+				}
+				dojo.toggleClass(check, "core-sprite-check_on", check.checked);
+			}
+
+			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				var newValue = evt.target.checked ? false : true;
+				var checkBox = evt.target;
+
+				checkBox.checked = newValue;
+				dojo.toggleClass(checkBox, "core-sprite-check_on", newValue);
+				
+				var selected = [];
+				dojo.query(".core-sprite-check_on." + section.id).forEach(dojo.hitch(this, function(node) {
+					var row = node.parentNode.parentNode;
+					selected.push(row._item);
+				}));
+				
+				if (section.getSelection) {
+					section.getSelection().setSelections(selected);		
+				}
+			}));
+			return check;
+		},
 
 		// Git unstaged changes
 		
 		GitStatusExplorer.prototype.displayUnstaged = function(status){
 
-			var tableNode = dojo.byId( 'table' );
-	
-			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"unstagedSectionHeader"}, tableNode );
-
 			var unstagedSortedChanges = this._sortBlock(this._model.interestedUnstagedGroup);
 			
-			dojo.create( "div", { id: "unstagedSectionTitle", "class":"layoutLeft", 
-				innerHTML: (unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes")}, titleWrapper );
-			var actionsArea = dojo.create( "div", { id: "unstagedSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
-
-			var commandService = this.registry.getService("orion.page.command");
-			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.stageCommand", 100);
-			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.checkoutCommand", 200);
-			commandService.registerCommandContribution("unstagedSectionActionsArea", "eclipse.orion.git.showPatchCommand", 300);
-			commandService.renderCommands("unstagedSectionActionsArea", actionsArea, status, this, "button");
+			var tableNode = dojo.byId( 'table' );
 			
-			var content =
-				'<div class="sectionTable">' +
-					'<div class="plugin-settings">' +
-						'<list id="unstagedNode" class="plugin-settings-list"></list>' +
-					'</div>' +
-				'</div>';
-	
-			dojo.place( content, tableNode );
+			var unstageSection = new mSection.Section(tableNode, {
+				explorer: this,
+				id: "unstagedSection",
+				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
+				content: '<list id="unstagedNode" class="plugin-settings-list"></list>',
+				commandService: this.registry.getService("orion.page.command"),
+				serviceRegistry: this.registry
+			});
 			
-			for(var i=0; (i<unstagedSortedChanges.length && i<10);i++){
-				this.renderUnstagedChange(unstagedSortedChanges[i], i);
+			unstageSection.registerCommandContribution("eclipse.orion.git.stageCommand", 100);
+			unstageSection.registerCommandContribution("eclipse.orion.git.checkoutCommand", 200);
+			unstageSection.registerCommandContribution("eclipse.orion.git.showPatchCommand", 300);
+			unstageSection.renderCommands(status, "button");
+			
+			for(var i=0; (i<unstagedSortedChanges.length);i++){
+				this.renderUnstagedChange(unstagedSortedChanges[i], i, unstageSection);
 			}
 		};
 		
-		GitStatusExplorer.prototype.renderUnstagedChange = function(unstagedSortedChange, index){
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, "unstagedNode");
-			var horizontalBox = dojo.create( "div", null, extensionListItem );
+		GitStatusExplorer.prototype.renderUnstagedChange = function(unstagedSortedChange, index, unstageSection){
 			
-			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
+			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem lightTreeTableRow" }, "unstagedNode");
+			extensionListItem._item = unstagedSortedChange;
 			
+			var detailsView = dojo.create( "div", { "class":"stretch"}, extensionListItem );
+			
+			detailsView.appendChild(this._createCheckbox("", unstageSection));
 			dojo.create( "span", { "class":"sectionIcon " + this._model.getClass(unstagedSortedChange.type) }, detailsView );
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: unstagedSortedChange.path }, detailsView );
 
@@ -329,7 +357,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.stageCommand", 100);
 			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.checkoutCommand", 200);
 
-			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
+			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, extensionListItem );
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: unstagedSortedChange}, this, "tool");
 		};
 		
@@ -374,7 +402,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 	
 			dojo.place( content, tableNode );
 			
-			for(var i=0; (i<stagedSortedChanges.length && i<10);i++){
+			for(var i=0; (i<stagedSortedChanges.length);i++){
 				this.renderStagedChange(stagedSortedChanges[i], i);
 			}
 		};
