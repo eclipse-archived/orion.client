@@ -195,7 +195,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 */
 	function CommandService(options) {
 		this._commandList = {};
-		this._contributionsByDomNode = {};
+		this._contributionsByScopeId = {};
 		this._activeBindings = {};
 		this._urlBindings = {};
 		this._init(options);
@@ -205,7 +205,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("orion.page.command", this);
-			this._selection = options.selection;
+			this._defaultSelectionService = options.selection;
 			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){
 				evt = evt || window.event;
 				// bindings are ignored if we are in a text field or editor
@@ -335,10 +335,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		/**
-		 * Return the selection service that is being used when commands should apply against a selection.
+		 * Return the default selection service that is being used when commands should apply against a selection.
 		 */
 		getSelectionService: function() {
-			return this._selection;
+			return this._defaultSelectionService;
 		},
 		
 		/**
@@ -513,10 +513,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 */	
 		 
 		addCommandGroup: function(scopeId, groupId, position, title, parentPath) {
-			if (!this._contributionsByDomNode[scopeId]) {
-				this._contributionsByDomNode[scopeId] = {};
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
 			}
-			var parentTable = this._contributionsByDomNode[scopeId];
+			var parentTable = this._contributionsByScopeId[scopeId];
 			if (parentPath) {
 				parentTable = this._createEntryForPath(parentTable, parentPath);		
 			} 
@@ -552,11 +552,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		/**
+		 * Register a selection service that should be used for certain command scopes.
+		 * @param {String} scopeId The id describing the scope for which this selection service applies.  Required.
+		 *  Only contributions made to this scope will use the selection service.
+		 * @param {orion.selection.Selection} selectionService the selection service for the scope.
+		 */
+		registerSelectionService: function(scopeId, selectionService) {
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
+			}
+			this._contributionsByScopeId.localSelectionService = selectionService;
+		},
+		
+		/**
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
-		 * @param {String} scopeId The id of a DOM element in which the command should be visible.  Required.
-		 *  When commands are rendered for a particular element, the command will be shown only if its scopeId
-		 *  matches the id being rendered.
+		 * @param {String} scopeId The id describing the scope of the command.  Required.
+		 *  This scope id is used when rendering commands.
 		 * @param {String} commandId the id of the command.  Required.
 		 * @param {Number} position the relative position of the command within its parent.  Required.
 		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
@@ -567,10 +579,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
-			if (!this._contributionsByDomNode[scopeId]) {
-				this._contributionsByDomNode[scopeId] = {};
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
 			}
-			var parentTable = this._contributionsByDomNode[scopeId];
+			var parentTable = this._contributionsByScopeId[scopeId];
 			if (parentPath) {
 				parentTable = this._createEntryForPath(parentTable, parentPath);		
 			} 
@@ -635,18 +647,20 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				throw "no parent"; 
 			}
 
-			if (!items) {
+			var contributions = this._contributionsByScopeId[scopeId];
+
+			if (!items && contributions) {
+				var selectionService = contributions.localSelectionService || this._defaultSelectionService;
 				var cmdService = this;
-				if (this._selection) {
-					this._selection.getSelections(function(selections) {
+				if (selectionService) {
+					dojo.when(selectionService.getSelections, function(selections) {
 						cmdService.renderCommands(scopeId, parent, selections, handler, renderType, userData);
 					});
 				}
 				return;
 			} 
-			var contributions = this._contributionsByDomNode[scopeId];
 			if (contributions) {
-				this._render(this._contributionsByDomNode[scopeId], parent, items, handler, renderType, userData);
+				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData);
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				if (renderType === "tool" || renderType === "button") {
 					if (this._isLastChildSeparator(parent, renderType)) {
