@@ -1385,7 +1385,7 @@ var exports = {};
 			tooltip: "Show the log for the corresponding remote tracking branch",
 			id : "eclipse.orion.git.switchToRemote",
 			hrefCallback : function(data) {
-				return require.toUrl("git/git-log.html")+"#" + data.items.toRef.RemoteLocation[0].Children[0].Location + "?page=1";
+				return require.toUrl("git/git-log.html")+"#" + data.items.toRef.RemoteLocation[0].Children[0].CommitLocation + "?page=1";
 			},
 			visibleWhen : function(item) {
 				return item.toRef != null && item.toRef.Type === "Branch" && item.toRef.Current && item.toRef.RemoteLocation && item.toRef.RemoteLocation.length===1 && item.toRef.RemoteLocation[0].Children.length===1;
