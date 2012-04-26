@@ -94,6 +94,7 @@ define(['dojo'], function(dojo){
 				return new ProgressMonitor(this);
 			},
 			_setMonitorMessage: function(monitorId, message){
+				this.progressNode.style.visibility = "visible";
 				this._loading[monitorId] = message;
 				var progressTitle = "";
 				for(var loadingId in this._loading){
@@ -102,7 +103,6 @@ define(['dojo'], function(dojo){
 					}
 					progressTitle+=this._loading[loadingId];
 				}
-				this.progressNode.style.visibility = "";
 				this.progressNode.title = progressTitle;
 			},
 			_monitorDone: function(monitorId){
