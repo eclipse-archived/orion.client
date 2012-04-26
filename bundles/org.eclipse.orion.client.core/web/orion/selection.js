@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2011 IBM Corporation and others.
+ * Copyright (c) 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -21,10 +21,13 @@ define(["dojo"], function(dojo){
 	 * @class Can provide one or more selections describing objects of interest.  Used to
 	 * establish input and output relationships between components.  For example, the selection
 	 * in one component can serve as the input of another component.
-	 */
-	function Selection(serviceRegistry) {
+	 */	
+	function Selection(serviceRegistry, selectionServiceId) {
+		if (!selectionServiceId)
+			selectionServiceId = "orion.page.selection";
+		
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService("orion.page.selection", this);
+		this._serviceRegistration = serviceRegistry.registerService(selectionServiceId, this);
 		this._selections = [];
 	}
 	 
