@@ -35,4 +35,5 @@
 
 .sectionProgress {
     text-decoration: blink;
+    visibility: hidden;
 }

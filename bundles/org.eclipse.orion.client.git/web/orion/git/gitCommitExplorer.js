@@ -11,8 +11,8 @@
 
 /*global define console document */
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
-		function(messages, dojo, mExplorer, mUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
+		function(messages, dojo, mSection, mExplorer, mUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -146,23 +146,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var tableNode = dojo.byId( 'table' );	
 			dojo.empty( tableNode );
 			
-			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"commitSectionHeader"}, tableNode );
-			
-			dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-modification" }, titleWrapper );
-			dojo.create( "div", { id: "commitSectionTitle", "class":"layoutLeft", innerHTML: (commit ? messages["Commit Details"] :  messages["No Commits"]) }, titleWrapper );
-			dojo.create( "div", { id: "commitSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
-
-			if (!commit)
-				return;
-			
-			var content =	
-				'<div class="sectionTable">' +
-					'<div class="plugin-settings">' +
-						'<list id="commitNode" class="plugin-settings-list"></list>' +
-					'</div>' +
-				'</div>';
-			
-			dojo.place( content, tableNode );
+			new mSection.Section(tableNode, {
+				explorer: this,
+				id: "commitSection",
+				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
+				iconClass: "gitImageSprite git-sprite-modification",
+				content: '<list id="commitNode" class="plugin-settings-list"></list>',
+			});
 
 		    var list = dojo.byId( "commitNode" );		
 			
@@ -245,29 +235,24 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			var diffs = commit.Diffs;
 			
 			var tableNode = dojo.byId( 'table' );
-
-			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"diffSectionHeader"}, tableNode );
 			
-			dojo.create( "div", { id: "diffSectionTitle", "class":"layoutLeft", innerHTML: messages["Diffs"] }, titleWrapper );
-			dojo.create( "div", { id: "diffSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
-						
-			var content =
-				'<div class="sectionTable">' +
-					'<div class="plugin-settings">' +
-						'<list id="diffNode" class="plugin-settings-list"></list>' +
-					'</div>' +
-				'</div>';
-
-			dojo.place( content, tableNode );
+			var titleWrapper = new mSection.Section(tableNode, {
+				explorer: this,
+				id: "diffSection",
+				title: messages["Diffs"],
+				content: '<list id="diffNode" class="plugin-settings-list"></list>',
+			}); 
 			
 			if(diffs.length > 0){
-				this.renderDiff(diffs, 0);
+				this.renderDiff(diffs, 0, titleWrapper);
 			}
 		};
 
-		GitCommitExplorer.prototype.renderDiff = function(diffs, index){
+		GitCommitExplorer.prototype.renderDiff = function(diffs, index, titleWrapper){
 			
 			// add diff details
+			var progress = titleWrapper.createProgressMonitor();
+			progress.begin("Rendering diff");
 			var diff = diffs[index];
 			var diffDetailsItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") );
 			var diffDetailsHorizontalBox = dojo.create( "div", null, diffDetailsItem );
@@ -277,6 +262,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			if (diff.ChangeType === "ADD"){
 				diffPath = diff.NewPath;
 			}	
+			progress.worked(mUtil.formatMessage("Rendering #{0}", diffPath));
+			
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
 
 			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox, "last" );
@@ -298,14 +285,14 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 				hasConflicts: false,
 				readonly: true,
 				complexURL: diff.DiffLocation,
-				callback : function(){}
+				callback : function(){progress.done();}
 			};
 			
 			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions);
 			var that = this;
 			inlineCompareContainer.startup( function(){
 				if(index < (diffs.length -1 )){
-					that.renderDiff(diffs, index+1);
+					that.renderDiff(diffs, index+1, titleWrapper);
 				}
 			});
 		};
@@ -317,39 +304,21 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'ori
 			
 			var tableNode = dojo.byId( 'table' );
 
-			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"tagSectionHeader"}, tableNode );
+			var titleWrapper = new mSection.Section(tableNode, {
+				explorer: this,
+				id: "tagSection",
+				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
+				iconClass: "gitImageSprite git-sprite-tag",
+				slideout: true,
+				content: '<list id="tagNode" class="plugin-settings-list"></list>',
+				commandService: this.commandService
+			}); 
 			
-			dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-tag" }, titleWrapper );
-			dojo.create( "div", { id: "tagSectionTitle", "class":"layoutLeft", innerHTML: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]) }, titleWrapper );
-			dojo.create( "div", { id: "tagSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
-
-			var parentId = "tagSectionHeader";
-			
-			var slideout = 
-				'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
-					'<span id="' + parentId + 'slideOut" class="slide">' +
-					   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
-					   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
-					'</span>' +
-				'</div>';
-		
-		
-			dojo.place( slideout, titleWrapper );
-			
-			this.commandService.registerCommandContribution("tagSectionActionsArea", "eclipse.orion.git.addTag", 2000);
-			this.commandService.renderCommands("tagSectionActionsArea", dojo.byId("tagSectionActionsArea"), commit, this, "button", false);
+			titleWrapper.registerCommandContribution("eclipse.orion.git.addTag", 2000);
+			titleWrapper.renderCommands(commit, "button", false);
 			
 			if (!tags && tags.length > 0)
 				return;
-			
-			var content =
-				'<div class="sectionTable">' +
-					'<div class="plugin-settings">' +
-						'<list id="tagNode" class="plugin-settings-list"></list>' +
-					'</div>' +
-				'</div>';
-
-			dojo.place( content, tableNode );
 			
 			for(var i=0; (i<tags.length && i<10);i++){
 				this.renderTag(tags[i]);
