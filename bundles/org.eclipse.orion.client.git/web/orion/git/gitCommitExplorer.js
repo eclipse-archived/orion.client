@@ -151,7 +151,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				id: "commitSection",
 				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
 				iconClass: "gitImageSprite git-sprite-modification",
-				content: '<list id="commitNode" class="plugin-settings-list"></list>',
+				content: '<list id="commitNode" class="plugin-settings-list"></list>'
 			});
 
 		    var list = dojo.byId( "commitNode" );		
@@ -240,7 +240,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				explorer: this,
 				id: "diffSection",
 				title: messages["Diffs"],
-				content: '<list id="diffNode" class="plugin-settings-list"></list>',
+				content: '<list id="diffNode" class="plugin-settings-list"></list>'
 			}); 
 			
 			if(diffs.length > 0){
