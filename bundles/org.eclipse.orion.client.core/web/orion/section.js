@@ -33,7 +33,7 @@ define(['dojo', 'orion/selection'], function(dojo, mSelection){
 			var icon = dojo.create( "span", { "class":"sectionIcon" }, this.domNode );
 			dojo.addClass(icon, options.iconClass);
 		}
-		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"layoutLeft", innerHTML: options.title }, this.domNode );
+		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor layoutLeft", innerHTML: options.title }, this.domNode );
 		this.progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, this.domNode );
 		this.actionsNode = dojo.create( "div", { id: options.id + "ActionsArea", "class":"layoutRight sectionActions"}, this.domNode );
 		if(options.slideout){

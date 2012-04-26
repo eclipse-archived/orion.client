@@ -13,7 +13,7 @@
 /*browser:true*/
 define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog'], 
+        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ContentDialog'], 
         function(require, dojo, mCommands, mUtil, mGitUtil) {
 
 /**
@@ -2138,6 +2138,28 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(applyPatchCommand);
+		
+		var showContentCommand = new mCommands.Command({
+			name : "Show content",
+			tooltip: "Apply a patch on the selected repository",
+			id : "eclipse.orion.git.showContent",
+			imageClass: "git-sprite-apply_patch",
+			spriteClass: "gitCommandSprite",
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				var dialog = new orion.git.widgets.ContentDialog({
+					title: "Content",
+					diffLocation: item.DiffLocation
+				});
+						dialog.startup();
+						dialog.show();
+	
+			},
+			//visibleWhen : function(item) {
+				//return item.Type === "Clone" ;
+			//}
+		});
+		commandService.addCommand(showContentCommand);
 		
 		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", "Commit name:")], {hasOptionalParameters: true});
 		
