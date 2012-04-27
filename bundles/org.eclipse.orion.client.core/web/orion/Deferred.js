@@ -148,6 +148,42 @@ define(function() {
 		this.state = function() {
 			return state || "wait";
 		};
+		
+		this.all = function(promises, optOnError) {
+			var count = promises.length, result = [], deferred = this;
+
+			function onResolve(i, value) {
+				if (!state) {
+					result[i] = value;
+					if (--count === 0) {
+						deferred.resolve(result);
+					}
+				}
+			}
+			
+			function onReject(i, error) {
+				if (!state) {
+					if (optOnError) {
+						try {
+							onResolve(i, optOnError(error)); 
+							return;
+						} catch (e) {
+							error = e;
+						}
+					}
+					deferred.reject(error);
+				}
+			}
+			
+			if (count === 0) {
+				this.resolve(result);
+			} else {
+				promises.forEach(function(promise, i) {
+					promise.then(onResolve.bind(null, i), onReject.bind(null, i));
+				});
+			}
+			return this.promise;
+		};
 	}
 	return Deferred;
 });
