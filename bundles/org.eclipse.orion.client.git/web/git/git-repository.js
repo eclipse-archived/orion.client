@@ -53,6 +53,7 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("pageActions", "eclipse.initGitRepository", 101, "eclipse.gitGroup");
 	commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, 
 		new mCommands.CommandKeyBinding('h', true, true), new mCommands.URLBinding("openGitCommit", "commitName"));
+	commandService.registerCommandContribution("pageActions", "eclipse.orion.git.showContent", 300, null,true,new mCommands.CommandKeyBinding('e', true, true));
 	
 	// object contributions
 	commandService.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100);

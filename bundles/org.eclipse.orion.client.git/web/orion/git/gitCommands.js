@@ -2308,7 +2308,7 @@ var exports = {};
 				var progressService = serviceRegistry.getService("orion.page.message");
 				
 				progressService.createProgressMonitor(
-					serviceRegistry.getService("orion.git.provider").unstage(item.object.indexURI, item.object.name),
+					serviceRegistry.getService("orion.git.provider").unstage(item.indexURI, item.name),
 					"Unstaging changes").deferred.then(
 					function(jsonData){
 						dojo.hitch(explorer, explorer.changedItem)(item);
@@ -2316,7 +2316,7 @@ var exports = {};
 				)
 			},
 			visibleWhen: function(item) {
-				return item.type === "fileItem" && mGitUtil.isStaged(item.object);
+				return mGitUtil.isStaged(item);
 			}
 		});	
 		

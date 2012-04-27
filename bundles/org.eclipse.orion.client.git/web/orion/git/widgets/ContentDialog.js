@@ -11,7 +11,10 @@
 /*global dojo dijit dojox widgets*/
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button','dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/ApplyPatchDialog.html'], function(dojo, dijit, dojox) {
+define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 
+        'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button','dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 
+        'text!orion/git/widgets/templates/ApplyPatchDialog.html'], 
+        function(dojo, dijit, dojox) {
 
 /**
  */
@@ -33,19 +36,18 @@ dojo.declare("orion.git.widgets.ContentDialog", [ dijit.Dialog, orion.widgets._O
 		this.inherited(arguments);
 		var sectionsDiv = dojo.byId("div1");
 		var sections =  dojo.query(".sectionAnchor");
-		var currentSection;
+
 		for (var i=0;i<sections.length;i++){
-			currentSection = sections[i];
+			var currentSection = sections[i];
 			dojo.create("li", {id : currentSection.id + "Span" }, sectionsDiv);
 			var ahref = dojo.create("a", { href: window.location.href, title: "Go to " + currentSection.id + " section", innerHTML: currentSection.id + "\n"}, currentSection.id + "Span");
-			var onClickHandler = dojo.connect(ahref, 'onclick', function() {
-				currentSection.scrollIntoView(false);
+			var onClickHandler = dojo.connect(ahref, 'onclick', dojo.hitch(currentSection, function() {
+				this.scrollIntoView(true);
 				that.hide();
 				return false;
-				
-			});
+			}));
 		}
-		}
-
+	}
 });
+
 });
