@@ -11,9 +11,9 @@
 
 /*global define console document */
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
         'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, dojo, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	
 	var exports = {};
 	
@@ -318,6 +318,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/util', 'orio
 		// Git unstaged changes
 		
 		GitStatusExplorer.prototype.displayUnstaged = function(status){
+			
+			var that = this;
 
 			var unstagedSortedChanges = this._sortBlock(this._model.interestedUnstagedGroup);
 			
@@ -327,39 +329,122 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/util', 'orio
 				explorer: this,
 				id: "unstagedSection",
 				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
-				content: '<list id="unstagedNode" class="plugin-settings-list"></list>',
+				content: '<div id="unstagedNode" class="plugin-settings-list"></div>',
 				commandService: this.registry.getService("orion.page.command"),
 				serviceRegistry: this.registry
 			});
 			
-			unstageSection.registerCommandContribution("eclipse.orion.git.stageCommand", 100);
-			unstageSection.registerCommandContribution("eclipse.orion.git.checkoutCommand", 200);
-			unstageSection.registerCommandContribution("eclipse.orion.git.showPatchCommand", 300);
-			unstageSection.renderCommands(status, "button");
+//			unstageSection.registerCommandContribution("eclipse.orion.git.stageCommand", 100);
+//			unstageSection.registerCommandContribution("eclipse.orion.git.checkoutCommand", 200);
+//			unstageSection.registerCommandContribution("eclipse.orion.git.showPatchCommand", 300);
+//			unstageSection.renderCommands(status, "button");
 			
-			for(var i=0; (i<unstagedSortedChanges.length);i++){
-				this.renderUnstagedChange(unstagedSortedChanges[i], i, unstageSection);
-			}
+			
+			
+			var sectionItemActionScopeId = "unstagedSectionItem";
+			
+			mySelectionService = new mSelection.Selection(this.registry);
+			
+			var commandService = this.registry.getService("orion.page.command");
+			commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.stageCommand", 100);
+			commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.checkoutCommand", 200);		
+			commandService.registerSelectionService(sectionItemActionScopeId, mySelectionService);
+			
+			UnstagedModel = (function() {
+				function UnstagedModel() {
+				}
+				
+				UnstagedModel.prototype = {
+					destroy: function(){
+					},
+					getRoot: function(onItem){
+						onItem(unstagedSortedChanges);
+					},
+					getChildren: function(parentItem, onComplete){
+						
+						if (parentItem instanceof Array && parentItem.length > 0) {
+							onComplete(parentItem);
+						} else {
+							onComplete([]);
+						}
+					},
+					getId: function(/* item */ item){
+						if (item instanceof Array && item.length > 0) {
+							return "root";
+						}
+						return item.name;
+					}
+				};
+				
+				return UnstagedModel;
+			}());
+			
+			UnstagedRenderer = (function() {
+				function UnstagedRenderer (options, explorer) {
+					this._init(options);
+					this.options = options;
+					this.explorer = explorer;
+				}
+				
+				UnstagedRenderer.prototype = new mExplorer.SelectionRenderer();
+				
+				UnstagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+					
+					switch(col_no){
+					case 0:				
+						var td = document.createElement("td", {style: "padding: 10px"});
+						var div = dojo.create( "div", {style: "padding: 10px"}, td );
+						dojo.create( "span", { "class":"sectionIcon " + that._model.getClass(item.type) }, div );
+						dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
+						return td;
+						break;
+					case 1:
+						var actionsColumn = this.getActionsColumn(item, tableRow);
+						return actionsColumn;
+						break;
+					};
+				};
+				
+				return UnstagedRenderer;
+			}());
+			
+			UnstagedNavigator = (function() {
+				function UnstagedNavigator(registry, selection, parentId, actionScopeId) {
+					this.registry = registry;
+					this.checkbox = true;
+					this.parentId = parentId;
+					this.selection = selection;
+					this.actionScopeId = actionScopeId;
+					this.renderer = new UnstagedRenderer({actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: true}, this);
+					this.createTree(this.parentId, new UnstagedModel());
+				}
+				
+				UnstagedNavigator.prototype = new mExplorer.Explorer();
+			
+				return UnstagedNavigator;
+			}());
+			
+			new UnstagedNavigator(this.registry, mySelectionService, "unstagedNode"/*tableNode.id*/, sectionItemActionScopeId);
 		};
 		
-		GitStatusExplorer.prototype.renderUnstagedChange = function(unstagedSortedChange, index, unstageSection){
-			
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem lightTreeTableRow" }, "unstagedNode");
-			extensionListItem._item = unstagedSortedChange;
-			
-			var detailsView = dojo.create( "div", { "class":"stretch"}, extensionListItem );
-			
-			detailsView.appendChild(this._createCheckbox("", unstageSection));
-			dojo.create( "span", { "class":"sectionIcon " + this._model.getClass(unstagedSortedChange.type) }, detailsView );
-			dojo.create( "span", { "class":"gitMainDescription", innerHTML: unstagedSortedChange.path }, detailsView );
-
-			var commandService = this.registry.getService("orion.page.command");
-			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.stageCommand", 100);
-			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.checkoutCommand", 200);
-
-			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, extensionListItem );
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: unstagedSortedChange}, this, "tool");
-		};
+//		GitStatusExplorer.prototype.renderUnstagedChange = function(unstagedSortedChange, index, unstageSection){
+//			
+//			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem lightTreeTableRow" }, "unstagedNode");
+//			extensionListItem._item = unstagedSortedChange;
+//			
+//			var detailsView = dojo.create( "div", { "class":"stretch"}, extensionListItem );
+//			
+//			detailsView.appendChild(this._createCheckbox("", unstageSection));
+//			dojo.create( "span", { "class":"sectionIcon " + this._model.getClass(unstagedSortedChange.type) }, detailsView );
+//			dojo.create( "span", { "class":"gitMainDescription", innerHTML: unstagedSortedChange.path }, detailsView );
+//
+//			var commandService = this.registry.getService("orion.page.command");
+//			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.stageCommand", 100);
+//			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.checkoutCommand", 200);
+//
+//			var actionsArea = dojo.create( "div", {"id":"unstagedActionsArea", "class":"sectionTableItemActions" }, extensionListItem );
+//			this.commandService.renderCommands(this.actionScopeId, actionsArea, {type: "fileItem", object: unstagedSortedChange}, this, "tool");
+//		};
 		
 		// Git staged changes
 		

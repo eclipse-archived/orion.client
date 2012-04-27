@@ -2282,7 +2282,7 @@ var exports = {};
 				var progressService = serviceRegistry.getService("orion.page.message");
 				
 				progressService.createProgressMonitor(
-					serviceRegistry.getService("orion.git.provider").stage(item.object.indexURI),
+					serviceRegistry.getService("orion.git.provider").stage(item.indexURI),
 					"Staging changes").deferred.then(
 					function(jsonData){
 						dojo.hitch(explorer, explorer.changedItem)(item);
@@ -2290,7 +2290,7 @@ var exports = {};
 				)
 			},
 			visibleWhen: function(item) {
-				return item.type === "fileItem" && !mGitUtil.isStaged(item.object);
+				return !mGitUtil.isStaged(item);
 			}
 		});	
 		
@@ -2405,12 +2405,12 @@ var exports = {};
 						}
 						var progressService = serviceRegistry.getService("orion.page.message");
 						progressService.createProgressMonitor(
-							serviceRegistry.getService("orion.git.provider").checkoutPath(item.object.CloneLocation, [item.object.path]),
+							serviceRegistry.getService("orion.git.provider").checkoutPath(item.CloneLocation, [item.path]),
 							"Resetting local changes").deferred.then(
 							function(jsonData){
 								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus
-						)						
+						);				
 					}
 				);
 				
@@ -2420,7 +2420,7 @@ var exports = {};
 //				var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
 //				return return_value;
 				
-				return item.type === "fileItem" && !mGitUtil.isStaged(item.object);
+				return !mGitUtil.isStaged(item);
 			}
 		});
 
