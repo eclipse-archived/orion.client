@@ -1179,7 +1179,7 @@ orion.GitStatusController = (function() {
 				name : "Complete log",
 				id : "orion.openGitRemote",
 				hrefCallback : function(data) {
-					return require.toUrl("git/git-log.html") +"#" + data.items.branch.RemoteLocation[0].Children[0].Location + "?page=1";
+					return require.toUrl("git/git-log.html") +"#" + data.items.branch.RemoteLocation[0].Children[0].CommitLocation + "?page=1";
 				},
 				visibleWhen : function(item) {
 					return (item.type === "gitRemote" && item.branch && item.branch.RemoteLocation.length===1 && item.branch.RemoteLocation[0].Children.length===1);
