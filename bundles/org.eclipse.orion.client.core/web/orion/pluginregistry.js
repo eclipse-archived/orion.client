@@ -379,23 +379,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 		});
 		
 		var d = new Deferred();
-		var count = installList.length;
-		if (count === 0) {
-			d.resolve();
-		} else {
-			installList.forEach(function (promise) {
-				promise.then(function() {
-					if (--count === 0) {
-						d.resolve();
-					}
-				}, function() {
-					if (--count === 0) {
-						d.resolve();
-					}
-				});
-			});
-		}
-		return d.promise;
+		return d.all(installList, function(){});
 	};
 	
 	/**

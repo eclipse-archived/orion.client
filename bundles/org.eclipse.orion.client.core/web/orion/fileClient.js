@@ -14,7 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
+define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -26,11 +26,11 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		if(!fileService[funcName]){
 			throw funcName + " is not supportted in this file system";
 		}
-		var clientDeferred = new dojo.Deferred();
+		var clientDeferred = new Deferred();
 		fileService[funcName].apply(fileService, funcArgs).then(
 			//on success, just forward the result to the client
 			function(result) {
-				clientDeferred.callback(result);
+				clientDeferred.resolve(result);
 			},
 			//on failure we might need to retry
 			function(error) {
@@ -39,16 +39,16 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 						//try again
 						fileService[funcName].apply(fileService, funcArgs).then(
 							function(result) {
-								clientDeferred.callback(result);
+								clientDeferred.resolve(result);
 							},
 							function(error) {
-								clientDeferred.errback(error);
+								clientDeferred.reject(error);
 							}
 						);
 					});
 				} else {
 					//forward other errors to client
-					clientDeferred.errback(error);
+					clientDeferred.reject(error);
 				}
 			}
 		);
@@ -99,7 +99,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 					}
 					results[i] = _copy(sourceService, childSourceLocation, targetService, childTargetLocation);
 				}
-				return new dojo.DeferredList(results);
+				return new Deferred().all(results);
 			});
 		});
 	}
@@ -128,7 +128,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		var _names = [];
 		
 		function _noMatch(location) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			d.reject("No Matching FileService for location:" + location);
 			return d;
 		}
@@ -136,22 +136,22 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		var _fileSystemsRoots = [];
 		var _allFileSystemsService =  {
 			fetchChildren: function() {
-				var d = new dojo.Deferred();
+				var d = new Deferred();
 				d.resolve(_fileSystemsRoots);
 				return d;
 			},
 			createWorkspace: function() {
-				var d = new dojo.Deferred();
+				var d = new Deferred();
 				d.reject("no file service");
 				return d;
 			},
 			loadWorkspaces: function() {
-				var d = new dojo.Deferred();
+				var d = new Deferred();
 				d.reject("no file service");
 				return d;
 			},
 			loadWorkspace: function(location) {
-				var d = new dojo.Deferred();
+				var d = new Deferred();
 				window.setTimeout(function() {
 					d.resolve({
 						Directory: true, 
