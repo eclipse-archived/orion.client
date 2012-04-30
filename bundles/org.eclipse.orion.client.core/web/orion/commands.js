@@ -653,7 +653,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				var selectionService = contributions.localSelectionService || this._defaultSelectionService;
 				var cmdService = this;
 				if (selectionService) {
-					dojo.when(selectionService.getSelections, function(selections) {
+					selectionService.getSelections(function(selections) {
 						cmdService.renderCommands(scopeId, parent, selections, handler, renderType, userData);
 					});
 				}
