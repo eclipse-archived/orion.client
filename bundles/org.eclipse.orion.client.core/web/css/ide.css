@@ -346,15 +346,16 @@ a:hover {
 
 .auxpane {
 	border: 0;
-	border-top: 1px solid #e4e4e4;
     background: #f8f8f8;
     overflow-x: auto;
     min-width: 200px;
+    padding-top: 16px;
 }
 
 .auxPadding {
 	padding-left: 8px;
-	padding-top: 4px;
+	padding-top: 2px;
+    padding-bottom: 8px;
 }
 
 .claro .dijitBorderContainer {
@@ -406,7 +407,6 @@ a:hover {
 }
  
 .mainpane {
-	border-top: 1px solid #ebebeb;
     background: #FFFFFF;
 	overflow: auto;
 }
@@ -503,11 +503,13 @@ a:hover {
  	min-height: 32px;
 	width: 100%;
 	color: #222222;
+	border-bottom: 1px solid #e4e4e4;
 }
 
 .mainToolbar {
  	min-height: 30px;
  	background: #ffffff;
+	border-bottom: 1px solid #ebebeb;
 }
 
 .pageTitle {
@@ -547,9 +549,11 @@ a:hover {
 }
 
 .paneTitle {
+	margin-top: 2px;
 	padding-top: 2px;
-	padding-left: 2px;
+	padding-left: 8px;
 	vertical-align: baseline;
+	display: inline-block;
 }
 
 .paneHeading {
@@ -559,7 +563,7 @@ a:hover {
 	border-top: 1px solid #ebebeb;
 	min-height: 26px;
 	width: 100%;
-	font-size: 9pt;
+	font-size: 10pt;
 	font-weight: bold;
 	color: #808080;
 }
@@ -569,16 +573,15 @@ a:hover {
 }
 
 .auxpaneHeading {
-	background-color: #fafafa;
-	border-bottom: 1px solid #ebebeb;
-	border-top: 1px solid #ebebeb;
-	vertical-align: middle;
+	margin-top: 8px;
 	min-height: 26px;
+	vertical-align: baseline;
 	width: 100%;
-	font-size: 9pt;
+	font-size: 10pt;
 	font-weight: bold;
 	color: #808080;
 }
+
 .slideContainer {
 	height: auto;
 	width: 97%;
@@ -834,6 +837,7 @@ a:hover {
 }
 
 #outline li {
+	padding-bottom: 2px;
 	list-style-type: none;
 	white-space: nowrap; /*wrapping makes indented list hard to read*/
 }

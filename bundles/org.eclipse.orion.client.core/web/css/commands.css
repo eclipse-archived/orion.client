@@ -63,6 +63,7 @@
 }
 
 .commandMenu {
+    color: #222222;
 	display: inline-block;
 	vertical-align: baseline;
 	margin: 0;
@@ -178,6 +179,10 @@
   padding: 1px;
   color: #808080;
   margin: 0;
+}
+
+.claro .commandMenu .dijitButtonNode {
+  color: #222222;
 }
 
 /* button hover */

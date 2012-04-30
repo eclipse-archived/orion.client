@@ -45,13 +45,14 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 			dojo.when(this._outlineService, function(service) {
 				service.addEventListener("outline", function(outlineModel, title, providerId) {
 					self.providerId = providerId;
-					self._renderMenu(self.outlineProviders);
+					self._renderHeadingAndMenu(self.outlineProviders);
 					self._renderOutline.apply(self, Array.prototype.slice.call(arguments));
 				});
 			});
 			
 			var switchOutlineCommand = new mCommands.Command({
-				name: "Outline",
+				name: "Switch",
+				tooltip: "Switch the type of outliner used",
 				id: "eclipse.edit.outline.switch",
 				visibleWhen: function(item) {
 					return true;
@@ -70,10 +71,11 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 		 */
 		setSelectedProvider: function(/**ServiceReference*/ provider) {
 			this.providerId = provider.getProperty("id");
+			this.providerName = provider.getProperty("name");
 		},
 		setOutlineProviders: function(providers) {
 			this.outlineProviders = providers;
-			this._renderMenu(this.outlineProviders);
+			this._renderHeadingAndMenu(this.outlineProviders);
 		},
 		_renderOutline: function(outlineModel, title) {
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
@@ -101,16 +103,12 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 			}
 			return choices;
 		},
-		_renderMenu: function(/**ServiceReference*/ outlineProviders) {
-			if (this.menuNode) {
-				dojo.empty(this.menuNode);
-			} else {
-				this.menuNode = dojo.create("div", {id: "switchOutlineMenu"}, this._parent, "last");
-			}
+		_renderHeadingAndMenu: function(/**ServiceReference*/ outlineProviders) {
+			dojo.destroy("outlinerHeading");
 			if (outlineProviders.length > 1) {
-				this._commandService.registerCommandContribution(this.menuNode.id, "eclipse.edit.outline.switch", 1);
-				this._commandService.renderCommands(this.menuNode.id, this.menuNode, null, this, "button");
+				this._commandService.registerCommandContribution("outlineCommands", "eclipse.edit.outline.switch", 1);
 			}
+			mUtil.createPaneHeading(this._parent, "outlinerHeading", "Outliner", true, null, "outlineCommands", this._commandService, this);
 		},
 		_renderElement: function(/**DOMNode*/ parentNode, /**Object*/ element, title) {
 			if (!element) {

@@ -874,6 +874,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 										label: command.name,
 										dropDown: choicesMenu
 								        });
+								dojo.addClass(menuButton.domNode, "commandMenu");
+								dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
+								dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 								if (command.image) {
 									dojo.addClass(menuButton.iconNode, "commandImage");
 									menuButton.iconNode.src = command.image;

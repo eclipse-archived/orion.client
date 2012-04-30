@@ -193,7 +193,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 					mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "File Servers", true);
 					
 					var fileSystemTable = dojo.create("table", {id: "fileSystemTable", role: "presentation"});
-					dojo.addClass(fileSystemTable, "favoritesTable");
+					dojo.addClass(fileSystemTable, "favoritesTable auxPadding");
 					var body = dojo.create("tbody", null, fileSystemTable);
 					for(var i = 0; i < allReferences.length; ++i) {
 						var name = allReferences[i].getProperty("Name");
@@ -218,7 +218,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 
 			// favorites
 			var navOutlineTable = dojo.create("table", {id: "favoritesTable", role: "presentation"});
-			dojo.addClass(navOutlineTable, "favoritesTable");
+			dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
 			var id, tr, col1, href, actionsWrapper;
 			var tbody = dojo.create("tbody", null, navOutlineTable);
 
@@ -255,7 +255,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			if (searches.length > 0) {
 				mUtil.createPaneHeading(this._parent, "searchesHeading", "Searches", true);
 				navOutlineTable = dojo.create("table", {id: "searchTable", role: "presentation"});
-				dojo.addClass(navOutlineTable, "favoritesTable");
+				dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
 
 				tbody = dojo.create("tbody", null, navOutlineTable);
 				for (var k=0; k < searches.length; k++) {
