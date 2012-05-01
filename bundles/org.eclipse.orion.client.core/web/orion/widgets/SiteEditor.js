@@ -27,14 +27,12 @@ var AUTOSAVE_INTERVAL = 8000;
 dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'),
-	
-	/** dojo.Deferred */
-	_workspaces: null,
-	
+
 	/** dojo.Deferred */
 	_projects: null,
 	
-	_fetched: false,
+	/** dojo.Deferred */
+	_workspaces: null,
 	
 	/** SiteConfiguration */
 	_siteConfiguration: null,
@@ -119,6 +117,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				visibleWhen: dojo.hitch(this, function(item) {
 					return !!item.Location && !this._isSelfHosting;
 				}),
+				// FIXME selfhosting 
 				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
 			this._commandService.addCommand(convertCommand);
 			
@@ -249,13 +248,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			});
 		return deferred;
 	},
-	
-	/**
-	 * Fetches top-level children of the siteConfiguration's workspace
-	 * @returns {dojo.Deferred}
-	 */
+
 	_fetchProjects: function(siteConfiguration) {
 		if (!this._fetched) {
+			// Can't we optimize this
 			dojo.when(this._workspaces, dojo.hitch(this, function(workspaces) {
 				var workspace;
 				for (var i=0; i < workspaces.length; i++) {
@@ -268,7 +264,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					this._fileClient.fetchChildren(workspace.Location).then(
 						dojo.hitch(this, function(projects) {
 							this._fetched = true;
-							this._projects.callback(projects);
+							this._projects.resolve(projects);
 						}),
 						dojo.hitch(this, this._onError));
 				}
@@ -298,8 +294,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		if (!this.mappings) {
 			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
 					siteClient: this._siteClient, fileClient: this._fileClient, selection: null, 
-					parentId: this.mappingsPlaceholder.id, siteConfiguration: this._siteConfiguration, 
-					projects: this._projects /**dojo.Deferred*/
+					parentId: this.mappingsPlaceholder.id, siteConfiguration: this._siteConfiguration
 				});
 		} else {
 			this.mappings._setSiteConfiguration(this._siteConfiguration);
