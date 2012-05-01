@@ -652,7 +652,7 @@ exports.DiffBlockFeeder = (function() {
 			var lineStart = textModel.getLineStart(lineIndex);
 			var lineEnd = textModel.getLineEnd(lineIndex);
 			if(lineStart !== lineEnd){
-				if(annoPosition.start == lineEnd){
+				if(annoPosition.start === lineEnd){
 					annoPosition.start--;
 					return this._mapperColumnIndex === 0 ? DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT : DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT;
 				}
