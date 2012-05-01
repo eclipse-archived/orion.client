@@ -11,6 +11,7 @@
 /*global define document window*/
 /*jslint regexp:false*/
 define(['require', 'dojo'], function(require, dojo) {
+	var Deferred = dojo.Deferred;
 	function qualifyURL(url) {
 		var link = document.createElement("a");
 		link.href = url;
@@ -31,8 +32,38 @@ define(['require', 'dojo'], function(require, dojo) {
 		return site.HostingStatus.URL + (path[0] !== "/" ? "/" : "") + path + (file.Directory ? "/" : "");
 	}
 
-	function SiteImpl(filePrefix) {
+	function SiteImpl(filePrefix, workspacePrefix) {
 		this.filePrefix = filePrefix;
+		this.cache = {
+			getProjects: function(workspaceId) {
+				// TODO would be better to invoke the FileService here but we are inside a plugin so we can't.
+				if (!this.projects) {
+					var headers = { "Orion-Version": "1" };
+					this.projects = dojo.xhrGet({
+						url: workspacePrefix,
+						headers: headers,
+						handleAs: 'json'
+					}).then(function(data) {
+						var workspaces = data.Workspaces;
+						var workspace;
+						for (var i = 0; i < workspaces.length; i++) {
+							workspace = workspaces[i];
+							if (workspace.Id === workspaceId) {
+								break;
+							}
+						}
+						return dojo.xhrGet({
+							url: workspace.Location,
+							headers: headers,
+							handleAs: 'json'
+						}).then(function(workspaceData) {
+							return workspaceData.Children || [];
+						});
+					});
+				}
+				return this.projects;
+			}
+		};
 	}
 	SiteImpl.prototype = {
 		getSiteConfigurations: function() {
@@ -149,11 +180,26 @@ define(['require', 'dojo'], function(require, dojo) {
 		},
 		/** @returns {Object} */
 		getMappingObject: function(site, fileLocation, virtualPath) {
-			return {
-				Source: virtualPath,
-				Target: this.toInternalForm(fileLocation),
-				FriendlyPath: '', // oh god
-			};
+			var internalPath = this.toInternalForm(fileLocation);
+			return this.cache.getProjects(site.Workspace).then(function(projects) {
+				// Determine display string based on the project name (first segment of internal form)
+				var segments = internalPath.split('/');
+				var firstSegment = segments[1];
+				var displayString;
+				for (var i=0; i < projects.length; i++) {
+					var project = projects[i];
+					if (project.Id === firstSegment) {
+						segments[1] = project.Name;
+						displayString = segments.join('/');
+						break;
+					}
+				}
+				return {
+					Source: virtualPath,
+					Target: internalPath,
+					FriendlyPath: displayString || virtualPath,
+				};
+			});
 		},
 		// TODO review the methods below
 		// FIXME "view on site"

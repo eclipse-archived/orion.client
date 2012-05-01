@@ -50,7 +50,8 @@
 			// Tightly coupled to the fileClientPlugin
 			var siteBase = unqualify('../../site');
 			var fileBase = unqualify('../../file');
-			console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase);
+			var workspaceBase = unqualify('../../workspace');
+			console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
 
 			var provider = new eclipse.PluginProvider();
 
@@ -74,7 +75,7 @@
 			var host = document.createElement('a');
 			host.href = '/';
 			provider.registerServiceProvider('orion.site',
-				new siteImpl.SiteImpl(fileBase),
+				new siteImpl.SiteImpl(fileBase, workspaceBase),
 				{	id: 'orion.site.default',
 					name: '' + host.hostname,
 					pattern: siteBase,

@@ -8,8 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
-/*jslint browser:true regexp:true */
+/*global define document */
 
 define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
 		function(require, dojo, mUtil, mCommands, mExplorer) {
@@ -25,6 +24,15 @@ function mixin(target, source) {
 // FIXME perhaps site service should be in charge of this.0
 function isWorkspacePath(/**String*/ path) {
 	return new RegExp("^/").test(path);
+}
+
+/** @returns true if b is a sub-path of a */
+function pathsMatch(a, b) {
+	return a === b || a.indexOf(b + "/") === 0;
+}
+
+function safePath(str) {
+	return str.replace(/[\r\n\t]/g, "");
 }
 
 mSiteMappingsTable.Model = (function() {
@@ -112,7 +120,7 @@ mSiteMappingsTable.Renderer = (function() {
 				this.options.siteClient.toFileLocation(target).then(function(loc) {
 					href = mUtil.safeText(loc);
 					col.innerHTML = "<span class=\"validating\">&#8230;</span>";
-					// use file service directly to avoid authentication prompt & retrying
+					// use file service directly to avoid retrying in case of failure
 					self.options.fileClient._getService(loc).read(loc, true).then(
 						function(object) {
 							var isDirectory = object && object.Directory;
@@ -154,7 +162,6 @@ mSiteMappingsTable.MappingsTable = (function() {
 				actionScopeId: "siteMappingCommand"
 			}, this);
 		this.myTree = null;
-		this.projectsPromise = options.projects;
 		this._setSiteConfiguration(options.siteConfiguration);
 		this.setDirty(false);
 	}
@@ -170,15 +177,14 @@ mSiteMappingsTable.MappingsTable = (function() {
 				d.callback(this.siteConfiguration.Mappings);
 				return d;
 			});
-			dojo.when(this.projectsPromise, dojo.hitch(this, function(projects) {
-				this.projects = projects;
-				// Make FriendlyPath
-				this.siteConfiguration.Mappings = dojo.map(this.siteConfiguration.Mappings, dojo.hitch(this, function(mapping) {
-					return this.createMappingObject(mapping.Source, mapping.Target);
-				}));
-				// Build visuals
-				this.createTree(this.parentId, new mSiteMappingsTable.Model(null, fetchItems, this.siteConfiguration.Mappings));
-			}));
+			// This code refreshes the display strings. Should be done by the site service.
+			var self = this;
+			this.siteConfiguration.Mappings = this.siteConfiguration.Mappings.map(function(mapping) {
+				// TODO refresh display name from the site service
+				return mapping;
+			});
+			// Build visuals
+			this.createTree(this.parentId, new mSiteMappingsTable.Model(null, fetchItems, this.siteConfiguration.Mappings));
 		},
 		render: function() {
 			this.changedItem(this.siteConfiguration.Mappings, this.siteConfiguration.Mappings);
@@ -254,23 +260,22 @@ mSiteMappingsTable.MappingsTable = (function() {
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);
 		},
-		// TODO: use makeNewItemPlaceHolder() ?
-		_addMapping: function(/**String*/ source, /**String*/ target, /**String*/ friendlyPath) {
-			source = this.safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
-			target = this.safePath(typeof(target) === "string" ? target : "/");
+		_addMapping: function(object) {
+			var source = object.Souce, target = object.Target, friendlyPath = object.FriendlyPath;
+			source = safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
+			target = safePath(typeof(target) === "string" ? target : "/");
 			if (!this.mappingExists(source, target)) {
-				var newItem = this.createMappingObject(source, target);
-				this.siteConfiguration.Mappings.push(newItem);
+				this.siteConfiguration.Mappings.push(object);
 			}
 		},
-		addMapping: function(source, target, friendlyPath) {
-			this._addMapping(source, target, friendlyPath);
+		addMapping: function(object) {
+			this._addMapping(object);
 			this.render();
 			this.setDirty(true);
 		},
 		addMappings: function(mappings) {
 			for (var i=0; i < mappings.length; i++) {
-				this._addMapping(mappings[i].Source, mappings[i].Target);
+				this.addMapping(mappings[i]);
 			}
 			this.render();
 			this.setDirty(true);
@@ -313,9 +318,6 @@ mSiteMappingsTable.MappingsTable = (function() {
 			}
 			return "/web/somePath";
 		},
-		createMappingObject: function(source, target) {
-			return {Source: source, Target: target, FriendlyPath: this.toFriendlyPath(target)};
-		},
 		deleteMapping: function(/**Object*/ mapping) {
 			var index = this.siteConfiguration.Mappings.indexOf(mapping);
 			if (index !== -1) {
@@ -326,7 +328,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			this.siteConfiguration.Mappings.splice(0, this.siteConfiguration.Mappings.length);
 		},
 		fieldChanged: function(/**Object*/ item, /**String*/ fieldName, /**String*/ newValue, /**Event*/ event) {
-			newValue = this.safePath(newValue);
+			newValue = safePath(newValue);
 			var oldValue = item[fieldName];
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
@@ -345,7 +347,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 					var name = "/" + project.Name;
 					// FIXME ASYNC
 					var location = this.siteClient.toInternalForm(project.Location);
-					if (this.pathsMatch(target, location)) {
+					if (pathsMatch(target, location)) {
 						friendlyPath = name + target.substring(location.length);
 						break;
 					}
@@ -361,7 +363,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 					var name = "/" + project.Name;
 					// FIXME ASYNC
 					var location = this.siteClient.toInternalForm(project.Location);
-					if (this.pathsMatch(friendlyPath, name)) {
+					if (pathsMatch(friendlyPath, name)) {
 						var rest = friendlyPath.substring(name.length);
 						item.Target = location + rest;
 						return;
@@ -370,13 +372,6 @@ mSiteMappingsTable.MappingsTable = (function() {
 			}
 			// Bogus workspace path, or not a workspace path at all
 			item.Target = friendlyPath;
-		},
-		/** @returns true if b is a sub-path of a */
-		pathsMatch: function(a, b) {
-			return a === b || a.indexOf(b + "/") === 0;
-		},
-		safePath: function(str) {
-			return str.replace(/[\r\n\t]/g, "");
 		},
 		setDirty: function(value) {
 			this._isDirty = value;
