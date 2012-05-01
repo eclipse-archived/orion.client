@@ -88,10 +88,20 @@ exports.CompareStyler = (function() {
 		this._syntaxHighlither = new Highlight.SyntaxHighlighter(registry);
 	}	
 	CompareStyler.prototype = {
-		highlight: function(fileName, contentType, editorWidget) {
-			this._syntaxHighlither.setup(contentType, editorWidget, 
+		highlight: function(fileName, contentType, editorWidget, compareWidget, loadingNumber) {
+			this._syntaxHighlither.setup(contentType, editorWidget.getTextView(), 
 										 null, //passing an AnnotationModel allows the styler to use it to annotate tasks/comment folding/etc, but we do not really need this in compare editor
-										 fileName);
+										 fileName).then(function(){
+										 	if(compareWidget && loadingNumber){
+												editorWidget.highlightAnnotations();
+												editorWidget.setAnnotationRulerVisible(false);
+										 		compareWidget._highlighterLoaded++;
+										 		if(compareWidget._highlighterLoaded === loadingNumber){
+										 			compareWidget._diffNavigator.renderAnnotations();
+										 			compareWidget._diffNavigator.gotoBlock(compareWidget.options.blockNumber-1, compareWidget.options.changeNumber-1);
+										 		}
+										 	}
+										 });
 		}
 	};
 	return CompareStyler;
@@ -760,6 +770,7 @@ exports.TwoWayCompareContainer = (function() {
 			result = this.parseMapper(input , output, diff , this.options.hasConflicts, onsave);
 			output = result.output;
 		}
+		this._highlighterLoaded = 0;
 		var that = this;
 		if(!this._leftEditor){
 			this.initEditorContainers(result.delim , output , input ,  result.mapper , true);
@@ -776,18 +787,13 @@ exports.TwoWayCompareContainer = (function() {
 			this._curveRuler.init(result.mapper ,this._leftEditor , this._rightEditor, this._diffNavigator);
 			this._inputManager.filePath = this.options.newFile.URL;
 			this._rightEditor.setInput(this.options.baseFile.Name, null, input);
-			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightTextView);
-			this._rightEditor.highlightAnnotations();
-			this._rightEditor.setAnnotationRulerVisible(false);
 			this._leftEditor.setInput(this.options.newFile.Name, null, output);
-			this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftTextView);
-			this._leftEditor.highlightAnnotations();
-			this._leftEditor.setAnnotationRulerVisible(false);
+			this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftEditor, this, 2);
+			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
 			this.renderCommands();
 			if(!this.options.readonly)
 				this._inputManager.setInput(this.options.newFile.URL , this._leftEditor);
 		}
-		this._diffNavigator.renderAnnotations();
 		if(this._viewLoadedCounter > 1){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
@@ -976,6 +982,7 @@ exports.InlineCompareContainer = (function() {
 			output = result.output;
 		}
 		var that = this;
+		this._highlighterLoaded = 0;
 		if(!this._textView){
 			this.initEditorContainers(result.delim , input ,  result.mapper , result.diffArray , true);
 		}else {
@@ -987,10 +994,8 @@ exports.InlineCompareContainer = (function() {
 			rFeeder.setModel(this._textView.getModel());
 			lFeeder.setModel(this._textView.getModel());
 			this._diffNavigator.initAll(this.options.charDiff ? "char" : "word", this._editor, this._editor, rFeeder, lFeeder, this._overviewRuler);
-			this._highlighter[0].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._textView);
-			this._editor.highlightAnnotations();
+			this._highlighter[0].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._editor, this, 1);
 			this.renderCommands();
-			this._diffNavigator.renderAnnotations();
 			this.addRulers();
 			var drawLine = this._textView.getTopIndex() ;
 			this._textView.redrawLines(drawLine , drawLine+  1 , this._overviewRuler);
