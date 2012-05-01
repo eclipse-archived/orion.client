@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Console</title>
+
+		<link rel="stylesheet" type="text/css" href="orion-gcli-console.css" />
+		<script type="text/javascript" src="../requirejs/require.js"></script>
+		<script type="text/javascript">
+		
+		require({ baseUrl: '..',
+			      packages: [{ name: 'dojo', location: 'org.dojotoolkit/dojo', main: 'lib/main-browser', lib: '.' },
+							 { name: 'dijit', location: 'org.dojotoolkit/dijit', main: 'lib/main',lib: '.' },
+							 { name: 'dojox', location: 'org.dojotoolkit/dojox', main: 'lib/main', lib: '.' } ],
+			      paths: { text: 'requirejs/text', i18n: 'requirejs/i18n', domReady: 'requirejs/domReady' },
+			      packagePaths: {
+						"console/gcli/lib": [
+							{ name: "gcli", main: "index", lib: "." }
+//							{ name: "test", main: "index", lib: "." },
+//							{ name: "gclitest", main: "index", lib: "." },
+//							{ name: "demo", main: "index", lib: "." }
+       					]
+        		 }
+		});
+		require(["console/orion-gcli-console"]);
+		</script>
+	<body style="visibility:hidden" class="nihilo">
+		<div id="orion.console" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+			<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
+			</div>
+			<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" gutters="false" design="headline" liveSplitters="false" splitter="false">
+				<div class="toolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+				</div>
+  				<div id="gcli-display" dojoType="dijit.layout.ContentPane" region="center"></div>
+  				<div id="glci-input-area" dojoType="dijit.layout.ContentPane" region="bottom">
+  					<input id="gcli-input"/>
+  					<div id="gcli-row-complete"></div>
+  				</div>
+			</div>
+			<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		</div>
+	</body>
+</html>

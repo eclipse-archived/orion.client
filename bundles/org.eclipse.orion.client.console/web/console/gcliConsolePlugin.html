@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script>
+	/*global window*/
+	function qualifyURL(url){
+	    var a = document.createElement('a');
+	    a.href = url; // set string url
+	    return a.href;
+	}
+	
+	window.onload = function() {
+		var serviceImpl = { /* All data is in properties */ };
+
+		var provider = new eclipse.PluginProvider();
+		
+		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			name: "Console",
+			id: "orion.gcli",
+			uriTemplate: "{OrionHome}/console/orion-gcli-console.html"
+		});
+		provider.connect();
+	};
+	</script>
+</head>
+<body>
+<h1>Plugin</h1>
+</body>
+</html>
