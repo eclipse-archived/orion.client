@@ -323,8 +323,14 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 					}
 					var blob = builder.getBlob();
 					writer.write(blob);
+					var truncated = false;
 					writer.onwrite = function() {
-						createFile(entry).then(d.resolve, d.reject);
+						if (!truncated) {
+							truncated = true;
+							writer.truncate(blob.size);
+						} else {
+							createFile(entry).then(d.resolve, d.reject);
+						}
 					};
 					writer.onerror = function() {
 						d.reject(writer.error);
