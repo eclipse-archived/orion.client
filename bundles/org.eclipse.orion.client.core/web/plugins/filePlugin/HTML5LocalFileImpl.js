@@ -92,21 +92,25 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		_createParents: function(entry) {
 			var deferred = new orion.Deferred();
 			var result = [];
+			var rootFullPath = this._root.fullPath;
 			
 			function handleParent(parent) {
-				if (parent.fullPath !== entry.fullPath) {
+				if (parent.fullPath !== rootFullPath) {
 					result.push({
-						Name: entry.name,
-						Location: entry.toURL(),
-						ChildrenLocation: entry.toURL()
+						Name: parent.name,
+						Location: parent.toURL(),
+						ChildrenLocation: parent.toURL()
 					});
-					entry = parent;
 					entry.getParent(handleParent, deferred.reject);
 				} else {
 					deferred.resolve(result);
 				}
 			}
-			entry.getParent(handleParent, deferred.reject);
+			if (rootFullPath === entry.fullPath) {
+				deferred.resolve(null);
+			} else {
+				entry.getParent(handleParent, deferred.reject);
+			}
 			return deferred;
 		},
 		_getEntry: function(location) {
@@ -158,7 +162,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 					}
 					return that._createParents(dirEntry);
 				}).then(function(parents) {
-					if (parents && parents.length) {
+					if (parents) {
 						result.Parents = parents;
 					}
 					return result;
@@ -276,10 +280,18 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
+			var that = this;
 			return this._getEntry(location).then(function(entry) {
 				var d;
 				if (isMetadata) {
-					return createFile(entry);
+					return createFile(entry).then(function(file) {
+						return that._createParents(entry).then(function(parents) {
+							if (parents) {
+								file.Parents = parents;
+							}
+							return file;
+						});
+					});
 				}
 				d = new orion.Deferred();
 				entry.file(function(file) {
