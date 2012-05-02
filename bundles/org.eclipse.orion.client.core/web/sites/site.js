@@ -92,15 +92,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 					return "There are unsaved changes.";
 				}
 			};
-			
-			// Hook up commands stuff
-			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
-			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
-			mSiteCommands.createSiteCommands(serviceRegistry, {
-				startCallback: refresher,
-				stopCallback: refresher,
-				errorCallback: errorHandler
-			});
+
+			mSiteCommands.createSiteCommands(serviceRegistry);
 			commandService.registerCommandContribution("pageActions", "orion.site.start", 1);
 			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2);
 			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3);

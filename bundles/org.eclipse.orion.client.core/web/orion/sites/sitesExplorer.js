@@ -35,7 +35,7 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 			for (var i=0; i < serviceRefs.length; i++) {
 				var siteServiceRef = serviceRefs[i];
 				var siteService = this.registry.getService(siteServiceRef);
-				var siteClient = new mSiteClient.SiteClient(serviceRegistry, siteService, siteServiceRef.getProperty('pattern'), siteServiceRef.getProperty('filePattern'));
+				var siteClient = new mSiteClient.SiteClient(serviceRegistry, siteService, siteServiceRef);
 				var sectionId = 'section' + i;
 				var sitesNodeId = sectionId + 'siteNode';
 				var section = new Section(this.parentNode, {
