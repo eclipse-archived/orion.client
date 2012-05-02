@@ -11,7 +11,6 @@
 /*global define document window*/
 /*jslint regexp:false*/
 define(['require', 'dojo'], function(require, dojo) {
-	var Deferred = dojo.Deferred;
 	function qualifyURL(url) {
 		var link = document.createElement("a");
 		link.href = url;
@@ -31,22 +30,41 @@ define(['require', 'dojo'], function(require, dojo) {
 	function makeURL(site, path, file) {
 		return site.HostingStatus.URL + (path[0] !== "/" ? "/" : "") + path + (file.Directory ? "/" : "");
 	}
-
-	function SiteImpl(filePrefix, workspacePrefix) {
-		this.filePrefix = filePrefix;
-		this.cache = {
-			getProjects: function(workspaceId) {
-				// TODO would be better to invoke the FileService here but we are inside a plugin so we can't.
-				if (!this.projects) {
-					var headers = { "Orion-Version": "1" };
-					this.projects = dojo.xhrGet({
-						url: workspacePrefix,
+	function isInternalPath(path) {
+		return new RegExp("^/").test(path);
+	}
+	/**
+	 * @returns {String} A display string constructed by replacing the first segment (project id)
+	 * of internalPath with the project's Name.
+	 */
+	function getDisplayString(internalPath, projects) {
+		var displayString;
+		var segments = internalPath.split('/');
+		var firstSegment = segments[1];
+		for (var i=0; i < projects.length; i++) {
+			var project = projects[i];
+			if (project.Id === firstSegment) {
+				segments[1] = project.Name;
+				displayString = segments.join('/');
+				break;
+			}
+		}
+		return displayString;
+	}
+	function Cache(workspaceBase) {
+		this.projects = {};
+		this.getProjects = function(workspaceId) {
+			// TODO would be better to invoke the FileService here but we are inside a plugin so we can't.
+			var headers = { "Orion-Version": "1" };
+			if (!this.projects[workspaceId]) {
+				this.projects[workspaceId] = dojo.xhrGet(
+					{	url: workspaceBase,
 						headers: headers,
 						handleAs: 'json'
 					}).then(function(data) {
 						var workspaces = data.Workspaces;
 						var workspace;
-						for (var i = 0; i < workspaces.length; i++) {
+						for (var i=0; i < workspaces.length; i++) {
 							workspace = workspaces[i];
 							if (workspace.Id === workspaceId) {
 								break;
@@ -60,10 +78,14 @@ define(['require', 'dojo'], function(require, dojo) {
 							return workspaceData.Children || [];
 						});
 					});
-				}
-				return this.projects;
 			}
+			return this.projects[workspaceId];
 		};
+	}
+
+	function SiteImpl(filePrefix, workspacePrefix) {
+		this.filePrefix = filePrefix;
+		this.cache = new Cache(workspacePrefix);
 	}
 	SiteImpl.prototype = {
 		getSiteConfigurations: function() {
@@ -182,18 +204,7 @@ define(['require', 'dojo'], function(require, dojo) {
 		getMappingObject: function(site, fileLocation, virtualPath) {
 			var internalPath = this.toInternalForm(fileLocation);
 			return this.cache.getProjects(site.Workspace).then(function(projects) {
-				// Determine display string based on the project name (first segment of internal form)
-				var segments = internalPath.split('/');
-				var firstSegment = segments[1];
-				var displayString;
-				for (var i=0; i < projects.length; i++) {
-					var project = projects[i];
-					if (project.Id === firstSegment) {
-						segments[1] = project.Name;
-						displayString = segments.join('/');
-						break;
-					}
-				}
+				var displayString = getDisplayString(internalPath, projects);
 				return {
 					Source: virtualPath,
 					Target: internalPath,
@@ -201,7 +212,48 @@ define(['require', 'dojo'], function(require, dojo) {
 				};
 			});
 		},
+		getMappingProposals: function(site) {
+			var self = this;
+			return this.cache.getProjects(site.Workspace).then(function(projects) {
+				return projects.map(function(project) {
+					return {
+						Source: '/' + project.Name,
+						Target: self.toInternalForm(project.Location),
+						FriendlyPath: '/' + project.Name
+					};
+				});
+			});
+		},
+		parseInternalForm: function(site, displayString) {
+			if (isInternalPath(displayString)) {
+				return this.cache.getProjects(site.Workspace).then(function(projects) {
+					// Find project whose Name matches the first segment of display string
+					var segments = displayString.split('/');
+					for (var i=0; i < projects.length; i++) {
+						var project = projects[i];
+						if (segments[1] === project.Name) {
+							// Replace Name by Id to produce the internal form
+							segments[1] = project.Id;
+							return segments.join('/');
+						}
+					}
+				});
+			}
+			return null; // no internal form
+		},
 		// TODO review the methods below
+		updateMappingsDisplayStrings: function(site) {
+			return this.cache.getProjects(site.Workspace).then(function(projects) {
+				var mappings = site.Mappings;
+				for (var i = 0; i < mappings.length; i++) {
+					var mapping = mappings[i];
+					if (isInternalPath(mapping.Target)) {
+						mapping.FriendlyPath = getDisplayString(mapping.Target, projects);
+					}
+				}
+				return site;
+			});
+		},
 		// FIXME "view on site"
 		getURLOnSite: function(site, file) {
 			var mappings = site.Mappings, filePath = this.toInternalForm(file.Location);

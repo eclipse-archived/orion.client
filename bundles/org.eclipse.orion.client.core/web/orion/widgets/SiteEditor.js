@@ -28,12 +28,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'),
 
-	/** dojo.Deferred */
-	_projects: null,
-	
-	/** dojo.Deferred */
-	_workspaces: null,
-	
 	/** SiteConfiguration */
 	_siteConfiguration: null,
 	
@@ -42,7 +36,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	
 	/** MappingsTable */
 	mappings: null,
-	
+
+	_mappingProposals: null,
+
 	_isDirty: false,
 	
 	_autoSaveTimer: null,
@@ -63,9 +59,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		if (this.options.location) {
 			this.load(this.options.location);
 		}
-		
-		this._workspaces = this._fileClient.loadWorkspaces();
-		this._projects = new dojo.Deferred();
 	},
 	
 	postMixInProperties: function() {
@@ -92,40 +85,20 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}));
 		
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.save);
-		
-		dojo.when(this._projects, dojo.hitch(this, function(projects) {
-			// Register command used for adding mapping
-			var addMappingCommand = new mCommands.Command({
-				name: "Add",
-				tooltip: "Add a directory mapping to the site configuration",
-				imageClass: "core-sprite-add",
-				id: "orion.site.mappings.add",
-				visibleWhen: function(item) {
-					return true;
-				},
-				choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, projects)});
-			this._commandService.addCommand(addMappingCommand);
-			var toolbarId = this.addMappingToolbar.id;
-			this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1);
-			this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
-			
-			var convertCommand = new mCommands.Command({
-				name: "Convert to Self-Hosting",
-				tooltip: "Enable the site configuration to launch an Orion server running your local client code",
-				imageClass: "core-sprite-add",
-				id: "orion.site.convert",
-				visibleWhen: dojo.hitch(this, function(item) {
-					return !!item.Location && !this._isSelfHosting;
-				}),
-				// FIXME selfhosting 
-				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
-			this._commandService.addCommand(convertCommand);
-			
-			this._refreshFields();
 
-			this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
-		}));
-		
+		// FIXME figure out where this selfhosting command should go
+		var convertCommand = new mCommands.Command({
+			name: "Convert to Self-Hosting",
+			tooltip: "Enable the site configuration to launch an Orion server running your local client code",
+			imageClass: "core-sprite-add",
+			id: "orion.site.convert",
+			visibleWhen: dojo.hitch(this, function(item) {
+				return !!item.Location && !this._isSelfHosting;
+			}),
+			// FIXME selfhosting 
+			callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
+		this._commandService.addCommand(convertCommand);
+
 		// Save command
 		var saveCommand = new mCommands.Command({
 				name: "Save",
@@ -137,6 +110,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				},
 				callback: dojo.hitch(this, this.save)});
 		this._commandService.addCommand(saveCommand);
+
+		this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 	},
 	
 	checkOptions: function(options, names) {
@@ -148,40 +123,39 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 	
 	/**
-	 * this._projects must be resolved before this is called
-	 * @param {Array} Projects in workspace
+	 * @param {Array} proposals 
 	 * @param {Array|Object} items
 	 * @param {Object} userData
 	 * @returns {Array}
 	 */
-	_makeAddMenuChoices: function(projects, items, userData) {
+	_makeAddMenuChoices: function(proposals, items, userData) {
 		items = dojo.isArray(items) ? items[0] : items;
-		projects = projects.sort(function(projectA, projectB) {
-				return projectA.Name.toLowerCase().localeCompare(projectB.Name.toLowerCase());
+		proposals = proposals.sort(function(a, b) {
+				return a.FriendlyPath.toLowerCase().localeCompare(b.FriendlyPath.toLowerCase());
 			});
-		/**
-		 * @this An object from the choices array with shape {name:String, location:String}
-		 * @param {Object} item
-		 */
 		var self = this;
+		/**
+		 * @this An object from the choices array with shape {name:String, mapping:Object}
+		 */
 		var callback = function(data) {
-			self._siteClient.getMappingObject(self.getSiteConfiguration(), this.location, this.name).then(
-				function(mapping) {
-					self.mappings.addMapping(mapping);
-				});
+			self.mappings.addMapping(this.mapping);
 		};
 		var addUrl = function() {
-			self.mappings.addMapping("/web/somePath", "http://");
+			self.mappings.addMapping({
+				Source: "/web/somePath",
+				Target: "http://",
+				FriendlyPath: "http://"
+			});
 		};
-		var choices = projects.map(function(project) {
+		var choices = proposals.map(function(proposal) {
 				return {
-					name: "/" + project.Name,
+					name: proposal.FriendlyPath,
 					imageClass: "core-sprite-folder",
-					location: project.Location,
+					mapping: proposal,
 					callback: callback
 				};
 			});
-		if (projects.length > 0) {
+		if (proposals.length > 0) {
 			choices.push({}); // Separator
 		}
 		choices.push({
@@ -193,10 +167,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					fileClient: this.fileClient,
 					func: dojo.hitch(this, function(folder) {
 						if (!!folder) {
-							callback({
-								name: folder.Name,
-								location: folder.Location
-							});
+							this._siteClient.getMappingObject(this.getSiteConfiguration(), folder.Location, folder.Name).then(
+								function(mapping) {
+									callback.call({mapping: mapping});
+								});
 						}
 					})});
 				dialog.startup();
@@ -249,33 +223,30 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		return deferred;
 	},
 
-	_fetchProjects: function(siteConfiguration) {
-		if (!this._fetched) {
-			// Can't we optimize this
-			dojo.when(this._workspaces, dojo.hitch(this, function(workspaces) {
-				var workspace;
-				for (var i=0; i < workspaces.length; i++) {
-					if (workspaces[i].Id === siteConfiguration.Workspace) {
-						workspace = workspaces[i];
-						break;
-					}
-				}
-				if (workspace) {
-					this._fileClient.fetchChildren(workspace.Location).then(
-						dojo.hitch(this, function(projects) {
-							this._fetched = true;
-							this._projects.resolve(projects);
-						}),
-						dojo.hitch(this, this._onError));
-				}
-			}));
-		}
-	},
-
 	_setSiteConfiguration: function(siteConfiguration) {
 		this._detachListeners();
 		this._siteConfiguration = siteConfiguration;
-		this._fetchProjects(siteConfiguration);
+
+		// Ask the service for the proposals to put in the dropdown menu
+		if (!this._mappingProposals) {
+			this._mappingProposals = this._siteClient.getMappingProposals(siteConfiguration).then(dojo.hitch(this, function(proposals) {
+				// Register command used for adding mapping
+				var addMappingCommand = new mCommands.Command({
+					name: "Add",
+					tooltip: "Add a directory mapping to the site configuration",
+					imageClass: "core-sprite-add",
+					id: "orion.site.mappings.add",
+					visibleWhen: function(item) {
+						return true;
+					},
+					choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, proposals)});
+				this._commandService.addCommand(addMappingCommand);
+				var toolbarId = this.addMappingToolbar.id;
+				this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1);
+				// do we really have to render here
+				this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
+			}));
+		}
 		this._refreshFields();
 	},
 	
