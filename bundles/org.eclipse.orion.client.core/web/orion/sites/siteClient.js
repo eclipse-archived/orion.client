@@ -60,11 +60,12 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	 * Constructs a new SiteClient.
 	 * @name orion.sites.SiteClient
 	 */
-	function SiteClient(serviceRegistry, siteService, sitePattern, filePattern) {
+	function SiteClient(serviceRegistry, siteService, siteServiceRef) {
 		this._serviceRegistry = serviceRegistry;
 		this._siteService = siteService;
-		this._sitePattern = sitePattern;
-		this._filePattern = filePattern;
+		this._selfHost = siteServiceRef.getProperty('canSelfHost');
+		this._sitePattern = siteServiceRef.getProperty('sitePattern');
+		this._filePattern = siteServiceRef.getProperty('filePattern');
 
 		this._getService = function() {
 			return this._siteService;
@@ -74,6 +75,9 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		};
 		this._getFileClient = function() {
 			return getFileClient(this._serviceRegistry, this._getFilePattern());
+		};
+		this._canSelfHost = function() {
+			return this._selfHost;
 		};
 	}
 	SiteClient.prototype = {
@@ -110,6 +114,12 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		parseInternalForm: function(site, displayString) {
 			return _doServiceCall(this._getService(), 'parseInternalForm', Array.prototype.slice.call(arguments));
 		},
+		isSelfHostingSite: function(site) {
+			return _doServiceCall(this._getService(), 'isSelfHostingSite', Array.prototype.slice.call(arguments));
+		},
+		convertToSelfHosting: function(site, basePath) {
+			return _doServiceCall(this._getService(), 'convertToSelfHosting', Array.prototype.slice.call(arguments));
+		},
 		// TODO review the methods below
 		getURLOnSite: function(site, file) {
 			return _doServiceCall(this._getService(), 'getURLOnSite', Array.prototype.slice.call(arguments));
@@ -120,12 +130,6 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		mapOnSiteAndStart: function(site, file, workspaceId) {
 			return _doServiceCall(this._getService(), 'mapOnSiteAndStart', Array.prototype.slice.call(arguments));
 		},
-		isSelfHosting: function(site) {
-			return _doServiceCall(this._getService(), 'isSelfHosting', Array.prototype.slice.call(arguments));
-		},
-		getSelfHostingMappings: function(site, basePath) {
-			return _doServiceCall(this._getService(), 'getSelfHostingMappings', Array.prototype.slice.call(arguments));
-		}
 	};
 	SiteClient.prototype.constructor = SiteClient;
 
@@ -163,7 +167,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		var serviceIndex = getServiceIndex(location);
 		var service = services[serviceIndex];
 		var serviceRef = references[serviceIndex];
-		return new SiteClient(serviceRegistry, service, serviceRef.getProperty('sitePattern'), serviceRef.getProperty('filePattern'));
+		return new SiteClient(serviceRegistry, service, serviceRef);
 	}
 
 	/**

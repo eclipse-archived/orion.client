@@ -82,7 +82,8 @@ mSiteMappingsTable.Renderer = (function() {
 					col = dojo.create("td");
 					input = dojo.create("input");
 					dojo.addClass(input, "pathInput");
-					input.value = item.FriendlyPath;
+					// TODO
+					input.value = typeof item.FriendlyPath !== "undefined" ? item.FriendlyPath : item.Target;
 					handler = dojo.hitch(this, function(event) {
 							this.options.onchange(item, "FriendlyPath", event.target.value, event);
 						});
@@ -327,7 +328,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
 				if (fieldName === "FriendlyPath") {
-					// Convert what user typed into the internal path representation, update the Target f ield
+					// Convert displayed string into the internal path representation, update the Target field
 					var friendlyPath = newValue;
 					var self = this;
 					this.siteClient.parseInternalForm(this.siteConfiguration, friendlyPath).then(

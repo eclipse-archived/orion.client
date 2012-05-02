@@ -82,6 +82,42 @@ define(['require', 'dojo'], function(require, dojo) {
 			return this.projects[workspaceId];
 		};
 	}
+	function getSelfHostingMappings(basePath) {
+		// TODO: prompt for port? It is not detectable from client side if proxy is used
+		var hostPrefix = "http://localhost" + ":" + "8080" + makeHostRelative(getContext());
+		return [
+			["/", basePath + "/bundles/org.eclipse.orion.client.core/web/index.html"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.core/web"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.editor/web"],
+			["/org.dojotoolkit/dojo", basePath + "/bundles/org.eclipse.orion.client.core/web/dojo"],
+			["/org.dojotoolkit/dojox", basePath + "/bundles/org.eclipse.orion.client.core/web/dojox"],
+			["/file", hostPrefix + "file"],
+			["/prefs", hostPrefix + "prefs"],
+			["/workspace", hostPrefix + "workspace"],
+			["/org.dojotoolkit", hostPrefix + "org.dojotoolkit"],
+			["/users", hostPrefix + "users"],
+			["/authenticationPlugin.html", hostPrefix + "authenticationPlugin.html"],
+			["/login", hostPrefix + "login"],
+			["/loginstatic", hostPrefix + "loginstatic"],
+			["/site", hostPrefix + "site"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.git/web"],
+			["/gitapi", hostPrefix + "gitapi"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.users/web"],
+			["/xfer", hostPrefix + "xfer"],
+			["/filesearch", hostPrefix + "filesearch"],
+			["/index.jsp", hostPrefix + "index.jsp"],
+			["/plugins/git", hostPrefix + "plugins/git"],
+			["/plugins/user", hostPrefix + "plugins/user"],
+			["/logout", hostPrefix + "logout"],
+			["/mixloginstatic", hostPrefix + "mixloginstatic"],
+			["/mixlogin/manageopenids", hostPrefix + "mixlogin/manageopenids"],
+			["/openids", hostPrefix + "openids"],
+			["/task", hostPrefix + "task"],
+			["/help", hostPrefix + "help"]
+		].map(function(item) {
+			return {Source: item[0], Target: item[1]};
+		});
+	}
 
 	function SiteImpl(filePrefix, workspacePrefix) {
 		this.filePrefix = filePrefix;
@@ -241,6 +277,37 @@ define(['require', 'dojo'], function(require, dojo) {
 			}
 			return null; // no internal form
 		},
+		isSelfHostingSite: function(site) {
+			function hasMapping(mappings, mapping) {
+				for (var i=0; i < mappings.length; i++) {
+					var m = mappings[i];
+					if (m.Source === mapping.Source || m.Target === mapping.Target) {
+						return true;
+					}
+				}
+				return false;
+			}
+			var self = this;
+			return this.cache.getProjects(site.Workspace).then(function(projects) {
+				// There must be a project for which all self hosting mappings can be generated using the project's Id
+				return projects.some(function(project) {
+					var internalPath = self.toInternalForm(project.Location);
+					var selfHostMappings = getSelfHostingMappings(internalPath);
+					for (var i=0; i < selfHostMappings.length; i++) {
+						if (!hasMapping(site.Mappings, selfHostMappings[i])) {
+							return false;
+						}
+					}
+					return true;
+				});
+			});
+		},
+		convertToSelfHosting: function(site, selfHostfileLocation) {
+			var internalPath = this.toInternalForm(selfHostfileLocation);
+			var mappings = getSelfHostingMappings(internalPath);
+			site.Mappings = mappings;
+			return site;
+		},
 		// TODO review the methods below
 		updateMappingsDisplayStrings: function(site) {
 			return this.cache.getProjects(site.Workspace).then(function(projects) {
@@ -300,129 +367,6 @@ define(['require', 'dojo'], function(require, dojo) {
 			return deferred.then(function(site) {
 				return makeURL(site, virtualPath, file);
 			});
-		},
-		// FIXME "self hosting"
-		isSelfHosting: function(site) {
-			var selfHost = this.getSelfHostingMappings('^.*');
-			var mappings = site.Mappings;
-			for (var i=0; i < selfHost.length; i++) {
-				var selfHostEntry = new RegExp(selfHost[i].Target);
-				var foundMatch = false;
-				for (var j=0; j < mappings.length; j++) {
-					var mapping = mappings[j];
-					if (selfHostEntry.test(mapping.Target)) {
-						foundMatch = true;
-						break;
-					}
-				}
-				if (!foundMatch) {
-					return false;
-				}
-			}
-			return true;
-//			for (var i=0; i < projects.length; i++) {
-//				var path = this._siteClient.toInternalForm(projects[i].Location);
-//				var selfHostingMappings = this.getSelfHostingMappings(path);
-//				var pass = true;
-//				for (var j=0; j < selfHostingMappings.length; j++) {
-//					if (!this.mappings.mappingExists(selfHostingMappings[j])) {
-//						pass = false;
-//					}
-//				}
-//				if (pass) {
-//					return true;
-//				}
-//			}
-		},
-		getSelfHostingMappings: function(basePath) {
-			// TODO: prompt for port? It is not detectable from client side if proxy is used
-			var hostPrefix = "http://localhost" + ":" + "8080" + makeHostRelative(getContext());
-			return [
-				{ Source: "/",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.core/web/index.html"
-				},
-				{ Source: "/",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.core/web"
-				},
-				{ Source: "/",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.editor/web"
-				},
-				{ Source: "/org.dojotoolkit/dojo",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.core/web/dojo"
-				},
-				{ Source: "/org.dojotoolkit/dojox",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.core/web/dojox"
-				},
-				{ Source: "/file",
-				  Target: hostPrefix + "file"
-				},
-				{ Source: "/prefs",
-				  Target: hostPrefix + "prefs"
-				},
-				{ Source: "/workspace",
-				  Target: hostPrefix + "workspace"
-				},
-				{ Source: "/org.dojotoolkit",
-				  Target: hostPrefix + "org.dojotoolkit"
-				},
-				{ Source: "/users",
-				  Target: hostPrefix + "users"
-				},
-				{ Source: "/authenticationPlugin.html",
-				  Target: hostPrefix + "authenticationPlugin.html"
-				},
-				{ Source: "/login",
-				  Target: hostPrefix + "login"
-				},
-				{ Source: "/loginstatic",
-				  Target: hostPrefix + "loginstatic"
-				},
-				{ Source: "/site",
-				  Target: hostPrefix + "site"
-				},
-				{ Source: "/",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.git/web"
-				},
-				{ Source: "/gitapi",
-				  Target: hostPrefix + "gitapi"
-				},
-				{ Source: "/",
-				  Target: basePath + "/bundles/org.eclipse.orion.client.users/web"
-				},
-				{ Source: "/xfer",
-				  Target: hostPrefix + "xfer"
-				},
-				{ Source: "/filesearch",
-				  Target: hostPrefix + "filesearch"
-				},
-				{ Source: "/index.jsp",
-				  Target: hostPrefix + "index.jsp"
-				},
-				{ Source: "/plugins/git",
-				  Target: hostPrefix + "plugins/git"
-				},
-				{ Source: "/plugins/user",
-				  Target: hostPrefix + "plugins/user"
-				},
-				{ Source: "/logout",
-				  Target: hostPrefix + "logout"
-				},
-				{ Source: "/mixloginstatic",
-				  Target: hostPrefix + "mixloginstatic"
-				},
-				{ Source: "/mixlogin/manageopenids",
-				  Target: hostPrefix + "mixlogin/manageopenids"
-				},
-				{ Source: "/openids",
-				  Target: hostPrefix + "openids"
-				},
-				{ Source: "/task",
-				  Target: hostPrefix + "task"
-				},
-				{ Source: "/help",
-				  Target: hostPrefix + "help"
-				}
-			];
 		}
 	};
 	return {

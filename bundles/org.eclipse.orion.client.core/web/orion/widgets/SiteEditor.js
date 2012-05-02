@@ -39,6 +39,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 
 	_mappingProposals: null,
 
+	_isSelfHostingSite: false,
+
 	_isDirty: false,
 	
 	_autoSaveTimer: null,
@@ -86,18 +88,21 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.save);
 
-		// FIXME figure out where this selfhosting command should go
-		var convertCommand = new mCommands.Command({
-			name: "Convert to Self-Hosting",
-			tooltip: "Enable the site configuration to launch an Orion server running your local client code",
-			imageClass: "core-sprite-add",
-			id: "orion.site.convert",
-			visibleWhen: dojo.hitch(this, function(item) {
-				return !!item.Location && !this._isSelfHosting;
-			}),
-			// FIXME selfhosting 
-			callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
-		this._commandService.addCommand(convertCommand);
+		// "Convert to self hosting" command
+		var self = this;
+		dojo.when(this.siteClient._canSelfHost(), function(canSelfHost) {
+			var convertCommand = new mCommands.Command({
+				name: "Convert to Self-Hosting",
+				tooltip: "Enable the site configuration to launch an Orion server running your local client code",
+				imageClass: "core-sprite-add",
+				id: "orion.site.convert",
+				visibleWhen: function(item) {
+					return !!item.Location && canSelfHost && !self._isSelfHostingSite;
+				},
+				// FIXME selfhosting 
+				callback: dojo.hitch(self, self.convertToSelfHostedSite)});
+			self._commandService.addCommand(convertCommand);
+		});
 
 		// Save command
 		var saveCommand = new mCommands.Command({
@@ -181,20 +186,20 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 
 	// Special feature for setting up self-hosting
-	convertToSelfHostedSite: function(projectsPromise, items, userData) {
+	// TODO ideally this command would be defined entirely by a plugin. It is here because of the DirectoryPrompter dependency
+	convertToSelfHostedSite: function(items, userData) {
 		var dialog = new orion.widgets.DirectoryPrompterDialog({
 			serviceRegistry: this.serviceRegistry,
 			fileClient: this.fileClient,
 			func: dojo.hitch(this, function(folder) {
 				if (folder) {
-					this._siteClient.toInternalForm(folder.Location).then(function(path) {
-						this.mappings.deleteAllMappings();
-						// FIXME async selfhosting
-						this._siteClient.getSelfHostingMappings(path).then(function(mappings) {
-							this.mappings.addMappings(mappings);
-							this.save();
+					var self = this;
+					this._siteClient.convertToSelfHosting(this.getSiteConfiguration(), folder.Location).then(
+						function(updatedSite) {
+							self.mappings.deleteAllMappings();
+							self.mappings.addMappings(updatedSite.Mappings);
+							self.save();
 						});
-					});
 				}
 			}),
 			title: "Choose Orion Source Folder",
@@ -247,6 +252,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
 			}));
 		}
+
+		this._refreshCommands();
 		this._refreshFields();
 	},
 	
@@ -257,7 +264,29 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	isDirty: function() {
 		return this._isDirty;
 	},
-	
+
+	// Called after setSiteConfiguration and after every save/autosave
+	_refreshCommands: function() {
+		var self = this;
+		function errorHandler(err) {
+			self._onError(err);
+		}
+		function reload(site) {
+			self._setSiteConfiguration(site);
+		}
+		this._siteClient.isSelfHostingSite(this.getSiteConfiguration()).then(function(isSelfHostingSite) {
+			self._isSelfHostingSite = isSelfHostingSite;
+			dojo.empty(self._commandsContainer);
+			var userData = {
+				site: self._siteConfiguration,
+				startCallback: reload,
+				stopCallback: reload,
+				errorCallback: errorHandler
+			};
+			self._commandService.renderCommands(self._commandsContainer.id, self._commandsContainer, self._siteConfiguration, {}, "button", userData);
+		});
+	},
+
 	_refreshFields: function() {
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
@@ -280,17 +309,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			dojo.style(this.siteStartedWarning, {display: "none"});
 			mUtil.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
 		}
-		
-		var self = this;
-		// FIXME async also isSelfHosting
-		this._siteClient.isSelfHosting(this._siteConfiguration).then(function(result) {
-			self._isSelfHosting = result;
-			dojo.empty(self._commandsContainer);
-			var userData = {
-				site: self._siteConfiguration
-			};
-			self._commandService.renderCommands(self._commandsContainer.id, self._commandsContainer, self._siteConfiguration, {}, "button", userData);
-		});
 
 		setTimeout(dojo.hitch(this, function() {
 			this._attachListeners(this._siteConfiguration);
@@ -356,8 +374,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
 			var siteConfig = this._siteConfiguration;
-			// Omit the HostingStatus field before save since it's likely to be updated from
-			// the sites page, and we don't want to overwrite
+			// Omit the HostingStatus field from the object we send since it's likely to be updated from the
+			// sites page, and we don't want to overwrite
 			var status = siteConfig.HostingStatus;
 			delete siteConfig.HostingStatus;
 			var self = this;
@@ -369,6 +387,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 						return updatedSiteConfig;
 					} else {
 						siteConfig.HostingStatus = status;
+						self._refreshCommands();
 						return siteConfig;
 					}
 				});
