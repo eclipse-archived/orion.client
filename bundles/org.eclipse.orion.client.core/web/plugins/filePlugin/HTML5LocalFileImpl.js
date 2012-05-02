@@ -101,7 +101,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 						Location: parent.toURL(),
 						ChildrenLocation: parent.toURL()
 					});
-					entry.getParent(handleParent, deferred.reject);
+					parent.getParent(handleParent, deferred.reject);
 				} else {
 					deferred.resolve(result);
 				}
