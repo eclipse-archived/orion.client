@@ -12,6 +12,8 @@
 /*global window eclipse:true orion FileReader*/
 /*jslint forin:true devel:true*/
 
+window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL || window.webkitResolveLocalFileSystemURL;
 window.BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
 
 function createFile(entry) {
@@ -54,6 +56,12 @@ function readEntries(dirEntry) {
 	return deferred;
 }
 
+function resolveEntryURL(url) {
+	var d = new orion.Deferred();
+	window.resolveLocalFileSystemURL(url, d.resolve, d.reject);
+	return d;
+}
+
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
 
@@ -73,6 +81,14 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 	
 	HTML5LocalFileServiceImpl.prototype = /**@lends eclipse.HTML5LocalFileServiceImpl.prototype */
 	{
+		_normalizeLocation : function(location) {
+			if (!location) {
+				location = "/";
+			} else {
+				location = location.replace(this._rootLocation, "/");				
+			}
+			return location;
+		},
 		_createParents: function(entry) {
 			var deferred = new orion.Deferred();
 			var result = [];
@@ -94,18 +110,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			return deferred;
 		},
 		_getEntry: function(location) {
-			if (!location) {
-				location = "/";
-			} else {
-				location = location.replace(this._rootLocation, "/");
-			}
-			
-			var d = new orion.Deferred();
-			var that = this;
-			this._root.getDirectory(location, {create:false}, d.resolve, function() {
-				that._root.getFile(location, {create:false}, d.resolve, d.reject);
-			});
-			return d;
+			return resolveEntryURL(location || this._rootLocation);
 		},
 		/**
 		 * Obtains the children of a remote resource
@@ -299,15 +304,17 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(location, contents, args) {
-			if (!location) {
-				location = "/";
-			} else {
-				location = location.replace(this._rootLocation, "/");
-			}
-			
-			var d = new orion.Deferred();
-			this._root.getFile(location, {create:true}, d.resolve, d.reject);
-			return d.then(function(entry) {
+			var that = this;
+			return this._getEntry(location).then(function(entry){
+				return entry;
+			}, function() {
+				var lastSlash = location.lastIndexOf("/");
+				var parentLocation = (lastSlash === -1) ? this._rootLocation : location.substring(0, lastSlash + 1);
+				var name = decodeURIComponent(location.substring(lastSlash +1));
+				return that.createFile(parentLocation, name).then(function() {
+					return that._getEntry(location);
+				});
+			}).then(function(entry) {
 				var d = new orion.Deferred();
 				entry.createWriter(function(writer) {
 					var builder = new window.BlobBuilder();
