@@ -21,14 +21,9 @@ function mixin(target, source) {
 	}
 }
 
-// FIXME perhaps site service should be in charge of this.0
+// TODO perhaps site service should be in charge of this.
 function isWorkspacePath(/**String*/ path) {
 	return new RegExp("^/").test(path);
-}
-
-/** @returns true if b is a sub-path of a */
-function pathsMatch(a, b) {
-	return a === b || a.indexOf(b + "/") === 0;
 }
 
 function safePath(str) {
@@ -177,14 +172,13 @@ mSiteMappingsTable.MappingsTable = (function() {
 				d.callback(this.siteConfiguration.Mappings);
 				return d;
 			});
-			// This code refreshes the display strings. Should be done by the site service.
+			// Refresh display names from the site service
 			var self = this;
-			this.siteConfiguration.Mappings = this.siteConfiguration.Mappings.map(function(mapping) {
-				// TODO refresh display name from the site service
-				return mapping;
+			this.siteClient.updateMappingsDisplayStrings(this.siteConfiguration).then(function(updatedSite) {
+				self.siteConfiguration.Mappings = updatedSite.Mappings;
+				// Build visuals
+				self.createTree(self.parentId, new mSiteMappingsTable.Model(null, fetchItems, self.siteConfiguration.Mappings));
 			});
-			// Build visuals
-			this.createTree(this.parentId, new mSiteMappingsTable.Model(null, fetchItems, this.siteConfiguration.Mappings));
 		},
 		render: function() {
 			this.changedItem(this.siteConfiguration.Mappings, this.siteConfiguration.Mappings);
@@ -207,7 +201,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				id: "orion.site.mappings.remove",
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
-					return item.Source && item.Target;
+					return typeof item.Source !== "undefined" && typeof item.Target !== "undefined";
 				},
 				callback: dojo.hitch(this, function(data) {
 					//table._hideTooltip();
@@ -333,45 +327,17 @@ mSiteMappingsTable.MappingsTable = (function() {
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
 				if (fieldName === "FriendlyPath") {
-					this.propagate(newValue, item);
-				}
-				this.renderItemRow(item, fieldName);
-				this.setDirty(true);
-			}
-		},
-		toFriendlyPath: function(target) {
-			var friendlyPath;
-			if (isWorkspacePath(target)) {
-				for (var i=0; i < this.projects.length; i++) {
-					var project = this.projects[i];
-					var name = "/" + project.Name;
-					// FIXME ASYNC
-					var location = this.siteClient.toInternalForm(project.Location);
-					if (pathsMatch(target, location)) {
-						friendlyPath = name + target.substring(location.length);
-						break;
-					}
+					// Convert what user typed into the internal path representation, update the Target f ield
+					var friendlyPath = newValue;
+					var self = this;
+					this.siteClient.parseInternalForm(this.siteConfiguration, friendlyPath).then(
+						function(internalPath) {
+							item.Target = internalPath || friendlyPath;
+							self.renderItemRow(item, fieldName);
+							self.setDirty(true);	
+						});
 				}
 			}
-			return friendlyPath || target;
-		},
-		/** Rewrites item's FriendlyPath using the project shortname and sets the result into the Target */
-		propagate: function(friendlyPath, item) {
-			if (isWorkspacePath(friendlyPath)) {
-				for (var i=0; i < this.projects.length; i++) {
-					var project = this.projects[i];
-					var name = "/" + project.Name;
-					// FIXME ASYNC
-					var location = this.siteClient.toInternalForm(project.Location);
-					if (pathsMatch(friendlyPath, name)) {
-						var rest = friendlyPath.substring(name.length);
-						item.Target = location + rest;
-						return;
-					}
-				}
-			}
-			// Bogus workspace path, or not a workspace path at all
-			item.Target = friendlyPath;
 		},
 		setDirty: function(value) {
 			this._isDirty = value;

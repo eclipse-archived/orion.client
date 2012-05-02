@@ -98,11 +98,17 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		toInternalForm: function(filePath) {
 			return _doServiceCall(this._getService(), 'toInternalForm', Array.prototype.slice.call(arguments));
 		},
-		toDisplayString: function() {
-			return _doServiceCall(this._getService(), 'getURLOnSite', Array.prototype.slice.call(arguments));
-		},
 		getMappingObject: function(site, fileLocation, virtualPath) {
 			return _doServiceCall(this._getService(), 'getMappingObject', Array.prototype.slice.call(arguments));
+		},
+		getMappingProposals: function(site) {
+			return _doServiceCall(this._getService(), 'getMappingProposals', Array.prototype.slice.call(arguments));
+		},
+		updateMappingsDisplayStrings: function(site) {
+			return _doServiceCall(this._getService(), 'updateMappingsDisplayStrings', Array.prototype.slice.call(arguments));
+		},
+		parseInternalForm: function(site, displayString) {
+			return _doServiceCall(this._getService(), 'parseInternalForm', Array.prototype.slice.call(arguments));
 		},
 		// TODO review the methods below
 		getURLOnSite: function(site, file) {
