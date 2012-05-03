@@ -19,6 +19,7 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {Function} options.createCallback
 	 * @param {Function} options.errorCallback
+	 * @name orion.sites.siteCommands#createSiteServiceCommands
 	 */
 	function createSiteServiceCommands(serviceRegistry, options) {
 		function getFileService(siteServiceRef) {
@@ -53,8 +54,7 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 	/**
 	 * Creates & adds commands that act on an individual site configuration.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
-	 * @name orion.siteCommands#createSiteCommands
-	 * @function
+	 * @name orion.sites.siteCommands#createSiteCommands
 	 */
 	function createSiteCommands(serviceRegistry) {
 		var commandService = serviceRegistry.getService("orion.page.command"),
@@ -145,6 +145,7 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 		commandService.addCommand(deleteCommand);
 	}
 
+// TODO deal with this
 //	var workspacesCache = null;
 //
 //	function WorkspacesCache(fileService) {
@@ -162,41 +163,33 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 //			workspacesCache = new WorkspacesCache(serviceRegistry.getService("orion.core.file"));
 //		}
 //	}
-
 	/**
-	 * @param {Function} options.addAndStartCallback
-	 * @param {Function} options.errorCallback
-	 * @param {Object} options.file
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @name orion.sites.siteCommands#createViewOnSiteCommands
 	 */
 	function createViewOnSiteCommands(serviceRegistry, options) {
-		function isFileAvailable(siteService, site, file) {
-			// TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-			// TODO async this should be done with validation properties?
-			var isStarted = site.HostingStatus && site.HostingStatus.Status === "started";
-			return site && file && isStarted && siteService.isFileMapped(site, file);
-		}
-
-		options = options || {};
-		var commandService = serviceRegistry.getService("orion.page.command"),
-		    siteService = options.siteService;
+		var fileService = serviceRegistry.getService("orion.core.file");
+		var commandService = serviceRegistry.getService("orion.page.command");
 		commandService.addCommand(new Command({
-			name: "View on site",
-			tooltip: "View the file on this site",
+			name: "Add to site",
+			tooltip: "Add the file to this site",
 			id: "orion.site.add-to",
 			imageClass: "core-sprite-add",
 			visibleWhen: function(item) {
-				// TODO async this should be expressed with validation properties
-				return !isFileAvailable(siteService, item.SiteConfiguration, options.file);
+				// Model tells us whether the file is running on the site configuration
+				return !item.IsFileRunningOn;
 			},
-			callback: function(data, callback) {
+			/**
+			 * @param {Function} data.userData.addToCallback
+			 * @param {Function} data.userData.errorCallback
+			 * @param {Object} data.userData.file
+			 */
+			callback: function(data) {
+				var file = data.userData.file;
 				var site = data.items.SiteConfiguration;
-				var fileLocation = data.userData;
-				return serviceRegistry.getService("orion.core.file").read(fileLocation, true).then(function(file) {
-					// TODO cache workspaces
-					return serviceRegistry.getService("orion.core.file").getWorkspaces().then(function(workspaces) {
-						return siteService.mapOnSiteAndStart(site, file, workspaces[0].Id);
-					});
-				}).then(options.addAndStartCallback, options.errorCallback);
+				return fileService.loadWorkspaces().then(function(workspaces) {
+					return mSiteClient.forFileLocation(serviceRegistry, file.Location).mapOnSiteAndStart(site, file, workspaces[0].Id);
+				}).then(data.userData.addToCallback, data.userData.errorCallback);
 			}}));
 		// Command that generates a href to view the file on the site if it's mapped
 		commandService.addCommand(new Command({
@@ -204,15 +197,12 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 			tooltip: "View the file on the site",
 			id: "orion.site.view-on-link",
 			visibleWhen: function(item) {
-				// TODO this should be expressed with validation properties
-				return isFileAvailable(siteService, item.SiteConfiguration, options.file);
+				return item.IsFileRunningOn;
 			},
 			hrefCallback: function(data) {
-				var fileLocation = data.userData;
+				var file = data.userData.file;
 				var site = data.items.SiteConfiguration;
-				return serviceRegistry.getService("orion.core.file").read(fileLocation, true).then(function(file) {
-					siteService.getURLOnSite(site, file);
-				});
+				return mSiteClient.forFileLocation(serviceRegistry, file.Location).getURLOnSite(site, file);
 			}}));
 	}
 	return {

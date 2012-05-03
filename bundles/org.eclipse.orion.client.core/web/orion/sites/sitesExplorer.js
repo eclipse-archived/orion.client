@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
+define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
 		'orion/sites/siteCommands', 'orion/treetable'],
-		function(dojo, mSection, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
+		function(dojo, Deferred, mSection, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
 	var Section = mSection.Section;
 	var TableTree = treetable.TableTree;
 	var SitesTree, ViewOnSiteTree;
@@ -167,7 +167,7 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 				var options = this._options;
 				var userData = {
 					startCallback: options.startCallback,
-					stopCallback: options.startCallback,
+					stopCallback: options.stopCallback,
 					deleteCallback: options.deleteCallback,
 					errorCallback: function(err) {
 						options.serviceRegistry.getService('orion.page.message').setProgressResult(err);
@@ -197,27 +197,36 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 	}());
 	
 	var ViewOnSiteTreeModel = (function() {
-		function createViewOnSiteModelItems(siteConfigurations) {
-			function ViewOnSiteModelItem(siteConfig) {
+		function createModelItems(siteConfigurations, isRunningOns) {
+			function ViewOnSiteModelItem(siteConfig, isFileRunningOn) {
 				this.SiteConfiguration = siteConfig;
 				this.Id = "ViewOnSite" + siteConfig.Id;
+				// Model keeps track of whether the file is available on this site configuration
+				this.IsFileRunningOn = isFileRunningOn;
 			}
-			function createNewSitePlaceholder() {
-				return {
-					SiteConfiguration: {
-						Name: "New Site"
-					},
-					Id: "newsite",
+			var modelItems = [];
+			modelItems.push(
+				{	Id: "newsite",
 					Placeholder: true
-				};
+				});
+			for (var i=0; i < siteConfigurations.length; i++) {
+				modelItems.push(new ViewOnSiteModelItem(siteConfigurations[i], isRunningOns[i]));
 			}
-			return [createNewSitePlaceholder()].concat(
-				siteConfigurations.map(function(siteConfig) {
-					return new ViewOnSiteModelItem(siteConfig);
-				}));
+			return modelItems;
 		}
-		function ViewOnSiteTreeModel(siteService, id) {
+		/** @returns {Deferred} */
+		function isFileRunningOnSite(siteService, site, file) {
+			return siteService.isFileMapped(site, file).then(function(isFileMapped) {
+				var isStarted = site.HostingStatus && site.HostingStatus.Status === "started";
+				return site && file && isStarted && isFileMapped;
+			});
+		}
+		/**
+		 * @param {Object} file
+		 */
+		function ViewOnSiteTreeModel(siteService, id, file) {
 			SiteTreeModel.call(this, siteService, id);
+			this._file = file;
 		}
 		ViewOnSiteTreeModel.prototype = {
 			getRoot: SiteTreeModel.prototype.getRoot,
@@ -226,26 +235,41 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 				if (parentItem.children) {
 					onComplete(parentItem.children);
 				} else if (parentItem === this._root) {
-					// TODO filter to only the sites with applicable mapping rules here?
-					this._siteService.getSiteConfigurations().then(
-						function(siteConfigurations) {
-							var viewOnSiteModelItems = createViewOnSiteModelItems(siteConfigurations);
-							parentItem.children = viewOnSiteModelItems;
-							onComplete(viewOnSiteModelItems);
-						});
+					var self = this;
+					ViewOnSiteTreeModel.createViewOnSiteModelItems(self._siteService, self._file).then(function(modelItems) {
+						parentItem.children = modelItems;
+						onComplete(modelItems);
+					});
 				} else {
-					return onComplete([]);
+					onComplete([]);
 				}
 			}
 		};
-		ViewOnSiteTreeModel.createViewOnSiteModelItems = createViewOnSiteModelItems;
+		/** @returns {Deferred} */
+		ViewOnSiteTreeModel.createViewOnSiteModelItems = function(siteService, file) {
+			return siteService.getSiteConfigurations().then(function(siteConfigurations) {
+				return new Deferred().all(siteConfigurations.map(function(site) {
+					return isFileRunningOnSite(siteService, site, file);
+				})).then(function(isRunningOns) {
+					return createModelItems(siteConfigurations, isRunningOns);
+				});
+			});
+		};
 		return ViewOnSiteTreeModel;
 	}());
 	
 	var ViewOnSiteRenderer = (function() {
-		function ViewOnSiteRenderer(commandService, fileLocation) {
+		/**
+		 * @param {Object} options.file
+		 * @param {Function} options.addToCallback
+		 * @param {Function} options.errorCallback
+		 */
+		function ViewOnSiteRenderer(options) {
 			SitesRenderer.apply(this, Array.prototype.slice.call(arguments));
-			this.fileLocation = fileLocation;
+			this.serviceRegistry = options.serviceRegistry;
+			this.file = options.file;
+			this.addToCallback = options.addToCallback;
+			this.errorCallback = options.errorCallback;
 		}
 		ViewOnSiteRenderer.prototype = {
 			initTable: function (tableNode, tableTree) {
@@ -266,14 +290,19 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 				var actionCol = dojo.create("td", {id: tableRow.id + "col2"});
 				
 				// Site config column
-				dojo.place(document.createTextNode(siteConfig.Name), siteConfigCol, "last");
-	
+				var name = item.Placeholder ? "New Site" : siteConfig.Name;
+				dojo.place(document.createTextNode(name), siteConfigCol, "last");
+
 				// Action column
 				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
-	
-				// contact the command service to render appropriate commands here.
-				this._commandService.renderCommands("viewOnSiteCommand", actionsWrapper, item, {} /*handler*/, "tool", this.fileLocation);
-	
+
+				var userData = {
+					file: this.file,
+					addToCallback: this.addToCallback,
+					errorCallback: this.errorCallback
+				};
+				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "tool", userData);
+
 				dojo.place(siteConfigCol, tableRow, "last");
 				dojo.place(actionCol, tableRow, "last");
 			},
@@ -283,6 +312,15 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 		return ViewOnSiteRenderer;
 	}());
 
+	/**
+	 * @param {orion.sites.SiteService} options.siteService
+	 * @param {String} options.id
+	 * @param {DomNode} options.parent
+	 * @param {orion.sites.SiteTreeModel} [options.model]
+	 * @param {orion.sites.SitesRenderer} [options.renderer]
+	 * @class
+	 * @private
+	 */
 	SitesTree = (function() {
 		function SitesTree(options) {
 			this.siteService = options.siteService;
@@ -310,22 +348,47 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sit
 	 * @name orion.sites.ViewOnSiteTree
 	 * @class A tree widget that displays a list of sites that a file can be viewed on.
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry
-	 * @param {orion.sites.SiteService} options.siteService
-	 * @param {Object} options.file
+	 * @param {String} options.fileLocation
+	 *
+	 * @param {String} options.id
+	 * @param {DomNode} options.parent
+	 * @param {orion.sites.SiteTreeModel} [options.model]
+	 * @param {orion.sites.SitesRenderer} [options.renderer]
 	 */
 	ViewOnSiteTree = (function() {
 		function ViewOnSiteTree(options) {
 			var serviceRegistry = options.serviceRegistry;
-			options.model = new ViewOnSiteTreeModel(options.siteService, options.id);
-			options.renderer = new ViewOnSiteRenderer(serviceRegistry.getService("orion.page.command"), options.file);
-			SitesTree.call(this, options);
+			var commandService = serviceRegistry.getService("orion.page.command");
+			var siteService = mSiteClient.forFileLocation(serviceRegistry, options.fileLocation);
+			var self = this;
+			serviceRegistry.getService("orion.core.file").read(options.fileLocation, true).then(function(file) {
+				options.siteService = siteService;
+				options.model = new ViewOnSiteTreeModel(siteService, options.id, file);
+				options.file = self.file = file;
+
+				// TODO should this be done by glue code?
+				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.add-to", 10);
+				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.view-on-link", 20);
+
+				options.addToCallback = function() {
+					self.refresh();
+				};
+				options.errorCallback = function(err) {
+					options.serviceRegistry.getService('orion.page.message').setErrorMessage(err);
+				};
+
+				options.renderer = new ViewOnSiteRenderer(options);
+				SitesTree.call(self, options);
+			});
 		}
 		ViewOnSiteTree.prototype = /** @lends orion.sites.ViewOnSiteTree.prototype */ {
 			refresh: function() {
+				// TODO call helper for this
 				var self = this;
-				this.siteService.getSiteConfigurations().then(function(siteConfigs) {
-					self.treeWidget.refresh("site-table-tree", ViewOnSiteTreeModel.createViewOnSiteModelItems(siteConfigs), true);
-				});
+				ViewOnSiteTreeModel.createViewOnSiteModelItems(self.siteService, self.file).then(
+					function(modelItems) {
+						self.treeWidget.refresh(self.model._id, modelItems, true);
+					});
 			}
 		};
 		return ViewOnSiteTree;
