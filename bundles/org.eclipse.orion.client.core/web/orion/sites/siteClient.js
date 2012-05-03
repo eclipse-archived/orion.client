@@ -59,6 +59,11 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	/**
 	 * Constructs a new SiteClient.
 	 * @name orion.sites.SiteClient
+	 * @extends orion.sites.SiteService
+	 * @class Convenience API for interacting with a particular {@link orion.sites.SiteService}.
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {orion.serviceregistry.Service} siteService
+	 * @param {orion.serviceregistry.ServiceReference} siteServiceRef
 	 */
 	function SiteClient(serviceRegistry, siteService, siteServiceRef) {
 		this._serviceRegistry = serviceRegistry;
@@ -81,65 +86,83 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		};
 	}
 	SiteClient.prototype = {
-		createSiteConfiguration: function() {
-			return _doServiceCall(this._getService(), 'createSiteConfiguration', Array.prototype.slice.call(arguments));
-		},
-		getSiteConfigurations: function() {
-			return _doServiceCall(this._getService(), 'getSiteConfigurations', Array.prototype.slice.call(arguments));
-		},
-		deleteSiteConfiguration: function(location) {
-			return _doServiceCall(this._getService(), 'deleteSiteConfiguration', Array.prototype.slice.call(arguments));
-		},
-		loadSiteConfiguration: function(location) {
-			return _doServiceCall(this._getService(), 'loadSiteConfiguration', Array.prototype.slice.call(arguments));
-		},
-		updateSiteConfiguration: function(location) {
-			return _doServiceCall(this._getService(), 'updateSiteConfiguration', Array.prototype.slice.call(arguments));
-		},
-		toFileLocation: function(internalForm) {
-			return _doServiceCall(this._getService(), 'toFileLocation', Array.prototype.slice.call(arguments));
-		},
-		toInternalForm: function(filePath) {
-			return _doServiceCall(this._getService(), 'toInternalForm', Array.prototype.slice.call(arguments));
-		},
-		getMappingObject: function(site, fileLocation, virtualPath) {
-			return _doServiceCall(this._getService(), 'getMappingObject', Array.prototype.slice.call(arguments));
-		},
-		getMappingProposals: function(site) {
-			return _doServiceCall(this._getService(), 'getMappingProposals', Array.prototype.slice.call(arguments));
-		},
-		updateMappingsDisplayStrings: function(site) {
-			return _doServiceCall(this._getService(), 'updateMappingsDisplayStrings', Array.prototype.slice.call(arguments));
-		},
-		parseInternalForm: function(site, displayString) {
-			return _doServiceCall(this._getService(), 'parseInternalForm', Array.prototype.slice.call(arguments));
-		},
-		isSelfHostingSite: function(site) {
-			return _doServiceCall(this._getService(), 'isSelfHostingSite', Array.prototype.slice.call(arguments));
-		},
-		convertToSelfHosting: function(site, basePath) {
-			return _doServiceCall(this._getService(), 'convertToSelfHosting', Array.prototype.slice.call(arguments));
-		},
-		// TODO review the methods below
-		getURLOnSite: function(site, file) {
-			return _doServiceCall(this._getService(), 'getURLOnSite', Array.prototype.slice.call(arguments));
-		},
+		// Convenience methods below
 		isFileMapped: function(site, file) {
-			return _doServiceCall(this._getService(), 'isFileMapped', Array.prototype.slice.call(arguments));
+			if (!site) {
+				var d = new Deferred();
+				d.resolve(false);
+				return d;
+			}
+			return this.getURLOnSite(site, file).then(function(url) {
+				return url !== null;
+			});
 		},
 		mapOnSiteAndStart: function(site, file, workspaceId) {
-			return _doServiceCall(this._getService(), 'mapOnSiteAndStart', Array.prototype.slice.call(arguments));
-		},
+			var siteClient = this;
+			function insertMappingFor(virtualPath, filePath, mappings) {
+				return siteClient.isFileMapped(site, file).then(function(isFileMapped) {
+					if (!isFileMapped) {
+						mappings.push({Source: virtualPath, Target: filePath, FriendlyPath: virtualPath});
+					}
+					var d = new Deferred();
+					d.resolve();
+					return d;
+				});
+			}
+			var virtualPath = "/" + file.Name;
+			var deferred;
+			if (!site) {
+				// Create a site first
+				var name = file.Name + " site";
+				deferred = siteClient.toInternalForm(file.Location).then(function(filePath) {
+					var mappings = [];
+					return insertMappingFor(virtualPath, filePath, mappings).then(function() {
+						return siteClient.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"})
+							.then(function(createdSite) {
+									return createdSite;
+								});
+					});
+				});
+			} else {
+				if (site.HostingStatus.Status === "started") {
+					site.HostingStatus.Status = "stopped";
+				}
+				deferred = siteClient.toInternalForm(file.Location).then(function(filePath) {
+					return insertMappingFor(virtualPath, filePath, site.Mappings).then(function() {
+						// Restart the site so the change will take effect
+						return siteClient.updateSiteConfiguration(site.Location, site).then(function(site) {
+							return siteClient.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}});
+						});
+					});
+				});
+			}
+			return deferred.then(function(site) {
+				return siteClient.getURLOnSite(site, file);
+			});
+		}
 	};
+	// Service methods
+	function proxyServiceMethod(object, name) {
+		object[name] = function() {
+			return _doServiceCall(this._getService(), name, Array.prototype.slice.call(arguments));
+		};
+	}
+	[	'createSiteConfiguration', 'getSiteConfigurations', 'deleteSiteConfiguration', 
+		'loadSiteConfiguration', 'updateSiteConfiguration', 'toFileLocation', 'toInternalForm', 'getMappingObject',
+		'getMappingProposals', 'updateMappingsDisplayStrings', 'parseInternalForm', 'isSelfHostingSite', 
+		'convertToSelfHosting', 'getURLOnSite' 
+	].forEach(function(methodName) {
+			proxyServiceMethod(SiteClient.prototype, methodName);
+		});
 	SiteClient.prototype.constructor = SiteClient;
 
-	function forLocation(serviceRegistry, location) {
+	function forLocationProperty(serviceRegistry, locationPropertyName, location) {
 		var siteReferences = serviceRegistry.getServiceReferences('orion.site');
 		var references = [];
 		var patterns = [];
 		var services = [];
 		for (var i=0; i < siteReferences.length; i++) {
-			var pattern = siteReferences[i].getProperty('pattern');
+			var pattern = siteReferences[i].getProperty(locationPropertyName);
 			var patternEpxr;
 			if (pattern[0] !== '^') {
 				patternEpxr = '^' + pattern;
@@ -162,12 +185,33 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 					return i;
 				}
 			}
-			throw 'No Matching SiteService for location: ' + location;
+			throw 'No Matching SiteService for ' + locationPropertyName + ': ' + location;
 		};
 		var serviceIndex = getServiceIndex(location);
 		var service = services[serviceIndex];
 		var serviceRef = references[serviceIndex];
 		return new SiteClient(serviceRegistry, service, serviceRef);
+	}
+
+	/**
+	 * @name SiteClient.forLocation
+	 * @static
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {String} location Location of a site configuration.
+	 * @returns {orion.sites.SiteClient}
+	 */
+	function forLocation(serviceRegistry, location) {
+		return forLocationProperty(serviceRegistry, 'pattern', location);
+	}
+
+	/**
+	 * @name SiteClient.forLocation
+	 * @static
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
+	 * @param {String} location Location of a site configuration.
+	 */
+	function forFileLocation(serviceRegistry, fileLocation) {
+		return forLocationProperty(serviceRegistry, 'filePattern', fileLocation);
 	}
 
 	/**
@@ -201,25 +245,24 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		 * @param {String} workspace
 		 * @param {Array} [mappings]
 		 * @param {String} [hostHint] 
-		 * @returns {Promise} A promise for the result. Will be resolved with the created {@link orion.sites.SiteConfiguration} on success.
+		 * @returns {orion.sites.SiteConfiguration} The created site configuration.
 		 */
 		/**
 		 * Deletes a site configuration.
 		 * @name deleteSiteConfiguration
 		 * @param {String} locationUrl Location of the site configuration resource to be deleted.
-		 * @returns {Promise} A promise for the result. Will be resolved with no argument on success.
+		 * @returns {void}
 		 */
 		/**
 		 * Retrieves all site configurations defined by the logged-in user.
 		 * @name getSiteConfigurations
-		 * @returns {Promise} A promise for the result. Will be resolved with the argument {@link Array} on success, 
-		 * where each element of the array is a {@link orion.sites.SiteConfiguration}.
+		 * @returns {orion.sites.SiteConfiguration[]} The site configurations.
 		 */
 		/**
 		 * Loads an individual site configuration from the given location.
 		 * @name loadSiteConfiguration
 		 * @param {String} locationUrl Location URL of a site configuration resource.
-		 * @returns {Promise} A promise for the result. Will be resolved with the loaded {@link orion.sites.SiteConfiguration} on success.
+		 * @returns {orion.sites.SiteConfiguration} The loaded site configuration.
 		 */
 		/**
 		 * Edits an existing site configuration.
@@ -227,13 +270,62 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		 * @param {String} locationUrl Location of the site configuration resource to be updated.
 		 * @param {orion.sites.SiteConfiguration} updatedSiteConfig A representation of the updated site. Properties that are not changing
 		 * may be omitted.
-		 * @returns {Promise} A promise for the result. Will be resolved with the updated {@link orion.sites.SiteConfiguration} on success.
+		 * @returns {orion.sites.SiteConfiguration} The updated site configuration.
 		 */
-		 // TODOC getURLOnSite isFileMapped toFileLocation toInternalForm mapOnSite isSelfHosting getSelfHostingMappings
+		/**
+		 * @name toInternalForm
+		 * @param {String} fileLocation
+		 * @returns {String}
+		 */
+		/**
+		 * @name toFileLocation
+		 * @param {String} internalPath
+		 * @returns {String}
+		 */
+		/**
+		 * @name getMappingObject
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @param {String} fileLocation
+		 * @param {String} virtualPath
+		 * @returns {Object}
+		 */
+		/**
+		 * @name getMappingProposals
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @returns {String[]}
+		 */
+		/**
+		 * @name updateMappingsDisplayStrings
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @returns {orion.sites.SiteConfiguration}
+		 */
+		/**
+		 * @name parseInternalForm
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @param {String} displayString
+		 * @returns {String}
+		 */
+		/**
+		 * @name isSelfHostingSite
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @returns {Boolean}
+		 */
+		/**
+		 * @name convertToSelfHosting
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @returns {orion.sites.SiteConfiguration}
+		 */
+		/**
+		 * @name getURLOnSite
+		 * @param {orion.sites.SiteConfiguration} site
+		 * @param {Object} file
+		 * @returns {String}
+		 */
 	/**#@-*/
 
 	return {
 		forLocation: forLocation,
+		forFileLocation: forFileLocation,
 		getFileClient: getFileClient,
 		SiteClient: SiteClient
 	};

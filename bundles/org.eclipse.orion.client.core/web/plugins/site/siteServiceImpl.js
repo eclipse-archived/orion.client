@@ -260,6 +260,18 @@ define(['require', 'dojo'], function(require, dojo) {
 				});
 			});
 		},
+		updateMappingsDisplayStrings: function(site) {
+			return this.cache.getProjects(site.Workspace).then(function(projects) {
+				var mappings = site.Mappings;
+				for (var i = 0; i < mappings.length; i++) {
+					var mapping = mappings[i];
+					if (isInternalPath(mapping.Target)) {
+						mapping.FriendlyPath = getDisplayString(mapping.Target, projects);
+					}
+				}
+				return site;
+			});
+		},
 		parseInternalForm: function(site, displayString) {
 			if (isInternalPath(displayString)) {
 				return this.cache.getProjects(site.Workspace).then(function(projects) {
@@ -308,20 +320,6 @@ define(['require', 'dojo'], function(require, dojo) {
 			site.Mappings = mappings;
 			return site;
 		},
-		// TODO review the methods below
-		updateMappingsDisplayStrings: function(site) {
-			return this.cache.getProjects(site.Workspace).then(function(projects) {
-				var mappings = site.Mappings;
-				for (var i = 0; i < mappings.length; i++) {
-					var mapping = mappings[i];
-					if (isInternalPath(mapping.Target)) {
-						mapping.FriendlyPath = getDisplayString(mapping.Target, projects);
-					}
-				}
-				return site;
-			});
-		},
-		// FIXME "view on site"
 		getURLOnSite: function(site, file) {
 			var mappings = site.Mappings, filePath = this.toInternalForm(file.Location);
 			if (!mappings) {
@@ -334,39 +332,6 @@ define(['require', 'dojo'], function(require, dojo) {
 				}
 			}
 			return null;
-		},
-		// FIXME "view on site"
-		isFileMapped: function(site, file) {
-			return this.getURLOnSite(site, file) !== null;
-		},
-		// FIXME "view on site"
-		mapOnSiteAndStart: function(site, file, workspaceId) {
-			function insertMappingFor(virtualPath, filePath, mappings) {
-				if (!this.isFileMapped(site, file)) {
-					mappings.push({Source: virtualPath, Target: filePath, FriendlyPath: virtualPath});
-				}
-			}
-			var virtualPath = "/" + file.Name;
-			var deferred, filePath;
-			if (!site) {
-				var name = file.Name + " site";
-				filePath = this.toInternalForm(file.Location);
-				var mappings = [];
-				insertMappingFor(virtualPath, filePath, mappings);
-				deferred = this.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"});
-			} else {
-				if (site.HostingStatus.Status === "started") {
-					site.HostingStatus.Status = "stopped";
-				}
-				filePath = this.toInternalForm(file.Location);
-				insertMappingFor(virtualPath, filePath, site.Mappings);
-				deferred = this.updateSiteConfiguration(site.Location, site).then(function(site) {
-					return this.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}});
-				});
-			}
-			return deferred.then(function(site) {
-				return makeURL(site, virtualPath, file);
-			});
 		}
 	};
 	return {
