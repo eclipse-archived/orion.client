@@ -23,8 +23,8 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 								'<span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>' +
 							'</span>' +
 						'</div>' +
-						'<div data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">' +
-							'<div class="uploadContainer" data-dojo-attach-event="dragenter:dragEnter,dragexit:dragExit,dragover:dragOver,drop:drop">' +
+						'<div ondragover="event.preventDefault()" data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">' +
+							'<div class="uploadContainer" data-dojo-attach-event="drop:drop,dragenter:dragEnter,dragexit:dragExit,dragover:dragOver">' +
 								'<div class="dottedOutline">' +
 									'<div data-dojo-attach-point="dragArea" class="floatingSection">' +
 										'<div class="uploadInstruction">Drag a File or Zip here</div>' + 
@@ -96,21 +96,19 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 	},
 
 	dragEnter: function(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
+		return false;
 	},
 
 	dragExit: function(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
+		return false;
 	},
 
 	dragOver: function(evt){
-		evt.stopPropagation();
-		evt.preventDefault();
+		return false;
 	},
 
-	drop: function(evt){	
+	drop: function(evt){
+		evt.preventDefault();
 		evt.stopPropagation();
  
 		var files = evt.dataTransfer.files;
