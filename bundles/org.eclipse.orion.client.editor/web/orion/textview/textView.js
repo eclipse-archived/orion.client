@@ -393,9 +393,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		getActions: function (defaultAction) {
 			var result = [];
 			var actions = this._actions;
-			for (var i = 0; i < actions.length; i++) {
-				if (!defaultAction && actions[i].defaultHandler) { continue; }
-				result.push(actions[i].name);
+			for (var i in actions) {
+				if (actions.hasOwnProperty(i)) {
+					if (!defaultAction && actions[i].defaultHandler) { continue; }
+					result.push(i);
+				}
 			}
 			return result;
 		},
@@ -725,16 +727,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		invokeAction: function (name, defaultAction) {
 			if (!this._clientDiv) { return; }
-			var actions = this._actions;
-			for (var i = 0; i < actions.length; i++) {
-				var a = actions[i];
-				if (a.name && a.name === name) {
-					if (!defaultAction && a.userHandler) {
-						if (a.userHandler()) { return; }
-					}
-					if (a.defaultHandler) { return a.defaultHandler(); }
-					return false;
+			var action = this._actions[name];
+			if (action) {
+				if (!defaultAction && action.userHandler) {
+					if (action.userHandler()) { return; }
 				}
+				if (action.defaultHandler) { return action.defaultHandler(); }
 			}
 			return false;
 		},
@@ -1187,14 +1185,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		setAction: function(name, handler) {
 			if (!name) { return; }
 			var actions = this._actions;
-			for (var i = 0; i < actions.length; i++) {
-				var a = actions[i];
-				if (a.name === name) {
-					a.userHandler = handler;
-					return;
-				}
+			var action = actions[name];
+			if (!action) { 
+				action = actions[name] = {};
 			}
-			actions.push({name: name, userHandler: handler});
+			action.userHandler = handler;
 		},
 		/**
 		 * Associates a key binding with the given action name. Any previous
@@ -1215,28 +1210,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						if (kb.predefined) {
 							kb.name = null;
 						} else {
-							var oldName = kb.name; 
 							keyBindings.splice(i, 1);
-							var index = 0;
-							while (index < keyBindings.length && oldName !== keyBindings[index].name) {
-								index++;
-							}
-							if (index === keyBindings.length) {
-								/* <p>
-								 * Removing all the key bindings associated to an user action will cause
-								 * the user action to be removed. TextView predefined actions are never
-								 * removed (so they can be reinstalled in the future). 
-								 * </p>
-								 */
-								var actions = this._actions;
-								for (var j = 0; j < actions.length; j++) {
-									if (actions[j].name === oldName) {
-										if (!actions[j].defaultHandler) {
-											actions.splice(j, 1);
-										}
-									}
-								}
-							}
 						}
 					}
 					return;
@@ -2444,21 +2418,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (kb.keyBinding.match(e)) {
 					if (kb.name) {
 						var actions = this._actions;
-						for (var j = 0; j < actions.length; j++) {
-							var a = actions[j];
-							if (a.name === kb.name) {
-								if (a.userHandler) {
-									if (!a.userHandler()) {
-										if (a.defaultHandler) {
-											return typeof(a.defaultHandler()) === "boolean";
-										} else {
-											return false;
-										}
+						var action = actions[kb.name];
+						if (action) {
+							if (action.userHandler) {
+								if (!action.userHandler()) {
+									if (action.defaultHandler) {
+										return typeof(action.defaultHandler()) === "boolean";
+									} else {
+										return false;
 									}
-								} else if (a.defaultHandler) {
-									return typeof(a.defaultHandler()) === "boolean";
 								}
-								break;
+							} else if (action.defaultHandler) {
+								return typeof(action.defaultHandler()) === "boolean";
 							}
 						}
 					}
@@ -3165,57 +3136,57 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 
 			//1 to 1, no duplicates
 			var self = this;
-			this._actions = [
-				{name: "lineUp",		defaultHandler: function() {return self._doLineUp({select: false});}},
-				{name: "lineDown",		defaultHandler: function() {return self._doLineDown({select: false});}},
-				{name: "lineStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:false});}},
-				{name: "lineEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}},
-				{name: "charPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}},
-				{name: "charNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
-				{name: "pageUp",		defaultHandler: function() {return self._doPageUp({select: false});}},
-				{name: "pageDown",		defaultHandler: function() {return self._doPageDown({select: false});}},
-				{name: "scrollPageUp",		defaultHandler: function() {return self._doScroll({type: "pageUp"});}},
-				{name: "scrollPageDown",		defaultHandler: function() {return self._doScroll({type: "pageDown"});}},
-				{name: "wordPrevious",		defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
-				{name: "wordNext",		defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
-				{name: "textStart",		defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
-				{name: "textEnd",		defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
-				{name: "scrollTextStart",	defaultHandler: function() {return self._doScroll({type: "textStart"});}},
-				{name: "scrollTextEnd",		defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
-				{name: "centerLine",		defaultHandler: function() {return self._doScroll({type: "centerLine"});}},
+			this._actions = {
+				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}},
+				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}},
+				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}},
+				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}},
+				"charPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}},
+				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
+				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}},
+				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}},
+				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}},
+				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}},
+				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
+				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
+				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
+				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
+				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}},
+				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
+				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}},
 				
-				{name: "selectLineUp",		defaultHandler: function() {return self._doLineUp({select: true});}},
-				{name: "selectLineDown",	defaultHandler: function() {return self._doLineDown({select: true});}},
-				{name: "selectWholeLineUp",		defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
-				{name: "selectWholeLineDown",	defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}},
-				{name: "selectLineStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
-				{name: "selectLineEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
-				{name: "selectCharPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
-				{name: "selectCharNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}},
-				{name: "selectPageUp",		defaultHandler: function() {return self._doPageUp({select: true});}},
-				{name: "selectPageDown",	defaultHandler: function() {return self._doPageDown({select: true});}},
-				{name: "selectWordPrevious",	defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}},
-				{name: "selectWordNext",	defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
-				{name: "selectTextStart",	defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
-				{name: "selectTextEnd",		defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
+				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}},
+				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}},
+				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
+				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}},
+				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
+				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
+				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
+				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}},
+				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}},
+				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}},
+				"selectWordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}},
+				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
+				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
+				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
 
-				{name: "deletePrevious",	defaultHandler: function() {return self._doBackspace({unit:"character"});}},
-				{name: "deleteNext",		defaultHandler: function() {return self._doDelete({unit:"character"});}},
-				{name: "deleteWordPrevious",	defaultHandler: function() {return self._doBackspace({unit:"word"});}},
-				{name: "deleteWordNext",	defaultHandler: function() {return self._doDelete({unit:"word"});}},
-				{name: "deleteLineStart",	defaultHandler: function() {return self._doBackspace({unit: "line"});}},
-				{name: "deleteLineEnd",	defaultHandler: function() {return self._doDelete({unit: "line"});}},
-				{name: "tab",			defaultHandler: function() {return self._doTab();}},
-				{name: "shiftTab",			defaultHandler: function() {return self._doShiftTab();}},
-				{name: "enter",			defaultHandler: function() {return self._doEnter();}},
-				{name: "enterNoCursor",	defaultHandler: function() {return self._doEnter({noCursor:true});}},
-				{name: "selectAll",		defaultHandler: function() {return self._doSelectAll();}},
-				{name: "copy",			defaultHandler: function() {return self._doCopy();}},
-				{name: "cut",			defaultHandler: function() {return self._doCut();}},
-				{name: "paste",			defaultHandler: function() {return self._doPaste();}},
+				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}},
+				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}},
+				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}},
+				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}},
+				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}},
+				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}},
+				"tab": {defaultHandler: function() {return self._doTab();}},
+				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}},
+				"enter": {defaultHandler: function() {return self._doEnter();}},
+				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}},
+				"selectAll": {defaultHandler: function() {return self._doSelectAll();}},
+				"copy": {defaultHandler: function() {return self._doCopy();}},
+				"cut": {defaultHandler: function() {return self._doCut();}},
+				"paste": {defaultHandler: function() {return self._doPaste();}},
 				
-				{name: "toggleTabMode",			defaultHandler: function() {return self._doTabMode();}}
-			];
+				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}}
+			};
 		},
 		_createLine: function(parent, div, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
