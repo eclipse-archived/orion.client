@@ -3,7 +3,7 @@
 <head>
 	<script src='../../requirejs/require.js'></script>
 	<script>
-		/*global eclipse require window*/
+		/*global require*/
 		require({
 		  baseUrl: '../../',
 		  packages: [
@@ -23,68 +23,7 @@
 		  }
 		});
 
-		require(['../../orion/plugin.js', 'siteplugin/siteServiceImpl'], function(plugin, siteImpl) {
-			function qualify(url) {
-				var a = document.createElement('a');
-				a.href = url;
-				return a.href;
-			}
-			function unqualify(url) {
-				url = qualify(url);
-				try {
-					if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
-						return url.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
-					}
-				} catch (e) {}
-				return url;
-			}
-			function filesAndFoldersOnService(filePrefix) {
-				return [
-					{	source: 'Location|Directory'
-					},
-					{	source: 'Location',
-						match: '^' + filePrefix
-					}];
-			}
-
-			// Tightly coupled to the fileClientPlugin
-			var siteBase = unqualify('../../site');
-			var fileBase = unqualify('../../file');
-			var workspaceBase = unqualify('../../workspace');
-			console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
-
-			var provider = new eclipse.PluginProvider();
-
-			provider.registerServiceProvider('orion.navigate.command', null, {
-				id: 'orion.site.viewon',
-				name: 'View on Site',
-				tooltip: 'View this file or folder on a web site hosted by Orion',
-				forceSingleItem: true,
-				validationProperties: filesAndFoldersOnService(fileBase),
-				uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
-			});
-
-			provider.registerServiceProvider('orion.page.link.related', null, {
-				id: 'orion.site.viewon',
-				name: 'View on Site',
-				tooltip: 'View this file or folder on a web site hosted by Orion',
-				validationProperties: filesAndFoldersOnService(fileBase),
-				uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
-			});
-
-			var host = document.createElement('a');
-			host.href = '/';
-			provider.registerServiceProvider('orion.site',
-				new siteImpl.SiteImpl(fileBase, workspaceBase),
-				{	id: 'orion.site.default',
-					name: '' + host.hostname,
-					canSelfHost: true,
-					pattern: siteBase,
-					filePattern: fileBase
-				});
-
-			provider.connect();
-		});
+		require(["sitePlugin.js"]);
 	</script>
 </head>
 <body>
