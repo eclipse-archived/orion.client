@@ -223,7 +223,8 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 		deleteFile: function(location) {
 			return this._getEntry(location).then(function(entry) {
 				var d = new orion.Deferred();
-				entry.remove(function() {
+				var remove = (entry.removeRecursively) ? "removeRecursively" : "remove";
+				entry[remove](function() {
 					d.resolve();
 				}, d.reject);
 				return d;
