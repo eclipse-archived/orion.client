@@ -325,7 +325,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return this._hasFocus;
 		},
 		/**
-		 * Returns all action names defined in the text view.
+		 * Returns all action IDs defined in the text view.
 		 * <p>
 		 * There are two types of actions, the predefined actions of the view 
 		 * and the actions added by application code.
@@ -383,7 +383,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * </p>
 		 *
 		 * @param {Boolean} [defaultAction=false] whether or not the predefined actions are included.
-		 * @returns {String[]} an array of action names defined in the text view.
+		 * @returns {String[]} an array of action IDs defined in the text view.
 		 *
 		 * @see #invokeAction
 		 * @see #setAction
@@ -488,19 +488,19 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return this._getScroll().x;
 		},
 		/**
-		 * Returns all the key bindings associated to the given action name.
+		 * Returns all the key bindings associated to the given action ID.
 		 *
-		 * @param {String} name the action name.
-		 * @returns {orion.textview.KeyBinding[]} the array of key bindings associated to the given action name.
+		 * @param {String} actionID the action ID.
+		 * @returns {orion.textview.KeyBinding[]} the array of key bindings associated to the given action ID.
 		 *
 		 * @see #setKeyBinding
 		 * @see #setAction
 		 */
-		getKeyBindings: function (name) {
+		getKeyBindings: function (actionID) {
 			var result = [];
 			var keyBindings = this._keyBindings;
 			for (var i = 0; i < keyBindings.length; i++) {
-				if (keyBindings[i].name === name) {
+				if (keyBindings[i].actionID === actionID) {
 					result.push(keyBindings[i].keyBinding);
 				}
 			}
@@ -708,7 +708,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return this._getScroll().y;
 		},
 		/**
-		 * Executes the action handler associated with the given name.
+		 * Executes the action handler associated with the given action ID.
 		 * <p>
 		 * The application defined action takes precedence over predefined actions unless
 		 * the <code>defaultAction</code> paramater is <code>true</code>.
@@ -718,16 +718,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * action is executed if present.
 		 * </p>
 		 *
-		 * @param {String} name the action name.
+		 * @param {String} actionID the action ID.
 		 * @param {Boolean} [defaultAction] whether to always execute the predefined action.
 		 * @returns {Boolean} <code>true</code> if the action was executed.
 		 *
 		 * @see #setAction
 		 * @see #getActions
 		 */
-		invokeAction: function (name, defaultAction) {
+		invokeAction: function (actionID, defaultAction) {
 			if (!this._clientDiv) { return; }
-			var action = this._actions[name];
+			var action = this._actions[actionID];
 			if (action) {
 				if (!defaultAction && action.userHandler) {
 					if (action.userHandler()) { return; }
@@ -1169,46 +1169,46 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._handleResize(null);
 		},
 		/**
-		 * Associates an application defined handler to an action name.
+		 * Associates an application defined handler to an action ID.
 		 * <p>
-		 * If the action name is a predefined action, the given handler executes before
+		 * If the action ID is a predefined action, the given handler executes before
 		 * the default action handler.  If the given handler returns <code>true</code>, the
 		 * default action handler is not called.
 		 * </p>
 		 *
-		 * @param {String} name the action name.
+		 * @param {String} actionID the action ID.
 		 * @param {Function} handler the action handler.
 		 *
 		 * @see #getActions
 		 * @see #invokeAction
 		 */
-		setAction: function(name, handler) {
-			if (!name) { return; }
+		setAction: function(actionID, handler) {
+			if (!actionID) { return; }
 			var actions = this._actions;
-			var action = actions[name];
+			var action = actions[actionID];
 			if (!action) { 
-				action = actions[name] = {};
+				action = actions[actionID] = {};
 			}
 			action.userHandler = handler;
 		},
 		/**
-		 * Associates a key binding with the given action name. Any previous
+		 * Associates a key binding with the given action ID. Any previous
 		 * association with the specified key binding is overwriten. If the
-		 * action name is <code>null</code>, the association is removed.
+		 * action ID is <code>null</code>, the association is removed.
 		 * 
 		 * @param {orion.textview.KeyBinding} keyBinding the key binding
-		 * @param {String} name the action
+		 * @param {String} actionID the action ID
 		 */
-		setKeyBinding: function(keyBinding, name) {
+		setKeyBinding: function(keyBinding, actionID) {
 			var keyBindings = this._keyBindings;
 			for (var i = 0; i < keyBindings.length; i++) {
 				var kb = keyBindings[i]; 
 				if (kb.keyBinding.equals(keyBinding)) {
-					if (name) {
-						kb.name = name;
+					if (actionID) {
+						kb.actionID = actionID;
 					} else {
 						if (kb.predefined) {
-							kb.name = null;
+							kb.actionID = null;
 						} else {
 							keyBindings.splice(i, 1);
 						}
@@ -1216,8 +1216,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					return;
 				}
 			}
-			if (name) {
-				keyBindings.push({keyBinding: keyBinding, name: name});
+			if (actionID) {
+				keyBindings.push({keyBinding: keyBinding, actionID: actionID});
 			}
 		},
 		/**
@@ -2416,9 +2416,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			for (var i = 0; i < keyBindings.length; i++) {
 				var kb = keyBindings[i];
 				if (kb.keyBinding.match(e)) {
-					if (kb.name) {
+					if (kb.actionID) {
 						var actions = this._actions;
-						var action = actions[kb.name];
+						var action = actions[kb.actionID];
 						if (action) {
 							if (action.userHandler) {
 								if (!action.userHandler()) {
@@ -3001,96 +3001,96 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var bindings = this._keyBindings = [];
 
 			// Cursor Navigation
-			bindings.push({name: "lineUp",		keyBinding: new KeyBinding(38), predefined: true});
-			bindings.push({name: "lineDown",	keyBinding: new KeyBinding(40), predefined: true});
-			bindings.push({name: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true});
-			bindings.push({name: "charNext",	keyBinding: new KeyBinding(39), predefined: true});
+			bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38), predefined: true});
+			bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40), predefined: true});
+			bindings.push({actionID: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true});
+			bindings.push({actionID: "charNext",	keyBinding: new KeyBinding(39), predefined: true});
 			if (isMac) {
-				bindings.push({name: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true});
-				bindings.push({name: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true});
-				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true});
-				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true});
-				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true});
-				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true});
-				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true});
-				bindings.push({name: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true});
-				bindings.push({name: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({name: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
-				bindings.push({name: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
-				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
-				bindings.push({name: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true});
-				bindings.push({name: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true});
-				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true});
-				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true});
+				bindings.push({actionID: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({actionID: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true});
+				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true});
+				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true});
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true});
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true});
+				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true});
+				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true});
+				bindings.push({actionID: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true});
+				bindings.push({actionID: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
+				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
+				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
+				bindings.push({actionID: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true});
+				bindings.push({actionID: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true});
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true});
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true});
 				//TODO These two actions should be changed to paragraph start and paragraph end  when word wrap is implemented
-				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true});
-				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true});
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true});
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true});
 			} else {
-				bindings.push({name: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
-				bindings.push({name: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
-				bindings.push({name: "lineStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({name: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true});
-				bindings.push({name: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true});
-				bindings.push({name: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true});
-				bindings.push({name: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true});
-				bindings.push({name: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true});
+				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
+				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(36), predefined: true});
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true});
+				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true});
+				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true});
+				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true});
+				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true});
 			}
 			if (isFirefox && isLinux) {
-				bindings.push({name: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true});
-				bindings.push({name: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true});
+				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true});
+				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true});
 			}
 
 			// Select Cursor Navigation
-			bindings.push({name: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true});
-			bindings.push({name: "selectLineDown",		keyBinding: new KeyBinding(40, null, true), predefined: true});
-			bindings.push({name: "selectCharPrevious",	keyBinding: new KeyBinding(37, null, true), predefined: true});
-			bindings.push({name: "selectCharNext",		keyBinding: new KeyBinding(39, null, true), predefined: true});
-			bindings.push({name: "selectPageUp",		keyBinding: new KeyBinding(33, null, true), predefined: true});
-			bindings.push({name: "selectPageDown",		keyBinding: new KeyBinding(34, null, true), predefined: true});
+			bindings.push({actionID: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true});
+			bindings.push({actionID: "selectLineDown",		keyBinding: new KeyBinding(40, null, true), predefined: true});
+			bindings.push({actionID: "selectCharPrevious",	keyBinding: new KeyBinding(37, null, true), predefined: true});
+			bindings.push({actionID: "selectCharNext",		keyBinding: new KeyBinding(39, null, true), predefined: true});
+			bindings.push({actionID: "selectPageUp",		keyBinding: new KeyBinding(33, null, true), predefined: true});
+			bindings.push({actionID: "selectPageDown",		keyBinding: new KeyBinding(34, null, true), predefined: true});
 			if (isMac) {
-				bindings.push({name: "selectLineStart",	keyBinding: new KeyBinding(37, true, true), predefined: true});
-				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(39, true, true), predefined: true});
-				bindings.push({name: "selectWordPrevious",	keyBinding: new KeyBinding(37, null, true, true), predefined: true});
-				bindings.push({name: "selectWordNext",	keyBinding: new KeyBinding(39, null, true, true), predefined: true});
-				bindings.push({name: "selectTextStart",	keyBinding: new KeyBinding(36, null, true), predefined: true});
-				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
-				bindings.push({name: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
-				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
-				bindings.push({name: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true});
-				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, true, true), predefined: true});
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, true, true), predefined: true});
+				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, null, true, true), predefined: true});
+				bindings.push({actionID: "selectWordNext",	keyBinding: new KeyBinding(39, null, true, true), predefined: true});
+				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(36, null, true), predefined: true});
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
+				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true});
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true});
 				//TODO These two actions should be changed to select paragraph start and select paragraph end  when word wrap is implemented
-				bindings.push({name: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true});
-				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true});
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true});
 			} else {
 				if (isLinux) {
-					bindings.push({name: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
-					bindings.push({name: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+					bindings.push({actionID: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
+					bindings.push({actionID: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true});
 				}
-				bindings.push({name: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true});
-				bindings.push({name: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
-				bindings.push({name: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true});
-				bindings.push({name: "selectWordNext",		keyBinding: new KeyBinding(39, true, true), predefined: true});
-				bindings.push({name: "selectTextStart",		keyBinding: new KeyBinding(36, true, true), predefined: true});
-				bindings.push({name: "selectTextEnd",		keyBinding: new KeyBinding(35, true, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true});
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
+				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true});
+				bindings.push({actionID: "selectWordNext",		keyBinding: new KeyBinding(39, true, true), predefined: true});
+				bindings.push({actionID: "selectTextStart",		keyBinding: new KeyBinding(36, true, true), predefined: true});
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, true, true), predefined: true});
 			}
 
 			//Misc
-			bindings.push({name: "deletePrevious",		keyBinding: new KeyBinding(8), predefined: true});
-			bindings.push({name: "deletePrevious",		keyBinding: new KeyBinding(8, null, true), predefined: true});
-			bindings.push({name: "deleteNext",		keyBinding: new KeyBinding(46), predefined: true});
-			bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true), predefined: true});
-			bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true});
-			bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true});
-			bindings.push({name: "tab",			keyBinding: new KeyBinding(9), predefined: true});
-			bindings.push({name: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true});
-			bindings.push({name: "enter",			keyBinding: new KeyBinding(13), predefined: true});
-			bindings.push({name: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true});
-			bindings.push({name: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true});
-			bindings.push({name: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true});
+			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8), predefined: true});
+			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8, null, true), predefined: true});
+			bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46), predefined: true});
+			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true), predefined: true});
+			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true});
+			bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true});
+			bindings.push({actionID: "tab",			keyBinding: new KeyBinding(9), predefined: true});
+			bindings.push({actionID: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true});
+			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13), predefined: true});
+			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true});
+			bindings.push({actionID: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true});
+			bindings.push({actionID: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true});
 			if (isMac) {
-				bindings.push({name: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true});
-				bindings.push({name: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true});
-				bindings.push({name: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true});
+				bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true});
+				bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true});
+				bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true});
 			}
 				
 			/*
@@ -3100,36 +3100,36 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			if (!isFirefox) {
 				var isMacChrome = isMac && isChrome;
-				bindings.push({name: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
-				bindings.push({name: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
-				bindings.push({name: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({actionID: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({actionID: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({actionID: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
 			}
 
 			if (isFirefox) {
-				bindings.push({name: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
-				bindings.push({name: "paste", keyBinding: new KeyBinding(45, null, true), predefined: true});
-				bindings.push({name: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true});
+				bindings.push({actionID: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
+				bindings.push({actionID: "paste", keyBinding: new KeyBinding(45, null, true), predefined: true});
+				bindings.push({actionID: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true});
 			}
 
 			// Add the emacs Control+ ... key bindings.
 			if (isMac) {
-				bindings.push({name: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
-				bindings.push({name: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
-				bindings.push({name: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
-				bindings.push({name: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
-				bindings.push({name: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
-				bindings.push({name: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
-				bindings.push({name: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
-				bindings.push({name: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
-				bindings.push({name: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
+				bindings.push({actionID: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
+				bindings.push({actionID: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
+				bindings.push({actionID: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
+				bindings.push({actionID: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
+				bindings.push({actionID: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
+				bindings.push({actionID: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
+				bindings.push({actionID: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
+				bindings.push({actionID: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
+				bindings.push({actionID: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
 				if (isFirefox) {
-					bindings.push({name: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
-					bindings.push({name: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
-					bindings.push({name: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
+					bindings.push({actionID: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					bindings.push({actionID: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
+					bindings.push({actionID: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
 				} else {
-					bindings.push({name: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
-					bindings.push({name: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true});
-					bindings.push({name: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true});
+					bindings.push({actionID: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
+					bindings.push({actionID: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true});
+					bindings.push({actionID: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true});
 					//TODO implement: y (yank), t (transpose)
 				}
 			}
