@@ -1,0 +1,96 @@
+
+.gcli-row-in {
+  margin: 5px;
+  color: #333;
+  background-color: #EEE;
+  padding: 3px 8px 1px 1px;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+}
+
+.gcli-row-in > img {
+  cursor: pointer;
+}
+
+.gcli-row-hover {
+  display: none;
+  float: right;
+  padding: 2px 2px 0;
+}
+
+.gcli-row-in:hover > .gcli-row-hover {
+  display: inline;
+}
+
+.gcli-row-in:hover > .gcli-row-hover.gcli-row-hidden {
+  display: none;
+}
+
+.gcli-row-in-typed {
+  color: #000;
+  font-family: consolas, courier, monospace;
+}
+
+.gcli-row-prompt {
+  font-family: consolas, courier, monospace;
+  color: #00F;
+  font-weight: bold;
+  font-size: 120%;
+  padding-left: 2px;
+}
+
+.gcli-row-prompt.gcli-row-complete {
+  color: #060;
+}
+
+.gcli-row-prompt.gcli-row-error {
+  color: #F00;
+}
+
+.gcli-row-duration {
+  font-size: 80%;
+}
+
+.gcli-row-out {
+  padding-left: 10px;
+  line-height: 1.2em;
+  font-size: 95%;
+  margin-bottom: 20px;
+}
+
+.gcli-row-out strong,
+.gcli-row-out b,
+.gcli-row-out th,
+.gcli-row-out h1,
+.gcli-row-out h2,
+.gcli-row-out h3 {
+  color: #000;
+}
+
+.gcli-row-out a {
+  font-weight: bold;
+  color: #666;
+  text-decoration: none;
+}
+
+.gcli-row-out a:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.gcli-row-out input[type=password],
+.gcli-row-out input[type=text],
+.gcli-row-out textarea {
+  color: #000;
+  font-size: 120%;
+  background: transparent;
+  padding: 3px;
+  border-radius: 5px;
+}
+
+.gcli-row-out table,
+.gcli-row-out td,
+.gcli-row-out th {
+  border: 0;
+  padding: 0 2px;
+}
