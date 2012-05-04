@@ -24,11 +24,6 @@ html,body {
 	height: 100%;
 }
 
-h1 {
-	position: relative;
-	margin-top: 18px;
-}
-
 .statusPane {
 	font-weight: bold;
 }

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src='../../requirejs/require.js'></script>
+	<script>
+		/*global require*/
+		require({
+		  baseUrl: '../../',
+		  packages: [
+		    {	name: 'dojo',
+				location: 'org.dojotoolkit/dojo',
+				main: 'lib/main-browser',
+				lib: '.'
+		    },
+		    {	name: 'siteplugin',
+				location: 'plugins/site'
+		    }
+		  ],
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+
+		require(["sitePlugin.js"]);
+	</script>
+</head>
+<body>
+</body>
+</html>
