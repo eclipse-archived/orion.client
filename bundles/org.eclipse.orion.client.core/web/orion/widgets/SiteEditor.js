@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -11,7 +11,7 @@
 /*global define orion*/
 /*jslint browser:true */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/siteMappingsTable',
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/sites/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
@@ -23,24 +23,11 @@ var AUTOSAVE_INTERVAL = 8000;
  * @name orion.widgets.SiteEditor
  * @class Editor for an individual site configuration.
  * @param {Object} options Options bag for creating the widget.
- * @param {orion.fileClient.FileClient} options.fileClient
- * @param {orion.sites.SiteService} options.siteService
- * @param {orion.commands.CommandService} options.commandService
- * @param {String} [options.location] Optional URL of a site configuration to load in editor
- * upon creation.
  */
 dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templated], {
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'),
-	
-	/** dojo.Deferred */
-	_workspaces: null,
-	
-	/** dojo.Deferred */
-	_projects: null,
-	
-	_fetched: false,
-	
+
 	/** SiteConfiguration */
 	_siteConfiguration: null,
 	
@@ -49,7 +36,11 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	
 	/** MappingsTable */
 	mappings: null,
-	
+
+	_mappingProposals: null,
+
+	_isSelfHostingSite: false,
+
 	_isDirty: false,
 	
 	_autoSaveTimer: null,
@@ -57,10 +48,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	constructor: function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
-		this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteService", "commandService", "statusService", "progressService"]);
+		this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteClient", "commandService", "statusService", "progressService"]);
 
 		this._fileClient = this.options.fileClient;
-		this._siteService = this.options.siteService;
+		this._siteClient = this.options.siteClient;
 		this._commandService = this.options.commandService;
 		this._statusService = this.options.statusService;
 		this._progressService = this.options.progressService;
@@ -70,9 +61,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		if (this.options.location) {
 			this.load(this.options.location);
 		}
-		
-		this._workspaces = this._fileClient.loadWorkspaces();
-		this._projects = new dojo.Deferred();
 	},
 	
 	postMixInProperties: function() {
@@ -99,40 +87,23 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}));
 		
 		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.save);
-		
-		dojo.when(this._projects, dojo.hitch(this, function(projects) {
-			// Register command used for adding mapping
-			var addMappingCommand = new mCommands.Command({
-				name: "Add",
-				tooltip: "Add a directory mapping to the site configuration",
-				imageClass: "core-sprite-add",
-				id: "orion.site.mappings.add",
-				visibleWhen: function(item) {
-					return true;
-				},
-				choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, projects)});
-			this._commandService.addCommand(addMappingCommand);
-			var toolbarId = this.addMappingToolbar.id;
-			this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1);
-			this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
-			
+
+		// "Convert to self hosting" command
+		var self = this;
+		dojo.when(this.siteClient._canSelfHost(), function(canSelfHost) {
 			var convertCommand = new mCommands.Command({
 				name: "Convert to Self-Hosting",
 				tooltip: "Enable the site configuration to launch an Orion server running your local client code",
 				imageClass: "core-sprite-add",
 				id: "orion.site.convert",
-				visibleWhen: dojo.hitch(this, function(item) {
-					// Only applies to SiteConfiguration objects
-					return !!item.Location && !this.isSelfHosting(projects);
-				}),
-				callback: dojo.hitch(this, this.convertToSelfHostedSite, this._projects)});
-			this._commandService.addCommand(convertCommand);
-			
-			this._refreshFields();
+				visibleWhen: function(item) {
+					return !!item.Location && canSelfHost && !self._isSelfHostingSite;
+				},
+				// FIXME selfhosting 
+				callback: dojo.hitch(self, self.convertToSelfHostedSite)});
+			self._commandService.addCommand(convertCommand);
+		});
 
-			this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
-		}));
-		
 		// Save command
 		var saveCommand = new mCommands.Command({
 				name: "Save",
@@ -144,6 +115,8 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				},
 				callback: dojo.hitch(this, this.save)});
 		this._commandService.addCommand(saveCommand);
+
+		this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 	},
 	
 	checkOptions: function(options, names) {
@@ -155,44 +128,39 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 	
 	/**
-	 * this._projects must be resolved before this is called
-	 * @param {Array} Projects in workspace
+	 * @param {Array} proposals 
 	 * @param {Array|Object} items
 	 * @param {Object} userData
 	 * @returns {Array}
 	 */
-	_makeAddMenuChoices: function(projects, items, userData) {
+	_makeAddMenuChoices: function(proposals, items, userData) {
 		items = dojo.isArray(items) ? items[0] : items;
-		var workspaceId = this.getSiteConfiguration().Workspace;
-		projects = projects.sort(function(projectA, projectB) {
-				return projectA.Name.toLowerCase().localeCompare(projectB.Name.toLowerCase());
+		proposals = proposals.sort(function(a, b) {
+				return a.FriendlyPath.toLowerCase().localeCompare(b.FriendlyPath.toLowerCase());
 			});
-		
+		var self = this;
 		/**
-		 * @this An object from the choices array with shape {name:String, path:String, callback:Function}
-		 * @param {Object} item
+		 * @this An object from the choices array with shape {name:String, mapping:Object}
 		 */
-		var editor = this;
-		var addMappingCallback = function(data) {
-			editor.mappings.addMapping(null, this.path, this.name);
+		var callback = function(data) {
+			self.mappings.addMapping(this.mapping);
 		};
-//		var addOther = function() {
-//			editor.mappings.addMapping("/mountPoint", "/FolderId/somepath");
-//		};
 		var addUrl = function() {
-			editor.mappings.addMapping("/web/somePath", "http://");
+			self.mappings.addMapping({
+				Source: "/web/somePath",
+				Target: "http://",
+				FriendlyPath: "http://"
+			});
 		};
-		
-		var choices = dojo.map(projects, function(project) {
+		var choices = proposals.map(function(proposal) {
 				return {
-					name: "/" + project.Name,
+					name: proposal.FriendlyPath,
 					imageClass: "core-sprite-folder",
-					path: editor._siteService.makeRelativeFilePath(project.Location),
-					callback: addMappingCallback
+					mapping: proposal,
+					callback: callback
 				};
 			});
-		
-		if (projects.length > 0) {
+		if (proposals.length > 0) {
 			choices.push({}); // Separator
 		}
 		choices.push({
@@ -204,7 +172,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					fileClient: this.fileClient,
 					func: dojo.hitch(this, function(folder) {
 						if (!!folder) {
-							this.mappings.addMapping(null, editor._siteService.makeRelativeFilePath(folder.Location), folder.Name);
+							this._siteClient.getMappingObject(this.getSiteConfiguration(), folder.Location, folder.Name).then(
+								function(mapping) {
+									callback.call({mapping: mapping});
+								});
 						}
 					})});
 				dialog.startup();
@@ -215,132 +186,26 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 
 	// Special feature for setting up self-hosting
-	convertToSelfHostedSite: function(projectsPromise, items, userData) {
+	// TODO ideally this command would be defined entirely by a plugin. It is here because of the DirectoryPrompter dependency
+	convertToSelfHostedSite: function(items, userData) {
 		var dialog = new orion.widgets.DirectoryPrompterDialog({
 			serviceRegistry: this.serviceRegistry,
 			fileClient: this.fileClient,
 			func: dojo.hitch(this, function(folder) {
 				if (folder) {
-					var path = this._siteService.makeRelativeFilePath(folder.Location);
-					this.mappings.deleteAllMappings();
-					this.mappings.addMappings(this.getSelfHostingMappings(path));
-					this.save();
+					var self = this;
+					this._siteClient.convertToSelfHosting(this.getSiteConfiguration(), folder.Location).then(
+						function(updatedSite) {
+							self.mappings.deleteAllMappings();
+							self.mappings.addMappings(updatedSite.Mappings);
+							self.save();
+						});
 				}
 			}),
 			title: "Choose Orion Source Folder",
 			message: "Select the folder where you checked out the <b>org.eclipse.orion.client</b> repository:"});
 		dialog.startup();
 		dialog.show();
-	},
-	
-	isSelfHosting: function(projects) {
-		for (var i=0; i < projects.length; i++) {
-			var path = this._siteService.makeRelativeFilePath(projects[i].Location);
-			var selfHostingMappings = this.getSelfHostingMappings(path);
-			var pass = true;
-			for (var j=0; j < selfHostingMappings.length; j++) {
-				if (!this.mappings.mappingExists(selfHostingMappings[j])) {
-					pass = false;
-				}
-			}
-			if (pass) {
-				return true;
-			}
-		}
-		return false;
-	},
-	
-	getSelfHostingMappings: function(clientRepoPath) {
-		var context = this._siteService.getContext();
-		context = this._siteService._makeHostRelative(context);
-		// TODO: prompt for port? It is not detectable from client side if proxy is used
-		var hostPrefix = "http://localhost" + ":" + "8080" + context;
-		return [
-			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/index.html"
-			},
-			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web"
-			},
-			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.editor/web"
-			},
-			{ Source: "/org.dojotoolkit/dojo",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/dojo"
-			},
-			{ Source: "/org.dojotoolkit/dojox",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.core/web/dojox"
-			},
-			{ Source: "/file",
-			  Target: hostPrefix + "file"
-			},
-			{ Source: "/prefs",
-			  Target: hostPrefix + "prefs"
-			},
-			{ Source: "/workspace",
-			  Target: hostPrefix + "workspace"
-			},
-			{ Source: "/org.dojotoolkit",
-			  Target: hostPrefix + "org.dojotoolkit"
-			},
-			{ Source: "/users",
-			  Target: hostPrefix + "users"
-			},
-			{ Source: "/authenticationPlugin.html",
-			  Target: hostPrefix + "authenticationPlugin.html"
-			},
-			{ Source: "/login",
-			  Target: hostPrefix + "login"
-			},
-			{ Source: "/loginstatic",
-			  Target: hostPrefix + "loginstatic"
-			},
-			{ Source: "/site",
-			  Target: hostPrefix + "site"
-			},
-			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.git/web"
-			},
-			{ Source: "/gitapi",
-			  Target: hostPrefix + "gitapi"
-			},
-			{ Source: "/",
-			  Target: clientRepoPath + "/bundles/org.eclipse.orion.client.users/web"
-			},
-			{ Source: "/xfer",
-			  Target: hostPrefix + "xfer"
-			},
-			{ Source: "/filesearch",
-			  Target: hostPrefix + "filesearch"
-			},
-			{ Source: "/index.jsp",
-			  Target: hostPrefix + "index.jsp"
-			},
-			{ Source: "/plugins/git",
-			  Target: hostPrefix + "plugins/git"
-			},
-			{ Source: "/plugins/user",
-			  Target: hostPrefix + "plugins/user"
-			},
-			{ Source: "/logout",
-			  Target: hostPrefix + "logout"
-			},
-			{ Source: "/mixloginstatic",
-			  Target: hostPrefix + "mixloginstatic"
-			},
-			{ Source: "/mixlogin/manageopenids",
-			  Target: hostPrefix + "mixlogin/manageopenids"
-			},
-			{ Source: "/openids",
-			  Target: hostPrefix + "openids"
-			},
-			{ Source: "/task",
-			  Target: hostPrefix + "task"
-			},
-			{ Source: "/help",
-			  Target: hostPrefix + "help"
-			}
-		];
 	},
 	
 	/**
@@ -351,7 +216,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	load: function(location) {
 		var deferred = new dojo.Deferred();
 		this._busyWhile(deferred, "Loading...");
-		this._siteService.loadSiteConfiguration(location).then(
+		this._siteClient.loadSiteConfiguration(location).then(
 			dojo.hitch(this, function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
 				this.setDirty(false);
@@ -362,37 +227,33 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			});
 		return deferred;
 	},
-	
-	/**
-	 * Fetches top-level children of the siteConfiguration's workspace
-	 * @returns {dojo.Deferred}
-	 */
-	_fetchProjects: function(siteConfiguration) {
-		if (!this._fetched) {
-			dojo.when(this._workspaces, dojo.hitch(this, function(workspaces) {
-				var workspace;
-				for (var i=0; i < workspaces.length; i++) {
-					if (workspaces[i].Id === siteConfiguration.Workspace) {
-						workspace = workspaces[i];
-						break;
-					}
-				}
-				if (workspace) {
-					this._fileClient.fetchChildren(workspace.Location).then(
-						dojo.hitch(this, function(projects) {
-							this._fetched = true;
-							this._projects.callback(projects);
-						}),
-						dojo.hitch(this, this._onError));
-				}
-			}));
-		}
-	},
 
 	_setSiteConfiguration: function(siteConfiguration) {
 		this._detachListeners();
 		this._siteConfiguration = siteConfiguration;
-		this._fetchProjects(siteConfiguration);
+
+		// Ask the service for the proposals to put in the dropdown menu
+		if (!this._mappingProposals) {
+			this._mappingProposals = this._siteClient.getMappingProposals(siteConfiguration).then(dojo.hitch(this, function(proposals) {
+				// Register command used for adding mapping
+				var addMappingCommand = new mCommands.Command({
+					name: "Add",
+					tooltip: "Add a directory mapping to the site configuration",
+					imageClass: "core-sprite-add",
+					id: "orion.site.mappings.add",
+					visibleWhen: function(item) {
+						return true;
+					},
+					choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, proposals)});
+				this._commandService.addCommand(addMappingCommand);
+				var toolbarId = this.addMappingToolbar.id;
+				this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1);
+				// do we really have to render here
+				this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button");
+			}));
+		}
+
+		this._refreshCommands();
 		this._refreshFields();
 	},
 	
@@ -403,15 +264,37 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	isDirty: function() {
 		return this._isDirty;
 	},
-	
+
+	// Called after setSiteConfiguration and after every save/autosave
+	_refreshCommands: function() {
+		var self = this;
+		function errorHandler(err) {
+			self._onError(err);
+		}
+		function reload(site) {
+			self._setSiteConfiguration(site);
+		}
+		this._siteClient.isSelfHostingSite(this.getSiteConfiguration()).then(function(isSelfHostingSite) {
+			self._isSelfHostingSite = isSelfHostingSite;
+			dojo.empty(self._commandsContainer);
+			var userData = {
+				site: self._siteConfiguration,
+				startCallback: reload,
+				stopCallback: reload,
+				errorCallback: errorHandler
+			};
+			self._commandService.renderCommands(self._commandsContainer.id, self._commandsContainer, self._siteConfiguration, {}, "button", userData);
+		});
+	},
+
 	_refreshFields: function() {
 		this.name.set("value", this._siteConfiguration.Name);
 		this.hostHint.set("value", this._siteConfiguration.HostHint);
 
 		if (!this.mappings) {
 			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
-					siteService: this._siteService, selection: null, parentId: this.mappingsPlaceholder.id,
-					siteConfiguration: this._siteConfiguration, projects: this._projects /**dojo.Deferred*/
+					siteClient: this._siteClient, fileClient: this._fileClient, selection: null, 
+					parentId: this.mappingsPlaceholder.id, siteConfiguration: this._siteConfiguration
 				});
 		} else {
 			this.mappings._setSiteConfiguration(this._siteConfiguration);
@@ -426,10 +309,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			dojo.style(this.siteStartedWarning, {display: "none"});
 			mUtil.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
 		}
-		
-		dojo.empty(this._commandsContainer);
-		this._commandService.renderCommands(this._commandsContainer.id, this._commandsContainer, this._siteConfiguration, {},
-			"button", this._siteConfiguration /*userData*/);
 
 		setTimeout(dojo.hitch(this, function() {
 			this._attachListeners(this._siteConfiguration);
@@ -495,12 +374,12 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var form = dijit.byId("siteForm");
 		if (form.isValid()) {
 			var siteConfig = this._siteConfiguration;
-			// Omit the HostingStatus field before save since it's likely to be updated from
-			// the sites page, and we don't want to overwrite
+			// Omit the HostingStatus field from the object we send since it's likely to be updated from the
+			// sites page, and we don't want to overwrite
 			var status = siteConfig.HostingStatus;
 			delete siteConfig.HostingStatus;
 			var self = this;
-			var deferred = this._siteService.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
+			var deferred = this._siteClient.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
 				function(updatedSiteConfig) {
 					self.setDirty(false);
 					if (refreshUI) {
@@ -508,6 +387,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 						return updatedSiteConfig;
 					} else {
 						siteConfig.HostingStatus = status;
+						self._refreshCommands();
 						return siteConfig;
 					}
 				});

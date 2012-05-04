@@ -16,9 +16,9 @@
  * Glue code for site.html
  */
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/PageUtil',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteCommands, mSiteTree, mTreeTable, PageUtil) {
+	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteClient, mSiteCommands, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -27,22 +27,18 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 			document.body.style.visibility = "visible";
 			dojo.parser.parse();
 			
-			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		
-			var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
-				var pattern = reference.getProperty("pattern");
-				return pattern && pattern.indexOf("/") === 0;
-			});
-			var siteService = new mSiteService.SiteService(serviceRegistry);
+			var siteLocation = PageUtil.matchResourceParameters().resource;
+			var siteClient = mSiteClient.forLocation(serviceRegistry, siteLocation);
+			var fileClient = siteClient._getFileClient();
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			
+
 			var updateTitle = function() {
 				var editor = dijit.byId("site-editor");
 				var site = editor && editor.getSiteConfiguration();
@@ -76,7 +72,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 				widget = new orion.widgets.SiteEditor({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
-					siteService: siteService,
+					siteClient: siteClient,
 					commandService: commandService,
 					statusService: statusService,
 					progressService: progressService,
@@ -96,15 +92,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 					return "There are unsaved changes.";
 				}
 			};
-			
-			// Hook up commands stuff
-			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
-			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
-			mSiteCommands.createSiteCommands(serviceRegistry, {
-				startCallback: refresher,
-				stopCallback: refresher,
-				errorCallback: errorHandler
-			});
+
+			mSiteCommands.createSiteCommands(serviceRegistry);
 			commandService.registerCommandContribution("pageActions", "orion.site.start", 1);
 			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2);
 			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3);
