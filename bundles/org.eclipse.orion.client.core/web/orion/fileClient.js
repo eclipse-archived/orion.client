@@ -201,7 +201,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 				return -1;
 			} else if (!location || (location.length && location.length === 0)) {
 				// TODO we could make the default file service a preference but for now we use the first one
-				return 0;
+				return _services[0] ? 0 : -1;
 			}
 			for(var i = 0; i < _patterns.length; ++i) {
 				if (_patterns[i].test(location)) {
