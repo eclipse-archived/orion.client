@@ -185,5 +185,16 @@ define(function() {
 			return this.promise;
 		};
 	}
+	Deferred.when = function(value, onResolve, onReject, onUpdate) {
+		var promise, deferred;
+		if (value && typeof value.then === "function") {
+			promise = value;
+		} else {
+			deferred = new Deferred();
+			deferred.resolve(value);
+			promise = deferred.promise;
+		}
+		return promise.then(onResolve, onReject, onUpdate);
+	};
 	return Deferred;
 });

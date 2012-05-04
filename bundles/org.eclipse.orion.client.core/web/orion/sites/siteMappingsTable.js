@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2011, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,11 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define */
-/*jslint browser:true regexp:true */
+/*global define document */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/explorer'],
-		function(require, dojo, dijit, mUtil, mCommands, mExplorer) {
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
+		function(require, dojo, mUtil, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 
@@ -22,8 +21,13 @@ function mixin(target, source) {
 	}
 }
 
+// TODO perhaps site service should be in charge of this.
 function isWorkspacePath(/**String*/ path) {
 	return new RegExp("^/").test(path);
+}
+
+function safePath(str) {
+	return str.replace(/[\r\n\t]/g, "");
 }
 
 mSiteMappingsTable.Model = (function() {
@@ -78,7 +82,8 @@ mSiteMappingsTable.Renderer = (function() {
 					col = dojo.create("td");
 					input = dojo.create("input");
 					dojo.addClass(input, "pathInput");
-					input.value = item.FriendlyPath;
+					// TODO
+					input.value = typeof item.FriendlyPath !== "undefined" ? item.FriendlyPath : item.Target;
 					handler = dojo.hitch(this, function(event) {
 							this.options.onchange(item, "FriendlyPath", event.target.value, event);
 						});
@@ -105,29 +110,23 @@ mSiteMappingsTable.Renderer = (function() {
 		getIsValidCell: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {
 			var target = item.Target;
 			var col = document.createElement("td");
-			var href, result;
+			var href;
 			if (isWorkspacePath(target)) {
-				var location = this.options.siteService.makeFullFilePath(target);
-				href = mUtil.safeText(location);
-				col.innerHTML = "<span class=\"validating\">&#8230;</span>";
-				// TODO: should use fileClient here, but without authentication prompt & without retrying
-				//this._fileClient.fetchChildren(location)
-				dojo.xhrGet({
-					url: location,
-					headers: { "Orion-Version": "1" },
-					handleAs: "text"
-				}).then(
-					function(object) {
-						try {
-							object = dojo.fromJson(object);
-						} catch(e) {}
-						var isDirectory = (typeof object === "object" && object.Directory);
-						var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
-						var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
-					}, function(error) {
-						col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
-					});
+				var self = this;
+				this.options.siteClient.toFileLocation(target).then(function(loc) {
+					href = mUtil.safeText(loc);
+					col.innerHTML = "<span class=\"validating\">&#8230;</span>";
+					// use file service directly to avoid retrying in case of failure
+					self.options.fileClient._getService(loc).read(loc, true).then(
+						function(object) {
+							var isDirectory = object && object.Directory;
+							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
+							var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
+						}, function(error) {
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
+						});
+				});
 			} else {
 				href = mUtil.safeText(target);
 				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="External link to ' + href + '"/></a>';
@@ -147,17 +146,18 @@ mSiteMappingsTable.MappingsTable = (function() {
 		this.registry = options.serviceRegistry;
 		this.commandService = this.registry.getService("orion.page.command");
 		this.registerCommands();
-		this.siteService = options.siteService;
+		this.siteClient = options.siteClient;
 		this.parentId = options.parentId;
 		this.selection = options.selection;
 		this.renderer = new mSiteMappingsTable.Renderer({
 				checkbox: false, /*TODO make true when we have selection-based commands*/
 				onchange: dojo.hitch(this, this.fieldChanged),
-				siteService: options.siteService,
+				siteConfiguration: options.siteConfiguration,
+				siteClient: options.siteClient,
+				fileClient: options.fileClient,
 				actionScopeId: "siteMappingCommand"
 			}, this);
 		this.myTree = null;
-		this.projectsPromise = options.projects;
 		this._setSiteConfiguration(options.siteConfiguration);
 		this.setDirty(false);
 	}
@@ -173,15 +173,13 @@ mSiteMappingsTable.MappingsTable = (function() {
 				d.callback(this.siteConfiguration.Mappings);
 				return d;
 			});
-			dojo.when(this.projectsPromise, dojo.hitch(this, function(projects) {
-				this.projects = projects;
-				// Make FriendlyPath
-				this.siteConfiguration.Mappings = dojo.map(this.siteConfiguration.Mappings, dojo.hitch(this, function(mapping) {
-					return this.createMappingObject(mapping.Source, mapping.Target);
-				}));
+			// Refresh display names from the site service
+			var self = this;
+			this.siteClient.updateMappingsDisplayStrings(this.siteConfiguration).then(function(updatedSite) {
+				self.siteConfiguration.Mappings = updatedSite.Mappings;
 				// Build visuals
-				this.createTree(this.parentId, new mSiteMappingsTable.Model(null, fetchItems, this.siteConfiguration.Mappings));
-			}));
+				self.createTree(self.parentId, new mSiteMappingsTable.Model(null, fetchItems, self.siteConfiguration.Mappings));
+			});
 		},
 		render: function() {
 			this.changedItem(this.siteConfiguration.Mappings, this.siteConfiguration.Mappings);
@@ -204,7 +202,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				id: "orion.site.mappings.remove",
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
-					return item.Source && item.Target;
+					return typeof item.Source !== "undefined" && typeof item.Target !== "undefined";
 				},
 				callback: dojo.hitch(this, function(data) {
 					//table._hideTooltip();
@@ -257,23 +255,22 @@ mSiteMappingsTable.MappingsTable = (function() {
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);
 		},
-		// TODO: use makeNewItemPlaceHolder() ?
-		_addMapping: function(/**String*/ source, /**String*/ target, /**String*/ friendlyPath) {
-			source = this.safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
-			target = this.safePath(typeof(target) === "string" ? target : "/");
+		_addMapping: function(object) {
+			var source = object.Souce, target = object.Target, friendlyPath = object.FriendlyPath;
+			source = safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
+			target = safePath(typeof(target) === "string" ? target : "/");
 			if (!this.mappingExists(source, target)) {
-				var newItem = this.createMappingObject(source, target);
-				this.siteConfiguration.Mappings.push(newItem);
+				this.siteConfiguration.Mappings.push(object);
 			}
 		},
-		addMapping: function(source, target, friendlyPath) {
-			this._addMapping(source, target, friendlyPath);
+		addMapping: function(object) {
+			this._addMapping(object);
 			this.render();
 			this.setDirty(true);
 		},
 		addMappings: function(mappings) {
 			for (var i=0; i < mappings.length; i++) {
-				this._addMapping(mappings[i].Source, mappings[i].Target);
+				this.addMapping(mappings[i]);
 			}
 			this.render();
 			this.setDirty(true);
@@ -316,9 +313,6 @@ mSiteMappingsTable.MappingsTable = (function() {
 			}
 			return "/web/somePath";
 		},
-		createMappingObject: function(source, target) {
-			return {Source: source, Target: target, FriendlyPath: this.toFriendlyPath(target)};
-		},
 		deleteMapping: function(/**Object*/ mapping) {
 			var index = this.siteConfiguration.Mappings.indexOf(mapping);
 			if (index !== -1) {
@@ -329,55 +323,22 @@ mSiteMappingsTable.MappingsTable = (function() {
 			this.siteConfiguration.Mappings.splice(0, this.siteConfiguration.Mappings.length);
 		},
 		fieldChanged: function(/**Object*/ item, /**String*/ fieldName, /**String*/ newValue, /**Event*/ event) {
-			newValue = this.safePath(newValue);
+			newValue = safePath(newValue);
 			var oldValue = item[fieldName];
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
 				if (fieldName === "FriendlyPath") {
-					this.propagate(newValue, item);
-				}
-				this.renderItemRow(item, fieldName);
-				this.setDirty(true);
-			}
-		},
-		toFriendlyPath: function(target) {
-			var friendlyPath;
-			if (isWorkspacePath(target)) {
-				for (var i=0; i < this.projects.length; i++) {
-					var project = this.projects[i];
-					var name = "/" + project.Name;
-					var location = this.siteService.makeRelativeFilePath(project.Location);
-					if (this.pathsMatch(target, location)) {
-						friendlyPath = name + target.substring(location.length);
-						break;
-					}
+					// Convert displayed string into the internal path representation, update the Target field
+					var friendlyPath = newValue;
+					var self = this;
+					this.siteClient.parseInternalForm(this.siteConfiguration, friendlyPath).then(
+						function(internalPath) {
+							item.Target = internalPath || friendlyPath;
+							self.renderItemRow(item, fieldName);
+							self.setDirty(true);	
+						});
 				}
 			}
-			return friendlyPath || target;
-		},
-		/** Rewrites item's FriendlyPath using the project shortname and sets the result into the Target */
-		propagate: function(friendlyPath, item) {
-			if (isWorkspacePath(friendlyPath)) {
-				for (var i=0; i < this.projects.length; i++) {
-					var project = this.projects[i];
-					var name = "/" + project.Name;
-					var location = this.siteService.makeRelativeFilePath(project.Location);
-					if (this.pathsMatch(friendlyPath, name)) {
-						var rest = friendlyPath.substring(name.length);
-						item.Target = location + rest;
-						return;
-					}
-				}
-			}
-			// Bogus workspace path, or not a workspace path at all
-			item.Target = friendlyPath;
-		},
-		/** @returns true if b is a sub-path of a */
-		pathsMatch: function(a, b) {
-			return a === b || a.indexOf(b + "/") === 0;
-		},
-		safePath: function(str) {
-			return str.replace(/[\r\n\t]/g, "");
 		},
 		setDirty: function(value) {
 			this._isDirty = value;

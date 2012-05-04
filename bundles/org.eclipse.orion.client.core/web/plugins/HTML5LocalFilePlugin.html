@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<script src="../orion/Deferred.js"></script>
+	<script src="../orion/plugin.js"></script>
+	<script src="filePlugin/HTML5LocalFileImpl.js"></script>
+	<script type="text/javascript">
+	/*global window console eclipse orion*/
+		window.onload = function() {
+			function trace(implementation) {
+				var method;
+				var traced = {};
+				for (method in implementation) {
+					if (typeof implementation[method] === 'function') {
+						traced[method] = function(methodName) {
+							return function() {
+								console.log("*" + methodName);
+								var arg;
+								for (arg in arguments) {
+									console.log(" [" + arg + "] " + arguments[arg]);
+								}
+								var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
+								orion.Deferred.when(result, function(json) {
+									console.log(json);
+								});
+								return result;
+							};
+						}(method);
+					}
+				}
+				return traced;
+			}
+			var provider = new eclipse.PluginProvider();
+			window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+			if (window.requestFileSystem) {
+				window.requestFileSystem(window.TEMPORARY, 10*1024*1024 , function(fs) {
+					var base = fs.root.toURL();
+					var service = new eclipse.HTML5LocalFileServiceImpl(fs);
+					provider.registerServiceProvider("orion.core.file", trace(service), {Name:'HTML5 Local File contents', top:base, pattern:base});
+					service.dispatchEvent = provider.dispatchEvent;
+					provider.connect();
+				}, function(error) {
+					console.log(error);
+					provider.connect();
+				});
+			} else {
+				provider.connect();
+			}
+		};
+	</script>
+</head>
+<body>
+</body>
+</html>

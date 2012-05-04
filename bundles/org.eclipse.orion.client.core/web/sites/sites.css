@@ -14,17 +14,21 @@
 
 @import "../css/commands.css";
 
+@import "../css/sections.css";
+
 html,body {
 	height: 100%;
 }
 
-h1 {
-	position: relative;
-	margin-top: 18px;
-}
-
 .statusPane {
 	font-weight: bold;
+}
+
+.sites {
+	min-width: 800px;
+	max-width: 900px;
+	padding-left: 20px;
+	padding-right: 40px;
 }
 
 .domCommandToolbar {
@@ -33,6 +37,15 @@ h1 {
 
 tr.treeTableRow td:first-child {
 	padding-left: 16px !important;
+}
+
+.treeTableRow {
+	vertical-align: baseline;
+}
+
+.newSiteRow > td {
+	background-color: #f4f4f4;
+	font-weight: bold;
 }
 
 .treetable th {
