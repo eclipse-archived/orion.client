@@ -49,16 +49,17 @@
 	<div id="eclipse.navigate-table" class="orionPage" dojoType="orion.widgets.eWebBorderContainer" design="headline" gutters="false" persist="true" liveSplitters="true">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div id="leftPane" dojoType="dijit.layout.BorderContainer" region="leading" design="headline" style="width: 20%;" liveSplitters="false" gutters="false" splitter="true">
-			<div id="favorites" class="auxpane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-				<div id="favoriteProgress"></div>
+		<div id="leftPane" dojoType="dijit.layout.BorderContainer" region="leading" design="headline" style="width: 40%;" liveSplitters="false" gutters="false" splitter="true">
+			<div id="navOutline" class="auxpane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
+				<div class = "auxPadding" id="favorites"></div>
+				<div class = "auxPadding" id="gettingStarted"></div>
 			</div>
 		</div>
 		<div id="rightPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false" gutters="false" role="main">
 			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
 			</div>
 			<div class="mainpane" tabindex="0"  id="explorer-tree" dojoType="dijit.layout.ContentPane" splitter="false" region="center">
-				<!-- Breadcrumbs, tree content go here -->
+				<p>Welcome to Orion.  To get started, try creating a project using one of the links on the left.</p>
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">

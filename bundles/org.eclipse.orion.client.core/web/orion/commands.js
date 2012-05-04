@@ -318,18 +318,30 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * Run the command with the specified commandId.
 		 *
 		 * @param {String} commandId the id of the command to run.
+		 * @param {Object} the item on which the command should run.
+		 * @param {Object} the handler for the command.
 		 *
 		 * Note:  The current implementation will only run the command if a URL binding has been
-		 * specified.  
+		 * specified, or if an item to run the command against has been specified.  
 		 */
-		runCommand: function(commandId) {
-			//TODO should we be keeping invocation context for commands without bindings? 
-			var binding = this._urlBindings[commandId];
-			if (binding && binding.command) {
-				if (binding.command.callback) {
+		runCommand: function(commandId, item, handler) {
+			if (item) {
+				var command = this._commandList[commandId];
+				var enabled = command.visibleWhen ? command.visibleWhen(item) : true;
+				if (enabled && command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._invoke(binding.invocation);
+						this._invoke(new CommandInvocation(this, handler, item, null, command));
 					}), 0);
+				}
+			} else {
+				//TODO should we be keeping invocation context for commands without bindings? 
+				var binding = this._urlBindings[commandId];
+				if (binding && binding.command) {
+					if (binding.command.callback) {
+						window.setTimeout(dojo.hitch(this, function() {
+							this._invoke(binding.invocation);
+						}), 0);
+					}
 				}
 			}
 		},
@@ -683,24 +695,28 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			var sortedByPosition = contributions.sortedContributions;
 			if (!sortedByPosition) {
 				sortedByPosition = [];
+				var pushedItem = false;
 				for (var key in contributions) {
 				    if (!contributions.hasOwnProperty || contributions.hasOwnProperty(key)) {
 						var item = contributions[key];
 						if (item && typeof(item.position) === "number") {
 							item.id = key;
 							sortedByPosition.push(item);
+							pushedItem = true;
 						}
 					}
 				}
-				sortedByPosition.sort(function(a,b) {
-					return a.position-b.position;
-				});
-				contributions.sortedContributions = sortedByPosition;
+				if (pushedItem) {
+					sortedByPosition.sort(function(a,b) {
+						return a.position-b.position;
+					});
+					contributions.sortedContributions = sortedByPosition;
+				}
 			}
 			// now traverse the sorted contributions and render as we go
 			for (var i = 0; i < sortedByPosition.length; i++) {
 				var id, menuButton, invocation;
-				if (sortedByPosition[i].children) {
+				if (sortedByPosition[i].children && Object.getOwnPropertyNames(sortedByPosition[i].children).length > 0) {
 					var group = sortedByPosition[i];
 					var children;
 					var childContributions = sortedByPosition[i].children;
@@ -751,12 +767,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
-							window.setTimeout(dojo.hitch(this, function() {
-								commandService._render(childContributions, newMenu, items, handler, "menu", userData); 
+							window.setTimeout(dojo.hitch({contributions: childContributions}, function() {
+								commandService._render(this.contributions, newMenu, items, handler, "menu", userData); 
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								children = newMenu.getChildren();
-								if (this._isLastChildSeparator(newMenu, "menu")) {
+								if (commandService._isLastChildSeparator(newMenu, "menu")) {
 									var trailingSep = children[children.length-1];
 									newMenu.removeChild(trailingSep);
 									trailingSep.destroy();
@@ -925,7 +941,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * would use when rendering different groups of commands.
 		 */
 		generateSeparatorImage: function(parent) {
-			var sep = dojo.create("span", null, parent, "last");
+			var sep;
+			if (parent.nodeName.toLowerCase() === "ul") {
+				sep = dojo.create("li", null, parent, "last");
+			} else {
+				sep = dojo.create("span", null, parent, "last");
+			}
 			dojo.addClass(sep, "core-sprite-sep");  // location in sprite
 			dojo.addClass(sep, "imageSprite");  // sets sprite background
 			dojo.addClass(sep, "commandSeparator");
@@ -1001,6 +1022,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;
+			this.description = options.description;
 		},
 		/*
 		 *  Adds a "tool" representation for the command.  

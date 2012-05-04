@@ -472,7 +472,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
 		commandService.addCommand(newFileCommand);
 		
-		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')]);
+		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Folder name:', 'New Folder')]);
 
 		var newFolderCommand = new mCommands.Command({
 			name: "New Folder",
@@ -501,50 +501,137 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 	
 		commandService.addCommand(newFolderCommand);
 		
+		var canCreateProject = function(item) {
+			item = forceSingleItem(item);
+			return item.Location && mUtil.isAtRoot(item.Location);
+		};
+		
+		var createProjectFunction = function(name, populateFunction) {
+			if (name) {
+				if (!mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
+					if (window.confirm("You must be at the top level of the Navigator to continue.  Go there?")) {
+						dojo.hash("");
+						window.setTimeout(function() {createProjectFunction(name, populateFunction);}, 0);
+						return;
+					}
+				}
+				fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(function(project) {
+					// we need folder metadata for the commands, not the project object
+					fileClient.read(project.ContentLocation, true).then(function(folder) {
+						if (populateFunction) {
+							populateFunction(folder);
+						}
+						explorer.loadResourceList(explorer.treeRoot.Path, true);
+					}, errorHandler);
+				}, 
+				errorHandler);
+			}
+		};	
+		
 		var newProjectCommand = new mCommands.Command({
-			name: "New Folder",
+			name: "Empty Folder",
 			parameters: newFolderNameParameters,
-			tooltip: "Create a new folder",
 			imageClass: "core-sprite-new_folder",
-			id: "eclipse.newProject",
+			tooltip: "Create an empty folder",
+			description: "Create an empty folder on the Orion server.  You can import, upload, or create content in the editor.",
+			id: "orion.new.project",
 			callback: function(data) {
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
+				if (data.parameters && data.parameters.valueFor('name')) {
+					createProjectFunction(data.parameters.valueFor('name'));
+				} else {
+					getNewItemName(data.items, data.domNode.id, "New Folder", createProjectFunction);
+				}
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newProjectCommand);
+		
+		var newTemplateProjectCommand = new mCommands.Command({
+			name: "Sample HTML5 Site",
+			tooltip: "Generate a sample",
+			description: "Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files.", 
+			id: "orion.new.template",
+			callback: function(data) {
+				createProjectFunction("Hello World",
+				function(folder) {
+					// this is a temporary hack so we can always find a site template, even when disconnected.
+					// it's built into a known path on the server.
+					var files = ["index.html", "hello.css", "hello.js"];
+					for (var i=0; i<files.length;  i++) {
+						fileClient.createFile(folder.Location, files[i]).then(function(newFileMetadata) {
+							mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/projectTemplates/helloWorld/"+newFileMetadata.Name});
+						}, errorHandler);
+					}
+				});
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newTemplateProjectCommand);
+
+		var newSFTPProjectCommand = new mCommands.Command({
+			name: "SFTP Import",
+			imageClass: "core-sprite-transferin",
+			tooltip: "Import content from SFTP",
+			description: "Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials.",
+			id: "orion.new.sftp",
+			callback: function(data) {
+				createProjectFunction("Imported Content",
+				function(folder) {
+					data.commandService.runCommand("eclipse.importSFTPCommand", folder, explorer);
+				});
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newSFTPProjectCommand);
+		
+		var newZipProjectCommand = new mCommands.Command({
+			name: "Upload a Zip",
+			tooltip: "Upload content from a local zip file",
+			imageClass: "core-sprite-importzip",
+			description: "Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file.",
+			id: "orion.new.zip",
+			callback: function(data) {
+				createProjectFunction("Uploaded Content",
+				function(folder) {
+					data.commandService.runCommand("eclipse.importCommand", folder, explorer);
+				});
+		},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newZipProjectCommand);
+		
+		var newGitClone = new mCommands.Command({
+			name: "Clone Git Repository",
+			tooltip: "Clone a git repository",
+			description: "Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator.",
+			id: "orion.new.gitclone",
+			hrefCallback: function(data) {
+				return window.location.protocol + "//" + window.location.host + "/git/git-repository.html#,cloneGitRepository=URL";
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newGitClone);
+
+		var linkProjectCommand = new mCommands.Command({
+			name: "Link to Server",
+			tooltip: "Link to existing content on the server",
+			description: "Create a folder that links to an existing folder on the server.",
+			imageClass: "core-sprite-link",
+			id: "orion.new.linkProject",
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder'), new mCommands.CommandParameter('url', 'url', 'Server path:', '')]),
+			callback: function(data) {
+				var createFunction = function(name, url) {
+					if (name && url) {
+						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
 				};
-				if (data.parameters && data.parameters.valueFor('name')) {
-					createFunction(data.parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) {
+					createFunction(data.parameters.valueFor('name'), data.parameters.valueFor('url'));
 				} else {
-					getNewItemName(data.items, data.domNode.id, "New Folder", createFunction);
+					errorHandler("The name and server location were not specified.");
 				}
-			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Location && mUtil.isAtRoot(item.Location);}});
-	
-		commandService.addCommand(newProjectCommand);
-		
-		var linkProjectCommand = new mCommands.Command({
-			name: "Link Folder",
-			tooltip: "Create a folder that links to an existing folder on the server",
-			imageClass: "core-sprite-link",
-			id: "eclipse.linkProject",
-			callback: function(data) {
-				var dialog = new orion.widgets.NewItemDialog({
-					title: "Link Folder",
-					label: "Folder name:",
-					func:  function(name, url, create){
-						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), //refresh the root
-							errorHandler);
-					},
-					advanced: true
-				});
-				dialog.startup();
-				dialog.show();
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -713,8 +800,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					}
 				}
 			});
-		commandService.addCommand(pasteFromBufferCommand);
-		
+		commandService.addCommand(pasteFromBufferCommand);		
 	};
 	
 	var contentTypesCache;
