@@ -153,10 +153,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			getOperations: function(){
 				var result = new dojo.Deferred();
 				var results = [];
-				if(this._services.length<1){
-					result.errback("No operations services registered.");
-					return result;
-				}
+
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i]);
 				}
@@ -168,10 +165,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			getRunningOperations: function(){
 				var result = new dojo.Deferred();
 				var results = [];
-				if(this._services.length<1){
-					result.errback("No operations services registered.");
-					return result;
-				}
+
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i], {RunningOnly: true});
 				}
