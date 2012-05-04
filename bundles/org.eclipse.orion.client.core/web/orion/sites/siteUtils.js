@@ -11,11 +11,11 @@
 
 /*global define */
 
-define(['require', 'orion/util', 'orion/URITemplate', 'orion/siteUtils'],
+define(['require', 'orion/util', 'orion/URITemplate', 'orion/sites/siteUtils'],
 		function(require, mUtil, URITemplate) {
 	/**
 	 * Returns a relative URL pointing to the editing page for the given site configuration. 
-	 * @param {orion.siteService.SiteConfiguration} site The site configuration
+	 * @param {orion.siteClient.SiteConfiguration} site The site configuration
 	 * @return {String} The URL.
 	 * @name orion.siteUtils#generateEditSiteHref
 	 * @function

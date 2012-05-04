@@ -33,6 +33,9 @@ dojo.addOnLoad(function(){
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 		new mSiteService.SiteService(serviceRegistry);
 		
+		// Git operations
+		//new eclipse.GitService(serviceRegistry);
+		
 		var treeRoot = {
 			children:[]
 		};
