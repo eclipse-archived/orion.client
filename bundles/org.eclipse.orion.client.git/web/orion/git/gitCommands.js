@@ -2237,19 +2237,8 @@ var exports = {};
 		});
 		commandService.addCommand(openCommitCommand);
 	};
-	
-	
-	
 
-
-	
-	
-	
-	
-	
-	
-	
-	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
+	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
 		
 		function displayErrorOnStatus(error) {
 			if (error.status === 401 || error.status === 403)
@@ -2270,6 +2259,13 @@ var exports = {};
 			serviceRegistry.getService("orion.page.message").setProgressResult(display);
 		}
 		
+		function forceArray(item) {
+			if (!dojo.isArray(item)) {
+				item = [item];
+			}
+			return item;
+		}
+		
 		var stageCommand = new mCommands.Command({
 			name: "Stage",
 			tooltip: "Stage the change",
@@ -2277,20 +2273,43 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.stageCommand",
 			callback: function(data) {
-				var item = data.items;
+				var items = forceArray(data.items);
 				
 				var progressService = serviceRegistry.getService("orion.page.message");
 				
-				progressService.createProgressMonitor(
-					serviceRegistry.getService("orion.git.provider").stage(item.indexURI),
-					"Staging changes").deferred.then(
-					function(jsonData){
-						dojo.hitch(explorer, explorer.changedItem)(item);
-					}, displayErrorOnStatus
-				)
+				if (items.length === 1){				
+					progressService.createProgressMonitor(
+						serviceRegistry.getService("orion.git.provider").stage(items[0].indexURI),
+						"Staging changes").deferred.then(
+						function(jsonData){
+							dojo.hitch(explorer, explorer.changedItem)(items);
+						}, displayErrorOnStatus
+					);
+				} else {
+					var paths = [];
+					for ( var i = 0; i < items.length; i++) {
+						paths[i] = items[i].path;
+					}
+					
+					progressService.createProgressMonitor(
+						serviceRegistry.getService("orion.git.provider").stageMultipleFiles(data.userData.Clone.IndexLocation, paths),
+						"Staging changes").deferred.then(
+						function(jsonData){
+							dojo.hitch(explorer, explorer.changedItem)(items);
+						}, displayErrorOnStatus
+					);
+				}			
 			},
 			visibleWhen: function(item) {
-				return !mGitUtil.isStaged(item);
+				var items = forceArray(item);
+				if (items.length === 0)
+					return false;
+
+				for (var i = 0; i < items.length; i++) {
+					if (mGitUtil.isStaged(items[i]))
+						return false; 
+				}
+				return true;
 			}
 		});	
 		
@@ -2303,20 +2322,43 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.unstageCommand",
 			callback: function(data) {
-				var item = data.items;
+				var items = forceArray(data.items);
 				
 				var progressService = serviceRegistry.getService("orion.page.message");
-				
-				progressService.createProgressMonitor(
-					serviceRegistry.getService("orion.git.provider").unstage(item.indexURI, item.name),
-					"Unstaging changes").deferred.then(
-					function(jsonData){
-						dojo.hitch(explorer, explorer.changedItem)(item);
-					}, displayErrorOnStatus
-				)
+
+				if (items.length === 1){				
+					progressService.createProgressMonitor(
+						serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name),
+						"Staging changes").deferred.then(
+						function(jsonData){
+							dojo.hitch(explorer, explorer.changedItem)(items);
+						}, displayErrorOnStatus
+					);
+				} else {
+					var paths = [];
+					for ( var i = 0; i < items.length; i++) {
+						paths[i] = items[i].path;
+					}
+					
+					progressService.createProgressMonitor(
+						serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths),
+						"Staging changes").deferred.then(
+						function(jsonData){
+							dojo.hitch(explorer, explorer.changedItem)(items);
+						}, displayErrorOnStatus
+					);
+				}
 			},
 			visibleWhen: function(item) {
-				return mGitUtil.isStaged(item);
+				var items = forceArray(item);
+				if (items.length === 0)
+					return false;
+
+				for (var i = 0; i < items.length; i++) {
+					if (!mGitUtil.isStaged(items[i]))
+						return false; 
+				}
+				return true;
 			}
 		});	
 		
@@ -2342,7 +2384,7 @@ var exports = {};
 					function(jsonData){
 						dojo.hitch(explorer, explorer.changedItem)(item);
 					}, displayErrorOnStatus
-				)
+				);
 			},
 			visibleWhen: function(item) {
 				return true;
@@ -2374,7 +2416,7 @@ var exports = {};
 							function(jsonData){
 								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus
-						)						
+						);		
 					}
 				);
 			},
@@ -2394,7 +2436,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.checkoutCommand",
 			callback: function(data) {				
-				var item = data.items;
+				var items = forceArray(data.items);
 				
 				var dialog = serviceRegistry.getService("orion.page.dialog");
 				dialog.confirm("Your changes to the selected files will be discarded and cannot be recovered.\n" +
@@ -2403,24 +2445,34 @@ var exports = {};
 						if (!doit) {
 							return;
 						}
+						
 						var progressService = serviceRegistry.getService("orion.page.message");
+						
+						var paths = [];
+						for ( var i = 0; i < items.length; i++) {
+							paths[i] = items[i].path;
+						}
+						
 						progressService.createProgressMonitor(
-							serviceRegistry.getService("orion.git.provider").checkoutPath(item.CloneLocation, [item.path]),
+							serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths),
 							"Resetting local changes").deferred.then(
 							function(jsonData){
-								dojo.hitch(explorer, explorer.changedItem)(item);
+								dojo.hitch(explorer, explorer.changedItem)(items);
 							}, displayErrorOnStatus
 						);				
 					}
 				);
-				
-				
 			},
 			visibleWhen: function(item) {
-//				var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
-//				return return_value;
-				
-				return !mGitUtil.isStaged(item);
+				var items = forceArray(item);
+				if (items.length === 0)
+					return false;
+
+				for (var i = 0; i < items.length; i++) {
+					if (mGitUtil.isStaged(items[i]))
+						return false; 
+				}
+				return true;
 			}
 		});
 
@@ -2432,21 +2484,26 @@ var exports = {};
 			imageClass: "git-sprite-diff",
 			spriteClass: "gitCommandSprite",
 			id: "eclipse.orion.git.showPatchCommand",
-			hrefCallback : function() {
-//				var url = self._curClone.DiffLocation + "?parts=diff";
-//				var selectedItems = self._unstagedContentRenderer.getSelected();
-//				for (var i = 0; i < selectedItems.length; i++) {
-//					url += "&Path=";
-//					url += selectedItems[i].modelItem.path;
-//				}
-//				return url;
-				return "http://elo";
+			hrefCallback : function(data) {
+				var items = forceArray(data.items);
+				
+				var url = data.userData.Clone.DiffLocation + "?parts=diff";
+				for (var i = 0; i < items.length; i++) {
+					url += "&Path=";
+					url += items[i].path;
+				}
+				return url;
 			},
 			visibleWhen: function(item) {
-//				var return_value = (item.type === "unstagedItems" && self.hasUnstaged && self._unstagedContentRenderer.getSelected().length > 0);
-//				return return_value;
-				
-				return false;
+				var items = forceArray(item);
+				if (items.length === 0)
+					return false;
+
+				for (var i = 0; i < items.length; i++) {
+					if (mGitUtil.isStaged(items[i]))
+						return false; 
+				}
+				return true;
 			}
 		});
 		
