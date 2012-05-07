@@ -35,7 +35,8 @@ define(['dojo', 'orion/selection'], function(dojo, mSelection){
 		}
 		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor layoutLeft", innerHTML: options.title }, this.domNode );
 		this.progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, this.domNode );
-		this.actionsNode = dojo.create( "div", { id: options.id + "ActionsArea", "class":"layoutRight sectionActions"}, this.domNode );
+		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode );
+		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode );
 		if(options.slideout){
 			this.slideout = '<div id="' + options.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
 								'<span id="' + options.id + 'slideOut" class="slide">' +
@@ -102,12 +103,12 @@ define(['dojo', 'orion/selection'], function(dojo, mSelection){
 			},
 			
 			getSelection: function(){
-				if (!this._serviceRegistry)
-					return null;
-					
-				if (!this._selection)
-					this._selection = new mSelection.Selection(this._serviceRegistry, this.id);
-				return this._selection;
+//				if (!this._serviceRegistry)
+//					return null;
+//					
+//				if (!this._selection)
+//					this._selection = new mSelection.Selection(this._serviceRegistry, this.id);
+//				return this._selection;
 			},
 			
 			_setMonitorMessage: function(monitorId, message){
