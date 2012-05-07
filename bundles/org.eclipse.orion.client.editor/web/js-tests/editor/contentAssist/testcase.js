@@ -21,12 +21,12 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	 * Wraps a test body to ensure a test failure if the promise doesn't resolve. This is convenient for asserting 
 	 * that some content assist API method gets called eventually.
 	 * @param {Function} func The test body (must return a promise).
-	 * @returns {Promise}
+	 * @returns {Deferred}
 	 */
 	function createTestWithTimeout(func) {
 		return function() {
 			var wrapper = new Deferred();
-			var inner = func();
+			var inner;
 			var innerPromiseFired = false;
 			try {
 				inner = func();
