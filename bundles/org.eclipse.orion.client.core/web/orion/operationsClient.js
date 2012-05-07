@@ -17,7 +17,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 		operationsService[funcName].apply(operationsService, funcArgs).then(
 			//on success, just forward the result to the client
 			function(result) {
-				clientDeferred.callback(result);
+				clientDeferred.resolve(result);
 			},
 			//on failure we might need to retry
 			function(error) {
@@ -26,16 +26,16 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 						//try again
 						operationsService[funcName].apply(operationsService, funcArgs).then(
 							function(result) {
-								clientDeferred.callback(result);
+								clientDeferred.resolve(result);
 							},
 							function(error) {
-								clientDeferred.errback(error);
+								clientDeferred.reject(error);
 							}
 						);
 					});
 				} else {
 					//forward other errors to client
-					clientDeferred.errback(error);
+					clientDeferred.reject(error);
 				}
 			}
 		);
@@ -52,7 +52,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 	
 	function returnNoMatchingError(){
 		var result = new Deferred();
-		result.errback("No Matching OperationService for location:" + this._location);
+		result.reject("No Matching OperationService for location:" + this._location);
 		return result;
 	}
 	
