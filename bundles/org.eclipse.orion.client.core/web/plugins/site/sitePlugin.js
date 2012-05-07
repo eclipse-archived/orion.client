@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document eclipse parent window*/
-define(['../../orion/plugin.js', 'siteplugin/siteServiceImpl'], function(plugin, siteImpl) {
+define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugin, siteImpl) {
 	function qualify(url) {
 		var a = document.createElement('a');
 		a.href = url;
