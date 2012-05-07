@@ -47,7 +47,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		// define commands
 		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
 		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
-		mGitCommands.createGitStatusCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
+		mGitCommands.createGitStatusCommands(serviceRegistry, commandService, explorer);
 
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
