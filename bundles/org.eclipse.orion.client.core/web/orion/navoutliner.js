@@ -25,18 +25,13 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 	 */
 	function NavigationOutliner(options) {
 		var parent = options.parent;
-		var toolbar = options.toolbar;
 		if (typeof(parent) === "string") {
 			parent = dojo.byId(parent);
-		}
-		if (typeof(toolbar) === "string") {
-			toolbar = dojo.byId(toolbar);
 		}
 		if (!parent) { throw "no parent"; }
 		if (!options.serviceRegistry) {throw "no service registry"; }
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
-		this._toolbar = toolbar;
 		var navoutliner = this;
 		var reg = options.serviceRegistry;
 		
@@ -212,44 +207,44 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				}
 			}
 			
-
-			// Favorites heading
-			mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
-
-			// favorites
-			var navOutlineTable = dojo.create("table", {id: "favoritesTable", role: "presentation"});
-			dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
-			var id, tr, col1, href, actionsWrapper;
-			var tbody = dojo.create("tbody", null, navOutlineTable);
-
-			for (var j=0; j < favorites.length; j++) {
-				var fave = favorites[j];
-				if (fave.isExternalResource) {
-					href = fave.path;
-				} else {
-					href = fave.directory ? require.toUrl("navigate/table.html") + "#" + fave.path : require.toUrl("edit/edit.html") + "#" + fave.path;
-					if (href==="#") {
-						href="";
+			var navOutlineTable, id, tr, col1, href, actionsWrapper, tbody;
+			if (favorites.length > 0) {
+				// Favorites heading
+				mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
+				// favorites
+				navOutlineTable = dojo.create("table", {id: "favoritesTable", role: "presentation"});
+				dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
+				tbody = dojo.create("tbody", null, navOutlineTable);
+	
+				for (var j=0; j < favorites.length; j++) {
+					var fave = favorites[j];
+					if (fave.isExternalResource) {
+						href = fave.path;
+					} else {
+						href = fave.directory ? require.toUrl("navigate/table.html") + "#" + fave.path : require.toUrl("edit/edit.html") + "#" + fave.path;
+						if (href==="#") {
+							href="";
+						}
 					}
+					var clazz = fave.directory ? "navlinkonpage" : "navlink";
+					id = "fave"+j;
+					tr = dojo.create("tr");
+					tr.id = "row"+id;
+					col1 = dojo.create("td", null, tr, "last");
+					dojo.style(col1, "whiteSpace", "nowrap");
+					link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
+					dojo.place(window.document.createTextNode(fave.name), link, "only");
+					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
+					this._registry.getService("orion.page.command").renderCommands("favoriteCommands", actionsWrapper, fave, this, "tool", j);
+					dojo.place(tr, tbody, "last");
 				}
-				var clazz = fave.directory ? "navlinkonpage" : "navlink";
-				id = "fave"+j;
-				tr = dojo.create("tr");
-				tr.id = "row"+id;
-				col1 = dojo.create("td", null, tr, "last");
-				dojo.style(col1, "whiteSpace", "nowrap");
-				link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
-				dojo.place(window.document.createTextNode(fave.name), link, "only");
-				actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-				this._registry.getService("orion.page.command").renderCommands("favoriteCommands", actionsWrapper, fave, this, "tool", j);
-				dojo.place(tr, tbody, "last");
+				dojo.place(navOutlineTable, this._parent, "last");
+				
+				// spacer, which also is a placeholder for newly added favorites
+				var spacer = dojo.create("tr", null, navOutlineTable);
+				spacer = dojo.create("td", {colspan: 2}, spacer);
+				dojo.create("span", {id: "spacer"}, spacer);
 			}
-			dojo.place(navOutlineTable, this._parent, "last");
-			
-			// spacer, which also is a placeholder for newly added favorites
-			var spacer = dojo.create("tr", null, navOutlineTable);
-			spacer = dojo.create("td", {colspan: 2}, spacer);
-			dojo.create("span", {id: "spacer"}, spacer);
 
 			// Searches if we have them
 			if (searches.length > 0) {

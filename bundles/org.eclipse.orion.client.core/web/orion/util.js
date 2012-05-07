@@ -314,8 +314,9 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @param {String} commandId the id for command tools.  Optional
 	 * @param {Object} command service for rendering commands.  Optional, no commands are rendered if not specified.
 	 * @param {Object} the handler for commands.  Optional.  
+	 * @param {Object} the item for command rendering.  Optional.
 	 */
-	function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler) {
+	function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler, item) {
 		headingId = headingId || id+"heading";
 		commandId = commandId || id+"commands";
 		var paneHeadingFragment = 
@@ -336,8 +337,9 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		} else {
 			dojo.addClass(id, "paneHeading");
 		}
+		
 		if (commandService) {
-			commandService.renderCommands(commandId, dojo.byId(commandId), handler, handler, "button");
+			commandService.renderCommands(commandId, dojo.byId(commandId), item || handler, handler, "button");
 		}
 		return dojo.byId(id);
 	}

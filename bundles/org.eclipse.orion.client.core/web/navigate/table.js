@@ -13,10 +13,10 @@
 /*browser:true*/
 
 define(['dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
+        'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mNavOutliner,
+		function(dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
@@ -52,10 +52,28 @@ dojo.addOnLoad(function(){
 			var pageParams = PageUtil.matchResourceParameters();
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
+				var isAtRoot = mUtil.isAtRoot(explorer.treeRoot.Location) ;
+				if (isAtRoot && !dojo.byId("gettingStartedTasks")) {
+					// TODO eventually we may expose an extension point or this, but right now we don't have a good story for 
+					// how a plugin can add content to the workspace.  So we have only internal/canned creation tasks.
+					var tasks = [
+						{commandId: "orion.new.template"},
+						{commandId: "orion.new.sftp"},
+						{commandId: "orion.new.zip"},
+						{commandId: "orion.new.gitclone"},
+						{commandId: "orion.new.project"},
+					];
+					// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
+					// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
+					// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
+					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: "Create new content", tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: explorer.treeRoot.children.length > 0});
+				} else {
+					dojo.empty("gettingStarted");
+				}
 			});
 		}
 	
-		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
+		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favorites", serviceRegistry: serviceRegistry});
 							
 		// global commands
 		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]);
@@ -78,7 +96,7 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("fileFolderCommands", "eclipse.fileGroup", 100, "*");  // TODO: '*' is a total undocumented hack
 		commandService.addCommandGroup("fileFolderCommands", "eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
 		commandService.addCommandGroup("fileFolderCommands", "eclipse.newResources", 101, null, "eclipse.fileGroup");
-		commandService.addCommandGroup("pageActions", "eclipse.fileGroup.unlabeled", 100);
+		commandService.addCommandGroup("pageActions", "orion.new", 1000, "New");
 		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 200);
 		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
 		// commands that don't appear but have keybindings
@@ -103,11 +121,16 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFile", 1, "eclipse.fileGroup/eclipse.newResources");
 		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFolder", 2, "eclipse.fileGroup/eclipse.newResources");
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
-		commandService.registerCommandContribution("pageActions", "eclipse.newFile", 1, "eclipse.fileGroup.unlabeled");
-		commandService.registerCommandContribution("pageActions", "eclipse.newFolder", 2, "eclipse.fileGroup.unlabeled", false, null, new mCommands.URLBinding("newFolder", "name"));
-		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, "eclipse.fileGroup.unlabeled", false, new mCommands.CommandKeyBinding(38, false, false, true));
-		commandService.registerCommandContribution("pageActions", "eclipse.newProject", 3, "eclipse.fileGroup.unlabeled");
-		commandService.registerCommandContribution("pageActions", "eclipse.linkProject", 4, "eclipse.fileGroup.unlabeled");
+		commandService.registerCommandContribution("pageActions", "eclipse.newFile", 1);
+		commandService.registerCommandContribution("pageActions", "eclipse.newFolder", 2, null, false, null, new mCommands.URLBinding("newFolder", "name"));
+		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, false, new mCommands.CommandKeyBinding(38, false, false, true));
+		// new project creation in the toolbar (in a group)
+		commandService.registerCommandContribution("pageActions", "orion.new.project", 1, "orion.new");
+		commandService.registerCommandContribution("pageActions", "orion.new.zip", 2, "orion.new");
+		commandService.registerCommandContribution("pageActions", "orion.new.sftp", 3, "orion.new");
+		commandService.registerCommandContribution("pageActions", "orion.new.template", 4, "orion.new");
+		commandService.registerCommandContribution("pageActions", "orion.new.linkProject", 5, "orion.new");
+	
 		// selection based command contributions in nav toolbar
 		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 1, "eclipse.selectionGroup");
 		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 2, "eclipse.selectionGroup");
@@ -132,6 +155,7 @@ dojo.addOnLoad(function(){
 			refresh();
 		});
 		refresh();
+
 		document.body.style.visibility = "visible";
 		dojo.parser.parse();
 	});

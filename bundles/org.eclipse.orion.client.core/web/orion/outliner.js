@@ -104,7 +104,9 @@ define(['dojo', 'orion/util', 'orion/commands', 'orion/URITemplate'], function(d
 			return choices;
 		},
 		_renderHeadingAndMenu: function(/**ServiceReference*/ outlineProviders) {
-			dojo.destroy("outlinerHeading");
+			if (dojo.byId("outlinerHeading")) {
+				dojo.destroy("outlinerHeading");
+			}
 			if (outlineProviders.length > 1) {
 				this._commandService.registerCommandContribution("outlineCommands", "eclipse.edit.outline.switch", 1);
 			}
