@@ -382,7 +382,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 					if (typeof postLoad === "function") {
-						postLoad();
+						try {
+							postLoad();
+						} catch(e){
+							this.registry.getService("orion.page.message").setErrorMessage(e);	
+						}
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
 					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){ 
@@ -393,7 +397,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					}
 					this.navHandler.refreshModel(this.model);
 					this.navHandler.cursorOn();
-					this.onchange && this.onchange(this.treeRoot);
+					if (typeof this.onchange === "function") {
+						this.onchange(this.treeRoot);
+					}
 				}),
 				dojo.hitch(self, function(error) {
 					clearTimeout(progressTimeout);
