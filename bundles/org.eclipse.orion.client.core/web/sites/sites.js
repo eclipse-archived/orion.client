@@ -49,7 +49,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var explorer = new mSitesExplorer.SiteServicesExplorer({
 					parent: "table",
 					serviceRegistry: serviceRegistry,
-					selection: null,
+					selection: null
 				});
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
 			createCommands();
