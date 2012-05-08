@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window widgets eclipse:true serviceRegistry define */
-/*browser:true*/
+/*global alert confirm orion window widgets eclipse:true serviceRegistry define */
+/*jslint browser:true eqeqeq:false laxbreak:true */
 define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ContentDialog'], 
