@@ -647,8 +647,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  The caller
 		 *  must supply the parent menu.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
+		 * @param {Array} domNodeWrapperList Optional an array containing  wrapper objects that wraps DOM nodes for commands that have been rendered . 
+		 *  Each wrapper object should have "domNode" as mandatory property and "widget" as optional property if the command is rendered as non standard HTML element.
 		 */	
-		renderCommands: function(scopeId, parent, items, handler, renderType, userData) {
+		renderCommands: function(scopeId, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			if (typeof(scopeId) !== "string") {
 				throw "a scope id for rendering must be specified";
 			}
@@ -672,7 +674,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				return;
 			} 
 			if (contributions) {
-				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData);
+				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData, domNodeWrapperList);
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				if (renderType === "tool" || renderType === "button") {
 					if (this._isLastChildSeparator(parent, renderType)) {
@@ -690,7 +692,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 		},
 		
-		_render: function(contributions, parent, items, handler, renderType, userData) {
+		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
 			if (!sortedByPosition) {
@@ -744,6 +746,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								dropDown: newMenu
 						        });
 							dojo.addClass(menuButton.domNode, "commandMenu");
+							if(domNodeWrapperList){
+								//we need to add the menuButton as the optional widget param
+								mUtil.generateNavGrid(domNodeWrapperList, menuButton.domNode, menuButton);
+							}
 							var menuParent = parent;
 							if (parent.nodeName.toLowerCase() === "ul") {
 								menuParent = dojo.create("li", {}, parent);
@@ -768,7 +774,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
 							window.setTimeout(dojo.hitch({contributions: childContributions}, function() {
-								commandService._render(this.contributions, newMenu, items, handler, "menu", userData); 
+								commandService._render(childContributions, newMenu, items, handler, "menu", userData, domNodeWrapperList); 
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								children = newMenu.getChildren();
@@ -780,6 +786,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								}
 								// now determine if we actually needed the menu or not
 								if (children.length === 0) {
+									if(domNodeWrapperList){
+										mUtil.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+									}
 									menuButton.destroyRecursive();
 								} else {
 									dojo.style(menuButton.domNode, "visibility", "visible");
@@ -793,7 +802,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
-							commandService._render(childContributions, parent, items, handler, renderType, userData); 
+							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 	
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -816,7 +825,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							parent.addChild(groupPopup);
 							// asynchronously populate the menu
 							window.setTimeout(dojo.hitch(this, function() {
-								commandService._render(childContributions, subMenu, items, handler, renderType, userData); 
+								commandService._render(childContributions, subMenu, items, handler, renderType, userData, domNodeWrapperList); 
 								if (subMenu.getChildren().length === 0) {
 									groupPopup.set("label", "removeme");
 									parent.removeChild(groupPopup);
@@ -832,7 +841,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								parent.addChild(menuSep);
 							}
 							// synchronously render the children since order matters
-							commandService._render(childContributions, parent, items, handler, renderType, userData); 
+							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -920,7 +929,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						} else {
 							if (renderType === "tool") {
 								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addTool(parent, id, invocation);	
+								command._addTool(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "button") {
 								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
 								command._addButton(parent, id, invocation);	
@@ -1029,7 +1038,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is an image button.  If there is no image button, use bolded text button.
 		 */
-		_addTool: function(parent, name, context) {
+		_addTool: function(parent, name, context, domNodeWrapperList) {
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
@@ -1038,7 +1047,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					return;
 				}
 			} else {
-				element = dojo.create("span", {tabindex: "0", role: "button"});
+				element = dojo.create("span", {tabindex: domNodeWrapperList ? "-1" : "0", role: "button"});
 				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
 					dojo.place(text, element, "last");
@@ -1069,6 +1078,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
+			mUtil.generateNavGrid(domNodeWrapperList, image);
 		},
 	
 		/*

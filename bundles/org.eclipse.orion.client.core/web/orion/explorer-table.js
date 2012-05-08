@@ -74,24 +74,36 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		}
 	};
 		
-	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
-	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
-	FileRenderer.prototype.getRowActionElement = function(tableRowId){
-		return dojo.byId(tableRowId+"NameColumn");
-	};
-	
-	FileRenderer.prototype.onRowIterate = function(model){
-		if(this.explorer.navHandler){
-			this.explorer.navHandler.cursorOn(model);
-		}
-	};
-	
 	FileRenderer.prototype.setTarget = function(target){
 		this.target = target;
 		
 		dojo.query(".targetSelector").forEach(function(node, index, arr){
 			node.target = target;
 		});
+	};
+	
+	FileRenderer.prototype.getCheckboxColumn = function(item, tableRow){
+		if (this._useCheckboxSelection) {
+			var checkColumn = document.createElement('td');
+			var check = document.createElement("span");
+			check.id = this.getCheckBoxId(tableRow.id);
+			dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite");
+			check.itemId = tableRow.id;
+			if(this.getCheckedFunc){
+				check.checked = this.getCheckedFunc(item);
+				if(this._highlightSelection){
+					dojo.toggleClass(tableRow, "checkedRow", check.checked);
+				}
+				dojo.toggleClass(check, "core-sprite-check_on", check.checked);
+			}
+			checkColumn.appendChild(check);
+			mUtil.addNavGrid(item, check);
+			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
+				var newValue = evt.target.checked ? false : true;
+				this.onCheck(tableRow, evt.target, newValue, true);
+			}));
+			return checkColumn;
+		}
 	};
 	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -130,7 +142,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					}
 			}
 		}
-
+		
 		switch(col_no){
 
 		case 0:
@@ -139,7 +151,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			var link;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
+				var expandImage = this.getExpandImage(tableRow, span);
+				mUtil.addNavGrid(item, expandImage);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
@@ -172,7 +185,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
-			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool");
+			mUtil.addNavGrid(item, link);
+			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, mUtil.getNavGridHolder(item));
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
@@ -180,19 +194,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 				var fileDate = new Date(item.LocalTimeStamp);
 				dateColumn.innerHTML = dojo.date.locale.format(fileDate);
 			}
-			var that = this;
-			if(this.onRowIterate){
-				dojo.connect(dateColumn, "onclick", dateColumn, function() {
-					that.onRowIterate(item);
-				});
-				dojo.connect(dateColumn, "onmouseover", dateColumn, function() {
-					dateColumn.style.cursor ="pointer";
-				});
-				dojo.connect(dateColumn, "onmouseout", dateColumn, function() {
-					dateColumn.style.cursor ="default";
-				});
-			}
-
 			return dateColumn;
 		case 2:
 			var sizeColumn = document.createElement('td');
@@ -389,8 +390,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 						}
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
-					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){ 
-																							 self.navHandler.onCollapse(model);}}});
+					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){self.navHandler.onCollapse(model);}}});
 					//Hook up iterator
 					if(!this.navHandler){
 						this.navHandler = new mNavHandler.ExplorerNavHandler(this);

@@ -773,9 +773,12 @@ a:hover {
 }
 
 .treeIterationCursor {
-	background-color: #EAF2FE !important;
+	outline: #000000 1px dashed ;
 }
 
+.treeIterationCursorRow {
+	background-color: #EAF2FE;
+}
 .searchCmdGroupMargin {
 	margin-left: 16px;
 }

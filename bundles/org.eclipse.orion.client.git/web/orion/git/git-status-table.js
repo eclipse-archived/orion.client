@@ -528,7 +528,7 @@ orion.GitLogTableRenderer = (function() {
 			}
 			dojo.addClass(this._cmdSpan, "statusLogCmd paneHeadingCommands");
 			this._logContentId = this._parentId + "_" + this._type + "_content";
-			var contentDiv = dojo.create("div", {id:this._logContentId }, section, "last");
+			var contentDiv = dojo.create("div", {id:this._logContentId , tabindex: "0"}, section, "last");
 			dojo.addClass(contentDiv, "statusLogContent");
 		},
 		

@@ -15,6 +15,8 @@
 define(['dojo', 'orion/treeModelIterator'], function(dojo, mTreeModelIterator){
 
 var exports = {};
+var userAgent = navigator.userAgent;
+var isPad = userAgent.indexOf("iPad") !== -1;
 
 exports.ExplorerNavHandler = (function() {
 	/**
@@ -30,6 +32,9 @@ exports.ExplorerNavHandler = (function() {
 		this.model = this.explorer.model;
 		
 	    this._listeners = [];
+	    this._selections = [];
+	    
+	    this._currentColumn = 0;
 		
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([],
 		   		   {isExpanded: dojo.hitch(this, function(model) {
@@ -49,7 +54,9 @@ exports.ExplorerNavHandler = (function() {
 		this._init(options);
 		
 	    var parentDiv = this._getEventListeningDiv();
-	    parentDiv.focus();
+	    if(!options || options.setFocus !== false){
+	    	parentDiv.focus();
+	    }
 		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) {
             if (e.target) {// Firefox,  Chrome and Safari
                 if(e.target !== parentDiv){
@@ -105,6 +112,8 @@ exports.ExplorerNavHandler = (function() {
 	ExplorerNavHandler.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavHandler.prototype */ {
 		
 		_init: function(options){
+			this._linearGridMove = true;//temporary. If true right key on the last grid will go to first grid of next row
+			                            // Left key on the first grid will go to the last line grid of the previous line
 			if(!options){
 				return;
 			}
@@ -165,10 +174,98 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
+		
+		_inSelection: function(model){
+			for(var i = 0; i < this._selections.length; i++){
+				if(model === this._selections[i]){
+					return i;
+				}
+			}
+			return -1;
+		},
+		
+		
+		_clearSelection: function(){
+			for(var i = 0; i < this._selections.length; i++){
+				this._checkRow(this._selections[i], true);
+			}
+			this._selections.splice(0, this._selections.length);
+		},
+		
+		_setSelection: function(model, toggling){
+			if(!toggling){
+				this._clearSelection();
+				this._checkRow(model,false);		
+				this._selections.push(model);
+				this._lastSelection = model;
+			} else{
+				var index = this._inSelection(model);
+				if(index >= 0){
+					this._checkRow(model, true);
+					this._selections.splice(index, 1);
+				} else {
+					this._checkRow(model,false);		
+					this._selections.push(model);
+					this._lastSelection = model;
+				}
+			}
+		},
+		
+		moveColumn: function(model, offset){
+			if(!model){
+				model = this.currentModel();
+			}
+			if(model && model.gridChildren && model.gridChildren.length > 0){
+				if(offset !== 0){
+					this.toggleCursor(model, false);
+				}
+				var column = this._currentColumn;
+				var rowChanged= true;
+				column = column + offset;
+				if(column < 0){
+					if(this._linearGridMove && offset !== 0){
+						if(this._modelIterator.iterate(false)){
+							model = this.currentModel();
+						} else {
+							rowChanged = false;
+						}
+					}
+					column = rowChanged ? model.gridChildren.length - 1 : this._currentColumn;
+				} else if(column >= model.gridChildren.length){
+					if(this._linearGridMove && offset !== 0){
+						if(this._modelIterator.iterate(true)){
+							model = this.currentModel();
+						} else {
+							rowChanged = false;
+						}
+					}
+					column = rowChanged ? 0 : this._currentColumn;
+				}
+				this._currentColumn = column;
+				if(offset !== 0){
+					this.toggleCursor(model, true);
+				}
+				return true;
+			}
+			return false;
+		},
+		
+		getCurrentGrid:  function(model){
+			if(!model){
+				model = this.currentModel();
+			}
+			if(model && model.gridChildren && model.gridChildren.length > 0){
+				return model.gridChildren[this._currentColumn];
+			}
+			return null;
+		},
+		
 		toggleCursor:  function(model, on){
 			var currentRow = this.getRowDiv(model);
-			if(currentRow) {
-				dojo.toggleClass(currentRow, "treeIterationCursor", on);
+			dojo.toggleClass(currentRow, "treeIterationCursorRow", on);
+			var currentgrid = this.getCurrentGrid(model);
+			if(currentgrid) {
+				dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on);
 			}
 		},
 		
@@ -197,6 +294,7 @@ exports.ExplorerNavHandler = (function() {
 			if(force && !currentModel){
 				return;
 			}
+			this.moveColumn(null, 0);
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
 			if(currentRowDiv && !this._visible(currentRowDiv)) {
@@ -212,7 +310,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!rowModel){
 				return null;
 			}
-			return dojo.byId(this.model.getId(rowModel));
+			return rowModel.rowDomNode ? rowModel.rowDomNode :  dojo.byId(this.model.getId(rowModel));
 		},
 		
 		iterate: function(forward, forceExpand, selecting)	{
@@ -222,7 +320,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._modelIterator.iterate(forward, forceExpand)){
 				this.cursorOn(null, false, forward);
 				if(selecting){
-					this._checkRow(this._modelIterator.prevCursor(), true);
+					this._setSelection(this._modelIterator.prevCursor(), true);
 				}
 			}
 		},
@@ -238,6 +336,8 @@ exports.ExplorerNavHandler = (function() {
 				if(checked !== checkBox.checked){
 					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true);
 				}
+			} else {
+				this._select(model, toggle);
 			}
 		},
 		
@@ -258,6 +358,50 @@ exports.ExplorerNavHandler = (function() {
 			return false;
 		},
 			
+		_select: function(model, toggling){
+			if(!model){
+				model = this._modelIterator.cursor();
+			}
+			if(!model.selected){
+				model.selected = false;
+			}
+			model.selected = !model.selected;
+			dojo.toggleClass(this.getRowDiv(model), "checkedRow", model.selected);
+		},
+		
+		_onModelGrid: function(model, mouseEvt){
+			if(model.gridChildren){
+				for(var i = 0; i < model.gridChildren.length; i++){
+					if(mouseEvt.target === model.gridChildren[i].domNode){
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		
+		onClick: function(model, mouseEvt)	{
+			if(this._onModelGrid(model, mouseEvt)){
+				return;
+			}
+			this.cursorOn(model);
+			if(isPad){
+				this._setSelection(model, true);
+			} else if(mouseEvt.ctrlKey){
+				this._setSelection(model, true);
+			} else if(mouseEvt.shiftKey && this._lastSelection){
+				var scannedSel = this._modelIterator.scan(this._lastSelection, model);
+				if(scannedSel){
+					this._clearSelection();
+					for(var i = 0; i < scannedSel.length; i++){
+						this._setSelection(scannedSel[i], true);
+					}
+				}
+			} else {
+				this._setSelection(model, false);
+			}
+		},
+		
 		onCollapse: function(model)	{
 			if(this._modelIterator.collapse(model)){
 				this.cursorOn();
@@ -287,6 +431,10 @@ exports.ExplorerNavHandler = (function() {
 		//Left arrow key collapses the current row. If current row is not expandable(e.g. a file in file navigator), move the cursor to its parent row.
 		//If current row is expandable and expanded, collapse it. Otherwise move the cursor to its parent row.
 		onLeftArrow:  function(e) {
+			if(!e.ctrlKey && this.moveColumn(null, -1)){
+				e.preventDefault();
+				return true;
+			}
 			var curModel = this._modelIterator.cursor();
 			if(!curModel){
 				return false;
@@ -308,6 +456,10 @@ exports.ExplorerNavHandler = (function() {
 		
 		//Right arrow key expands the current row if it is expandable and collapsed.
 		onRihgtArrow: function(e) {
+			if(!e.ctrlKey && this.moveColumn(null, 1)){
+				e.preventDefault();
+				return true;
+			}
 			var curModel = this._modelIterator.cursor();
 			if(!curModel){
 				return;
@@ -318,17 +470,33 @@ exports.ExplorerNavHandler = (function() {
 					e.preventDefault();
 					return false;
 				}
-			} 
+			}
 		},
 
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
-			this._checkRow(null, true);
+			this._setSelection(this.currentModel(), true);
 			e.preventDefault();
 		},
 		
 		//Enter key simulates a href call if the current row has an href link rendered. The render has to provide the getRowActionElement function that returns the href DIV.
 		onEnter: function(e) {
+			var currentGrid = this.getCurrentGrid(this._modelIterator.cursor());
+			if(currentGrid){
+				if(currentGrid.widget){
+					if(typeof currentGrid.onClick === "function"){
+						currentGrid.onClick();
+					} else if(typeof currentGrid.widget.focus === "function"){
+						currentGrid.widget.focus();
+					}
+				} else {
+					var evt = document.createEvent("MouseEvents");
+					evt.initMouseEvent("click", true, true, window,
+							0, 0, 0, 0, 0, e.ctrlKey, false, false, false, 0, null);
+					currentGrid.domNode.dispatchEvent(evt);
+				}
+				return;
+			}
 			if(this.explorer.renderer.getRowActionElement){
 				var curModel = this._modelIterator.cursor();
 				if(!curModel){
