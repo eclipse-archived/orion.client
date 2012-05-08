@@ -2154,7 +2154,7 @@ var exports = {};
 						dialog.startup();
 						dialog.show();
 	
-			},
+			}
 			//visibleWhen : function(item) {
 				//return item.Type === "Clone" ;
 			//}
