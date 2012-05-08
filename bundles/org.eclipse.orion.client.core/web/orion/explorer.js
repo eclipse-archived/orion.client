@@ -247,7 +247,7 @@ exports.ExplorerRenderer = (function() {
 			this.renderTableHeader(tableNode);
 
 		},
-		getActionsColumn: function(item, tableRow, renderType, columnClass){
+		getActionsColumn: function(item, tableRow, renderType, columnClass, gridHolder){
 			renderType = renderType || "tool";
 			var commandService = this.explorer.registry.getService("orion.page.command");
 			var actionsColumn = document.createElement('td');
@@ -257,7 +257,7 @@ exports.ExplorerRenderer = (function() {
 			}
 			// contact the command service to render appropriate commands here.
 			if (this.actionScopeId) {
-				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType);
+				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType, null, gridHolder);
 			} else {
 				window.console.log("Warning, no action scope was specified.  No commands rendered.");
 			}
@@ -562,7 +562,12 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
-
+		item.rowDomNode = tableRow;
+		dojo.connect(tableRow, "onclick", dojo.hitch(this, function(evt) {
+			if(this.explorer.navHandler){
+				this.explorer.navHandler.onClick(item, evt);
+			}
+		}));
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
 			dojo.addClass(checkColumn, 'checkColumn');
