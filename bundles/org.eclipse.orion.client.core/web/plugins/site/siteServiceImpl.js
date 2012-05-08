@@ -244,7 +244,7 @@ define(['require', 'dojo'], function(require, dojo) {
 				return {
 					Source: virtualPath,
 					Target: internalPath,
-					FriendlyPath: displayString || virtualPath,
+					FriendlyPath: displayString || virtualPath
 				};
 			});
 		},
