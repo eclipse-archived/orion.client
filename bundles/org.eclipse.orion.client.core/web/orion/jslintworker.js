@@ -4987,7 +4987,7 @@ loop:   for (;;) {
             this.first.push(parse(10));
             if (nexttoken.id === ',') {
                 comma();
-                if (nexttoken.id === ']' && !option.es5) {
+                if (nexttoken.id === ']' /*&& !option.es5*/) {
                     warning("Extra comma.", token);
                     break;
                 }
@@ -5139,7 +5139,7 @@ loop:   for (;;) {
                     comma();
                     if (nexttoken.id === ',') {
                         warning("Extra comma.", token);
-                    } else if (nexttoken.id === '}' && !option.es5) {
+                    } else if (nexttoken.id === '}' /*&& !option.es5*/) {
                         warning("Extra comma.", token);
                     }
                 } else {

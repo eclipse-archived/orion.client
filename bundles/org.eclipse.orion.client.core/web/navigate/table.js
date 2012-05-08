@@ -61,7 +61,7 @@ dojo.addOnLoad(function(){
 						{commandId: "orion.new.sftp"},
 						{commandId: "orion.new.zip"},
 						{commandId: "orion.new.gitclone"},
-						{commandId: "orion.new.project"},
+						{commandId: "orion.new.project"}
 					];
 					// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
 					// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
