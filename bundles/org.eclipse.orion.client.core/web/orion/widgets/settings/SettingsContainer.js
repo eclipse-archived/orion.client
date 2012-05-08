@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/InputBuilder'], function(require, dojo, dijit, mUtil, mCommands, PageUtil) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(require, dojo, dijit, mUtil, mCommands, PageUtil) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], {
 
@@ -33,7 +33,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
-			var category = pageParams.category || "plugins";
+			var category = pageParams.category || "userSettings";
 			this.showById(category);
 			this.commandService.processURL(window.location.href);
 		},
@@ -93,6 +93,64 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 			this.addCategory(item, this.initialSettings.length);
 		},
+		
+		addUserSettings: function() {
+
+			var item = {
+				id: "userSettings",
+				innerHTML: "User Profile",
+				"class": 'navbar-item',
+				role: "tab",
+				tabindex: -1,
+				"aria-selected": "false",
+				onclick: dojo.hitch( this, 'showUserSettings', "userSettings" )
+			};
+
+			this.addCategory(item, this.initialSettings.length);
+		},
+		
+		
+		showUserSettings: function(id){
+
+			if (this.selectedCategory) {
+				dojo.removeClass(this.selectedCategory, "navbar-item-selected");
+				dojo.attr(this.selectedCategory, "aria-selected", "false");
+				this.selectedCategory.tabIndex = -1;
+			}
+
+			if (id) {
+				this.selectedCategory = dojo.byId(id);
+			}
+
+			dojo.addClass(this.selectedCategory, "navbar-item-selected");
+			dojo.attr(this.selectedCategory, "aria-selected", "true");
+			dojo.attr(this.mainNode, "aria-labelledby", id);
+			this.selectedCategory.tabIndex = 0;
+			this.selectedCategory.focus();
+
+			dojo.empty(this.table);
+
+			if (this.userWidget) {
+				this.userWidget.destroyRecursive(true);
+			}
+
+			this.updateToolbar(id);
+			
+			var pluginNode = dojo.create( 'div', null, this.table );
+
+			this.userWidget = new orion.widgets.settings.UserSettings({
+				registry: this.registry,
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				userClient: this.userClient,
+				toolbarID: "pageActions"
+			}, pluginNode);
+			
+			this.userWidget.startUp();
+		},
 
 
 /*	showPlugins - iterates over the plugin array, reads
@@ -146,10 +204,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 		showById: function(id) {
 			this.updateToolbar(id);
-			if (id === "plugins") {
-				this.showPlugins(id);
-			} else {
-				this.selectCategory(id);
+			
+			switch(id){
+			
+				case "plugins":
+					this.showPlugins(id);
+					break;
+				
+				case "userSettings":
+					this.showUserSettings(id);
+					break;
+					
+				default:
+					this.selectCategory(id);
+					break;
+			
 			}
 		},
 
@@ -157,6 +226,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 			this.inherited(arguments);
 
+
+			this.addUserSettings();
 			this.addPlugins();
 			this.processHash();
 
@@ -169,8 +240,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		
 		handleError: function( error ){
 			console.log( error );
-			
-			
 		},
 
 		manageDefaultData: function(settings) {
@@ -225,8 +294,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		   it should be replaceable. Perhaps plugins will need to ship with a translation file, which
 		   will need to be correlated with a selected language - will refer to dojo possibly. 'label' is
 		   the key for the storage field */
+		   
+		   /* { "ui": "Login", "label": "Login", "input": "textfield", "setting": "" },
+							{ "ui": "Login", "label": "Login", "input": "textfield", "setting": "" },
+							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" }*/
 
 initialSettings: [
+//			{"category": "User",
+//				"subcategory": [{ "ui": "Personal information", "label": "Personal information",
+//				"items": [ { "ui": "Login", "label": "Login", "input": "textfield", "setting": "" },
+//							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" } ]}
+//				]
+//			},
 			{"category": "General",
 				"subcategory": [{ "ui": "Navigation", "label": "Navigation",
 				"items": [{ "ui": "Links", "label": "Links", "input": "combo", "values": [{"label": "Open in same tab"}, {"label": "Open in new tab"}], "setting": "Open in same tab" } ] }

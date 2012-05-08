@@ -14,7 +14,7 @@
 /* This InputBuilder widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widgets/settings/Select", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit, mUtil, mCommands) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widgets/settings/Select", "orion/widgets/settings/TextField", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit, mUtil, mCommands) {
 
 	dojo.declare("orion.widgets.settings.InputBuilder", null, {
 	
@@ -128,6 +128,25 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 						}, picker);
 		
 						break;
+						
+						
+					case "textfield":
+					
+						new orion.widgets.settings.TextField({ 
+							category:category, 
+							item:label, 
+							element:item.label, 
+							ui:ui, 
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												
+						}, picker );
+					
+						break;
+						
+					case "textstring":
+					
+						break;
+					
+						
 					}
 				});
 			} 
