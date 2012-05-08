@@ -22,6 +22,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		templateString: '<div>' + 
 							'<div class="pluginwrapper">' +
 								'<div class="pluginTitle" data-dojo-attach-point="pluginTitle"></div>' +
+								'<div class="pluginCount" data-dojo-attach-point="pluginCount">0</div>' +
 					        '</div>' +
 					        '<div class="displaytable">' +
 								'<div class="plugin-settings">' +
@@ -126,7 +127,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			var list = this.pluginSettingsList;
 			dojo.empty( list );
 			var pluginList = this.settings.pluginRegistry.getPlugins();
-			this.pluginTitle.innerHTML = "Plugins [" + pluginList.length +"]";
+			this.pluginTitle.innerHTML = "Plugins";
+			this.pluginCount.innerHTML = pluginList.length;
 
 			for( var p = 0; p < pluginList.length; p++ ){
 				var pluginEntry = new orion.widgets.plugin.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );

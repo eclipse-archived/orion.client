@@ -30,7 +30,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 										'<span data-dojo-attach-point="pluginTitle" class="plugin-title"></span>' +
 										'<div></div>' +
 										'<span class="plugin-description">A plugin for Eclipse Orion</span>' + 
-										'<a class="plugin-link" data-dojo-attach-point="pluginLink">Plugin Link</a>' +
+										'<a class="plugin-link" style="font-size:11px" data-dojo-attach-point="pluginLink">Plugin Link</a>' +
 									'</div>' +
 									'<span class="plugin-commands" data-dojo-attach-point="commandSpan"></span>' +
 								'</div>' +
