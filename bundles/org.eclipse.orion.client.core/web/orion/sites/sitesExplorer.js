@@ -71,7 +71,7 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 					deleteCallback: refresher
 				});
 			}
-		},
+		}
 	};
 
 	var SiteTreeModel = (function() {
