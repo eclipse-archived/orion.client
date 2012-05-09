@@ -14,6 +14,7 @@ define( {
 		"Navigator": "Navigator",
 		"Sites": "Sites",
 		"Repositories": "Repositories",
+		"Console": "Console",
 		"Get Plugins": "Get Plugins",
 		"Navigate": "Navigate",
 		"Go to the navigator": "Go to the navigator",
