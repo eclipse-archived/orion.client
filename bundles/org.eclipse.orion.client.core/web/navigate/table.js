@@ -93,12 +93,11 @@ dojo.addOnLoad(function(){
 		commandService.addCommand(toggleOutlineCommand);
 				
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("fileFolderCommands", "eclipse.fileGroup", 100, "*");  // TODO: '*' is a total undocumented hack
-		commandService.addCommandGroup("fileFolderCommands", "eclipse.importExportGroup", 100, null, "eclipse.fileGroup");		
-		commandService.addCommandGroup("fileFolderCommands", "eclipse.newResources", 101, null, "eclipse.fileGroup");
 		commandService.addCommandGroup("pageActions", "orion.new", 1000, "New");
-		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 200);
-		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
+		commandService.addCommandGroup("pageActions", "orion.gitGroup", 200);
+		commandService.addCommandGroup("selectionTools", "orion.selectionGroup", 500, "More");
+		commandService.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup");		
+		commandService.addCommandGroup("selectionTools", "orion.newResources", 101, null, "orion.selectionGroup");
 		// commands that don't appear but have keybindings
 		commandService.registerCommandContribution("pageActions", "eclipse.toggleSplitter", 1, null, true, new mCommands.CommandKeyBinding('o', true));
 		commandService.registerCommandContribution("pageActions", "eclipse.copySelections", 1, null, true, new mCommands.CommandKeyBinding('c', true));
@@ -107,19 +106,6 @@ dojo.addOnLoad(function(){
 		// commands appearing in nav tool bar
 		commandService.registerCommandContribution("pageActions", "eclipse.openResource", 500);
 		
-		// favorites has been defined at the global level and we need to contribute it here
-		commandService.registerCommandContribution("fileFolderCommands", "orion.makeFavorite", 1, "eclipse.fileGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.renameResource", 2, "eclipse.fileGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.copyFile", 3, "eclipse.fileGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.moveFile", 4, "eclipse.fileGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.deleteFile", 5, "eclipse.fileGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.importCommand", 1, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.downloadFile", 2, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.importSFTPCommand", 3, "eclipse.fileGroup/eclipse.importExportGroup");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.exportSFTPCommand", 4, "eclipse.fileGroup/eclipse.importExportGroup");
-		// new file and new folder in the actions column uses the labeled group
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFile", 1, "eclipse.fileGroup/eclipse.newResources");
-		commandService.registerCommandContribution("fileFolderCommands", "eclipse.newFolder", 2, "eclipse.fileGroup/eclipse.newResources");
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
 		commandService.registerCommandContribution("pageActions", "eclipse.newFile", 1);
 		commandService.registerCommandContribution("pageActions", "eclipse.newFolder", 2, null, false, null, new mCommands.URLBinding("newFolder", "name"));
@@ -132,11 +118,17 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("pageActions", "orion.new.linkProject", 5, "orion.new");
 	
 		// selection based command contributions in nav toolbar
-		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 1, "eclipse.selectionGroup");
-		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 2, "eclipse.selectionGroup");
-		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 3, "eclipse.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.renameResource", 2, "orion.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 3, "orion.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 4, "orion.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.importCommand", 1, "orion.selectionGroup/orion.importExportGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.downloadFile", 2, "orion.selectionGroup/orion.importExportGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.importSFTPCommand", 3, "orion.selectionGroup/orion.importExportGroup");
+		commandService.registerCommandContribution("selectionTools", "eclipse.exportSFTPCommand", 4, "orion.selectionGroup/orion.importExportGroup");
 			
-		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "eclipse.fileGroup", "eclipse.selectionGroup");
+		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup");
 
 		// when new item is fetched, display it in the page title
 		dojo.connect(explorer, "onchange", function(item) {

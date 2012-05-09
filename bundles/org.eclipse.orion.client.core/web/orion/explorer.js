@@ -578,8 +578,11 @@ exports.SelectionRenderer = (function(){
 		var cell = this.getCellElement(i, item, tableRow);
 		while(cell){
 			tableRow.appendChild(cell);
-			dojo.addClass(cell, 'secondaryColumn');
-			
+			if (i===0) {
+				dojo.addClass(cell, "navColumn");
+			} else {
+				dojo.addClass(cell, "secondaryColumn");
+			}
 			cell = this.getCellElement(++i, item, tableRow);
 		}
 		

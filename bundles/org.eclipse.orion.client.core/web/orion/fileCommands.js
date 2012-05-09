@@ -126,11 +126,14 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		};
 		
 		function forceSingleItem(item) {
+			if (!item) {
+				return {};
+			}
 			if (dojo.isArray(item)) {
-				if (item.length > 1) {
-					item = {};
-				} else {
+				if (item.length === 1) {
 					item = item[0];
+				} else {
+					item = {};
 				}
 			}
 			return item;
@@ -809,7 +812,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 	
 	var contentTypesCache;
 
-	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
+	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
@@ -873,37 +876,24 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					command.isEditor = commandInfo.isEditor;
 				}
 				
-				if (commandInfo.forceSingleItem || commandInfo.uriTemplate) {
-					// single items go in the local actions column, grouped in their own unnamed group to get a separator
-					commandService.addCommand(command);
-					if (!extensionGroupCreated) {
-						extensionGroupCreated = true;
-						commandService.addCommandGroup("fileFolderCommands", "eclipse.fileCommandExtensions", 1000, null, fileGroup);
-					}
-					if (!openWithGroupCreated) {
-						openWithGroupCreated = true;
-						commandService.addCommandGroup("fileFolderCommands", "eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
-					}
-					
-					if (commandInfo.isEditor) {
-						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
-					} else {
-						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions");
-					}
-				} else {  
-					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
-					// TODO would we also want to add these to the menu above so that they are available for single selections?  
-					// For now we do not do this to reduce clutter, but we may revisit this.
-					commandService.addCommand(command);
-					if (!selectionGroupCreated) {
-						selectionGroupCreated = true;
-						commandService.addCommandGroup(selectionToolbarId, "eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
-					}
-					commandService.registerCommandContribution(selectionToolbarId, command.id, i, selectionGroup + "/eclipse.bulkFileCommandExtensions");
+				commandService.addCommand(command);
+				if (!extensionGroupCreated) {
+					extensionGroupCreated = true;
+					commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup);
 				}
-				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
-				explorer.updateCommands();
+				if (!openWithGroupCreated) {
+					openWithGroupCreated = true;
+					commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, "Open With", commandGroup + "/eclipse.fileCommandExtensions");
+				}
+				if (commandInfo.isEditor) {
+					commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
+				} else {
+					commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions");
+				}
 			}
+			fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
+			explorer.updateCommands();
+
 		}));
 	};
 	
