@@ -161,6 +161,15 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		refreshModel: function(model, noReset){
+			this._clearSelection();
+			var that = this;
+			if(this.explorer.selection){
+				this.explorer.selection.getSelections(function(selections) {
+					for (var i = 0; i < selections.length; i++){
+						that._selections.push(selections[i]);
+					}
+				});
+			}
 			this.topIterationNodes = [];
 			this.model = model;
 			if(this.model.getTopIterationNodes){
@@ -185,16 +194,18 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		
-		_clearSelection: function(){
-			for(var i = 0; i < this._selections.length; i++){
-				this._checkRow(this._selections[i], true);
+		_clearSelection: function(visually){
+			if(visually){
+				for(var i = 0; i < this._selections.length; i++){
+					this._checkRow(this._selections[i], true);
+				}
 			}
 			this._selections.splice(0, this._selections.length);
 		},
 		
 		_setSelection: function(model, toggling){
 			if(!toggling){
-				this._clearSelection();
+				this._clearSelection(true);
 				this._checkRow(model,false);		
 				this._selections.push(model);
 				this._lastSelection = model;
@@ -392,7 +403,7 @@ exports.ExplorerNavHandler = (function() {
 			} else if(mouseEvt.shiftKey && this._lastSelection){
 				var scannedSel = this._modelIterator.scan(this._lastSelection, model);
 				if(scannedSel){
-					this._clearSelection();
+					this._clearSelection(true);
 					for(var i = 0; i < scannedSel.length; i++){
 						this._setSelection(scannedSel[i], true);
 					}
