@@ -160,16 +160,20 @@ exports.ExplorerNavHandler = (function() {
 			return this.explorer.myTree.isExpanded(this.model.getId(model));
 		},
 		
-		refreshModel: function(model, noReset){
-			this._clearSelection();
+		refreshSelection: function(){
 			var that = this;
 			if(this.explorer.selection){
 				this.explorer.selection.getSelections(function(selections) {
+					that._clearSelection();
 					for (var i = 0; i < selections.length; i++){
 						that._selections.push(selections[i]);
 					}
 				});
 			}
+		},
+		
+		refreshModel: function(model, noReset){
+			this.refreshSelection();
 			this.topIterationNodes = [];
 			this.model = model;
 			if(this.model.getTopIterationNodes){
@@ -219,6 +223,10 @@ exports.ExplorerNavHandler = (function() {
 					this._selections.push(model);
 					this._lastSelection = model;
 				}
+			}
+			if (this.explorer.selection) {
+				this.explorer.renderer.storeSelections();
+				this.explorer.selection.setSelections(this._selections);		
 			}
 		},
 		
@@ -316,6 +324,18 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
+		getSelection: function(){
+			return this._selections;
+		},
+		
+		getSelectionIds: function(){
+			var ids = [];
+			for (var i = 0; i < this._selections.length; i++) {
+				ids.push(this.model.getId(this._selections[i]));
+			}
+			return ids;
+		},
+		
 		getRowDiv: function(model){
 			var rowModel = model ? model: this._modelIterator.cursor();
 			if(!rowModel){
@@ -373,11 +393,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				model = this._modelIterator.cursor();
 			}
-			if(!model.selected){
-				model.selected = false;
-			}
-			model.selected = !model.selected;
-			dojo.toggleClass(this.getRowDiv(model), "checkedRow", model.selected);
+			dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
 		},
 		
 		_onModelGrid: function(model, mouseEvt){
