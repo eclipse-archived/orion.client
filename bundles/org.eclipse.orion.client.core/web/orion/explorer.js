@@ -305,13 +305,13 @@ exports.ExplorerRenderer = (function() {
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
-			this._storeSelections();
+			this.storeSelections();
 			if (this.explorer.selection) {
 				this.explorer.selection.setSelections(this.getSelected());		
 			}
 		},
 		
-		_storeSelections: function() {
+		storeSelections: function() {
 			var selectionIDs = this.getSelectedIds();
 			var prefPath = this._getUIStatePreferencePath();
 			if (prefPath && window.sessionStorage) {
@@ -348,6 +348,9 @@ exports.ExplorerRenderer = (function() {
 			var selectedItems = this.getSelected();
 			if(this.explorer.selection) {
 				this.explorer.selection.setSelections(selectedItems);
+				if(this.explorer.navHandler){
+					this.explorer.navHandler.refreshSelection();
+				}
 			}
 		},
 		
@@ -444,17 +447,20 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
-				var row = node.parentNode.parentNode;
+			dojo.query(".checkedRow").forEach(dojo.hitch(this, function(node) {
+				var row = node;
 				selected.push(this.tableTree.getItem(row));
 			}));
 			return selected;
 		},
 		
 		getSelectedIds: function() {
+			if(this.explorer.navHandler){
+				return this.explorer.navHandler.getSelectionIds();
+			}
 			var selected = [];
-			dojo.query(".core-sprite-check_on").forEach(dojo.hitch(this, function(node) {
-				var row = node.parentNode.parentNode;
+			dojo.query("checkedRow").forEach(dojo.hitch(this, function(node) {
+				var row = node;
 				selected.push(row.id);
 			}));
 			return selected;
@@ -562,7 +568,7 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
-		item.rowDomNode = tableRow;
+		//item.rowDomNode = tableRow;
 		dojo.connect(tableRow, "onclick", dojo.hitch(this, function(evt) {
 			if(this.explorer.navHandler){
 				this.explorer.navHandler.onClick(item, evt);

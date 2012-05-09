@@ -238,7 +238,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.selectionToolsId = options.selectionToolsId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new FileRenderer({checkbox: true, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
+		this.checkbox = false;
+		this.renderer = new FileRenderer({checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
 		this.preferences = options.preferences;
 		this.setTarget();
 		this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) );
