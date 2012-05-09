@@ -647,8 +647,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  The caller
 		 *  must supply the parent menu.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
-		 * @param {Array} domNodeWrapperList Optional an array containing  wrapper objects that wraps DOM nodes for commands that have been rendered . 
-		 *  Each wrapper object should have "domNode" as mandatory property and "widget" as optional property if the command is rendered as non standard HTML element.
+		 * @param {Array} domNodeWrapperList Optional an array used to record any DOM nodes that are rendered during this call.
+		 *  If an array is provided, then as commands are rendered, an object will be created to represent the command's node.  
+		 *  The object will always have the property "domNode" which contains the node created for the command.  If the command is
+		 *  rendered using other means (toolkit widget) then the optional property "widget" should contain the toolkit
+		 *  object that represents the specified dom node.
 		 */	
 		renderCommands: function(scopeId, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			if (typeof(scopeId) !== "string") {
@@ -774,7 +777,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
 							window.setTimeout(dojo.hitch({contributions: childContributions}, function() {
-								commandService._render(childContributions, newMenu, items, handler, "menu", userData, domNodeWrapperList); 
+								commandService._render(this.contributions, newMenu, items, handler, "menu", userData, domNodeWrapperList); 
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								children = newMenu.getChildren();
