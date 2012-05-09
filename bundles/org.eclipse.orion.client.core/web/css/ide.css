@@ -6,7 +6,7 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 9pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	font: 8pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 }
 
 .orionPage {
@@ -151,7 +151,6 @@ a:hover {
 }
 
 .pageActions {
-	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	min-height: 30px;
 	margin-top: 4px;
 }
@@ -237,6 +236,13 @@ a:hover {
 .navColumn {
 	min-width: 150px;
 	padding-right: 8px;
+	min-height: 24px;
+	display: inline-block;
+	vertical-align: baseline;
+}
+
+.navRow {
+	vertical-align: baseline;
 }
 
 .actionsColumn {
@@ -548,13 +554,13 @@ a:hover {
 
 .auxpaneHeading {
 	margin-top: 8px;
-	margin-right: 16px;
+	margin-right: 8px;
 	min-height: 26px;
 	vertical-align: baseline;
-	font-size: 10pt;
 	font-weight: bold;
 	color: #808080;
-	border-bottom: 1px solid #ebebeb;
+	background-color: #fafafa;
+	border: 1px solid #ebebeb;
 }
 
 .slideContainer {
