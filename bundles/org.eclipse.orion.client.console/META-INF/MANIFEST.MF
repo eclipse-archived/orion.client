@@ -1,8 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name
-Bundle-SymbolicName: org.eclipse.orion.client.console;singleton:=true
-Bundle-Version: 0.0.1.qualifier
-Bundle-ActivationPolicy: lazy
-Bundle-Vendor: %Bundle-Vendor
-Bundle-Localization: bundle
