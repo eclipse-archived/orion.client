@@ -31,6 +31,11 @@
 			uriTemplate: "{OrionHome}/git/git-repository.html#"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			name: messages.Console,
+			id: "orion.console",
+			uriTemplate: "{OrionHome}/console/consolePage.html"
+		});
+		provider.registerServiceProvider("orion.page.link", serviceImpl, {
 			name: messages["Get Plugins"],
 			id: "orion.plugins.get",
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
