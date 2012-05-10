@@ -447,7 +447,7 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query(".checkedRow").forEach(dojo.hitch(this, function(node) {
+			dojo.query("checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
 				var row = node;
 				selected.push(this.tableTree.getItem(row));
 			}));
@@ -459,7 +459,7 @@ exports.ExplorerRenderer = (function() {
 				return this.explorer.navHandler.getSelectionIds();
 			}
 			var selected = [];
-			dojo.query("checkedRow").forEach(dojo.hitch(this, function(node) {
+			dojo.query("checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
 				var row = node;
 				selected.push(row.id);
 			}));
