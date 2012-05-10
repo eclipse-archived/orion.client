@@ -1,14 +1,14 @@
 /*******************************************************************************
-* @license
-* Copyright (c) 2012 IBM Corporation and others.
-* All rights reserved. This program and the accompanying materials are made
-* available under the terms of the Eclipse Public License v1.0
-* (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
-* License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
-*
-* Contributors:
- *     IBM Corporation - initial API and implementation
-*******************************************************************************/
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
+ *
+ * Contributors:
+ *     Kris De Volder (VMWare) - initial API and implementation
+ *******************************************************************************/
 
 /*global define window*/
 /*jslint browser:true*/
@@ -143,18 +143,18 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 	}
 
 	/*
-	 * Creates a gcli exec function that wraps a 'run' function contributed by
+	 * Creates a gcli exec function that wraps a 'callback' function contributed by
 	 * an 'orion.console.command' service implementation.
 	 */
 	function contributedExecFunc(service) {
-		if (typeof(service.run) === 'function') {
+		if (typeof(service.callback) === 'function') {
 			//TODO: we may support different styles of exec functions based on 
 			// properties set in the service. For now we just have the one
 			// type that executes asynchronously and renders the result as 'pre' text.
 			return function(args, context) {
 				var promise = context.createPromise();
 				createPluginContext(context, function(jsonContext) {
-					service.run(args, jsonContext).then(function(result) {
+					service.callback(args, jsonContext).then(function(result) {
 						promise.resolve(result);
 					});
 				});
@@ -192,9 +192,9 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 			console.addCommand({
 				name: 'cd',
 				description: 'Change current directory',
-				run: cdExec,
+				callback: cdExec,
 				returnType: 'string',
-				params: [
+				parameters: [
 						    {
 								name: 'directory',
 								type: 'directory',
@@ -205,9 +205,9 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 			console.addCommand({
 				name: 'edit',
 				description: 'Edit a file',
-				run: editExec,
+				callback: editExec,
 				returnType: 'string',
-				params: [
+				parameters: [
 						    {
 								name: 'file',
 								type: 'file',
@@ -218,13 +218,13 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 			console.addCommand({
 				name: 'ls',
 				description: 'Show a list of files in the current directory',
-				run: lsExec,
+				callback: lsExec,
 				returnType: 'string'
 			});
 			console.addCommand({
 				name: 'pwd',
 				description: 'Print current directory',
-				run: pwdExec,
+				callback: pwdExec,
 				returnType: 'string'
 			});
 
@@ -259,7 +259,7 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 						name: ref.getProperty("name"),
 						description: ref.getProperty("description"),
 						manual: ref.getProperty("manual"),
-						params: ref.getProperty("params"),
+						parameters: ref.getProperty("parameters"),
 						exec: contributedExecFunc(service)
 					});
 				}
