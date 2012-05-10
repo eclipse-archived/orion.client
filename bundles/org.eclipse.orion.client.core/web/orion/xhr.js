@@ -110,12 +110,16 @@ define(['orion/Deferred'], function(Deferred) {
 				}
 			}
 		};
-		xhr.open(method, url, true /* async */);
-		for (i=0; i < headerNames.length; i++) {
-			var headerName = headerNames[i], headerValue = headers[headerName];
-			xhr.setRequestHeader(headerName, headerValue);
+		try {
+			xhr.open(method, url, true /* async */);
+			for (i=0; i < headerNames.length; i++) {
+				var headerName = headerNames[i], headerValue = headers[headerName];
+				xhr.setRequestHeader(headerName, headerValue);
+			}
+			xhr.send(data);
+		} catch (e) {
+			d.reject(e);
 		}
-		xhr.send(data);
 		return d;
 	}
 	return _xhr;
