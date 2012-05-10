@@ -33,6 +33,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			this._setReadyState(this.OPENED);
 		},
 		send: function() {
+			if (this.readyState !== this.OPENED) {
+				throw new Error('send called out of order');
+			}
 		},
 		setRequestHeader: function(name, value) {
 			if (this.readyState !== this.OPENED) {
@@ -95,7 +98,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 
 	function reject(err) {
 		var d = new Deferred();
-		d.resolve.apply(d, Array.prototype.slice.call(arguments));
+		d.reject.apply(d, Array.prototype.slice.call(arguments));
 		return d;
 	}
 
@@ -195,5 +198,13 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, new OkXhr())
 		.then(resolve, reject);
 	});
+
+	tests['test open() exception causes reject'] = withTimeout(function() {
+		var alreadyOpenXhr = new OkXhr();
+		alreadyOpenXhr.open('GET', '/foo');
+		// The 2nd call to open() should throw, and xhr should catch & reject
+		return xhr('GET', '/bar', null, alreadyOpenXhr).then(reject, resolve);
+	});
+
 return tests;
 });
