@@ -1,17 +1,14 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials are made 
- * available under the terms of the Eclipse Public License v1.0 
- * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
- * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * All rights reserved. This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License v1.0
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *
  * Contributors:
- *     Contributors: IBM Corporation - initial API and implementation 
- *                      (copied: see explorer-table.js)
- *     Kris De Volder (VMWare) - Copied from explorer-table.js and modified to  
- *                               implement console page.
- *******************************************************************************/ 
+ *     Kris De Volder (VMWare) - initial API and implementation
+ *******************************************************************************/
 
 /*global define*/
 /*jslint browser:true*/
@@ -151,7 +148,10 @@ define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/a
 			},
 			addCommand: function(command) {
 				if (!command.exec) {
-					command.exec = command.run;
+					command.exec = command.callback;
+				}
+				if (!command.params) {
+					command.params = command.parameters;
 				}
 				mGCLI.addCommand(command);
 			},
