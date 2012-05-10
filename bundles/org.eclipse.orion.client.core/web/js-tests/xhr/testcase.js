@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define setTimeout*/
-define(["orion/assert", "orion/test", "orion/Deferred", "oxhr/xhr"], function(assert, mTest, Deferred, xhr) {
+define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(assert, mTest, Deferred, xhr) {
 	function resolve(result) {
 		var d = new Deferred();
 		d.resolve.apply(d, Array.prototype.slice.call(arguments));
