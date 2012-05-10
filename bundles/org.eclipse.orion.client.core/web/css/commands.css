@@ -54,7 +54,6 @@
     cursor: pointer;
     display: inline-block;
     padding: 4px;
-    font-size:9px;
     font-weight:bold;
     border-radius:3px;
     line-height: 12px;
@@ -63,11 +62,10 @@
 .commandButtonOver {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
-    border-radius: 2px;
 }
 
 .commandMenu {
-    color: #222222;
+    color: #777;
 	display: inline-block;
 	vertical-align: baseline;
 	margin: 0;
@@ -178,16 +176,18 @@
 .claro .dijitToggleButton .dijitButtonNode {
   background-color: transparent;
   background-image: none;
-  box-shadow: none;
   border: 1px solid transparent;
-  border-radius: 2px;
-  padding: 1px;
-  color: #808080;
+  box-shadow: none;
+  border-radius: 3px;
+  font-weight: bold;
+  padding: 2px;
+  padding-bottom: 3px;
+  color: #777;
   margin: 0;
 }
 
 .claro .commandMenu .dijitButtonNode {
-  color: #222222;
+  color: #777;
 }
 
 /* button hover */
