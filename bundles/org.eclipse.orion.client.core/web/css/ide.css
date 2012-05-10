@@ -117,22 +117,24 @@ a:hover {
 }
 
 .logo {
-	padding-top: 2px;
+	padding-top: 4px;
+	padding-right:5px;
 }
 
 .primaryNav {
-	font-size: 8pt;
-	color: #bfbfbf;
-	padding-top: 4px;
+	font-size: 10px;
+	font-weight:bold;
+	color: #DDD;
+	padding-top: 6px;
 	vertical-align: baseline;
 }
 
 .primaryNav a {
-	font-size: 8pt;
-	color: #bfbfbf;
+	font-size: 10px;
+	color: #DDD;
 	margin-right: 6px;
 	margin-left: 6px;
-	padding-top: 4px;
+	padding-top: 6px;
 	vertical-align: baseline;
 }
 
@@ -148,8 +150,9 @@ a:hover {
 }
 
 .pageActions {
-	min-height: 30px;
-	margin-top: 4px;
+	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	min-height: 28px;
+	margin-top: 7px;
 }
 
 /* 4px margin used by toolbar, plus 4px of border/padding */
@@ -475,7 +478,8 @@ a:hover {
 	vertical-align: middle;
 	min-height: 32px;
 	width: 100%;
-	color: #222222;
+	color: #222;
+	border-bottom: 1px solid whitesmoke;
 }
 
 .auxToolbar {
@@ -493,8 +497,10 @@ a:hover {
 }
 
 .pageTitle {
-	font-size: 12pt;
+	font-size: 13px;
 	vertical-align: top;
+	margin-top:4px;
+	font-weight:bold;
 	color: #666666;
 }
 
@@ -515,7 +521,7 @@ a:hover {
 	margin: 0;
 	border: 0;
 	background-color: #2e2e2e;
-	height: 22px;
+	height: 24px;
 }
 
 .titleArea {
@@ -524,7 +530,7 @@ a:hover {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6'); /* IE */
     background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f6f6f6));
     background: -moz-linear-gradient(top,  #ffffff,  #f6f6f6);
-    border-bottom: 1px solid #bfbfbf;
+    border-bottom: 1px solid #EEE;
 }
 
 .paneTitle {
@@ -572,6 +578,10 @@ a:hover {
 	margin-right: 4px;
 	margin: 2px;
 	display: none;
+	padding: 3px;
+	vertical-align:middle;
+	font-size:11px;
+	font-weight:bold;
 }
 
 .slideParameters {
@@ -611,11 +621,13 @@ a:hover {
 }
 
 .searchbox {
-	background: transparent;
-	border: 1px solid #a6a6a6;
-	font-size: 8pt;
+	background: white;
+	border: 1px solid #CCC;
+	font-size: 11px;
 	min-width: 15em;
-	margin-top: 2px;
+	margin-top: 3px;
+	padding: 2px;
+	border-radius: 3px;
 }
 
 .toolbarButton {

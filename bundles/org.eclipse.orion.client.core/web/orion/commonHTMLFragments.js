@@ -42,7 +42,7 @@ define(['require'],
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' +
 				'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' +
 				'<div id="relatedLinks" class="spacingLeft layoutLeft"></div>' +
-				'<input type="search" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' +
+				'<input type="text" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' +
 			'</div>' +
 			'<div id="dimension" class="clear dimension"></div>' +
 			'<div id="location" class="clear currentLocation"></div>' +
