@@ -14,7 +14,7 @@
 /*jslint browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/widgets/Console', 'consolePage/current-directory', 'consolePage/paramType-file', 'orion/plugin'], 
+		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/plugin'], 
 	function(require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
 
 	/* implementation of the 'edit' command */

@@ -12,7 +12,7 @@
 
 /*global define*/
 
-define(['dojo', 'consolePage/current-directory', 'orion/widgets/Console'],
+define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 	function(dojo, mCurrentDirectory, mConsole) {
 
 	var orion = {};
