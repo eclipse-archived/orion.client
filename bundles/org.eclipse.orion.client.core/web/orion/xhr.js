@@ -71,7 +71,9 @@ define(['orion/Deferred'], function(Deferred) {
 				queryBuf.push(encode(param) + '=' + encode(value));
 			}
 			if (queryBuf.length) {
-				url = url + (url.indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&');
+				var urlComponents = url.split('#');
+				urlComponents[0] += (urlComponents[0].indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&');
+				url = urlComponents.join('#');
 			}
 		}
 		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) {

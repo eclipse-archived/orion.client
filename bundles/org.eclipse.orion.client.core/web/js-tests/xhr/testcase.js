@@ -95,5 +95,26 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 		}, reject);
 	});
 
+	tests['test GET query params with fragment'] = withTimeout(function() {
+		return xhr('GET', '/#some?junk&we?dont&care?about', {
+			query: {
+				'foo*bar': 'baz',
+				'quux': 'a b'
+			}
+		}).then(function(result) {
+			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about');
+		}, reject);
+	});
+
+	tests['test GET query params with existing params and fragment'] = withTimeout(function() {
+		return xhr('GET', '/?a%20=b#some?junk&we?dont&care?about', {
+			query: {
+				'foo*bar': 'baz'
+			}
+		}).then(function(result) {
+			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about');
+		}, reject);
+	});
+
 return tests;
 });
