@@ -55,10 +55,10 @@ define(['orion/Deferred'], function(Deferred) {
 	 * In both cases a {@link orion.xhr.Result} is provided to the listener.
 	 */
 	// TODO: upload progress, user/password
-	function _xhr(method, url, options) {
+	function _xhr(method, url, options/*, XMLHttpRequestImpl */) {
 		options = options || {};
+		var xhr = (arguments.length > 3 && typeof arguments[3] === 'object') ? arguments[3] : new XMLHttpRequest();
 		var d = new Deferred();
-		var xhr = new XMLHttpRequest();
 		var headers = options.headers || {}, headerNames = Object.keys(headers);
 		var log = options.log || false;
 		var data;

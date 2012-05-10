@@ -10,12 +10,77 @@
  ******************************************************************************/
 
 /*global define setTimeout*/
-define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(assert, mTest, Deferred, xhr) {
+define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
+		function(assert, mTest, Deferred, xhr, mEventTarget) {
+	var EventTarget = mEventTarget.EventTarget;
+	/**
+	 * Fake version of XMLHttpRequest for testing without actual network accesses.
+	 */
+	function MockXMLHttpRequest() {
+		this.readyState = 0;
+		this.headers = {};
+	}
+	MockXMLHttpRequest.prototype = {
+		open: function() {
+		},
+		send: function() {
+		},
+		setRequestHeader: function(name, value) {
+			this.headers[name] = value;
+		},
+		_setReadyState: function(value) {
+			this.readyState = value;
+			if (typeof this.onreadystatechange === 'function') {
+				this.onreadystatechange();
+			}
+		},
+		_setResponse: function(response) {
+			this.response = response;
+		},
+		_setStatus: function(status) {
+			this.status = status;
+		},
+		_fakeComplete: function(status, response) {
+			this._setStatus(status);
+			this._setResponse(response);
+			this._setReadyState(4);
+		},
+		_fakeTimeout: function(err) {
+			this.dispatchEvent({type: 'timeout'});
+		}
+	};
+	EventTarget.addMixin(MockXMLHttpRequest.prototype);
+
+	/** A mock XHR request that succeeds. */
+	function OkXhr() {
+		MockXMLHttpRequest.apply(this, Array.prototype.slice.call(arguments));
+		this.send = function() {
+			var self = this;
+			setTimeout(function() {
+				self._fakeComplete(200, 'success!');
+			}, 75);
+		};
+	}
+	OkXhr.prototype = new MockXMLHttpRequest();
+
+	/** A mock XHR request that 404s. */
+	function FailXhr() {
+		MockXMLHttpRequest.apply(this, Array.prototype.slice.call(arguments));
+		this.send = function() {
+			var self = this;
+			setTimeout(function() {
+				self._fakeComplete(404, 'i failed');
+			}, 100);
+		};
+	}
+	FailXhr.prototype = new MockXMLHttpRequest();
+
 	function resolve(result) {
 		var d = new Deferred();
 		d.resolve.apply(d, Array.prototype.slice.call(arguments));
 		return d;
 	}
+
 	function reject(err) {
 		var d = new Deferred();
 		d.resolve.apply(d, Array.prototype.slice.call(arguments));
@@ -56,11 +121,11 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 
 	var tests = {};
 	tests['test GET resolve'] = withTimeout(function() {
-		return xhr('GET', '/').then(resolve, reject);
+		return xhr('GET', '/', null, new OkXhr()).then(resolve, reject);
 	});
 
 	tests['test GET reject'] = withTimeout(function() {
-		return xhr('GET', '/bogus/url/that/doesnt/exist').then(reject, resolve);
+		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(reject, resolve);
 	});
 
 	tests['test GET query params'] = withTimeout(function() {
@@ -70,7 +135,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 				'bar': 'baz'
 			}
 		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo=3&bar=baz');
+			assert.strictEqual(result.url, '/?foo=3&bar=baz', null, new OkXhr());
 		}, reject);
 	});
 
@@ -81,7 +146,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 				'baz': 'fizz buzz'
 			}
 		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz');
+			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null, new OkXhr());
 		}, reject);
 	});
 
@@ -92,7 +157,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 				'quux': 'a b'
 			}
 		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about');
+			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null, new OkXhr());
 		}, reject);
 	});
 
@@ -102,7 +167,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 				'foo*bar': 'baz'
 			}
 		}).then(function(result) {
-			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about');
+			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null, new OkXhr());
 		}, reject);
 	});
 
