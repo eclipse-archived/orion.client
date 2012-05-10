@@ -169,6 +169,8 @@ a:hover {
 .taskTitle {
 	color:  #3087B3 !important;  /* overriding command framework values */
 	text-align: left !important;
+	font-weight: bold !important;
+	border: 1px solid transparent !important;
 }
 
 .taskDescription {
