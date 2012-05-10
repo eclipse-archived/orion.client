@@ -63,6 +63,9 @@ define(['orion/Deferred'], function(Deferred) {
 		var log = options.log || false;
 		var data;
 		var i;
+		if (typeof headers['X-Requested-With'] === 'undefined') {
+			headers['X-Requested-With'] = 'XMLHttpRequest';
+		}
 		if (typeof options.query === 'object' && method === 'GET') {
 			var queryObj = options.query, paramNames = Object.keys(queryObj);
 			var queryBuf = [];
@@ -78,14 +81,6 @@ define(['orion/Deferred'], function(Deferred) {
 		}
 		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) {
 			data = options.data;
-		}
-		// Headers
-		if (typeof headers['X-Requested-With'] === 'undefined') {
-			headers['X-Requested-With'] = 'XMLHttpRequest';
-		}
-		for (i=0; i < headerNames.length; i++) {
-			var headerName = headerNames[i], headerValue = headers[headerName];
-			xhr.setRequestHeader(headerName, headerValue);
 		}
 		if (typeof options.responseType === 'string') {
 			xhr.responseType = options.responseType;
@@ -116,6 +111,10 @@ define(['orion/Deferred'], function(Deferred) {
 			}
 		};
 		xhr.open(method, url, true /* async */);
+		for (i=0; i < headerNames.length; i++) {
+			var headerName = headerNames[i], headerValue = headers[headerName];
+			xhr.setRequestHeader(headerName, headerValue);
+		}
 		xhr.send(data);
 		return d;
 	}

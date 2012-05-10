@@ -21,11 +21,23 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		this.headers = {};
 	}
 	MockXMLHttpRequest.prototype = {
+		UNSENT: 0,
+		OPENED: 1,
+		HEADERS_RECEIVED: 2,
+		LOADING: 3,
+		DONE: 4,
 		open: function() {
+			if (this.readyState !== this.UNSENT) {
+				throw new Error('open called out of order');
+			}
+			this._setReadyState(this.OPENED);
 		},
 		send: function() {
 		},
 		setRequestHeader: function(name, value) {
+			if (this.readyState !== this.OPENED) {
+				throw new Error('setRequestHeader called out of order');
+			}
 			this.headers[name] = value;
 		},
 		_setReadyState: function(value) {
@@ -43,7 +55,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		_fakeComplete: function(status, response) {
 			this._setStatus(status);
 			this._setResponse(response);
-			this._setReadyState(4);
+			this._setReadyState(this.DONE);
 		},
 		_fakeTimeout: function(err) {
 			this.dispatchEvent({type: 'timeout'});
@@ -134,8 +146,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				'foo': 3,
 				'bar': 'baz'
 			}
-		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo=3&bar=baz', null, new OkXhr());
+		}, new OkXhr())
+		.then(function(result) {
+			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
 		}, reject);
 	});
 
@@ -145,8 +158,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				'foo!bar': 31337,
 				'baz': 'fizz buzz'
 			}
-		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null, new OkXhr());
+		}, new OkXhr())
+		.then(function(result) {
+			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null);
 		}, reject);
 	});
 
@@ -156,8 +170,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				'foo*bar': 'baz',
 				'quux': 'a b'
 			}
-		}).then(function(result) {
-			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null, new OkXhr());
+		}, new OkXhr())
+		.then(function(result) {
+			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null);
 		}, reject);
 	});
 
@@ -166,10 +181,19 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			query: {
 				'foo*bar': 'baz'
 			}
-		}).then(function(result) {
-			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null, new OkXhr());
+		}, new OkXhr())
+		.then(function(result) {
+			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null);
 		}, reject);
 	});
 
+	tests['test GET with headers'] = withTimeout(function() {
+		return xhr('GET', '/', {
+			headers: {
+				'X-Foo-Bar': 'baz'
+			}
+		}, new OkXhr())
+		.then(resolve, reject);
+	});
 return tests;
 });
