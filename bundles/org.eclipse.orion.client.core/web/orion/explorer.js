@@ -447,7 +447,10 @@ exports.ExplorerRenderer = (function() {
 		
 		getSelected: function() {
 			var selected = [];
-			dojo.query("checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
+			//racing issue: this functino can be called during .myTree is created
+			//TODO we need a better idea to collect selected items 
+			var treeNode = this.explorer.myTree ? dojo.byId(this.explorer.myTree.id) : null;
+			dojo.query(".checkedRow", treeNode).forEach(dojo.hitch(this, function(node) {
 				var row = node;
 				selected.push(this.tableTree.getItem(row));
 			}));
@@ -459,7 +462,7 @@ exports.ExplorerRenderer = (function() {
 				return this.explorer.navHandler.getSelectionIds();
 			}
 			var selected = [];
-			dojo.query("checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
+			dojo.query(".checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
 				var row = node;
 				selected.push(row.id);
 			}));
