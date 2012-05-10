@@ -373,12 +373,13 @@ list>*,grid>* {
 .pluginCount {
 	padding: 3px;
 	border-radius: 4px;
-	background: #999;
+	border: 1px solid #AAA;
+	background: white;
 	float: left;
-	color: white;
+	color: #AAA;
 	text-align: center;
 	font-size: 8px;
-	font-weight: bolder;
+	font-weight: bold;
 	margin-left: 5px;
 }
 
@@ -386,13 +387,14 @@ list>*,grid>* {
 	padding-left: 3px;
 	padding-right: 3px;
 	border-radius: 4px;
-	background: #999;
+	background: white;
 	float: left;
-	color: white;
+	color: #AAA;
 	text-align: center;
 	font-size: 8px;
-	font-weight: bolder;
+	font-weight: bold;
 	margin-left: 5px;
+	border: 1px solid #AAA;
 }
 
 .plugin-action-area {
@@ -455,7 +457,7 @@ input, textarea, select {
 	border: 1px solid #CCC;
 	border-radius:3px;
 	/* background:whitesmoke; */
-	font-size:10px;
+	font-size:9px;
 	font-weight:bold;
 	display:inline-block;
 }

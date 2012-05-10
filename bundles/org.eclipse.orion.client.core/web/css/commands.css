@@ -46,14 +46,18 @@
 }
 
 .commandButton {
-	color: #222222;
-	border: 1px solid transparent;
+	color: #777;
+	border: 1px solid #CCC;
 	background-color: transparent;
 	text-align: center;
 	vertical-align: baseline;
     cursor: pointer;
     display: inline-block;
-    padding: 1px;
+    padding: 4px;
+    font-size:9px;
+    font-weight:bold;
+    border-radius:3px;
+    line-height: 12px;
 }
 
 .commandButtonOver {
@@ -106,8 +110,9 @@
 .imageSprite {
    background-image: url(../images/core_sprites.png);
    display: inline-block;
-   margin: 1px;
+   margin: 5px;
    vertical-align: middle;
+   border:none;
 }
 
 .core-sprite-add{ background-position: 0 0; width: 16px; height: 16px; } 
