@@ -85,9 +85,7 @@ define(['orion/Deferred'], function(Deferred) {
 		}
 		for (i=0; i < headerNames.length; i++) {
 			var headerName = headerNames[i], headerValue = headers[headerName];
-			if (headerValue) {
-				xhr.setRequestHeader(headerName, headerValue);
-			}
+			xhr.setRequestHeader(headerName, headerValue);
 		}
 		if (typeof options.responseType === 'string') {
 			xhr.responseType = options.responseType;
