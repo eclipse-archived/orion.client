@@ -22,11 +22,8 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 		return d;
 	}
 
-	var tests = {};
-
 	/**
-	 * Wraps a test body to ensure a test failure if the promise doesn't resolve. This is convenient for asserting 
-	 * that some content assist API method gets called eventually.
+	 * Wraps a test body to ensure a test failure if the promise doesn't resolve.
 	 * @param {Function} func The test body (must return a promise).
 	 * @returns {Deferred}
 	 */
@@ -39,15 +36,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 				inner = func();
 				setTimeout(function() {
 					if (!innerPromiseFired) {
-						var testName = '';
-						for (testName in tests) {
-							if (tests.hasOwnProperty(testName)) {
-								if (tests[testName] === func) {
-									break;
-								}
-							}
-						}
-						wrapper.reject('Timed out: ' + testName);
+						wrapper.reject('Timed out');
 					}
 				}, 3000);
 				inner.then(
@@ -65,6 +54,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 		};
 	}
 
+	var tests = {};
 	tests['test GET resolve'] = withTimeout(function() {
 		return xhr('GET', '/').then(resolve, reject);
 	});
