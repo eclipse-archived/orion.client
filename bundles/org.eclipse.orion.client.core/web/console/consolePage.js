@@ -13,9 +13,9 @@
 /*global define window*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/plugin'], 
-	function(require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
+	function(require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
 
 	/* implementation of the 'edit' command */
 
@@ -179,6 +179,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 
 			var console = new mConsole.Console(dojo.byId("console-input"), dojo.byId("console-output"));
+			/* the Console creates a child of console-input, resize to give it a height */
+			dijit.byId("centerPane").resize();
 
 			/* add the locally-defined types */
 			var directoryType = new mFileParamType.ParamTypeFile("directory", true, false);
