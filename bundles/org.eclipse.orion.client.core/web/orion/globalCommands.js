@@ -552,6 +552,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			id: "orion.makeFavorite",
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];
+				if (items.length === 0) {
+					return false;
+				}
 				for (var i=0; i < items.length; i++) {
 					if (!items[i].Location) {
 						return false;

@@ -37,21 +37,21 @@ h2 {
 a {
 	cursor: hand;
 	text-decoration: none;
-	color: #024892;
+	color: #3087B3;
 }
 
 a:visited {
-	color: #024892;
+	color: #3087B3;
 }
 
 a:active {
-	color: #024892;
+	color: #3087B3;
 }
 
 a:hover {
 	cursor: hand;
 	text-decoration: underline;
-	color: #024892;
+	color: #3087B3;
 }
 
 .layoutBlock {
@@ -96,24 +96,21 @@ a:hover {
 	margin: 4px;
 }
 
+.navlink {
+	display: inline-block;
+}
+
 .navlinkonpage {
-	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 }
 
-.navlinkonpage:visited {
-	color: #024892;
-}
-
 .navlinkonpage:active {
-	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 }
 
 .navlinkonpage:hover {
-	color: #024892;
 	cursor: hand;
 	text-decoration: none;
 	border-bottom: 1px dotted;
@@ -166,8 +163,6 @@ a:hover {
 }
 
 .taskTitle {
-	font: 10pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
-	font-weight: bold;
 	color:  #024892 !important;  /* overriding command framework values */
 	text-align: left !important;
 }
@@ -236,12 +231,17 @@ a:hover {
 .navColumn {
 	min-width: 150px;
 	padding-right: 8px;
-	min-height: 24px;
-	display: inline-block;
 	vertical-align: baseline;
 }
 
 .navRow {
+	vertical-align: baseline;
+	border-spacing: 8px;
+}
+
+.mainNavColumn {
+	display: inline-block;
+	padding: 4px;
 	vertical-align: baseline;
 }
 
@@ -326,7 +326,7 @@ a:hover {
 
 .auxpane {
 	border: 0;
-    background: #f8f8f8;
+    background: #f6f6f6;
     overflow-x: auto;
     min-width: 200px;
     padding-top: 16px;
@@ -503,7 +503,6 @@ a:hover {
 	width: 100%;
 	border: 0;
 	padding: 0;
-	font-size: 0.9em;
 	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
 }
@@ -522,9 +521,9 @@ a:hover {
 .titleArea {
     margin: 0;
     border: 0;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f7f7f7'); /* IE */
-    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f7f7f7));
-    background: -moz-linear-gradient(top,  #ffffff,  #f7f7f7);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6'); /* IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f6f6f6));
+    background: -moz-linear-gradient(top,  #ffffff,  #f6f6f6);
     border-bottom: 1px solid #bfbfbf;
 }
 
@@ -556,7 +555,7 @@ a:hover {
 	margin-top: 8px;
 	margin-right: 8px;
 	min-height: 26px;
-	vertical-align: baseline;
+	vertical-align: middle;
 	font-weight: bold;
 	color: #808080;
 	background-color: #fafafa;
@@ -783,7 +782,7 @@ a:hover {
 }
 
 .treeIterationCursorRow {
-	background-color: #EAF2FE;
+	background-color: #EAF2F2;
 }
 .searchCmdGroupMargin {
 	margin-left: 16px;
