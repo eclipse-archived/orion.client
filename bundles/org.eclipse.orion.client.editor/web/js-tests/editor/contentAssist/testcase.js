@@ -15,11 +15,9 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	    ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
-	var tests = {};
 
 	/**
-	 * Wraps a test body to ensure a test failure if the promise doesn't resolve. This is convenient for asserting 
-	 * that some content assist API method gets called eventually.
+	 * Wraps a test body to ensure a test failure if the promise doesn't resolve.
 	 * @param {Function} func The test body (must return a promise).
 	 * @returns {Deferred}
 	 */
@@ -32,15 +30,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 				inner = func();
 				setTimeout(function() {
 					if (!innerPromiseFired) {
-						var testName = '';
-						for (testName in tests) {
-							if (tests.hasOwnProperty(testName)) {
-								if (tests[testName] === func) {
-									break;
-								}
-							}
-						}
-						wrapper.reject('Timed out: ' + testName);
+						wrapper.reject('Timed out');
 					}
 				}, 3000);
 				inner.then(
@@ -127,6 +117,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 		return deferred;
 	}
 
+	var tests = {};
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
 	tests.testComputeProposals = createTestWithTimeout(function() {
 		var text = 'this is the first line\nthis is the second line@@@';
