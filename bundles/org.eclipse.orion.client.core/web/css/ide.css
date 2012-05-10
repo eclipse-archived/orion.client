@@ -136,12 +136,14 @@ a:hover {
 	margin-left: 6px;
 	padding-top: 6px;
 	vertical-align: baseline;
+	text-decoration: none;
 }
 
 .primaryNav a:hover {
 	color: #bfbfbf;
 	cursor: hand;
-	text-decoration: underline;
+	color: white;
+	font-weight:bolder;
 }
 
 .pageNav {
@@ -535,8 +537,8 @@ a:hover {
 
 .paneTitle {
 	margin-top: 2px;
-	padding-top: 2px;
-	padding-left: 8px;
+	padding-top: 4px;
+	padding-left: 4px;
 	vertical-align: baseline;
 	display: inline-block;
 }
@@ -565,6 +567,8 @@ a:hover {
 	font-weight: bold;
 	color: #808080;
 	background-color: #fafafa;
+	padding:1px;
+	border-radius:4px;
 	border: 1px solid #ebebeb;
 }
 
