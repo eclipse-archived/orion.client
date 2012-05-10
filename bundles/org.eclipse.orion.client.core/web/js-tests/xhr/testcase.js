@@ -84,5 +84,16 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr"], function(a
 		}, reject);
 	});
 
+	tests['test GET query params encoding'] = withTimeout(function() {
+		return xhr('GET', '/', {
+			query: {
+				'foo!bar': 31337,
+				'baz': 'fizz buzz'
+			}
+		}).then(function(result) {
+			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz');
+		}, reject);
+	});
+
 return tests;
 });

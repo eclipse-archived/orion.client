@@ -26,6 +26,12 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @property {XMLHttpRequest} xhr The underlying XMLHttpRequest object.
 	 */
 
+	function encode(value) {
+		return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
+			return '%' + str.charCodeAt(0).toString(16).toUpperCase();
+		});
+	}
+
 	/**
 	 * Wrapper for {@link XMLHttpRequest} that returns a promise.
 	 * @name xhr
@@ -62,7 +68,7 @@ define(['orion/Deferred'], function(Deferred) {
 			var queryBuf = [];
 			for (i=0; i < paramNames.length; i++) {
 				var param = paramNames[i], value = queryObj[param];
-				queryBuf.push(param + '=' + value);
+				queryBuf.push(encode(param) + '=' + encode(value));
 			}
 			if (queryBuf.length) {
 				url = url + (url.indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&');
