@@ -90,13 +90,13 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 	}
 	FailXhr.prototype = new MockXMLHttpRequest();
 
-	function resolve(result) {
+	function succeed(result) {
 		var d = new Deferred();
 		d.resolve.apply(d, Array.prototype.slice.call(arguments));
 		return d;
 	}
 
-	function reject(err) {
+	function fail(err) {
 		var d = new Deferred();
 		d.reject.apply(d, Array.prototype.slice.call(arguments));
 		return d;
@@ -136,11 +136,11 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 
 	var tests = {};
 	tests['test GET resolve'] = withTimeout(function() {
-		return xhr('GET', '/', null, new OkXhr()).then(resolve, reject);
+		return xhr('GET', '/', null, new OkXhr()).then(succeed, fail);
 	});
 
 	tests['test GET reject'] = withTimeout(function() {
-		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(reject, resolve);
+		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
 	});
 
 	tests['test GET query params'] = withTimeout(function() {
@@ -152,7 +152,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, new OkXhr())
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
-		}, reject);
+		}, fail);
 	});
 
 	tests['test GET query params encoding'] = withTimeout(function() {
@@ -164,7 +164,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, new OkXhr())
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null);
-		}, reject);
+		}, fail);
 	});
 
 	tests['test GET query params with fragment'] = withTimeout(function() {
@@ -176,7 +176,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, new OkXhr())
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null);
-		}, reject);
+		}, fail);
 	});
 
 	tests['test GET query params with existing params and fragment'] = withTimeout(function() {
@@ -187,7 +187,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, new OkXhr())
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null);
-		}, reject);
+		}, fail);
 	});
 
 	tests['test GET with headers'] = withTimeout(function() {
@@ -196,14 +196,14 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				'X-Foo-Bar': 'baz'
 			}
 		}, new OkXhr())
-		.then(resolve, reject);
+		.then(succeed, fail);
 	});
 
 	tests['test open() exception causes reject'] = withTimeout(function() {
 		var alreadyOpenXhr = new OkXhr();
 		alreadyOpenXhr.open('GET', '/foo');
-		// The 2nd call to open() should throw, and xhr should catch & reject
-		return xhr('GET', '/bar', null, alreadyOpenXhr).then(reject, resolve);
+		// Since request is already OPEN the next call to open() will throw, and xhr should catch & reject
+		return xhr('GET', '/bar', null, alreadyOpenXhr).then(fail, succeed);
 	});
 
 return tests;
