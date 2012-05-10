@@ -441,7 +441,7 @@ exports.ExplorerRenderer = (function() {
 			return expandImage;
 		},
 		render: function(item, tableRow){
-			tableRow.cellSpacing = "8px";
+			dojo.addClass(tableRow, "navRow");
 			this.renderRow(item, tableRow);
 		},
 		

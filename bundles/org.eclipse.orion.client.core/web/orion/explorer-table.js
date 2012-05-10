@@ -147,13 +147,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 
 		case 0:
 			var col = document.createElement('td');
-			var span = dojo.create("span", {id: tableRow.id+"Actions"}, col, "only");
+			var span = dojo.create("span", {id: tableRow.id+"MainCol"}, col, "only");
+			dojo.addClass(span, "mainNavColumn");
 			var link;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var expandImage = this.getExpandImage(tableRow, span);
 				mUtil.addNavGrid(item, expandImage);
-				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameColumn", href: "#" + item.ChildrenLocation}, span, "last");
+				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameLink", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
 				var i;			
@@ -181,7 +182,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					href = this.defaultEditor.hrefCallback({items: item});
 				}				
 
-				link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameColumn", href: href, target:this.target}, span, "last");
+				link = dojo.create("a", {className: "navlink targetSelector", id: tableRow.id+"NameLink", href: href, target:this.target}, span, "last");
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
@@ -269,7 +270,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		var rowId = this.model.getId(item);
 		if (rowId) {
 			// I know this from my renderer below.
-			return dojo.byId(rowId+"NameColumn");
+			return dojo.byId(rowId+"NameLink");
 		}
 	};
 		
