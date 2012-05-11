@@ -43,6 +43,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			}
 			this.headers[name] = value;
 		},
+		_getRequestHeaders: function() {
+			return this.headers;
+		},
 		_setReadyState: function(value) {
 			this.readyState = value;
 			if (typeof this.onreadystatechange === 'function') {
@@ -141,6 +144,22 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 
 	tests['test GET reject'] = withTimeout(function() {
 		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
+	});
+
+	tests['test \'X-Requested-With\' is set'] = withTimeout(function() {
+		var d = new Deferred();
+		var headerCheckerXhr = new MockXMLHttpRequest();
+		headerCheckerXhr.send = function() {
+			var headers = this._getRequestHeaders();
+			if (headers['X-Requested-With'] === 'XMLHttpRequest') {
+				d.resolve();
+			} else {
+				d.reject();
+			}
+			this._fakeComplete(200, 'OK');
+		};
+		xhr('GET', '/', null, headerCheckerXhr);
+		return d;
 	});
 
 	tests['test GET query params'] = withTimeout(function() {

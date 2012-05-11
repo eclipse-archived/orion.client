@@ -59,7 +59,7 @@ define(['orion/Deferred'], function(Deferred) {
 		options = options || {};
 		var xhr = (arguments.length > 3 && typeof arguments[3] === 'object') ? arguments[3] : new XMLHttpRequest();
 		var d = new Deferred();
-		var headers = options.headers || {}, headerNames = Object.keys(headers);
+		var headers = options.headers || {};
 		var log = options.log || false;
 		var data;
 		var i;
@@ -112,6 +112,7 @@ define(['orion/Deferred'], function(Deferred) {
 		};
 		try {
 			xhr.open(method, url, true /* async */);
+			var headerNames = Object.keys(headers);
 			for (i=0; i < headerNames.length; i++) {
 				var headerName = headerNames[i], headerValue = headers[headerName];
 				xhr.setRequestHeader(headerName, headerValue);
