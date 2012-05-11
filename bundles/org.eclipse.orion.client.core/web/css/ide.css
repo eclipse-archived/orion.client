@@ -795,7 +795,7 @@ a:hover {
 }
 
 .treeIterationCursor {
-	outline: #000000 1px dashed ;
+	outline: #000000 1px dotted ;
 }
 
 .treeIterationCursorRow {
