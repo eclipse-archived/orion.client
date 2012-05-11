@@ -13,6 +13,27 @@
 
 /*global define*/
 
-define(['orion/textview/util'], function(mUtil){
-	return mUtil.getNlsBundle("orion/textview/nls/messages");
+define(['orion/textview/nlsPlugin!orion/editor/nls/messages'], function(bundle){
+	var result = {
+		root: {
+			"multipleAnnotations": "Multiple annotations:",
+			"line": "Line: ${0}",
+			"breakpoint": "Breakpoint",
+			"bookmark": "Bookmark",
+			"task": "Task",
+			"error": "Error",
+			"warning": "Warning",
+			"matchingSearch": "Matching Search",
+			"currentSearch": "Current Search",
+			"currentLine": "Current Line",
+			"matchingBracket": "Matching Bracket",
+			"currentBracket": "Current Bracket"
+		}
+	};
+	Object.keys(bundle).forEach(function(key) {
+		if (typeof result[key] === 'undefined') {
+			result[key] = bundle[key];
+		}
+	});
+	return result;
 });

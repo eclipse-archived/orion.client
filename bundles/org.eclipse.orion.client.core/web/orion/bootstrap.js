@@ -12,8 +12,16 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry) {
+define(['require', 'dojo', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, dojo, Deferred, mServiceregistry, mPreferences, mPluginRegistry) {
+
+	var once; // Deferred
+
 	function startup() {
+		if (once) {
+			return once;
+		}
+		once = new Deferred();
+	
 		// initialize service registry and EAS services
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	
@@ -46,11 +54,13 @@ define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/
 				pluginRegistry.shutdown();
 			});
 		}).then(function() {
-			return {
+			var result = {
 				serviceRegistry: serviceRegistry,
 				preferences: preferences,
 				pluginRegistry: pluginRegistry
 			};
+			once.resolve(result);
+			return result;
 		});
 	}
 	return {startup: startup};
