@@ -407,7 +407,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 					clearTimeout(progressTimeout);
 					// Show an error message when a problem happens during getting the workspace
 					if (error.status !== null && error.status !== 401){
-						dojo.place(document.createTextNode("Sorry, an error occurred: " + error.message), progress, "only");
+						try {
+							error = JSON.parse(error.responseText);
+						} catch(e) {
+						}
+						dojo.place(document.createTextNode("Sorry, an error occurred: " + error.Message), progress, "only");
 					}
 				})
 			);
