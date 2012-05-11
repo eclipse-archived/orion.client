@@ -83,7 +83,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 						return testResult.then(function() {
 							_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
 						}, function(e) {
-							_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
+							_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e && e.toString(), stack: e && (e.stack || e.stacktrace)});
 						});
 					} else {
 						_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
