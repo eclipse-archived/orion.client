@@ -306,13 +306,15 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				imageClass: "core-sprite-rename",
 				id: "eclipse.renameResource",
 				visibleWhen: function(item) {
-					item = forceSingleItem(item);
+					if (dojo.isArray(item)) {
+						return item.length === 1 && item[0].Name;
+					}
 					return item.Location;
 				},
 				callback: dojo.hitch(this, function(data) {
 					// we want to popup the edit box over the name in the explorer.
 					// if we can't find it, we'll pop it up over the command dom element.
-					var item = data.items;
+					var item = forceSingleItem(data.items);
 					var refNode = explorer.getNameNode(item);
 					if (!refNode) {
 						refNode = data.domNode;
