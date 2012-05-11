@@ -17,6 +17,8 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/plugin'], 
 	function(require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
 
+	var fileClient;
+
 	/* implementation of the 'edit' command */
 
 	function editExec(node) {
@@ -41,6 +43,25 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 			result.push('<br>');
 		}
 		return result;
+	}
+
+	function formatFullPath(node) {
+		var path = fileClient.fileServiceName(node.Location);
+		var parents = node.Parents;
+		// TODO it could be useful to make the path segments link to something
+		// useful, see breadcrumb.js for an idea
+		if (parents) {
+			path += '/';
+			for (var i = parents.length; --i >= 0 ;){
+				path += parents[i].Name; 
+				path += '/';
+			}
+			path += node.Name;
+		}
+		if (node.Directory) {
+			path += '/';
+		}
+		return path;
 	}
 
 	/*
@@ -81,14 +102,25 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 		var result = context.createPromise();
 		mCurrentDirectory.withCurrentTreeNode(function(node) {
 			if (targetDirName === '..') {
-				var newLocation = mCurrentDirectory.getParentLocation(node);
-				if (newLocation !== null) {
-					dojo.hash(newLocation);
-					mCurrentDirectory.setCurrentTreeNode(null);
-					result.resolve('Changed to parent directory');
-				} else {
-					result.resolve('ERROR: Cannot determine parent');
-				}
+				fileClient.read(node.Location, true).then(
+					dojo.hitch(this, function(metadata) {
+						if (metadata.Parents && metadata.Parents.length > 0) {
+							var parentLocation = metadata.Parents[0].Location;
+							fileClient.read(parentLocation, true).then(
+								dojo.hitch(this, function(parentMetadata) {
+									dojo.hash(parentMetadata.Location);
+									var buffer = formatFullPath(parentMetadata);
+									result.resolve("Changed to: <b>" + buffer + "</b>");
+								})
+							);
+						} else {
+							dojo.hash("#");
+							var buffer = fileClient.fileServiceName(metadata.Location);
+							result.resolve("Changed to: <b>" + buffer + "</b>");
+						}
+						mCurrentDirectory.setCurrentTreeNode(null);
+					})
+				);
 			} else {
 				mCurrentDirectory.withChildren(node, function(children) {
 					var found = false;
@@ -98,14 +130,19 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 							if (child.Directory) {
 								found = true;
 								mCurrentDirectory.setCurrentTreeNode(child);
-								result.resolve('Working directory changed successfully');
+								fileClient.read(child.Location, true).then(
+									dojo.hitch(this, function(metadata) {
+										var buffer = formatFullPath(metadata);
+										result.resolve("Changed to: <b>" + buffer + "</b>");
+									})
+								);
 							} else {
-								result.resolve('ERROR: ' + targetDirName + ' is not a directory');
+								result.resolve("<em>" + targetDirName + " is not a directory</em>");
 							}
 						}
 					}
 					if (!found) {
-						result.resolve('ERROR: ' + targetDirName + ' not found.');
+						result.resolve("<em>" + targetDirName + " was not found</em>");
 					}
 				});
 			}
@@ -116,11 +153,14 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 	/* implementation of the 'pwd' command */
 
 	function pwdExec(args, context) {
-		//TODO: this implementation only prints the name of the current directory
 		var result = context.createPromise();
 		mCurrentDirectory.withCurrentTreeNode(function(node) {
-			var buffer = formatLsChild(node);
-			result.resolve(buffer.join(''));
+			fileClient.read(node.Location, true).then(
+				dojo.hitch(this, function(metadata) {
+					var buffer = formatFullPath(metadata);
+					result.resolve("<b>" + buffer + "</b>");
+				})
+			);
 		});
 		return result;
 	}
@@ -174,7 +214,7 @@ define(['require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/
 			dojo.parser.parse();
 
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
 
