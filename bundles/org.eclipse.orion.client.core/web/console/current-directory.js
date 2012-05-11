@@ -58,39 +58,6 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 		return false;
 	}
 
-	/*
-	 * Returns the location of a node's parent node, or null if the node does not have a parent.
-	 *
-	 * Note: '' is a valid parent location, which indicates the 'root' location. To determine if
-	 * a valid parent was returned, use 'if (loc !== null)' rather than 'if (loc)'. 
-	 */
-	function getParentLocation(node) {
-		if (node.Parents && node.Parents.length > 0) {
-			return node.Parents[0].Location;
-		} else {
-			//TODO: Should not be using URL hackery to determine parent location, but there
-			// sometimes is not a choice when the Parent's attribute is missing.
-			var location = node.Location;
-			var parentLocation = null;
-			if (endsWith(location,'/')) {
-				location = location.slice(0, location.length - 1);
-			}
-			if (location) {
-				var lastSlash = location.lastIndexOf('/');
-				if (lastSlash >= 0) {
-					parentLocation = location.slice(0, lastSlash + 1);
-					if (parentLocation === '/file/') {
-						parentLocation = '';
-					} else if (parentLocation === '/workspace/') {
-						parentLocation = null;
-					}
-				}
-			}
-			return parentLocation;
-		}
-	}
-	exports.getParentLocation = getParentLocation;
-
 	function setCurrentTreeNode(node) {
 		currentTreeNode = node;
 		if (currentTreeNode && currentTreeNode.Location) {
