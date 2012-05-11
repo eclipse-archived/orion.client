@@ -796,12 +796,8 @@ a:hover {
 }
 
 .treeIterationCursor {
-<<<<<<< HEAD
 	outline: #CCC 1px dotted;
 	border-radius:4px;
-=======
-	outline: #000000 1px dotted ;
->>>>>>> 8925aa7b2fdc28dda73fbec1c2fcbbb255dc3c7d
 }
 
 .treeIterationCursorRow {
