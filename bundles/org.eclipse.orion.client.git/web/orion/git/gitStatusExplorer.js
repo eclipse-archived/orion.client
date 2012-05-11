@@ -300,7 +300,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
 				content: '<div id="unstagedNode" class="plugin-settings-list"></div>',
 				commandService: this.registry.getService("orion.page.command"),
-				serviceRegistry: this.registry
+				serviceRegistry: this.registry,
+				canHide: true
 			});
 			
 			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.stageCommand", 100);
@@ -320,6 +321,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				});
 				this.unstagedOnce = true;
 			}
+			
+			this.commandService.renderCommands(unstagedSection.actionsNode.id, unstagedSection.actionsNode.id, status, that, "button");
 			
 			var sectionItemActionScopeId = "unstagedSectionItemActionArea";
 			
@@ -420,7 +423,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				content: '<div id="stagedNode" class="plugin-settings-list"></div>',
 				commandService: this.registry.getService("orion.page.command"),
 				serviceRegistry: this.registry,
-				slideout: true
+				slideout: true,
+				canHide: true
 			});
 			
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100);
@@ -539,15 +543,19 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var tableNode = dojo.byId( 'table' );
 			
 			var diffSection = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "diffSection_" + index,
 				title: change.name,
-				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>',
+				explorer: this,
+				serviceRegistry: this.registry,
 				commandService: this.registry.getService("orion.page.command"),
-				serviceRegistry: this.registry
+				canHide: true,
+				hidden: true,
+				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>',
 			});
 			
 			// add inline compare view
+			
+			
 			
 			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode_" + index) );
 			var diffHorizontalBox = dojo.create( "div", null, diffItem );
@@ -557,7 +565,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
 			var diffOptions = {
-				commandSpanId: "diffSection_" + index + "ActionsArea",
+				commandSpanId: diffSection.actionsNode.id,
 				diffProvider: diffProvider,
 				hasConflicts: false,
 				readonly: true,
@@ -577,39 +585,22 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		// Git commits
 		
 		GitStatusExplorer.prototype.displayCommits = function(repository){
-					
+								
 			var that = this;
 			
 			var tableNode = dojo.byId( 'table' );
-
-			var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id":"commitSectionHeader"}, tableNode );
 			
-			dojo.create( "div", { id: "commitSectionTitle", "class":"layoutLeft", innerHTML: "Commits" }, titleWrapper );
-			dojo.create( "div", { id: "commitSectionProgress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, titleWrapper );
-			dojo.create( "div", { id: "commitSectionActionsArea", "class":"layoutRight sectionActions"}, titleWrapper );
+			var commitSection = new mSection.Section(tableNode, {
+				explorer: this,
+				id: "commitSection",
+				title: "Commits",
+				content: '<list id="commitNode" class="plugin-settings-list"></list>',
+				commandService: this.registry.getService("orion.page.command"),
+				serviceRegistry: this.registry,
+				slideout: true,
+				canHide: true
+			});
 			
-			var parentId = "commitSectionHeader";
-			
-			var slideout = 
-				'<div id="' + parentId + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
-					'<span id="' + parentId + 'slideOut" class="slide">' +
-					   '<span id="' + parentId + 'pageCommandParameters" class="parameters"></span>' +
-					   '<span id="' + parentId + 'pageCommandDismiss" class="parametersDismiss"></span>' +
-					'</span>' +
-				'</div>';
-		
-		
-			dojo.place( slideout, titleWrapper );
-
-			var content =	
-				'<div class="sectionTable" role="region" aria-labelledby="commitSectionTitle">' +
-					'<div class="plugin-settings">' +
-						'<list id="commitNode" class="plugin-settings-list"></list>' +
-					'</div>' +
-				'</div>';
-			
-			dojo.place( content, tableNode );
-
 			this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then(
 				function(resp){
 					var branches = resp.Children;
@@ -623,22 +614,22 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					
 					var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 					
-					dojo.byId("commitSectionTitle").innerHTML = "Commits for \"" + currentBranch.Name + "\" branch";
+					commitSection.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
 					
-					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.repositories.viewAllCommand", 10);
-					that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), 
+					that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, 
 						{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "button");
 							
 					if (tracksRemoteBranch){
-						that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.fetch", 100);
-						that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.merge", 100);
-						that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.rebase", 100);
-						that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.resetIndex", 100);
-						that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), currentBranch.RemoteLocation[0].Children[0], that, "button"); 
+						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.fetch", 100);
+						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.merge", 100);
+						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.rebase", 100);
+						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
+						that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button"); 
 					};
 					
-					that.commandService.registerCommandContribution("commitSectionActionsArea", "eclipse.orion.git.push", 100);
-					that.commandService.renderCommands("commitSectionActionsArea", dojo.byId("commitSectionActionsArea"), currentBranch, that, "button"); 
+					that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.push", 100);
+					that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, currentBranch, that, "button"); 
 					
 					if (currentBranch.RemoteLocation[0] == null){
 						dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
