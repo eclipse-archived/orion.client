@@ -2,8 +2,7 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="../orion/i18n.js"></script>
+	<script src="../orion/plugin.js"></script>
 	<script>
 	/*global eclipse window*/
 	var VERSION = "0.5";
@@ -12,7 +11,32 @@
 		var serviceImpl = { /* All data is in properties */ };
 
 		var provider = new eclipse.PluginProvider();
-		var messages = new eclipse.I18nMessages("nls/messages");
+		var messages = { // TEMPORARY
+			"Navigator": "Navigator",
+			"Sites": "Sites",
+			"Repositories": "Repositories",
+			"Console": "Console",
+			"Get Plugins": "Get Plugins",
+			"Navigate": "Navigate",
+			"Go to the navigator": "Go to the navigator",
+			"Clone a github repository": "Clone a github repository",
+			"Clone a repository from github": "Clone a repository from github",
+			"Upload some code!": "Upload some code!",
+			"Upload a zip file from your computer.": "Upload a zip file from your computer.",
+			"github": "github",
+			"github description": "Go to github and copy the repository URL for the repository you want to clone.",
+			"Orion Repositories": "Orion Repositories",
+			"Orion Repositories description": "Go to the Orion repositories page and select the 'Clone' link at the top left of the page",
+			"Orion/GitHub How-To": "Orion/GitHub How-To",
+			"Orion/GitHub How-To description": "The how-to provides further information about setting up credentials.",
+			"Navigator description": "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu.",
+			"Generate a web site": "Generate a web site",
+			"Generate a web site description":"Generate an HTML 5 Website Template using initializr.com",
+			"Initializr": "Initializr",
+			"Initializr description": "Go to the initializr site, choose the options that you would like, and download the template to your computer.",
+			"Navigator description2": "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated.",
+			"Non externalized string literal 0": "Non externalized string literal ${0}"
+		};
 		
 		// Primary navigation links
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
