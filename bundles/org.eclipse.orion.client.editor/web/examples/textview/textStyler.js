@@ -12,7 +12,7 @@
 
 /*global document window navigator define */
 
-define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
+define("examples/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",

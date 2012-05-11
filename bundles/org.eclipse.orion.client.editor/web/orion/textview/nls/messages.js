@@ -16,32 +16,18 @@
 define(['orion/textview/nlsPlugin!orion/textview/nls/messages'], function(bundle) {
 	var result = {
 		root: {
-			"incrementalFind": "Incremental find: ${0}",
-			"incrementalFindNotFound": "Incremental find: ${0} (not found)",
-			"find": "Find...",
-			"findNext": "Find Next Occurrence",
-			"findPrevious": "Find Previous Occurrence",
-			"incrementalFindKey": "Incremental Find",
-			"indentLines": "Indent Lines",
-			"unindentLines": "Unindent Lines",
-			"moveLinesUp": "Move Lines Up",
-			"moveLinesDown": "Move Lines Down",
-			"copyLinesUp": "Copy Lines Up",
-			"copyLinesDown": "Copy Lines Down",
-			"deleteLines": "Delete Lines",
-			"gotoLine": "Goto Line...",
-			"gotoLinePrompty": "Goto Line:",
-			"nextAnnotation": "Next Annotation",
-			"prevAnnotation": "Previous Annotation",
-			"lastEdit": "Last Edit Location",
-			"toggleLineComment": "Toggle Line Comment",
-			"addBlockComment": "Add Block Comment",
-			"removeBlockComment": "Remove Block Comment",
-			"linkedModeEntered": "Linked Mode entered",
-			"linkedModeExited": "Linked Mode exited",
-			"syntaxError": "Syntax Error",
-			"contentAssist": "Content Assist",
-			"lineColumn": "Line ${0} : Col ${1}"
+			"multipleAnnotations": "Multiple annotations:",
+			"line": "Line: ${0}",
+			"breakpoint": "Breakpoint",
+			"bookmark": "Bookmark",
+			"task": "Task",
+			"error": "Error",
+			"warning": "Warning",
+			"matchingSearch": "Matching Search",
+			"currentSearch": "Current Search",
+			"currentLine": "Current Line",
+			"matchingBracket": "Matching Bracket",
+			"currentBracket": "Current Bracket"
 		}
 	};
 	Object.keys(bundle).forEach(function(key) {
