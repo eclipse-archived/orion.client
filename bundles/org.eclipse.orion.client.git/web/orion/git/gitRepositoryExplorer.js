@@ -599,7 +599,8 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Commits",
 			slideout: true,
 			content: '<list id="commitNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			commandService: this.commandService,
+			canHide: true
 		}); 
 
 		var progress = titleWrapper.createProgressMonitor();
