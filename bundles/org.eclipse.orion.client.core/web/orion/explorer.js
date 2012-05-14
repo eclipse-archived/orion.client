@@ -613,5 +613,34 @@ exports.SelectionRenderer = (function(){
 	
 	return SelectionRenderer;
 }());
+
+exports.SimpleFlatModel = (function() {	
+	/**
+	 * Creates a new flat model based on an array of items already known.
+	 *
+	 * @name orion.explorer.SimpleFlatModel
+	 * @param {Array} items the items in the model
+	 */
+	function SimpleFlatModel(items) {
+		this.items = items;
+		this.root = {};
+	}
+	
+	SimpleFlatModel.prototype = new exports.ExplorerModel();
+		
+	SimpleFlatModel.prototype.getRoot = function(onItem){
+		onItem(this.root);
+	};
+		
+	SimpleFlatModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
+		if(parentItem === this.root){
+			onComplete(this.items);
+		}else{
+			onComplete([]);
+		}
+	};
+	return SimpleFlatModel;
+}());
+
 return exports;
 });
