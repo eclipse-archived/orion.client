@@ -115,18 +115,10 @@ exports.GitCommitNavigator = (function() {
 		};
 
 		if (treeRoot.Children) {
-			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog, treeRoot.Children));
+			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog, treeRoot.Children), {setFocus: !this.minimal});
 			waitDeferred.callback();
 		} else {
-			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog));
-		}
-		//Hook up selection model
-		if(!this.navHandler){
-			this.navHandler = new mNavHandler.ExplorerNavHandler(this, {setFocus: !this.minimal});
-		}
-		this.navHandler.refreshModel({root: {children:this.model.root}, getId: this.model.getId});
-		if(!this.minimal){
-			this.navHandler.cursorOn();
+			this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(path, doGitLog), {setFocus: !this.minimal});
 		}
 		return waitDeferred;
 

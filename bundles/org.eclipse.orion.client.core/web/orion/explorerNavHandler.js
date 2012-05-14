@@ -172,14 +172,14 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
-		refreshModel: function(model, noReset){
+		refreshModel: function(model, topIterationNodes, noReset){
 			this.refreshSelection();
 			this.topIterationNodes = [];
 			this.model = model;
 			if(this.model.getTopIterationNodes){
 				this.topIterationNodes = this.model.getTopIterationNodes();
-			} else if(this.model.root && this.model.root.children){
-				this.topIterationNodes = this.model.root.children;
+			} else if(topIterationNodes){
+				this.topIterationNodes = topIterationNodes;
 			}
 			this._modelIterator.setTree(this.topIterationNodes);
 			if(!noReset){
