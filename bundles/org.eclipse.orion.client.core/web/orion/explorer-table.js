@@ -250,14 +250,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 	
 	// we have changed an item on the server at the specified parent node
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
-		var self = this;
+		var that = this;
 		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 			mUtil.processNavigatorParent(parent, children);
 			//If a key board navigator is hooked up, we need to sync up the model
-			if(self.navHandler){
-				self.navHandler.refreshModel(self.model);
+			if(that.navHandler){
+				that._initSelModel();
 			}
-			dojo.hitch(self.myTree, self.myTree.refresh)(parent, children, forceExpand);
+			dojo.hitch(that.myTree, that.myTree.refresh)(parent, children, forceExpand);
 		});
 	};
 	
@@ -392,13 +392,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 						}
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
-					this.createTree(this.parentId, this.model, { onCollapse: function(model){if(self.navHandler){self.navHandler.onCollapse(model);}}});
-					//Hook up iterator
-					if(!this.navHandler){
-						this.navHandler = new mNavHandler.ExplorerNavHandler(this);
-					}
-					this.navHandler.refreshModel(this.model);
-					this.navHandler.cursorOn();
+					this.createTree(this.parentId, this.model, {setFocus: true, onCollapse: function(model){if(self.navHandler){self.navHandler.onCollapse(model);}}});
 					if (typeof this.onchange === "function") {
 						this.onchange(this.treeRoot);
 					}

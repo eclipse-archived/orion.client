@@ -1483,7 +1483,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		} else {
 			this.navHandler.focus();
 		}
-		this.navHandler.refreshModel(this.model);
+		this.navHandler.refreshModel(this.model, this.model._listRoot);
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
@@ -1549,14 +1549,14 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		}
 		this.model.indexedFileItems = newIndex;
 		if(this.model.indexedFileItems.length === 0){
-			this.navHandler.refreshModel(this.model);
+			this.navHandler.refreshModel(this.model, this.model._listRoot);
 			this.navHandler.cursorOn(null, true);
 		} else if(!currentFileItem){
 			this.navHandler.cursorOn(null, true);
-			this.navHandler.refreshModel(this.model);
+			this.navHandler.refreshModel(this.model, this.model._listRoot);
 			this.gotoCurrent();
 		} else {
-			this.navHandler.refreshModel(this.model, true);
+			this.navHandler.refreshModel(this.model, this.model._listRoot, true);
 		}
 	};
 	
