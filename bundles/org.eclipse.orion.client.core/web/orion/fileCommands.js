@@ -568,7 +568,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 					var files = ["index.html", "hello.css", "hello.js"];
 					for (var i=0; i<files.length;  i++) {
 						fileClient.createFile(folder.Location, files[i]).then(function(newFileMetadata) {
-							mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/projectTemplates/helloWorld/"+newFileMetadata.Name});
+							mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/contentTemplates/helloWorld/"+newFileMetadata.Name});
 						}, errorHandler);
 					}
 				}, "Creating a folder for " + projectName);
