@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/treetable'], function(require, dojo, mTreeTable){
+define(['require', 'dojo', 'orion/treetable', 'orion/explorerNavHandler'], function(require, dojo, mTreeTable, mNavHandler){
 
 var exports = {};
 
@@ -107,6 +107,8 @@ exports.Explorer = (function() {
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
+			this._createSelModel(parentId, options);
+			this._initSelModel(options);
 		},
 		
 		getRootPath: function() {
@@ -114,6 +116,33 @@ exports.Explorer = (function() {
 				return this.model.root.Location;
 			}
 			return null;
+		},
+		
+		_createSelModel: function(parentId, options){
+			var useSelection = !options || (options && !options.noSelection);
+			if(useSelection){
+				dojo.attr(parentId, "tabIndex", 0);
+				if(!this.navHandler){
+					this.navHandler = new mNavHandler.ExplorerNavHandler(this, {setFocus: options && options.setFocus});
+				}
+			}
+		},
+	    
+		_initSelModel: function(options){
+			var useSelection = !options || (options && !options.noSelection);
+			if(useSelection){
+				var that = this;
+				this.model.getRoot(function(itemOrArray){
+					if(itemOrArray instanceof Array){
+						that.navHandler.refreshModel(that.model, itemOrArray);
+					} else if(itemOrArray.children && itemOrArray.children instanceof Array){
+						that.navHandler.refreshModel(that.model, itemOrArray.children);
+					}
+					if(options && options.setFocus){
+						that.navHandler.cursorOn();
+					}
+				});
+			}
 		},
 	    
 	    _lastHash: null,

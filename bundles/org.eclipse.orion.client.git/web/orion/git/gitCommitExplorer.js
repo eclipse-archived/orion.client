@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document */
+/*global define console document Image*/
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/util', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
-		function(messages, dojo, mSection, mExplorer, mUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/i18nUtili18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
+		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -72,7 +72,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 						loadingDeferred.callback();
 						that.initTitleBar();
 						that.displayCommit();
-					} else if (resp.Children.length == 1 && resp.Children[0].Type === "Commit") {
+					} else if (resp.Children.length === 1 && resp.Children[0].Type === "Commit") {
 						var commits = resp.Children;
 						
 						that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then(
@@ -118,7 +118,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				item.Parents[0].ChildrenLocation = repository.Location;
 				item.Parents[1] = {};
 				item.Parents[1].Name = messages["Repositories"];
-				pageTitle = mUtil.formatMessage(messages["0 on 1 - Git"], commit.Name, repository.Name);
+				pageTitle = i18nUtil.formatMessage(messages["0 on 1 - Git"], commit.Name, repository.Name);
 			} else {
 				item.Name = "";
 				pageTitle = messages["Git"];
@@ -173,7 +173,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
 			}
 						
-			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: mUtil.formatMessage(messages["commit: 0"], commit.Name)}, detailsView );
+			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: i18nUtil.formatMessage(messages["commit: 0"], commit.Name)}, detailsView );
 			
 			if (commit.Parents && commit.Parents.length > 0){
 				dojo.create( "div", null, detailsView );
@@ -181,9 +181,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				var parentMessage = dojo.create( "span", { "class":"gitSecondaryDescription"}, detailsView );
 				
 				var temp = dojo.create("span");
-				link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, temp);
+				var link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, temp);
 				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
-				parentMessage.innerHTML = mUtil.formatMessage(messages["parent: 0"], temp.innerHTML);
+				parentMessage.innerHTML = i18nUtil.formatMessage(messages["parent: 0"], temp.innerHTML);
 			}
 			
 			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
@@ -199,11 +199,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			}
 			
 			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: mUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}))}, detailsView );
+				innerHTML: i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}))}, detailsView );
 			
 			dojo.create( "div", null, detailsView );
 			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: mUtil.formatMessage(messages["committed by 0 (1)"],  commit.CommitterName, commit.CommitterEmail)}, detailsView );
+				innerHTML: i18nUtil.formatMessage(messages["committed by 0 (1)"],  commit.CommitterName, commit.CommitterEmail)}, detailsView );
 		};
 		
 		GitCommitExplorer.prototype._splitCommitMessage = function(commitMessage){
@@ -262,7 +262,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			if (diff.ChangeType === "ADD"){
 				diffPath = diff.NewPath;
 			}	
-			progress.worked(mUtil.formatMessage("Rendering #{0}", diffPath));
+			progress.worked(i18nUtil.formatMessage("Rendering #{0}", diffPath));
 			
 			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
 

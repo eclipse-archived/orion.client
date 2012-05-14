@@ -102,11 +102,13 @@ ul,menu,dir {
 	color: black;
 }
 
+/* Experimenting with full width */
+
 .settings {
 	min-width:800px;
-	max-width:1000px;
+	/* max-width:1000px; */
 	padding-left: 20px;
-	padding-right: 40px;
+	/* padding-right: 40px; */
 }
 
 .pluginwrapper {

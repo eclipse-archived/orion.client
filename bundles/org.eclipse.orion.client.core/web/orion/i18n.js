@@ -5,53 +5,99 @@
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- *
- * Contributors:
- *     IBM Corporation - initial API and implementation
- *******************************************************************************/
-var eclipse = eclipse || {};
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 
-eclipse.I18nMessages = function(bundlePath, locale){
-	var urlSegments = bundlePath.split("/");
-	var nlsModule = urlSegments[urlSegments.length-1];
-	var baseNls = bundlePath.substring(0, bundlePath.length - nlsModule.length);
-	locale = locale || navigator.language || navigator.userLanguage;
-	
-	var messages = {};
-	
-	messages.formatMessage = function(msg) {
-		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
+/*global define */
+define(function() {
+	return {
+		load: function(name, parentRequire, onLoad, config) {
+
+			// as per requirejs i18n definition ignoring irrelevant matching groups
+			// [0] is complete match
+			// [1] is the message bundle prefix
+			// [2] is the locale or suffix for the master bundle
+			// [3] is the message file suffix or empty string for the master bundle
+			var NLS_REG_EXP = /(^.*(?:^|\/)nls(?:\/|$))([^\/]*)\/?([^\/]*)/;
+			var match = NLS_REG_EXP.exec(name);
+			if (!match) {
+				onLoad(null);
+				return;
+			}
+
+			if (parentRequire.defined(name)) {
+				onLoad(parentRequire(name));
+				return;
+			}
+
+			var prefix = match[1],
+				locale = match[3] ? match[2] : "",
+				suffix = match[3] || match[2];
+			parentRequire(['orion/bootstrap'], function(bootstrap) {
+				bootstrap.startup().then(function(core) {
+					var serviceRegistry = core.serviceRegistry;
+					var nlsReferences = serviceRegistry.getServiceReferences("orion.i18n.message");
+
+					if (!locale) {
+						// create master language entries				
+						var master = {};
+						var masterReference;
+						nlsReferences.forEach(function(reference) {
+							var name = reference.getProperty("name");
+							if ((match = NLS_REG_EXP.exec(name)) && prefix === match[1] && suffix === (match[3] || match[2])) {
+								locale = match[3] ? match[2] : "";
+								if (locale) {
+									master[locale] = true;
+									if (!parentRequire.specified(name)) {
+										define(name, ['orion/i18n!' + name], function(bundle) {
+											return bundle;
+										});
+									}
+								} else {
+									masterReference = reference;
+								}
+							}
+						});
+						if (!parentRequire.specified(name)) {
+							if (masterReference) {
+								serviceRegistry.getService(masterReference).getMessageBundle().then(function(bundle) {
+									Object.keys(master).forEach(function(key) {
+										if (typeof bundle[key] === 'undefined') {
+											bundle[key] = master[key];
+										}
+									});
+									define(name, [], bundle);
+									onLoad(bundle);
+								}, function() {
+									define(name, [], master);
+									onLoad(master);
+								});
+							} else {
+								define(name, [], master);
+								onLoad(master);
+							}
+						} else {
+							onLoad(master);
+						}
+					} else {
+						var found = nlsReferences.some(function(reference) {
+							if (name === reference.getProperty("name")) {
+								serviceRegistry.getService(reference).getMessageBundle().then(function(bundle) {
+									onLoad(bundle);
+								}, function() {
+									onLoad({});
+								});
+								return true;
+							}
+							return false;
+						});
+						if (!found) {
+							onLoad({});
+						}
+					}
+				});
+			});
+		}
 	};
-	
-	function define(messageBundle){
-		for(var key in messageBundle){
-			messages[key] = messageBundle[key];
-		}
-	}
-	
-	function loadBundle(loc){
-		var http = new XMLHttpRequest();
-		http.open('GET',  baseNls + loc + "/" + nlsModule + ".js", false);
-		http.send();
-		if(http.status!=200)
-			return false;
-		eval(http.responseText);
-		return true;
-	}
-	
-	loadBundle("root");
-	
-	if(locale){
-		if(loadBundle(locale)){
-			return messages;
-		}
-		var parts = locale.split("-");
-		if(parts.length>1){
-			loadBundle(parts[0]);
-		}
-	}
-	
-	
-	return messages;
-};
+});
