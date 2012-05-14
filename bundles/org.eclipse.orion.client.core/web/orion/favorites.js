@@ -26,7 +26,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 	 */
 	function FavoritesService(serviceRegistry) {
 		this._favorites = [];
-		this._searches = [];
 		this._init(serviceRegistry);
 		this._initializeFavorites();
 	}
@@ -37,10 +36,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		_notifyListeners: function() {
-			// FIXME: it is bogus that we separate favorites and searches
-			// we need a general representation and let the UI (and user) sort out
-			// how it is filtered or organized
-			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, search: this._searches, registry: this._registry});
+			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry});
 		},
 	
 		/**
@@ -105,13 +101,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		
-		addFavoriteSearch: function(theName, theQuery) {
-			this._searches.push({ "name": theName, "query": theQuery, "isSearch": true });
-			this._searches.sort(this._sorter);
-			this._storeSearches();
-			this._notifyListeners();
-		},
-		
 		hasFavorite: function(path) {
 			for (var i in this._favorites) {
 				if (this._favorites[i].path === path) {
@@ -175,36 +164,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			}
 			return result;
 		},
-
-		removeSearch: function(query) {
-			for (var i in this._searches) {
-				if (this._searches[i].query === query) {
-					this._searches.splice(i, 1);
-					break;
-				}
-			}
-			this._searches.sort(this._sorter);
-			this._storeSearches();
-			this._notifyListeners();
-		},
-					
-		renameSearch: function(query, newName) {
-			var changed = false;
-			for (var i in this._searches) {
-				if (this._searches[i].query === query) {
-					var search = this._searches[i];
-					if (search.name !== newName) {
-						search.name = newName;
-						changed = true;
-					}
-				}
-			}
-			if (changed) {
-				this._searches.sort(this._sorter);
-				this._storeSearches();
-				this._notifyListeners();
-			}
-		},
 		
 		_initializeFavorites: function () {
 			var favorites = this;
@@ -220,16 +179,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 						favorites._favorites.push(navigate[i]);
 					}
 				}
-				var search = prefs.get("search");
-				if (typeof search === "string") {
-					search = JSON.parse(search);
-				}
-				if (search) {
-					for (i in search) {
-						search[i].isSearch = true; // migration code, may not been stored
-						favorites._searches.push(search[i]);
-					}
-				}
+
 				favorites._favorites.sort(favorites._sorter);
 				favorites._notifyListeners();
 			});
@@ -239,13 +189,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			var storedFavorites = this._favorites;
 			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
 				prefs.put("navigate", storedFavorites);
-			}); 
-		},
-		
-		_storeSearches: function() {
-			var storedSearches = this._searches;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
-				prefs.put("search", storedSearches);
 			}); 
 		},
 		
@@ -262,7 +205,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		getFavorites: function() {
-			return {navigator: this._favorites, search: this._searches};
+			return {navigator: this._favorites};
 		}
 	};
 	FavoritesService.prototype.constructor = FavoritesService;
