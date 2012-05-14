@@ -727,6 +727,7 @@ a:hover {
 .treetable {
 	border-spacing: 0;
 	min-width: 600px;
+	width:100%;
 }
 
 .favoritesTable {
