@@ -14,7 +14,7 @@ define(['require' ,'orion/Deferred'], function(require, Deferred) {
 
 	function getMessageBundle(name){
 		var d = new Deferred();
-		require(['orion/nlsPlugin!' + name], function() {
+		require(['orion/i18n!' + name], function() {
 			require(['i18n!' + name], function(bundle) {
 				d.resolve(bundle);
 			});

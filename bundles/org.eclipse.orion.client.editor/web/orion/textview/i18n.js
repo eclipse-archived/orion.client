@@ -13,7 +13,7 @@
 define({
 	load: function(name, parentRequire, onLoad, config) {
 		if (parentRequire.specified("orion/bootstrap")) {
-			parentRequire(["orion/nlsPlugin!" + name], function(languages) {
+			parentRequire(["orion/i18n!" + name], function(languages) {
 				onLoad(languages);
 			});
 		} else {

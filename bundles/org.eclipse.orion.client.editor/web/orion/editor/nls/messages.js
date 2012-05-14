@@ -13,7 +13,7 @@
 
 /*global define*/
 
-define(['orion/textview/nlsPlugin!orion/editor/nls/messages'], function(bundle) {
+define(['orion/textview/i18n!orion/editor/nls/messages'], function(bundle) {
 	var result = {
 		root: {
 			"incrementalFind": "Incremental find: ${0}",

@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
-define(['orion/nlsPlugin!git/nls/gitmessages'], function(bundle) {
+define(['orion/i18n!git/nls/gitmessages'], function(bundle) {
 	var result = {
 			root:true
 	};

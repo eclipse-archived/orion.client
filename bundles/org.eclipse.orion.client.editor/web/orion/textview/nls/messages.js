@@ -13,7 +13,7 @@
 
 /*global define*/
 
-define(['orion/textview/nlsPlugin!orion/textview/nls/messages'], function(bundle) {
+define(['orion/textview/i18n!orion/textview/nls/messages'], function(bundle) {
 	var result = {
 		root: {
 			"multipleAnnotations": "Multiple annotations:",
