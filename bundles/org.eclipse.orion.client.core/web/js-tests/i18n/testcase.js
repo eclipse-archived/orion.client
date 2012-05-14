@@ -8,13 +8,14 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define console setTimeout*/
+/*global define console setTimeout navigator*/
 
 
-define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/nlsutil", "orion/nlsPlugin"], function(require, Deferred, bootstrap, assert, nlsutil) {
+define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/i18nUtil", "orion/i18n"], function(require, Deferred, bootstrap, assert, i18nUtil) {
 
-	var NLS_PLUGIN = "orion/nlsPlugin";
+	var I18N_PLUGIN = "orion/i18n";
 	var tests = {};
+	var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
 
 	tests.testI18n = function() {
 		var name = "test/i18n/nls/message1";
@@ -35,7 +36,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 
 	tests.testI18nPlugin = function() {
 		var name = "test/i18n/nls/message2";
-		define(name, [NLS_PLUGIN + "!" + name], function(bundle) {
+		define(name, [I18N_PLUGIN + "!" + name], function(bundle) {
 			var result = {
 				root: {
 					test: "test"
@@ -61,21 +62,21 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 
 	tests.testI18nService = function() {
 		var name = "test/i18n/nls/message3";
-		var serviceName = "test/i18n/nls/en/message3";
+		var serviceName = "test/i18n/nls/" + locale + "/message3";
 
 		var d = new Deferred();
 		bootstrap.startup().then(function(core) {
 			core.serviceRegistry.registerService("orion.i18n.message", {
 				getMessageBundle: function() {
 					return {
-						test: "test-en"
+						test: "test-" + locale
 					};
 				}
 			}, {
 				name: serviceName
 			});
 
-			define(name, [NLS_PLUGIN + "!" + name], function(bundle) {
+			define(name, [I18N_PLUGIN + "!" + name], function(bundle) {
 				var result = {
 					root: {
 						test: "test"
@@ -94,7 +95,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 			});
 		});
 		return d.then(function(messages) {
-			assert.equal(messages.test, "test-en");
+			assert.equal(messages.test, "test-" + locale);
 		});
 	};
 
@@ -115,7 +116,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 				name: name
 			});
 
-			nlsutil.getMessageBundle(name).then(function(messages) {
+			i18nUtil.getMessageBundle(name).then(function(messages) {
 				d.resolve(messages);
 			});
 		});
@@ -126,7 +127,7 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 
 	tests.testI18nMasterAndAdditionalService = function() {
 		var name = "test/i18n/nls/message5";
-		var serviceName = "test/i18n/nls/en/message5";
+		var serviceName = "test/i18n/nls/" + locale + "/message5";
 
 		var d = new Deferred();
 		bootstrap.startup().then(function(core) {
@@ -145,22 +146,91 @@ define(["require", "orion/Deferred", "orion/bootstrap", "orion/assert", "orion/n
 			core.serviceRegistry.registerService("orion.i18n.message", {
 				getMessageBundle: function() {
 					return {
-						test: "test-en"
+						test: "test-" + locale
 					};
 				}
 			}, {
 				name: serviceName
 			});
 
-			nlsutil.getMessageBundle(name).then(function(messages) {
+			i18nUtil.getMessageBundle(name).then(function(messages) {
 				d.resolve(messages);
 			});
 		});
 		return d.then(function(messages) {
-			assert.equal(messages.test, "test-en");
+			assert.equal(messages.test, "test-" + locale);
 		});
 	};
 
+	tests.testI18nNoMasterAndAdditionalService = function() {
+		var name = "test/i18n/nls/message6";
+		var serviceName = "test/i18n/nls/" + locale + "/message6";
+
+		var d = new Deferred();
+		bootstrap.startup().then(function(core) {
+
+			core.serviceRegistry.registerService("orion.i18n.message", {
+				getMessageBundle: function() {
+					return {
+						test: "test-" + locale
+					};
+				}
+			}, {
+				name: serviceName
+			});
+
+			i18nUtil.getMessageBundle(name).then(function(messages) {
+				d.resolve(messages);
+			});
+		});
+		return d.then(function(messages) {
+			assert.equal(messages.test, "test-" + locale);
+		});
+	};
+	
+	tests.testI18nNoMasterAndRootService = function() {
+		var name = "test/i18n/nls/message7";
+		var serviceName = "test/i18n/nls/" + "root" + "/message7";
+
+		var d = new Deferred();
+		bootstrap.startup().then(function(core) {
+
+			core.serviceRegistry.registerService("orion.i18n.message", {
+				getMessageBundle: function() {
+					return {
+						test: "test-" + locale
+					};
+				}
+			}, {
+				name: serviceName
+			});
+
+			i18nUtil.getMessageBundle(name).then(function(messages) {
+				d.resolve(messages);
+			});
+		});
+		return d.then(function(messages) {
+			assert.equal(messages.test, "test-" + locale);
+		});
+	};
+	
+	tests.testI18nMasterAndAdditionalServiceFromPlugin = function() {
+		var name = "test/i18n/nls/message8";
+
+		var d = new Deferred();
+		bootstrap.startup().then(function(core) {
+			core.pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+				i18nUtil.getMessageBundle(name).then(function(messages) {
+					plugin.uninstall();
+					d.resolve(messages);
+				});
+			});
+		});
+		return d.then(function(messages) {
+			assert.equal(messages.test, "test-" + locale);
+		});
+	};
+	
 
 	return tests;
 });

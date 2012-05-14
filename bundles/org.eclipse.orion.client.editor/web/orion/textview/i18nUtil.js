@@ -10,24 +10,13 @@
  *******************************************************************************/
 
 /*global define*/
-define(['require' ,'orion/Deferred'], function(require, Deferred) {
-
+define(function() {
 	function formatMessage(msg) {
 		var args = arguments;
 		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
 	}
 
-	function getMessageBundle(name){
-		var d = new Deferred();
-		require(['orion/i18n!' + name], function() {
-			require(['i18n!' + name], function(bundle) {
-				d.resolve(bundle);
-			});
-		});
-		return d;
-	}
 	return {
-		getMessageBundle: getMessageBundle,
 		formatMessage: formatMessage
 	};
 });
