@@ -121,7 +121,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 				}
 				return true;
 			},
-			callback: function(data) {
+			callback: dojo.hitch(this, function(data) {
 				var items = dojo.isArray(data.items) ? data.items : [data.items];
 				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].name + "' from the favorites?" : "Are you sure you want to delete these " + items.length + " favorites?";
 				if(window.confirm(confirmMessage)) {
@@ -129,7 +129,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 						options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path);
 					}
 				}
-			}
+			})
 		});		
 		var renameFaveCommand = new mCommands.Command({
 			name: "Rename",
@@ -203,8 +203,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 						}
 					});
 				}
-				var explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
-				this.favoritesTable = explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
+				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
+				this.favoritesTable = this.explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
 					if (item.path) {
 						return item.path;
 					}
@@ -213,6 +213,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 					}
 					return "";
 				}));
+				// TODO temporary hack from Libing 
+				this.explorer.navHandler._clearSelection(false);
 			}
 		}
 	};//end navigation outliner prototype
