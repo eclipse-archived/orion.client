@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands', 'orion/contentTypes',
+        'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/breadcrumbs', 'orion/globalCommands', 'orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mNavOutliner, 
+		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mBreadcrumbs, mGlobalCommands, mContentTypes) {
 
 	dojo.addOnLoad(function() {
@@ -30,14 +30,15 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			// Favorites
+			// favorites and saved searches
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+			new mSearchOutliner.SavedSearches({serviceRegistry: serviceRegistry});
 
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
+			var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry});
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher);
 			
 			var queryString =extractQueryString();

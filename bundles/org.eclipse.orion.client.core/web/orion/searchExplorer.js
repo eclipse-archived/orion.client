@@ -735,7 +735,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		
 		var saveResultsCommand = new mCommands.Command({
 			name: "Save Search",
-			tooltip: "Save query to search favorites",
+			tooltip: "Save search query",
 			id: "orion.saveSearchResults",
 			callback: function(data) {
 				that.saveSearch(that.queryStr);
@@ -1215,8 +1215,8 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 	};
 	
 	
-	SearchResultExplorer.prototype.addFavorite = function(favoriteName, query) {
-		this.registry.getService("orion.core.favorite").addFavoriteSearch(favoriteName, query);
+	SearchResultExplorer.prototype.addSavedSearch = function(searchName, query) {
+		this.registry.getService("orion.core.savedSearches").addSearch(searchName, query);
 	};
 	
 	SearchResultExplorer.prototype.saveSearch = function(query) {
@@ -1229,18 +1229,18 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 					dojo.hitch(this, function(meta) {
 						var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 						var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name;
-						this.addFavorite(qName + fullName, query);
+						this.addSavedSearch(qName + fullName, query);
 					}),
 					dojo.hitch(this, function(error) {
 						console.error("Error loading file meta data: " + error.message);
-						this.addFavorite(qName + "root", query);
+						this.addSavedSearch(qName + "root", query);
 					})
 				);
 			} else {
-				this.addFavorite(qName + "root", query);
+				this.addSavedSearch(qName + "root", query);
 			}
 		} else {
-			this.addFavorite(qName, query);
+			this.addSavedSearch(qName, query);
 		}
 	};
 	
