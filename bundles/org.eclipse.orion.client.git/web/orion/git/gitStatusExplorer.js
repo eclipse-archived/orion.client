@@ -427,11 +427,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			UnstagedNavigator = (function() {
 				function UnstagedNavigator(registry, selection, parentId, actionScopeId) {
 					this.registry = registry;
-					this.checkbox = true;
+					this.checkbox = false;
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new UnstagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: true}, this);
+					this.renderer = new UnstagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: false}, this);
 					this.createTree(this.parentId, new UnstagedModel());
 				}
 				
@@ -585,11 +585,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			StagedNavigator = (function() {
 				function StagedNavigator(registry, selection, parentId, actionScopeId) {
 					this.registry = registry;
-					this.checkbox = true;
+					this.checkbox = false;
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new StagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: true}, this);
+					this.renderer = new StagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: false}, this);
 					this.createTree(this.parentId, new StagedModel());
 				}
 				
