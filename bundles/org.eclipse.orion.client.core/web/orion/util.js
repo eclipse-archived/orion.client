@@ -442,11 +442,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		return splitLines;
 	}
 	
-	function formatMessage(msg) {
-		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
-	}
-	
 	/**
 	 * Add a grid navigation item to a row navigation model. A row navigation model normally comes from any node in a {treeModelIterator}.
 	 * The .gridChildren property will be lazily created on the row model as an array where all the grid navigation items live.
@@ -546,7 +541,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		forceLayout: forceLayout,
 		saveFileContents: saveFileContents,
 		splitFile: splitFile,
-		formatMessage: formatMessage,
 		addNavGrid: addNavGrid,
 		generateNavGrid: generateNavGrid,
 		getNavGridHolder: getNavGridHolder,
