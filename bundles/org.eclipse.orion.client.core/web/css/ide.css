@@ -103,6 +103,7 @@ a:hover {
 .navlinkonpage {
 	cursor: hand;
 	text-decoration: none;
+	padding:2px;
 }
 
 .navlinkonpage:active {
@@ -282,8 +283,8 @@ a:hover {
 @media all and (min-device-width: 1025px) {
 	.modelDecorationSprite { 	
 		padding: 0;
-		padding-left: 4px;
-		padding-right: 4px;
+		padding-left: 2px;
+		padding-right: 2px;
 		margin: 0;
 		margin-right: 2px;
 	}
@@ -726,6 +727,7 @@ a:hover {
 .treetable {
 	border-spacing: 0;
 	min-width: 600px;
+	width:100%;
 }
 
 .favoritesTable {
@@ -795,7 +797,8 @@ a:hover {
 }
 
 .treeIterationCursor {
-	outline: #000000 1px dotted ;
+	outline: #CCC 1px dotted;
+	border-radius:4px;
 }
 
 .treeIterationCursorRow {

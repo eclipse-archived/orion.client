@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define document window*/
 /*jslint regexp:false*/
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'orion/xhr'], function(require, xhr) {
 	function qualifyURL(url) {
 		var link = document.createElement("a");
 		link.href = url;
@@ -51,16 +51,27 @@ define(['require', 'dojo'], function(require, dojo) {
 		}
 		return displayString;
 	}
+	/**
+	 * Invoke the xhr API passing JSON data and returning the response as JSON.
+	 * @returns {Deferred} A deferred that resolves to a JS object, or null if the server returned
+	 * an empty response.
+	 */
+	function xhrJson(method, url, options) {
+		if (options && typeof options.data !== 'undefined') {
+			options.data = JSON.stringify(options.data);
+		}
+		return xhr.apply(null, Array.prototype.slice.call(arguments)).then(function(result) {
+			return JSON.parse(result.response || null);
+		});
+	}
 	function Cache(workspaceBase) {
 		this.projects = {};
 		this.getProjects = function(workspaceId) {
 			// TODO would be better to invoke the FileService here but we are inside a plugin so we can't.
 			var headers = { "Orion-Version": "1" };
 			if (!this.projects[workspaceId]) {
-				this.projects[workspaceId] = dojo.xhrGet(
-					{	url: workspaceBase,
-						headers: headers,
-						handleAs: 'json'
+				this.projects[workspaceId] = xhrJson('GET', workspaceBase,
+					{	headers: headers
 					}).then(function(data) {
 						var workspaces = data.Workspaces;
 						var workspace;
@@ -70,10 +81,8 @@ define(['require', 'dojo'], function(require, dojo) {
 								break;
 							}
 						}
-						return dojo.xhrGet({
-							url: workspace.Location,
-							headers: headers,
-							handleAs: 'json'
+						return xhrJson('GET', workspace.Location, {
+							headers: headers
 						}).then(function(workspaceData) {
 							return workspaceData.Children || [];
 						});
@@ -128,25 +137,20 @@ define(['require', 'dojo'], function(require, dojo) {
 			//NOTE: require.toURL needs special logic here to handle "site"
 			var siteUrl = require.toUrl("site._");
 			siteUrl = siteUrl.substring(0,siteUrl.length-2);
-			return dojo.xhrGet({
-				url: siteUrl,
-				preventCache: true,
+			return xhrJson('GET', siteUrl, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000
 			}).then(function(response) {
 				return response.SiteConfigurations;
 			});
 		},
 		loadSiteConfiguration: function(locationUrl) {
-			return dojo.xhrGet({
-				url: locationUrl,
+			return xhrJson('GET', locationUrl, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000
 			});
 		},
@@ -173,36 +177,30 @@ define(['require', 'dojo'], function(require, dojo) {
 			//NOTE: require.toURL needs special logic here to handle "site"
 			var siteUrl = require.toUrl("site._");
 			siteUrl = siteUrl.substring(0,siteUrl.length-2);
-			return dojo.xhrPost({
-				url: siteUrl,
-				postData: JSON.stringify(toCreate),
+			return xhrJson('POST', siteUrl, {
+				data: toCreate,
 				headers: {
 					"Content-Type": "application/json; charset=utf-8",
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000
 			});
 		},
 		updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
-			return dojo.xhrPut({
-				url: locationUrl,
-				putData: JSON.stringify(updatedSiteConfig),
+			return xhrJson('PUT', locationUrl, {
+				data: updatedSiteConfig,
 				headers: {
 					"Content-Type": "application/json; charset=utf-8",
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000
 			});
 		},
 		deleteSiteConfiguration: function(locationUrl) {
-			return dojo.xhrDelete({
-				url: locationUrl,
+			return xhrJson('DELETE', locationUrl, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000
 			});
 		},
