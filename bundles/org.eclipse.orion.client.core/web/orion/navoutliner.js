@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'orion/explorer', 'orion/explorerNavHandler'], function(require, dojo, mUtil, mCommands, mSelection, mExplorer, mNavHandler){
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'orion/explorer'], function(require, dojo, mUtil, mCommands, mSelection, mExplorer){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -109,10 +109,25 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 			name: "Delete",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteFave",
-			visibleWhen: function(item) {return item.isFavorite;},
+			visibleWhen: function(items) {
+				items = dojo.isArray(items) ? items : [items];
+				if (items.length === 0) {
+					return false;
+				}
+				for (var i=0; i<items.length; i++) {
+					if (!items[i].isFavorite) {
+						return false;
+					}
+				}
+				return true;
+			},
 			callback: function(data) {
-				if(window.confirm("Do you want to remove " + data.items.name + " from favorites?")) {
-					options.serviceRegistry.getService("orion.core.favorite").removeFavorite(data.items.path);
+				var items = dojo.isArray(data.items) ? data.items : [data.items];
+				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].name + "' from the favorites?" : "Are you sure you want to delete these " + items.length + " favorites?";
+				if(window.confirm(confirmMessage)) {
+					for (var i=0; i<items.length; i++) {
+						options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path);
+					}
 				}
 			}
 		});		
@@ -121,46 +136,23 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 			imageClass: "core-sprite-rename",
 			id: "eclipse.renameFave",
 			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
-			visibleWhen: function(item) {return item.isFavorite;},
+			visibleWhen: function(items) {
+				items = dojo.isArray(items) ? items : [items];
+				return items.length === 1 && items[0].isFavorite;
+			},
 			callback: dojo.hitch(this, function(data) {
+				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
+				
 				if (data.parameters && data.parameters.valueFor('name')) {
-					reg.getService("orion.core.favorite").renameFavorite(data.items.path, data.parameters.valueFor('name'));
+					reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name'));
 				}
 			})
-		});
-		var renameSearchCommand = new mCommands.Command({
-			name: "Rename",
-			imageClass: "core-sprite-rename",
-			id: "eclipse.renameSearch",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
-			visibleWhen: function(item) {return item.isSearch;},
-			callback: dojo.hitch(this, function(data) {
-				if (data.parameters && data.parameters.valueFor('name')) {
-					reg.getService("orion.core.favorite").renameSearch(data.items.query, data.parameters.valueFor('name'));
-				}
-			})
-		});
-		var deleteSearchCommand = new mCommands.Command({
-			name: "Delete",
-			imageClass: "core-sprite-delete",
-			id: "eclipse.deleteSearch",
-			visibleWhen: function(item) {return item.isSearch;},
-			callback: function(data) {
-				if(window.confirm("Do you want to remove " + data.items.name + " from favorites?")) {
-					options.serviceRegistry.getService("orion.core.favorite").removeSearch(data.items.query);
-				}
-			}
 		});
 		this.commandService = this._registry.getService("orion.page.command");
 		// register commands 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
-		this.commandService.addCommand(renameSearchCommand);	
-		this.commandService.addCommand(deleteSearchCommand);	
 		this.commandService.addCommand(addFaveURLCommand);	
-		// to the search section heading
-		this.commandService.registerCommandContribution("searchCommands", "eclipse.renameSearch", 1);	
-		this.commandService.registerCommandContribution("searchCommands", "eclipse.deleteSearch", 2);
 		// to the fave section heading
 		this.commandService.registerCommandContribution("faveCommands", "eclipse.renameFave", 1);
 		this.commandService.registerCommandContribution("faveCommands", "eclipse.deleteFave", 2);
@@ -212,10 +204,15 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 					});
 				}
 				var explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
-				this.favoritesTable = explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites));	
-				explorer.navHandler = new mNavHandler.ExplorerNavHandler(this);
-				explorer.navHandler.refreshModel(explorer.model);
-				explorer.navHandler.cursorOn();
+				this.favoritesTable = explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
+					if (item.path) {
+						return item.path;
+					}
+					if (typeof(item.getProperty) === "function" && item.getProperty("top")) {
+						return item.getProperty("top");
+					}
+					return "";
+				}));
 			}
 		}
 	};//end navigation outliner prototype

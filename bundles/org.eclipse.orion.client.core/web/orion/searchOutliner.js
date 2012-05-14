@@ -235,7 +235,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 					});
 				}
 				var explorer = new SearchExplorer(serviceRegistry, this.searchSelection);
-				this.searchTable = explorer.createTree(this.searchDiv.id, new mExplorer.SimpleFlatModel(searches));	
+				this.searchTable = explorer.createTree(this.searchDiv.id, new mExplorer.SimpleFlatModel(searches, "srch", function(item) {return item.query;}));	
 			}
 		}
 	};//end navigation outliner prototype

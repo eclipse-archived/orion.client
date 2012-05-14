@@ -649,16 +649,38 @@ exports.SimpleFlatModel = (function() {
 	 *
 	 * @name orion.explorer.SimpleFlatModel
 	 * @param {Array} items the items in the model
+	 * @param {String} idPrefix string used to prefix generated id's
+	 * @param {Function} getKey function used to get the property name used for generating an id in the model
 	 */
-	function SimpleFlatModel(items) {
+	function SimpleFlatModel(items, idPrefix, getKey) {
 		this.items = items;
-		this.root = {};
+		this.getKey = getKey;
+		this.idPrefix = idPrefix;
+		this.root = {children: items};
 	}
 	
 	SimpleFlatModel.prototype = new exports.ExplorerModel();
 		
 	SimpleFlatModel.prototype.getRoot = function(onItem){
 		onItem(this.root);
+	};
+	
+	SimpleFlatModel.prototype.destroy = function() {
+	};
+	
+	SimpleFlatModel.prototype.getId = function(/* item */ item){
+		var key = this.getKey(item);
+		// this might be a path, so strip slashes
+		var stripSlashes = key.replace(/[\\\/]/g, "");
+		var id = "";
+		for (var i=0; i<stripSlashes.length; i++) {
+			if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
+				id += stripSlashes.charCodeAt(i);
+			} else {
+				id += stripSlashes[i];
+			}
+		}
+		return this.idPrefix + id;
 	};
 		
 	SimpleFlatModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
