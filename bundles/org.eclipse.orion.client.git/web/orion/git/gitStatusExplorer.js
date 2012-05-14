@@ -12,8 +12,8 @@
 /*global define console document */
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
-        'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+        'orion/breadcrumbs', 'orion/git/util', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitUtil, mGitCommands) {
 	
 	var exports = {};
 	
@@ -193,7 +193,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				
 								that.displayUnstaged(status, repositories[0]);
 								that.displayStaged(status, repositories[0]);
-								that.displayDiffs(status);
+//								that.displayDiffs(status);
 								that.displayCommits(repositories[0]);
 								
 								// render commands
@@ -343,6 +343,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					getChildren: function(parentItem, onComplete){	
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
+						} else if (mGitUtil.isChange(parentItem)) {
+							onComplete([{"diffUri" : parentItem.diffURI, "Type": "Diff"}]);
 						} else {
 							onComplete([]);
 						}
@@ -350,8 +352,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
 							return "root";
+						} else if (mGitUtil.isChange(item)) {
+							return item.name;
+						} else {
+							return item.diffUri;
 						}
-						return item.name;
 					}
 				};
 				
@@ -363,23 +368,55 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this._init(options);
 					this.options = options;
 					this.explorer = explorer;
+					this.registry = options.registry;
 				}
 				
 				UnstagedRenderer.prototype = new mExplorer.SelectionRenderer();
 				
-				UnstagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-					
+				UnstagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
 					switch(col_no){
-					case 0:				
-						var td = document.createElement("td", {style: "padding: 10px"});
-						var div = dojo.create( "div", {style: "padding: 10px"}, td );
-						dojo.create( "span", { "class":"sectionIcon " + that._model.getClass(item.type) }, div );
-						dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
-						return td;
+					case 0:		
+						if (mGitUtil.isChange(item)){
+							var td = document.createElement("td", {style: "padding: 10px"});
+							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							
+							this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
+							dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
+							
+							return td;
+						} else {
+							var td = document.createElement("td", {style: "padding: 10px"});
+							td.colSpan = 2;
+							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"width: 900px; height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+
+							setTimeout(function(){
+								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
+								
+								var diffOptions = {
+									//commandSpanId: diffSection.actionsNode.id,
+									diffProvider: diffProvider,
+									hasConflicts: false,
+									readonly: true,
+									complexURL: item.diffUri,
+									callback : function(){}
+								};
+								
+								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
+								inlineCompareContainer.startup( function(){});
+							}, 500);
+							
+							return td;
+						}
+
 						break;
 					case 1:
-						var actionsColumn = this.getActionsColumn(item, tableRow);
-						return actionsColumn;
+						if (item.type){
+							var actionsColumn = this.getActionsColumn(item, tableRow);
+							return actionsColumn;
+						}
+						
 						break;
 					};
 				};
@@ -394,7 +431,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new UnstagedRenderer({actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: true}, this);
+					this.renderer = new UnstagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: true}, this);
 					this.createTree(this.parentId, new UnstagedModel());
 				}
 				
@@ -455,16 +492,17 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				function StagedModel() {
 				}
 				
-				StagedModel.prototype = {
+				StagedModel.prototype = {					
 					destroy: function(){
 					},
 					getRoot: function(onItem){
 						onItem(stagedSortedChanges);
 					},
-					getChildren: function(parentItem, onComplete){
-						
+					getChildren: function(parentItem, onComplete){	
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
+						} else if (mGitUtil.isChange(parentItem)) {
+							onComplete([{"diffUri" : parentItem.diffURI, "Type": "Diff"}]);
 						} else {
 							onComplete([]);
 						}
@@ -472,8 +510,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
 							return "root";
+						} else if (mGitUtil.isChange(item)) {
+							return item.name;
+						} else {
+							return item.diffUri;
 						}
-						return item.name;
 					}
 				};
 				
@@ -485,23 +526,55 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this._init(options);
 					this.options = options;
 					this.explorer = explorer;
+					this.registry = options.registry;
 				}
 				
 				StagedRenderer.prototype = new mExplorer.SelectionRenderer();
 				
 				StagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-					
 					switch(col_no){
-					case 0:				
-						var td = document.createElement("td", {style: "padding: 10px"});
-						var div = dojo.create( "div", {style: "padding: 10px"}, td );
-						dojo.create( "span", { "class":"sectionIcon " + that._model.getClass(item.type) }, div );
-						dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
-						return td;
+					case 0:		
+						if (mGitUtil.isChange(item)){
+							var td = document.createElement("td", {style: "padding: 10px"});
+							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							
+							this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
+							dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
+							
+							return td;
+						} else {
+							var td = document.createElement("td", {style: "padding: 10px"});
+							td.colSpan = 2;
+							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"width: 900px; height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+
+							setTimeout(function(){
+								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
+								
+								var diffOptions = {
+									//commandSpanId: diffSection.actionsNode.id,
+									diffProvider: diffProvider,
+									hasConflicts: false,
+									readonly: true,
+									complexURL: item.diffUri,
+									callback : function(){}
+								};
+								
+								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
+								inlineCompareContainer.startup( function(){});
+							}, 500);
+							
+							return td;
+						}
+
 						break;
 					case 1:
-						var actionsColumn = this.getActionsColumn(item, tableRow);
-						return actionsColumn;
+						if (item.type){
+							var actionsColumn = this.getActionsColumn(item, tableRow);
+							return actionsColumn;
+						}
+						
 						break;
 					};
 				};
@@ -516,7 +589,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new StagedRenderer({actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: true}, this);
+					this.renderer = new StagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: true}, this);
 					this.createTree(this.parentId, new StagedModel());
 				}
 				
