@@ -12,7 +12,56 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, dojo, mUtil, mCommands){
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'orion/explorer', 'orion/explorerNavHandler'], function(require, dojo, mUtil, mCommands, mSelection, mExplorer, mNavHandler){
+
+	function NavOutlineRenderer (options, explorer) {
+		this.explorer = explorer;
+		this._init(options);
+	}
+	NavOutlineRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	NavOutlineRenderer.prototype.constructor = NavOutlineRenderer;
+	NavOutlineRenderer.prototype.getLabelColumnIndex = function() {
+		return 0;
+	};
+	NavOutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		var href, clazz;
+		if (item.isExternalResource) {
+			href = item.path;
+			clazz = "navlink";
+		} else if (item.directory) {
+			href = require.toUrl("navigate/table.html") + "#" + item.path;
+			clazz= "navlinkonpage";
+		} else if (item.path) {
+			href = require.toUrl("edit/edit.html") + "#" + item.path;
+			clazz = "navlink";
+		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) {
+			href = require.toUrl("navigate/table.html") + "#" + item.getProperty("top");
+			clazz = "navlinkonpage";
+		} else {
+			href = "";
+			item.name = "Unknown item";
+		}
+		if (href === "#") {
+			href="";
+		}
+
+		var col = dojo.create("td", null, tableRow, "last");
+		dojo.addClass(col, "mainNavColumn");
+		dojo.style(col, "whiteSpace", "nowrap");
+		var link = dojo.create("a", {href: href, className: clazz}, col, "only");
+		dojo.place(window.document.createTextNode(item.name), link, "only");
+		mUtil.addNavGrid(item, link);
+	};
+
+	function NavOutlineExplorer(serviceRegistry, selection) {
+		this.selection = selection;
+		this.registry = serviceRegistry;
+		this.renderer = new NavOutlineRenderer({checkbox: false, decorateAlternatingLines: false}, this);
+	}
+	NavOutlineExplorer.prototype = mExplorer.Explorer.prototype;	
+	NavOutlineExplorer.prototype.constructor = NavOutlineExplorer;
+
+	
 
 	/**
 	 * Creates a new user interface element showing an outliner used for navigation
@@ -32,7 +81,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 		if (!options.serviceRegistry) {throw "no service registry"; }
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
-		var navoutliner = this;
 		var reg = options.serviceRegistry;
 		
 		var addFaveURLCommand = new mCommands.Command({
@@ -72,18 +120,24 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 			name: "Rename",
 			imageClass: "core-sprite-rename",
 			id: "eclipse.renameFave",
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
 			visibleWhen: function(item) {return item.isFavorite;},
 			callback: dojo.hitch(this, function(data) {
-				this.editFavoriteName(data.items, data.id, data.domNode.id, data.userData);
+				if (data.parameters && data.parameters.valueFor('name')) {
+					reg.getService("orion.core.favorite").renameFavorite(data.items.path, data.parameters.valueFor('name'));
+				}
 			})
 		});
 		var renameSearchCommand = new mCommands.Command({
 			name: "Rename",
 			imageClass: "core-sprite-rename",
 			id: "eclipse.renameSearch",
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
 			visibleWhen: function(item) {return item.isSearch;},
 			callback: dojo.hitch(this, function(data) {
-				this.editSearchName(data.items, data.id, data.domNode.id, data.userData);
+				if (data.parameters && data.parameters.valueFor('name')) {
+					reg.getService("orion.core.favorite").renameSearch(data.items.query, data.parameters.valueFor('name'));
+				}
 			})
 		});
 		var deleteSearchCommand = new mCommands.Command({
@@ -97,176 +151,71 @@ define(['require', 'dojo', 'orion/util', 'orion/commands'], function(require, do
 				}
 			}
 		});
-		var commandService = this._registry.getService("orion.page.command");
+		this.commandService = this._registry.getService("orion.page.command");
 		// register commands 
-		commandService.addCommand(deleteFaveCommand);
-		commandService.addCommand(renameFaveCommand);
-		commandService.addCommand(renameSearchCommand);	
-		commandService.addCommand(deleteSearchCommand);	
-		commandService.addCommand(addFaveURLCommand);		
-		// declare the individual item contributions to the ui
-		commandService.addCommandGroup("favoriteCommands", "orion.favorites", 100, "*");
-		commandService.registerCommandContribution("favoriteCommands", "eclipse.renameFave", 1, "orion.favorites");
-		commandService.registerCommandContribution("favoriteCommands", "eclipse.deleteFave", 2, "orion.favorites");
-		commandService.addCommandGroup("searchCommands", "orion.search", 100, "*");
-		commandService.registerCommandContribution("searchCommands", "eclipse.renameSearch", 1, "orion.search");	
-		commandService.registerCommandContribution("searchCommands", "eclipse.deleteSearch", 2, "orion.search");
-		// to the section heading
-		commandService.registerCommandContribution("faveCommands", "eclipse.addExternalFave", 1);		
+		this.commandService.addCommand(deleteFaveCommand);
+		this.commandService.addCommand(renameFaveCommand);
+		this.commandService.addCommand(renameSearchCommand);	
+		this.commandService.addCommand(deleteSearchCommand);	
+		this.commandService.addCommand(addFaveURLCommand);	
+		// to the search section heading
+		this.commandService.registerCommandContribution("searchCommands", "eclipse.renameSearch", 1);	
+		this.commandService.registerCommandContribution("searchCommands", "eclipse.deleteSearch", 2);
+		// to the fave section heading
+		this.commandService.registerCommandContribution("faveCommands", "eclipse.renameFave", 1);
+		this.commandService.registerCommandContribution("faveCommands", "eclipse.deleteFave", 2);
+		this.commandService.registerCommandContribution("faveCommands", "eclipse.addExternalFave", 3);		
 
 		var favoritesService = this._registry.getService("orion.core.favorite");
+		var navoutliner = this;
+
 		if (favoritesService) {
 			// render the favorites
 			var registry = this._registry;
-			favoritesService.getFavorites().then(function(favs) {
-				navoutliner.render(favs.navigator, favs.search, registry);
-			});
+			favoritesService.getFavorites().then(dojo.hitch(navoutliner, function(favs) {
+				this.render(favs.navigator, registry);
+			}));
 
-			favoritesService.addEventListener("favoritesChanged", function(favs) {
-				navoutliner.render(favs.navigator, favs.search, favs.registry);
-			});
+			favoritesService.addEventListener("favoritesChanged", dojo.hitch(navoutliner,
+				function(favs) {
+					this.render(favs.navigator, favs.registry);
+				}));
 		}
 	}
 	NavigationOutliner.prototype = /** @lends orion.navoutliner.NavigationOutliner.prototype */ {
-		
-		editFavoriteName: function(fave, commandId, imageId, faveIndex) {
-			var reg = this._registry;
-			var link = dojo.byId("fave"+faveIndex);
-			
-			// hide command buttons while editor is up
-			var commandParent = dojo.byId(imageId).parentNode;
-			dojo.style(link, "display", "none");
-			var children = commandParent.childNodes;
-			for (var i = 0; i < children.length; i++) {
-				dojo.style(children[i], "display", "none");
-			}
-			mUtil.getUserText(imageId+"EditBox", link, true, fave.name, 
-				function(newText) {
-					reg.getService("orion.core.favorite").renameFavorite(fave.path, newText);
-				}, 
-				function() {
-					// re-show the local commands
-					var commandParent = dojo.byId(imageId).parentNode;
-					var children = commandParent.childNodes;
-					for (var i = 0; i < children.length; i++) {
-						dojo.style(children[i], "display", "inline");
-					}
-				});				
-		},
 
-		editSearchName: function(search, commandId, imageId, faveIndex) {
-			var reg = this._registry;
-			var link = dojo.byId("search"+faveIndex);
-			
-			// hide command buttons while editor is up
-			var commandParent = dojo.byId(imageId).parentNode;
-			dojo.style(link, "display", "none");
-			var children = commandParent.childNodes;
-			for (var i = 0; i < children.length; i++) {
-				dojo.style(children[i], "display", "none");
-			}
-			mUtil.getUserText(imageId+"EditBox", link, true, search.name, 
-				function(newText) {
-					reg.getService("orion.core.favorite").renameSearch(search.query, newText);
-				}, 
-				function() {
-					// re-show the local commands
-					var commandParent = dojo.byId(imageId).parentNode;
-					var children = commandParent.childNodes;
-					for (var i = 0; i < children.length; i++) {
-						dojo.style(children[i], "display", "inline");
-					}
-				});				
-		},
-		render: function(favorites, searches, serviceRegistry) {
-			dojo.empty(this._parent);
+		render: function(favorites, serviceRegistry) {
 			var link;
 			if (serviceRegistry) {
 				var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
 				// top level folder outline if there is more than one file service
 				if (allReferences.length > 1) {
-					mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "File Servers", true);
-					
-					var fileSystemTable = dojo.create("table", {id: "fileSystemTable", role: "presentation"});
-					dojo.addClass(fileSystemTable, "favoritesTable auxPadding");
-					var body = dojo.create("tbody", null, fileSystemTable);
-					for(var i = 0; i < allReferences.length; ++i) {
-						var name = allReferences[i].getProperty("Name");
-						var location = allReferences[i].getProperty("top");
-						if (name && location) {
-							var navLocation = require.toUrl("navigate/table.html") + "#" + location;
-							var row = dojo.create("tr", null, body);
-							var col = dojo.create("td", null, row);
-							link = dojo.create("a", {href: navLocation}, col);
-							dojo.addClass(link, "navlinkonpage");
-							var label = window.document.createTextNode(name);
-							dojo.place(label, link, "last");
-						}
-					}
-					dojo.place(fileSystemTable, this._parent);
+					mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "Places", true);
 				}
 			}
 			
 			var navOutlineTable, id, tr, col1, href, actionsWrapper, tbody;
+			var commandService = this.commandService;
 			if (favorites.length > 0) {
-				// Favorites heading
-				mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
-				// favorites
-				navOutlineTable = dojo.create("table", {id: "favoritesTable", role: "presentation"});
-				dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
-				tbody = dojo.create("tbody", null, navOutlineTable);
-	
-				for (var j=0; j < favorites.length; j++) {
-					var fave = favorites[j];
-					if (fave.isExternalResource) {
-						href = fave.path;
-					} else {
-						href = fave.directory ? require.toUrl("navigate/table.html") + "#" + fave.path : require.toUrl("edit/edit.html") + "#" + fave.path;
-						if (href==="#") {
-							href="";
+				// first time setup
+				if (!this.favoritesDiv) {
+					mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
+					this.favoritesDiv = dojo.create("div", {id: "favoritesContent"}, this._parent);
+					this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
+					commandService.registerSelectionService("faveCommands", this.favoritesSelection);
+					serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+						var selectionTools = dojo.byId("faveCommands");
+						if (selectionTools) {
+							dojo.empty(selectionTools);
+							commandService.renderCommands("faveCommands", selectionTools, selections, this, "button");
 						}
-					}
-					var clazz = fave.directory ? "navlinkonpage" : "navlink";
-					id = "fave"+j;
-					tr = dojo.create("tr");
-					tr.id = "row"+id;
-					col1 = dojo.create("td", null, tr, "last");
-					dojo.style(col1, "whiteSpace", "nowrap");
-					link = dojo.create("a", {id: id, href: href, className: clazz}, col1, "only");
-					dojo.place(window.document.createTextNode(fave.name), link, "only");
-					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-					this._registry.getService("orion.page.command").renderCommands("favoriteCommands", actionsWrapper, fave, this, "tool", j);
-					dojo.place(tr, tbody, "last");
+					});
 				}
-				dojo.place(navOutlineTable, this._parent, "last");
-				
-				// spacer, which also is a placeholder for newly added favorites
-				var spacer = dojo.create("tr", null, navOutlineTable);
-				spacer = dojo.create("td", {colspan: 2}, spacer);
-				dojo.create("span", {id: "spacer"}, spacer);
-			}
-
-			// Searches if we have them
-			if (searches.length > 0) {
-				mUtil.createPaneHeading(this._parent, "searchesHeading", "Searches", true);
-				navOutlineTable = dojo.create("table", {id: "searchTable", role: "presentation"});
-				dojo.addClass(navOutlineTable, "favoritesTable auxPadding");
-
-				tbody = dojo.create("tbody", null, navOutlineTable);
-				for (var k=0; k < searches.length; k++) {
-					var search = searches[k];
-					href=require.toUrl("search/search.html") + "#" + search.query;
-					id = "search"+k;
-					tr = dojo.create("tr");
-					tr.id = "searchRow"+id;
-					col1 = dojo.create("td", null, tr, "last");
-					link = dojo.create("a", {id:id, href: href}, col1, "only");
-					dojo.place(window.document.createTextNode(search.name), link, "only");
-					actionsWrapper = dojo.create("span", {id: tr.id+"actionsWrapper"}, col1, "last");
-					this._registry.getService("orion.page.command").renderCommands("searchCommands", actionsWrapper, search, this, "tool", k);
-					dojo.place(tr, tbody, "last");
-				}
-				dojo.place(navOutlineTable, this._parent, "last");
+				var explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
+				this.favoritesTable = explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites));	
+				explorer.navHandler = new mNavHandler.ExplorerNavHandler(this);
+				explorer.navHandler.refreshModel(explorer.model);
+				explorer.navHandler.cursorOn();
 			}
 		}
 	};//end navigation outliner prototype
