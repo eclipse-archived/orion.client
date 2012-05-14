@@ -98,21 +98,19 @@ a:hover {
 
 .navlink {
 	display: inline-block;
+	padding: 2px;
 }
 
 .navlinkonpage {
-	cursor: hand;
 	text-decoration: none;
-	padding:2px;
+	padding: 2px;
 }
 
 .navlinkonpage:active {
-	cursor: hand;
 	text-decoration: none;
 }
 
 .navlinkonpage:hover {
-	cursor: hand;
 	text-decoration: none;
 	border-bottom: 1px dotted;
 }
