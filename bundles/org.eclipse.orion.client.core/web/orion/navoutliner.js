@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer'], function(require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer){
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer', 'orion/navigationUtils'], function(require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -50,7 +50,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 		dojo.style(col, "whiteSpace", "nowrap");
 		var link = dojo.create("a", {href: href, className: clazz}, col, "only");
 		dojo.place(window.document.createTextNode(name), link, "only");
-		mUtil.addNavGrid(item, link);
+		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
 
 	function NavOutlineExplorer(serviceRegistry, selection) {
@@ -220,7 +220,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 					return item.path || "";
 				}));
 				// TODO temporary hack from Libing 
-				this.explorer.navHandler._clearSelection(false);
+				this.explorer.getNavHandler()._clearSelection(false);
 			} else {
 				dojo.place("<p>You can create favorites by selecting any file or folder in the navigator and choosing <b>Make Favorite</b> from the More menu.</p>", "favoritesContent", "only");
 			}

@@ -11,7 +11,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil){
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil, mNavUtils){
 
 	/*
 	 * stateless helper function
@@ -751,7 +751,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							dojo.addClass(menuButton.domNode, "commandMenu");
 							if(domNodeWrapperList){
 								//we need to add the menuButton as the optional widget param
-								mUtil.generateNavGrid(domNodeWrapperList, menuButton.domNode, menuButton);
+								mNavUtils.generateNavGrid(domNodeWrapperList, menuButton.domNode, menuButton);
 							}
 							var menuParent = parent;
 							if (parent.nodeName.toLowerCase() === "ul") {
@@ -1081,7 +1081,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
-			mUtil.generateNavGrid(domNodeWrapperList, image);
+			mNavUtils.generateNavGrid(domNodeWrapperList, image);
 		},
 	
 		/*

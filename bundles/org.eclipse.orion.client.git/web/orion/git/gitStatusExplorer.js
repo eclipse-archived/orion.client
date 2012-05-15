@@ -12,8 +12,8 @@
 /*global define console document */
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
-        'orion/breadcrumbs', 'orion/git/util', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitUtil, mGitCommands) {
+        'orion/breadcrumbs', 'orion/git/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitUtil, mGitCommands, mNavUtils) {
 	
 	var exports = {};
 	
@@ -381,18 +381,17 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var div = dojo.create( "div", {style: "padding: 10px"}, td );
 
 							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
-							mUtil.addNavGrid(item, expandImage);
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
 							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
-							mUtil.addNavGrid(item, itemLabel);
-							
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							return td;
 						} else {
 							var td = document.createElement("td", {style: "padding: 10px"});
 							td.colSpan = 2;
 							var div = dojo.create( "div", {style: "padding: 10px"}, td );
 
-							mUtil.addNavGrid(item, div);
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
 
@@ -418,7 +417,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						if (item.type){
-							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, mUtil.getNavGridHolder(item));
+							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
 							return actionsColumn;
 						}
 						
@@ -544,10 +543,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var div = dojo.create( "div", {style: "padding: 10px"}, td );
 
 							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
-							mUtil.addNavGrid(item, expandImage);
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
 							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
-							mUtil.addNavGrid(item, itemLabel);
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							
 							return td;
 						} else {
@@ -555,7 +554,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							td.colSpan = 2;
 							var div = dojo.create( "div", {style: "padding: 10px"}, td );
 
-							mUtil.addNavGrid(item, div);
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
 
@@ -581,7 +580,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						if (item.type){
-							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, mUtil.getNavGridHolder(item));
+							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
 							return actionsColumn;
 						}
 						
@@ -633,7 +632,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				commandService: this.registry.getService("orion.page.command"),
 				canHide: true,
 				hidden: true,
-				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>',
+				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>'
 			});
 			
 			// add inline compare view

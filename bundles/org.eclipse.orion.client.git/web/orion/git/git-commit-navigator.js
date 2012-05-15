@@ -12,7 +12,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/explorerNavHandler', 'orion/git/widgets/CommitTooltipDialog'], function(dojo, mExplorer, mUtil, mGitCommands, mNavHandler) {
+define(['dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], function(dojo, mExplorer, mUtil, mGitCommands, mNavUtils) {
 
 var exports =  {};
 exports.GitCommitNavigator = (function() {
@@ -202,7 +202,7 @@ exports.GitCommitRenderer = (function() {
 				
 			link = dojo.create("a", {className: "navlink", href: "/git/git-commit.html#" + item.Location + "?page=1&pageSize=1"}, div, "last");			
 			dojo.place(document.createTextNode(item.Message), link, "only");		
-			mUtil.addNavGrid(item, link);
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			
 			var _timer;
 			
@@ -257,7 +257,7 @@ exports.GitCommitRenderer = (function() {
 			if (this.options['minimal'])
 				break;
 			
-			var actionsColumn = this.getActionsColumn(item, tableRow, null, null, mUtil.getNavGridHolder(item));
+			var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
 			dojo.style(actionsColumn, "padding-left", "5px");
 			dojo.style(actionsColumn, "padding-right", "5px");
 			return actionsColumn;
