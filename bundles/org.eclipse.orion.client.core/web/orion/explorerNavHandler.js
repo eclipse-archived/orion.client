@@ -27,9 +27,10 @@ exports.ExplorerNavHandler = (function() {
 	 * @param {Object} explorer The orion.explorer.Explorer instance.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
 	 */
-	function ExplorerNavHandler(explorer, options) {
+	function ExplorerNavHandler(explorer, navDict, options) {
 		this.explorer = explorer;
 		this.model = this.explorer.model;
+		this._navDict = navDict;
 		
 	    this._listeners = [];
 	    this._selections = [];
@@ -71,9 +72,9 @@ exports.ExplorerNavHandler = (function() {
 				return true;
 			}
 			if(e.keyCode === dojo.keys.DOWN_ARROW){
-				return this.onUpArrow(e);
-			} else if(e.keyCode === dojo.keys.UP_ARROW){
 				return this.onDownArrow(e);
+			} else if(e.keyCode === dojo.keys.UP_ARROW){
+				return this.onUpArrow(e);
 			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
 				if(!e.ctrlKey){
 					return this.onRihgtArrow(e);
@@ -172,10 +173,12 @@ exports.ExplorerNavHandler = (function() {
 			}
 		},
 		
-		refreshModel: function(model, topIterationNodes, noReset){
+		refreshModel: function(navDict, model, topIterationNodes, noReset){
 			this.refreshSelection();
+		    this._currentColumn = 0;
 			this.topIterationNodes = [];
 			this.model = model;
+			this._navDict = navDict;
 			if(this.model.getTopIterationNodes){
 				this.topIterationNodes = this.model.getTopIterationNodes();
 			} else if(topIterationNodes){
@@ -207,7 +210,7 @@ exports.ExplorerNavHandler = (function() {
 			this._selections.splice(0, this._selections.length);
 		},
 		
-		_setSelection: function(model, toggling){
+		setSelection: function(model, toggling){
 			if(!toggling){
 				this._clearSelection(true);
 				this._checkRow(model,false);		
@@ -234,7 +237,8 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				model = this.currentModel();
 			}
-			if(model && model.gridChildren && model.gridChildren.length > 0){
+			var gridChildren = this._getGridChildren(model);
+			if(gridChildren && gridChildren.length > 1){
 				if(offset !== 0){
 					this.toggleCursor(model, false);
 				}
@@ -249,8 +253,8 @@ exports.ExplorerNavHandler = (function() {
 							rowChanged = false;
 						}
 					}
-					column = rowChanged ? model.gridChildren.length - 1 : this._currentColumn;
-				} else if(column >= model.gridChildren.length){
+					column = rowChanged ? gridChildren.length - 1 : this._currentColumn;
+				} else if(column >= gridChildren.length){
 					if(this._linearGridMove && offset !== 0){
 						if(this._modelIterator.iterate(true)){
 							model = this.currentModel();
@@ -269,12 +273,20 @@ exports.ExplorerNavHandler = (function() {
 			return false;
 		},
 		
+		_getGridChildren: function(model){
+			if(this._navDict){
+				return this._navDict.getGridNavHolder(model);
+			}
+			return null;
+		},
+		
 		getCurrentGrid:  function(model){
 			if(!model){
 				model = this.currentModel();
 			}
-			if(model && model.gridChildren && model.gridChildren.length > 0){
-				return model.gridChildren[this._currentColumn];
+			var gridChildren = this._getGridChildren(model);
+			if(gridChildren && gridChildren.length > 0){
+				return gridChildren[this._currentColumn];
 			}
 			return null;
 		},
@@ -341,7 +353,9 @@ exports.ExplorerNavHandler = (function() {
 			if(!rowModel){
 				return null;
 			}
-			return rowModel.rowDomNode ? rowModel.rowDomNode :  dojo.byId(this.model.getId(rowModel));
+			var modelId = this.model.getId(rowModel);
+			var value = this._navDict.getValue(modelId);
+			return value && value.rowDomNode ? value.rowDomNode :  dojo.byId(modelId);
 		},
 		
 		iterate: function(forward, forceExpand, selecting)	{
@@ -351,7 +365,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._modelIterator.iterate(forward, forceExpand)){
 				this.cursorOn(null, false, forward);
 				if(selecting){
-					this._setSelection(this._modelIterator.prevCursor(), true);
+					this.setSelection(this._modelIterator.prevCursor(), true);
 				}
 			}
 		},
@@ -397,9 +411,10 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_onModelGrid: function(model, mouseEvt){
-			if(model.gridChildren){
-				for(var i = 0; i < model.gridChildren.length; i++){
-					if(mouseEvt.target === model.gridChildren[i].domNode){
+			var gridChildren = this._getGridChildren(model);
+			if(gridChildren){
+				for(var i = 0; i < gridChildren.length; i++){
+					if(mouseEvt.target === gridChildren[i].domNode){
 						return true;
 					}
 				}
@@ -413,19 +428,19 @@ exports.ExplorerNavHandler = (function() {
 			}
 			this.cursorOn(model);
 			if(isPad){
-				this._setSelection(model, true);
+				this.setSelection(model, true);
 			} else if(mouseEvt.ctrlKey){
-				this._setSelection(model, true);
+				this.setSelection(model, true);
 			} else if(mouseEvt.shiftKey && this._lastSelection){
 				var scannedSel = this._modelIterator.scan(this._lastSelection, model);
 				if(scannedSel){
 					this._clearSelection(true);
 					for(var i = 0; i < scannedSel.length; i++){
-						this._setSelection(scannedSel[i], true);
+						this.setSelection(scannedSel[i], true);
 					}
 				}
 			} else {
-				this._setSelection(model, false);
+				this.setSelection(model, false);
 			}
 		},
 		
@@ -438,21 +453,23 @@ exports.ExplorerNavHandler = (function() {
 		//Up arrow key iterates the current row backward. If control key is on, browser's scroll up behavior takes over.
 		//If shift key is on, it toggles the check box and iterates backward.
 		onUpArrow: function(e) {
-			if(!e.ctrlKey){
-				this.iterate(true, false, e.shiftKey);
-				e.preventDefault();
-				return false;
+			this.iterate(false, false, e.shiftKey);
+			if(!e.ctrlKey && !e.shiftKey){
+				this.setSelection(this.currentModel(), false);
 			}
+			e.preventDefault();
+			return false;
 		},
 
 		//Down arrow key iterates the current row forward. If control key is on, browser's scroll down behavior takes over.
 		//If shift key is on, it toggles the check box and iterates forward.
 		onDownArrow: function(e) {
-			if(!e.ctrlKey){
-				this.iterate(false, false, e.shiftKey);
-				e.preventDefault();
-				return false;
+			this.iterate(true, false, e.shiftKey);
+			if(!e.ctrlKey && !e.shiftKey){
+				this.setSelection(this.currentModel(), false);
 			}
+			e.preventDefault();
+			return false;
 		},
 
 		//Left arrow key collapses the current row. If current row is not expandable(e.g. a file in file navigator), move the cursor to its parent row.
@@ -502,7 +519,7 @@ exports.ExplorerNavHandler = (function() {
 
 		//Space key toggles the check box on the current row if the renderer uses check box
 		onSpace: function(e) {
-			this._setSelection(this.currentModel(), true);
+			this.setSelection(this.currentModel(), true);
 			e.preventDefault();
 		},
 		
@@ -541,6 +558,77 @@ exports.ExplorerNavHandler = (function() {
 		}
 	};
 	return ExplorerNavHandler;
+}());
+
+exports.ExplorerNavDict = (function() {
+	/**
+	 * Creates a new explorer navigation dictionary. The key of the dictionary is the model id. The value is a wrapper object that holds .modelItem, .rowDomNode and .gridChildren properties.
+	 * The .modelItem property helps quickly looking up a model object by a given id. The .rowDomNode also helps to find out the row DOM node instead of doing dojo.byId(). 
+	 * The .gridChildren is an array representing all the grid navigation information, which the caller has to fill the array out.
+	 *
+	 * @name orion.ExplorerNavHandler.ExplorerNavDict
+	 * @class A explorer navigation dictionary.
+	 * @param {Object} model The model object that represent the overall explorer.
+	 */
+	function ExplorerNavDict(model) {
+		this._dict= [];
+		this._model = model;
+	}
+	ExplorerNavDict.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavDict.prototype */ {
+		
+		/**
+		 * Add a row to the dictionary.
+		 * @param {Object} modelItem The model item object that represent a row.
+		 * @param {domNode} rowDomNode optional The DOM node that represent a row. If 
+		 */
+		addRow: function(modelItem, rowDomNode){
+			var modelId = this._model.getId(modelItem);
+			this._dict[modelId] = {model: modelItem, rowDomNode: rowDomNode};
+		},
+			
+		/**
+		 * Get the value of a key by model id. 		 
+		 *  @param {String} id The model id.
+		 * @returns {Object} The value of the id from the dictionary.
+		 */
+		getValue: function(id) {
+			return this._dict[id];
+		},
+		
+		/**
+		 * Get the grid navigation holder from a row navigation model. 		 
+		 *  @param {Object} modelItem The model item object that represent a row.
+		 * @returns {Array} The .gridChildren property of the value keyed by the model id.
+		 */
+		getGridNavHolder: function(modelItem, lazyCreate) {
+			if(!modelItem){
+				return null;
+			}
+			var modelId = this._model.getId(modelItem);
+			if(this._dict[modelId]){
+				if(!this._dict[modelId].gridChildren && lazyCreate){
+					this._dict[modelId].gridChildren = [];
+				}
+				return this._dict[modelId].gridChildren;
+			}
+			return null;
+		},
+		
+		/**
+		 * Initialize the grid navigation holder to null. 		 
+		 *  @param {Object} modelItem The model item object that represent a row.
+		 */
+		initGridNavHolder: function(modelItem) {
+			if(!modelItem){
+				return null;
+			}
+			var modelId = this._model.getId(modelItem);
+			if(this._dict[modelId]){
+				this._dict[modelId].gridChildren = null;
+			}
+		}
+	};
+	return ExplorerNavDict;
 }());
 
 return exports;

@@ -95,6 +95,10 @@ exports.Explorer = (function() {
 				model.rootId = treeId;
 			}
 			this.model = model;
+			var useSelection = !options || (options && !options.noSelection);
+			if(useSelection){
+				this._navDict = new mNavHandler.ExplorerNavDict(this.model);
+			}
 			this.myTree = new mTreeTable.TableTree({
 				id: treeId,
 				model: model,
@@ -107,8 +111,21 @@ exports.Explorer = (function() {
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
-			this._createSelModel(parentId, options);
-			this._initSelModel(options);
+			if(useSelection){
+				this._initNavHandler(parentId, options);
+			}
+		},
+		/*
+		getSelectionModel: function(){
+			return this._selectionModel;
+		},
+		*/
+		getNavHandler: function(){
+			return this._navHandler;
+		},
+		
+		getNavDict: function(){
+			return this._navDict;
 		},
 		
 		getRootPath: function() {
@@ -118,31 +135,22 @@ exports.Explorer = (function() {
 			return null;
 		},
 		
-		_createSelModel: function(parentId, options){
-			var useSelection = !options || (options && !options.noSelection);
-			if(useSelection){
+		_initNavHandler: function(parentId, options){
+			if(!this.getNavHandler()){
 				dojo.attr(parentId, "tabIndex", 0);
-				if(!this.navHandler){
-					this.navHandler = new mNavHandler.ExplorerNavHandler(this, {setFocus: options && options.setFocus});
+				this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus});
+			}
+			var that = this;
+			this.model.getRoot(function(itemOrArray){
+				if(itemOrArray instanceof Array){
+					that.getNavHandler().refreshModel(that.getNavDict(), that.model, itemOrArray);
+				} else if(itemOrArray.children && itemOrArray.children instanceof Array){
+					that.getNavHandler().refreshModel(that.getNavDict(), that.model, itemOrArray.children);
 				}
-			}
-		},
-	    
-		_initSelModel: function(options){
-			var useSelection = !options || (options && !options.noSelection);
-			if(useSelection){
-				var that = this;
-				this.model.getRoot(function(itemOrArray){
-					if(itemOrArray instanceof Array){
-						that.navHandler.refreshModel(that.model, itemOrArray);
-					} else if(itemOrArray.children && itemOrArray.children instanceof Array){
-						that.navHandler.refreshModel(that.model, itemOrArray.children);
-					}
-					if(options && options.setFocus){
-						that.navHandler.cursorOn();
-					}
-				});
-			}
+				if(options && options.setFocus){
+					that.getNavHandler().cursorOn();
+				}
+			});
 		},
 	    
 	    _lastHash: null,
@@ -276,7 +284,7 @@ exports.ExplorerRenderer = (function() {
 			this.renderTableHeader(tableNode);
 
 		},
-		getActionsColumn: function(item, tableRow, renderType, columnClass, gridHolder){
+		getActionsColumn: function(item, tableRow, renderType, columnClass, renderAsGrid){
 			renderType = renderType || "tool";
 			var commandService = this.explorer.registry.getService("orion.page.command");
 			var actionsColumn = document.createElement('td');
@@ -286,7 +294,7 @@ exports.ExplorerRenderer = (function() {
 			}
 			// contact the command service to render appropriate commands here.
 			if (this.actionScopeId) {
-				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType, null, gridHolder);
+				commandService.renderCommands(this.actionScopeId, actionsColumn, item, this.explorer, renderType, null, (renderAsGrid && this.explorer.getNavDict()) ? this.explorer.getNavDict().getGridNavHolder(item, true) : null);
 			} else {
 				window.console.log("Warning, no action scope was specified.  No commands rendered.");
 			}
@@ -327,24 +335,22 @@ exports.ExplorerRenderer = (function() {
 			
 		onCheck: function(tableRow, checkBox, checked, manually){
 			checkBox.checked = checked;
-			if(this._highlightSelection && tableRow){
-				dojo.toggleClass(tableRow, "checkedRow", checked);
-			}
 			dojo.toggleClass(checkBox, "core-sprite-check_on", checked);
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
-			this.storeSelections();
-			if (this.explorer.selection) {
-				this.explorer.selection.setSelections(this.getSelected());		
+			if(this.explorer.getNavHandler()){
+				this.explorer.getNavHandler().setSelection(this.explorer.getNavDict().getValue(tableRow.id).model, true);	
 			}
 		},
 		
 		storeSelections: function() {
-			var selectionIDs = this.getSelectedIds();
-			var prefPath = this._getUIStatePreferencePath();
-			if (prefPath && window.sessionStorage) {
-				window.sessionStorage[prefPath+"selection"] = JSON.stringify(selectionIDs);
+			if(this.explorer.getNavHandler()){
+				var selectionIDs = this.explorer.getNavHandler().getSelectionIds();
+				var prefPath = this._getUIStatePreferencePath();
+				if (prefPath && window.sessionStorage) {
+					window.sessionStorage[prefPath+"selection"] = JSON.stringify(selectionIDs);
+				}
 			}
 		},
 		
@@ -358,29 +364,28 @@ exports.ExplorerRenderer = (function() {
 				}
 			}
 			var i;
-			if (selections) {
+			if (selections && this.explorer.getNavDict()) {
+				var selectedItems = [];
 				for (i=0; i<selections.length; i++) {
-					var tableRow = dojo.byId(selections[i]);
-					if (tableRow) {
-						if(this._highlightSelection){
-							dojo.addClass(tableRow, "checkedRow");
-						}
-						var check = dojo.byId(this.getCheckBoxId(tableRow.id));
+					var wrapper = this.explorer.getNavDict().getValue(selections[i]);
+					if(wrapper && wrapper.rowDomNode && wrapper.model){
+						selectedItems.push(wrapper.model);
+						dojo.addClass(wrapper.rowDomNode, "checkedRow");
+						var check = dojo.byId(this.getCheckBoxId(wrapper.rowDomNode.id));
 						if (check) {
 							check.checked = true;
 							dojo.addClass(check, "core-sprite-check_on");
 						}
 					}
 				}
-			}	
-			// notify the selection service of our new selections
-			var selectedItems = this.getSelected();
-			if(this.explorer.selection) {
-				this.explorer.selection.setSelections(selectedItems);
-				if(this.explorer.navHandler){
-					this.explorer.navHandler.refreshSelection();
+				// notify the selection service of our new selections
+				if(this.explorer.selection) {
+					this.explorer.selection.setSelections(selectedItems);
+					if(this.explorer.getNavHandler()){
+						this.explorer.getNavHandler().refreshSelection();
+					}
 				}
-			}
+			}	
 		},
 		
 		_storeExpansions: function(prefPath) {
@@ -474,30 +479,6 @@ exports.ExplorerRenderer = (function() {
 			this.renderRow(item, tableRow);
 		},
 		
-		getSelected: function() {
-			var selected = [];
-			//racing issue: this functino can be called during .myTree is created
-			//TODO we need a better idea to collect selected items 
-			var treeNode = this.explorer.myTree ? dojo.byId(this.explorer.myTree.id) : null;
-			dojo.query(".checkedRow", treeNode).forEach(dojo.hitch(this, function(node) {
-				var row = node;
-				selected.push(this.tableTree.getItem(row));
-			}));
-			return selected;
-		},
-		
-		getSelectedIds: function() {
-			if(this.explorer.navHandler){
-				return this.explorer.navHandler.getSelectionIds();
-			}
-			var selected = [];
-			dojo.query(".checkedRow", dojo.byId(this.explorer.myTree.id)).forEach(dojo.hitch(this, function(node) {
-				var row = node;
-				selected.push(row.id);
-			}));
-			return selected;
-		},
-		
 		rowsChanged: function() {
 			if (this._decorateAlternatingLines) {
 				dojo.query(".treeTableRow").forEach(function(node, i) {
@@ -511,9 +492,10 @@ exports.ExplorerRenderer = (function() {
 				});
 			}
 			// notify the selection service of the change in state.
+			/*
 			if(this.explorer.selection) {
 				this.explorer.selection.setSelections(this.getSelected());
-			}
+			}*/
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;
@@ -600,12 +582,15 @@ exports.SelectionRenderer = (function(){
 	SelectionRenderer.prototype.renderRow = function(item, tableRow) {
 		dojo.style(tableRow, "verticalAlign", "baseline");
 		dojo.addClass(tableRow, "treeTableRow");
-		//item.rowDomNode = tableRow;
-		dojo.connect(tableRow, "onclick", dojo.hitch(this, function(evt) {
-			if(this.explorer.navHandler){
-				this.explorer.navHandler.onClick(item, evt);
-			}
-		}));
+		var navDict = this.explorer.getNavDict();
+		if(navDict){
+			navDict.addRow(item, tableRow);
+			dojo.connect(tableRow, "onclick", dojo.hitch(this, function(evt) {
+				if(this.explorer.getNavHandler()){
+					this.explorer.getNavHandler().onClick(item, evt);
+				}
+			}));
+		}
 		var checkColumn = this.getCheckboxColumn(item, tableRow);
 		if(checkColumn) {
 			dojo.addClass(checkColumn, 'checkColumn');

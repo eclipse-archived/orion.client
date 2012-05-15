@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explorerNavHandler', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
-		function(require, dojo, dijit, mUtil, mExplorer, mNavHandler, mBreadcrumbs, mFileCommands, mExtensionCommands){
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navigationUtils', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+		function(require, dojo, dijit, mUtil,  mExplorer, mNavUtils, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -30,6 +30,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 	Model.prototype.getRoot = function(onItem){
 		onItem(this.root);
 	};
+	/*
+	Model.prototype.getTopIterationNodes = function(){
+		return this.indexedFileItems;
+	};
+	*/
 		
 	Model.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		// the parent already has the children fetched
@@ -82,30 +87,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		});
 	};
 	
-	FileRenderer.prototype.getCheckboxColumn = function(item, tableRow){
-		if (this._useCheckboxSelection) {
-			var checkColumn = document.createElement('td');
-			var check = document.createElement("span");
-			check.id = this.getCheckBoxId(tableRow.id);
-			dojo.addClass(check, "core-sprite-check selectionCheckmarkSprite");
-			check.itemId = tableRow.id;
-			if(this.getCheckedFunc){
-				check.checked = this.getCheckedFunc(item);
-				if(this._highlightSelection){
-					dojo.toggleClass(tableRow, "checkedRow", check.checked);
-				}
-				dojo.toggleClass(check, "core-sprite-check_on", check.checked);
-			}
-			checkColumn.appendChild(check);
-			mUtil.addNavGrid(item, check);
-			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) {
-				var newValue = evt.target.checked ? false : true;
-				this.onCheck(tableRow, evt.target, newValue, true);
-			}));
-			return checkColumn;
-		}
-	};
-	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		function isImage(contentType) {
 			switch (contentType && contentType.id) {
@@ -153,7 +134,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var expandImage = this.getExpandImage(tableRow, span);
-				mUtil.addNavGrid(item, expandImage);
+				mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameLink", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {
@@ -186,8 +167,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 				addImageToLink(contentType, link);
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
-			mUtil.addNavGrid(item, link);
-			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, mUtil.getNavGridHolder(item));
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true);
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
@@ -254,7 +235,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
 			mUtil.processNavigatorParent(parent, children);
 			//If a key board navigator is hooked up, we need to sync up the model
-			if(that.navHandler){
+			if(that.getNavHandler()){
 				that._initSelModel();
 			}
 			dojo.hitch(that.myTree, that.myTree.refresh)(parent, children, forceExpand);
@@ -392,7 +373,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/explo
 						}
 					}
 					this.model = new Model(this.registry, this.treeRoot, this.fileClient);
-					this.createTree(this.parentId, this.model, {setFocus: true, onCollapse: function(model){if(self.navHandler){self.navHandler.onCollapse(model);}}});
+					this.createTree(this.parentId, this.model, {setFocus: true, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
 					if (typeof this.onchange === "function") {
 						this.onchange(this.treeRoot);
 					}
