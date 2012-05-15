@@ -394,7 +394,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 							mUtil.addNavGrid(item, div);
 
-							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"width: 900px; height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
 
 							setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
@@ -557,7 +557,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 							mUtil.addNavGrid(item, div);
 
-							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"width: 900px; height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
 
 							setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
