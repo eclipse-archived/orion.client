@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'orion/explorer'], function(require, dojo, mUtil, mCommands, mSelection, mExplorer){
+define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(require, dojo, mSection, mCommands, mSelection, mExplorer){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -173,10 +173,14 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 			imageClass: "core-sprite-rename",
 			id: "eclipse.renameSearch",
 			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
-			visibleWhen: function(item) {return item.isSearch;},
+			visibleWhen: function(items) {
+				items = dojo.isArray(items) ? items : [items];
+				return items.length === 1 && items[0].query;
+			},
 			callback: dojo.hitch(this, function(data) {
+				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
 				if (data.parameters && data.parameters.valueFor('name')) {
-					reg.getService("orion.core.savedSearches").renameSearch(data.items.query, data.parameters.valueFor('name'));
+					reg.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name'));
 				}
 			})
 		});
@@ -184,10 +188,25 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 			name: "Delete",
 			imageClass: "core-sprite-delete",
 			id: "eclipse.deleteSearch",
-			visibleWhen: function(item) {return item.isSearch;},
+			visibleWhen: function(items) {
+				items = dojo.isArray(items) ? items : [items];
+				if (items.length === 0) {
+					return false;
+				}
+				for (var i=0; i<items.length; i++) {
+					if (!items[i].query) {
+						return false;
+					}
+				}
+				return true;
+			},
 			callback: function(data) {
-				if(window.confirm("Do you want to remove " + data.items.name + " from favorites?")) {
-					options.serviceRegistry.getService("orion.core.savedSearches").removeSearch(data.items.query);
+				var items = dojo.isArray(data.items) ? data.items : [data.items];
+				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].name + "' from the searches?" : "Are you sure you want to delete these " + items.length + " searches?";
+				if(window.confirm(confirmMessage)) {
+					for (var i=0; i<items.length; i++) {
+						options.serviceRegistry.getService("orion.core.savedSearches").removeSearch(items[i].query);
+					}
 				}
 			}
 		});
@@ -195,16 +214,13 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		// register commands 
 		this.commandService.addCommand(renameSearchCommand);	
 		this.commandService.addCommand(deleteSearchCommand);	
-		// to the search section heading
-		this.commandService.registerCommandContribution("searchCommands", "eclipse.renameSearch", 1);	
-		this.commandService.registerCommandContribution("searchCommands", "eclipse.deleteSearch", 2);
 		var savedSearches = this._registry.getService("orion.core.savedSearches");
 		var searchOutliner = this;
 		if (savedSearches) {
 			// render the searches
 			var registry = this._registry;
-			savedSearches.getSearches().then(dojo.hitch(searchOutliner, function(favs) {
-				this.render(favs.navigator, favs.search, registry);
+			savedSearches.getSearches().then(dojo.hitch(searchOutliner, function(searches) {
+				this.render(searches.searches, registry);
 			}));
 
 			savedSearches.addEventListener("searchesChanged", dojo.hitch(searchOutliner,
@@ -218,25 +234,42 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		render: function(searches, serviceRegistry) {
 			// Searches if we have them
 			var commandService = this.commandService;
-
-			if (searches.length > 0) {
-				// first time setup
-				if (!this.searchDiv) {
-					mUtil.createPaneHeading(this._parent, "searchHeading", "Searches", true, null, "searchCommands", this._registry.getService("orion.page.command"), this);
-					this.searchDiv = dojo.create("div", {id: "searchContent"}, this._parent);
-					this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.search.selection");
-					commandService.registerSelectionService("searchCommands", this.searchSelection);
-					serviceRegistry.getService("orion.search.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
-						var selectionTools = dojo.byId("searchCommands");
-						if (selectionTools) {
-							dojo.empty(selectionTools);
-							commandService.renderCommands("searchCommands", selectionTools, selections, this, "button");
-						}
-					});
-				}
-				var explorer = new SearchExplorer(serviceRegistry, this.searchSelection);
-				this.searchTable = explorer.createTree(this.searchDiv.id, new mExplorer.SimpleFlatModel(searches, "srch", function(item) {return item.query;}));	
+			// first time setup
+			if (!this.searchesSection) {
+				this.searchesSection = new mSection.Section(this._parent, {
+					id: "searchSection",
+					title: "Searches",
+					content: '<div id="searchContent"></div>',
+					explorer: this,
+					commandService: this.commandService,
+					preferenceService: serviceRegistry.getService("orion.core.preference")
+				});
+				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
+				this.searchMonitor = this.searchesSection.createProgressMonitor();
+				// add commands to the search section heading
+				var selectionId = this.searchesSection.selectionNode.id;
+				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1);	
+				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2);
+				commandService.registerSelectionService(selectionId, this.searchSelection);
+				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+					var selectionTools = dojo.byId(selectionId);
+					if (selectionTools) {
+						dojo.empty(selectionTools);
+						commandService.renderCommands(selectionId, selectionTools, selections, this, "button");
+					}
+				});
 			}
+			if (searches.length > 0) {
+				var explorer = new SearchExplorer(serviceRegistry, this.searchSelection);
+				this.searchTable = explorer.createTree("searchContent", new mExplorer.SimpleFlatModel(searches, "srch", function(item) {
+					return item.query;
+				}));	
+				// TODO temporary hack from Libing 
+				explorer.navHandler._clearSelection(false);
+			} else {
+				dojo.place("<p>You can save frequently used by searches by choosing <b>Save Search</b> in the search toolbar.</p>", "searchContent", "only");
+			}
+			this.searchMonitor.done();
 		}
 	};//end navigation outliner prototype
 	SearchOutliner.prototype.constructor = SearchOutliner;

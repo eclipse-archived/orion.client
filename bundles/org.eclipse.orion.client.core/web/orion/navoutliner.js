@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'orion/explorer'], function(require, dojo, mUtil, mCommands, mSelection, mExplorer){
+define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer'], function(require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -130,10 +130,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		// register commands 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
-		// to the fave section heading
-		this.commandService.registerCommandContribution("faveCommands", "eclipse.renameFave", 1);
-		this.commandService.registerCommandContribution("faveCommands", "eclipse.deleteFave", 2);
-
 		var favoritesService = this._registry.getService("orion.core.favorite");
 		var navoutliner = this;
 
@@ -161,58 +157,74 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 	NavigationOutliner.prototype = /** @lends orion.navoutliner.NavigationOutliner.prototype */ {
 
 		render: function(favorites, serviceRegistry) {
-			var link, navOutlineTable, id, tr, col1, href, actionsWrapper, tbody;
 			var commandService = this.commandService;
 
 			if (serviceRegistry) {
 				var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
-				// top level folder outline if there is more than one file service
+				// top level folder outline if there is more than one file service.  We never show this if there is only one file service,
+				// because it's not an interesting concepts for users.
 				if (allReferences.length > 1) {
-					if (!this.fileSystemsDiv) {
-						mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "Places", true);
-						this.fileSystemsDiv = dojo.create("div", {id: "fileSystemsContent"}, this._parent);
-						this.fileSystemSelection = new mSelection.Selection(serviceRegistry, "orion.filesystems.selection");
-						commandService.registerSelectionService("fileSystemCommands", this.fileSystemSelection);
-						serviceRegistry.getService("orion.filesystems.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
-							var selectionTools = dojo.byId("fileSystemCommands");
-							if (selectionTools) {
-								dojo.empty(selectionTools);
-								commandService.renderCommands("fileSystemCommands", selectionTools, selections, this, "button");
-							}
+					if (!this.fileSystemsSection) {
+						this.fileSystemsSection = new mSection.Section(this._parent, {
+							id: "fileSystemsSection",
+							title: "Places",
+							content: '<div id="fileSystemsContent"></div>',
+							// we don't have any file system level commands yet....
+							// commandService: this.commandService,
+							// explorer: this,
+							preferenceService: serviceRegistry.getService("orion.core.preference"),
+							canHide: true
 						});
+						this.fileSystemMonitor = this.fileSystemsSection.createProgressMonitor();
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
-					this.fileSystemsTable = this.explorer.createTree(this.fileSystemsDiv.id, new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) {
+					this.fileSystemsTable = this.explorer.createTree("fileSystemsContent", new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) {
 						if (typeof(item.getProperty) === "function" && item.getProperty("top")) {
 							return item.getProperty("top");
 						}
 						return "";
 					}));
+					this.fileSystemMonitor.done();
 				}
 			}
 			
+			// first time setup
+			if (!this.favoritesSection) {
+				this.favoritesSection = new mSection.Section(this._parent, {
+					id: "favoritesSection",
+					title: "Favorites",
+					content: '<div id="favoritesContent"></div>',
+					explorer: this,
+					commandService: this.commandService,
+					preferenceService: serviceRegistry.getService("orion.core.preference"),
+					canHide: true
+				});
+				this.favoritesMonitor = this.favoritesSection.createProgressMonitor();
+				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
+				// add commands to the fave section heading
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1);
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2);
+				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
+				var selectionId = this.favoritesSection.selectionNode.id;
+				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+					var selectionTools = dojo.byId(selectionId);
+					if (selectionTools) {
+						dojo.empty(selectionTools);
+						commandService.renderCommands(selectionId, selectionTools, selections, this, "button");
+					}
+				});
+			}
 			if (favorites.length > 0) {
-				// first time setup
-				if (!this.favoritesDiv) {
-					mUtil.createPaneHeading(this._parent, "favoritesHeading", "Favorites", true, null, "faveCommands", this._registry.getService("orion.page.command"), this);
-					this.favoritesDiv = dojo.create("div", {id: "favoritesContent"}, this._parent);
-					this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
-					commandService.registerSelectionService("faveCommands", this.favoritesSelection);
-					serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
-						var selectionTools = dojo.byId("faveCommands");
-						if (selectionTools) {
-							dojo.empty(selectionTools);
-							commandService.renderCommands("faveCommands", selectionTools, selections, this, "button");
-						}
-					});
-				}
 				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
-				this.favoritesTable = this.explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
+				this.favoritesTable = this.explorer.createTree("favoritesContent", new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
 					return item.path || "";
 				}));
 				// TODO temporary hack from Libing 
 				this.explorer.navHandler._clearSelection(false);
+			} else {
+				dojo.place("<p>You can create favorites by selecting any file or folder in the navigator and choosing <b>Make Favorite</b> from the More menu.</p>", "favoritesContent", "only");
 			}
+			this.favoritesMonitor.done();
 		}
 	};//end navigation outliner prototype
 	NavigationOutliner.prototype.constructor = NavigationOutliner;
