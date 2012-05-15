@@ -63,8 +63,8 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this.addFavorite(url, url, false, true);
 		},
 						
-		addFavorite: function(theName, thePath, isDirectory, isExternalResource) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true, "isExternalResource": isExternalResource });
+		addFavorite: function(theName, thePath, isDirectory) {
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true });
 			this._favorites.sort(this._sorter);
 			this._storeFavorites();
 			this._notifyListeners();
