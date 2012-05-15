@@ -10,15 +10,15 @@
  ******************************************************************************/
 define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection, mCommands){
 	
-
 	/**
 	 * Generates a section
 	 * 
 	 * @param parent parent node
 	 * @param options.id [required] id of the section header
-	 * @param options.explorer [required] explorer that is the parent of this section
+	 * @param options.explorer [optional] explorer that is the parent of this section, used as the handler for commands
 	 * @param options.title [required] title of the section
 	 * @param options.commandService [optional] required if there are any commands in this section
+	 * @param options.preferenceService [optional] used to store the hidden/shown state of the section if specified
 	 * @param options.iconClass [optional] the class of the icon decorating section, no icon displayed if not provided
 	 * @param options.content [optional] content of the section in HTML. May be set later using setContent()
 	 * @param options.slideout {boolean} [optional] if true section will contain generated slideout
@@ -41,7 +41,8 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 		this.id = options.id;
 		
-		if (!options.explorer) {
+		// TODO explorer should really be called handler?
+		if (options.commandService && !options.explorer) {
 			throw new Error("Missing required argument: explorer");
 		}
 		this._explorer = options.explorer;
@@ -56,15 +57,17 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		// if canHide, add twistie and stuff...
 		if(options.canHide){
 			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft" }, this.domNode );
-			
 			dojo.style(this.domNode, "cursor", "pointer");
 			dojo.attr(this.domNode, "tabIndex", "0");
 			dojo.connect(this.domNode, "onclick", function(evt) {
-				that._changeExpandedState();
+				if (evt.target.parentNode !== that.actionsNode && evt.target.parentNode !== that.selectionNode) {
+					that._changeExpandedState();
+				}
 			});
 			dojo.connect(this.domNode, "onkeydown", function(evt) {
-				if(evt.keyCode === dojo.keys.ENTER)
+				if(evt.keyCode === dojo.keys.ENTER && evt.target.parentNode !== that.actionsNode && evt.target.parentNode !== that.selectionNode) {
 					that._changeExpandedState();
+				}
 			});
 		}
 
@@ -97,16 +100,30 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 		
 		this.hidden = options.hidden;
-		this._updateExpandedState(!this.hidden);
-		if (this.hidden){
-			dojo.style(this._contentParent, "display", "none");
+		this._preferenceService = options.preferenceService;
+		// initially style as hidden until we determine what needs to happen
+		dojo.style(this._contentParent, "display", "none");
+		// should we consult a preference?
+		if (this._preferenceService) {
+			this._preferenceService.getPreferences("/window/views").then(dojo.hitch(this, function(prefs) { 
+				var show = prefs.get(this.id) !== false;
+				if (show) {
+					dojo.style(this._contentParent, "display", "block");
+				} else {
+					this.hidden = true;
+				}
+				this._updateExpandedState(show, false);
+			}));
+		} else {
+			if (!this.hidden) {
+				dojo.style(this._contentParent, "display", "block");
+			}
+			this._updateExpandedState(!this.hidden, false);
 		}
-
 		this._commandService = options.commandService;
-		
 		this._lastMonitor = 0;
 		this._loading = {};
-	};
+	}
 	
 	Section.prototype = {
 			
@@ -198,14 +215,21 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 				this.hidden = false;
 			}
 			
-			this._updateExpandedState(!this.hidden);
+			this._updateExpandedState(!this.hidden, true);
 		},
 		
-		_updateExpandedState: function(isExpanded) {
+		_updateExpandedState: function(isExpanded, storeValue) {
 			var expandImage = this.twistie;
+			var id = this.id;
 			if (expandImage) {
 				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
 				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
+			}
+			// if a preference service was specified, we remember the state.
+			if (this._preferenceService && storeValue) {
+				this._preferenceService.getPreferences("/window/views").then(function(prefs){
+					prefs.put(id, isExpanded);
+				}); 
 			}
 		}
 	};
