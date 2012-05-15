@@ -245,16 +245,17 @@ exports.EditorCommandFactory = (function() {
 							}));
 						this.commandService.addCommand(command);
 						this.commandService.registerCommandContribution(this.toolbarId, command.id, 100+i);
-						// We must regenerate the command toolbar everytime we process an extension because
-						// this is asynchronous and we probably have already populated the toolbar.
-						// In the editor, we generate page level commands to the banner.
-						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 						if (info.key) {
 							// add it to the editor as a keybinding
 							var textView = editor.getTextView();
 							textView.setKeyBinding(createKeyBinding(info.key), command.id);
 							textView.setAction(command.id, command.callback);
 						}				
+					}
+					// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
+					// metadata, because we'll generate again once we know.
+					if (input.getFileMetadata()) {
+						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
 					}
 				}));
 			}

@@ -506,7 +506,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	inputManager.setInput(dojo.hash(), editor);
 	
 	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler);
-	mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) {
