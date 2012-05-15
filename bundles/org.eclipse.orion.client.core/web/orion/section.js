@@ -31,6 +31,12 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		
 		var that = this;
 		
+		this._expandImageClass = "core-sprite-twistie_open";
+		this._collapseImageClass = "core-sprite-twistie_closed";
+		this._twistieSpriteClass = "modelDecorationSprite";
+		
+		// ...
+		
 		if (!options.id) {
 			throw new Error("Missing required argument: id");
 		}
@@ -46,9 +52,23 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 
 		// setting up the section
-		
 		this.domNode = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id": options.id}, parent );
-		
+
+		// if canHide, add twistie and stuff...
+		if(options.canHide){
+			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft" }, this.domNode );
+			
+			dojo.style(this.domNode, "cursor", "pointer");
+			dojo.attr(this.domNode, "tabIndex", "0");
+			dojo.connect(this.domNode, "onclick", function(evt) {
+				that._changeExpandedState();
+			});
+			dojo.connect(this.domNode, "onkeydown", function(evt) {
+				if(evt.keyCode === dojo.keys.ENTER)
+					that._changeExpandedState();
+			});
+		}
+
 		if(options.iconClass){
 			var icon = dojo.create( "span", { "class":"sectionIcon" }, this.domNode );
 			dojo.addClass(icon, options.iconClass);
@@ -77,9 +97,10 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 			this.setContent(options.content);
 		}
 		
-		if (options.hidden){
+		this.hidden = options.hidden;
+		this._updateExpandedState(!this.hidden);
+		if (this.hidden){
 			dojo.style(this._contentParent, "display", "none");
-			this.hidden = true;
 		}
 		
 		this._serviceRegistry = options.serviceRegistry;
@@ -87,42 +108,6 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		
 		this._lastMonitor = 0;
 		this._loading = {};
-		
-		if(options.canHide && options.commandService) {		
-			var hideSectionCommand = new mCommands.Command({
-				id : "eclipse.orion.page.hideSectionCommand_" + this.id,
-				callback : function(data) {
-					var t = new dojo.fx.Toggler({
-						node: that._contentParent.id,
-						showDuration: 500,
-						hideDuration: 500,
-						showFunc: dojo.fx.wipeIn,
-						hideFunc: dojo.fx.wipeOut
-						});
-						
-						if (!that.hidden){
-							t.hide();
-							that.hidden = true;
-						} else {
-							t.show();
-							that.hidden = false;
-						}
-						
-						dojo.empty(that._toolActionsNode.id);
-						that._commandService.renderCommands(that._toolActionsNode.id, that._toolActionsNode.id, {}, that._explorer, "button");
-				},
-				visibleWhen : function(item) {
-					this.name = that.hidden ? "View" : "Hide";
-					this.tooltip = that.hidden ? "View" : "Hide";
-					return true;
-				}
-			});
-			
-			this._commandService.addCommand(hideSectionCommand);
-			
-			this._commandService.registerCommandContribution(this._toolActionsNode.id, hideSectionCommand.id, 100);
-			this._commandService.renderCommands(this._toolActionsNode.id, this._toolActionsNode.id, {}, this._explorer, "button");
-		}
 	};
 	
 	Section.prototype = {
@@ -195,6 +180,35 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 			this._progressNode.title = progressTitle;
 			if(progressTitle===""){
 				this._progressNode.style.visibility = "hidden";
+			}
+		},
+		
+		_changeExpandedState: function() {
+			console.info("whee")
+			var t = new dojo.fx.Toggler({
+				node: this._contentParent.id,
+				showDuration: 500,
+				hideDuration: 500,
+				showFunc: dojo.fx.wipeIn,
+				hideFunc: dojo.fx.wipeOut
+			});
+				
+			if (!this.hidden){
+				t.hide();
+				this.hidden = true;
+			} else {
+				t.show();
+				this.hidden = false;
+			}
+			
+			this._updateExpandedState(!this.hidden);
+		},
+		
+		_updateExpandedState: function(isExpanded) {
+			var expandImage = this.twistie;
+			if (expandImage) {
+				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
+				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
 			}
 		}
 	};
