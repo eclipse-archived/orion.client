@@ -18,7 +18,6 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 	 * @param options.id [required] id of the section header
 	 * @param options.explorer [required] explorer that is the parent of this section
 	 * @param options.title [required] title of the section
-	 * @param options.serviceRegistry [optional] required if selection service is to be used
 	 * @param options.commandService [optional] required if there are any commands in this section
 	 * @param options.iconClass [optional] the class of the icon decorating section, no icon displayed if not provided
 	 * @param options.content [optional] content of the section in HTML. May be set later using setContent()
@@ -102,8 +101,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		if (this.hidden){
 			dojo.style(this._contentParent, "display", "none");
 		}
-		
-		this._serviceRegistry = options.serviceRegistry;
+
 		this._commandService = options.commandService;
 		
 		this._lastMonitor = 0;
@@ -184,7 +182,6 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		},
 		
 		_changeExpandedState: function() {
-			console.info("whee")
 			var t = new dojo.fx.Toggler({
 				node: this._contentParent.id,
 				showDuration: 500,
