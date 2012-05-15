@@ -24,22 +24,22 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		return 0;
 	};
 	NavOutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		var href, clazz;
-		if (item.isExternalResource) {
-			href = item.path;
-			clazz = "navlink";
-		} else if (item.directory) {
+		var href, clazz, name;
+		if (item.directory) {
 			href = require.toUrl("navigate/table.html") + "#" + item.path;
-			clazz= "navlinkonpage";
+			clazz = "navlinkonpage";
+			name = item.name;
 		} else if (item.path) {
 			href = require.toUrl("edit/edit.html") + "#" + item.path;
 			clazz = "navlink";
+			name = item.name;
 		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) {
 			href = require.toUrl("navigate/table.html") + "#" + item.getProperty("top");
 			clazz = "navlinkonpage";
+			name = item.getProperty("Name");
 		} else {
 			href = "";
-			item.name = "Unknown item";
+			name = "Unknown item";
 		}
 		if (href === "#") {
 			href="";
@@ -49,7 +49,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		dojo.addClass(col, "mainNavColumn");
 		dojo.style(col, "whiteSpace", "nowrap");
 		var link = dojo.create("a", {href: href, className: clazz}, col, "only");
-		dojo.place(window.document.createTextNode(item.name), link, "only");
+		dojo.place(window.document.createTextNode(name), link, "only");
 		mUtil.addNavGrid(item, link);
 	};
 
@@ -83,28 +83,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		this._registry = options.serviceRegistry;
 		var reg = options.serviceRegistry;
 		
-		var addFaveURLCommand = new mCommands.Command({
-			name: "Add",
-			tooltip: "Add link as favorite",
-			imageClass: "core-sprite-add",
-			id: "eclipse.addExternalFave",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("url", "text", 'URL:', '')]),
-			callback: dojo.hitch(this, function(data) {
-				if (data.parameters) {
-					var newText = data.parameters.valueFor('url');
-					if (newText) {
-						var favService = reg.getService("orion.core.favorite");
-						favService.hasFavorite(newText).then(function(result) {
-							if (!result) {
-								favService.addFavoriteUrl(newText);
-							} else {
-								reg.getService("orion.page.message").setMessage(newText + " is already a favorite.", 2000);
-							}
-						});
-					}
-				}
-			})
-		});		
 		var deleteFaveCommand = new mCommands.Command({
 			name: "Delete",
 			imageClass: "core-sprite-delete",
@@ -152,11 +130,9 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 		// register commands 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
-		this.commandService.addCommand(addFaveURLCommand);	
 		// to the fave section heading
 		this.commandService.registerCommandContribution("faveCommands", "eclipse.renameFave", 1);
 		this.commandService.registerCommandContribution("faveCommands", "eclipse.deleteFave", 2);
-		this.commandService.registerCommandContribution("faveCommands", "eclipse.addExternalFave", 3);		
 
 		var favoritesService = this._registry.getService("orion.core.favorite");
 		var navoutliner = this;
@@ -170,24 +146,51 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 
 			favoritesService.addEventListener("favoritesChanged", dojo.hitch(navoutliner,
 				function(favs) {
-					this.render(favs.navigator, favs.registry);
+					// TODO temporary code, get rid of old "external favorites"
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=379435
+					var faves = [];
+					for (var i=0; i<favs.navigator.length; i++) {
+						if (!favs.navigator[i].isExternalResource) {
+							faves.push(favs.navigator[i]);
+						}
+					}
+					this.render(faves, favs.registry);
 				}));
 		}
 	}
 	NavigationOutliner.prototype = /** @lends orion.navoutliner.NavigationOutliner.prototype */ {
 
 		render: function(favorites, serviceRegistry) {
-			var link;
+			var link, navOutlineTable, id, tr, col1, href, actionsWrapper, tbody;
+			var commandService = this.commandService;
+
 			if (serviceRegistry) {
 				var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
 				// top level folder outline if there is more than one file service
 				if (allReferences.length > 1) {
-					mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "Places", true);
+					if (!this.fileSystemsDiv) {
+						mUtil.createPaneHeading(this._parent, "fileServerSectionHeading", "Places", true);
+						this.fileSystemsDiv = dojo.create("div", {id: "fileSystemsContent"}, this._parent);
+						this.fileSystemSelection = new mSelection.Selection(serviceRegistry, "orion.filesystems.selection");
+						commandService.registerSelectionService("fileSystemCommands", this.fileSystemSelection);
+						serviceRegistry.getService("orion.filesystems.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+							var selectionTools = dojo.byId("fileSystemCommands");
+							if (selectionTools) {
+								dojo.empty(selectionTools);
+								commandService.renderCommands("fileSystemCommands", selectionTools, selections, this, "button");
+							}
+						});
+					}
+					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
+					this.fileSystemsTable = this.explorer.createTree(this.fileSystemsDiv.id, new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) {
+						if (typeof(item.getProperty) === "function" && item.getProperty("top")) {
+							return item.getProperty("top");
+						}
+						return "";
+					}));
 				}
 			}
 			
-			var navOutlineTable, id, tr, col1, href, actionsWrapper, tbody;
-			var commandService = this.commandService;
 			if (favorites.length > 0) {
 				// first time setup
 				if (!this.favoritesDiv) {
@@ -205,13 +208,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/selection', 'o
 				}
 				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
 				this.favoritesTable = this.explorer.createTree(this.favoritesDiv.id, new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
-					if (item.path) {
-						return item.path;
-					}
-					if (typeof(item.getProperty) === "function" && item.getProperty("top")) {
-						return item.getProperty("top");
-					}
-					return "";
+					return item.path || "";
 				}));
 				// TODO temporary hack from Libing 
 				this.explorer.navHandler._clearSelection(false);
