@@ -506,7 +506,9 @@ exports.ExplorerRenderer = (function() {
 				
 				dojo.empty(actionsWrapper);
 				// contact the command service to render appropriate commands here.
-				registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool");
+				if (this.actionScopeId) {
+					registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool");
+				}
 			});
 		},
 		
