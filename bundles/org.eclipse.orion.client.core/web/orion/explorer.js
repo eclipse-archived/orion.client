@@ -31,6 +31,7 @@ exports.Explorer = (function() {
 		this.registry = serviceRegistry;
 		this.renderer = renderer;
 		this.selection = selection;
+		this.highlightSelection = true;
 		this.myTree = null;
 	}
 	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
@@ -138,7 +139,7 @@ exports.Explorer = (function() {
 		_initNavHandler: function(parentId, options){
 			if(!this.getNavHandler()){
 				dojo.attr(parentId, "tabIndex", 0);
-				this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus});
+				this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
 			}
 			var that = this;
 			this.model.getRoot(function(itemOrArray){
@@ -339,7 +340,7 @@ exports.ExplorerRenderer = (function() {
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
-			if(this.explorer.getNavHandler()){
+			if(this.explorer.getNavHandler() && manually){
 				this.explorer.getNavHandler().setSelection(this.explorer.getNavDict().getValue(tableRow.id).model, true);	
 			}
 		},
@@ -370,7 +371,9 @@ exports.ExplorerRenderer = (function() {
 					var wrapper = this.explorer.getNavDict().getValue(selections[i]);
 					if(wrapper && wrapper.rowDomNode && wrapper.model){
 						selectedItems.push(wrapper.model);
-						dojo.addClass(wrapper.rowDomNode, "checkedRow");
+						if(this._highlightSelection){
+							dojo.addClass(wrapper.rowDomNode, "checkedRow");
+						}
 						var check = dojo.byId(this.getCheckBoxId(wrapper.rowDomNode.id));
 						if (check) {
 							check.checked = true;

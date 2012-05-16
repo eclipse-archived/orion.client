@@ -30,11 +30,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 	Model.prototype.getRoot = function(onItem){
 		onItem(this.root);
 	};
-	/*
-	Model.prototype.getTopIterationNodes = function(){
-		return this.indexedFileItems;
-	};
-	*/
 		
 	Model.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
 		// the parent already has the children fetched
@@ -240,7 +235,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 			mUtil.processNavigatorParent(parent, children);
 			//If a key board navigator is hooked up, we need to sync up the model
 			if(that.getNavHandler()){
-				that._initSelModel();
+				//that._initSelModel();
 			}
 			dojo.hitch(that.myTree, that.myTree.refresh)(parent, children, forceExpand);
 		});
