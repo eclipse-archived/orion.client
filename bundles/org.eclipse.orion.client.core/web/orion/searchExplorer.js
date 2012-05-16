@@ -377,19 +377,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			var nameSpan = dojo.create("span", { className: "primaryColumn", id: this.getItemLinkId(item)}, spanHolder, "last");
 			dojo.place(document.createTextNode(renderName), nameSpan, "only");
 			nameSpan.title = "Click to compare";
-			var itemId = this.explorer.model.getId(item);
-			var that = this;
-			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
-				nameSpan.style.cursor ="pointer";
-				dojo.toggleClass(itemId, "fileNameCheckedRow", true);
-			});
-			dojo.connect(nameSpan, "onmouseout", nameSpan, function() {
-				nameSpan.style.cursor ="default";
-				dojo.toggleClass(itemId, "fileNameCheckedRow", false);
-			});
-			dojo.connect(nameSpan, "onclick", nameSpan, function() {
-				that.explorer.getNavHandler().cursorOn(item);
-			});
 		}
 	};
 	
@@ -465,19 +452,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last");
 			//dojo.place(document.createTextNode(renderName), nameSpan, "only");
 			nameSpan.title = "Click to compare";
-			var itemId = this.explorer.model.getId(item);
-			var that = this;
-			dojo.connect(nameSpan, "onmouseover", nameSpan, function() {
-				nameSpan.style.cursor ="pointer";
-				dojo.toggleClass(itemId, "fileNameCheckedRow", true);
-			});
-			dojo.connect(nameSpan, "onmouseout", nameSpan, function() {
-				nameSpan.style.cursor ="default";
-				dojo.toggleClass(itemId, "fileNameCheckedRow", false);
-			});
-			dojo.connect(nameSpan, "onclick", nameSpan, function() {
-				that.explorer.getNavHandler().cursorOn(item);
-			});
 			return nameSpan;
 		}
 	};
@@ -549,19 +523,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only");
 			var that = this;
 			if(!this.explorer.model.replaceMode()){
-				dojo.connect(tableRow, "onclick", tableRow, function() {
-					if(!item.stale){
-						that.explorer.getNavHandler().cursorOn(item);
-					}
-				});
-				dojo.connect(tableRow, "onmouseover", tableRow, function() {
-					if(!item.stale){
-						tableRow.style.cursor ="pointer";
-					}
-				});
-				dojo.connect(tableRow, "onmouseout", tableRow, function() {
-					tableRow.style.cursor ="default";
-				});
 			}
 			if(item.type ===  "file"){
 				var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name;
@@ -687,6 +648,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
 		this.defaulRows = 40;
+		this.highlightSelection = false;
 		this.declareCommands();
 	}
 	
@@ -710,12 +672,12 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this._replaceStr = this.model.queryObj.replace;
 		if(this.model.replaceMode()){
 			this.checkbox = true;
-			this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection:false,
+			this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection: false,
 				  getCheckedFunc: function(item){return that.getItemChecked(item);},
 				  onCheckedFunc: function(rowId, checked, manually){that.onRowChecked(rowId, checked, manually);}}, that);
 		} else {
 			this.checkbox = false;
-			this.renderer = new SearchResultRenderer({checkbox: false}, this);
+			this.renderer = new SearchResultRenderer({checkbox: false, highlightSelection: false}, this);
 		}
 		
 		this._reporting = false;
@@ -1095,7 +1057,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 			this.reportStatus("Preparing preview...");	
 		}
 		var that = this;
-		this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
+		this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 20, onCollapse: function(model){that.onCollapse(model);}});
 
 		if(init){
 			this.hookUpNavHandler();
@@ -1514,7 +1476,7 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		    });
 			this.initCommands();
 			dojo.empty(this.getParentDivId());
-			this.createTree(this.getParentDivId()/*this.parentNode*/, this.model, {indent: 20, onCollapse: function(model){that.onCollapse(model);}});
+			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 20, onCollapse: function(model){that.onCollapse(model);}});
 			this.hookUpNavHandler();
 		
 			this.gotoCurrent(this.restoreLocationStatus());
