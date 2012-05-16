@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection, mCommands){
+define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'], function(dojo, mSelection, mCommands, mHTMLFragments){
 	
 	/**
 	 * Generates a section
@@ -80,12 +80,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode );
 		
 		if(options.slideout){
-			this.slideout = '<div id="' + options.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
-								'<span id="' + options.id + 'slideOut" class="slide">' +
-								   '<span id="' + options.id + 'pageCommandParameters" class="parameters"></span>' +
-								   '<span id="' + options.id + 'pageCommandDismiss" class="parametersDismiss"></span>' +
-								'</span>' +
-							'</div>';
+			this.slideout = mHTMLFragments.slideoutHTMLFragment(options.id);
 			dojo.place(this.slideout, this.domNode);
 		}
 

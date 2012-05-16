@@ -108,7 +108,6 @@
 .imageSprite {
    background-image: url(../images/core_sprites.png);
    display: inline-block;
-   margin: 5px;
    vertical-align: middle;
    border:none;
 }

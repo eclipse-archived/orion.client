@@ -105,8 +105,8 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			this._activeElements = this._findParameterElements(commandNode);
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer && this._activeElements.parameterContainer) {
 				this._activeElements.onClose = onClose;
-				var focusNode = fillFunction(this._activeElements.parameterArea);
-				var close = dojo.query("#closebox", this._activeElements.parameterArea);
+				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
+				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea);
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
 					var dismiss = this._activeElements.dismissArea || this._activeElements.parameterArea;
@@ -182,7 +182,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		 * @returns {Function} a function that can fill the specified dom node with parameter collection behavior
 		 */
 		 getFillFunction: function(commandInvocation, closeFunction) {
-			return dojo.hitch(this, function(parameterArea) {
+			return dojo.hitch(this, function(parameterArea, dismissArea) {
 				var first = null;
 				var localClose = dojo.hitch(this, function() {
 					if (closeFunction) {
@@ -201,7 +201,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				});
 				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
-						dojo.create("label", {innerHTML: parm.label, "for": parm.name + "parameterCollector"}, parameterArea, "last");
+						dojo.create("label", {innerHTML: parm.label, "class": "parameterInput", "for": parm.name + "parameterCollector"}, parameterArea, "last");
 					} 
 					var options = {type: parm.type, id: parm.name + "parameterCollector"};
 					if (parm.type === "boolean") {
@@ -226,7 +226,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}
 					dojo.connect(field, "onkeypress", keyHandler);
 				});
-				var parentDismiss = parameterArea;
+				var parentDismiss = dismissArea || parameterArea;
 				var finish = function (collector) {
 					collector._collectAndCall(commandInvocation, parameterArea);
 					localClose();

@@ -204,6 +204,7 @@ a:hover {
 .parametersDismiss {
 	color: #404040;
 	vertical-align: middle;
+	font-weight: normal;
 }
 
 .dismiss {
@@ -221,7 +222,9 @@ a:hover {
 }
 
 .parameterInput {
-	margin-left: 4px;
+	margin-right: 16px;
+	font-weight: normal;
+	vertical-align: middle;
 }
 
 .parameterInputurl {
@@ -601,7 +604,7 @@ a:hover {
 .slide {
 	text-align: left;
 	vertical-align: middle;
-	float: left;
+	clear: both;
 	opacity: 0;
 	height: 0;
  	transition: opacity .5s ease-out;
@@ -620,7 +623,6 @@ a:hover {
 }
 
 .slideActive {
-	padding: 8px;
 	opacity: 1;
 	height: auto;
 }
