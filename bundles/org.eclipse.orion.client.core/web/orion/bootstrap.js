@@ -54,6 +54,18 @@ define(['require', 'dojo', 'orion/Deferred', 'orion/serviceregistry', 'orion/pre
 				pluginRegistry.shutdown();
 			});
 		}).then(function() {
+			var auth = serviceRegistry.getService("orion.core.auth");
+			if (auth) {
+				return auth.getUser().then(function(user) {
+					if (!user) {
+						return auth.getAuthForm(window.location.href).then(function(formURL) {
+							window.location = formURL;
+							return {then: function(){}};
+						});
+					}
+				});
+			}
+		}).then(function() {
 			var result = {
 				serviceRegistry: serviceRegistry,
 				preferences: preferences,

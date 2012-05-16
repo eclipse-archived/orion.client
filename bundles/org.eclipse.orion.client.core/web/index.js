@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global define*/
+/*global define window*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
@@ -18,20 +18,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
-			// This should be the minimal list of services needed to login.  
-			var serviceRegistry = core.serviceRegistry;
-			var preferences = core.preferences;
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
-			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-				
-			// global commands
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			document.body.style.visibility = "visible";
-			dojo.parser.parse();
+			window.location = "navigate/table.html";
 		});
 	});
 });
