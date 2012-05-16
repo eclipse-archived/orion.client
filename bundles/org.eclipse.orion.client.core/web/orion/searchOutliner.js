@@ -65,7 +65,18 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 		},
 
 		addSearch: function(theName, theQuery) {
-			this._searches.push({ "name": theName, "query": theQuery});
+			var alreadyFound = false;
+			for (var i in this._searches) {
+				if (this._searches[i].query === theQuery) {
+					this._searches[i].name = theName;
+					alreadyFound = true;
+				}
+			}
+			if (alreadyFound) {
+				this._registry.getService("orion.page.message").setMessage(theName + " is already saved.", 2000);
+			} else {
+				this._searches.push({ "name": theName, "query": theQuery});
+			}
 			this._searches.sort(this._sorter);
 			this._storeSearches();
 			this._notifyListeners();
@@ -240,8 +251,7 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 					id: "searchSection",
 					title: "Searches",
 					content: '<div id="searchContent"></div>',
-					explorer: this,
-					commandService: this.commandService,
+					useAuxStyle: true,
 					preferenceService: serviceRegistry.getService("orion.core.preference")
 				});
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
