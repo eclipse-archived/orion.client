@@ -186,6 +186,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								loadingDeferred.callback();
 								var repositories = resp.Children;
 								
+								// TODO this is a workaround for missing shaping resource feature
+								status.Clone = repositories[0];
+								
 								var tableNode = dojo.byId( 'table' );	
 								dojo.empty( tableNode );
 								
@@ -219,7 +222,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			// TODO add info about branch or detached
 			
-			item.Name = "Status";
+			item.Name = "Status" + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") != -1) ? " (Rebase in Progress)" : "");
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = repository.Name;
@@ -396,7 +399,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									//commandSpanId: diffSection.actionsNode.id,
+									//commandSpanId: spanId,
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
