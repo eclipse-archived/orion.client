@@ -58,7 +58,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 		this.commandService = commandService;
 		this.contentTypeService = contentTypeService;
 		this.openWithCommands = null;
-		this.actionScopeId = "fileFolderCommands";
+		this.actionScopeId = options.actionScopeId;
 		this._init(options);
 		this.target = "_self";
 	}
@@ -163,7 +163,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			}
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-			this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true);
+			// render any inline commands that are present.
+			if (this.actionScopeId) {
+				this.commandService.renderCommands(this.actionScopeId, span, item, this.explorer, "tool", null, true);
+			}
 			return col;
 		case 1:
 			var dateColumn = document.createElement('td');
@@ -200,6 +203,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 	 * @param {String} options.breadcrumbId
 	 * @param {String} options.toolbarId
 	 * @param {String} options.selectionToolsId
+	 * @param {String} options.actionsScopeId
 	 */
 	function FileExplorer(options) {
 		this.registry = options.serviceRegistry;
@@ -216,7 +220,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 		this.model = null;
 		this.myTree = null;
 		this.checkbox = false;
-		this.renderer = new FileRenderer({checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
+		this.renderer = new FileRenderer({actionScopeId: options.actionScopeId, checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService);
 		this.preferences = options.preferences;
 		this.setTarget();
 		this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) );
