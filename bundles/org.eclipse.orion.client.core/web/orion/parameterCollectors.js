@@ -146,7 +146,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		
 		_collectAndCall: function(commandInvocation, parent) {
 			dojo.query("input", parent).forEach(function(field) {
-				if (field.type !== "button") {
+				if (field.type === "checkbox") {
+					commandInvocation.parameters.setValue(field.parameterName, field.checked);
+				} else if (field.type !== "button") {
 					commandInvocation.parameters.setValue(field.parameterName, field.value);
 				}
 			});
@@ -201,18 +203,26 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					if (parm.label) {
 						dojo.create("label", {innerHTML: parm.label, "for": parm.name + "parameterCollector"}, parameterArea, "last");
 					} 
-					var field = dojo.create("input", {type: parm.type, id: parm.name + "parameterCollector"}, parameterArea, "last");
+					var options = {type: parm.type, id: parm.name + "parameterCollector"};
+					if (parm.type === "boolean") {
+						options.type = "checkbox";
+						if (parm.value) {
+							options.checked = true;
+						}
+					} else {
+						if (parm.value) {
+							options.value = parm.value;
+						}
+					}
+					var field = dojo.create("input", options, parameterArea, "last");
 					dojo.addClass(field, "parameterInput");
 					// we define special classes for some parameter types
-					dojo.addClass(field, "parameterInput"+parm.type);
+					dojo.addClass(field, "parameterInput"+options.type);
 					field.setAttribute("speech", "speech");
 					field.setAttribute("x-webkit-speech", "x-webkit-speech");
 					field.parameterName = parm.name;
 					if (!first) {
 						first = field;
-					}
-					if (parm.value) {
-						field.value = parm.value;
 					}
 					dojo.connect(field, "onkeypress", keyHandler);
 				});
