@@ -84,9 +84,7 @@ exports.ExplorerNavHandler = (function() {
 					return this.onLeftArrow(e);
 				}
 			} else if(e.keyCode === dojo.keys.SPACE){
-				if(!e.ctrlKey){
-					return this.onSpace(e);
-				}
+				return this.onSpace(e);
 			} else if(e.keyCode === dojo.keys.ENTER) {
 				return this.onEnter(e);
 			}
@@ -118,6 +116,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!options){
 				return;
 			}
+			this._selectionPolicy = options.selectionPolicy;
 			this.preventDefaultFunc = options.preventDefaultFunc;//optional callback. If this function returns true then the default behavior of all key press will stop at this time.
 			                                                     //The key event is passed to preventDefaultFunc. It can implement its own behavior based o nteh key event.
 			this.postDefaultFunc = options.postDefaultFunc;//optional callback. If this function provides addtional behaviors after the default behavior.
@@ -211,6 +210,9 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		setSelection: function(model, toggling){
+			if(this._selectionPolicy === "cursorOnly"){
+				return;
+			}
 			if(!toggling){
 				this._clearSelection(true);
 				this._checkRow(model,false);		
@@ -407,7 +409,9 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				model = this._modelIterator.cursor();
 			}
-			dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
+			if(this.explorer.highlightSelection){
+				dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
+			}
 		},
 		
 		_onModelGrid: function(model, mouseEvt){
