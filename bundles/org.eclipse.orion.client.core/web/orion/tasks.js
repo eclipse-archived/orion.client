@@ -61,7 +61,8 @@ define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require,
 					content: '<div id="'+contentId+'"></div>',
 					preferenceService: this._registry.getService("orion.core.preference"),
 					canHide: true,
-					hidden: this._collapsed
+					hidden: this._collapsed,
+					useAuxStyle: true
 				});
 				if (this._description) {
 					dojo.place("<p>"+this._description+"</p>", contentId, "only");

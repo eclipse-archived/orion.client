@@ -31,7 +31,18 @@
 	padding-top: 5px;
 	padding-left: 5px;
     border: 1px solid #e6e6e6;
-    background: #f8f8f8;
+    background-color: #f8f8f8;
+	border-radius:4px;
+	margin-right: 8px;
+	min-height: 26px;
+	vertical-align: middle;
+	font-weight: bold;
+	color: #808080;
+}
+
+.sectionWrapperAux {
+    background-color: #fafafa;
+	border: 1px solid #ebebeb;
 }
 
 .sectionProgress {

@@ -22,6 +22,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 	 * @param options.slideout {boolean} [optional] if true section will contain generated slideout
 	 * @param options.canHide {boolean} [optional] if true section may be hidden
 	 * @param options.hidden {boolean} [optional] if true section will be hidden at first display
+	 * @param options.useAuxStyle {boolean} [optional] if true the section will be styled for an auxiliary pane
 	 * @returns Section object
 	 */
 	function Section(parent, options) {
@@ -44,7 +45,8 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 
 		// setting up the section
-		this.domNode = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id": options.id}, parent );
+		var wrapperClass = options.useAuxStyle ? "sectionWrapper sectionWrapperAux" : "sectionWrapper";
+		this.domNode = dojo.create( "div", {"class": wrapperClass+" toolComposite", "id": options.id}, parent );
 
 		// if canHide, add twistie and stuff...
 		if(options.canHide){

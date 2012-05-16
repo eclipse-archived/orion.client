@@ -169,11 +169,9 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 							id: "fileSystemsSection",
 							title: "Places",
 							content: '<div id="fileSystemsContent"></div>',
-							// we don't have any file system level commands yet....
-							// commandService: this.commandService,
-							// explorer: this,
 							preferenceService: serviceRegistry.getService("orion.core.preference"),
-							canHide: true
+							canHide: true,
+							useAuxStyle: true
 						});
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
@@ -192,10 +190,9 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 					id: "favoritesSection",
 					title: "Favorites",
 					content: '<div id="favoritesContent"></div>',
-					explorer: this,
-					commandService: this.commandService,
 					preferenceService: serviceRegistry.getService("orion.core.preference"),
-					canHide: true
+					canHide: true,
+					useAuxStyle: true
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
 				// add commands to the fave section heading
