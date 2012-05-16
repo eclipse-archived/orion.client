@@ -2508,8 +2508,96 @@ var exports = {};
 		});
 		
 		commandService.addCommand(showPatchCommand);
+		
+		// Rebase commands
+		
+		var rebaseContinueCommand = new mCommands.Command({
+			name: "Continue",
+			tooltip: "Contibue Rebase",
+			id: "eclipse.orion.git.rebaseContinueCommand",
+			callback: function(data) {
+				var item = data.items;
+				return _rebase(item.Clone.HeadLocation, "CONTINUE");
+			},
+			
+			visibleWhen: function(item) {
+				return item.RepositoryState.indexOf("REBASING") != -1;
+			}
+		});
+		
+		commandService.addCommand(rebaseContinueCommand);
+		
+		var rebaseSkipPatchCommand = new mCommands.Command({
+			name: "Skip Patch",
+			tooltip: "Skip Patch",
+			id: "eclipse.orion.git.rebaseSkipPatchCommand",
+			callback: function(data) {
+				var item = data.items;
+				return _rebase(item.Clone.HeadLocation, "SKIP");
+			},
+			
+			visibleWhen: function(item) {
+				return item.RepositoryState.indexOf("REBASING") != -1;
+			}
+		});
+		
+		commandService.addCommand(rebaseSkipPatchCommand);
+		
+		var rebaseAbortCommand = new mCommands.Command({
+			name: "Abort",
+			tooltip: "Abort Rebase",
+			id: "eclipse.orion.git.rebaseAbortCommand",
+			callback: function(data) {
+				var item = data.items;
+				return _rebase(item.Clone.HeadLocation, "ABORT");
+			},
+			
+			visibleWhen: function(item) {
+				return item.RepositoryState.indexOf("REBASING") != -1;
+			}
+		});
+		
+		commandService.addCommand(rebaseAbortCommand);		
+		
+		function _rebase(HeadLocation, action){
+			var progressService = serviceRegistry.getService("orion.page.message");
+			
+			progressService.createProgressMonitor(
+				serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action),
+				action).deferred.then(
+				function(jsonData){
+					if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") {
+						var display = [];
+						display.Severity = "Ok";
+						display.HTML = false;
+						display.Message = jsonData.Result;
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display);
+						dojo.hitch(explorer, explorer.changedItem)({});
+					}
+					
+					if (jsonData.Result == "STOPPED") {
+						var display = [];
+						display.Severity = "Warning";
+						display.HTML = false;
+						display.Message = jsonData.Result + ". Repository still contains conflicts.";
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display);
+						dojo.hitch(explorer, explorer.changedItem)({});
+					} else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
+						var display = [];
+						display.Severity = "Error";
+						display.HTML = false;
+						display.Message = jsonData.Result + ". Repository contains unmerged paths. Resolve conflicts first.";
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display);
+					}
+					
+				}, displayErrorOnStatus
+			);
+		};
 	};
-	
+
 }());
 return exports;	
 });

@@ -55,6 +55,9 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 
 		// object contributions
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.resetCommand", 100, "eclipse.gitGroup");
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseContinueCommand", 200, "eclipse.gitGroup");
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseSkipPatchCommand", 300, "eclipse.gitGroup");
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseAbortCommand", 400, "eclipse.gitGroup");
 		
 		// add commands specific for the page	
 		var viewAllCommand = new mCommands.Command({
