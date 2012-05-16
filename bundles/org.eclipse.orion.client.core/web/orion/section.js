@@ -15,9 +15,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 	 * 
 	 * @param parent parent node
 	 * @param options.id [required] id of the section header
-	 * @param options.explorer [optional] explorer that is the parent of this section, used as the handler for commands
 	 * @param options.title [required] title of the section
-	 * @param options.commandService [optional] required if there are any commands in this section
 	 * @param options.preferenceService [optional] used to store the hidden/shown state of the section if specified
 	 * @param options.iconClass [optional] the class of the icon decorating section, no icon displayed if not provided
 	 * @param options.content [optional] content of the section in HTML. May be set later using setContent()
@@ -40,13 +38,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 			throw new Error("Missing required argument: id");
 		}
 		this.id = options.id;
-		
-		// TODO explorer should really be called handler?
-		if (options.commandService && !options.explorer) {
-			throw new Error("Missing required argument: explorer");
-		}
-		this._explorer = options.explorer;
-		
+				
 		if (!options.title) {
 			throw new Error("Missing required argument: title");
 		}
@@ -77,7 +69,10 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 		
 		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor layoutLeft", innerHTML: options.title }, this.domNode );
+		
 		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, this.domNode );
+		this._progressNode.style.visibility = "hidden";
+		
 		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode );
 		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode );
 		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode );
@@ -141,29 +136,6 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		 */
 		setContent: function(content){
 			this._content.innerHTML = content;
-		},
-		
-		/**
-		 * Register command to this section
-		 * @param commandId
-		 * @param position
-		 * @param parentPath
-		 * @param bindingOnly
-		 * @param keyBinding
-		 * @param urlBinding
-		 */
-		registerCommandContribution: function(commandId, position, parentPath, bindingOnly, keyBinding, urlBinding){
-			this._commandService.registerCommandContribution(this.actionsNode.id, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding);
-		},
-		
-		/**
-		 * Render commands for this section
-		 * @param items
-		 * @param renderType
-		 * @param userData
-		 */
-		renderCommands: function(items, renderType, userData){
-			this._commandService.renderCommands(this.actionsNode.id, this.actionsNode, items, this._explorer, renderType, userData);
 		},
 		
 		createProgressMonitor: function(){

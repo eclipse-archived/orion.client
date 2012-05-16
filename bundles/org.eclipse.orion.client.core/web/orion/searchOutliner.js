@@ -245,7 +245,6 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 					preferenceService: serviceRegistry.getService("orion.core.preference")
 				});
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
-				this.searchMonitor = this.searchesSection.createProgressMonitor();
 				// add commands to the search section heading
 				var selectionId = this.searchesSection.selectionNode.id;
 				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1);	
@@ -269,7 +268,6 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 			} else {
 				dojo.place("<p>You can save frequently used by searches by choosing <b>Save Search</b> in the search toolbar.</p>", "searchContent", "only");
 			}
-			this.searchMonitor.done();
 		}
 	};//end navigation outliner prototype
 	SearchOutliner.prototype.constructor = SearchOutliner;
