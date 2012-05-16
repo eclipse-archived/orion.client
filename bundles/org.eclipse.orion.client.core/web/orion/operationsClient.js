@@ -105,36 +105,35 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 		return result;
 	}
 	
-	//TODO this is unused can we delete it?
-//	function _registerOperationChangeListener(service, listener, longpollingId){
-//		var that = this;
-//		var args = {Longpolling: true};
-//		if(longpollingId){
-//			args.LongpollingId = longpollingId;
-//		}
-//		_doServiceCall(service, "getOperations", [args]).then(function(result){
-//			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
-//				return;
-//			}
-//			listener(result, longpollingId);
-//			if(result.LongpollingId){
-//				that._currentLongpollingIds.push(result.LongpollingId);
-//				_registerOperationChangeListener.bind(that)(service, listener, result.LongpollingId);
-//			} else {
-//				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
-//			}
-//			
-//		}, function(error){
-//			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
-//				return;
-//			}
-//			if("timeout"===error.dojoType) {
-//				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
-//			} else {
-//				setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
-//			}
-//		});
-//	}
+	function _registerOperationChangeListener(service, listener, longpollingId){
+		var that = this;
+		var args = {Longpolling: true};
+		if(longpollingId){
+			args.LongpollingId = longpollingId;
+		}
+		_doServiceCall(service, "getOperations", [args]).then(function(result){
+			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
+				return;
+			}
+			listener(result, longpollingId);
+			if(result.LongpollingId){
+				that._currentLongpollingIds.push(result.LongpollingId);
+				_registerOperationChangeListener.bind(that)(service, listener, result.LongpollingId);
+			} else {
+				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
+			}
+			
+		}, function(error){
+			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
+				return;
+			}
+			if("timeout"===error.dojoType) {
+				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
+			} else {
+				setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
+			}
+		});
+	}
 	
 	function _notifyChangeListeners(result){
 		for(var i=0; i<this._operationListeners.length; i++){
@@ -193,7 +192,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 						throw "No operations services registered.";
 					}
 					for(var i=0; i<this._services.length; i++){
-						this._registerOperationChangeListener(this._services[i], _notifyChangeListeners.bind(this));
+						_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));
 					}
 				}
 			},
@@ -217,7 +216,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 					throw "No operations services registered.";
 				}
 				for(var i=0; i<this._services.length; i++){
-					this._registerOperationChangeListener(this._services[i], _notifyChangeListeners.bind(this));
+					_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));
 				}
 			}
 	};
