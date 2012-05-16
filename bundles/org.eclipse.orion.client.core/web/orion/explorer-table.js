@@ -128,8 +128,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navig
 			var link;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				var expandImage = this.getExpandImage(tableRow, span);
-				mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
+				this.getExpandImage(tableRow, span);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameLink", href: "#" + item.ChildrenLocation}, span, "last");
 				dojo.place(document.createTextNode(item.Name), link, "last");
 			} else {

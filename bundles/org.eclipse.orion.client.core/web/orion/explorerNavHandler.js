@@ -168,6 +168,9 @@ exports.ExplorerNavHandler = (function() {
 					for (var i = 0; i < selections.length; i++){
 						that._selections.push(selections[i]);
 					}
+					if(that._selections.length > 0){
+						that.cursorOn(that._selections[0]);
+					}
 				});
 			}
 		},
@@ -188,7 +191,6 @@ exports.ExplorerNavHandler = (function() {
 				this._modelIterator.reset();
 			}
 		},
-		
 		
 		_inSelection: function(model){
 			for(var i = 0; i < this._selections.length; i++){
@@ -367,7 +369,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._modelIterator.iterate(forward, forceExpand)){
 				this.cursorOn(null, false, forward);
 				if(selecting){
-					this.setSelection(this._modelIterator.prevCursor(), true);
+					this.setSelection(this.currentModel(), true);
 				}
 			}
 		},
