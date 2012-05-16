@@ -88,8 +88,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		}
 
 		this._contentParent = dojo.create("div", { "id": this.id + "Content", "role": "region", "class":"sectionTable", "aria-labelledby": this.titleNode.id}, parent, "last");
-		this._content = dojo.create("div", {"class": "plugin-settings"}, this._contentParent);
-		
+
 		if(options.content){
 			this.setContent(options.content);
 		}
@@ -135,7 +134,7 @@ define(['dojo', 'orion/selection', 'orion/commands'], function(dojo, mSelection,
 		 * @param content
 		 */
 		setContent: function(content){
-			this._content.innerHTML = content;
+			this._contentParent.innerHTML = content;
 		},
 		
 		createProgressMonitor: function(){
