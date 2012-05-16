@@ -47,8 +47,8 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 					serviceRegistry: serviceRegistry,
 					slideout: true
 				});
-				section.registerCommandContribution('orion.site.create', 100);
-				section.renderCommands(siteServiceRef, 'button');
+				commandService.registerCommandContribution(section.actionsNode.id, 'orion.site.create', 100);
+				commandService.renderCommands(section.actionsNode.id, section.actionsNode, siteServiceRef, this, 'button');
 
 				var sectionItemActionScopeId = 'section' + i + 'Action';
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.edit', 10);
