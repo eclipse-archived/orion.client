@@ -295,12 +295,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var tableNode = dojo.byId( 'table' );
 			
 			var unstagedSection = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "unstagedSection",
 				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
 				content: '<div id="unstagedNode" class="plugin-settings-list"></div>',
-				commandService: this.registry.getService("orion.page.command"),
-				serviceRegistry: this.registry,
 				canHide: true
 			});
 			
@@ -458,12 +455,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var tableNode = dojo.byId( 'table' );
 			
 			var stagedSection = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "stagedSection",
 				title: stagedSortedChanges.length > 0 ? "Staged" : "No Staged Changes",
 				content: '<div id="stagedNode" class="plugin-settings-list"></div>',
-				commandService: this.registry.getService("orion.page.command"),
-				serviceRegistry: this.registry,
 				slideout: true,
 				canHide: true
 			});
@@ -627,9 +621,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var diffSection = new mSection.Section(tableNode, {
 				id: "diffSection_" + index,
 				title: change.name,
-				explorer: this,
-				serviceRegistry: this.registry,
-				commandService: this.registry.getService("orion.page.command"),
 				canHide: true,
 				hidden: true,
 				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>'
@@ -673,12 +664,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var tableNode = dojo.byId( 'table' );
 			
 			var commitSection = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "commitSection",
 				title: "Commits",
 				content: '<list id="commitNode" class="plugin-settings-list"></list>',
-				commandService: this.registry.getService("orion.page.command"),
-				serviceRegistry: this.registry,
 				slideout: true,
 				canHide: true
 			});

@@ -175,7 +175,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 							preferenceService: serviceRegistry.getService("orion.core.preference"),
 							canHide: true
 						});
-						this.fileSystemMonitor = this.fileSystemsSection.createProgressMonitor();
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
 					this.fileSystemsTable = this.explorer.createTree("fileSystemsContent", new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) {
@@ -184,7 +183,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 						}
 						return "";
 					}));
-					this.fileSystemMonitor.done();
 				}
 			}
 			
@@ -199,7 +197,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 					preferenceService: serviceRegistry.getService("orion.core.preference"),
 					canHide: true
 				});
-				this.favoritesMonitor = this.favoritesSection.createProgressMonitor();
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
 				// add commands to the fave section heading
 				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1);
@@ -224,7 +221,6 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 			} else {
 				dojo.place("<p>You can create favorites by selecting any file or folder in the navigator and choosing <b>Make Favorite</b> from the More menu.</p>", "favoritesContent", "only");
 			}
-			this.favoritesMonitor.done();
 		}
 	};//end navigation outliner prototype
 	NavigationOutliner.prototype.constructor = NavigationOutliner;

@@ -147,7 +147,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			dojo.empty( tableNode );
 			
 			new mSection.Section(tableNode, {
-				explorer: this,
 				id: "commitSection",
 				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
 				iconClass: "gitImageSprite git-sprite-modification",
@@ -237,7 +236,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			var tableNode = dojo.byId( 'table' );
 			
 			var titleWrapper = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "diffSection",
 				title: messages["Diffs"],
 				content: '<list id="diffNode" class="plugin-settings-list"></list>'
@@ -305,17 +303,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			var tableNode = dojo.byId( 'table' );
 
 			var titleWrapper = new mSection.Section(tableNode, {
-				explorer: this,
 				id: "tagSection",
 				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
 				iconClass: "gitImageSprite git-sprite-tag",
 				slideout: true,
-				content: '<list id="tagNode" class="plugin-settings-list"></list>',
-				commandService: this.commandService
+				content: '<list id="tagNode" class="plugin-settings-list"></list>'
 			}); 
 			
-			titleWrapper.registerCommandContribution("eclipse.orion.git.addTag", 2000);
-			titleWrapper.renderCommands(commit, "button", false);
+			this.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.addTag", 100);
+			this.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, commit, this, "button");
 			
 			if (!tags && tags.length > 0)
 				return;

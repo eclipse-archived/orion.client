@@ -63,7 +63,6 @@ define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require,
 					canHide: true,
 					hidden: this._collapsed
 				});
-				var monitor = this.fileSystemsSection.createProgressMonitor();
 				if (this._description) {
 					dojo.place("<p>"+this._description+"</p>", contentId, "only");
 				}
@@ -85,7 +84,6 @@ define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require,
 						dojo.place(document.createTextNode(command.description || command.tooltip), col, "last");
 					}
 				}
-				monitor.done();
 			}
 		}
 	};//end navigation outliner prototype

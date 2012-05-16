@@ -289,11 +289,10 @@ exports.GitRepositoryExplorer = (function() {
 		dojo.empty( tableNode );
 
 		var titleWrapper = new mSection.Section(tableNode, {
-					explorer: this,
-					id: "repositorySection",
-					title: (mode === "full" ? "Repositories" : "Repository"),
-					iconClass: "gitImageSprite git-sprite-repository"
-				});
+			id: "repositorySection",
+			title: (mode === "full" ? "Repositories" : "Repository"),
+			iconClass: "gitImageSprite git-sprite-repository"
+		});
 	
 		if (!repositories || repositories.length === 0){
 			titleWrapper.setTitle(mode === "full" ? "No Repositories" : "Repository Not Found");
@@ -372,7 +371,6 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "workingDirectorySection",
 			title: "Working Directory",
 			content: '<list id="workingDirectoryNode" class="plugin-settings-list"></list>'
@@ -444,13 +442,11 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 		
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "branchSection",
 			title: "Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
 			slideout: true,
-			content: '<list id="branchNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			content: '<list id="branchNode" class="plugin-settings-list"></list>'
 		});
 
 		var progress = titleWrapper.createProgressMonitor();
@@ -461,12 +457,13 @@ exports.GitRepositoryExplorer = (function() {
 				progress.done();
 				
 				if (mode !== "full" && branches.length !== 0){
-					titleWrapper.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10);
-					titleWrapper.renderCommands({"ViewAllLink":"/git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all local and remote tracking branches"}, "button");
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
+						{"ViewAllLink":"/git/git-repository.html#" + branchLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all local and remote tracking branches"}, that, "button");
 				}
 				
-				titleWrapper.registerCommandContribution("eclipse.addBranch", 2000);
-				titleWrapper.renderCommands(repository, "button");
+				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.addBranch", 200);
+				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, repository, that, "button");
 				
 				for(var i=0; i<branches.length;i++){
 					branches[i].ParentLocation = branchLocation;
@@ -516,12 +513,10 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 		
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "remoteBranchSection",
 			title: "Remote Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
-			content: '<list id="remoteBranchNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			content: '<list id="remoteBranchNode" class="plugin-settings-list"></list>'
 		}); 
 
 		var progress = titleWrapper.createProgressMonitor();
@@ -594,12 +589,10 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "commitSection",
 			title: "Commits",
 			slideout: true,
 			content: '<list id="commitNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService,
 			canHide: true
 		}); 
 
@@ -619,20 +612,21 @@ exports.GitRepositoryExplorer = (function() {
 				var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 				
 				titleWrapper.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
+
+				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
+					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "button");
 				
-				titleWrapper.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10);
-				titleWrapper.renderCommands({"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, "button");
-						
 				if (tracksRemoteBranch){
-					titleWrapper.registerCommandContribution("eclipse.orion.git.fetch", 100);
-					titleWrapper.registerCommandContribution("eclipse.orion.git.merge", 100);
-					titleWrapper.registerCommandContribution("eclipse.orion.git.rebase", 100);
-					titleWrapper.registerCommandContribution("eclipse.orion.git.resetIndex", 100);
-					titleWrapper.renderCommands(currentBranch.RemoteLocation[0].Children[0], "button"); 
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100);
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.merge", 100);
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100);
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button");
 				};
 				
-				titleWrapper.registerCommandContribution("eclipse.orion.git.push", 100);
-				titleWrapper.renderCommands(currentBranch, "button"); 
+				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100);
+				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button");
 				
 				if (currentBranch.RemoteLocation[0] == null){
 					progress.done();
@@ -806,12 +800,10 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 		
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "tagSection",
 			iconClass: "gitImageSprite git-sprite-tag",
 			title: ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
-			content: '<list id="tagNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			content: '<list id="tagNode" class="plugin-settings-list"></list>'
 		}); 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting tags");
@@ -824,8 +816,9 @@ exports.GitRepositoryExplorer = (function() {
 				
 				progress.done();
 				if (mode !== "full" && tags.length !== 0){
-					titleWrapper.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10);
-					titleWrapper.renderCommands({"ViewAllLink":"/git/git-repository.html#" + tagLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all tags"}, "button");
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
+							{"ViewAllLink":"/git/git-repository.html#" + tagLocation + "?page=1", "ViewAllLabel":"View All", "ViewAllTooltip":"View all tags"}, that, "button");
 				}
 
 				if (tags.length === 0) {
@@ -917,22 +910,19 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 		
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "remoteSection",
 			title: "Remotes",
 			iconClass: "gitImageSprite git-sprite-remote",
 			slideout: true,
-			content: '<list id="remoteNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			content: '<list id="remoteNode" class="plugin-settings-list"></list>'
 		});
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting remotes");
 		
-		titleWrapper.registerCommandContribution("eclipse.addRemote", 2000);
-		titleWrapper.renderCommands(repository, "button");
-		
-		
+		that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.addRemote", 100);
+		that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, repository, that, "button");
+				
 		this.registry.getService("orion.git.provider").getGitRemote(remoteLocation).then(
 			function(resp){
 				var remotes = resp.Children;
@@ -981,12 +971,10 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );
 		
 		var titleWrapper = new mSection.Section(tableNode, {
-			explorer: this,
 			id: "configSection",
 			title: "Configuration" + (mode === "full" ? "" : " (user.*)"),
 			slideout: true,
-			content: '<list id="configNode" class="plugin-settings-list"></list>',
-			commandService: this.commandService
+			content: '<list id="configNode" class="plugin-settings-list"></list>'
 		});
 		
 		var progress = titleWrapper.createProgressMonitor();
@@ -998,13 +986,15 @@ exports.GitRepositoryExplorer = (function() {
 				var configurationEntries = resp.Children;
 				
 				if (mode !== "full" && configurationEntries.length !== 0){
-					titleWrapper.registerCommandContribution("eclipse.orion.git.repositories.viewAllCommand", 10);
-					titleWrapper.renderCommands({"ViewAllLink":"/git/git-repository.html#" + configLocation, "ViewAllLabel":"View All", "ViewAllTooltip":"View all configuration entries"}, "button");
+
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
+							{"ViewAllLink":"/git/git-repository.html#" + configLocation, "ViewAllLabel":"View All", "ViewAllTooltip":"View all configuration entries"}, that, "button");
 				}
 				
 				if (mode === "full"){
-					titleWrapper.registerCommandContribution("eclipse.orion.git.addConfigEntryCommand", 1000);
-					titleWrapper.renderCommands(repository, "button");
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.addConfigEntryCommand", 1000);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, repository, that, "button");
 				}
 				
 				if (configurationEntries.length === 0){
