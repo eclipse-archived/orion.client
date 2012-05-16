@@ -65,6 +65,15 @@ define(['require'],
 		'</footer>';
 	// END BOTTOM BANNER FRAGMENT
 
+	function slideoutHTMLFragment(id) { 
+		return '<div id="'+id+'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+			'<span id="'+id+'pageParameterArea" class="slide">' +
+				'<span id="'+id+'pageCommandParameters" class="layoutLeft parameters"></span>' +
+				'<span id="'+id+'pageCommandDismiss" class="layoutRight parametersDismiss"></span>' +
+			'</span>' +
+		'</div>';
+	}
+	
 	var toolbarHTMLFragment = 
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' +
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' +
@@ -74,18 +83,14 @@ define(['require'],
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' +
 				'<div class="layoutLeft" id="notifications" aria-live="assertive" aria-atomic="true"></div>' +
 				'<div class="layoutRight"><span tabindex="0" role="button" aria-label="Close notification" class="layoutRight core-sprite-close imageSprite" id="closeNotifications"></span></div>' +
-		'</div>' +
-		'<div id="parameterArea" class="layoutBlock slideParameters slideContainer">' +
-			'<span id="pageParameterArea" class="slide">' +
-				'<span id="pageCommandParameters" class="parameters"></span>' +
-				'<span id="pageCommandDismiss" class="parametersDismiss"></span>' +
-			'</span>' +
-		'</div>';
+		'</div>' + slideoutHTMLFragment("mainToolbar");
+		
 	
 	//return the module exports
 	return {
 		topHTMLFragment: topHTMLFragment,
 		bottomHTMLFragment: bottomHTMLFragment,
-		toolbarHTMLFragment: toolbarHTMLFragment
+		toolbarHTMLFragment: toolbarHTMLFragment,
+		slideoutHTMLFragment: slideoutHTMLFragment
 	};
 });
