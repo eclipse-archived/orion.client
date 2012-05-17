@@ -44,6 +44,7 @@ define(['orion/Deferred'], function(Deferred) {
 			} catch (e) {
 				wrapper.reject(e);
 			}
+			return wrapper;
 		};
 	}
 	return {
