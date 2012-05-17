@@ -48,7 +48,7 @@
 .commandButton {
 	color: #777;
 	border: 1px solid #CCC;
-	background-color: transparent;
+	background-color: white;
 	text-align: center;
 	vertical-align: baseline;
     cursor: pointer;
@@ -57,6 +57,7 @@
     font-weight:bold;
     border-radius:3px;
     line-height: 12px;
+    font-size:7pt;
 }
 
 .commandButtonOver {
@@ -69,6 +70,7 @@
 	display: inline-block;
 	vertical-align: baseline;
 	margin: 0;
+	font-size:7pt;
 }
 
 .commandMenuItem {
@@ -162,8 +164,8 @@
 .core-sprite-stop{ background-position: -96px -1044px; width: 16px; height: 16px; } 
 .core-sprite-transferin{ background-position: -96px -1110px; width: 16px; height: 16px; } 
 .core-sprite-transferout{ background-position: -96px -1176px; width: 16px; height: 16px; } 
-.core-sprite-twistie_closed{ background-position: -96px -1242px; width: 16px; height: 16px; } 
-.core-sprite-twistie_open{ background-position: -96px -1308px; width: 16px; height: 16px; } 
+.core-sprite-twistie_closed{ background-image:url(../images/closedarrow.png);width: 16px; height: 16px; } 
+.core-sprite-twistie_open{ background-image:url(../images/openarrow.png); width: 16px; height: 16px; } 
 .core-sprite-twistie_partOpen{ background-position: -96px -1374px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: -96px -1440px; width: 16px; height: 16px; } 
 
@@ -229,6 +231,18 @@
 
 .claro .dijitMenuItem {
    outline: none;
+   padding-top:4px;
+}
+
+.claro .dijitMenuSeparatorTop {
+	height: auto;
+	margin-top: 1px;
+	border-bottom: 1px solid #DDD;
+}
+
+.claro .dijitMenuItemLabel {
+	position: relative;
+	padding: 5px;
 }
 
 .claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
