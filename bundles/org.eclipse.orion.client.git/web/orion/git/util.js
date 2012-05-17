@@ -54,11 +54,29 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		return false;
 	}
 	
+	function hasStagedChanges(status){
+		for(var i = 0; i < interestedStagedGroup.length ; i++){
+			if (status[interestedStagedGroup[i]].length > 0)
+				return true;
+		}
+		return false;
+	}
+	
+	function hasUnstagedChanges(status){
+		for(var i = 0; i < interestedUnstagedGroup.length ; i++){
+			if (status[interestedUnstagedGroup[i]].length > 0)
+				return true;
+		}
+		return false;
+	}
+	
 	//return module exports
 	return {
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
-		isChange: isChange
+		isChange: isChange,
+		hasStagedChanges: hasStagedChanges,
+		hasUnstagedChanges: hasUnstagedChanges
 	};
 
 });

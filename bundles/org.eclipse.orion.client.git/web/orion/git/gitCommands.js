@@ -2364,7 +2364,8 @@ var exports = {};
 		
 		commandService.addCommand(unstageCommand);
 		
-		var commitMessageParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Commit message')]);
+		var commitMessageParameters = new mCommands.ParametersDescription(
+			[new mCommands.CommandParameter('name', 'text', 'Commit message:'), new mCommands.CommandParameter('amend', 'boolean', 'Amend:', false)]);
 		
 		var commitCommand = new mCommands.Command({
 			name: "Commit",
@@ -2376,6 +2377,7 @@ var exports = {};
 				
 				var body = {};
 				body.Message = data.parameters.valueFor("name");
+				body.Amend = data.parameters.valueFor("amend");
 				
 				var progressService = serviceRegistry.getService("orion.page.message");
 				progressService.createProgressMonitor(
@@ -2387,7 +2389,7 @@ var exports = {};
 				);
 			},
 			visibleWhen: function(item) {
-				return true;
+				return mGitUtil.hasStagedChanges(item);
 			}
 		});	
 
@@ -2422,8 +2424,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				// TODO Should check if there are any local changes
-				return /*(self.hasStaged || self.hasUnstaged)*/ true;
+				return mGitUtil.hasStagedChanges(item) || mGitUtil.hasUnstagedChanges(item);;
 			}
 		});
 
