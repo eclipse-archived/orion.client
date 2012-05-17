@@ -13,9 +13,9 @@ define(['orion/Deferred'], function(Deferred) {
 	var DEFAULT_TIMEOUT = 3000;
 	/**
 	 * @name orion.test.makeTimeoutable
-	 * Wraps a function into a timeout-able function. This is convenient for constructing a testcase function that fails
-	 * if an an expected promise never calls back.
-	 * @param {Function} func The test body function to be executed (must return a promise).
+	 * Wraps a promise-returning function into a timeoutable-promise-returning function. This is convenient for constructing
+	 * a testcase function that fails if an an expected promise never calls back.
+	 * @param {Function} func The test body function to be executed. Should return a promise.
 	 * @param {Number} [optTimeout=3000] How long to wait for a response before rejecting.
 	 * @returns {Function} A testcase function. When executed, it returns a promise that rejects if <code>func()</code>'s
 	 * promise does not call back within the specified amount of time.
@@ -28,21 +28,26 @@ define(['orion/Deferred'], function(Deferred) {
 			var innerPromiseFired = false;
 			try {
 				inner = func();
-				setTimeout(function() {
-					if (!innerPromiseFired) {
-						wrapper.reject('Timed out');
-					}
-				}, timeout);
-				inner.then(
-					function(result) {
-						innerPromiseFired = true;
-						wrapper.resolve(result);
-					}, function(err) {
-						innerPromiseFired = true;
-						wrapper.reject(err);
-					});
+				if (inner && inner.then) {
+					setTimeout(function() {
+						if (!innerPromiseFired) {
+							wrapper.reject('Timed out');
+						}
+					}, timeout);
+					inner.then(
+						function(result) {
+							innerPromiseFired = true;
+							wrapper.resolve(result);
+						}, function(err) {
+							innerPromiseFired = true;
+							wrapper.reject(err);
+						});
+				} else {
+					// func() didn't return a promise; continue
+					wrapper.resolve();
+				}
 			} catch (e) {
-				wrapper.reject(e);
+				throw e;
 			}
 			return wrapper;
 		};
