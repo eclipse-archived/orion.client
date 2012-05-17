@@ -48,11 +48,6 @@
 	max-width:700px;
 }
 
-.plugin-settings {
-    overflow-x: hidden;
-    width: 100%;
-}
-
 .activeBranch {
 	font-weight: bold;
 }

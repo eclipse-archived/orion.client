@@ -39,11 +39,6 @@
 	max-width:700px;
 }
 
-.plugin-settings {
-    overflow-x: hidden;
-    width: 100%;
-}
-
 pre {
 	margin-left: 10px;
     padding: 15px;
