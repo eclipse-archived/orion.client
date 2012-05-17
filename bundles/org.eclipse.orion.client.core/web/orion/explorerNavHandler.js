@@ -169,14 +169,13 @@ exports.ExplorerNavHandler = (function() {
 						that._selections.push(selections[i]);
 					}
 					if(that._selections.length > 0){
-						that.cursorOn(that._selections[0]);
+						that.cursorOn(that._selections[0], true);
 					}
 				});
 			}
 		},
 		
 		refreshModel: function(navDict, model, topIterationNodes, noReset){
-			this.refreshSelection();
 		    this._currentColumn = 0;
 			this.topIterationNodes = [];
 			this.model = model;
@@ -190,6 +189,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!noReset){
 				this._modelIterator.reset();
 			}
+			this.refreshSelection();
 		},
 		
 		_inSelection: function(model){
@@ -577,7 +577,7 @@ exports.ExplorerNavDict = (function() {
 	 * @param {Object} model The model object that represent the overall explorer.
 	 */
 	function ExplorerNavDict(model) {
-		this._dict= [];
+		this._dict= {};
 		this._model = model;
 	}
 	ExplorerNavDict.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavDict.prototype */ {
