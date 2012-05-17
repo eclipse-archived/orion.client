@@ -2306,7 +2306,7 @@ var exports = {};
 					return false;
 
 				for (var i = 0; i < items.length; i++) {
-					if (mGitUtil.isStaged(items[i]))
+					if (!mGitUtil.isChange(items[i]) || mGitUtil.isStaged(items[i]))
 						return false; 
 				}
 				return true;
@@ -2355,7 +2355,7 @@ var exports = {};
 					return false;
 
 				for (var i = 0; i < items.length; i++) {
-					if (!mGitUtil.isStaged(items[i]))
+					if (!mGitUtil.isChange(items[i]) || !mGitUtil.isStaged(items[i]))
 						return false; 
 				}
 				return true;
@@ -2470,7 +2470,7 @@ var exports = {};
 					return false;
 
 				for (var i = 0; i < items.length; i++) {
-					if (mGitUtil.isStaged(items[i]))
+					if (!mGitUtil.isChange(items[i]) || mGitUtil.isStaged(items[i]))
 						return false; 
 				}
 				return true;
