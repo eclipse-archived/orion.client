@@ -826,15 +826,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 								popup: subMenu
 							});
 							parent.addChild(groupPopup);
-							// asynchronously populate the menu
-							window.setTimeout(dojo.hitch(this, function() {
-								commandService._render(childContributions, subMenu, items, handler, renderType, userData, domNodeWrapperList); 
-								if (subMenu.getChildren().length === 0) {
-									groupPopup.set("label", "removeme");
-									parent.removeChild(groupPopup);
-									groupPopup.destroyRecursive();
-								}
-							}), 0);
+							commandService._render(childContributions, subMenu, items, handler, renderType, userData, domNodeWrapperList); 
+							if (subMenu.getChildren().length === 0) {
+								groupPopup.set("label", "removeme");
+								parent.removeChild(groupPopup);
+								groupPopup.destroyRecursive();
+							}
 						} else {  
 							// menu items with leading and trailing separators
 							// don't render a separator if there is nothing preceding, or if the last thing was a separator
