@@ -133,10 +133,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/widge
 			userdata.Name = settingsWidget.accountFields[1].getValue();
 			userdata.email = settingsWidget.accountFields[2].getValue();
 			
-			userdata.password = settingsWidget.passwordFields[1].getValue();
-			userdata.passwordRetype = settingsWidget.passwordFields[1].getValue();
+//			userdata.password = settingsWidget.passwordFields[1].getValue();
+//			userdata.passwordRetype = settingsWidget.passwordFields[1].getValue();
 
-			if( userdata.password === userdata.passwordRetype ){
+//			if( userdata.password === userdata.passwordRetype ){
 			
 			for(var i=0; i<authServices.length; i++){
 				var servicePtr = authServices[i];
@@ -154,9 +154,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/widge
 					});
 				});
 			}		
-			}else{
-				messageService.setProgressResult( 'New password, and retyped password do not match' );
-			}
+//			}else{
+//				messageService.setProgressResult( 'New password, and retyped password do not match' );
+//			}
 		},
 		
 		startUp:function(){

@@ -30,8 +30,8 @@ define(['require'],
 			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
 			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' +
 			'<div class="layoutRight">' +
-				'<div id="userInfo" class="layoutLeft primaryNav"></div>' +
-				'<div id="userMenu" class="spacingLeft layoutLeft textless"></div>' +
+				'<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' +
+				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' +
 			'</div>' +
 		'</div>' +
 		//Title area

@@ -13,10 +13,21 @@
 
 define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(require, dojo, dijit, mCommands, mUtil) {
 	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
+	
 		widgetsInTemplate: false,
 		id: "userMenu",
+		
+		templateString: '<table role="menu" tabIndex="${tabIndex}" dojoAttachEvent="onkeypress:_onKeyPress" cellspacing="0">' +
+						'<tbody class="dijitReset" dojoAttachPoint="containerNode"></tbody>' +
+						'</table>',
+		
+		label: 'test',
+		
 		postCreate : function() {
 			this.inherited(arguments);
+			
+			dojo.style( this.domNode, 'border-radius', '3px' );
+			dojo.style( this.domNode, 'border', '1px solid #DDD' );
 		},
 		
 		constructor : function() {
@@ -63,7 +74,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			
 			if(!authService){
 				var loginForm = this.unauthenticatedServices[key].SignInLocation;
-				if(loginForm.indexOf("?")==-1){
+				if(loginForm.indexOf("?")===-1){
 					loginForm+= "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
 				}else{
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
@@ -77,7 +88,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			}else if(authService.getAuthForm){
 				dojo.hitch(_self, function(key){
 					authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
-						if(loginForm.indexOf("?")==-1){
+						if(loginForm.indexOf("?")===-1){
 							loginForm+= "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
 						}else{
 							loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
@@ -105,6 +116,43 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			for(var i=0; i<children.length; i++){
 				this.removeChild(children[i]);
 			}
+			
+//			 this.addChild(new dijit.MenuItem({
+//				 label: "<a href="+require.toUrl("operations/list.html") + ">Background Operations</a>",
+//				 onKeyDown: function(evt){
+//					if(evt.keyCode === 13 || evt.keyCode === 32) {
+//						if(evt.ctrlKey) {
+//							window.open(require.toUrl("operations/list.html"));
+//						} else {
+//							window.location=require.toUrl("operations/list.html");
+//						}
+//					}
+//				 },
+//				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
+//			 }));
+			 
+			this.addChild(new dijit.MenuItem({
+				 label: "<a href="+require.toUrl("help/index.jsp") + ">Help</a>",
+				 onKeyDown: function(evt){
+					if(evt.keyCode === 13 || evt.keyCode === 32) {
+						if(evt.ctrlKey) {
+							window.open(require.toUrl("help/index.jsp"));
+						} else {
+							window.location=require.toUrl("help/index.jsp");
+						}
+					}
+				 },
+				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
+			 }));
+			if(this.keyAssistFunction){
+				this.addChild(new dijit.MenuItem({
+					 label: "Keyboard Shortcuts",
+					 onClick: this.keyAssistFunction
+				 }));	
+			}
+			
+			this.addChild(new dijit.MenuSeparator());
+			
 			if(this.isSingleService()){
 				//add sign out only for single service.
 				//When there are more services user may use Sign out on the tooltip that is always available 
@@ -125,53 +173,20 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				 },
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
-			 this.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("operations/list.html") + ">Background Operations</a>",
-				 onKeyDown: function(evt){
-					if(evt.keyCode === 13 || evt.keyCode === 32) {
-						if(evt.ctrlKey) {
-							window.open(require.toUrl("operations/list.html"));
-						} else {
-							window.location=require.toUrl("operations/list.html");
-						}
-					}
-				 },
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
-			 }));
-			 this.addChild(new dijit.MenuSeparator());
-			this.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("help/index.jsp") + ">Help</a>",
-				 onKeyDown: function(evt){
-					if(evt.keyCode === 13 || evt.keyCode === 32) {
-						if(evt.ctrlKey) {
-							window.open(require.toUrl("help/index.jsp"));
-						} else {
-							window.location=require.toUrl("help/index.jsp");
-						}
-					}
-				 },
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
-			 }));
-			if(this.keyAssistFunction){
-				this.addChild(new dijit.MenuItem({
-					 label: "Keyboard Help",
-					 onClick: this.keyAssistFunction
-				 }));	
-			}
 			
-			this.addChild(new dijit.MenuItem({
-				 label: "<a href='"+require.toUrl("help/about.html") + "'>About Orion</a>",
-				 onKeyDown: function(evt){
-					if(evt.keyCode === 13 || evt.keyCode === 32) {
-						if(evt.ctrlKey) {
-							window.open(require.toUrl("help/about.html"));
-						} else {
-							window.location=require.toUrl("help/about.html");
-						}
-					}
-				 },
-				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
-			 }));
+//			this.addChild(new dijit.MenuItem({
+//				 label: "<a href='"+require.toUrl("help/about.html") + "'>About Orion</a>",
+//				 onKeyDown: function(evt){
+//					if(evt.keyCode === 13 || evt.keyCode === 32) {
+//						if(evt.ctrlKey) {
+//							window.open(require.toUrl("help/about.html"));
+//						} else {
+//							window.location=require.toUrl("help/about.html");
+//						}
+//					}
+//				 },
+//				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
+//			 }));
 			
 		},
 		
@@ -234,7 +249,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				if(authService.getAuthForm){
 					dojo.hitch(this, function(key){
 						authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
-							if(loginForm.indexOf("?")==-1){
+							if(loginForm.indexOf("?")===-1){
 								loginForm+= "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;
 							}else{
 								loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key;

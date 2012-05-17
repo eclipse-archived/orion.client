@@ -14,7 +14,7 @@
 
 define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
-	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu'], 
+	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
         function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, mContentTypes, URITemplate, PageUtil){
 
 	/**
@@ -58,6 +58,39 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			dojo.hitch(progressService, progressService.init)("progressPane");
 		}
 	}
+	
+	function setUserName(registry, dropdown){
+			
+			var userService = registry.getService("orion.core.user");
+			
+			var authenticationIds = [];
+			
+			var authServices = registry.getServiceReferences("orion.core.auth");
+			
+			var settingsWidget = this;
+			
+			for(var i=0; i<authServices.length; i++){
+				var servicePtr = authServices[i];
+				var authService = registry.getService(servicePtr);		
+
+				authService.getKey().then(function(key){
+					authenticationIds.push(key);
+					authService.getUser().then(function(jsonData){
+					
+						var data = jsonData;
+						
+						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
+						
+							if( accountData.Name ){
+								dropdown.set( 'label', accountData.Name );
+							}else if( accountData.login ){
+								dropdown.set( 'label', accountData.login );
+							}						
+						});
+					});
+				});
+			}
+		}
 
 	/**
 	 * Adds the user-related commands to the toolbar
@@ -74,11 +107,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		}
 		
 		if(!dijit.byId('logins')){
-			var menuButton = new dijit.form.DropDownButton({
+			var menuButton = new orion.widgets.UserMenuDropDown({
 				id: "logins",
 				dropDown: userMenu,
 				label: "Options", 
-				showLabel: false
+				showLabel: true
 			});
 			dojo.addClass(menuButton.domNode, "commandMenu");
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
@@ -93,6 +126,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				label: "Options",
 				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands
 			});
+			
+			setUserName( serviceRegistry, menuButton );
 		}
 		
 		for(var i=0; i<authServices.length; i++){
@@ -106,7 +141,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 							loginDialog.addUserItem(key, authService, label, jsonData);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						}, 
-						function(errorData){
+						function(errorData, jsonData){
 							loginDialog.addUserItem(key, authService, label);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						});
@@ -145,7 +180,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						try{
 							dijit.popup.open({
 								popup: loginDialog,
-								around: dojo.byId('userInfo')
+								around: dojo.byId('userMenu')
 							});
 						}catch(e){}
 					}, 500);
@@ -153,7 +188,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					try{
 						dijit.popup.open({
 							popup: loginDialog,
-							around: dojo.byId('userInfo')
+							around: dojo.byId('userMenu')
 						});	
 					}catch(e){}
 				}
@@ -222,7 +257,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			linksMenu.destroy();
 		} 
 		linksMenu = new dijit.Menu({
-			style: "display: none;",
+			style: "display: none;padding:3px;border-radius:3px;",
 			id: "relatedLinksMenu"
 		});
 		return linksMenu;
