@@ -10,9 +10,10 @@
  ******************************************************************************/
 
 /*global define setTimeout*/
-define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
-		function(assert, mTest, Deferred, xhr, mEventTarget) {
+define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
+		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
+	var getTimeoutable = testHelpers.getTimeoutable;
 	/**
 	 * Fake version of XMLHttpRequest for testing without actual network accesses.
 	 */
@@ -105,48 +106,16 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		return d;
 	}
 
-	/**
-	 * Wraps a test body to ensure a test failure if the promise doesn't resolve.
-	 * @param {Function} func The test body (must return a promise).
-	 * @returns {Deferred}
-	 */
-	function withTimeout(func) {
-		return function() {
-			var wrapper = new Deferred();
-			var inner;
-			var innerPromiseFired = false;
-			try {
-				inner = func();
-				setTimeout(function() {
-					if (!innerPromiseFired) {
-						wrapper.reject('Timed out');
-					}
-				}, 3000);
-				inner.then(
-					function(result) {
-						innerPromiseFired = true;
-						wrapper.resolve(result);
-					}, function(err) {
-						innerPromiseFired = true;
-						wrapper.reject(err);
-					});
-			} catch (e) {
-				wrapper.reject(e);
-			}
-			return wrapper;
-		};
-	}
-
 	var tests = {};
-	tests['test GET resolve'] = withTimeout(function() {
+	tests['test GET resolve'] = getTimeoutable(function() {
 		return xhr('GET', '/', null, new OkXhr()).then(succeed, fail);
 	});
 
-	tests['test GET reject'] = withTimeout(function() {
+	tests['test GET reject'] = getTimeoutable(function() {
 		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
 	});
 
-	tests['test \'X-Requested-With\' is set'] = withTimeout(function() {
+	tests['test \'X-Requested-With\' is set'] = getTimeoutable(function() {
 		var d = new Deferred();
 		var headerCheckerXhr = new MockXMLHttpRequest();
 		headerCheckerXhr.send = function() {
@@ -162,7 +131,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		return d;
 	});
 
-	tests['test GET query params'] = withTimeout(function() {
+	tests['test GET query params'] = getTimeoutable(function() {
 		return xhr('GET', '/', {
 			query: {
 				'foo': 3,
@@ -174,7 +143,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, fail);
 	});
 
-	tests['test GET query params encoding'] = withTimeout(function() {
+	tests['test GET query params encoding'] = getTimeoutable(function() {
 		return xhr('GET', '/', {
 			query: {
 				'foo!bar': 31337,
@@ -186,7 +155,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, fail);
 	});
 
-	tests['test GET query params with fragment'] = withTimeout(function() {
+	tests['test GET query params with fragment'] = getTimeoutable(function() {
 		return xhr('GET', '/#some?junk&we?dont&care?about', {
 			query: {
 				'foo*bar': 'baz',
@@ -198,7 +167,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, fail);
 	});
 
-	tests['test GET query params with existing params and fragment'] = withTimeout(function() {
+	tests['test GET query params with existing params and fragment'] = getTimeoutable(function() {
 		return xhr('GET', '/?a%20=b#some?junk&we?dont&care?about', {
 			query: {
 				'foo*bar': 'baz'
@@ -209,7 +178,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		}, fail);
 	});
 
-	tests['test GET with headers'] = withTimeout(function() {
+	tests['test GET with headers'] = getTimeoutable(function() {
 		return xhr('GET', '/', {
 			headers: {
 				'X-Foo-Bar': 'baz'
@@ -218,7 +187,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		.then(succeed, fail);
 	});
 
-	tests['test open() exception causes reject'] = withTimeout(function() {
+	tests['test open() exception causes reject'] = getTimeoutable(function() {
 		var alreadyOpenXhr = new OkXhr();
 		alreadyOpenXhr.open('GET', '/foo');
 		// Since request is already OPEN the next call to open() will throw, and xhr should catch & reject
