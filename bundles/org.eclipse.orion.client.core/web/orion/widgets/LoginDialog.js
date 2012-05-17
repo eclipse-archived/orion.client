@@ -280,10 +280,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	},
 	getHostname : function(url) {
 		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
-	    var img = document.createElement('img');
-	    img.src = url; // set string url
-	    url = img.src; // get qualified url
-	    img.src = null; // no server request
+		var temp = document.createElement('a');
+		temp.href = url;
+	    url = temp.href; // get qualified url
 		return url.match(re)[1].toString();
 		},
 	closeDialog: function(){
