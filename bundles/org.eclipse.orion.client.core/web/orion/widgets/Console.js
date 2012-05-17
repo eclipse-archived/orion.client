@@ -59,10 +59,18 @@ define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/a
 
 				var inputText = document.createElement("input");
 				inputText.id = "gcli-input";
+				inputText.style.background = "transparent";
+				inputText.style.fontFamily = "inherit";
+				inputText.style.fontSize = "inherit";
+				inputText.style.paddingLeft = "1em";
+				inputText.style.width = "100%";
 				inputDiv.appendChild(inputText);
 
 				var rowCompleteDiv = document.createElement("div");
 				rowCompleteDiv.id = "gcli-row-complete";
+				rowCompleteDiv.style.position = "absolute";
+				rowCompleteDiv.style.top = "2px";
+				rowCompleteDiv.style.zIndex = "-1000";
 				inputDiv.appendChild(rowCompleteDiv);
 
 				mGCLI.createView();
