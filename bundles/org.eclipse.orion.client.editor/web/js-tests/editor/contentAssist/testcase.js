@@ -9,44 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout*/
-define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
-		function(dojo, DeferredList, assert, mTextModel, mMockTextView, mContentAssist) {
+define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
+		function(dojo, DeferredList, assert, testHelpers, mTextModel, mMockTextView, mContentAssist) {
 	var Deferred = dojo.Deferred,
+		getTimeoutable = testHelpers.getTimeoutable,
 	    ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
-
-	/**
-	 * Wraps a test body to ensure a test failure if the promise doesn't resolve.
-	 * @param {Function} func The test body (must return a promise).
-	 * @returns {Deferred}
-	 */
-	function createTestWithTimeout(func) {
-		return function() {
-			var wrapper = new Deferred();
-			var inner;
-			var innerPromiseFired = false;
-			try {
-				inner = func();
-				setTimeout(function() {
-					if (!innerPromiseFired) {
-						wrapper.reject('Timed out');
-					}
-				}, 3000);
-				inner.then(
-					function(result) {
-						innerPromiseFired = true;
-						wrapper.resolve(result);
-					}, function(err) {
-						innerPromiseFired = true;
-						wrapper.reject(err);
-					});
-			} catch (e) {
-				wrapper.reject(e);
-			}
-			return wrapper;
-		};
-	}
 
 	function withData(func) {
 		var view = new MockTextView({});
@@ -119,7 +88,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 
 	var tests = {};
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
-	tests.testComputeProposals = createTestWithTimeout(function() {
+	tests.testComputeProposals = getTimeoutable(function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
@@ -129,7 +98,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	});
 
 	// Tests that 'getProposals' works as an alias of 'computeProposals' (backwards compatibility)
-	tests.testGetProposals = createTestWithTimeout(function() {
+	tests.testGetProposals = getTimeoutable(function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
@@ -139,7 +108,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	});
 	
 	// Tests that active ContentAssist will call providers as we type.
-	tests.testFiltering = createTestWithTimeout(function() {
+	tests.testFiltering = getTimeoutable(function() {
 		var first = new Deferred(),
 		    second = new Deferred(),
 		    deferred = new DeferredList([first, second]);
@@ -190,7 +159,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	});
 
 	// Tests that Activating, Deactivating events are fired as expected.
-	tests.testEvents1 = createTestWithTimeout(function() {
+	tests.testEvents1 = getTimeoutable(function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
@@ -212,7 +181,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	});
 
 	// Tests that ProposalsComputed, ProposalsApplied events are fired as expected.
-	tests.testEvents2 = createTestWithTimeout(function() {
+	tests.testEvents2 = getTimeoutable(function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
