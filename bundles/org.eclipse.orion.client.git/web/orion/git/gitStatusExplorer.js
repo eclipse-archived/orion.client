@@ -344,18 +344,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri" : parentItem.diffURI, "Type": "Diff"}]);
+							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]);
 						} else {
 							onComplete([]);
 						}
 					},
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
-							return "root";
+							return "unstagedRoot";
 						} else if (mGitUtil.isChange(item)) {
-							return item.name;
+							return "unstaged" + item.name;
 						} else {
-							return item.diffUri;
+							return "unstaged" + item.diffUri;
 						}
 					}
 				};
@@ -399,7 +399,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									//commandSpanId: spanId,
+									commandSpanId: "unstaged" + item.parent.name + "actionswrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -417,7 +417,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						if (item.type){
-							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
+							var actionsColumn = this.getActionsColumn({}, tableRow, null, null, true);
 							return actionsColumn;
 						}
 						
@@ -503,18 +503,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri" : parentItem.diffURI, "Type": "Diff"}]);
+							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]);
 						} else {
 							onComplete([]);
 						}
 					},
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
-							return "root";
+							return "stagedRoot";
 						} else if (mGitUtil.isChange(item)) {
-							return item.name;
+							return "staged" + item.name;
 						} else {
-							return item.diffUri;
+							return "staged" + item.diffUri;
 						}
 					}
 				};
@@ -559,7 +559,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									//commandSpanId: diffSection.actionsNode.id,
+									commandSpanId: "staged" + item.parent.name + "actionswrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -577,7 +577,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						if (item.type){
-							var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
+							var actionsColumn = this.getActionsColumn({}, tableRow, null, null, true);
 							return actionsColumn;
 						}
 						
