@@ -91,7 +91,8 @@ exports.CompareStyler = (function() {
 		highlight: function(fileName, contentType, editorWidget, compareWidget, loadingNumber) {
 			this._syntaxHighlither.setup(contentType, editorWidget.getTextView(), 
 										 null, //passing an AnnotationModel allows the styler to use it to annotate tasks/comment folding/etc, but we do not really need this in compare editor
-										 fileName).then(function(){
+										 fileName,
+										 false /*bug 378193*/).then(function(){
 										 	if(compareWidget && loadingNumber){
 												editorWidget.highlightAnnotations();
 												editorWidget.setAnnotationRulerVisible(false);

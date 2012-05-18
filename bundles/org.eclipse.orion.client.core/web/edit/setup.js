@@ -129,7 +129,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							this.setTitle(fileURI);
 							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
 						}
-						syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI)
+						syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
 							.then(dojo.hitch(this, function() {
 								// TODO folding should be a preference.
 								var styler = syntaxHighlighter.getStyler();
