@@ -648,7 +648,6 @@ define(['require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler',
 		this._commandService = commandService;
 		this.fileClient = new mFileClient.FileClient(this.registry);
 		this.defaulRows = 40;
-		this.highlightSelection = false;
 		this.declareCommands();
 	}
 	
