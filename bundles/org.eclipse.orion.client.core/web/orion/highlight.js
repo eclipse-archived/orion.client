@@ -22,9 +22,10 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	 * @param {orion.textview.TextView} textView
 	 * @param {orion.textview.AnnotationModel} annotationModel
 	 * @param {String} [fileName] Deprecated.
+	 * @param {Boolean} [allowAsync=true]
 	 * @returns {Dojo.Deferred}
 	 */
-	function createStyler(serviceRegistry, contentTypeService, contentType, textView, annotationModel, fileName) {
+	function createStyler(serviceRegistry, contentTypeService, contentType, textView, annotationModel, fileName, allowAsync) {
 		// Returns a promise (if provider matches) or null (if it doesn't match).
 		function getPromise(provider, extension) {
 			var contentTypeIds = provider.getProperty("contentType"),
@@ -40,6 +41,9 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 				return d;
 			}
 			return null;
+		}
+		function isAllowed(provider) {
+			return allowAsync || provider.getProperty("type") !== "highlighter";
 		}
 		function createDefaultStyler(contentType) {
 			var styler = null;
@@ -88,7 +92,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			var provider;
 			for (var i = promises.length - 1; i >= 0; i--) {
 				var promise = promises[i][1];
-				if (promise) {
+				if (promise && isAllowed(promise)) {
 					provider = promise;
 					break;
 				}
@@ -125,9 +129,12 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		 * @param {orion.textview.AnnotationModel} annotationModel
 		 * @param {String} [fileName] <i>Deprecated.</i> For backwards compatibility only, service-contributed highlighters
 		 * will be checked against the file extension instead of contentType.
+		 * @param {Boolean} [allowAsync=true] If true, plugin-contributed asynchronous highlighters (i.e. <code>type == "highlighter"</code>
+		 * will be consulted. If false, only rule-based highlighters will be consulted.
 		 * @returns {dojo.Deferred} A promise that is resolved when this highlighter has been set up.
 		 */
-		setup: function(fileContentType, textView, annotationModel, fileName) {
+		setup: function(fileContentType, textView, annotationModel, fileName, allowAsync) {
+			allowAsync = typeof allowAsync === "undefined" ? true : allowAsync;
 			if (this.styler) {
 				if (this.styler.destroy) {
 					this.styler.destroy();
@@ -136,7 +143,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			}
 			var self = this;
 			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contenttypes"),
-				fileContentType, textView, annotationModel, fileName).then(
+				fileContentType, textView, annotationModel, fileName, allowAsync).then(
 					function(styler) {
 						self.styler = styler;
 						return styler;
