@@ -15,6 +15,12 @@ a.breadcrumb:visited {
 	color: #3087B3;
 }
 
+.breadcrumbSeparator {
+	font-size: 8pt;
+	text-decoration: none;
+	color: #808080;
+}
+
 .currentLocation {
 	font-weight: bold;
 	font-size: 10pt;

@@ -81,9 +81,9 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				crumbs.appendChild(seg);
 				if (this._resource && this._resource.Parents) {
 					slash = document.createElement('span');
-					dojo.place(document.createTextNode(' >> '), slash, "only");
+					dojo.place(document.createTextNode(' / '), slash, "only");
 					this.path+="/";
-					dojo.addClass(slash, "breadcrumb");
+					dojo.addClass(slash, "breadcrumbSeparator");
 					crumbs.appendChild(slash);
 				} else {
 					// we are at the root.  Get rid of any href since we are already here
@@ -112,15 +112,15 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 						}
 						crumbs.appendChild(seg);
 						slash = document.createElement('span');
-						dojo.place(document.createTextNode(' >> '), slash, "only");
+						dojo.place(document.createTextNode(' / '), slash, "only");
 						this.path += '/';
-						dojo.addClass(slash, "breadcrumb");
+						dojo.addClass(slash, "breadcrumbSeparator");
 						crumbs.appendChild(slash);
 					}
 				}
 				//add a final entry for the current location
 				seg = document.createElement('span');
-				dojo.place("<br>" + this._resource.Name, seg, "only");
+				dojo.place(document.createTextNode(this._resource.Name), seg, "only");
 				dojo.addClass(seg, "currentLocation");
 				this.path+=this._resource.Name;
 				crumbs.appendChild(seg);
