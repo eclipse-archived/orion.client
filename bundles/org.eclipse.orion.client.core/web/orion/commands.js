@@ -1078,7 +1078,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
-			mNavUtils.generateNavGrid(domNodeWrapperList, image);
+			mNavUtils.generateNavGrid(domNodeWrapperList, element);
 		},
 	
 		/*
