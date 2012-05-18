@@ -31,7 +31,6 @@ exports.Explorer = (function() {
 		this.registry = serviceRegistry;
 		this.renderer = renderer;
 		this.selection = selection;
-		this.highlightSelection = true;
 		this.myTree = null;
 	}
 	Explorer.prototype = /** @lends orion.explorer.Explorer.prototype */ {
@@ -87,6 +86,12 @@ exports.Explorer = (function() {
 		 * @param options optional parameters of the tree(custom indent, onCollapse callback)
 		 */
 		createTree: function (parentId, model, options){
+			if(this.selection) {
+				this.selection.setSelections([]);
+			}
+			if(this.getNavHandler()){
+				this.getNavHandler()._clearSelection();
+			}
 			var treeId = parentId + "innerTree";
 			var existing = dojo.byId(treeId);
 			if (existing) {
@@ -96,8 +101,11 @@ exports.Explorer = (function() {
 				model.rootId = treeId;
 			}
 			this.model = model;
+			this._parentId = parentId;
+			this._treeOptions = options;
 			var useSelection = !options || (options && !options.noSelection);
 			if(useSelection){
+				this.selectionPolicy = options ? options.selectionPolicy : "";
 				this._navDict = new mNavHandler.ExplorerNavDict(this.model);
 			}
 			this.myTree = new mTreeTable.TableTree({
@@ -112,21 +120,33 @@ exports.Explorer = (function() {
 				tableStyle: "mainPadding"
 			});
 			this.renderer._initializeUIState();
-			if(useSelection){
-				this._initNavHandler(parentId, options);
+			if(this.selectionPolicy === "cursorOnly"){
+				this.initNavHandler();
 			}
 		},
-		/*
-		getSelectionModel: function(){
-			return this._selectionModel;
-		},
-		*/
 		getNavHandler: function(){
 			return this._navHandler;
 		},
 		
 		getNavDict: function(){
 			return this._navDict;
+		},
+		
+		refreshSelection: function(){
+			if(this.selection) {
+				var navHandler = this.getNavHandler();
+				var selections = [];
+				if(navHandler && this.getNavDict()){
+					var existingSels = navHandler.getSelection();
+					for(var i = 0; i < existingSels.length; i++){
+						var rowDiv = navHandler.getRowDiv(existingSels[i]);
+						if(rowDiv && rowDiv.parentNode){
+							selections.push(existingSels[i]);
+						}
+					}
+				}
+				this.selection.setSelections(selections);
+			}
 		},
 		
 		getRootPath: function() {
@@ -136,7 +156,14 @@ exports.Explorer = (function() {
 			return null;
 		},
 		
-		_initNavHandler: function(parentId, options){
+		initNavHandler: function(){
+			var parentId = this._parentId;
+			var options = this._treeOptions;
+			
+			var useSelection = !options || (options && !options.noSelection);
+			if(!useSelection){
+				return;
+			}
 			if(!this.getNavHandler()){
 				dojo.attr(parentId, "tabIndex", 0);
 				this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
@@ -477,6 +504,7 @@ exports.ExplorerRenderer = (function() {
 			});
 			return expandImage;
 		},
+		
 		render: function(item, tableRow){
 			dojo.addClass(tableRow, "navRow");
 			this.renderRow(item, tableRow);
@@ -495,10 +523,10 @@ exports.ExplorerRenderer = (function() {
 				});
 			}
 			// notify the selection service of the change in state.
-			/*
-			if(this.explorer.selection) {
-				this.explorer.selection.setSelections(this.getSelected());
-			}*/
+			if(this.explorer.selectionPolicy !== "cursorOnly"){
+				this.explorer.refreshSelection();
+				this.explorer.initNavHandler();			
+			}
 		},
 		updateCommands: function(){
 			var registry = this.explorer.registry;

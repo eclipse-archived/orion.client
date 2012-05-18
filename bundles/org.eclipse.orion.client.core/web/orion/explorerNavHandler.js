@@ -142,7 +142,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){
 				return this.explorer.keyEventListeningDiv();
 			}
-			return this.explorer.myTree._parent;
+			return dojo.byId(this.explorer._parentId);
 		},
 		
 		isExpandable: function(model){
@@ -208,7 +208,8 @@ exports.ExplorerNavHandler = (function() {
 					this._checkRow(this._selections[i], true);
 				}
 			}
-			this._selections.splice(0, this._selections.length);
+			this._selections = [];
+			//this._selections.splice(0, this._selections.length);
 		},
 		
 		setSelection: function(model, toggling){
@@ -394,7 +395,7 @@ exports.ExplorerNavHandler = (function() {
 			if (rowDiv.offsetWidth === 0 || rowDiv.offsetHeight === 0) {
 				return false;
 			}
-		    var parentNode = this.explorer.myTree._parent;
+		    var parentNode = this._getEventListeningDiv();
 			var parentRect = parentNode.getClientRects()[0],
 			rects = rowDiv.getClientRects();
 			for (var i = 0, l = rects.length; i < l; i++) {
@@ -411,9 +412,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				model = this._modelIterator.cursor();
 			}
-			if(this.explorer.highlightSelection){
-				dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
-			}
+			dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
 		},
 		
 		_onModelGrid: function(model, mouseEvt){
