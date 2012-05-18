@@ -67,6 +67,12 @@ a:hover {
 .layoutLeft {
 	float: left;
 	margin: 0;
+	margin-top:5px !important;
+}
+
+.layoutLeftBanner {
+	float: left;
+	margin: 0;
 }
 
 .layoutRight {
@@ -181,6 +187,13 @@ a:hover {
 	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 	margin-top: 2px;
 	vertical-align: baseline;
+}
+
+.sectionAnchor{
+	line-height:16px;
+	font-size:10pt;
+	color: #444;
+	font-weight:normal;
 }
 
 .pageNavigationActions {
@@ -347,7 +360,7 @@ a:hover {
 
 .auxpane {
 	border: 0;
-    background: #f6f6f6;
+    background: #fbfbfb;
     overflow-x: auto;
     min-width: 200px;
     padding-top: 16px;
@@ -718,7 +731,7 @@ a:hover {
 }
 
 .checkedRow {
-	background-color: #e3e3e3 !important;
+	background-color: #FFC !important; /* was e3e3e3 */
 }
 
 .testResult {
@@ -765,11 +778,11 @@ a:hover {
 }
 
 .lightTreeTableRow > td {
-	border-bottom: 1px solid #e6e6e6;
+	border-bottom: 1px solid whiteSmoke;
 }
 
 .darkTreeTableRow > td {
-	border-bottom: 1px solid #e6e6e6;
+	border-bottom: 1px solid whiteSmoke;
 }
 
 .testNavTreetable {

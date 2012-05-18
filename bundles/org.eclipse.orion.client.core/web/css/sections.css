@@ -30,23 +30,30 @@
 	text-align: right;
 }
 
+.displayTable {
+	padding-left:20px;
+	padding-right:20px;
+}
+
 .sectionWrapper {
 	margin-top: 15px;
 	padding-top: 5px;
 	padding-left: 5px;
-    border: 1px solid #e6e6e6;
-    background-color: #f8f8f8;
-	border-radius:4px;
+	border-bottom: 1px solid #DDD;
+	/* background-color: #F8F8F8; */
+	/* padding-bottom: 6px; */
 	margin-right: 8px;
 	min-height: 26px;
 	vertical-align: middle;
 	font-weight: bold;
-	color: #808080;
+	color: gray;
+	padding-bottom:3px;
+	margin-bottom:5px;
 }
 
 .sectionWrapperAux {
-    background-color: #fafafa;
-	border: 1px solid #ebebeb;
+    /* background-color: #fafafa;
+	border: 1px solid #ebebeb; */
 }
 
 .sectionProgress {

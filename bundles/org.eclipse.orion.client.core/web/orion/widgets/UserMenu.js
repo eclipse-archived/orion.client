@@ -64,7 +64,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 								localStorage.removeItem(key);
 								}));};
 							})(authService, key)
-					}), startIndex);
+					}));
 			}
 		},
 		
@@ -153,13 +153,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			
 			this.addChild(new dijit.MenuSeparator());
 			
-			if(this.isSingleService()){
-				//add sign out only for single service.
-				//When there are more services user may use Sign out on the tooltip that is always available 
-				for(var i in this.authenticatedServices){
-					this._renderAuthenticatedService(i, 0);
-				}
-			}
+			
 			 this.addChild(new dijit.MenuItem({
 				 label: "<a href="+require.toUrl("settings/settings.html") + ">Settings</a>",
 				 onKeyDown: function(evt){
@@ -173,6 +167,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				 },
 				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 			 }));
+			 
+			 if(this.isSingleService()){
+				//add sign out only for single service.
+				//When there are more services user may use Sign out on the tooltip that is always available 
+				for(var i in this.authenticatedServices){
+					this._renderAuthenticatedService(i, 0);
+				}
+			}
 			
 //			this.addChild(new dijit.MenuItem({
 //				 label: "<a href='"+require.toUrl("help/about.html") + "'>About Orion</a>",
@@ -200,6 +202,10 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			} else {
 				return userData.label;
 			}
+		},
+		
+		setUserName: function( name ){
+		
 		},
 		
 		setKeyAssist: function(keyAssistFunction){

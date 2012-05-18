@@ -149,7 +149,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/widge
 						var data = jsonData;
 						
 						var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-							messageService.setProgressResult('changed');
+							messageService.setProgressResult( 'User profile data successfully reset.' );
+							
+							if( userdata.Name ){
+							
+								var userMenu = dijit.byId( 'logins' );
+								
+								userMenu.set( 'label', userdata.Name  );
+							
+							}
+							
 						});
 					});
 				});
