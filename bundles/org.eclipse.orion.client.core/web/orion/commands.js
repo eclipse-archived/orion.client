@@ -1404,18 +1404,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 	 * A CommandParameter defines a parameter that is required by a command.
 	 *
 	 * @param {String} name the name of the parameter
-	 * @param {String} type the type of the parameter, one of the HTML5 input types
+	 * @param {String} type the type of the parameter, one of the HTML5 input types, or "boolean"
 	 * @param {String} [label] the (optional) label that should be used when showing the parameter
 	 * @param {String} [value] the (optional) default value for the parameter
+	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
+	 *
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
 	 */
-	function CommandParameter (name, type, label, value) {
+	function CommandParameter (name, type, label, value, lines) {
 		this.name = name;
 		this.type = type;
 		this.label = label;
 		this.value = value;
+		this.lines = lines || 1;
 	}
 	CommandParameter.prototype = /** @lends orion.commands.CommandParameter.prototype */ {
 		/**
@@ -1562,7 +1565,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 		 makeCopy: function() {
 			var parameters = [];
 			this.forEach(function(parm) {
-				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines);
 				parameters.push(newParm);
 			});
 			return new ParametersDescription(parameters, this._options, this.getParameters);
