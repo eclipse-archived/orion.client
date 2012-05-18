@@ -141,7 +141,10 @@ exports.Explorer = (function() {
 					for(var i = 0; i < existingSels.length; i++){
 						var rowDiv = navHandler.getRowDiv(existingSels[i]);
 						if(rowDiv && rowDiv.parentNode){
-							selections.push(existingSels[i]);
+							var value = this.getNavDict().getValue(this.model.getId(existingSels[i]));
+							if(value.model){
+								selections.push(value.model);
+							}
 						}
 					}
 				}
