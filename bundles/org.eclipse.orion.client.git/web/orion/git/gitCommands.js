@@ -2366,7 +2366,7 @@ var exports = {};
 		commandService.addCommand(unstageCommand);
 		
 		var commitMessageParameters = new mCommands.ParametersDescription(
-			[new mCommands.CommandParameter('name', 'text', 'Commit message:'), new mCommands.CommandParameter('amend', 'boolean', 'Amend:', false)],
+			[new mCommands.CommandParameter('name', 'text', 'Commit message:', "", 4), new mCommands.CommandParameter('amend', 'boolean', 'Amend:', false)],
 			 {hasOptionalParameters: true});
 		
 		var commitCommand = new mCommands.Command({
