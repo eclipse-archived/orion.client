@@ -110,6 +110,7 @@ OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
 OrionTestCase("extensionParsing", "/js-tests/extensionParsing/test.html");
 OrionTestCase("xhr", "/js-tests/xhr/test.html");
+OrionTestCase("config", "/js-tests/config/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");

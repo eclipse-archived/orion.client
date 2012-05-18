@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document */
+/*global define dojo dijit console document window */
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
         'orion/breadcrumbs', 'orion/git/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], 
@@ -222,7 +222,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			// TODO add info about branch or detached
 			
-			item.Name = "Status" + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") != -1) ? " (Rebase in Progress)" : "");
+			item.Name = "Status" + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") !== -1) ? " (Rebase in Progress)" : "");
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = repository.Name;
@@ -283,7 +283,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				return 0;
 			}); 
 			return retValue;
-		},
+		};
 
 		// Git unstaged changes
 		
@@ -372,7 +372,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				}
 				
 				UnstagedRenderer.prototype = new mExplorer.SelectionRenderer();
-				
+				UnstagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
+					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
+					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper");
+					if (compareActions) {
+						if (isExpanded) {
+							dojo.style(compareActions, "display", "block");
+						} else {
+							dojo.style(compareActions, "display", "none");
+						}
+					}
+				};
+
 				UnstagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
 					switch(col_no){
 					case 0:		
@@ -394,12 +405,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
-
-							setTimeout(function(){
+							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									commandSpanId: "unstaged" + item.parent.name + "actionswrapper",
+									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -416,13 +426,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 						break;
 					case 1:
+						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
 						if (item.type){
-							var actionsColumn = this.getActionsColumn({}, tableRow, null, null, true);
+							var actionsColumn = document.createElement('td');
+							actionsColumn.id = tableRow.id + "actionswrapper";
+							dojo.addClass(actionsColumn, "sectionExplorerActions");
+							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged"+item.name+"compareActionWrapper"}, actionsColumn, "last");
 							return actionsColumn;
 						}
-						
 						break;
-					};
+					}
 				};
 				
 				return UnstagedRenderer;
@@ -532,6 +545,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				
 				StagedRenderer.prototype = new mExplorer.SelectionRenderer();
 				
+				StagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
+					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
+					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper");
+					if (compareActions) {
+						if (isExpanded) {
+							dojo.style(compareActions, "display", "block");
+						} else {
+							dojo.style(compareActions, "display", "none");
+						}
+					}
+				};
+				
 				StagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 					switch(col_no){
 					case 0:		
@@ -555,11 +580,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
 
-							setTimeout(function(){
+							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									commandSpanId: "staged" + item.parent.name + "actionswrapper",
+									commandSpanId: "staged" + item.parent.name + "compareActionWrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -576,13 +601,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 						break;
 					case 1:
+						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
 						if (item.type){
-							var actionsColumn = this.getActionsColumn({}, tableRow, null, null, true);
+							var actionsColumn = document.createElement('td');
+							actionsColumn.id = tableRow.id + "actionswrapper";
+							dojo.addClass(actionsColumn, "sectionExplorerActions");
+							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "staged"+item.name+"compareActionWrapper"}, actionsColumn, "last");
 							return actionsColumn;
 						}
-						
 						break;
-					};
+					}
 				};
 				
 				return StagedRenderer;
@@ -685,7 +713,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						}
 					}
 					
-					var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+					var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 					
 					commitSection.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
 					
@@ -704,7 +732,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.push", 100);
 					that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, currentBranch, that, "button"); 
 					
-					if (currentBranch.RemoteLocation[0] == null){
+					if (currentBranch.RemoteLocation[0] === null){
 						dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
 						that.renderNoCommit();
 						return;
@@ -799,14 +827,14 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					dijit.popup.close(tooltipDialog);
 	            },
 	            onMouseEnter: function(){
-			    	clearTimeout(_timer);
+			    	window.clearTimeout(_timer);
 	            }
 			});
 			
 			dojo.connect(titleLink, "onmouseover", titleLink, function() {
-				clearTimeout(_timer);
+				window.clearTimeout(_timer);
 				
-				_timer = setTimeout(function(){
+				_timer = window.setTimeout(function(){
 					dijit.popup.open({
 						popup: tooltipDialog,
 						around: titleLink,
@@ -816,9 +844,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			});
 			
 			dojo.connect(titleLink, "onmouseout", titleLink, function() {
-				clearTimeout(_timer);
+				window.clearTimeout(_timer);
 				
-				_timer = setTimeout(function(){
+				_timer = window.setTimeout(function(){
 					if(dijit.popup.hide)
 						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
 					dijit.popup.close(tooltipDialog);

@@ -111,7 +111,7 @@ dojo.addOnLoad(function(){
 		//new file and new folder in the nav bar do not label the group (we don't want a menu)
 		commandService.registerCommandContribution("pageActions", "eclipse.newFile", 1);
 		commandService.registerCommandContribution("pageActions", "eclipse.newFolder", 2, null, false, null, new mCommands.URLBinding("newFolder", "name"));
-		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, false, new mCommands.CommandKeyBinding(38, false, false, true));
+		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, true, new mCommands.CommandKeyBinding(38, false, false, true));
 		// new project creation in the toolbar (in a group)
 		commandService.registerCommandContribution("pageActions", "orion.new.project", 1, "orion.new");
 		commandService.registerCommandContribution("pageActions", "orion.new.zip", 2, "orion.new");
