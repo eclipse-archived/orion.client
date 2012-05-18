@@ -224,11 +224,19 @@ a:hover {
 .parameterInput {
 	margin-right: 16px;
 	font-weight: normal;
-	vertical-align: middle;
+	vertical-align: baseline;
 }
 
 .parameterInputurl {
 	width: 30em;
+}
+
+.parameterInputcheckbox {
+	width: auto;
+}
+
+.parameterInputtextarea {
+	vertical-align: top;
 }
 
 .navTableHeading {
@@ -251,6 +259,11 @@ a:hover {
 	display: inline-block;
 	padding: 4px;
 	vertical-align: baseline;
+}
+
+.singleNavColumn {
+	width: 100%;
+	white-space: nowrap;
 }
 
 .actionsColumn {

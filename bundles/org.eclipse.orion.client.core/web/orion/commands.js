@@ -761,16 +761,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 							}
 							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
 							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-							if (group.title === "*") {
-								dojo.addClass(menuButton.domNode, "textless");
-								new CommandTooltip({
-									connectId: [menuButton.focusNode],
-									label: "Actions menu",
-									position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
-									commandParent: parent,
-									commandService: this
-								});
-							}
 							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
 							dojo.place(menuButton.domNode, menuParent, "last");
 							// we'll need to identify a menu with the dom id of its original parent
@@ -932,9 +922,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 								command._addTool(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "button") {
 								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addButton(parent, id, invocation);	
+								command._addButton(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "menu") {
-								command._addMenuItem(parent, invocation);
+								command._addMenuItem(parent, invocation, domNodeWrapperList);
 							}
 						}
 					} 
@@ -1078,7 +1068,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
-			mNavUtils.generateNavGrid(domNodeWrapperList, image);
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 	
 		/*
@@ -1086,7 +1076,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is a text button.  If there is no name, use an image.
 		 */
-		_addButton: function(parent, name, context) {
+		_addButton: function(parent, name, context, domNodeWrapperList) {
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
@@ -1129,8 +1119,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
-		_addMenuItem: function(parent, context) {
+		_addMenuItem: function(parent, context, domNodeWrapperList) {
 			context.domParent = parent.domNode;
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
@@ -1189,7 +1180,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				menuitem.iconNode.src = this.image;
 			}
 			context.domNode = menuitem.domNode;
-
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 		
 		/*
@@ -1404,18 +1395,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 	 * A CommandParameter defines a parameter that is required by a command.
 	 *
 	 * @param {String} name the name of the parameter
-	 * @param {String} type the type of the parameter, one of the HTML5 input types
+	 * @param {String} type the type of the parameter, one of the HTML5 input types, or "boolean"
 	 * @param {String} [label] the (optional) label that should be used when showing the parameter
 	 * @param {String} [value] the (optional) default value for the parameter
+	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
+	 *
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
 	 */
-	function CommandParameter (name, type, label, value) {
+	function CommandParameter (name, type, label, value, lines) {
 		this.name = name;
 		this.type = type;
 		this.label = label;
 		this.value = value;
+		this.lines = lines || 1;
 	}
 	CommandParameter.prototype = /** @lends orion.commands.CommandParameter.prototype */ {
 		/**
@@ -1562,7 +1556,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 		 makeCopy: function() {
 			var parameters = [];
 			this.forEach(function(parm) {
-				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines);
 				parameters.push(newParm);
 			});
 			return new ParametersDescription(parameters, this._options, this.getParameters);

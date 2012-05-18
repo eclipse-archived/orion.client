@@ -142,8 +142,7 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 		if (item.query) {
 			href=require.toUrl("search/search.html") + "#" + item.query;
 			var col = dojo.create("td", null, tableRow, "last");
-			dojo.addClass(col, "navli");
-			dojo.style(col, "whiteSpace", "nowrap");
+			dojo.addClass(col, "mainNavColumn singleNavColumn");
 			var link = dojo.create("a", {href: href, className: "navlinkonpage"}, col, "only");
 			dojo.place(window.document.createTextNode(item.name), link, "only");
 		} 
@@ -252,7 +251,8 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 					title: "Searches",
 					content: '<div id="searchContent"></div>',
 					useAuxStyle: true,
-					preferenceService: serviceRegistry.getService("orion.core.preference")
+					preferenceService: serviceRegistry.getService("orion.core.preference"),
+					slideout: true
 				});
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
 				// add commands to the search section heading

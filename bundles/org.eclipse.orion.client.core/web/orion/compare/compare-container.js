@@ -129,6 +129,7 @@ exports.CompareContainer = (function() {
 				this.options.mapper = options.mapper ? options.mapper : this.options.mapper;
 				
 				this.options.commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this.options.commandSpanId;
+				this.options.navGridHolder = options.navGridHolder || this.options.navGridHolder;
 				this.options.readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this.options.readonly;
 				this.options.wordLevelNav = (options.wordLevelNav !== undefined &&  options.wordLevelNav !== null) ? options.wordLevelNav : this.options.wordLevelNav;
 				this.options.charDiff = (options.charDiff !== undefined &&  options.charDiff !== null) ? options.charDiff : this.options.charDiff;
@@ -282,7 +283,7 @@ exports.CompareContainer = (function() {
 				return;
 			}
 			dojo.empty(commandSpanId);
-			this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button");
+			this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.navGridHolder);
 		},
 		
 		generateLink: function(){	
