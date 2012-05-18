@@ -13,7 +13,8 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ContentDialog'], 
+        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 
+        'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
         function(require, dojo, mCommands, mUtil, mGitUtil) {
 
 /**
@@ -2365,7 +2366,8 @@ var exports = {};
 		commandService.addCommand(unstageCommand);
 		
 		var commitMessageParameters = new mCommands.ParametersDescription(
-			[new mCommands.CommandParameter('name', 'text', 'Commit message:'), new mCommands.CommandParameter('amend', 'boolean', 'Amend:', false)]);
+			[new mCommands.CommandParameter('name', 'text', 'Commit message:'), new mCommands.CommandParameter('amend', 'boolean', 'Amend:', false)],
+			 {hasOptionalParameters: true});
 		
 		var commitCommand = new mCommands.Command({
 			name: "Commit",
@@ -2375,18 +2377,44 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				
+				var commitFunction = function(body){		
+					var progressService = serviceRegistry.getService("orion.page.message");
+					progressService.createProgressMonitor(
+						serviceRegistry.getService("orion.git.provider").commitAll(item.CommitLocation, null, dojo.toJson(body)),
+						"Committing changes").deferred.then(
+						function(jsonData){
+							dojo.hitch(explorer, explorer.changedItem)(item);
+						}, displayErrorOnStatus
+					);
+				};
+				
 				var body = {};
 				body.Message = data.parameters.valueFor("name");
 				body.Amend = data.parameters.valueFor("amend");
 				
-				var progressService = serviceRegistry.getService("orion.page.message");
-				progressService.createProgressMonitor(
-					serviceRegistry.getService("orion.git.provider").commitAll(item.CommitLocation, null, dojo.toJson(body)),
-					"Committing changes").deferred.then(
-					function(jsonData){
-						dojo.hitch(explorer, explorer.changedItem)(item);
-					}, displayErrorOnStatus
-				);
+				var config = item.Clone.Config;
+				for (var i=0; i < config.length; i++){
+					if (config[i].Key === "user.name"){
+						body.CommitterName = config[i].Value;
+						body.AuthorName = config[i].Value;
+					} else if (config[i].Key === "user.email"){
+						body.CommitterEmail = config[i].Value;
+						body.AuthorEmail = config[i].Value;
+					}					
+				}
+				
+
+				if (body.Message && body.CommitterName && body.CommitterEmail && !data.parameters.optionsRequested) {
+					commitFunction(body);
+				} else {
+					var dialog = new orion.git.widgets.CommitDialog({
+						body: body,
+						func: commitFunction
+					});
+							
+					dialog.startup();
+					dialog.show();
+				}
 			},
 			visibleWhen: function(item) {
 				return mGitUtil.hasStagedChanges(item);

@@ -183,24 +183,37 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						
 						that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation).then(
 							function(resp){
-								loadingDeferred.callback();
 								var repositories = resp.Children;
 								
-								// TODO this is a workaround for missing shaping resource feature
-								status.Clone = repositories[0];
-								
-								var tableNode = dojo.byId( 'table' );	
-								dojo.empty( tableNode );
-								
-								that.initTitleBar(status, repositories[0]);
-				
-								that.displayUnstaged(status, repositories[0]);
-								that.displayStaged(status, repositories[0]);
-//								that.displayDiffs(status);
-								that.displayCommits(repositories[0]);
-								
-								// render commands
-								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status);
+								that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation).then(
+									function(resp){
+										loadingDeferred.callback();
+										var config = resp.Children;
+										
+										status.Clone = repositories[0];
+										status.Clone.Config = [];
+										
+										for (var i=0; i < config.length; i++){
+											if (config[i].Key === "user.name" || config[i].Key === "user.email")
+												status.Clone.Config.push(config[i])
+										}
+										
+										var tableNode = dojo.byId( 'table' );	
+										dojo.empty( tableNode );
+										
+										that.initTitleBar(status, repositories[0]);
+						
+										that.displayUnstaged(status, repositories[0]);
+										that.displayStaged(status, repositories[0]);
+										that.displayCommits(repositories[0]);
+										
+										// render commands
+										mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status);
+									}, function (error) {
+										loadingDeferred.callback();
+										dojo.hitch(that, that.handleError)(error);
+									}
+								);
 							}, function (error) {
 								loadingDeferred.callback();
 								dojo.hitch(that, that.handleError)(error);
