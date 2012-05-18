@@ -922,9 +922,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 								command._addTool(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "button") {
 								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addButton(parent, id, invocation);	
+								command._addButton(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "menu") {
-								command._addMenuItem(parent, invocation);
+								command._addMenuItem(parent, invocation, domNodeWrapperList);
 							}
 						}
 					} 
@@ -1068,7 +1068,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
-			mNavUtils.generateNavGrid(domNodeWrapperList, element);
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 	
 		/*
@@ -1076,7 +1076,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is a text button.  If there is no name, use an image.
 		 */
-		_addButton: function(parent, name, context) {
+		_addButton: function(parent, name, context, domNodeWrapperList) {
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
@@ -1119,8 +1119,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				dojo.addClass(element, "commandMargins");
 			}
 			dojo.place(element, parent, "last");
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
-		_addMenuItem: function(parent, context) {
+		_addMenuItem: function(parent, context, domNodeWrapperList) {
 			context.domParent = parent.domNode;
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text",
@@ -1179,7 +1180,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				menuitem.iconNode.src = this.image;
 			}
 			context.domNode = menuitem.domNode;
-
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 		
 		/*
