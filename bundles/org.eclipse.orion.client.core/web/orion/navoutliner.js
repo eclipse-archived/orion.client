@@ -46,8 +46,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 		}
 
 		var col = dojo.create("td", null, tableRow, "last");
-		dojo.addClass(col, "mainNavColumn");
-		dojo.style(col, "whiteSpace", "nowrap");
+		dojo.addClass(col, "mainNavColumn singleNavColumn");
 		var link = dojo.create("a", {href: href, className: clazz}, col, "only");
 		dojo.place(window.document.createTextNode(name), link, "only");
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
@@ -171,7 +170,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 							content: '<div id="fileSystemsContent"></div>',
 							preferenceService: serviceRegistry.getService("orion.core.preference"),
 							canHide: true,
-							useAuxStyle: true
+							useAuxStyle: true,
+							slideout: true
 						});
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
@@ -192,7 +192,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 					content: '<div id="favoritesContent"></div>',
 					preferenceService: serviceRegistry.getService("orion.core.preference"),
 					canHide: true,
-					useAuxStyle: true
+					useAuxStyle: true,
+					slideout: true
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
 				// add commands to the fave section heading

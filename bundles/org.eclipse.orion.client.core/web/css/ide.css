@@ -253,6 +253,11 @@ a:hover {
 	vertical-align: baseline;
 }
 
+.singleNavColumn {
+	width: 100%;
+	white-space: nowrap;
+}
+
 .actionsColumn {
 	min-width: 300px;
 	text-align: right;
