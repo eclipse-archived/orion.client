@@ -298,9 +298,11 @@ exports.ExplorerNavHandler = (function() {
 		
 		toggleCursor:  function(model, on){
 			var currentRow = this.getRowDiv(model);
-			dojo.toggleClass(currentRow, "treeIterationCursorRow", on);
+			if(currentRow){
+				dojo.toggleClass(currentRow, "treeIterationCursorRow", on);
+			}
 			var currentgrid = this.getCurrentGrid(model);
-			if(currentgrid) {
+			if(currentgrid && currentgrid.domNode) {
 				dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on);
 			}
 		},
@@ -412,7 +414,10 @@ exports.ExplorerNavHandler = (function() {
 			if(!model){
 				model = this._modelIterator.cursor();
 			}
-			dojo.toggleClass(this.getRowDiv(model), "checkedRow", this._inSelection(model) < 0);
+			var rowDiv = this.getRowDiv(model);
+			if(rowDiv){
+				dojo.toggleClass(rowDiv, "checkedRow", this._inSelection(model) < 0);
+			}
 		},
 		
 		_onModelGrid: function(model, mouseEvt){
