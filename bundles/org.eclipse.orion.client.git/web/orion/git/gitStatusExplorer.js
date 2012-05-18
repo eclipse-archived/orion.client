@@ -183,24 +183,37 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						
 						that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation).then(
 							function(resp){
-								loadingDeferred.callback();
 								var repositories = resp.Children;
 								
-								// TODO this is a workaround for missing shaping resource feature
-								status.Clone = repositories[0];
-								
-								var tableNode = dojo.byId( 'table' );	
-								dojo.empty( tableNode );
-								
-								that.initTitleBar(status, repositories[0]);
-				
-								that.displayUnstaged(status, repositories[0]);
-								that.displayStaged(status, repositories[0]);
-//								that.displayDiffs(status);
-								that.displayCommits(repositories[0]);
-								
-								// render commands
-								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status);
+								that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation).then(
+									function(resp){
+										loadingDeferred.callback();
+										var config = resp.Children;
+										
+										status.Clone = repositories[0];
+										status.Clone.Config = [];
+										
+										for (var i=0; i < config.length; i++){
+											if (config[i].Key === "user.name" || config[i].Key === "user.email")
+												status.Clone.Config.push(config[i])
+										}
+										
+										var tableNode = dojo.byId( 'table' );	
+										dojo.empty( tableNode );
+										
+										that.initTitleBar(status, repositories[0]);
+						
+										that.displayUnstaged(status, repositories[0]);
+										that.displayStaged(status, repositories[0]);
+										that.displayCommits(repositories[0]);
+										
+										// render commands
+										mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status);
+									}, function (error) {
+										loadingDeferred.callback();
+										dojo.hitch(that, that.handleError)(error);
+									}
+								);
 							}, function (error) {
 								loadingDeferred.callback();
 								dojo.hitch(that, that.handleError)(error);
@@ -405,10 +418,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
-								
 								var diffOptions = {
+									navGridHolder: navGridHolder,
 									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
@@ -579,11 +593,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
-
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
+									navGridHolder: navGridHolder,
 									commandSpanId: "staged" + item.parent.name + "compareActionWrapper",
 									diffProvider: diffProvider,
 									hasConflicts: false,
@@ -669,6 +684,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
 			var diffOptions = {
+				navGridHolder: (this.getNavDict() ? this.getNavDict().getGridNavHolder(change, true) : null),
 				commandSpanId: diffSection.actionsNode.id,
 				diffProvider: diffProvider,
 				hasConflicts: false,

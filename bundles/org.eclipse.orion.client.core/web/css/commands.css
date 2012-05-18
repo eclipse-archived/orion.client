@@ -32,6 +32,12 @@
 	cursor: pointer;
 	display: inline-block;
 	padding: 1px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .commandImageOver {
@@ -58,6 +64,12 @@
     border-radius:3px;
     line-height: 12px;
     font-size:7pt;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .commandButtonOver {
@@ -83,6 +95,12 @@
 	display: inline-block;
 	vertical-align: baseline;
 	padding: 2px;  /* other commands have 1px plus a border, so we need 2 */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .commandSeparator {

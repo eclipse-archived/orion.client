@@ -13,6 +13,7 @@
 define(function() {
 	return {
 		load: function(name, parentRequire, onLoad, config) {
+			config = config || {};
 
 			// as per requirejs i18n definition ignoring irrelevant matching groups
 			// [0] is complete match
@@ -30,6 +31,11 @@ define(function() {
 				onLoad(parentRequire(name));
 				return;
 			}
+			
+			if (config.isBuild) {
+				onLoad({});
+				return;
+			}	
 
 			var prefix = match[1],
 				locale = match[3] ? match[2] : "",

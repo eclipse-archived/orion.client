@@ -44,8 +44,7 @@ exports.GitCommitNavigator = (function() {
 
 		var waitDeferred = new dojo.Deferred();
 
-		// show checkboxes only for file commits
-		this.renderer._useCheckboxSelection = !this.isDirectory && this.checkbox;
+		this.renderer._useCheckboxSelection = false;
 		
 		path = mUtil.makeRelative(path);
 		if (path === this._lastHash && !force) {

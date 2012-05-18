@@ -152,6 +152,9 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					commandInvocation.parameters.setValue(field.parameterName, field.value);
 				}
 			});
+			dojo.query("textArea", parent).forEach(function(field) {
+				commandInvocation.parameters.setValue(field.parameterName, field.value);
+			});
 			if (commandInvocation.command.callback) {
 				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
 			}
@@ -204,7 +207,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 						dojo.create("label", {innerHTML: parm.label, "class": "parameterInput", "for": parm.name + "parameterCollector"}, parameterArea, "last");
 					} 
 					var options = {type: parm.type, id: parm.name + "parameterCollector"};
-					if (parm.type === "boolean") {
+					var field;
+					if (parm.type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) {
+						options.rows = parm.lines;
+						options.type = "textarea";
+						field = dojo.create("textarea", options, parameterArea, "last");
+					} else if (parm.type === "boolean") {
 						options.type = "checkbox";
 						if (parm.value) {
 							options.checked = true;
@@ -214,10 +222,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 							options.value = parm.value;
 						}
 					}
-					var field = dojo.create("input", options, parameterArea, "last");
-					dojo.addClass(field, "parameterInput");
+					if (!field) {
+						field = dojo.create("input", options, parameterArea, "last");
+					}
 					// we define special classes for some parameter types
-					dojo.addClass(field, "parameterInput"+options.type);
+					dojo.addClass(field, "parameterInput parameterInput"+options.type);
+					// for fun
 					field.setAttribute("speech", "speech");
 					field.setAttribute("x-webkit-speech", "x-webkit-speech");
 					field.parameterName = parm.name;
