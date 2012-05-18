@@ -54,7 +54,7 @@
 .commandButton {
 	color: #777;
 	border: 1px solid #CCC;
-	background-color: white;
+	background-color: transparent;
 	text-align: center;
 	vertical-align: baseline;
     cursor: pointer;

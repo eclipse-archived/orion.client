@@ -27,11 +27,11 @@ define(['require'],
 	'<header role="banner">' +
 		//Top row:  Logo + discovery links + user
 		'<div id="staticBanner" class="layoutBlock topRowBanner">' +
-			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
-			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' +
+			'<a id="home" class="layoutLeftBanner logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
+			'<nav id="primaryNav" class="layoutLeftBanner primaryNav" role="navigation"></nav>' +
 			'<div class="layoutRight">' +
-				'<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' +
-				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' +
+				'<div id="userInfo" style= "display:none;" class="layoutLeftBanner primaryNav"></div>' +
+				'<div id="userMenu" class="spacingLeft layoutLeftBanner"></div>' +
 			'</div>' +
 		'</div>' +
 		//Title area
