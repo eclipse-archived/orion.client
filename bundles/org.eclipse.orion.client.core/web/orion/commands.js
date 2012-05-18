@@ -761,16 +761,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 							}
 							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
 							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-							if (group.title === "*") {
-								dojo.addClass(menuButton.domNode, "textless");
-								new CommandTooltip({
-									connectId: [menuButton.focusNode],
-									label: "Actions menu",
-									position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
-									commandParent: parent,
-									commandService: this
-								});
-							}
 							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
 							dojo.place(menuButton.domNode, menuParent, "last");
 							// we'll need to identify a menu with the dom id of its original parent
