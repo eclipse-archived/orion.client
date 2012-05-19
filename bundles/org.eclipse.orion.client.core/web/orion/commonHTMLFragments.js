@@ -27,7 +27,7 @@ define(['require'],
 	'<header role="banner">' +
 		//Top row:  Logo + discovery links + user
 		'<div id="staticBanner" class="layoutBlock topRowBanner">' +
-			'<a id="home" class="layoutLeftBanner logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-small-lightondark.gif") + '" alt="Orion Logo"/></a>' +
+			'<a id="home" class="layoutLeftBanner logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-transparent.png") + '" alt="Orion Logo"/></a>' +
 			'<nav id="primaryNav" class="layoutLeftBanner primaryNav" role="navigation"></nav>' +
 			'<div class="layoutRight">' +
 				'<div id="userInfo" style= "display:none;" class="layoutLeftBanner primaryNav"></div>' +
