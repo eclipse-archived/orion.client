@@ -552,6 +552,8 @@ a:hover {
 	margin: 0;
 	border: 0;
 	background-color: #2e2e2e;
+	background: -webkit-linear-gradient(top, #111, #777);
+	background: -moz-linear-gradient(top, #111, #777);
 	height: 24px;
 }
 
