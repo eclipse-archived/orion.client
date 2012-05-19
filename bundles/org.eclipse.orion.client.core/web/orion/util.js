@@ -305,46 +305,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	}
 	
 	/**
-	 * Create a stylized pane heading.
-	 * @param {DomNode} parent the parent node of the title element
-	 * @param {String} the string to use as the heading id. It will also be used to prefix any generated id's.
-	 * @param {String} headingLabel the pane heading text
-	 * @param {Boolean} isAuxStyle specifies whether heading is in an auxiliary pane or main pane
-	 * @param {String} headingId the id for the heading label.  Optional
-	 * @param {String} commandId the id for command tools.  Optional
-	 * @param {Object} command service for rendering commands.  Optional, no commands are rendered if not specified.
-	 * @param {Object} the handler for commands.  Optional.  
-	 * @param {Object} the item for command rendering.  Optional.
-	 */
-	function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler, item) {
-		headingId = headingId || id+"heading";
-		commandId = commandId || id+"commands";
-		var paneHeadingFragment = 
-			'<div class="toolComposite" id="' + id + '">' +
-				'<div class="layoutLeft" id="' + id + '"><span class="paneTitle" id="' + headingId + '">' + headingLabel + '</span></div>' +
-				'<ul class="layoutRight commandList sectionActions" id="' + commandId + '"></ul>' +
-				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
-					'<span id="' + parent.id + 'slideOut" class="slide">' +
-						'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
-						'<span id="' + parent.id + 'pageCommandDismiss" class="parametersDismiss"></span>' +
-					'</span>' +
-				'</div>'+
-			'</div>';
-			
-		dojo.place(paneHeadingFragment, parent, "last");
-		if (isAuxStyle) {
-			dojo.addClass(id, "auxpaneHeading");
-		} else {
-			dojo.addClass(id, "paneHeading");
-		}
-		
-		if (commandService) {
-			commandService.renderCommands(commandId, dojo.byId(commandId), item || handler, handler, "button");
-		}
-		return dojo.byId(id);
-	}
-	
-	/**
 	 * Force a layout in the parent tree of the specified node, if there are layout managers assigned.
 	 *
 	 * @param {DomNode} node the node triggering new layout.
@@ -456,7 +416,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		getText: getText,
 		safeText: safeText,
 		setText: setText,
-		createPaneHeading: createPaneHeading,
 		forceLayout: forceLayout,
 		saveFileContents: saveFileContents,
 		splitFile: splitFile

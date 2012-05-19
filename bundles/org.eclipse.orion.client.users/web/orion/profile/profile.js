@@ -271,7 +271,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/bread
 				if(dijit.byId(content.sections[i].id))
 					dijit.byId(content.sections[i].id).destroy();
 
-				var titleWrapper = dojo.create( "div", {"class":"auxpaneHeading sectionWrapper toolComposite", "id": content.sections[i].id + "_SectionHeader"}, placeholder );
+				var titleWrapper = dojo.create( "div", {"class":"sectionWrapper toolComposite", "id": content.sections[i].id + "_SectionHeader"}, placeholder );
 				
 				dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft", innerHTML: content.sections[i].name }, titleWrapper );
 
