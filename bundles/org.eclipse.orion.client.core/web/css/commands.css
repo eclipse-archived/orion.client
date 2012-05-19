@@ -230,16 +230,6 @@
 	vertical-align: middle; 
 }
 
-.claro .textless .dijitArrowButtonInner {
-	background-position: 0 -1551px;	
-	width: 16px; height: 16px; 
-	background-image: url(../images/core_sprites.png);
-	display: inline-block; 
-	vertical-align: middle; 
-	margin-left: 2px;
-	margin-right: 2px;
-}
-
 /* menus and menu items */
 
 .claro .dijitMenu {
