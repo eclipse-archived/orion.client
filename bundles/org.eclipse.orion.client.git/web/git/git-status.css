@@ -19,3 +19,47 @@
 @import "css/status.css";
 
 @import "../orion/compare/compare-container.css";
+
+/* deprecated.  */
+.auxpaneHeading {
+	margin-top: 8px;
+	margin-right: 8px;
+	min-height: 26px;
+	vertical-align: middle;
+	font-weight: bold;
+	color: #808080;
+	background-color: #fafafa;
+	padding:1px;
+	border-radius:4px;
+	border: 1px solid #ebebeb;
+}
+
+.paneHeadingCommands {
+	text-align: right;
+}
+
+.paneHeading {
+	background-color: #f8f8f8;
+	vertical-align: middle;
+	border-bottom: 1px solid #ebebeb;
+	border-top: 1px solid #ebebeb;
+	min-height: 26px;
+	width: 100%;
+	font-size: 10pt;
+	font-weight: bold;
+	color: #808080;
+}
+
+.paneHeadingFixed {
+	min-width: 300px;
+}
+
+.paneTitle {
+	margin-top: 2px;
+	padding-top: 4px;
+	padding-left: 4px;
+	vertical-align: baseline;
+	display: inline-block;
+}
+
+
