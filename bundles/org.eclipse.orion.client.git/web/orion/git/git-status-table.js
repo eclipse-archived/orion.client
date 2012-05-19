@@ -11,10 +11,51 @@
 
 /*global define dojo dijit document console */
 
-define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/util', 'orion/breadcrumbs', 'dijit/layout/ContentPane'], function(
-		require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mUtil, mBreadcrumbs) {
+define(['require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/breadcrumbs', 'orion/util', 'dijit/layout/ContentPane'], function(
+		require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mBreadcrumbs, mUtil) {
 
 	var orion = orion || {};
+	
+		
+/**
+ * Create a stylized pane heading.
+ * @param {DomNode} parent the parent node of the title element
+ * @param {String} the string to use as the heading id. It will also be used to prefix any generated id's.
+ * @param {String} headingLabel the pane heading text
+ * @param {Boolean} isAuxStyle specifies whether heading is in an auxiliary pane or main pane
+ * @param {String} headingId the id for the heading label.  Optional
+ * @param {String} commandId the id for command tools.  Optional
+ * @param {Object} command service for rendering commands.  Optional, no commands are rendered if not specified.
+ * @param {Object} the handler for commands.  Optional.  
+ * @param {Object} the item for command rendering.  Optional.
+ */
+function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler, item) {
+	headingId = headingId || id+"heading";
+	commandId = commandId || id+"commands";
+	var paneHeadingFragment = 
+		'<div class="toolComposite" id="' + id + '">' +
+			'<div class="layoutLeft" id="' + id + '"><span class="paneTitle" id="' + headingId + '">' + headingLabel + '</span></div>' +
+			'<ul class="layoutRight commandList sectionActions" id="' + commandId + '"></ul>' +
+			'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
+				'<span id="' + parent.id + 'slideOut" class="slide">' +
+					'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
+					'<span id="' + parent.id + 'pageCommandDismiss" class="parametersDismiss"></span>' +
+				'</span>' +
+			'</div>'+
+		'</div>';
+		
+	dojo.place(paneHeadingFragment, parent, "last");
+	if (isAuxStyle) {
+		dojo.addClass(id, "auxpaneHeading");
+	} else {
+		dojo.addClass(id, "paneHeading");
+	}
+	
+	if (commandService) {
+		commandService.renderCommands(commandId, dojo.byId(commandId), item || handler, handler, "button");
+	}
+	return dojo.byId(id);
+}
 
 orion.GitStatusModel = (function() {
 	function GitStatusModel() {
@@ -125,7 +166,7 @@ orion.GitStatusContentRenderer = (function() {
 	}
 	GitStatusContentRenderer.prototype = {
 		initTable: function () {
-			tableId = this._tableParentDivId + "_table";
+			var tableId = this._tableParentDivId + "_table";
 		  	var tableParentDomNode = dojo.byId( this._tableParentDivId);
 			dojo.place(document.createTextNode(""), tableParentDomNode, "only");
 			var table = dojo.create("table", {id: tableId});
@@ -266,7 +307,7 @@ orion.GitStatusTableRenderer = (function() {
 	}
 	GitStatusTableRenderer.prototype = {
 		render: function (renderSeparator) {
-			var headingSection = mUtil.createPaneHeading(this._parentId, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
+			var headingSection = createPaneHeading(this._parentId, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
 			dojo.addClass(headingSection, "paneHeadingFixed");
 			var check = dojo.create("input", {type: "checkbox"}, this._type+"_header", "after");
 			dojo.addClass(check, "statusCheckBoxOverall");
@@ -510,7 +551,7 @@ orion.GitLogTableRenderer = (function() {
 	GitLogTableRenderer.prototype = {
 		render: function (renderSeparator) {
 			var section = dojo.create("section", {id: this._sectionId, role: "region", "aria-labelledby": this._type + "_header"}, this._parentId);
-			var headingSection = mUtil.createPaneHeading(section, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
+			var headingSection = createPaneHeading(section, this._type + "heading", this._header, true, this._type + "_header", this._type + "commands");
 			dojo.addClass(headingSection, "paneHeadingFixed");
 			var idAdditional = this._type+"commandSpanAdditional";
 			this._cmdSpanAdditional = dojo.create("span", {"id": idAdditional}, this._type + "commands", "last");
@@ -585,7 +626,7 @@ orion.InlineCompareRenderer = (function() {
 			parent.addChild(titleDiv);
 			parent.addChild(viewerDiv);
 			if (createCommandSpan) {
-				td = document.createElement('td');
+				var td = document.createElement('td');
 				td.id = "inlineCompareCommands"; // this id should not be known here.  It is decided in compare-container.js
 				row.appendChild(td);
 				td.noWrap = true;
