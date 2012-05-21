@@ -300,7 +300,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 
 		
-		titleWrapper.setContent('<list id="repositoryNode" class="plugin-settings-list"></list>');
+		titleWrapper.setContent('<list id="repositoryNode" class="mainPadding"></list>');
 		
 		
 		var repositoryMonitor = titleWrapper.createProgressMonitor();
@@ -373,7 +373,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "workingDirectorySection",
 			title: "Working Directory",
-			content: '<list id="workingDirectoryNode" class="plugin-settings-list"></list>'
+			content: '<list id="workingDirectoryNode" class="mainPadding"></list>'
 		});
 		
 		var progress = titleWrapper.createProgressMonitor();
@@ -446,7 +446,7 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
 			slideout: true,
-			content: '<list id="branchNode" class="plugin-settings-list"></list>',
+			content: '<list id="branchNode" class="mainPadding"></list>',
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference")
 		});
@@ -518,7 +518,7 @@ exports.GitRepositoryExplorer = (function() {
 			id: "remoteBranchSection",
 			title: "Remote Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
-			content: '<list id="remoteBranchNode" class="plugin-settings-list"></list>',
+			content: '<list id="remoteBranchNode" class="mainPadding"></list>',
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference")
 		}); 
@@ -596,7 +596,7 @@ exports.GitRepositoryExplorer = (function() {
 			id: "commitSection",
 			title: "Commits",
 			slideout: true,
-			content: '<list id="commitNode" class="plugin-settings-list"></list>',
+			content: '<list id="commitNode" class="mainPadding"></list>',
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference")
 		}); 
@@ -812,7 +812,7 @@ exports.GitRepositoryExplorer = (function() {
 			id: "tagSection",
 			iconClass: "gitImageSprite git-sprite-tag",
 			title: ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
-			content: '<list id="tagNode" class="plugin-settings-list"></list>',
+			content: '<list id="tagNode" class="mainPadding"></list>',
 			canHide: true,
 			hidden: true,
 			preferenceService: this.registry.getService("orion.core.preference")
@@ -926,7 +926,7 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Remotes",
 			iconClass: "gitImageSprite git-sprite-remote",
 			slideout: true,
-			content: '<list id="remoteNode" class="plugin-settings-list"></list>',
+			content: '<list id="remoteNode" class="mainPadding"></list>',
 			canHide: true,
 			hidden: true,
 			preferenceService: this.registry.getService("orion.core.preference")
@@ -989,7 +989,7 @@ exports.GitRepositoryExplorer = (function() {
 			id: "configSection",
 			title: "Configuration" + (mode === "full" ? "" : " (user.*)"),
 			slideout: true,
-			content: '<list id="configNode" class="plugin-settings-list"></list>',
+			content: '<list id="configNode" class="mainPadding"></list>',
 			canHide: true,
 			hidden: true,
 			preferenceService: this.registry.getService("orion.core.preference")
