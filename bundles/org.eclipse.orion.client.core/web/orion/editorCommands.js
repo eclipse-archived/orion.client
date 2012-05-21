@@ -16,8 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
-	function(dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack) {
+define(['i18n!edit/nls/messages', 'dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
+	function(messages, dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack) {
 
 var exports = {};
 
@@ -42,11 +42,11 @@ exports.EditorCommandFactory = (function() {
 				if (contentTypesCache) {
 					return contentTypesCache;
 				}
-				var contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+				var contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 				//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 				if (!contentTypeService) {
 					contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-					contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+					contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 				}
 				return contentTypeService.getContentTypes().then(function(ct) {
 					contentTypesCache = ct;
@@ -63,11 +63,11 @@ exports.EditorCommandFactory = (function() {
 	
 			// create commands common to all editors
 			if (!this.isReadOnly) {
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "Save");
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), messages["Save"]); //$NON-NLS-0$
 				//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
 				//That way the file system knows how to implement their save mechanism
 				if(this.inputManager.onSave){
-					editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+					editor.getTextView().setAction(messages['Save'], dojo.hitch(this, function () {
 						var contents = editor.getText();
 						this.inputManager.onSave(this.inputManager.getInput(), contents,
 												dojo.hitch(this, function(result) {
@@ -83,10 +83,10 @@ exports.EditorCommandFactory = (function() {
 						return true;
 					}));
 				} else {
-					editor.getTextView().setAction("Save", dojo.hitch(this, function () {
+					editor.getTextView().setAction(messages['Save'], dojo.hitch(this, function () {
 						var contents = editor.getText();
 						var etag = this.inputManager.getFileMetadata().ETag;
-						var args = { "ETag" : etag };
+						var args = { "ETag" : etag }; //$NON-NLS-0$
 						this.fileClient.write(this.inputManager.getInput(), contents, args).then(
 								dojo.hitch(this, function(result) {
 									this.inputManager.getFileMetadata().ETag = result.ETag;
@@ -99,7 +99,7 @@ exports.EditorCommandFactory = (function() {
 									// expected error - HTTP 412 Precondition Failed 
 									// occurs when file is out of sync with the server
 									if (error.status === 412) {
-										var forceSave = confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+										var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 										if (forceSave) {
 											// repeat save operation, but without ETag 
 											this.fileClient.write(this.inputManager.getInput(), contents).then(
@@ -122,35 +122,35 @@ exports.EditorCommandFactory = (function() {
 					}));
 				}
 				var saveCommand = new mCommands.Command({
-					name: "Save",
-					tooltip: "Save this file",
-					id: "orion.save",
+					name: messages['Save'],
+					tooltip: messages["Save this file"],
+					id: "orion.save", //$NON-NLS-0$
 					callback: function(data) {
-						data.items.getTextView().invokeAction("Save");
+						data.items.getTextView().invokeAction(messages['Save']);
 					}});
 				this.commandService.addCommand(saveCommand);
-				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mCommands.CommandKeyBinding('s', true));
+				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mCommands.CommandKeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
 	
 				// page navigation commands (go to line)
-				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false},
+				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		function() {
 																			var line = editor.getModel().getLineAtOffset(editor.getCaretOffset()) + 1;
-																			return [new mCommands.CommandParameter('line', 'number', 'Line:', line.toString())];
+																			return [new mCommands.CommandParameter('line', 'number', 'Line:', line.toString())]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 																		});
 				
 				var gotoLineCommand =  new mCommands.Command({
-					name: "Go to Line",
-					tooltip: "Go to specified line number",
-					id: "orion.gotoLine",
+					name: messages["Go to Line"],
+					tooltip: messages["Go to specified line number"],
+					id: "orion.gotoLine", //$NON-NLS-0$
 					parameters: lineParameter,
 					callback: function(data) {
 						var line;
 						var model = editor.getModel();
-						if (data.parameters && data.parameters.valueFor('line')) {
-							line = data.parameters.valueFor('line');
+						if (data.parameters && data.parameters.valueFor('line')) { //$NON-NLS-0$
+							line = data.parameters.valueFor('line'); //$NON-NLS-0$
 						} else {
 							line = model.getLineAtOffset(editor.getCaretOffset());
-							line = prompt("Go to line:", line + 1);
+							line = prompt(messages["Go to line:"], line + 1);
 							if (line) {
 								line = parseInt(line, 10);
 							}
@@ -160,11 +160,11 @@ exports.EditorCommandFactory = (function() {
 						}
 					}});
 				this.commandService.addCommand(gotoLineCommand);
-				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mCommands.CommandKeyBinding('l', true), new mCommands.URLBinding("gotoLine", "line"));
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mCommands.CommandKeyBinding('l', true), new mCommands.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				// override the editor binding 
-				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine");
-				editor.getTextView().setAction("gotoLine", dojo.hitch(this, function () {
-					this.commandService.runCommand("orion.gotoLine");
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
+				editor.getTextView().setAction("gotoLine", dojo.hitch(this, function () { //$NON-NLS-0$
+					this.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
 				}));
 
@@ -200,7 +200,7 @@ exports.EditorCommandFactory = (function() {
 				//                                            and its "selection" attribute (optional) will be used to set the new selection.
 			
 				// iterate through the extension points and generate commands for each one.
-				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command");
+				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
 				var input = this.inputManager;
 				var makeCommand = function(info, service, options) {
 					options.callback = dojo.hitch(editor, function(data) {
@@ -217,7 +217,7 @@ exports.EditorCommandFactory = (function() {
 										editor.getTextView().focus();
 									}
 								} else {
-									if (typeof result === 'string') {
+									if (typeof result === 'string') { //$NON-NLS-0$
 										editor.setText(result, selection.start, selection.end);
 										editor.setSelection(selection.start, selection.start + result.length);
 										editor.getTextView().focus();
@@ -273,38 +273,38 @@ exports.UndoCommandFactory = (function() {
 	UndoCommandFactory.prototype = {
 		createUndoStack: function(editor) {
 			var undoStack =  new mUndoStack.UndoStack(editor.getTextView(), 200);
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "Undo");
-			editor.getTextView().setAction("Undo", function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('z', true), messages["Undo"]); //$NON-NLS-0$
+			editor.getTextView().setAction(messages['Undo'], function() {
 				undoStack.undo();
 				return true;
 			});
 			var undoCommand = new mCommands.Command({
-				name: "Undo",
-				id: "orion.undo",
+				name: messages['Undo'],
+				id: "orion.undo", //$NON-NLS-0$
 				callback: function(data) {
-					data.items.getTextView().invokeAction("Undo");
+					data.items.getTextView().invokeAction(messages['Undo']);
 				}});
 			this.commandService.addCommand(undoCommand);
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1;
-			var binding = isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true);
-			editor.getTextView().setKeyBinding(binding, "Redo");
+			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+			var binding = isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true); //$NON-NLS-1$ //$NON-NLS-0$
+			editor.getTextView().setKeyBinding(binding, messages["Redo"]);
 			
-			editor.getTextView().setAction("Redo", function() {
+			editor.getTextView().setAction(messages['Redo'], function() {
 				undoStack.redo();
 				return true;
 			});
 	
 			var redoCommand = new mCommands.Command({
-				name: "Redo",
-				id: "orion.redo",
+				name: messages['Redo'],
+				id: "orion.redo", //$NON-NLS-0$
 				callback: function(data) {
-					data.items.getTextView().invokeAction("Redo");
+					data.items.getTextView().invokeAction(messages['Redo']);
 				}});
 			this.commandService.addCommand(redoCommand);
 	
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, new mCommands.CommandKeyBinding('z', true));
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, binding);
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, new mCommands.CommandKeyBinding('z', true)); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, binding); //$NON-NLS-0$
 
 			return undoStack;
 		}
