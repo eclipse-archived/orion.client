@@ -21,9 +21,9 @@ orion.SearchUIFactory = (function() {
 	SearchUIFactory.prototype = {
 		
 		buildUI:function(){
-			this._topWidgetId = this._parentDivID + "_topWidget";
-			this._matchWidgetId = this._parentDivID + "_matches";
-			this._compareWidgetId = this._parentDivID + "_compare";
+			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
+			this._matchWidgetId = this._parentDivID + "_matches"; //$NON-NLS-0$
+			this._compareWidgetId = this._parentDivID + "_compare"; //$NON-NLS-0$
 			var topWidget = dijit.byId(this._topWidgetId);
 			if(topWidget){
 				topWidget.destroyRecursive();
@@ -31,11 +31,11 @@ orion.SearchUIFactory = (function() {
 			
 			var marginBox = dojo.marginBox(this._parentDivID);
 
-			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			dojo.addClass(matchWidget.domNode, 'topBorder');
-			dojo.addClass(compareWidget.domNode, 'bottomBorderReplace');
+			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(matchWidget.domNode, 'topBorder'); //$NON-NLS-0$
+			dojo.addClass(compareWidget.domNode, 'bottomBorderReplace'); //$NON-NLS-0$
 			
 			topWidget.placeAt(this._parentDivID);
 			topWidget.addChild(matchWidget);
@@ -44,7 +44,7 @@ orion.SearchUIFactory = (function() {
 		},
 		
 		destroy: function(){
-			this._topWidgetId = this._parentDivID + "_topWidget";
+			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
 			var topWidget = dijit.byId(this._topWidgetId);
 			if(topWidget){
 				topWidget.destroyRecursive();

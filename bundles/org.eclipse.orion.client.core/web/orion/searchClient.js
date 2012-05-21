@@ -13,7 +13,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(require, dojo, dijit, mAuth, mUtil, mSearchUtils){
+define(['i18n!search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils){
 
 	/**
 	 * Creates a new search client.
@@ -27,7 +27,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		this._commandService = options.commandService;
 		this._fileService = options.fileService;
 		if(!this._fileService){
-			console.error("No file service on search client");
+			console.error("No file service on search client"); //$NON-NLS-0$
 		}
 	}
 	Searcher.prototype = /**@lends orion.searchClient.Searcher.prototype*/ {
@@ -61,30 +61,30 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						return transformed;
 					};
 					var token = jsonData.responseHeader.params.q;
-					token= token.substring(token.indexOf("}")+1);
+					token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 					//remove field name if present
-					token= token.substring(token.indexOf(":")+1);
+					token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
 					renderer(transform(jsonData), token);
 				}, function(error) {
 					renderer(null, null, error);
 				});
 			}
 			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	
+				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 			}
 		},
 						
 		handleError: function(response, resultsNode) {
 			console.error(response);
 			var errorText = document.createTextNode(response);
-			dojo.place(errorText, resultsNode, "only");
+			dojo.place(errorText, resultsNode, "only"); //$NON-NLS-0$
 			return response;
 		},
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
 			var noneRootMeta = null;
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
-				if(useParentLocation.index === "last"){
+				if(useParentLocation.index === "last"){ //$NON-NLS-0$
 					noneRootMeta = meta.Parents[meta.Parents.length-1];
 				} else {
 					noneRootMeta = meta.Parents[0];
@@ -98,20 +98,20 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 			} else if(meta){
 				locationName = this._fileService.fileServiceName(meta && meta.Location);
 			}
-			var searchInputDom = dojo.byId("search");
+			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
 			if(!locationName){
 				locationName = "";
 			}
 			if(searchInputDom && searchInputDom.placeholder){
 				searchInputDom.value = "";
 				if(locationName.length > 23){
-					searchInputDom.placeholder = "Search " + locationName.substring(0, 20) + "...";
+					searchInputDom.placeholder = messages["Search "] + locationName.substring(0, 20) + "..."; //$NON-NLS-1$
 				} else {
-					searchInputDom.placeholder = "Search " + locationName;
+					searchInputDom.placeholder = messages['Search '] + locationName;
 				}
 			}
 			if(searchInputDom && searchInputDom.title){
-				searchInputDom.title = "Type a keyword or wild card to search in " + locationName;
+				searchInputDom.title = messages["Type a keyword or wild card to search in "] + locationName;
 			}
 		},
 		setLocationByURL: function(locationURL){
@@ -126,16 +126,16 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		 */
 		createSearchQuery: function(query, nameQuery, sort, skipLocation)  {
 			if (!sort) {
-				sort = "Path";
+				sort = "Path"; //$NON-NLS-0$
 			}
-			sort += " asc";//ascending sort order
+			sort += " asc";//ascending sort order //$NON-NLS-0$
 			if (nameQuery) {
 				//assume implicit trailing wildcard if there isn't one already
-				var wildcard= (/\*$/.test(nameQuery) ? "" : "*");
+				var wildcard= (/\*$/.test(nameQuery) ? "" : "*"); //$NON-NLS-0$
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					searchStr: "NameLower:" + this._luceneEscape(nameQuery, true) + wildcard});
+					searchStr: "NameLower:" + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
@@ -153,11 +153,11 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 		 */
 		_luceneEscape: function(input, omitWildcards) {
 			var output = "",
-			    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : "");
+			    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
 			for (var i = 0; i < input.length; i++) {
 				var c = input.charAt(i);
 				if (specialChars.indexOf(c) >= 0) {
-					output += '\\';
+					output += '\\'; //$NON-NLS-0$
 				}
 				output += c;
 			}
@@ -189,8 +189,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 				 */
 				function render(resources, queryName, error) {
 					if (error) {
-						dojo.place("<div>Search failed.</div>", resultsNode, "only");
-						if (typeof(onResultReady) === "function") {
+						dojo.place("<div>"+messages["Search failed."]+"</div>", resultsNode, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 							onResultReady(resultsNode);
 						}
 						return;
@@ -206,9 +206,9 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 						
 						function doAppend(domElement, resource) {
 							var path = resource.folderName ? resource.folderName : resource.path;
-							var pathNode = document.createElement('span');
+							var pathNode = document.createElement('span'); //$NON-NLS-0$
 							pathNode.id = path.replace(/[^a-zA-Z0-9_\.:\-]/g,'');
-							pathNode.appendChild(document.createTextNode(' - ' + path + ' '));
+							pathNode.appendChild(document.createTextNode(' - ' + path + ' ')); //$NON-NLS-1$ //$NON-NLS-0$
 							domElement.appendChild(pathNode);
 						}
 						
@@ -218,7 +218,7 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 								//Seen the name before
 								doAppend(domElement, resource);
 								var deferred = namesSeenMap[name];
-								if (typeof(deferred)==='function') {
+								if (typeof(deferred)==='function') { //$NON-NLS-0$
 									//We have seen the name before, but prior element left some deferred processing
 									namesSeenMap[name] = null;
 									deferred();
@@ -234,8 +234,8 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 					var foundValidHit = false;
 					dojo.empty(resultsNode);
 					if (resources && resources.length > 0) {
-						var table = document.createElement('table');
-						table.setAttribute('role', 'presentation');
+						var table = document.createElement('table'); //$NON-NLS-0$
+						table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
 						for (var i=0; i < resources.length; i++) {
 							var resource = resources[i];
 							var col;
@@ -253,10 +253,10 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 							if (decorator) {
 								decorator(col);
 							}
-							var resourceLink = document.createElement('a');
+							var resourceLink = document.createElement('a'); //$NON-NLS-0$
 							dojo.place(document.createTextNode(resource.name), resourceLink);
 							if (resource.LineNumber) { // FIXME LineNumber === 0 
-								dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink);
+								dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 							var loc = resource.location;
 							if (resource.isExternalResource) {
@@ -264,31 +264,31 @@ define(['require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUti
 								loc = resource.path;
 							} else {
 								loc	= resource.directory ? 
-										require.toUrl("navigate/table.html") + "#" + resource.path : 
-										require.toUrl("edit/edit.html") + "#" + resource.path;
-								if (loc === "#") {
+										require.toUrl("navigate/table.html") + "#" + resource.path :  //$NON-NLS-1$ //$NON-NLS-0$
+										require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+								if (loc === "#") { //$NON-NLS-0$
 									loc = "";
 								}
 							}
 		
-							resourceLink.setAttribute('href', loc);
-							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,''));
-							dojo.style(resourceLink, "verticalAlign", "middle");
+							resourceLink.setAttribute('href', loc); //$NON-NLS-0$
+							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,'')); //$NON-NLS-0$
+							dojo.style(resourceLink, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$
 							col.appendChild(resourceLink);
 							appendPath(col, resource);
 						}
-						dojo.place(table, resultsNode, "last");
-						if (typeof(onResultReady) === "function") {
+						dojo.place(table, resultsNode, "last"); //$NON-NLS-0$
+						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 							onResultReady(resultsNode);
 						}
 					}
 					if (!foundValidHit) {
 						// only display no matches found if we have a proper name
 						if (queryName) {
-							var div = dojo.place("<div>No matches found for </div>", resultsNode, "only");
-							var b = dojo.create("b", null, div, "last");
-							dojo.place(document.createTextNode(queryName), b, "only");
-							if (typeof(onResultReady) === "function") {
+							var div = dojo.place("<div>"+messages["No matches found for "]+"</div>", resultsNode, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+							var b = dojo.create("b", null, div, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.place(document.createTextNode(queryName), b, "only"); //$NON-NLS-0$
+							if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 								onResultReady(resultsNode);
 							}
 						}

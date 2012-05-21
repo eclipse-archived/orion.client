@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['require', 'orion/textview/annotations', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
-	function(require, mAnnotations, dojo, dijit, mCommands, mRegex, mSearchUtils){
+define(['i18n!search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
+	function(messages, require, mAnnotations, dojo, dijit, mCommands, mRegex, mSearchUtils){
 	
 var orion = orion || {};
 
@@ -30,7 +30,7 @@ orion.TextSearcher = (function() {
 		this._findAfterReplace = true;
 		
 		this._reverse = false;
-		this.isMac = navigator.platform.indexOf("Mac") !== -1;
+		this.isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 		
 		this._searchRange = null;
 		this._timer = null;
@@ -47,21 +47,21 @@ orion.TextSearcher = (function() {
 	TextSearcher.prototype = {
 		_createActionTable : function() {
 			var that = this;
-			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) {
+			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
 	
 				// create the command span for Find
-				var span = document.createElement('span');
-				dojo.addClass(span, "parameters");
-				span.id = "localSearchFindCommands";
+				var span = document.createElement('span'); //$NON-NLS-0$
+				dojo.addClass(span, "parameters"); //$NON-NLS-0$
+				span.id = "localSearchFindCommands"; //$NON-NLS-0$
 				parentDiv.appendChild(span);
 				// td.noWrap = true;
 	
 				// create the input box for searc hterm
-				var searchStringDiv = document.createElement('input');
-				searchStringDiv.type = "text";
-				searchStringDiv.name = "Find:";
-				searchStringDiv.id = "localSearchFindWith";
-				searchStringDiv.placeholder="Find With";
+				var searchStringDiv = document.createElement('input'); //$NON-NLS-0$
+				searchStringDiv.type = "text"; //$NON-NLS-0$
+				searchStringDiv.name = messages["Find:"];
+				searchStringDiv.id = "localSearchFindWith"; //$NON-NLS-0$
+				searchStringDiv.placeholder=messages["Find With"];
 				searchStringDiv.onkeyup = function(evt){
 					return that._handleKeyUp(evt);
 				};
@@ -71,48 +71,48 @@ orion.TextSearcher = (function() {
 				parentDiv.appendChild(searchStringDiv);
 				
 				// create replace text
-				var replaceStringDiv = document.createElement('input');
-				replaceStringDiv.type = "text";
-				replaceStringDiv.name = "ReplaceWith:";
-				replaceStringDiv.id = "localSearchReplaceWith";
-				replaceStringDiv.placeholder="Replace With";
-				dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
+				var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
+				replaceStringDiv.type = "text"; //$NON-NLS-0$
+				replaceStringDiv.name = messages["ReplaceWith:"];
+				replaceStringDiv.id = "localSearchReplaceWith"; //$NON-NLS-0$
+				replaceStringDiv.placeholder=messages["Replace With"];
+				dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin'); //$NON-NLS-0$
 				replaceStringDiv.onkeydown = function(evt){
 					return that._handleKeyDown(evt, false);
 				};
 				parentDiv.appendChild(replaceStringDiv);
 	
 				// create the command span for Replace
-				span = document.createElement('span');
-				dojo.addClass(span, "parameters");
-				span.id = "localSearchReplaceCommands";
+				span = document.createElement('span'); //$NON-NLS-0$
+				dojo.addClass(span, "parameters"); //$NON-NLS-0$
+				span.id = "localSearchReplaceCommands"; //$NON-NLS-0$
 				parentDiv.appendChild(span);
 	
 				// create all other span for commands : replace/find ,
 				// replace all
-				span = document.createElement('span');
-				span.id = "localSearchOtherCommands";
-				dojo.addClass(span, "parameters");
+				span = document.createElement('span'); //$NON-NLS-0$
+				span.id = "localSearchOtherCommands"; //$NON-NLS-0$
+				dojo.addClass(span, "parameters"); //$NON-NLS-0$
 				parentDiv.appendChild(span);
 	
 				// create Options button , which will bring a dialog
-				var optionTd = document.createElement('span');
-				dojo.addClass(optionTd, "parameters");
+				var optionTd = document.createElement('span'); //$NON-NLS-0$
+				dojo.addClass(optionTd, "parameters"); //$NON-NLS-0$
 
 				// td.noWrap = true;
 				parentDiv.appendChild(optionTd);
 	
-				var optionMenu = dijit.byId("searchOptMenu");
+				var optionMenu = dijit.byId("searchOptMenu"); //$NON-NLS-0$
 				if (optionMenu) {
 					optionMenu.destroy();
 				}
 				var newMenu = new dijit.Menu({
-					style : "display: none;",
-					id : "searchOptMenu"
+					style : "display: none;", //$NON-NLS-0$
+					id : "searchOptMenu" //$NON-NLS-0$
 				});
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Show all",
+					label: messages["Show all"],
 					checked: that._showAllOccurrence,
 					onChange : function(checked) {
 						that.setOptions({showAllOccurrence: checked});
@@ -128,7 +128,7 @@ orion.TextSearcher = (function() {
 				}));
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Case sensitive",
+					label: messages["Case sensitive"],
 					checked: !that._ignoreCase,
 					onChange : function(checked) {
 						that.setOptions({ignoreCase: !checked});
@@ -136,14 +136,14 @@ orion.TextSearcher = (function() {
 				}));
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Wrap search",
+					label: messages["Wrap search"],
 					checked: that._wrapSearch,
 					onChange : function(checked) {
 						that.setOptions({wrapSearch: checked});
 					}
 				}));
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Incremental search",
+					label: messages["Incremental search"],
 					checked: that._incremental,
 					onChange : function(checked) {
 						that.setOptions({incremental: checked});
@@ -151,7 +151,7 @@ orion.TextSearcher = (function() {
 				}));
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Whole Word",
+					label: messages["Whole Word"],
 					checked: that._wholeWord,
 					onChange : function(checked) {
 						that.setOptions({wholeWord: checked});
@@ -159,7 +159,7 @@ orion.TextSearcher = (function() {
 				}));
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Regular expression",
+					label: messages["Regular expression"],
 					checked: that._useRegExp,
 					onChange : function(checked) {
 						that.setOptions({useRegExp: checked});
@@ -167,7 +167,7 @@ orion.TextSearcher = (function() {
 				}));
 				
 				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: "Find after replace",
+					label: messages["Find after replace"],
 					checked: that._findAfterReplace,
 					onChange : function(checked) {
 						that.setOptions({findAfterReplace: checked});
@@ -175,17 +175,17 @@ orion.TextSearcher = (function() {
 				}));
 				
 				var menuButton = new dijit.form.DropDownButton({
-					label : "Options",
+					label : messages["Options"],
 					dropDown : newMenu
 				});
-				dojo.addClass(menuButton.domNode, "parametersMenu");
-				dojo.place(menuButton.domNode, optionTd, "last");
+				dojo.addClass(menuButton.domNode, "parametersMenu"); //$NON-NLS-0$
+				dojo.place(menuButton.domNode, optionTd, "last"); //$NON-NLS-0$
 			},
 			function(){that.closeUI();});
 		},
 		
 		visible: function(){
-			return document.getElementById("localSearchFindWith") ? true : false;
+			return document.getElementById("localSearchFindWith") ? true : false; //$NON-NLS-0$
 		},
 		
 		_handleKeyUp: function(evt){
@@ -238,7 +238,7 @@ orion.TextSearcher = (function() {
 			if(this.visible()){
 				this._commandService.closeParameterCollector();
 			}
-			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus);
+			this._editor.getTextView().removeEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
 			this._editor.getTextView().focus();
 			var annotationModel = this._editor.getAnnotationModel();
 			if (annotationModel) {
@@ -257,8 +257,8 @@ orion.TextSearcher = (function() {
 		buildToolBar : function(defaultSearchStr) {
 			this._keyUpHandled = true;
 			var that = this;
-			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus);
-			var findDiv = document.getElementById("localSearchFindWith");
+			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
+			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (this.visible()) {
 				if(defaultSearchStr.length > 0){
 					findDiv.value = defaultSearchStr;
@@ -272,7 +272,7 @@ orion.TextSearcher = (function() {
 			this._createActionTable();
 
 			// set the default value of search string
-			findDiv = document.getElementById("localSearchFindWith");
+			findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			findDiv.value = defaultSearchStr;
 			window.setTimeout(function() {
 				findDiv.select();
@@ -280,40 +280,40 @@ orion.TextSearcher = (function() {
 			}, 10);				
 
 			var findNextCommand = new mCommands.Command({
-				tooltip : "Find next match",
-				imageClass : "core-sprite-move_down",
-				id : "orion.search.findNext",
-				groupId : "orion.searchGroup",
+				tooltip : messages["Find next match"],
+				imageClass : "core-sprite-move_down", //$NON-NLS-0$
+				id : "orion.search.findNext", //$NON-NLS-0$
+				groupId : "orion.searchGroup", //$NON-NLS-0$
 				callback : function() {
 					that.findNext(true);
 				}
 			});
 
 			var findPrevCommand = new mCommands.Command({
-				tooltip : "Find previous match",
-				imageClass : "core-sprite-move_up",
-				id : "orion.search.findPrev",
-				groupId : "orion.searchGroup",
+				tooltip : messages["Find previous match"],
+				imageClass : "core-sprite-move_up", //$NON-NLS-0$
+				id : "orion.search.findPrev", //$NON-NLS-0$
+				groupId : "orion.searchGroup", //$NON-NLS-0$
 				callback : function() {
 					that.findNext(false);
 				}
 			});
 
 			var replaceCommand = new mCommands.Command({
-				name : "Replace",
-				image : require.toUrl("images/replace.gif"),
-				id : "orion.search.replace",
-				groupId : "orion.searchGroup",
+				name : messages["Replace"],
+				image : require.toUrl("images/replace.gif"), //$NON-NLS-0$
+				id : "orion.search.replace", //$NON-NLS-0$
+				groupId : "orion.searchGroup", //$NON-NLS-0$
 				callback : function() {
 					that.replace();
 				}
 			});
 
 			var replaceAllCommand = new mCommands.Command({
-				name : "Replace All",
-				image : require.toUrl("images/replaceAll.gif"),
-				id : "orion.search.replaceAll",
-				groupId : "orion.searchGroup",
+				name : messages["Replace All"],
+				image : require.toUrl("images/replaceAll.gif"), //$NON-NLS-0$
+				id : "orion.search.replaceAll", //$NON-NLS-0$
+				groupId : "orion.searchGroup", //$NON-NLS-0$
 				callback : function() {
 					that.replaceAll();
 				}
@@ -325,12 +325,12 @@ orion.TextSearcher = (function() {
 			this._commandService.addCommand(replaceAllCommand);
 
 			// Register command contributions
-			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findNext", 1);
-			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findPrev", 2);
-			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replace", 1);
-			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replaceAll", 2);
-			this._commandService.renderCommands("localSearchFindCommands", "localSearchFindCommands", that, that, "button");
-			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchReplaceCommands", that, that, "button");
+			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findNext", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findPrev", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replace", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replaceAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.renderCommands("localSearchFindCommands", "localSearchFindCommands", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchReplaceCommands", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
 		setOptions : function(options) {
@@ -390,7 +390,7 @@ orion.TextSearcher = (function() {
 			this.setOptions({
 				reverse : !next
 			});
-			var findTextDiv = document.getElementById("localSearchFindWith");
+			var findTextDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			var startIndex = this.getSearchStartIndex(incremental ? true : !next);
 			if(!searchStr){
 				searchStr = findTextDiv ? findTextDiv.value : this._lastSearchString;
@@ -412,13 +412,13 @@ orion.TextSearcher = (function() {
 	
 		replace: function() {
 			this.startUndo();
-			var newStr = document.getElementById("localSearchReplaceWith").value;
+			var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
 			var editor = this._editor;
 			var selection = editor.getSelection();
 			editor.setText(newStr, selection.start, selection.end);
 			editor.setSelection(selection.start , selection.start + newStr.length, true);
 			this.endUndo();
-			var searchStr = document.getElementById("localSearchFindWith").value;
+			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
 			if (this._findAfterReplace && searchStr){
 				this._doFind(searchStr, this.getSearchStartIndex(false), false, this._wrapSearch);
 			}
@@ -448,7 +448,7 @@ orion.TextSearcher = (function() {
 				if (result) {
 					this._editor.reportStatus("");
 				} else {
-					this._editor.reportStatus("Not found", "error");
+					this._editor.reportStatus(messages["Not found"], "error"); //$NON-NLS-1$
 				}
 				var visible = this.visible();
 				if (visible) {
@@ -478,13 +478,13 @@ orion.TextSearcher = (function() {
 		},
 
 		replaceAll : function() {
-			var searchStr = document.getElementById("localSearchFindWith").value;
+			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
 			if(searchStr){
 				this._replacingAll = true;
 				var editor = this._editor;
 				editor.reportStatus("");
-				editor.reportStatus("Replacing all...", "progress");
-				var newStr = document.getElementById("localSearchReplaceWith").value;
+				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-1$
+				var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
 				window.setTimeout(dojo.hitch(this, function() {
 					var startPos = 0;
 					var number = 0, lastResult;
@@ -506,11 +506,11 @@ orion.TextSearcher = (function() {
 					if(number > 0) {
 						this.endUndo();
 					}
-					editor.reportStatus("", "progress");
+					editor.reportStatus("", "progress"); //$NON-NLS-0$
 					if(startPos > 0) {
-						editor.reportStatus("Replaced "+number+" matches");
+						editor.reportStatus(messages["Replaced "]+number+messages[" matches"]);
 					} else {
-						editor.reportStatus("Nothing replaced", "error");
+						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-1$
 					}
 					this._replacingAll = false;
 				}), 100);				
@@ -532,7 +532,7 @@ orion.TextSearcher = (function() {
 					remove.push(annotation);
 				}
 			}
-			var searchStr = document.getElementById("localSearchFindWith").value;
+			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
 			if(singleResult && searchStr) {
 				iter = this._editor.getModel().find({
 					string: searchStr,

@@ -34,29 +34,29 @@ orion.searchUtils = orion.searchUtils || {};
  * @function
  */
 orion.searchUtils.parseQueryStr = function(queryStr) {
-	var indexOfQMark = queryStr.indexOf("?");
-	var indexOfQWqual = queryStr.indexOf("q=");
+	var indexOfQMark = queryStr.indexOf("?"); //$NON-NLS-0$
+	var indexOfQWqual = queryStr.indexOf("q="); //$NON-NLS-0$
 	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
 		queryStr = queryStr.substring(indexOfQMark+1);
 	}
 	//var obj = dojo.queryToObject(queryStr);
-	var splitQ = queryStr.split("&");
-	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null};
+	var splitQ = queryStr.split("&"); //$NON-NLS-0$
+	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
 	for(var i=0; i < splitQ.length; i++){
-		var qIndex = splitQ[i].indexOf("q=");
-		var rIndex = splitQ[i].indexOf("replace=");
+		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
+		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
 		if(qIndex >= 0){
 			orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj);
 		} else if(rIndex >= 0){
 			queryObj.replace = splitQ[i].substring(rIndex+8);
 		} else {
-			var splitparameters = splitQ[i].split("=");
+			var splitparameters = splitQ[i].split("="); //$NON-NLS-0$
 			if(splitparameters.length === 2){
-				if(splitparameters[0] === "rows"){
+				if(splitparameters[0] === "rows"){ //$NON-NLS-0$
 					queryObj.rows = parseInt(splitparameters[1]);
-				} else if(splitparameters[0] === "start"){
+				} else if(splitparameters[0] === "start"){ //$NON-NLS-0$
 					queryObj.start = parseInt(splitparameters[1]);
-				} else if(splitparameters[0] === "sort"){
+				} else if(splitparameters[0] === "sort"){ //$NON-NLS-0$
 					queryObj.sort = splitparameters[1];
 				} 
 			}
@@ -77,12 +77,12 @@ orion.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
 };
 
 orion.searchUtils.generateSearchHref = function(options) {
-	var base =  require.toUrl("search/search.html");
-	return base + "#" + orion.searchUtils.generateSearchQuery(options);
+	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
+	return base + "#" + orion.searchUtils.generateSearchQuery(options); //$NON-NLS-0$
 };
 
 orion.searchUtils.generateSearchQuery = function(options) {
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "";
+	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	if(options){
 		if(options.sort){
 			sort = options.sort;
@@ -95,63 +95,63 @@ orion.searchUtils.generateSearchQuery = function(options) {
 		}
 		if(options.searchStr){
 			searchStr = options.searchStr;
-			searchStr = searchStr.split(" ").join("");
+			searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
 		}
 		if(options.location){
 			loc = options.location;
-			if(loc.length > 0 && loc[loc.length -1] !== '*'){
-				loc = loc + "*";
+			if(loc.length > 0 && loc[loc.length -1] !== '*'){ //$NON-NLS-0$
+				loc = loc + "*"; //$NON-NLS-0$
 			}
 			if(loc !== ""){
-				loc = "+Location:" + loc;
+				loc = "+Location:" + loc; //$NON-NLS-0$
 			}
 		}
 		if(options.replace !== null && options.replace !== undefined){
-			replace = "&replace=" + options.replace;
+			replace = "&replace=" + options.replace; //$NON-NLS-0$
 		}
 	}
-	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace;
+	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 };
 
 orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj) {
-	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1);
+	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
 	queryObj.location = "";
 	queryObj.searchStr = locAndSearchStr;
 	if(hasLocation){
-		var splitStr = locAndSearchStr.split("+Location:");
+		var splitStr = locAndSearchStr.split("+Location:"); //$NON-NLS-0$
 		if(splitStr.length === 2){
 			var loc = splitStr[1];
-			if(loc.length > 0 && loc[loc.length - 1] === '*'){
+			if(loc.length > 0 && loc[loc.length - 1] === '*'){ //$NON-NLS-0$
 				loc = loc.substring(0, loc.length-1);
 			}
 			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0].split(" ").join("");
+			queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
 		}
 	}
-	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join("");
+	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
 	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr);
 };
 
 orion.searchUtils.generateInFileQuery = function(searchStr) {
 	var inFileQuery = {};
-	var hasStar = (searchStr.indexOf("*") > -1);
-	var hasQMark = (searchStr.indexOf("?") > -1);
+	var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
+	var hasQMark = (searchStr.indexOf("?") > -1); //$NON-NLS-0$
 	if(hasStar){
-		searchStr = searchStr.split("*").join(".*");
+		searchStr = searchStr.split("*").join(".*"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	if(hasQMark){
-		searchStr = searchStr.split("?").join(".");
+		searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	if(!hasStar && !hasQMark){
-		inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase();
+		inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
 		inFileQuery.wildCard = false;
 	} else {
 		inFileQuery.searchStr =searchStr.toLowerCase();
-		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/");
+		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 		if (regexp) {
 			var pattern = regexp.pattern;
 			var flags = regexp.flags;
-			flags = flags + (flags.indexOf("i") === -1 ? "i" : "");
+			flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
 			inFileQuery.regExp = {pattern: pattern, flags: flags};
 			inFileQuery.wildCard = true;
 		}
@@ -167,7 +167,7 @@ orion.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 };
 
 orion.searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
-	var regexp = mRegex.parse("/" + keyword + "/gim");
+	var regexp = mRegex.parse("/" + keyword + "/gim"); //$NON-NLS-1$ //$NON-NLS-0$
 	return orion.searchUtils.replaceRegEx(text,regexp, replacingStr);
 };
 
@@ -217,8 +217,8 @@ orion.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	flags = flags || "";
 	// 'g' makes exec() iterate all matches, 'm' makes ^$
 	// work linewise
-	flags += (flags.indexOf("g") === -1 ? "g" : "")
-			+ (flags.indexOf("m") === -1 ? "m" : "");
+	flags += (flags.indexOf("g") === -1 ? "g" : "") //$NON-NLS-1$ //$NON-NLS-0$
+			+ (flags.indexOf("m") === -1 ? "m" : ""); //$NON-NLS-1$ //$NON-NLS-0$
 	var regexp = new RegExp(pattern, flags);
 	var result = null, match = null;
 	result = regexp.exec(text.substring(startIndex));
@@ -357,12 +357,12 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 				if(result){
 					var lineNumber = i+1;
 					if(!replacing){
-						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber};
+						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){
 							var matchNumber = j+1;
-							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber};
+							var detailNode = {parent: fileModelNode, checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, matchNumber: matchNumber, name: lineStringOrigin, location: fileModelNode.location + "-" + lineNumber + "-" + matchNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							fileModelNode.children.push(detailNode);
 						}
 					}
@@ -375,18 +375,18 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 };
 
 orion.searchUtils.searchAllOccurrence = function( isRegEx, searchStr, caseSensitive, text, lineDelim){
-	var node = {type: "file", name: "allOccurrence"};
+	var node = {type: "file", name: "allOccurrence"}; //$NON-NLS-1$ //$NON-NLS-0$
 	var inFileQuery = {};
 	if(!isRegEx){
 		inFileQuery.searchStr = caseSensitive ? searchStr : searchStr.toLowerCase();
 		inFileQuery.wildCard = false;
 	} else {
 		inFileQuery.searchStr =caseSensitive ? searchStr : searchStr.toLowerCase();;
-		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/");
+		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 		if (regexp) {
 			var pattern = regexp.pattern;
 			var flags = regexp.flags;
-			flags = flags + (flags.indexOf("i") === -1 ? "i" : "");
+			flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
 			inFileQuery.regExp = {pattern: pattern, flags: flags};
 			inFileQuery.wildCard = true;
 		}
@@ -436,7 +436,7 @@ orion.searchUtils.fullPathNameByMeta = function(parents){
 	//add parents chain top down if needed
 	if(parentIndex > 0){
 		for(var j = parentIndex - 1; j > -1; j--){
-			var separator = (fullPath === "") ? "" : "/";
+			var separator = (fullPath === "") ? "" : "/"; //$NON-NLS-1$ //$NON-NLS-0$
 			fullPath = fullPath + separator + parents[j].Name;
 		}
 	}
