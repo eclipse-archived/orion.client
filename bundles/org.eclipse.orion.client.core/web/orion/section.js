@@ -50,7 +50,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 
 		// if canHide, add twistie and stuff...
 		if(options.canHide){
-			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft" }, this.domNode );
+			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft sectionTitle" }, this.domNode );
 			dojo.style(this.domNode, "cursor", "pointer");
 			dojo.attr(this.domNode, "tabIndex", "0");
 			dojo.connect(this.domNode, "onclick", function(evt) {
@@ -70,9 +70,9 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			dojo.addClass(icon, options.iconClass);
 		}
 		
-		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor layoutLeft", innerHTML: options.title }, this.domNode );
+		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode );
 		
-		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress layoutLeft", innerHTML: "..."}, this.domNode );
+		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode );
 		this._progressNode.style.visibility = "hidden";
 		
 		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode );
