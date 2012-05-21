@@ -22,19 +22,19 @@ var SyntaxChecker = (function () {
 		/* Looks up applicable validator services, calls validators, passes result to the marker service. */
 		checkSyntax: function (contentType, title, message, contents) {
 			function getValidators(registry, contentType) {
-				var contentTypeService = registry.getService("orion.core.contenttypes");
+				var contentTypeService = registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 				function getFilteredValidator(registry, validator, contentType) {
-					var contentTypeIds = validator.getProperty("contentType");
+					var contentTypeIds = validator.getProperty("contentType"); //$NON-NLS-0$
 					return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(function(result) {
 						return result ? validator : null;
 					});
 				}
-				var validators = registry.getServiceReferences("orion.edit.validator");
+				var validators = registry.getServiceReferences("orion.edit.validator"); //$NON-NLS-0$
 				var filteredValidators = [];
 				for (var i=0; i < validators.length; i++) {
 					var serviceReference = validators[i];
-					var pattern = serviceReference.getProperty("pattern"); // backwards compatibility
-					if (serviceReference.getProperty("contentType")) {
+					var pattern = serviceReference.getProperty("pattern"); // backwards compatibility //$NON-NLS-0$
+					if (serviceReference.getProperty("contentType")) { //$NON-NLS-0$
 						filteredValidators.push(getFilteredValidator(registry, serviceReference, contentType));
 					} else if (pattern && new RegExp(pattern).test(title)) {
 						var d = new dojo.Deferred();
@@ -81,7 +81,7 @@ var SyntaxChecker = (function () {
 									problems = problems.concat(probs);
 								}
 							}
-							self.registry.getService("orion.core.marker")._setProblems(problems);
+							self.registry.getService("orion.core.marker")._setProblems(problems); //$NON-NLS-0$
 						});
 				});
 			}
@@ -92,9 +92,9 @@ var SyntaxChecker = (function () {
 				var problem = problems[i];
 				
 				problem.description = problem.description || problem.reason;
-				problem.severity = problem.severity || "error";
-				problem.start = (typeof problem.start === "number") ? problem.start : problem.character;
-				problem.end = (typeof problem.end === "number") ? problem.end : problem.start + 1;
+				problem.severity = problem.severity || "error"; //$NON-NLS-0$
+				problem.start = (typeof problem.start === "number") ? problem.start : problem.character; //$NON-NLS-0$
+				problem.end = (typeof problem.end === "number") ? problem.end : problem.start + 1; //$NON-NLS-0$
 				
 				// Range check
 				var lineLength = model.getLine(problem.line - 1, false).length;
