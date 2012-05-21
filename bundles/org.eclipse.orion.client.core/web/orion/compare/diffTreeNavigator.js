@@ -376,6 +376,8 @@ exports.DiffTreeNavigator = (function() {
 				return -1;
 			}
 			var cursor = this.iterator.cursor();
+			if(!cursor)
+				return -1;
 			if(cursor.type === "block"){
 				return cursor.index;
 			} else {
@@ -431,6 +433,8 @@ exports.DiffTreeNavigator = (function() {
 				return;
 			}
 			var cursor = this.iterator.cursor();
+			if(!cursor)
+				return
 			var annoType0, annoType1;
 			var annoPosOld = {start: cursor.oldA.start, end: cursor.oldA.end};
 			var annoPosNew = {start: cursor.newA.start, end: cursor.newA.end};
