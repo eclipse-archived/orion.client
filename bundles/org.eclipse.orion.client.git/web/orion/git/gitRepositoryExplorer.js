@@ -614,7 +614,7 @@ exports.GitRepositoryExplorer = (function() {
 					}
 				}
 				
-				var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+				var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 				
 				titleWrapper.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
 
@@ -628,16 +628,16 @@ exports.GitRepositoryExplorer = (function() {
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100);
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
 					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button");
-				};
+				}
 				
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100);
 				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button");
 				
-				if (currentBranch.RemoteLocation[0] == null){
+				if (currentBranch.RemoteLocation[0] === null){
 					progress.done();
 					that.renderNoCommit();
 					return;
-				};
+				}
 				
 				progress.worked("Getting commits for \"" + currentBranch.Name + "\" branch");
 				if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
@@ -661,8 +661,10 @@ exports.GitRepositoryExplorer = (function() {
 									
 									commitsCount = commitsCount + resp.Children.length; 
 									
-									if (commitsCount == 0)
+									if (commitsCount === 0){
 										that.renderNoCommit();
+									}
+									
 									progress.done();
 								},
 								function(error){
@@ -682,8 +684,10 @@ exports.GitRepositoryExplorer = (function() {
 								that.renderCommit(resp.Children[i], true, i);
 							}
 							
-							if (resp.Children.length == 0)
+							if (resp.Children.length === 0){
 								that.renderNoCommit();
+							}	
+								
 							progress.done();
 						},
 						function(error) {

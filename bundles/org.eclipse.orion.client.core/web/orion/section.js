@@ -54,12 +54,12 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			dojo.style(this.domNode, "cursor", "pointer");
 			dojo.attr(this.domNode, "tabIndex", "0");
 			dojo.connect(this.domNode, "onclick", function(evt) {
-				if (evt.target.parentNode !== that.actionsNode && evt.target.parentNode !== that.selectionNode) {
+				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
 					that._changeExpandedState();
 				}
 			});
 			dojo.connect(this.domNode, "onkeydown", function(evt) {
-				if(evt.keyCode === dojo.keys.ENTER && evt.target.parentNode !== that.actionsNode && evt.target.parentNode !== that.selectionNode) {
+				if(evt.keyCode === dojo.keys.ENTER && (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie)) {
 					that._changeExpandedState();
 				}
 			});
