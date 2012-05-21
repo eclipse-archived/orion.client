@@ -32,6 +32,8 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		"Conflicting":["gitImageSprite git-sprite-conflict-file", "Conflicting"]	
 	};
 	
+	var statusUILocation = "git/git-status2.html";
+	
 	function isChange(change){
 		return isStaged(change) || isUnstaged(change);
 	}
@@ -72,6 +74,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	
 	//return module exports
 	return {
+		statusUILocation: statusUILocation,
 		isStaged: isStaged,
 		isUnstaged: isUnstaged,
 		isChange: isChange,

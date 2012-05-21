@@ -717,7 +717,7 @@ var exports = {};
 			imageClass: "git-sprite-status",
 			spriteClass: "gitCommandSprite",
 			hrefCallback : function(data) {
-				return require.toUrl("git/git-status.html")+"#" + data.items.StatusLocation;
+				return require.toUrl(mGitUtil.statusUILocation) + "#" + data.items.StatusLocation;
 			},
 			visibleWhen : function(item) {
 				if (!item.StatusLocation)
@@ -992,7 +992,7 @@ var exports = {};
 						display.Severity = "Warning";
 						display.HTML = true;
 						display.Message = "<span>" + result.jsonData.Result
-							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
+							+ ". Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					} else if(result.error) {
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status");
@@ -1004,7 +1004,7 @@ var exports = {};
 							display.Message = result.error.message;
 						}
 						display.HTML = true;
-						display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
+						display.Message ="<span>" + display.Message + " Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" 
 							+ statusLocation + "\">Git Status page</a>.<span>";
 					}
 
@@ -1017,7 +1017,7 @@ var exports = {};
 						display.Severity = "Error";
 						display.HTML = true;
 						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage
-						+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
+						+ ". Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" 
 						+ statusLocation +"\">Git Status page</a>.<span>";
 
 						serviceRegistry.getService("orion.page.message").setProgressResult(display);
@@ -1064,7 +1064,7 @@ var exports = {};
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result
 							+ ". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing."
-							+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
+							+ " Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					}
 					else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") {
@@ -1072,7 +1072,7 @@ var exports = {};
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result
 							+ ". Repository state is invalid (i.e. already during rebasing)."
-							+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
+							+ " Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					}
 					else if (jsonData.Result == "FAILED_UNMERGED_PATHS") {
@@ -1080,7 +1080,7 @@ var exports = {};
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result
 							+ ". Repository contains unmerged paths."
-							+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
+							+ " Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					}
 					else if (jsonData.Result == "FAILED_PENDING_CHANGES") {
@@ -1088,7 +1088,7 @@ var exports = {};
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result
 							+ ". Repository contains pending changes. Please commit or stash them."
-							+ " Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" 
+							+ " Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" 
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					}
 					// handle other cases
@@ -1096,7 +1096,7 @@ var exports = {};
 						display.Severity = "Warning";
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result
-							+ ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#"
+							+ ". Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"
 							+ statusLocation +"\">Git Status page</a>.<span>";
 					} 
 
@@ -1654,12 +1654,12 @@ var exports = {};
 					else if (jsonData.Result == "CONFLICTING") {
 						display.Severity = "Warning";
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result + ". Some conflicts occurred. Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" + statusLocation
+						display.Message = "<span>" + jsonData.Result + ". Some conflicts occurred. Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" + statusLocation
 								+ "\">Git Status page</a>.<span>";
 					} else if (jsonData.Result == "FAILED") {
 						display.Severity = "Error";
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result + ". Go to <a href=\"" + require.toUrl("git/git-status.html") + "#" + statusLocation
+						display.Message = "<span>" + jsonData.Result + ". Go to <a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#" + statusLocation
 								+ "\">Git Status page</a>.<span>";
 					}
 					// handle other cases
