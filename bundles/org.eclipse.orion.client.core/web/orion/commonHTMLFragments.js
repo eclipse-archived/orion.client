@@ -30,20 +30,21 @@ define(['require'],
 			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"><img src="' + require.toUrl("images/orion-transparent.png") + '" alt="Orion Logo"/></a>' +
 			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' +
 			'<div class="layoutRight">' +
+				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' +
+				'<div id="relatedLinks" class="spacingLeft layoutLeft"></div>' +
+				'<input type="text" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' +
 				'<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' +
 				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' +
 			'</div>' +
 		'</div>' +
 		//Title area
 		'<div id="titleArea" class="layoutBlock titleArea">' +
-			'<div id="pageTitle" class="layoutLeft pageTitle"></div>' +
+			'<div class="layoutLeft pageTitle"></div>' +
+			
+			'<div id="location" style="padding-bottom:5px;display:inline;" class="clear currentLocation"></div>' +
 			'<div class="layoutRight pageNav">' +
-				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' +
 				'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' +
-				'<div id="relatedLinks" class="spacingLeft layoutLeft"></div>' +
-				'<input type="text" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' +
 			'</div>' +
-			'<div id="location" style="padding-bottom:5px;" class="clear currentLocation"></div>' +
 		'</div>' +
 	'</header>';
 	// END TOP BANNER FRAGMENT

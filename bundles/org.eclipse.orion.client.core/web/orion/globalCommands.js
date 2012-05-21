@@ -274,9 +274,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		var menuButton = dijit.byId("related");
 		var domNode = dojo.byId("relatedLinks");
 		if (domNode && !menuButton) {
-			menuButton = new dijit.form.DropDownButton({
+			menuButton = new orion.widgets.UserMenuDropDown({
 				id: "related",
-				label: "Related pages",
+				label: "Related",
 				dropDown: linksMenu
 			});
 			dojo.addClass(menuButton.domNode, "bannerMenu");
@@ -387,9 +387,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				menuButton.destroy();
 			}
 			if (foundLink) {
-				menuButton = new dijit.form.DropDownButton({
+				menuButton = new orion.widgets.UserMenuDropDown({
 					id: "related",
-					label: "Related pages",
+					label: "Related",
 					dropDown: menu
 				});
 				dojo.addClass(menuButton.domNode, "bannerMenu");
