@@ -31,7 +31,7 @@ define(['require'],
 			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' +
 			'<div class="layoutRight">' +
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' +
-				'<div id="relatedLinks" class="spacingLeft layoutLeft"></div>' +
+				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>' +
 				'<input type="text" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' +
 				'<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' +
 				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' +
