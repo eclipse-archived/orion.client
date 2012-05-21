@@ -16,13 +16,13 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileClient', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder'], function(require, dojo, dijit, mUtil, mCommands, mFileClient, PageUtil) {
 
-	dojo.declare("orion.widgets.maker.ScrollingContainer", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.maker.ScrollingContainer", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		templateString:	'<div>' + 
-							'<div data-dojo-attach-point="scontent" class="scrollcontent">' + 
-								'<div data-dojo-attach-point="sections" style="padding-bottom:200px;"></div>' +
-							'</div>' + 
-						'</div>',
+		templateString:	'<div>' +  //$NON-NLS-0$
+							'<div data-dojo-attach-point="scontent" class="scrollcontent">' +  //$NON-NLS-0$
+								'<div data-dojo-attach-point="sections" style="padding-bottom:200px;"></div>' + //$NON-NLS-0$
+							'</div>' +  //$NON-NLS-0$
+						'</div>', //$NON-NLS-0$
 						
 		scrolling: false,	
 		offset: null,
@@ -34,24 +34,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 		
 		postCreate: function(){
 			
-			var bar = dojo.byId( 'pageToolbar' );	
-			dojo.style( bar, 'borderBottom', '2px solid whitesmoke' );
+			var bar = dojo.byId( 'pageToolbar' );	 //$NON-NLS-0$
+			dojo.style( bar, 'borderBottom', '2px solid whitesmoke' ); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var actions = dojo.byId( 'pageActions' );
+			var actions = dojo.byId( 'pageActions' ); //$NON-NLS-0$
 			
-			this.sectionNavigation = dojo.create( 'div', null, actions );
+			this.sectionNavigation = dojo.create( 'div', null, actions ); //$NON-NLS-0$
 		
 			this.sectionList = [];
 			
 			this.fileClient = new mFileClient.FileClient(this.serviceRegistry);	
 			
-			dojo.style( this.domNode.parentNode, 'background', 'white' );
+			dojo.style( this.domNode.parentNode, 'background', 'white' ); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		
 		addCommand: function( name, command ){
 		
-			var id = "orion.add" + name;
+			var id = "orion.add" + name; //$NON-NLS-0$
 			var tooltip = name;
 		
 			var createPluginCommand = new mCommands.Command({
@@ -65,12 +65,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 			
 			this.commandService.addCommand(createPluginCommand);
 			this.commandService.registerCommandContribution(this.toolbarID, id, 2);
-			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button");
+			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button"); //$NON-NLS-0$
 			
-			var nodes = dojo.query(".commandButton");
+			var nodes = dojo.query(".commandButton"); //$NON-NLS-0$
 			
 			for( var n = 0; n < nodes.length; n++ ){
-				nodes[n].style.padding = '3px';
+				nodes[n].style.padding = '3px'; //$NON-NLS-0$
 			}
 			
 		},
@@ -115,21 +115,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
                 
                 this.lastScroll = this.offset + this.travel * ease;
                 
-                console.log( 'POINT: ' + this.lastScroll );
+                console.log( 'POINT: ' + this.lastScroll ); //$NON-NLS-0$
                 
-				dojo.byId( 'centerPane' ).scrollTop = this.lastScroll;
+				dojo.byId( 'centerPane' ).scrollTop = this.lastScroll; //$NON-NLS-0$
             }
         },
         
         smooth: function( name ){
 			var date = new Date().getTime();   
-			this.interval = window.setInterval( dojo.hitch( this, 'roll', name, date ), 15 );
+			this.interval = window.setInterval( dojo.hitch( this, 'roll', name, date ), 15 ); //$NON-NLS-0$
         },
 		
 		adjust: function( node ){
-			dojo.removeClass( this.selectedNode, 'smiSelected' );
+			dojo.removeClass( this.selectedNode, 'smiSelected' ); //$NON-NLS-0$
 			this.selectedNode = node;
-			dojo.addClass( this.selectedNode, 'smiSelected' );
+			dojo.addClass( this.selectedNode, 'smiSelected' ); //$NON-NLS-0$
         },
 		
 		position: function(element){	
@@ -147,7 +147,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 			this.scrolling = true;
 			
 			try{
-				var targetName = event.currentTarget.href.split("#")[1];
+				var targetName = event.currentTarget.href.split("#")[1]; //$NON-NLS-0$
 				var targetNode = dojo.byId( targetName );
 				this.offset = this.lastScroll;
 				this.travel = this.position( targetNode ).y - this.offset;
@@ -162,26 +162,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 		
 		createMenuItem: function( name, count ){
 		
-			var content = { 'class':'scrollmenuitem', 
-							'href': '#' + name, 
-							'data-dojo-attach-point':name, 
-							'onclick': dojo.hitch( this, 'scrollTo' ),
-							'innerHTML': name };
+			var content = { 'class':'scrollmenuitem',  //$NON-NLS-1$ //$NON-NLS-0$
+							'href': '#' + name,  //$NON-NLS-1$ //$NON-NLS-0$
+							'data-dojo-attach-point':name,  //$NON-NLS-0$
+							'onclick': dojo.hitch( this, 'scrollTo' ), //$NON-NLS-1$ //$NON-NLS-0$
+							'innerHTML': name }; //$NON-NLS-0$
 			
-			var menuItem = dojo.create( 'a', content );
+			var menuItem = dojo.create( 'a', content ); //$NON-NLS-0$
 			
 			if( !this.selectedNode ){
 				this.selectedNode = menuItem;			
-				dojo.addClass( this.selectedNode, 'smiSelected' );
+				dojo.addClass( this.selectedNode, 'smiSelected' ); //$NON-NLS-0$
 			}
 			
-			var listItem = dojo.create( 'li' );
+			var listItem = dojo.create( 'li' ); //$NON-NLS-0$
 			
 			listItem.appendChild( menuItem );
 			
-			var counter = dojo.create( 'div', { innerHTML: count, 'class':'itemcount' }, listItem );
+			var counter = dojo.create( 'div', { innerHTML: count, 'class':'itemcount' }, listItem ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var actions = dojo.byId( 'pageActions' );
+			var actions = dojo.byId( 'pageActions' ); //$NON-NLS-0$
 		
 			dojo.byId( this.toolbarID ).appendChild( listItem );
 			
@@ -207,8 +207,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 		
 		resize: function( size ){
 			var mb = dojo.marginBox ( this.scontent );	
-			dojo.style( this.scontent, 'width', mb.w + 'px' );
-			dojo.style( this.domNode.parentNode, 'overflow', 'auto' );
+			dojo.style( this.scontent, 'width', mb.w + 'px' ); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style( this.domNode.parentNode, 'overflow', 'auto' ); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	
 	});

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  /*globals define console setTimeout*/
-define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
+define(['i18n!operations/nls/messages', "orion/auth", "orion/Deferred"], function(messages, mAuth, Deferred){
 	
 	function _doServiceCall(operationsService, funcName, funcArgs) {
 		var clientDeferred = new Deferred();
@@ -43,7 +43,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 	}
 	
 	function _getOperations(operationsService, options){
-		return _doServiceCall(operationsService, "getOperations", [options]);
+		return _doServiceCall(operationsService, "getOperations", [options]); //$NON-NLS-0$
 	}
 	
 	function NoMatchingOperationsClient(location){
@@ -52,7 +52,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 	
 	function returnNoMatchingError(){
 		var result = new Deferred();
-		result.reject("No Matching OperationService for location:" + this._location);
+		result.reject(messages["No Matching OperationService for location:"] + this._location);
 		return result;
 	}
 	
@@ -71,15 +71,15 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 		this._patterns = [];
 		this._operationListeners = [];
 		this._currentLongpollingIds = [];
-		var operationsServices = serviceRegistry.getServiceReferences("orion.core.operation");
+		var operationsServices = serviceRegistry.getServiceReferences("orion.core.operation"); //$NON-NLS-0$
 		for(var i=0; i<operationsServices.length; i++){
 			var servicePtr = operationsServices[i];
 			var operationsService = serviceRegistry.getService(servicePtr);
 			this._services[i] = operationsService;
 			
-			var patternString = operationsServices[i].getProperty("pattern") || ".*";
-			if (patternString[0] !== "^") {
-				patternString = "^" + patternString;
+			var patternString = operationsServices[i].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (patternString[0] !== "^") { //$NON-NLS-0$
+				patternString = "^" + patternString; //$NON-NLS-0$
 			}
 			this._patterns[i] = new RegExp(patternString);
 		}
@@ -111,7 +111,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 		if(longpollingId){
 			args.LongpollingId = longpollingId;
 		}
-		_doServiceCall(service, "getOperations", [args]).then(function(result){
+		_doServiceCall(service, "getOperations", [args]).then(function(result){ //$NON-NLS-0$
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
@@ -127,7 +127,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
-			if("timeout"===error.dojoType) {
+			if("timeout"===error.dojoType) { //$NON-NLS-0$
 				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
 			} else {
 				setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
@@ -167,29 +167,29 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 				return result;
 			},
 			getOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments); //$NON-NLS-0$
 			},
 			removeCompletedOperations: function(){
 				var results = [];
 				for(var i=0; i<this._services.length; i++){
-					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations");
+					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations"); //$NON-NLS-0$
 				}
 				return new Deferred().all(results);
 			},
 			
 			removeOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "removeOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "removeOperation", arguments); //$NON-NLS-0$
 			},
 			
 			cancelOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "cancelOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "cancelOperation", arguments); //$NON-NLS-0$
 			},
 	
 			addOperationChangeListener: function(listener){
 				this._operationListeners.push(listener);
 				if(this._operationListeners.length===1){
 					if(this._services.length<1){
-						throw "No operations services registered.";
+						throw messages["No operations services registered."];
 					}
 					for(var i=0; i<this._services.length; i++){
 						_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));
@@ -213,7 +213,7 @@ define(["orion/auth", "orion/Deferred"], function(mAuth, Deferred){
 			resetChangeListeners: function(){
 				this._currentLongpollingIds = [];
 				if(this._services.length<1){
-					throw "No operations services registered.";
+					throw messages['No operations services registered.'];
 				}
 				for(var i=0; i<this._services.length; i++){
 					_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));

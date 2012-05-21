@@ -11,12 +11,12 @@
 /*global dojo dijit widgets define*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/OperationsDialog.html'], function(require, dojo, dijit, mUtil) {
+define(['i18n!operations/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/OperationsDialog.html'], function(messages, require, dojo, dijit, mUtil) {
 	
-	dojo.declare("orion.widgets.OperationsDialog", [dijit.TooltipDialog], {
+	dojo.declare("orion.widgets.OperationsDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: true,
 		closable: true,
-		templateString: dojo.cache('orion', 'widgets/templates/OperationsDialog.html'),
+		templateString: dojo.cache('orion', 'widgets/templates/OperationsDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 
 		constructor : function() {
 			this.inherited(arguments);
@@ -26,7 +26,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		},
 		postCreate: function(){
 			this.inherited(arguments);
-			this.allOperationsLink.href = require.toUrl("operations/list.html");
+			this.allOperationsLink.href = require.toUrl("operations/list.html"); //$NON-NLS-0$
 			this._setOperationsVisibility();
 		},
 		setOperations: function(operations, myOperations){
@@ -71,67 +71,67 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			dojo.empty(operationsTable);
 			for(var i=0; i<operations.length; i++){
 				var operation = operations[i];
-				var tr = dojo.create("tr");
-				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr);
-				var div = dojo.create("div", null, col, "only");
-				var link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last");
+				var tr = dojo.create("tr"); //$NON-NLS-0$
+				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr); //$NON-NLS-1$ //$NON-NLS-0$
+				var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				var link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-				dojo.place(document.createTextNode(operation.Name), link, "only");
+				dojo.place(document.createTextNode(operation.Name), link, "only"); //$NON-NLS-0$
 				
-				var operationIcon = dojo.create("span", null, div, "first");
-				dojo.addClass(operationIcon, "imageSprite");
+				var operationIcon = dojo.create("span", null, div, "first"); //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.addClass(operationIcon, "imageSprite"); //$NON-NLS-0$
 				
 				var result =  this.parseProgressResult(operation.Result);
 				
 				
 				switch (result.Severity) {
-					case "Warning":
-						dojo.addClass(operationIcon, "core-sprite-warning");
-						dojo.attr(operationIcon, "aria-label", "Operation resulted in a warning.");
+					case "Warning": //$NON-NLS-0$
+						dojo.addClass(operationIcon, "core-sprite-warning"); //$NON-NLS-0$
+						dojo.attr(operationIcon, "aria-label", messages["Operation resulted in a warning."]); //$NON-NLS-0$
 						break;
-					case "Error":
-						dojo.addClass(operationIcon, "core-sprite-error");
-						dojo.attr(operationIcon, "aria-label", "Operation resulted in an error.");
+					case "Error": //$NON-NLS-0$
+						dojo.addClass(operationIcon, "core-sprite-error"); //$NON-NLS-0$
+						dojo.attr(operationIcon, "aria-label", messages["Operation resulted in an error."]); //$NON-NLS-0$
 						break;
 					default:
 						if(operation.Running===true) {
-							dojo.addClass(operationIcon, "core-sprite-start");
-							dojo.attr(operationIcon, "aria-label", "Operation is running.");
+							dojo.addClass(operationIcon, "core-sprite-start"); //$NON-NLS-0$
+							dojo.attr(operationIcon, "aria-label", messages["Operation is running."]); //$NON-NLS-0$
 						}
 						else if(operation.Canceled===true) {
-							dojo.addClass(operationIcon, "core-sprite-stop");
-							dojo.attr(operationIcon, "aria-label", "Operation is canceled.");
+							dojo.addClass(operationIcon, "core-sprite-stop"); //$NON-NLS-0$
+							dojo.attr(operationIcon, "aria-label", messages["Operation is canceled."]); //$NON-NLS-0$
 						}
 						else if(operation.Failed===true) {
-							dojo.addClass(operationIcon, "core-sprite-error");
-							dojo.attr(operationIcon, "aria-label", "Operation failed.");
+							dojo.addClass(operationIcon, "core-sprite-error"); //$NON-NLS-0$
+							dojo.attr(operationIcon, "aria-label", messages["Operation failed."]); //$NON-NLS-0$
 						}
 						else {
-							dojo.addClass(operationIcon, "core-sprite-ok");
-							dojo.attr(operationIcon, "aria-label", "Operation ok.");
+							dojo.addClass(operationIcon, "core-sprite-ok"); //$NON-NLS-0$
+							dojo.attr(operationIcon, "aria-label", "Operation ok."); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 				}
 				
 				if(result.Message || operation.Message){
 					var message = result.Message || operation.Message;
 					if(result.DetailedMessage && result.DetailedMessage!=="")
-						message += ": " + result.DetailedMessage;
-					dojo.create("br", null, div, "last");
-					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: message}, div, "last");
+						message += ": " + result.DetailedMessage; //$NON-NLS-0$
+					dojo.create("br", null, div, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: message}, div, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 				}
 				
-				dojo.place(tr, operationsTable, "last");
+				dojo.place(tr, operationsTable, "last"); //$NON-NLS-0$
 			}
 			this._setOperationsVisibility();
 		},
 		_setOperationsVisibility: function(){			
-			this.operationsList.style.display = this._operations.length > 0 ? "" : "none";
-			this.otherOperations.style.display  = this._operations.length > 0 ? "" : "none";
-			this.myOperationsList.style.display = this._myOperations.length > 0 ? "" : "none";
-			this.myOperationsListEmpty.style.display = this._myOperations.length > 0 ? "none" : "";
-			this.operationsDontExist.style.display = this._operations.length + this._myOperations.length > 0 ? "none": "";
-			this.operationsExist.style.display = this._operations.length + this._myOperations.length > 0 ? "" : "none";
+			this.operationsList.style.display = this._operations.length > 0 ? "" : "none"; //$NON-NLS-0$
+			this.otherOperations.style.display  = this._operations.length > 0 ? "" : "none"; //$NON-NLS-0$
+			this.myOperationsList.style.display = this._myOperations.length > 0 ? "" : "none"; //$NON-NLS-0$
+			this.myOperationsListEmpty.style.display = this._myOperations.length > 0 ? "none" : ""; //$NON-NLS-0$
+			this.operationsDontExist.style.display = this._operations.length + this._myOperations.length > 0 ? "none": ""; //$NON-NLS-0$
+			this.operationsExist.style.display = this._operations.length + this._myOperations.length > 0 ? "" : "none"; //$NON-NLS-0$
 		},
 		_onBlur: function(){
 			this.inherited(arguments);

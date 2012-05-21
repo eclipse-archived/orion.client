@@ -14,16 +14,16 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(messages, require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.LabeledTextfield",[dijit._Widget, dijit._Templated],{
+	dojo.declare("orion.widgets.settings.LabeledTextfield",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
-		templateString: '<div>' + 
-							'<label>' +
-								'<span data-dojo-attach-point="mylabel">Label:</span>' + 
-								'<input type="text" name="myname" data-dojo-attach-point="myfield" data-dojo-attach-event="onchange:change"/>' +
-							'</label>' + 
-						'</div>',
+		templateString: '<div>' +  //$NON-NLS-0$
+							'<label>' + //$NON-NLS-0$
+								'<span data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<input type="text" name="myname" data-dojo-attach-point="myfield" data-dojo-attach-event="onchange:change"/>' + //$NON-NLS-0$
+							'</label>' +  //$NON-NLS-0$
+						'</div>', //$NON-NLS-0$
 						
 		setStorageItem: function(){
 		
@@ -44,14 +44,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
         
         postCreate: function(){
 
-            this.mylabel.innerHTML = this.fieldlabel + ':';
+            this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
             
-            if( this.inputType && this.inputType === 'password' ){
-				this.myfield.type = "password";
+            if( this.inputType && this.inputType === 'password' ){ //$NON-NLS-0$
+				this.myfield.type = "password"; //$NON-NLS-0$
             }
             
-            if( this.editmode && this.editmode === 'readonly' ){
-				dojo.attr(this.myfield, "readonly", true);
+            if( this.editmode && this.editmode === 'readonly' ){ //$NON-NLS-0$
+				dojo.attr(this.myfield, "readonly", true); //$NON-NLS-0$
             }
         }, 
         

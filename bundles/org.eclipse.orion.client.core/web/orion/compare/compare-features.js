@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(dojo, dijit) {
+define(['i18n!compare/nls/messages', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, dojo, dijit) {
 
 
 var orion = orion || {};
@@ -25,48 +25,48 @@ orion.TwoWayCompareUIFactory = (function() {
 	}	
 	TwoWayCompareUIFactory.prototype = {
 		_createNoWrapTextDiv:function(textDivId , defaultText , align, createCommandSpan){
-			var table = document.createElement('table');
-			table.width = "100%";
-			var row = document.createElement('tr');
+			var table = document.createElement('table'); //$NON-NLS-0$
+			table.width = "100%"; //$NON-NLS-0$
+			var row = document.createElement('tr'); //$NON-NLS-0$
 			table.appendChild(row);
-			var td = document.createElement('td');
+			var td = document.createElement('td'); //$NON-NLS-0$
 			td.noWrap = true;
 			if(align)
 				td.align = align;
 			row.appendChild(td);
-			var textDiv =  document.createElement('h2');
+			var textDiv =  document.createElement('h2'); //$NON-NLS-0$
 			textDiv.id = textDivId;
-			dojo.place(document.createTextNode(defaultText), textDiv, "only");
+			dojo.place(document.createTextNode(defaultText), textDiv, "only"); //$NON-NLS-0$
 			td.appendChild(textDiv);
 			if (createCommandSpan && !this._commandSpanId) {//If there is already a command span defined for the compare command, we do not want to create it here
-				this._commandSpanId = "compare_rightContainerCommands";
-				td = document.createElement('td');
+				this._commandSpanId = "compare_rightContainerCommands"; //$NON-NLS-0$
+				td = document.createElement('td'); //$NON-NLS-0$
 				td.id = this._commandSpanId; 
 				row.appendChild(td);
 				td.noWrap = true;
-				td.align = "right";
-				table.align = "right";
+				td.align = "right"; //$NON-NLS-0$
+				table.align = "right"; //$NON-NLS-0$
 			}
 			return table;
 		},
 		
 		_createEditorParentDiv: function(editorParentDivId ,containerDivId) {
-			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center"});
-			dojo.addClass(editorParentDiv.domNode, 'paneScrolled');
-			dojo.addClass(editorParentDiv.domNode, 'compareEditorParent');
+			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center"}); //$NON-NLS-0$
+			dojo.addClass(editorParentDiv.domNode, 'paneScrolled'); //$NON-NLS-0$
+			dojo.addClass(editorParentDiv.domNode, 'compareEditorParent'); //$NON-NLS-0$
 			return editorParentDiv;
 		},
 		
 		_createCompareCanvasDiv: function(canvasDivId ,containerDivId){
-			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false});
-			dojo.addClass(canvasContainer.domNode, 'canvasContainer');
+			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false}); //$NON-NLS-0$
+			dojo.addClass(canvasContainer.domNode, 'canvasContainer'); //$NON-NLS-0$
 			
-			var canvas = document.createElement('canvas');
+			var canvas = document.createElement('canvas'); //$NON-NLS-0$
 			canvas.id = canvasDivId;
 			canvas.width = 46;
 			canvas.height = 3000;
-			dojo.toggleClass(canvas, "compareCanvas", true);
-			canvasContainer.attr('content', canvas);
+			dojo.toggleClass(canvas, "compareCanvas", true); //$NON-NLS-0$
+			canvasContainer.attr('content', canvas); //$NON-NLS-0$
 			return canvasContainer;
 		},
 		
@@ -75,18 +75,18 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		_createTileDiv: function(titleDivId, titleStr, createCommandArea) {
-			var table = this._createNoWrapTextDiv(titleDivId , titleStr ? titleStr: "Compare...", "left", createCommandArea);
-			var titleContainer = new dijit.layout.ContentPane({region: "top"});
-			dojo.addClass(titleContainer.domNode, 'titleContainer');
-			titleContainer.attr('content', table);
+			var table = this._createNoWrapTextDiv(titleDivId , titleStr ? titleStr: messages["Compare..."], "left", createCommandArea); //$NON-NLS-1$
+			var titleContainer = new dijit.layout.ContentPane({region: "top"}); //$NON-NLS-0$
+			dojo.addClass(titleContainer.domNode, 'titleContainer'); //$NON-NLS-0$
+			titleContainer.attr('content', table); //$NON-NLS-0$
 			return titleContainer;
 		},
 		
 		_createStatusDiv: function(statusDivId) {
-			var table = this._createNoWrapTextDiv(statusDivId , "Line 0 : Col 0" , "center");
-			var statusContainer = new dijit.layout.ContentPane({region: "bottom"});
-			dojo.addClass(statusContainer.domNode, 'statusContainer');
-			statusContainer.attr('content', table);
+			var table = this._createNoWrapTextDiv(statusDivId , messages["Line 0 : Col 0"] , "center"); //$NON-NLS-1$
+			var statusContainer = new dijit.layout.ContentPane({region: "bottom"}); //$NON-NLS-0$
+			dojo.addClass(statusContainer.domNode, 'statusContainer'); //$NON-NLS-0$
+			statusContainer.attr('content', table); //$NON-NLS-0$
 			return statusContainer;
 		},
 		
@@ -95,26 +95,26 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		_createRightEditorParentDiv: function(editorParentDivId ,canvasId) {
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
-			dojo.addClass(bc.domNode, 'borderContainer');
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false}); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(bc.domNode, 'borderContainer'); //$NON-NLS-0$
 			this._appendDomNode(bc,this._createCompareCanvasDiv(canvasId));
 			this._appendDomNode(bc,this._createEditorParentDiv(editorParentDivId));
 			return bc;
 		},
 				
 		_createLeftBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
-			dojo.addClass(bc.domNode, 'leftBorder');
+			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(bc.domNode, 'leftBorder'); //$NON-NLS-0$
 			
 			if(this._showTitle){
-				this._leftTitleDivId = this._parentDivID + "_left_title_id";
+				this._leftTitleDivId = this._parentDivID + "_left_title_id"; //$NON-NLS-0$
 				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId, this._leftTitle, false));
 			}
-			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id";
+			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id"; //$NON-NLS-0$
 			this._appendDomNode(bc , this._createLeftEditorParentDiv(this._leftEditorParentDivId));
 
 			if(this._showLineStatus){
-				this._leftStatusDivId = this._parentDivID + "_left_status_id";
+				this._leftStatusDivId = this._parentDivID + "_left_status_id"; //$NON-NLS-0$
 				this._appendDomNode(bc , this._createStatusDiv(this._leftStatusDivId));
 			}
 			
@@ -122,20 +122,20 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		_createRightBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false});
-			dojo.addClass(bc.domNode, 'rightBorder');
+			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false}); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(bc.domNode, 'rightBorder'); //$NON-NLS-0$
 			
 			if(this._showTitle){
-				this._rightTitleDivId = this._parentDivID + "_right_title_id";
+				this._rightTitleDivId = this._parentDivID + "_right_title_id"; //$NON-NLS-0$
 				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId, this._rightTitle, true));
 			}
 			
-			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id";
-			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id";
+			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id"; //$NON-NLS-0$
+			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id"; //$NON-NLS-0$
 			this._appendDomNode(bc , this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
 
 			if(this._showLineStatus){
-				this._rightStatusDivId = this._parentDivID + "_right_status_id";
+				this._rightStatusDivId = this._parentDivID + "_right_status_id"; //$NON-NLS-0$
 				this._appendDomNode(bc , this._createStatusDiv(this._rightStatusDivId));
 			}
 			
@@ -143,15 +143,15 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		buildUI:function(){
-			this._topWidgetId = this._parentDivID + "_topWidget";
+			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
 			this.destroy();
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
 			var marginBox = dojo.marginBox(this._parentDivID);
-			var styleH = marginBox.h + "px";
-			var styleW = marginBox.w + "px";
-			var styleStr = "height:" + styleH + ";width:" + styleW;
-			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true });
+			var styleH = marginBox.h + "px"; //$NON-NLS-0$
+			var styleW = marginBox.w + "px"; //$NON-NLS-0$
+			var styleStr = "height:" + styleH + ";width:" + styleW; //$NON-NLS-1$ //$NON-NLS-0$
+			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 		
 			topWidget.placeAt(this._parentDivID);
 			topWidget.addChild(leftB);

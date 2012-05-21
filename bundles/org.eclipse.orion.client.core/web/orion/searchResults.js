@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils'], function(require, dojo, mCommands, mSearchExplorer, mSearchUtils){
+define(['i18n!search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils){
 
 	/**
 	 * Creates a new search results generator.
@@ -34,7 +34,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 			var resultLocation = [];
 			dojo.empty(resultsNode);
 			var token = jsonData.responseHeader.params.q;
-			token= token.substring(token.indexOf("}")+1);
+			token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 			if (jsonData.response.numFound > 0) {
 				for (var i=0; i < jsonData.response.docs.length; i++) {
 					var hit = jsonData.response.docs[i];
@@ -43,7 +43,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 							foundValidHit = true;
 						}
 						var loc = hit.Location;
-						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path, name: hit.Name, lastModified: hit.LastModified});
+						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
 						
 					}
 				}
@@ -72,7 +72,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 					}));
 			}
 			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	
+				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 			}
 		},
 
@@ -84,7 +84,7 @@ define(['require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/sear
 		loadResults: function(query) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = dojo.byId(this.resultsId);
-			dojo.place(document.createTextNode("Searching..."), parent, "only");
+			dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 			this._search(parent, query);
 		}
 		
