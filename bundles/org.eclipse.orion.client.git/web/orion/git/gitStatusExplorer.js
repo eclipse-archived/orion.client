@@ -313,7 +313,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var unstagedSection = new mSection.Section(tableNode, {
 				id: "unstagedSection",
 				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
-				content: '<div id="unstagedNode" class="plugin-settings-list"></div>',
+				content: '<div id="unstagedNode"></div>',
 				canHide: true
 			});
 			
@@ -401,8 +401,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					switch(col_no){
 					case 0:		
 						if (mGitUtil.isChange(item)){
-							var td = document.createElement("td", {style: "padding: 10px"});
-							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							var td = document.createElement("td");
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
 
 							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
@@ -411,9 +411,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							return td;
 						} else {
-							var td = document.createElement("td", {style: "padding: 10px"});
+							var td = document.createElement("td");
 							td.colSpan = 2;
-							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
@@ -487,7 +487,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var stagedSection = new mSection.Section(tableNode, {
 				id: "stagedSection",
 				title: stagedSortedChanges.length > 0 ? "Staged" : "No Staged Changes",
-				content: '<div id="stagedNode" class="plugin-settings-list"></div>',
+				content: '<div id="stagedNode"></div>',
 				slideout: true,
 				canHide: true
 			});
@@ -575,8 +575,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					switch(col_no){
 					case 0:		
 						if (mGitUtil.isChange(item)){
-							var td = document.createElement("td", {style: "padding: 10px"});
-							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							var td = document.createElement("td");
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
 
 							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
@@ -586,9 +586,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							
 							return td;
 						} else {
-							var td = document.createElement("td", {style: "padding: 10px"});
+							var td = document.createElement("td");
 							td.colSpan = 2;
-							var div = dojo.create( "div", {style: "padding: 10px"}, td );
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
@@ -669,7 +669,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				title: change.name,
 				canHide: true,
 				hidden: true,
-				content: '<list id="diffNode_' + index + '" class="plugin-settings-list"></list>'
+				content: '<list id="diffNode_' + index + '></list>'
 			});
 			
 			// add inline compare view
@@ -713,7 +713,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			var titleWrapper = new mSection.Section(tableNode, {
 				id: "commitSection",
 				title: "Commits",
-				content: '<list id="commitNode" class="plugin-settings-list"></list>',
+				content: '<list id="commitNode" class="mainPadding"></list>',
 				slideout: true,
 				canHide: true,
 				preferenceService: this.registry.getService("orion.core.preference")
