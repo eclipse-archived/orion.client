@@ -1308,11 +1308,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
 	 * @param {Boolean} mod3 the third modifier (usually Alt).
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+	 * @param {String|DomElement} domScope the element for which this key binding is active.  If not specified, the key
+	 *       binding is considered to be global.
 	 * 
 	 * @name orion.commands.CommandKeyBinding
 	 * @class
 	 */
-	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
+	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4, domScope) {
 		if (typeof(keyCode) === "string") {
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
@@ -1322,6 +1324,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
+		if (typeof(domScope) === "string") {
+			this.domScope = dojo.byId(domScope);
+		} else {
+			this.domScope = domScope;
+		}
 	}
 	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
 		/**
@@ -1337,7 +1344,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 				if (this.mod2 !== e.shiftKey) { return false; }
 				if (this.mod3 !== e.altKey) { return false; }
 				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
-				return true;
+				// if no scope specified, a match has been found
+				if (!this.domScope) {
+					return true;
+				}
+				// check that the keybinding is in the right scope
+				var node = e.target;
+				while (node) {
+			        if (node === window.document) {
+			            return false;
+			        }
+			        if (node === this.domScope) {
+			        	return true;
+			        }
+			        node = node.parentNode;
+				}
 			}
 			return false;
 		},
@@ -1354,6 +1375,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 			if (this.mod2 !== kb.mod2) { return false; }
 			if (this.mod3 !== kb.mod3) { return false; }
 			if (this.mod4 !== kb.mod4) { return false; }
+			if (this.domScope !== kb.domScope) { return false; }
 			return true;
 		}
 	};
