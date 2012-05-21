@@ -197,8 +197,8 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
 				// add commands to the fave section heading
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1);
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2);
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent"));
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent"));
 				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
 				var selectionId = this.favoritesSection.selectionNode.id;
 				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) {

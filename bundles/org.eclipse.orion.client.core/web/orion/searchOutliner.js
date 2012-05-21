@@ -257,8 +257,8 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
 				// add commands to the search section heading
 				var selectionId = this.searchesSection.selectionNode.id;
-				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1);	
-				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2);
+				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "searchContent"));	
+				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));
 				commandService.registerSelectionService(selectionId, this.searchSelection);
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
 					var selectionTools = dojo.byId(selectionId);
