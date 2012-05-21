@@ -446,7 +446,9 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
 			slideout: true,
-			content: '<list id="branchNode" class="plugin-settings-list"></list>'
+			content: '<list id="branchNode" class="plugin-settings-list"></list>',
+			canHide: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		});
 
 		var progress = titleWrapper.createProgressMonitor();
@@ -516,7 +518,9 @@ exports.GitRepositoryExplorer = (function() {
 			id: "remoteBranchSection",
 			title: "Remote Branches",
 			iconClass: "gitImageSprite git-sprite-branch",
-			content: '<list id="remoteBranchNode" class="plugin-settings-list"></list>'
+			content: '<list id="remoteBranchNode" class="plugin-settings-list"></list>',
+			canHide: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		}); 
 
 		var progress = titleWrapper.createProgressMonitor();
@@ -593,7 +597,8 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Commits",
 			slideout: true,
 			content: '<list id="commitNode" class="plugin-settings-list"></list>',
-			canHide: true
+			canHide: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		}); 
 
 		var progress = titleWrapper.createProgressMonitor();
@@ -803,7 +808,10 @@ exports.GitRepositoryExplorer = (function() {
 			id: "tagSection",
 			iconClass: "gitImageSprite git-sprite-tag",
 			title: ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
-			content: '<list id="tagNode" class="plugin-settings-list"></list>'
+			content: '<list id="tagNode" class="plugin-settings-list"></list>',
+			canHide: true,
+			hidden: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		}); 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting tags");
@@ -914,7 +922,10 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Remotes",
 			iconClass: "gitImageSprite git-sprite-remote",
 			slideout: true,
-			content: '<list id="remoteNode" class="plugin-settings-list"></list>'
+			content: '<list id="remoteNode" class="plugin-settings-list"></list>',
+			canHide: true,
+			hidden: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		});
 		
 		var progress = titleWrapper.createProgressMonitor();
@@ -974,7 +985,10 @@ exports.GitRepositoryExplorer = (function() {
 			id: "configSection",
 			title: "Configuration" + (mode === "full" ? "" : " (user.*)"),
 			slideout: true,
-			content: '<list id="configNode" class="plugin-settings-list"></list>'
+			content: '<list id="configNode" class="plugin-settings-list"></list>',
+			canHide: true,
+			hidden: true,
+			preferenceService: this.registry.getService("orion.core.preference")
 		});
 		
 		var progress = titleWrapper.createProgressMonitor();
@@ -1006,7 +1020,7 @@ exports.GitRepositoryExplorer = (function() {
 				for(var i=0; i<configurationEntries.length ;i++){
 					if (mode === "full" || configurationEntries[i].Key.indexOf("user.") !== -1)
 						that.renderConfigEntry(configurationEntries[i], i);
-				};
+				}
 				progress.done();
 			}, function(error){
 				progress.done();
