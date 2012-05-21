@@ -149,11 +149,11 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				if (field.type === "checkbox") {
 					commandInvocation.parameters.setValue(field.parameterName, field.checked);
 				} else if (field.type !== "button") {
-					commandInvocation.parameters.setValue(field.parameterName, field.value);
+					commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 				}
 			});
 			dojo.query("textArea", parent).forEach(function(field) {
-				commandInvocation.parameters.setValue(field.parameterName, field.value);
+				commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 			});
 			if (commandInvocation.command.callback) {
 				commandInvocation.command.callback.call(commandInvocation.handler, commandInvocation);
