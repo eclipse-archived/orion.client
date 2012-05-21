@@ -14,24 +14,24 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(messages, require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.LabeledToggle",[dijit._Widget, dijit._Templated],{
+	dojo.declare("orion.widgets.settings.LabeledToggle",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 	
 		state: false,
 		
-		templateString: '<div>' + 
-							'<label style="display:table;">' +
-								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" >Label:</span>' + 
-								'<span style="display:table-cell; vertical-align:middle;">' +
-								'<span class="toggleShell">' +
-									'<div data-dojo-attach-point="leftToggle" data-dojo-attach-event="onclick:toggle"></div><div data-dojo-attach-point="rightToggle" data-dojo-attach-event="onclick:toggle"></div>' +
-									'<div data-dojo-attach-point="toggleSlide" class="toggleSlide"></div>' +
-								'</span>' +
-								'</span>' +
+		templateString: '<div>' +  //$NON-NLS-0$
+							'<label style="display:table;">' + //$NON-NLS-0$
+								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" >'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<span style="display:table-cell; vertical-align:middle;">' + //$NON-NLS-0$
+								'<span class="toggleShell">' + //$NON-NLS-0$
+									'<div data-dojo-attach-point="leftToggle" data-dojo-attach-event="onclick:toggle"></div><div data-dojo-attach-point="rightToggle" data-dojo-attach-event="onclick:toggle"></div>' + //$NON-NLS-0$
+									'<div data-dojo-attach-point="toggleSlide" class="toggleSlide"></div>' + //$NON-NLS-0$
+								'</span>' + //$NON-NLS-0$
+								'</span>' + //$NON-NLS-0$
 //								'<div data-dojo-attach-point="toggleOff" class="toggleOff"></div>' +
-							'</label>' + 
-						'</div>',
+							'</label>' +  //$NON-NLS-0$
+						'</div>', //$NON-NLS-0$
 						
 		onAction: function(){
 						
@@ -42,15 +42,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 				this.leftToggle.innerHTML = this.toggleOnState;
 				this.rightToggle.innerHTML = this.toggleOffSwitch;
           
-				dojo.addClass( this.leftToggle, 'toggleOn' );
-				dojo.addClass( this.rightToggle, 'toggleOff' );
+				dojo.addClass( this.leftToggle, 'toggleOn' ); //$NON-NLS-0$
+				dojo.addClass( this.rightToggle, 'toggleOff' ); //$NON-NLS-0$
 		
             }else{
 				this.leftToggle.innerHTML = this.toggleOnSwitch;
 				this.rightToggle.innerHTML = this.toggleOffState;
 	
-				dojo.addClass( this.leftToggle, 'toggleOff' );
-				dojo.addClass( this.rightToggle, 'toggleOn' );	
+				dojo.addClass( this.leftToggle, 'toggleOff' ); //$NON-NLS-0$
+				dojo.addClass( this.rightToggle, 'toggleOn' );	 //$NON-NLS-0$
             }
 		},
 		
@@ -75,7 +75,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
         
             this.inherited( arguments );
         
-			this.mylabel.innerHTML = this.fieldlabel + ':';
+			this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
         
 			this.styleSwitch();
 //            dojo.style( this.myfield, 'width', '20px' );

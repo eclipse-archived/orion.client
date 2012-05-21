@@ -16,24 +16,24 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder'], function(require, dojo, dijit, mUtil, mCommands, PageUtil) {
 
-	dojo.declare("orion.widgets.maker.ScrollingContainerSection", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.maker.ScrollingContainerSection", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		templateString:	'<div>' +
-							'<a class="anchor" data-dojo-attach-point="anchor" id="section" name="section"></a>' +
-							'<div data-dojo-attach-point="section" class="sectionBlock">' + 
-								'<div data-dojo-attach-point="contentArea" class="inner">' + 
-								'</div>' +
-							'</div>' +				
-							'<div data-dojo-attach-point="sectionTitle" class="pluginTitle"></div>' + 
-							'<div data-dojo-attach-point="orderCircle" class="circle">1</div>' + 
-						'</div>',
+		templateString:	'<div>' + //$NON-NLS-0$
+							'<a class="anchor" data-dojo-attach-point="anchor" id="section" name="section"></a>' + //$NON-NLS-0$
+							'<div data-dojo-attach-point="section" class="sectionBlock">' +  //$NON-NLS-0$
+								'<div data-dojo-attach-point="contentArea" class="inner">' +  //$NON-NLS-0$
+								'</div>' + //$NON-NLS-0$
+							'</div>' +				 //$NON-NLS-0$
+							'<div data-dojo-attach-point="sectionTitle" class="pluginTitle"></div>' +  //$NON-NLS-0$
+							'<div data-dojo-attach-point="orderCircle" class="circle">1</div>' +  //$NON-NLS-0$
+						'</div>', //$NON-NLS-0$
 						
-		content: "<div></div>",
+		content: "<div></div>", //$NON-NLS-0$
 						
 		order: 1,
 		
 		postCreate: function(){
-			this.sectionID = this.title + ' Section';
+			this.sectionID = this.title + ' Section'; //$NON-NLS-0$
 			this.selectedNode = this.home;
 			this.anchor.id = this.title;
 			this.anchor.name = this.title;
@@ -43,8 +43,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		startup: function(){
 			var mb = dojo.position( this.domNode );
 			var parentmb = dojo.position( this.domNode.parentNode );
-			this.sectionTitle.style.top = mb.y - parentmb.y - 18 + 'px';
-			this.orderCircle.style.top =  mb.y - parentmb.y + 30 + 'px';
+			this.sectionTitle.style.top = mb.y - parentmb.y - 18 + 'px'; //$NON-NLS-0$
+			this.orderCircle.style.top =  mb.y - parentmb.y + 30 + 'px'; //$NON-NLS-0$
 			dojo.place( this.content, this.contentArea );
 		},
 		
