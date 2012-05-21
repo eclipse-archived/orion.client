@@ -442,7 +442,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		var faveButton = dojo.byId("pageFavorite");
 		if (faveButton) {
 			if (favoriteTarget && favoriteTarget.Location) {
-				dojo.addClass(faveButton, "commandButton");
+				dojo.addClass(faveButton, "bannerButton");
 				dojo.connect(faveButton, "onclick", this, function() {
 					makeFavorite(serviceRegistry);
 				});
@@ -452,10 +452,6 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						makeFavorite(serviceRegistry);
 					}
 				});
-				dojo.connect(faveButton, "onmouseover", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
-				dojo.connect(faveButton, "onfocus", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
-				dojo.connect(faveButton, "onmouseout", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
-				dojo.connect(faveButton, "onblur", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
 				new mCommands.CommandTooltip({
 					connectId: [faveButton],
 					label: "Add to the favorites list",

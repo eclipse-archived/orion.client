@@ -129,11 +129,12 @@
 
 /* these really belong in ide.css but simply moving them there upsets the order of things.  Do later.  */
 
+/* This is used to achieve spriting and is used pervasively.  No additional styling (padding, borders, etc.)
+should be added here.  Use additional classes where more treatment is needed. */
 .imageSprite {
    background-image: url(../images/core_sprites.png);
    display: inline-block;
    vertical-align: middle;
-   border:none;
 }
 
 .core-sprite-add{ background-position: 0 0; width: 16px; height: 16px; } 
