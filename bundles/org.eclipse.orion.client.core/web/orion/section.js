@@ -97,13 +97,18 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		// should we consult a preference?
 		if (this._preferenceService) {
 			this._preferenceService.getPreferences("/window/views").then(dojo.hitch(this, function(prefs) { 
-				var show = prefs.get(this.id) !== false;
-				if (show) {
-					dojo.style(this._contentParent, "display", "block");
+				var isExpanded = prefs.get(this.id);
+				
+				if (isExpanded === undefined){
 				} else {
-					this.hidden = true;
+					this.hidden = !isExpanded;
 				}
-				this._updateExpandedState(show, false);
+
+				if (!this.hidden) {
+					dojo.style(this._contentParent, "display", "block");
+				}
+				
+				this._updateExpandedState(!this.hidden, false);
 			}));
 		} else {
 			if (!this.hidden) {
