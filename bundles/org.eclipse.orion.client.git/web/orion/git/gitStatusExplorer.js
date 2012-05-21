@@ -710,14 +710,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			var tableNode = dojo.byId( 'table' );
 			
-			var commitSection = new mSection.Section(tableNode, {
+			var titleWrapper = new mSection.Section(tableNode, {
 				id: "commitSection",
 				title: "Commits",
 				content: '<list id="commitNode" class="plugin-settings-list"></list>',
 				slideout: true,
-				canHide: true
+				canHide: true,
+				preferenceService: this.registry.getService("orion.core.preference")
 			});
 			
+			var progress = titleWrapper.createProgressMonitor();
+			
+			progress.begin("Getting current branch");
 			this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then(
 				function(resp){
 					var branches = resp.Children;
@@ -731,33 +735,34 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					
 					var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 					
-					commitSection.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
-					
-					that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
-					that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, 
+					titleWrapper.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
+	
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
 						{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "button");
-							
-					if (tracksRemoteBranch){
-						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.fetch", 100);
-						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.merge", 100);
-						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.rebase", 100);
-						that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
-						that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button"); 
-					};
 					
-					that.commandService.registerCommandContribution(commitSection.actionsNode.id, "eclipse.orion.git.push", 100);
-					that.commandService.renderCommands(commitSection.actionsNode.id, commitSection.actionsNode.id, currentBranch, that, "button"); 
+					if (tracksRemoteBranch){
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100);
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.merge", 100);
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100);
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
+						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button");
+					}
+					
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100);
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button");
 					
 					if (currentBranch.RemoteLocation[0] === null){
-						dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
+						progress.done();
 						that.renderNoCommit();
 						return;
-					};
+					}
 					
+					progress.worked("Getting commits for \"" + currentBranch.Name + "\" branch");
 					if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
 						that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then(
 							function(resp){
-								dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
+								progress.worked("Rendering commits");
 								
 								var commitsCount = resp.Children.length;
 								
@@ -765,31 +770,47 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									that.renderCommit(resp.Children[i], true, i);
 								}
 								
+								progress.worked("Getting outgoing commits");
 								that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id).then( 
 									function(resp){	
+										progress.worked("Rendering commits");
 										for (var i=0; i<resp.Children.length; i++){
 											that.renderCommit(resp.Children[i], false, i + commitsCount);
 										}
 										
 										commitsCount = commitsCount + resp.Children.length; 
 										
-										if (commitsCount == 0)
+										if (commitsCount === 0){
 											that.renderNoCommit();
+										}
+										
+										progress.done();
+									},
+									function(error){
+										progress.done(error);
 									}
 								);	
+							},
+							function(error){
+								progress.done(error);
 							}
 						);
 					} else {
 						that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then( 
 							function(resp){	
-								dojo.style(dojo.byId("commitSectionProgress"), "visibility", "hidden");
-							
+								progress.worked("Rendering commits");
 								for (var i=0; i<resp.Children.length; i++){
 									that.renderCommit(resp.Children[i], true, i);
 								}
 								
-								if (resp.Children.length == 0)
+								if (resp.Children.length === 0){
 									that.renderNoCommit();
+								}	
+									
+								progress.done();
+							},
+							function(error) {
+								progress.done(error);
 							}
 						);	
 					}
