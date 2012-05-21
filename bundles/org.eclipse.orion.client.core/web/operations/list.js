@@ -12,9 +12,9 @@
 /*jslint browser:true devel:true*/
 /*global define*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/operationsClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
+define(['i18n!operations/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/operationsClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
         'orion/operationsTable', 'orion/operationsCommands', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-		function(require, dojo, mBootstrap, mCommands, mSelection, mFileClient, mSearchClient, mOperationsClient, mStatus, mProgress, mGlobalCommands, mOperationsTable, mOperationsCommands) {
+		function(messages, require, dojo, mBootstrap, mCommands, mSelection, mFileClient, mSearchClient, mOperationsClient, mStatus, mProgress, mGlobalCommands, mOperationsTable, mOperationsCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -25,27 +25,27 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 				
-			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools", "operationItems");
+			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools", "operationItems"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// global commands
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			mOperationsCommands.createOperationsCommands(serviceRegistry, commandService, operationsTable, operationsClient);
 			
-			commandService.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100);
-			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, "More");
+			commandService.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			commandService.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled");
-			commandService.registerCommandContribution("operationItems", "eclipse.removeOperation", 1);
-			commandService.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1, "eclipse.selectionGroup");
-			commandService.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2);
-			commandService.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup");
+			commandService.registerCommandContribution("pageActions", "eclipse.removeCompletedOperations", 1, "eclipse.taskGroup.unlabeled"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("operationItems", "eclipse.removeOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("selectionTools", "eclipse.removeOperation", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			function displayError(error){
 				var display = [];
-				display.Severity = "Error";
+				display.Severity = "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				
 				try {
@@ -55,7 +55,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 					display.Message = error;
 				}
 				
-				serviceRegistry.getService("orion.page.message").setProgressResult(display);
+				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 			}
 			
 			try{
@@ -66,7 +66,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 				displayError(e);
 				dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
 			}
-			window.addEventListener("storage", function(e){
+			window.addEventListener("storage", function(e){ //$NON-NLS-0$
 				try{
 					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
 						dojo.hitch(operationsTable, operationsTable.loadOperations)({Children: []});
@@ -78,7 +78,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection
 				}
 			}, false);
 			
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 		});
 	});
