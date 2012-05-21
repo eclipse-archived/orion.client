@@ -16,10 +16,10 @@
  * Glue code for content.html
  */
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['i18n!content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/URITemplate', 'orion/PageUtil', 
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
-			function(require, dojo, mBootstrap, mUtil, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
+			function(messages, require, dojo, mBootstrap, mUtil, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
 			mGlobalCommands, mBreadcrumbs, URITemplate, PageUtil) {
 
 	dojo.addOnLoad(function() {
@@ -28,7 +28,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 			var preferences = core.preferences;
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
@@ -40,7 +40,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 			function loadContent() {
 				var foundContent = false;
 				var params = PageUtil.matchResourceParameters(window.location.href);
-				var nonHash = window.location.href.split('#')[0];
+				var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 				// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 				hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 				var locationObject = {OrionHome: hostName, Location: params.resource};
@@ -56,10 +56,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 					//		optional attribute: saveToken - if specified, this token (or array of tokens) should be used to find a content URL provided inside a save URL
 					//		optional attribute: saveTokenTerminator - if specified this terminator (or array of terminators) should be used to find the 
 					//			end of a content URL provided in a save URL
-					var contentProviders = serviceRegistry.getServiceReferences("orion.page.content");
+					var contentProviders = serviceRegistry.getServiceReferences("orion.page.content"); //$NON-NLS-0$
 					for (var i=0; i<contentProviders.length; i++) {
 						// Exclude any navigation commands themselves, since we are the navigator.
-						var id = contentProviders[i].getProperty("id");
+						var id = contentProviders[i].getProperty("id"); //$NON-NLS-0$
 						if (id === params.contentProvider) {
 							var impl = serviceRegistry.getService(contentProviders[i]);
 							var info = {};
@@ -68,10 +68,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 								info[propertyNames[j]] = contentProviders[i].getProperty(propertyNames[j]);
 							}
 							foundContent = true;
-							locationObject.ExitURL = hostName+"/content/exit.html";
+							locationObject.ExitURL = hostName+"/content/exit.html"; //$NON-NLS-0$
 							if (info.saveToken) {
 								// we need to set up a SaveURL for the iframe to use.
-								locationObject.SaveURL = hostName+"/content/saveHook.html#" + params.resource + ",contentProvider=" + params.contentProvider + ",";
+								locationObject.SaveURL = hostName+"/content/saveHook.html#" + params.resource + ",contentProvider=" + params.contentProvider + ","; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 							// this is ripe for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349531
 							document.title = info.name;
@@ -79,7 +79,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 							function makeIFrame() {
 								var uriTemplate = new URITemplate(info.uriTemplate);
 								var href = uriTemplate.expand(locationObject);
-								dojo.place('<iframe id="' + id + '" type="text/html" width="100%" height="100%" frameborder="0" src="'+ href + '"></iframe>', "delegatedContent", "only");
+								dojo.place('<iframe id="' + id + '" type="text/html" width="100%" height="100%" frameborder="0" src="'+ href + '"></iframe>', "delegatedContent", "only"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							}
 							
@@ -88,15 +88,15 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 							if (locationObject.Location && locationObject.Location.length > 0) {
 								fileClient.read(locationObject.Location, true).then(
 									function(metadata) {
-										dojo.empty("location");
+										dojo.empty("location"); //$NON-NLS-0$
 										if (metadata) {
 											locationObject.Name = metadata.Name;
 											fileMetadata = metadata;
 											mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
-											searcher.setLocationByMetaData(metadata, {index: "first"});
+											searcher.setLocationByMetaData(metadata, {index: "first"}); //$NON-NLS-0$
 											var root = fileClient.fileServiceName(metadata.Location);
 											new mBreadcrumbs.BreadCrumbs({
-												container: "location", 
+												container: "location",  //$NON-NLS-0$
 												resource: metadata,
 												firstSegmentName: root
 											});
@@ -116,24 +116,24 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 					}
 				}
 				if (!foundContent) {
-					dojo.place("<div>Plugin content could not be found</div>", "delegatedContent", "only");
+					dojo.place("<div>"+messages["Plugin content could not be found"]+"</div>", "delegatedContent", "only"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$ //$NON-NLS-2$
 				}
 			}
 			
 			// Listen for events from our internal iframe.  This should eventually belong as part of the plugin registry.
 			// This mechanism should become generalized into a "shell services" API for plugin iframes to contact the outer context.
-			dojo.connect(window, "message", function(event) {
+			dojo.connect(window, "message", function(event) { //$NON-NLS-0$
 				// For potentially dangerous actions, such as save, we will force the content to be from our domain (internal
 				// save hook), which we know has given the user the change to look at the data before save.
 				if (hostName && fileMetadata && event.source.parent === window && event.origin === hostName ) {
-					if (typeof event.data === "string") {
+					if (typeof event.data === "string") { //$NON-NLS-0$
 					var data = JSON.parse(event.data);
 						if (data.shellService) {
 							if (data.sourceLocation) {
 								mUtil.saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
-									if (window.confirm("Content has been saved.  Click OK to go to the navigator, Cancel to keep editing.")) {
+									if (window.confirm(messages["Content has been saved.  Click OK to go to the navigator, Cancel to keep editing."])) {
 										// go to the navigator
-										window.location.href = hostName + "/navigate/table.html#" + fileMetadata.Parents[0].ChildrenLocation;
+										window.location.href = hostName + "/navigate/table.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$
 									} else {
 										loadContent();
 									}
@@ -144,12 +144,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'ori
 				}
 			});
 			
-			dojo.subscribe("/dojo/hashchange", this, function() {
+			dojo.subscribe("/dojo/hashchange", this, function() { //$NON-NLS-0$
 				loadContent();
 			});
 			loadContent();
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			document.body.style.visibility = "visible";
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 
