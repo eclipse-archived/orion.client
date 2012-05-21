@@ -27,6 +27,7 @@
 
 .commandImage {
 	border: 1px solid transparent;
+    border-radius: 2px;
 	background-color: transparent;
 	vertical-align: baseline;
 	cursor: pointer;
@@ -43,7 +44,6 @@
 .commandImageOver {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
-    border-radius: 2px;
 }
 
 /* should be used in conjunction with .commandButton when a tool has no icon. */
@@ -83,6 +83,10 @@
 	vertical-align: baseline;
 	margin: 0;
 	font-size:7pt;
+	border: 1px solid #CCC;
+	background-color: transparent;
+    cursor: pointer;
+    border-radius:3px;
 }
 
 .commandMenuItem {
