@@ -11,7 +11,7 @@
 
 /*global define console */
 
-define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+define(['i18n!compare/nls/messages', 'dojo', 'orion/auth'], function(messages, dojo, mAuth) {
 
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		var clientDeferred = new dojo.Deferred();
@@ -44,8 +44,8 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 	}
 	
 	function _normalizeURL(location) {
-		if (location.indexOf("://") === -1) {
-			var temp = document.createElement('a');
+		if (location.indexOf("://") === -1) { //$NON-NLS-0$
+			var temp = document.createElement('a'); //$NON-NLS-0$
 			temp.href = location;
 	        return temp.href;
 		}
@@ -59,7 +59,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 	 * @name orion.compare.DiffProvider
 	 */
 	function DiffProvider(serviceRegistry, filter) {
-		var allReferences = serviceRegistry.getServiceReferences("orion.core.diff");
+		var allReferences = serviceRegistry.getServiceReferences("orion.core.diff"); //$NON-NLS-0$
 		var _references = allReferences;
 		if (filter) {
 			_references = [];
@@ -73,7 +73,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		var _services = [];
 		
 		for(var i = 0; i < _references.length; ++i) {
-			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");			
+			_patterns[i] = new RegExp(_references[i].getProperty("pattern") || ".*");			 //$NON-NLS-1$ //$NON-NLS-0$
 			_services[i] = serviceRegistry.getService(_references[i]);
 		}
 
@@ -84,17 +84,17 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 					return _services[i];
 				}
 			}
-			throw "No Matching DiffService for location:" + location;
+			throw messages["No Matching DiffService for location:"] + location;
 		};
 	}
 
 	DiffProvider.prototype = /** @lends orion.compare.DiffProvider.prototype */
 	{
 		getDiffContent: function(diffURI){
-			return _doServiceCall(this._getService(diffURI), "getDiffContent", arguments);
+			return _doServiceCall(this._getService(diffURI), "getDiffContent", arguments); //$NON-NLS-0$
 		},
 		getDiffFileURI: function(diffURI){
-			return _doServiceCall(this._getService(diffURI), "getDiffFileURI", arguments);
+			return _doServiceCall(this._getService(diffURI), "getDiffFileURI", arguments); //$NON-NLS-0$
 		}
 		
 	};

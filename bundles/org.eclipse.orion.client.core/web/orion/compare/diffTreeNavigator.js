@@ -27,7 +27,7 @@ exports.DiffTreeNavigator = (function() {
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
 	 */
 	function DiffTreeNavigator(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler) {
-		this._root = {type: "root", children: []};
+		this._root = {type: "root", children: []}; //$NON-NLS-0$
 		this._initialized = false;
 		this.initAll(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, curveRuler);
 	}
@@ -35,181 +35,181 @@ exports.DiffTreeNavigator = (function() {
 	/**
 	 * Annotation type for the block diff 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK = "orion.annotation.diff.addedBlock";
+	DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK = "orion.annotation.diff.addedBlock"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current block diff
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK = "orion.annotation.diff.currentAddedBlock";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK = "orion.annotation.diff.currentAddedBlock"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the block diff 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK = "orion.annotation.diff.deletedBlock";
+	DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK = "orion.annotation.diff.deletedBlock"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current block diff
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK = "orion.annotation.diff.currentDeletedBlock";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK = "orion.annotation.diff.currentDeletedBlock"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the block diff, top only 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY = "orion.annotation.diff.blockTop";
+	DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY = "orion.annotation.diff.blockTop"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current block diff, top only 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY = "orion.annotation.diff.currentBlockTop";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY = "orion.annotation.diff.currentBlockTop"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the block diff, conflicting 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT = "orion.annotation.diff.blockConflict";
+	DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT = "orion.annotation.diff.blockConflict"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current block diff, conflicting 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT = "orion.annotation.diff.currentBlockConflict";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT = "orion.annotation.diff.currentBlockConflict"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for an added word 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_ADDED_WORD = "orion.annotation.diff.addedWord";
+	DiffAnnoTypes.ANNO_DIFF_ADDED_WORD = "orion.annotation.diff.addedWord"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current added word 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD = "orion.annotation.diff.currentAddedWord";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD = "orion.annotation.diff.currentAddedWord"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for a deleted word 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_DELETED_WORD = "orion.annotation.diff.deletedWord";
+	DiffAnnoTypes.ANNO_DIFF_DELETED_WORD = "orion.annotation.diff.deletedWord"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for the current deleted word 
 	 */
-	DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD = "orion.annotation.diff.currentDeletedWord";
+	DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD = "orion.annotation.diff.currentDeletedWord"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for an empty word annotation, putting on the left side of character, e.g (start: 123, end: 123)
 	 */
-	DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT = "orion.annotation.diff.emptyDeletedWordLeft";
+	DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT = "orion.annotation.diff.emptyDeletedWordLeft"; //$NON-NLS-0$
 
 	/**
 	 * Annotation type for an empty word annotation, putting on the right side of character, e.g (start: 123, end: 123)
 	 */
-	DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT = "orion.annotation.diff.emptyDeletedWordRight";
+	DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT = "orion.annotation.diff.emptyDeletedWordRight"; //$NON-NLS-0$
 	
 	/**
 	 * Annotation type for an empty word annotation, putting on the left side of character, e.g (start: 123, end: 123)
 	 */
-	DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT = "orion.annotation.diff.emptyAddedWordLeft";
+	DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT = "orion.annotation.diff.emptyAddedWordLeft"; //$NON-NLS-0$
 
 	/**
 	 * Annotation type for an empty word annotation, putting on the right side of character, e.g (start: 123, end: 123)
 	 */
-	DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT = "orion.annotation.diff.emptyAddedWordRight";
+	DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT = "orion.annotation.diff.emptyAddedWordRight"; //$NON-NLS-0$
 
 	/*** registration of all the diff block annotation types ***/
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine addedBlockDiff"}
+		lineStyle: {styleClass: "annotationLine addedBlockDiff"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine currentAddedBlockDiff"}
+		lineStyle: {styleClass: "annotationLine currentAddedBlockDiff"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine deletedBlockDiff"}
+		lineStyle: {styleClass: "annotationLine deletedBlockDiff"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine currentDeletedBlockDiff"}
+		lineStyle: {styleClass: "annotationLine currentDeletedBlockDiff"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine blockDiffTopOnly"}
+		lineStyle: {styleClass: "annotationLine blockDiffTopOnly"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine currentBlockDiffTopOnly"}
+		lineStyle: {styleClass: "annotationLine currentBlockDiffTopOnly"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine blockDiffConflict"}
+		lineStyle: {styleClass: "annotationLine blockDiffConflict"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, {
 		title: "",
 		html: "",
-		lineStyle: {styleClass: "annotationLine currentBlockDiffConflict"}
+		lineStyle: {styleClass: "annotationLine currentBlockDiffConflict"} //$NON-NLS-0$
 	});
 	
 	/*** registration of all the diff word annotation types ***/
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_ADDED_WORD, {
-		title: "word added",
+		title: "word added", //$NON-NLS-0$
 		html: "",
-		rangeStyle: {styleClass: "annotationRange addedWordDiff"}
+		rangeStyle: {styleClass: "annotationRange addedWordDiff"} //$NON-NLS-0$
 	});
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange currentAddedWordDiff"}
+		rangeStyle: {styleClass: "annotationRange currentAddedWordDiff"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_DELETED_WORD, {
-		title: "word deleted",
+		title: "word deleted", //$NON-NLS-0$
 		html: "",
-		rangeStyle: {styleClass: "annotationRange deletedWordDiff"}
+		rangeStyle: {styleClass: "annotationRange deletedWordDiff"} //$NON-NLS-0$
 	});
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange currentDeletedWordDiff"}
+		rangeStyle: {styleClass: "annotationRange currentDeletedWordDiff"} //$NON-NLS-0$
 	});
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange emptyDeletedWordDiffLeft"}
+		rangeStyle: {styleClass: "annotationRange emptyDeletedWordDiffLeft"} //$NON-NLS-0$
 	});
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange emptyDeletedWordDiffRight"}
+		rangeStyle: {styleClass: "annotationRange emptyDeletedWordDiffRight"} //$NON-NLS-0$
 	});
 	
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange emptyAddedWordDiffLeft"}
+		rangeStyle: {styleClass: "annotationRange emptyAddedWordDiffLeft"} //$NON-NLS-0$
 	});
 	mAnnotations.AnnotationType.registerType(DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT, {
 		title: "",
 		html: "",
-		rangeStyle: {styleClass: "annotationRange emptyAddedWordDiffRight"}
+		rangeStyle: {styleClass: "annotationRange emptyAddedWordDiffRight"} //$NON-NLS-0$
 	});
 	
 	DiffTreeNavigator.prototype = /** @lends orion.DiffTreeNavigator.DiffTreeNavigator.prototype */ {
 		
 		initAll: function(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, overviewRuler, curveRuler){
 			if(!charOrWordDiff){
-				this._charOrWordDiff = "word";
+				this._charOrWordDiff = "word"; //$NON-NLS-0$
 			} else {
 				this._charOrWordDiff = charOrWordDiff;
 			}
@@ -255,14 +255,14 @@ exports.DiffTreeNavigator = (function() {
 			this._root.children = [];
 			var oldDiffBlocks = this.editorWrapper[0].diffFeeder.getDiffBlocks();
 			if(!oldDiffBlocks || oldDiffBlocks.length === 0){
-				this.replaceAllAnnotations(true, 0, "block", false, []);
-				this.replaceAllAnnotations(true, 1, "block", false, []);
-				this.replaceAllAnnotations(true, 0, "word", false, []);
-				this.replaceAllAnnotations(true, 1, "word", false, []);
-				this.replaceAllAnnotations(true, 0, "block", true, []);
-				this.replaceAllAnnotations(true, 1, "block", true, []);
-				this.replaceAllAnnotations(true, 0, "word", true, []);
-				this.replaceAllAnnotations(true, 1, "word", true, []);
+				this.replaceAllAnnotations(true, 0, "block", false, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 1, "block", false, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 0, "word", false, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 1, "word", false, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 0, "block", true, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 1, "block", true, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 0, "word", true, []); //$NON-NLS-0$
+				this.replaceAllAnnotations(true, 1, "word", true, []); //$NON-NLS-0$
 				return;
 			}
 			var adapter = new mJSDiffAdapter.JSDiffAdapter();
@@ -274,10 +274,10 @@ exports.DiffTreeNavigator = (function() {
 					diffBlockModel.children = children;
 				}
 			}
-			this.replaceAllAnnotations(false, 0, "block", true);
-			this.replaceAllAnnotations(false, 1, "block", true);
-			this.replaceAllAnnotations(false, 0, "word", true);
-			this.replaceAllAnnotations(false, 1, "word", true);
+			this.replaceAllAnnotations(false, 0, "block", true); //$NON-NLS-0$
+			this.replaceAllAnnotations(false, 1, "block", true); //$NON-NLS-0$
+			this.replaceAllAnnotations(false, 0, "word", true); //$NON-NLS-0$
+			this.replaceAllAnnotations(false, 1, "word", true); //$NON-NLS-0$
 			this.iterator = new mTreeModelIterator.TreeModelIterator(this._root.children);
 		},
 		
@@ -312,7 +312,7 @@ exports.DiffTreeNavigator = (function() {
 			}
 			this.iterator.iterate(forward);
 			var cursor = this.iterator.cursor();
-			if(cursor.type === "block" && cursor.children && cursor.children.length > 0){
+			if(cursor.type === "block" && cursor.children && cursor.children.length > 0){ //$NON-NLS-0$
 				this.iterator.iterate(forward);
 			}
 			this.updateCurrentAnnotation(true);
@@ -378,7 +378,7 @@ exports.DiffTreeNavigator = (function() {
 			var cursor = this.iterator.cursor();
 			if(!cursor)
 				return -1;
-			if(cursor.type === "block"){
+			if(cursor.type === "block"){ //$NON-NLS-0$
 				return cursor.index;
 			} else {
 				return cursor.parent.index;
@@ -390,7 +390,7 @@ exports.DiffTreeNavigator = (function() {
 				return {};
 			}
 			var cursor = this.iterator.cursor();
-			if(cursor.type === "block"){
+			if(cursor.type === "block"){ //$NON-NLS-0$
 				return {block: cursor.index+1};
 			} else {
 				return {block: cursor.parent.index+1, change: cursor.index+1};
@@ -425,10 +425,10 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		updateCurrentAnnotation: function(moveSelection, textView){
-			this.replaceAllAnnotations(true, 0, "block", false, []);
-			this.replaceAllAnnotations(true, 1, "block", false, []);
-			this.replaceAllAnnotations(true, 0, "word", false, []);
-			this.replaceAllAnnotations(true, 1, "word", false, []);
+			this.replaceAllAnnotations(true, 0, "block", false, []); //$NON-NLS-0$
+			this.replaceAllAnnotations(true, 1, "block", false, []); //$NON-NLS-0$
+			this.replaceAllAnnotations(true, 0, "word", false, []); //$NON-NLS-0$
+			this.replaceAllAnnotations(true, 1, "word", false, []); //$NON-NLS-0$
 			if(!this.iterator){
 				return;
 			}
@@ -438,7 +438,7 @@ exports.DiffTreeNavigator = (function() {
 			var annoType0, annoType1;
 			var annoPosOld = {start: cursor.oldA.start, end: cursor.oldA.end};
 			var annoPosNew = {start: cursor.newA.start, end: cursor.newA.end};
-			if(cursor.type === "word"){
+			if(cursor.type === "word"){ //$NON-NLS-0$
 				annoType0 = this.editorWrapper[0].diffFeeder.getCurrentWordAnnoType(annoPosOld, this.editorWrapper[0].editor.getTextView().getModel());
 				annoType1 = this.editorWrapper[1].diffFeeder.getCurrentWordAnnoType(annoPosNew, this.editorWrapper[1].editor.getTextView().getModel());
 			} else {
@@ -467,7 +467,7 @@ exports.DiffTreeNavigator = (function() {
 		generatePairBlockAnnotations: function(parentObj, diffBlockIndex){
 			var oldBlockAnno = this.generateBlockDiffAnnotations(0, diffBlockIndex);
 			var newBlockAnno = this.generateBlockDiffAnnotations(1, diffBlockIndex);
-			return {parent: parentObj, index: diffBlockIndex, type: "block", oldA: oldBlockAnno, newA: newBlockAnno};
+			return {parent: parentObj, index: diffBlockIndex, type: "block", oldA: oldBlockAnno, newA: newBlockAnno}; //$NON-NLS-0$
 		},
 		
 		generatePairWordAnnotations: function(parentObj, diffBlockIndex, jsDiffAdapter){
@@ -477,7 +477,7 @@ exports.DiffTreeNavigator = (function() {
 			var startOld = 0;
 			var startNew = 0;
 			if(textOld && textNew){
-				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text, textNew.text, this._charOrWordDiff === "word");
+				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text, textNew.text, this._charOrWordDiff === "word"); //$NON-NLS-0$
 				startNew = textNew.start;
 				startOld = textOld.start;
 			} else {
@@ -489,7 +489,7 @@ exports.DiffTreeNavigator = (function() {
 			this.generateWordDiffAnnotations(1, newAnnotations, startNew, charDiffMap, 0, 1);
 			var pairAnnotations = [];
 			for(var i = 0; i < oldAnnotations.length; i++){
-				pairAnnotations.push({parent: parentObj, index: i, type: "word", oldA: oldAnnotations[i], newA: newAnnotations[i]});
+				pairAnnotations.push({parent: parentObj, index: i, type: "word", oldA: oldAnnotations[i], newA: newAnnotations[i]}); //$NON-NLS-0$
 			} 
 			return pairAnnotations;
 		},
@@ -506,7 +506,7 @@ exports.DiffTreeNavigator = (function() {
 		
 		generateBlockDiffAnnotations: function(wrapperIndex, diffBlockIndex){
 			var type = this.editorWrapper[wrapperIndex].diffFeeder.getCurrentBlockAnnoType(diffBlockIndex);
-			var annoList = this.getAnnoModelList(wrapperIndex, "block", type.normal);
+			var annoList = this.getAnnoModelList(wrapperIndex, "block", type.normal); //$NON-NLS-0$
 			var range = this.editorWrapper[wrapperIndex].diffFeeder.getCharRange(diffBlockIndex);
 			var annotation = mAnnotations.AnnotationType.createAnnotation(type.normal, range.start, range.end);
 			if(annoList){
@@ -518,7 +518,7 @@ exports.DiffTreeNavigator = (function() {
 		generateWordDiffAnnotations: function(wrapperIndex, diffBlockAnnotaionArray, startIndex, charDiffMap, startColumn, endColumn){
 			if(charDiffMap){
 				var type = this.editorWrapper[wrapperIndex].diffFeeder.getCurrentWordAnnoType({start: -1, end: -1});
-				var annoList = this.getAnnoModelList(wrapperIndex, "word", type.normal);
+				var annoList = this.getAnnoModelList(wrapperIndex, "word", type.normal); //$NON-NLS-0$
 				for(var i = 0; i < charDiffMap.length; i++){
 					var start = charDiffMap[i][startColumn] + startIndex;
 					var end = charDiffMap[i][endColumn] + startIndex;
@@ -625,14 +625,14 @@ exports.DiffBlockFeeder = (function() {
 		
 		getWordAnnoTypes: function(result){
 			if(this._mapperColumnIndex === 0){
-				result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD, list: []});
+				result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_ADDED_WORD, list: []}); //$NON-NLS-0$
 			} else {
-				result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD, list: []});
+				result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_WORD, normal: DiffAnnoTypes.ANNO_DIFF_DELETED_WORD, list: []}); //$NON-NLS-0$
 			}
-			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT});
-			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT});
-			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT});
-			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT});
+			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_LEFT}); //$NON-NLS-0$
+			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_DELETED_WORD_RIGHT}); //$NON-NLS-0$
+			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_LEFT}); //$NON-NLS-0$
+			result.push({type: "word", current: DiffAnnoTypes.ANNO_DIFF_EMPTY_ADDED_WORD_RIGHT}); //$NON-NLS-0$
 		},
  
 		getCurrentWordAnnoType: function(annoPosition, textModel){
@@ -760,12 +760,12 @@ exports.TwoWayDiffBlockFeeder = (function() {
 	};
 	TwoWayDiffBlockFeeder.prototype.getBlockAnnoTypes = function(result){
 		if(this._mapperColumnIndex === 0){
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []});
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []}); //$NON-NLS-0$
 		} else {
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []}); //$NON-NLS-0$
 		}
-		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
-		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []}); //$NON-NLS-0$
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []}); //$NON-NLS-0$
 	};
 	TwoWayDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
@@ -774,9 +774,9 @@ exports.TwoWayDiffBlockFeeder = (function() {
 		} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
 			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
 		} else if(this._mapperColumnIndex === 0){
-			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []};
+			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []}; //$NON-NLS-0$
 		} 
-		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []};
+		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []}; //$NON-NLS-0$
 	};
 	return TwoWayDiffBlockFeeder;
 }());
@@ -829,13 +829,13 @@ exports.inlineDiffBlockFeeder = (function() {
 	};
 	inlineDiffBlockFeeder.prototype.getBlockAnnoTypes = function(result){
 		if(this._mapperColumnIndex === 0){
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []});
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []}); //$NON-NLS-0$
 		} else {
-			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []});
+			result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []}); //$NON-NLS-0$
 		}
 		//We do not want to show the empty line annotation i ninline compare
 		//result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY, list: []});
-		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []});
+		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []}); //$NON-NLS-0$
 	};
 	inlineDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
@@ -846,9 +846,9 @@ exports.inlineDiffBlockFeeder = (function() {
 		} else if(mCompareUtils.isMapperConflict(this.getMapper(), mapperIndex)){
 			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT};
 		} else if(this._mapperColumnIndex === 0){
-			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []};
+			return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_ADDED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_ADDED_BLOCK, list: []}; //$NON-NLS-0$
 		} 
-		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []};
+		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []}; //$NON-NLS-0$
 	};
 	inlineDiffBlockFeeder.prototype.getDiffBlockH = function(diffBlockIndex){
 		if(!this._diffBlocks){
