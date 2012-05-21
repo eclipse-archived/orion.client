@@ -64,13 +64,10 @@ a:hover {
 	vertical-align: baseline;
 }
 
+/* These classes are used pervasively in the UI to achieve left/right floats.  Please do not add extra styling to
+   to these classes, but rather add additional classes as needed for non-float needs.
+*/
 .layoutLeft {
-	float: left;
-	margin: 0;
-	margin-top:5px !important;
-}
-
-.layoutLeftBanner {
 	float: left;
 	margin: 0;
 }
@@ -222,16 +219,17 @@ a:hover {
 
 .dismiss {
 	border: 1px solid transparent;
+    border-radius: 2px;
 	cursor: pointer;
 	padding: 1px;
 	font-size: 8pt;
+	margin: 0;
 	margin-left: 8px;
 	vertical-align: middle;
 }
 .dismiss:hover {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
-    border-radius: 2px;
 }
 
 .parameterInput {
@@ -563,11 +561,8 @@ a:hover {
 	clear: both;
 	float: left;
 	border-radius: 2px;
-	margin-left: 4px;
-	margin-right: 4px;
-	margin: 2px;
+	margin: 8px;
 	display: none;
-	padding: 3px;
 	vertical-align:middle;
 	font-size:11px;
 	font-weight:bold;
@@ -615,6 +610,22 @@ a:hover {
 	font-size: 7pt;
 	display: inline-block;
 	vertical-align: baseline;
+}
+
+.bannerButton {
+	border: 1px solid transparent;
+	text-align: center;
+	vertical-align: baseline;
+    cursor: pointer;
+    display: inline-block;
+    border-radius:3px;
+    margin: 2px;
+    padding: 2px;
+}
+
+.bannerButton:hover {
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
 }
 
 .searchbox {
