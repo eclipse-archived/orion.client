@@ -21,7 +21,7 @@ define(['orion/edit/dispatcher'], function() {
 		this.serviceRegistry = serviceRegistry;
 		this.editor = editor;
 		this.contentType = contentType;
-		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+		this.contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		this.serviceReferences = {};
 
 		var self = this;
@@ -33,8 +33,8 @@ define(['orion/edit/dispatcher'], function() {
 				self._onServiceRemoved(serviceReference, service);
 			}
 		};
-		this.serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded);
-		this.serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved);
+		this.serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved); //$NON-NLS-0$
 		this._init();
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
@@ -43,20 +43,20 @@ define(['orion/edit/dispatcher'], function() {
 			if (this.editor.getTextView()) {
 				this._wire(this.serviceRegistry);
 			} else {
-				this.editor.addEventListener("TextViewInstalled", function() {
+				this.editor.addEventListener("TextViewInstalled", function() { //$NON-NLS-0$
 					self._wire(self.serviceRegistry);
 				});
 			}
 		},
 		_wire: function(serviceRegistry) {
 			// Find registered services that are interested in this contenttype
-			var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.model");
+			var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.model"); //$NON-NLS-0$
 			for (var i=0; i < serviceRefs.length; i++) {
 				this._wireServiceReference(serviceRefs[i]);
 			}
 		},
 		_wireServiceReference: function(serviceRef) {
-			var refContentType = serviceRef.getProperty("contentType");
+			var refContentType = serviceRef.getProperty("contentType"); //$NON-NLS-0$
 			if (typeof refContentType !== undefined && refContentType !== null) {
 				var self = this;
 				this.contentTypeService.isSomeExtensionOf(this.contentType, refContentType).then(
@@ -68,12 +68,12 @@ define(['orion/edit/dispatcher'], function() {
 			}
 		},
 		_wireService: function(serviceReference, service) {
-			var types = serviceReference.getProperty("types");
+			var types = serviceReference.getProperty("types"); //$NON-NLS-0$
 			var textView = this.editor.getTextView();
 			if (!types) { return; }
 			for (var i=0; i < types.length; i++) {
 				var type = types[i];
-				var method = service["on" + type];
+				var method = service["on" + type]; //$NON-NLS-0$
 				if (method) {
 					this._wireServiceMethod(serviceReference, service, method, textView, type);
 				}
@@ -104,7 +104,7 @@ define(['orion/edit/dispatcher'], function() {
 			}
 		},
 		_onServiceAdded: function(serviceReference, service) {
-			if (serviceReference.getName() === "orion.edit.model") {
+			if (serviceReference.getName() === "orion.edit.model") { //$NON-NLS-0$
 				this._wireServiceReference(serviceReference);
 			}
 		},
@@ -112,10 +112,10 @@ define(['orion/edit/dispatcher'], function() {
 		// So dispatch a 'Changing' event that brings the service's empty model up to speed with the editor content.
 		_initService: function(service, textView) {
 			var onModelChanging = service.onModelChanging;
-			if (typeof onModelChanging === "function") {
+			if (typeof onModelChanging === "function") { //$NON-NLS-0$
 				var model = textView.getModel(), text = model.getText();
 				var event = {
-					type: "Changing",
+					type: "Changing", //$NON-NLS-0$
 					text: text,
 					start: 0,
 					removedCharCount: 0,

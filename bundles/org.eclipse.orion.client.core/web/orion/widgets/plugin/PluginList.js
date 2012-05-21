@@ -15,38 +15,38 @@
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, mUtil, mCommands) {
 	
-	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		templateString: '<div>' + 
-							'<div class="pluginwrapper">' +
-								'<div class="pluginTitle" data-dojo-attach-point="pluginTitle"></div>' +
-								'<div class="pluginCount" data-dojo-attach-point="pluginCount">0</div>' +
-					        '</div>' +
-					        '<div class="displaytable">' +
-								'<div class="plugin-settings">' +
-									'<list style="overflow:hidden;" data-dojo-attach-point="pluginSettingsList"></list>' +
-								'</div>' +
-							'</div>' +
-					    '</div>',
+		templateString: '<div>' +  //$NON-NLS-0$
+							'<div class="pluginwrapper">' + //$NON-NLS-0$
+								'<div class="pluginTitle" data-dojo-attach-point="pluginTitle"></div>' + //$NON-NLS-0$
+								'<div class="pluginCount" data-dojo-attach-point="pluginCount">0</div>' + //$NON-NLS-0$
+					        '</div>' + //$NON-NLS-0$
+					        '<div class="displaytable">' + //$NON-NLS-0$
+								'<div class="plugin-settings">' + //$NON-NLS-0$
+									'<list style="overflow:hidden;" data-dojo-attach-point="pluginSettingsList"></list>' + //$NON-NLS-0$
+								'</div>' + //$NON-NLS-0$
+							'</div>' + //$NON-NLS-0$
+					    '</div>', //$NON-NLS-0$
 				
 		pluginDialogState: false,
 		
 		includeMaker: false,
 		
-		target: "_self",
+		target: "_self", //$NON-NLS-0$
 					    
 		postCreate: function(){
 			// set up the toolbar level commands
 			var installPluginCommand = new mCommands.Command({
-				name: "Install",
-				tooltip: "Install a plugin by specifying its URL",
-				id: "orion.installPlugin",
-				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', 'Plugin URL:', '')]),
+				name: messages["Install"],
+				tooltip: messages["Install a plugin by specifying its URL"],
+				id: "orion.installPlugin", //$NON-NLS-0$
+				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['Plugin URL:'], '')]), //$NON-NLS-1$ //$NON-NLS-0$
 				callback: dojo.hitch(this, function(data) {
 					if (data.parameters) {
-						var location = data.parameters.valueFor('url');
+						var location = data.parameters.valueFor('url'); //$NON-NLS-0$
 						if (location) {
 							this.installHandler(location);
 						}
@@ -54,11 +54,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				})
 			});
 			this.commandService.addCommand(installPluginCommand);
-			this.commandService.registerCommandContribution(this.toolbarID, "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url"));
+			this.commandService.registerCommandContribution(this.toolbarID, "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var reloadAllPluginsCommand = new mCommands.Command({
-				name: "Reload all",
-				tooltip: "Reload all installed plugins",
-				id: "orion.reloadAllPlugins",
+				name: messages["Reload all"],
+				tooltip: messages["Reload all installed plugins"],
+				id: "orion.reloadAllPlugins", //$NON-NLS-0$
 				callback: dojo.hitch(this, function() {
 					this.reloadPlugins();
 				})
@@ -66,13 +66,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar and render them.  Rendering is normally done by our outer page, but since
 			// we might have been created after the page first loaded, we have to do this ourselves.
-			this.commandService.registerCommandContribution(this.toolbarID, "orion.reloadAllPlugins", 2);
+			this.commandService.registerCommandContribution(this.toolbarID, "orion.reloadAllPlugins", 2); //$NON-NLS-0$
 			
 			
 			var createPluginCommand = new mCommands.Command({
-				name: "Create",
-				tooltip: "Create a new Orion Plugin",
-				id: "orion.createPlugin",
+				name: messages['Create'],
+				tooltip: messages["Create a new Orion Plugin"],
+				id: "orion.createPlugin", //$NON-NLS-0$
 				callback: dojo.hitch(this, function(data){
 					this.createPlugin(data.items);
 				})
@@ -82,44 +82,44 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			this.commandService.addCommand(createPluginCommand);
 			
 			if( this.includeMaker === true ){
-				this.commandService.registerCommandContribution(this.toolbarID, "orion.createPlugin", 2);
+				this.commandService.registerCommandContribution(this.toolbarID, "orion.createPlugin", 2); //$NON-NLS-0$
 			}
 			
-			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button");
+			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button"); //$NON-NLS-0$
 			
 			var reloadPluginCommand = new mCommands.Command({
-				name: "Reload",
-				tooltip: "Reload the plugin",
-				id: "orion.reloadPlugin",
-				imageClass: "core-sprite-refresh",
+				name: messages["Reload"],
+				tooltip: messages["Reload the plugin"],
+				id: "orion.reloadPlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-refresh", //$NON-NLS-0$
 				visibleWhen: function(items) {  // we expect a URL
-					return typeof items === "string";
+					return typeof items === "string"; //$NON-NLS-0$
 				},
 				callback: dojo.hitch(this, function(data) {
 					this.reloadPlugin(data.items);
 				})
 			});			
 			this.commandService.addCommand(reloadPluginCommand);
-			this.commandService.registerCommandContribution("pluginCommand", "orion.reloadPlugin", 1);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.reloadPlugin", 1); //$NON-NLS-1$ //$NON-NLS-0$
 
 			// now we register commands that are appropriate at the object (row) level
 			var uninstallPluginCommand = new mCommands.Command({
-				name: "Delete",
-				tooltip: "Delete this plugin from the configuration",
-				imageClass: "core-sprite-delete",
-				id: "orion.uninstallPlugin",
+				name: messages["Delete"],
+				tooltip: messages["Delete this plugin from the configuration"],
+				imageClass: "core-sprite-delete", //$NON-NLS-0$
+				id: "orion.uninstallPlugin", //$NON-NLS-0$
 				visibleWhen: function(items) {  // we expect a URL
-					return typeof items === "string";
+					return typeof items === "string"; //$NON-NLS-0$
 				},
 				callback: dojo.hitch(this, function(data) {
 					this.removePlugin(data.items);
 				})
 			});			
 			this.commandService.addCommand(uninstallPluginCommand);
-			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			this.addRows();
 			this.setTarget();
-			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) );
+			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
 		},
 		
 		addRows: function(){
@@ -127,7 +127,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			var list = this.pluginSettingsList;
 			dojo.empty( list );
 			var pluginList = this.settings.pluginRegistry.getPlugins();
-			this.pluginTitle.innerHTML = "Plugins";
+			this.pluginTitle.innerHTML = messages['Plugins'];
 			this.pluginCount.innerHTML = pluginList.length;
 
 			for( var p = 0; p < pluginList.length; p++ ){
@@ -139,24 +139,24 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				
 		pluginURLFocus: function(){
 			this.pluginUrlEntry.value = '';
-			dojo.style( this.pluginUrlEntry, "color", "" );
+			dojo.style( this.pluginUrlEntry, "color", "" ); //$NON-NLS-0$
 		},
 		
 		pluginURLBlur: function(){
 			if( this.pluginUrlEntry.value === '' ){
-				this.pluginUrlEntry.value = 'Type a plugin url here ...';
-				dojo.style( this.pluginUrlEntry, "color", "#AAA" );
+				this.pluginUrlEntry.value = messages['Type a plugin url here ...'];
+				dojo.style( this.pluginUrlEntry, "color", "#AAA" ); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		
 		createPlugin: function( data ){
-			var path = require.toUrl("settings/maker.html");
+			var path = require.toUrl("settings/maker.html"); //$NON-NLS-0$
 			window.open( path, this.target );
 		},
 		
 		addPlugin: function( plugin ){
-			this.statusService.setMessage("Installed " + plugin.getLocation(), 5000, true);
-			this.settings.preferences.getPreferences("/plugins").then(function(plugins) {
+			this.statusService.setMessage(messages["Installed "] + plugin.getLocation(), 5000, true);
+			this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 				plugins.put(plugin.getLocation(), true);
 			}); // this will force a sync
 			
@@ -170,18 +170,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 		
 		installHandler: function(newPluginUrl){
 			if (/^\S+$/.test(dojo.trim(newPluginUrl))) {
-				this.statusService.setMessage("Installing " + newPluginUrl + "...", null, true);
+				this.statusService.setMessage(messages["Installing "] + newPluginUrl + "...", null, true); //$NON-NLS-1$
 				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
-					this.statusService.setErrorMessage("Already installed");
+					this.statusService.setErrorMessage(messages["Already installed"]);
 				} else {
-					this.settings.pluginRegistry.installPlugin(newPluginUrl).then( dojo.hitch( this, 'addPlugin' ), dojo.hitch( this, 'pluginError' ) );
+					this.settings.pluginRegistry.installPlugin(newPluginUrl).then( dojo.hitch( this, 'addPlugin' ), dojo.hitch( this, 'pluginError' ) ); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		},
 		
 		reloaded: function(){
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			this.statusService.setMessage( "Reloaded " + settingsPluginList.length + " plugin" + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true );
+			this.statusService.setMessage( messages["Reloaded "] + settingsPluginList.length + messages[" plugin"] + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true ); //$NON-NLS-3$ //$NON-NLS-2$
 			this.addRows();
 		},
 		
@@ -191,7 +191,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			for( var p = 0; p < settingsPluginList.length; p++ ){
 				if( settingsPluginList[p].getLocation() === url ){
 					settingsPluginList[p].update();
-					this.statusService.setMessage("Reloaded " + url, 5000, true);
+					this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
 					break;
 				}
 			}
@@ -217,7 +217,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				});
 			}
 			
-			d.then( dojo.hitch( this, "reloaded" ) );
+			d.then( dojo.hitch( this, "reloaded" ) ); //$NON-NLS-0$
 		},
 		
 		forceRemove: function(url){
@@ -229,8 +229,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			for( var p = 0; p < settingsPluginList.length; p++ ){
 				if( settingsPluginList[p].getLocation() === url ){
 					settingsPluginList[p].uninstall();
-					statusService.setMessage("Uninstalled " + url, 5000, true);
-					settings.preferences.getPreferences("/plugins").then(function(plugins) {
+					statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
+					settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 						plugins.remove(url);
 					}); // this will force a sync
 					
@@ -246,21 +246,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 			var preferences = this.preferences;	
 			var renderer = this;
 		
-			this.preferences.getPreferences('/settings', 2).then( function(prefs){	
+			this.preferences.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
 			
-				var data = prefs.get("General");
+				var data = prefs.get("General"); //$NON-NLS-0$
 				
 				if( data !== undefined ){
 						
 					var storage = JSON.parse( data );
 					
 					if(storage){
-						var target = preferences.getSetting( storage, "Navigation", "Links" );
+						var target = preferences.getSetting( storage, "Navigation", messages['Links'] ); //$NON-NLS-0$
 						
-						if( target === "Open in new tab" ){
-							target = "_blank";
+						if( target === messages['Open in new tab'] ){
+							target = "_blank"; //$NON-NLS-0$
 						}else{
-							target = "_self";
+							target = "_self"; //$NON-NLS-0$
 						}
 						
 						renderer.target = target;
@@ -284,7 +284,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/Toolt
 				
 			// TODO: Should be internationalized
 				
-			var confirmMessage = "Are you sure you want to uninstall '" + url + "'?";
+			var confirmMessage = messages["Are you sure you want to uninstall '"] + url + "'?"; //$NON-NLS-1$
 			if (window.confirm(confirmMessage)) {
 				this.forceRemove(url);
 			}

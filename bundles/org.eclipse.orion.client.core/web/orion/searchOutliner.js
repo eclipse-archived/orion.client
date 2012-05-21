@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(require, dojo, mSection, mCommands, mSelection, mExplorer){
+define(['i18n!search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -32,20 +32,20 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 	SavedSearches.prototype = /** @lends orion.searches.SavedSearches.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.savedSearches", this);
+			this._serviceRegistration = this._registry.registerService("orion.core.savedSearches", this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
-			this._serviceRegistration.dispatchEvent("searchesChanged", {searches: this._searches, registry: this._registry});
+			this._serviceRegistration.dispatchEvent("searchesChanged", {searches: this._searches, registry: this._registry}); //$NON-NLS-0$
 		},
 
 		
 		_initializeSearches: function () {
 			var savedSearches = this;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) { 
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 				var i;
-				var searches = prefs.get("search");
-				if (typeof searches === "string") {
+				var searches = prefs.get("search"); //$NON-NLS-0$
+				if (typeof searches === "string") { //$NON-NLS-0$
 					searches = JSON.parse(searches);
 				}
 				if (searches) {
@@ -59,8 +59,8 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 				
 		_storeSearches: function() {
 			var storedSearches = this._searches;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
-				prefs.put("search", storedSearches);
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){ //$NON-NLS-1$ //$NON-NLS-0$
+				prefs.put("search", storedSearches); //$NON-NLS-0$
 			}); 
 		},
 
@@ -73,9 +73,9 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 				}
 			}
 			if (alreadyFound) {
-				this._registry.getService("orion.page.message").setMessage(theName + " is already saved.", 2000);
+				this._registry.getService("orion.page.message").setMessage(theName + " is already saved.", 2000); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				this._searches.push({ "name": theName, "query": theQuery});
+				this._searches.push({ "name": theName, "query": theQuery}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			this._searches.sort(this._sorter);
 			this._storeSearches();
@@ -140,11 +140,11 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 	SearchRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		var href;
 		if (item.query) {
-			href=require.toUrl("search/search.html") + "#" + item.query;
-			var col = dojo.create("td", null, tableRow, "last");
-			dojo.addClass(col, "mainNavColumn singleNavColumn");
-			var link = dojo.create("a", {href: href, className: "navlinkonpage"}, col, "only");
-			dojo.place(window.document.createTextNode(item.name), link, "only");
+			href=require.toUrl("search/search.html") + "#" + item.query; //$NON-NLS-1$ //$NON-NLS-0$
+			var col = dojo.create("td", null, tableRow, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(col, "mainNavColumn singleNavColumn"); //$NON-NLS-0$
+			var link = dojo.create("a", {href: href, className: "navlinkonpage"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.place(window.document.createTextNode(item.name), link, "only"); //$NON-NLS-0$
 		} 
 	};
 
@@ -169,35 +169,35 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 	 */
 	function SearchOutliner(options) {
 		var parent = options.parent;
-		if (typeof(parent) === "string") {
+		if (typeof(parent) === "string") { //$NON-NLS-0$
 			parent = dojo.byId(parent);
 		}
-		if (!parent) { throw "no parent"; }
-		if (!options.serviceRegistry) {throw "no service registry"; }
+		if (!parent) { throw "no parent"; } //$NON-NLS-0$
+		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var reg = options.serviceRegistry;
 		
 		var renameSearchCommand = new mCommands.Command({
-			name: "Rename",
-			imageClass: "core-sprite-rename",
-			id: "eclipse.renameSearch",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
+			name: messages["Rename"],
+			imageClass: "core-sprite-rename", //$NON-NLS-0$
+			id: "eclipse.renameSearch", //$NON-NLS-0$
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = dojo.isArray(items) ? items : [items];
 				return items.length === 1 && items[0].query;
 			},
 			callback: dojo.hitch(this, function(data) {
 				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
-				if (data.parameters && data.parameters.valueFor('name')) {
-					reg.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+					reg.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			})
 		});
 		var deleteSearchCommand = new mCommands.Command({
-			name: "Delete",
-			imageClass: "core-sprite-delete",
-			id: "eclipse.deleteSearch",
+			name: "Delete", //$NON-NLS-0$
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "eclipse.deleteSearch", //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = dojo.isArray(items) ? items : [items];
 				if (items.length === 0) {
@@ -212,19 +212,19 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 			},
 			callback: function(data) {
 				var items = dojo.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].name + "' from the searches?" : "Are you sure you want to delete these " + items.length + " searches?";
+				var confirmMessage = items.length === 1 ? dojo.string.substitute("Are you sure you want to delete '${0}' from the searches?", [items[0].name]) : dojo.string.substitute("Are you sure you want to delete these ${0} searches?", [items.length]); //$NON-NLS-1$ //$NON-NLS-0$
 				if(window.confirm(confirmMessage)) {
 					for (var i=0; i<items.length; i++) {
-						options.serviceRegistry.getService("orion.core.savedSearches").removeSearch(items[i].query);
+						options.serviceRegistry.getService("orion.core.savedSearches").removeSearch(items[i].query); //$NON-NLS-0$
 					}
 				}
 			}
 		});
-		this.commandService = this._registry.getService("orion.page.command");
+		this.commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		// register commands 
 		this.commandService.addCommand(renameSearchCommand);	
 		this.commandService.addCommand(deleteSearchCommand);	
-		var savedSearches = this._registry.getService("orion.core.savedSearches");
+		var savedSearches = this._registry.getService("orion.core.savedSearches"); //$NON-NLS-0$
 		var searchOutliner = this;
 		if (savedSearches) {
 			// render the searches
@@ -233,7 +233,7 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 				this.render(searches.searches, registry);
 			}));
 
-			savedSearches.addEventListener("searchesChanged", dojo.hitch(searchOutliner,
+			savedSearches.addEventListener("searchesChanged", dojo.hitch(searchOutliner, //$NON-NLS-0$
 				function(searches) {
 					this.render(searches.searches, searches.registry);
 				}));
@@ -247,36 +247,36 @@ define(['require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection',
 			// first time setup
 			if (!this.searchesSection) {
 				this.searchesSection = new mSection.Section(this._parent, {
-					id: "searchSection",
-					title: "Searches",
-					content: '<div id="searchContent"></div>',
+					id: "searchSection", //$NON-NLS-0$
+					title: messages["Searches"],
+					content: '<div id="searchContent"></div>', //$NON-NLS-0$
 					useAuxStyle: true,
-					preferenceService: serviceRegistry.getService("orion.core.preference"),
+					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 					slideout: true
 				});
-				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection");
+				this.searchSelection = new mSelection.Selection(serviceRegistry, "orion.searches.selection"); //$NON-NLS-0$
 				// add commands to the search section heading
 				var selectionId = this.searchesSection.selectionNode.id;
-				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "searchContent"));	
-				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));
+				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
+				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
 				commandService.registerSelectionService(selectionId, this.searchSelection);
-				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, selections, this, "button");
+						commandService.renderCommands(selectionId, selectionTools, selections, this, "button"); //$NON-NLS-0$
 					}
 				});
 			}
 			if (searches.length > 0) {
 				var explorer = new SearchExplorer(serviceRegistry, this.searchSelection);
-				this.searchTable = explorer.createTree("searchContent", new mExplorer.SimpleFlatModel(searches, "srch", function(item) {
+				this.searchTable = explorer.createTree("searchContent", new mExplorer.SimpleFlatModel(searches, "srch", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 					return item.query;
 				}));	
 				// TODO temporary hack from Libing 
 				explorer.navHandler._clearSelection(false);
 			} else {
-				dojo.place("<p>You can save frequently used by searches by choosing <b>Save Search</b> in the search toolbar.</p>", "searchContent", "only");
+				dojo.place("<p>"+dojo.string.substitute(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>", "searchContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 			}
 		}
 	};//end navigation outliner prototype

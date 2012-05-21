@@ -194,44 +194,44 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 };
 
 orion.compareUtils.generateCompareHref = function(diffLocation, options) {
-	var base =  require.toUrl("compare/compare.html");
+	var base =  require.toUrl("compare/compare.html"); //$NON-NLS-0$
 	var compareParam = "";
 	var diffPosition = "";
 	if(options){
 		if(options.readonly){
-			compareParam = "?readonly";
+			compareParam = "?readonly"; //$NON-NLS-0$
 		}
 		if(options.conflict){
 			if(compareParam === ""){
-				compareParam = "?conflict";
+				compareParam = "?conflict"; //$NON-NLS-0$
 			} else {
-				compareParam = compareParam + "&conflict";
+				compareParam = compareParam + "&conflict"; //$NON-NLS-0$
 			}
 		}
 		if(options.block && options.block > 0){
-			diffPosition = ",block=" + options.block;
+			diffPosition = ",block=" + options.block; //$NON-NLS-0$
 			if(options.change && options.change > 0){
-				diffPosition = diffPosition + "&change="+ options.change;
+				diffPosition = diffPosition + "&change="+ options.change; //$NON-NLS-0$
 			}
 		}
 	}
-	var tempLink = dojo.create("a", {href: base + compareParam + "#" + diffLocation + diffPosition});
+	var tempLink = dojo.create("a", {href: base + compareParam + "#" + diffLocation + diffPosition}); //$NON-NLS-1$ //$NON-NLS-0$
 	return tempLink.href;
 };
 
 orion.compareUtils.parseCompareHash = function(hash) {
 	var diffObj = {complexURL: hash};
-	var diffPosIndex = hash.indexOf(",block=");
+	var diffPosIndex = hash.indexOf(",block="); //$NON-NLS-0$
 	if(diffPosIndex > 0){
 		diffObj.complexURL = hash.substring(0, diffPosIndex);
 		var diffPosStr = hash.substring(diffPosIndex+1);
-		var splitDiffPosStr = diffPosStr.split("&");
+		var splitDiffPosStr = diffPosStr.split("&"); //$NON-NLS-0$
 		for(var i=0; i < splitDiffPosStr.length; i++){
-			var splitParams = splitDiffPosStr[i].split("=");
+			var splitParams = splitDiffPosStr[i].split("="); //$NON-NLS-0$
 			if(splitParams.length === 2){
-				if(splitParams[0] === "block"){
+				if(splitParams[0] === "block"){ //$NON-NLS-0$
 					diffObj.block = parseInt(splitParams[1]);
-				} else if(splitParams[0] === "change"){
+				} else if(splitParams[0] === "change"){ //$NON-NLS-0$
 					diffObj.change = parseInt(splitParams[1]);
 				} 
 			}

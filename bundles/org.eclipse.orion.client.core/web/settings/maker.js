@@ -13,7 +13,7 @@
 /*global define dojo dijit orion window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteUtils', 'orion/sites/sitesExplorer', 'orion/treetable', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/maker/PluginMakerContainer', 'orion/widgets/maker/ScrollingContainerSection', 'orion/widgets/maker/PluginDescriptionSection', 'orion/widgets/maker/PluginCompletionSection', 'dijit/form/Button', 'dijit/ColorPalette'], function(require, dojo, mBootstrap, mStatus, mCommands, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteUtils, mSiteTree, mTreeTable) {
+define(['i18n!settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteUtils', 'orion/sites/sitesExplorer', 'orion/treetable', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/maker/PluginMakerContainer', 'orion/widgets/maker/ScrollingContainerSection', 'orion/widgets/maker/PluginDescriptionSection', 'orion/widgets/maker/PluginCompletionSection', 'dijit/form/Button', 'dijit/ColorPalette'], function(messages, require, dojo, mBootstrap, mStatus, mCommands, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteUtils, mSiteTree, mTreeTable) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -21,12 +21,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var commandService = new mCommands.CommandService({
 				serviceRegistry: serviceRegistry
 			});
@@ -39,9 +39,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 			});
 
 			var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
-			preferencesStatusService.setMessage("Loading...");
+			preferencesStatusService.setMessage("Loading..."); //$NON-NLS-0$
 			
 			/* Note 'pageActions' is the attach id for commands in the toolbar */
 			
@@ -51,14 +51,14 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 										commandService: commandService,
 										preferenceDialogService: preferenceDialogService,
 										settingsCore: core,
-										toolbarID: "pageActions" };
+										toolbarID: "pageActions" }; //$NON-NLS-0$
 
-			var container = new orion.widgets.maker.PluginMakerContainer( containerParameters, dojo.byId( "selectionAgent" ));
+			var container = new orion.widgets.maker.PluginMakerContainer( containerParameters, dojo.byId( "selectionAgent" )); //$NON-NLS-0$
 			
-			var description = orion.widgets.maker.PluginDescriptionSection({title:"Plugin Description"});
+			var description = orion.widgets.maker.PluginDescriptionSection({title:messages["Plugin Description"]});
 			container.addSection( description );
 			
-			container.addCommand( 'Create', 'createPlugin' );
+			container.addCommand( messages['Create'], 'createPlugin' ); //$NON-NLS-1$
 
 			preferencesStatusService.setMessage("");
 		});
