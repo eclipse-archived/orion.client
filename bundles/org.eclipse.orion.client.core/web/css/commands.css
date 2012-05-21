@@ -149,7 +149,7 @@ should be added here.  Use additional classes where more treatment is needed. */
 .core-sprite-error{ background-position: 0 -561px; width: 16px; height: 16px; } 
 .core-sprite-expandAll{ background-position: 0 -627px; width: 16px; height: 16px; } 
 .core-sprite-exportzip{ background-position: 0 -693px; width: 16px; height: 16px; } 
-.core-sprite-favorite_sml{ background-position: 0 -759px; width: 16px; height: 16px; } 
+.core-sprite-favorite_sml{ background-position: 0 -759px; width: 16px; height: 10px; margin:0; } 
 .core-sprite-file{ background-position: 0 -825px; width: 16px; height: 16px; } 
 .core-sprite-file_model{ background-position: 0 -891px; width: 16px; height: 16px; } 
 .core-sprite-folder{ background-position: 0 -957px; width: 16px; height: 16px; } 
@@ -187,8 +187,8 @@ should be added here.  Use additional classes where more treatment is needed. */
 .core-sprite-stop{ background-position: -96px -1044px; width: 16px; height: 16px; } 
 .core-sprite-transferin{ background-position: -96px -1110px; width: 16px; height: 16px; } 
 .core-sprite-transferout{ background-position: -96px -1176px; width: 16px; height: 16px; } 
-.core-sprite-twistie_closed{ background-image:url(../images/closedarrow.png);width: 16px; height: 16px; } 
-.core-sprite-twistie_open{ background-image:url(../images/openarrow.png); width: 16px; height: 16px; } 
+.core-sprite-twistie_closed{ background:url(../images/closedarrow.png) no-repeat top left;width: 16px; height: 16px; } 
+.core-sprite-twistie_open{ background:url(../images/openarrow.png) no-repeat top left; width: 16px; height: 16px; } 
 .core-sprite-twistie_partOpen{ background-position: -96px -1374px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: -96px -1440px; width: 16px; height: 16px; } 
 

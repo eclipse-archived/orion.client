@@ -7,6 +7,7 @@ html, body {
 	margin: 0;
 	padding: 0;
 	font: 8pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	min-width:900px;
 }
 
 .orionPage {
@@ -119,15 +120,15 @@ a:hover {
 }
 
 .logo {
-	padding-top: 4px;
+	padding-top: 5px;
 	padding-right:5px;
 }
 
 .primaryNav {
 	font-size: 10px;
 	font-weight:bold;
-	color: #DDD;
-	padding-top: 6px;
+	color: #CCC;
+	padding-top: 7px;
 	vertical-align: baseline;
 }
 
@@ -135,8 +136,7 @@ a:hover {
 	font-size: 10px;
 	color: #DDD;
 	margin-right: 6px;
-	margin-left: 6px;
-	padding-top: 6px;
+	margin-left: 6px; 
 	vertical-align: baseline;
 	text-decoration: none;
 }
@@ -541,18 +541,19 @@ a:hover {
 	border: 0;
 	background-color: #2e2e2e;
 	background: -webkit-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
-	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
-	
-	height: 24px;
+	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);	
+	height: 28px;
 }
 
 .titleArea {
     margin: 0;
+    margin-top:5px;
     border: 0;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6'); /* IE */
     background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f6f6f6));
     background: -moz-linear-gradient(top,  #ffffff,  #f6f6f6);
     border-bottom: 1px solid #EEE;
+    min-height:20px;
 }
 
 .slideContainer {
@@ -609,6 +610,7 @@ a:hover {
 	margin-right: 8px;
 	font-size: 7pt;
 	display: inline-block;
+	padding-tp:0 !important;
 	vertical-align: baseline;
 }
 
@@ -629,13 +631,17 @@ a:hover {
 }
 
 .searchbox {
-	background: white;
-	border: 1px solid #CCC;
+	background: #DDD;
+	border: 1px solid #AAA;
 	font-size: 11px;
 	min-width: 15em;
-	margin-top: 3px;
-	padding: 2px;
+	height: 16px;
 	border-radius: 3px;
+	color:#444;
+	padding:0;
+	margin-left:2px;
+	padding-left:2px;
+	margin-top:5px;
 }
 
 .toolbarButton {
@@ -706,7 +712,7 @@ a:hover {
 }
 
 .checkedRow {
-	background-color: #FFC !important; /* was e3e3e3 */
+	background-color: #fee49a !important; /* was e3e3e3 */
 }
 
 .testResult {
@@ -730,6 +736,7 @@ a:hover {
 	border-spacing: 0;
 	min-width: 600px;
 	width:100%;
+	padding-right:4px;
 }
 
 .favoritesTable {

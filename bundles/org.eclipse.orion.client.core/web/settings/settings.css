@@ -98,7 +98,7 @@ ul,menu,dir {
 }
 
 .navbar-item-selected {
-	background: #FFC;/* was #e3e3e3; */
+	background: #fee49a;/* was #e3e3e3; */
 	color: black;
 }
 
