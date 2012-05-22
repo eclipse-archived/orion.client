@@ -15,7 +15,7 @@
  * @name orion.xhr
  * @namespace Provides a promise-based API to {@link XMLHttpRequest}.
  */
-define(['i18n!orion/nls/messages', 'orion/Deferred'], function(messages, Deferred) {
+define(['orion/Deferred'], function(Deferred) {
 	/**
 	 * @name orion.xhr.Result
 	 * @class Wraps an XHR response.
@@ -88,7 +88,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred'], function(messages, Deferre
 		if (typeof options.timeout === 'number') { //$NON-NLS-0$
 			xhr.timeout = options.timeout;
 			xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
-				d.reject(messages['Timeout exceeded: '] + e);
+				d.reject('Timeout exceeded: ' + e);
 			});
 		}
 		xhr.onreadystatechange = function() {
