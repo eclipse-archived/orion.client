@@ -631,17 +631,22 @@ a:hover {
 }
 
 .searchbox {
-	background: #444;
+	background: url('../images/glass.png') no-repeat #777 4px 4px;
 	border: 1px solid #555;
 	font-size: 11px;
-	min-width: 15em;
-	height: 16px;
-	border-radius: 3px;
-	color:#aaa;
+	width: 15em;
+	height: 18px;
+	border-radius: 10px;
+	color:#444;
 	padding:0;
-	margin-left:2px;
-	padding-left:2px;
-	margin-top:5px;
+	padding-left:17px;
+	margin-left:5px;
+	margin-top:4px;
+}
+
+.searchbox:focus{
+	color: white;
+	outline:none;
 }
 
 .toolbarButton {

@@ -11,12 +11,12 @@
 /*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(dojo, dijit) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(messages, dojo, dijit) {
 
 if (!localStorage.getItem("orion.sftpConnections")) { //$NON-NLS-0$
 	var defaultItems = { 
 		identifier: 'name', //$NON-NLS-0$
-		label: 'name',
+		label: messages['name'],
 		items: []
 	};
 	localStorage.setItem("orion.sftpConnections", JSON.stringify(defaultItems)); //$NON-NLS-0$
@@ -44,12 +44,12 @@ dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets.
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = "SFTP Transfer"; //$NON-NLS-0$
-		this.sftpHostLabelText= 'Remote host:';
-		this.sftpPathLabelText= 'Remote path:';
-		this.sftpUserLabelText= 'User name:';
-		this.sftpPasswordLabelText= 'Password:';
-		this.buttonOk = 'Start Transfer';
-		this.locationLabelText = 'Location:';
+		this.sftpHostLabelText= messages['Remote host:'];
+		this.sftpPathLabelText= messages['Remote path:'];
+		this.sftpUserLabelText= messages['User name:'];
+		this.sftpPasswordLabelText= messages['Password:'];
+		this.buttonOk = messages['Start Transfer'];
+		this.locationLabelText = messages['Location:'];
 		sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
 	},
 	postCreate: function() {

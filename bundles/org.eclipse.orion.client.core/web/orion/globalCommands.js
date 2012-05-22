@@ -12,10 +12,10 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, mContentTypes, URITemplate, PageUtil){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, mContentTypes, URITemplate, PageUtil){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -110,7 +110,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			var menuButton = new orion.widgets.UserMenuDropDown({
 				id: "logins", //$NON-NLS-0$
 				dropDown: userMenu,
-				label: "Options", 
+				label: messages["Options"], 
 				showLabel: true
 			});
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only"); //$NON-NLS-0$
@@ -122,7 +122,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			}
 			new mCommands.CommandTooltip({
 				connectId: [menuButton.focusNode],
-				label: "Options",
+				label: messages['Options'],
 				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
 			
@@ -276,7 +276,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		if (domNode && !menuButton) {
 			menuButton = new orion.widgets.UserMenuDropDown({
 				id: "related", //$NON-NLS-0$
-				label: "Related",
+				label: messages["Related"],
 				dropDown: linksMenu
 			});
 			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
@@ -429,9 +429,9 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			favoriteService.hasFavorite(favoriteTarget.ChildrenLocation || favoriteTarget.Location).then(function(result) {
 				if (!result) {
 					favoriteService.makeFavorites([favoriteTarget]);
-					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " has been added to the favorites list.", 2000); //$NON-NLS-0$
+					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" has been added to the favorites list."], 2000); //$NON-NLS-0$
 				} else {
-					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " is already a favorite.", 2000); //$NON-NLS-0$
+					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" is already a favorite."], 2000); //$NON-NLS-0$
 				}
 			});
 		} 
@@ -454,7 +454,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				});
 				new mCommands.CommandTooltip({
 					connectId: [faveButton],
-					label: "Add to the favorites list",
+					label: messages["Add to the favorites list"],
 					position: ["below", "left", "right", "above"], // below since this is at top of page. //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService: commandService
 				});
@@ -488,7 +488,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		
 		var parent = dojo.byId(parentId);
 		if (!parent) {
-			throw "could not find banner parent, id was " + parentId;
+			throw messages["could not find banner parent, id was "] + parentId;
 		}
 				
 		// place the HTML fragment from above.
@@ -557,7 +557,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				} else {
-					window.alert("Can't search: no search service is available");
+					window.alert(messages["Can't search: no search service is available"]);
 				}
 			}
 		});
@@ -572,8 +572,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		
 		// Assemble global commands
 		var favoriteCommand = new mCommands.Command({
-			name: "Make Favorite",
-			tooltip: "Add to the favorites list",
+			name: messages["Make Favorite"],
+			tooltip: messages['Add to the favorites list'],
 			imageClass: "core-sprite-makeFavorite", //$NON-NLS-0$
 			id: "orion.makeFavorite", //$NON-NLS-0$
 			visibleWhen: function(item) {
@@ -595,7 +595,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 						if (!result) {
 							favService.makeFavorites(item);
 						} else {
-							serviceRegistry.getService("orion.page.message").setMessage(item.Name + " is already a favorite.", 2000); //$NON-NLS-0$
+							serviceRegistry.getService("orion.page.message").setMessage(item.Name + messages[' is already a favorite.'], 2000); //$NON-NLS-0$
 						}
 					};
 				};
@@ -624,8 +624,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		};
 			
 		var openResourceCommand = new mCommands.Command({
-			name: "Find File Named...",
-			tooltip: "Choose a file by name and open an editor on it",
+			name: messages["Find File Named..."],
+			tooltip: messages["Choose a file by name and open an editor on it"],
 			id: "eclipse.openResource", //$NON-NLS-0$
 			callback: function(data) {
 				openResourceDialog(searcher, serviceRegistry, editor);
@@ -633,8 +633,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			
 		// set binding in editor and a general one for other pages
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), "Find File Named..."); //$NON-NLS-0$
-			editor.getTextView().setAction("Find File Named...", function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), messages['Find File Named...']); //$NON-NLS-0$
+			editor.getTextView().setAction(messages['Find File Named...'], function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
 				});
@@ -645,8 +645,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
-			name: "Toggle banner and footer",
-			tooltip: "Hide or show the page banner and footer",
+			name: messages["Toggle banner and footer"],
+			tooltip: messages["Hide or show the page banner and footer"],
 			id: "orion.toggleTrim", //$NON-NLS-0$
 			callback: function() {
 				var layoutWidget = dijit.byId(parent.parentNode.id);
@@ -708,14 +708,14 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		}
 		
 		var keyAssistCommand = new mCommands.Command({
-			name: "Show Keys",
-			tooltip: "Show a list of all the keybindings on this page",
+			name: messages["Show Keys"],
+			tooltip: messages["Show a list of all the keybindings on this page"],
 			id: "eclipse.keyAssist", //$NON-NLS-0$
 			callback: function() {
 				if (keyAssistNode.style.display === "none") { //$NON-NLS-0$
 					dojo.empty(keyAssistNode);
 					if (editor) {
-						dojo.place("<h2>Editor</h2>", keyAssistNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.place("<h2>"+messages["Editor"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ //$NON-NLS-2$
 						var editorActions = editor.getTextView().getActions(false);
 						for(var i=0; i<editorActions.length; i++) {
 							var actionName = editorActions[i];
@@ -725,7 +725,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 							}
 						}
 					}
-					dojo.place("<h2>"+"Global"+"</h2>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					dojo.place("<h2>"+messages["Global"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					commandService.showKeyBindings(keyAssistNode);
 					keyAssistNode.style.display = "block"; //$NON-NLS-0$
 				} else {
@@ -737,8 +737,8 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		if (editor) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), "Show Keys");
-			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), messages['Show Keys']);
+			editor.getTextView().setAction(messages['Show Keys'], keyAssistCommand.callback);
 		}
 		
 		userMenu.setKeyAssist(keyAssistCommand.callback);

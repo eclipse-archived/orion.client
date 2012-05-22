@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(dojo, dijit) {
+define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -340,7 +340,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 				// expected error - HTTP 412 Precondition Failed 
 				// occurs when file is out of sync with the server
 				if (error.status === 412) {
-					var forceSave = window.confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 					if (forceSave) {
 						// repeat save operation, but without ETag 
 						fileClient.write(targetMetadata.Location, contents).then(
