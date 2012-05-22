@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
+define(['i18n!sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
 		'orion/sites/siteCommands', 'orion/treetable'],
-		function(dojo, Deferred, mSection, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
+		function(messages, dojo, Deferred, mSection, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
 	var Section = mSection.Section;
 	var TableTree = treetable.TableTree;
 	var SitesTree, ViewOnSiteTree;
@@ -25,43 +25,43 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 	function SiteServicesExplorer(options) {
 		this.registry = options.serviceRegistry;
 		this.parentNode = options.parent;
-		this.siteServiceRefs = this.registry.getServiceReferences('orion.site');
+		this.siteServiceRefs = this.registry.getServiceReferences('orion.site'); //$NON-NLS-0$
 	}
 	SiteServicesExplorer.prototype = /** @lends orion.sites.SiteServicesExplorer.prototype */ {
 		display: function() {
 			var serviceRegistry = this.registry;
-			var commandService = serviceRegistry.getService('orion.page.command');
+			var commandService = serviceRegistry.getService('orion.page.command'); //$NON-NLS-0$
 			var serviceRefs = this.siteServiceRefs;
 			for (var i=0; i < serviceRefs.length; i++) {
 				var siteServiceRef = serviceRefs[i];
 				var siteService = this.registry.getService(siteServiceRef);
 				var siteClient = new mSiteClient.SiteClient(serviceRegistry, siteService, siteServiceRef);
-				var sectionId = 'section' + i;
-				var sitesNodeId = sectionId + 'siteNode';
+				var sectionId = 'section' + i; //$NON-NLS-0$
+				var sitesNodeId = sectionId + 'siteNode'; //$NON-NLS-0$
 				var section = new Section(this.parentNode, {
 					explorer: this,
 					id: sectionId,
-					title: 'Site Configurations on ' + siteServiceRef.getProperty('name'),
-					content: '<div id="' + sitesNodeId + '" class="plugin-settings-list"></div>',
+					title: messages['Site Configurations on '] + siteServiceRef.getProperty('name'), //$NON-NLS-1$
+					content: '<div id="' + sitesNodeId + '" class="plugin-settings-list"></div>', //$NON-NLS-1$ //$NON-NLS-0$
 					commandService: commandService,
 					serviceRegistry: serviceRegistry,
 					slideout: true
 				});
-				commandService.registerCommandContribution(section.actionsNode.id, 'orion.site.create', 100);
-				commandService.renderCommands(section.actionsNode.id, section.actionsNode, siteServiceRef, this, 'button');
+				commandService.registerCommandContribution(section.actionsNode.id, 'orion.site.create', 100); //$NON-NLS-0$
+				commandService.renderCommands(section.actionsNode.id, section.actionsNode, siteServiceRef, this, 'button'); //$NON-NLS-0$
 
-				var sectionItemActionScopeId = 'section' + i + 'Action';
-				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.edit', 10);
-				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.start', 20);
-				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.stop', 30);
-				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.delete', 40);
+				var sectionItemActionScopeId = 'section' + i + 'Action'; //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.edit', 10); //$NON-NLS-0$
+				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.start', 20); //$NON-NLS-0$
+				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.stop', 30); //$NON-NLS-0$
+				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.delete', 40); //$NON-NLS-0$
 				var refresher = (function(section) {
 					return function() {
 						section.tree.refresh();
 					};
 				}(section));
 				section.tree = new SitesTree({
-					id: sitesNodeId + 'tree',
+					id: sitesNodeId + 'tree', //$NON-NLS-0$
 					parent: sitesNodeId,
 					actionScopeId: sectionItemActionScopeId,
 					serviceRegistry: this.registry,
@@ -119,75 +119,75 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 		 * @private
 		 */
 		function SitesRenderer(options) {
-			this._commandService = options.serviceRegistry.getService("orion.page.command");
+			this._commandService = options.serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 			this._options = options;
 		}
 		SitesRenderer.prototype = /** @lends orion.sites.SitesRenderer.prototype */{
 			initTable: function (tableNode, tableTree) {
 				this.tableTree = tableTree;
-				dojo.addClass(tableNode, "treetable");
-				var thead = dojo.create("thead", null);
-				dojo.create("th", {innerHTML: "Name"}, thead, "last");
-				dojo.create("th", {innerHTML: "Status"}, thead, "last");
-				dojo.create("th", {innerHTML: "URL", className: "urlCol"}, thead, "last");
-				dojo.create("th", {innerHTML: "Actions"}, thead, "last");
+				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
+				var thead = dojo.create("thead", null); //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages["Name"]}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages["Status"]}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages["URL"], className: "urlCol"}, thead, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
 				tableNode.appendChild(thead);
 			},
 			render: function(item, tableRow) {
-				dojo.addClass(tableRow, "treeTableRow sitesTableRow");
+				dojo.addClass(tableRow, "treeTableRow sitesTableRow"); //$NON-NLS-0$
 				
-				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"});
-				var statusCol = dojo.create("td", {id: tableRow.id + "col2"});
-				var urlCol = dojo.create("td", {id: tableRow.id + "col3"});
-				var actionCol = dojo.create("td", {id: tableRow.id + "col4"});
+				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var statusCol = dojo.create("td", {id: tableRow.id + "col2"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var urlCol = dojo.create("td", {id: tableRow.id + "col3"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var actionCol = dojo.create("td", {id: tableRow.id + "col4"}); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Site config column
 				var href = mSiteUtils.generateEditSiteHref(item);
-				var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last");
-				dojo.place(document.createTextNode(item.Name), nameLink, "last");
+				var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.place(document.createTextNode(item.Name), nameLink, "last"); //$NON-NLS-0$
 				
 				// Status, URL columns
 				var status = item.HostingStatus;
-				if (typeof status === "object") {
-					if (status.Status === "started") {
-						dojo.place(document.createTextNode("Started"), statusCol, "last");
-						var link = dojo.create("a", {className: "siteURL"}, urlCol, "last");
-						dojo.place(document.createTextNode(status.URL), link, "only");
+				if (typeof status === "object") { //$NON-NLS-0$
+					if (status.Status === "started") { //$NON-NLS-0$
+						dojo.place(document.createTextNode(messages["Started"]), statusCol, "last"); //$NON-NLS-1$
+						var link = dojo.create("a", {className: "siteURL"}, urlCol, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.place(document.createTextNode(status.URL), link, "only"); //$NON-NLS-0$
 						link.href = status.URL;
 					} else {
 						var statusString = status.Status.substring(0,1).toUpperCase() + status.Status.substring(1);
-						dojo.place(document.createTextNode(statusString), statusCol, "only");
+						dojo.place(document.createTextNode(statusString), statusCol, "only"); //$NON-NLS-0$
 					}
 				} else {
-					dojo.place(document.createTextNode("Unknown"), statusCol, "only");
+					dojo.place(document.createTextNode(messages["Unknown"]), statusCol, "only"); //$NON-NLS-1$
 				}
 				
 				// Action column
-				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
+				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var options = this._options;
 				var userData = {
 					startCallback: options.startCallback,
 					stopCallback: options.stopCallback,
 					deleteCallback: options.deleteCallback,
 					errorCallback: function(err) {
-						options.serviceRegistry.getService('orion.page.message').setProgressResult(err);
+						options.serviceRegistry.getService('orion.page.message').setProgressResult(err); //$NON-NLS-0$
 					}
 				};
-				this._commandService.renderCommands(options.actionScopeId, actionsWrapper, item, null /*handler*/, "tool", userData);
+				this._commandService.renderCommands(options.actionScopeId, actionsWrapper, item, null /*handler*/, "tool", userData); //$NON-NLS-0$
 				
-				dojo.place(siteConfigCol, tableRow, "last");
-				dojo.place(statusCol, tableRow, "last");
-				dojo.place(urlCol, tableRow, "last");
-				dojo.place(actionCol, tableRow, "last");
+				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
+				dojo.place(statusCol, tableRow, "last"); //$NON-NLS-0$
+				dojo.place(urlCol, tableRow, "last"); //$NON-NLS-0$
+				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
 			},
 			rowsChanged: function() {
-				dojo.query(".treeTableRow").forEach(function(node, i) {
+				dojo.query(".treeTableRow").forEach(function(node, i) { //$NON-NLS-0$
 					if (i % 2) {
-						dojo.addClass(node, "darkTreeTableRow");
-						dojo.removeClass(node, "lightTreeTableRow");
+						dojo.addClass(node, "darkTreeTableRow"); //$NON-NLS-0$
+						dojo.removeClass(node, "lightTreeTableRow"); //$NON-NLS-0$
 					} else {
-						dojo.addClass(node, "lightTreeTableRow");
-						dojo.removeClass(node, "darkTreeTableRow");
+						dojo.addClass(node, "lightTreeTableRow"); //$NON-NLS-0$
+						dojo.removeClass(node, "darkTreeTableRow"); //$NON-NLS-0$
 					}
 				});
 			},
@@ -200,13 +200,13 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 		function createModelItems(siteConfigurations, isRunningOns) {
 			function ViewOnSiteModelItem(siteConfig, isFileRunningOn) {
 				this.SiteConfiguration = siteConfig;
-				this.Id = "ViewOnSite" + siteConfig.Id;
+				this.Id = "ViewOnSite" + siteConfig.Id; //$NON-NLS-0$
 				// Model keeps track of whether the file is available on this site configuration
 				this.IsFileRunningOn = isFileRunningOn;
 			}
 			var modelItems = [];
 			modelItems.push(
-				{	Id: "newsite",
+				{	Id: "newsite", //$NON-NLS-0$
 					Placeholder: true
 				});
 			for (var i=0; i < siteConfigurations.length; i++) {
@@ -217,7 +217,7 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 		/** @returns {Deferred} */
 		function isFileRunningOnSite(siteService, site, file) {
 			return siteService.isFileMapped(site, file).then(function(isFileMapped) {
-				var isStarted = site.HostingStatus && site.HostingStatus.Status === "started";
+				var isStarted = site.HostingStatus && site.HostingStatus.Status === "started"; //$NON-NLS-0$
 				return site && file && isStarted && isFileMapped;
 			});
 		}
@@ -274,37 +274,37 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 		ViewOnSiteRenderer.prototype = {
 			initTable: function (tableNode, tableTree) {
 				this.tableTree = tableTree;
-				dojo.addClass(tableNode, "treetable");
-				var thead = dojo.create("thead", null);
-				dojo.create("th", {innerHTML: "Name"}, thead, "last");
-				dojo.create("th", {innerHTML: "Actions"}, thead, "last");
+				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
+				var thead = dojo.create("thead", null); //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages['Name']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {innerHTML: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
 				tableNode.appendChild(thead);
 			},
 			render: function(item, tableRow) {
 				var siteConfig = item.SiteConfiguration;
-				dojo.addClass(tableRow, "treeTableRow sitesTableRow");
+				dojo.addClass(tableRow, "treeTableRow sitesTableRow"); //$NON-NLS-0$
 				if (item.Placeholder) {
-					dojo.addClass(tableRow, "newSiteRow");
+					dojo.addClass(tableRow, "newSiteRow"); //$NON-NLS-0$
 				}
-				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"});
-				var actionCol = dojo.create("td", {id: tableRow.id + "col2"});
+				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var actionCol = dojo.create("td", {id: tableRow.id + "col2"}); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Site config column
-				var name = item.Placeholder ? "New Site" : siteConfig.Name;
-				dojo.place(document.createTextNode(name), siteConfigCol, "last");
+				var name = item.Placeholder ? messages["New Site"] : siteConfig.Name;
+				dojo.place(document.createTextNode(name), siteConfigCol, "last"); //$NON-NLS-0$
 
 				// Action column
-				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only");
+				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				var userData = {
 					file: this.file,
 					addToCallback: this.addToCallback,
 					errorCallback: this.errorCallback
 				};
-				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "tool", userData);
+				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "tool", userData); //$NON-NLS-1$ //$NON-NLS-0$
 
-				dojo.place(siteConfigCol, tableRow, "last");
-				dojo.place(actionCol, tableRow, "last");
+				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
+				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
 			},
 			rowsChanged: SitesRenderer.prototype.rowsChanged,
 			labelColumnIndex: 0
@@ -358,23 +358,23 @@ define(['dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/sele
 	ViewOnSiteTree = (function() {
 		function ViewOnSiteTree(options) {
 			var serviceRegistry = options.serviceRegistry;
-			var commandService = serviceRegistry.getService("orion.page.command");
+			var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 			var siteService = mSiteClient.forFileLocation(serviceRegistry, options.fileLocation);
 			var self = this;
-			serviceRegistry.getService("orion.core.file").read(options.fileLocation, true).then(function(file) {
+			serviceRegistry.getService("orion.core.file").read(options.fileLocation, true).then(function(file) { //$NON-NLS-0$
 				options.siteService = siteService;
 				options.model = new ViewOnSiteTreeModel(siteService, options.id, file);
 				options.file = self.file = file;
 
 				// TODO should this be done by glue code?
-				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.add-to", 10);
-				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.view-on-link", 20);
+				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.add-to", 10); //$NON-NLS-1$ //$NON-NLS-0$
+				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.view-on-link", 20); //$NON-NLS-1$ //$NON-NLS-0$
 
 				options.addToCallback = function() {
 					self.refresh();
 				};
 				options.errorCallback = function(err) {
-					options.serviceRegistry.getService('orion.page.message').setErrorMessage(err);
+					options.serviceRegistry.getService('orion.page.message').setErrorMessage(err); //$NON-NLS-0$
 				};
 
 				options.renderer = new ViewOnSiteRenderer(options);

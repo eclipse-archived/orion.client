@@ -22,12 +22,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = 'visible';
+			document.body.style.visibility = 'visible'; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, 'statusPane', 'notifications', 'notificationArea');
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, 'statusPane', 'notifications', 'notificationArea'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
@@ -36,12 +36,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 
 			var treeWidget;
 			function createTree(file) {
-				var parentId = 'table';
+				var parentId = 'table'; //$NON-NLS-0$
 				if (treeWidget) {
 					dojo.empty(parentId);
 				}
 				treeWidget = new mSitesExplorer.ViewOnSiteTree({
-					id: 'view-on-site-table',
+					id: 'view-on-site-table', //$NON-NLS-0$
 					parent: parentId,
 					serviceRegistry: serviceRegistry,
 					fileLocation: file
@@ -55,12 +55,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					mSiteCommands.createViewOnSiteCommands(serviceRegistry);
 				}
 			}
-			dojo.subscribe("/dojo/hashchange", null, function() {
+			dojo.subscribe("/dojo/hashchange", null, function() { //$NON-NLS-0$
 				processParameters();
 			});
 
 			processParameters();
-			mGlobalCommands.generateBanner('banner', serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner('banner', serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		});
 	});
 });

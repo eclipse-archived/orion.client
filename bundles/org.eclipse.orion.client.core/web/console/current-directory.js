@@ -51,7 +51,7 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 	exports.withCurrentTreeNode = withCurrentTreeNode;
 
 	function endsWith(string, suffix) {
-		if (typeof(string) === 'string' && typeof(suffix) === 'string') {
+		if (typeof(string) === 'string' && typeof(suffix) === 'string') { //$NON-NLS-1$ //$NON-NLS-0$
 			var loc = string.lastIndexOf(suffix);
 			return (loc + suffix.length) === string.length;
 		}

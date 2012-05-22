@@ -16,11 +16,11 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.TextField", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.settings.TextField", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
 		// templateString: '<input type="text" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
 		
-		templateString: '<div><div>THIS IS A PLACEHOLDER</div></div>',
+		templateString: '<div><div>THIS IS A PLACEHOLDER</div></div>', //$NON-NLS-0$
 		
 		// category, item, element, ui - provided on construction
 		
@@ -31,12 +31,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 		
 		constructor: function(){
 			this.inherited( arguments );
-			console.log( 'c o n s t r u c t o r: ' + this.ui );
+			console.log( 'c o n s t r u c t o r: ' + this.ui ); //$NON-NLS-0$
 		},
 		
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
-			console.log( 'TextField setStorageIem' );
+			console.log( 'TextField setStorageIem' ); //$NON-NLS-0$
 		},
 		
 		change: function(){
@@ -49,7 +49,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 		postCreate: function(){
 			this.inherited( arguments );
 			
-			console.log( 'p o s t c r e a t e' );
+			console.log( 'p o s t c r e a t e' ); //$NON-NLS-0$
 			
 //			this.textfield.name = this.ui;
 		}	

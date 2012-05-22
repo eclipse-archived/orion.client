@@ -12,8 +12,8 @@
 
 /*global define*/
 
-define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
-	function(dojo, mCurrentDirectory, mConsole) {
+define(['i18n!console/nls/messages', 'dojo', 'console/current-directory', 'orion/widgets/Console'],
+	function(messages, dojo, mCurrentDirectory, mConsole) {
 
 	var orion = {};
 	orion.consolePage = {};
@@ -30,7 +30,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 				this.files = files;
 				this.cache = {};
 				var self = this;
-				dojo.subscribe("/dojo/hashchange", function(newHash) {
+				dojo.subscribe("/dojo/hashchange", function(newHash) { //$NON-NLS-0$
 					self.cache = {};
 				});
 			},
@@ -62,7 +62,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 			},
 
 			stringify: function(value) {
-				if (typeof(value) === "string") {
+				if (typeof(value) === "string") { //$NON-NLS-0$
 					return value;
 				}
 				return value.Name;
@@ -76,7 +76,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 					var add = text.length < 3;
 					if (add) {
 						for (var i = 0; i < text.length; i++) {
-							if (text.charAt(i) !== '.') {
+							if (text.charAt(i) !== '.') { //$NON-NLS-0$
 								add = false;
 								break;
 							}
@@ -86,7 +86,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 						// TODO the value for ".." should of course be the node of the
 						// parent directory, but is currently just ".." because this
 						// value often cannot always be determined
-						predictions.push({name: "..", value: ".."});
+						predictions.push({name: "..", value: ".."}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
 				for (var i = 0; i < validDirs.length; i++) {
@@ -111,7 +111,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 					status = mConsole.CompletionStatus.PARTIAL;
 				} else {
 					status = mConsole.CompletionStatus.ERROR;
-					message = "'" + string + "'" + " is not valid";
+					message = dojo.string.substitute(messages['\'${0}\' is not valid'], [string]);
 				}
 				return {value: value, status: status, message: message, predictions: predictions};
 			},
@@ -144,7 +144,7 @@ define(['dojo', 'console/current-directory', 'orion/widgets/Console'],
 				return null;
 			},
 			startsWith: function(string, prefix) {
-				if (typeof(string) === "string" && typeof(prefix) === "string") {
+				if (typeof(string) === "string" && typeof(prefix) === "string") { //$NON-NLS-1$ //$NON-NLS-0$
 					return string.indexOf(prefix) === 0;
 				}
 				return false;

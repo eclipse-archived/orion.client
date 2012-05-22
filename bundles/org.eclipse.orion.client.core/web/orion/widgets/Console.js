@@ -13,8 +13,8 @@
 /*global define*/
 /*jslint browser:true*/
 
-define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/argument', 'gcli/util', 'gcli/ui/menu'],
-	function(mGCLI, mTypes, mBasicTypes, mField, mArgument, mUtil, mMenu) {
+define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/argument', 'gcli/util', 'gcli/ui/menu'],
+	function(messages, mGCLI, mTypes, mBasicTypes, mField, mArgument, mUtil, mMenu) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mBasicTypes.DeferredType.prototype);
@@ -42,35 +42,35 @@ define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/a
 		Console.prototype = /** @lends orion.console.Console.prototype */{			
 			/** @private */
 			_init: function(input, output) {
-				if (!input) { throw "no input"; }
-				if (!output) { throw "no output"; }
+				if (!input) { throw messages["no input"]; }
+				if (!output) { throw messages["no output"]; }
 
-				var outputDiv = document.createElement("div");
-				outputDiv.id = "gcli-display";
-				outputDiv.style.height = "100%";
-				outputDiv.style.width = "100%";
+				var outputDiv = document.createElement("div"); //$NON-NLS-0$
+				outputDiv.id = "gcli-display"; //$NON-NLS-0$
+				outputDiv.style.height = "100%"; //$NON-NLS-0$
+				outputDiv.style.width = "100%"; //$NON-NLS-0$
 				output.appendChild(outputDiv);
 
-				var inputDiv = document.createElement("div");
-				inputDiv.id = "gcli-input-area";
-				inputDiv.style.height = "100%";
-				inputDiv.style.width = "100%";
+				var inputDiv = document.createElement("div"); //$NON-NLS-0$
+				inputDiv.id = "gcli-input-area"; //$NON-NLS-0$
+				inputDiv.style.height = "100%"; //$NON-NLS-0$
+				inputDiv.style.width = "100%"; //$NON-NLS-0$
 				input.appendChild(inputDiv);
 
-				var inputText = document.createElement("input");
-				inputText.id = "gcli-input";
-				inputText.style.background = "transparent";
-				inputText.style.fontFamily = "inherit";
-				inputText.style.fontSize = "inherit";
-				inputText.style.paddingLeft = "1em";
-				inputText.style.width = "100%";
+				var inputText = document.createElement("input"); //$NON-NLS-0$
+				inputText.id = "gcli-input"; //$NON-NLS-0$
+				inputText.style.background = "transparent"; //$NON-NLS-0$
+				inputText.style.fontFamily = "inherit"; //$NON-NLS-0$
+				inputText.style.fontSize = "inherit"; //$NON-NLS-0$
+				inputText.style.paddingLeft = "1em"; //$NON-NLS-0$
+				inputText.style.width = "100%"; //$NON-NLS-0$
 				inputDiv.appendChild(inputText);
 
-				var rowCompleteDiv = document.createElement("div");
-				rowCompleteDiv.id = "gcli-row-complete";
-				rowCompleteDiv.style.position = "absolute";
-				rowCompleteDiv.style.top = "2px";
-				rowCompleteDiv.style.zIndex = "-1000";
+				var rowCompleteDiv = document.createElement("div"); //$NON-NLS-0$
+				rowCompleteDiv.id = "gcli-row-complete"; //$NON-NLS-0$
+				rowCompleteDiv.style.position = "absolute"; //$NON-NLS-0$
+				rowCompleteDiv.style.top = "2px"; //$NON-NLS-0$
+				rowCompleteDiv.style.zIndex = "-1000"; //$NON-NLS-0$
 				inputDiv.appendChild(rowCompleteDiv);
 
 				mGCLI.createView();
@@ -79,17 +79,17 @@ define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/a
 					mField.Field.call(this, type, options);
 					this.onInputChange = this.onInputChange.bind(this);
 					this.arg = new mArgument.Argument();
-					this.element = mUtil.dom.createElement(this.document, 'div');
-					this.input = mUtil.dom.createElement(this.document, 'input');
-					this.input.type = 'text';
-					this.input.addEventListener('keyup', this.onInputChange, false);
-					this.input.classList.add('gcli-field');
-					this.input.classList.add('gcli-field-directory');
+					this.element = mUtil.dom.createElement(this.document, 'div'); //$NON-NLS-0$
+					this.input = mUtil.dom.createElement(this.document, 'input'); //$NON-NLS-0$
+					this.input.type = 'text'; //$NON-NLS-0$
+					this.input.addEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
+					this.input.classList.add('gcli-field'); //$NON-NLS-0$
+					this.input.classList.add('gcli-field-directory'); //$NON-NLS-0$
 					this.element.appendChild(this.input);
 					this.menu = new mMenu.Menu({ document: this.document, field: true });
 					this.element.appendChild(this.menu.element);
-					this.input.addEventListener('keyup', this.onInputChange, false);
-					this.fieldChanged = mUtil.createEvent('DirectoryField.fieldChanged');
+					this.input.addEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
+					this.fieldChanged = mUtil.createEvent('DirectoryField.fieldChanged'); //$NON-NLS-0$
 					// i.e. Register this.onItemClick as the default action for a menu click
 					this.menu.onItemClick = this.onItemClick.bind(this);
 				}
@@ -97,7 +97,7 @@ define(['gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/a
 				CustomField.prototype = Object.create(mField.Field.prototype);
 				CustomField.prototype.destroy = function() {
 					mField.Field.prototype.destroy.call(this);
-					this.input.removeEventListener('keyup', this.onInputChange, false);
+					this.input.removeEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
 					this.menu.destroy();
 					delete this.element;
 					delete this.input;

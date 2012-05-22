@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define document window*/
-define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function(require, Deferred, mAuth, mFileClient) {
+define(['i18n!sites/nls/messages', 'require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function(messages, require, Deferred, mAuth, mFileClient) {
 	/**
 	 * Performs a service call, handling authentication and retrying after auth.
 	 * @returns {Promise}
@@ -18,8 +18,8 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	function _doServiceCall(service, methodName, args) {
 		var serviceMethod = service[methodName];
 		var clientDeferred = new Deferred();
-		if (typeof serviceMethod !== 'function') {
-			throw 'Service method missing: ' + methodName;
+		if (typeof serviceMethod !== 'function') { //$NON-NLS-0$
+			throw messages['Service method missing: '] + methodName;
 		}
 		// On success, just forward the result to the client
 		var onSuccess = function(result) {
@@ -51,7 +51,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 
 	function getFileClient(serviceRegistry, filePattern) {
 		return new mFileClient.FileClient(serviceRegistry, function(reference) {
-			var top = reference.getProperty("top");
+			var top = reference.getProperty("top"); //$NON-NLS-0$
 			return top && top.indexOf(filePattern) === 0;
 		});
 	}
@@ -68,9 +68,9 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	function SiteClient(serviceRegistry, siteService, siteServiceRef) {
 		this._serviceRegistry = serviceRegistry;
 		this._siteService = siteService;
-		this._selfHost = siteServiceRef.getProperty('canSelfHost');
-		this._sitePattern = siteServiceRef.getProperty('sitePattern');
-		this._filePattern = siteServiceRef.getProperty('filePattern');
+		this._selfHost = siteServiceRef.getProperty('canSelfHost'); //$NON-NLS-0$
+		this._sitePattern = siteServiceRef.getProperty('sitePattern'); //$NON-NLS-0$
+		this._filePattern = siteServiceRef.getProperty('filePattern'); //$NON-NLS-0$
 
 		this._getService = function() {
 			return this._siteService;
@@ -109,29 +109,29 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 					return d;
 				});
 			}
-			var virtualPath = "/" + file.Name;
+			var virtualPath = "/" + file.Name; //$NON-NLS-0$
 			var deferred;
 			if (!site) {
 				// Create a site first
-				var name = file.Name + " site";
+				var name = file.Name + " site"; //$NON-NLS-0$
 				deferred = siteClient.toInternalForm(file.Location).then(function(filePath) {
 					var mappings = [];
 					return insertMappingFor(virtualPath, filePath, mappings).then(function() {
-						return siteClient.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"})
+						return siteClient.createSiteConfiguration(name, workspaceId, mappings, null, {Status: "started"}) //$NON-NLS-0$
 							.then(function(createdSite) {
 									return createdSite;
 								});
 					});
 				});
 			} else {
-				if (site.HostingStatus.Status === "started") {
-					site.HostingStatus.Status = "stopped";
+				if (site.HostingStatus.Status === "started") { //$NON-NLS-0$
+					site.HostingStatus.Status = "stopped"; //$NON-NLS-0$
 				}
 				deferred = siteClient.toInternalForm(file.Location).then(function(filePath) {
 					return insertMappingFor(virtualPath, filePath, site.Mappings).then(function() {
 						// Restart the site so the change will take effect
 						return siteClient.updateSiteConfiguration(site.Location, site).then(function(site) {
-							return siteClient.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}});
+							return siteClient.updateSiteConfiguration(site.Location, {HostingStatus: {Status: "started"}}); //$NON-NLS-0$
 						});
 					});
 				});
@@ -147,25 +147,25 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 			return _doServiceCall(this._getService(), name, Array.prototype.slice.call(arguments));
 		};
 	}
-	[	'createSiteConfiguration', 'getSiteConfigurations', 'deleteSiteConfiguration', 
-		'loadSiteConfiguration', 'updateSiteConfiguration', 'toFileLocation', 'toInternalForm', 'getMappingObject',
-		'getMappingProposals', 'updateMappingsDisplayStrings', 'parseInternalForm', 'isSelfHostingSite', 
-		'convertToSelfHosting', 'getURLOnSite' 
+	[	'createSiteConfiguration', 'getSiteConfigurations', 'deleteSiteConfiguration',  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		'loadSiteConfiguration', 'updateSiteConfiguration', 'toFileLocation', 'toInternalForm', 'getMappingObject', //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		'getMappingProposals', 'updateMappingsDisplayStrings', 'parseInternalForm', 'isSelfHostingSite',  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		'convertToSelfHosting', 'getURLOnSite'  //$NON-NLS-1$ //$NON-NLS-0$
 	].forEach(function(methodName) {
 			proxyServiceMethod(SiteClient.prototype, methodName);
 		});
 	SiteClient.prototype.constructor = SiteClient;
 
 	function forLocationProperty(serviceRegistry, locationPropertyName, location) {
-		var siteReferences = serviceRegistry.getServiceReferences('orion.site');
+		var siteReferences = serviceRegistry.getServiceReferences('orion.site'); //$NON-NLS-0$
 		var references = [];
 		var patterns = [];
 		var services = [];
 		for (var i=0; i < siteReferences.length; i++) {
 			var pattern = siteReferences[i].getProperty(locationPropertyName);
 			var patternEpxr;
-			if (pattern[0] !== '^') {
-				patternEpxr = '^' + pattern;
+			if (pattern[0] !== '^') { //$NON-NLS-0$
+				patternEpxr = '^' + pattern; //$NON-NLS-0$
 			} else {
 				patternEpxr = pattern;
 			}
@@ -175,7 +175,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 		}
 
 		var getServiceIndex = function(location) {
-			if (location === '/') {
+			if (location === '/') { //$NON-NLS-0$
 				return -1;
 			} else if (!location || (location.length && location.length === 0)) {
 				return 0;
@@ -185,7 +185,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 					return i;
 				}
 			}
-			throw 'No Matching SiteService for ' + locationPropertyName + ': ' + location;
+			throw messages['No Matching SiteService for '] + locationPropertyName + ': ' + location; //$NON-NLS-1$
 		};
 		var serviceIndex = getServiceIndex(location);
 		var service = services[serviceIndex];
@@ -201,7 +201,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	 * @returns {orion.sites.SiteClient}
 	 */
 	function forLocation(serviceRegistry, location) {
-		return forLocationProperty(serviceRegistry, 'pattern', location);
+		return forLocationProperty(serviceRegistry, 'pattern', location); //$NON-NLS-0$
 	}
 
 	/**
@@ -211,7 +211,7 @@ define(['require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function
 	 * @param {String} location Location of a site configuration.
 	 */
 	function forFileLocation(serviceRegistry, fileLocation) {
-		return forLocationProperty(serviceRegistry, 'filePattern', fileLocation);
+		return forLocationProperty(serviceRegistry, 'filePattern', fileLocation); //$NON-NLS-0$
 	}
 
 	/**

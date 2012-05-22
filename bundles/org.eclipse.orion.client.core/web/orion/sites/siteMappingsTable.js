@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define document */
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
-		function(require, dojo, mUtil, mCommands, mExplorer) {
+define(['i18n!sites/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
+		function(messages, require, dojo, mUtil, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};
 
@@ -23,7 +23,7 @@ function mixin(target, source) {
 
 // TODO perhaps site service should be in charge of this.
 function isWorkspacePath(/**String*/ path) {
-	return new RegExp("^/").test(path);
+	return new RegExp("^/").test(path); //$NON-NLS-0$
 }
 
 function safePath(str) {
@@ -43,7 +43,7 @@ mSiteMappingsTable.Model = (function() {
 			if (item === this.root) {
 				result = this.rootId;
 			} else {
-				result = "mapping_" + this.items.indexOf(item);
+				result = "mapping_" + this.items.indexOf(item); //$NON-NLS-0$
 			}
 			return result;
 		}});
@@ -65,12 +65,12 @@ mSiteMappingsTable.Renderer = (function() {
 			var col;
 			switch(col_no){
 				case 0:
-					col = dojo.create("th", {innerHTML: " "});
-					dojo.addClass(col, "isValidColumn");
+					col = dojo.create("th", {innerHTML: " "}); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.addClass(col, "isValidColumn"); //$NON-NLS-0$
 					return col;
-				case 1: return dojo.create("th", {innerHTML: "Path"});
-				case 2: return dojo.create("th", {innerHTML: "Mount at (server path)"});
-				case 3: return dojo.create("th", {innerHTML: "Actions"});
+				case 1: return dojo.create("th", {innerHTML: messages["Path"]}); //$NON-NLS-0$
+				case 2: return dojo.create("th", {innerHTML: messages["Mount at (server path)"]}); //$NON-NLS-0$
+				case 3: return dojo.create("th", {innerHTML: messages["Actions"]}); //$NON-NLS-0$
 			}
 		},
 		getCellElement: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {
@@ -79,25 +79,25 @@ mSiteMappingsTable.Renderer = (function() {
 				case 0:
 					return this.getIsValidCell(col_no, item, tableRow);
 				case 1: // Path
-					col = dojo.create("td");
-					input = dojo.create("input");
-					dojo.addClass(input, "pathInput");
+					col = dojo.create("td"); //$NON-NLS-0$
+					input = dojo.create("input"); //$NON-NLS-0$
+					dojo.addClass(input, "pathInput"); //$NON-NLS-0$
 					// TODO
-					input.value = typeof item.FriendlyPath !== "undefined" ? item.FriendlyPath : item.Target;
+					input.value = typeof item.FriendlyPath !== "undefined" ? item.FriendlyPath : item.Target; //$NON-NLS-0$
 					handler = dojo.hitch(this, function(event) {
-							this.options.onchange(item, "FriendlyPath", event.target.value, event);
+							this.options.onchange(item, "FriendlyPath", event.target.value, event); //$NON-NLS-0$
 						});
 					input.onchange = handler;
 					input.onkeyup = handler;
 					dojo.place(input, col);
 					return col;
 				case 2: // Mount at
-					col = dojo.create("td");
-					input = dojo.create("input");
-					dojo.addClass(input, "serverPathInput");
+					col = dojo.create("td"); //$NON-NLS-0$
+					input = dojo.create("input"); //$NON-NLS-0$
+					dojo.addClass(input, "serverPathInput"); //$NON-NLS-0$
 					input.value = item.Source;
 					handler =  dojo.hitch(this, function(event) {
-							this.options.onchange(item, "Source", event.target.value, event);
+							this.options.onchange(item, "Source", event.target.value, event); //$NON-NLS-0$
 						});
 					input.onchange = handler;
 					input.onkeyup = handler;
@@ -109,29 +109,29 @@ mSiteMappingsTable.Renderer = (function() {
 		},
 		getIsValidCell: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {
 			var target = item.Target;
-			var col = document.createElement("td");
+			var col = document.createElement("td"); //$NON-NLS-0$
 			var href;
 			if (isWorkspacePath(target)) {
 				var self = this;
 				this.options.siteClient.toFileLocation(target).then(function(loc) {
 					href = mUtil.safeText(loc);
-					col.innerHTML = "<span class=\"validating\">&#8230;</span>";
+					col.innerHTML = "<span class=\"validating\">&#8230;</span>"; //$NON-NLS-0$
 					// use file service directly to avoid retrying in case of failure
 					self.options.fileClient._getService(loc).read(loc, true).then(
 						function(object) {
 							var isDirectory = object && object.Directory;
-							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file";
-							var title = (isDirectory ? "Workspace folder" : "Workspace file") + " " + href;
-							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>';
+							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file"; //$NON-NLS-1$ //$NON-NLS-0$
+							var title = (isDirectory ? messages["Workspace folder"] : messages["Workspace file"]) + " " + href; //$NON-NLS-2$
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						}, function(error) {
-							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="Workspace resource not found: ' + href + '"/></a>';
+							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="'+messages['Workspace resource not found: '] + href + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 						});
 				});
 			} else {
 				href = mUtil.safeText(target);
-				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="External link to ' + href + '"/></a>';
+				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="'+messages['External link to '] + href + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			dojo.addClass(col, "isValidCell");
+			dojo.addClass(col, "isValidCell"); //$NON-NLS-0$
 			return col;
 		}
 	});
@@ -144,7 +144,7 @@ mSiteMappingsTable.Renderer = (function() {
 mSiteMappingsTable.MappingsTable = (function() {
 	function MappingsTable(options) {
 		this.registry = options.serviceRegistry;
-		this.commandService = this.registry.getService("orion.page.command");
+		this.commandService = this.registry.getService("orion.page.command"); //$NON-NLS-0$
 		this.registerCommands();
 		this.siteClient = options.siteClient;
 		this.parentId = options.parentId;
@@ -155,7 +155,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				siteConfiguration: options.siteConfiguration,
 				siteClient: options.siteClient,
 				fileClient: options.fileClient,
-				actionScopeId: "siteMappingCommand"
+				actionScopeId: "siteMappingCommand" //$NON-NLS-0$
 			}, this);
 		this.myTree = null;
 		this._setSiteConfiguration(options.siteConfiguration);
@@ -186,23 +186,23 @@ mSiteMappingsTable.MappingsTable = (function() {
 		},
 		// Render the row of a single item, without rendering its siblings.
 		renderItemRow: function(item, fieldName) {
-			if (fieldName === "FriendlyPath") {
+			if (fieldName === "FriendlyPath") { //$NON-NLS-0$
 				// Just update the "is valid" column
 				var rowNode = dojo.byId(this.myTree._treeModel.getId(item));
-				var oldCell = dojo.query(".isValidCell", rowNode)[0];
-				var col_no = dojo.query("td", rowNode).indexOf(oldCell);
+				var oldCell = dojo.query(".isValidCell", rowNode)[0]; //$NON-NLS-0$
+				var col_no = dojo.query("td", rowNode).indexOf(oldCell); //$NON-NLS-0$
 				var cell = this.renderer.getIsValidCell(col_no, item, rowNode);
-				dojo.place(cell, oldCell, "replace");
+				dojo.place(cell, oldCell, "replace"); //$NON-NLS-0$
 			}
 		},
 		registerCommands: function() {
 			var deleteMappingCommand = new mCommands.Command({
-				name: "Delete",
-				imageClass: "core-sprite-delete",
-				id: "orion.site.mappings.remove",
+				name: messages['Delete'],
+				imageClass: "core-sprite-delete", //$NON-NLS-0$
+				id: "orion.site.mappings.remove", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
-					return typeof item.Source !== "undefined" && typeof item.Target !== "undefined";
+					return typeof item.Source !== "undefined" && typeof item.Target !== "undefined"; //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				callback: dojo.hitch(this, function(data) {
 					//table._hideTooltip();
@@ -211,12 +211,12 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(deleteMappingCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.remove", 0);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.remove", 0); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var moveUpCommand = new mCommands.Command({
-				name: "Move Up",
-				imageClass: "core-sprite-move_up",
-				id: "orion.site.mappings.moveUp",
+				name: messages["Move Up"],
+				imageClass: "core-sprite-move_up", //$NON-NLS-0$
+				id: "orion.site.mappings.moveUp", //$NON-NLS-0$
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
@@ -230,12 +230,12 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(moveUpCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveUp", 1);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveUp", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var moveDownCommand = new mCommands.Command({
-				name: "Move Down",
-				imageClass: "core-sprite-move_down",
-				id: "orion.site.mappings.moveDown",
+				name: messages["Move Down"],
+				imageClass: "core-sprite-move_down", //$NON-NLS-0$
+				id: "orion.site.mappings.moveDown", //$NON-NLS-0$
 				visibleWhen: dojo.hitch(this, function(item) {
 					return item.Source && item.Target;
 				}),
@@ -250,15 +250,15 @@ mSiteMappingsTable.MappingsTable = (function() {
 					this.setDirty(true);
 				})});
 			this.commandService.addCommand(moveDownCommand);
-			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveDown", 2);
+			this.commandService.registerCommandContribution("siteMappingCommand", "orion.site.mappings.moveDown", 2); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		getItemIndex: function(item) {
 			return this.siteConfiguration.Mappings.indexOf(item);
 		},
 		_addMapping: function(object) {
 			var source = object.Souce, target = object.Target, friendlyPath = object.FriendlyPath;
-			source = safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath));
-			target = safePath(typeof(target) === "string" ? target : "/");
+			source = safePath(typeof(source) === "string" ? source : this.getNextMountPoint(friendlyPath)); //$NON-NLS-0$
+			target = safePath(typeof(target) === "string" ? target : "/"); //$NON-NLS-1$ //$NON-NLS-0$
 			if (!this.mappingExists(source, target)) {
 				this.siteConfiguration.Mappings.push(object);
 			}
@@ -276,7 +276,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			this.setDirty(true);
 		},
 		mappingExists: function(source, target) {
-			if (typeof source === "object" && typeof target === "undefined") {
+			if (typeof source === "object" && typeof target === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
 				target = source.Target;
 				source = source.Source;
 			}
@@ -293,25 +293,25 @@ mSiteMappingsTable.MappingsTable = (function() {
 			var mappings = this.siteConfiguration.Mappings;
 			var hasRoot = false;
 			for (var i=0; i < mappings.length; i++) {
-				if (mappings[i].Source === "/") {
+				if (mappings[i].Source === "/") { //$NON-NLS-0$
 					hasRoot = true;
 					break;
 				}
 			}
 			if (!hasRoot) {
-				return "/";
+				return "/"; //$NON-NLS-0$
 			}
 			// Else base it on friendlyPath
 			if (!friendlyPath) {
-				return "/web/somePath";
+				return "/web/somePath"; //$NON-NLS-0$
 			}
-			var segments = friendlyPath.split("/");
+			var segments = friendlyPath.split("/"); //$NON-NLS-0$
 			for (i = segments.length-1; i >= 0; i--) {
 				if (!/\s+/.test(segments[i])) {
-					return "/" + segments[i];
+					return "/" + segments[i]; //$NON-NLS-0$
 				}
 			}
-			return "/web/somePath";
+			return "/web/somePath"; //$NON-NLS-0$
 		},
 		deleteMapping: function(/**Object*/ mapping) {
 			var index = this.siteConfiguration.Mappings.indexOf(mapping);
@@ -327,7 +327,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 			var oldValue = item[fieldName];
 			if (oldValue !== newValue) {
 				item[fieldName] = newValue;
-				if (fieldName === "FriendlyPath") {
+				if (fieldName === "FriendlyPath") { //$NON-NLS-0$
 					// Convert displayed string into the internal path representation, update the Target field
 					var friendlyPath = newValue;
 					var self = this;
