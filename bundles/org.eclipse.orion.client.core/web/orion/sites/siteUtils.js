@@ -21,8 +21,8 @@ define(['require', 'orion/util', 'orion/URITemplate', 'orion/sites/siteUtils'],
 	 * @function
 	 */
 	function generateEditSiteHref(site) {
-		var base = require.toUrl("sites/site.html");
-		return new URITemplate(base + "#{,resource,params*}").expand({
+		var base = require.toUrl("sites/site.html"); //$NON-NLS-0$
+		return new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
 			resource: mUtil.makeRelative(site.Location)
 		});
 	}
