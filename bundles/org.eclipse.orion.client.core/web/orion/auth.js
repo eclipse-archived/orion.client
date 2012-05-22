@@ -38,7 +38,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 	 */
 	function handleAuthenticationError(error, retry) {
 		if (error.status === 403) { 
-			if (typeof forbiddenAccessDlg === "undefined") {
+			if (typeof forbiddenAccessDlg === "undefined") { //$NON-NLS-0$
 				forbiddenAccessDlg = new dijit.Dialog({
 			        title: "Forbidden access"
 			    });
@@ -48,7 +48,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 				var responseObject = JSON.parse(error.responseText);
 				message = responseObject.Message || error.message;
 			}
-			forbiddenAccessDlg.set("content", message);
+			forbiddenAccessDlg.set("content", message); //$NON-NLS-0$
 			forbiddenAccessDlg.show();
 			return;
 		} else if (error.status === 401) { 
@@ -69,7 +69,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 						if(lastSignInKeyValue===userItem){
 							return;
 						}
-						window.removeEventListener("storage", storageListener, false); // ... but only once
+						window.removeEventListener("storage", storageListener, false); // ... but only once //$NON-NLS-0$
 						delete pendingAuthentication[responseObj.SignInKey];
 						mGlobalCommands.setPendingAuthentication(pendingAuthentication);
 						mGlobalCommands.authenticatedService(responseObj.SignInKey);
@@ -78,7 +78,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 						}
 					};
 					
-					window.addEventListener("storage", storageListener, false);
+					window.addEventListener("storage", storageListener, false); //$NON-NLS-0$
 					
 					if(responseObj.SignInKey){
 										

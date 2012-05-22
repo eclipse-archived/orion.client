@@ -33,7 +33,7 @@ define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 
 							'<input type="text" name="web" id="pluginLicence" size="30">' +										 //$NON-NLS-0$
 						'</p>' +			 //$NON-NLS-0$
 						'<p>' + //$NON-NLS-0$
-							'<label for="message">'+messages['Description:']+'</label>' +
+							'<label for="message">'+messages['Description:']+'</label>' +//$NON-NLS-2$ //$NON-NLS-0$
 							'<textarea name="message" id="pluginDescription" cols="30" rows="10"></textarea>' + //$NON-NLS-0$
 						'</p>' +					 //$NON-NLS-0$
 					'</fieldset>' +								 //$NON-NLS-0$

@@ -14,7 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
+define(['i18n!navigate/nls/messages', "orion/Deferred", "orion/auth"], function(messages, Deferred, mAuth){
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -24,7 +24,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + " is not supportted in this file system";
+			throw funcName + messages[" is not supportted in this file system"];
 		}
 		var clientDeferred = new Deferred();
 		fileService[funcName].apply(fileService, funcArgs).then(
@@ -58,32 +58,32 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
 		
 		if (!sourceService.readBlob) {
-			throw "source file service does not support binary read";
+			throw messages["source file service does not support binary read"];
 		}
 
 		if (!targetService.writeBlob) {
-			throw "target file service does not support binary write";
+			throw messages["target file service does not support binary write"];
 		}
 	
-		if (sourceLocation[sourceLocation.length -1] !== "/") {
-			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) {
-				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]);
+		if (sourceLocation[sourceLocation.length -1] !== "/") { //$NON-NLS-0$
+			return _doServiceCall(sourceService, "readBlob", [sourceLocation]).then(function(contents) { //$NON-NLS-0$
+				return _doServiceCall(targetService, "writeBlob", [targetLocation, contents]); //$NON-NLS-0$
 			});
 		}
 
 		var temp = targetLocation.substring(0, targetLocation.length - 1);
-		var name = decodeURIComponent(temp.substring(temp.lastIndexOf("/")+1));
-		var parentLocation = temp.substring(0, temp.lastIndexOf("/")+1); 
+		var name = decodeURIComponent(temp.substring(temp.lastIndexOf("/")+1)); //$NON-NLS-0$
+		var parentLocation = temp.substring(0, temp.lastIndexOf("/")+1);  //$NON-NLS-0$
 
-		return _doServiceCall(targetService, "createFolder", [parentLocation, name]).then(function() {
+		return _doServiceCall(targetService, "createFolder", [parentLocation, name]).then(function() { //$NON-NLS-0$
 			return;
 		}, function() {
 			return;
 		}).then(function() {
-			if (sourceLocation.indexOf("/") === 0) {
-				sourceLocation += "?depth=1";
+			if (sourceLocation.indexOf("/") === 0) { //$NON-NLS-0$
+				sourceLocation += "?depth=1"; //$NON-NLS-0$
 			}
-			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) {
+			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) { //$NON-NLS-0$
 				var results = [];
 				for(var i = 0; i < children.length; ++i) {
 					var childSourceLocation = children[i].Location;
@@ -91,11 +91,11 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 					if (children[i].Directory) {
 						childTemp = childSourceLocation.substring(0, childSourceLocation.length - 1);
 					}
-					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1));
+					var childName = decodeURIComponent(childTemp.substring(childTemp.lastIndexOf("/")+1)); //$NON-NLS-0$
 					
 					var childTargetLocation = targetLocation + encodeURIComponent(childName);
 					if (children[i].Directory) {
-						childTargetLocation += "/";
+						childTargetLocation += "/"; //$NON-NLS-0$
 					}
 					results[i] = _copy(sourceService, childSourceLocation, targetService, childTargetLocation);
 				}
@@ -113,7 +113,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 	 * @name orion.fileClient.FileClient
 	 */
 	function FileClient(serviceRegistry, filter) {
-		var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
+		var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 		var _references = allReferences;
 		if (filter) {
 			_references = [];
@@ -129,7 +129,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		
 		function _noMatch(location) {
 			var d = new Deferred();
-			d.reject("No Matching FileService for location:" + location);
+			d.reject(messages["No Matching FileService for location:"] + location);
 			return d;
 		}
 		
@@ -142,12 +142,12 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 			},
 			createWorkspace: function() {
 				var d = new Deferred();
-				d.reject("no file service");
+				d.reject(messages["no file service"]);
 				return d;
 			},
 			loadWorkspaces: function() {
 				var d = new Deferred();
-				d.reject("no file service");
+				d.reject(messages['no file service']);
 				return d;
 			},
 			loadWorkspace: function(location) {
@@ -157,10 +157,10 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 						Directory: true, 
 						Length: 0, 
 						LocalTimeStamp: 0,
-						Name: "File Servers",
-						Location: "/", 
+						Name: messages["File Servers"],
+						Location: "/",  //$NON-NLS-0$
 						Children: _fileSystemsRoots,
-						ChildrenLocation: "/"
+						ChildrenLocation: "/" //$NON-NLS-0$
 					});
 				}, 100);
 				return d;
@@ -181,23 +181,23 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 				Directory: true, 
 				Length: 0, 
 				LocalTimeStamp: 0,
-				Location: _references[j].getProperty("top"),
-				ChildrenLocation: _references[j].getProperty("top"),
-				Name: _references[j].getProperty("Name")		
+				Location: _references[j].getProperty("top"), //$NON-NLS-0$
+				ChildrenLocation: _references[j].getProperty("top"), //$NON-NLS-0$
+				Name: _references[j].getProperty("Name")		 //$NON-NLS-0$
 			};
 
-			var patternString = _references[j].getProperty("pattern") || ".*";
-			if (patternString[0] !== "^") {
-				patternString = "^" + patternString;
+			var patternString = _references[j].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (patternString[0] !== "^") { //$NON-NLS-0$
+				patternString = "^" + patternString; //$NON-NLS-0$
 			}
 			_patterns[j] = new RegExp(patternString);			
 			_services[j] = serviceRegistry.getService(_references[j]);
-			_names[j] = _references[j].getProperty("Name");
+			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
 		}
 				
 		this._getServiceIndex = function(location) {
 			// client must specify via "/" when a multi file service tree is truly wanted
-			if (location === "/") {
+			if (location === "/") { //$NON-NLS-0$
 				return -1;
 			} else if (!location || (location.length && location.length === 0)) {
 				// TODO we could make the default file service a preference but for now we use the first one
@@ -208,7 +208,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 					return i;
 				}
 			}
-			throw "No Matching FileService for location:" + location;
+			throw messages['No Matching FileService for location:'] + location;
 		};
 		
 		this._getService = function(location) {
@@ -237,7 +237,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
-			return _doServiceCall(this._getService(location), "fetchChildren", arguments);
+			return _doServiceCall(this._getService(location), "fetchChildren", arguments); //$NON-NLS-0$
 		},
 
 		/**
@@ -246,7 +246,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @param {String} name The name of the new workspace
 		 */
 		createWorkspace: function(name) {
-			return _doServiceCall(this._getService(), "createWorkspace", arguments);
+			return _doServiceCall(this._getService(), "createWorkspace", arguments); //$NON-NLS-0$
 		},
 
 		/**
@@ -254,7 +254,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return _doServiceCall(this._getService(), "loadWorkspaces", arguments);
+			return _doServiceCall(this._getService(), "loadWorkspaces", arguments); //$NON-NLS-0$
 		},
 		
 		/**
@@ -264,7 +264,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			return _doServiceCall(this._getService(location), "loadWorkspace", arguments);
+			return _doServiceCall(this._getService(location), "loadWorkspace", arguments); //$NON-NLS-0$
 		},
 		
 		/**
@@ -275,7 +275,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
 		createProject: function(url, projectName, serverPath, create) {
-			return _doServiceCall(this._getService(url), "createProject", arguments);
+			return _doServiceCall(this._getService(url), "createProject", arguments); //$NON-NLS-0$
 		},
 		/**
 		 * Creates a folder.
@@ -284,7 +284,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return _doServiceCall(this._getService(parentLocation), "createFolder", arguments);
+			return _doServiceCall(this._getService(parentLocation), "createFolder", arguments); //$NON-NLS-0$
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
@@ -294,14 +294,14 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return _doServiceCall(this._getService(parentLocation), "createFile", arguments);
+			return _doServiceCall(this._getService(parentLocation), "createFile", arguments); //$NON-NLS-0$
 		},
 		/**
 		 * Deletes a file, directory, or project.
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {
-			return _doServiceCall(this._getService(location), "deleteFile", arguments);
+			return _doServiceCall(this._getService(location), "deleteFile", arguments); //$NON-NLS-0$
 		},
 		
 		/**		 
@@ -315,14 +315,14 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return _doServiceCall(sourceService, "moveFile", arguments);				
+				return _doServiceCall(sourceService, "moveFile", arguments);				 //$NON-NLS-0$
 			}
 			
-			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
+			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
 			var target = targetLocation;
 			
-			if (target[target.length -1] !== "/") {
-				target += "/";
+			if (target[target.length -1] !== "/") { //$NON-NLS-0$
+				target += "/"; //$NON-NLS-0$
 			}
 			
 			if (name) {
@@ -332,15 +332,15 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 				if (isDirectory) {
 					temp = temp.substring(0, temp.length - 1);
 				}
-				target += temp.substring(temp.lastIndexOf("/")+1);
+				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			}
 			
-			if (isDirectory && target[target.length -1] !== "/") {
-				target += "/";
+			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
+				target += "/"; //$NON-NLS-0$
 			}
 	
 			return _copy(sourceService, sourceLocation, targetService, target).then(function() {
-				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]);
+				return _doServiceCall(sourceService, "deleteFile", [sourceLocation]); //$NON-NLS-0$
 			});
 			
 		},
@@ -356,24 +356,24 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 			var targetService = this._getService(targetLocation);
 			
 			if (sourceService === targetService) {
-				return _doServiceCall(sourceService, "copyFile", arguments);				
+				return _doServiceCall(sourceService, "copyFile", arguments);				 //$NON-NLS-0$
 			}
 			
-			var isDirectory = sourceLocation[sourceLocation.length -1] === "/";
+			var isDirectory = sourceLocation[sourceLocation.length -1] === "/"; //$NON-NLS-0$
 			var target = targetLocation;
 			
-			if (target[target.length -1] !== "/") {
-				target += "/";
+			if (target[target.length -1] !== "/") { //$NON-NLS-0$
+				target += "/"; //$NON-NLS-0$
 			}
 			
 			var temp = sourceLocation;
 			if (isDirectory) {
 				temp = temp.substring(0, temp.length - 1);
 			}
-			target += temp.substring(temp.lastIndexOf("/")+1);
+			target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			
-			if (isDirectory && target[target.length -1] !== "/") {
-				target += "/";
+			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
+				target += "/"; //$NON-NLS-0$
 			}	
 
 			return _copy(sourceService, sourceLocation, targetService, target);
@@ -388,7 +388,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			return _doServiceCall(this._getService(location), "read", arguments);
+			return _doServiceCall(this._getService(location), "read", arguments); //$NON-NLS-0$
 		},
 
 		/**
@@ -400,7 +400,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return A deferred for chaining events after the write completes with new metadata object
 		 */		
 		write: function(location, contents, args) {
-			return _doServiceCall(this._getService(location), "write", arguments);
+			return _doServiceCall(this._getService(location), "write", arguments); //$NON-NLS-0$
 		},
 
 		/**
@@ -411,7 +411,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return A deferred for chaining events after the import completes
 		 */		
 		remoteImport: function(targetLocation, options) {
-			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments);
+			return _doServiceCall(this._getService(targetLocation), "remoteImport", arguments); //$NON-NLS-0$
 		},
 
 		/**
@@ -422,7 +422,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @return A deferred for chaining events after the export completes
 		 */		
 		remoteExport: function(sourceLocation, options) {
-			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments);
+			return _doServiceCall(this._getService(sourceLocation), "remoteExport", arguments); //$NON-NLS-0$
 		},
 		
 		/**
@@ -430,7 +430,7 @@ define(["orion/Deferred", "orion/auth"], function(Deferred, mAuth){
 		 * @param {String} query The search query
 		 */
 		search: function(location, query) {
-			return _doServiceCall(this._getService(location), "search", arguments);
+			return _doServiceCall(this._getService(location), "search", arguments); //$NON-NLS-0$
 		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;

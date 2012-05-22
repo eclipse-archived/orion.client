@@ -40,23 +40,23 @@ define(function() {
 			var prefix = match[1],
 				locale = match[3] ? match[2] : "",
 				suffix = match[3] || match[2];
-			parentRequire(['orion/bootstrap'], function(bootstrap) {
+			parentRequire(['orion/bootstrap'], function(bootstrap) { //$NON-NLS-0$
 				bootstrap.startup().then(function(core) {
 					var serviceRegistry = core.serviceRegistry;
-					var nlsReferences = serviceRegistry.getServiceReferences("orion.i18n.message");
+					var nlsReferences = serviceRegistry.getServiceReferences("orion.i18n.message"); //$NON-NLS-0$
 
 					if (!locale) {
 						// create master language entries				
 						var master = {};
 						var masterReference;
 						nlsReferences.forEach(function(reference) {
-							var name = reference.getProperty("name");
+							var name = reference.getProperty("name"); //$NON-NLS-0$
 							if ((match = NLS_REG_EXP.exec(name)) && prefix === match[1] && suffix === (match[3] || match[2])) {
 								locale = match[3] ? match[2] : "";
 								if (locale) {
 									master[locale] = true;
 									if (!parentRequire.specified(name)) {
-										define(name, ['orion/i18n!' + name], function(bundle) {
+										define(name, ['orion/i18n!' + name], function(bundle) { //$NON-NLS-0$
 											return bundle;
 										});
 									}
@@ -69,7 +69,7 @@ define(function() {
 							if (masterReference) {
 								serviceRegistry.getService(masterReference).getMessageBundle().then(function(bundle) {
 									Object.keys(master).forEach(function(key) {
-										if (typeof bundle[key] === 'undefined') {
+										if (typeof bundle[key] === 'undefined') { //$NON-NLS-0$
 											bundle[key] = master[key];
 										}
 									});
@@ -88,7 +88,7 @@ define(function() {
 						}
 					} else {
 						var found = nlsReferences.some(function(reference) {
-							if (name === reference.getProperty("name")) {
+							if (name === reference.getProperty("name")) { //$NON-NLS-0$
 								serviceRegistry.getService(reference).getMessageBundle().then(function(bundle) {
 									onLoad(bundle);
 								}, function() {

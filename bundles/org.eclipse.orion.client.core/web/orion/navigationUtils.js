@@ -54,10 +54,10 @@ define(['dojo'], function(dojo) {
 		}
 		if(widget){
 			domNodeWrapperList.push({domNode: domNode, widget: widget, onClick: onClick});
-			dojo.attr(widget, "tabIndex", -1);
+			dojo.attr(widget, "tabIndex", -1); //$NON-NLS-0$
 		} else {
 			domNodeWrapperList.push({domNode: domNode});
-			dojo.attr(domNode, "tabIndex", -1);
+			dojo.attr(domNode, "tabIndex", -1); //$NON-NLS-0$
 		}
 	}
 	

@@ -32,11 +32,11 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 	FavoritesService.prototype = /** @lends orion.favorites.FavoritesService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this);
+			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
-			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry});
+			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
 		},
 	
 		/**
@@ -64,7 +64,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 						
 		addFavorite: function(theName, thePath, isDirectory) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true });
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true }); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._favorites.sort(this._sorter);
 			this._storeFavorites();
 			this._notifyListeners();
@@ -111,7 +111,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		/** @private special characters in regex */
-		_SPECIAL_CHARS : "^$\\+[]().",
+		_SPECIAL_CHARS : "^$\\+[]().", //$NON-NLS-0$
 
 		
 		/**
@@ -141,17 +141,17 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			var convertedQuery = "";
 			for (i = 0; i < queryText.length; i++) {
 				var c = queryText.charAt(i);
-				if (c === "*") {
-					convertedQuery += ".*";
-				} else if (c === "?") {
-					convertedQuery += ".?";
+				if (c === "*") { //$NON-NLS-0$
+					convertedQuery += ".*"; //$NON-NLS-0$
+				} else if (c === "?") { //$NON-NLS-0$
+					convertedQuery += ".?"; //$NON-NLS-0$
 				} else if (this._SPECIAL_CHARS.indexOf(c) >= 0) {
-					convertedQuery += ("\\" + c);
+					convertedQuery += ("\\" + c); //$NON-NLS-0$
 				} else {
 					convertedQuery += c;
 				}
 			}
-			convertedQuery += ".*";
+			convertedQuery += ".*"; //$NON-NLS-0$
 			var regex = new RegExp(convertedQuery);
 			
 			// for now, just search the beginning, but we need to support
@@ -167,10 +167,10 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		
 		_initializeFavorites: function () {
 			var favorites = this;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) { 
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 				var i;
-				var navigate = prefs.get("navigate");
-				if (typeof navigate === "string") {
+				var navigate = prefs.get("navigate"); //$NON-NLS-0$
+				if (typeof navigate === "string") { //$NON-NLS-0$
 					navigate = JSON.parse(navigate);
 				}
 				if (navigate) {
@@ -187,8 +187,8 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		
 		_storeFavorites: function() {
 			var storedFavorites = this._favorites;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
-				prefs.put("navigate", storedFavorites);
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){ //$NON-NLS-1$ //$NON-NLS-0$
+				prefs.put("navigate", storedFavorites); //$NON-NLS-0$
 			}); 
 		},
 		
