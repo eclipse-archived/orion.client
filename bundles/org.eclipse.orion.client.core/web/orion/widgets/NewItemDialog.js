@@ -12,7 +12,7 @@
 /*jslint browser:true*/
 
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(dojo, dijit) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param options {{ 
@@ -33,7 +33,7 @@ dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionD
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.itemNameLabelText = this.options.label || "Name:";
+		this.itemNameLabelText = this.options.label || messages['Name:'];
 	},
 	postCreate: function() {
 		this.inherited(arguments);

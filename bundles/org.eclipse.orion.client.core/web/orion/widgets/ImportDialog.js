@@ -11,7 +11,7 @@
 /*global dojo dijit dojox widgets console define orion*/
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/ImportDialog.html', 'dojo/io/iframe'], function(dojo, dijit, dojox) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/ImportDialog.html', 'dojo/io/iframe'], function(messages, dojo, dijit, dojox) {
 
 dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 	widgetsInTemplate : true,
@@ -27,11 +27,11 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 							'<div class="uploadContainer" data-dojo-attach-event="drop:drop,dragenter:dragEnter,dragexit:dragExit,dragover:dragOver">' + //$NON-NLS-0$
 								'<div class="dottedOutline">' + //$NON-NLS-0$
 									'<div data-dojo-attach-point="dragArea" class="floatingSection">' + //$NON-NLS-0$
-										'<div class="uploadInstruction">'+'Drag a File or Zip here'+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
-										'<div class="tipInstruction">'+'or if you prefer'+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div class="uploadInstruction">'+messages['Drag a File or Zip here']+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div class="tipInstruction">'+messages['or if you prefer']+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
 										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' + //$NON-NLS-0$
 
-										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="'+'Browse...'+'" >' + //$NON-NLS-2$ //$NON-NLS-0$
+										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="'+messages['Browse...']+'" >' + //$NON-NLS-2$ //$NON-NLS-0$
 										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' + //$NON-NLS-0$
 										'</form>' + //$NON-NLS-0$
 									'</div>' + //$NON-NLS-0$
@@ -48,7 +48,7 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Import a file or zip";
+		this.title = messages['Import a file or zip'];
 	},
 
 	handleReadyState: function(state){	

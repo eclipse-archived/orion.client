@@ -11,7 +11,7 @@
 
 /*global define window orion dijit console localStorage*/
 
-define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDialog'], function(require, dojo, mGlobalCommands) {
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDialog'], function(messages, require, dojo, mGlobalCommands) {
 	
 	/**
 	 * Service for tracking operations changes
@@ -22,7 +22,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 	 */
 	function ProgressService(serviceRegistry, operationsClient){
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this); //$NON-NLS-0$
 		this._operationsClient = operationsClient;
 		this._initDone = false;
 		this._topicListeners = {};
@@ -38,10 +38,10 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				}
 				this._progressPane = dojo.byId(progressPane);
 				this._operationsDialog = new orion.widgets.OperationsDialog();
-				dojo.connect(this._progressPane, "onclick", dojo.hitch(this, this._openOperationsPopup));
+				dojo.connect(this._progressPane, "onclick", dojo.hitch(this, this._openOperationsPopup)); //$NON-NLS-0$
 				var that = this;
-				dojo.connect(this._progressPane, "onkeypress", function(evt) { 
-					if(evt.charOrCode === ' ' || evt.keyCode === dojo.keys.ENTER) {
+				dojo.connect(this._progressPane, "onkeypress", function(evt) {  //$NON-NLS-0$
+					if(evt.charOrCode === ' ' || evt.keyCode === dojo.keys.ENTER) { //$NON-NLS-0$
 						dojo.hitch(that, that._openOperationsPopup)();
 					}
 				});
@@ -54,13 +54,13 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						}, 5000);
 					}, function(error){console.error(error);});
 				}else{
-					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}')));
+					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'))); //$NON-NLS-1$ //$NON-NLS-0$
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkOperationsChanges());
 					}, 5000);
 				}
 				
-				window.addEventListener("storage", function(e){
+				window.addEventListener("storage", function(e){ //$NON-NLS-0$
 					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
 						//refresh operation list every time when user changes
 						that._operationsClient.getRunningOperations().then(function(operationsList){
@@ -69,16 +69,16 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 					}
 				}, false);
 				
-				window.addEventListener("storage", function(e){
-					if(e.key === "orionOperations"){
-						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}')));
+				window.addEventListener("storage", function(e){ //$NON-NLS-0$
+					if(e.key === "orionOperations"){ //$NON-NLS-0$
+						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'))); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 			},
 			_loadOperationsList: function(operationsList){
 				operationsList.lastClientDate = new Date();
 				if(operationsList.lastClientDate-this.getLastListUpdate()>300000){
-					localStorage.setItem("orionOperations", JSON.stringify(operationsList));
+					localStorage.setItem("orionOperations", JSON.stringify(operationsList)); //$NON-NLS-0$
 					this._generateOperationsInfo(operationsList);
 				}
 			},
@@ -87,11 +87,11 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 * @returns {Date}
 			 */
 			getLastListUpdate: function(){
-				var list = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				var list = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
 				return list.lastClientDate ? new Date(list.lastClientDate) : new Date(0);
 			},
 			_markOperationAsFailed: function(operation, error, ioArgs){
-				operation.Message = "Operation status is unknown";
+				operation.Message = messages["Operation status is unknown"];
 				operation.Running = false;
 				operation.Failed = true;
 				operation.Result = {HttpCode: ioArgs ? ioArgs.xhr.staus : 500, Severity: error, Message: error.Message ? error.Message : error};
@@ -99,7 +99,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			},
 			_checkOperationsChanges: function(){
 				var that = this;
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
 				var operationsToDelete = [];
 				var allRequests = [];
 				for(var i=0; i<operations.Children.length; i++){
@@ -133,7 +133,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						for(var i=operationsToDelete.length-1; i>=0; i--){
 							operations.Children.splice(operationsToDelete[i], 1);
 						}
-						localStorage.setItem("orionOperations", JSON.stringify(operations));
+						localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
 						dojo.hitch(that, that._generateOperationsInfo)(operations);
 					}
 					window.setTimeout(function() {
@@ -163,11 +163,11 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				this._operationsDialog.setOperations(operations, this._myOperations);
 				
 				if(!operations.Children || operations.Children.length==0){
-					this._switchIconTo("progressPane_empty");
-					this._progressPane.title = "Operations";
-					this._progressPane.alt = "Operations";
-					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) {
-						dojo.removeAttr(this._progressPane, "aria-valuetext");
+					this._switchIconTo("progressPane_empty"); //$NON-NLS-0$
+					this._progressPane.title = "Operations"; //$NON-NLS-0$
+					this._progressPane.alt = "Operations"; //$NON-NLS-0$
+					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) { //$NON-NLS-0$
+						dojo.removeAttr(this._progressPane, "aria-valuetext"); //$NON-NLS-0$
 					}
 					return;
 				}
@@ -178,7 +178,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						continue; //only operations run by this page change status
 					}
 					if(operation.Running==true){
-						status = "running";
+						status = "running"; //$NON-NLS-0$
 						break;
 					}
 				}
@@ -186,42 +186,42 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				if(status==="" && this._lastOperation!=null){
 					if(this._lastOperation.Result){
 						switch (this._operationsDialog.parseProgressResult(this._lastOperation.Result).Severity) {
-						case "Warning":
-							if(status!=="error") {
-								status="warning";
+						case "Warning": //$NON-NLS-0$
+							if(status!=="error") { //$NON-NLS-0$
+								status="warning"; //$NON-NLS-0$
 							}
 							break;
-						case "Error":
-							status = "error";
+						case "Error": //$NON-NLS-0$
+							status = "error"; //$NON-NLS-0$
 						} 
 					}
 				}
 				switch(status){
-				case "running":
-					this._progressPane.title = "Operations running";
-					this._progressPane.alt = "Operations running";
-					dojo.attr(this._progressPane, "aria-valuetext", "Operations running");
-					this._switchIconTo("progressPane_running");
+				case "running": //$NON-NLS-0$
+					this._progressPane.title = messages["Operations running"];
+					this._progressPane.alt = messages['Operations running'];
+					dojo.attr(this._progressPane, "aria-valuetext", messages['Operations running']); //$NON-NLS-0$
+					this._switchIconTo("progressPane_running"); //$NON-NLS-0$
 					break;
-				case "warning":
-					this._progressPane.title = "Some operations finished with warning";
-					this._progressPane.alt = "Some operations finished with warning";
-					dojo.attr(this._progressPane, "aria-valuetext", "Some operations finished with warning");
-					this._switchIconTo("progressPane_warning");
+				case "warning": //$NON-NLS-0$
+					this._progressPane.title = messages["Some operations finished with warning"];
+					this._progressPane.alt = messages['Some operations finished with warning'];
+					dojo.attr(this._progressPane, "aria-valuetext", messages['Some operations finished with warning']); //$NON-NLS-0$
+					this._switchIconTo("progressPane_warning"); //$NON-NLS-0$
 					break;
-				case "error":
-					this._progressPane.title = "Some operations finished with error";
-					this._progressPane.alt = "Some operations finished with error";
-					dojo.attr(this._progressPane, "aria-valuetext", "Some operations finished with error");
-					this._switchIconTo("progressPane_error");
+				case "error": //$NON-NLS-0$
+					this._progressPane.title = messages["Some operations finished with error"];
+					this._progressPane.alt = messages['Some operations finished with error'];
+					dojo.attr(this._progressPane, "aria-valuetext", messages['Some operations finished with error']); //$NON-NLS-0$
+					this._switchIconTo("progressPane_error"); //$NON-NLS-0$
 					break;
 				default:
-					this._progressPane.title = "Operations";
-					this._progressPane.alt = "Operations";
-					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) {
-						dojo.removeAttr(this._progressPane, "aria-valuetext");
+					this._progressPane.title = messages["Operations"];
+					this._progressPane.alt = messages['Operations'];
+					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) { //$NON-NLS-0$
+						dojo.removeAttr(this._progressPane, "aria-valuetext"); //$NON-NLS-0$
 					}
-					this._switchIconTo("progressPane_operations");					
+					this._switchIconTo("progressPane_operations");					 //$NON-NLS-0$
 				}
 			},
 			/**
@@ -242,15 +242,15 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						that._operationsClient.getOperation(operationJson.Location).then(function(jsonData, ioArgs) {
 								dojo.hitch(that, that.followOperation(jsonData, result, operationJson.Location));
 							}, function(error, secondArg){
-								dojo.hitch(that, that.setProgressResult)({Severity: "Error", Message: error});
+								dojo.hitch(that, that.setProgressResult)({Severity: "Error", Message: error}); //$NON-NLS-0$
 								dojo.hitch(that, that._markOperationAsFailed(operationJson, error, secondArg));
 								result.errback(error, secondArg);
 								});
 					}, 2000);
 				} else if (operationJson && operationJson.Result) {
-					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
+					that._serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 					var severity = this._operationsDialog.parseProgressResult(operationJson.Result).Severity;
-					if(severity=="Error" || severity=="Warning"){
+					if(severity=="Error" || severity=="Warning"){ //$NON-NLS-1$ //$NON-NLS-0$
 						operationJson.Result.failedOperation = {Location: operationLocation, Id: operationJson.Id, Name: operationJson.Name};
 						result.callback(operationJson);
 						setTimeout(function(){
@@ -288,7 +288,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				}
 				delete this._myOperations[operationId];
 				
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
 					if(operation.Id && operation.Id===operationId){
@@ -296,22 +296,22 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						break;
 					}
 				}
-				localStorage.setItem("orionOperations", JSON.stringify(operations));
+				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
 				this._generateOperationsInfo(operations); 
 			},
 			removeCompletedOperations: function(){
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
 				for(var i=operations.Children.length-1; i>=0; i--){
 					var operation = operations.Children[i];
 					if(!operation.Running){
 						operations.Children.splice(i, 1);
 					}
 				}
-				localStorage.setItem("orionOperations", JSON.stringify(operations));
+				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
 				this._generateOperationsInfo(operations);
 			},
 			setProgressResult: function(result){
-				this._serviceRegistry.getService("orion.page.message").setProgressResult(result);
+				this._serviceRegistry.getService("orion.page.message").setProgressResult(result); //$NON-NLS-0$
 			},
 			/**
 			 * Shows a progress message until the given deferred is resolved. Returns a deferred that resolves when
@@ -322,7 +322,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			 */
 			showWhile: function(deferred, message){
 				if(message)
-					this._serviceRegistry.getService("orion.page.message").setProgressMessage(message);
+					this._serviceRegistry.getService("orion.page.message").setProgressMessage(message); //$NON-NLS-0$
 				var that = this;
 				return deferred.then(function(jsonResult){
 					//see if we are dealing with a progress resource
@@ -330,7 +330,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 						return dojo.hitch(that, that.followOperation)(jsonResult, null, jsonResult.Location);
 					}
 					//clear the progress message
-					that._serviceRegistry.getService("orion.page.message").setProgressMessage("");
+					that._serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 					return jsonResult;
 				}, function(jsonError){
 					dojo.hitch(that, that.setProgressResult)(jsonError);
@@ -353,7 +353,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 			writeOperation: function(operationj){
 				var operationJson = JSON.parse(JSON.stringify(operationj));
 				this._lastOperation = operationJson;
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}');
+				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
 					if(operation.Id && operation.Id===operationJson.Id){
@@ -369,7 +369,7 @@ define(['require', 'dojo', 'orion/globalCommands', 'orion/widgets/OperationsDial
 				operations.Children.push(operationJson);
 				//update also the last list update
 				operations.lastClientDate = new Date();
-				localStorage.setItem("orionOperations", JSON.stringify(operations));
+				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
 				this._generateOperationsInfo(operations); 
 			}
 	};

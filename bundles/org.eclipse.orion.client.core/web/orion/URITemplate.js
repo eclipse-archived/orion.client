@@ -49,7 +49,7 @@ define(function(){
 		if (encoding === "U+R-,") { //$NON-NLS-0$
 			return encodeURI(value).replace(/%5B/g, '[').replace(/%5D/g, ']').replace(/,/g, '%2C'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		throw new Error("Unknown allowed character set: " + encoding);
+		throw new Error(messages["Unknown allowed character set: "] + encoding);
 	}
 	
 	function encodeArray(value, encoding, separator) {
@@ -79,7 +79,7 @@ define(function(){
 		for (var i=0; i < rawSpecs.length; i++) {
 			var match = rawSpecs[i].match(VARSPEC_REGEXP);
 			if (match === null) {
-				throw new Error("Bad VarSpec: " + text);
+				throw new Error(messages["Bad VarSpec: "] + text);
 			}
 			result.push({
 				name: match[1], 
@@ -92,7 +92,7 @@ define(function(){
 	
 	function Expression(text) {
 		if (text.length === 0) {
-			throw new Error("Invalid Expression: 0 length expression");
+			throw new Error(messages["Invalid Expression: 0 length expression"]);
 		}
 		
 		this._operator = OPERATOR[text[0]];
@@ -146,7 +146,7 @@ define(function(){
 							resultText += encodeObject(value, this._operator.allow, "=", this._operator.sep); //$NON-NLS-0$
 						}
 					} else {
-						throw new Error("bad param type: " + name + " : " + valueType); //$NON-NLS-1$
+						throw new Error(messages["bad param type: "] + name + " : " + valueType); //$NON-NLS-1$
 					}
 					result.push(resultText);
 				}
@@ -163,7 +163,7 @@ define(function(){
 			result.push(new Literal(text.substring(current, curlyStartIndex)));
 			var curlyEndIndex = text.indexOf("}", curlyStartIndex + 1); //$NON-NLS-0$
 			if (curlyEndIndex === -1) {
-				throw new Error("Invalid template: " + text);
+				throw new Error(messages["Invalid template: "] + text);
 			}
 			result.push(new Expression(text.substring(curlyStartIndex + 1, curlyEndIndex)));
 			current = curlyEndIndex + 1;
