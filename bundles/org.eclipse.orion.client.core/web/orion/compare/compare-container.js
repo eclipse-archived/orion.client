@@ -383,9 +383,9 @@ exports.CompareContainer = (function() {
 				if(currentIndex < (files.length - 1)){
 					that.getFileContent(files, currentIndex+1);
 				} else {
-					that.setEditor();
+					var viewHeight = that.setEditor();
 					if(that._onLoadContents){
-						that._onLoadContents();
+						that._onLoadContents(viewHeight);
 					}
 				}
 			}, function(error, ioArgs) {
@@ -394,9 +394,9 @@ exports.CompareContainer = (function() {
 					if(currentIndex < (files.length - 1)){
 						that.getFileContent(files, currentIndex+1);
 					} else {
-						that.setEditor();
+						var viewHeight = that.setEditor();
 						if(that._onLoadContents){
-							that._onLoadContents();
+							that._onLoadContents(viewHeight);
 						}
 					}
 				} else if (that.errorCallback) {
@@ -799,6 +799,9 @@ exports.TwoWayCompareContainer = (function() {
 		if(this._viewLoadedCounter > 1){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
+		var leftViewHeight = this._leftTextView.getModel().getLineCount() * this._leftTextView.getLineHeight(); + 5;
+		var rightViewHeight = this._rightTextView.getModel().getLineCount() * this._rightTextView.getLineHeight(); +5;
+		return leftViewHeight > rightViewHeight ? leftViewHeight : rightViewHeight;
 	};
 	return TwoWayCompareContainer;
 }());
@@ -1005,6 +1008,7 @@ exports.InlineCompareContainer = (function() {
 			this._textView.redrawLines(drawLine , drawLine+  1 , this._rulerNew);
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
+		return this._textView.getLineHeight() * this._textView.getModel().getLineCount() + 5;
 	};
 	
 	InlineCompareContainer.prototype.setConflicting =  function(conflicting){	

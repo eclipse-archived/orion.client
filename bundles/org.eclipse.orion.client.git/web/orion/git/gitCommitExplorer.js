@@ -288,7 +288,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions);
 			var that = this;
-			inlineCompareContainer.startup( function(){
+			inlineCompareContainer.startup( function(maxHeight){
+				var vH = 420;
+				if(maxHeight < vH){
+					vH = maxHeight;
+				}
+				dojo.style("diffArea_" + index, "height", vH + "px");
 				if(index < (diffs.length -1 )){
 					that.renderDiff(diffs, index+1, titleWrapper);
 				}
