@@ -631,16 +631,16 @@ a:hover {
 }
 
 .searchbox {
-	background: #777;
+	background: url('../images/glass.png') no-repeat #777 4px 4px;
 	border: 1px solid #555;
 	font-size: 11px;
-	min-width: 17em;
+	width: 15em;
 	height: 18px;
 	border-radius: 10px;
-	color:#EEE;
+	color:#444;
 	padding:0;
-	margin-left:2px;
-	padding-left:5px;
+	padding-left:17px;
+	margin-left:5px;
 	margin-top:4px;
 }
 
