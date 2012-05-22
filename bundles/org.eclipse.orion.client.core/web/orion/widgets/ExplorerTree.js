@@ -14,19 +14,19 @@
 define(['dojo', 'dijit', 'dijit/Tree', 'text!orion/widgets/templates/_ExplorerTreeNode.html'], function(dojo, dijit) {
 
 dojo.declare(
-	"orion.widgets._ExplorerTreeNode",
+	"orion.widgets._ExplorerTreeNode", //$NON-NLS-0$
 	[dijit._TreeNode],
 {
-	templateString : dojo.cache('orion', 'widgets/templates/_ExplorerTreeNode.html'),
+	templateString : dojo.cache('orion', 'widgets/templates/_ExplorerTreeNode.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	/**
 	 * @override
 	 */
 	_updateItemClasses: function(item) {
 		this.inherited(arguments);
-		this._applyClassAndStyle(item, "follow", "Follow");
+		this._applyClassAndStyle(item, "follow", "Follow"); //$NON-NLS-1$ //$NON-NLS-0$
 		// Apply any other magic to the link (set href, etc)
-		if (typeof this.tree.updateFollowLink === "function") {
+		if (typeof this.tree.updateFollowLink === "function") { //$NON-NLS-0$
 			this.tree.updateFollowLink(item, this.followLink);
 		}
 	}
@@ -40,14 +40,14 @@ dojo.declare(
  * - The selectedNode property (see dijit.Tree) stores the most-recently-selected node.
  */
 dojo.declare(
-	"orion.widgets.ExplorerTree",
+	"orion.widgets.ExplorerTree", //$NON-NLS-0$
 	[dijit.Tree],
 {
 	selectedNodes: {}, /* key:dijit Id of TreeNode, value:TreeNode */
 	
 	postCreate: function() {
-		dojo.connect(this, "onMouseDown", this._eatSelectionEvent);
-		dojo.connect(this.domNode, "onselectstart", this._eatSelectionEvent); // IE only
+		dojo.connect(this, "onMouseDown", this._eatSelectionEvent); //$NON-NLS-0$
+		dojo.connect(this.domNode, "onselectstart", this._eatSelectionEvent); // IE only //$NON-NLS-0$
 		this.inherited(arguments);
 	},
 	
@@ -147,7 +147,7 @@ dojo.declare(
 				}
 			} else {
 				// "other" click
-				this._publish("execute", { item: nodeWidget.item, node: nodeWidget, evt: e } );
+				this._publish("execute", { item: nodeWidget.item, node: nodeWidget, evt: e } ); //$NON-NLS-0$
 				this.onClick(nodeWidget.item, nodeWidget, e);
 				this.focusNode(nodeWidget);
 			}
@@ -195,7 +195,7 @@ dojo.declare(
 	
 	// Adds or removes node from the selection
 	_toggleSelectNode: function(/**dijit._TreeNode*/ node) {
-		if (this.selectedNodes[node.get("id")]) {
+		if (this.selectedNodes[node.get("id")]) { //$NON-NLS-0$
 			node.setSelected(false);
 			this._removeFromSelection(node);
 		} else {
@@ -205,11 +205,11 @@ dojo.declare(
 	},
 	
 	_addToSelection: function(node) {
-		this.selectedNodes[node.get("id")] = node;
+		this.selectedNodes[node.get("id")] = node; //$NON-NLS-0$
 	},
 	
 	_removeFromSelection: function(node) {
-		delete this.selectedNodes[node.get("id")];
+		delete this.selectedNodes[node.get("id")]; //$NON-NLS-0$
 	},
 	
 	/**
@@ -254,7 +254,7 @@ dojo.declare(
 			return;
 		}
 		
-		console.debug("Warning: couldn't select range from " + visibleStart.label + " to " + visibleEnd.label);
+		console.debug("Warning: couldn't select range from " + visibleStart.label + " to " + visibleEnd.label); //$NON-NLS-1$ //$NON-NLS-0$
 	},
 	
 	/**

@@ -22,13 +22,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 
@@ -47,11 +47,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				mSiteCommands.createSiteCommands(serviceRegistry);
 			}
 			var explorer = new mSitesExplorer.SiteServicesExplorer({
-					parent: "table",
+					parent: "table", //$NON-NLS-0$
 					serviceRegistry: serviceRegistry,
 					selection: null
 				});
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 			createCommands();
 			explorer.display();
 		});

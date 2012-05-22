@@ -29,36 +29,36 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		
 		var that = this;
 		
-		this._expandImageClass = "core-sprite-twistie_open";
-		this._collapseImageClass = "core-sprite-twistie_closed";
-		this._twistieSpriteClass = "modelDecorationSprite";
+		this._expandImageClass = "core-sprite-twistie_open"; //$NON-NLS-0$
+		this._collapseImageClass = "core-sprite-twistie_closed"; //$NON-NLS-0$
+		this._twistieSpriteClass = "modelDecorationSprite"; //$NON-NLS-0$
 		
 		// ...
 		
 		if (!options.id) {
-			throw new Error("Missing required argument: id");
+			throw new Error("Missing required argument: id"); //$NON-NLS-0$
 		}
 		this.id = options.id;
 				
 		if (!options.title) {
-			throw new Error("Missing required argument: title");
+			throw new Error("Missing required argument: title"); //$NON-NLS-0$
 		}
 
 		// setting up the section
-		var wrapperClass = options.useAuxStyle ? "sectionWrapper sectionWrapperAux" : "sectionWrapper";
-		this.domNode = dojo.create( "div", {"class": wrapperClass+" toolComposite", "id": options.id}, parent );
+		var wrapperClass = options.useAuxStyle ? "sectionWrapper sectionWrapperAux" : "sectionWrapper"; //$NON-NLS-1$ //$NON-NLS-0$
+		this.domNode = dojo.create( "div", {"class": wrapperClass+" toolComposite", "id": options.id}, parent ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// if canHide, add twistie and stuff...
 		if(options.canHide){
-			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft sectionTitle" }, this.domNode );
-			dojo.style(this.domNode, "cursor", "pointer");
-			dojo.attr(this.domNode, "tabIndex", "0");
-			dojo.connect(this.domNode, "onclick", function(evt) {
+			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft sectionTitle" }, this.domNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style(this.domNode, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.attr(this.domNode, "tabIndex", "0"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.connect(this.domNode, "onclick", function(evt) { //$NON-NLS-0$
 				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
 					that._changeExpandedState();
 				}
 			});
-			dojo.connect(this.domNode, "onkeydown", function(evt) {
+			dojo.connect(this.domNode, "onkeydown", function(evt) { //$NON-NLS-0$
 				if(evt.keyCode === dojo.keys.ENTER && (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie)) {
 					that._changeExpandedState();
 				}
@@ -66,25 +66,25 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		}
 
 		if(options.iconClass){
-			var icon = dojo.create( "span", { "class":"sectionIcon" }, this.domNode );
+			var icon = dojo.create( "span", { "class":"sectionIcon" }, this.domNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.addClass(icon, options.iconClass);
 		}
 		
-		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode );
+		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode );
-		this._progressNode.style.visibility = "hidden";
+		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 		
-		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode );
-		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode );
-		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode );
+		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if(options.slideout){
 			this.slideout = mHTMLFragments.slideoutHTMLFragment(options.id);
 			dojo.place(this.slideout, this.domNode);
 		}
 
-		this._contentParent = dojo.create("div", { "id": this.id + "Content", "role": "region", "class":"sectionTable", "aria-labelledby": this.titleNode.id}, parent, "last");
+		this._contentParent = dojo.create("div", { "id": this.id + "Content", "role": "region", "class":"sectionTable", "aria-labelledby": this.titleNode.id}, parent, "last"); //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		if(options.content){
 			this.setContent(options.content);
@@ -93,10 +93,10 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		this.hidden = options.hidden;
 		this._preferenceService = options.preferenceService;
 		// initially style as hidden until we determine what needs to happen
-		dojo.style(this._contentParent, "display", "none");
+		dojo.style(this._contentParent, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 		// should we consult a preference?
 		if (this._preferenceService) {
-			this._preferenceService.getPreferences("/window/views").then(dojo.hitch(this, function(prefs) { 
+			this._preferenceService.getPreferences("/window/views").then(dojo.hitch(this, function(prefs) {  //$NON-NLS-0$
 				var isExpanded = prefs.get(this.id);
 				
 				if (isExpanded === undefined){
@@ -105,14 +105,14 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 				}
 
 				if (!this.hidden) {
-					dojo.style(this._contentParent, "display", "block");
+					dojo.style(this._contentParent, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				
 				this._updateExpandedState(!this.hidden, false);
 			}));
 		} else {
 			if (!this.hidden) {
-				dojo.style(this._contentParent, "display", "block");
+				dojo.style(this._contentParent, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			this._updateExpandedState(!this.hidden, false);
 		}
@@ -144,12 +144,12 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		},
 		
 		_setMonitorMessage: function(monitorId, message){
-			this._progressNode.style.visibility = "visible";
+			this._progressNode.style.visibility = "visible"; //$NON-NLS-0$
 			this._loading[monitorId] = message;
 			var progressTitle = "";
 			for(var loadingId in this._loading){
 				if(progressTitle!==""){
-					progressTitle+="\n";
+					progressTitle+="\n"; //$NON-NLS-0$
 				}
 				progressTitle+=this._loading[loadingId];
 			}
@@ -161,13 +161,13 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			var progressTitle = "";
 			for(var loadingId in this._loading){
 				if(progressTitle!==""){
-					progressTitle+="\n";
+					progressTitle+="\n"; //$NON-NLS-0$
 				}
 				progressTitle+=this._loading[loadingId];
 			}
 			this._progressNode.title = progressTitle;
 			if(progressTitle===""){
-				this._progressNode.style.visibility = "hidden";
+				this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 			}
 		},
 		
@@ -200,7 +200,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			}
 			// if a preference service was specified, we remember the state.
 			if (this._preferenceService && storeValue) {
-				this._preferenceService.getPreferences("/window/views").then(function(prefs){
+				this._preferenceService.getPreferences("/window/views").then(function(prefs){ //$NON-NLS-0$
 					prefs.put(id, isExpanded);
 				}); 
 			}

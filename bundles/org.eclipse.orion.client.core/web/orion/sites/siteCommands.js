@@ -10,8 +10,8 @@
  ******************************************************************************/
 
 /*global console define document window*/
-define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/fileClient'],
-		function(require, mCommands, mSiteUtils, mSiteClient) {
+define(['i18n!sites/nls/messages', 'require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/fileClient'],
+		function(messages, require, mCommands, mSiteUtils, mSiteClient) {
 	var Command = mCommands.Command;
 
 	/**
@@ -23,22 +23,22 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 	 */
 	function createSiteServiceCommands(serviceRegistry, options) {
 		function getFileService(siteServiceRef) {
-			return mSiteClient.getFileClient(serviceRegistry, siteServiceRef.getProperty('filePattern'));
+			return mSiteClient.getFileClient(serviceRegistry, siteServiceRef.getProperty('filePattern')); //$NON-NLS-0$
 		}
 		options = options || {};
-		var commandService = serviceRegistry.getService("orion.page.command");
+		var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 		var createCommand = new mCommands.Command({
-			name : "Create",
-			tooltip: "Create a new site configuration",
-			id: "orion.site.create",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')]),
+			name : messages["Create"],
+			tooltip: messages["Create a new site configuration"],
+			id: "orion.site.create", //$NON-NLS-0$
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'string', 'Name:')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(bah) {
 				return true;
 			},
 			callback : function(data) {
 				var siteServiceRef = data.items, siteService = serviceRegistry.getService(siteServiceRef);
 				var fileService = getFileService(siteServiceRef);
-				var name = data.parameters && data.parameters.valueFor('name');
+				var name = data.parameters && data.parameters.valueFor('name'); //$NON-NLS-0$
 				fileService.loadWorkspaces().then(function(workspaces) {
 			        var workspaceId = workspaces && workspaces[0] && workspaces[0].Id;
 			        if (workspaceId && name) {
@@ -57,14 +57,14 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 	 * @name orion.sites.siteCommands#createSiteCommands
 	 */
 	function createSiteCommands(serviceRegistry) {
-		var commandService = serviceRegistry.getService("orion.page.command"),
-		    dialogService = serviceRegistry.getService("orion.page.dialog"),
-		    progressService = serviceRegistry.getService("orion.page.progress");
+		var commandService = serviceRegistry.getService("orion.page.command"), //$NON-NLS-0$
+		    dialogService = serviceRegistry.getService("orion.page.dialog"), //$NON-NLS-0$
+		    progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var editCommand = new Command({
-			name: "Edit",
-			tooltip: "Edit the site configuration",
-			imageClass: "core-sprite-edit",
-			id: "orion.site.edit",
+			name: messages["Edit"],
+			tooltip: messages["Edit the site configuration"],
+			imageClass: "core-sprite-edit", //$NON-NLS-0$
+			id: "orion.site.edit", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return item.HostingStatus;
 			},
@@ -72,12 +72,12 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 		commandService.addCommand(editCommand);
 
 		var startCommand = new Command({
-			name: "Start",
-			tooltip: "Start the site",
-			imageClass: "core-sprite-start",
-			id: "orion.site.start",
+			name: messages["Start"],
+			tooltip: messages["Start the site"],
+			imageClass: "core-sprite-start", //$NON-NLS-0$
+			id: "orion.site.start", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+				return item.HostingStatus && item.HostingStatus.Status === "stopped"; //$NON-NLS-0$
 			},
 			/**
 			 * @param {SiteConfiguration} [userData.site] If passed, we'll mutate this site config.
@@ -87,7 +87,7 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 			callback: function(data) {
 				var userData = data.userData;
 				var newItem = userData.site || {} /* just update the HostingStatus */;
-				newItem.HostingStatus = { Status: "started" };
+				newItem.HostingStatus = { Status: "started" }; //$NON-NLS-0$
 				var location = data.items.Location;
 				var siteService = mSiteClient.forLocation(serviceRegistry, location);
 				var deferred = siteService.updateSiteConfiguration(location, newItem);
@@ -96,12 +96,12 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 		commandService.addCommand(startCommand);
 
 		var stopCommand = new Command({
-			name: "Stop",
-			tooltip: "Stop the site",
-			imageClass: "core-sprite-stop",
-			id: "orion.site.stop",
+			name: messages["Stop"],
+			tooltip: messages["Stop the site"],
+			imageClass: "core-sprite-stop", //$NON-NLS-0$
+			id: "orion.site.stop", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				return item.HostingStatus && item.HostingStatus.Status === "started";
+				return item.HostingStatus && item.HostingStatus.Status === "started"; //$NON-NLS-0$
 			},
 			/**
 			 * @param {SiteConfiguration} [data.userData.site] If passed, we'll mutate this site config.
@@ -111,7 +111,7 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 			callback: function(data) {
 				var userData = data.userData;
 				var newItem = userData.site || {} /* just update the HostingStatus */;
-				newItem.HostingStatus = { Status: "stopped" };
+				newItem.HostingStatus = { Status: "stopped" }; //$NON-NLS-0$
 				var location = data.items.Location;
 				var siteService = mSiteClient.forLocation(serviceRegistry, location);
 				var deferred = siteService.updateSiteConfiguration(location, newItem);
@@ -120,19 +120,19 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 		commandService.addCommand(stopCommand);
 
 		var deleteCommand = new Command({
-			name: "Delete",
-			tooltip: "Delete the site configuration",
-			imageClass: "core-sprite-delete",
-			id: "orion.site.delete",
+			name: messages["Delete"],
+			tooltip: messages["Delete the site configuration"],
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "orion.site.delete", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				return item.HostingStatus && item.HostingStatus.Status === "stopped";
+				return item.HostingStatus && item.HostingStatus.Status === "stopped"; //$NON-NLS-0$
 			},
 			/**
 			 * @param {Function} [data.userData.deleteCallback]
 			 * @param {Function} [data.userData.errorCallback]
 			 */
 			callback: function(data) {
-				var msg = "Are you sure you want to delete the site configuration '" + data.items.Name + "'?";
+				var msg = messages["Are you sure you want to delete the site configuration '"] + data.items.Name + "'?"; //$NON-NLS-1$
 				dialogService.confirm(msg, function(confirmed) {
 					if (confirmed) {
 						var location = data.items.Location;
@@ -168,13 +168,13 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 	 * @name orion.sites.siteCommands#createViewOnSiteCommands
 	 */
 	function createViewOnSiteCommands(serviceRegistry, options) {
-		var fileService = serviceRegistry.getService("orion.core.file");
-		var commandService = serviceRegistry.getService("orion.page.command");
+		var fileService = serviceRegistry.getService("orion.core.file"); //$NON-NLS-0$
+		var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 		commandService.addCommand(new Command({
-			name: "Add to site",
-			tooltip: "Add the file to this site",
-			id: "orion.site.add-to",
-			imageClass: "core-sprite-add",
+			name: messages["Add to site"],
+			tooltip: messages["Add the file to this site"],
+			id: "orion.site.add-to", //$NON-NLS-0$
+			imageClass: "core-sprite-add", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				// Model tells us whether the file is running on the site configuration
 				return !item.IsFileRunningOn;
@@ -193,9 +193,9 @@ define(['require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteC
 			}}));
 		// Command that generates a href to view the file on the site if it's mapped
 		commandService.addCommand(new Command({
-			name: "View",
-			tooltip: "View the file on the site",
-			id: "orion.site.view-on-link",
+			name: messages["View"],
+			tooltip: messages["View the file on the site"],
+			id: "orion.site.view-on-link", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				return item.IsFileRunningOn;
 			},

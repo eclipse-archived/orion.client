@@ -13,8 +13,8 @@
  
 define(['dojo', 'dijit', 'dijit/layout/BorderContainer', 'dojox/layout/ToggleSplitter'], function(dojo, dijit) {
 
-dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, {
-	_splitterClass : "orion.widgets.eWebSplitter",
+dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, { //$NON-NLS-0$
+	_splitterClass : "orion.widgets.eWebSplitter", //$NON-NLS-0$
 		
 	getPreferredLeftPaneWidth: function(){
 		// if we haven't remembered a width in the past, compute one that is 1/4 of the right pane width.
@@ -30,7 +30,7 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 	},
 	
 	isLeftPaneOpen: function(){
-		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if(splitter){
 			return splitter.open;
 		}
@@ -43,7 +43,7 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 		}
 		var children = this.getChildren();
 		for (var i=0; i<children.length; i++) {
-			if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) {
+			if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) { //$NON-NLS-1$ //$NON-NLS-0$
 				this._left = children[i].domNode;
 				return this._left;
 			}
@@ -60,7 +60,7 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 		}
 		var children = this.getChildren();
 		for (var i=0; i<children.length; i++) {
-			if (children[i].region && children[i].region === "center") {
+			if (children[i].region && children[i].region === "center") { //$NON-NLS-0$
 				this._center = children[i].domNode;
 				return this._center;
 			}
@@ -70,7 +70,7 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 	
 	
 	getSizeCookie: function(){
-		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			return splitter.getSizeCookie();
 		}
@@ -78,14 +78,14 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 	},
 	
 	setSizeCookie: function(value){
-		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			return splitter.setSizeCookie(value);
 		}
 	},
 	
 	toggleLeftPaneState: function(){
-		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("left");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			splitter.toggleHidingPaneState();
 		}
@@ -100,9 +100,9 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 		if (!this._left || !this._center) {
 			var children = this.getChildren();
 			for (var i=0; i<children.length; i++) {
-				if (children[i].region && children[i].region === "center") {
+				if (children[i].region && children[i].region === "center") { //$NON-NLS-0$
 					this._center = children[i].domNode;
-				} else if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) {
+				} else if (children[i].region && (children[i].region === "leading" || children[i].region === "left")) { //$NON-NLS-1$ //$NON-NLS-0$
 					this._left = children[i].domNode;
 				}
 			}
@@ -131,9 +131,9 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 			onAnimate: dojo.hitch(this, function(x){
 				var deltaW = (targetWint - originalW)*x/100;
 				var curWidth = originalW + deltaW;
-				leftPane.style.width = curWidth + "px";
-				leftPane.style.overflow = "hidden";
-				rightPane.style.overflow = "hidden";
+				leftPane.style.width = curWidth + "px"; //$NON-NLS-0$
+				leftPane.style.overflow = "hidden"; //$NON-NLS-0$
+				rightPane.style.overflow = "hidden"; //$NON-NLS-0$
 				this.layout();
 				//this.resize();
 			}),
@@ -155,13 +155,13 @@ dojo.declare("orion.widgets.eWebBorderContainer", dijit.layout.BorderContainer, 
 	}
 });
 
-dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
+dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter, //$NON-NLS-0$
 {
 	postCreate: function(){
 		this.inherited(arguments);
-		this.connect(this.toggleNode, "onmousedown", "_onThumbMouseDown");
-		this.connect(this.domNode, "onmouseover", "_onMouseOver");
-		this._openStateCookieName = this.container.id + "_" + this.region + "_" + "open";
+		this.connect(this.toggleNode, "onmousedown", "_onThumbMouseDown"); //$NON-NLS-1$ //$NON-NLS-0$
+		this.connect(this.domNode, "onmouseover", "_onMouseOver"); //$NON-NLS-1$ //$NON-NLS-0$
+		this._openStateCookieName = this.container.id + "_" + this.region + "_" + "open"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	}, 
 
 	startup: function(){
@@ -169,19 +169,19 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		if (this.container.persist){ 
 			// restore old state
 			var persistOpenState = dojo.cookie(this._openStateCookieName);
-			if (persistOpenState === "true") {
-				this.container.getHidingPane().style.width = this.getSizeCookie() + "px";
-			} else if (persistOpenState === "false") {
-				this.set("open", false);
+			if (persistOpenState === "true") { //$NON-NLS-0$
+				this.container.getHidingPane().style.width = this.getSizeCookie() + "px"; //$NON-NLS-0$
+			} else if (persistOpenState === "false") { //$NON-NLS-0$
+				this.set("open", false); //$NON-NLS-0$
 				this._handleOnChange();
 			} else {
 				// unrecognized value, assume open
-				this.set("open", true);
+				this.set("open", true); //$NON-NLS-0$
 				this._handleOnChange();
 			}
 		} else {
 			// start out in an open state
-			this.set("open", true);
+			this.set("open", true); //$NON-NLS-0$
 			this._handleOnChange();		
 		}
 		return this;
@@ -195,20 +195,20 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		
 		var paneNode = this.child.domNode, 
 			openProps,
-			dim = this.horizontal ? "height" : "width"; 
+			dim = this.horizontal ? "height" : "width";  //$NON-NLS-1$ //$NON-NLS-0$
 
 		if(this.open){
 			// change to open state
 			var styleProps = dojo.mixin({
-				display: "block", 
-				visibility: "visible"
+				display: "block",  //$NON-NLS-0$
+				visibility: "visible" //$NON-NLS-0$
 			}, this._openStyleProps);
 
 			styleProps[dim] = (this._openStyleProps && this._openStyleProps[dim]) ? this._openStyleProps[dim] : this.openSize;
 			dojo.style(paneNode, styleProps);
 			
 			// and re-hook up the mouse event handler
-			this.connect(this.domNode, "onmousedown", "_onMouseDown");
+			this.connect(this.domNode, "onmousedown", "_onMouseDown"); //$NON-NLS-1$ //$NON-NLS-0$
 
 		} else {
 			// change to closed state
@@ -225,7 +225,7 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 		if(this.container._started){
 			var regionSize = 0;
 			if(this.open && this.openSize) {
-				regionSize = parseInt(this.openSize.replace("px", ""), 10);
+				regionSize = parseInt(this.openSize.replace("px", ""), 10); //$NON-NLS-0$
 			}
 			this.container._layoutChildren(this.region, regionSize);
 		}
@@ -245,9 +245,9 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 
 	_onMouseOver: function(e){
 		if(!this.open){
-			this.domNode.style.cursor = "default";
+			this.domNode.style.cursor = "default"; //$NON-NLS-0$
 		} else {
-			this.domNode.style.cursor = "e-resize";
+			this.domNode.style.cursor = "e-resize"; //$NON-NLS-0$
 		}
 	},
 
@@ -266,7 +266,7 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 			// restore old size
 			var persistSize = dojo.cookie(this._cookieName);
 			if(persistSize){
-				return parseInt(persistSize.replace("px", ""), 10);
+				return parseInt(persistSize.replace("px", ""), 10); //$NON-NLS-0$
 			}
 		}
 		return 0;
@@ -274,21 +274,21 @@ dojo.declare("orion.widgets.eWebSplitter", dojox.layout.ToggleSplitter,
 	
 	setSizeCookie: function(value){
 		if(this.container.persist){
-			dojo.cookie(this._cookieName, this.child.domNode.style[this.horizontal ? "height" : "width"], {expires:365});
+			dojo.cookie(this._cookieName, this.child.domNode.style[this.horizontal ? "height" : "width"], {expires:365}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	},
 	
 	toggleHidingPaneState: function(){
-		this.set("open", !this.open);
-		this.container.getHidingPane().style.visibility = this.open ? "visible" : "hidden";	
+		this.set("open", !this.open); //$NON-NLS-0$
+		this.container.getHidingPane().style.visibility = this.open ? "visible" : "hidden";	 //$NON-NLS-1$ //$NON-NLS-0$
 		if(this.container.persist){
-			dojo.cookie(this._openStateCookieName, this.open ? "true" : "false", {expires:365});
+			dojo.cookie(this._openStateCookieName, this.open ? "true" : "false", {expires:365}); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	}
 });
 
-dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer, {
-	_splitterClass : "orion.widgets.eWebSplitter",
+dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderContainer, { //$NON-NLS-0$
+	_splitterClass : "orion.widgets.eWebSplitter", //$NON-NLS-0$
 		
 	getPreferredRightPaneWidth: function(){
 		// if we haven't remembered a width in the past, compute one that is 1/4 of the left pane width.
@@ -304,7 +304,7 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 	},
 	
 	isRightPaneOpen: function(){
-		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if(splitter){
 			return splitter.open;
 		}
@@ -317,7 +317,7 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 		}
 		var children = this.getChildren();
 		for (var i=0; i<children.length; i++) {
-			if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) {
+			if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) { //$NON-NLS-1$ //$NON-NLS-0$
 				this._right = children[i].domNode;
 				return this._right;
 			}
@@ -334,7 +334,7 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 		}
 		var children = this.getChildren();
 		for (var i=0; i<children.length; i++) {
-			if (children[i].region && children[i].region === "center") {
+			if (children[i].region && children[i].region === "center") { //$NON-NLS-0$
 				this._center = children[i].domNode;
 				return this._center;
 			}
@@ -344,7 +344,7 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 	
 	
 	getSizeCookie: function(){
-		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			return splitter.getSizeCookie();
 		}
@@ -352,14 +352,14 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 	},
 	
 	setSizeCookie: function(value){
-		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			return splitter.setSizeCookie(value);
 		}
 	},
 	
 	toggleRightPaneState: function(){
-		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0
+		var splitter = this.getSplitter("right");  // TODO going away in dojo 2.0 //$NON-NLS-0$
 		if (splitter){
 			splitter.toggleHidingPaneState();
 		}
@@ -374,9 +374,9 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 		if (!this._right || !this._center) {
 			var children = this.getChildren();
 			for (var i=0; i<children.length; i++) {
-				if (children[i].region && children[i].region === "center") {
+				if (children[i].region && children[i].region === "center") { //$NON-NLS-0$
 					this._center = children[i].domNode;
-				} else if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) {
+				} else if (children[i].region && (children[i].region === "trailing" || children[i].region === "right")) { //$NON-NLS-1$ //$NON-NLS-0$
 					this._right = children[i].domNode;
 				}
 			}
@@ -405,9 +405,9 @@ dojo.declare("orion.widgets.eWebBorderContainerReverse", dijit.layout.BorderCont
 			onAnimate: dojo.hitch(this, function(x){
 				var deltaW = (targetWint - originalW)*x/100;
 				var curWidth = originalW + deltaW;
-				rightPane.style.width = curWidth + "px";
-				rightPane.style.overflow = "hidden";
-				leftPane.style.overflow = "hidden";
+				rightPane.style.width = curWidth + "px"; //$NON-NLS-0$
+				rightPane.style.overflow = "hidden"; //$NON-NLS-0$
+				leftPane.style.overflow = "hidden"; //$NON-NLS-0$
 				this.layout();
 				//this.resize();
 			}),

@@ -37,14 +37,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					dojo.empty(this._activeElements.parameterArea);
 				}
 				if (this._activeElements.parameterContainer) {
-					dojo.removeClass(this._activeElements.parameterContainer, "slideActive");
-					dojo.removeClass(this._activeElements.slideContainer, "slideContainerActive");
+					dojo.removeClass(this._activeElements.parameterContainer, "slideActive"); //$NON-NLS-0$
+					dojo.removeClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
 				}
 				if (this._activeElements.dismissArea) {
 					 dojo.empty(this._activeElements.dismissArea);
 				}
 				if (this._activeElements.commandNode) {
-					dojo.removeClass(this._activeElements.commandNode, "activeCommand");
+					dojo.removeClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
 				}
 				mUtil.forceLayout(this._activeElements.parameterContainer);
 				if (this._activeElements.onClose) {
@@ -61,7 +61,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		_findParameterElements: function(commandOrToolbar) {
 			var elements = {};
 			var toolbarNode = null;
-			if (typeof commandOrToolbar === "string") {
+			if (typeof commandOrToolbar === "string") { //$NON-NLS-0$
 				commandOrToolbar = dojo.byId(commandOrToolbar);
 			}
 			var node = commandOrToolbar;
@@ -69,20 +69,20 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			// We need to walk up until we find a "toolComposite"
 
 			while (node) {
-				if (dojo.hasClass(node, "toolComposite")) {
+				if (dojo.hasClass(node, "toolComposite")) { //$NON-NLS-0$
 					toolbarNode = node;
 					break;
 				}
 				node = node.parentNode;
 			}
-			if (dojo.hasClass(commandOrToolbar, "commandMarker")) {
+			if (dojo.hasClass(commandOrToolbar, "commandMarker")) { //$NON-NLS-0$
 				elements.commandNode = commandOrToolbar;
 			}
 			if (toolbarNode) {
-				elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0];
-				elements.parameterContainer = dojo.query(".slide", toolbarNode)[0];
-				elements.parameterArea = dojo.query(".parameters", toolbarNode)[0];
-				elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0];
+				elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0]; //$NON-NLS-0$
+				elements.parameterContainer = dojo.query(".slide", toolbarNode)[0]; //$NON-NLS-0$
+				elements.parameterArea = dojo.query(".parameters", toolbarNode)[0]; //$NON-NLS-0$
+				elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0]; //$NON-NLS-0$
 			}
 			return elements;
 		},
@@ -96,7 +96,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		 * @param {Function} onClose a function that will be called when the parameter area is closed
 		 */
 		open: function(commandNode, fillFunction, onClose) {
-			if (typeof commandNode === "string") {
+			if (typeof commandNode === "string") { //$NON-NLS-0$
 				commandNode = dojo.byId(commandNode);
 			}
 			this.close();
@@ -106,28 +106,28 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer && this._activeElements.parameterContainer) {
 				this._activeElements.onClose = onClose;
 				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
-				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea);
+				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
 					var dismiss = this._activeElements.dismissArea || this._activeElements.parameterArea;
-					close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, dismiss, "last");
-					dojo.addClass(close, "imageSprite");
-					dojo.addClass(close, "core-sprite-close");
-					dojo.addClass(close, "dismiss");
+					close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, dismiss, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
+					dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
+					dojo.addClass(close, "dismiss"); //$NON-NLS-0$
 					close.title = "Close";
-					dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
+					dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
 						this.close();
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
-					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
+					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
 						if(e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {
 							this.close();
 						}
 					}));
 				}
 				// all parameters have been generated.  Activate the area.
-				dojo.addClass(this._activeElements.slideContainer, "slideContainerActive");
-				dojo.addClass(this._activeElements.parameterContainer, "slideActive");
+				dojo.addClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
+				dojo.addClass(this._activeElements.parameterContainer, "slideActive"); //$NON-NLS-0$
 				mUtil.forceLayout(this._activeElements.parameterContainer);
 				if (focusNode) {
 					this._oldFocusNode = window.document.activeElement;
@@ -137,7 +137,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}, 0);
 				}
 				if (this._activeElements.commandNode) {
-					dojo.addClass(this._activeElements.commandNode, "activeCommand");
+					dojo.addClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
 				}
 				return true;
 			}
@@ -145,14 +145,14 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		},
 		
 		_collectAndCall: function(commandInvocation, parent) {
-			dojo.query("input", parent).forEach(function(field) {
-				if (field.type === "checkbox") {
+			dojo.query("input", parent).forEach(function(field) { //$NON-NLS-0$
+				if (field.type === "checkbox") { //$NON-NLS-0$
 					commandInvocation.parameters.setValue(field.parameterName, field.checked);
-				} else if (field.type !== "button") {
+				} else if (field.type !== "button") { //$NON-NLS-0$
 					commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 				}
 			});
-			dojo.query("textArea", parent).forEach(function(field) {
+			dojo.query("textArea", parent).forEach(function(field) { //$NON-NLS-0$
 				commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 			});
 			if (commandInvocation.command.callback) {
@@ -170,7 +170,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 		collectParameters: function(commandInvocation) {
 			if (commandInvocation.parameters) {
 				if (commandInvocation.domNode) {
-					dojo.addClass(commandInvocation.domNode, "commandMarker");
+					dojo.addClass(commandInvocation.domNode, "commandMarker"); //$NON-NLS-0$
 				}
 				return this.open(commandInvocation.domNode || commandInvocation.domParent, this.getFillFunction(commandInvocation));
 			}
@@ -204,16 +204,16 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				});
 				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
-						dojo.create("label", {innerHTML: parm.label, "class": "parameterInput", "for": parm.name + "parameterCollector"}, parameterArea, "last");
+						dojo.create("label", {innerHTML: parm.label, "class": "parameterInput", "for": parm.name + "parameterCollector"}, parameterArea, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					} 
-					var options = {type: parm.type, id: parm.name + "parameterCollector"};
+					var options = {type: parm.type, id: parm.name + "parameterCollector"}; //$NON-NLS-0$
 					var field;
-					if (parm.type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) {
+					if (parm.type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) { //$NON-NLS-1$ //$NON-NLS-0$
 						options.rows = parm.lines;
-						options.type = "textarea";
-						field = dojo.create("textarea", options, parameterArea, "last");
-					} else if (parm.type === "boolean") {
-						options.type = "checkbox";
+						options.type = "textarea"; //$NON-NLS-0$
+						field = dojo.create("textarea", options, parameterArea, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					} else if (parm.type === "boolean") { //$NON-NLS-0$
+						options.type = "checkbox"; //$NON-NLS-0$
 						if (parm.value) {
 							options.checked = true;
 						}
@@ -223,18 +223,18 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 						}
 					}
 					if (!field) {
-						field = dojo.create("input", options, parameterArea, "last");
+						field = dojo.create("input", options, parameterArea, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					// we define special classes for some parameter types
-					dojo.addClass(field, "parameterInput parameterInput"+options.type);
+					dojo.addClass(field, "parameterInput parameterInput"+options.type); //$NON-NLS-0$
 					// for fun
-					field.setAttribute("speech", "speech");
-					field.setAttribute("x-webkit-speech", "x-webkit-speech");
+					field.setAttribute("speech", "speech"); //$NON-NLS-1$ //$NON-NLS-0$
+					field.setAttribute("x-webkit-speech", "x-webkit-speech"); //$NON-NLS-1$ //$NON-NLS-0$
 					field.parameterName = parm.name;
 					if (!first) {
 						first = field;
 					}
-					dojo.connect(field, "onkeypress", keyHandler);
+					dojo.connect(field, "onkeypress", keyHandler); //$NON-NLS-0$
 				});
 				var parentDismiss = dismissArea || parameterArea;
 				var finish = function (collector) {
@@ -245,15 +245,15 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				if (commandInvocation.parameters.hasOptionalParameters()) {
 					commandInvocation.parameters.optionsRequested = false;
 					
-					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
-					dojo.place(window.document.createTextNode("More"), options, "last");
-					dojo.addClass(options, "dismiss");
-					dojo.connect(options, "onclick", dojo.hitch(this, function() {
+					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.place(window.document.createTextNode("More"), options, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.addClass(options, "dismiss"); //$NON-NLS-0$
+					dojo.connect(options, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
 						commandInvocation.parameters.optionsRequested = true;
 						finish(this);
 					}));
 					// onClick events do not register for spans when using the keyboard without a screen reader
-					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) {
+					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
 						if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {			
 							commandInvocation.parameters.optionsRequested = true;
 							finish(this);
@@ -261,29 +261,29 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					}));
 				}
 				// OK and cancel buttons
-				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last");
-				dojo.place(window.document.createTextNode("Submit"), ok, "last");
-				dojo.addClass(ok, "dismiss");
-				dojo.connect(ok, "onclick", dojo.hitch(this, function() {
+				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.place(window.document.createTextNode("Submit"), ok, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.addClass(ok, "dismiss"); //$NON-NLS-0$
+				dojo.connect(ok, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
 					finish(this);
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
-				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) {
+				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
 					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						finish(this);
 					}
 				}));
 				
-				var close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, parentDismiss, "last");
-				dojo.addClass(close, "imageSprite");
-				dojo.addClass(close, "core-sprite-close");
-				dojo.addClass(close, "dismiss");
+				var close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
+				dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
+				dojo.addClass(close, "dismiss"); //$NON-NLS-0$
 				close.title = "Close";
-				dojo.connect(close, "onclick", dojo.hitch(this, function(event) {
+				dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
 					localClose();
 				}));
 				// onClick events do not register for spans when using the keyboard without a screen reader
-				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) {
+				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
 					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
 						localClose();
 					}

@@ -28,7 +28,7 @@ define(['orion/Deferred'], function(Deferred) {
 
 	function encode(value) {
 		return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
-			return '%' + str.charCodeAt(0).toString(16).toUpperCase();
+			return '%' + str.charCodeAt(0).toString(16).toUpperCase(); //$NON-NLS-0$
 		});
 	}
 
@@ -57,37 +57,37 @@ define(['orion/Deferred'], function(Deferred) {
 	// TODO: upload progress, user/password
 	function _xhr(method, url, options/*, XMLHttpRequestImpl */) {
 		options = options || {};
-		var xhr = (arguments.length > 3 && typeof arguments[3] === 'object') ? arguments[3] : new XMLHttpRequest();
+		var xhr = (arguments.length > 3 && typeof arguments[3] === 'object') ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
 		var log = options.log || false;
 		var data;
 		var i;
-		if (typeof headers['X-Requested-With'] === 'undefined') {
-			headers['X-Requested-With'] = 'XMLHttpRequest';
+		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
+			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		if (typeof options.query === 'object' && method === 'GET') {
+		if (typeof options.query === 'object' && method === 'GET') { //$NON-NLS-1$ //$NON-NLS-0$
 			var queryObj = options.query, paramNames = Object.keys(queryObj);
 			var queryBuf = [];
 			for (i=0; i < paramNames.length; i++) {
 				var param = paramNames[i], value = queryObj[param];
-				queryBuf.push(encode(param) + '=' + encode(value));
+				queryBuf.push(encode(param) + '=' + encode(value)); //$NON-NLS-0$
 			}
 			if (queryBuf.length) {
-				var urlComponents = url.split('#');
-				urlComponents[0] += (urlComponents[0].indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&');
-				url = urlComponents.join('#');
+				var urlComponents = url.split('#'); //$NON-NLS-0$
+				urlComponents[0] += (urlComponents[0].indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&'); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				url = urlComponents.join('#'); //$NON-NLS-0$
 			}
 		}
-		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) {
+		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			data = options.data;
 		}
-		if (typeof options.responseType === 'string') {
+		if (typeof options.responseType === 'string') { //$NON-NLS-0$
 			xhr.responseType = options.responseType;
 		}
-		if (typeof options.timeout === 'number') {
+		if (typeof options.timeout === 'number') { //$NON-NLS-0$
 			xhr.timeout = options.timeout;
-			xhr.addEventListener('timeout', function(e) {
+			xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
 				d.reject('Timeout exceeded: ' + e);
 			});
 		}
@@ -104,7 +104,7 @@ define(['orion/Deferred'], function(Deferred) {
 					d.resolve(result);
 				} else {
 					if (log && console) {
-						console.log(new Error(code + ' ' + response.statusText));
+						console.log(new Error(code + ' ' + response.statusText)); //$NON-NLS-0$
 					}
 					d.reject(result);
 				}

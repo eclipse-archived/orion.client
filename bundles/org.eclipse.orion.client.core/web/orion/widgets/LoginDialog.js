@@ -13,9 +13,9 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(require, dojo, dijit, mUtil) {
 	
-	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], {
+	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: true,
-		templateString: dojo.cache('orion', 'widgets/templates/LoginDialog.html'),
+		templateString: dojo.cache('orion', 'widgets/templates/LoginDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 
 		constructor : function() {
 			this.inherited(arguments);
@@ -28,17 +28,17 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			this.inherited(arguments);
 			var _self = this;
 
-			dojo.addClass(this.closeLink, "imageSprite");
-			dojo.addClass(this.closeLink, "core-sprite-close");
+			dojo.addClass(this.closeLink, "imageSprite"); //$NON-NLS-0$
+			dojo.addClass(this.closeLink, "core-sprite-close"); //$NON-NLS-0$
 			
-			dojo.connect(this.closeLink, "onmouseover", this.closeLink, function() {
-				_self.closeLink.style.cursor = "pointer";
+			dojo.connect(this.closeLink, "onmouseover", this.closeLink, function() { //$NON-NLS-0$
+				_self.closeLink.style.cursor = "pointer"; //$NON-NLS-0$
 			});
-			dojo.connect(this.closeLink, "onmouseout", this.closeLink, function() {
-				_self.closeLink.style.cursor = "default";
+			dojo.connect(this.closeLink, "onmouseout", this.closeLink, function() { //$NON-NLS-0$
+				_self.closeLink.style.cursor = "default"; //$NON-NLS-0$
 			});
 			
-			dojo.connect(this.closeLink, "onclick", function() {dojo.hitch(_self, _self.closeDialog)();});
+			dojo.connect(this.closeLink, "onclick", function() {dojo.hitch(_self, _self.closeDialog)();}); //$NON-NLS-0$
 		},
 	
 		setPendingAuthentication: function(services){
@@ -92,30 +92,30 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 	
 	renderAuthenticatedServices: function(){
 		dojo.empty(this.authenticatedList);
-		this.authenticated.style.display = this.isEmpty(this.authenticatedServices) ? 'none' : '';
+		this.authenticated.style.display = this.isEmpty(this.authenticatedServices) ? 'none' : ''; //$NON-NLS-0$
 		var _self = this;
 		var isFirst = true;
 		for(var i in this.authenticatedServices){
 			if(!isFirst){
-				var tr = dojo.create("tr", null, this.authenticatedList);
-				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr);
+				var tr = dojo.create("tr", null, this.authenticatedList); //$NON-NLS-0$
+				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			isFirst = false;
-			var tr = dojo.create("tr", {className: "navTableHeading"});
+			var tr = dojo.create("tr", {className: "navTableHeading"}); //$NON-NLS-1$ //$NON-NLS-0$
 			var authService = this.authenticatedServices[i].authService;
-			var td = dojo.create("td", null, tr, "only");
-			var h2 = dojo.create("h2", null, td, "only");
+			var td = dojo.create("td", null, tr, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			var h2 = dojo.create("h2", null, td, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(!authService){
 				var loginForm = this.authenticatedServices[i].SignInLocation;
 				if(this.authenticatedServices[i].label){
-					h2.innerHTML = this.authenticatedServices[i].label + "<br>";
+					h2.innerHTML = this.authenticatedServices[i].label + "<br>"; //$NON-NLS-0$
 				}
 				h2.innerHTML += this.getHostname(loginForm);
 			}else if(authService.getAuthForm){
 				dojo.hitch(_self, function(h2, i){
 					authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 						if(_self.authenticatedServices[i].label){
-							h2.innerHTML = _self.authenticatedServices[i].label + "<br>";
+							h2.innerHTML = _self.authenticatedServices[i].label + "<br>"; //$NON-NLS-0$
 						}
 						h2.innerHTML += _self.getHostname(loginForm);
 					});
@@ -123,31 +123,31 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			}else{
 				h2.innerHTML = this.authenticatedServices[i].label ? this.authenticatedServices[i].label: i;
 			}
-			dojo.addClass(td, "LoginWindowLeft");
-			var td = dojo.create("td", {style: "text-align: right"}, tr, "last");
-			dojo.addClass(td, "LoginWindowRight");
+			dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
+			var td = dojo.create("td", {style: "text-align: right"}, tr, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
 			var jsonData = this.authenticatedServices[i].data;
 			var authService = this.authenticatedServices[i].authService;
 			if(!authService){
-				dojo.place(tr, this.authenticatedList, "last");
+				dojo.place(tr, this.authenticatedList, "last"); //$NON-NLS-0$
 				return;
 			}
 			if(jsonData.Location)
-				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: "Profile"}, td, "last");
-			dojo.place(document.createTextNode(" "), td, "last");
+				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: "Profile"}, td, "last"); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.place(document.createTextNode(" "), td, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(authService.logout){
-				var a = dojo.create("a", {
+				var a = dojo.create("a", { //$NON-NLS-0$
 					innerHTML: "Sign out"
-				}, td, "last");
+				}, td, "last"); //$NON-NLS-0$
 				
-				dojo.connect(a, "onmouseover", a, function() {
-					a.style.cursor = "pointer";
+				dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
+					a.style.cursor = "pointer"; //$NON-NLS-0$
 				});
-				dojo.connect(a, "onmouseout", a, function() {
-					a.style.cursor = "default";
+				dojo.connect(a, "onmouseout", a, function() { //$NON-NLS-0$
+					a.style.cursor = "default"; //$NON-NLS-0$
 				});
 				
-				dojo.connect(a, "onclick",  dojo.hitch(_self, function(authService, i){
+				dojo.connect(a, "onclick",  dojo.hitch(_self, function(authService, i){ //$NON-NLS-0$
 					return function(){authService.logout().then(dojo.hitch(_self, function(){
 						this.addUserItem(i, authService, this.authenticatedServices[i].label);
 						if(this.isSingleService()){
@@ -157,88 +157,88 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 						}));};
 					})(authService, i));
 			}
-			dojo.place(tr, this.authenticatedList, "last");
+			dojo.place(tr, this.authenticatedList, "last"); //$NON-NLS-0$
 			
 			var lastLogin = "N/A";
 			if (jsonData && jsonData.lastlogintimestamp) {
-				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"});
+				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"}); //$NON-NLS-0$
 			}
-			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login;
-			tr = dojo.create("tr");
+			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login; //$NON-NLS-0$
+			tr = dojo.create("tr"); //$NON-NLS-0$
 			if(userName.length>40){
-				td = dojo.create("td", {innerHTML: userName.substring(0, 30) + '... ' + "logged in since " + lastLogin, colspan: 2, title: userName + ' ' + "logged in since " + lastLogin}, tr, "only");
+				td = dojo.create("td", {innerHTML: userName.substring(0, 30) + '... ' + 'logged in since ' + lastLogin, colspan: 2, title: userName + ' ' + "logged in since " + lastLogin}, tr, "only"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			}else{
-				td = dojo.create("td", {innerHTML: userName + ' ' + "logged in since " + lastLogin, colspan: 2}, tr, "only");
+				td = dojo.create("td", {innerHTML: userName + ' ' + 'logged in since ' + lastLogin, colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			dojo.addClass(td, "LoginWindowLeft");
-			dojo.addClass(td, "LoginWindowRight");
-			dojo.addClass(td, "LoginWindowComment");
-			dojo.place(tr, this.authenticatedList, "last");
+			dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
+			dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
+			dojo.addClass(td, "LoginWindowComment"); //$NON-NLS-0$
+			dojo.place(tr, this.authenticatedList, "last"); //$NON-NLS-0$
 		}
 		
 		
 	},
 	
 	renderUnauthenticatedServices: function(){
-		this.emptyListInfo.style.display = this.unauthenticatedServices.length===0 && this.authenticatedServices.length===0 ? '' : 'none';
+		this.emptyListInfo.style.display = this.unauthenticatedServices.length===0 && this.authenticatedServices.length===0 ? '' : 'none'; //$NON-NLS-0$
 		dojo.empty(this.otherUnauthenticatedList);
 		var _self = this;
-		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : '';
+		this.otherUnauthenticated.style.display = this.isEmpty(this.unauthenticatedServices) ? 'none' : ''; //$NON-NLS-0$
 		var isFirst = true;
 		for(var i in this.unauthenticatedServices){
 			if(!isFirst || !this.isEmpty(this.authenticatedServices)){
-				var tr = dojo.create("tr", null, this.otherUnauthenticatedList);
-				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr);
+				var tr = dojo.create("tr", null, this.otherUnauthenticatedList); //$NON-NLS-0$
+				dojo.create("td", {style: "padding: 0; margin 0;" ,colspan: 2, innerHTML: "<hr style='border-bottom: medium none; border-top: 1px solid #D3D3D3; color: gray; height: 0; margin: 2px;'>"}, tr); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			isFirst = false;
-			var tr = dojo.create("tr", {className: "navTableHeading"});
-			var td = dojo.create("td", null, tr, "only");
-			dojo.addClass(td, "LoginWindowLeft");
-			var h2 = dojo.create("h2", null, td, "only");
-			td = dojo.create("td", {style: "text-align: right"}, tr, "last");
-			dojo.addClass(td, "LoginWindowRight");
+			var tr = dojo.create("tr", {className: "navTableHeading"}); //$NON-NLS-1$ //$NON-NLS-0$
+			var td = dojo.create("td", null, tr, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
+			var h2 = dojo.create("h2", null, td, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			td = dojo.create("td", {style: "text-align: right"}, tr, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
 
 			var authService = this.unauthenticatedServices[i].authService;
 			
 			if(!authService){
 				var loginForm = this.unauthenticatedServices[i].SignInLocation;
-				if(loginForm.indexOf("?")==-1){
-					dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+				if(loginForm.indexOf("?")==-1){ //$NON-NLS-0$
+					dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}else{
-					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				
 				if(this.unauthenticatedServices[i].label){
-					h2.innerHTML = this.unauthenticatedServices[i].label + "<br>";
+					h2.innerHTML = this.unauthenticatedServices[i].label + "<br>"; //$NON-NLS-0$
 				}
 				h2.innerHTML += this.getHostname(loginForm);
 			}else if(authService.getAuthForm){
 				dojo.hitch(_self, function(td, i){
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 					
-					if(loginForm.indexOf("?")==-1){
-						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+					if(loginForm.indexOf("?")==-1){ //$NON-NLS-0$
+						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}else{
-						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last");
+						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if(_self.unauthenticatedServices[i].label){
-						h2.innerHTML = _self.unauthenticatedServices[i].label + "<br>";
+						h2.innerHTML = _self.unauthenticatedServices[i].label + "<br>"; //$NON-NLS-0$
 					}
 					h2.innerHTML += _self.getHostname(loginForm);
 				});
 				})(td, i);
 			}else if(authService.login){
 				
-				dojo.place(document.createTextNode(this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i), h2, "only");
+				dojo.place(document.createTextNode(this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i), h2, "only"); //$NON-NLS-0$
 				
-				var a = dojo.create("a", {innerHTML: "Sign in", style: "cursor: hand;"}, td, "last");
-				dojo.connect(a, "onmouseover", a, function() {
-					a.style.cursor = "pointer";
+				var a = dojo.create("a", {innerHTML: 'Sign in', style: "cursor: hand;"}, td, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
+					a.style.cursor = "pointer"; //$NON-NLS-0$
 				});
-				dojo.connect(a, "onmouseout", a, function() {
-					a.style.cursor = "default";
+				dojo.connect(a, "onmouseout", a, function() { //$NON-NLS-0$
+					a.style.cursor = "default"; //$NON-NLS-0$
 				});
-				dojo.connect(a, "onclick", dojo.hitch(_self, function(authService){
+				dojo.connect(a, "onclick", dojo.hitch(_self, function(authService){ //$NON-NLS-0$
 					return function(){authService.login(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(){
 						if(_self.isSingleService())
 							if(dijit.popup.hide)
@@ -249,14 +249,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				
 			}
 					
-			dojo.place(tr, this.otherUnauthenticatedList, "last");
+			dojo.place(tr, this.otherUnauthenticatedList, "last"); //$NON-NLS-0$
 			if(this.unauthenticatedServices[i].pending){
-				tr = dojo.create("tr");
-				td = dojo.create("td", {innerHTML: "Authentication required!", style: "padding-left: 10px", colspan: 2}, tr, "only");
-				dojo.addClass(td, "LoginWindowLeft");
-				dojo.addClass(td, "LoginWindowRight");
-				dojo.create("img", {src: require.toUrl("images/warning.gif"), style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first");
-				dojo.place(tr, this.otherUnauthenticatedList, "last");
+				tr = dojo.create("tr"); //$NON-NLS-0$
+				td = dojo.create("td", {innerHTML: "Authentication required!", style: "padding-left: 10px", colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
+				dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
+				dojo.create("img", {src: require.toUrl("images/warning.gif"), style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.place(tr, this.otherUnauthenticatedList, "last"); //$NON-NLS-0$
 			}
 		}
 	},
@@ -279,8 +279,8 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 		return length;
 	},
 	getHostname : function(url) {
-		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im');
-		var temp = document.createElement('a');
+		var re = new RegExp('^(?:f|ht)tp(?:s)?\://([^/]+)', 'im'); //$NON-NLS-0$
+		var temp = document.createElement('a'); //$NON-NLS-0$
 		temp.href = url;
 	    url = temp.href; // get qualified url
 		return url.match(re)[1].toString();
