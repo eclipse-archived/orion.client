@@ -16,17 +16,17 @@ define(function(){
 	function matchResourceParameters(optURIText) {
 		optURIText = optURIText || window.location.toString();
 		var result = {resource:""};
-		var hashIndex = optURIText.indexOf("#");
+		var hashIndex = optURIText.indexOf("#"); //$NON-NLS-0$
 		if (hashIndex !== -1) {
 			var text = optURIText.substring(hashIndex + 1);
 			if (text.length !== 0) {
-				var params = text.split(",");
+				var params = text.split(","); //$NON-NLS-0$
 				result.resource = decodeURIComponent(params[0]);
 				for (var i = 1; i < params.length; i++) {
-					var nameValue = params[i].split("=");
+					var nameValue = params[i].split("="); //$NON-NLS-0$
 					var name = decodeURIComponent(nameValue[0]);
 					var value = (nameValue.length === 2) ? decodeURIComponent(nameValue[1]) : null;
-					if (value !== null && name !== "resource") {
+					if (value !== null && name !== "resource") { //$NON-NLS-0$
 						result[name] = value;
 					}
 				}

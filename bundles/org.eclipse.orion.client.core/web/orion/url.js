@@ -14,18 +14,18 @@ define(function() {
 	var buildMap = {};
 	function jsEscape(text) {
 		return (text + '')
-			.replace(/([\\'])/g, '\\$&')
-			.replace(/[\0]/g, "\\0")
-			.replace(/[\b]/g, "\\b")
-			.replace(/[\f]/g, "\\f")
-			.replace(/[\n]/g, "\\n")
-			.replace(/[\r]/g, "\\r")
-			.replace(/[\t]/g, "\\t");
+			.replace(/([\\'])/g, '\\$&') //$NON-NLS-0$
+			.replace(/[\0]/g, "\\0") //$NON-NLS-0$
+			.replace(/[\b]/g, "\\b") //$NON-NLS-0$
+			.replace(/[\f]/g, "\\f") //$NON-NLS-0$
+			.replace(/[\n]/g, "\\n") //$NON-NLS-0$
+			.replace(/[\r]/g, "\\r") //$NON-NLS-0$
+			.replace(/[\t]/g, "\\t"); //$NON-NLS-0$
 	}
 
 	return {
 		load: function(name, parentRequire, onLoad, config) {
-			var temp = parentRequire.toUrl(name + "._");
+			var temp = parentRequire.toUrl(name + "._"); //$NON-NLS-0$
 			var url = temp.substring(0, temp.length - 2);
 			if (config.isBuild) {
 				buildMap[name] = url;
@@ -35,7 +35,7 @@ define(function() {
 		write: function(pluginName, moduleName, write, config) {
 			if (moduleName in buildMap) {
 				var text = jsEscape(buildMap[moduleName]);
-				write("define('" + pluginName + "!" + moduleName + "', function(){return '" + text + "';});\n");
+				write("define('" + pluginName + "!" + moduleName + "', function(){return '" + text + "';});\n"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		}
 	};

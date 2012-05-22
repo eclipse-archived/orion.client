@@ -78,7 +78,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		var serviceRegistration, deferred;
 		try {
 			if (message.method) {
-				if ("plugin" === message.method) {
+				if ("plugin" === message.method) { //$NON-NLS-0$
 					if (!data) {
 						data = message.params[0];
 						_parseData();
@@ -104,10 +104,10 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						_deferredUpdate.resolve(_self);
 						_deferredUpdate = null;
 					}
-				} else if ("dispatchEvent" === message.method){
+				} else if ("dispatchEvent" === message.method){ //$NON-NLS-0$
 					serviceRegistration = _serviceRegistrations[message.serviceId];
 					serviceRegistration.dispatchEvent.apply(serviceRegistration, message.params);		
-				} else if ("progress" === message.method){
+				} else if ("progress" === message.method){ //$NON-NLS-0$
 					deferred = _deferredResponses[String(message.requestId)];
 					deferred.update.apply(deferred, message.params);	
 				} else {
@@ -220,8 +220,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		return _deferredLoad.promise;
 	};
 	
-	if (typeof url !== "string") {
-		throw new Error("invalid url:" + url);
+	if (typeof url !== "string") { //$NON-NLS-0$
+		throw new Error("invalid url:" + url); //$NON-NLS-0$
 	}
 	
 	if (data) {
@@ -240,12 +240,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	var _channels = [];
 	var _pluginEventTarget = new mServiceregistry.EventTarget();
 
-	addEventListener("message", function(event) {
+	addEventListener("message", function(event) { //$NON-NLS-0$
 		var source = event.source;
 		_channels.some(function(channel){
 			if (source === channel.target) {
-				if (typeof channel.useStructuredClone === "undefined") {
-					channel.useStructuredClone = typeof event.data !== "string";
+				if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
+					channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
 				}
 				channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
 				return true; // e.g. break
@@ -254,8 +254,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	}, false);
 	
 	function _normalizeURL(location) {
-		if (location.indexOf("://") === -1) {
-			var temp = document.createElement('a');
+		if (location.indexOf("://") === -1) { //$NON-NLS-0$
+			var temp = document.createElement('a'); //$NON-NLS-0$
 			temp.href = location;
 	        return temp.href;
 		}
@@ -263,13 +263,13 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	}
 	
 	function _clear(plugin) {
-		delete _storage["plugin."+plugin.getLocation()];
+		delete _storage["plugin."+plugin.getLocation()]; //$NON-NLS-0$
 	}
 	
 	function _persist(plugin) {
 		var expiresSeconds = 60 * 60;
 		plugin.getData()._expires = new Date().getTime() + 1000 * expiresSeconds;
-		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData());
+		_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData()); //$NON-NLS-0$
 	}
 
 	var internalRegistry = {
@@ -279,11 +279,11 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 					handler: handler,
 					url: url
 				};
-				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") {
+				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") { //$NON-NLS-0$
 					var worker = new Worker(url);
 					worker.onmessage = function(event) {
-							if (typeof channel.useStructuredClone === "undefined") {
-								channel.useStructuredClone = typeof event.data !== "string";
+							if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
+								channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
 							}
 							channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
 					};
@@ -292,12 +292,12 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 						worker.terminate();
 					};
 				} else {
-					var iframe = document.createElement("iframe");
+					var iframe = document.createElement("iframe"); //$NON-NLS-0$
 					iframe.id = url;
 					iframe.name = url;
 					if (!opt_visible) {
-						iframe.style.display = "none";
-						iframe.style.visibility = "hidden";
+						iframe.style.display = "none"; //$NON-NLS-0$
+						iframe.style.visibility = "hidden"; //$NON-NLS-0$
 					}
 					iframe.src = url;
 					document.body.appendChild(iframe);
@@ -327,14 +327,14 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				for (var i = 0; i < _plugins.length; i++) {
 					if (plugin === _plugins[i]) {
 						_plugins.splice(i,1);
-						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin);
+						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin); //$NON-NLS-0$
 						break;
 					}
 				}
 			},
 			updatePlugin: function(plugin) {
 				_persist(plugin);
-				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin);
+				_pluginEventTarget.dispatchEvent("pluginUpdated", plugin); //$NON-NLS-0$
 			},
 			postMessage: function(message, channel) {
 				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
@@ -363,7 +363,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 		var installList = [];
 		pluginURLs.forEach(function(pluginURL) {
 			pluginURL = _normalizeURL(pluginURL);
-			var key = "plugin." + pluginURL;
+			var key = "plugin." + pluginURL; //$NON-NLS-0$
 			var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
 			if (pluginData && pluginData._expires && pluginData._expires > new Date().getTime()) {
 				if (_getPlugin(pluginURL) === null) {
@@ -371,7 +371,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 					_plugins.push(new eclipse.Plugin(pluginURL, pluginData, internalRegistry));
 				}
 			} else {
-				_storage[key] ="{}";
+				_storage[key] ="{}"; //$NON-NLS-0$
 				var plugin = new eclipse.Plugin(pluginURL, {}, internalRegistry); 
 				_plugins.push(plugin);
 				installList.push(plugin._load(false)); // _load(false) because we want to ensure the plugin is updated
@@ -415,22 +415,22 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				var pluginTracker = function(plugin) {
 					if (plugin.getLocation() === url) {
 						d.resolve(plugin);
-						_pluginEventTarget.removeEventListener("pluginAdded", pluginTracker);
+						_pluginEventTarget.removeEventListener("pluginAdded", pluginTracker); //$NON-NLS-0$
 					}
 				};
-				_pluginEventTarget.addEventListener("pluginAdded", pluginTracker);
+				_pluginEventTarget.addEventListener("pluginAdded", pluginTracker); //$NON-NLS-0$
 			}
 		} else {
 			plugin = new eclipse.Plugin(url, opt_data, internalRegistry);
 			_plugins.push(plugin);
 			if(plugin.getData()) {
 				_persist(plugin);
-				_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
+				_pluginEventTarget.dispatchEvent("pluginAdded", plugin); //$NON-NLS-0$
 				d.resolve(plugin);
 			} else {				
 				plugin._load(true).then(function() {
 					_persist(plugin);
-					_pluginEventTarget.dispatchEvent("pluginAdded", plugin);
+					_pluginEventTarget.dispatchEvent("pluginAdded", plugin); //$NON-NLS-0$
 					d.resolve(plugin);
 				}, function(e) {
 					d.reject(e);
