@@ -168,7 +168,6 @@ exports.Explorer = (function() {
 				return;
 			}
 			if(!this.getNavHandler()){
-				dojo.attr(parentId, "tabIndex", 0); //$NON-NLS-0$
 				this._navHandler = new mNavHandler.ExplorerNavHandler(this, this._navDict, {setFocus: options && options.setFocus, selectionPolicy: (options ? options.selectionPolicy : null)});
 			}
 			var that = this;
