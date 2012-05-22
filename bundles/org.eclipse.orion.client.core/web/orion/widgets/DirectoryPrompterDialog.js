@@ -21,11 +21,11 @@ define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'ori
 	}}
  */
  
-dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'widgets/templates/DirectoryPrompterDialog.html'),
+	templateString : dojo.cache('orion', 'widgets/templates/DirectoryPrompterDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
@@ -40,9 +40,9 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	
 	postCreate : function() {
 		this.inherited(arguments);
-		this.loadFolderList("/");	// workspace root
+		this.loadFolderList("/");	// workspace root //$NON-NLS-0$
 		if (!this.message) {
-			dojo.style(this.messageCell, {display: "none"});
+			dojo.style(this.messageCell, {display: "none"}); //$NON-NLS-0$
 		}
 	},
 	
@@ -64,8 +64,8 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	createTree : function(){
 		var myTreeModel = new orion.widgets.DirectoryTreeModel(this.options.serviceRegistry, this.treeRoot , this.options.fileClient);
 		this.treeWidget = new orion.widgets.ExplorerTree({
-			id: "treeWidget",
-			style: "width:100%; height:100%",
+			id: "treeWidget", //$NON-NLS-0$
+			style: "width:100%; height:100%", //$NON-NLS-0$
 			model: myTreeModel,
 			showRoot: false,
 			persist: true, // remember expanded state
@@ -74,7 +74,7 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 				return item.Name;
 			},
 			getIconClass: function(/* dojo.data.Item */ item, /* Boolean */ opened){
-				return "folderItem";			
+				return "folderItem";			 //$NON-NLS-0$
 			}
 		});	
 		    
@@ -135,7 +135,7 @@ orion.widgets.DirectoryTreeModel = (function() {
 			if (item.Name) {
 				result = item.Location;
 			} else {
-				result = "ROOT";
+				result = "ROOT"; //$NON-NLS-0$
 			}
 			return result;
 		},
