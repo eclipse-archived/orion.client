@@ -805,6 +805,15 @@ a:hover {
 	background-color: #EAF2FE;
 }
 
+.selectionModelContainer {
+-webkit-touch-callout: none;
+-webkit-user-select: none;
+-khtml-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+
 .treeIterationCursor {
 	outline: #CCC 1px dotted;
 	border-radius:4px;
