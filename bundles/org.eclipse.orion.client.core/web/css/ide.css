@@ -631,13 +631,13 @@ a:hover {
 }
 
 .searchbox {
-	background: #DDD;
-	border: 1px solid #AAA;
+	background: #444;
+	border: 1px solid #555;
 	font-size: 11px;
 	min-width: 15em;
 	height: 16px;
 	border-radius: 3px;
-	color:#444;
+	color:#aaa;
 	padding:0;
 	margin-left:2px;
 	padding-left:2px;
