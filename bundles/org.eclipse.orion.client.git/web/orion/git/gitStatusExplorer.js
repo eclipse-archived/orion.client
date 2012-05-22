@@ -427,6 +427,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
+									editableInComparePage: true,
 									complexURL: item.diffUri,
 									callback : function(){}
 								};

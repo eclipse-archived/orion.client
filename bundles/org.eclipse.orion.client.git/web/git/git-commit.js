@@ -54,25 +54,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 
 		// object contributions
 		commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000);
-		
 		var showDiffCommand = new mCommands.Command({
-			name: messages["Compare"],
-			tooltip: messages["View the side-by-side compare"],
-			imageClass: "git-sprite-open_compare",
-			spriteClass: "gitCommandSprite",
-			id: "eclipse.orion.git.diff.showFullCompare",
-			hrefCallback: function(data) {
-				return require.toUrl("compare/compare.html") +"?readonly#" + data.items.DiffLocation;
-			},
-			visibleWhen: function(item) {
-				return item.Type === "Diff";
-			}
-		});		
-
-		commandService.addCommand(showDiffCommand);
-		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showFullCompare", 1000);
-		
-		showDiffCommand = new mCommands.Command({
 			name: messages["Working Directory Version"],
 			tooltip: messages["View the working directory version of the file"],
 			imageClass: "git-sprite-open_compare",
