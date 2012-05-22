@@ -13,32 +13,32 @@
 
 define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button', 'dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/ImportDialog.html', 'dojo/io/iframe'], function(dojo, dijit, dojox) {
 
-dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 	widgetsInTemplate : true,
 
-	templateString: '<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">' +
-						'<div data-dojo-attach-point="titleBar" class="dijitDialogTitleBar">' +
-							'<span data-dojo-attach-point="titleNode" class="dijitDialogTitle" id="${id}_title"></span>' +
-							'<span data-dojo-attach-point="closeButtonNode" class="dijitDialogCloseIcon" data-dojo-attach-event="onclick:onCancel" title="${buttonCancel}">' +
-								'<span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>' +
-							'</span>' +
-						'</div>' +
-						'<div ondragover="event.preventDefault()" data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">' +
-							'<div class="uploadContainer" data-dojo-attach-event="drop:drop,dragenter:dragEnter,dragexit:dragExit,dragover:dragOver">' +
-								'<div class="dottedOutline">' +
-									'<div data-dojo-attach-point="dragArea" class="floatingSection">' +
-										'<div class="uploadInstruction">Drag a File or Zip here</div>' + 
-										'<div class="tipInstruction">or if you prefer</div>' + 
-										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' +
+	templateString: '<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">' + //$NON-NLS-0$
+						'<div data-dojo-attach-point="titleBar" class="dijitDialogTitleBar">' + //$NON-NLS-0$
+							'<span data-dojo-attach-point="titleNode" class="dijitDialogTitle" id="${id}_title"></span>' + //$NON-NLS-0$
+							'<span data-dojo-attach-point="closeButtonNode" class="dijitDialogCloseIcon" data-dojo-attach-event="onclick:onCancel" title="${buttonCancel}">' + //$NON-NLS-0$
+								'<span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>' + //$NON-NLS-0$
+							'</span>' + //$NON-NLS-0$
+						'</div>' + //$NON-NLS-0$
+						'<div ondragover="event.preventDefault()" data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">' + //$NON-NLS-0$
+							'<div class="uploadContainer" data-dojo-attach-event="drop:drop,dragenter:dragEnter,dragexit:dragExit,dragover:dragOver">' + //$NON-NLS-0$
+								'<div class="dottedOutline">' + //$NON-NLS-0$
+									'<div data-dojo-attach-point="dragArea" class="floatingSection">' + //$NON-NLS-0$
+										'<div class="uploadInstruction">'+'Drag a File or Zip here'+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div class="tipInstruction">'+'or if you prefer'+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' + //$NON-NLS-0$
 
-										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="Browse..." >' +
-										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' +
-										'</form>' +
-									'</div>' +
-								'</div>' +
-							'</div>' +
-						'</div>' + 
-					'</div>',
+										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="'+'Browse...'+'" >' + //$NON-NLS-2$ //$NON-NLS-0$
+										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' + //$NON-NLS-0$
+										'</form>' + //$NON-NLS-0$
+									'</div>' + //$NON-NLS-0$
+								'</div>' + //$NON-NLS-0$
+							'</div>' + //$NON-NLS-0$
+						'</div>' +  //$NON-NLS-0$
+					'</div>', //$NON-NLS-0$
 
 
 	constructor : function() {
@@ -64,14 +64,14 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 		// Use native XMLHttpRequest instead of XhrGet since dojo 1.5 does not allow to send binary data as per docs
 		this.req = new XMLHttpRequest();
 
-		this.req.open('post', this.options.importLocation, true);
-		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-		this.req.setRequestHeader("Slug", file.name);
-		if (file.name.indexOf(".zip") !== file.name.length-4) {
-			this.req.setRequestHeader("X-Xfer-Options", "raw");
+		this.req.open('post', this.options.importLocation, true); //$NON-NLS-0$
+		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
+		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
+		if (file.name.indexOf(".zip") !== file.name.length-4) { //$NON-NLS-0$
+			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		this.req.setRequestHeader("Content-Type", file.type);
-		this.req.onreadystatechange = dojo.hitch( this, 'handleReadyState' );
+		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
+		this.req.onreadystatechange = dojo.hitch( this, 'handleReadyState' ); //$NON-NLS-0$
 		this.req.send(file);
 	},
 
@@ -122,28 +122,28 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 	postCreate : function() {
 		this.inherited(arguments);
 
-		dojo.style( this.importloader.domNode, "left", '100px' );
-		dojo.style( this.titleBar, "padding", '10px 10px 10px' );
+		dojo.style( this.importloader.domNode, "left", '100px' ); //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.style( this.titleBar, "padding", '10px 10px 10px' ); //$NON-NLS-1$ //$NON-NLS-0$
 
-		this.importloader.force = 'iframe';
+		this.importloader.force = 'iframe'; //$NON-NLS-0$
 		this.importloader.preventDefault = function(){};
 		this.importloader.stopPropagation = function(){};
 
 		this.importform.action = this.options.importLocation;
 		this.importloader.url = this.options.importLocation;
 
-		dojo.connect(this.importloader, "onChange", dojo.hitch(this, function(dataArray) {
+		dojo.connect(this.importloader, "onChange", dojo.hitch(this, function(dataArray) { //$NON-NLS-0$
 			var uploadData = { preventDefault: function(){}, stopPropagation: function(){} };
 			this.importloader.upload(uploadData);
 		}));
 
-		dojo.connect(this.importloader, "onError", dojo.hitch(this, function(dataArray) {
+		dojo.connect(this.importloader, "onError", dojo.hitch(this, function(dataArray) { //$NON-NLS-0$
 			setTimeout(dojo.hitch(this, function(){
 				this.hide();
 			}), 2000);		
 		}));
 
-		dojo.connect(this.importloader, "onComplete", dojo.hitch(this, function(dataArray) {
+		dojo.connect(this.importloader, "onComplete", dojo.hitch(this, function(dataArray) { //$NON-NLS-0$
 			setTimeout(dojo.hitch(this, function(){
 				this.hide();
 				this.options.func();
@@ -153,7 +153,7 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 		// Stop the dialog from submitting if trying to activate the upload button with a keyboard.
 		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=370969
 		
-		dojo.connect(this.importloader, "onKeyPress", function(evt) {
+		dojo.connect(this.importloader, "onKeyPress", function(evt) { //$NON-NLS-0$
 			if(evt.keyCode === dojo.keys.ENTER) {
 				evt.stopPropagation();
 			}

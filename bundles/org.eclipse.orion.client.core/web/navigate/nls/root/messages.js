@@ -76,5 +76,6 @@ define({
 	"Paste Items": "Paste Items",
 	"Paste items from the copy/paste buffer": "Paste items from the copy/paste buffer",
 	"Cannot paste into the Workspace root": "Cannot paste into the Workspace root",
-	"Open With": "Open With"
+	"Open With": "Open With",
+	"Loading ": "Loading "
 });
