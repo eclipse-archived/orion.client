@@ -36,6 +36,8 @@ exports.ExplorerNavHandler = (function() {
 	    this._selections = [];
 	    
 	    this._currentColumn = 0;
+		dojo.attr(this.explorer._parentId, "tabIndex", 0); //$NON-NLS-0$
+		dojo.style(this.explorer._parentId, "outline", "none");//$NON-NLS-0$
 		
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([],
 		   		   {isExpanded: dojo.hitch(this, function(model) {
