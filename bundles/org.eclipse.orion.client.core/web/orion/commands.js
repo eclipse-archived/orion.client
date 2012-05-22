@@ -11,7 +11,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
 
 	/*
 	 * stateless helper function
@@ -743,7 +743,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navig
 								style: "display: none;" //$NON-NLS-0$
 							});
 							menuButton = new dijit.form.DropDownButton({
-								label: group.title === "*" ? "Actions" : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
+								label: group.title === "*" ? messages["Actions"] : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
 								showLabel:  group.title !== "*", //$NON-NLS-0$
 								style: "visibility: hidden;", //$NON-NLS-0$
 								dropDown: newMenu

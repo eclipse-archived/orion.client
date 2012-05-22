@@ -12,7 +12,7 @@
 /*global window document define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require, dojo, mSection, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands'], function(messages, require, dojo, mSection, mCommands){
 
 	/**
 	 * Creates a new user interface element showing a list of tasks
@@ -28,19 +28,19 @@ define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require,
 	 */
 	function TaskList(options) {
 		var parent = options.parent;
-		if (typeof(parent) === "string") {
+		if (typeof(parent) === "string") { //$NON-NLS-0$
 			parent = dojo.byId(parent);
 		}
-		if (!parent) { throw "no parent"; }
-		if (!options.serviceRegistry) {throw "no service registry"; }
+		if (!parent) { throw messages['no parent']; }
+		if (!options.serviceRegistry) {throw messages["no service registry"]; }
 		this._parent = parent;
 		this._registry = options.serviceRegistry;	
 		this._description = options.description;
 		this._tasks = options.tasks;
-		this._title = options.title || "Tasks";
+		this._title = options.title || messages["Tasks"];
 		this._collapsed = options.collapsed;
-		this._id = options.id || this._parent.id + "taskList";
-		this._contentId = this._parent.id + "taskContent";
+		this._id = options.id || this._parent.id + "taskList"; //$NON-NLS-0$
+		this._contentId = this._parent.id + "taskContent"; //$NON-NLS-0$
 		this._item = options.item;
 		this._handler = options.handler;
 		this._commandService = options.commandService;
@@ -54,35 +54,35 @@ define(['require', 'dojo', 'orion/section', 'orion/commands'], function(require,
 		renderTasks: function() {
 			// first time setup
 			if (!this._taskSection) {
-				var contentId = "taskListContent"+this._title;
+				var contentId = "taskListContent"+this._title; //$NON-NLS-0$
 				this.fileSystemsSection = new mSection.Section(this._parent, {
-					id: "taskListSection"+this._title,
+					id: "taskListSection"+this._title, //$NON-NLS-0$
 					title: this._title,
-					content: '<div id="'+contentId+'"></div>',
-					preferenceService: this._registry.getService("orion.core.preference"),
+					content: '<div id="'+contentId+'"></div>', //$NON-NLS-1$ //$NON-NLS-0$
+					preferenceService: this._registry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: true,
 					hidden: this._collapsed,
 					useAuxStyle: true
 				});
 				if (this._description) {
-					dojo.place("<p>"+this._description+"</p>", contentId, "only");
+					dojo.place("<p>"+this._description+"</p>", contentId, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
-				var taskTable = dojo.create("table", { role: "presentation" }, contentId, "last");
+				var taskTable = dojo.create("table", { role: "presentation" }, contentId, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				for (var i=0; i<this._tasks.length; i++) {
-					var row = dojo.create("tr", null, taskTable, "last");
-					var col = dojo.create("td", null, row, "last");
-					this._commandService.registerCommandContribution("task"+i, this._tasks[i].commandId, 1);
-					this._commandService.renderCommands("task"+i, col, this._item, this._handler, "button");
-					dojo.addClass(col, "taskTitle");
+					var row = dojo.create("tr", null, taskTable, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					var col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					this._commandService.registerCommandContribution("task"+i, this._tasks[i].commandId, 1); //$NON-NLS-0$
+					this._commandService.renderCommands("task"+i, col, this._item, this._handler, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.addClass(col, "taskTitle"); //$NON-NLS-0$
 					if (col.childNodes.length > 0) {
 						// I know I have only one command if I have any at all
-						dojo.addClass(col.childNodes[0], "taskTitle");
+						dojo.addClass(col.childNodes[0], "taskTitle"); //$NON-NLS-0$
 					}
-					col = dojo.create("td", null, row, "last");
-					dojo.addClass(col, "taskDescription");
+					col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.addClass(col, "taskDescription"); //$NON-NLS-0$
 					var command = this._commandService.findCommand(this._tasks[i].commandId);
 					if (command) {
-						dojo.place(document.createTextNode(command.description || command.tooltip), col, "last");
+						dojo.place(document.createTextNode(command.description || command.tooltip), col, "last"); //$NON-NLS-0$
 					}
 				}
 			}
