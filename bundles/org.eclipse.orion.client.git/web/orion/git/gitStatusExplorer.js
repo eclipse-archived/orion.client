@@ -432,7 +432,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								};
 								
 								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
-								inlineCompareContainer.startup( function(){});
+								inlineCompareContainer.startup( function(maxHeight){
+									var vH = 420;
+									if(maxHeight < vH){
+										vH = maxHeight;
+									}
+									dojo.style("diffArea_" + item.diffUri, "height", vH + "px");
+								});
 							}, 500);
 							
 							return td;
@@ -608,7 +614,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								};
 								
 								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
-								inlineCompareContainer.startup( function(){});
+								inlineCompareContainer.startup( function(maxHeight){
+									var vH = 420;
+									if(maxHeight < vH){
+										vH = maxHeight;
+									}
+									dojo.style("diffArea_" + item.diffUri, "height", vH + "px");
+								});
 							}, 500);
 							
 							return td;
