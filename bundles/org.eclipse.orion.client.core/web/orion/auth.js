@@ -18,7 +18,7 @@
 
  */
 
-define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(dojo, dijit, mGlobalCommands) {
+define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widgets/LoginDialog'], function(messages, dojo, dijit, mGlobalCommands) {
 
 	var forbiddenAccessDlg;
 	var pendingAuthentication = {};
@@ -40,7 +40,7 @@ define(['dojo', 'dijit', 'orion/globalCommands', 'dojo/date/locale', 'orion/widg
 		if (error.status === 403) { 
 			if (typeof forbiddenAccessDlg === "undefined") { //$NON-NLS-0$
 				forbiddenAccessDlg = new dijit.Dialog({
-			        title: "Forbidden access"
+			        title: messages["Forbidden access"]
 			    });
 			}
 			var message = error.message;

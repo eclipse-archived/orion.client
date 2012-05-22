@@ -11,7 +11,7 @@
 /*global define dojo dijit eclipse orion widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(dojo, dijit, mUtil) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'orion/util', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], function(messages, dojo, dijit, mUtil) {
 
 /**
 * @param options {{
@@ -33,8 +33,8 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 	
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title || "Choose a Folder";
-		this.buttonOk = "OK";	
+		this.title = this.options.title || messages['Choose a Folder'];
+		this.buttonOk = messages['OK'];	
 		this.message = this.options.message || "";
 	},
 	
