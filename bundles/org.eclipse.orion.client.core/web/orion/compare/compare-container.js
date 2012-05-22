@@ -130,6 +130,8 @@ exports.CompareContainer = (function() {
 				this.options.mapper = options.mapper ? options.mapper : this.options.mapper;
 				
 				this.options.commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this.options.commandSpanId; //$NON-NLS-0$
+				this.options.generateLink = (options.generateLink !== undefined &&  options.generateLink !== null) ? options.generateLink : this.options.generateLink;
+				this.options.editableInComparePage = (options.editableInComparePage !== undefined &&  options.editableInComparePage !== null) ? options.editableInComparePage : this.options.editableInComparePage;
 				this.options.navGridHolder = options.navGridHolder || this.options.navGridHolder;
 				this.options.readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this.options.readonly;
 				this.options.wordLevelNav = (options.wordLevelNav !== undefined &&  options.wordLevelNav !== null) ? options.wordLevelNav : this.options.wordLevelNav;
@@ -207,10 +209,22 @@ exports.CompareContainer = (function() {
 				id: "orion.compare.generateLink", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return item.options.complexURL;
+					return item.options.complexURL && item.options.generateLink;
 				},
 				callback : function(data) {
 					data.items.generateLink();
+			}});
+			var openComparePageCommand = new mCommands.Command({
+				tooltip : messages["Open the compare page"],
+				name: messages["Compare"],
+				imageClass : "core-sprite-link", //$NON-NLS-0$
+				id: "orion.compare.openComparePage", //$NON-NLS-0$
+				groupId: "orion.compareGroup", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					return item.options.complexURL && !item.options.generateLink;
+				},
+				hrefCallback: function(data) {
+					return data.items.openComparePage();
 			}});
 			var nextDiffCommand = new mCommands.Command({
 				tooltip : messages["Next diff block"],
@@ -248,6 +262,7 @@ exports.CompareContainer = (function() {
 			this._commandService.addCommand(toggle2TwoWayCommand);
 			this._commandService.addCommand(toggle2InlineCommand);
 			this._commandService.addCommand(generateLinkCommand);
+			this._commandService.addCommand(openComparePageCommand);
 			this._commandService.addCommand(nextDiffCommand);
 			this._commandService.addCommand(prevDiffCommand);
 			if(this.options.wordLevelNav){
@@ -256,6 +271,7 @@ exports.CompareContainer = (function() {
 			}
 				
 			// Register command contributions
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.openComparePage", 107); //$NON-NLS-0$
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108); //$NON-NLS-0$
 			if (!this.options.readonly) {
 				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109); //$NON-NLS-0$
@@ -296,6 +312,17 @@ exports.CompareContainer = (function() {
 				change: diffPos.change ? diffPos.change : 0 
 			});
 			prompt(messages["Copy the link URL:"], href);
+		},
+		
+		openComparePage: function(){	
+			var diffPos = this.getCurrentDiffPos();
+			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
+				readonly: !this.options.editableInComparePage,
+				conflict: this._conflict,
+				block: diffPos.block ? diffPos.block : 1, 
+				change: diffPos.change ? diffPos.change : 0 
+			});
+			return href;
 		},
 		
 		getCurrentDiffPos: function(){	
@@ -544,7 +571,7 @@ exports.TwoWayCompareContainer = (function() {
 				var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
 				var shortTitle = title;
 				if (indexOfSlash !== -1) {
-					shortTitle = messages["Compare "] + shortTitle.substring(indexOfSlash + 1);
+					shortTitle = messages["Compare"] + " " + shortTitle.substring(indexOfSlash + 1);
 					if (title.charAt(0) === '*') { //$NON-NLS-0$
 						shortTitle = '*' + shortTitle; //$NON-NLS-0$
 					}

@@ -11,11 +11,11 @@
 
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
-define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/git/widgets/CloneGitRepositoryDialog', 
+define(['require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 
         'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
-        function(require, dojo, mCommands, mUtil, mGitUtil) {
+        function(require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -750,7 +750,7 @@ var exports = {};
 			hrefCallback : function(data) {
 				var item = data.items;
 				return serviceRegistry.getService("orion.git.provider").getDiff(item[1].DiffLocation, item[0].Name).then(function(diffLocation) {
-					return require.toUrl("compare/compare.html") + "?readonly#" + diffLocation;
+					return mCompareUtils.generateCompareHref(diffLocation, {readonly: true});
 				});
 			},
 			visibleWhen : function(item) {
@@ -769,7 +769,7 @@ var exports = {};
 			spriteClass: "gitCommandSprite",
 			id : "eclipse.compareWithWorkingTree",
 			hrefCallback : function(data) {
-				return require.toUrl("compare/compare.html")+"#" + data.items.DiffLocation;
+				return mCompareUtils.generateCompareHref(data.items.DiffLocation, {});
 			},
 			visibleWhen : function(item) {
 				return item.Type === "Commit" && !explorer.isDirectory;
