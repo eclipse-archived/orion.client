@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
-		function(require, dojo, dijit) {
+		function(messages, require, dojo, dijit) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -49,19 +49,19 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		}
 		this.searchRenderer = this.options && this.options.searchRenderer;
 		if (!this.searchRenderer || typeof(this.searchRenderer.makeRenderFunction) !== "function") { //$NON-NLS-0$
-			throw new Error("Missing required argument: searchRenderer");
+			throw new Error(messages['Missing required argument: searchRenderer']);
 		}
 		this.favService = this.options.favoriteService;
 		if (!this.favService) {
-			throw new Error("Missing required argument: favService");
+			throw new Error(messages['Missing required argument: favService']);
 		}
 	},
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || "Find File Named";
-		this.selectFile = "Type the name of a file to open (? = any character, * = any string):";
-		this.searchPlaceHolder = "Search";
+		this.options.title = this.options.title || messages['Find File Named'];
+		this.selectFile = messages['Type the name of a file to open (? = any character, * = any string):'];
+		this.searchPlaceHolder = messages['Search'];
 		this.inherited(arguments);
 	},
 	
@@ -143,7 +143,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	
 	/** @private kick off initial population of favorites */
 	populateFavorites: function() {
-		dojo.place("<div>"+"Populating favorites&#x2026;"+"</div>", this.favresults, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+		dojo.place("<div>"+messages['Populating favorites&#x2026;']+"</div>", this.favresults, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 		
 		// initially, show all favorites
 		this.favService.getFavorites().then(this.showFavorites());
@@ -181,7 +181,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		dojo.addClass(image, "commandImage"); //$NON-NLS-0$
 		// without an image, chrome will draw a border  (?)
 		image.src = require.toUrl("images/none.png"); //$NON-NLS-0$
-		image.title = "Favorite";
+		image.title = messages['Favorite'];
 		col.appendChild(image);
 		dojo.style(image, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$
 	},
@@ -210,7 +210,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 
 		// don't do a server-side query for an empty text box
 		if (text) {
-			dojo.place("<div>"+"Searching&#x2026;"+"</div>", this.results, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+			dojo.place("<div>"+messages['Searching&#x2026;']+"</div>", this.results, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {

@@ -80,7 +80,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 				for (var i=0; i < this._stores.length; ++i) {
 					var store = this._stores[i];
 					for (var j in store) {
-						if (store.hasOwnProperty(j) && typeof(this._cached[j]) === "undefined" ) {
+						if (store.hasOwnProperty(j) && typeof(this._cached[j]) === "undefined" ) { //$NON-NLS-0$
 							this._cached[j] = store[j];
 						}
 					}
@@ -230,12 +230,12 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 	
 	function UserPreferencesProvider(serviceRegistry) {
 		this._currentPromises = {};
-		this._cache = new Cache("/orion/preferences/user", 60*60);
+		this._cache = new Cache("/orion/preferences/user", 60*60); //$NON-NLS-0$
 		
 		this._service = null;
 		this.available = function() {
 			if (!this._service) {
-				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider");
+				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider"); //$NON-NLS-0$
 				if (references.length > 0) {
 					this._service = serviceRegistry.getService(references[0]);
 				}
@@ -314,7 +314,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 	function DefaultPreferencesProvider(location) {
 		this._location = location;
 		this._currentPromise = null;
-		this._cache = new Cache("/orion/preferences/default", 60*60);
+		this._cache = new Cache("/orion/preferences/default", 60*60); //$NON-NLS-0$
 	}
 	
 	DefaultPreferencesProvider.prototype = {
@@ -338,9 +338,9 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 				dojo.xhrGet({
 					url: this._location,
 					headers: {
-						"Orion-Version": "1"
+						"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
 					},
-					handleAs: "json",
+					handleAs: "json", //$NON-NLS-0$
 					timeout: 15000,
 					load: function(data, ioArgs) {
 						that._cache.set(name, data[name] || {});
@@ -383,7 +383,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 	};
 	
 	function LocalPreferencesProvider() {
-		this._cache = new Cache("/orion/preferences/local", -1);
+		this._cache = new Cache("/orion/preferences/local", -1); //$NON-NLS-0$
 	}
 	
 	LocalPreferencesProvider.prototype = {
@@ -419,12 +419,12 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 		this._userProvider = new UserPreferencesProvider(serviceRegistry);
 		this._localProvider = new LocalPreferencesProvider();
 		
-		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref";
-		if (defaultPreferencesLocation.indexOf("://") === -1) {
+		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref"; //$NON-NLS-0$
+		if (defaultPreferencesLocation.indexOf("://") === -1) { //$NON-NLS-0$
 			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
 		}
 		this._defaultsProvider = new DefaultPreferencesProvider(defaultPreferencesLocation);
-		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this); //$NON-NLS-0$
 	}
 	
 	PreferencesService.DEFAULT_SCOPE = 1;
@@ -434,8 +434,8 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 	PreferencesService.prototype = /** @lends orion.preferences.PreferencesService.prototype */ {
 	
 		listenForChangedSettings: function( callback ){
-			window.addEventListener("storage", callback, false);
-			return "/orion/preferences/local/settings";
+			window.addEventListener("storage", callback, false); //$NON-NLS-0$
+			return "/orion/preferences/local/settings"; //$NON-NLS-0$
 		},
 		
 		/**
@@ -444,7 +444,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 		 */
 		getPreferences: function(name, optScope) {
 			
-			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) {
+			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) { //$NON-NLS-0$
 				optScope = PreferencesService.DEFAULT_SCOPE | PreferencesService.LOCAL_SCOPE | PreferencesService.USER_SCOPE;
 			}
 			var providers = [];
