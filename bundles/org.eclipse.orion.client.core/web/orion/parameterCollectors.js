@@ -12,8 +12,8 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton'], 
-        function(require, dojo, dijit, mCommands, mUtil){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton'], 
+        function(messages, require, dojo, dijit, mCommands, mUtil){
 
 	
 	/**
@@ -114,7 +114,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
 					dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
 					dojo.addClass(close, "dismiss"); //$NON-NLS-0$
-					close.title = "Close";
+					close.title = messages["Close"];
 					dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
 						this.close();
 					}));
@@ -278,7 +278,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 				dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
 				dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
 				dojo.addClass(close, "dismiss"); //$NON-NLS-0$
-				close.title = "Close";
+				close.title = messages['Close'];
 				dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
 					localClose();
 				}));

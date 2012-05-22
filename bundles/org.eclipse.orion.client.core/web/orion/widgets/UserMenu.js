@@ -11,8 +11,8 @@
 
 /*global define window eclipse localStorage*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(require, dojo, dijit, mCommands, mUtil) {
-	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(messages, require, dojo, dijit, mCommands, mUtil) {
+	dojo.declare(messages["orion.widgets.UserMenu"], [dijit.Menu], {
 	
 		widgetsInTemplate: false,
 		id: "userMenu", //$NON-NLS-0$
@@ -21,7 +21,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 						'<tbody class="dijitReset" dojoAttachPoint="containerNode"></tbody>' + //$NON-NLS-0$
 						'</table>', //$NON-NLS-0$
 		
-		label: 'test',
+		label: messages['test'],
 		
 		postCreate : function() {
 			this.inherited(arguments);
@@ -57,7 +57,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			var authService = this.authenticatedServices[key].authService;
 			if(authService && authService.logout){
 					this.addChild(new dijit.MenuItem({
-						label: who ? "Sign Out " + who : "Sign Out",
+						label: who ? messages["Sign Out "] + who : messages["Sign Out"],
 						onClick: dojo.hitch(this, function(authService, key){
 							return function(){authService.logout().then(dojo.hitch(_self, function(){
 								this.addUserItem(key, authService, this.authenticatedServices[key].label);
@@ -80,7 +80,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				this.addChild(new dijit.MenuItem({
-					label: where ? "<a target='_blank' href="+loginForm+">"+"Sign In To "+ where +"</a>" : "<a target='_blank' href="+loginForm+">Sign In"+"</a>", //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+					label: where ? "<a target='_blank' href="+loginForm+">"+messages["Sign In To "]+ where +"</a>" : "<a target='_blank' href="+loginForm+messages[">"]+"Sign In"+messages["</a>"], //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 					onKeyDown: function(evt){if(evt.keyCode===13) window.open(loginForm);},
 					_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 				}), startIndex);
@@ -94,7 +94,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 							loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						_self.addChild(new dijit.MenuItem({
-							label: where ? "<a target='_blank' href="+loginForm+">"+"Sign In To "+where+"</a>" : "<a target='_blank' href="+loginForm+">"+"Sign In"+"</a>", //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+							label: where ? "<a target='_blank' href="+loginForm+">"+messages['Sign In To ']+where+"</a>" : "<a target='_blank' href="+loginForm+">"+messages["Sign In"]+"</a>", //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 							onKeyDown: function(evt){if(evt.keyCode===13) window.open(loginForm);},
 							_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 						}), startIndex);
@@ -132,7 +132,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 //			 }));
 			 
 			this.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("help/index.jsp") + ">"+"Help"+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: "<a href="+require.toUrl("help/index.jsp") + ">"+messages["Help"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				 onKeyDown: function(evt){
 					if(evt.keyCode === 13 || evt.keyCode === 32) {
 						if(evt.ctrlKey) {
@@ -146,7 +146,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			 }));
 			if(this.keyAssistFunction){
 				this.addChild(new dijit.MenuItem({
-					 label: "Keyboard Shortcuts",
+					 label: messages["Keyboard Shortcuts"],
 					 onClick: this.keyAssistFunction
 				 }));	
 			}
@@ -155,7 +155,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 			
 			
 			 this.addChild(new dijit.MenuItem({
-				 label: "<a href="+require.toUrl("settings/settings.html") + ">"+"Settings"+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: "<a href="+require.toUrl("settings/settings.html") + ">"+messages["Settings"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				 onKeyDown: function(evt){
 					if(evt.keyCode === 13 || evt.keyCode === 32) {
 						if(evt.ctrlKey) {
@@ -243,12 +243,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					displayName = displayName.substring(0, 30) + "..."; //$NON-NLS-0$
 				var profileLink = dojo.create("a", {innerHTML: displayName, //$NON-NLS-0$
 									  href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location, //$NON-NLS-1$ //$NON-NLS-0$
-									  "aria-label": "View profile of " + userName, //$NON-NLS-0$
+									  "aria-label": messages["View profile of "] + userName, //$NON-NLS-0$
 									  style: "margin-right: 0px" //$NON-NLS-0$
 								  }, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
 				new mCommands.CommandTooltip({
 					connectId: [profileLink],
-					label: "View profile of " + userName,
+					label: messages['View profile of '] + userName,
 					position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}else if(this.isSingleService() && !jsonData){
@@ -260,7 +260,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 							}else{
 								loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 							}
-							dojo.create("a", {innerHTML: "Sign In", //$NON-NLS-0$
+							dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
 								href: loginForm,
 								style: "margin-right: 0px", //$NON-NLS-0$
 								target: "_blank" //$NON-NLS-0$
@@ -268,7 +268,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 						});
 					})(key);
 				}else if(authService.login){
-					var a = dojo.create("a", {innerHTML: "Sign In", //$NON-NLS-0$
+					var a = dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
 						style: "margin-right: 0px" //$NON-NLS-0$
 					}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
 					
@@ -285,7 +285,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'
 					
 				}
 			} else if(this.hasServices()) {
-				var a = dojo.create("a", {innerHTML: "Profiles", //$NON-NLS-0$
+				var a = dojo.create("a", {innerHTML: messages["Profiles"], //$NON-NLS-0$
 					style: "margin-right: 0px" //$NON-NLS-0$
 					}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
 				

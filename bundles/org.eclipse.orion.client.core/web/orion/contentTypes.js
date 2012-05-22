@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define([], function() {
+define(['i18n!orion/nls/messages'], function(messages) {
 	var SERVICE_ID = "orion.core.contenttypes"; //$NON-NLS-0$
 	var EXTENSION_ID = "orion.core.contenttype"; //$NON-NLS-0$
 	var OLD_EXTENSION_ID = "orion.file.contenttype"; // backwards compatibility //$NON-NLS-0$
@@ -150,7 +150,7 @@ define([], function() {
 				var parent = contentTypeA, seen = {};
 				while (parent && (parent = this.getContentType(parent['extends']))) { //$NON-NLS-0$
 					if (parent.id === contentTypeB.id) { return true; }
-					if (seen[parent.id]) { throw new Error("Cycle: " + parent.id); }
+					if (seen[parent.id]) { throw new Error(messages["Cycle: "] + parent.id); }
 					seen[parent.id] = true;
 				}
 			}

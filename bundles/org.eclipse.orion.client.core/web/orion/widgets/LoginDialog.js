@@ -11,7 +11,7 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(require, dojo, dijit, mUtil) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(messages, require, dojo, dijit, mUtil) {
 	
 	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: true,
@@ -133,11 +133,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				return;
 			}
 			if(jsonData.Location)
-				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: "Profile"}, td, "last"); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.create("a", {href: (require.toUrl("profile/user-profile.html") + "#" + jsonData.Location), innerHTML: messages['Profile']}, td, "last"); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(" "), td, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			if(authService.logout){
 				var a = dojo.create("a", { //$NON-NLS-0$
-					innerHTML: "Sign out"
+					innerHTML: messages['Sign out']
 				}, td, "last"); //$NON-NLS-0$
 				
 				dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
@@ -159,16 +159,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			}
 			dojo.place(tr, this.authenticatedList, "last"); //$NON-NLS-0$
 			
-			var lastLogin = "N/A";
+			var lastLogin = messages['N/A'];
 			if (jsonData && jsonData.lastlogintimestamp) {
 				lastLogin = dojo.date.locale.format(new Date(jsonData.lastlogintimestamp), {formatLength: "short"}); //$NON-NLS-0$
 			}
 			var userName = (jsonData.Name && jsonData.Name.replace(/^\s+|\s+$/g,"")!=="") ? jsonData.Name : jsonData.login; //$NON-NLS-0$
 			tr = dojo.create("tr"); //$NON-NLS-0$
 			if(userName.length>40){
-				td = dojo.create("td", {innerHTML: userName.substring(0, 30) + '... ' + 'logged in since ' + lastLogin, colspan: 2, title: userName + ' ' + "logged in since " + lastLogin}, tr, "only"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+				td = dojo.create("td", {innerHTML: userName.substring(0, 30) + '... ' + messages['logged in since '] + lastLogin, colspan: 2, title: userName + ' ' + messages['logged in since '] + lastLogin}, tr, "only"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			}else{
-				td = dojo.create("td", {innerHTML: userName + ' ' + 'logged in since ' + lastLogin, colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+				td = dojo.create("td", {innerHTML: userName + ' ' + messages['logged in since '] + lastLogin, colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
 			dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
@@ -203,9 +203,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			if(!authService){
 				var loginForm = this.unauthenticatedServices[i].SignInLocation;
 				if(loginForm.indexOf("?")==-1){ //$NON-NLS-0$
-					dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: "Sign in"}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}else{
-					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				
 				if(this.unauthenticatedServices[i].label){
@@ -217,9 +217,9 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 					
 					if(loginForm.indexOf("?")==-1){ //$NON-NLS-0$
-						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}else{
-						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: 'Sign in'}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					if(_self.unauthenticatedServices[i].label){
 						h2.innerHTML = _self.unauthenticatedServices[i].label + "<br>"; //$NON-NLS-0$
@@ -231,7 +231,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 				
 				dojo.place(document.createTextNode(this.unauthenticatedServices[i].label ? this.unauthenticatedServices[i].label : i), h2, "only"); //$NON-NLS-0$
 				
-				var a = dojo.create("a", {innerHTML: 'Sign in', style: "cursor: hand;"}, td, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				var a = dojo.create("a", {innerHTML: messages['Sign in'], style: "cursor: hand;"}, td, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 				dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
 					a.style.cursor = "pointer"; //$NON-NLS-0$
 				});
@@ -252,7 +252,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!o
 			dojo.place(tr, this.otherUnauthenticatedList, "last"); //$NON-NLS-0$
 			if(this.unauthenticatedServices[i].pending){
 				tr = dojo.create("tr"); //$NON-NLS-0$
-				td = dojo.create("td", {innerHTML: "Authentication required!", style: "padding-left: 10px", colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				td = dojo.create("td", {innerHTML: messages['Authentication required!'], style: "padding-left: 10px", colspan: 2}, tr, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 				dojo.addClass(td, "LoginWindowLeft"); //$NON-NLS-0$
 				dojo.addClass(td, "LoginWindowRight"); //$NON-NLS-0$
 				dojo.create("img", {src: require.toUrl("images/warning.gif"), style: "padding-right: 4px; vertical-align: bottom; padding-bottom: 2px;"}, td, "first"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

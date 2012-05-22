@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['dojo', 'orion/treeModelIterator'], function(dojo, mTreeModelIterator){
+define(['i18n!orion/nls/messages', 'dojo', 'orion/treeModelIterator'], function(messages, dojo, mTreeModelIterator){
 
 var exports = {};
 var userAgent = navigator.userAgent;

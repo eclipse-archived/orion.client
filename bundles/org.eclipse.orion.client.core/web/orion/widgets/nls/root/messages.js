@@ -47,5 +47,20 @@ define({
 	"Populating favorites&#x2026;": "Populating favorites&#x2026;",
 	"Favorite": "Favorite",
 	"Searching&#x2026;": "Searching&#x2026;",
-	"name": "name"
+	"name": "name",
+	"orion.widgets.UserMenu": "orion.widgets.UserMenu",
+	"test": "test",
+	"Sign Out": "Sign Out",
+	"Sign Out ": "Sign Out ",
+	"</a>": "</a>",
+	">": ">",
+	"Sign In To ": "Sign In To ",
+	"Sign In": "Sign In",
+	"Help": "Help",
+	"Keyboard Shortcuts": "Keyboard Shortcuts",
+	"Settings": "Settings",
+	"View profile of ": "View profile of ",
+	"Profiles": "Profiles",
+	"Information Needed": "Information Needed",
+	"Cancel": "Cancel"
 });
