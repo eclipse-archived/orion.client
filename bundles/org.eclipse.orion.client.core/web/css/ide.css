@@ -631,17 +631,21 @@ a:hover {
 }
 
 .searchbox {
-	background: #444;
+	background: #777;
 	border: 1px solid #555;
 	font-size: 11px;
 	min-width: 15em;
 	height: 16px;
-	border-radius: 3px;
-	color:#aaa;
+	border-radius: 10px;
+	color:#EEE;
 	padding:0;
 	margin-left:2px;
-	padding-left:2px;
+	padding-left:5px;
 	margin-top:5px;
+}
+
+.searchbox:focus{
+	color: white;
 }
 
 .toolbarButton {
