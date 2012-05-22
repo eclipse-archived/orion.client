@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define setTimeout*/
+/*global define setTimeout XMLHttpRequest*/
 define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
 		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
@@ -113,6 +113,50 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 
 	tests['test GET reject'] = getTimeoutable(function() {
 		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
+	});
+
+	tests['test resolve value has expected shape'] = getTimeoutable(function() {
+		return xhr('GET', '/foo', {
+				data: 'my request body',
+				headers: {'X-Foo': 'bar'},
+				log: true,
+				query: {param: 'value'},
+				responseType: 'text',
+				timeout: 1500
+			}, new OkXhr())
+			.then(function(result) {
+				assert.ok(!!result.args);
+				assert.equal(result.args.data, 'my request body');
+				assert.equal(result.args.headers['X-Foo'], 'bar');
+				assert.equal(result.args.log, true);
+				assert.ok(!!result.args.query);
+				assert.equal(result.args.query.param, 'value');
+				assert.equal(result.args.responseType, 'text');
+				assert.equal(result.args.timeout, 1500);
+				assert.ok(result.xhr instanceof MockXMLHttpRequest);
+			}, fail);
+	});
+
+	tests['test reject value has expected shape'] = getTimeoutable(function() {
+		return xhr('GET', '/bar', {
+				data: 'my request body',
+				headers: {'X-Foo': 'bar'},
+				log: false,
+				query: {param: 'value'},
+				responseType: 'text',
+				timeout: 1500
+			}, new FailXhr())
+			.then(fail, function(result) {
+				assert.ok(!!result.args);
+				assert.equal(result.args.data, 'my request body');
+				assert.equal(result.args.headers['X-Foo'], 'bar');
+				assert.equal(result.args.log, false);
+				assert.ok(!!result.args.query);
+				assert.equal(result.args.query.param, 'value');
+				assert.equal(result.args.responseType, 'text');
+				assert.equal(result.args.timeout, 1500);
+				assert.ok(result.xhr instanceof MockXMLHttpRequest);
+			});
 	});
 
 	tests['test \'X-Requested-With\' is set'] = getTimeoutable(function() {
