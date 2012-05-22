@@ -11,7 +11,14 @@
 
 /*global define window localStorage */
 
-define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require, dojo, mAuth){
+define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
+
+	// temporary to break dependency on orion/auth -- see bug 380303
+	// in progress
+	var mAuth = {
+		handleAuthenticationError: function(){}
+	};
+
 
 	/**
 	 * Constructs a new preferences instance. This constructor is not
