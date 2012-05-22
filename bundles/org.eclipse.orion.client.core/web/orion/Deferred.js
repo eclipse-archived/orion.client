@@ -77,7 +77,7 @@ define(function() {
 				if (listener[state]) {
 					try {
 						var listenerResult = listener[state](result);
-						if (listenerResult && typeof listenerResult.then === "function") {
+						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
 							listenerResult.then(deferred.resolve, deferred.reject, deferred.update);
 							continue;
 						}
@@ -94,18 +94,18 @@ define(function() {
 
 		this.resolve = function(value) {
 			if (state) {
-				throw new Error("'" + state + "' already called");
+				throw new Error("'" + state + "' already called"); //$NON-NLS-0$
 			}
-			state = "resolve";
+			state = "resolve"; //$NON-NLS-0$
 			result = value;
 			queueNotification(notify);
 		};
 
 		this.reject = function(error) {
 			if (state) {
-				throw new Error("'" + state + "' already called");
+				throw new Error("'" + state + '\' already called'); //$NON-NLS-0$
 			}
-			state = "reject";
+			state = "reject"; //$NON-NLS-0$
 			result = error;
 			queueNotification(notify);
 		};
@@ -146,7 +146,7 @@ define(function() {
 		};
 
 		this.state = function() {
-			return state || "wait";
+			return state || "wait"; //$NON-NLS-0$
 		};
 		
 		this.all = function(promises, optOnError) {
@@ -187,7 +187,7 @@ define(function() {
 	}
 	Deferred.when = function(value, onResolve, onReject, onUpdate) {
 		var promise, deferred;
-		if (value && typeof value.then === "function") {
+		if (value && typeof value.then === "function") { //$NON-NLS-0$
 			promise = value;
 		} else {
 			deferred = new Deferred();

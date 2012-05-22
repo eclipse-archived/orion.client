@@ -24,18 +24,18 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	var extensionCommandUtils  = {};
 	
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var nonHash = window.location.href.split('#')[0];
+	var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 	var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
-	    if (item === null || typeof(item) !== 'object') {
+	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$
 	        return item;
 	      }
 	
 	    var temp = item.constructor(); // changed
 	
 	    for(var key in item){
-			if(key!=="children" && key!=="Children") {
+			if(key!=="children" && key!=="Children") { //$NON-NLS-1$ //$NON-NLS-0$
 				temp[key] = clone(item[key]);
 			}
 	    }
@@ -48,29 +48,29 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 */
 	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypes) {
 		function getEditors() {
-			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor");
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
 			var editors = [];
 			for (var i=0; i < serviceReferences.length; i++) {
-				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id");
+				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id"); //$NON-NLS-0$
 				editors.push({
 					id: id,
-					name: serviceRef.getProperty("name"),
-					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate")
+					name: serviceRef.getProperty("name"), //$NON-NLS-0$
+					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate") //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
 			return editors;
 		}
 
 		function getEditorOpenWith(serviceRegistry, editor) {
-			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith"); //$NON-NLS-0$
 			var types = [];
 			for (var i=0; i < openWithReferences.length; i++) {
 				var ref = openWithReferences[i];
-				if (ref.getProperty("editor") === editor.id) {
-					var ct = ref.getProperty("contentType");
+				if (ref.getProperty("editor") === editor.id) { //$NON-NLS-0$
+					var ct = ref.getProperty("contentType"); //$NON-NLS-0$
 					if (ct instanceof Array) {
 						types = types.concat(ct);
-					} else if (ct !== null && typeof ct !== "undefined") {
+					} else if (ct !== null && typeof ct !== "undefined") { //$NON-NLS-0$
 						types.push(ct);
 					}
 				}
@@ -78,9 +78,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			return types;
 		}
 		function getDefaultEditor(serviceRegistry) {
-			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith.default");
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith.default"); //$NON-NLS-0$
 			for (var i=0; i < openWithReferences.length; i++) {
-				return {editor: openWithReferences[i].getProperty("editor")};
+				return {editor: openWithReferences[i].getProperty("editor")}; //$NON-NLS-0$
 			}
 			return null;
 		}
@@ -95,12 +95,12 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			if (editorContentTypes.length) {
 				var properties = {
 					name: editor.name || editor.id,
-					id: "eclipse.openWithCommand." + editor.id,
+					id: "eclipse.openWithCommand." + editor.id, //$NON-NLS-0$
 					tooltip: editor.name,
 					contentType: editorContentTypes,
 					uriTemplate: editor.uriTemplate,
 					forceSingleItem: true,
-					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
+					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
 				};
 				fileCommands.push({properties: properties, service: {}});
 			}
@@ -121,8 +121,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				if (!match) {  // value doesn't matter, just the presence of the property is enough
 					value = item[key];
 					valid = true;
-				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string
-					if (!typeof(item[key] === 'string')) {
+				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string //$NON-NLS-0$
+					if (!typeof(item[key] === 'string')) { //$NON-NLS-0$
 						// can't pattern match on a non-string
 						return false;
 					}
@@ -130,11 +130,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						var patternMatch = new RegExp(match).exec(item[key]);
 						if (patternMatch) {
 							var firstMatch = patternMatch[0];
-							if (validationProperty.variableMatchPosition === "before") {
+							if (validationProperty.variableMatchPosition === "before") { //$NON-NLS-0$
 								value = item[key].substring(0, patternMatch.index);
-							} else if (validationProperty.variableMatchPosition === "after") {
+							} else if (validationProperty.variableMatchPosition === "after") { //$NON-NLS-0$
 								value = item[key].substring(patternMatch.index + firstMatch.length);
-							} else if (validationProperty.variableMatchPosition === "only") {
+							} else if (validationProperty.variableMatchPosition === "only") { //$NON-NLS-0$
 								value = firstMatch;
 							} else {  // "all"
 								value = item[key];
@@ -166,7 +166,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 								invalid = true;
 							}
 							if (invalid) {
-								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]);
+								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]); //$NON-NLS-0$
 							}
 						}
 					}
@@ -179,20 +179,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		function matchSinglePattern(item, propertyName, validationProperty, validator){
 			var value = validationProperty.match;
 			var key, keyLastSegments;
-			if (propertyName.indexOf("|") >= 0) {
+			if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
 				// the pipe means that any one of the piped properties can match
-				key = propertyName.substring(0, propertyName.indexOf("|"));
-				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1);
+				key = propertyName.substring(0, propertyName.indexOf("|")); //$NON-NLS-0$
+				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1); //$NON-NLS-0$
 				// if key matches, we can stop.  No match is not a failure, look in the next segments.
 				if (matchSinglePattern(item, key, validationProperty, validator)) {
 					return true;
 				} else {
 					return matchSinglePattern(item, keyLastSegments, validationProperty, validator);
 				}
-			} else if (propertyName.indexOf(":") >= 0) {
+			} else if (propertyName.indexOf(":") >= 0) { //$NON-NLS-0$
 				// the colon is used to drill into a property
-				key = propertyName.substring(0, propertyName.indexOf(":"));
-				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1);
+				key = propertyName.substring(0, propertyName.indexOf(":")); //$NON-NLS-0$
+				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1); //$NON-NLS-0$
 				// must have key and then check the next value
 				if (item[key]) {
 					return matchSinglePattern(item[key], keyLastSegments, validationProperty, validator);
@@ -216,7 +216,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							return false;
 						} 
 					} else {
-						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified.");
+						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified."); //$NON-NLS-1$ //$NON-NLS-0$
 						return false;
 					}
 				}
@@ -241,7 +241,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	
 		var validator = {info: info};
 		validator.validationFunction =  dojo.hitch(validator, function(items){
-			if (typeof validationItemConverter === "function") {
+			if (typeof validationItemConverter === "function") { //$NON-NLS-0$
 				items = validationItemConverter.call(this, items);
 			}
 			if (items) {
@@ -291,7 +291,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							if (!item[validationProperty.variableName]) {
 								variableExpansions[validationProperty.variableName] = this[validationProperty.variableName];
 							} else {
-								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata.");
+								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata."); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					}

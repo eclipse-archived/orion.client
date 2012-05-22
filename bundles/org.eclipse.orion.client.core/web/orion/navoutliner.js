@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer', 'orion/navigationUtils'], function(require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
+define(['i18n!navigate/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer', 'orion/navigationUtils'], function(messages, require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -26,29 +26,29 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 	NavOutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		var href, clazz, name;
 		if (item.directory) {
-			href = require.toUrl("navigate/table.html") + "#" + item.path;
-			clazz = "navlinkonpage";
+			href = require.toUrl("navigate/table.html") + "#" + item.path; //$NON-NLS-1$ //$NON-NLS-0$
+			clazz = "navlinkonpage"; //$NON-NLS-0$
 			name = item.name;
 		} else if (item.path) {
-			href = require.toUrl("edit/edit.html") + "#" + item.path;
-			clazz = "navlink";
+			href = require.toUrl("edit/edit.html") + "#" + item.path; //$NON-NLS-1$ //$NON-NLS-0$
+			clazz = "navlink"; //$NON-NLS-0$
 			name = item.name;
-		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) {
-			href = require.toUrl("navigate/table.html") + "#" + item.getProperty("top");
-			clazz = "navlinkonpage";
-			name = item.getProperty("Name");
+		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			href = require.toUrl("navigate/table.html") + "#" + item.getProperty("top"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			clazz = "navlinkonpage"; //$NON-NLS-0$
+			name = item.getProperty("Name"); //$NON-NLS-0$
 		} else {
 			href = "";
-			name = "Unknown item";
+			name = messages["Unknown item"];
 		}
-		if (href === "#") {
+		if (href === "#") { //$NON-NLS-0$
 			href="";
 		}
 
-		var col = dojo.create("td", null, tableRow, "last");
-		dojo.addClass(col, "mainNavColumn singleNavColumn");
-		var link = dojo.create("a", {href: href, className: clazz}, col, "only");
-		dojo.place(window.document.createTextNode(name), link, "only");
+		var col = dojo.create("td", null, tableRow, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.addClass(col, "mainNavColumn singleNavColumn"); //$NON-NLS-0$
+		var link = dojo.create("a", {href: href, className: clazz}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.place(window.document.createTextNode(name), link, "only"); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
 
@@ -73,19 +73,19 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 	 */
 	function NavigationOutliner(options) {
 		var parent = options.parent;
-		if (typeof(parent) === "string") {
+		if (typeof(parent) === "string") { //$NON-NLS-0$
 			parent = dojo.byId(parent);
 		}
-		if (!parent) { throw "no parent"; }
-		if (!options.serviceRegistry) {throw "no service registry"; }
+		if (!parent) { throw "no parent"; } //$NON-NLS-0$
+		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
 		var reg = options.serviceRegistry;
 		
 		var deleteFaveCommand = new mCommands.Command({
-			name: "Delete",
-			imageClass: "core-sprite-delete",
-			id: "eclipse.deleteFave",
+			name: "Delete", //$NON-NLS-0$
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "eclipse.deleteFave", //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = dojo.isArray(items) ? items : [items];
 				if (items.length === 0) {
@@ -100,19 +100,19 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 			},
 			callback: dojo.hitch(this, function(data) {
 				var items = dojo.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].name + "' from the favorites?" : "Are you sure you want to delete these " + items.length + " favorites?";
+				var confirmMessage = items.length === 1 ? dojo.string.substitute(messages["Are you sure you want to delete '${0}' from the favorites?"], [items[0].name]) : dojo.string.substitute(messages["Are you sure you want to delete these ${0} favorites?"], [items.length]);
 				if(window.confirm(confirmMessage)) {
 					for (var i=0; i<items.length; i++) {
-						options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path);
+						options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path); //$NON-NLS-0$
 					}
 				}
 			})
 		});		
 		var renameFaveCommand = new mCommands.Command({
-			name: "Rename",
-			imageClass: "core-sprite-rename",
-			id: "eclipse.renameFave",
-			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]),
+			name: messages['Rename'],
+			imageClass: "core-sprite-rename", //$NON-NLS-0$
+			id: "eclipse.renameFave", //$NON-NLS-0$
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(items) {
 				items = dojo.isArray(items) ? items : [items];
 				return items.length === 1 && items[0].isFavorite;
@@ -120,16 +120,16 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 			callback: dojo.hitch(this, function(data) {
 				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
 				
-				if (data.parameters && data.parameters.valueFor('name')) {
-					reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+					reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			})
 		});
-		this.commandService = this._registry.getService("orion.page.command");
+		this.commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		// register commands 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
-		var favoritesService = this._registry.getService("orion.core.favorite");
+		var favoritesService = this._registry.getService("orion.core.favorite"); //$NON-NLS-0$
 		var navoutliner = this;
 
 		if (favoritesService) {
@@ -139,7 +139,7 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 				this.render(favs.navigator, registry);
 			}));
 
-			favoritesService.addEventListener("favoritesChanged", dojo.hitch(navoutliner,
+			favoritesService.addEventListener("favoritesChanged", dojo.hitch(navoutliner, //$NON-NLS-0$
 				function(favs) {
 					// TODO temporary code, get rid of old "external favorites"
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=379435
@@ -159,25 +159,25 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 			var commandService = this.commandService;
 
 			if (serviceRegistry) {
-				var allReferences = serviceRegistry.getServiceReferences("orion.core.file");
+				var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 				// top level folder outline if there is more than one file service.  We never show this if there is only one file service,
 				// because it's not an interesting concepts for users.
 				if (allReferences.length > 1) {
 					if (!this.fileSystemsSection) {
 						this.fileSystemsSection = new mSection.Section(this._parent, {
-							id: "fileSystemsSection",
-							title: "Places",
-							content: '<div id="fileSystemsContent"></div>',
-							preferenceService: serviceRegistry.getService("orion.core.preference"),
+							id: "fileSystemsSection", //$NON-NLS-0$
+							title: "Places", //$NON-NLS-0$
+							content: '<div id="fileSystemsContent"></div>', //$NON-NLS-0$
+							preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 							canHide: true,
 							useAuxStyle: true,
 							slideout: true
 						});
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
-					this.fileSystemsTable = this.explorer.createTree("fileSystemsContent", new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) {
-						if (typeof(item.getProperty) === "function" && item.getProperty("top")) {
-							return item.getProperty("top");
+					this.fileSystemsTable = this.explorer.createTree("fileSystemsContent", new mExplorer.SimpleFlatModel(allReferences, "fs", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
+						if (typeof(item.getProperty) === "function" && item.getProperty("top")) { //$NON-NLS-1$ //$NON-NLS-0$
+							return item.getProperty("top"); //$NON-NLS-0$
 						}
 						return "";
 					}));
@@ -187,37 +187,37 @@ define(['require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'ori
 			// first time setup
 			if (!this.favoritesSection) {
 				this.favoritesSection = new mSection.Section(this._parent, {
-					id: "favoritesSection",
-					title: "Favorites",
-					content: '<div id="favoritesContent"></div>',
-					preferenceService: serviceRegistry.getService("orion.core.preference"),
+					id: "favoritesSection", //$NON-NLS-0$
+					title: "Favorites", //$NON-NLS-0$
+					content: '<div id="favoritesContent"></div>', //$NON-NLS-0$
+					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: true,
 					useAuxStyle: true,
 					slideout: true
 				});
-				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection");
+				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection"); //$NON-NLS-0$
 				// add commands to the fave section heading
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent"));
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent"));
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent")); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent")); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
 				var selectionId = this.favoritesSection.selectionNode.id;
-				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, selections, this, "button");
+						commandService.renderCommands(selectionId, selectionTools, selections, this, "button"); //$NON-NLS-0$
 					}
 				});
 			}
 			if (favorites.length > 0) {
 				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
-				this.favoritesTable = this.explorer.createTree("favoritesContent", new mExplorer.SimpleFlatModel(favorites, "fav", function(item) {
+				this.favoritesTable = this.explorer.createTree("favoritesContent", new mExplorer.SimpleFlatModel(favorites, "fav", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 					return item.path || "";
 				}));
 				// TODO temporary hack from Libing 
 				this.explorer.getNavHandler()._clearSelection(false);
 			} else {
-				dojo.place("<p>You can create favorites by selecting any file or folder in the navigator and choosing <b>Make Favorite</b> from the More menu.</p>", "favoritesContent", "only");
+				dojo.place("<p>"+dojo.string.substitute(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu."], ["<b>"+messages["Make Favorite"]+"</b>"])+"</p>", "favoritesContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-0$
 			}
 		}
 	};//end navigation outliner prototype

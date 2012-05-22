@@ -16,7 +16,7 @@ define(['dojo', 'orion/treeModelIterator'], function(dojo, mTreeModelIterator){
 
 var exports = {};
 var userAgent = navigator.userAgent;
-var isPad = userAgent.indexOf("iPad") !== -1;
+var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
 
 exports.ExplorerNavHandler = (function() {
 	/**
@@ -58,7 +58,7 @@ exports.ExplorerNavHandler = (function() {
 	    if(!options || options.setFocus !== false){
 	    	parentDiv.focus();
 	    }
-		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) {
+		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) { //$NON-NLS-0$
             if (e.target) {// Firefox,  Chrome and Safari
                 if(e.target !== parentDiv){
     				return true;
@@ -90,14 +90,14 @@ exports.ExplorerNavHandler = (function() {
 			}
 		}));
 		this._listeners.push(keyListener);
-		var l1 = dojo.connect(parentDiv, "onblur", dojo.hitch(this, function (e) {
+		var l1 = dojo.connect(parentDiv, "onblur", dojo.hitch(this, function (e) { //$NON-NLS-0$
 			if(this.explorer.onFocus){
 				this.explorer.onFocus(false);
 			} else {
 				this.toggleCursor(null, false);
 			}
 		}));
-		var l2 = dojo.connect(parentDiv, "onfocus", dojo.hitch(this, function (e) {
+		var l2 = dojo.connect(parentDiv, "onfocus", dojo.hitch(this, function (e) { //$NON-NLS-0$
 			if(this.explorer.onFocus){
 				this.explorer.onFocus(true);
 			} else {
@@ -139,7 +139,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_getEventListeningDiv: function(){
-			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){
+			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){ //$NON-NLS-0$
 				return this.explorer.keyEventListeningDiv();
 			}
 			return dojo.byId(this.explorer._parentId);
@@ -213,7 +213,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		setSelection: function(model, toggling){
-			if(this._selectionPolicy === "cursorOnly"){
+			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
 				return;
 			}
 			if(!toggling){
@@ -299,11 +299,11 @@ exports.ExplorerNavHandler = (function() {
 		toggleCursor:  function(model, on){
 			var currentRow = this.getRowDiv(model);
 			if(currentRow){
-				dojo.toggleClass(currentRow, "treeIterationCursorRow", on);
+				dojo.toggleClass(currentRow, "treeIterationCursorRow", on); //$NON-NLS-0$
 			}
 			var currentgrid = this.getCurrentGrid(model);
 			if(currentgrid && currentgrid.domNode) {
-				dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on);
+				dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on); //$NON-NLS-0$
 			}
 		},
 		
@@ -416,7 +416,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var rowDiv = this.getRowDiv(model);
 			if(rowDiv){
-				dojo.toggleClass(rowDiv, "checkedRow", this._inSelection(model) < 0);
+				dojo.toggleClass(rowDiv, "checkedRow", this._inSelection(model) < 0); //$NON-NLS-0$
 			}
 		},
 		
@@ -503,7 +503,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!this._modelIterator.topLevel(curModel)){
 				this.cursorOn(curModel.parent);
 			//The cursor is now on a top level item which is collapsed. We need to ask the explorer is it wants to scope up.	
-			} else if (this.explorer.scopeUp && typeof this.explorer.scopeUp === "function"){
+			} else if (this.explorer.scopeUp && typeof this.explorer.scopeUp === "function"){ //$NON-NLS-0$
 				this.explorer.scopeUp();
 			}
 		},
@@ -538,14 +538,14 @@ exports.ExplorerNavHandler = (function() {
 			var currentGrid = this.getCurrentGrid(this._modelIterator.cursor());
 			if(currentGrid){
 				if(currentGrid.widget){
-					if(typeof currentGrid.onClick === "function"){
+					if(typeof currentGrid.onClick === "function"){ //$NON-NLS-0$
 						currentGrid.onClick();
-					} else if(typeof currentGrid.widget.focus === "function"){
+					} else if(typeof currentGrid.widget.focus === "function"){ //$NON-NLS-0$
 						currentGrid.widget.focus();
 					}
 				} else {
-					var evt = document.createEvent("MouseEvents");
-					evt.initMouseEvent("click", true, true, window,
+					var evt = document.createEvent("MouseEvents"); //$NON-NLS-0$
+					evt.initMouseEvent("click", true, true, window, //$NON-NLS-0$
 							0, 0, 0, 0, 0, e.ctrlKey, false, false, false, 0, null);
 					currentGrid.domNode.dispatchEvent(evt);
 				}

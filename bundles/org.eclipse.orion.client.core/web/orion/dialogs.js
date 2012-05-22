@@ -23,7 +23,7 @@ define([], function(){
 	 */
 	function DialogService(serviceRegistry) {
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService("orion.page.dialog", this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.page.dialog", this); //$NON-NLS-0$
 	}
 
 	DialogService.prototype = /** @lends orion.dialogs.DialogService.prototype */ {
