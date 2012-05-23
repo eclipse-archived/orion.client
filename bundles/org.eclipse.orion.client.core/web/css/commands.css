@@ -52,9 +52,9 @@
 }
 
 .commandButton {
-	color: #777;
-	border: 1px solid #CCC;
-	background-color: transparent;
+	color: #666;
+	border: 1px solid #DDD;
+	background-color: #EEE;
 	text-align: center;
 	vertical-align: baseline;
     cursor: pointer;
@@ -78,13 +78,13 @@
 }
 
 .commandMenu {
-    color: #777;
+    color: #666;
 	display: inline-block;
 	vertical-align: baseline;
 	margin: 0;
 	font-size:7pt;
-	border: 1px solid #CCC;
-	background-color: transparent;
+	border: 1px solid #DDD;
+	background-color: #EEE;
     cursor: pointer;
     border-radius:3px;
 }

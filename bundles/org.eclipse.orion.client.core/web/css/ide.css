@@ -120,21 +120,21 @@ a:hover {
 }
 
 .logo {
-	padding-top: 5px;
+	padding-top: 6px;
 	padding-right:5px;
 }
 
 .primaryNav {
 	font-size: 10px;
 	font-weight:bold;
-	color: #CCC;
-	padding-top: 7px;
+	color: #BFBFBF;
+	padding-top: 8px;
 	vertical-align: baseline;
 }
 
 .primaryNav a {
 	font-size: 10px;
-	color: #DDD;
+	color: #BFBFBF;
 	margin-right: 6px;
 	margin-left: 6px; 
 	vertical-align: baseline;
@@ -540,8 +540,8 @@ a:hover {
 	margin: 0;
 	border: 0;
 	background-color: #2e2e2e;
-	background: -webkit-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
-	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);	
+/*	background: -webkit-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
+	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);	Not sure about gradient - Linda to advise */
 	height: 28px;
 }
 
