@@ -778,13 +778,13 @@ Requisition.prototype.createInputArgTrace = function() {
   var i;
   this._args.forEach(function(arg) {
     for (i = 0; i < arg.prefix.length; i++) {
-      args.push({ arg: arg, char: arg.prefix[i], part: 'prefix' });
+      args.push({ arg: arg, 'char': arg.prefix[i], part: 'prefix' });
     }
     for (i = 0; i < arg.text.length; i++) {
-      args.push({ arg: arg, char: arg.text[i], part: 'text' });
+      args.push({ arg: arg, 'char': arg.text[i], part: 'text' });
     }
     for (i = 0; i < arg.suffix.length; i++) {
-      args.push({ arg: arg, char: arg.suffix[i], part: 'suffix' });
+      args.push({ arg: arg, 'char': arg.suffix[i], part: 'suffix' });
     }
   });
 
