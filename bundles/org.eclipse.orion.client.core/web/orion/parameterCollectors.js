@@ -212,6 +212,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 						options.rows = parm.lines;
 						options.type = "textarea"; //$NON-NLS-0$
 						field = dojo.create("textarea", options, parameterArea, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+						// esc only
+						keyHandler = dojo.hitch(this, function(event) {
+							if (event.keyCode === dojo.keys.ESCAPE) {
+								localClose();
+								dojo.stopEvent(event);
+							}
+						});
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
 						options.type = "checkbox"; //$NON-NLS-0$
 						if (parm.value) {
