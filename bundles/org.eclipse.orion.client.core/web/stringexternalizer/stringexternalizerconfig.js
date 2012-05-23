@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPrompterDialog'], function(dojo, mSection, mCommands){
+define(['i18n!stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands){
 	function StringExternalizerConfig(options){
 		this.parent = options.parent;
 		this.fileClient = options.fileClient;
@@ -25,9 +25,9 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPromp
 	StringExternalizerConfig.prototype={
 			createCommands: function(){
 				var changeMessagesDirectory = new mCommands.Command({
-					name: "Change Directory",
-					tooltip: "Change messages directory",
-					id: "eclipse.changeMessagesDirectory",
+					name: messages["Change Directory"],
+					tooltip: messages["Change messages directory"],
+					id: "eclipse.changeMessagesDirectory", //$NON-NLS-0$
 					callback: function(data) {
 						var dialog = new orion.widgets.DirectoryPrompterDialog({
 							serviceRegistry: this.serviceRegistry,
@@ -54,7 +54,7 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPromp
 			render: function(root){
 				dojo.empty(this.parent);
 				if(!this.config){
-					var savedConfig = localStorage.getItem("StringExternalizerConfig_"+root.Location);
+					var savedConfig = localStorage.getItem("StringExternalizerConfig_"+root.Location); //$NON-NLS-0$
 					try{
 						this.config = JSON.parse(savedConfig);
 					}catch (e) {
@@ -63,82 +63,82 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPromp
 				}
 				if(!this.config.directory){
 					this.config.directory = {
-							Location: root.Location[root.Location.length-1]==='/' ? root.Location + "nls" : root.Location + "/nls",
-							Name: "nls",
+							Location: root.Location[root.Location.length-1]==='/' ? root.Location + "nls" : root.Location + "/nls", //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							Name: "nls", //$NON-NLS-0$
 							Parents: [root].concat(root.Parents)
 					};
 				}
 				if(!this.config.file){
-					this.config.file = "messages.js";
+					this.config.file = "messages.js"; //$NON-NLS-0$
 				}
 				if(!this.config.module){
-					this.config.module = "i18n!messages";
+					this.config.module = "i18n!messages"; //$NON-NLS-0$
 				}
 				if(this.config.marknls==null){
 					this.config.marknls = true;
 				}
 				var section = new mSection.Section(this.parent, {
-					id: "stringexternalizerConfigSection",
-					title: "Externalize Strings Configuration",
-					content: '<div id="stringexternalizerConfigContent"></div>',
-					preferenceService: this.serviceRegistry.getService("orion.core.preference"),
+					id: "stringexternalizerConfigSection", //$NON-NLS-0$
+					title: messages["Externalize Strings Configuration"],
+					content: '<div id="stringexternalizerConfigContent"></div>', //$NON-NLS-0$
+					preferenceService: this.serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: false,
 					useAuxStyle: true
 				});
 				
-				this.commandService.registerCommandContribution(section.actionsNode.id, "eclipse.changeMessagesDirectory", 1);
-				this.commandService.renderCommands(section.actionsNode.id, section.actionsNode.id, this.config, this, "button");
+				this.commandService.registerCommandContribution(section.actionsNode.id, "eclipse.changeMessagesDirectory", 1); //$NON-NLS-0$
+				this.commandService.renderCommands(section.actionsNode.id, section.actionsNode.id, this.config, this, "button"); //$NON-NLS-0$
 				
 				
-				var sectionContent = dojo.byId('stringexternalizerConfigContent');
-				var p = dojo.create("p", null, sectionContent);
-				var b = dojo.create("b", null, p);
-				dojo.place(window.document.createTextNode("Messages directory:"), b, "only");
-				dojo.create("br", null, p, "last");
+				var sectionContent = dojo.byId('stringexternalizerConfigContent'); //$NON-NLS-0$
+				var p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
+				var b = dojo.create("b", null, p); //$NON-NLS-0$
+				dojo.place(window.document.createTextNode(messages["Messages directory:"]), b, "only"); //$NON-NLS-1$
+				dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				if(this.config.directory.Parents){
 					for(var i=this.config.directory.Parents.length-1; i>=0; i--){
-						dojo.place(window.document.createTextNode(this.config.directory.Parents[i].Name + "/"), p, "last");
+						dojo.place(window.document.createTextNode(this.config.directory.Parents[i].Name + "/"), p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				} else if(this.config.directory.parent){
 					var parent = this.config.directory.parent;
 					var path = "";
 					while(parent){
-						path = parent.Name + "/" + path;
+						path = parent.Name + "/" + path; //$NON-NLS-0$
 						if(parent.Id){
 							break; // this is a project
 						}
 						parent = parent.parent;
 					}
-					dojo.place(window.document.createTextNode(path), p, "last");
+					dojo.place(window.document.createTextNode(path), p, "last"); //$NON-NLS-0$
 				}
-				dojo.place(window.document.createTextNode(this.config.directory.Name + "/"), p, "last");
+				dojo.place(window.document.createTextNode(this.config.directory.Name + "/"), p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				
-				var p = dojo.create("p", null, sectionContent);
-				var b = dojo.create("b", null, p);
-				dojo.place(window.document.createTextNode("Messages file name:"), b, "only");
-				dojo.create("br", null, p, "last");
-				var fileName = dojo.create("input", {type: "text", value: this.config.file, size: 40}, p, "last");
-				dojo.connect(fileName, "onchange", null, dojo.hitch(this, function(){
+				var p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
+				var b = dojo.create("b", null, p); //$NON-NLS-0$
+				dojo.place(window.document.createTextNode(messages["Messages file name:"]), b, "only"); //$NON-NLS-1$
+				dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				var fileName = dojo.create("input", {type: "text", value: this.config.file, size: 40}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.connect(fileName, "onchange", null, dojo.hitch(this, function(){ //$NON-NLS-0$
 						this.config.file = fileName.value;
 						this.configChanged(true);
 					}));
 				
-				var p = dojo.create("p", null, sectionContent);
-				var b = dojo.create("b", null, p);
-				dojo.place(window.document.createTextNode("Messages module:"), b, "only");
-				dojo.create("br", null, p, "last");
-				var moduleName = dojo.create("input", {type: "text", value: this.config.module, size: 40}, p, "last");
-				dojo.connect(moduleName, "onchange", null, dojo.hitch(this, function(){
+				var p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
+				var b = dojo.create("b", null, p); //$NON-NLS-0$
+				dojo.place(window.document.createTextNode(messages["Messages module:"]), b, "only"); //$NON-NLS-1$
+				dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				var moduleName = dojo.create("input", {type: "text", value: this.config.module, size: 40}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.connect(moduleName, "onchange", null, dojo.hitch(this, function(){ //$NON-NLS-0$
 					this.config.module = moduleName.value;
 					this.configChanged(false);
 				}));
 
-				var p = dojo.create("p", null, sectionContent);
-				var b = dojo.create("b", null, p);
-				dojo.place(window.document.createTextNode("Mark not exported as NON-NLS:"), b, "only");
-				dojo.create("br", null, p, "last");
-				var markNls = dojo.create("input", {type: "checkbox", checked: this.config.marknls}, p, "last");
-				dojo.connect(markNls, "onchange", null, dojo.hitch(this, function(){
+				var p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
+				var b = dojo.create("b", null, p); //$NON-NLS-0$
+				dojo.place(window.document.createTextNode(messages["Mark not exported as NON-NLS:"]), b, "only"); //$NON-NLS-1$
+				dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				var markNls = dojo.create("input", {type: "checkbox", checked: this.config.marknls}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.connect(markNls, "onchange", null, dojo.hitch(this, function(){ //$NON-NLS-0$
 					this.config.marknls = markNls.checked;
 					this.configChanged(false);
 				}));
@@ -146,14 +146,14 @@ define(['dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPromp
 			},
 			configChanged: function(changedFile){
 				var that = this;
-				localStorage.setItem("StringExternalizerConfig_"+this.config.root.Location, JSON.stringify(this.config));
+				localStorage.setItem("StringExternalizerConfig_"+this.config.root.Location, JSON.stringify(this.config)); //$NON-NLS-0$
 				if(changedFile){
-					this.config.fileLocation = this.config.directory.Location+"/root/"+this.config.file;
+					this.config.fileLocation = this.config.directory.Location+"/root/"+this.config.file; //$NON-NLS-0$
 					this.fileClient.read(this.config.fileLocation).then(function(contents){
-						var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents);
+						var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 						var messages = {};
 						if(match){
-							var messagesString = match[0].substring("define(".length, match[0].length-");".length);
+							var messagesString = match[0].substring("define(".length, match[0].length-");".length); //$NON-NLS-1$ //$NON-NLS-0$
 							messages = JSON.parse(messagesString);
 						}
 						that.config.messages = {};

@@ -22,12 +22,12 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			window.document.body.style.visibility = "visible";
+			window.document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			// Favorites
@@ -39,17 +39,17 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			
 //			var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favoriteProgress", toolbar: "outlinerToolbar", serviceRegistry: serviceRegistry});
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
 			
-			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient);
-			var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({parent: "favoriteProgress", serviceRegistry: serviceRegistry, fileClient: fileClient, commandService: commandService, setConfig: dojo.hitch(searchResultsGenerator, searchResultsGenerator.setConfig)});
+			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient); //$NON-NLS-0$
+			var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({parent: "favoriteProgress", serviceRegistry: serviceRegistry, fileClient: fileClient, commandService: commandService, setConfig: dojo.hitch(searchResultsGenerator, searchResultsGenerator.setConfig)}); //$NON-NLS-0$
 
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searchResultsGenerator);     
 
 			initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService, configOutliner);
 			searchResultsGenerator.loadResults(dojo.hash());
 			//every time the user manually changes the hash, we need to load the results with that name
-			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() {
+			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
 				initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService, configOutliner);
 				searchResultsGenerator.loadResults(dojo.hash());
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searchResultsGenerator);     
@@ -60,7 +60,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 	function extractQueryString(){
 		//In fire fox, dojo.hash() transforms white space as "%20", where we can use it if the hash contains "replace=xx xx"
 		var qStr = window.location.hash;
-		var index = qStr.indexOf("#");
+		var index = qStr.indexOf("#"); //$NON-NLS-0$
 		if(index >= 0){
 			qStr = qStr.substring(index+1);
 		}
@@ -74,7 +74,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 					if (serviceRegistry && commandService) {
 						mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
 					}
-					var breadCrumbDomNode = dojo.byId("location");
+					var breadCrumbDomNode = dojo.byId("location"); //$NON-NLS-0$
 					if (breadCrumbDomNode) {
 						//If current location is not the root, set the search location in the searcher
 						searcher.setLocationByMetaData(metadata);
@@ -83,13 +83,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 							container: breadCrumbDomNode,
 							resource: metadata ,
 							firstSegmentName: fileClient.fileServiceName(metadata.Location),
-							makeHref:function(seg,location){seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;}
+							makeHref:function(seg,location){seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;} //$NON-NLS-1$ //$NON-NLS-0$
 						});
 					}
 					configOutliner.render(metadata);
 				}),
 				dojo.hitch(this, function(error) {
-					window.console.error("Error loading file metadata: " + error.message);
+					window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
 				})
 		);
 	}
