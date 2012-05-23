@@ -504,6 +504,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			if(!this._modelIterator.topLevel(curModel)){
 				this.cursorOn(curModel.parent);
+				this.setSelection(curModel.parent, false);
 			//The cursor is now on a top level item which is collapsed. We need to ask the explorer is it wants to scope up.	
 			} else if (this.explorer.scopeUp && typeof this.explorer.scopeUp === "function"){ //$NON-NLS-0$
 				this.explorer.scopeUp();

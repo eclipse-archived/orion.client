@@ -11,8 +11,9 @@
 
 /*global define dojo dijit document console */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/breadcrumbs', 'orion/util', 'dijit/layout/ContentPane'], function(messages, 
-		require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mBreadcrumbs, mUtil) {
+
+define(['i18n!git/nls/gitmessages', 'require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/breadcrumbs', 'orion/util', 'orion/compare/compareUtils', 'dijit/layout/ContentPane'], function(
+		messages, require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mBreadcrumbs, mUtil, mCompareUtils) {
 
 	var orion = orion || {};
 	
@@ -1413,25 +1414,12 @@ orion.GitStatusController = (function() {
 		},
 		
 		openCompareEditor: function(itemModel){
-			var diffParam = "";
-			var baseUrl = require.toUrl("compare/compare.html") +"#"; //$NON-NLS-1$ //$NON-NLS-0$
-			var paramLength = 0;
-			if(this._model.isStaged(itemModel.type)){
-				diffParam = "readonly"; //$NON-NLS-0$
-				paramLength = 1;
-			} 
-			if(this._model.isConflict(itemModel.type)){
-				if(paramLength === 0)
-					diffParam = "conflict"; //$NON-NLS-0$
-				else
-					diffParam = diffParam + "&conflict"; //$NON-NLS-0$
-				paramLength++;	
-			}
-			if(paramLength > 0)
-				baseUrl = require.toUrl("compare/compare.html") + "?" + diffParam + "#"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var url = baseUrl + itemModel.diffURI;
-			return url;
-			//window.open(url,"");
+
+			var href = mCompareUtils.generateCompareHref(itemModel.diffURI, {
+				readonly: this._model.isStaged(itemModel.type),
+				conflict: this._model.isConflict(itemModel.type)
+			});
+			return href;
 		},
 		
 		handleServerErrors: function(errorResponse , ioArgs){
