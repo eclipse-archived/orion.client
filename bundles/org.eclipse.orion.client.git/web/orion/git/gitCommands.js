@@ -2417,7 +2417,7 @@ var exports = {};
 				}
 			},
 			visibleWhen: function(item) {
-				return mGitUtil.hasStagedChanges(item);
+				return true;
 			}
 		});	
 
