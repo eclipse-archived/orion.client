@@ -307,7 +307,7 @@ exports.CompareContainer = (function() {
 			var diffPos = this.getCurrentDiffPos();
 			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
 				readonly: this.options.readonly,
-				conflict: this._conflict,
+				conflict: this.options.hasConflicts,
 				block: diffPos.block ? diffPos.block : 1, 
 				change: diffPos.change ? diffPos.change : 0 
 			});
@@ -318,7 +318,7 @@ exports.CompareContainer = (function() {
 			var diffPos = this.getCurrentDiffPos();
 			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
 				readonly: !this.options.editableInComparePage,
-				conflict: this._conflict,
+				conflict: this.options.hasConflicts,
 				block: diffPos.block ? diffPos.block : 1, 
 				change: diffPos.change ? diffPos.change : 0 
 			});
