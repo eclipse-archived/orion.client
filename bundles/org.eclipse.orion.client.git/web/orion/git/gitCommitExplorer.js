@@ -11,8 +11,9 @@
 
 /*global define console document Image*/
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands'], 
-		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
+        'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/navigationUtils'], 
+		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands, mNavUtils) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -150,7 +151,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				id: "commitSection", //$NON-NLS-0$
 				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
 				iconClass: "gitImageSprite git-sprite-modification", //$NON-NLS-0$
-				content: '<list id="commitNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
+				content: '<list id="commitNode"></list>' //$NON-NLS-0$
 			});
 
 		    var list = dojo.byId( "commitNode" );		 //$NON-NLS-0$
@@ -228,78 +229,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			return [commitMessage0, commitMessage1];
 		};
 		
-		// Git diffs
-		
-		GitCommitExplorer.prototype.displayDiffs = function(commit){
-			var diffs = commit.Diffs;
-			
-			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
-			
-			var titleWrapper = new mSection.Section(tableNode, {
-				id: "diffSection", //$NON-NLS-0$
-				title: messages["Diffs"],
-				content: '<list id="diffNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
-			}); 
-			
-			if(diffs.length > 0){
-				this.renderDiff(diffs, 0, titleWrapper);
-			}
-		};
-
-		GitCommitExplorer.prototype.renderDiff = function(diffs, index, titleWrapper){
-			
-			// add diff details
-			var progress = titleWrapper.createProgressMonitor();
-			progress.begin("Rendering diff"); //$NON-NLS-0$
-			var diff = diffs[index];
-			var diffDetailsItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var diffDetailsHorizontalBox = dojo.create( "div", null, diffDetailsItem ); //$NON-NLS-0$
-
-			var detailsView = dojo.create( "div", {"style":"float:left"}, diffDetailsHorizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var diffPath = diff.OldPath;
-			if (diff.ChangeType === "ADD"){ //$NON-NLS-0$
-				diffPath = diff.NewPath;
-			}	
-			progress.worked(i18nUtil.formatMessage(messages["Rendering ${0}"], diffPath));
-			
-			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox, "last" ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox,"last" ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, diff, this, "tool", false);	 //$NON-NLS-0$
-			
-			// add inline compare view
-			
-			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var diffHorizontalBox = dojo.create( "div", null, diffItem ); //$NON-NLS-0$
-			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
-			
-			var diffOptions = {
-				commandSpanId: compareActionsArea.id,
-				diffProvider: diffProvider,
-				hasConflicts: false,
-				readonly: true,
-				complexURL: diff.DiffLocation,
-				callback : function(){progress.done();}
-			};
-			
-			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
-			var that = this;
-			inlineCompareContainer.startup( function(maxHeight){
-				var vH = 420;
-				if(maxHeight < vH){
-					vH = maxHeight;
-				}
-				dojo.style("diffArea_" + index, "height", vH + "px"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				if(index < (diffs.length -1 )){
-					that.renderDiff(diffs, index+1, titleWrapper);
-				}
-			});
-		};
-		
 		// Git tags
 
 		GitCommitExplorer.prototype.displayTags = function(commit){
@@ -312,7 +241,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
 				iconClass: "gitImageSprite git-sprite-tag", //$NON-NLS-0$
 				slideout: true,
-				content: '<list id="tagNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
+				content: '<list id="tagNode"></list>', //$NON-NLS-0$
+				canHide: true,
+				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 			}); 
 			
 			this.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.addTag", 100); //$NON-NLS-0$
@@ -337,6 +268,190 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 
 			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions"}, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool", false);	 //$NON-NLS-0$
+		};
+		
+		// Git diffs
+		
+		GitCommitExplorer.prototype.displayDiffs = function(commit){
+			
+			var that = this;
+			
+			var diffs = commit.Diffs;
+			
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
+			
+			var section = new mSection.Section(tableNode, {
+				id: "diffSection", //$NON-NLS-0$
+				title: messages["Diffs"],
+				content: '<div id="diffNode"></div>', //$NON-NLS-0$
+				canHide: true,
+				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
+			});
+			
+			var sectionItemActionScopeId = "diffSectionItemActionArea"; //$NON-NLS-0$
+			
+			DiffModel = (function() {
+				function DiffModel() {
+				}
+				
+				DiffModel.prototype = {
+					destroy: function(){
+					},
+					getRoot: function(onItem){
+						onItem(diffs);
+					},
+					getChildren: function(parentItem, onComplete){	
+						if (parentItem instanceof Array && parentItem.length > 0) {
+							onComplete(parentItem);
+						} else if (parentItem.Type === "Diff") {
+							onComplete([{parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
+							onComplete([]);
+						}
+					},
+					getId: function(/* item */ item){
+						if (item instanceof Array && item.length > 0) {
+							return "diffRoot"; //$NON-NLS-0$
+						} else if (item.Type === "Diff") {
+							return "diff" + item.DiffLocation; //$NON-NLS-0$
+						} else {
+							return "diffWidget" + item.DiffLocation; //$NON-NLS-0$
+						}
+					}
+				};
+				
+				return DiffModel;
+			}());
+			
+			DiffRenderer = (function() {
+				function DiffRenderer (options, explorer) {
+					this._init(options);
+					this.options = options;
+					this.explorer = explorer;
+					this.registry = options.registry;
+				}
+				
+				DiffRenderer.prototype = new mExplorer.SelectionRenderer();
+				
+				DiffRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
+					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
+					var diffActionsSpan = dojo.byId(tableRow.id + "DiffActionsWrapper"); //$NON-NLS-0$
+					var diffWidgetActionsSpan = dojo.byId(tableRow.id + "DiffWidgetActionsWrapper"); //$NON-NLS-0$
+					
+					if (diffActionsSpan || diffWidgetActionsSpan) {
+						if (isExpanded) {
+							dojo.style(diffActionsSpan, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.style(diffWidgetActionsSpan, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
+							dojo.style(diffActionsSpan, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.style(diffWidgetActionsSpan, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+						}
+					}
+				};
+
+				DiffRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
+					switch(col_no){
+					case 0:		
+						if (item.Type === "Diff"){
+							var td = document.createElement("td"); //$NON-NLS-0$
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							
+							var path = item.OldPath;
+						    var sprite = "git-sprite-modification"; //$NON-NLS-0$
+							if (item.ChangeType === "ADD"){ //$NON-NLS-0$
+								path = item.NewPath;
+								sprite = "git-sprite-addition"; //$NON-NLS-0$
+							} else if (item.ChangeType === "DELETE"){ //$NON-NLS-0$
+								sprite = "git-sprite-removal"; //$NON-NLS-0$
+							}
+							
+							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", sprite); //$NON-NLS-0$
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
+							
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
+							
+							return td;
+						} else {
+							var td = document.createElement("td"); //$NON-NLS-0$
+							td.colSpan = 2;
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
+
+							dojo.create( "div", { "id":"diffArea_" + item.parent.DiffLocation, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
+							window.setTimeout(function(){
+								
+								
+								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
+								var diffOptions = {
+									navGridHolder: navGridHolder,
+									commandSpanId: "diff" + item.parent.DiffLocation + "DiffWidgetActionsWrapper", //$NON-NLS-1$ //$NON-NLS-0$
+									diffProvider: diffProvider,
+									hasConflicts: false,
+									readonly: true,
+									editableInComparePage: true,
+									complexURL: item.parent.DiffLocation,
+									callback : function(){
+										dojo.empty("diff"+item.parent.DiffLocation+"DiffActionsWrapper");
+										that.commandService.renderCommands("itemLevelCommands", "diff" + item.parent.DiffLocation+"DiffActionsWrapper", item.parent, that, "tool", false);	 //$NON-NLS-0$
+										
+									}
+								};
+								
+								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.parent.DiffLocation, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
+								inlineCompareContainer.startup( function(maxHeight){
+									var vH = 420;
+									if(maxHeight < vH){
+										vH = maxHeight;
+									}
+									dojo.style("diffArea_" + item.parent.DiffLocation, "height", vH + "px"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								});
+							}, 500);
+							
+							return td;
+						}
+
+						break;
+					case 1:
+						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
+						if (item.Type === "Diff"){
+							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+							
+							actionsColumn.id = tableRow.id + "ActionsWwrapper"; //$NON-NLS-0$
+							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+							
+							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffWidgetActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							
+							return actionsColumn;
+						}
+						
+						break;
+					}
+				};
+				
+				return DiffRenderer;
+			}());
+			
+			DiffNavigator = (function() {
+				function DiffNavigator(registry, selection, parentId, actionScopeId) {
+					this.registry = registry;
+					this.checkbox = false;
+					this.parentId = parentId;
+					this.selection = selection;
+					this.actionScopeId = actionScopeId;
+					this.renderer = new DiffRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "DiffNavigator", checkbox: false}, this); //$NON-NLS-0$
+					this.createTree(this.parentId, new DiffModel());
+				}
+				
+				DiffNavigator.prototype = new mExplorer.Explorer();
+			
+				return DiffNavigator;
+			}());
+			
+			new DiffNavigator(this.registry, null, "diffNode", sectionItemActionScopeId); //$NON-NLS-0$
 		};
 
 		return GitCommitExplorer;
