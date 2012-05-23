@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the

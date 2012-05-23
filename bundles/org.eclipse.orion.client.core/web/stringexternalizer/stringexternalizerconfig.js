@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands){
+define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands){
 	function StringExternalizerConfig(options){
 		this.parent = options.parent;
 		this.fileClient = options.fileClient;

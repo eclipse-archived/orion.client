@@ -13,7 +13,7 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['i18n!search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils){
 
 	/**
 	 * Creates a new search client.

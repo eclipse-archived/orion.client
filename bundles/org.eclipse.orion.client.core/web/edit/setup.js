@@ -12,7 +12,7 @@
 /*jslint browser:true devel:true*/
 /*global define eclipse:true orion:true dojo dijit window*/
 
-define(['i18n!edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/breadcrumbs', 'orion/textview/textView', 'orion/textview/textModel', 

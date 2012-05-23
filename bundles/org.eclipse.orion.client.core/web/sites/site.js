@@ -15,7 +15,7 @@
 /*
  * Glue code for site.html
  */
-define(['i18n!sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
+define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/PageUtil',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
 	function(messages, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteClient, mSiteCommands, PageUtil) {

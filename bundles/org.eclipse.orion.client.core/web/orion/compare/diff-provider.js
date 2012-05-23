@@ -11,7 +11,7 @@
 
 /*global define console */
 
-define(['i18n!compare/nls/messages', 'dojo', 'orion/auth'], function(messages, dojo, mAuth) {
+define(['i18n!orion/compare/nls/messages', 'dojo', 'orion/auth'], function(messages, dojo, mAuth) {
 
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		var clientDeferred = new dojo.Deferred();

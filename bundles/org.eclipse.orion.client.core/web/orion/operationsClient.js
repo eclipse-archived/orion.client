@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  /*globals define console setTimeout*/
-define(['i18n!operations/nls/messages', "orion/auth", "orion/Deferred"], function(messages, mAuth, Deferred){
+define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], function(messages, mAuth, Deferred){
 	
 	function _doServiceCall(operationsService, funcName, funcArgs) {
 		var clientDeferred = new Deferred();

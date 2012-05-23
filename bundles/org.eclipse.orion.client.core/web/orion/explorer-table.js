@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navigationUtils', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navigationUtils', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
 		function(messages, require, dojo, dijit, mUtil,  mExplorer, mNavUtils, mBreadcrumbs, mFileCommands, mExtensionCommands){
 
 	/**

@@ -14,7 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['i18n!navigate/nls/messages', "orion/Deferred", "orion/auth"], function(messages, Deferred, mAuth){
+define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth"], function(messages, Deferred, mAuth){
 
 	/**
 	 * This helper method implements invocation of the service call,

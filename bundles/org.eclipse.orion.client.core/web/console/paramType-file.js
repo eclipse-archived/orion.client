@@ -12,7 +12,7 @@
 
 /*global define*/
 
-define(['i18n!console/nls/messages', 'dojo', 'console/current-directory', 'orion/widgets/Console'],
+define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 'orion/widgets/Console'],
 	function(messages, dojo, mCurrentDirectory, mConsole) {
 
 	var orion = {};

@@ -11,7 +11,7 @@
 /*global define orion*/
 /*jslint browser:true */
 
-define(['i18n!sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/sites/siteMappingsTable',
+define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/sites/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
