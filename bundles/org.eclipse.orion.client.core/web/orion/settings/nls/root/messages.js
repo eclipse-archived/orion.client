@@ -96,7 +96,7 @@ define({
 	" plugin": " plugin",
 	"Reloaded ": "Reloaded ",
 	"Uninstalled ": "Uninstalled ",
-	"Are you sure you want to uninstall \'": "Are you sure you want to uninstall \'",
+	"Are you sure you want to uninstall '": "Are you sure you want to uninstall '",
 	"Services": "Services",
 	"Value": "Value",
 	"JavaScript Object": "JavaScript Object",
