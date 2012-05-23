@@ -355,14 +355,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 						if (item.Type === "Diff"){
 							var td = document.createElement("td"); //$NON-NLS-0$
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-							var expandImage = this.getExpandImage(tableRow, div); //$NON-NLS-0$
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
 							var path = item.OldPath;
+						    var sprite = "git-sprite-modification"; //$NON-NLS-0$
 							if (item.ChangeType === "ADD"){ //$NON-NLS-0$
 								path = item.NewPath;
-							}	
+								sprite = "git-sprite-addition"; //$NON-NLS-0$
+							} else if (item.ChangeType === "DELETE"){ //$NON-NLS-0$
+								sprite = "git-sprite-removal"; //$NON-NLS-0$
+							}
+							
+							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", sprite); //$NON-NLS-0$
+							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
 							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
