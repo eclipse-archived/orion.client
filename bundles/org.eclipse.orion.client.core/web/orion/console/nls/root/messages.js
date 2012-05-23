@@ -20,5 +20,5 @@ define({
 	"File": "File",
 	"Show a list of files in the current directory": "Show a list of files in the current directory",
 	"Print current directory": "Print current directory",
-	"\'${0}\' is not valid": "\'${0}\' is not valid"
+	"'${0}' is not valid": "'${0}' is not valid"
 });

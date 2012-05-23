@@ -39,7 +39,7 @@ define({
 	"Edit the site configuration": "Edit the site configuration",
 	"Delete": "Delete",
 	"Delete the site configuration": "Delete the site configuration",
-	"Are you sure you want to delete the site configuration \'": "Are you sure you want to delete the site configuration \'",
+	"Are you sure you want to delete the site configuration '": "Are you sure you want to delete the site configuration '",
 	"Add to site": "Add to site",
 	"Add the file to this site": "Add the file to this site",
 	"View": "View",

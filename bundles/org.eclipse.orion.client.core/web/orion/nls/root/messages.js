@@ -22,7 +22,8 @@ define({
 	" is already a favorite.": " is already a favorite.",
 	"Add to the favorites list": "Add to the favorites list",
 	"Make Favorite": "Make Favorite",
-	"Can\'t search: no search service is available": "Can\'t search: no search service is available",
+	"Unknown item": "Unknown item",
+	"Can't search: no search service is available": "Can't search: no search service is available",
 	"could not find banner parent, id was ": "could not find banner parent, id was ",
 	" has been added to the favorites list.": " has been added to the favorites list.",
 	"Related": "Related",
@@ -56,5 +57,8 @@ define({
 	"Orion Home": "Orion Home",
 	"Operations - Press spacebar to show current operations": "Operations - Press spacebar to show current operations",
 	"no service registry": "no service registry",
+	"Are you sure you want to delete '${0}' from the favorites?": "Are you sure you want to delete '${0}' from the favorites?",
+	"Are you sure you want to delete these ${0} favorites?": "Are you sure you want to delete these ${0} favorites?",
+	"You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.": "You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.",
 	"Tasks": "Tasks"
 });
