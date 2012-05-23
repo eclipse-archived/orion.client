@@ -458,19 +458,27 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			id: "eclipse.newFile", //$NON-NLS-0$
 			parameters: newFileNameParameters,
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createFile(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item, true);}),
-							errorHandler);
+				// Check selection service first, then use the provided item
+				explorer.selection.getSelections(function(selections) {
+					var item;
+					if (selections.length === 1 && selections[0].Directory) {
+						item = selections[0];
+					} else {
+						item = forceSingleItem(data.items);
 					}
-				};
-				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
-				} else {
-					getNewItemName(item, data.domNode.id, messages['New File'], createFunction);
-				}
+					var createFunction = function(name) {
+						if (name) {
+							fileClient.createFile(item.Location, name).then(
+								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
+								errorHandler);
+						}
+					};
+					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+					} else {
+						getNewItemName(item, data.domNode.id, messages['New File'], createFunction);
+					}
+				});
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -486,19 +494,27 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			id: "eclipse.newFolder", //$NON-NLS-0$
 			parameters: newFolderNameParameters,
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item, true);}),
-							errorHandler);
+				// Check selection service first, then use the provided item
+				explorer.selection.getSelections(function(selections) {
+					var item;
+					if (selections.length === 1 && selections[0].Directory) {
+						item = selections[0];
+					} else {
+						item = forceSingleItem(data.items);
 					}
-				};
-				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
-				} else {
-					getNewItemName(item, data.domNode.id, messages['New Folder'], createFunction);
-				}
+					var createFunction = function(name) {
+						if (name) {
+							fileClient.createFolder(item.Location, name).then(
+								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
+								errorHandler);
+						}
+					};
+					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+					} else {
+						getNewItemName(item, data.domNode.id, messages['New Folder'], createFunction);
+					}
+				});
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -770,7 +786,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				tooltip: messages["Copy the selected items to the copy/paste buffer"],
 				id: "eclipse.copySelections", //$NON-NLS-0$
 				callback: function() {
-					commandService.getSelectionService().getSelections(function(selections) {
+					explorer.selection.getSelections(function(selections) {
 						bufferedSelection = selections;
 					});
 				}
@@ -781,32 +797,44 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				name: messages["Paste Items"],
 				tooltip: messages["Paste items from the copy/paste buffer"],
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
-				callback: function() {
-					if (bufferedSelection.length > 0) {
-						// Do not allow pasting into the Root of the Workspace
-						if (mUtil.isAtRoot(this.treeRoot.Location)) {
-							errorHandler(messages["Cannot paste into the Workspace root"]);
-							return;
+				visibleWhen: function(item) {
+					item = forceSingleItem(item);
+					return item.Directory && !mUtil.isAtRoot(item.Location);},
+				callback: function(data) {
+					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
+					explorer.selection.getSelections(function(selections) {
+						var item;
+						if (selections.length === 1 && selections[0].Directory) {
+							item = selections[0];
+						} else {
+							item = forceSingleItem(data.items);
 						}
-						for (var i=0; i<bufferedSelection.length; i++) {
-							var location = bufferedSelection[i].Location;
-							var name = null;
-							if (location) {
-								if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
-									name = window.prompt(dojo.string.substitute(messages['Enter a new name for \'${0}\''], [bufferedSelection[i].Name]), dojo.string.substitute(messages['Copy of ${0}'], [bufferedSelection[i].Name]));
-									// user cancelled?  don't copy this one
-									if (!name) {
-										location = null;
-									}
-								}
+						if (bufferedSelection.length > 0) {
+							// Do not allow pasting into the Root of the Workspace
+							if (mUtil.isAtRoot(item.Location)) {
+								errorHandler(messages["Cannot paste into the root"]);
+								return;
+							}
+							for (var i=0; i<bufferedSelection.length; i++) {
+								var location = bufferedSelection[i].Location;
+								var name = null;
 								if (location) {
-									fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
-										this.changedItem(this.treeRoot, true);
-									}), errorHandler);
+									if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === item.Location) {
+										name = window.prompt(dojo.string.substitute(messages['Enter a new name for \'${0}\''], [bufferedSelection[i].Name]), dojo.string.substitute(messages['Copy of ${0}'], [bufferedSelection[i].Name]));
+										// user cancelled?  don't copy this one
+										if (!name) {
+											location = null;
+										}
+									}
+									if (location) {
+										fileClient.copyFile(location, item.Location, name).then(dojo.hitch(explorer, function() {
+											this.changedItem(item, true);
+										}), errorHandler);
+									}
 								}
 							}
 						}
-					}
+					});
 				}
 			});
 		commandService.addCommand(pasteFromBufferCommand);		
