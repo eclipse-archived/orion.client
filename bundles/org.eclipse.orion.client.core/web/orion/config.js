@@ -343,11 +343,6 @@ ConfigImpl = /** @ignore */ (function() {
 		}
 	}
 	ConfigImpl.prototype = {
-		'delete': function() { //$NON-NLS-0$
-			var self = this;
-			this.store.remove(this.pid);
-			self.factory.notifyDeleted(self);
-		},
 		getPid: function() {
 			return this.pid;
 		},
@@ -358,6 +353,11 @@ ConfigImpl = /** @ignore */ (function() {
 				props[PROPERTY_PID] = this.pid;
 			}
 			return props;
+		},
+		remove: function() { //$NON-NLS-0$
+			var self = this;
+			this.store.remove(this.pid);
+			self.factory.notifyDeleted(self);
 		},
 		update: function(props) {
 			setProperties(this, props);
@@ -386,6 +386,12 @@ ConfigImpl = /** @ignore */ (function() {
 	 * @methodOf orion.cm.Configuration.prototype
 	 * @returns {orion.cm.ConfigurationProperties} A private copy of this Configuration's properties, or <code>null</code>
 	 * if the configuration has never been updated.
+	 */
+	/**
+	 * @name remove
+	 * @methodOf orion.cm.Configuration.prototype
+	 * Deletes this Configuration. Any {@link orion.cm.ManagedService} that registered interest in this Configuration's 
+	 * PID will have its {@link orion.cm.ManagedService#updated} method called with <code>null</code> properties. 
 	 */
 	/**
 	 * @name update
