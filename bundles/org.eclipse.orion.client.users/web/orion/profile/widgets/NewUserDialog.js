@@ -10,15 +10,15 @@
  ******************************************************************************/
 /* global dojo dijit */
 /* jslint browser:true */
-define(['dojo', 'dijit', 'dijit/Dialog', 'text!orion/profile/widgets/templates/NewUserDialog.html'], function(dojo, dijit) {
+define(['i18n!profile/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'text!orion/profile/widgets/templates/NewUserDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param func
  */
-dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
+dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], { //$NON-NLS-0$
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'profile/widgets/templates/NewUserDialog.html'),
-	title : "Create New User",
+	templateString : dojo.cache('orion', 'profile/widgets/templates/NewUserDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
+	title : messages["Create New User"],
 
 	constructor : function() {
 		this.inherited(arguments);
@@ -36,7 +36,7 @@ dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 	},
 	postCreate : function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
+		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === dojo.keys.ENTER) {
 				this.domNode.focus(); // FF throws DOM error if textfield is
 										// focused after dialog closes
@@ -47,18 +47,18 @@ dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 	execute : function() {
 
 		if (this.userName.value === "") {
-			alert("Provide user login!");
+			alert(messages["Provide user login!"]);
 			return;
 		}
 
 		if (this.password.value !== this.passwordRetype.value) {
-			alert("Passwords don't match!");
+			alert(messages["Passwords don't match!"]);
 			return;
 		}
 		
 		var dialog = this;
 		
-		this.registry.getService("orion.core.user").createUser(dialog.userName.value, dialog.password.value).then(dialog.func, function(response) {
+		this.registry.getService("orion.core.user").createUser(dialog.userName.value, dialog.password.value).then(dialog.func, function(response) { //$NON-NLS-0$
 		  var message = response.message;
 		  try{
 			  if(response.responseText){
@@ -71,7 +71,7 @@ dojo.declare("orion.profile.widgets.NewUserDialog", [ dijit.Dialog ], {
 			if (message) {
 				alert(message);
 			} else {
-				alert("User could not be created.");
+				alert(messages["User could not be created."]);
 			}
 		});
 		

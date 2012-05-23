@@ -27,31 +27,31 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 			
 	UsersClient.prototype = /**@lends orion.profile.usersClient.UsersClient.prototype */ {
 		getUserInfo: function(userURI, onLoad){
-			return this._doServiceCall("getUserInfo", arguments);
+			return this._doServiceCall("getUserInfo", arguments); //$NON-NLS-0$
 		},
 		getUsersList : function(onLoad) {
-			return this._doServiceCall("getUsersList", arguments);
+			return this._doServiceCall("getUsersList", arguments); //$NON-NLS-0$
 		},
 		deleteUser : function(userURI, onLoad) {
-			return this._doServiceCall("deleteUser", arguments);
+			return this._doServiceCall("deleteUser", arguments); //$NON-NLS-0$
 		},
 		createUser : function(userName, password, onLoad, onError) {
-			return this._doServiceCall("createUser", arguments);
+			return this._doServiceCall("createUser", arguments); //$NON-NLS-0$
 		},
 		updateUserInfo: function(userUri, data, onLoad){
-			return this._doServiceCall("updateUserInfo", arguments);
+			return this._doServiceCall("updateUserInfo", arguments); //$NON-NLS-0$
 		},
 		resetUserPassword: function(login, password, onLoad){
-			return this._doServiceCall("resetUserPassword", arguments);
+			return this._doServiceCall("resetUserPassword", arguments); //$NON-NLS-0$
 		},
 		initProfile: function(userURI, pluginsEventName, dataEventName){
-			return this._doServiceCall("initProfile", arguments);
+			return this._doServiceCall("initProfile", arguments); //$NON-NLS-0$
 		},
 		fire: function(action, url, jsonData){
-			return this._doServiceCall("fire", arguments);
+			return this._doServiceCall("fire", arguments); //$NON-NLS-0$
 		},
 		getDivContent: function() {
-			return this._doServiceCall("getDivContent", arguments);
+			return this._doServiceCall("getDivContent", arguments); //$NON-NLS-0$
 		},
 			
 		/**
@@ -61,7 +61,7 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		 */
 		_doServiceCall: function(funcName, funcArgs) {
 			var clientDeferred = new dojo.Deferred();
-			var usersService = this.serviceRegistry.getService("orion.core.user");
+			var usersService = this.serviceRegistry.getService("orion.core.user"); //$NON-NLS-0$
 			usersService[funcName].apply(usersService, funcArgs).then(
 				//on success, just forward the result to the client
 				function(result) {
