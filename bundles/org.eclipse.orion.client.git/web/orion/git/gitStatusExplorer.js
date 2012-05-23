@@ -17,6 +17,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 	
 	var exports = {};
 	
+	var conflictTypeStr = "Conflicting"; //$NON-NLS-0$
+	
+	function isConflict(type){
+		return type === conflictTypeStr;
+	};
+	
 	var GitStatusModel = (function() {
 		function GitStatusModel() {
 			this.selectedFileId = undefined;
@@ -98,10 +104,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			getGroupData: function(groupName){
 				return this.items[groupName];
-			},
-			
-			isConflict: function(type){
-				return type === this.conflictType;
 			},
 			
 			isStaged: function(type){
@@ -283,7 +285,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 											indexURI:groupData[j].Git.IndexLocation,
 											diffURI:groupData[j].Git.DiffLocation,
 											CloneLocation:this._model.items.CloneLocation,
-											conflicting:this._model.isConflict(renderType)
+											conflicting:isConflict(renderType)
 						});
 					}
 				} 
@@ -419,13 +421,14 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
+							var hasConflict = isConflict(item.parent.type);
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
 									navGridHolder: navGridHolder,
 									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
 									diffProvider: diffProvider,
-									hasConflicts: false,
+									hasConflicts: hasConflict,
 									readonly: true,
 									editableInComparePage: true,
 									complexURL: item.diffUri,
@@ -601,6 +604,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
+							var hasConflict = isConflict(item.parent.type);
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
@@ -608,7 +612,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									navGridHolder: navGridHolder,
 									commandSpanId: "staged" + item.parent.name + "compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
 									diffProvider: diffProvider,
-									hasConflicts: false,
+									hasConflicts: hasConflict,
 									readonly: true,
 									complexURL: item.diffUri,
 									callback : function(){}
