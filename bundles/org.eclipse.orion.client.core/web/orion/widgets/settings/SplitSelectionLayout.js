@@ -23,13 +23,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		templateString: '<div style="height:100%;">' +  //$NON-NLS-0$
 							'<div data-dojo-type="dijit.layout.BorderContainer" style="height:100%;" data-dojo-props="design:\'heading\', gutters:false, liveSplitters:false">' +  //$NON-NLS-0$
 								'<div class="auxpane" id="categories" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:\'leading\', splitter:false"  style="width: 150px;">' +  //$NON-NLS-0$
-									'<div id="categoryNode">' + '<h1 id="content-title">'+messages['Categories']+'</h1>' +  //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+									'<div id="categoryNode" class="auxPadding" style="padding-top:10px;">' + 
 										'<ul class="navbar" data-dojo-attach-point="navbar" role="tablist" aria-labelledby="content-title"></ul>' +  //$NON-NLS-0$
 									'</div>' +  //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
 								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'">' +  //$NON-NLS-0$
 									'<div data-dojo-attach-point="mainNode" class="settings" role="tabpanel">' +  //$NON-NLS-0$
-									'<div data-dojo-attach-point="table" class="displayTable">' +  //$NON-NLS-0$
+									'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
 								'</div>' +  //$NON-NLS-0$
 							'</div>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$

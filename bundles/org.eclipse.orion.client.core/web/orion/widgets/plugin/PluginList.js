@@ -20,10 +20,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
 		templateString: '<div>' +  //$NON-NLS-0$
-							'<div class="pluginwrapper">' + //$NON-NLS-0$
-								'<div class="pluginTitle" data-dojo-attach-point="pluginTitle"></div>' + //$NON-NLS-0$
-								'<div class="pluginCount" data-dojo-attach-point="pluginCount">0</div>' + //$NON-NLS-0$
-					        '</div>' + //$NON-NLS-0$
+							'<div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor" data-dojo-attach-point="pluginTitle" style="float:left;"></div><div class="pluginCount" data-dojo-attach-point="pluginCount" style="float:left;;">0</div></div>' + //$NON-NLS-2$ //$NON-NLS-0$
+
 					        '<div class="displaytable">' + //$NON-NLS-0$
 								'<div class="plugin-settings">' + //$NON-NLS-0$
 									'<list style="overflow:hidden;" data-dojo-attach-point="pluginSettingsList"></list>' + //$NON-NLS-0$
