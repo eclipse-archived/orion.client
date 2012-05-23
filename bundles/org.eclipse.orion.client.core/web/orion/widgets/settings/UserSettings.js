@@ -21,8 +21,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		// templateString: '<input type="text" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
 		
 		templateString: '<div>' +  //$NON-NLS-0$
-							'<div data-dojo-attach-point="table" class="displayTable">' +  //$NON-NLS-0$
-								'<h1 id="General">'+messages['User Profile']+'</h1>' +  //$NON-NLS-2$ //$NON-NLS-0$
+							'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
+								'<div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor">'+messages['User Profile']+'</div></div>' + //$NON-NLS-2$ //$NON-NLS-0$
 								'<div data-dojo-attach-point="sections">' + //$NON-NLS-0$
 								'</sections>' + //$NON-NLS-0$
 							'</div>' + //$NON-NLS-0$

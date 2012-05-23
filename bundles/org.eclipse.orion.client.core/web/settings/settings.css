@@ -4,12 +4,14 @@
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 @import "../css/ide.css";
+@import "../css/sections.css";
 @import "../css/breadcrumbs.css";
 @import "../css/commands.css";
 @import "./services.css";
 
 html,body {
 	height: 100%;
+	font: 8pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
 }
 
 h1 {
@@ -85,10 +87,10 @@ button {
 	font-size: 90%;
 	outline: none;
 	padding: 7px 0;
-	text-align: right;
-	padding-right: 20px;
-	cursor:pointer;
-	margin: 0; 
+	/* text-align: right; */
+	padding-left: 20px;
+	cursor: pointer;
+	margin-right: 8px;
 	list-style: none;
 }
 
@@ -179,7 +181,7 @@ ul,menu,dir {
 
 .settings section {
 	color: #666;
-	border-bottom: 1px dotted #BFBFBF;
+	border-bottom: 1px solid whiteSmoke;
 	display: -webkit-box;
 	display: -moz-box;
 	margin-top: 17px;
@@ -193,6 +195,7 @@ ul,menu,dir {
 	vertical-align: middle;
 	width: 170px;
 	padding-right: 10px;
+	padding-left:10px;
 }
 
 .settings section>div {
@@ -287,8 +290,8 @@ div.page section:last-child {
 }
 
 .plugin-list-item {
-	padding-top: 20px;
-	width: 100%;
+	padding: 10px;
+	/* width: 100%; */
 }
 
 list,grid {
@@ -373,15 +376,15 @@ list>*,grid>* {
 }
 
 .pluginCount {
-	padding: 3px;
+	padding: 2px;
 	border-radius: 4px;
-	border: 1px solid #AAA;
+	border: 1px solid #CCC;
 	background: white;
 	float: left;
 	color: #AAA;
 	text-align: center;
 	font-size: 8px;
-	font-weight: bold;
+	font-weight: normal;
 	margin-left: 5px;
 }
 
@@ -394,9 +397,9 @@ list>*,grid>* {
 	color: #AAA;
 	text-align: center;
 	font-size: 8px;
-	font-weight: bold;
+	font-weight: normal;
 	margin-left: 5px;
-	border: 1px solid #AAA;
+	border: 1px solid #CCC;
 }
 
 .plugin-action-area {
@@ -416,7 +419,7 @@ list>*,grid>* {
 }
 
 .plugin-service-item {
-	width: 100%;
+	padding-left:10px;
 	min-width:700px;
 	/* margin-left: 63px; */
 }
@@ -452,7 +455,7 @@ input, textarea, select {
 }
 
 .toggleOff:hover{
-	background:orange;
+	background:#FEE49A;
 }
 
 .toggleShell{

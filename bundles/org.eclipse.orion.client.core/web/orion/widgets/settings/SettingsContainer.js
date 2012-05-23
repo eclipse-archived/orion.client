@@ -29,6 +29,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.drawUserInterface(this.initialSettings);
 			this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
 			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.byId('location').innerHTML = 'Settings';
 		},
 		
 		processHash: function() {
