@@ -2,7 +2,6 @@
 <html style="height: 100%;">
 	<head>
 		<title>Welcome to Orion</title>
-		<link rel="stylesheet" type="text/css" href="index.css" />
 		<script src="requirejs/require.js"></script>
 		<script type="text/javascript">
 		/*global require*/
@@ -40,36 +39,6 @@
 		require(["index.js"]);
 		</script>
 </head>
-	<body style="height: 100%; visibility:hidden;" class="claro">
-	
-	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" class="orionPage">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div dojoType="dijit.layout.BorderContainer" design="headline" persist="false" gutters="false" region="center" splitter="false" role="main">
-			<div dojoType="dijit.layout.BorderContainer" id="bottom" splitter="false" persist="false" gutters="false" region="center" class="landingPanelContainer">
-				<div dojoType="dijit.layout.ContentPane" region="center" class="landingPanel">
-					<div style="padding: 8px;">
-						<div id="content">
-							<h2 class="landingHeading">Welcome</h2>
-							<p class="landingDescription">A new landing page is in the works... (see <a href='https://bugs.eclipse.org/bugs/show_bug.cgi?id=368739'>bug 368739</a>)<br>In the meantime...</p>
-							<p class="landingDescription">If you're not logged in, please use the link at the top right.</p>
-							<p class="landingDescription">If you are logged in, please use the <a href='navigate/table.html'>Navigator</a></p>
-						</div>
-						<div id="social">
-							<h2 class="landingHeading">Get involved</h2>
-							<ul>
-							<li id="twitter"><a class="landingLink" href="http://twitter.com/#%21/orionhub">Follow us on Twitter</a></li>
-							<li id="rss"><a class="landingLink" href="http://planetorion.org/news/feed/">Orion News Feed</a></li>	
-							</ul>
-						</div>
-					</div>
-				</div>			
-
-			</div>
-		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
-		</div>
-
-	</div>
+	<body style="height: 100%; visibility:hidden;">
 	</body>
 </html>

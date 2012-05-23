@@ -12,7 +12,7 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['require', 'dojo', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, dojo, Deferred, mServiceregistry, mPreferences, mPluginRegistry) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry) {
 
 	var once; // Deferred
 
@@ -49,10 +49,6 @@ define(['require', 'dojo', 'orion/Deferred', 'orion/serviceregistry', 'orion/pre
 					return pluginRegistry.startup(pluginURLs);
 				});
 			}
-		}).then(function() {
-			dojo.addOnWindowUnload(function() {
-				pluginRegistry.shutdown();
-			});
 		}).then(function() {
 			var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (auth) {
