@@ -57,7 +57,7 @@ define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer'
 				});
 			}
 			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	
+				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 			}
 		},
 
@@ -70,7 +70,7 @@ define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer'
 			this.root = root;
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = dojo.byId(this.resultsId);
-			dojo.place(document.createTextNode("Searching for non externalized strings..."), parent, "only");
+			dojo.place(document.createTextNode("Searching for non externalized strings..."), parent, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._search(parent, root);
 		},
 		

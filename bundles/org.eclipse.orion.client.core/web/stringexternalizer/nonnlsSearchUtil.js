@@ -67,7 +67,7 @@ define(['dojo'], function(dojo){
 				});
 			}
 		} else {
-			if(jsonData.Name.lastIndexOf(".js")===(jsonData.Name.length-3)){
+			if(jsonData.Name.lastIndexOf(".js")===(jsonData.Name.length-3)){ //$NON-NLS-0$
 				self.fileClient.read(jsonData.Location, true).then(function(jsonData){
 					self.fileClient.read(jsonData.Location, false).then(function(contents){
 						jsonData.nonnls = dojo.hitch(self, self.parseFile)(contents);
@@ -107,14 +107,14 @@ define(['dojo'], function(dojo){
 				return false;
 		     }
 
-		var excluded = getExcluded(new RegExp("/\\x2a((\\x2a[^/]*)|[^*/]|[^*]/)*\\x2a/", "gm"), contents);
-		excluded = excluded.concat(getExcluded(new RegExp("//.*\\r?\\n*", "gm")), contents);
-		excluded = excluded.concat(getExcluded(new RegExp("define\\(\\[[^\\]]*\\]", "gm")), contents);
-		excluded = excluded.concat(getExcluded(new RegExp("define\\([\"\'][^\"\']*[\"\'], *\\[[^\\]]*\\]", "gm")), contents);
-		excluded = excluded.concat(getExcluded(new RegExp("messages\\[[^\\]]*\\]", "gmi")), contents);
+		var excluded = getExcluded(new RegExp("/\\x2a((\\x2a[^/]*)|[^*/]|[^*]/)*\\x2a/", "gm"), contents); //$NON-NLS-1$ //$NON-NLS-0$
+		excluded = excluded.concat(getExcluded(new RegExp("//.*\\r?\\n*", "gm")), contents); //$NON-NLS-0$
+		excluded = excluded.concat(getExcluded(new RegExp("define\\(\\[[^\\]]*\\]", "gm")), contents); //$NON-NLS-1$ //$NON-NLS-0$
+		excluded = excluded.concat(getExcluded(new RegExp("define\\([\"\'][^\"\']*[\"\'], *\\[[^\\]]*\\]", "gm")), contents); //$NON-NLS-1$ //$NON-NLS-0$
+		excluded = excluded.concat(getExcluded(new RegExp("messages\\[[^\\]]*\\]", "gmi")), contents); //$NON-NLS-1$ //$NON-NLS-0$
 	     
 	       var nonnlsstrings = [];
-	       var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g;
+	       var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g; //$NON-NLS-1$ //$NON-NLS-0$
 	       var nonnlsRegExp = /\/\/\$NON-NLS-[0-9]+\$/g;
 	       var lines = contents.split(/\r?\n/);
 	       for (var i=0; i < lines.length; i++) {
@@ -165,20 +165,20 @@ define(['dojo'], function(dojo){
 	}
 	
 	function addMessagesModule(contents, module){
-		var match = new RegExp("define\\(\\[[^\\]]*\\],[\\s\\r\\n]*function\\(", "gm").exec(contents);
+		var match = new RegExp("define\\(\\[[^\\]]*\\],[\\s\\r\\n]*function\\(", "gm").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 		if(!match){
-			match = new RegExp("define\\([\"\'][^\"\']*[\"\'], *\\[[^\\]]*\\],[\\s\\r\\n]*function\\(", "gm").exec(contents);
+			match = new RegExp("define\\([\"\'][^\"\']*[\"\'], *\\[[^\\]]*\\],[\\s\\r\\n]*function\\(", "gm").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if(!match || match[0].indexOf(module)>0){
 			return contents;
 		}
-		var modules = new RegExp("\\[[^\\]]*\\]", "gm").exec(match[0]);
-		if(modules[0].match(new RegExp("\\[\\s*\\]", "gm"))){
-			contents = contents.replace(match[0], match[0]+"messages");
-			contents = contents.replace(modules[0], modules[0][0] + "'" + module + "'" + modules[0].substring(1));			
+		var modules = new RegExp("\\[[^\\]]*\\]", "gm").exec(match[0]); //$NON-NLS-1$ //$NON-NLS-0$
+		if(modules[0].match(new RegExp("\\[\\s*\\]", "gm"))){ //$NON-NLS-1$ //$NON-NLS-0$
+			contents = contents.replace(match[0], match[0]+"messages"); //$NON-NLS-0$
+			contents = contents.replace(modules[0], modules[0][0] + "'" + module + "'" + modules[0].substring(1));			 //$NON-NLS-1$ //$NON-NLS-0$
 		}else{
-			contents = contents.replace(match[0], match[0]+"messages, ");
-			contents = contents.replace(modules[0], modules[0][0] + "'" + module + "', " + modules[0].substring(1));
+			contents = contents.replace(match[0], match[0]+"messages, "); //$NON-NLS-0$
+			contents = contents.replace(modules[0], modules[0][0] + "'" + module + "', " + modules[0].substring(1)); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		return contents;
 	}
@@ -199,7 +199,7 @@ define(['dojo'], function(dojo){
 				messages[message] = config.messages[message];
 			}
 		}
-		var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g;
+		var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g; //$NON-NLS-1$ //$NON-NLS-0$
 		 var lines = contents.split(/\r?\n/);
 		 var lineStructure = {};
 		 for(var i=0; i<nls.length; i++){
@@ -219,9 +219,9 @@ define(['dojo'], function(dojo){
 					 stringExternalized = true;
 					 var strippedString = unescapeQuotes(change.string);
 					 if(messages && messages[strippedString]){
-						 change.replace = "messages['" + escapeQuotes(messages[strippedString]) + "']";						 
+						 change.replace = "messages['" + escapeQuotes(messages[strippedString]) + "']";						  //$NON-NLS-1$ //$NON-NLS-0$
 					 } else {
-						 change.replace = "messages[" + change.string + "]";
+						 change.replace = "messages[" + change.string + "]"; //$NON-NLS-0$
 						 if(!messages) messages = {};
 						 messages[strippedString] = strippedString;
 					 }
@@ -235,7 +235,7 @@ define(['dojo'], function(dojo){
 				 } else if(config.marknls){
 					 var foundStrings = line.substring(0, change.character-1).match(stringRegExp);
 					 var stringNo = foundStrings ? foundStrings.length : 0;
-					 change.replace = " \/\/$NON-NLS-"+stringNo+"$";
+					 change.replace = " \/\/$NON-NLS-"+stringNo+"$"; //$NON-NLS-1$ //$NON-NLS-0$
 					 change.newcharacter = line.length;
 					 lines[lineNum] += change.replace;
 				 } else {
@@ -264,33 +264,33 @@ define(['dojo'], function(dojo){
 	}
 	
 	function escapeQuotes(message){
-		message = message.replace(/\"/g, "\\\"");
-		message = message.replace(/\'/g, "\\\'");
+		message = message.replace(/\"/g, "\\\""); //$NON-NLS-0$
+		message = message.replace(/\'/g, "\\\'"); //$NON-NLS-0$
 		return message;
 	}
 	
 	function unescapeQuotes(message){
 		message = message.substring(1, message.length-1);
-		message = message.replace(/\\\"/g, "\"");
-		message = message.replace(/\\\'/g, "\'");
+		message = message.replace(/\\\"/g, "\""); //$NON-NLS-0$
+		message = message.replace(/\\\'/g, "\'"); //$NON-NLS-0$
 		return message;
 	}
 	
 	function stringify(messages){
-		var ret = "{";
+		var ret = "{"; //$NON-NLS-0$
 		var isFirst = true;
 		for(var message in messages){
 			if(!isFirst){
-				ret+=",";
+				ret+=","; //$NON-NLS-0$
 			}
-			ret += "\n\t\"";
+			ret += "\n\t\""; //$NON-NLS-0$
 			ret += escapeQuotes(message);
-			ret += "\": \"";
+			ret += "\": \""; //$NON-NLS-0$
 			ret += escapeQuotes(messages[message]);
-			ret += "\"";
+			ret += "\""; //$NON-NLS-0$
 			isFirst = false;
 		}
-		ret +="\n}";
+		ret +="\n}"; //$NON-NLS-0$
 		return ret;
 	}
 	
@@ -301,12 +301,12 @@ define(['dojo'], function(dojo){
 			keyToMessage[messages[message]] = message;
 		}
 		fileClient.read(config.fileLocation).then(function(contents){
-			var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents);
+			var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 			if(match){
-				var messagesString = match[0].substring("define(".length, match[0].length-");".length);
+				var messagesString = match[0].substring("define(".length, match[0].length-");".length); //$NON-NLS-1$ //$NON-NLS-0$
 				contents = contents.replace(messagesString, stringify(keyToMessage));
 			} else {
-				contents = "define(" + stringify(keyToMessage)+");";
+				contents = "define(" + stringify(keyToMessage)+");"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			fileClient.write(config.fileLocation, contents).then(
 					function(){
@@ -318,11 +318,11 @@ define(['dojo'], function(dojo){
 		},function(error){
 			if(error.status===404){
 				function create(){
-					fileClient.createFolder(config.directory.Location, "root").then(
+					fileClient.createFolder(config.directory.Location, "root").then( //$NON-NLS-0$
 							function(metadata){
 								fileClient.createFile(metadata.Location, config.file).then(
 									function(metadata){
-										fileClient.write(metadata.Location, "define(" + stringify(keyToMessage)+");").then(
+										fileClient.write(metadata.Location, "define(" + stringify(keyToMessage)+");").then( //$NON-NLS-1$ //$NON-NLS-0$
 												function(){
 													deferred.resolve();
 												},
