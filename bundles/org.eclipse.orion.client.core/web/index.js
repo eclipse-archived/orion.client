@@ -12,13 +12,8 @@
 /*jslint browser:true devel:true*/
 /*global define window*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
-        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'/*, 'dojox/widget/Portlet', 'dojox/widget/FeedPortlet'*/], 
-		function(require, dojo, mBootstrap, mCommands, mFileClient, mOperationsClient, mSearchClient, mStatus, mProgress, mGlobalCommands) {
-
-	dojo.addOnLoad(function() {
-		mBootstrap.startup().then(function(core) {
-			window.location = "navigate/table.html";
-		});
+define(['orion/bootstrap', 'domReady!'], function(mBootstrap) {
+	mBootstrap.startup().then(function(core) {
+		window.location = "navigate/table.html";
 	});
 });
