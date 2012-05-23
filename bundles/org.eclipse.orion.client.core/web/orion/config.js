@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global console define setTimeout*/
 /*jslint sub:true*/
-define(['i18n!orion/nls/messages', 'orion/textview/eventTarget', 'orion/preferences'], function(messages, mEventTarget, mPreferences) {
+define(['orion/textview/eventTarget', 'orion/preferences'], function(mEventTarget, mPreferences) {
 var PreferencesService = mPreferences.PreferencesService;
 var ServiceTracker, ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
@@ -53,7 +53,7 @@ ServiceTracker = /** @ignore */ (function() {
 		};
 		this.close = function() {
 			if (state !== OPENED) {
-				throw messages['Already closed'];
+				throw 'Already closed'; //$NON-NLS-0$
 			}
 			state = CLOSED;
 			serviceRegistry.removeEventListener('serviceAdded', addedListener); //$NON-NLS-0$
@@ -76,7 +76,7 @@ ServiceTracker = /** @ignore */ (function() {
 		};
 		this.open = function() {
 			if (state !== CLOSED) {
-				throw messages['Already open'];
+				throw 'Already open'; //$NON-NLS-0$
 			}
 			state = OPENED;
 			var self = this;

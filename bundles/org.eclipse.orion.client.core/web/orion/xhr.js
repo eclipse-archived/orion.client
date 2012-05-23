@@ -88,7 +88,7 @@ define(['orion/Deferred'], function(Deferred) {
 		if (typeof options.timeout === 'number') { //$NON-NLS-0$
 			xhr.timeout = options.timeout;
 			xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
-				d.reject('Timeout exceeded: ' + e);
+				d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
 			});
 		}
 		xhr.onreadystatechange = function() {
