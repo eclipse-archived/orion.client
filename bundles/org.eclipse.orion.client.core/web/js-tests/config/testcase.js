@@ -117,7 +117,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		assert.strictEqual(properties.nil, null);
 	});
 
-	tests['test Configuration.delete()'] = makeTest(function() {
+	tests['test Configuration.remove()'] = makeTest(function() {
 		var pid = 'test.pid';
 		var configuration = configAdmin.getConfiguration(pid);
 		configuration.update({
@@ -126,7 +126,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		var properties = configuration.getProperties();
 		assert.strictEqual(properties.pid, pid);
 		assert.strictEqual(properties.str, 'blort');
-		configuration.delete();
+		configuration.remove();
 		assert.strictEqual(configAdmin.getConfiguration(pid).getProperties(), null);
 	});
 
@@ -201,7 +201,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		return d;
 	});
 
-	tests['test ManagedService.updated(null) called after deleting config'] = makeTest(function() {
+	tests['test ManagedService.updated(null) called after removing config'] = makeTest(function() {
 		var d = new Deferred();
 		var pid = 'orion.test.pid';
 		var count = 0;
@@ -226,7 +226,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			'test': 'whee'
 		});
 		// 3rd call happens after this
-		config.delete();
+		config.remove();
 		return d;
 	});
 
