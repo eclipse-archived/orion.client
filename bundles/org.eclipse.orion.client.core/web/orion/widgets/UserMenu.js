@@ -12,7 +12,7 @@
 /*global define window eclipse localStorage*/
 
 define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(messages, require, dojo, dijit, mCommands, mUtil) {
-	dojo.declare(messages["orion.widgets.UserMenu"], [dijit.Menu], {
+	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
 	
 		widgetsInTemplate: false,
 		id: "userMenu", //$NON-NLS-0$
@@ -80,7 +80,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				this.addChild(new dijit.MenuItem({
-					label: where ? "<a target='_blank' href="+loginForm+">"+messages["Sign In To "]+ where +"</a>" : "<a target='_blank' href="+loginForm+messages[">"]+"Sign In"+messages["</a>"], //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+					label: where ? "<a target='_blank' href="+loginForm+">"+messages["Sign In To "]+ where +"</a>" : "<a target='_blank' href="+loginForm+">"+messages["Sign In"]+"</a>", //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
 					onKeyDown: function(evt){if(evt.keyCode===13) window.open(loginForm);},
 					_onClick: function(evt) { this.getParent().onItemClick(this, evt); } 
 				}), startIndex);
