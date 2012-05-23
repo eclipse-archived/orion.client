@@ -82,5 +82,8 @@ define({
 	"Paste items from the copy/paste buffer": "Paste items from the copy/paste buffer",
 	"Cannot paste into the Workspace root": "Cannot paste into the Workspace root",
 	"Open With": "Open With",
-	"Loading ": "Loading "
+	"Loading ": "Loading ",
+	"New": "New",
+	"Click on an item to make a selection, then use this menu to see what actions are available.": "Click on an item to make a selection, then use this menu to see what actions are available.",
+	"Actions": "Actions"
 });

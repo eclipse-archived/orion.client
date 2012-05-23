@@ -522,9 +522,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		 * @param {String} parentPath The path of parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
+		 * @param {String} emptyGroupMessage A message to show if the group is empty and the user activates the UI element
+		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
 		 */	
 		 
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath) {
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage) {
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
@@ -540,9 +542,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				if (position) {
 					parentTable[groupId].position = position;
 				}
+				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
 				// create new group definition
-				parentTable[groupId] = {title: title, position: position, children: {}};
+				parentTable[groupId] = {title: title, position: position, emptyGroupMessage: emptyGroupMessage, children: {}};
 				parentTable.sortedContributions = null;
 			}
 		},
@@ -766,7 +769,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
-							window.setTimeout(dojo.hitch({contributions: childContributions}, function() {
+							window.setTimeout(dojo.hitch({contributions: childContributions, emptyGroupMessage: group.emptyGroupMessage}, function() {
 								commandService._render(this.contributions, newMenu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
@@ -779,10 +782,24 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 								}
 								// now determine if we actually needed the menu or not
 								if (children.length === 0) {
-									if(domNodeWrapperList){
-										mUtil.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+									if (this.emptyGroupMessage) {
+										dojo.connect(menuButton.focusNode, "onclick", this, function() { //$NON-NLS-0$
+											//Show the empty group message.
+											var tooltipDialog = new dijit.TooltipDialog({
+												content: "<p>"+this.emptyGroupMessage+"</p>",
+												onMouseLeave: function() {dijit.popup.close(tooltipDialog);}
+											});		
+											dijit.popup.open({popup: tooltipDialog, around: menuButton.domNode});
+											// in case the user's mouse never entered this popup and thus couldn't leave
+											window.setTimeout(function() {dijit.popup.close(tooltipDialog);}, 15000);
+										});
+										dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+									} else {
+										if(domNodeWrapperList){
+											mUtil.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+										}
+										menuButton.destroyRecursive();
 									}
-									menuButton.destroyRecursive();
 								} else {
 									dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 								}
@@ -1355,7 +1372,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			            return false;
 			        }
 			        if (node === this.domScope) {
-			        	return true;
+						return true;
 			        }
 			        node = node.parentNode;
 				}
