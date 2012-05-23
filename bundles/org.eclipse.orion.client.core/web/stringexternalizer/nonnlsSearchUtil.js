@@ -122,7 +122,9 @@ define(['dojo'], function(dojo){
 			var lineOffset = contents.indexOf(line);
 	         var match = stringRegExp.exec(line);
 	         var strings = [];
+	         var realStringNum = 0;
 	         while (match) {
+	        	 match.realNum = realStringNum++;
 				if(!isInExcluded(excluded, match, lineOffset)){
 						strings.push(match);
 					}
@@ -137,7 +139,7 @@ define(['dojo'], function(dojo){
 		         }
 		         
 		         for(var j=0; j<strings.length; j++){
-					if(!nonnls[j]){
+					if(!nonnls[strings[j].realNum]){
 						nonnlsstrings.push({
 						 lineNum: i,
 			             line: lines[i],
@@ -223,6 +225,7 @@ define(['dojo'], function(dojo){
 						 if(!messages) messages = {};
 						 messages[strippedString] = strippedString;
 					 }
+//					 change.replace = change.string;//remove
 					 var moveCharacters = change.replace.length - change.string.length;
 					 change.newcharacter = change.character;
 					 lines[lineNum] = line.substring(0, change.character-1) + change.replace + line.substring(change.end);

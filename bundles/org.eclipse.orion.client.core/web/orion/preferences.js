@@ -11,15 +11,7 @@
 
 /*global define window localStorage */
 
-define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
-
-	// temporary to break dependency on orion/auth -- see bug 380303
-	// in progress
-	var mAuth = {
-		handleAuthenticationError: function(){}
-	};
-
-
+define(['require', 'orion/Deferred', 'orion/xhr', 'orion/es5shim'], function(require, Deferred, xhr){
 	/**
 	 * Constructs a new preferences instance. This constructor is not
 	 * intended to be used by clients. Preferences should instead be
@@ -54,7 +46,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 				}
 			}
 			this._dirty = [];
-			return new dojo.DeferredList(flushes);
+			return new Deferred().all(flushes);
 		},
 		
 		_scheduleFlush: function(store) {
@@ -66,12 +58,12 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 				return;
 			}
 			this._flushPending = true;
-			window.setTimeout(dojo.hitch(this, function() {
+			window.setTimeout(function() {
 				if (this._flushPending) {
 					this._flushPending = false;
 					this._flush();
 				}
-			}),0);
+			}.bind(this), 0);
 		},
 		
 		_getCached: function() {
@@ -174,7 +166,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 					};
 				}(i)));
 			}
-			return new dojo.DeferredList(storeList).then(function(){
+			return new Deferred().all(storeList).then(function(){
 				that._cached = null;
 				that._getCached();
 			});
@@ -249,7 +241,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 			if (this._currentPromises[name]) {
 				return this._currentPromises[name];
 			}
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = null;
 			if (optForce) {
 				this._cache.remove(name);
@@ -266,15 +258,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 					delete that._currentPromises[name];
 					d.resolve(data);
 				}, function (error) {
-					if (error.status === 401) {
-						delete that._currentPromises[name];
-						d.resolve({});
-						
-						// retry
-						mAuth.handleAuthenticationError(error, function(){
-							that.get(name);
-						});
-					} else if (error.status === 404) {
+					if (error.status === 404) {
 						var data = {};
 						that._cache.set(name, data);
 						delete that._currentPromises[name];
@@ -289,25 +273,8 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 		},
 		
 		put: function(name, data) {
-			var d = new dojo.Deferred();
 			this._cache.set(name, data);
-			var that = this;
-			this._service.put(name, data).then(function() {
-				d.resolve();
-			}, function(error) {
-				if (error.status === 401) {
-					mAuth.handleAuthenticationError(error, function(){
-						that._service.put(name, data).then(function() {
-							d.resolve();
-						}, function() {
-							d.resolve();
-						});				
-					});
-				} else {
-					d.resolve(); // consider throwing here
-				}
-			});
-			return d;
+			return this._service.put(name, data);
 		}
 	};
 	
@@ -323,7 +290,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 			if (this._currentPromise) {
 				return this._currentPromise;
 			}
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = null;
 			if (optForce) {
 				this._cache.remove(name);
@@ -335,40 +302,28 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 			} else {
 				this._currentPromise = d;
 				var that = this;
-				dojo.xhrGet({
-					url: this._location,
+				xhr("GET", this._location, { //$NON-NLS-0$
 					headers: {
-						"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
+						"Orion-Version": "1" //$NON-NLS-0$
 					},
-					handleAs: "json", //$NON-NLS-0$
-					timeout: 15000,
-					load: function(data, ioArgs) {
-						that._cache.set(name, data[name] || {});
+					timeout: 15000
+				}).then(function(result) {
+					var data = JSON.parse(result.response);
+					that._cache.set(name, data[name] || {});
+					that._currentPromise = null;
+					d.resolve(data[name]|| {});
+				}, function(error) {
+					if (error.xhr.status === 401 || error.xhr.status === 404 ) {
+						that._cache.set(name, {});
 						that._currentPromise = null;
-						d.resolve(data[name]|| {});
-					},
-					error: function(response, ioArgs) {
-						if (ioArgs.xhr.status === 401) {
-							that._currentPromise = null;
-							d.resolve({});
-							d = new dojo.Deferred();
-							that._currentPromise = d;
-							var currentXHR = this;
-							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-								dojo.xhrGet(currentXHR); // retry GET							
-							});
-						} else if (ioArgs.xhr.status === 404) {
-							that._cache.set(name, {});
-							that._currentPromise = null;
-							d.resolve({});
+						d.resolve({});
+					} else {
+						that._currentPromise = null;
+						var data = that._cache.get(name, true);
+						if (data !== null) {
+							d.resolve(data[name] || {});
 						} else {
-							that._currentPromise = null;
-							var data = that._cache.get(name, true);
-							if (data !== null) {
-								d.resolve(data[name] || {});
-							} else {
-								d.resolve({});
-							}
+							d.resolve({});
 						}
 					}
 				});
@@ -376,7 +331,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 			return d;
 		},
 		put: function(name, data) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			d.resolve();
 			return d;
 		}
@@ -388,7 +343,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 	
 	LocalPreferencesProvider.prototype = {
 		get: function(name) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = this._cache.get(name);
 			if (cached !== null) {
 				d.resolve(cached);
@@ -398,7 +353,7 @@ define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo){
 			return d;
 		},
 		put: function(name, data) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			this._cache.set(name, data);
 			d.resolve();
 			return d;
