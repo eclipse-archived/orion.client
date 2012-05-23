@@ -27,7 +27,7 @@ define({
 	"committed by 0 (1)": "committed by ${0} (${1})",
 	"Tags:": "Tags:",
 	"No Tags": "No Tags",
-	"Diffs": "Diffs",
+	"Diffs": "Changes",
 	"More": "More",
 	"Loading git log...": "Loading git log...",
 	"local": "local",
