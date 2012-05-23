@@ -21,19 +21,19 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		function GitStatusModel() {
 			this.selectedFileId = undefined;
 			this.selectedItem = undefined;
-			this.interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"];
-			this.interestedStagedGroup = ["Added", "Changed","Removed"];
-			this.conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]];
-			this.conflictType = "Conflicting";
+			this.interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.interestedStagedGroup = ["Added", "Changed","Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]]; //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.conflictType = "Conflicting"; //$NON-NLS-0$
 			
 			this.statusTypeMap = { 
-				"Missing":["gitImageSprite git-sprite-removal", "Unstaged removal"],
-				"Removed":["gitImageSprite git-sprite-removal","Staged removal"],	
-				"Modified":["gitImageSprite git-sprite-modification","Unstaged change"],	
-				"Changed":["gitImageSprite git-sprite-modification","Staged change"],	
-			    "Untracked":["gitImageSprite git-sprite-addition","Unstaged addition"],	
-				"Added":["gitImageSprite git-sprite-addition","Staged addition"],	
-				"Conflicting":["gitImageSprite git-sprite-conflict-file", "Conflicting"]	
+				"Missing":["gitImageSprite git-sprite-removal", messages['Unstaged removal']], //$NON-NLS-1$ //$NON-NLS-0$
+				"Removed":["gitImageSprite git-sprite-removal",messages['Staged removal']],	 //$NON-NLS-1$ //$NON-NLS-0$
+				"Modified":["gitImageSprite git-sprite-modification",messages['Unstaged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+				"Changed":["gitImageSprite git-sprite-modification",messages['Staged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+			    "Untracked":["gitImageSprite git-sprite-addition",messages["Unstaged addition"]],	 //$NON-NLS-1$ //$NON-NLS-0$
+				"Added":["gitImageSprite git-sprite-addition",messages["Staged addition"]],	 //$NON-NLS-1$ //$NON-NLS-0$
+				"Conflicting":["gitImageSprite git-sprite-conflict-file", messages['Conflicting']]	 //$NON-NLS-1$ //$NON-NLS-0$
 			};
 		}
 		GitStatusModel.prototype = {
@@ -80,7 +80,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					if(itemsInDetectGroup.length === (conflictPattern.length - 2) ){
 						baseGroup[i].Conflicting = conflictPattern[0];
 						for(var k = 0; k < itemsInDetectGroup.length ; k++){
-							itemsInDetectGroup[k].Conflicting = "Hide";
+							itemsInDetectGroup[k].Conflicting = "Hide"; //$NON-NLS-0$
 						}
 					}
 				}
@@ -144,7 +144,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		
 		GitStatusExplorer.prototype.handleError = function(error) {
 			var display = {};
-			display.Severity = "Error";
+			display.Severity = "Error"; //$NON-NLS-0$
 			display.HTML = false;
 			try {
 				var resp = JSON.parse(error.responseText);
@@ -152,7 +152,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			} catch (Exception) {
 				display.Message = error.message;
 			}
-			this.registry.getService("orion.page.message").setProgressResult(display);
+			this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 			
 			if (error.status === 404) {
 				this.initTitleBar();
@@ -170,22 +170,22 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		
 		GitStatusExplorer.prototype.display = function(location){
 			var that = this;
-			var progressService = this.registry.getService("orion.page.message");
+			var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 
 			var loadingDeferred = new dojo.Deferred();
-			progressService.showWhile(loadingDeferred, "Loading...");
-			this.registry.getService("orion.git.provider").getGitStatus(location).then(
+			progressService.showWhile(loadingDeferred, messages['Loading...']);
+			this.registry.getService("orion.git.provider").getGitStatus(location).then( //$NON-NLS-0$
 				function(resp){
-					if (resp.Type === "Status") {
+					if (resp.Type === "Status") { //$NON-NLS-0$
 						var status = resp;
 						that._model = new GitStatusModel();
 						that._model.init(status);
 						
-						that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation).then(
+						that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation).then( //$NON-NLS-0$
 							function(resp){
 								var repositories = resp.Children;
 								
-								that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation).then(
+								that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation).then( //$NON-NLS-0$
 									function(resp){
 										loadingDeferred.callback();
 										var config = resp.Children;
@@ -194,11 +194,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 										status.Clone.Config = [];
 										
 										for (var i=0; i < config.length; i++){
-											if (config[i].Key === "user.name" || config[i].Key === "user.email")
+											if (config[i].Key === "user.name" || config[i].Key === "user.email") //$NON-NLS-1$ //$NON-NLS-0$
 												status.Clone.Config.push(config[i])
 										}
 										
-										var tableNode = dojo.byId( 'table' );	
+										var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
 										dojo.empty( tableNode );
 										
 										that.initTitleBar(status, repositories[0]);
@@ -208,7 +208,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 										that.displayCommits(repositories[0]);
 										
 										// render commands
-										mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status);
+										mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", status); //$NON-NLS-1$ //$NON-NLS-0$
 									}, function (error) {
 										loadingDeferred.callback();
 										dojo.hitch(that, that.handleError)(error);
@@ -235,20 +235,20 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			// TODO add info about branch or detached
 			
-			item.Name = "Status" + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") !== -1) ? " (Rebase in Progress)" : "");
+			item.Name = messages["Status"] + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") !== -1) ? messages[" (Rebase in Progress)"] : ""); //$NON-NLS-1$
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = repository.Name;
 			item.Parents[0].Location = repository.Location;
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
-			item.Parents[1].Name = "Repositories";
+			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
 			
-			pageTitle = "Status for " +  repository.Name + " - Git ";
+			pageTitle = dojo.string.substitute(messages["Status for ${0} - Git "], [repository.Name]);
 			
 			document.title = pageTitle;
 			
-			var location = dojo.byId("location");
+			var location = dojo.byId("location"); //$NON-NLS-0$
 			new mBreadcrumbs.BreadCrumbs({
 				container: location,
 				resource: item,
@@ -260,7 +260,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		};
 		
 		GitStatusExplorer.prototype.makeHref = function(seg, location) {
-			seg.href = "/git/git-repository.html#" + (location ? location : "");
+			seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
 		};
 		
 		// helpers
@@ -308,39 +308,39 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 
 			var unstagedSortedChanges = this._sortBlock(this._model.interestedUnstagedGroup);
 			
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 			
 			var unstagedSection = new mSection.Section(tableNode, {
-				id: "unstagedSection",
-				title: unstagedSortedChanges.length > 0 ? "Unstaged" : "No Unstaged Changes",
-				content: '<div id="unstagedNode"></div>',
+				id: "unstagedSection", //$NON-NLS-0$
+				title: unstagedSortedChanges.length > 0 ? messages['Unstaged'] : messages["No Unstaged Changes"],
+				content: '<div id="unstagedNode"></div>', //$NON-NLS-0$
 				canHide: true
 			});
 			
-			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.stageCommand", 100);
-			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.checkoutCommand", 200);
-			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.showPatchCommand", 300);
+			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.stageCommand", 100); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.checkoutCommand", 200); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.showPatchCommand", 300); //$NON-NLS-0$
 			
 			if (!this.unstagedOnce){
 				if (!this.unstagedSelection)
-					this.unstagedSelection = new mSelection.Selection(this.registry, "orion.unstagedSection.selection");
+					this.unstagedSelection = new mSelection.Selection(this.registry, "orion.unstagedSection.selection"); //$NON-NLS-0$
 				
-				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(unstagedSection.selectionNode.id);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository});
+						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.unstagedOnce = true;
 			}
 			
-			this.commandService.renderCommands(unstagedSection.actionsNode.id, unstagedSection.actionsNode.id, status, that, "button");
+			this.commandService.renderCommands(unstagedSection.actionsNode.id, unstagedSection.actionsNode.id, status, that, "button"); //$NON-NLS-0$
 			
-			var sectionItemActionScopeId = "unstagedSectionItemActionArea";
+			var sectionItemActionScopeId = "unstagedSectionItemActionArea"; //$NON-NLS-0$
 			
-			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.stageCommand", 100);
-			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.checkoutCommand", 200);		
+			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.stageCommand", 100); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.checkoutCommand", 200);		 //$NON-NLS-0$
 			this.commandService.registerSelectionService(sectionItemActionScopeId, this.unstagedSelection);
 			
 			UnstagedModel = (function() {
@@ -357,18 +357,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]);
+							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
 							onComplete([]);
 						}
 					},
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
-							return "unstagedRoot";
+							return "unstagedRoot"; //$NON-NLS-0$
 						} else if (mGitUtil.isChange(item)) {
-							return "unstaged" + item.name;
+							return "unstaged" + item.name; //$NON-NLS-0$
 						} else {
-							return "unstaged" + item.diffUri;
+							return "unstaged" + item.diffUri; //$NON-NLS-0$
 						}
 					}
 				};
@@ -387,12 +387,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				UnstagedRenderer.prototype = new mExplorer.SelectionRenderer();
 				UnstagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
 					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
-					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper");
+					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper"); //$NON-NLS-0$
 					if (compareActions) {
 						if (isExpanded) {
-							dojo.style(compareActions, "display", "block");
+							dojo.style(compareActions, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
-							dojo.style(compareActions, "display", "none");
+							dojo.style(compareActions, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 					}
 				};
@@ -401,29 +401,29 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					switch(col_no){
 					case 0:		
 						if (mGitUtil.isChange(item)){
-							var td = document.createElement("td");
-							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
+							var td = document.createElement("td"); //$NON-NLS-0$
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
+							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type)); //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							return td;
 						} else {
-							var td = document.createElement("td");
+							var td = document.createElement("td"); //$NON-NLS-0$
 							td.colSpan = 2;
-							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
-							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
 									navGridHolder: navGridHolder,
-									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper",
+									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -431,13 +431,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									callback : function(){}
 								};
 								
-								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
+								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 								inlineCompareContainer.startup( function(maxHeight){
 									var vH = 420;
 									if(maxHeight < vH){
 										vH = maxHeight;
 									}
-									dojo.style("diffArea_" + item.diffUri, "height", vH + "px");
+									dojo.style("diffArea_" + item.diffUri, "height", vH + "px"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								});
 							}, 500);
 							
@@ -448,10 +448,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					case 1:
 						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
 						if (item.type){
-							var actionsColumn = document.createElement('td');
-							actionsColumn.id = tableRow.id + "actionswrapper";
-							dojo.addClass(actionsColumn, "sectionExplorerActions");
-							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged"+item.name+"compareActionWrapper"}, actionsColumn, "last");
+							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
+							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							return actionsColumn;
 						}
 						break;
@@ -468,7 +468,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new UnstagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: false}, this);
+					this.renderer = new UnstagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "UnstagedNavigator", checkbox: false}, this); //$NON-NLS-0$
 					this.createTree(this.parentId, new UnstagedModel());
 				}
 				
@@ -477,7 +477,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				return UnstagedNavigator;
 			}());
 			
-			new UnstagedNavigator(this.registry, this.unstagedSelection, "unstagedNode"/*tableNode.id*/, sectionItemActionScopeId);
+			new UnstagedNavigator(this.registry, this.unstagedSelection, "unstagedNode"/*tableNode.id*/, sectionItemActionScopeId); //$NON-NLS-0$
 		};
 		
 		// Git staged changes
@@ -488,38 +488,38 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			var stagedSortedChanges = this._sortBlock(this._model.interestedStagedGroup);
 			
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 			
 			var stagedSection = new mSection.Section(tableNode, {
-				id: "stagedSection",
-				title: stagedSortedChanges.length > 0 ? "Staged" : "No Staged Changes",
-				content: '<div id="stagedNode"></div>',
+				id: "stagedSection", //$NON-NLS-0$
+				title: stagedSortedChanges.length > 0 ? messages['Staged'] : messages["No Staged Changes"],
+				content: '<div id="stagedNode"></div>', //$NON-NLS-0$
 				slideout: true,
 				canHide: true
 			});
 			
-			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100);
-			this.commandService.renderCommands(stagedSection.actionsNode.id, stagedSection.actionsNode.id, status, that, "button");
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
+			this.commandService.renderCommands(stagedSection.actionsNode.id, stagedSection.actionsNode.id, status, that, "button"); //$NON-NLS-0$
 			
-			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100);
+			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 			
 			if (!this.stagedOnce){
 				if (!this.stagedSelection)
-					this.stagedSelection = new mSelection.Selection(this.registry, "orion.stagedSection.selection");
+					this.stagedSelection = new mSelection.Selection(this.registry, "orion.stagedSection.selection"); //$NON-NLS-0$
 				
-				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(stagedSection.selectionNode.id);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository});
+						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.stagedOnce = true;
 			}
 			
-			var sectionItemActionScopeId = "stagedSectionItemActionArea";
+			var sectionItemActionScopeId = "stagedSectionItemActionArea"; //$NON-NLS-0$
 			
-			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.unstageCommand", 100);
+			this.commandService.registerCommandContribution(sectionItemActionScopeId, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 			this.commandService.registerSelectionService(sectionItemActionScopeId, this.stagedSelection);
 			
 			StagedModel = (function() {
@@ -536,18 +536,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]);
+							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
 							onComplete([]);
 						}
 					},
 					getId: function(/* item */ item){
 						if (item instanceof Array && item.length > 0) {
-							return "stagedRoot";
+							return "stagedRoot"; //$NON-NLS-0$
 						} else if (mGitUtil.isChange(item)) {
-							return "staged" + item.name;
+							return "staged" + item.name; //$NON-NLS-0$
 						} else {
-							return "staged" + item.diffUri;
+							return "staged" + item.diffUri; //$NON-NLS-0$
 						}
 					}
 				};
@@ -567,12 +567,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				
 				StagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
 					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
-					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper");
+					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper"); //$NON-NLS-0$
 					if (compareActions) {
 						if (isExpanded) {
-							dojo.style(compareActions, "display", "block");
+							dojo.style(compareActions, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
-							dojo.style(compareActions, "display", "none");
+							dojo.style(compareActions, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 						}
 					}
 				};
@@ -581,31 +581,31 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					switch(col_no){
 					case 0:		
 						if (mGitUtil.isChange(item)){
-							var td = document.createElement("td");
-							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
+							var td = document.createElement("td"); //$NON-NLS-0$
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type));
+							var expandImage = this.getExpandImage(tableRow, div, "gitImageSprite", that._model.getClass(item.type)); //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div );
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							
 							return td;
 						} else {
-							var td = document.createElement("td");
+							var td = document.createElement("td"); //$NON-NLS-0$
 							td.colSpan = 2;
-							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td );
+							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
-							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div);
+							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
 									navGridHolder: navGridHolder,
-									commandSpanId: "staged" + item.parent.name + "compareActionWrapper",
+									commandSpanId: "staged" + item.parent.name + "compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
@@ -613,13 +613,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									callback : function(){}
 								};
 								
-								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions);
+								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.diffUri, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 								inlineCompareContainer.startup( function(maxHeight){
 									var vH = 420;
 									if(maxHeight < vH){
 										vH = maxHeight;
 									}
-									dojo.style("diffArea_" + item.diffUri, "height", vH + "px");
+									dojo.style("diffArea_" + item.diffUri, "height", vH + "px"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								});
 							}, 500);
 							
@@ -630,10 +630,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					case 1:
 						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
 						if (item.type){
-							var actionsColumn = document.createElement('td');
-							actionsColumn.id = tableRow.id + "actionswrapper";
-							dojo.addClass(actionsColumn, "sectionExplorerActions");
-							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "staged"+item.name+"compareActionWrapper"}, actionsColumn, "last");
+							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
+							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "staged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							return actionsColumn;
 						}
 						break;
@@ -650,7 +650,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.parentId = parentId;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
-					this.renderer = new StagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: false}, this);
+					this.renderer = new StagedRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "StagedNavigator", checkbox: false}, this); //$NON-NLS-0$
 					this.createTree(this.parentId, new StagedModel());
 				}
 				
@@ -659,7 +659,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				return StagedNavigator;
 			}());
 			
-			new StagedNavigator(this.registry, this.stagedSelection, "stagedNode"/*tableNode.id*/, sectionItemActionScopeId);
+			new StagedNavigator(this.registry, this.stagedSelection, "stagedNode"/*tableNode.id*/, sectionItemActionScopeId); //$NON-NLS-0$
 		};
 				
 		// Git diffs
@@ -674,24 +674,24 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		
 		GitStatusExplorer.prototype.renderDiff = function(change, index){
 
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 			
 			var diffSection = new mSection.Section(tableNode, {
-				id: "diffSection_" + index,
+				id: "diffSection_" + index, //$NON-NLS-0$
 				title: change.name,
 				canHide: true,
 				hidden: true,
-				content: '<list id="diffNode_' + index + '></list>'
+				content: '<list id="diffNode_' + index + '></list>' //$NON-NLS-1$ //$NON-NLS-0$
 			});
 			
 			// add inline compare view
 			
 			
 			
-			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode_" + index) );
-			var diffHorizontalBox = dojo.create( "div", null, diffItem );
+			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode_" + index) ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var diffHorizontalBox = dojo.create( "div", null, diffItem ); //$NON-NLS-0$
 			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox);
+			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
@@ -705,7 +705,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				callback : function(){}
 			};
 			
-			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions);
+			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 			var that = this;
 			inlineCompareContainer.startup( function(){
 //				if(index < (diffs.length -1 )){
@@ -720,21 +720,21 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								
 			var that = this;
 			
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 			
 			var titleWrapper = new mSection.Section(tableNode, {
-				id: "commitSection",
-				title: "Commits",
-				content: '<list id="commitNode" class="mainPadding"></list>',
+				id: "commitSection", //$NON-NLS-0$
+				title: messages['Commits'],
+				content: '<list id="commitNode" class="mainPadding"></list>', //$NON-NLS-0$
 				slideout: true,
 				canHide: true,
-				preferenceService: this.registry.getService("orion.core.preference")
+				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 			});
 			
 			var progress = titleWrapper.createProgressMonitor();
 			
-			progress.begin("Getting current branch");
-			this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then(
+			progress.begin(messages['Getting current branch']);
+			this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
 				function(resp){
 					var branches = resp.Children;
 					var currentBranch;
@@ -747,22 +747,22 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					
 					var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 					
-					titleWrapper.setTitle("Commits for \"" + currentBranch.Name + "\" branch");
+					titleWrapper.setTitle(dojo.string.substitute(messages["Commits for \"${0}\" branch"], [currentBranch.Name]));
 	
-					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10);
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-						{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":"See Full Log", "ViewAllTooltip":"See the full log"}, that, "button");
+						{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":messages['See Full Log'], "ViewAllTooltip":"See the full log"}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 					if (tracksRemoteBranch){
-						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100);
-						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.merge", 100);
-						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100);
-						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100);
-						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button");
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.merge", 100); //$NON-NLS-0$
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.rebase", 100); //$NON-NLS-0$
+						that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.resetIndex", 100); //$NON-NLS-0$
+						that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch.RemoteLocation[0].Children[0], that, "button"); //$NON-NLS-0$
 					}
 					
-					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100);
-					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button");
+					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.push", 100); //$NON-NLS-0$
+					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, currentBranch, that, "button"); //$NON-NLS-0$
 					
 					if (currentBranch.RemoteLocation[0] === null){
 						progress.done();
@@ -770,11 +770,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						return;
 					}
 					
-					progress.worked("Getting commits for \"" + currentBranch.Name + "\" branch");
+					progress.worked(dojo.string.substitute(messages['Getting commits for \"${0}\" branch'],  [currentBranch.Name]));
 					if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-						that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then(
+						that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							function(resp){
-								progress.worked("Rendering commits");
+								progress.worked(messages['Rendering commits']);
 								
 								var commitsCount = resp.Children.length;
 								
@@ -782,10 +782,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 									that.renderCommit(resp.Children[i], true, i);
 								}
 								
-								progress.worked("Getting outgoing commits");
-								that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id).then( 
+								progress.worked(messages['Getting outgoing commits']);
+								that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id).then(  //$NON-NLS-1$ //$NON-NLS-0$
 									function(resp){	
-										progress.worked("Rendering commits");
+										progress.worked(messages['Rendering commits']);
 										for (var i=0; i<resp.Children.length; i++){
 											that.renderCommit(resp.Children[i], false, i + commitsCount);
 										}
@@ -808,9 +808,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							}
 						);
 					} else {
-						that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then( 
+						that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
 							function(resp){	
-								progress.worked("Rendering commits");
+								progress.worked(messages['Rendering commits']);
 								for (var i=0; i<resp.Children.length; i++){
 									that.renderCommit(resp.Children[i], true, i);
 								}
@@ -831,39 +831,39 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		};
 		
 		GitStatusExplorer.prototype.renderNoCommit = function(){
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("commitNode") );
-			var horizontalBox = dojo.create( "div", null, extensionListItem );
+			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("commitNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 			
-			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
-			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: "The branch is up to date."}, detailsView );
-			dojo.create( "div", null, detailsView );
+			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: messages['The branch is up to date.']}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 			
-			var description = dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: "You have no outgoing or incoming commits."}, detailsView );	
+			var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: messages['You have no outgoing or incoming commits.']}, detailsView );	
 		};
 			
 		GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index){
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") );
-			var horizontalBox = dojo.create( "div", null, extensionListItem );
+			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 			
-			var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit");
+			var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox );
+			dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox);
+				var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
 				image.width = 30;
 				image.height = 30;
-				dojo.place(image, authorImage, "first");
+				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
 			
-			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox );
+			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var titleLink = dojo.create("a", {"class": "gitMainDescription navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView);
+			var titleLink = dojo.create("a", {"class": "gitMainDescription navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(commit.Message), titleLink);		
 			
 			var _timer;
@@ -880,19 +880,19 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 	            }
 			});
 			
-			dojo.connect(titleLink, "onmouseover", titleLink, function() {
+			dojo.connect(titleLink, "onmouseover", titleLink, function() { //$NON-NLS-0$
 				window.clearTimeout(_timer);
 				
 				_timer = window.setTimeout(function(){
 					dijit.popup.open({
 						popup: tooltipDialog,
 						around: titleLink,
-						orient: {'BR':'TL', 'TR':'BL'}
+						orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}, 600);
 			});
 			
-			dojo.connect(titleLink, "onmouseout", titleLink, function() {
+			dojo.connect(titleLink, "onmouseout", titleLink, function() { //$NON-NLS-0$
 				window.clearTimeout(_timer);
 				
 				_timer = window.setTimeout(function(){
@@ -902,13 +902,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				}, 200);
 			});
 			
-			dojo.create( "div", null, detailsView );
-			var description = dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: " (SHA " + commit.Name + ") by " + commit.AuthorName 
-				+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView );
+			dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+			var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: " (SHA " + commit.Name + ") by " + commit.AuthorName  //$NON-NLS-1$ //$NON-NLS-0$
+				+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox );
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	
+			var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	 //$NON-NLS-0$
 		};		
 
 		return GitStatusExplorer;

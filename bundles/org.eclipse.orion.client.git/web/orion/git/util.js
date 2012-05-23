@@ -15,24 +15,24 @@
  * @class This class contains static utility methods.
  * @name orion.util
  */
-define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(dojo, dijit) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
                 
-	var interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"];
-	var interestedStagedGroup = ["Added", "Changed","Removed"];
-	var conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]];
-	var conflictType = "Conflicting";
+	var interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var interestedStagedGroup = ["Added", "Changed","Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var conflictPatterns = [["Both","Modified","Added", "Changed","Missing"],["RemoteDelete","Untracked","Removed"],["LocalDelete","Modified","Added", "Missing"]]; //$NON-NLS-11$ //$NON-NLS-10$ //$NON-NLS-9$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var conflictType = "Conflicting"; //$NON-NLS-0$
 	
 	var statusTypeMap = { 
-		"Missing":["gitImageSprite git-sprite-removal", "Unstaged removal"],
-		"Removed":["gitImageSprite git-sprite-removal","Staged removal"],	
-		"Modified":["gitImageSprite git-sprite-modification","Unstaged change"],	
-		"Changed":["gitImageSprite git-sprite-modification","Staged change"],	
-	    "Untracked":["gitImageSprite git-sprite-addition","Unstaged addition"],	
-		"Added":["gitImageSprite git-sprite-addition","Staged addition"],	
-		"Conflicting":["gitImageSprite git-sprite-conflict-file", "Conflicting"]	
+		"Missing":["gitImageSprite git-sprite-removal", messages['Unstaged removal']], //$NON-NLS-1$ //$NON-NLS-0$
+		"Removed":["gitImageSprite git-sprite-removal",messages['Staged removal']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Modified":["gitImageSprite git-sprite-modification",messages['Unstaged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Changed":["gitImageSprite git-sprite-modification",messages['Staged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+	    "Untracked":["gitImageSprite git-sprite-addition",messages['Unstaged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Added":["gitImageSprite git-sprite-addition",messages['Staged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Conflicting":["gitImageSprite git-sprite-conflict-file", messages['Conflicting']]	 //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
-	var statusUILocation = "git/git-status2.html";
+	var statusUILocation = "git/git-status2.html"; //$NON-NLS-0$
 	
 	function isChange(change){
 		return isStaged(change) || isUnstaged(change);

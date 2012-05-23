@@ -11,16 +11,16 @@
 
 /*global dojo dijit widgets*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/AddRemoteDialog.html'], function(dojo, dijit) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/AddRemoteDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], { //$NON-NLS-0$
 	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'git/widgets/templates/AddRemoteDialog.html'),
+	templateString: dojo.cache('orion', 'git/widgets/templates/AddRemoteDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -28,9 +28,9 @@ dojo.declare("orion.git.widgets.AddRemoteDialog", [dijit.Dialog, orion.widgets._
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Add Remote";
-		this.gitRemoteLabelText = "Remote Name:";
-		this.gitRemoteURILabelText = "Remote URI:";
+		this.title = messages["Add Remote"];
+		this.gitRemoteLabelText = messages["Remote Name:"];
+		this.gitRemoteURILabelText = messages["Remote URI:"];
 	},
 	execute: function() {
 		if(this.options.func)

@@ -11,9 +11,9 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], function(require, dojo, dijit, mUtil) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], function(messages, require, dojo, dijit, mUtil) {
 	
-	dojo.declare("orion.git.widgets.CommitTooltipDialog", [dijit.TooltipDialog], {
+	dojo.declare("orion.git.widgets.CommitTooltipDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: false,
 		closable: true,
 
@@ -28,40 +28,40 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], functi
 		
 		displayCommit: function(commit){
 			
-			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, this.containerNode);
+			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, this.containerNode); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-			link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
+			link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(commitMessage0), link);
 
-			dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
-			dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, tableNode );
+			dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: messages[" commit: "] + commit.Name}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			if (commit.Parents && commit.Parents.length > 0){
-				dojo.create( "div", null, tableNode );
+				dojo.create( "div", null, tableNode ); //$NON-NLS-0$
 				
-				dojo.place(document.createTextNode("parent: "), tableNode);
-				link = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
+				dojo.place(document.createTextNode(messages["parent: "]), tableNode);
+				link = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
 			}
 
-			dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
+			dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("div", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode);
+				var authorImage = dojo.create("div", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
 				image.width = 35;
 				image.height = 35;
-				dojo.place(image, authorImage, "first");
+				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
 			
-			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
-				+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, tableNode );
-			dojo.create( "div", null, tableNode );
-			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, tableNode );
+			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: dojo.string.substitute(messages[" authored by ${0} {${1}) on ${2}"], [commit.AuthorName, commit.AuthorEmail,
+				 dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})])}, tableNode ); //$NON-NLS-0$
+			dojo.create( "div", null, tableNode ); //$NON-NLS-0$
+			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail])}, tableNode );
 		},
 		
 		_onBlur: function(){

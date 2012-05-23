@@ -23,7 +23,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		document.body.style.visibility = "visible";
+		document.body.style.visibility = "visible"; //$NON-NLS-0$
 		dojo.parser.parse();
 
 		new mDialogs.DialogService(serviceRegistry);
@@ -31,7 +31,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		new mSshTools.SshService(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 
 		// ...
@@ -41,28 +41,28 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 
-		var explorer = new mGitStatusExplorer.GitStatusExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands");
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
+		var explorer = new mGitStatusExplorer.GitStatusExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 
 		// define commands
-		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
+		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
+		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 		mGitCommands.createGitStatusCommands(serviceRegistry, commandService, explorer);
 
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.showContent", 300, null,true,new mCommands.CommandKeyBinding('e', true, true));
+		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.showContent", 300, null,true,new mCommands.CommandKeyBinding('e', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// object contributions
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.resetCommand", 100, "eclipse.gitGroup");
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseContinueCommand", 200, "eclipse.gitGroup");
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseSkipPatchCommand", 300, "eclipse.gitGroup");
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseAbortCommand", 400, "eclipse.gitGroup");
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.resetCommand", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseContinueCommand", 200, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseSkipPatchCommand", 300, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.rebaseAbortCommand", 400, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		// add commands specific for the page	
 		var viewAllCommand = new mCommands.Command({
-			name : "View All",
-			id : "eclipse.orion.git.repositories.viewAllCommand",
+			name : messages['View All'],
+			id : "eclipse.orion.git.repositories.viewAllCommand", //$NON-NLS-0$
 			hrefCallback : function(data) {
 				return require.toUrl(data.items.ViewAllLink);
 			},
@@ -77,7 +77,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		explorer.display(dojo.hash());
 
 		//every time the user manually changes the hash, we need to load the commit with that name
-		dojo.subscribe("/dojo/hashchange", explorer, function() {
+		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
 			explorer.display(dojo.hash());
 		});
 	});

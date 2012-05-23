@@ -11,16 +11,16 @@
 /*global define window dojo dijit dojox orion*/
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 
         'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button','dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 
         'text!orion/git/widgets/templates/ContentDialog.html'], 
-        function(dojo, dijit, dojox) {
+        function(messages, dojo, dijit, dojox) {
 
 /**
  */
-dojo.declare("orion.git.widgets.ContentDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+dojo.declare("orion.git.widgets.ContentDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'git/widgets/templates/ContentDialog.html'),
+	templateString : dojo.cache('orion', 'git/widgets/templates/ContentDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 
 	constructor : function() {
 		this.inherited(arguments);
@@ -28,20 +28,20 @@ dojo.declare("orion.git.widgets.ContentDialog", [ dijit.Dialog, orion.widgets._O
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Content";
+		this.title = messages["Content"];
 	},
 	
 	postCreate : function() {
 		var that = this;
 		this.inherited(arguments);
-		var sectionsDiv = dojo.byId("div1");
-		var sections =  dojo.query(".sectionAnchor");
+		var sectionsDiv = dojo.byId("div1"); //$NON-NLS-0$
+		var sections =  dojo.query(".sectionAnchor"); //$NON-NLS-0$
 
 		for (var i=0;i<sections.length;i++){
 			var currentSection = sections[i];
-			dojo.create("li", {id : currentSection.id + "Span" }, sectionsDiv);
-			var ahref = dojo.create("a", { href: window.location.href, title: "Go to " + currentSection.id + " section", innerHTML: currentSection.id + "\n"}, currentSection.id + "Span");
-			dojo.connect(ahref, 'onclick', dojo.hitch(currentSection, function() {
+			dojo.create("li", {id : currentSection.id + "Span" }, sectionsDiv); //$NON-NLS-1$ //$NON-NLS-0$
+			var ahref = dojo.create("a", { href: window.location.href, title: dojo.string.substitute(messages["Go to ${0} section"], [currentSection.id]), innerHTML: currentSection.id + "\n"}, currentSection.id + "Span"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+			dojo.connect(ahref, 'onclick', dojo.hitch(currentSection, function() { //$NON-NLS-0$
 				this.scrollIntoView(true);
 				that.hide();
 				return false;

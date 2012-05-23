@@ -36,7 +36,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		
 		GitCommitExplorer.prototype.handleError = function(error) {
 			var display = {};
-			display.Severity = "Error";
+			display.Severity = "Error"; //$NON-NLS-0$
 			display.HTML = false;
 			try {
 				var resp = JSON.parse(error.responseText);
@@ -44,7 +44,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			} catch (Exception) {
 				display.Message = error.message;
 			}
-			this.registry.getService("orion.page.message").setProgressResult(display);
+			this.registry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 			
 			if (error.status === 404) {
 				this.initTitleBar();
@@ -62,20 +62,20 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		
 		GitCommitExplorer.prototype.display = function(location){
 			var that = this;
-			var progressService = this.registry.getService("orion.page.message");
+			var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 
 			var loadingDeferred = new dojo.Deferred();
 			progressService.showWhile(loadingDeferred, messages["Loading..."]);
-			this.registry.getService("orion.git.provider").getGitClone(location).then(
+			this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
 				function(resp){					
 					if (resp.Children.length === 0) {
 						loadingDeferred.callback();
 						that.initTitleBar();
 						that.displayCommit();
-					} else if (resp.Children.length === 1 && resp.Children[0].Type === "Commit") {
+					} else if (resp.Children.length === 1 && resp.Children[0].Type === "Commit") { //$NON-NLS-0$
 						var commits = resp.Children;
 						
-						that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then(
+						that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then( //$NON-NLS-0$
 							function(resp){
 								loadingDeferred.callback();
 								var repositories = resp.Children;
@@ -89,7 +89,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 								commits[0].CloneLocation = repositories[0].Location;
 								
 								// render commands
-								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", commits[0]);
+								mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", commits[0]); //$NON-NLS-1$ //$NON-NLS-0$
 							}, function (error) {
 								loadingDeferred.callback();
 								dojo.hitch(that, that.handleError)(error);
@@ -126,7 +126,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			document.title = pageTitle;
 			
-			var location = dojo.byId("location");
+			var location = dojo.byId("location"); //$NON-NLS-0$
 			new mBreadcrumbs.BreadCrumbs({
 				container: location,
 				resource: item,
@@ -138,70 +138,70 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		};
 		
 		GitCommitExplorer.prototype.makeHref = function(seg, location) {
-			seg.href = "/git/git-repository.html#" + (location ? location : "");
+			seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
 		};
 
 		GitCommitExplorer.prototype.displayCommit = function(commit){
 			
-			var tableNode = dojo.byId( 'table' );	
+			var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
 			dojo.empty( tableNode );
 			
 			new mSection.Section(tableNode, {
-				id: "commitSection",
+				id: "commitSection", //$NON-NLS-0$
 				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
-				iconClass: "gitImageSprite git-sprite-modification",
-				content: '<list id="commitNode" class="plugin-settings-list"></list>'
+				iconClass: "gitImageSprite git-sprite-modification", //$NON-NLS-0$
+				content: '<list id="commitNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
 			});
 
-		    var list = dojo.byId( "commitNode" );		
+		    var list = dojo.byId( "commitNode" );		 //$NON-NLS-0$
 			
-		    var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, list );
-			var horizontalBox = dojo.create( "div", null, extensionListItem );
-			var detailsView = dojo.create( "div", null, horizontalBox );
+		    var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, list ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+			var detailsView = dojo.create( "div", null, horizontalBox ); //$NON-NLS-0$
 			
 			var commitMessages = this._splitCommitMessage(commit.Message);
 
-			var div = dojo.create( "div", null, detailsView );
-			var mainCommitMessage = dojo.create( "span", { "class":"gitMainDescription"}, div );
-			this.registry.getService("orion.core.textlink").addLinks(commitMessages[0], mainCommitMessage);
-			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
+			var div = dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+			var mainCommitMessage = dojo.create( "span", { "class":"gitMainDescription"}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.registry.getService("orion.core.textlink").addLinks(commitMessages[0], mainCommitMessage); //$NON-NLS-0$
+			dojo.create( "div", {"style":"padding-top:15px"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commitMessages[1] !== null){
-				var secondaryCommitMessage = dojo.create( "pre", null, detailsView );
-				this.registry.getService("orion.core.textlink").addLinks(commitMessages[1], secondaryCommitMessage);
-				dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
+				var secondaryCommitMessage = dojo.create( "pre", null, detailsView ); //$NON-NLS-0$
+				this.registry.getService("orion.core.textlink").addLinks(commitMessages[1], secondaryCommitMessage); //$NON-NLS-0$
+				dojo.create( "div", {"style":"padding-top:15px"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 						
-			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: i18nUtil.formatMessage(messages["commit: 0"], commit.Name)}, detailsView );
+			dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: i18nUtil.formatMessage(messages["commit: 0"], commit.Name)}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.Parents && commit.Parents.length > 0){
-				dojo.create( "div", null, detailsView );
+				dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 				
-				var parentMessage = dojo.create( "span", { "class":"gitSecondaryDescription"}, detailsView );
+				var parentMessage = dojo.create( "span", { "class":"gitSecondaryDescription"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
-				var temp = dojo.create("span");
-				var link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, temp);
+				var temp = dojo.create("span"); //$NON-NLS-0$
+				var link = dojo.create("a", {className: "pnavlinkonpage", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, temp); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
 				parentMessage.innerHTML = i18nUtil.formatMessage(messages["parent: 0"], temp.innerHTML);
 			}
 			
-			dojo.create( "div", {"style":"padding-top:15px"}, detailsView );
+			dojo.create( "div", {"style":"padding-top:15px"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("span", {"class":"git-author-icon-small"}, detailsView);
+				var authorImage = dojo.create("span", {"class":"git-author-icon-small"}, detailsView); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
 				image.width = 35;
 				image.height = 35;
-				dojo.place(image, authorImage, "first");
+				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
 			
-			dojo.create( "span", { "class":"gitSecondaryDescription", 
-				innerHTML: i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}))}, detailsView );
+			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: i18nUtil.formatMessage(messages["authored by 0 (1) on 2"], commit.AuthorName, commit.AuthorEmail, dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}))}, detailsView ); //$NON-NLS-1$
 			
-			dojo.create( "div", null, detailsView );
-			dojo.create( "span", { "class":"gitSecondaryDescription", 
+			dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				innerHTML: i18nUtil.formatMessage(messages["committed by 0 (1)"],  commit.CommitterName, commit.CommitterEmail)}, detailsView );
 		};
 		
@@ -211,19 +211,19 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			var commitMessage0 = commitMessage.split(/(\r?\n|$)/)[0].trim();
 			if (commitMessage0.length > mainMessageMaxLength){
-				var cutPoint = commitMessage0.indexOf(" ", mainMessageMaxLength - 10);
+				var cutPoint = commitMessage0.indexOf(" ", mainMessageMaxLength - 10); //$NON-NLS-0$
 				commitMessage0 = commitMessage0.substring(0, (cutPoint !== -1 ? cutPoint : mainMessageMaxLength));
 				cut = true;
 			};
 			
 			var commitMessage1 = commitMessage.substring(commitMessage0.length + 1, commitMessage.length).trim();
 			if (commitMessage1.length > 0){
-				commitMessage1 = (cut ? "..." + commitMessage1 : commitMessage1);
+				commitMessage1 = (cut ? "..." + commitMessage1 : commitMessage1); //$NON-NLS-0$
 			} else {
 				commitMessage1 = null;
 			}
 			
-			commitMessage0 += (cut ? "..." : "");
+			commitMessage0 += (cut ? "..." : ""); //$NON-NLS-0$
 			
 			return [commitMessage0, commitMessage1];
 		};
@@ -233,12 +233,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		GitCommitExplorer.prototype.displayDiffs = function(commit){
 			var diffs = commit.Diffs;
 			
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 			
 			var titleWrapper = new mSection.Section(tableNode, {
-				id: "diffSection",
+				id: "diffSection", //$NON-NLS-0$
 				title: messages["Diffs"],
-				content: '<list id="diffNode" class="plugin-settings-list"></list>'
+				content: '<list id="diffNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
 			}); 
 			
 			if(diffs.length > 0){
@@ -250,30 +250,30 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			// add diff details
 			var progress = titleWrapper.createProgressMonitor();
-			progress.begin("Rendering diff");
+			progress.begin("Rendering diff"); //$NON-NLS-0$
 			var diff = diffs[index];
-			var diffDetailsItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") );
-			var diffDetailsHorizontalBox = dojo.create( "div", null, diffDetailsItem );
+			var diffDetailsItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var diffDetailsHorizontalBox = dojo.create( "div", null, diffDetailsItem ); //$NON-NLS-0$
 
-			var detailsView = dojo.create( "div", {"style":"float:left"}, diffDetailsHorizontalBox );
+			var detailsView = dojo.create( "div", {"style":"float:left"}, diffDetailsHorizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var diffPath = diff.OldPath;
-			if (diff.ChangeType === "ADD"){
+			if (diff.ChangeType === "ADD"){ //$NON-NLS-0$
 				diffPath = diff.NewPath;
 			}	
-			progress.worked(i18nUtil.formatMessage("Rendering #{0}", diffPath));
+			progress.worked(i18nUtil.formatMessage(messages["Rendering ${0}"], diffPath));
 			
-			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView );
+			dojo.create( "span", { "class":"gitMainDescription", innerHTML: diffPath + " (" + diff.ChangeType + ") " }, detailsView ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox, "last" );
-			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox,"last" );
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, diff, this, "tool", false);	
+			var compareActionsArea = dojo.create( "div", {"id":"compareActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox, "last" ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var actionsArea = dojo.create( "div", {"id":"diffActionsArea_" + index, "class":"sectionTableItemActions"}, diffDetailsHorizontalBox,"last" ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands(this.actionScopeId, actionsArea, diff, this, "tool", false);	 //$NON-NLS-0$
 			
 			// add inline compare view
 			
-			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") );
-			var diffHorizontalBox = dojo.create( "div", null, diffItem );
+			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var diffHorizontalBox = dojo.create( "div", null, diffItem ); //$NON-NLS-0$
 			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox);
+			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
 			
@@ -286,14 +286,14 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				callback : function(){progress.done();}
 			};
 			
-			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions);
+			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
 			var that = this;
 			inlineCompareContainer.startup( function(maxHeight){
 				var vH = 420;
 				if(maxHeight < vH){
 					vH = maxHeight;
 				}
-				dojo.style("diffArea_" + index, "height", vH + "px");
+				dojo.style("diffArea_" + index, "height", vH + "px"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				if(index < (diffs.length -1 )){
 					that.renderDiff(diffs, index+1, titleWrapper);
 				}
@@ -305,18 +305,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		GitCommitExplorer.prototype.displayTags = function(commit){
 			var tags = commit.Tags;
 			
-			var tableNode = dojo.byId( 'table' );
+			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 
 			var titleWrapper = new mSection.Section(tableNode, {
-				id: "tagSection",
+				id: "tagSection", //$NON-NLS-0$
 				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
-				iconClass: "gitImageSprite git-sprite-tag",
+				iconClass: "gitImageSprite git-sprite-tag", //$NON-NLS-0$
 				slideout: true,
-				content: '<list id="tagNode" class="plugin-settings-list"></list>'
+				content: '<list id="tagNode" class="plugin-settings-list"></list>' //$NON-NLS-0$
 			}); 
 			
-			this.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.addTag", 100);
-			this.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, commit, this, "button");
+			this.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.addTag", 100); //$NON-NLS-0$
+			this.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode, commit, this, "button"); //$NON-NLS-0$
 			
 			if (!tags && tags.length > 0)
 				return;
@@ -327,16 +327,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		};
 
 		GitCommitExplorer.prototype.renderTag = function(tag){
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("tagNode") );
-			var horizontalBox = dojo.create( "div", null, extensionListItem );
+			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("tagNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 
-			var detailsView = dojo.create( "div", {"class":"stretch"}, horizontalBox );
-			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tag.Name }, detailsView );
+			var detailsView = dojo.create( "div", {"class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tag.Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-			dojo.create( "div", null, horizontalBox );
+			dojo.create( "div", null, horizontalBox ); //$NON-NLS-0$
 
-			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions"}, horizontalBox );
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool", false);	
+			var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions"}, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool", false);	 //$NON-NLS-0$
 		};
 
 		return GitCommitExplorer;
