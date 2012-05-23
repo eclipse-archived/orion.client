@@ -18,7 +18,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress',  'orion/com
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
@@ -32,16 +32,16 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress',  'orion/com
 			new mDialogs.DialogService(serviceRegistry);
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 		
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			mGlobalCommands.setPageCommandExclusions(["eclipse.git.status"]);
-			var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone");
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.setPageCommandExclusions(["eclipse.git.status"]); //$NON-NLS-0$
+			var controller = new mGitStatusTable.GitStatusController({renderLog :true},serviceRegistry , commandService , statusService,"unstagedZone" , "stagedZone"); //$NON-NLS-1$ //$NON-NLS-0$
 			controller.getGitStatus(dojo.hash(),true);
 		
 			//every time the user manually changes the hash, we need to load the git status
-			dojo.subscribe("/dojo/hashchange", controller, function() {
+			dojo.subscribe("/dojo/hashchange", controller, function() { //$NON-NLS-0$
 				controller.getGitStatus(dojo.hash(),true);
 			});
 			

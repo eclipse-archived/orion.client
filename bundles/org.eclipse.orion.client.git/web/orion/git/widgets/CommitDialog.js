@@ -11,16 +11,16 @@
 
 /*global dojo dijit widgets*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/CommitDialog.html'], function(dojo, dijit) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/CommitDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], { //$NON-NLS-0$
 	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'git/widgets/templates/CommitDialog.html'),
+	templateString: dojo.cache('orion', 'git/widgets/templates/CommitDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -29,13 +29,13 @@ dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._Ori
 	
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "Commit Changes";
-		this.commitMessageLabelText = "Message:";
-		this.amendLabelText = "Amend:";
-		this.committerNameLabelText = "Committer Name:";
-		this.committerEmailLabelText = "Committer Email:";
-		this.authorNameLabelText = "Author Name:";
-		this.authorEmailLabelText = "Author Email:";
+		this.title = messages["Commit Changes"];
+		this.commitMessageLabelText = messages["Message:"];
+		this.amendLabelText = messages["Amend:"];
+		this.committerNameLabelText = messages["Committer Name:"];
+		this.committerEmailLabelText = messages["Committer Email:"];
+		this.authorNameLabelText = messages["Author Name:"];
+		this.authorEmailLabelText = messages["Author Email:"];
 	},
 	
 	postCreate : function(){
@@ -45,7 +45,7 @@ dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._Ori
 		if (this.options.body.Message) {
 			this.commitMessage.value = this.options.body.Message;
 		}
-		dojo.connect(this.commitMessage, "onkeyup", dojo.hitch(this, this.validate));
+		dojo.connect(this.commitMessage, "onkeyup", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		
 		if (this.options.body.Amend) {
 			this.amend.checked = true;
@@ -54,49 +54,49 @@ dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._Ori
 		if (this.options.body.CommitterName) {
 			this.committerName.value = this.options.body.CommitterName;
 		}
-		dojo.connect(this.committerName, "onkeyup", dojo.hitch(this, this.validate));
+		dojo.connect(this.committerName, "onkeyup", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		
 		if (this.options.body.CommitterEmail) {
 			this.committerEmail.value = this.options.body.CommitterEmail;
 		}
-		dojo.connect(this.committerEmail, "onkeyup", dojo.hitch(this, this.validate));
+		dojo.connect(this.committerEmail, "onkeyup", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		
 		if (this.options.body.AuthorName) {
 			this.authorName.value = this.options.body.AuthorName;
 		}
-		dojo.connect(this.authorName, "onkeyup", dojo.hitch(this, this.validate));
+		dojo.connect(this.authorName, "onkeyup", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		
 		if (this.options.body.AuthorEmail) {
 			this.authorEmail.value = this.options.body.AuthorEmail;
 		}
-		dojo.connect(this.authorEmail, "onkeyup", dojo.hitch(this, this.validate));
+		dojo.connect(this.authorEmail, "onkeyup", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		
 		this.validate();
 	},
 	
 	validate: function() {
 		if (!this.commitMessage.value) {
-			dojo.style(this.commitInfoBar, "display", "block");
+			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = "The commit message is required.";
+			this.commitInfo.innerHTML = messages["The commit message is required."];
 		} else if (!this.committerName.value) {
-			dojo.style(this.commitInfoBar, "display", "block");
+			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = "The committer name is required.";
+			this.commitInfo.innerHTML = messages['The committer name is required.'];
 		} else if (!this.committerEmail.value) {
-			dojo.style(this.commitInfoBar, "display", "block");
+			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = "The committer mail is required.";
+			this.commitInfo.innerHTML = messages['The committer mail is required.'];
 		} else if (!this.authorName.value) {
-			dojo.style(this.commitInfoBar, "display", "block");
+			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = "The author name is required.";
+			this.commitInfo.innerHTML = messages['The author name is required.'];
 		} else if (!this.authorEmail.value) {
-			dojo.style(this.commitInfoBar, "display", "block");
+			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = "The author mail is required.";
+			this.commitInfo.innerHTML = messages['The author mail is required.'];
 		} else {
-			dojo.style(this.commitInfoBar, "display", "none");
+			dojo.style(this.commitInfoBar, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = false;
 		}
 	},
