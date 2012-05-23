@@ -21,7 +21,7 @@ eclipse.UsersService = (function() {
 		if(serviceRegistry){
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
-					"orion.core.user", this);
+					"orion.core.user", this); //$NON-NLS-0$
 		}
 	}
 
@@ -30,15 +30,15 @@ eclipse.UsersService = (function() {
 		getUsersList : function(onLoad) {
 			var service = this;
 			return dojo.xhrGet({
-				url : "../users",
+				url : "../users", //$NON-NLS-0$
 				headers : {
-					"Orion-Version" : "1"
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				handleAs : "json",
+				handleAs : "json", //$NON-NLS-0$
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
-						if(typeof onLoad === "function")
+						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
@@ -59,13 +59,13 @@ eclipse.UsersService = (function() {
 				return dojo.xhrDelete({
 					url : userURI,
 					headers : {
-						"Orion-Version" : "1"
+						"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 					},
-					handleAs : "json",
+					handleAs : "json", //$NON-NLS-0$
 					timeout : 15000,
 					load : function(jsonData, secondArg) {
 						if (onLoad){
-							if(typeof onLoad === "function")
+							if(typeof onLoad === "function") //$NON-NLS-0$
 								onLoad(jsonData, secondArg);
 							else
 								service._serviceRegistration.dispatchEvent(onLoad, jsonData);
@@ -84,19 +84,19 @@ eclipse.UsersService = (function() {
 		createUser : function(userName, password, onLoad, onError) {
 			var service = this;
 			return dojo.xhrPost({
-				url : "../users",
+				url : "../users", //$NON-NLS-0$
 				headers : {
-					"Orion-Version" : "1"
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				content : {
 					login : userName,
 					password : password
 				},
-				handleAs : "text",
+				handleAs : "text", //$NON-NLS-0$
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
-						if(typeof onLoad === "function")
+						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
@@ -115,13 +115,13 @@ eclipse.UsersService = (function() {
 			return dojo.xhrGet({
 				url : userURI,
 				headers : {
-					"Orion-Version" : "1"
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				handleAs : "json",
+				handleAs : "json", //$NON-NLS-0$
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
-						if(typeof onLoad === "function")
+						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
@@ -143,7 +143,7 @@ eclipse.UsersService = (function() {
 
 			if(data.password!==data.passwordRetype){
 				var ret = new dojo.Deferred();
-				ret.errback({message: "Passwords do not match!"});
+				ret.errback({message: messages["Passwords do not match!"]});
 				return ret;
 			}
 
@@ -151,14 +151,14 @@ eclipse.UsersService = (function() {
 			return dojo.xhrPut({
 				url : uri,
 				headers : {
-					"Orion-Version" : "1"
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
-				handleAs : "json",
+				handleAs : "json", //$NON-NLS-0$
 				putData: dojo.toJson(data),
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
-						if(typeof onLoad === "function")
+						if(typeof onLoad === "function") //$NON-NLS-0$
 							return onLoad(jsonData, secondArg);
 						else{
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
@@ -180,20 +180,20 @@ eclipse.UsersService = (function() {
 		resetUserPassword: function(login, password, onLoad){
 			
 			return dojo.xhrPost({
-				url : "../users",
+				url : "../users", //$NON-NLS-0$
 				headers : {
-					"Orion-Version" : "1"
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				content : {
 					reset: true,
 					login : login,
 					password : password
 				},
-				handleAs : "json",
+				handleAs : "json", //$NON-NLS-0$
 				timeout : 15000,
 				load : function(jsonData, secondArg) {
 					if (onLoad){
-						if(typeof onLoad === "function")
+						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
 							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
