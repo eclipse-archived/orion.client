@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!navigate/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer', 'orion/navigationUtils'], function(messages, require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
+define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorer', 'orion/navigationUtils'], function(messages, require, dojo, mUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;

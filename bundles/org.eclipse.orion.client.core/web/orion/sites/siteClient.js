@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define document window*/
-define(['i18n!sites/nls/messages', 'require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function(messages, require, Deferred, mAuth, mFileClient) {
+define(['i18n!orion/sites/nls/messages', 'require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function(messages, require, Deferred, mAuth, mFileClient) {
 	/**
 	 * Performs a service call, handling authentication and retrying after auth.
 	 * @returns {Promise}

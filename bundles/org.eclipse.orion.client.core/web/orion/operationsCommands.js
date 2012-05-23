@@ -11,7 +11,7 @@
 
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
-define(['i18n!operations/nls/messages', 'require', 'dojo', 'orion/commands'], 
+define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands'], 
         function(messages, require, dojo, mCommands) {
 	/**
 	 * @namespace The global container for eclipse APIs.

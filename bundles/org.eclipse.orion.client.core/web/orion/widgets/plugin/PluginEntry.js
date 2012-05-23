@@ -16,7 +16,7 @@
    PluginList widget, but each plugin entry element should fit into any HTML list
    or table */
 
-define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/ServiceCarousel'], function(messages, require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/ServiceCarousel'], function(messages, require, dojo, dijit, mUtil, mCommands) {
 	
 	dojo.declare("orion.widgets.plugin.PluginEntry", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	

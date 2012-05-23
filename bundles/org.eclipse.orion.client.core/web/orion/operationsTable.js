@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['i18n!operations/nls/messages',  'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], function(messages, require, dojo,
+define(['i18n!orion/operations/nls/messages',  'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], function(messages, require, dojo,
 		mExplorer, mOperationsCommands) {
 	var exports = {};
 

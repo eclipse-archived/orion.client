@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
-define(['orion/i18n!compare/nls/messages'], function(bundle) {
+define(['orion/i18n!orion/stringexternalizer/nls/messages'], function(bundle) {
 	var result = {
 			root:true
 	};

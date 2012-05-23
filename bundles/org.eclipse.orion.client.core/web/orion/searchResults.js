@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils){
 
 	/**
 	 * Creates a new search results generator.

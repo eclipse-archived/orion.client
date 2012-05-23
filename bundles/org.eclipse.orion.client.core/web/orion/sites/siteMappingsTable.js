@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define document */
 
-define(['i18n!sites/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
+define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorer'],
 		function(messages, require, dojo, mUtil, mCommands, mExplorer) {
 
 var mSiteMappingsTable = {};

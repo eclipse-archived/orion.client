@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global console define document window*/
-define(['i18n!sites/nls/messages', 'require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/fileClient'],
+define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/fileClient'],
 		function(messages, require, mCommands, mSiteUtils, mSiteClient) {
 	var Command = mCommands.Command;
 

@@ -11,7 +11,7 @@
 /*global dojo dijit widgets console define*/
 /*jslint browser:true*/
 
-define(['i18n!settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/fx'], function(messages, require, dojo, dijit, mUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'dojo/fx'], function(messages, require, dojo, dijit, mUtil) {
 	
 	dojo.declare("orion.widgets.plugin.ServiceCarousel", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	

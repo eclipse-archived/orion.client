@@ -13,7 +13,7 @@
 /*global define window*/
 /*jslint browser:true*/
 
-define(['i18n!console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
 		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/plugin'], 
 	function(messages, require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
 

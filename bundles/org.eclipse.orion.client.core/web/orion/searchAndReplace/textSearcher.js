@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
+define(['i18n!orion/search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
 	function(messages, require, mAnnotations, dojo, dijit, mCommands, mRegex, mSearchUtils){
 	
 var orion = orion || {};

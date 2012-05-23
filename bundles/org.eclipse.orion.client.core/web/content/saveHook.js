@@ -16,7 +16,7 @@
  * Save hook for verifying that the user wants to save the content from a visual plugin.
  */
 
-define(['i18n!content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/PageUtil', 'dojo/parser'], 
+define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/PageUtil', 'dojo/parser'], 
 			function(messages, require, dojo, mBootstrap, PageUtil) {
 
 	dojo.addOnLoad(function() {
