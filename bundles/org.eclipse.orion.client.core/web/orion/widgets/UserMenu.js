@@ -59,11 +59,14 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 					this.addChild(new dijit.MenuItem({
 						label: who ? messages["Sign Out "] + who : messages["Sign Out"],
 						onClick: dojo.hitch(this, function(authService, key){
-							return function(){authService.logout().then(dojo.hitch(_self, function(){
-								this.addUserItem(key, authService, this.authenticatedServices[key].label);
-								localStorage.removeItem(key);
-								}));};
-							})(authService, key)
+							return function(){
+								authService.logout().then(dojo.hitch(_self, function(){
+									this.addUserItem(key, authService, this.authenticatedServices[key].label);
+									localStorage.removeItem(key);
+									window.location.reload();
+								}));
+							};
+						})(authService, key)
 					}));
 			}
 		},
