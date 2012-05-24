@@ -132,7 +132,6 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 									'\tmargin-left: -200px;\n' + //$NON-NLS-0$
 									'\tmargin-top: -200px;\n' + //$NON-NLS-0$
 									'\tborder-radius:5px;\n' + //$NON-NLS-0$
-									'\tfont-family:Verdana, Arial, Helvetica, Myriad, Tahoma, clean, sans-serif;\n' + //$NON-NLS-0$
 								'}\n\n' + //$NON-NLS-0$
 
 								'.banner{\n' + //$NON-NLS-0$
