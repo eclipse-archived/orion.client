@@ -809,7 +809,7 @@ a:hover {
 }
 
 .treeIterationCursor {
-	outline: #CCC 1px dotted;
+	outline: #666 1px dotted !important;
 	border-radius:4px;
 }
 
