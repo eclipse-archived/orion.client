@@ -424,7 +424,7 @@ orion.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalM
 		}
 		startIndex = originalMatches[i].startIndex + gap;
 	}
-	if(startIndex < (text.length - 1)){
+	if(startIndex < text.length){
 		replacedStr = replacedStr + text.substring(startIndex);
 	}
 	return {replacedStr: replacedStr, newMatches: newMatches};
