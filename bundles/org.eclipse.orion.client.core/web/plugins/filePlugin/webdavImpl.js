@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -113,6 +113,16 @@ function parseDAV_multistatus(text) {
 	return result;
 }
 
+function getHostName(url) {
+		var re = new RegExp('^(?:f|ht)tp(?:s)?://([^/]+)', 'im');
+		var result = url.match(re);
+		if (result === null) {
+			return null;
+		} else {
+			return result[0];
+		}
+}
+
 function createFile(response) {
 	var result = {
 		Attributes: {
@@ -122,9 +132,20 @@ function createFile(response) {
 				SymLink: false
 		}
 	};
-	result.Location = response.href[0];
+	
+	if (getHostName(response.href[0]) === null) {
+		result.Location = getHostName(this.name).concat(response.href[0]);
+	} else {
+		result.Location = response.href[0];
+	}
 	var prop = response.propstat[0].prop;
-	result.Name = prop.displayname;
+	var locationSplits = result.Location.split("/");
+	if (locationSplits[locationSplits.length-1] === "") {
+		result.Name = locationSplits[locationSplits.length-2];
+	}
+	else {
+		result.Name = locationSplits.pop();
+	}
 	result.Length = Number(prop.getcontentlength);
 	result.LocalTimeStamp = new Date(prop.getlastmodified).getTime();
 	result.Directory = (prop.resourcetype !== null && prop.resourcetype.indexOf("collection") !== -1);
