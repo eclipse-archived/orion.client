@@ -382,7 +382,7 @@ list>*,grid>* {
 	background: white;
 	float: left;
 	color: #AAA;
-	text-align: center;
+	margin-top: 4px;
 	font-size: 8px;
 	font-weight: normal;
 	margin-left: 5px;

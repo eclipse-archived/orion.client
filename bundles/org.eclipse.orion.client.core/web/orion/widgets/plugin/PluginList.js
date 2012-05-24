@@ -20,7 +20,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
 		templateString: '<div>' +  //$NON-NLS-0$
-							'<div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor" data-dojo-attach-point="pluginTitle" style="float:left;"></div><div class="pluginCount" data-dojo-attach-point="pluginCount" style="float:left;;">0</div></div>' + //$NON-NLS-2$ //$NON-NLS-0$
+							'<div class="sectionWrapper sectionWrapperAux toolComposite">' + 
+								'<div class="sectionAnchor sectionTitle layoutLeft" data-dojo-attach-point="pluginTitle"></div>' + 
+								'<div class="pluginCount layoutLeft" data-dojo-attach-point="pluginCount">0</div>' + 
+								'<div id="pluginCommands" data-dojo-attach-point="pluginCommands" class="layoutRight sectionActions"></div>' +
+							'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 
 					        '<div class="displaytable">' + //$NON-NLS-0$
 								'<div class="plugin-settings">' + //$NON-NLS-0$
@@ -34,9 +38,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		includeMaker: false,
 		
 		target: "_self", //$NON-NLS-0$
-					    
+				
 		postCreate: function(){
+			this.addRows();
+			this.setTarget();
+			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
+		},
+				
+		startup: function(){
 			// set up the toolbar level commands
+			
+			console.log( 'called startup' );
+			
 			var installPluginCommand = new mCommands.Command({
 				name: messages["Install"],
 				tooltip: messages["Install a plugin by specifying its URL"],
@@ -52,7 +65,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				})
 			});
 			this.commandService.addCommand(installPluginCommand);
-			this.commandService.registerCommandContribution(this.toolbarID, "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var reloadAllPluginsCommand = new mCommands.Command({
 				name: messages["Reload all"],
 				tooltip: messages["Reload all installed plugins"],
@@ -64,7 +77,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar and render them.  Rendering is normally done by our outer page, but since
 			// we might have been created after the page first loaded, we have to do this ourselves.
-			this.commandService.registerCommandContribution(this.toolbarID, "orion.reloadAllPlugins", 2); //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.reloadAllPlugins", 2); //$NON-NLS-0$
 			
 			
 			var createPluginCommand = new mCommands.Command({
@@ -80,10 +93,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.commandService.addCommand(createPluginCommand);
 			
 			if( this.includeMaker === true ){
-				this.commandService.registerCommandContribution(this.toolbarID, "orion.createPlugin", 2); //$NON-NLS-0$
+				this.commandService.registerCommandContribution("pluginCommands", "orion.createPlugin", 2); //$NON-NLS-0$
 			}
 			
-			this.commandService.renderCommands(this.toolbarID, this.toolbarID, this, this, "button"); //$NON-NLS-0$
+			this.commandService.renderCommands("pluginCommands", "pluginCommands", this, this, "button"); //$NON-NLS-0$
 			
 			var reloadPluginCommand = new mCommands.Command({
 				name: messages["Reload"],
@@ -115,9 +128,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			});			
 			this.commandService.addCommand(uninstallPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			this.addRows();
-			this.setTarget();
-			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
+			
 		},
 		
 		addRows: function(){
