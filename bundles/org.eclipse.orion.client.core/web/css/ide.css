@@ -6,7 +6,7 @@ html {
 html, body {
 	margin: 0;
 	padding: 0;
-	font: 8pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
+	font: 8pt Lucida Sans Unicode,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 	min-width:900px;
 }
 
@@ -128,7 +128,7 @@ a:hover {
 	font-size: 10px;
 	font-weight:bold;
 	color: #BFBFBF;
-	padding-top: 8px;
+	padding-top: 7px;
 	vertical-align: baseline;
 }
 
@@ -176,12 +176,12 @@ a:hover {
 }
 
 .taskDescription {
-	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	font-size: 8pt;
 	padding: 8px;
 }
 
 .sectionActions {
-	font: 8pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	font-size: 8pt;
 	margin-top: 2px;
 	vertical-align: baseline;
 }

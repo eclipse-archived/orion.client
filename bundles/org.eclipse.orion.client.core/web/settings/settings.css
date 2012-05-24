@@ -11,7 +11,7 @@
 
 html,body {
 	height: 100%;
-	font: 8pt Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif;
+	font-size: 8pt;
 }
 
 h1 {

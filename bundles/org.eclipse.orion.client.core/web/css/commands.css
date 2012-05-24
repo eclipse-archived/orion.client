@@ -267,7 +267,6 @@ should be added here.  Use additional classes where more treatment is needed. */
 /* tooltips */
 .claro .dijitTooltip {
 	max-width: 300px;
-	font: 9pt Verdana, Arial,Helvetica,Myriad,Tahoma,clean,sans-serif; 
 }
 
 .claro .dijitTooltipContainer {
