@@ -387,17 +387,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				}
 				
 				UnstagedRenderer.prototype = new mExplorer.SelectionRenderer();
-				UnstagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
-					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
-					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper"); //$NON-NLS-0$
-					if (compareActions) {
-						if (isExpanded) {
-							dojo.style(compareActions, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
-						} else {
-							dojo.style(compareActions, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					}
-				};
 
 				UnstagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
 					switch(col_no){
@@ -418,6 +407,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
+							
+							var compareWidgetActionWrapper = dojo.create("div", {"class": "sectionExplorerActions", id: "unstaged" + item.parent.name + "CompareWidgetActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
@@ -426,7 +417,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
 									navGridHolder: navGridHolder,
-									commandSpanId: "unstaged"+item.parent.name+"compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
+									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: hasConflict,
 									readonly: true,
@@ -451,13 +442,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
-						if (item.type){
-							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
-							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
-							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
-							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							return actionsColumn;
-						}
+//						if (item.type){
+//							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+//							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
+//							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+//							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//							return actionsColumn;
+//						}
 						break;
 					}
 				};
@@ -568,19 +559,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				}
 				
 				StagedRenderer.prototype = new mExplorer.SelectionRenderer();
-				
-				StagedRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
-					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
-					var compareActions = dojo.byId(tableRow.id+"compareActionWrapper"); //$NON-NLS-0$
-					if (compareActions) {
-						if (isExpanded) {
-							dojo.style(compareActions, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
-						} else {
-							dojo.style(compareActions, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					}
-				};
-				
+
 				StagedRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 					switch(col_no){
 					case 0:		
@@ -601,6 +580,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
+							
+							var compareWidgetActionWrapper = dojo.create("div", {"class": "sectionExplorerActions", id: "staged" + item.parent.name + "CompareWidgetActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
@@ -610,7 +591,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								
 								var diffOptions = {
 									navGridHolder: navGridHolder,
-									commandSpanId: "staged" + item.parent.name + "compareActionWrapper", //$NON-NLS-1$ //$NON-NLS-0$
+									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: hasConflict,
 									readonly: true,
@@ -634,13 +615,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						break;
 					case 1:
 						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
-						if (item.type){
-							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
-							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
-							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
-							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "staged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							return actionsColumn;
-						}
+//						if (item.type){
+//							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+//							actionsColumn.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
+//							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+//							var innerSpan = dojo.create("span", {"class": "sectionExplorerActions", id: "staged"+item.name+"compareActionWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//							return actionsColumn;
+//						}
 						break;
 					}
 				};
