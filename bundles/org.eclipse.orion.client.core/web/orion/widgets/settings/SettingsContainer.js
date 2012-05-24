@@ -37,6 +37,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var category = pageParams.category || "userSettings"; //$NON-NLS-0$
 			this.showById(category);
 			this.commandService.processURL(window.location.href);
+			
+			
+//			var pageToolBar = dojo.byId( 'pageToolbar' );
+//			
+//			dojo.removeNode( pageToolBar.parentNode.removeChild(pageToolBar) );
 		},
 
 		displaySettings: function(id) {
@@ -206,6 +211,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				commandService: this.commandService,
 				toolbarID: "pageActions" //$NON-NLS-0$
 			}, pluginNode);
+			
+			this.pluginWidget.startup();
 		},
 
 		showById: function(id) {

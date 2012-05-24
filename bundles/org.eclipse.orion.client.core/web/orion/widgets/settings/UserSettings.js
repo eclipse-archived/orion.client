@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection) {
 
 	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -22,11 +22,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
-								'<div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor">'+messages['User Profile']+'</div></div>' + //$NON-NLS-2$ //$NON-NLS-0$
+								'<div class="sectionWrapper toolComposite">' +
+									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['User Profile']+'</div>' + 
+									'<div id="userCommands" class="layoutRight sectionActions"></div>' +
+								'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 								'<div data-dojo-attach-point="sections">' + //$NON-NLS-0$
+								
 								'</sections>' + //$NON-NLS-0$
+								'<div></div>' +
+								
 							'</div>' + //$NON-NLS-0$
+//							'<div class="sectionWrapper toolComposite">' +
+//									'<div class="sectionAnchor sectionTitle layoutLeft">Linked Accounts</div>' + 
+//								'</div>' +
+							'<div data-dojo-attach-point="linkedSection"></div>' +
 						'</div>', //$NON-NLS-0$
+						
+		setHash: function(iframe, hash){
+			if(iframe.src.indexOf("#")>0){ //$NON-NLS-0$
+				iframe.src = iframe.src.substr(0, iframe.src.indexOf("#")) + "#" + hash; //$NON-NLS-1$ //$NON-NLS-0$
+			}else{
+				iframe.src = iframe.src + "#" + hash; //$NON-NLS-0$
+			}
+		},
 		
 		postCreate: function(){
 			
@@ -56,26 +74,26 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			/* - linked ------------------------------------------------------ */
 			
-			this.linkedFields = [];
-			
-			var toggleLabels = [ messages['Google'], messages['Yahoo'], messages['AOL'], messages['OpenId'] ];
-			
-			var openIds = [ 'https://www.google.com/accounts/o8/id', 'http://me.yahoo.com', 'http://openid.aol.com/', 'http://myopenid.com' ];//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			
-			var toggleData = {toggleOnState:messages["Linked"], toggleOffState:messages["Unlinked"], toggleOnSwitch:messages['Link'], toggleOffSwitch:messages['Unlink']};
-			
-			for( var toggle = 0; toggle< 4; toggle++ ){
-				toggleData.fieldlabel = toggleLabels[toggle];
-				
-				var toggleWidget = new orion.widgets.settings.LabeledToggle( toggleData );
-				
-				toggleWidget.onAction = dojo.hitch( this, 'confirmOpenId', openIds[toggle] ); //$NON-NLS-0$
-				
-				this.linkedFields.push( toggleWidget );
-				
-			}
-			
-			var linkedSection = new orion.widgets.settings.Section( {sectionName:messages['Linked Accounts'], container: this.sections, sections: this.linkedFields } );
+//			this.linkedFields = [];
+//			
+//			var toggleLabels = [ messages['Google'], messages['Yahoo'], messages['AOL'], messages['OpenId'] ];
+//			
+//			var openIds = [ 'https://www.google.com/accounts/o8/id', 'http://me.yahoo.com', 'http://openid.aol.com/', 'http://myopenid.com' ];//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+//			
+//			var toggleData = {toggleOnState:messages["Linked"], toggleOffState:messages["Unlinked"], toggleOnSwitch:messages['Link'], toggleOffSwitch:messages['Unlink']};
+//			
+//			for( var toggle = 0; toggle< 4; toggle++ ){
+//				toggleData.fieldlabel = toggleLabels[toggle];
+//				
+//				var toggleWidget = new orion.widgets.settings.LabeledToggle( toggleData );
+//				
+//				toggleWidget.onAction = dojo.hitch( this, 'confirmOpenId', openIds[toggle] ); //$NON-NLS-0$
+//				
+//				this.linkedFields.push( toggleWidget );
+//				
+//			}
+//			
+//			var linkedSection = new orion.widgets.settings.Section( {sectionName:messages['Linked Accounts'], container: this.sections, sections: this.linkedFields } );
 
 			/* - git --------------------------------------------------------- */
 			
@@ -100,7 +118,26 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this.commandService.renderCommands('profileCommands', this.toolbarID, this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands('profileCommands', dojo.byId( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			
+			
+			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
+							id: "linkedAccountSection", //$NON-NLS-0$
+							title: "Linked Accounts", //$NON-NLS-0$
+							content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
+							preferenceService: this.registry.getService("orion.core.preference"), //$NON-NLS-0$
+							canHide: true,
+							useAuxStyle: true,
+							hidden: true,
+							slideout: true
+			});
+			
+			var desc = { src: "../mixlogin/manageopenids", style: "border: 0px; width: 500px" };
+			
+			var iframe = dojo.create("iframe", desc, dojo.byId( 'iFrameContent' ) ); //$NON-NLS-0$
+			
+			this.setHash(iframe, "/users/D");
 			
 			this.startUp();
 		},
