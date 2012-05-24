@@ -650,59 +650,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			
 			new StagedNavigator(this.registry, this.stagedSelection, "stagedNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
 		};
-				
-		// Git diffs
-		
-		GitStatusExplorer.prototype.displayDiffs = function(status){
-			var allSortedChanges = this._sortBlock(this._model.interestedUnstagedGroup.concat(this._model.interestedStagedGroup));
-			
-			for(var i=0; (i<allSortedChanges.length && i<10);i++){
-				this.renderDiff(allSortedChanges[i], i);
-			}
-		}
-		
-		GitStatusExplorer.prototype.renderDiff = function(change, index){
-
-			var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
-			
-			var diffSection = new mSection.Section(tableNode, {
-				id: "diffSection_" + index, //$NON-NLS-0$
-				title: change.name,
-				canHide: true,
-				hidden: true,
-				content: '<list id="diffNode_' + index + '></list>' //$NON-NLS-1$ //$NON-NLS-0$
-			});
-			
-			// add inline compare view
-			
-			
-			
-			var diffItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("diffNode_" + index) ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var diffHorizontalBox = dojo.create( "div", null, diffItem ); //$NON-NLS-0$
-			
-			dojo.create( "div", { "id":"diffArea_" + index, "style":"height:420px;border:1px solid lightgray;overflow: hidden"}, diffHorizontalBox); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-			var diffProvider = new mCompareContainer.DefaultDiffProvider(this.registry);
-			
-			var diffOptions = {
-				navGridHolder: (this.getNavDict() ? this.getNavDict().getGridNavHolder(change, true) : null),
-				commandSpanId: diffSection.actionsNode.id,
-				diffProvider: diffProvider,
-				hasConflicts: false,
-				readonly: true,
-				complexURL: change.diffURI,
-				callback : function(){}
-			};
-			
-			var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(this.registry, "diffArea_" + index, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$
-			var that = this;
-			inlineCompareContainer.startup( function(){
-//				if(index < (diffs.length -1 )){
-//					that.renderDiff(diffs, index+1);
-//				}
-			});
-		};
-		
+	
 		// Git commits
 		
 		GitStatusExplorer.prototype.displayCommits = function(repository){
