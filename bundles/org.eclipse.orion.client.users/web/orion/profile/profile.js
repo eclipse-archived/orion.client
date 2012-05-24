@@ -96,7 +96,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				loginUrl = loginUrl.substring(0,loginUrl.length-2);
 				
 				dojo.xhrPost({
-					url : require.toUrl("login"), //$NON-NLS-0$
+					url : loginUrl, //$NON-NLS-0$
 					headers : {
 						"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 					},
