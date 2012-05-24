@@ -390,9 +390,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var expandImage = this.getExpandImage(tableRow, div); //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
+							
 							var diffActionWrapper = dojo.create("span", {"class": "sectionExplorerActions", id: "unstaged" + item.name + "DiffActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							window.setTimeout(function(){
-								that.commandService.renderCommands("DefaultActionWrapper", diffActionWrapper.id, item, that, "tool");	 //$NON-NLS-0$
+								that.commandService.renderCommands("DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder);	 //$NON-NLS-0$
 							}, 300);			
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -566,10 +568,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var expandImage = this.getExpandImage(tableRow, div);
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
 							
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
+							
 							var diffActionWrapper = dojo.create("span", {"class": "sectionExplorerActions", id: "staged" + item.name + "DiffActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							window.setTimeout(function(){
-								that.commandService.renderCommands("DefaultActionWrapper", diffActionWrapper.id, item, that, "tool");	 //$NON-NLS-0$
-							}, 300);			
+								that.commandService.renderCommands("DefaultActionWrapper", diffActionWrapper.id, item, that, "tool", null, navGridHolder);	 //$NON-NLS-0$
+							}, 300);		
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
