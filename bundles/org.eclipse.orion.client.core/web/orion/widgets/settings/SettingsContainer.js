@@ -45,11 +45,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			dojo.empty(this.table);
 
 			var category = this.initialSettings[settingsIndex].category;
+			
+			var sectionWrapper = dojo.create('div', { 'class':'sectionWrapper sectionWrapperAux toolComposite' }, this.table );
 
-			dojo.create("h1", { //$NON-NLS-0$
+			dojo.create('div', { //$NON-NLS-0$
 				id: category,
-				innerHTML: category
-			}, this.table);
+				innerHTML: category,
+				'class':'sectionAnchor'
+			}, sectionWrapper);
+			
+			// <div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor">User Profile</div></div>
 
 			var subcategory = this.initialSettings[settingsIndex].subcategory;
 

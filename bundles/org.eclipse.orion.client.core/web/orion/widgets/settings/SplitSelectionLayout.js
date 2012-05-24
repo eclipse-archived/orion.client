@@ -28,6 +28,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 									'</div>' +  //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
 								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'">' +  //$NON-NLS-0$
+								'<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">' +
 									'<div data-dojo-attach-point="mainNode" class="settings" role="tabpanel">' +  //$NON-NLS-0$
 									'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
 								'</div>' +  //$NON-NLS-0$
