@@ -32,9 +32,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 								'<div></div>' +
 								
 							'</div>' + //$NON-NLS-0$
-//							'<div class="sectionWrapper toolComposite">' +
-//									'<div class="sectionAnchor sectionTitle layoutLeft">Linked Accounts</div>' + 
-//								'</div>' +
 							'<div data-dojo-attach-point="linkedSection"></div>' +
 						'</div>', //$NON-NLS-0$
 						
@@ -135,9 +132,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var desc = { src: "../mixlogin/manageopenids", style: "border: 0px; width: 500px" };
 			
-			var iframe = dojo.create("iframe", desc, dojo.byId( 'iFrameContent' ) ); //$NON-NLS-0$
-			
-			this.setHash(iframe, "/users/D");
+			this.iframe = dojo.create("iframe", desc, dojo.byId( 'iFrameContent' ) ); //$NON-NLS-0$
 			
 			this.startUp();
 		},
@@ -236,6 +231,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							settingsWidget.gitFields[0].setValue( accountData.GitMail );
 							settingsWidget.gitFields[1].setValue( accountData.GitName );							
 						});
+						
+						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );
+						
+						
+						
 					});
 				});
 			}
