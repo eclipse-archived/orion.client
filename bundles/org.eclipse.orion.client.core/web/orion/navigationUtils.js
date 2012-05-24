@@ -58,6 +58,7 @@ define(['dojo'], function(dojo) {
 		} else {
 			domNodeWrapperList.push({domNode: domNode});
 			dojo.attr(domNode, "tabIndex", -1); //$NON-NLS-0$
+			dojo.style(domNode, "outline", "none"); //$NON-NLS-0$
 		}
 	}
 	

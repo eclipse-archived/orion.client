@@ -351,7 +351,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							if(!parentItem.children){//lazy creation, this is required for selection model to be able to trverse into children
+								parentItem.children = [];
+								parentItem.children.push({"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							}
+							onComplete(parentItem.children); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
 							onComplete([]);
 						}
@@ -387,8 +391,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var td = document.createElement("td"); //$NON-NLS-0$
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							var expandImage = this.getExpandImage(tableRow, div); //$NON-NLS-0$
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
+							this.getExpandImage(tableRow, div); //$NON-NLS-0$
 							
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 							
@@ -400,19 +403,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
 							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							return td;
 						} else {
 							var td = document.createElement("td"); //$NON-NLS-0$
 							td.colSpan = 2;
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
-							
 							var compareWidgetActionWrapper = dojo.create("div", {"class": "sectionExplorerActions", id: "unstaged" + item.parent.name + "CompareWidgetActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 							var hasConflict = isConflict(item.parent.type);
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
@@ -465,11 +465,16 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
 					this.renderer = new UnstagedRenderer({registry: this.registry,/* actionScopeId: sectionItemActionScopeId, */cachePrefix: "UnstagedNavigator", checkbox: false}, this); //$NON-NLS-0$
-					this.createTree(this.parentId, new UnstagedModel());
+					this.createTree(this.parentId, new UnstagedModel(), {setFocus: true});
 				}
 				
 				UnstagedNavigator.prototype = new mExplorer.Explorer();
-			
+
+				//provide to the selection model that if a row is selectable
+				UnstagedNavigator.prototype.isRowSelectable = function(modelItem){
+					return mGitUtil.isChange(modelItem);
+				};
+
 				return UnstagedNavigator;
 			}());
 			
@@ -529,7 +534,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 						if (parentItem instanceof Array && parentItem.length > 0) {
 							onComplete(parentItem);
 						} else if (mGitUtil.isChange(parentItem)) {
-							onComplete([{"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							if(!parentItem.children){//lazy creation, this is required for selection model to be able to trverse into children
+								parentItem.children = [];
+								parentItem.children.push({"diffUri": parentItem.diffURI, "Type": "Diff", parent: parentItem});//$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							}
+							onComplete(parentItem.children); 
 						} else {
 							onComplete([]);
 						}
@@ -565,9 +574,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							var td = document.createElement("td"); //$NON-NLS-0$
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							var expandImage = this.getExpandImage(tableRow, div);
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, expandImage);
-							
+							this.getExpandImage(tableRow, div);
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 							
 							var diffActionWrapper = dojo.create("span", {"class": "sectionExplorerActions", id: "staged" + item.name + "DiffActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -578,7 +585,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
 							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, itemLabel);
 							
 							return td;
 						} else {
@@ -586,12 +592,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							td.colSpan = 2;
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
-							
 							var compareWidgetActionWrapper = dojo.create("div", {"class": "sectionExplorerActions", id: "staged" + item.parent.name + "CompareWidgetActionWrapper"}, div, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 							dojo.create( "div", { "id":"diffArea_" + item.diffUri, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
+							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
 							var hasConflict = isConflict(item.parent.type);
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
@@ -649,6 +653,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				
 				StagedNavigator.prototype = new mExplorer.Explorer();
 			
+				//provide to the selection model that if a row is selectable
+				StagedNavigator.prototype.isRowSelectable = function(modelItem){
+					return mGitUtil.isChange(modelItem);
+				};
+				
 				return StagedNavigator;
 			}());
 			
