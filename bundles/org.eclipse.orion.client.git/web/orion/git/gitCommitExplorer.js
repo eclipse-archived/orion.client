@@ -332,22 +332,6 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				}
 				
 				DiffRenderer.prototype = new mExplorer.SelectionRenderer();
-				
-				DiffRenderer.prototype.updateExpandVisuals = function(tableRow, isExpanded) {
-					mExplorer.ExplorerRenderer.prototype.updateExpandVisuals.call(this, tableRow, isExpanded);
-					var diffActionsSpan = dojo.byId(tableRow.id + "DiffActionsWrapper"); //$NON-NLS-0$
-					var diffWidgetActionsSpan = dojo.byId(tableRow.id + "DiffWidgetActionsWrapper"); //$NON-NLS-0$
-					
-					if (diffActionsSpan || diffWidgetActionsSpan) {
-						if (isExpanded) {
-							dojo.style(diffActionsSpan, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
-							dojo.style(diffWidgetActionsSpan, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
-						} else {
-							dojo.style(diffActionsSpan, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
-							dojo.style(diffWidgetActionsSpan, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
-						}
-					}
-				};
 
 				DiffRenderer.prototype.getCellElement = function(col_no, item, tableRow){					
 					switch(col_no){
@@ -379,24 +363,25 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, div);
 
+							var actionsWrapper = dojo.create( "div", {"class": "sectionExplorerActions"}, div);
+							var diffActionWrapper = dojo.create("span", {id: "diff" + item.parent.DiffLocation + "DiffActionWrapper"}, actionsWrapper, "last");
+							var compareWidgetActionWrapper = dojo.create("span", {id: "diff" + item.parent.DiffLocation + "CompareWidgetActionWrapper"}, actionsWrapper, "last");
+							
 							dojo.create( "div", { "id":"diffArea_" + item.parent.DiffLocation, "style":"height:420px; border:1px solid lightgray; overflow: hidden"}, div); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item.parent, true) : null;
 							window.setTimeout(function(){
-								
-								
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
 									navGridHolder: navGridHolder,
-									commandSpanId: "diff" + item.parent.DiffLocation + "DiffWidgetActionsWrapper", //$NON-NLS-1$ //$NON-NLS-0$
+									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
 									editableInComparePage: true,
 									complexURL: item.parent.DiffLocation,
 									callback : function(){
-										dojo.empty("diff"+item.parent.DiffLocation+"DiffActionsWrapper");
-										that.commandService.renderCommands("itemLevelCommands", "diff" + item.parent.DiffLocation+"DiffActionsWrapper", item.parent, that, "tool", false);	 //$NON-NLS-0$
-										
+										dojo.empty(diffActionWrapper.id);
+										that.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false); //$NON-NLS-0$
 									}
 								};
 								
@@ -416,18 +401,17 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 						break;
 					case 1:
 						// Create an actions column that the compare container can use.  We don't render any commands in here, the container will.
-						if (item.Type === "Diff"){
-							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
-							
-							actionsColumn.id = tableRow.id + "ActionsWwrapper"; //$NON-NLS-0$
-							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
-							
-							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffWidgetActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							
-							return actionsColumn;
-						}
-						
+//						if (item.Type === "Diff"){
+//							var actionsColumn = document.createElement('td'); //$NON-NLS-0$
+//							
+//							actionsColumn.id = tableRow.id + "ActionsWwrapper"; //$NON-NLS-0$
+//							dojo.addClass(actionsColumn, "sectionExplorerActions"); //$NON-NLS-0$
+//							
+//							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffWidgetActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//							dojo.create("div", {"class": "sectionTableItemActions", id: "diff" + item.DiffLocation + "DiffActionsWrapper"}, actionsColumn, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//							
+//							return actionsColumn;
+//						}
 						break;
 					}
 				};
