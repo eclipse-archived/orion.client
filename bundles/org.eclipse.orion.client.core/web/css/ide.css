@@ -180,19 +180,6 @@ a:hover {
 	padding: 8px;
 }
 
-.sectionActions {
-	font-size: 8pt;
-	margin-top: 2px;
-	vertical-align: baseline;
-}
-
-.sectionAnchor{
-	line-height:16px;
-	font-size:10pt;
-	color: #444;
-	font-weight:normal;
-}
-
 .pageNavigationActions {
 	text-align: right;
 	min-height: 30px;
