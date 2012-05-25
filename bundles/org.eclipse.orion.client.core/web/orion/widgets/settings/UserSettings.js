@@ -20,6 +20,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	
 		// templateString: '<input type="text" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
 		
+		dispatch: true,
+		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
 								'<div class="sectionWrapper toolComposite">' +
@@ -115,15 +117,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this.commandService.renderCommands('profileCommands', dojo.byId( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			
+			this.commandService.renderCommands('profileCommands', dojo.byId( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 							id: "linkedAccountSection", //$NON-NLS-0$
 							title: "Linked Accounts", //$NON-NLS-0$
 							content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
-//							preferenceService: this.registry.getService("orion.core.preference"), //$NON-NLS-0$
 							canHide: true,
 							useAuxStyle: true,
 							hidden: true,
@@ -143,8 +142,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			}
 		},
 		
-		update: function(data){
-			console.log( 'update' ); //$NON-NLS-0$
+	update: function(data){
 			
 			var authenticationIds = [];
 			
@@ -165,39 +163,61 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			userdata.Name = settingsWidget.accountFields[1].getValue();
 			userdata.email = settingsWidget.accountFields[2].getValue();
 			
-//			userdata.password = settingsWidget.passwordFields[1].getValue();
-//			userdata.passwordRetype = settingsWidget.passwordFields[1].getValue();
+			var pword = settingsWidget.passwordFields[1].getValue();
+			var pwordRetype = settingsWidget.passwordFields[2].getValue();
 
-//			if( userdata.password === userdata.passwordRetype ){
+			if( pword.length > 0 ){
 			
-			for(var i=0; i<authServices.length; i++){
-				var servicePtr = authServices[i];
-				var authService = this.registry.getService(servicePtr);		
-
-				authService.getKey().then(function(key){
-					authenticationIds.push(key);
-					authService.getUser().then(function(jsonData){
+				if( pword !== pwordRetype ){
+					messageService.setProgressResult( 'New password, and retyped password do not match' );
 					
-						var data = jsonData;
+					this.dispatch = false;
+					
+				}else{
+				
+					if( settingsWidget.passwordFields[0].getValue().length > 0 ){
+						userdata.oldPassword = settingsWidget.passwordFields[0].getValue();
+						userdata.password = pword;
+						userdata.passwordRetype = pwordRetype;
+					
+						this.dispatch = true;
+					
+					}else{
+						messageService.setProgressResult( 'Need to type your current password' );
+					
+						this.dispatch = false;
+					}		
+				}
+			}
+			
+			if( this.dispatch === true ){
+			
+				for(var i=0; i<authServices.length; i++){
+					var servicePtr = authServices[i];
+					var authService = this.registry.getService(servicePtr);		
+	
+					authService.getKey().then(function(key){
+						authenticationIds.push(key);
+						authService.getUser().then(function(jsonData){
 						
-						var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-							messageService.setProgressResult( messages['User profile data successfully reset.'] );
+							var data = jsonData;
 							
-							if( userdata.Name ){
-							
-								var userMenu = dijit.byId( 'logins' ); //$NON-NLS-0$
+							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
+								messageService.setProgressResult( messages['User profile data successfully reset.'] );
 								
-								userMenu.set( 'label', userdata.Name  ); //$NON-NLS-0$
-							
-							}
-							
+								if( userdata.Name ){
+								
+									var userMenu = dijit.byId( 'logins' ); //$NON-NLS-0$
+									
+									userMenu.set( 'label', userdata.Name  ); //$NON-NLS-0$
+								
+								}
+								
+							});
 						});
 					});
-				});
-			}		
-//			}else{
-//				messageService.setProgressResult( 'New password, and retyped password do not match' );
-//			}
+				}		
+			}
 		},
 		
 		startUp:function(){
