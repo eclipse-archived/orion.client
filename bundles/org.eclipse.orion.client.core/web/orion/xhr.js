@@ -85,12 +85,6 @@ define(['orion/Deferred'], function(Deferred) {
 		if (typeof options.responseType === 'string') { //$NON-NLS-0$
 			xhr.responseType = options.responseType;
 		}
-		if (typeof options.timeout === 'number') { //$NON-NLS-0$
-			xhr.timeout = options.timeout;
-			xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
-				d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
-			});
-		}
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				var code = xhr.status, response = xhr.response;
@@ -112,6 +106,12 @@ define(['orion/Deferred'], function(Deferred) {
 		};
 		try {
 			xhr.open(method, url, true /* async */);
+			if (typeof options.timeout === 'number') { //$NON-NLS-0$
+				xhr.timeout = options.timeout;
+				xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
+					d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
+				});
+			}
 			var headerNames = Object.keys(headers);
 			for (i=0; i < headerNames.length; i++) {
 				var headerName = headerNames[i], headerValue = headers[headerName];
