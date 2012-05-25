@@ -216,11 +216,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/ut
 				dojo.hitch(_self, function(td, i){
 				authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm){
 					
-					if(loginForm.indexOf("?")==-1){ //$NON-NLS-0$
-						dojo.create("a", {target: "_blank", href: loginForm + "?redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					}else{
-						dojo.create("a", {target: "_blank", href: loginForm + "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + i, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					}
+					dojo.create("a", {target: "_blank", href: loginForm, innerHTML: messages['Sign in']}, td, "last"); //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 					if(_self.unauthenticatedServices[i].label){
 						h2.innerHTML = _self.unauthenticatedServices[i].label + "<br>"; //$NON-NLS-0$
 					}
