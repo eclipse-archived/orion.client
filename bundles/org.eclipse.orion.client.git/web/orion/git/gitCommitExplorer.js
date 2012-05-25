@@ -428,7 +428,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
 					this.renderer = new DiffRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "DiffNavigator", checkbox: false}, this); //$NON-NLS-0$
-					this.createTree(this.parentId, new DiffModel());
+					this.createTree(this.parentId, new DiffModel(), {selectionPolicy: "cursorOnly"});
 				}
 				
 				DiffNavigator.prototype = new mExplorer.Explorer();
