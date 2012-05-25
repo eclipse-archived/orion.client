@@ -173,13 +173,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		for(i in services){
 			if(services.hasOwnProperty(i)){
 				//open prompt if there is at least one pending authentication
-				var userInfo = dojo.byId('userInfo'); //$NON-NLS-0$
-				if(!userInfo.innerHTML){
+				var userMenu = dojo.byId('userMenu'); //$NON-NLS-0$
+				if(!userMenu.innerHTML){
 					window.setTimeout(function(){ //wait a few milliseconds for the content to generate 
 						try{
 							dijit.popup.open({
 								popup: loginDialog,
-								around: dojo.byId('userMenu') //$NON-NLS-0$
+								around: userMenu //$NON-NLS-0$
 							});
 						}catch(e){}
 					}, 500);
@@ -187,7 +187,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					try{
 						dijit.popup.open({
 							popup: loginDialog,
-							around: dojo.byId('userMenu') //$NON-NLS-0$
+							around: userMenu //$NON-NLS-0$
 						});	
 					}catch(e){}
 				}
