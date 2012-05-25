@@ -2289,7 +2289,7 @@ var exports = {};
 				} else {
 					var paths = [];
 					for ( var i = 0; i < items.length; i++) {
-						paths[i] = items[i].path;
+						paths[i] = items[i].name;
 					}
 					
 					progressService.createProgressMonitor(
@@ -2338,7 +2338,7 @@ var exports = {};
 				} else {
 					var paths = [];
 					for ( var i = 0; i < items.length; i++) {
-						paths[i] = items[i].path;
+						paths[i] = items[i].name;
 					}
 					
 					progressService.createProgressMonitor(
@@ -2479,7 +2479,7 @@ var exports = {};
 						
 						var paths = [];
 						for ( var i = 0; i < items.length; i++) {
-							paths[i] = items[i].path;
+							paths[i] = items[i].name;
 						}
 						
 						progressService.createProgressMonitor(
@@ -2519,7 +2519,7 @@ var exports = {};
 				var url = data.userData.Clone.DiffLocation + "?parts=diff"; //$NON-NLS-0$
 				for (var i = 0; i < items.length; i++) {
 					url += "&Path="; //$NON-NLS-0$
-					url += items[i].path;
+					url += items[i].name;
 				}
 				return url;
 			},
