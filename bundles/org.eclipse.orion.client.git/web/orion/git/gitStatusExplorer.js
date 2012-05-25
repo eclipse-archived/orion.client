@@ -402,7 +402,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.name }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							return td;
 						} else {
 							var td = document.createElement("td"); //$NON-NLS-0$
@@ -584,7 +584,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.path }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.name }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
 							return td;
 						} else {
