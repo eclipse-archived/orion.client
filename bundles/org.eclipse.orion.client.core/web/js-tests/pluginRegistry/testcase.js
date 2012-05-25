@@ -338,5 +338,19 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		};
 	}
 
+	tests["test __plugin__ property"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		return pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			var serviceReferences = serviceRegistry.getServiceReferences("test");
+			assert.equal(serviceReferences.length, 1);
+			var __plugin__ = serviceReferences[0].getProperty("__plugin__");
+			assert.equal(__plugin__, plugin.getLocation());
+
+			plugin.uninstall();
+			pluginRegistry.shutdown();
+		});
+	};
 	return tests;
 });
