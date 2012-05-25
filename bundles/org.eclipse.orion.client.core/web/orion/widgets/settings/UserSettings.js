@@ -123,7 +123,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							id: "linkedAccountSection", //$NON-NLS-0$
 							title: "Linked Accounts", //$NON-NLS-0$
 							content: '<div id="iFrameContent"></div>', //$NON-NLS-0$
-							preferenceService: this.registry.getService("orion.core.preference"), //$NON-NLS-0$
+//							preferenceService: this.registry.getService("orion.core.preference"), //$NON-NLS-0$
 							canHide: true,
 							useAuxStyle: true,
 							hidden: true,
