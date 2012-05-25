@@ -2380,7 +2380,7 @@ var exports = {};
 				var commitFunction = function(body){		
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").commitAll(item.CommitLocation, null, dojo.toJson(body)), //$NON-NLS-0$
+						serviceRegistry.getService("orion.git.provider").commitAll(item.Clone.HeadLocation, null, dojo.toJson(body)), //$NON-NLS-0$
 						messages["Committing changes"]).deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(item);
