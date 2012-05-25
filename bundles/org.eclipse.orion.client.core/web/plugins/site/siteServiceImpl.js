@@ -118,7 +118,6 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 			["/plugins/git", hostPrefix + "plugins/git"],
 			["/plugins/user", hostPrefix + "plugins/user"],
 			["/logout", hostPrefix + "logout"],
-			["/mixloginstatic", hostPrefix + "mixloginstatic"],
 			["/mixlogin/manageopenids", hostPrefix + "mixlogin/manageopenids"],
 			["/openids", hostPrefix + "openids"],
 			["/task", hostPrefix + "task"],
