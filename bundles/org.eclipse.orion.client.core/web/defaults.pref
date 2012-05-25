@@ -1,6 +1,6 @@
 {
 	"/plugins":{
-		"authenticationPlugin.html": true,
+		"plugins/authenticationPlugin.html": true,
 		"plugins/fileClientPlugin.html":true,
 		"plugins/jslintPlugin.html":true,
 		"git/plugins/gitPlugin.html":true,
