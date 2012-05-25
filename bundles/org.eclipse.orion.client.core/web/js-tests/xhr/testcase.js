@@ -115,6 +115,19 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
 	});
 
+	tests['test timeout causes reject'] = getTimeoutable(function() {
+		var timeoutingXhr = new OkXhr();
+		timeoutingXhr.send = function() {
+			var self = this;
+			setTimeout(function() {
+				self._fakeTimeout();
+			}, 50);
+		};
+		return xhr('GET', '/', {
+				timeout: 25 // the value is not important here
+			}, timeoutingXhr).then(fail, succeed);
+	});
+
 	tests['test resolve value has expected shape'] = getTimeoutable(function() {
 		return xhr('GET', '/foo', {
 				data: 'my request body',
