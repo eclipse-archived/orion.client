@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define*/
-define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry'],
-		function(assert, Deferred, testHelpers, config, mServiceRegistry) {
+define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
+		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
 	var MANAGED_SERVICE = 'orion.cm.managedservice';
 
@@ -40,17 +40,21 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		};
 	}
 
-	var serviceRegistry, mockPrefs, factory, configAdmin;
-	var setUp = function() {
+	var serviceRegistry, pluginRegistry, pluginStorage, mockPrefs, factory, configAdmin;
+	var setUp = function(storage) {
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		pluginStorage = arguments.length ? storage : {};
+		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, pluginStorage);
 		mockPrefs = new MockPrefsService();
-		factory = new ConfigAdminFactory(serviceRegistry, mockPrefs);
+		factory = new ConfigAdminFactory(serviceRegistry, pluginRegistry, mockPrefs);
 		return factory.getConfigurationAdmin().then(function(admin) {
 			configAdmin = admin;
 		});
 	},
 	tearDown = function() {
 		serviceRegistry = null;
+		pluginRegistry = null;
+		pluginStorage = null;
 		mockPrefs = null;
 		factory = null;
 		configAdmin = null;
@@ -228,6 +232,31 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		// 3rd call happens after this
 		config.remove();
 		return d;
+	});
+
+	tests['test plugin load calls its ManagedServices\' updated() first'] = makeTest(function() {
+		return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
+			// Destroy the plugin's iframe
+			pluginRegistry.shutdown();
+			// Create a new PluginRegistry (using the same storage as the old one so it gets our plugin data),
+			// and new ServiceRegistry, ConfigAdmin, etc.
+			return setUp(pluginStorage).then(function() {
+				// This loads the plugin's data from the storage
+				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
+					// At this point our plugin's data is in the registry, but the plugin is not loaded.
+					// Lazy-load it by invoking a service method
+					var testService = serviceRegistry.getService('test.bogus');
+					return testService.test().then(function() {
+						return testService.getCallOrder().then(function(callOrder) {
+							assert.strictEqual(callOrder[0], 'orion.cm.managedservice');
+							assert.strictEqual(callOrder[1], 'test.bogus');
+							// TODO use this test once __plugin__ support is implemented in service metadata.
+							// assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+						});
+					});
+				});
+			});
+		});
 	});
 
 return tests;
