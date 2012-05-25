@@ -9,6 +9,7 @@
 <title>Login Page</title>
 <style type="text/css">
 @import "css/loginWindow.css";
+@import "css/landing.css";
 </style>
 <script type="text/javascript" src="js/htmlAuth.js"></script>
 </head>
@@ -16,13 +17,158 @@
 <!--<div class="layoutBlock topRowBanner" id="staticBanner"><a class="layoutLeft primaryNav" id="home"><img alt="Orion Logo" src="images/orion-small-lightondark.gif"></a></div> -->
 <!--<div class="layoutBlock titleArea" id="titleArea"><div class="layoutLeft pageTitle" id="pageTitle">Login to Orion</div></div> -->
 <!--<div id="pageToolbar" class="toolbar layoutBlock"></div> -->
-	<div id="loginWindow" class="loginWindow">
+
+
+<div class="orion-login-container" id="login-window">
+	<div class="orion-landing-area">
+		<div class="orion-banner"></div>
+		<div class="orion-welcome-area">
+			<div class="orion-welcome-area-text">
+				<h1>Welcome to Orion</h1>
+				<div class="orion-welcome-area-text-content">Orion is a web based developer platform supporting editing, testing and deploying web applictions. Orion has built in Git support. So create an account, clone a repository to OrionHub and start editing</div>
+			</div>
+		</div>
+		<div class="orion-login">
+			<div class="orion-login-header">User Login</div>
+			<form>
+				<div class="orion-input-holder">
+					<input type="text" class="orion-text-input" name="login" id="login" value="username" title="Username or email" autocomplete="on" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
+				</div>
+				<div class="orion-input-holder">
+					<input name="password" type="password" id="password" class="orion-text-input" value="password"  title="Password" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}">
+				</div>
+				<div class="orion-login-button-holder">
+					<input type="button" name="password" type="password" id="password" class="orion-login-button" onclick='confirmLogin();' value="Sign in" tabindex="0">
+				</div>
+				<div class="orion-login-forgot-holder">
+					<a id="resetUserLink" class="orion-forgot-password" style="font-size: 0.85em;" href="javascript:showResetUser();">Forgot password?</a>
+				</div>
+			</form>
+		</div>
+		<!--div class="orion-register">
+			<div class="orion-login-header">Get an account</div>
+			<form>
+				<div class="orion-input-holder">
+					<input type="text" class="orion-text-input" value="email address" title="Username or email" autocomplete="on">
+				</div>
+				<div class="orion-login-button-holder">
+					<input type="submit" class="orion-register-button" value="Sign up" tabindex="0">
+				</div>
+			</form>
+		</div -->
+		
+		<div class="open-accounts">
+			<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
+		<h3 id="openIDLogin" class="loginWindow" style="float: left; margin-top: 10px; margin-bottom: 10px; margin-right: 5px;">Login with:</h3> <a class="loginWindow"
+					href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin"><img id="googleLogin"
+					class="loginWindow" src="../openids/google.png" alt="Google"
+					title="Google"> </a><a class="loginWindow"
+					href="javascript:confirmOpenId('http://me.yahoo.com')" aria-labelledby="openIDLogin yahooLogin"><img id="yahooLogin"
+					class="loginWindow" src="../openids/yahoo-logo.png" alt="Yahoo!"
+					title="Yahoo!"> </a><a class="loginWindow"
+					href="javascript:confirmOpenId('http://openid.aol.com/')" aria-labelledby="openIDLogin aolLogin"><img id="aolLogin"
+					class="loginWindow" src="../openids/aim-logo.png" alt="AOL"
+					title="AOL"> </a><a class="loginWindow"
+					href="javascript:confirmOpenId('http://myopenid.com')" aria-labelledby="openIDLogin myopenidLogin"><img id="myopenidLogin"
+					class="loginWindow" src="../openids/myopenid-logo.png" alt="myOpenID"
+					title="myOpenID"> </a>
+		</div>
+	</div>
+	
+	<span id="resetUser" style="display: none">
+			<div id="resetUserHr" class="hrloginWindow"></div>
+				<h3 class="loginWindow" id="newResetUserHeaderShown">Reset Orion Account</h3>
+				<p  class="loginWindow" style="margin-left: 20px; margin-right: 20px;">You can reset your password providing your email OR your account name.</p>
+				<table class="loginWindow" role="presentation">
+					<tr>
+						<td class="loginWindow">
+							<label class="loginWindow" id="resetLabel" for="reset">Account name: </label>
+						</td>
+						<td class="loginWindow">
+							<input class="loginWindow" id="reset">
+						</td>
+					</tr>
+					<tr>
+						<td class="loginWindow">
+							<label class="loginWindow" id="emailLabel" for="resetEmail">Email: </label>
+						</td>
+						<td class="loginWindow">
+							<input class="loginWindow" id="resetEmail" type="email">
+						</td>
+					</tr>
+					<tr id="reset_errorWin" style="display: none;" aria-atomic="true" aria-live="assertive">
+						<td colspan=2>
+							<ul id="reset_errorList">
+								<li id="reset_errorMessage">&nbsp;</li>
+							</ul>
+						</td>
+					</tr>
+					<tr>
+						<td class="loginWindow loginWindowButtonTd" colspan=2>
+							<button type='button' class="loginWindow"
+								onClick="javascript:hideResetUser();">Cancel</button>
+							<button class="loginWindow" type="submit"
+								onClick=confirmResetUser() value=OK>Reset</button>
+						</td>
+					</tr>
+				</table>
+			</span>
+			
+			<span id="resetUser" style="display: none">
+			<div id="resetUserHr" class="hrloginWindow"></div>
+				<h3 class="loginWindow" id="newResetUserHeaderShown">Reset Orion Account</h3>
+				<p  class="loginWindow" style="margin-left: 20px; margin-right: 20px;">You can reset your password providing your email OR your account name.</p>
+				<table class="loginWindow" role="presentation">
+					<tr>
+						<td class="loginWindow">
+							<label class="loginWindow" id="resetLabel" for="reset">Account name: </label>
+						</td>
+						<td class="loginWindow">
+							<input class="loginWindow" id="reset">
+						</td>
+					</tr>
+					<tr>
+						<td class="loginWindow">
+							<label class="loginWindow" id="emailLabel" for="resetEmail">Email: </label>
+						</td>
+						<td class="loginWindow">
+							<input class="loginWindow" id="resetEmail" type="email">
+						</td>
+					</tr>
+					<tr id="reset_errorWin" style="display: none;" aria-atomic="true" aria-live="assertive">
+						<td colspan=2>
+							<ul id="reset_errorList">
+								<li id="reset_errorMessage">&nbsp;</li>
+							</ul>
+						</td>
+					</tr>
+					<tr>
+						<td class="loginWindow loginWindowButtonTd" colspan=2>
+							<button type='button' class="loginWindow"
+								onClick="javascript:hideResetUser();">Cancel</button>
+							<button class="loginWindow" type="submit"
+								onClick=confirmResetUser() value=OK>Reset</button>
+						</td>
+					</tr>
+				</table>
+			</span>
+						<div id="newUserHr" class="hrloginWindow"></div>
+			<h3 id="newUserHeader" class="loginWindow">
+				New to Orion? <a class="loginWindow"
+					href="javascript:goToCreateUser();">Create account</a>
+			</h3>
+		
+	
+</div>
+
+
+ 	<!-- div id="loginWindow" class="loginWindow">
 		<div style="clear: left; margin: 8px;">
 			<table class="loginWindow" role="presentation">
 				<tbody>
 					<tr>
 						<td class="loginWindow"><label class="loginWindow"
-							id="loginLabel" for="login">Name:</label></td>
+							id="loginLabel" for="login">Hello:</label></td>
 						<td class="loginWindow"><input class="loginWindow" name="login" id="login"
 							onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}"><br>
 						</td>
@@ -157,6 +303,6 @@
 			</div>
 			
 		</div>
-	</div>
+	</div -->
 </body>
 </html>
