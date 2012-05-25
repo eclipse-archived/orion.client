@@ -825,7 +825,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 	 * @param {Function} [options.onEnd]
 	 * @param {Number} [options.rate=20] The time between frames, in milliseconds.
 	 */
-	Animation = (function() {
+	Animation = /** @ignore */ (function() {
 		function Animation(options) {
 			this.options = options;
 		}
