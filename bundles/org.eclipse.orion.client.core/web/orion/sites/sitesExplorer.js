@@ -355,7 +355,7 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/sectio
 	 * @param {orion.sites.SiteTreeModel} [options.model]
 	 * @param {orion.sites.SitesRenderer} [options.renderer]
 	 */
-	ViewOnSiteTree = (function() {
+	ViewOnSiteTree = /** @ignore */ (function() {
 		function ViewOnSiteTree(options) {
 			var serviceRegistry = options.serviceRegistry;
 			var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
