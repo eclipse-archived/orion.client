@@ -116,7 +116,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 						} else {
 							dojo.hash("#"); //$NON-NLS-0$
 							var buffer = fileClient.fileServiceName(metadata.Location);
-							result.resolve(dojo.string.substitute(messages['Changed to: ${0}'] ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
+							result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
 						}
 						mCurrentDirectory.setCurrentTreeNode(null);
 					})
