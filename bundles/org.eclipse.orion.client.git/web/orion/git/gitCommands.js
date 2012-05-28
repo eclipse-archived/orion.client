@@ -1286,7 +1286,7 @@ var exports = {};
 					return;
 				}
 
-				exports.gatherSshCredentials(serviceRegistry, commandInvocation, errorData).then(
+				exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
 					function(options) {
 						
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
