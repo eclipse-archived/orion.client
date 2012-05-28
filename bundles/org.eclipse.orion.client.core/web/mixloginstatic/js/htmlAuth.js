@@ -88,12 +88,10 @@ window.onload = function() {
 		if (checkusersrequest.readyState === 4) {
 			if (checkusersrequest.status === 200) {
 				var responseObject = JSON.parse(checkusersrequest.responseText);
-
 				if (responseObject.CanAddUsers === false) {
-					document.getElementById("newUserHeader").style.display = 'none';
-					document.getElementById("newUserHr").style.display = 'none';
+					formatForNoUserCreation();
 				}
-
+				document.getElementById("login-window").style.display = '';
 			}
 		}
 	};
@@ -122,6 +120,7 @@ window.onload = function() {
 	checkemailrequest.send();
 
 	document.getElementById("login").focus();
+	
 };
 
 function setResetMessage(isError, message) {
@@ -176,7 +175,7 @@ function getRedirect() {
 	return results === null ? null : results[1];
 }
 
-function confirmOpenId(openid) { /* don't wait for the login response, notify anyway */
+function confirmOpenId(openid) {
 	notify = true;
 	if (openid !== "" && openid !== null) {
 		var redirect = getRedirect();
@@ -234,12 +233,12 @@ function goToLoginWindow() {
 
 function validatePassword() {
 	if (document.getElementById("create_password").value !== document.getElementById("create_passwordRetype").value) {
-		document.getElementById("create_errorWin").style.visibility = '';
-		document.getElementById("create_errorMessage").innerHTML = "Passwords don't match!";
+		document.getElementById("errorWin").style.visibility = '';
+		document.getElementById("errorMessage").innerHTML = "Passwords don't match!";
 		return false;
 	}
-	document.getElementById("create_errorWin").style.visibility = 'hidden';
-	document.getElementById("create_errorMessage").innerHTML = "&nbsp;";
+	document.getElementById("errorWin").style.visibility = 'hidden';
+	document.getElementById("errorMessage").innerHTML = "&nbsp;";
 	return true;
 }
 
@@ -257,9 +256,12 @@ function confirmCreateUser() {
 	mypostrequest.onreadystatechange = function() {
 		if (mypostrequest.readyState === 4) {
 			if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+				if (!mypostrequest.responseText) {
+					return;	
+				}
 				var responseObject = JSON.parse(mypostrequest.responseText);
-				document.getElementById("create_errorMessage").innerHTML = responseObject.Message;
-				document.getElementById("create_errorWin").style.visibility = '';
+				document.getElementById("errorMessage").innerHTML = responseObject.Message;
+				document.getElementById("errorWin").style.visibility = '';
 			} else {
 				confirmLogin(login, password);
 			}
@@ -278,17 +280,23 @@ function revealRegistration(){
 	document.getElementById('newUserHeaderShown').style.visibility = '';
 }
 
+function hideRegistration(){
+	document.getElementById('orionLogin').style.visibility = '';
+	document.getElementById('orionRegister').style.visibility = '';
+	document.getElementById('newUserHeaderShown').style.visibility = 'hidden';
+}
+
 function focusUserField( event ){
 	if( event.currentTarget.value === 'username' ){
 		event.currentTarget.value = '';
-	};
+	}
 }
 
 function focusPasswordField( event ){
 	event.currentTarget.type = 'password';
 	if( event.currentTarget.value === 'password' || event.currentTarget.value === 'retype password'){
 		event.currentTarget.value = '';
-	};
+	}
 }
 
 function formatForNoUserCreation(){
