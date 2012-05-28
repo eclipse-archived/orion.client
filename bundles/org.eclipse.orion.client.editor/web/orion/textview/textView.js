@@ -5126,6 +5126,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_setReadOnly: function (readOnly) {
+			this._readonly = readOnly;
 			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false");
 		},
 		_setTabSize: function (tabSize, init) {
