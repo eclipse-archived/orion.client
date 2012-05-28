@@ -12,6 +12,9 @@
 <body style="margin: 0; padding: 0;">
 	<div class="orion-login-container" id="login-window" style="display:none;">
 		<div class="orion-landing-area">
+			<div id="errorWin"  class="orion-error" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
+					<div id="errorMessage">&nbsp;</div>
+			</div>
 			<div class="orion-banner"></div>
 			<div class="orion-welcome-area">
 				<div class="orion-welcome-area-text">
@@ -114,11 +117,6 @@
 						<button class="loginWindow" type="submit" onclick="confirmResetUser()" value=OK>Reset</button></td>
 				</tr>
 			</table> 
-		</div>
-
-
-		<div id="errorWin" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
-			<div id="errorMessage">&nbsp;</div>
 		</div>
 	</div>
 </body>

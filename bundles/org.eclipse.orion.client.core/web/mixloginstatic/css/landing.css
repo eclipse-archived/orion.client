@@ -54,7 +54,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	margin: -154px 0 0 -418px;
 }
 
-.orion-welcome-area, .orion-login, .orion-register, .orion-open, .orion-signup{
+.orion-welcome-area, .orion-login, .orion-register, .orion-open, .orion-signup, .orion-error{
 	border-radius: 4px;
 	border: solid 1px #CCC;
 }
@@ -285,6 +285,18 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 .orion-open-images{
 	padding-top:5px;
 	display:inline;
+}
+
+.orion-error{
+	color: #B94A48;
+	background-color: #F2DEDE;
+	border-color: #EED3D7;
+	width: 852px;
+	margin-right:0;
+	position: absolute;
+	top: 345px;
+	padding:5px;
+	padding-right:0;
 }
 
 .open-accounts {
