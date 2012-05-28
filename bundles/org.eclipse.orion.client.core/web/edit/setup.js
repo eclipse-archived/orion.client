@@ -90,14 +90,20 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} catch(e) {}
 				return error.responseText;
 			}
+			function parseNumericParams(input, params) {
+				for (var i=0; i < params.length; i++) {
+					var param = params[i];
+					if (input[param]) {
+						input[param] = parseInt(input[param], 10);
+					}
+				}
+			}
 			if (location && location[0] !== "#") { //$NON-NLS-0$
 				location = "#" + location; //$NON-NLS-0$
 			}
 			var input = PageUtil.matchResourceParameters(location);
 			var fileURI = input.resource;
-			if (input.line) {
-				input.line = parseInt(input.line,10);
-			}
+			parseNumericParams(input, ["start", "end", "line", "offset", "length"]);
 			// populate editor
 			if (fileURI) {
 				if (fileURI === this.lastFilePath) {
