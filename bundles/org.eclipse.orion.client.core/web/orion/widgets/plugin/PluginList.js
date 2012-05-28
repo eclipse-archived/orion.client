@@ -48,8 +48,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		startup: function(){
 			// set up the toolbar level commands
 			
-			console.log( 'called startup' );
-			
 			var installPluginCommand = new mCommands.Command({
 				name: messages["Install"],
 				tooltip: messages["Install a plugin by specifying its URL"],

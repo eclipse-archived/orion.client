@@ -162,6 +162,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.userWidget.startUp();
 		},
+		
+		initPlugins: function(id){
+			dojo.empty(this.table);
+
+			if (this.pluginWidget) {
+				this.pluginWidget.destroyRecursive(true);
+			}
+
+			this.updateToolbar(id);
+			
+			var pluginNode = dojo.create( 'div', null, this.table ); //$NON-NLS-0$
+
+			this.pluginWidget = new orion.widgets.plugin.PluginList({
+				settings: this.settingsCore,
+				preferences: this.preferences,
+				statusService: this.preferencesStatusService,
+				dialogService: this.preferenceDialogService,
+				commandService: this.commandService,
+				toolbarID: "pageActions" //$NON-NLS-0$
+			}, pluginNode);
+			
+			this.pluginWidget.startup();
+		},
 
 
 /*	showPlugins - iterates over the plugin array, reads
@@ -193,26 +216,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 
-			dojo.empty(this.table);
-
-			if (this.pluginWidget) {
-				this.pluginWidget.destroyRecursive(true);
-			}
-
-			this.updateToolbar(id);
+			this.initPlugins(id);
 			
-			var pluginNode = dojo.create( 'div', null, this.table ); //$NON-NLS-0$
-
-			this.pluginWidget = new orion.widgets.plugin.PluginList({
-				settings: this.settingsCore,
-				preferences: this.preferences,
-				statusService: this.preferencesStatusService,
-				dialogService: this.preferenceDialogService,
-				commandService: this.commandService,
-				toolbarID: "pageActions" //$NON-NLS-0$
-			}, pluginNode);
+			/* Need to init twice - because of a bug with command initialization where 
+			   the delete plugins are not showing. This is a temporary emergency fix 
+			   for M2 */
 			
-			this.pluginWidget.startup();
+			this.initPlugins(id);
+			
+			
 		},
 
 		showById: function(id) {
