@@ -170,6 +170,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	color:#666;
 	font-size:12px;
 	font-weight:bold;
+	margin-left: 5px;
 }
 
 .orion-login-button:hover{
@@ -225,11 +226,28 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	color:white;
 	font-size:12px;
 	font-weight:bold;
+	margin-left: 5px;
 }
 
 .orion-register-button:hover{
 	background:white;
 	color:#666;
+}
+
+.orion-cancel-button {
+	background:white;
+	border-radius:4px;
+	height:30px;
+	width:80px;
+	border: solid 1px #CCC;
+	color:#666;
+	font-size:12px;
+	font-weight:bold;
+}
+
+.orion-cancel-button:hover{
+	background:#666;
+	color:white;
 }
 
 .orion-or-div {
