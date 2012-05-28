@@ -5,20 +5,12 @@
 	content="Copyright (c) 2010,2012 IBM Corporation and others.">
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<meta http-equiv="X-UA-Compatible" content="IE=8">
+<link rel="stylesheet" type="text/css" href="css/loginWindow.css" />
+<link rel="stylesheet" type="text/css" href="css/landing.css" />
+<script src="js/htmlAuth.js"></script>
 <title>Login Page</title>
-<style type="text/css">
-@import "css/loginWindow.css";
-@import "css/landing.css";
-</style>
-<script type="text/javascript" src="js/htmlAuth.js"></script>
 </head>
 <body style="margin: 0; padding: 0;">
-<!--<div class="layoutBlock topRowBanner" id="staticBanner"><a class="layoutLeft primaryNav" id="home"><img alt="Orion Logo" src="images/orion-small-lightondark.gif"></a></div> -->
-<!--<div class="layoutBlock titleArea" id="titleArea"><div class="layoutLeft pageTitle" id="pageTitle">Login to Orion</div></div> -->
-<!--<div id="pageToolbar" class="toolbar layoutBlock"></div> -->
-
-
 <div class="orion-login-container" id="login-window">
 	<div class="orion-landing-area">
 		<div class="orion-banner"></div>
@@ -75,7 +67,7 @@
 		</div>
 	</div>
 	
-	<span id="resetUser" style="display: none">
+	<span id="resetUser" style="display: none;">
 			<div id="resetUserHr" class="hrloginWindow"></div>
 				<h3 class="loginWindow" id="newResetUserHeaderShown">Reset Orion Account</h3>
 				<p  class="loginWindow" style="margin-left: 20px; margin-right: 20px;">You can reset your password providing your email OR your account name.</p>
@@ -106,9 +98,9 @@
 					<tr>
 						<td class="loginWindow loginWindowButtonTd" colspan=2>
 							<button type='button' class="loginWindow"
-								onClick="javascript:hideResetUser();">Cancel</button>
+								onClick="hideResetUser();">Cancel</button>
 							<button class="loginWindow" type="submit"
-								onClick=confirmResetUser() value=OK>Reset</button>
+								onClick="confirmResetUser();" value=OK>Reset</button>
 						</td>
 					</tr>
 				</table>
@@ -152,15 +144,17 @@
 					</tr>
 				</table>
 			</span>
-						<div id="newUserHr" class="hrloginWindow"></div>
+			
+			<!-- these are just placeholders -->
+			<div id="newUserHr" class="hrloginWindow" style="display: none">
 			<h3 id="newUserHeader" class="loginWindow">
-				New to Orion? <a class="loginWindow"
-					href="javascript:goToCreateUser();">Create account</a>
+				New to Orion? <a class="loginWindow" href="javascript:goToCreateUser();">Create account</a>
 			</h3>
-		
-	
-</div>
-
+			</div>
+			<div id="errorWin" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
+				<div id="errorMessage">&nbsp;</div>
+			</div>
+	</div>
 
  	<!-- div id="loginWindow" class="loginWindow">
 		<div style="clear: left; margin: 8px;">

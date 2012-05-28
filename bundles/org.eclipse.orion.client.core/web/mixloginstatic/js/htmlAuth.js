@@ -9,119 +9,18 @@
 
 /*global document window XMLHttpRequest */
 
-window.onload = function() {
-
-	var error = getParam("error");
-	if (error) {
-		var errorMessage = decodeBase64(error);
-
-		document.getElementById("errorWin").style.visibility = '';
-		document.getElementById("errorMessage").innerHTML = errorMessage;
-	}
-
-	var checkusersrequest = new XMLHttpRequest();
-	checkusersrequest.onreadystatechange = function() {
-		if (checkusersrequest.readyState == 4) {
-			if (checkusersrequest.status === 200) {
-				var responseObject = JSON.parse(checkusersrequest.responseText);
-
-				if (responseObject.CanAddUsers === false) {
-					document.getElementById("newUserHeader").style.display = 'none';
-					document.getElementById("newUserHr").style.display = 'none';
-				}
-
-			}
-		}
-	};
-
-	checkusersrequest.open("POST", "../login/canaddusers", true);
-	checkusersrequest.setRequestHeader("Content-type",
-			"application/x-www-form-urlencoded");
-	checkusersrequest.setRequestHeader("Orion-Version", "1");
-	checkusersrequest.send();
-
-	var checkemailrequest = new XMLHttpRequest();
-	checkemailrequest.onreadystatechange = function() {
-		if (checkemailrequest.readyState == 4) {
-			if (checkemailrequest.status === 200) {
-				var responseObject = JSON.parse(checkemailrequest.responseText);
-				if (responseObject.emailConfigured === false) {
-					document.getElementById("resetUserLink").style.display = 'none';
-				}
-
-			}
-		}
-	};
-
-	checkemailrequest.open("POST", "../useremailconfirmation/cansendemails",
-			true);
-	checkemailrequest.setRequestHeader("Content-type",
-			"application/x-www-form-urlencoded");
-	checkemailrequest.setRequestHeader("Orion-Version", "1");
-	checkemailrequest.send();
-
-	document.getElementById("login").focus();
-}
-
-function setResetMessage(isError, message) {
-	document.getElementById("reset_errorMessage").innerHTML = message;
-	document.getElementById("reset_errorList").className = isError ? "loginError"
-			: "loginInfo";
-	document.getElementById("reset_errorWin").style.display = '';
-}
-
-function confirmResetUser() {
-	if (document.getElementById("reset").value == "" && document.getElementById("resetEmail").value == "") {
-		setResetMessage(true, "Provide user or email to reset.");
-		return;
-	}
-	var mypostrequest = new XMLHttpRequest();
-	mypostrequest.onreadystatechange = function() {
-		document.getElementById("reset_errorWin").style.display = 'none';
-		if (mypostrequest.readyState == 4) {
-			if (mypostrequest.status === 200) {
-				var responseObject = JSON.parse(mypostrequest.responseText);
-				if (responseObject.Message) {
-					setResetMessage(false, responseObject.Message);
-				} else {
-					document.getElementById("reset_errorWin").style.display = 'none';
-				}
-			} else {
-				try {
-					var responseObject = JSON.parse(mypostrequest.responseText);
-					if (responseObject.Message) {
-						setResetMessage(true, responseObject.Message);
-						return;
-					}
-				} catch (e) {
-					// not json
-				}
-				setResetMessage(true, mypostrequest.statusText);
-			}
-		}
-	};
-
-	mypostrequest.open("POST", "../useremailconfirmation", true);
-	mypostrequest.setRequestHeader("Content-type",
-			"application/x-www-form-urlencoded");
-	mypostrequest.setRequestHeader("Orion-Version", "1");
-	mypostrequest
-			.send("{login='" + document.getElementById("reset").value + "', email='" + document.getElementById("resetEmail").value + "'}");
-
-	setResetMessage(false, "Sending password reset confirmation...");
-}
-
 function getParam(key) {
 	var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
 	var results = regex.exec(window.location.href);
-	if (results == null)
+	if (results === null) {
 		return;
+	}
 	return results[1];
 }
 
 function decodeBase64(input) {
 
-	var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
+	var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 	var output = "";
 	var chr1, chr2, chr3;
 	var enc1, enc2, enc3, enc4;
@@ -142,10 +41,10 @@ function decodeBase64(input) {
 
 		output = output + String.fromCharCode(chr1);
 
-		if (enc3 != 64) {
+		if (enc3 !== 64) {
 			output = output + String.fromCharCode(chr2);
 		}
-		if (enc4 != 64) {
+		if (enc4 !== 64) {
 			output = output + String.fromCharCode(chr3);
 		}
 
@@ -153,7 +52,7 @@ function decodeBase64(input) {
 	output = output.replace(/\r\n/g, "\n");
 	var utftext = "";
 
-	for ( var n = 0; n < output.length; n++) {
+	for (var n = 0; n < output.length; n++) {
 
 		var c = output.charCodeAt(n);
 
@@ -173,26 +72,121 @@ function decodeBase64(input) {
 	return utftext;
 }
 
+
+window.onload = function() {
+
+	var error = getParam("error");
+	if (error) {
+		var errorMessage = decodeBase64(error);
+
+		document.getElementById("errorWin").style.visibility = '';
+		document.getElementById("errorMessage").innerHTML = errorMessage;
+	}
+
+	var checkusersrequest = new XMLHttpRequest();
+	checkusersrequest.onreadystatechange = function() {
+		if (checkusersrequest.readyState === 4) {
+			if (checkusersrequest.status === 200) {
+				var responseObject = JSON.parse(checkusersrequest.responseText);
+
+				if (responseObject.CanAddUsers === false) {
+					document.getElementById("newUserHeader").style.display = 'none';
+					document.getElementById("newUserHr").style.display = 'none';
+				}
+
+			}
+		}
+	};
+
+	checkusersrequest.open("POST", "../login/canaddusers", true);
+	checkusersrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	checkusersrequest.setRequestHeader("Orion-Version", "1");
+	checkusersrequest.send();
+
+	var checkemailrequest = new XMLHttpRequest();
+	checkemailrequest.onreadystatechange = function() {
+		if (checkemailrequest.readyState === 4) {
+			if (checkemailrequest.status === 200) {
+				var responseObject = JSON.parse(checkemailrequest.responseText);
+				if (responseObject.emailConfigured === false) {
+					document.getElementById("resetUserLink").style.display = 'none';
+				}
+
+			}
+		}
+	};
+
+	checkemailrequest.open("POST", "../useremailconfirmation/cansendemails", true);
+	checkemailrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	checkemailrequest.setRequestHeader("Orion-Version", "1");
+	checkemailrequest.send();
+
+	document.getElementById("login").focus();
+};
+
+function setResetMessage(isError, message) {
+	document.getElementById("reset_errorMessage").innerHTML = message;
+	document.getElementById("reset_errorList").className = isError ? "loginError" : "loginInfo";
+	document.getElementById("reset_errorWin").style.display = '';
+}
+
+function confirmResetUser() {
+	var responseObject;
+	if (document.getElementById("reset").value === "" && document.getElementById("resetEmail").value === "") {
+		setResetMessage(true, "Provide user or email to reset.");
+		return;
+	}
+	var mypostrequest = new XMLHttpRequest();
+	mypostrequest.onreadystatechange = function() {
+		document.getElementById("reset_errorWin").style.display = 'none';
+		if (mypostrequest.readyState === 4) {
+			if (mypostrequest.status === 200) {
+				responseObject = JSON.parse(mypostrequest.responseText);
+				if (responseObject.Message) {
+					setResetMessage(false, responseObject.Message);
+				} else {
+					document.getElementById("reset_errorWin").style.display = 'none';
+				}
+			} else {
+				try {
+					responseObject = JSON.parse(mypostrequest.responseText);
+					if (responseObject.Message) {
+						setResetMessage(true, responseObject.Message);
+						return;
+					}
+				} catch (e) {
+					// not json
+				}
+				setResetMessage(true, mypostrequest.statusText);
+			}
+		}
+	};
+
+	mypostrequest.open("POST", "../useremailconfirmation", true);
+	mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	mypostrequest.setRequestHeader("Orion-Version", "1");
+	mypostrequest.send("{login='" + document.getElementById("reset").value + "', email='" + document.getElementById("resetEmail").value + "'}");
+
+	setResetMessage(false, "Sending password reset confirmation...");
+}
+
 function getRedirect() {
 	var regex = new RegExp('[\\?&]redirect=([^&#]*)');
 	var results = regex.exec(window.location.href);
-	return results == null ? null : results[1];
+	return results === null ? null : results[1];
 }
 
-function confirmOpenId(openid) {
-	/* don't wait for the login response, notify anyway */
+function confirmOpenId(openid) { /* don't wait for the login response, notify anyway */
 	notify = true;
-	if (openid != "" && openid != null) {
+	if (openid !== "" && openid !== null) {
 		var redirect = getRedirect();
-		if (redirect != null) {
-			window.location = "../login/openid?openid="
-					+ encodeURIComponent(openid) + "&redirect=" + getRedirect();
+		if (redirect !== null) {
+			window.location = "../login/openid?openid=" + encodeURIComponent(openid) + "&redirect=" + getRedirect();
 		} else {
-			window.location = "../login/openid?openid="
-					+ encodeURIComponent(openid);
+			window.location = "../login/openid?openid=" + encodeURIComponent(openid);
 		}
 	}
-};
+}
 
 function confirmLogin(login, password) {
 	if (!login) {
@@ -201,15 +195,14 @@ function confirmLogin(login, password) {
 	}
 	var mypostrequest = new XMLHttpRequest();
 	mypostrequest.onreadystatechange = function() {
-		if (mypostrequest.readyState == 4) {
-			if (mypostrequest.status != 200
-					&& window.location.href.indexOf("http") != -1) {
-				responseObject = JSON.parse(mypostrequest.responseText);
+		if (mypostrequest.readyState === 4) {
+			if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+				var responseObject = JSON.parse(mypostrequest.responseText);
 				document.getElementById("errorMessage").innerHTML = responseObject.error;
 				document.getElementById("errorWin").style.visibility = '';
 			} else {
 				var redirect = getRedirect();
-				if (redirect != null) {
+				if (redirect !== null) {
 					window.location = decodeURIComponent(redirect);
 				} else {
 					window.close();
@@ -219,11 +212,9 @@ function confirmLogin(login, password) {
 		}
 	};
 
-	var parameters = "login=" + encodeURIComponent(login) + "&password="
-			+ encodeURIComponent(password);
+	var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
 	mypostrequest.open("POST", "../login/form", true);
-	mypostrequest.setRequestHeader("Content-type",
-			"application/x-www-form-urlencoded");
+	mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	mypostrequest.setRequestHeader("Orion-Version", "1");
 	mypostrequest.send(parameters);
 }
@@ -242,8 +233,7 @@ function goToLoginWindow() {
 }
 
 function validatePassword() {
-	if (document.getElementById("create_password").value !== document
-			.getElementById("create_passwordRetype").value) {
+	if (document.getElementById("create_password").value !== document.getElementById("create_passwordRetype").value) {
 		document.getElementById("create_errorWin").style.visibility = '';
 		document.getElementById("create_errorMessage").innerHTML = "Passwords don't match!";
 		return false;
@@ -265,10 +255,9 @@ function confirmCreateUser() {
 	var login = document.getElementById("create_login").value;
 	var password = document.getElementById("create_password").value;
 	mypostrequest.onreadystatechange = function() {
-		if (mypostrequest.readyState == 4) {
-			if (mypostrequest.status != 200
-					&& window.location.href.indexOf("http") != -1) {
-				responseObject = JSON.parse(mypostrequest.responseText);
+		if (mypostrequest.readyState === 4) {
+			if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+				var responseObject = JSON.parse(mypostrequest.responseText);
 				document.getElementById("create_errorMessage").innerHTML = responseObject.Message;
 				document.getElementById("create_errorWin").style.visibility = '';
 			} else {
@@ -276,11 +265,9 @@ function confirmCreateUser() {
 			}
 		}
 	};
-	var parameters = "login=" + encodeURIComponent(login) + "&password="
-			+ encodeURIComponent(password);
+	var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
 	mypostrequest.open("POST", "../users", true);
-	mypostrequest.setRequestHeader("Content-type",
-			"application/x-www-form-urlencoded");
+	mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 	mypostrequest.setRequestHeader("Orion-Version", "1");
 	mypostrequest.send(parameters);
 }
