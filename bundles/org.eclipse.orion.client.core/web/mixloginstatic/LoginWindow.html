@@ -20,14 +20,14 @@
 				<div class="orion-welcome-area-text-content">Orion is a web based developer platform supporting editing, testing and deploying web applictions. Orion has built in Git support. So create an account, clone a repository to OrionHub and start editing</div>
 			</div>
 		</div>
-		<div class="orion-login">
+		<div class="orion-login" id="orionLogin">
 			<div class="orion-login-header">User Login</div>
 			<form>
 				<div class="orion-input-holder">
 					<input type="text" class="orion-text-input" name="login" id="login" value="username" title="Username or email" autocomplete="on" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
 				</div>
 				<div class="orion-input-holder">
-					<input name="password" type="password" id="password" class="orion-text-input" value="password"  title="Password" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}">
+					<input name="password" type="text" id="password" class="orion-text-input" value="password" onfocus='setPasswordField(event)' title="Password" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}">
 				</div>
 				<div class="orion-login-button-holder">
 					<input type="button" name="password" type="password" id="password" class="orion-login-button" onclick='confirmLogin();' value="Sign in" tabindex="0">
@@ -37,33 +37,53 @@
 				</div>
 			</form>
 		</div>
-		<!--div class="orion-register">
-			<div class="orion-login-header">Get an account</div>
+		
+		<div class="orion-register" id="orionRegister">
+			<div class="orion-register-header">Get an account</div>
 			<form>
-				<div class="orion-input-holder">
-					<input type="text" class="orion-text-input" value="email address" title="Username or email" autocomplete="on">
-				</div>
 				<div class="orion-login-button-holder">
-					<input type="submit" class="orion-register-button" value="Sign up" tabindex="0">
+					<input type="button" class="orion-register-button" value="Register" onclick='revealRegistration();' tabindex="0">
 				</div>
 			</form>
-		</div -->
+		</div>
 		
-		<div class="open-accounts">
+		<div class="orion-signup" id="newUserHeaderShown" style="padding:10px;visibility: hidden;">
+			<div class="orion-login-header">Get an account</div>
+			<form>
+				<div class="orion-register-input-holder">
+					<input type="text" class="orion-text-input" value="username" title="Username or email" autocomplete="on">
+				</div>
+				<div class="orion-register-input-holder">
+					<input type="text" class="orion-text-input" value="password" title="password" autocomplete="on" onfocus='setPasswordField(event)' id="create_password" aria-required="true"
+						onkeyup="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmCreateUser(); } else {validatePassword();}">
+				</div>
+				<div class="orion-register-input-holder">
+					<input type="text" class="orion-text-input" value="retype password" title="retype password" autocomplete="on" onfocus='setPasswordField(event)' name="passwordRetype" id="create_passwordRetype" aria-required="true"
+						onkeyup="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmCreateUser(); } else {validatePassword();}">
+				</div>
+				<div class="orion-login-button-holder">
+					<input type="submit" class="orion-register-button" value="Sign up" tabindex="0" onClick=confirmCreateUser()>
+				</div>
+			</form>
+		</div>
+		
+		<div class="orion-open">
 			<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
-		<h3 id="openIDLogin" class="loginWindow" style="float: left; margin-top: 10px; margin-bottom: 10px; margin-right: 5px;">Login with:</h3> <a class="loginWindow"
-					href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin"><img id="googleLogin"
-					class="loginWindow" src="../openids/google.png" alt="Google"
-					title="Google"> </a><a class="loginWindow"
-					href="javascript:confirmOpenId('http://me.yahoo.com')" aria-labelledby="openIDLogin yahooLogin"><img id="yahooLogin"
-					class="loginWindow" src="../openids/yahoo-logo.png" alt="Yahoo!"
-					title="Yahoo!"> </a><a class="loginWindow"
-					href="javascript:confirmOpenId('http://openid.aol.com/')" aria-labelledby="openIDLogin aolLogin"><img id="aolLogin"
-					class="loginWindow" src="../openids/aim-logo.png" alt="AOL"
-					title="AOL"> </a><a class="loginWindow"
-					href="javascript:confirmOpenId('http://myopenid.com')" aria-labelledby="openIDLogin myopenidLogin"><img id="myopenidLogin"
-					class="loginWindow" src="../openids/myopenid-logo.png" alt="myOpenID"
-					title="myOpenID"> </a>
+		<div id="openIDLogin" class="orion-open-header">Login with:</div>
+			<div class="orion-open-images">
+				<a class="loginWindow" href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin">
+					<img id="googleLogin" class="loginWindow" src="../openids/google.png" alt="Google" title="Google"> 
+				</a>
+				<a class="loginWindow" href="javascript:confirmOpenId('http://me.yahoo.com')" aria-labelledby="openIDLogin yahooLogin">
+					<img id="yahooLogin" class="loginWindow" src="../openids/yahoo-logo.png" alt="Yahoo!" title="Yahoo!"> 
+				</a>
+				<a class="loginWindow" href="javascript:confirmOpenId('http://openid.aol.com/')" aria-labelledby="openIDLogin aolLogin">
+					<img id="aolLogin" class="loginWindow" src="../openids/aim-logo.png" alt="AOL" title="AOL"> 
+				</a>
+				<a class="loginWindow" href="javascript:confirmOpenId('http://myopenid.com')" aria-labelledby="openIDLogin myopenidLogin">
+					<img id="myopenidLogin" class="loginWindow" src="../openids/myopenid-logo.png" alt="myOpenID" title="myOpenID"> 
+				</a>
+			</div>
 		</div>
 	</div>
 	
@@ -153,6 +173,13 @@
 			</div>
 			<div id="errorWin" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
 				<div id="errorMessage">&nbsp;</div>
+			</div>
+			<div id="create_errorWin" style="visibility: hidden;">
+					<td colspan=2>
+						<ul class="loginError">
+							<li id="create_errorMessage">&nbsp;</li>
+						</ul>
+					</td>
 			</div>
 	</div>
 

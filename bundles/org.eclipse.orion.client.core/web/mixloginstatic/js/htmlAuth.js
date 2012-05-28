@@ -272,6 +272,16 @@ function confirmCreateUser() {
 	mypostrequest.send(parameters);
 }
 
+function revealRegistration(){
+	document.getElementById('orionLogin').style.visibility = 'hidden';
+	document.getElementById('orionRegister').style.visibility = 'hidden';
+	document.getElementById('newUserHeaderShown').style.visibility = '';
+}
+
+function setPasswordField( event ){
+	event.currentTarget.type = 'password';
+}
+
 function showResetUser() {
 	document.getElementById('resetUser').style.display = '';
 }
