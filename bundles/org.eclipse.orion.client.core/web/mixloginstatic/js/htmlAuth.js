@@ -278,9 +278,26 @@ function revealRegistration(){
 	document.getElementById('newUserHeaderShown').style.visibility = '';
 }
 
-function setPasswordField( event ){
-	event.currentTarget.type = 'password';
+function focusUserField( event ){
+	if( event.currentTarget.value === 'username' ){
+		event.currentTarget.value = '';
+	};
 }
+
+function focusPasswordField( event ){
+	event.currentTarget.type = 'password';
+	if( event.currentTarget.value === 'password' || event.currentTarget.value === 'retype password'){
+		event.currentTarget.value = '';
+	};
+}
+
+function formatForNoUserCreation(){
+	document.getElementById('orionRegister').style.visibility = 'hidden';
+	document.getElementById('orionOpen').style.top = '188px';
+	document.getElementById('orionOpen').style.height = '75px';
+	document.getElementById('orionOpen').style.paddingTop = '55px';
+}
+
 
 function showResetUser() {
 	document.getElementById('resetUser').style.display = '';

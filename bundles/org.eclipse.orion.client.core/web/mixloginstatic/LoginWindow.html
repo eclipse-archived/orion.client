@@ -24,10 +24,10 @@
 			<div class="orion-login-header">User Login</div>
 			<form>
 				<div class="orion-input-holder">
-					<input type="text" class="orion-text-input" name="login" id="login" value="username" title="Username or email" autocomplete="on" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
+					<input type="text" class="orion-text-input" name="login" id="login" value="username" onclick='focusUserField(event)' title="Username or email" autocomplete="on" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
 				</div>
 				<div class="orion-input-holder">
-					<input name="password" type="text" id="password" class="orion-text-input" value="password" onfocus='setPasswordField(event)' title="Password" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}">
+					<input name="password" type="text" id="password" class="orion-text-input" value="password" onfocus='focusPasswordField(event)' title="Password" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmLogin() } else {return true;}">
 				</div>
 				<div class="orion-login-button-holder">
 					<input type="button" name="password" type="password" id="password" class="orion-login-button" onclick='confirmLogin();' value="Sign in" tabindex="0">
@@ -51,23 +51,28 @@
 			<div class="orion-login-header">Get an account</div>
 			<form>
 				<div class="orion-register-input-holder">
-					<input type="text" class="orion-text-input" value="username" title="Username or email" autocomplete="on">
+					<input type="text" class="orion-text-input" value="username" title="Username or email" autocomplete="on" onclick='focusUserField(event)' autofocus="autofocus">
 				</div>
 				<div class="orion-register-input-holder">
-					<input type="text" class="orion-text-input" value="password" title="password" autocomplete="on" onfocus='setPasswordField(event)' id="create_password" aria-required="true"
+					<input type="text" class="orion-text-input" value="password" title="password" autocomplete="on" onfocus='focusPasswordField(event)' id="create_password" aria-required="true"
 						onkeyup="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmCreateUser(); } else {validatePassword();}">
 				</div>
 				<div class="orion-register-input-holder">
-					<input type="text" class="orion-text-input" value="retype password" title="retype password" autocomplete="on" onfocus='setPasswordField(event)' name="passwordRetype" id="create_passwordRetype" aria-required="true"
+					<input type="text" class="orion-text-input" value="retype password" title="retype password" autocomplete="on" onfocus='focusPasswordField(event)' name="passwordRetype" id="create_passwordRetype" aria-required="true"
 						onkeyup="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13) { confirmCreateUser(); } else {validatePassword();}">
 				</div>
 				<div class="orion-login-button-holder">
-					<input type="submit" class="orion-register-button" value="Sign up" tabindex="0" onClick=confirmCreateUser()>
+					<input type="submit" class="orion-login-button" value="Sign up" tabindex="0" onClick=confirmCreateUser()>
 				</div>
+				<div style="padding-right:5px;"></div>
+				<div class="orion-login-button-holder">
+					<input type="submit" class="orion-cancel-button" value="Cancel" tabindex="0" onClick=confirmCreateUser()>
+				</div>
+				
 			</form>
 		</div>
 		
-		<div class="orion-open">
+		<div class="orion-open" id="orionOpen">
 			<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
 		<div id="openIDLogin" class="orion-open-header">Login with:</div>
 			<div class="orion-open-images">
