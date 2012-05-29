@@ -12,8 +12,8 @@
 /*global define dojo dijit console document window */
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection', 'orion/section', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
-        'orion/breadcrumbs', 'orion/git/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitUtil, mGitCommands, mNavUtils) {
+        'orion/git/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, dojo, mExplorer, mSelection, mSection, mUtil, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mGitUtil, mGitCommands, mNavUtils) {
 	
 	var exports = {};
 	
@@ -231,38 +231,23 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		};
 		
 		GitStatusExplorer.prototype.initTitleBar = function(status, repository){
-			var that = this;
 			var item = {};
-			var pageTitle;
 			
-			// TODO add info about branch or detached
-			
+			// TODO add info about branch or detached		
 			item.Name = messages["Status"] + ((status.RepositoryState && status.RepositoryState.indexOf("REBASING") !== -1) ? messages[" (Rebase in Progress)"] : ""); //$NON-NLS-1$
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = repository.Name;
-			item.Parents[0].Location = repository.Location;
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
-			
-			pageTitle = dojo.string.substitute(messages["Status for ${0} - Git "], [repository.Name]);
-			
-			document.title = pageTitle;
-			
-			var location = dojo.byId("location"); //$NON-NLS-0$
-			new mBreadcrumbs.BreadCrumbs({
-				container: location,
-				resource: item,
-				makeHref:function(seg, location){
-					that.makeHref(seg, location);
-				}
-			});		
-			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
-		};
-		
-		GitStatusExplorer.prototype.makeHref = function(seg, location) {
-			seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+
+			mGlobalCommands.setPageTarget({task: messages["Status"], target: repository, 
+				breadcrumbTarget: item,
+				makeBreadcrumbLink: function(seg, location) {
+					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+				},
+				serviceRegistry: this.registry, commandService: this.commandService});
 		};
 		
 		// helpers

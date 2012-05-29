@@ -13,12 +13,39 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/breadcrumbs', 'orion/globalCommands', 'orion/contentTypes',
+        'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/globalCommands', 'orion/contentTypes',
         'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig, 
-				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mBreadcrumbs, mGlobalCommands, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
 
 	dojo.addOnLoad(function() {
+	
+		function extractQueryString(){
+			//In fire fox, dojo.hash() transforms white space as "%20", where we can use it if the hash contains "replace=xx xx"
+			var qStr = window.location.hash;
+			var index = qStr.indexOf("#"); //$NON-NLS-0$
+			if(index >= 0){
+				qStr = qStr.substring(index+1);
+			}
+			return qStr;
+		}
+	
+		function setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner){		
+			fileClient.read(dojo.hash(), true).then(
+					dojo.hitch(this, function(metadata) {
+						mGlobalCommands.setPageTarget({task: "Externalize Strings", target: metadata, 
+							makeBreadcrumbLink: function(seg,location){seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;}, //$NON-NLS-0$
+							serviceRegistry: serviceRegistry, fileService: fileClient, searchService: searcher,
+							commandService: commandService});
+						configOutliner.render(metadata);
+					}),
+					dojo.hitch(this, function(error) {
+						window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
+					})
+			);
+		}	
+	
+	
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -46,51 +73,14 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searchResultsGenerator);     
 
-			initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService, configOutliner);
+			setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner);
 			searchResultsGenerator.loadResults(dojo.hash());
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
-				initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService, configOutliner);
+				setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner);
 				searchResultsGenerator.loadResults(dojo.hash());
 				mGlobalCommands.generateDomCommandsInBanner(commandService, searchResultsGenerator);     
 			});
 		});
 	});
-
-	function extractQueryString(){
-		//In fire fox, dojo.hash() transforms white space as "%20", where we can use it if the hash contains "replace=xx xx"
-		var qStr = window.location.hash;
-		var index = qStr.indexOf("#"); //$NON-NLS-0$
-		if(index >= 0){
-			qStr = qStr.substring(index+1);
-		}
-		return qStr;
-	}
-
-	function initTitleBreadCrumb(fileClient, searcher, serviceRegistry, commandService, configOutliner){
-		
-		fileClient.read(dojo.hash(), true).then(
-				dojo.hitch(this, function(metadata) {
-					if (serviceRegistry && commandService) {
-						mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
-					}
-					var breadCrumbDomNode = dojo.byId("location"); //$NON-NLS-0$
-					if (breadCrumbDomNode) {
-						//If current location is not the root, set the search location in the searcher
-						searcher.setLocationByMetaData(metadata);
-						dojo.empty(breadCrumbDomNode);
-						var breadcrumb = new mBreadcrumbs.BreadCrumbs({
-							container: breadCrumbDomNode,
-							resource: metadata ,
-							firstSegmentName: fileClient.fileServiceName(metadata.Location),
-							makeHref:function(seg,location){seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;} //$NON-NLS-1$ //$NON-NLS-0$
-						});
-					}
-					configOutliner.render(metadata);
-				}),
-				dojo.hitch(this, function(error) {
-					window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
-				})
-		);
-	}
 });

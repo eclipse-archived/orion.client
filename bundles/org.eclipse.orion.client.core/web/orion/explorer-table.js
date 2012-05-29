@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navigationUtils', 'orion/breadcrumbs', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
-		function(messages, require, dojo, dijit, mUtil,  mExplorer, mNavUtils, mBreadcrumbs, mFileCommands, mExtensionCommands){
+define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'orion/navigationUtils', 'orion/fileCommands', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+		function(messages, require, dojo, dijit, mUtil,  mExplorer, mNavUtils, mFileCommands, mExtensionCommands){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -194,12 +194,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry
 	 * @param {Object} options.treeRoot
 	 * @param {orion.selection.Selection} options.selection
-	 * @param {orion.searchClient.Searcher} options.searcher
 	 * @param {orion.fileClient.FileClient} options.fileClient
 	 * @param {orion.commands.CommandService} options.commandService
 	 * @param {orion.core.ContentTypeService} options.contentTypeService
 	 * @param {String} options.parentId
-	 * @param {String} options.breadcrumbId
 	 * @param {String} options.toolbarId
 	 * @param {String} options.selectionToolsId
 	 * @param {String} options.actionsScopeId
@@ -208,12 +206,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		this.registry = options.serviceRegistry;
 		this.treeRoot = options.treeRoot;
 		this.selection = options.selection;
-		this.searcher = options.searcher;
 		this.fileClient = options.fileClient;
 		this.commandService = options.commandService;
 		this.contentTypeService = options.contentTypeService;
 		this.parentId = options.parentId;
-		this.breadcrumbId = options.breadcrumbId;
 		this.toolbarId = options.toolbarId;
 		this.selectionToolsId = options.selectionToolsId;
 		this.model = null;
@@ -350,18 +346,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						this.treeRoot[i] = loadedWorkspace[i];
 					}
 					mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);	
-					//If current location is not the root, set the search location in the searcher
-					this.searcher.setLocationByMetaData(this.treeRoot);
-					// erase any old page title
-					var breadcrumb = dojo.byId(this.breadcrumbId);
-					if (breadcrumb) {
-						dojo.empty(breadcrumb);
-						new mBreadcrumbs.BreadCrumbs({
-							container: breadcrumb, 
-							resource: this.treeRoot,
-							firstSegmentName: this.fileClient.fileServiceName(this.treeRoot.Path)
-						});
-					}
 					mFileCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.treeRoot);
 					if (typeof postLoad === "function") { //$NON-NLS-0$
 						try {

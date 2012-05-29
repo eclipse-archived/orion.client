@@ -44,14 +44,15 @@ dojo.addOnLoad(function(){
 //		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
 
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, searcher: searcher, 
+		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, 
 				fileClient: fileClient, commandService: commandService, contentTypeService: contentTypeService,
-				parentId: "explorer-tree", breadcrumbId: "location", toolbarId: "pageActions", selectionToolsId: "selectionTools", preferences: preferences}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				parentId: "explorer-tree", toolbarId: "pageActions", selectionToolsId: "selectionTools", preferences: preferences}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();
 			explorer.loadResourceList(pageParams.resource, false, function() {
-				mGlobalCommands.setPageTarget(explorer.treeRoot, serviceRegistry, commandService, null, /* favorites target */explorer.treeRoot);
+				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, isFavoriteTarget: true,
+					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService});
 				var isAtRoot = mUtil.isAtRoot(explorer.treeRoot.Location) ;
 				if (isAtRoot && !dojo.byId("gettingStartedTasks")) { //$NON-NLS-0$
 					// TODO eventually we may expose an extension point or this, but right now we don't have a good story for 

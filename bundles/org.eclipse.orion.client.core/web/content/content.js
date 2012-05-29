@@ -17,10 +17,10 @@
  */
 
 define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/URITemplate', 'orion/PageUtil', 
+	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 			function(messages, require, dojo, mBootstrap, mUtil, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
-			mGlobalCommands, mBreadcrumbs, URITemplate, PageUtil) {
+			mGlobalCommands, URITemplate, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -73,8 +73,6 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 								// we need to set up a SaveURL for the iframe to use.
 								locationObject.SaveURL = hostName+"/content/saveHook.html#" + params.resource + ",contentProvider=" + params.contentProvider + ","; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
-							// this is ripe for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349531
-							document.title = info.name;
 							
 							function makeIFrame() {
 								var uriTemplate = new URITemplate(info.uriTemplate);
@@ -88,27 +86,24 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 							if (locationObject.Location && locationObject.Location.length > 0) {
 								fileClient.read(locationObject.Location, true).then(
 									function(metadata) {
-										dojo.empty("location"); //$NON-NLS-0$
 										if (metadata) {
+											// store info used for iframe and saving
 											locationObject.Name = metadata.Name;
 											fileMetadata = metadata;
-											mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService);
-											searcher.setLocationByMetaData(metadata, {index: "first"}); //$NON-NLS-0$
-											var root = fileClient.fileServiceName(metadata.Location);
-											new mBreadcrumbs.BreadCrumbs({
-												container: "location",  //$NON-NLS-0$
-												resource: metadata,
-												firstSegmentName: root
-											});
+											mGlobalCommands.setPageTarget(
+												{task: info.name, location: metadata.Location, target: metadata, serviceRegistry: serviceRegistry, 
+													commandService: commandService, searchService: searcher, fileService: fileClient, isFavoriteTarget: true});
 											makeIFrame();
 										}
 						
 									},  
 									// TODO couldn't read metadata, try to make iframe anyway.
 									function() {
+										mGlobalCommands.setPageTarget({task: info.name, title: info.name});
 										makeIFrame();
 									});
 							} else {
+								mGlobalCommands.setPageTarget({task: info.name, title: info.name});
 								makeIFrame();
 							}
 							break;
@@ -144,11 +139,11 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 				}
 			});
 			
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			dojo.subscribe("/dojo/hashchange", this, function() { //$NON-NLS-0$
 				loadContent();
 			});
 			loadContent();
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 

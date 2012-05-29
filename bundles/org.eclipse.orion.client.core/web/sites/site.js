@@ -43,10 +43,19 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
 				var site = editor && editor.getSiteConfiguration();
 				if (editor && site) {
-					var location = dojo.byId("location"); //$NON-NLS-0$
-					dojo.place(document.createTextNode(site.Name), location, "only"); //$NON-NLS-0$
-					document.title = site.Name + (editor.isDirty() ? "* " : "") + " - Edit Site"; //$NON-NLS-1$ //$NON-NLS-0$
-					mUtil.forceLayout(location);
+					mGlobalCommands.setDirtyIndicator(editor.isDirty());
+					var item = 	{};
+					item.Parents = [];
+					item.Name = site.Name;
+					item.Parents[0] = {};
+					item.Parents[0].Name = "Sites";
+					item.Parents[0].Location = "";
+					mGlobalCommands.setPageTarget({task: "Edit Site", target: site, breadcrumbTarget: item,
+						makeBreadcrumbLink: function(seg, location){
+							seg.href = "/sites/sites.html"; //$NON-NLS-0$
+						},
+						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService
+					});
 				}
 			};
 			

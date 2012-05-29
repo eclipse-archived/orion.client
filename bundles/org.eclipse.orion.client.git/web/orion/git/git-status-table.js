@@ -12,8 +12,8 @@
 /*global define dojo dijit document console */
 
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/breadcrumbs', 'orion/util', 'orion/compare/compareUtils', 'dijit/layout/ContentPane'], function(
-		messages, require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mBreadcrumbs, mUtil, mCompareUtils) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo',  'orion/compare/compare-container', 'orion/commands', 'orion/globalCommands', 'orion/git/git-commit-navigator', 'orion/git/gitCommands', 'orion/util', 'orion/compare/compareUtils', 'dijit/layout/ContentPane'], function(
+		messages, require, dojo,  mCompareContainer, mCommands, mGlobalCommands, mGitCommitNavigator, mGitCommands, mUtil, mCompareUtils) {
 
 	var orion = orion || {};
 	
@@ -792,60 +792,38 @@ orion.GitStatusController = (function() {
 			}
 			this._curRemote =  ( this._remoteInfo &&  this._remoteInfo.Children && this._remoteInfo.Children.length > 0 ) ? this._remoteInfo.Children[0]:null;
 			this._curClone = this._cloneInfo.Children[0];
-			mGlobalCommands.setPageTarget(this._curClone, this._registry, this._commandService, dojo.hitch(this._curBranch || this._curRemote,
-				function() {
-					return this;
-				}));
-			this._initTitleBar(true);
+			var branchName = this._curBranch ? this._curBranch.Name : "detached"; //$NON-NLS-0$
+			this._logTableRenderer.modifyHeader(branchName);
+			if(this._curBranch && this._curRemote){
+				branchName = (this._curBranch.RemoteLocation.length > 0 ? this._curBranch.RemoteLocation[0].Name : "") + "/" + this._curBranch.Name; //$NON-NLS-0$
+				//render git log title on remote branch
+				this._remoteTableRenderer.modifyHeader(branchName);
+			}
+			var breadcrumbTarget = 	{};
+			breadcrumbTarget.Parents = [];
+			breadcrumbTarget.Name = dojo.string.substitute(messages["Status (${0})"], [branchName]);
+			breadcrumbTarget.Parents[0] = {};
+			breadcrumbTarget.Parents[0].Name = this._curClone.Name;
+			breadcrumbTarget.Parents[0].Location = this._curClone.Location;
+			breadcrumbTarget.Parents[0].ChildrenLocation = this._curClone.Location;
+			breadcrumbTarget.Parents[1] = {};
+			breadcrumbTarget.Parents[1].Name = "Repositories"; //$NON-NLS-0$
+
+			mGlobalCommands.setPageTarget({task: "Status", target: this._curClone, 
+				serviceRegistry: this._registry, commandService: this._commandService, 
+				breadcrumbTarget: breadcrumbTarget,
+				makeBreadcrumbLink: function(seg, location){
+					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+				},
+				makeAlternate: dojo.hitch(this._curBranch || this._curRemote,
+					function() {
+						return this;
+					})});
 			this._logTableRenderer.renderAction();
 			this._remoteTableRenderer.renderAction();
 			
 			this._committerAndAuthorZoneRenderer.setDefaultPersonIdent(this._userName, this._userEmail);
 			this._committerAndAuthorZoneRenderer.hide();
-		},
-		
-		_initTitleBar:function(withBranchName){
-			var title = messages["Git Status"];
-			var branchName = this._curBranch ? this._curBranch.Name : "detached"; //$NON-NLS-0$
-
-			//render browser title
-			document.title = dojo.string.substitute(messages["Status for ${0} - Git"],  [this._curClone.Name]);
-			//render page title
-			//FIXME we should not know these global page ids inside component implementations
-//			dojo.place(document.createTextNode(title), "pageTitle", "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			var that = this;
-			var item = {};
-			var location_ = dojo.byId("location"); //$NON-NLS-0$
-			
-			item.Name = branchName;
-			item.Parents = [];
-			item.Name = dojo.string.substitute(messages["Status (${0})"], [branchName]);
-			item.Parents[0] = {};
-			item.Parents[0].Name = this._curClone.Name;
-			item.Parents[0].Location = this._curClone.Location;
-			item.Parents[0].ChildrenLocation = this._curClone.Location;
-			item.Parents[1] = {};
-			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
-
-			if(withBranchName) {
-				//render git status title on local branch 
-				this._logTableRenderer.modifyHeader(branchName);
-				if(this._curBranch && this._curRemote){
-					branchName = (this._curBranch.RemoteLocation.length > 0 ? this._curBranch.RemoteLocation[0].Name : "") + "/" + this._curBranch.Name; //$NON-NLS-0$
-					//render git log title on remote branch
-					this._remoteTableRenderer.modifyHeader(branchName);
-				}
-			}
-			
-			new mBreadcrumbs.BreadCrumbs({
-				container: location_,
-				resource: item,
-				makeHref:function(seg, location_){
-					seg.href = "/git/git-repository.html#" + (location_ ? location_ : ""); //$NON-NLS-0$
-				}
-			});
-			mUtil.forceLayout("pageTitle"); //$NON-NLS-0$
-
 		},
 		
 		_getCloneInfo:function(){
@@ -857,7 +835,6 @@ orion.GitStatusController = (function() {
 					that._cloneInfo = cloneJsonData;
 					if(that._cloneInfo.Children.length === 0){
 						that._renderLog = false;
-						that._initTitleBar();
 						that._processStatus();
 						return;
 					}
