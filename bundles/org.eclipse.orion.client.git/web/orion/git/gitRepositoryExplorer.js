@@ -11,8 +11,8 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/section', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mSection, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mCommands, mSection, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -21,15 +21,13 @@ exports.GitRepositoryExplorer = (function() {
 	 * Creates a new Git repository explorer.
 	 * @class Git repository explorerpadd
 	 */
-	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId){
+	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, actionScopeId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.linkService = linkService;
 		this.commandService = commandService;
 		this.selection = selection;
 		this.parentId = parentId;
-		this.toolbarId = toolbarId;
-		this.selectionToolsId = selectionToolsId;
 		this.actionScopeId = actionScopeId;
 		this.checkbox = false;
 	}
@@ -156,14 +154,21 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
+	var updatePageActions = function(registry, toolbarId, scopeId, item){
+		var toolbar = dojo.byId(toolbarId);
+		if (toolbar) {
+			dojo.empty(toolbar);
+		} else {
+			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
+		}
+		registry.getService("orion.page.command").renderCommands(scopeId, toolbar, item, null, "button");  //$NON-NLS-0$
+	};
+	
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName){
 		var that = this;
 		var item = {};
 		var pageTitle;		
-		
-		// render commands
-		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", resource); //$NON-NLS-1$ //$NON-NLS-0$
-		
+
 		if (resource && resource.Type === "Clone" && sectionName){ //$NON-NLS-0$
 			var repository = resource;
 			
@@ -177,6 +182,9 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = dojo.string.substitute(messages['0 on 1 - Git'], [sectionName, repository.Name]);
 			
+			// render commands
+			updatePageActions(that.registry, "pageActions", "repoPageActions", repository); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		} else if (resource && resource.Type === "Clone") { //$NON-NLS-0$
 			var repository = resource;
@@ -187,10 +195,16 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0].Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = repository.Name + messages[" - Git"];
 			
+			// render commands
+			updatePageActions(that.registry, "pageActions", "repoPageActions", repository); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		} else {
 			item.Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = messages["Repositories - Git"];
+			
+			// render commands
+			updatePageActions(that.registry, "pageActions", "reposPageActions", {}); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			mGlobalCommands.setPageTarget({}, this.registry, this.commandService);
 		}
@@ -293,34 +307,32 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
 		dojo.empty( tableNode );
-
-		var titleWrapper = new mSection.Section(tableNode, {
-			id: "repositorySection", //$NON-NLS-0$
-			title: (mode === "full" ? messages['Repositories'] : messages["Repository"]), //$NON-NLS-0$
-			iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
-		});
 	
 		if (!repositories || repositories.length === 0){
+			var titleWrapper = new mSection.Section(tableNode, {
+				id: "repositorySection", //$NON-NLS-0$
+				title: "Repository",
+				iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
+			});
 			titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
 			return;
 		}
 
+		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
+		contentParent.innerHTML = '<list id="repositoryNode" class="mainPadding"></list>'; //$NON-NLS-0$
 		
-		titleWrapper.setContent('<list id="repositoryNode" class="mainPadding"></list>'); //$NON-NLS-0$
-		
-		
-		var repositoryMonitor = titleWrapper.createProgressMonitor();
-		repositoryMonitor.begin(mode === "full" ? messages["Loading repositories"] : messages["Loading repository"]); //$NON-NLS-0$
+//		var repositoryMonitor = titleWrapper.createProgressMonitor();
+//		repositoryMonitor.begin(mode === "full" ? messages["Loading repositories"] : messages["Loading repository"]); //$NON-NLS-0$
 		this.decorateRepositories(repositories, mode).then(
 			function(){
-				repositoryMonitor.done();
+//				repositoryMonitor.done();
 				for(var i=0; i<repositories.length;i++){
 					that.renderRepository(repositories[i], i, repositories.length, mode, links);
 				}
 				that.loadingDeferred.callback();
 			},
 			function(){
-				repositoryMonitor.done();
+//				repositoryMonitor.done();
 			}
 		);
 	};
@@ -341,7 +353,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: (repository.GitUrl != null ? repository.GitUrl : messages["(no remote)"]) }, detailsView );
+			innerHTML: (repository.GitUrl != null ? "git url: " + repository.GitUrl : messages["(no remote)"]) }, detailsView );
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: messages["location: "] + repository.Content.Path }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
@@ -362,8 +374,10 @@ exports.GitRepositoryExplorer = (function() {
 				innerHTML: ((commitsState > 0 ) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."])}, detailsView );
 		}
 		
-		var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool"); //$NON-NLS-0$
+		if (mode === "full"){
+			var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool"); //$NON-NLS-0$
+		}
 	};
 	
 	// Git status
@@ -381,6 +395,10 @@ exports.GitRepositoryExplorer = (function() {
 			title: "Working Directory", //$NON-NLS-0$
 			content: '<list id="workingDirectoryNode" class="mainPadding"></list>' //$NON-NLS-0$
 		});
+		
+		that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
+		that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
+			{"ViewAllLink":"/git/git-status2.html#" + repository.StatusLocation, "ViewAllLabel": "See Full Status", "ViewAllTooltip": "See the status"}, that, "button");
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Loading status"); //$NON-NLS-0$
@@ -413,9 +431,6 @@ exports.GitRepositoryExplorer = (function() {
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			innerHTML: dojo.string.substitute(messages['${0} file(s) to stage and ${1} file(s) to commit.'], [unstaged, staged])
 						}, detailsView );
-				
-		var actionsArea = dojo.create( "div", {"id":"statusActionsArea", "class":"sectionTableItemActions"}, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool");	 //$NON-NLS-0$
 	};
 	
 	// Git branches
