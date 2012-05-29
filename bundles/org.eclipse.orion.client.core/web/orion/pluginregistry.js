@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout addEventListener document console localStorage Worker*/
+/*global define setTimeout clearTimeout addEventListener document console localStorage Worker*/
 
 define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(Deferred, mServiceregistry){
 var eclipse = eclipse || {};
@@ -110,6 +110,15 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 				} else if ("progress" === message.method){ //$NON-NLS-0$
 					deferred = _deferredResponses[String(message.requestId)];
 					deferred.update.apply(deferred, message.params);	
+				} else if ("timeout"){
+					if (!_loaded) {
+						_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
+					}
+					
+					if (_deferredUpdate) {
+						_deferredUpdate.reject(new Error("Load timeout for plugin: " + url));
+						_deferredUpdate = null;
+					}
 				} else {
 					throw new Error("Bad response method: " + message.method);
 				}		
@@ -195,27 +204,19 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			updatePromise = _deferredUpdate;
 			internalRegistry.disconnect(_channel);
 			_channel = internalRegistry.connect(url, _responseHandler);
-			setTimeout(function() {
-				if (_deferredUpdate === updatePromise) {
-					_deferredUpdate.reject(new Error("Load timeout for plugin: " + url));
-				}
-			}, 15000);
 		}
 		return _deferredUpdate.promise;
 	};
 	
-	this._load = function(isInstall) {
+	this._load = function(isInstall, optTimeout) {
 		if (!_channel) {
-			_channel = internalRegistry.connect(url, _responseHandler);
-			setTimeout(function() {
-				if (!_loaded) {
-					if (!isInstall) {
-						data = {};
-						internalRegistry.updatePlugin(_self);
-					}
-					_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
+			_channel = internalRegistry.connect(url, _responseHandler, optTimeout);
+			_deferredLoad.then(null, function() {
+				if (!isInstall) {
+					data = {};
+					internalRegistry.updatePlugin(_self);
 				}
-			}, 15000);
+			});
 		}
 		return _deferredLoad.promise;
 	};
@@ -274,11 +275,18 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 
 	var internalRegistry = {
 			registerService: serviceRegistry.registerService.bind(serviceRegistry),
-			connect: function(url, handler) {
+			connect: function(url, handler, timeout) {
 				var channel = {
 					handler: handler,
 					url: url
 				};
+				
+				function sendTimeout() {
+					handler({method:"timeout"});
+				}
+				
+				var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
+				
 				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") { //$NON-NLS-0$
 					var worker = new Worker(url);
 					worker.onmessage = function(event) {
@@ -300,6 +308,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 						iframe.style.visibility = "hidden"; //$NON-NLS-0$
 					}
 					iframe.src = url;
+					iframe.onload = function() {
+						clearTimeout(loadTimeout);
+						setTimeout(sendTimeout, 2000);
+					};
 					document.body.appendChild(iframe);
 					channel.target = iframe.contentWindow;
 					channel.close = function() {
@@ -307,6 +319,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 					};
 				}
 				_channels.push(channel);
+				var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
 				return channel;
 			},
 			disconnect: function(channel) {
@@ -374,7 +387,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				_storage[key] ="{}"; //$NON-NLS-0$
 				var plugin = new eclipse.Plugin(pluginURL, {}, internalRegistry); 
 				_plugins.push(plugin);
-				installList.push(plugin._load(false)); // _load(false) because we want to ensure the plugin is updated
+				installList.push(plugin._load(false, 5000)); // _load(false) because we want to ensure the plugin is updated
 			}
 		});
 		
