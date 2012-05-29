@@ -61,33 +61,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	
 	function setUserName(registry, dropdown){
 			
-			var userService = registry.getService("orion.core.user"); //$NON-NLS-0$
-			
-			var authenticationIds = [];
-			
-			var authServices = registry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
-			
-			var settingsWidget = this;
-			
-			for(var i=0; i<authServices.length; i++){
-				var servicePtr = authServices[i];
-				var authService = registry.getService(servicePtr);		
-
-				authService.getKey().then(function(key){
-					authenticationIds.push(key);
-					authService.getUser().then(function(jsonData){
-					
-						var data = jsonData;
-						
-						var b = userService.getUserInfo(jsonData.Location).then( function( accountData ){
-						
-							if( accountData.Name ){
-								dropdown.set( 'label', accountData.Name ); //$NON-NLS-0$
-							}else if( accountData.login ){
-								dropdown.set( 'label', accountData.login ); //$NON-NLS-0$
-							}						
-						});
-					});
+			var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
+			if (authService !== null) {
+				authService.getUser().then(function(jsonData){
+					if( jsonData.Name ){
+						dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+					}else if( jsonData.login ){
+						dropdown.set( 'label', jsonData.login ); //$NON-NLS-0$
+					}						
 				});
 			}
 		}
