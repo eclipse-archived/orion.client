@@ -20,7 +20,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 	var fileClient;
 
 	var resolveError = function(result, error) {
-		result.resolve(dojo.string.substitute(messages['File service error: ${0}'], ["<em>" + error + "</em>"]));
+		result.resolve(dojo.string.substitute(messages['File service error: ${0}'], ["<em>" + error + "</em>"])); //$NON-NLS-2$ //$NON-NLS-1$
 	};
 
 	/* implementation of the 'edit' command */
@@ -133,13 +133,13 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 						dojo.hitch(this, function(metadata) {
 							if (!metadata.Parents) {
 								/* changing to the root where file services are mounted */
-								dojo.hash('#');
-								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>/</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
+								dojo.hash('#'); //$NON-NLS-0$
+								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>/</b>"])); //$NON-NLS-1$
 								mCurrentDirectory.setCurrentTreeNode(null);
 							} else if (metadata.Parents.length === 0) {
 								/* changing to the root directory within the current file service */
 								// TODO: computing the parent location based on the current location may not always be valid
-								var index = metadata.Location.indexOf('/', 1);
+								var index = metadata.Location.indexOf('/', 1); //$NON-NLS-0$
 								var hash = metadata.Location.substr(0, index);
 								dojo.hash(hash);
 								var buffer = fileClient.fileServiceName(metadata.Location);
@@ -184,13 +184,13 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 											})
 										);
 									} else {
-										resolveError(result, dojo.string.substitute(messages['${0} is not a directory'], [targetDirName])); //$NON-NLS-0$
+										resolveError(result, dojo.string.substitute(messages['${0} is not a directory'], [targetDirName]));
 									}
 									break;
 								}
 							}
 							if (!found) {
-								resolveError(result, dojo.string.substitute(messages['${0} was not found'], [targetDirName])); //$NON-NLS-0$
+								resolveError(result, dojo.string.substitute(messages['${0} was not found'], [targetDirName]));
 							}
 						},
 						function(error) {
