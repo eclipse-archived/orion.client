@@ -49,6 +49,16 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
+				name: "Git Status",
+				id: "eclipse.git.status2",
+				tooltip: "Go to Git Status",
+				validationProperties: [
+					{source: "StatusLocation", variableName: "GitStatusLocation"}
+				],
+				uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}"
+			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.log"
 			});
 			

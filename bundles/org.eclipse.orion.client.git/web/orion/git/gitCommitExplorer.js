@@ -134,7 +134,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				makeHref:function(seg, location){
 					that.makeHref(seg, location);
 				}
-			});		
+			});
+			
 			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		};
 		
