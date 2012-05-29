@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, mContentTypes, URITemplate, PageUtil){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mFavorites, mContentTypes, URITemplate, PageUtil){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -446,14 +446,89 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 	}
 	
-	function setPageTarget(item, serviceRegistry, commandService, /*optional*/ alternateItem, /* optional */ pageFavoriteTarget) {
-		pageItem = item;
-		generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem);
-		favoriteTarget = pageFavoriteTarget;
-		checkFavoritesButton(serviceRegistry, commandService);
-		// in the future we should do breadcrumb management and search scoping here
+	/**
+	 * Set a dirty indicator for the page.
+	 */
+	function setDirtyIndicator(isDirty) {
+		var dirty = dojo.byId("dirty");
+		if (dirty) {
+			if (isDirty) {
+				dirty.innerHTML = "*"; //$NON-NLS-0$
+			} else {
+				dirty.innerHTML = ""; //$NON-NLS-0$
+			}
+		}
 	}
-	
+	/**
+	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be
+	 * added for the page.
+	 * @param {Object} options The target options object.
+	 * @param {String} options.task the name of the user task that the page represents.
+	 * @param {Object} options.target the metadata describing the page resource target.  Optional.
+	 * @param {String} options.name the name of the resource that is showing on the page.  Optional.  If a target
+	 * parameter is supplied, the target metadata name will be used if a name is not specified in the options.
+	 * @param {String} options.title the title to be used for the page.  Optional.  If not specified, a title
+	 * will be constructed using the task and/or name.
+	 * @param {Object} options.breadcrumbTarget the metadata used for the breadcrumb target. Optional.  If not
+	 * specified, options.target is used as the breadcrumb target.
+	 * @param {Boolean} options.isFavoriteTarget true if the target can be a favorite. Optional. If specified, 
+	 * a favorites button will be added to the banner.  
+	 * @param {Function} options.makeAlternate a function that can supply alternate metadata for the related
+	 * pages menu if the target does not validate against a contribution.  Optional.
+	 * @param {Function} options.makeBreadcrumbLink a function that will supply a breadcrumb link based on a location
+	 * shown in a breadcrumb.  Optional.  If not specified, and if a target is specified, the breadcrumb link will
+	 * refer to the Navigator.
+	 * @param {Object} options.serviceRegistry the registry to use for obtaining any unspecified services.  Optional.  
+	 * If not specified, then any banner elements requiring Orion services will not be provided.
+	 * @param {Object} options.commandService the commandService used for accessing related page commands.  Optional.
+	 * If not specified, a related page menu will not be shown.
+	 * @param {Object} options.searchService the searchService used for scoping the searchbox.  Optional.  If not 
+	 * specified, the searchbox will not be scoped.
+	 * @param {Object} options.fileService the fileService used for retrieving additional metadata and managing
+	 * the breadcrumb.  If not specified, there may be reduced support for multiple file implementations.
+	 *
+	 */
+	function setPageTarget(options) {
+		var name, firstSegmentName;
+		if (options.target) {  // we have metadata
+			if (options.searchService) {
+				options.searchService.setLocationByMetaData(options.target, {index: "first"}); //$NON-NLS-0$
+			}
+			if (options.fileService && !options.breadcrumbTarget) {
+				firstSegmentName = options.fileService.fileServiceName(options.target.Location);
+			} 
+			name = options.name || options.target.Name;
+			pageItem = options.target;
+			generateRelatedLinks(options.serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
+		} else {
+			if (!options.breadcrumbTarget) {
+				firstSegmentName = options.task || options.name;
+			}
+			name = options.name;
+		}
+		var title = options.title;
+		if (!title) {
+			if (options.name) {
+				title = name + " - "+ options.task;
+			} else {
+				title = options.task
+			}
+		} 
+		window.document.title = title;
+		dojo.empty("location"); //$NON-NLS-0$
+		new mBreadcrumbs.BreadCrumbs({
+			container: "location",  //$NON-NLS-0$
+			resource: options.breadcrumbTarget || options.target,
+			firstSegmentName: firstSegmentName,
+			makeHref: options.makeBreadcrumbLink
+		});
+		if (options.target && options.isFavoriteTarget) {
+			favoriteTarget = options.target;
+		} else {
+			favoriteTarget = null;
+		}
+		checkFavoritesButton(options.serviceRegistry, options.commandService);
+	}
 	
 	/**
 	 * Generates the banner at the top of a page.
@@ -793,6 +868,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		setPendingAuthentication: setPendingAuthentication,
 		getAuthenticationIds: getAuthenticationIds,
 		setPageTarget: setPageTarget,
+		setDirtyIndicator: setDirtyIndicator,
 		setPageCommandExclusions: setPageCommandExclusions,
 		authenticatedService: authenticatedService
 	};

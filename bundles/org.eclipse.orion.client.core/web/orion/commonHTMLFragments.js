@@ -40,8 +40,7 @@ define(['i18n!orion/nls/messages', 'require'],
 		//Title area
 		'<div id="titleArea" class="layoutBlock titleArea">' + //$NON-NLS-0$
 			'<div class="layoutLeft pageTitle"></div>' + //$NON-NLS-0$
-			
-			'<div id="location" style="padding-bottom:5px;display:inline;" class="clear currentLocation"></div>' + //$NON-NLS-0$
+			'<div class="clear" style="padding-bottom:5px;display:inline;"><span id="location" class="currentLocation"></span><span id="dirty" class="currentLocation"></span></div>' + //$NON-NLS-0$
 			'<div class="layoutRight pageNav">' + //$NON-NLS-0$
 				'<span id="pageFavorite" tabindex="0" role="button" aria-label="'+messages['Add this page to the favorites list']+'" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' + //$NON-NLS-2$ //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$

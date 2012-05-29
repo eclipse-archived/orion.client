@@ -291,6 +291,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 			fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.setPageTarget({task: "Console"});
 
 			var console = new mConsole.Console(dojo.byId("console-input"), dojo.byId("console-output")); //$NON-NLS-1$ //$NON-NLS-0$
 			/* the Console creates a child of console-input, resize to give it a height */

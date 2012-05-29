@@ -10,9 +10,9 @@
  ******************************************************************************/
 /*global dojo dijit window eclipse:true*/
 
-define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/auth', 'orion/breadcrumbs',
+define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/globalCommands', 'orion/auth',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/CheckBox', 'dijit/form/Form'], 
-			function(messages, require, dojo, dijit, mCommands ,mAuth, mBreadcrumbs) {
+			function(messages, require, dojo, dijit, mCommands, mGlobalCommands, mAuth) {
 
 	/**
 	 * Used when a value should be displayed as Date but is returned as long.
@@ -302,22 +302,12 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 					}
 				}
 			}
-			if(content.actions && content.actions.length>0){
-				
-				var bannerPane = dojo.byId('pageTitle'); //$NON-NLS-0$
-				
-				dojo.empty(bannerPane);
-				dojo.create("span", {id:"profileBanner", innerHTML: messages["User Profile"]}, bannerPane); //$NON-NLS-1$ //$NON-NLS-0$
-	
-				var location = dojo.byId("location"); //$NON-NLS-0$
-				if (location) {
-					dojo.empty(location);
-					new mBreadcrumbs.BreadCrumbs({
-						container: "location", //$NON-NLS-0$
-						firstSegmentName: (profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="") ? profile.lastJSON.Name : profile.lastJSON.login //$NON-NLS-0$
-					});
-				}
-				
+			if(content.actions && content.actions.length>0) {
+				var breadcrumbTarget = 	{};
+				breadcrumbTarget.Parents = [];
+				breadcrumbTarget.Name = profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="" ? profile.lastJSON.Name : profile.lastJSON.login; //$NON-NLS-0$
+				mGlobalCommands.setPageTarget({task: "User Profile", breadcrumbTarget: breadcrumbTarget});
+			
 				dojo.empty(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup(this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup", 100); //$NON-NLS-0$
 				for(var i=0; i<content.actions.length; i++){

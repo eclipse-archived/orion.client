@@ -52,6 +52,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					selection: null
 				});
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
+			mGlobalCommands.setPageTarget({task: "Sites"});
 			createCommands();
 			explorer.display();
 		});

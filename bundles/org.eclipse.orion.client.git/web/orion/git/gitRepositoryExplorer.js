@@ -11,8 +11,8 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mSection, mUtil, PageUtil, mGlobalCommands, mBreadcrumbs, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mCommands, mSection, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -167,11 +167,12 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName){
 		var that = this;
 		var item = {};
-		var pageTitle;		
-
+		var task = "Repositories";
+		// render commands
+		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", resource); //$NON-NLS-1$ //$NON-NLS-0$
+		var repository;
 		if (resource && resource.Type === "Clone" && sectionName){ //$NON-NLS-0$
-			var repository = resource;
-			
+			repository = resource;
 			item.Name = sectionName;
 			item.Parents = [];
 			item.Parents[0] = {};
@@ -180,50 +181,23 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
-			pageTitle = dojo.string.substitute(messages['0 on 1 - Git'], [sectionName, repository.Name]);
-			
-			// render commands
-			updatePageActions(that.registry, "pageActions", "repoPageActions", repository); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
+			task = sectionName;
 		} else if (resource && resource.Type === "Clone") { //$NON-NLS-0$
-			var repository = resource;
-			
+			repository = resource;
 			item.Name = repository.Name;
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = "Repositories"; //$NON-NLS-0$
-			pageTitle = repository.Name + messages[" - Git"];
-			
-			// render commands
-			updatePageActions(that.registry, "pageActions", "repoPageActions", repository); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		} else {
 			item.Name = "Repositories"; //$NON-NLS-0$
-			pageTitle = messages["Repositories - Git"];
-			
-			// render commands
-			updatePageActions(that.registry, "pageActions", "reposPageActions", {}); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			mGlobalCommands.setPageTarget({}, this.registry, this.commandService);
 		}
-		
-		document.title = pageTitle;
-		
-		var location = dojo.byId("location"); //$NON-NLS-0$
-		var breadcrumb = new mBreadcrumbs.BreadCrumbs({
-			container: location,
-			resource: item,
-			makeHref:function(seg, location){
-				that.makeHref(seg, location);
-			}
-		});
+		updatePageActions(that.registry, "pageActions", "repoPageActions", repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
+		mGlobalCommands.setPageTarget({task: "Repositories", target: repository, breadcrumbTarget: item,
+			makeBreadcrumbLink: function(seg, location) {
+				seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+			},
+			serviceRegistry: this.registry, commandService: this.commandService}); 
 	};
-	
-	GitRepositoryExplorer.prototype.makeHref = function(seg, location) {
-		seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
-	}
 	
 	// Git repo
 	
@@ -935,7 +909,6 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRemotes = function(repository, mode){
 		
 		var remoteLocation = repository.RemoteLocation;
-				
 		var that = this;
 		
 		var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$

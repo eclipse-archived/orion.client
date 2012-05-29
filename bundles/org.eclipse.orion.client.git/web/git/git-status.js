@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress',  'orion/commands',
-	        'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/breadcrumbs','orion/dialogs','orion/ssh/sshTools', 'orion/contentTypes',
+	        'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands', 'orion/git/gitClient', 'orion/git/git-status-table', 'orion/dialogs','orion/ssh/sshTools', 'orion/contentTypes',
 	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-			function(dojo, mBootstrap, mStatus, mProgress, mCommands, mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mGitClient, mGitStatusTable, mBreadcrumbs,mDialogs,mSshTools, mContentTypes) {
+			function(dojo, mBootstrap, mStatus, mProgress, mCommands, mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mGitClient, mGitStatusTable, mDialogs,mSshTools, mContentTypes) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {

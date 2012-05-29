@@ -15,13 +15,13 @@
 define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
-        'orion/breadcrumbs', 'orion/textview/textView', 'orion/textview/textModel', 
+        'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight',
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
-				mSyntaxchecker, mBreadcrumbs, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
+				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
 				mDispatcher, mContentTypes, PageUtil, Highlight) {
 	
 var exports = exports || {};
@@ -117,24 +117,33 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
 					}, 800); // wait 800ms before displaying
 					var setInput = dojo.hitch(this, function(contents, metadata) {
+						var altPageTarget;
 						if (metadata) {
 							this._fileMetadata = metadata;
-							// page target is the file but if any interesting links fail, try our parent folder metadata.
-							mGlobalCommands.setPageTarget(metadata, serviceRegistry, commandService, 
-								function() {
-									if (metadata.Parents && metadata.Parents.length > 0) {
-										return fileClient.read(metadata.Parents[0].Location, true);
-									}
-								}, metadata);
 							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);
+							// page target is the file, but if any interesting links fail, try the parent folder metadata.
+							altPageTarget = function() {
+								if (metadata.Parents && metadata.Parents.length > 0) {
+									return fileClient.read(metadata.Parents[0].Location, true);
+								}
+							};
 						} else {
 							// No metadata
 							this._fileMetadata = null;
 							this.setTitle(fileURI);
 							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
 						}
+						mGlobalCommands.setPageTarget({task: "Coding", title: this.getTitle(), target: metadata,
+							isFavoriteTarget: true, makeAlternate: function() {
+								if (metadata.Parents && metadata.Parents.length > 0) {
+									return fileClient.read(metadata.Parents[0].Location, true);
+								}
+							},
+							serviceRegistry: serviceRegistry, commandService: commandService,
+							searchService: searcher, fileService: fileClient});
+						mGlobalCommands.setDirtyIndicator(false);
 						syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
 							.then(dojo.hitch(this, function() {
 								// TODO folding should be a preference.
@@ -184,27 +193,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			var shortTitle = title;
 			if (indexOfSlash !== -1) {
 				shortTitle = shortTitle.substring(indexOfSlash + 1);
-				if (title.charAt(0) === '*') { //$NON-NLS-0$
-					shortTitle = '*' + shortTitle; //$NON-NLS-0$
-				}
 			}
 			this._lastTitle = shortTitle;
-			window.document.title = shortTitle;
-			var titlePane = dojo.byId("location"); //$NON-NLS-0$
-			if (titlePane) {
-				dojo.empty(titlePane);
-				searcher.setLocationByMetaData(this._fileMetadata, {index: "first"}); //$NON-NLS-0$
-				var root = fileClient.fileServiceName(this._fileMetadata && this._fileMetadata.Location);
-				new mBreadcrumbs.BreadCrumbs({
-					container: "location",  //$NON-NLS-0$
-					resource: this._fileMetadata,
-					firstSegmentName: root
-				});
-				if (title.charAt(0) === '*') { //$NON-NLS-0$
-					var dirty = dojo.create('b', null, titlePane, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					dirty.innerHTML = '*'; //$NON-NLS-0$
-				}
-			}
 		},
 		
 		getTitle: function() {
@@ -220,15 +210,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		},
 
 		setDirty: function(dirty) {
-			if (dirty) {
-				if (this._lastTitle && this._lastTitle.charAt(0) !== '*') { //$NON-NLS-0$
-					this.setTitle('*'+ this._lastTitle); //$NON-NLS-0$
-				}
-			} else {
-				if (this._lastTitle && this._lastTitle.charAt(0) === '*') { //$NON-NLS-0$
-					this.setTitle(this._lastTitle.substring(1));
-				}
-			}
+			mGlobalCommands.setDirtyIndicator(dirty);
 		},
 		
 		hashChanged: function(editor) {

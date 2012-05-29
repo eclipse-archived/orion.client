@@ -12,9 +12,9 @@
 /*global define window dijit */
 /*jslint browser:true devel:true */
 define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
-        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/breadcrumbs', 'orion/commands',
+        'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
         'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator'], 
-		function(messages, require, dojo, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands, mBreadcrumbs,
+		function(messages, require, dojo, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
 				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator) {
 
 var exports = {};
@@ -478,8 +478,11 @@ exports.TwoWayCompareContainer = (function() {
 	function TwoWayCompareContainer(serviceRegistry, parentDivId, uiFactory, options) {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._registry = serviceRegistry;
+		// TODO this is probably not a good idea, 
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337740
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		this._fileClient = this._registry.getService("orion.core.file"); //$NON-NLS-0$
+		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
 		this._uiFactory = uiFactory;
 		if(!this._uiFactory){
 			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
@@ -525,16 +528,9 @@ exports.TwoWayCompareContainer = (function() {
 			getInput: function() {
 				return this.filePath;
 			},
+			
 			setDirty: function(dirty) {
-				if (dirty) {
-					if (this._lastTitle && this._lastTitle.charAt(0) !== '*') { //$NON-NLS-0$
-						this.setTitle('*'+ this._lastTitle); //$NON-NLS-0$
-					}
-				} else {
-					if (this._lastTitle && this._lastTitle.charAt(0) === '*') { //$NON-NLS-0$
-						this.setTitle(this._lastTitle.substring(1));
-					}
-				}
+				mGlobalCommands.setDirtyIndicator(dirty);
 			},
 			
 			getFileMetadata: function() {
@@ -556,7 +552,7 @@ exports.TwoWayCompareContainer = (function() {
 					that._fileClient.read(fileURI, true).then(
 						dojo.hitch(this, function(metadata) {
 							this._fileMetadata = metadata;
-							this.setTitle(metadata.Location);
+							this.setTitle(metadata.Location, metadata);
 						}),
 						dojo.hitch(this, function(error) {
 							console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
@@ -567,27 +563,23 @@ exports.TwoWayCompareContainer = (function() {
 				this.lastFilePath = fileURI;
 			},
 			
-			setTitle : function(title) {
+			setTitle : function(title, /*optional*/ metadata) {
+				var name;
+				if (title.charAt(0) === '*') { //$NON-NLS-0$
+					mGlobalCommands.setDirtyIndicator(true);
+					name = title.substring(1);
+				} else {
+					mGlobalCommands.setDirtyIndicator(false);
+				} 
+				if (metadata) {
+					name = metadata.Name;
+				}
+				mGlobalCommands.setPageTarget({task: messages["Compare"], name: name, target: metadata,
+							serviceRegistry: serviceRegistry, commandService: this._commandService,
+							searchService: this._searchService, fileService: this._fileClient});
 				var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
-				var shortTitle = title;
-				if (indexOfSlash !== -1) {
-					shortTitle = messages["Compare"] + " " + shortTitle.substring(indexOfSlash + 1);
-					if (title.charAt(0) === '*') { //$NON-NLS-0$
-						shortTitle = '*' + shortTitle; //$NON-NLS-0$
-					}
-				}
-				this._lastTitle = shortTitle;
-				window.document.title = shortTitle;
-				var location = dojo.byId("location"); //$NON-NLS-0$
-				if (location && this._fileMetadata) {
-					dojo.empty(location);
-					new mBreadcrumbs.BreadCrumbs({container: "location", resource: this._fileMetadata}); //$NON-NLS-0$
-					if (title.charAt(0) === '*') { //$NON-NLS-0$
-						var dirty = dojo.create('b', null, location, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-						dirty.innerHTML = '*'; //$NON-NLS-0$
-					}
-				}
 			},
+			
 			afterSave: function(){
 				that.startup(true);
 			}
@@ -826,8 +818,8 @@ exports.TwoWayCompareContainer = (function() {
 		if(this._viewLoadedCounter > 1){
 			this._diffNavigator.gotoBlock(this.options.blockNumber-1, this.options.changeNumber-1);
 		}
-		var leftViewHeight = this._leftTextView.getModel().getLineCount() * this._leftTextView.getLineHeight(); + 5;
-		var rightViewHeight = this._rightTextView.getModel().getLineCount() * this._rightTextView.getLineHeight(); +5;
+		var leftViewHeight = this._leftTextView.getModel().getLineCount() * this._leftTextView.getLineHeight() + 5;
+		var rightViewHeight = this._rightTextView.getModel().getLineCount() * this._rightTextView.getLineHeight() +5;
 		return leftViewHeight > rightViewHeight ? leftViewHeight : rightViewHeight;
 	};
 	return TwoWayCompareContainer;

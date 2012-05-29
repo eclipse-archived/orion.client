@@ -12,8 +12,8 @@
 /*global define console document Image*/
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container', 'orion/breadcrumbs', 'orion/git/gitCommands', 'orion/navigationUtils'], 
-		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mBreadcrumbs, mGitCommands, mNavUtils) {
+        'orion/compare/compare-container', 'orion/git/gitCommands', 'orion/navigationUtils'], 
+		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands, mNavUtils) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {
@@ -107,10 +107,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		
 		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
-			var item = {};
+			var item;
 			var pageTitle;
 			
 			if (commit){
+				item = {};
 				item.Name = commit.Name;
 				item.Parents = [];
 				item.Parents[0] = {};
@@ -119,30 +120,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				item.Parents[0].ChildrenLocation = repository.Location;
 				item.Parents[1] = {};
 				item.Parents[1].Name = messages["Repositories"];
-				pageTitle = i18nUtil.formatMessage(messages["0 on 1 - Git"], commit.Name, repository.Name);
-			} else {
-				item.Name = "";
-				pageTitle = messages["Git"];
 			}
-			
-			document.title = pageTitle;
-			
-			var location = dojo.byId("location"); //$NON-NLS-0$
-			new mBreadcrumbs.BreadCrumbs({
-				container: location,
-				resource: item,
-				makeHref:function(seg, location){
-					that.makeHref(seg, location);
-				}
-			});
-			
-			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
+			mGlobalCommands.setPageTarget({task: "Commit", target: repository, 
+				breadcrumbTarget: item, 
+				makeBreadcrumbLink: function(seg, location) {
+					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+				},
+				serviceRegistry: this.registry, commandService: this.commandService});
 		};
 		
-		GitCommitExplorer.prototype.makeHref = function(seg, location) {
-			seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
-		};
-
 		GitCommitExplorer.prototype.displayCommit = function(commit){
 			
 			var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
