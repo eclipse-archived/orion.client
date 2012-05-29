@@ -109,8 +109,22 @@ function loadAttachedOpenIds(userjsonData) {
 	}
 }
 
-
-
+ function loadUserData(userLocation){
+		dojo.xhrGet({
+			url : userLocation,
+			headers : {
+				"Orion-Version" : "1"
+			},
+			handleAs : "json",
+			timeout : 15000,
+			load : function(jsonData, secondArg) {
+				loadAttachedOpenIds(jsonData);
+			},
+			error : function(error, ioArgs) {
+				console.error(error.message);
+			}
+		});
+ }
 
 function onHashChange(hash) {
 	if (lastHash === hash) {
