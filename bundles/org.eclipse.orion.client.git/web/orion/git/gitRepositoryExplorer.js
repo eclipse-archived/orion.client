@@ -176,6 +176,8 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = dojo.string.substitute(messages['0 on 1 - Git'], [sectionName, repository.Name]);
+			
+			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		} else if (resource && resource.Type === "Clone") { //$NON-NLS-0$
 			var repository = resource;
 			
@@ -184,9 +186,13 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0] = {};
 			item.Parents[0].Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = repository.Name + messages[" - Git"];
+			
+			mGlobalCommands.setPageTarget(repository, this.registry, this.commandService);
 		} else {
 			item.Name = "Repositories"; //$NON-NLS-0$
 			pageTitle = messages["Repositories - Git"];
+			
+			mGlobalCommands.setPageTarget({}, this.registry, this.commandService);
 		}
 		
 		document.title = pageTitle;
@@ -198,7 +204,7 @@ exports.GitRepositoryExplorer = (function() {
 			makeHref:function(seg, location){
 				that.makeHref(seg, location);
 			}
-		});		
+		});
 	};
 	
 	GitRepositoryExplorer.prototype.makeHref = function(seg, location) {
@@ -914,8 +920,6 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRemotes = function(repository, mode){
 		
 		var remoteLocation = repository.RemoteLocation;
-		mGlobalCommands.setPageTarget(repository, this.registry, this.commandService); 
-
 				
 		var that = this;
 		

@@ -138,34 +138,5 @@ mBootstrap.startup().then(function(core) {
 //	makeRightPane(explorer);
 });
 
-/*function makeRightPane(explorer){
-	// set up the splitter bar and its key binding
-	var splitArea = dijit.byId("orion.innerNavigator");
-	
-	//by default the pane should be closed
-	if(splitArea.isRightPaneOpen()){
-		splitArea.toggle();
-	}
-			
-	var bufferedSelection = [];
-	
-	window.document.onkeydown = function (evt){
-		evt = evt || window.event;
-		var handled = false;
-		if(evt.ctrlKey && evt.keyCode  === 79){ // Ctrl+o handler for toggling outline 
-			splitArea.toggle();
-			handled = true;			
-		} 
-		if (handled) {
-			if (window.document.all) { 
-				evt.keyCode = 0;
-			} else { 
-				evt.preventDefault();
-				evt.stopPropagation();
-			}		
-		}
-	};
-}*/
-
 //end of define
 });
