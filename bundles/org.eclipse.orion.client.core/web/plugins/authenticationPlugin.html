@@ -2,74 +2,76 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script src="../requirejs/require.js"></script>
 	<script>
-		window.onload = function() {
+		/*global require eclipse*/
+		require({
+		  baseUrl: '..',
+		  paths: {
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+		
+		require(["orion/xhr", "domReady!", "orion/plugin"], function (xhr) {
 			var provider = new eclipse.PluginProvider();
 			function qualifyURL(url){
 			    var a = document.createElement('a');
 			    a.href = url; // set string url
 			    return a.href;
 			}
+			var loginData;
+			
 			var serviceImpl = {
 				getUser : function() {
+					if (loginData) {
+						return loginData;
+					}
 					
-					return dojo.xhrPost({
-						url : "../login",
-						headers : {
-							"Orion-Version" : "1"
+					return xhr("POST", "../login", { //$NON-NLS-0$
+						headers: {
+							"Orion-Version": "1" //$NON-NLS-0$
 						},
-						handleAs : "json",
-						timeout : 15000,
-						load : function(jsonData, ioArgs) {
-							return jsonData;
-						},
-						error : function(response, ioArgs) {
-							return response;
-						}
+						timeout: 15000
+					}).then(function(result) {
+						loginData = result.response ? JSON.parse(result.response) : null;
+						return loginData;
+					}, function(error) {
+						return error.response ? JSON.parse(error.response) : null;
 					});
-					
 				},
-			
 				logout : function() {
 				/* don't wait for the login response, notify anyway */
-				notify = true;
-				return dojo.xhrPost({
-					url : "../logout",
-					headers : {
-						"Orion-Version" : "1"
-					},
-					handleAs : "json",
-					timeout : 15000,
-					load : function(jsonData, ioArgs) {
-						return jsonData;
-					},
-					error : function(response, ioArgs) {
-						return response;
-					}
-				});
-			},
-			
-			getAuthForm : function(notify){
-				return qualifyURL(notify ? ('../mixloginstatic/LoginWindow.html?redirect='+encodeURIComponent(notify)+'&key=FORMOpenIdUser') : '../mixloginstatic/LoginWindow.html');
-			},
-			
-			getKey : function(){
-				return "FORMOpenIdUser";
-			},
-			
-			getLabel : function(){
-				return "Orion workspace server";
-			}
-			
+					loginData = null;
+					return xhr("POST", "../logout", { //$NON-NLS-0$
+						headers: {
+							"Orion-Version": "1" //$NON-NLS-0$
+						},
+						timeout: 15000
+					}).then(function(result) {
+						loginData = null;
+						return result.response ? JSON.parse(result.response) : null;
+					}, function(error) {
+						return error.response ? JSON.parse(error.response) : null;
+					});
+				},
+				getAuthForm : function(notify){
+					return qualifyURL(notify ? ('../mixloginstatic/LoginWindow.html?redirect='+encodeURIComponent(notify)+'&key=FORMOpenIdUser') : '../mixloginstatic/LoginWindow.html');
+				},
+				
+				getKey : function(){
+					return "FORMOpenIdUser";
+				},
+				
+				getLabel : function(){
+					return "Orion workspace server";
+				}			
 			};
 			var serviceProps = {
-				name : "FORM+OpenId",
+				name : "FORM+OpenId"
 			};
 			provider.registerServiceProvider("orion.core.auth", serviceImpl, serviceProps);
 			provider.connect();
-		};
+		});
 	</script>
 </head>
 <body>
