@@ -40,7 +40,7 @@ var exports = {};
 			var pageNav = dojo.byId(pageNavId);
 			if (pageNav) {
 				dojo.empty(pageNav);
-				commandService.renderCommands(pageNavId, pageNav, item, explorer, "button", true);   //$NON-NLS-0$
+				commandService.renderCommands(pageNavId, pageNav, item, explorer, "button");   //$NON-NLS-0$
 			}
 		}
 		
@@ -2077,16 +2077,18 @@ var exports = {};
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "eclipse.git.deleteClone", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				var items = dojo.isArray(item) ? item : [item];
-				if (items.length === 0) {
-					return false;
-				}
-				for (var i=0; i < items.length; i++) {
-					if (!items[i].ContentLocation) {
-						return false;
-					}
-				}
-				return true;
+				return item.Type === "Clone";
+				
+//				var items = dojo.isArray(item) ? item : [item];
+//				if (items.length === 0) {
+//					return false;
+//				}
+//				for (var i=0; i < items.length; i++) {
+//					if (items[i].Type !== "Clone") { //$NON-NLS-0$
+//						return false;
+//					}
+//				}
+//				return true;
 			},
 			callback: function(data) {
 				var item = data.items;

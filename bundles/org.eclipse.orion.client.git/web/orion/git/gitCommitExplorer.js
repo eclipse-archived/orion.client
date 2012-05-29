@@ -147,13 +147,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
 			dojo.empty( tableNode );
-			
-			new mSection.Section(tableNode, {
-				id: "commitSection", //$NON-NLS-0$
-				title: (commit ? messages["Commit Details"] :  messages["No Commits"]),
-				iconClass: "gitImageSprite git-sprite-modification", //$NON-NLS-0$
-				content: '<list id="commitNode"></list>' //$NON-NLS-0$
-			});
+						
+			if (!commit){
+				var titleWrapper = new mSection.Section(tableNode, {
+					id: "commitSection", //$NON-NLS-0$
+					title: messages["No Commits"],
+					iconClass: "gitImageSprite git-sprite-modification", //$NON-NLS-0$
+				});
+				return;
+			}
+
+			var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
+			contentParent.innerHTML = '<list id="commitNode" class="mainPadding"></list>'; //$NON-NLS-0$
 
 		    var list = dojo.byId( "commitNode" );		 //$NON-NLS-0$
 			
