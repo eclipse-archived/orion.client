@@ -1144,12 +1144,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				var options = {
 					readonly: true,
 					hasConflicts: false,
-					baseFile: {
+					newFile: {
 						Name: fileItem.location,
 						Type: fType,
 						Content: fileItem.contents.join(that.model._lineDelimiter)
 					},
-					newFile: {
+					baseFile: {
 						Name: fileItem.location,
 						Type: fType,
 						Content: that._currentReplacedContents.join(that.model._lineDelimiter)
@@ -1159,8 +1159,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
 						parentDivID: uiFactory.getCompareDivID(),
 						showTitle: true,
-						leftTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.name]),
-						rightTitle: dojo.string.substitute(messages["Original File  (${0})"], [fileItem.name]),
+						rightTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.name]),
+						leftTitle: dojo.string.substitute(messages["Original File  (${0})"], [fileItem.name]),
 						showLineStatus: false
 					});
 					that.uiFactoryCompare.buildUI();
@@ -1168,9 +1168,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 					that.twoWayCompareContainer.startup();
 				} else {
 					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
 					dojo.empty(that.uiFactoryCompare.getTitleDivId());
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File  (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File  (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
