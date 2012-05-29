@@ -25,19 +25,33 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 	/* the working directory relative to which we will execute commands on the server */
 	var currentTreeNode = null;
 
-	function withWorkspace(func) {
-		fileClient.loadWorkspace('').then(func);
+	function withWorkspace(func, errorFunc) {
+		fileClient.loadWorkspace('').then(
+			func,
+			function(error) {
+				if (errorFunc) {
+					errorFunc(error);
+				}
+			}
+		);
 	}
 	exports.withWorkspace = withWorkspace;
 
 	/* ensure that there is a currentTreeNode and invoke a function with it */
-	function withCurrentTreeNode(func) {
+	function withCurrentTreeNode(func, errorFunc) {
 		if (currentTreeNode === null) {
-			var location = dojo.hash() || "";
-			fileClient.loadWorkspace(location).then(function(node) {
-				currentTreeNode = node;
-				func(node);
-			});
+			var location = dojo.hash() || '/'; //$NON-NLS-0$
+			fileClient.loadWorkspace(location).then(
+				function(node) {
+					currentTreeNode = node;
+					func(node);
+				},
+				function(error) {
+					if (errorFunc) {
+						errorFunc(error);
+					}
+				}
+			);
 		} else {
 			/*
 			 * The following is wrapped in a setTimeout to match the timing of
@@ -67,25 +81,35 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 	exports.setCurrentTreeNode = setCurrentTreeNode;
 
 	/* calls a callback function with the children of a given node */
-	function withChildren(node, func) {
+	function withChildren(node, func, errorFunc) {
 		if (node.Children) {
 			func(node.Children);
 		} else if (node.ChildrenLocation) {
-			fileClient.fetchChildren(node.ChildrenLocation).then(function(children) {
-				node.Children = children; /* cache for later */
-				func(children);
-			});
+			fileClient.fetchChildren(node.ChildrenLocation).then(
+				function(children) {
+					node.Children = children; /* cache for later */
+					func(children);
+				},
+				function(error) {
+					if (errorFunc) {
+						errorFunc(error);
+					}
+				}
+			);
 		}
 	}
 	exports.withChildren = withChildren;
 
-	function withCurrentChildren(func) {
-		withCurrentTreeNode(function(node) {
-			withChildren(node, func);
-		});
+	function withCurrentChildren(func, errorFunc) {
+		withCurrentTreeNode(
+			function(node) {
+				withChildren(node, func, errorFunc);
+			},
+			errorFunc
+		);
 	}
 	exports.withCurrentChildren = withCurrentChildren;
-	
+
 	dojo.ready(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;

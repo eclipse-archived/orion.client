@@ -43,22 +43,22 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 				var predictions = this.getPredictions(string);
 				if (predictions !== null) {
 					return this.createCompletion(string, predictions);
-				} else {
-					/* 
-					 * The predictions are not available yet, so return a completion without predictions.
-					 * A 'then' method is added to allow access to the actual completion via a callback.
-					 */
-					var deferredCompletion = {
-						value: string,
-						status: mConsole.CompletionStatus.PARTIAL
-					};
-					deferredCompletion.then = function(callback) {
-						this.withCompletions(string, function(predictions) {
-							callback(this.createCompletion(string, predictions));
-						});
-					};
-					return deferredCompletion;
 				}
+
+				/*
+				 * The predictions are not available yet, so return a completion without predictions.
+				 * A 'then' method is added to allow access to the actual completion via a callback.
+				 */
+				var deferredCompletion = {
+					value: string,
+					status: mConsole.CompletionStatus.PARTIAL
+				};
+				deferredCompletion.then = function(callback) {
+					this.withCompletions(string, function(predictions) {
+						callback(this.createCompletion(string, predictions));
+					});
+				};
+				return deferredCompletion;
 			},
 
 			stringify: function(value) {
@@ -138,9 +138,14 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 				}
 				/* no predictions currently ready, try to prefetch for future use */
 				var self = this;
-				this.withValidDirs(function(validDirs) {
-					self.cache.validDirs = validDirs;
-				});
+				this.withValidDirs(
+					function(validDirs) {
+						self.cache.validDirs = validDirs;
+					},
+					function(error) {
+						self.cache.validDirs = [];
+					}
+				);
 				return null;
 			},
 			startsWith: function(string, prefix) {
@@ -159,24 +164,41 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 					func(completions);
 				} else {
 					var self = this;
-					this.withValidDirs(function(validDirs) {
-						self.cache.validDirs = validDirs;
-						func(this.getPredictions(text));
-					});
+					this.withValidDirs(
+						function(validDirs) {
+							validDirs.sort(function(a,b) {
+								var isDir1 = a.Directory;
+								var isDir2 = b.Directory;
+								if (isDir1 !== isDir2) {
+									return isDir1 ? -1 : 1;
+								}
+								var n1 = a.Name && a.Name.toLowerCase();
+								var n2 = b.Name && b.Name.toLowerCase();
+								if (n1 < n2) { return -1; }
+								if (n1 > n2) { return 1; }
+								return 0;
+							});
+							self.cache.validDirs = validDirs;
+							func(this.getPredictions(text));
+						}
+					);
 				}
 			},
-			withValidDirs: function(func) {
+			withValidDirs: function(func, errorFunc) {
 				var self = this;
-				mCurrentDirectory.withCurrentChildren(function(nodes) {
-					var names = [];
-					for (var i = 0; i < nodes.length; i++) {
-						var node = nodes[i];
-						if ((node.Directory && self.directories) || (!node.Directory && self.files)) {
-							names.push(node);
+				mCurrentDirectory.withCurrentChildren(
+					function(nodes) {
+						var result = [];
+						for (var i = 0; i < nodes.length; i++) {
+							var node = nodes[i];
+							if ((node.Directory && self.directories) || (!node.Directory && self.files)) {
+								result.push(node);
+							}
 						}
-					}
-					func(names);
-				});
+						func(result);
+					},
+					errorFunc
+				);
 			}
 		};
 		return ParamTypeFile;
