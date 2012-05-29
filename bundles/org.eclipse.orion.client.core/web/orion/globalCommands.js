@@ -508,7 +508,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 		var title = options.title;
 		if (!title) {
-			if (options.name) {
+			if (name) {
 				title = name + " - "+ options.task;
 			} else {
 				title = options.task

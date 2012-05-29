@@ -117,7 +117,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
 					}, 800); // wait 800ms before displaying
 					var setInput = dojo.hitch(this, function(contents, metadata) {
-						var altPageTarget;
+						var altPageTarget, name;
 						if (metadata) {
 							this._fileMetadata = metadata;
 							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
@@ -129,13 +129,15 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 									return fileClient.read(metadata.Parents[0].Location, true);
 								}
 							};
+							name = metadata.Name;
 						} else {
 							// No metadata
 							this._fileMetadata = null;
 							this.setTitle(fileURI);
 							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
+							name = this.getTitle();
 						}
-						mGlobalCommands.setPageTarget({task: "Coding", title: this.getTitle(), target: metadata,
+						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,
 							isFavoriteTarget: true, makeAlternate: function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
 									return fileClient.read(metadata.Parents[0].Location, true);
