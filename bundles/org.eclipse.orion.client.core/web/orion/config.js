@@ -354,7 +354,7 @@ ConfigImpl = /** @ignore */ (function() {
 			}
 			return props;
 		},
-		remove: function() { //$NON-NLS-0$
+		remove: function() {
 			var self = this;
 			this.store.remove(this.pid);
 			self.factory.notifyDeleted(self);
@@ -390,8 +390,8 @@ ConfigImpl = /** @ignore */ (function() {
 	/**
 	 * @name remove
 	 * @methodOf orion.cm.Configuration.prototype
-	 * Deletes this Configuration. Any {@link orion.cm.ManagedService} that registered interest in this Configuration's 
-	 * PID will have its {@link orion.cm.ManagedService#updated} method called with <code>null</code> properties. 
+	 * @description Deletes this Configuration. Any {@link orion.cm.ManagedService} that registered interest in this 
+	 * Configuration's PID will have its {@link orion.cm.ManagedService#updated} method called with <code>null</code> properties. 
 	 */
 	/**
 	 * @name update
