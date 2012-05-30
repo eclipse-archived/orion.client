@@ -27,7 +27,7 @@
 						return loginData;
 					}
 					
-					return xhr("POST", "../login", { //$NON-NLS-0$
+					loginData = xhr("POST", "../login", { //$NON-NLS-0$
 						headers: {
 							"Orion-Version": "1" //$NON-NLS-0$
 						},
@@ -36,8 +36,10 @@
 						loginData = result.response ? JSON.parse(result.response) : null;
 						return loginData;
 					}, function(error) {
+						loginData = null;
 						return error.response ? JSON.parse(error.response) : null;
 					});
+					return loginData;
 				},
 				logout : function() {
 				/* don't wait for the login response, notify anyway */
