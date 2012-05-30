@@ -370,9 +370,10 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 					console.addCommand({
 						name: ref.getProperty("name"), //$NON-NLS-0$
 						description: ref.getProperty("description"), //$NON-NLS-0$
-						manual: ref.getProperty("manual"), //$NON-NLS-0$
+						callback: contributedExecFunc(service),
+						returnType: 'string', //$NON-NLS-0$
 						parameters: ref.getProperty("parameters"), //$NON-NLS-0$
-						exec: contributedExecFunc(service)
+						manual: ref.getProperty("manual") //$NON-NLS-0$
 					});
 				}
 			}
