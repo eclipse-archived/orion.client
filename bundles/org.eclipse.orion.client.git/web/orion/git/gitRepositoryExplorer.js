@@ -559,7 +559,7 @@ exports.GitRepositoryExplorer = (function() {
 				}
 				progress = titleWrapper.createProgressMonitor();
 				progress.begin(messages["Rendering branches"]);
-				that.displayRemoteBranches2(remotes, repository).addBoth(function(){
+				that.displayRemoteBranches2(titleWrapper, remotes, repository).addBoth(function(){
 					progress.done();
 				});
 			}, function(error){
@@ -568,7 +568,7 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(remotes, repository, deferred, anyRemoteBranch){
+	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(titleWrapper, remotes, repository, deferred, anyRemoteBranch){
 		var that = this;
 		if (deferred == null)
 			deferred = new dojo.Deferred();
@@ -581,7 +581,7 @@ exports.GitRepositoryExplorer = (function() {
 						remoteBranches[i].Repository = repository;
 						that.renderRemoteBranch(remoteBranches[i], i);
 					}
-					that.displayRemoteBranches2(remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)));
+					that.displayRemoteBranches2(titleWrapper, remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)));
 				}, function () {
 					
 				}
