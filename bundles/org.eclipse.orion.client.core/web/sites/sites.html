@@ -39,16 +39,18 @@
 		require(["sites.js"]);
 		</script>
 	</head>
-<body style="visibility:hidden;" class="claro">
-	<div id="orion-sites" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+	
+	
+<body style="height: 100%; visibility:hidden" class="claro">
+	<div id="orion.sites" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div id="centerPane" dojoType="dijit.layout.BorderContainer" gutters="false" region="center" design="headline" liveSplitters="false" splitter="false" role="main">
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" gutters="false" splitter="false" role="main">
 			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
 			</div>
-			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
-				<div id="mainNode" class="sites mainPadding">
-					<div id="table" class="displayTable">
+			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">		
+				<div id="mainNode" class="settings mainPadding">
+					<div id="table" class="displayTable" style="padding-bottom: 20px;">
 					</div>
 				</div>
 			</div>
@@ -56,6 +58,6 @@
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
 	</div>
-	
-</body>
+</body>	
+
 </html>
