@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'dijit/TooltipDialog'], 
-		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer) {
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler', 'orion/util', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/navigationUtils', 'dijit/TooltipDialog'], 
+		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mUtil, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils) {
 
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, options) {
 		this.registry= serviceRegistry;
@@ -336,6 +336,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 
 	SearchResultRenderer.prototype.staleFileElement = function(item){
 		if(item.stale){
+			var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
+			mNavUtils.removeNavGrid(navGridHolder, dojo.byId(this.getItemLinkId(item)));
 			var span = dojo.byId(this.getFileSpanId(item));
 			dojo.empty(span);
 			dojo.place(document.createTextNode(item.name), span, "last"); //$NON-NLS-0$
@@ -377,6 +379,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(!this.explorer.model.replaceMode()){
 			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		} else {
 			var nameSpan = dojo.create("span", { className: "primaryColumn", id: this.getItemLinkId(item)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(renderName), nameSpan, "only"); //$NON-NLS-0$
@@ -448,6 +451,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		var that = this;
 		if(!this.explorer.model.replaceMode()){
 			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
 				that.explorer.getNavHandler().cursorOn(item);
 			});
@@ -498,11 +502,20 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		var link = dojo.create("a", {className: "navlink", href: href}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		link.title = dojo.string.substitute(messages["Search again in this folder with \"${0}\""], [this.explorer.model.queryObj.searchStrTitle]);
+		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
 		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
 			that.explorer.closeContextTip();
 		});
 		dojo.place(document.createTextNode(item.fullPathName), link, "only"); //$NON-NLS-0$
+	};
+	
+	SearchResultRenderer.prototype.getPrimColumnStyle = function(){
+		return "search_primaryColumn";//$NON-NLS-0$
+	};
+	
+	SearchResultRenderer.prototype.getSecondaryColumnStyle = function(){
+		return "search_secondaryColumn";//$NON-NLS-0$
 	};
 	
 	SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow){
@@ -526,8 +539,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			col = document.createElement('td'); //$NON-NLS-0$
 			span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			var that = this;
-			if(!this.explorer.model.replaceMode()){
-			}
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name; //$NON-NLS-1$ //$NON-NLS-0$
 				this.renderFileElement(item, span, renderName);
@@ -1060,7 +1071,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			this.reportStatus(messages["Preparing preview..."]);	
 		}
 		var that = this;
-		this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 20, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
+		this.createTree(this._uiFactory ? this._uiFactory.getMatchDivID() : this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
 
 		if(init){
 			this.hookUpNavHandler();
@@ -1160,17 +1171,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 						parentDivID: uiFactory.getCompareDivID(),
 						showTitle: true,
 						rightTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.name]),
-						leftTitle: dojo.string.substitute(messages["Original File  (${0})"], [fileItem.name]),
+						leftTitle: dojo.string.substitute(messages["Original File (${0})"], [fileItem.name]),
 						showLineStatus: false
 					});
 					that.uiFactoryCompare.buildUI();
 					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
 					that.twoWayCompareContainer.startup();
 				} else {
-					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
 					dojo.empty(that.uiFactoryCompare.getTitleDivId());
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File  (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
+					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
@@ -1357,8 +1368,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	//Provide the key listening div.If not provided this._myTree._parent will be used.
-	SearchResultExplorer.prototype.keyEventListeningDiv = function(){
-		return dojo.byId(this.getParentDivId());
+	SearchResultExplorer.prototype.keyEventListeningDiv = function(secondLevel){
+		return dojo.byId(this.getParentDivId(secondLevel));
 
 	};
 	
@@ -1479,7 +1490,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		    });
 			this.initCommands();
 			dojo.empty(this.getParentDivId());
-			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 20, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
+			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
 			this.hookUpNavHandler();
 		
 			this.gotoCurrent(this.restoreLocationStatus());

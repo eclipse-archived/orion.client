@@ -70,7 +70,7 @@ define({
 	"Writing files...": "Writing files...",
 	"Preparing preview...": "Preparing preview...",
 	"Replaced File (${0})": "Replaced File (${0})",
-	"Original File  (${0})": "Original File  (${0})",
+	"Original File (${0})": "Original File (${0})",
 	"Sort by Name": "Sort by Name",
 	"Compare changes": "Compare changes",
 	"Search Results": "Search Results",

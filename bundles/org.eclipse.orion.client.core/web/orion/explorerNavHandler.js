@@ -37,8 +37,9 @@ exports.ExplorerNavHandler = (function() {
 	    this._selections = [];
 	    
 	    this._currentColumn = 0;
-	    dojo.attr(this.explorer._parentId, "tabIndex", 0); //$NON-NLS-0$
-		dojo.addClass(this.explorer._parentId, "selectionModelContainer"); //$NON-NLS-0$
+	    var parentDiv = this._getEventListeningDiv();
+	    dojo.attr(parentDiv, "tabIndex", 0); //$NON-NLS-0$
+		dojo.addClass(parentDiv, "selectionModelContainer"); //$NON-NLS-0$
 		
 		this._modelIterator = new mTreeModelIterator.TreeModelIterator([],
 		   		   {isExpanded: dojo.hitch(this, function(model) {
@@ -57,7 +58,6 @@ exports.ExplorerNavHandler = (function() {
 		   		   });
 		this._init(options);
 		
-	    var parentDiv = this._getEventListeningDiv();
 	    if(!options || options.setFocus !== false){
 	    	parentDiv.focus();
 	    }
@@ -79,13 +79,9 @@ exports.ExplorerNavHandler = (function() {
 			} else if(e.keyCode === dojo.keys.UP_ARROW){
 				return this.onUpArrow(e);
 			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
-				if(!this._ctrlKeyOn(e)){
-					return this.onRihgtArrow(e);
-				}
+				return this.onRightArrow(e);
 			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
-				if(!this._ctrlKeyOn(e)){
-					return this.onLeftArrow(e);
-				}
+				return this.onLeftArrow(e);
 			} else if(e.keyCode === dojo.keys.SPACE){
 				return this.onSpace(e);
 			} else if(e.keyCode === dojo.keys.ENTER) {
@@ -145,9 +141,9 @@ exports.ExplorerNavHandler = (function() {
 		    }
 		},
 		
-		_getEventListeningDiv: function(){
+		_getEventListeningDiv: function(secondLevel){
 			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){ //$NON-NLS-0$
-				return this.explorer.keyEventListeningDiv();
+				return this.explorer.keyEventListeningDiv(secondLevel);
 			}
 			return dojo.byId(this.explorer._parentId);
 		},
@@ -221,6 +217,9 @@ exports.ExplorerNavHandler = (function() {
 		
 		setSelection: function(model, toggling){
 			if(this._selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
+				if(toggling && this.explorer.renderer._useCheckboxSelection){
+					this._checkRow(model,true);
+				}
 				return;
 			}
 			if(!this._isRowSelectable(model)){
@@ -431,7 +430,7 @@ exports.ExplorerNavHandler = (function() {
 			headerHeight += this._getToolBarHeight("titleArea");
 			headerHeight += this._getToolBarHeight("pageToolbar");
 			
-		    var parentNode = this._getEventListeningDiv();
+		    var parentNode = this._getEventListeningDiv(true);
 			var parentRect = parentNode.getClientRects()[0];
 			var vPortRect = {top: headerHeight, left: 0, bottom : this._vpHeight(), right: this._vpWidth()};
 			
@@ -521,10 +520,24 @@ exports.ExplorerNavHandler = (function() {
 			return false;
 		},
 
+		_shouldMoveColumn: function(e){
+			var model = this.currentModel();
+			var gridChildren = this._getGridChildren(model);
+			if(gridChildren && gridChildren.length > 1){
+				if(this.isExpandable(model)){
+					return this._ctrlKeyOn(e);
+				}
+				return true;
+			} else {
+				return false;
+			}
+		},
+		
 		//Left arrow key collapses the current row. If current row is not expandable(e.g. a file in file navigator), move the cursor to its parent row.
 		//If current row is expandable and expanded, collapse it. Otherwise move the cursor to its parent row.
 		onLeftArrow:  function(e) {
-			if(!this._ctrlKeyOn(e) && this.moveColumn(null, -1)){
+			if(this._shouldMoveColumn(e)){
+				this.moveColumn(null, -1);
 				e.preventDefault();
 				return true;
 			}
@@ -549,14 +562,15 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		//Right arrow key expands the current row if it is expandable and collapsed.
-		onRihgtArrow: function(e) {
-			if(!this._ctrlKeyOn(e) && this.moveColumn(null, 1)){
+		onRightArrow: function(e) {
+			if(this._shouldMoveColumn(e)){
+				this.moveColumn(null, 1);
 				e.preventDefault();
 				return true;
 			}
 			var curModel = this._modelIterator.cursor();
 			if(!curModel){
-				return;
+				return false;
 			}
 			if(this.isExpandable(curModel)){
 				if(!this.isExpanded(curModel)){

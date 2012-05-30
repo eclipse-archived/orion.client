@@ -796,7 +796,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 										dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 									} else {
 										if(domNodeWrapperList){
-											mUtil.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+											mNavUtils.removeNavGrid(domNodeWrapperList, menuButton.domNode);
 										}
 										menuButton.destroyRecursive();
 									}

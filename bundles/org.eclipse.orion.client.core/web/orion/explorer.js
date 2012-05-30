@@ -363,13 +363,13 @@ exports.ExplorerRenderer = (function() {
 			return rowId + "selectedState"; //$NON-NLS-0$
 		},
 			
-		onCheck: function(tableRow, checkBox, checked, manually){
+		onCheck: function(tableRow, checkBox, checked, manually, setSelection){
 			checkBox.checked = checked;
 			dojo.toggleClass(checkBox, "core-sprite-check_on", checked); //$NON-NLS-0$
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
 			}
-			if(this.explorer.getNavHandler() && manually){
+			if(this.explorer.getNavHandler() && setSelection){
 				this.explorer.getNavHandler().setSelection(this.explorer.getNavDict().getValue(tableRow.id).model, true);	
 			}
 		},
@@ -637,9 +637,17 @@ exports.SelectionRenderer = (function(){
 		while(cell){
 			tableRow.appendChild(cell);
 			if (i===0) {
-				dojo.addClass(cell, "navColumn"); //$NON-NLS-0$
+				if(this.getPrimColumnStyle){
+					dojo.addClass(cell, this.getPrimColumnStyle()); //$NON-NLS-0$
+				} else {
+					dojo.addClass(cell, "navColumn"); //$NON-NLS-0$
+				}
 			} else {
-				dojo.addClass(cell, "secondaryColumn"); //$NON-NLS-0$
+				if(this.getSecondaryColumnStyle){
+					dojo.addClass(cell, this.getSecondaryColumnStyle()); //$NON-NLS-0$
+				} else {
+					dojo.addClass(cell, "secondaryColumn"); //$NON-NLS-0$
+				}
 			}
 			cell = this.getCellElement(++i, item, tableRow);
 		}
