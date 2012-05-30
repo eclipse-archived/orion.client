@@ -14,6 +14,7 @@
 				name: "Git Status",
 				id: "eclipse.git.status",
 				tooltip: "Go to Git Status",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
 					{source: "Directory", match: true}
@@ -26,6 +27,7 @@
 				name: "Git Log",
 				id: "eclipse.git.log",
 				tooltip: "Go to Git Log",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:CommitLocation", variableName: "GitLogLocation"}
 				],
@@ -37,6 +39,7 @@
 				name: "Git Remote",
 				id: "eclipse.git.remote",
 				tooltip: "Go to Git Remote",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:DefaultRemoteBranchLocation", variableName: "GitRemoteLocation"}
 				],
@@ -52,6 +55,7 @@
 				name: "Git Status",
 				id: "eclipse.git.status2",
 				tooltip: "Go to Git Status",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "StatusLocation", variableName: "GitStatusLocation"}
 				],
@@ -70,6 +74,7 @@
 				id: "eclipse.git.repository",
 				name: "Git Repository",
 				tooltip: "Go to the git repository",
+				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "CloneLocation|Git:CloneLocation",
 					variableName: "GitRepoLocation"
@@ -81,6 +86,7 @@
 				id: "orion.git.gotoEclipseGit",
 				name: "Show in eclipse.org",
 				tooltip: "Show this repository at eclipse.org",
+				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "GitUrl", 
 					match: "git.eclipse.org/gitroot", 
@@ -93,6 +99,7 @@
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "orion.git.gotoGithub",
 				name: "Show in GitHub",
+				nls: "git/nls/gitmessages",
 				tooltip: "Show this repository at GitHub",
 				validationProperties: [{
 					source: "GitUrl", 

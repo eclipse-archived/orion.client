@@ -15,6 +15,8 @@ define({
 	"Toggle Left Pane": "Toggle Left Pane",
 	"Open or close the left pane": "Open or close the left pane",
 	"Navigator": "Navigator",
+	"Strings Xtrnalizr": "Strings Xtrnalizr",
+	"Externalize Strings from JavaScript files in this folder": "Externalize Strings from JavaScript files in this folder",
 	"Choose a Folder": "Choose a Folder",
 	"could not find toolbar ": "could not find toolbar ",
 	"Copy of ${0}": "Copy of ${0}",

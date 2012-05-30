@@ -11,6 +11,7 @@
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("orion.page.link", serviceImpl, {
 				name: "Console",
+				nls: "orion/nls/messages",
 				id: "orion.console",
 				uriTemplate: "{OrionHome}/console/consolePage.html"
 			});

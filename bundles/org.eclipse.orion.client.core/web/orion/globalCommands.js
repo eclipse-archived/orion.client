@@ -302,6 +302,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
 			var menu = _makeEmptyLinksMenu();
 			var foundLink = false;
+			var deferreds = [];
 			// assemble the related links
 			for (var i=0; i<contributedLinks.length; i++) {
 				var info = {};
@@ -311,35 +312,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 				}
 				if (info.id) {
-					var command = null;
-					// exclude anything in the list of exclusions
-					var position = dojo.indexOf(exclusions, info.id);
-					if (position < 0) {
-						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (info.name && info.uriTemplate) {
-							command = new mCommands.Command(mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true));
-						}
-						// If we couldn't compose one, see if one is already registered.
-						if (!command) {
-							command = commandService.findCommand(info.id);
-						}
-						// If it's not registered look for it in orion.navigate.command and create it
-						if (!command) {
-							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
-							for (j=0; j<commandsReferences.length; j++) {
-								var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
-								if (id === info.id) {
-									var navInfo = {};
-									propertyNames = commandsReferences[j].getPropertyNames();
-									for (var k = 0; k < propertyNames.length; k++) {
-										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
-									}
-									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true);
-									command = new mCommands.Command(commandOptions);
-									break;
-								}
-							}
-						} 
+					
+					function enhanceCommand(command){
 						if (command) {
 							if (!command.visibleWhen || command.visibleWhen(item)) {
 								foundLink = true;
@@ -361,22 +335,72 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							}
 						} 
 					}
+					
+					var command = null;
+					// exclude anything in the list of exclusions
+					var position = dojo.indexOf(exclusions, info.id);
+					if (position < 0) {
+						// First see if we have a uriTemplate and name, which is enough to build a command internally.
+						if (info.name && info.uriTemplate) {
+							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true)
+							deferreds.push(deferred);
+							deferred.then(
+									dojo.hitch(this, function(commandOptions){
+										var command = new mCommands.Command(commandOptions);
+										enhanceCommand(command);
+									}));
+							continue;
+						}
+						// If we couldn't compose one, see if one is already registered.
+						if (!command) {
+							command = commandService.findCommand(info.id);
+							if(command){
+								enhanceCommand(command);
+								continue;
+							}
+						}
+						// If it's not registered look for it in orion.navigate.command and create it
+						if (!command) {
+							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
+							for (j=0; j<commandsReferences.length; j++) {
+								var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
+								if (id === info.id) {
+									var navInfo = {};
+									propertyNames = commandsReferences[j].getPropertyNames();
+									for (var k = 0; k < propertyNames.length; k++) {
+										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
+									}
+									var deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true)
+									deferreds.push(deferred);
+									deferred.then(
+											dojo.hitch(this, function(commandOptions){
+												command = new mCommands.Command(commandOptions);
+												enhanceCommand(command);
+											}));
+									break;
+								}
+							}
+						} 
+
+					}
 				} 
 			}
 			var menuButton = dijit.byId("related"); //$NON-NLS-0$
 			if (menuButton) {
 				menuButton.destroy();
 			}
-			if (foundLink) {
-				menuButton = new orion.widgets.UserMenuDropDown({
-					id: "related", //$NON-NLS-0$
-					label: "Related", //$NON-NLS-0$
-					dropDown: menu
-				});
-				dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-				dojo.place(menuButton.domNode, related, "only"); //$NON-NLS-0$
-			}	
-			mUtil.forceLayout(related);
+			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+				if (foundLink) {
+					menuButton = new orion.widgets.UserMenuDropDown({
+						id: "related", //$NON-NLS-0$
+						label: messages["Related"],
+						dropDown: menu
+					});
+					dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+					dojo.place(menuButton.domNode, related, "only"); //$NON-NLS-0$
+				}	
+				mUtil.forceLayout(related);
+			}));
 		}));
 	}
 	
@@ -590,7 +614,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}
-				if (info.uriTemplate && info.name) {
+			if(info.uriTemplate && info.nls && info.name){
+				require(['i18n!'+info.nls], function(commandMessages){
+					var uriTemplate = new URITemplate(info.uriTemplate);
+					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					text = document.createTextNode(commandMessages[info.name]);
+					dojo.place(text, link, "only"); //$NON-NLS-0$
+				});
+			} else if (info.uriTemplate && info.name) {
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
