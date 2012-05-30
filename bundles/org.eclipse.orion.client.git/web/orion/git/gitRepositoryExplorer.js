@@ -55,10 +55,10 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
-		this.redisplayClonesList();
+		this.redisplay();
 	};
 	
-	GitRepositoryExplorer.prototype.redisplayClonesList = function(){
+	GitRepositoryExplorer.prototype.redisplay = function(){
 		var pageParams = PageUtil.matchResourceParameters();
 		if (pageParams.resource) {
 			this.displayRepository(pageParams.resource);
@@ -68,10 +68,34 @@ exports.GitRepositoryExplorer = (function() {
 			
 			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
 			var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
-			gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
+			gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
 			
-			this.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath); //$NON-NLS-1$ //$NON-NLS-0$
+			this.displayRepositories2(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath); //$NON-NLS-1$ //$NON-NLS-0$
 		};
+	};
+	
+	GitRepositoryExplorer.prototype.displayRepositories2 = function(location){
+		var that = this;
+		this.loadingDeferred = new dojo.Deferred();
+		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
+		this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
+			function(resp){
+				if (resp.Children.length === 0) {
+					that.initTitleBar({});
+					that.displayRepositories([], "full"); //$NON-NLS-0$
+				} else if (resp.Children[0].Type === "Clone"){ //$NON-NLS-0$
+					var repositories = resp.Children;
+					
+					that.initTitleBar(repositories);
+					that.displayRepositories(repositories, "full", true); //$NON-NLS-0$
+				}
+				
+				that.commandService.processURL(window.location.href);
+			}, function(error){
+				dojo.hitch(that, that.handleError)(error);
+			}
+		);
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
@@ -168,8 +192,8 @@ exports.GitRepositoryExplorer = (function() {
 		var that = this;
 		var item = {};
 		var task = "Repositories";
-		// render commands
-		mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", resource); //$NON-NLS-1$ //$NON-NLS-0$
+		var scopeId = "repoPageActions";
+
 		var repository;
 		if (resource && resource.Type === "Clone" && sectionName){ //$NON-NLS-0$
 			repository = resource;
@@ -190,8 +214,10 @@ exports.GitRepositoryExplorer = (function() {
 			item.Parents[0].Name = "Repositories"; //$NON-NLS-0$
 		} else {
 			item.Name = "Repositories"; //$NON-NLS-0$
+			scopeId = "reposPageActions";
 		}
-		updatePageActions(that.registry, "pageActions", "repoPageActions", repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
+		
+		updatePageActions(that.registry, "pageActions", scopeId, repository || {}); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: "Repositories", target: repository, breadcrumbTarget: item,
 			makeBreadcrumbLink: function(seg, location) {
 				seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
@@ -289,24 +315,27 @@ exports.GitRepositoryExplorer = (function() {
 				iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
 			});
 			titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
+			that.loadingDeferred.callback();
+			progressService.setProgressMessage("");
 			return;
 		}
 
 		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
 		contentParent.innerHTML = '<list id="repositoryNode" class="mainPadding"></list>'; //$NON-NLS-0$
-		
-//		var repositoryMonitor = titleWrapper.createProgressMonitor();
-//		repositoryMonitor.begin(mode === "full" ? messages["Loading repositories"] : messages["Loading repository"]); //$NON-NLS-0$
+
+		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+
 		this.decorateRepositories(repositories, mode).then(
 			function(){
-//				repositoryMonitor.done();
 				for(var i=0; i<repositories.length;i++){
 					that.renderRepository(repositories[i], i, repositories.length, mode, links);
 				}
 				that.loadingDeferred.callback();
+				progressService.setProgressMessage("");
 			},
 			function(){
-//				repositoryMonitor.done();
+				that.loadingDeferred.errback();
+				progressService.setProgressMessage("");
 			}
 		);
 	};
