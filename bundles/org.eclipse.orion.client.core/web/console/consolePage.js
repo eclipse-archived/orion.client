@@ -133,26 +133,26 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 						dojo.hitch(this, function(metadata) {
 							if (!metadata.Parents) {
 								/* changing to the root where file services are mounted */
+								mCurrentDirectory.setCurrentTreeNode(null);
 								dojo.hash('#'); //$NON-NLS-0$
 								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>/</b>"])); //$NON-NLS-1$
-								mCurrentDirectory.setCurrentTreeNode(null);
 							} else if (metadata.Parents.length === 0) {
 								/* changing to the root directory within the current file service */
 								// TODO: computing the parent location based on the current location may not always be valid
+								mCurrentDirectory.setCurrentTreeNode(null);
 								var index = metadata.Location.indexOf('/', 1); //$NON-NLS-0$
 								var hash = metadata.Location.substr(0, index);
 								dojo.hash(hash);
 								var buffer = fileClient.fileServiceName(metadata.Location);
 								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
-								mCurrentDirectory.setCurrentTreeNode(null);
 							} else {
 								var parentLocation = metadata.Parents[0].Location;
 								fileClient.loadWorkspace(parentLocation).then(
 									dojo.hitch(this, function(parentMetadata) {
+										mCurrentDirectory.setCurrentTreeNode(parentMetadata);
 										dojo.hash(parentMetadata.Location);
 										var buffer = formatFullPath(parentMetadata);
 										result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
-										mCurrentDirectory.setCurrentTreeNode(parentMetadata);
 									}),
 									dojo.hitch(this, function(error) {
 										resolveError(result, error);
@@ -174,6 +174,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 									if (child.Directory) {
 										found = true;
 										mCurrentDirectory.setCurrentTreeNode(child);
+										dojo.hash(child.Location);
 										fileClient.loadWorkspace(child.Location).then(
 											dojo.hitch(this, function(metadata) {
 												var buffer = formatFullPath(metadata);
@@ -369,9 +370,10 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 					console.addCommand({
 						name: ref.getProperty("name"), //$NON-NLS-0$
 						description: ref.getProperty("description"), //$NON-NLS-0$
-						manual: ref.getProperty("manual"), //$NON-NLS-0$
+						callback: contributedExecFunc(service),
+						returnType: 'string', //$NON-NLS-0$
 						parameters: ref.getProperty("parameters"), //$NON-NLS-0$
-						exec: contributedExecFunc(service)
+						manual: ref.getProperty("manual") //$NON-NLS-0$
 					});
 				}
 			}
