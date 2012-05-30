@@ -1996,8 +1996,8 @@ var exports = {};
 								options.gitPrivateKey, options.gitPassphrase),
 								messages["Cloning repository: "] + gitUrl).deferred.then(function(jsonData, secondArg) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
-								if (explorer.redisplayClonesList) {
-									dojo.hitch(explorer, explorer.redisplayClonesList)();
+								if (explorer.changedItem) {
+									dojo.hitch(explorer, explorer.changedItem)();
 								}
 							}, func, messages['Clone Git Repository']);
 						}, function(jsonData, secondArg) {
@@ -2041,8 +2041,8 @@ var exports = {};
 						serviceRegistry.getService("orion.page.message").createProgressMonitor(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath), //$NON-NLS-0$
 								messages["Initializing repository: "] + name).deferred.then(function(jsonData, secondArg){
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
-								if(explorer.redisplayClonesList)
-									dojo.hitch(explorer, explorer.redisplayClonesList)();
+								if(explorer.changedItem)
+									dojo.hitch(explorer, explorer.changedItem)();
 							}, func, messages["Init Git Repository"]);
 						}, function(jsonData, secondArg) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Init Git Repository']);
@@ -2100,8 +2100,8 @@ var exports = {};
 							gitService.removeGitRepository(item[i].Location).then(
 									function(jsonData){
 										alreadyDeleted++;
-										if(alreadyDeleted >= item.length && explorer.redisplayClonesList){
-											dojo.hitch(explorer, explorer.redisplayClonesList)();
+										if(alreadyDeleted >= item.length && explorer.changedItem){
+											dojo.hitch(explorer, explorer.changedItem)();
 										}
 									}, displayErrorOnStatus);
 						}
@@ -2110,8 +2110,8 @@ var exports = {};
 					if(confirm(dojo.string.substitute(messages['Are you sure you want to delete ${0}?'], [item.Name])))
 						gitService.removeGitRepository(item.Location).then(
 							function(jsonData){
-								if(explorer.redisplayClonesList){
-									dojo.hitch(explorer, explorer.redisplayClonesList)();
+								if(explorer.changedItem){
+									dojo.hitch(explorer, explorer.changedItem)();
 								}
 							},
 							displayErrorOnStatus);

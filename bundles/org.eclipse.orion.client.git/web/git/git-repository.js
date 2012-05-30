@@ -107,19 +107,7 @@ mBootstrap.startup().then(function(core) {
 	fileClient.loadWorkspace().then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
-			var pageParams = PageUtil.matchResourceParameters();
-			if (pageParams.resource) {
-				explorer.displayRepository(pageParams.resource);
-			} else {
-				var path = workspace.Location;
-				var relativePath = mUtil.makeRelative(path);
-				
-				//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-				var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
-				gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
-				
-				explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath); //$NON-NLS-1$ //$NON-NLS-0$
-			}
+			explorer.redisplay();
 		}	
 	);	
 	
@@ -128,19 +116,7 @@ mBootstrap.startup().then(function(core) {
 		fileClient.loadWorkspace().then(
 			function(workspace){
 				explorer.setDefaultPath(workspace.Location);
-				var pageParams = PageUtil.matchResourceParameters();
-				if (pageParams.resource) {
-					explorer.displayRepository(pageParams.resource);
-				} else {
-					var path = workspace.Location;
-					var relativePath = mUtil.makeRelative(path);
-					
-					//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
-					var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
-					gitapiCloneUrl = gitapiCloneUrl.substring(0,gitapiCloneUrl.length-2);
-					
-					explorer.displayRepository(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath); //$NON-NLS-1$ //$NON-NLS-0$
-				}
+				explorer.redisplay();
 			}	
 		);	
 	});
