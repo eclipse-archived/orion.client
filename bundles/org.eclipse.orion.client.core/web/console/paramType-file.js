@@ -28,11 +28,35 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 				this.name = name;
 				this.directories = directories;
 				this.files = files;
-				this.cache = {};
+				this._initCache();
 				var self = this;
 				dojo.subscribe("/dojo/hashchange", function(newHash) { //$NON-NLS-0$
-					self.cache = {};
+					self._initCache();
 				});
+			},
+			_initCache: function() {
+				this.cache = {};
+				var self = this;
+				this.withValidDirs(
+					function(validDirs) {
+						validDirs.sort(function(a,b) {
+							var isDir1 = a.Directory;
+							var isDir2 = b.Directory;
+							if (isDir1 !== isDir2) {
+								return isDir1 ? -1 : 1;
+							}
+							var n1 = a.Name && a.Name.toLowerCase();
+							var n2 = b.Name && b.Name.toLowerCase();
+							if (n1 < n2) { return -1; }
+							if (n1 > n2) { return 1; }
+							return 0;
+						});
+						self.cache.validDirs = validDirs;
+					},
+					function(error) {
+						self.cache.validDirs = [];
+					}
+				);
 			},
 			/**
 			 * This function is invoked by the console to query for the completion
@@ -136,16 +160,7 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 					this.cache.text = text;
 					return this.cache.predictions;
 				}
-				/* no predictions currently ready, try to prefetch for future use */
-				var self = this;
-				this.withValidDirs(
-					function(validDirs) {
-						self.cache.validDirs = validDirs;
-					},
-					function(error) {
-						self.cache.validDirs = [];
-					}
-				);
+				/* no predictions are currently ready */
 				return null;
 			},
 			startsWith: function(string, prefix) {
@@ -166,18 +181,6 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 					var self = this;
 					this.withValidDirs(
 						function(validDirs) {
-							validDirs.sort(function(a,b) {
-								var isDir1 = a.Directory;
-								var isDir2 = b.Directory;
-								if (isDir1 !== isDir2) {
-									return isDir1 ? -1 : 1;
-								}
-								var n1 = a.Name && a.Name.toLowerCase();
-								var n2 = b.Name && b.Name.toLowerCase();
-								if (n1 < n2) { return -1; }
-								if (n1 > n2) { return 1; }
-								return 0;
-							});
 							self.cache.validDirs = validDirs;
 							func(this.getPredictions(text));
 						}
