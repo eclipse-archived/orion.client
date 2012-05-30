@@ -45,6 +45,7 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 		id: 'orion.site.viewon',
 		name: 'View on Site',
 		tooltip: 'View this file or folder on a web site hosted by Orion',
+		nls: 'orion/nls/messages',
 		forceSingleItem: true,
 		validationProperties: filesAndFoldersOnService(fileBase),
 		uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
@@ -54,6 +55,7 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 		id: 'orion.site.viewon',
 		name: 'View on Site',
 		tooltip: 'View this file or folder on a web site hosted by Orion',
+		nls: 'orion/nls/messages',
 		validationProperties: filesAndFoldersOnService(fileBase),
 		uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
 	});

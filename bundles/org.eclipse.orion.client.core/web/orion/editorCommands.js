@@ -229,6 +229,7 @@ exports.EditorCommandFactory = (function() {
 					return new mCommands.Command(options);
 				};
 				dojo.when(getContentTypes(this.serviceRegistry), dojo.hitch(this, function() {
+					var deferreds = [];
 					for (var i=0; i<actionReferences.length; i++) {
 						var serviceReference = actionReferences[i];
 						var service = this.serviceRegistry.getService(actionReferences[i]);
@@ -238,25 +239,31 @@ exports.EditorCommandFactory = (function() {
 							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 						}
 						info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
-						var command = makeCommand(info, service, 
-							mExtensionCommands._createCommandOptions(info, serviceReference, this.serviceRegistry, contentTypesCache, false, function(items) {
-								// items is the editor and we care about the file metadata for validation
-								return input.getFileMetadata();
-							}));
-						this.commandService.addCommand(command);
-						this.commandService.registerCommandContribution(this.toolbarId, command.id, 100+i);
-						if (info.key) {
-							// add it to the editor as a keybinding
-							var textView = editor.getTextView();
-							textView.setKeyBinding(createKeyBinding(info.key), command.id);
-							textView.setAction(command.id, command.callback);
-						}				
+						
+						var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, this.serviceRegistry, contentTypesCache, false, function(items) {
+							// items is the editor and we care about the file metadata for validation
+							return input.getFileMetadata();
+						});
+						deferreds.push(deferred);	
+						deferred.then(dojo.hitch(this, function(commandOptions){
+							var command = makeCommand(info, service, commandOptions);
+							this.commandService.addCommand(command);
+							this.commandService.registerCommandContribution(this.toolbarId, command.id, 100+i);
+							if (info.key) {
+								// add it to the editor as a keybinding
+								var textView = editor.getTextView();
+								textView.setKeyBinding(createKeyBinding(info.key), command.id);
+								textView.setAction(command.id, command.callback);
+							}				
+						}));
 					}
-					// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
-					// metadata, because we'll generate again once we know.
-					if (input.getFileMetadata()) {
-						mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
-					}
+					new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+						// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
+						// metadata, because we'll generate again once we know.
+						if (input.getFileMetadata()) {
+							mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
+						}
+					}));
 				}));
 			}
 		}

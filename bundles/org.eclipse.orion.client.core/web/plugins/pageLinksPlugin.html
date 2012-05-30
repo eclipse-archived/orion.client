@@ -11,64 +11,44 @@
 		var serviceImpl = { /* All data is in properties */ };
 
 		var provider = new eclipse.PluginProvider();
-		var messages = { // TEMPORARY
-			"Navigator": "Navigator",
-			"Sites": "Sites",
-			"Repositories": "Repositories",
-			"Console": "Console",
-			"Get Plugins": "Get Plugins",
-			"Navigate": "Navigate",
-			"Go to the navigator": "Go to the navigator",
-			"Clone a github repository": "Clone a github repository",
-			"Clone a repository from github": "Clone a repository from github",
-			"Upload some code!": "Upload some code!",
-			"Upload a zip file from your computer.": "Upload a zip file from your computer.",
-			"github": "github",
-			"github description": "Go to github and copy the repository URL for the repository you want to clone.",
-			"Orion Repositories": "Orion Repositories",
-			"Orion Repositories description": "Go to the Orion repositories page and select the 'Clone' link at the top left of the page",
-			"Orion/GitHub How-To": "Orion/GitHub How-To",
-			"Orion/GitHub How-To description": "The how-to provides further information about setting up credentials.",
-			"Navigator description": "Go the Orion navigator.  Create a new folder and then choose import from the 'More' menu.",
-			"Generate a web site": "Generate a web site",
-			"Generate a web site description":"Generate an HTML 5 Website Template using initializr.com",
-			"Initializr": "Initializr",
-			"Initializr description": "Go to the initializr site, choose the options that you would like, and download the template to your computer.",
-			"Navigator description2": "Go to the Orion navigator.  Create a new folder and then choose import from the 'More' menu.  Select the zip file you just generated.",
-			"Non externalized string literal 0": "Non externalized string literal ${0}"
-		};
 		
 		// Primary navigation links
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Navigator,
+			name: "Navigator",
 			id: "orion.navigator",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/navigate/table.html#"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Sites,
+			name: "Sites",
 			id: "orion.sites",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/sites/sites.html"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Repositories,
+			name: "Repositories",
 			id: "orion.repositories",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/git/git-repository.html#"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Console,
+			name: "Console",
 			id: "orion.console",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/console/consolePage.html"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages["Get Plugins"],
+			name: "Get Plugins",
 			id: "orion.plugins.get",
+			nls: "orion/nls/messages",
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
 		});
 		
 		provider.registerServiceProvider("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
-			name: messages.Navigator,
-			tooltip: messages["Go to the navigator"],
+			name: "Navigator",
+			nls: "orion/nls/messages",
+			tooltip: "Go to the navigator",
 			validationProperties: [{
 				source: "ChildrenLocation|ContentLocation",
 				variableName: "NavigatorLocation",

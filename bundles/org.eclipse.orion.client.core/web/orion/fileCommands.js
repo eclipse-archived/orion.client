@@ -896,33 +896,40 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			var extensionGroupCreated = false;
 			var selectionGroupCreated = false;
 			var openWithGroupCreated = false;
+			var commandDeferreds = [];
 		
 			for (i=0; i < fileCommands.length; i++) {
 				var commandInfo = fileCommands[i].properties;
 				var service = fileCommands[i].service;
-				var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
-				var command = new mCommands.Command(commandOptions);
-				if (commandInfo.isEditor) {
-					command.isEditor = commandInfo.isEditor;
-				}
-				
-				commandService.addCommand(command);
-				if (!extensionGroupCreated) {
-					extensionGroupCreated = true;
-					commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
-				}
-				if (!openWithGroupCreated) {
-					openWithGroupCreated = true;
-					commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-0$
-				}
-				if (commandInfo.isEditor) {
-					commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
-				} else {
-					commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
-				}
+				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
+				commandDeferreds.push[commandDeferred];
+				commandDeferred.then(dojo.hitch(this, 
+						function(commandOptions){
+							var command = new mCommands.Command(commandOptions);
+							if (commandInfo.isEditor) {
+								command.isEditor = commandInfo.isEditor;
+							}
+							
+							commandService.addCommand(command);
+							if (!extensionGroupCreated) {
+								extensionGroupCreated = true;
+								commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
+							}
+							if (!openWithGroupCreated) {
+								openWithGroupCreated = true;
+								commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-0$
+							}
+							if (commandInfo.isEditor) {
+								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
+							} else {
+								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
+							}
+						}));
 			}
-			fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
-			explorer.updateCommands();
+			new dojo.DeferredList(commandDeferreds).addBoth(function(){
+				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
+				explorer.updateCommands();
+			});
 
 		}));
 	};

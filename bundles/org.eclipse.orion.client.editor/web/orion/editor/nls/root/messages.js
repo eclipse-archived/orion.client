@@ -14,6 +14,7 @@
 //NLS_CHARSET=UTF-8
 
 define({
+	"Comment": "Comment",
 	"incrementalFind": "Incremental find: ${0}",
 	"incrementalFindNotFound": "Incremental find: ${0} (not found)",
 	"find": "Find...",
