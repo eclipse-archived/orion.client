@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/section', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
+define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
 		'orion/sites/siteCommands', 'orion/treetable'],
-		function(messages, dojo, Deferred, mSection, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
-	var Section = mSection.Section;
+		function(messages, dojo, Deferred, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
+
 	var TableTree = treetable.TableTree;
 	var SitesTree, ViewOnSiteTree;
 
@@ -27,6 +27,17 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/sectio
 		this.parentNode = options.parent;
 		this.siteServiceRefs = this.registry.getServiceReferences('orion.site'); //$NON-NLS-0$
 	}
+	
+	var updatePageActions = function(registry, toolbarId, scopeId, item){
+		var toolbar = dojo.byId(toolbarId);
+		if (toolbar) {
+			dojo.empty(toolbar);
+		} else {
+			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
+		}
+		registry.getService("orion.page.command").renderCommands(scopeId, toolbar, item, null, "button");  //$NON-NLS-0$
+	};
+	
 	SiteServicesExplorer.prototype = /** @lends orion.sites.SiteServicesExplorer.prototype */ {
 		display: function() {
 			var serviceRegistry = this.registry;
@@ -38,17 +49,15 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/sectio
 				var siteClient = new mSiteClient.SiteClient(serviceRegistry, siteService, siteServiceRef);
 				var sectionId = 'section' + i; //$NON-NLS-0$
 				var sitesNodeId = sectionId + 'siteNode'; //$NON-NLS-0$
-				var section = new Section(this.parentNode, {
-					explorer: this,
-					id: sectionId,
-					title: messages['Site Configurations on '] + siteServiceRef.getProperty('name'), //$NON-NLS-1$
-					content: '<div id="' + sitesNodeId + '" class="plugin-settings-list"></div>', //$NON-NLS-1$ //$NON-NLS-0$
-					commandService: commandService,
-					serviceRegistry: serviceRegistry,
-					slideout: true
-				});
-				commandService.registerCommandContribution(section.actionsNode.id, 'orion.site.create', 100); //$NON-NLS-0$
-				commandService.renderCommands(section.actionsNode.id, section.actionsNode, siteServiceRef, this, 'button'); //$NON-NLS-0$
+				
+				var section = {};
+				
+				var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, this.parentNode, "last");
+				contentParent.innerHTML = '<div id="' + sitesNodeId + '" class="plugin-settings-list"></div>'; //$NON-NLS-0$
+				
+				commandService.registerCommandContribution("pageActions", 'orion.site.create', 100); //$NON-NLS-0$
+				
+				updatePageActions(this.registry, "pageActions", "pageActions", siteServiceRef); //$NON-NLS-1$ //$NON-NLS-0$
 
 				var sectionItemActionScopeId = 'section' + i + 'Action'; //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.edit', 10); //$NON-NLS-0$
