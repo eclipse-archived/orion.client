@@ -37,9 +37,9 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 			_initCache: function() {
 				this.cache = {};
 				var self = this;
-				this.withValidDirs(
-					function(validDirs) {
-						validDirs.sort(function(a,b) {
+				this.withValidFiles(
+					function(validFiles) {
+						validFiles.sort(function(a,b) {
 							var isDir1 = a.Directory;
 							var isDir2 = b.Directory;
 							if (isDir1 !== isDir2) {
@@ -51,10 +51,10 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 							if (n1 > n2) { return 1; }
 							return 0;
 						});
-						self.cache.validDirs = validDirs;
+						self.cache.validFiles = validFiles;
 					},
 					function(error) {
-						self.cache.validDirs = [];
+						self.cache.validFiles = [];
 					}
 				);
 			},
@@ -94,7 +94,7 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 			
 			/* internal */
 
-			computePredictions: function(text, validDirs) {
+			computePredictions: function(text, validFiles) {
 				var predictions = [];
 				if (this.directories) {
 					var add = text.length < 3;
@@ -113,8 +113,8 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 						predictions.push({name: "..", value: ".."}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
-				for (var i = 0; i < validDirs.length; i++) {
-					var candidate = validDirs[i];
+				for (var i = 0; i < validFiles.length; i++) {
+					var candidate = validFiles[i];
 					var name = candidate.Name;
 					if (this.startsWith(name, text)) {
 						predictions.push({name: name, value: candidate});
@@ -154,9 +154,9 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 				if (this.cache.predictions && this.cache.text === text) {
 					return this.cache.predictions;
 				}
-				if (this.cache.validDirs) {
+				if (this.cache.validFiles) {
 					/* do a quick computation from the list of dirs */
-					this.cache.predictions = this.computePredictions(text, this.cache.validDirs);
+					this.cache.predictions = this.computePredictions(text, this.cache.validFiles);
 					this.cache.text = text;
 					return this.cache.predictions;
 				}
@@ -179,15 +179,15 @@ define(['i18n!orion/console/nls/messages', 'dojo', 'console/current-directory', 
 					func(completions);
 				} else {
 					var self = this;
-					this.withValidDirs(
-						function(validDirs) {
-							self.cache.validDirs = validDirs;
+					this.withValidFiles(
+						function(validFiles) {
+							self.cache.validFiles = validFiles;
 							func(this.getPredictions(text));
 						}
 					);
 				}
 			},
-			withValidDirs: function(func, errorFunc) {
+			withValidFiles: function(func, errorFunc) {
 				var self = this;
 				mCurrentDirectory.withCurrentChildren(
 					function(nodes) {
