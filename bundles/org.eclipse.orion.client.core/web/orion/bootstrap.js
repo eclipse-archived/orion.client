@@ -52,11 +52,10 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		}).then(function() {
 			var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (auth) {
-				return auth.getUser().then(function(user) {
+				auth.getUser().then(function(user) {
 					if (!user) {
-						return auth.getAuthForm(window.location.href).then(function(formURL) {
+						auth.getAuthForm(window.location.href).then(function(formURL) {
 							window.location = formURL;
-							return {then: function(){}};
 						});
 					}
 				});

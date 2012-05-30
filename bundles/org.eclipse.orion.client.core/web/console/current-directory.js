@@ -74,9 +74,6 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 
 	function setCurrentTreeNode(node) {
 		currentTreeNode = node;
-		if (currentTreeNode && currentTreeNode.Location) {
-			dojo.hash(currentTreeNode.Location);
-		}
 	}
 	exports.setCurrentTreeNode = setCurrentTreeNode;
 

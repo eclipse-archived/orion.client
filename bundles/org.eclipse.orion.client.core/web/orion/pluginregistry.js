@@ -319,7 +319,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 					};
 				}
 				_channels.push(channel);
-				var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
 				return channel;
 			},
 			disconnect: function(channel) {
