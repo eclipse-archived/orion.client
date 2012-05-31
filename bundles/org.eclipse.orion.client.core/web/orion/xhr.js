@@ -22,6 +22,7 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @property {Object} args Arguments passed to the {@link orion.xhr.xhr} call.
 	 * @property {Object|ArrayBuffer|Blob|Document|String} response The <code>response</code> object returned by the XMLHttpRequest.
 	 * It is typed according to the <code>responseType</code> passed to the XHR call (by default it is a {@link String}).
+	 * @property {String} responseText The <code>response</code> object returned by the XMLHttpRequest if it is a {@link String}.
 	 * @property {String} url The URL that the XHR request was made to.
 	 * @property {XMLHttpRequest} xhr The underlying XMLHttpRequest object.
 	 */
@@ -90,7 +91,9 @@ define(['orion/Deferred'], function(Deferred) {
 				var code = xhr.status, response = xhr.response;
 				var result = {
 					args: options,
-					response: xhr.response,
+					response: response,
+					responseText: xhr.responseText,
+					status: code,
 					url: url,
 					xhr: xhr
 				};
