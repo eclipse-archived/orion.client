@@ -300,8 +300,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 		
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
+			var alternateItemDeferred;
 			var menu = _makeEmptyLinksMenu();
 			var deferreds = [];
+			
 			// assemble the related links
 			for (var i=0; i<contributedLinks.length; i++) {
 				var info = {};
@@ -316,19 +318,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							if (!command.visibleWhen || command.visibleWhen(item)) {
 								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
 								_addRelatedLinkCommand(command, invocation);
-							} else {
-								if (typeof alternateItem === "function") { //$NON-NLS-0$
-									// asynch call to consider an alternate target item for just this command
-									window.setTimeout(dojo.hitch(command, function() {
-										dojo.when(alternateItem(), dojo.hitch(this, function (newItem) {
-											if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
-												if (!this.visibleWhen || this.visibleWhen(newItem)) {
-													_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
-												}
-											}
-										}));
-									}), 0);
+							} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+								if (!alternateItemDeferred) {
+									alternateItemDeferred = alternateItem();
 								}
+								dojo.when(alternateItemDeferred, dojo.hitch(command, function (newItem) {
+									if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
+										if (!this.visibleWhen || this.visibleWhen(newItem)) {
+											_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
+										}
+									}
+								}));
 							}
 						} 
 					}
@@ -339,7 +339,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					if (position < 0) {
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
 						if (info.name && info.uriTemplate) {
-							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true)
+							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
 							deferreds.push(deferred);
 							deferred.then(
 									dojo.hitch(this, function(commandOptions){
@@ -367,7 +367,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 									for (var k = 0; k < propertyNames.length; k++) {
 										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
 									}
-									var deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true)
+									deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true);
 									deferreds.push(deferred);
 									deferred.then(
 											dojo.hitch(this, function(commandOptions){
@@ -516,7 +516,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (name) {
 				title = name + " - "+ options.task;
 			} else {
-				title = options.task
+				title = options.task;
 			}
 		} 
 		window.document.title = title;
