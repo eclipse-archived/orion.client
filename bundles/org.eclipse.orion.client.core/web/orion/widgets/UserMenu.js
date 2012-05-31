@@ -63,7 +63,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 								authService.logout().then(dojo.hitch(_self, function(){
 									this.addUserItem(key, authService, this.authenticatedServices[key].label);
 									localStorage.removeItem(key);
-									window.location.reload();
+									authService.getAuthForm(window.location.href).then(function(formURL) {
+										window.location = formURL;
+									});
 								}));
 							};
 						})(authService, key)
