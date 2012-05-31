@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
 	 * Utility methods
@@ -349,22 +349,16 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		}
 		
 		if(info.nls){
-			try{
-				require(['i18n!'+info.nls], function(commandMessages){
-					var commandOptions = {
-							name: commandMessages[info.name],
-							image: info.image,
-							id: info.id || info.name,
-							tooltip: info.tooltip ? commandMessages[info.tooltip] : null,
-							isEditor: info.isEditor
-					};
-					enhanceCommandOptions(commandOptions, deferred);
-				});
-			}catch(e){
-				console.error(e);
-				if(!deferred.fired)
-					deferred.reject(e);
-			}
+			i18nUtil.getMessageBundle(info.nls).then(function(commandMessages){
+				var commandOptions = {
+						name: commandMessages[info.name],
+						image: info.image,
+						id: info.id || info.name,
+						tooltip: info.tooltip ? commandMessages[info.tooltip] : null,
+						isEditor: info.isEditor
+				};
+				enhanceCommandOptions(commandOptions, deferred);
+			});
 		} else {
 			var commandOptions = {
 					name: info.name,
