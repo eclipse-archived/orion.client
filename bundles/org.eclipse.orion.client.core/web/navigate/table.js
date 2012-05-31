@@ -20,6 +20,10 @@ define(['i18n!orion/navigate/nls/messages', 'dojo', 'dijit', 'orion/bootstrap', 
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
+	dojo.parser.parse();
+	var currentTime = new Date().getTime();
+	window.console.log(( currentTime - beginTime) + " milliseconds elapsed after load.  Beginning Orion bootstrap and service initialization.");
+	beginTime = currentTime;
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -31,18 +35,20 @@ dojo.addOnLoad(function(){
 		new mSsh.SshService(serviceRegistry);
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-		
-		// Git operations
-		//new eclipse.GitService(serviceRegistry);
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+
+		currentTime = new Date().getTime();
+		window.console.log((currentTime - beginTime) + " milliseconds elapsed after bootstrap. Loading UI.  ");
+		beginTime = currentTime;
+		// global commands
+		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		
 		var treeRoot = {
 			children:[]
 		};
-		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 					
-//		var fileServices = serviceRegistry.getServiceReferences("orion.core.file");
-
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, 
 				fileClient: fileClient, commandService: commandService, contentTypeService: contentTypeService,
@@ -75,12 +81,9 @@ dojo.addOnLoad(function(){
 				}
 			});
 		}
-	
+		refresh();
 		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favorites", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
 							
-		// global commands
-		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
 		
@@ -133,26 +136,12 @@ dojo.addOnLoad(function(){
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		// when new item is fetched, display it in the page title
-		dojo.connect(explorer, "onchange", function(item) { //$NON-NLS-0$
-			var title = messages["Navigator"];
-			if (item) {
-				var name = mUtil.isAtRoot(item.Location) ? fileClient.fileServiceName(item.Location) : item.Name;
-				if (name) {
-					title = "/" + name + " - " + title; //$NON-NLS-1$ //$NON-NLS-0$
-				}
-			}
-			document.title = title;
-		});
-
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
 			refresh();
 		});
-		refresh();
-
-		document.body.style.visibility = "visible"; //$NON-NLS-0$
-		dojo.parser.parse();
+		currentTime = new Date().getTime();
+		window.console.log((currentTime - beginTime) + " milliseconds elapsed.  All done.");
 	});
 });
 

@@ -246,7 +246,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	function _addRelatedLinkCommand(command, invocation) {
 		if (!linksMenu) {
 			linksMenu = new dijit.Menu({
-				style: "display: none;", //$NON-NLS-0$
+				style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
 				id: "relatedLinksMenu" //$NON-NLS-0$
 			});
 		}
@@ -301,7 +301,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
 			var menu = _makeEmptyLinksMenu();
-			var foundLink = false;
 			var deferreds = [];
 			// assemble the related links
 			for (var i=0; i<contributedLinks.length; i++) {
@@ -312,20 +311,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 				}
 				if (info.id) {
-					
 					function enhanceCommand(command){
 						if (command) {
 							if (!command.visibleWhen || command.visibleWhen(item)) {
-								foundLink = true;
 								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
-								command._addMenuItem(menu, invocation);
+								_addRelatedLinkCommand(command, invocation);
 							} else {
 								if (typeof alternateItem === "function") { //$NON-NLS-0$
 									// asynch call to consider an alternate target item for just this command
 									window.setTimeout(dojo.hitch(command, function() {
 										dojo.when(alternateItem(), dojo.hitch(this, function (newItem) {
 											if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
-												if (this.visibleWhen(newItem)) {
+												if (!this.visibleWhen || this.visibleWhen(newItem)) {
 													_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
 												}
 											}
@@ -385,33 +382,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					}
 				} 
 			}
-			var menuButton = dijit.byId("related"); //$NON-NLS-0$
-			if (menuButton) {
-				menuButton.destroy();
-			}
 			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
-				if (foundLink) {
-					menuButton = new orion.widgets.UserMenuDropDown({
-						id: "related", //$NON-NLS-0$
-						label: messages["Related"],
-						dropDown: menu
-					});
-					dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-					dojo.place(menuButton.domNode, related, "only"); //$NON-NLS-0$
-				}	
 				mUtil.forceLayout(related);
 			}));
 		}));
 	}
 	
-	function renderGlobalCommands(commandService, handler, pageItem) {
+	function renderGlobalCommands(commandService) {
 		var globalTools = dojo.byId("globalActions"); //$NON-NLS-0$
 		if (globalTools) {	
 			dojo.empty(globalTools);
-			// need to have some item associated with the command
-			var item = dojo.isArray(pageItem) ? pageItem[0] : pageItem;
-			item = item || handler || {};
-			commandService.renderCommands(globalTools.id, globalTools, item, handler, "tool"); //$NON-NLS-0$
+			commandService.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
 		}
 	}
 	
@@ -560,8 +541,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 * @function
 	 */
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
-		// this needs to come from somewhere but I'm not going to do a separate get for it
-		
 		var text;
 		
 		var target = "_self"; //$NON-NLS-0$
@@ -571,8 +550,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			throw messages["could not find banner parent, id was "] + parentId;
 		}
 				
-		// place the HTML fragment from above.
-		dojo.place(commonHTML.topHTMLFragment, parent, "only"); //$NON-NLS-0$
+		if (!dojo.byId("staticBanner")) {
+			// place the HTML fragment for the header.
+			dojo.place(commonHTML.topHTMLFragment, parent, "only"); //$NON-NLS-0$
+		}
 		
 		var toolbar = dojo.byId("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
@@ -581,6 +562,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		} else {
 			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar toolComposite layoutBlock"}, "titleArea", "after"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
+		}
+		
+		if (!dojo.byId("footerContent")) {
+			// Needs cleanup
+			var footer = dojo.byId("footer"); //$NON-NLS-0$
+			if (footer) {
+				dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
+			}
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
@@ -649,14 +638,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			}
 		});
-		
-		// Put page title in title area.  
-		var title = dojo.byId("pageTitle"); //$NON-NLS-0$
-		if (title) {
-			text = document.createTextNode(document.title);
-			dojo.place(text, title, "last"); //$NON-NLS-0$
-		}
-
 		
 		// Assemble global commands
 		var favoriteCommand = new mCommands.Command({
@@ -832,18 +813,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		userMenu.setKeyAssist(keyAssistCommand.callback);
 		checkFavoritesButton(serviceRegistry, commandService);
 
-		renderGlobalCommands(commandService, handler, pageItem);
+		renderGlobalCommands(commandService);
 		
 		generateUserInfo(serviceRegistry);
 		
-		// generate the footer. 
-		// TODO The footer div id should not be assumed here
-		if (commonHTML.bottomHTMLFragment) {
-			var footer = dojo.byId("footer"); //$NON-NLS-0$
-			if (footer) {
-				dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
-			}
-		}
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
 
@@ -886,8 +859,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			});
 		}
-		
-		readTargetPreference();
+		window.setTimeout(function() {readTargetPreference();}, 0);
 	}
 	
 	//return the module exports

@@ -51,7 +51,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	// BEGIN BOTTOM BANNER FRAGMENT
 	// styling of the surrounding div (text-align, etc) is in ide.css "footer"
 	var bottomHTMLFragment = 
-		'<footer class="layoutBlock" role="contentinfo">' + //$NON-NLS-0$
+		'<footer id="footerContent" class="layoutBlock" role="contentinfo">' + //$NON-NLS-0$
 			'<div class="footerBlock">' + //$NON-NLS-0$
 				messages['Orion is in Beta. Please try it out but BEWARE your data may be lost.'] +
 			'</div>' + //$NON-NLS-0$
