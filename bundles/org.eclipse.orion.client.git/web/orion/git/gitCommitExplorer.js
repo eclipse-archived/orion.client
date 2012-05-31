@@ -138,7 +138,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				var titleWrapper = new mSection.Section(tableNode, {
 					id: "commitSection", //$NON-NLS-0$
 					title: messages["No Commits"],
-					iconClass: "gitImageSprite git-sprite-modification", //$NON-NLS-0$
+					iconClass: "gitImageSprite git-sprite-modification" //$NON-NLS-0$
 				});
 				return;
 			}
