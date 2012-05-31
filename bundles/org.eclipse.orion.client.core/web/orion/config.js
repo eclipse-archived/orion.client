@@ -9,98 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences'], function(mEventTarget, Deferred, mPreferences) {
+define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences', 'orion/serviceTracker'],
+	function(mEventTarget, Deferred, mPreferences, ServiceTracker) {
 var PreferencesService = mPreferences.PreferencesService;
-var ServiceTracker, ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
+var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
 var MANAGED_SERVICE = 'orion.cm.managedservice'; //$NON-NLS-0$
-
-/**
- * @name orion.cm.impl.ServiceTracker
- * @class Tracks services in the ServiceRegistry whose name matches serviceName.
- * @private
- */
-ServiceTracker = /** @ignore */ (function() {
-	var CLOSED = 0, OPENED = 1;
-	function ServiceTracker(serviceRegistry, serviceName) {
-		var refs = {};
-		var services = {};
-		var state = CLOSED;
-		var addedListener, removedListener;
-
-		function add(serviceRef) {
-			var id = serviceRef.getServiceId();
-			var serviceObject = this.addingService(serviceRef);
-			if (serviceObject) {
-				refs[id] = serviceRef;
-				services[id] = serviceObject;
-			}
-		}
-		function remove(serviceRef) {
-			var id = serviceRef.getServiceId();
-			var service = services[id];
-			delete refs[id];
-			delete services[id];
-			this.removedService(serviceRef, service);
-		}
-		function isTrackable(serviceRef) {
-			return serviceName === serviceRef.getName();
-		}
-
-		this.addingService = function(serviceRef) {
-			return serviceRegistry.getService(serviceRef);
-		};
-		this.close = function() {
-			if (state !== OPENED) {
-				throw 'Already closed'; //$NON-NLS-0$
-			}
-			state = CLOSED;
-			serviceRegistry.removeEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.removeEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
-			addedListener = null;
-			removedListener = null;
-			var self = this;
-			this.getServiceReferences().forEach(function(serviceRef) {
-				remove.call(self, serviceRef);
-			});
-		};
-		this.getServiceReferences = function() {
-			var refs = refs;
-			if (refs.length) {
-				return Object.keys(refs).map(function(serviceId) {
-					return refs[serviceId];
-				});
-			}
-			return null;
-		};
-		this.open = function() {
-			if (state !== CLOSED) {
-				throw 'Already open'; //$NON-NLS-0$
-			}
-			state = OPENED;
-			var self = this;
-			addedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					add.call(self, serviceRef);
-				}
-			};
-			removedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					remove.call(self, serviceRef);
-				}
-			};
-			serviceRegistry.addEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.addEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
-			serviceRegistry.getServiceReferences(serviceName).forEach(function(serviceRef) {
-				add.call(self, serviceRef);
-			});
-		};
-		this.removedService = function(serviceRef, service) {
-		};
-	}
-	return ServiceTracker;
-}());
 
 /**
  * @name orion.cm.impl.ManagedServiceTracker
