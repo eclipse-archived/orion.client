@@ -2759,7 +2759,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return true;
 		},
 		_doTab: function (args) {
-			if(!this._tabMode) { return; }
+			if(!this._tabMode || this._readonly) { return; }
 			var text = "\t";
 			if (this._expandTab) {
 				var model = this._model;
@@ -2773,7 +2773,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return true;
 		},
 		_doShiftTab: function (args) {
-			if(!this._tabMode) { return; }
+			if(!this._tabMode || this._readonly) { return; }
 			return true;
 		},
 		_doTabMode: function (args) {
