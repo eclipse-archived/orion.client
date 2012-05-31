@@ -9,22 +9,23 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true */
+/*global window define XMLHttpRequest BlobBuilder*/
 /*jslint forin:true devel:true*/
 
-/** @namespace The global container for eclipse APIs. */
-var eclipse = eclipse || {};
 
-/**
- * An implementation of the file service that understands the Orion 
- * server file API. This implementation is suitable for invocation by a remote plugin.
- */
-eclipse.FileServiceImpl= (function() {
+define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr) {
+	/**
+	 * An implementation of the file service that understands the Orion 
+	 * server file API. This implementation is suitable for invocation by a remote plugin.
+	 */
+	 
 	/**
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
 	 */
-	function FileServiceImpl() {
+	function FileServiceImpl(fileBase, workspaceBase) {
+		this.fileBase = fileBase;
+		this.workspaceBase = workspaceBase;
 	}
 	
 	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
@@ -35,20 +36,18 @@ eclipse.FileServiceImpl= (function() {
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
-			if (location===fileBase) {
+			if (location===this.fileBase) {
 				return this.loadWorkspace(location).then(function(jsondata) {return jsondata.Children || [];});
 			}
 			// console.log("get children");
-			return dojo.xhrGet({
-				url: location,
+			return xhr("GET", location,{
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData.Children || [];
-				}
+				timeout: 15000
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				return jsonData.Children || [];
 			});
 		},
 
@@ -59,17 +58,15 @@ eclipse.FileServiceImpl= (function() {
 		 */
 		_createWorkspace: function(name) {
 			//return the deferred so client can chain on post-processing
-			return dojo.xhrPost({
-				url: workspaceBase,
+			return xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name
 				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData.Workspaces;
-				}
+				timeout: 15000
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				return jsonData.Workspaces;
 			});
 		},
 
@@ -78,16 +75,14 @@ eclipse.FileServiceImpl= (function() {
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return dojo.xhrGet({
-				url: workspaceBase,
+			return xhr("POST", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
-				timeout: 15000,
-				load: dojo.hitch(this, function(jsonData, ioArgs) {
-					return jsonData.Workspaces;
-				})
+				timeout: 15000
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				return jsonData.Workspaces;
 			});
 		},
 		
@@ -98,37 +93,31 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {Function} onLoad the function to invoke when the workspace is loaded
 		 */
 		loadWorkspace: function(location) {
-			if (location===fileBase) {
+			if (location===this.fileBase) {
 				location = null;
 			}
-			return dojo.xhrGet({
-				url: location ? location : workspaceBase,
+			return xhr("GET", location ? location : this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
 				timeout: 15000,
-				load: dojo.hitch(this, function(jsonData) {
-					//in most cases the returned object is the workspace we care about
-					if (location) {
-						return jsonData;
+				log: false
+			}).then(function(result) {
+				var jsonData = result.response ? JSON.parse(result.response) : {};
+				//in most cases the returned object is the workspace we care about
+				if (location) {
+					return jsonData;
+				} else {
+					//user didn't specify a workspace so we are at the root
+					//just pick the first location in the provided list
+					if (jsonData.Workspaces.length > 0) {
+						return this.loadWorkspace(jsonData.Workspaces[0].Location);
 					} else {
-						//user didn't specify a workspace so we are at the root
-						//just pick the first location in the provided list
-						if (jsonData.Workspaces.length > 0) {
-							return this.loadWorkspace(jsonData.Workspaces[0].Location);
-						} else {
-							//no workspace exists, and the user didn't specify one. We'll create one for them
-							return this._createWorkspace("MyWorkspace");
-						}
+						//no workspace exists, and the user didn't specify one. We'll create one for them
+						return this._createWorkspace("MyWorkspace");
 					}
-				}),
-				error: function(error) {
-					error.log=false;
-					return error;
-				},
-				failOk: true
-			});
+				}
+			}.bind(this));
 		},
 		/**
 		 * Adds a project to a workspace.
@@ -137,8 +126,8 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {String} serverPath The optional path of the project on the server.
 		 * @param {Boolean} create If true, the project is created on the server file system if it doesn't already exist
 		 */
-		createProject: function(url, projectName, serverPath, create) {
-			if (!url) { // null, undefined, '' ...
+		createProject: function(location, projectName, serverPath, create) {
+			if (!location) { // null, undefined, '' ...
 				// window.document.eas.status.setErrorMessage("<enter message here>");
 				console.error("url is undefined, make sure you're signed in before creating a project");
 				return;
@@ -152,18 +141,15 @@ eclipse.FileServiceImpl= (function() {
 			if (create) {
 				data.CreateIfDoesntExist = create;
 			}
-			return dojo.xhrPost({
-				url: url,
+			return xhr("POST", location, {
 				headers: {
 					"Orion-Version": "1",
 					"Content-Type": "application/json"
 				},
-				handleAs: "json",
 				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				},
-				postData: dojo.toJson(data)
+				data: JSON.stringify(data)
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		/**
@@ -173,24 +159,21 @@ eclipse.FileServiceImpl= (function() {
 		 * @return {Object} JSON representation of the created folder
 		 */
 		createFolder: function(parentLocation, folderName) {
-			return dojo.xhrPost({
-				url: parentLocation,
+			return xhr("POST", parentLocation, {
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
 					"Slug": folderName,
 					"Content-Type": "application/json"
 				},
-				postData: dojo.toJson({
+				data: JSON.stringify({
 					"Name": folderName,
 					"LocalTimeStamp": "0",
 					"Directory": "true"
 				}),
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		/**
@@ -201,24 +184,21 @@ eclipse.FileServiceImpl= (function() {
 		 * @return {Object} A deferred that will provide the new file object
 		 */
 		createFile: function(parentLocation, fileName) {
-			return dojo.xhrPost({
-				url: parentLocation,
+			return xhr("POST", parentLocation, {
 				headers: {
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
 					"Slug": fileName,
 					"Content-Type": "application/json"
 				},
-				postData: dojo.toJson({
+				postData: JSON.stringify({
 					"Name": fileName,
 					"LocalTimeStamp": "0",
 					"Directory": "false"
 				}),
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		/**
@@ -226,16 +206,13 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {String} location The location of the file or directory to delete.
 		 */
 		deleteFile: function(location) {
-			return dojo.xhrDelete({
-				url: location,
+			return xhr("DELETE", location, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		
@@ -265,19 +242,16 @@ eclipse.FileServiceImpl= (function() {
 				var segments = sourceLocation.split("/");
 				name = segments.pop() || segments.pop();
 			}
-			return dojo.xhrPost({
-				url: targetLocation,
+			return xhr("POST", targetLocation, {
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name,
 					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy")
 				},
-				postData: dojo.toJson({"Location": sourceLocation}),
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				data: JSON.stringify({"Location": sourceLocation}),
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		/**
@@ -289,25 +263,18 @@ eclipse.FileServiceImpl= (function() {
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			var xhrArgs = {
-				url: location,
+			return xhr("GET", location, {
 				timeout: 5000,
 				headers: { "Orion-Version": "1" },
-				load: function(data, ioArgs) {
-					return data;
-				},
-				error: function(error) {
-					error.log=false;
-					return error;
-				},
-				failOk: true
-			};
-			//some different header for getting metadata
-			if (isMetadata) {
-				xhrArgs.content = { "parts": "meta" };
-				xhrArgs.handleAs = "json";
-			}
-			return dojo.xhrGet(xhrArgs);
+				log: false,
+				query: isMetadata ? { "parts": "meta" } : {}
+			}).then(function(result) {
+				if (isMetadata) {
+					return result.response ? JSON.parse(result.response) : null;
+				} else {
+					return result.response;
+				}
+			});
 		},
 		/**
 		 * Writes the contents or metadata of the file at the given location.
@@ -325,34 +292,27 @@ eclipse.FileServiceImpl= (function() {
 			if (args && args.ETag) {
 				headerData["If-Match"] = args.ETag;
 			}
-			var xhrArgs = {
-				url: location,
+			var options = {
 				timeout: 5000,
 				headers: headerData,
-				putData: contents,
-				handleAs: "json",
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				},
-				error: function(error) {
-					error.log = false;
-					return error;
-				},
-				failOk: true
+				data: contents,
+				log: false
 			};
 						
 			// check if we have raw contents or something else
 			if (typeof contents !== "string") {
 				// look for remote content
 				if (contents.sourceLocation) {
-					xhrArgs.url = location + "?source=" + contents.sourceLocation;
-					xhrArgs.putData = null;
+					options.query = {source: contents.sourceLocation};
+					options.data = null;
 				} else {
 					// assume we are putting metadata
-					xhrArgs.url = location + "?parts=meta";
+					options.query = {parts: "meta"};
 				}
 			}
-			return dojo.xhrPut(xhrArgs);
+			return xhr("PUT", location, options).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
+			});
 		},
 		/**
 		 * Imports file and directory contents from another server
@@ -368,15 +328,12 @@ eclipse.FileServiceImpl= (function() {
 			if (options.OptionHeader) {
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 			}
-			return dojo.xhrPost({
-				url: targetLocation,
+			return xhr("POST", targetLocation, {
 				headers: headerData,
-				postData: dojo.toJson(options),
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				data: JSON.stringify(options),
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		/**
@@ -393,15 +350,12 @@ eclipse.FileServiceImpl= (function() {
 			if (options.OptionHeader) {
 				headerData["X-Xfer-Options"] = options.OptionHeader;
 			}
-			return dojo.xhrPost({
-				url: sourceLocation,
+			return xhr("POST", sourceLocation, {
 				headers: headerData,
-				postData: dojo.toJson(options),
-				handleAs: "json",
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				data: JSON.stringify(options),
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : null;
 			});
 		},
 		
@@ -410,24 +364,20 @@ eclipse.FileServiceImpl= (function() {
 		 * @param {String} query The search query
 		 */
 		search: function(location, query) {
-			return dojo.xhrGet({
-				url: "/filesearch" + query,
-				handleAs: "json",
+			return xhr("GET", "/filesearch" + query, {
 				headers: {
 					"Accept": "application/json",
 					"Orion-Version": "1"
 				},
-				sync: false,
-				timeout: 15000,
-				load: function(jsonData, ioArgs) {
-					return jsonData;
-				}
+				timeout: 15000
+			}).then(function(result) {
+				return result.response ? JSON.parse(result.response) : {};
 			});
 		}
 	};
 	
 	function _call2(method, url, headers, body) {
-		var d = new dojo.Deferred(); // create a promise
+		var d = new Deferred(); // create a promise
 		var xhr = new XMLHttpRequest();
 		var header;
 		try {
@@ -489,4 +439,4 @@ eclipse.FileServiceImpl= (function() {
 	}
 	
 	return FileServiceImpl;
-}());
+});
