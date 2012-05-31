@@ -10,20 +10,35 @@
  *******************************************************************************/
 
 /*global define*/
-define(['require' ,'orion/Deferred'], function(require, Deferred) {
+define(['require', 'orion/Deferred'], function(require, Deferred) {
+
+	var messageBundleDeffereds = {};
 
 	function formatMessage(msg) {
 		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
+		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) {
+			return args[(index << 0) + 1];
+		});
 	}
 
-	function getMessageBundle(name){
+	function getMessageBundle(name) {
+		if (messageBundleDeffereds.name) {
+			return messageBundleDeffereds.name;
+		}
+	
 		var d = new Deferred();
-		require(['orion/i18n!' + name], function() { //$NON-NLS-0$
+		messageBundleDeffereds.name = d;
+		function _resolveMessageBundle() {
 			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
 				d.resolve(bundle);
 			});
-		});
+		}
+
+		try {
+			require([name], _resolveMessageBundle);
+		} catch (ignore) {
+			require(['orion/i18n!' + name], _resolveMessageBundle);
+		}
 		return d;
 	}
 	return {
