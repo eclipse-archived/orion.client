@@ -55,6 +55,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		},
 		_setResponse: function(response) {
 			this.response = response;
+			if (typeof response === 'string') {
+				this.responseText = response;
+			}
 		},
 		_setStatus: function(status) {
 			this.status = status;
@@ -146,6 +149,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 				assert.equal(result.args.query.param, 'value');
 				assert.equal(result.args.responseType, 'text');
 				assert.equal(result.args.timeout, 1500);
+				assert.equal(result.status, 200);
+				assert.equal(result.responseText, 'success!');
+				assert.equal(result.response, 'success!');
 				assert.ok(result.xhr instanceof MockXMLHttpRequest);
 			}, fail);
 	});
