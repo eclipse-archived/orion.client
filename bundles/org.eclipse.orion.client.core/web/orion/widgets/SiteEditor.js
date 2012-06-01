@@ -11,11 +11,11 @@
 /*global define orion*/
 /*jslint browser:true */
 
-define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/sites/siteMappingsTable',
+define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/sites/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-		function(messages, require, dojo, dijit, mUtil, mCommands, mSiteMappingsTable) {
+		function(messages, require, dojo, dijit, mUtil, mCommands, mSection, mSiteMappingsTable) {
 
 var AUTOSAVE_INTERVAL = 8000;
 
@@ -246,10 +246,10 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 					},
 					choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, proposals)});
 				this._commandService.addCommand(addMappingCommand);
-				var toolbarId = this.addMappingToolbar.id;
-				this._commandService.registerCommandContribution(toolbarId, "orion.site.mappings.add", 1); //$NON-NLS-0$
+				var toolbar = this.titleWrapper.actionsNode;
+				this._commandService.registerCommandContribution(toolbar.id, "orion.site.mappings.add", 1); //$NON-NLS-0$
 				// do we really have to render here
-				this._commandService.renderCommands(toolbarId, this.addMappingToolbar, this.mappings, this, "button"); //$NON-NLS-0$
+				this._commandService.renderCommands(toolbar.id, toolbar, this.mappings, this, "button"); //$NON-NLS-0$
 			}));
 		}
 
@@ -292,9 +292,16 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this.hostHint.set("value", this._siteConfiguration.HostHint); //$NON-NLS-0$
 
 		if (!this.mappings) {
+			this.titleWrapper = new mSection.Section(this.mappingsPlaceholder.id, {
+				id: "workingDirectorySection", //$NON-NLS-0$
+				title: "Mappings", //$NON-NLS-0$
+				content: '<div id="mappingsNode"/>', //$NON-NLS-0$
+				canHide: true
+			});
+			
 			this.mappings = new mSiteMappingsTable.MappingsTable({serviceRegistry: this.serviceRegistry,
 					siteClient: this._siteClient, fileClient: this._fileClient, selection: null, 
-					parentId: this.mappingsPlaceholder.id, siteConfiguration: this._siteConfiguration
+					parentId: "mappingsNode", siteConfiguration: this._siteConfiguration
 				});
 		} else {
 			this.mappings._setSiteConfiguration(this._siteConfiguration);

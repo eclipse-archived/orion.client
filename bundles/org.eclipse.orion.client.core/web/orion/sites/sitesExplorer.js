@@ -60,10 +60,12 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 				updatePageActions(this.registry, "pageActions", "pageActions", siteServiceRef); //$NON-NLS-1$ //$NON-NLS-0$
 
 				var sectionItemActionScopeId = 'section' + i + 'Action'; //$NON-NLS-1$ //$NON-NLS-0$
+				
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.edit', 10); //$NON-NLS-0$
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.start', 20); //$NON-NLS-0$
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.stop', 30); //$NON-NLS-0$
 				commandService.registerCommandContribution(sectionItemActionScopeId, 'orion.site.delete', 40); //$NON-NLS-0$
+				
 				var refresher = (function(section) {
 					return function() {
 						section.tree.refresh();
@@ -133,21 +135,12 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 		}
 		SitesRenderer.prototype = /** @lends orion.sites.SitesRenderer.prototype */{
 			initTable: function (tableNode, tableTree) {
-				this.tableTree = tableTree;
-				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
-				var thead = dojo.create("thead", null); //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages["Name"]}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages["Status"]}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages["URL"], className: "urlCol"}, thead, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				tableNode.appendChild(thead);
+				dojo.addClass(tableNode, "treetable");
 			},
 			render: function(item, tableRow) {
 				dojo.addClass(tableRow, "treeTableRow sitesTableRow"); //$NON-NLS-0$
 				
 				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"}); //$NON-NLS-1$ //$NON-NLS-0$
-				var statusCol = dojo.create("td", {id: tableRow.id + "col2"}); //$NON-NLS-1$ //$NON-NLS-0$
-				var urlCol = dojo.create("td", {id: tableRow.id + "col3"}); //$NON-NLS-1$ //$NON-NLS-0$
 				var actionCol = dojo.create("td", {id: tableRow.id + "col4"}); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Site config column
@@ -155,24 +148,26 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 				var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(item.Name), nameLink, "last"); //$NON-NLS-0$
 				
+				var statusField = dojo.create("span", {"style" : "padding-left:10px; padding-right:10px"}, siteConfigCol, "last");
+				
 				// Status, URL columns
 				var status = item.HostingStatus;
 				if (typeof status === "object") { //$NON-NLS-0$
 					if (status.Status === "started") { //$NON-NLS-0$
-						dojo.place(document.createTextNode(messages["Started"]), statusCol, "last"); //$NON-NLS-1$
-						var link = dojo.create("a", {className: "siteURL"}, urlCol, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						dojo.place(document.createTextNode(status.URL), link, "only"); //$NON-NLS-0$
+						dojo.place(document.createTextNode(messages["Started"]), statusField, "last"); //$NON-NLS-1$
+						var link = dojo.create("a", null, siteConfigCol, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.place(document.createTextNode(status.URL), link, "last"); //$NON-NLS-0$
 						link.href = status.URL;
 					} else {
 						var statusString = status.Status.substring(0,1).toUpperCase() + status.Status.substring(1);
-						dojo.place(document.createTextNode(statusString), statusCol, "only"); //$NON-NLS-0$
+						dojo.place(document.createTextNode(statusString), statusField, "last"); //$NON-NLS-0$
 					}
 				} else {
-					dojo.place(document.createTextNode(messages["Unknown"]), statusCol, "only"); //$NON-NLS-1$
+					dojo.place(document.createTextNode(messages["Unknown"]), statusField, "last"); //$NON-NLS-1$
 				}
 				
 				// Action column
-				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper", "class":"sectionTableItemActions"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var options = this._options;
 				var userData = {
 					startCallback: options.startCallback,
@@ -185,8 +180,6 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 				this._commandService.renderCommands(options.actionScopeId, actionsWrapper, item, null /*handler*/, "tool", userData); //$NON-NLS-0$
 				
 				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
-				dojo.place(statusCol, tableRow, "last"); //$NON-NLS-0$
-				dojo.place(urlCol, tableRow, "last"); //$NON-NLS-0$
 				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
 			},
 			rowsChanged: function() {

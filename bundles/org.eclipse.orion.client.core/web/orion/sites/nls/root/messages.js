@@ -45,7 +45,7 @@ define({
 	"View": "View",
 	"View the file on the site": "View the file on the site",
 	"Site Configurations on ": "Site Configurations on ",
-	"Started": "Started",
+	"Started": "Started at",
 	"Unknown": "Unknown",
 	"Name": "Name",
 	"Actions": "Actions",
