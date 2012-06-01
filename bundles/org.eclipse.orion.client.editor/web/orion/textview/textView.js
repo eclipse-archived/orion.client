@@ -2226,7 +2226,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var oldScroll = this._getScroll();
 			this._scrollView(pixelX, pixelY);
 			var newScroll = this._getScroll();
-			if (isSafari) { this._mouseWheelLine = null; }
 			if (oldScroll.x !== newScroll.x || oldScroll.y !== newScroll.y) {
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
