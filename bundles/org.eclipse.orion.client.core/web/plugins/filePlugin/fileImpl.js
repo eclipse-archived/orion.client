@@ -75,7 +75,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		 * workspaces when ready.
 		 */
 		loadWorkspaces: function() {
-			return xhr("POST", this.workspaceBase, {
+			return xhr("GET", this.workspaceBase, {
 				headers: {
 					"Orion-Version": "1"
 				},
