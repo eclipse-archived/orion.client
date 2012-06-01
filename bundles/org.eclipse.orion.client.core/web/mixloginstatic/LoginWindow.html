@@ -27,7 +27,7 @@
 				<form>
 					<div class="orion-input-holder">
 						<input type="text" class="orion-text-input" name="login" id="login" value="username" onclick='focusUserField(event)' title="Username or email" autocomplete="on"
-							onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
+							autofocus="true" onkeypress="var event = window.event ? window.event : event ? event : evt; if (event.keyCode === 13){ confirmLogin() } else {return true;}">
 					</div>
 					<div class="orion-input-holder">
 						<input name="password" type="text" id="password" class="orion-text-input" value="password" onfocus='focusPasswordField(event)' title="Password"
