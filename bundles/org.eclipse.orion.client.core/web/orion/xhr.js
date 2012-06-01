@@ -60,7 +60,7 @@ define(['orion/Deferred'], function(Deferred) {
 	// TODO: upload progress, user/password
 	function _xhr(method, url, options/*, XMLHttpRequestImpl */) {
 		options = options || {};
-		var xhr = (arguments.length > 3 && typeof arguments[3] === 'object') ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
+		var xhr = (arguments.length > 3 && arguments[3]) ? arguments[3] : new XMLHttpRequest(); //$NON-NLS-0$
 		var d = new Deferred();
 		var headers = options.headers || {};
 		var log = options.log || false;
@@ -69,7 +69,7 @@ define(['orion/Deferred'], function(Deferred) {
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
 			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		if (typeof options.query === 'object' && method === 'GET') { //$NON-NLS-1$ //$NON-NLS-0$
+		if (options.query && typeof options.query === 'object' && method === 'GET') { //$NON-NLS-1$ //$NON-NLS-0$
 			var queryObj = options.query, paramNames = Object.keys(queryObj);
 			var queryBuf = [];
 			for (i=0; i < paramNames.length; i++) {
