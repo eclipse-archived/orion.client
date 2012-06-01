@@ -471,6 +471,10 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		onClick: function(model, mouseEvt)	{
+			var twistieSpan = dojo.byId(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
+			if(mouseEvt.target === twistieSpan){
+				return;
+			}
 			if(this._onModelGrid(model, mouseEvt)){
 				return;
 			}
