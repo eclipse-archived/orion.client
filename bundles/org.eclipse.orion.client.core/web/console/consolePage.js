@@ -233,52 +233,25 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 	/* methods for handling contributed commands */
 
 	/*
-	 * Creates a JSON object with context information an external command
-	 * may need access to in order to execute.
-	 */
-	function createPluginContext(gcliContext, func) {
-		mCurrentDirectory.withWorkspace(function(wsNode) {
-			mCurrentDirectory.withCurrentTreeNode(
-				function(pwdNode) {
-					return func({
-						location: pwdNode.Location,
-						workspaceLocation: wsNode.Location
-					});
-				},
-				function(error) {
-					return func({});
-				}
-			);
-		});
-	}
-
-	/*
 	 * Creates a gcli exec function that wraps a 'callback' function contributed by
 	 * an 'orion.console.command' service implementation.
 	 */
 	function contributedExecFunc(service) {
 		if (typeof(service.callback) === 'function') { //$NON-NLS-0$
-			//TODO: we may support different styles of exec functions based on 
-			// properties set in the service. For now we just have the one
-			// type that executes asynchronously and renders the result as 'pre' text.
 			return function(args, context) {
 				var promise = context.createPromise();
-				createPluginContext(context, function(jsonContext) {
-					service.callback(args, jsonContext).then(
-						function(result) {
-							promise.resolve(result);
-						},
-						function(error) {
-							resolveError(promise, error);
-						}
-					);
-				});
+				service.callback(args).then(
+					function(result) {
+						promise.resolve(result);
+					},
+					function(error) {
+						resolveError(promise, error);
+					}
+				);
 				return promise;
 			};
 		}
 		return undefined; 
-		//returns undefined if we can't create an exec function (typically because the 
-		//service doesn't provide one and is just a parent node in the command hierarchy).
 	}
 
 	dojo.addOnLoad(function() {
