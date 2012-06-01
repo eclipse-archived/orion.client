@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define navigator setTimeout XMLHttpRequest*/
+/*global console define navigator setTimeout XMLHttpRequest*/
 define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
 		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
@@ -66,8 +66,14 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		_setStatus: function(status) {
 			this.status = status;
 		},
-		_fakeComplete: function(status, response) {
+		_setStatusText: function(statusText) {
+			this.statusText = statusText;
+		},
+		_fakeComplete: function(status, response, statusText) {
 			this._setStatus(status);
+			if (arguments.length === 3) {
+				this._setStatusText(statusText);
+			}
 			this._setResponse(response);
 			this._setReadyState(this.DONE);
 		},
@@ -95,7 +101,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		this.send = function() {
 			var self = this;
 			setTimeout(function() {
-				self._fakeComplete(404, 'i failed');
+				self._fakeComplete(404, 'i failed', '404 Bogus Failure');
 			}, 100);
 		};
 	}
