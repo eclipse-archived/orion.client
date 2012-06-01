@@ -58,5 +58,7 @@ define({
 	"External link to ": "External link to ",
 	"Move Up": "Move Up",
 	"Move Down": "Move Down",
-	"HostHint": "HostHint"
+	"HostHint": "HostHint",
+	"Start": "Start",
+	"Stop": "Stop"
 });
