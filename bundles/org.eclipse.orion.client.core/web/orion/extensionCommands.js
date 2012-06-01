@@ -55,6 +55,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				editors.push({
 					id: id,
 					name: serviceRef.getProperty("name"), //$NON-NLS-0$
+					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
 					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate") //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
@@ -99,6 +100,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 					tooltip: editor.name,
 					contentType: editorContentTypes,
 					uriTemplate: editor.uriTemplate,
+					nls: editor.nls,
 					forceSingleItem: true,
 					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
 				};
