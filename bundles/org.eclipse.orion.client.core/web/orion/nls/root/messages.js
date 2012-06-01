@@ -42,7 +42,7 @@ define({
 	"Copyright Agent": "Copyright Agent",
 	"Orion Logo": "Orion Logo",
 	"Type a keyword or wild card to search in root": "Type a keyword or wild card to search in root",
-	"Orion is in Beta. Please try it out but BEWARE your data may be lost.": "Orion is in Beta. Please try it out but BEWARE your data may be lost.",
+	"Orion is in Beta. Please try it out but BEWARE your data may be lost.": "Beta build @buildLabel@. Please try it out but BEWARE your data may be lost.",
 	"Add this page to the favorites list": "Add this page to the favorites list",
 	"LOG: ": "LOG: ",
 	"Switch": "Switch",
