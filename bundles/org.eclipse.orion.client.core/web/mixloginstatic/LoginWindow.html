@@ -4,7 +4,6 @@
 <meta name="copyright" content="Copyright (c) 2010,2012 IBM Corporation and others.">
 <meta http-equiv="Content-Language" content="en-us">
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-<link rel="stylesheet" type="text/css" href="css/loginWindow.css" />
 <link rel="stylesheet" type="text/css" href="css/landing.css" />
 <script src="js/htmlAuth.js"></script>
 <title>Login Page</title>
@@ -81,12 +80,18 @@
 				<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
 				<div id="openIDLogin" class="orion-open-header">Login with:</div>
 				<div class="orion-open-images">
-					<a class="loginWindow" href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin"> <img id="googleLogin" class="loginWindow"
-						src="../openids/google.png" alt="Google" title="Google"> </a> <a class="loginWindow" href="javascript:confirmOpenId('http://me.yahoo.com')" aria-labelledby="openIDLogin yahooLogin"> <img
-						id="yahooLogin" class="loginWindow" src="../openids/yahoo-logo.png" alt="Yahoo!" title="Yahoo!"> </a> <a class="loginWindow" href="javascript:confirmOpenId('http://openid.aol.com/')"
-						aria-labelledby="openIDLogin aolLogin"> <img id="aolLogin" class="loginWindow" src="../openids/aim-logo.png" alt="AOL" title="AOL"> </a> <a class="loginWindow"
-						href="javascript:confirmOpenId('http://myopenid.com')" aria-labelledby="openIDLogin myopenidLogin"> <img id="myopenidLogin" class="loginWindow" src="../openids/myopenid-logo.png"
-						alt="myOpenID" title="myOpenID"> </a>
+					<a class="loginWindow googleIcon" href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin"> 
+						<div id="googleLogin" class="googleIcon" alt="Google" title="Google"></div>
+					</a> 
+					<a class="loginWindow" href="javascript:confirmOpenId('http://me.yahoo.com')" aria-labelledby="openIDLogin yahooLogin"> 
+						<div id="yahooLogin" class="yahooIcon" alt="Yahoo!" title="Yahoo!"></div> 
+					</a> 
+					<a class="loginWindow" href="javascript:confirmOpenId('http://openid.aol.com/')" aria-labelledby="openIDLogin aolLogin"> 
+						<div id="aolLogin" class="aolIcon"  alt="AOL" title="AOL"></div>
+					</a> 
+					<a class="loginWindow" href="javascript:confirmOpenId('http://myopenid.com')" aria-labelledby="openIDLogin myopenidLogin"> 
+						<div id="myopenidLogin" class="openIdIcon" alt="myOpenID" title="myOpenID"></div> 
+					</a>
 				</div>
 			</div>
 		</div>
