@@ -441,7 +441,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 						});		
 						var parameterArea = dojo.create("div"); //$NON-NLS-0$
 						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-							dijit.popup.close(tooltipDialog);})(parameterArea);
+							dijit.popup.close(tooltipDialog);
+							tooltipDialog.destroyRecursive();
+						})(parameterArea);
 						tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
 						var menu = dijit.byId(commandInvocation.domParent.id);
 						var pos;
@@ -787,11 +789,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 											//Show the empty group message.
 											var tooltipDialog = new dijit.TooltipDialog({
 												content: "<p>"+this.emptyGroupMessage+"</p>",
-												onMouseLeave: function() {dijit.popup.close(tooltipDialog);}
+												onMouseLeave: function() {
+													dijit.popup.close(tooltipDialog);
+													tooltipDialog.destroyRecursive();
+												}
 											});		
 											dijit.popup.open({popup: tooltipDialog, around: menuButton.domNode});
 											// in case the user's mouse never entered this popup and thus couldn't leave
-											window.setTimeout(function() {dijit.popup.close(tooltipDialog);}, 15000);
+											window.setTimeout(function() {
+												dijit.popup.close(tooltipDialog);
+												tooltipDialog.destroyRecursive();
+											}, 15000);
 										});
 										dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 									} else {
