@@ -11,7 +11,7 @@
 
 /*global window document parent define console eclipse*/
 
-define(["orion/Deferred", "filePlugin/fileImpl.js", "domReady!", "orion/plugin"], function(Deferred, FileServiceImpl) {
+define(["orion/Deferred", "plugins/filePlugin/fileImpl", "domReady!", "orion/plugin"], function(Deferred, FileServiceImpl) {
 	function trace(implementation) {
 		var method;
 		var traced = {};
