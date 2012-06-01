@@ -114,7 +114,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 					dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
 					dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
 					dojo.addClass(close, "dismiss"); //$NON-NLS-0$
-					close.title = messages["Close"];
+					close.title = messages['Close'];
 					dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
 						this.close();
 					}));
