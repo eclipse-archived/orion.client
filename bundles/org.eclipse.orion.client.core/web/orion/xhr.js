@@ -105,7 +105,7 @@ define(['orion/Deferred'], function(Deferred) {
 					d.resolve(result);
 				} else {
 					if (log && console) {
-						console.log(new Error(code + ' ' + response.statusText)); //$NON-NLS-0$
+						console.log(new Error(xhr.statusText));
 					}
 					d.reject(result);
 				}
