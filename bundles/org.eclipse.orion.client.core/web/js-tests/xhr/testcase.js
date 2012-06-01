@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define setTimeout XMLHttpRequest*/
+/*global define navigator setTimeout XMLHttpRequest*/
 define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
 		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
@@ -20,6 +20,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 	function MockXMLHttpRequest() {
 		this.readyState = 0;
 		this.headers = {};
+		this.responseType = '';
 	}
 	MockXMLHttpRequest.prototype = {
 		UNSENT: 0,
@@ -54,8 +55,11 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 			}
 		},
 		_setResponse: function(response) {
-			this.response = response;
-			if (typeof response === 'string') {
+			// Bug 381396: if this test is running in IE, emulate IE's non-support for 'response' attribute.
+			if (navigator.appName.indexOf("Microsoft Internet Explorer") === -1) {
+				this.response = response;
+			}
+			if (this.responseType === '' || this.responseType === 'text') {
 				this.responseText = response;
 			}
 		},

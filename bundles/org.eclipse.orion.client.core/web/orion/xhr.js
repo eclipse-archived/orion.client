@@ -90,11 +90,13 @@ define(['orion/Deferred'], function(Deferred) {
 		}
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
-				var code = xhr.status, response = xhr.response;
+				var code = xhr.status;
+				var response = typeof xhr.response !== 'undefined' ? xhr.response : xhr.responseText; //$NON-NLS-0$
+				var responseText = typeof response === 'string' ? response : null; //$NON-NLS-0$
 				var result = {
 					args: options,
 					response: response,
-					responseText: typeof response === 'string' ? response : null, //$NON-NLS-0$
+					responseText: responseText,
 					status: code,
 					url: url,
 					xhr: xhr
