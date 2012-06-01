@@ -22,12 +22,12 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 	}
 
 	function getMessageBundle(name) {
-		if (messageBundleDeffereds.name) {
-			return messageBundleDeffereds.name;
+		if (messageBundleDeffereds[name]) {
+			return messageBundleDeffereds[name];
 		}
 	
 		var d = new Deferred();
-		messageBundleDeffereds.name = d;
+		messageBundleDeffereds[name] = d;
 		function _resolveMessageBundle() {
 			require(['i18n!' + name], function(bundle) { //$NON-NLS-0$
 				d.resolve(bundle);
@@ -37,7 +37,7 @@ define(['require', 'orion/Deferred'], function(require, Deferred) {
 		try {
 			require([name], _resolveMessageBundle);
 		} catch (ignore) {
-			require(['orion/i18n!' + name], _resolveMessageBundle);
+			require(['orion/i18n!' + name], _resolveMessageBundle); //$NON-NLS-0$
 		}
 		return d;
 	}
