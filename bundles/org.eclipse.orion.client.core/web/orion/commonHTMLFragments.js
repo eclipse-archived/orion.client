@@ -53,7 +53,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	var bottomHTMLFragment = 
 		'<footer id="footerContent" class="layoutBlock" role="contentinfo">' + //$NON-NLS-0$
 			'<div class="footerBlock">' + //$NON-NLS-0$
-				messages['Orion is in Beta. Please try it out but BEWARE your data may be lost.'] +
+				messages['Beta build @buildLabel@. Please try it out but BEWARE your data may be lost.'] +
 			'</div>' + //$NON-NLS-0$
 			'<div class="footerRightBlock">' + //$NON-NLS-0$
 				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">'+messages['FAQ']+'</a> | ' +  //$NON-NLS-0$
