@@ -8,9 +8,6 @@
 	font-family: monospace;
 	font-size: 10pt;
 }
-::-webkit-scrollbar-corner {
-	background-color: #eeeeee;
-}
 
 .textviewContent {
 }
