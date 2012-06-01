@@ -32,7 +32,7 @@ define(function() {
 				return;
 			}
 			
-			if (config.isBuild) {
+			if (config.isBuild || config.isTest) {
 				onLoad({});
 				return;
 			}	
