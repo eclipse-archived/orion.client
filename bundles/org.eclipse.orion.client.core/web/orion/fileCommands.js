@@ -903,8 +903,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				var service = fileCommands[i].service;
 				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
 				commandDeferreds.push[commandDeferred];
-				commandDeferred.then(dojo.hitch(this, 
-						function(commandOptions){
+				commandDeferred.then(dojo.hitch(this,
+						function(i, commandInfo, commandOptions){
 							var command = new mCommands.Command(commandOptions);
 							if (commandInfo.isEditor) {
 								command.isEditor = commandInfo.isEditor;
@@ -924,7 +924,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							} else {
 								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
 							}
-						}));
+						}, i, commandInfo));
 			}
 			new dojo.DeferredList(commandDeferreds).addBoth(function(){
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
