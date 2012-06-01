@@ -10,7 +10,7 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout */
+/*global define*/
 
 /**
  * This module provides utility methods to retrieve information about directories. It also keeps
@@ -19,27 +19,16 @@
  */ 
 define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstrap, mFileClient) {
 
-	var fileClient;
 	var exports = {};
 
-	/* the working directory relative to which we will execute commands on the server */
+	var fileClient;
 	var currentTreeNode = null;
-
-	function withWorkspace(func, errorFunc) {
-		fileClient.loadWorkspace('').then(
-			func,
-			function(error) {
-				if (errorFunc) {
-					errorFunc(error);
-				}
-			}
-		);
-	}
-	exports.withWorkspace = withWorkspace;
 
 	/* ensure that there is a currentTreeNode and invoke a function with it */
 	function withCurrentTreeNode(func, errorFunc) {
-		if (currentTreeNode === null) {
+		if (currentTreeNode !== null) {
+			func(currentTreeNode);
+		} else {
 			var location = dojo.hash() || '/'; //$NON-NLS-0$
 			fileClient.loadWorkspace(location).then(
 				function(node) {
@@ -52,25 +41,9 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 					}
 				}
 			);
-		} else {
-			/*
-			 * The following is wrapped in a setTimeout to match the timing of
-			 * the currentTreeNode == null case.
-			 */
-			setTimeout(function() {
-				func(currentTreeNode);
-			});
 		}
 	}
 	exports.withCurrentTreeNode = withCurrentTreeNode;
-
-	function endsWith(string, suffix) {
-		if (typeof(string) === 'string' && typeof(suffix) === 'string') { //$NON-NLS-1$ //$NON-NLS-0$
-			var loc = string.lastIndexOf(suffix);
-			return (loc + suffix.length) === string.length;
-		}
-		return false;
-	}
 
 	function setCurrentTreeNode(node) {
 		currentTreeNode = node;
