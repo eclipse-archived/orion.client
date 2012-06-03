@@ -44,9 +44,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.setTarget();
 			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
 		},
+		
+		updateToolbar: function(id){
+			if(this.pluginCommands) {
+				dojo.empty(this.pluginCommands);
+			}
+		},
 				
 		startup: function(){
 			// set up the toolbar level commands
+			
+			this.updateToolbar();
 			
 			var installPluginCommand = new mCommands.Command({
 				name: messages["Install"],
@@ -129,9 +137,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 		},
 		
-		addRows: function(){
-			
+		addRows: function(referenceplugin){
+		
 			var list = this.pluginSettingsList;
+		
+			if(referenceplugin){
+				list = referenceplugin.pluginSettingsList;
+			}
+
 			dojo.empty( list );
 			var pluginList = this.settings.pluginRegistry.getPlugins();
 			this.pluginTitle.innerHTML = messages['Plugins'];
@@ -233,14 +246,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var settingsPluginList = settings.pluginRegistry.getPlugins();
 		
+			var pluginlist = this;
+		
 			for( var p = 0; p < settingsPluginList.length; p++ ){
 				if( settingsPluginList[p].getLocation() === url ){
 					settingsPluginList[p].uninstall();
 					statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
 					settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 						plugins.remove(url);
+						pluginlist.addRows(pluginlist);
 					}); // this will force a sync
 					
+					this.addRows();
 					this.addRows();
 					
 					break;

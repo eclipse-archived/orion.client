@@ -23,7 +23,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		templateString: '<div style="height:100%;">' +  //$NON-NLS-0$
 							'<div data-dojo-type="dijit.layout.BorderContainer" style="height:100%;" data-dojo-props="design:\'heading\', gutters:false, liveSplitters:false">' +  //$NON-NLS-0$
 								'<div class="auxpane" id="categories" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:\'leading\', splitter:false"  style="width: 150px;">' +  //$NON-NLS-0$
-									'<div id="categoryNode" class="auxPadding" style="padding-top:10px;">' + 
+									'<div id="categoryNode" class="auxPadding" style="padding-left:0;padding-top:10px;">' + 
 										'<ul class="navbar" data-dojo-attach-point="navbar" role="tablist" aria-labelledby="content-title"></ul>' +  //$NON-NLS-0$
 									'</div>' +  //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
@@ -33,6 +33,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 									'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
 //								'</div>' +  //$NON-NLS-0$
 							'</div>' +  //$NON-NLS-0$
+							'<div id="pageToolbar" style="display:none"/>' +
 						'</div>', //$NON-NLS-0$
 
 		itemToIndexMap: null,

@@ -122,6 +122,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		
 		showUserSettings: function(id){
+		
+			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
+				var navigate = prefs.get(messages["JavaScript Editor"]);					
+			} );
 
 			if (this.selectedCategory) {
 				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
@@ -147,7 +151,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.updateToolbar(id);
 			
-			var pluginNode = dojo.create( 'div', null, this.table ); //$NON-NLS-0$
+			var userNode = dojo.create( 'div', null, this.table ); //$NON-NLS-0$
 
 			this.userWidget = new orion.widgets.settings.UserSettings({
 				registry: this.registry,
@@ -156,9 +160,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
 				commandService: this.commandService,
-				userClient: this.userClient,
-				toolbarID: "pageActions" //$NON-NLS-0$
-			}, pluginNode);
+				userClient: this.userClient
+			}, userNode);
 			
 			this.userWidget.startUp();
 		},
@@ -179,8 +182,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
-				commandService: this.commandService,
-				toolbarID: "pageActions" //$NON-NLS-0$
+				commandService: this.commandService
+//				toolbarID: "pageActions" //$NON-NLS-0$
 			}, pluginNode);
 			
 			this.pluginWidget.startup();
