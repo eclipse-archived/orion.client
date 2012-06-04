@@ -21,9 +21,6 @@ define(['i18n!orion/navigate/nls/messages', 'dojo', 'dijit', 'orion/bootstrap', 
 
 dojo.addOnLoad(function(){
 	dojo.parser.parse();
-	var currentTime = new Date().getTime();
-	window.console.log(( currentTime - beginTime) + " milliseconds elapsed after load.  Beginning Orion bootstrap and service initialization.");
-	beginTime = currentTime;
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -38,9 +35,6 @@ dojo.addOnLoad(function(){
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 
-		currentTime = new Date().getTime();
-		window.console.log((currentTime - beginTime) + " milliseconds elapsed after bootstrap. Loading UI.  ");
-		beginTime = currentTime;
 		// global commands
 		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
 		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
@@ -140,8 +134,6 @@ dojo.addOnLoad(function(){
 		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
 			refresh();
 		});
-		currentTime = new Date().getTime();
-		window.console.log((currentTime - beginTime) + " milliseconds elapsed.  All done.");
 	});
 });
 
