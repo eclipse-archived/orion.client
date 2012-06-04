@@ -303,7 +303,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 					addToCallback: this.addToCallback,
 					errorCallback: this.errorCallback
 				};
-				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "tool", userData); //$NON-NLS-1$ //$NON-NLS-0$
+				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "button", userData); //$NON-NLS-1$ //$NON-NLS-0$
 
 				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
 				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
