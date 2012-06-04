@@ -639,7 +639,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		});
 		
-		// Assemble global commands
+		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
+		// make favorite
 		var favoriteCommand = new mCommands.Command({
 			name: messages["Make Favorite"],
 			tooltip: messages['Add to the favorites list'],
@@ -675,6 +676,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}});
 		commandService.addCommand(favoriteCommand);
 	
+		// open resource
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
 			var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
@@ -775,7 +777,32 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			};
 			escapeProvider.addHandler(keyAssistEscHandler);
 		}
+		//	Open configuration page, Ctrl+Shift+F1
+		var configDetailsCommand = new mCommands.Command({
+			name: messages["System Configuration Details"],
+			tooltip: messages["System Config Tooltip"],
+			id: "orion.configDetailsPage", //$NON-NLS-0$
+			hrefCallback: function() {
+				return require.toUrl("help/about.html"); //$NON-NLS-0$
+			}});
+					
+		commandService.addCommand(configDetailsCommand);
+		commandService.registerCommandContribution("globalActions", "orion.configDetailsPage", 100,  null, true, new mCommands.CommandKeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+		//	Background Operations Page, Ctrl+Shift+O
+		var operationsCommand = new mCommands.Command({
+			name: messages["Background Operations"],
+			tooltip: messages["Background Operations Tooltip"],
+			id: "orion.backgroundOperations", //$NON-NLS-0$
+			hrefCallback: function() {
+				return require.toUrl("operations/list.html"); //$NON-NLS-0$
+			}});
+					
+		commandService.addCommand(operationsCommand);
+		commandService.registerCommandContribution("globalActions", "orion.backgroundOperations", 100,  null, true, new mCommands.CommandKeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 		
+		// Key assist
 		var keyAssistCommand = new mCommands.Command({
 			name: messages["Show Keys"],
 			tooltip: messages["Show a list of all the keybindings on this page"],
