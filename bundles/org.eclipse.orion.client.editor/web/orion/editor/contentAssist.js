@@ -124,11 +124,11 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 		};
 		var isMac = navigator.platform.indexOf("Mac") !== -1;
-		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), messages.contentAssist);
-		textView.setAction(messages.contentAssist, function() {
+		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
+		textView.setAction("contentAssist", function() {
 			self.activate();
 			return true;
-		});
+		}, {name: messages.contentAssist});
 	}
 	ContentAssist.prototype = /** @lends orion.editor.ContentAssist.prototype */ {
 		/**

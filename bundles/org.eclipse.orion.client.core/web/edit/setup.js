@@ -354,8 +354,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		keyModeStack.push(escHandler);
 		
 		// global search
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), messages["Search Files"]); //$NON-NLS-0$
-		editor.getTextView().setAction(messages['Search Files'], function() {
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
+		editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$
 			window.setTimeout(function() {
 				var e = editor.getTextView();
 				var selection = e.getSelection();
@@ -415,14 +415,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				searcher.search(query, inputManager.getInput(), renderer);
 			}, 0);
 			return true;
-		});
+		}, {name: messages["Search Files"]}); //$NON-NLS-0$
 		
 		// splitter binding
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), messages["Toggle Outliner"]); //$NON-NLS-0$
-		editor.getTextView().setAction(messages['Toggle Outliner'], function(){
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
+		editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
 				splitArea.toggle();
 				return true;
-		});
+		}, {name: messages["Toggle Outliner"]}); //$NON-NLS-0$
 	};
 	
 	// Content Assist

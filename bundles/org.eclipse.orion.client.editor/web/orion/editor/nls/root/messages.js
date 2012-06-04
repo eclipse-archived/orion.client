@@ -13,11 +13,16 @@
 
 //NLS_CHARSET=UTF-8
 
+/*global define*/
+
 define({
 	"Comment": "Comment",
 	"incrementalFind": "Incremental find: ${0}",
 	"incrementalFindNotFound": "Incremental find: ${0} (not found)",
 	"find": "Find...",
+	"undo": "Undo",
+	"redo": "Redo",
+	"cancelMode": "Cancel Current Mode",
 	"findNext": "Find Next Occurrence",
 	"findPrevious": "Find Previous Occurrence",
 	"incrementalFindKey": "Incremental Find",
