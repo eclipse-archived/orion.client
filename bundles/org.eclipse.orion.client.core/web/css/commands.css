@@ -96,6 +96,10 @@
 	margin: 0;
 }
 
+.commandMenuItemAnchor {
+	padding-right: 40px;
+}
+
 .commandLink {
 	display: inline-block;
 	vertical-align: baseline;
