@@ -189,40 +189,25 @@ exports.EditorCommandFactory = (function() {
 					callback: function(data) {
 						if (that._searcher) {
 							var searchString = "";
-							var fromSelection = false;
-							if(searchString.length === 0){
-								var selection = editor.getSelection();
-								if (selection.end > selection.start) {
-									var model = editor.getModel();
-									searchString = model.getText(selection.start, selection.end);
-									fromSelection = true;
-								}
-							}
-							var lineNumber = 1;
-							if(!fromSelection){
+							var parsedParam = null;
+							var selection = editor.getSelection();
+							if (selection.end > selection.start) {//If there is selection from editor, we want to use it as the default keyword
+								var model = editor.getModel();
+								searchString = model.getText(selection.start, selection.end);
+								fromSelection = true;
+							} else {//If there is no selection from editor, we want to parse the parameter from URL binding
 								if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
 									var findParam = data.parameters.valueFor('find');
-									
-									var splitParam = findParam.split("@@line");
-									if(splitParam.length > 1){
-										lineNumber = parseInt(splitParam[1]);
-										if(lineNumber < 1){
-											lineNumber = 1;
-										}
-									}
-									var searchQuery = splitParam[0];
-									var inFileQ = mSearchUtils.generateInFileQuery(searchQuery);
-									searchString = inFileQ.searchStr;
-									if(inFileQ.wildCard){
-										that._searcher.setOptions({useRegExp:true});
-									} else {
-										that._searcher.setOptions({useRegExp:false});
-									}
+									var parsedParam = mSearchUtils.parseFindURLBinding(findParam);
+									searchString = parsedParam.searchStr;
 								}
 							}
-							that._searcher.buildToolBar(searchString);
-							if(!fromSelection){
-								editor.onGotoLine(lineNumber - 1, 0);
+							that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+							if(parsedParam){
+								that._searcher.setOptions({useRegExp: parsedParam.useRegExp});
+								if(parsedParam.lineNumber){
+									editor.onGotoLine(parsedParam.lineNumber - 1, 0);
+								}
 								that._searcher.findNext(true);
 							}
 							return true;

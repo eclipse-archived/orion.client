@@ -273,8 +273,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 				this.searchTable = explorer.createTree("searchContent", new mExplorer.SimpleFlatModel(searches, "srch", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 					return item.query;
 				}));	
-				// TODO temporary hack from Libing 
-				explorer.navHandler._clearSelection(false);
 			} else {
 				dojo.place("<p>"+dojo.string.substitute(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>", "searchContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 			}
