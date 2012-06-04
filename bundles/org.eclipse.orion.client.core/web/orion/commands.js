@@ -87,13 +87,29 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	/**
 	 * Override the dijit MenuItem so that the inherited click behavior is not used.
 	 * This is done when the command is defined with a link, so that the normal browser
-	 * link behavior (and interpretations of various mouse clicks) is used.
+	 * link behavior (and interpretations of various mouse clicks) is used.  We also style
+	 * link specially (padding, etc.) to help reduce the difference in perceived
+	 * responsive area (the menu item) with the actual area (the link)
 	 * 
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350584
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=371265
 	 */
 	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
+	
+		// if it has a link and the anchor is already in the dom, style it with some padding.
+		postCreate: function() {
+			var anchor = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
+			if (anchor) {
+				dojo.addClass(anchor, "commandMenuItemAnchor"); //$NON-NLS-0$
+			}
+		},
+		
+		setLink: function(href, name) {
+			this.set("label", "<a class='commandMenuItemAnchor' href='"+href+"'>"+name+"</a>"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		},
+		
 		_onClick: function(evt) {
-			if (!this.hrefCallback) {
+			if (!this.hasLink) {
 				this.inherited(arguments);
 			}
 		}
@@ -1152,7 +1168,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				labelType: this.hrefCallback ? "html" : "text", //$NON-NLS-1$ //$NON-NLS-0$
 				label: this.name,
 				iconClass: this.imageClass,
-				hrefCallback: !!this.hrefCallback,
+				hasLink: !!this.hrefCallback,
 				onKeyDown: function(evt) {
 					if(this.hrefCallback && (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE)) {
 						var link = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
@@ -1180,10 +1196,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				if (loc) {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
-							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							menuitem.setLink(l, this.name); 
 						}));
 					} else if (loc) {
-						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						menuitem.setLink(loc, this.name);
 					} else {
 						return;
 					}
