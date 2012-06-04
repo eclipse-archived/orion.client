@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/commands', 'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 
-		'orion/sites/siteCommands', 'orion/treetable'],
-		function(messages, dojo, Deferred, mCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
-
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
+		'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
+		function(messages, i18nUtil, dojo, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
+	var formatMessage = i18nUtil.formatMessage;
 	var TableTree = treetable.TableTree;
 	var SitesTree, ViewOnSiteTree;
 
@@ -303,7 +303,7 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 					addToCallback: this.addToCallback,
 					errorCallback: this.errorCallback
 				};
-				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "tool", userData); //$NON-NLS-1$ //$NON-NLS-0$
+				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "button", userData); //$NON-NLS-1$ //$NON-NLS-0$
 
 				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
 				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
@@ -372,6 +372,12 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.add-to", 10); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerCommandContribution("viewOnSiteScope", "orion.site.view-on-link", 20); //$NON-NLS-1$ //$NON-NLS-0$
 
+				mGlobalCommands.setPageTarget({
+						task: messages.ViewOnSiteTitle,
+						target: file,
+						serviceRegistry: serviceRegistry,
+						commandService: commandService});
+
 				options.addToCallback = function() {
 					self.refresh();
 				};
@@ -380,6 +386,9 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/Deferred', 'orion/comman
 				};
 
 				options.renderer = new ViewOnSiteRenderer(options);
+				if (options.label) {
+					dojo.byId(options.label).innerHTML = formatMessage(messages.ViewOnSiteCaption, file.Name);
+				}
 				SitesTree.call(self, options);
 			});
 		}
