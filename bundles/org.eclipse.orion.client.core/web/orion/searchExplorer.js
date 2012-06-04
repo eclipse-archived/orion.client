@@ -376,15 +376,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		if(!this.explorer.model.replaceMode()){
-			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + ",find=" + this.explorer.model.queryObj.inFileQuery.originalSearchStr}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
-			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-		} else {
-			var nameSpan = dojo.create("span", { className: "primaryColumn", id: this.getItemLinkId(item)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(document.createTextNode(renderName), nameSpan, "only"); //$NON-NLS-0$
-			nameSpan.title = "Click to compare"; //$NON-NLS-0$
-		}
+		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.queryObj.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
+		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
 	
 	SearchResultRenderer.prototype.generateContextTip = function(detailModel){
@@ -449,19 +443,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
-		if(!this.explorer.model.replaceMode()){
-			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-			dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
-				that.explorer.getNavHandler().cursorOn(item);
-			});
-			return dojo.create("span", null, link, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-		} else {
-			var nameSpan = dojo.create("span", { className: "primaryColumn"}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			//dojo.place(document.createTextNode(renderName), nameSpan, "only");
-			nameSpan.title = messages["Click to compare"];
-			return nameSpan;
-		}
+		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.queryObj.inFileQuery, item.lineNumber, this.explorer._replaceStr);
+		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
+		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
+			that.explorer.getNavHandler().cursorOn(item);
+		});
+		return dojo.create("span", null, link, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
 	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.

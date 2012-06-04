@@ -161,6 +161,39 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 	return inFileQuery;
 };
 	
+orion.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
+	var binding = ",find=" + inFileQuery.originalSearchStr;
+	if (typeof(replaceStr) === "string") { //$NON-NLS-0$
+		binding = binding + "@@replaceWith@@" + replaceStr;
+	}
+	if (typeof(lineNumber) === "number") { //$NON-NLS-0$
+		binding = binding + "@@atLine@@" + lineNumber;
+	}
+	return binding;
+};
+
+orion.searchUtils.parseFindURLBinding = function(findParam) {
+	var lineNumber = null;
+	var splitParam = findParam.split("@@atLine@@");
+	if(splitParam.length > 1){
+		lineNumber = parseInt(splitParam[1]);
+		if(lineNumber < 1){
+			lineNumber = 1;
+		}
+	}
+	var findAndReplaceQuery = splitParam[0];
+	var replaceStr = null;
+	var splitQuery = findAndReplaceQuery.split("@@replaceWith@@");
+	var	findQuery = splitQuery[0];
+	if(splitQuery.length > 1){
+		replaceStr = splitQuery[1];
+	}
+	
+	var inFileQ = orion.searchUtils.generateInFileQuery(findQuery);
+	var searchString = inFileQ.searchStr;
+	return {searchStr: searchString, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: inFileQ.wildCard};
+};
+
 orion.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
 	return text.replace(regexp, replacingStr); 
@@ -358,10 +391,9 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 				if(result){
 					var lineNumber = i+1;
 					if(!replacing){
-						//var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, 
-										 linkLocation: fileModelNode.linkLocation + ",find=" + inFileQuery.originalSearchStr + "@@line"+ lineNumber, 
-										 location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
+										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, 
+										  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){

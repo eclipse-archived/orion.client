@@ -254,7 +254,7 @@ orion.TextSearcher = (function() {
 			}
 		},
 		
-		buildToolBar : function(defaultSearchStr) {
+		buildToolBar : function(defaultSearchStr, defaultReplaceStr) {
 			this._keyUpHandled = true;
 			var that = this;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
@@ -271,6 +271,11 @@ orion.TextSearcher = (function() {
 			}
 			this._createActionTable();
 
+			// set the default value of replace string
+			if (typeof(defaultReplaceStr) === "string") { //$NON-NLS-0$
+				replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
+				replaceDiv.value = defaultReplaceStr;
+			}
 			// set the default value of search string
 			findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			findDiv.value = defaultSearchStr;
