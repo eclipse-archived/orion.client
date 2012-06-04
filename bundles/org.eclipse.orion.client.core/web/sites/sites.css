@@ -45,6 +45,9 @@ tr.treeTableRow td:first-child {
 
 .newSiteRow > td {
 	background-color: #f4f4f4;
+}
+
+.newSiteCol {
 	font-weight: bold;
 }
 

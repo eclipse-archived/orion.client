@@ -288,7 +288,9 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 				if (item.Placeholder) {
 					dojo.addClass(tableRow, "newSiteRow"); //$NON-NLS-0$
 				}
-				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var siteConfigCol = dojo.create("td", { //$NON-NLS-0$
+					id: tableRow.id + "col1", //$NON-NLS-0$
+					className: item.Placeholder ? "newSiteCol" : ""}); //$NON-NLS-0$ //$NON-NLS-1$
 				var actionCol = dojo.create("td", {id: tableRow.id + "col2"}); //$NON-NLS-1$ //$NON-NLS-0$
 				
 				// Site config column
