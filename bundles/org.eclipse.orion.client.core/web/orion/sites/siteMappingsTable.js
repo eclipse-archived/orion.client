@@ -202,7 +202,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				id: "orion.site.mappings.remove", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					// Only show on a Mappings object
-					return typeof item.Source !== "undefined" && typeof item.Target !== "undefined"; //$NON-NLS-1$ //$NON-NLS-0$
+					return 'Source' in item || 'Target' in item || 'FriendlyPath' in item; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				callback: dojo.hitch(this, function(data) {
 					//table._hideTooltip();
@@ -218,7 +218,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				imageClass: "core-sprite-move_up", //$NON-NLS-0$
 				id: "orion.site.mappings.moveUp", //$NON-NLS-0$
 				visibleWhen: dojo.hitch(this, function(item) {
-					return item.Source && item.Target;
+					return 'Source' in item || 'Target' in item || 'FriendlyPath' in item; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}),
 				callback: dojo.hitch(this, function(data) {
 					var index = this.getItemIndex(data.items);
@@ -237,7 +237,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				imageClass: "core-sprite-move_down", //$NON-NLS-0$
 				id: "orion.site.mappings.moveDown", //$NON-NLS-0$
 				visibleWhen: dojo.hitch(this, function(item) {
-					return item.Source && item.Target;
+					return 'Source' in item || 'Target' in item || 'FriendlyPath' in item; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}),
 				callback: dojo.hitch(this, function(data) {
 //					this._hideTooltip();
