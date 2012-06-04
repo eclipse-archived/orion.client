@@ -336,7 +336,9 @@ a:hover {
 
 .auxpane {
 	border: 0;
-    	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
+	background: #fbfbfb;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
+	background: -moz-linear-gradient(top, #fbfbfb 0%, #fbfbfb 100%);
     overflow-x: auto;
     min-width: 200px;
     padding-top: 16px;
@@ -527,7 +529,9 @@ a:hover {
 .topRowBanner {
 	margin: 0;
 	border: 0;
+	background: #333;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333), color-stop(100%,#333));
+	background: -moz-linear-gradient(top, #333 0%, #333 100%);
 /*	background: -webkit-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
 	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);	Not sure about gradient - Linda to advise */
 	height: 28px;
@@ -537,7 +541,9 @@ a:hover {
     margin: 0;
     padding-top:5px;
     border: 0;
+    background: #EFEFEF;
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
+    background: -moz-linear-gradient(top, #EFEFEF 0%, #EFEFEF 100%);
     border-bottom: 1px solid #DEDEDE;
     min-height:20px;
 }
