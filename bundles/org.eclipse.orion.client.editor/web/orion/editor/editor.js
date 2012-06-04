@@ -533,8 +533,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			}
 			
 			// Set keybindings for keys that apply to different modes
-			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "Cancel Current Mode");
-			textView.setAction("Cancel Current Mode", function() {
+			textView.setKeyBinding(new mKeyBinding.KeyBinding(27), "cancelMode");
+			textView.setAction("cancelMode", function() {
 				// loop through all modes in case multiple modes are active.  Keep track of whether we processed the key.
 				var keyUsed = false;
 				for (var i=0; i<this._keyModes.length; i++) {
@@ -543,7 +543,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					}
 				}
 				return keyUsed;
-			}.bind(this));
+			}.bind(this), {name: messages.cancelMode});
 
 			textView.setAction("lineUp", function() {
 				for (var i=0; i<this._keyModes.length; i++) {

@@ -704,11 +704,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			
 		// set binding in editor and a general one for other pages
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), messages['Find File Named...']); //$NON-NLS-0$
-			editor.getTextView().setAction(messages['Find File Named...'], function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);
+			editor.getTextView().setAction(openResourceCommand.id, function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
-				});
+				}, openResourceCommand);
 		}
 		
 		commandService.addCommand(openResourceCommand);
@@ -739,8 +739,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		commandService.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new mCommands.CommandKeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim"); //$NON-NLS-1$ //$NON-NLS-0$
-			editor.getTextView().setAction("Toggle Trim", toggleBanner.callback); //$NON-NLS-0$
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
+			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
 				
 		var keyAssistNode = dojo.byId("keyAssist"); //$NON-NLS-0$
@@ -814,8 +814,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 						dojo.place("<h2>"+messages["Editor"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ //$NON-NLS-2$
 						var editorActions = editor.getTextView().getActions(false);
 						for(var i=0; i<editorActions.length; i++) {
-							var actionName = editorActions[i];
-							var bindings = editor.getTextView().getKeyBindings(actionName);
+							var actionID = editorActions[i], actionName = actionID;
+							var textView = editor.getTextView();
+							var actionDescription = textView.getActionDescription(actionID);
+							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
+							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
 								dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
@@ -833,8 +836,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		if (editor) {
 			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), messages['Show Keys']);
-			editor.getTextView().setAction(messages['Show Keys'], keyAssistCommand.callback);
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
+			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		}
 		
 		userMenu.setKeyAssist(keyAssistCommand.callback);
