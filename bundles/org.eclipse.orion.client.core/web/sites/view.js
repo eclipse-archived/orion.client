@@ -37,12 +37,14 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var treeWidget;
 			function createTree(file) {
 				var parentId = 'table'; //$NON-NLS-0$
+				var labelId = 'viewOnSiteCaption'; //$NON-NLS-0$
 				if (treeWidget) {
 					dojo.empty(parentId);
 				}
 				treeWidget = new mSitesExplorer.ViewOnSiteTree({
 					id: 'view-on-site-table', //$NON-NLS-0$
 					parent: parentId,
+					label: labelId,
 					serviceRegistry: serviceRegistry,
 					fileLocation: file
 				});
