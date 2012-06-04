@@ -125,15 +125,15 @@ a:hover {
 }
 
 .primaryNav {
-	font-size: 10px;
-	font-weight:bold;
+	font-size: 8pt; /* 7pt */
+	font-weight:normal;
 	color: #BFBFBF;
-	padding-top: 7px;
+	padding-top: 6px;
 	vertical-align: baseline;
 }
 
 .primaryNav a {
-	font-size: 10px;
+	font-size: 8pt; /* 7pt */
 	color: #BFBFBF;
 	margin-right: 6px;
 	margin-left: 6px; 
@@ -145,7 +145,7 @@ a:hover {
 	color: #bfbfbf;
 	cursor: hand;
 	color: white;
-	font-weight:bolder;
+	font-weight:normal;
 }
 
 .pageNav {
@@ -336,7 +336,7 @@ a:hover {
 
 .auxpane {
 	border: 0;
-    background: #fbfbfb;
+    	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
     overflow-x: auto;
     min-width: 200px;
     padding-top: 16px;
@@ -527,7 +527,7 @@ a:hover {
 .topRowBanner {
 	margin: 0;
 	border: 0;
-	background-color: #2e2e2e;
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333), color-stop(100%,#333));
 /*	background: -webkit-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);
 	background: -moz-linear-gradient(top, #7D7E7D 0%, #0E0E0E 100%);	Not sure about gradient - Linda to advise */
 	height: 28px;
@@ -535,12 +535,10 @@ a:hover {
 
 .titleArea {
     margin: 0;
-    margin-top:5px;
+    padding-top:5px;
     border: 0;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#f6f6f6'); /* IE */
-    background: -webkit-gradient(linear, left top, left bottom, from(#ffffff), to(#f6f6f6));
-    background: -moz-linear-gradient(top,  #ffffff,  #f6f6f6);
-    border-bottom: 1px solid #EEE;
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
+    border-bottom: 1px solid #DEDEDE;
     min-height:20px;
 }
 
@@ -618,18 +616,25 @@ a:hover {
 	border: 1px solid #808080;
 }
 
+/* Searchbox in the top navigation area seems a difficult thing to 
+   get right. I've worked with a range of colors. What I notice is that
+   if the edges are curved, then it seems to need a lighter shade. That
+   draws more attention to the search box. It is more passive and fitting
+   if drawn with straight edges and a darker background */
+
 .searchbox {
-	background: url('../images/glass.png') no-repeat #777 4px 4px;
-	border: 1px solid #555;
+	background: url('../images/glass.png') no-repeat #444 4px 3px; /* 777 */
+	border: 1px solid #222;
 	font-size: 11px;
 	width: 15em;
-	height: 18px;
-	border-radius: 10px;
-	color:#444;
+	height: 16px;
+	border-radius: 10px; /* 10px */
+	color:#999;
 	padding:0;
-	padding-left:17px;
+	padding-left:20px;
 	margin-left:5px;
-	margin-top:4px;
+	margin-top:6px;
+	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;
 }
 
 .searchbox:focus{
@@ -809,7 +814,7 @@ a:hover {
 }
 
 .treeIterationCursor {
-	outline: #666 1px dotted !important;
+	outline: #AAA 1px dotted !important;
 	border-radius:4px;
 }
 
