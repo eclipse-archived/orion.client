@@ -143,24 +143,6 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			};
 			this.textView.addEventListener("ModelChanged", this._lastEditListener.onModelChanged);
 			
-			// Find actions
-			// These variables are used among the various find actions:
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("f", true), messages.find);
-			this.textView.setAction(messages.find, function() {
-				if (this._searcher) {
-					var editor = this.editor;
-					var selection = editor.getSelection();
-					var searchString = "";
-					if (selection.end > selection.start) {
-						var model = editor.getModel();
-						searchString = model.getText(selection.start, selection.end);
-					}
-					this._searcher.buildToolBar(searchString);
-					return true;
-				}
-				return false;
-			}.bind(this));
-			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("k", true), messages.findNext);
 			this.textView.setAction(messages.findNext, function() {
 				if (this._searcher){

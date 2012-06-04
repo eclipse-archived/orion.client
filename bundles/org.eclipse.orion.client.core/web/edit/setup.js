@@ -330,8 +330,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		keyModeStack.push(tabHandler);
 		
+		var localSearcher = new mSearcher.TextSearcher(editor, commandService, undoStack);
 		// Create keybindings for generic editing, no dependency on the service model
-		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , new mSearcher.TextSearcher(editor, commandService, undoStack));
+		var genericBindings = new mEditorFeatures.TextActions(editor, undoStack , localSearcher);
 		keyModeStack.push(genericBindings);
 		
 		// Linked Mode
@@ -345,7 +346,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		
 		// Register commands that depend on external services, the registry, etc.  Do this after
 		// the generic keybindings so that we can override some of them.
-		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions"); //$NON-NLS-1$ //$NON-NLS-0$
+		var commandGenerator = new mEditorCommands.EditorCommandFactory(serviceRegistry, commandService, fileClient, inputManager, "pageActions", isReadOnly, "pageNavigationActions", localSearcher); //$NON-NLS-1$ //$NON-NLS-0$
 		commandGenerator.generateEditorCommands(editor);
 
 		
@@ -532,6 +533,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	}
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		outlineService.emitOutline(editor.getText(), editor.getTitle());
+		commandService.processURL(window.location.href);
 	});
 	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
 		outlineService.setProvider(outlineProvider);

@@ -377,7 +377,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
 		if(!this.explorer.model.replaceMode()){
-			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + ",find=" + this.explorer.model.queryObj.inFileQuery.originalSearchStr}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		} else {

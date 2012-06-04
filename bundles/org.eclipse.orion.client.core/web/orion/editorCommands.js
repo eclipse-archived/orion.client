@@ -16,14 +16,14 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack'], 
-	function(messages, dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack) {
+define(['i18n!orion/edit/nls/messages', 'dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils'], 
+	function(messages, dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils) {
 
 var exports = {};
 
 var contentTypesCache = null;;
 exports.EditorCommandFactory = (function() {
-	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId) {
+	function EditorCommandFactory (serviceRegistry, commandService, fileClient, inputManager, toolbarId, isReadOnly, navToolbarId, searcher) {
 		this.serviceRegistry = serviceRegistry;
 		this.commandService = commandService;
 		this.fileClient = fileClient;
@@ -31,6 +31,7 @@ exports.EditorCommandFactory = (function() {
 		this.toolbarId = toolbarId;
 		this.pageNavId = navToolbarId;
 		this.isReadOnly = isReadOnly;
+		this._searcher = searcher;
 	}
 	EditorCommandFactory.prototype = {
 		/**
@@ -165,6 +166,75 @@ exports.EditorCommandFactory = (function() {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
 				editor.getTextView().setAction("gotoLine", dojo.hitch(this, function () { //$NON-NLS-0$
 					this.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
+					return true;
+				}));
+
+				// find&&replace commands (find)
+				var findParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('find', 'text', 'Find:')], {clientCollect: true}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+																		function() {
+																			var selection = editor.getSelection();
+																			var searchString = "";
+																			if (selection.end > selection.start) {
+																				var model = editor.getModel();
+																				searchString = model.getText(selection.start, selection.end);
+																			}
+																			return [new mCommands.CommandParameter('find', 'text', 'Find:', searchString)]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+																		});
+				var that = this;
+				var findCommand =  new mCommands.Command({
+					name: "Find",
+					tooltip: "Find",
+					id: "orion.editor.find", //$NON-NLS-0$
+					parameters: findParameter,
+					callback: function(data) {
+						if (that._searcher) {
+							var searchString = "";
+							var fromSelection = false;
+							if(searchString.length === 0){
+								var selection = editor.getSelection();
+								if (selection.end > selection.start) {
+									var model = editor.getModel();
+									searchString = model.getText(selection.start, selection.end);
+									fromSelection = true;
+								}
+							}
+							var lineNumber = 1;
+							if(!fromSelection){
+								if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
+									var findParam = data.parameters.valueFor('find');
+									
+									var splitParam = findParam.split("@@line");
+									if(splitParam.length > 1){
+										lineNumber = parseInt(splitParam[1]);
+										if(lineNumber < 1){
+											lineNumber = 1;
+										}
+									}
+									var searchQuery = splitParam[0];
+									var inFileQ = mSearchUtils.generateInFileQuery(searchQuery);
+									searchString = inFileQ.searchStr;
+									if(inFileQ.wildCard){
+										that._searcher.setOptions({useRegExp:true});
+									} else {
+										that._searcher.setOptions({useRegExp:false});
+									}
+								}
+							}
+							that._searcher.buildToolBar(searchString);
+							if(!fromSelection){
+								editor.onGotoLine(lineNumber - 1, 0);
+								that._searcher.findNext(true);
+							}
+							return true;
+						}
+						return false;
+					}});
+				this.commandService.addCommand(findCommand);
+				this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mCommands.CommandKeyBinding('f', true), new mCommands.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				// override the editor binding 
+				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('f', true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
+				editor.getTextView().setAction("find", dojo.hitch(this, function () { //$NON-NLS-0$
+					this.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
 					return true;
 				}));
 

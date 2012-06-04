@@ -134,6 +134,7 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 
 orion.searchUtils.generateInFileQuery = function(searchStr) {
 	var inFileQuery = {};
+	inFileQuery.originalSearchStr = searchStr;
 	var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
 	var hasQMark = (searchStr.indexOf("?") > -1); //$NON-NLS-0$
 	if(hasStar){
@@ -357,7 +358,10 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 				if(result){
 					var lineNumber = i+1;
 					if(!replacing){
-						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						//var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, linkLocation: fileModelNode.linkLocation + ",line=" + lineNumber, location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, 
+										 linkLocation: fileModelNode.linkLocation + ",find=" + inFileQuery.originalSearchStr + "@@line"+ lineNumber, 
+										 location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
 					} else {
 						for(var j = 0; j < result.length; j++){
@@ -372,28 +376,6 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 		}
 		fileModelNode.totalMatches = totalMatches;
 	}
-};
-
-orion.searchUtils.searchAllOccurrence = function( isRegEx, searchStr, caseSensitive, text, lineDelim){
-	var node = {type: "file", name: "allOccurrence"}; //$NON-NLS-1$ //$NON-NLS-0$
-	var inFileQuery = {};
-	if(!isRegEx){
-		inFileQuery.searchStr = caseSensitive ? searchStr : searchStr.toLowerCase();
-		inFileQuery.wildCard = false;
-	} else {
-		inFileQuery.searchStr =caseSensitive ? searchStr : searchStr.toLowerCase();;
-		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
-		if (regexp) {
-			var pattern = regexp.pattern;
-			var flags = regexp.flags;
-			flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
-			inFileQuery.regExp = {pattern: pattern, flags: flags};
-			inFileQuery.wildCard = true;
-		}
-	}
-	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
-	orion.searchUtils.searchWithinFile(inFileQuery, node, text, lineDelim, false, caseSensitive);
-	return {m: node, q:inFileQuery};
 };
 
 orion.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
