@@ -188,7 +188,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 					dojo.create("span", { 'class':'objectLink', 'title':messages['click here, then check javascript console to drill down'], 'onclick': dojo.hitch( this, 'consoleOutput', debugData ), 'innerHTML':messages['JavaScript Object'] }, cell ); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}else{
-					row.innerHTML = value;
+					cell.innerHTML = value;
 				}
 			}
 			
