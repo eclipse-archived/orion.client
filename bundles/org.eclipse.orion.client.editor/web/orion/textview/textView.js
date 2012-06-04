@@ -49,7 +49,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
 	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
 	var platformDelimiter = isWindows ? "\r\n" : "\n";
-	var scrollButtonHeight = isPad ? 0 : 17;
 	
 	/** 
 	 * Constructs a new Selection object.
@@ -2286,8 +2285,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
 				var viewRect = this._viewDiv.getBoundingClientRect();
-				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * scrollButtonHeight;
-				lineIndex = Math.floor(((e.clientY - viewRect.top) - scrollButtonHeight) * lineCount / trackHeight);
+				var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * this._metrics.scrollWidth;
+				lineIndex = Math.floor(((e.clientY - viewRect.top) - this._metrics.scrollWidth) * lineCount / trackHeight);
 				if (!(0 <= lineIndex && lineIndex < lineCount)) {
 					lineIndex = undefined;
 				}
@@ -2896,10 +2895,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			var trim = this._getLineTrim(line);
 			parent.removeChild(line);
-			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: this._calculatePadding()};
-		},
-		_calculatePadding: function() {
-			var parent = this._clientDiv;
+			
+			// calculate pad and scroll width
 			var pad = this._getPadding(this._viewDiv);
 			var div1 = document.createElement("DIV");
 			div1.style.position = "fixed";
@@ -2917,14 +2914,20 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			parent.appendChild(div1);
 			var rect1 = div1.getBoundingClientRect();
 			var rect2 = div2.getBoundingClientRect();
+			div1.style.overflow = 'hidden';
+			div2.style.height = "200px";
+			var w1 = div2.offsetWidth;
+			div1.style.overflow = 'scroll';
+			var w2 = div2.offsetWidth;
 			parent.removeChild(div1);
+			var scrollWidth = w1 - w2;
 			pad = {
 				left: rect2.left - rect1.left,
 				top: rect2.top - rect1.top,
 				right: rect1.right - rect2.right,
 				bottom: rect1.bottom - rect2.bottom
 			};
-			return pad;
+			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth};
 		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
@@ -5650,7 +5653,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					var clientHeight = this._getClientHeight ();
 					var lineCount = this._model.getLineCount ();
 					var contentHeight = lineHeight * lineCount;
-					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * scrollButtonHeight;
+					var trackHeight = clientHeight + viewPad.top + viewPad.bottom - 2 * this._metrics.scrollWidth;
 					var divHeight;
 					if (contentHeight < trackHeight) {
 						divHeight = lineHeight;
@@ -5672,7 +5675,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							annotation = annotations[prop];
 							this._applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute";
-							lineDiv.style.top = scrollButtonHeight + lineHeight + Math.floor(lineIndex * divHeight) + "px";
+							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px";
 							if (annotation.html) {
 								lineDiv.innerHTML = annotation.html;
 							}
@@ -5684,7 +5687,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					} else if (div._oldTrackHeight !== trackHeight) {
 						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
 						while (lineDiv) {
-							lineDiv.style.top = scrollButtonHeight + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
+							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
 							lineDiv = lineDiv.nextSibling;
 						}
 					}
