@@ -1032,7 +1032,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			this.linkedModeActive = false;
 			this.textView.removeEventListener("Verify", this.linkedModeListener.onVerify);
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab");
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), null);
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab");
 			
 			this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
 
