@@ -42,7 +42,8 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			// console.log("get children");
 			return xhr("GET", location,{
 				headers: {
-					"Orion-Version": "1"
+					"Orion-Version": "1",
+					"Content-Type": "charset=UTF-8"
 				},
 				timeout: 15000
 			}).then(function(result) {
