@@ -33,6 +33,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			this.selectionToolsId = selectionToolsId;
 			this.checkbox = false;
 			this.actionScopeId = actionScopeId;
+			mExplorer.createExplorerCommands(commandService);
 		}
 		
 		GitCommitExplorer.prototype.handleError = function(error) {
@@ -280,6 +281,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 			});
 			
+			this.commandService.registerCommandContribution(section.actionsNode.id, "orion.explorer.expandAll", 100); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(section.actionsNode.id, "orion.explorer.collapseAll", 200); //$NON-NLS-1$ //$NON-NLS-0$
+
 			var sectionItemActionScopeId = "diffSectionItemActionArea"; //$NON-NLS-0$
 			
 			DiffModel = (function() {
@@ -420,18 +424,25 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
 					this.renderer = new DiffRenderer({registry: this.registry, actionScopeId: sectionItemActionScopeId, cachePrefix: "DiffNavigator", checkbox: false}, this); //$NON-NLS-0$
-					this.createTree(this.parentId, new DiffModel(), {selectionPolicy: "cursorOnly"});
+					this.createTree(this.parentId, new DiffModel(), {/*selectionPolicy: "cursorOnly"*/});
 				}
 				
 				DiffNavigator.prototype = new mExplorer.Explorer();
 			
+				//provide to the selection model that if a row is selectable
 				DiffNavigator.prototype.isRowSelectable = function(modelItem){
-					return modelItem.Type === "Diff";
+					return false;
 				};
+				//provide to the expandAll/collapseAll commands
+				DiffNavigator.prototype.getItemCount  = function(){
+					return diffs.length;
+				};
+				
 				return DiffNavigator;
 			}());
 			
-			new DiffNavigator(this.registry, null, "diffNode", sectionItemActionScopeId); //$NON-NLS-0$
+			var diffnavigator = new DiffNavigator(this.registry, null, "diffNode", sectionItemActionScopeId); //$NON-NLS-0$
+			this.commandService.renderCommands(section.actionsNode.id, section.actionsNode.id, diffnavigator, diffnavigator, "button"); //$NON-NLS-0$
 		};
 
 		return GitCommitExplorer;

@@ -835,40 +835,18 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			callback : function() {
 				that.gotoNext(false, true);
 		}});
-		var expandAllCommand = new mCommands.Command({
-			tooltip : messages["Expand all results"],
-			imageClass : "core-sprite-expandAll", //$NON-NLS-0$
-			id: "orion.search.expandAll", //$NON-NLS-0$
-			groupId: "orion.searchGroup", //$NON-NLS-0$
-			visibleWhen : function(item) {
-				return !that._reporting;
-			},
-			callback : function() {
-				that.expandAll();
-		}});
-		var collapseAllCommand = new mCommands.Command({
-			tooltip : messages["Collapse all results"],
-			imageClass : "core-sprite-collapseAll", //$NON-NLS-0$
-			id: "orion.search.collapseAll", //$NON-NLS-0$
-			groupId: "orion.searchGroup", //$NON-NLS-0$
-			visibleWhen : function(item) {
-				return !that._reporting;
-			},
-			callback : function() {
-				that.collapseAll();
-		}});
 		this._commandService.addCommand(previousPage);
 		this._commandService.addCommand(nextPage);
 		this._commandService.addCommand(nextResultCommand);
 		this._commandService.addCommand(prevResultCommand);
-		this._commandService.addCommand(expandAllCommand);
-		this._commandService.addCommand(collapseAllCommand);
-			
+		mExplorer.createExplorerCommands(this._commandService, function(item){
+			return !item._reporting;
+		});
 		// Register command contributions
-		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextResult", 1); //$NON-NLS-1$ //$NON-NLS-0$
-		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevResult", 2); //$NON-NLS-1$ //$NON-NLS-0$
-		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.expandAll", 3); //$NON-NLS-1$ //$NON-NLS-0$
-		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.collapseAll", 4); //$NON-NLS-1$ //$NON-NLS-0$
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.collapseAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextResult", 3); //$NON-NLS-1$ //$NON-NLS-0$
+		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevResult", 4); //$NON-NLS-1$ //$NON-NLS-0$
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.prevPage", 5); //$NON-NLS-1$ //$NON-NLS-0$
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 6); //$NON-NLS-1$ //$NON-NLS-0$
 	};
@@ -1142,6 +1120,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			dojo.when(fType, function(fType) {
 				var options = {
 					readonly: true,
+					onPage: true,
 					hasConflicts: false,
 					newFile: {
 						Name: fileItem.location,
@@ -1525,6 +1504,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 	};
 	
+	//provide to the expandAll/collapseAll commands
+	SearchResultExplorer.prototype.getItemCount  = function(){
+		return this.model._listRoot.children.length;
+	};
+	
 	SearchResultExplorer.prototype.sortWithName = function(byName) {
 		if(this.model.sortByName === byName){
 			return;
@@ -1535,38 +1519,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		window.location.href = href;
 	};
-	
-	SearchResultExplorer.prototype.expandAll = function() {
-		for (var i = 0; i < this.model.indexedFileItems.length ; i++){
-			if(this.model.matchesReplaced(this.model.indexedFileItems[i]) > 0){
-				this.expandRecursively(this.model.indexedFileItems[i]);
-			}
-		}
-	};
-	
-	SearchResultExplorer.prototype.collapseAll = function() {
-		for (var i = 0; i <  this.model.indexedFileItems.length ; i++){
-			this.myTree.collapse( this.model.indexedFileItems[i]);
-		}
-	};
-	
-	
-	SearchResultExplorer.prototype.expandRecursively = function(node)	{
-		if(node.type === "detail") { //$NON-NLS-0$
-			return;
-		}
-		this.myTree.expand(node);
-		var children = node.children;
-		if(children === undefined || children === null) {
-			return;
-		}
-				
-		var len = children.length;
-		for (var i = 0; i < len ; i++){
-			this.expandRecursively(children[i]);
-		}
-	};
-	
+
 	SearchResultExplorer.prototype.getParentDivId = function(secondLevel){
 		if(!this.model.replaceMode() || !secondLevel){
 			return this.parentNode.id;
