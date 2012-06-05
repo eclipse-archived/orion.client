@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorer', 'orion/profile/usersUtil'], function(messages, require, dojo, mExplorer, mUsersUtil) {
+define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorer', 'orion/profile/usersUtil', 'orion/navigationUtils'], function(messages, require, dojo, mExplorer, mUsersUtil, mNavUtils) {
 
 
 var eclipse = eclipse || {};
@@ -26,7 +26,7 @@ eclipse.UsersList = (function(){
 		this.actionScopeId = actionScopeId;
 		this.model = null;
 		this.myTree = null;
-		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, checkbox: this.checkbox, cachePrefix: "UsersNavigator"}, this); //$NON-NLS-0$
+		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, checkbox: false, cachePrefix: "UsersNavigator"}, this); //$NON-NLS-0$
 	};
 	UsersList.prototype = new mExplorer.Explorer();
 	
@@ -45,7 +45,7 @@ eclipse.UsersList = (function(){
 		mUsersUtil.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
 					
 		var service = this.registry.getService("orion.core.user"); //$NON-NLS-0$
-		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel("/users", service.getUsersList)); //$NON-NLS-0$
+		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel("/users", service.getUsersList), {setFocus: true}); //$NON-NLS-0$
 	};
 	
 	UsersList.prototype.reloadUsers = function() {
@@ -94,10 +94,11 @@ eclipse.UsersRenderer = (function() {
 			div = dojo.create("div", {style: "padding-left: 5px; padding-right: 5px; ; padding-top: 5px; padding-bottom: 5px"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			link = dojo.create("a", {className: "navlinkonpage", href: require.toUrl("profile/user-profile.html") +"#" + item.Location}, div, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(item.login), link, "only");			 //$NON-NLS-0$
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			return col;
 			break;
 		case 1:
-			return this.getActionsColumn(item, tableRow);
+			return this.getActionsColumn(item, tableRow, null, null, true);
 			break;
 		case 2:
 			return dojo.create("td", {innerHTML: item.Name ? item.Name : "&nbsp;"}); //$NON-NLS-1$ //$NON-NLS-0$
