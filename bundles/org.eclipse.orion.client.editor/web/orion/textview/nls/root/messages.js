@@ -11,19 +11,21 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
+/*global define */
+
 //NLS_CHARSET=UTF-8
 
 define({
-	"multipleAnnotations": "Multiple annotations:",
-	"line": "Line: ${0}",
-	"breakpoint": "Breakpoint",
-	"bookmark": "Bookmark",
-	"task": "Task",
-	"error": "Error",
-	"warning": "Warning",
-	"matchingSearch": "Matching Search",
-	"currentSearch": "Current Search",
-	"currentLine": "Current Line",
-	"matchingBracket": "Matching Bracket",
-	"currentBracket": "Current Bracket"
+	"multipleAnnotations": "Multiple annotations:", //$NON-NLS-1$ //$NON-NLS-0$
+	"line": "Line: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
+	"breakpoint": "Breakpoint", //$NON-NLS-1$ //$NON-NLS-0$
+	"bookmark": "Bookmark", //$NON-NLS-1$ //$NON-NLS-0$
+	"task": "Task", //$NON-NLS-1$ //$NON-NLS-0$
+	"error": "Error", //$NON-NLS-1$ //$NON-NLS-0$
+	"warning": "Warning", //$NON-NLS-1$ //$NON-NLS-0$
+	"matchingSearch": "Matching Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"currentSearch": "Current Search", //$NON-NLS-1$ //$NON-NLS-0$
+	"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
+	"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$
+	"currentBracket": "Current Bracket" //$NON-NLS-1$ //$NON-NLS-0$
 });

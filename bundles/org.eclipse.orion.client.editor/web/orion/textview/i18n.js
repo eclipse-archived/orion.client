@@ -12,8 +12,8 @@
 /*global define */
 define({
 	load: function(name, parentRequire, onLoad, config) {
-		if (parentRequire.specified("orion/bootstrap")) {
-			parentRequire(["orion/i18n!" + name], function(languages) {
+		if (parentRequire.specified("orion/bootstrap")) { //$NON-NLS-0$
+			parentRequire(["orion/i18n!" + name], function(languages) { //$NON-NLS-0$
 				onLoad(languages);
 			});
 		} else {

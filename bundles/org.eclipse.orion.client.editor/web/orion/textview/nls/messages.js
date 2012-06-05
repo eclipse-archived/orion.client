@@ -18,7 +18,7 @@ define(['orion/textview/i18n!orion/textview/nls/messages'], function(bundle) {
 		root: true
 	};
 	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
+		if (typeof result[key] === 'undefined') { //$NON-NLS-0$
 			result[key] = bundle[key];
 		}
 	});
