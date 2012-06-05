@@ -20,6 +20,8 @@
 
 @import "../css/sections.css";
 
+@import "./siteEditor.css";
+
 @import "../org.dojotoolkit/dojox/grid/resources/Grid.css";
 
 @import "../org.dojotoolkit/dojox/grid/resources/claroGrid.css";
@@ -31,3 +33,4 @@ html,body {
 .statusPane {
 	font-weight: bold;
 }
+
