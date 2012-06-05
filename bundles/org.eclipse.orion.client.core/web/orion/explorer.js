@@ -232,7 +232,7 @@ exports.Explorer = (function() {
 		},
 	    
 	    _lastHash: null,
-	    checkbox: this.checkbox || true
+	    checkbox: false
 	};
 	return Explorer;
 }());
