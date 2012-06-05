@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2010, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -144,7 +144,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			return xhr("POST", location, {
 				headers: {
 					"Orion-Version": "1",
-					"Content-Type": "application/json"
+					"Content-Type": "application/json;charset=UTF-8"
 				},
 				timeout: 15000,
 				data: JSON.stringify(data)
@@ -164,7 +164,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
 					"Slug": folderName,
-					"Content-Type": "application/json"
+					"Content-Type": "application/json;charset=UTF-8"
 				},
 				data: JSON.stringify({
 					"Name": folderName,
@@ -189,9 +189,9 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 					"Orion-Version": "1",
 					"X-Create-Options" : "no-overwrite",
 					"Slug": fileName,
-					"Content-Type": "application/json"
+					"Content-Type": "application/json;charset=UTF-8"
 				},
-				postData: JSON.stringify({
+				data: JSON.stringify({
 					"Name": fileName,
 					"LocalTimeStamp": "0",
 					"Directory": "false"
@@ -246,9 +246,13 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				headers: {
 					"Orion-Version": "1",
 					"Slug": name,
-					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy")
+					"X-Create-Options": "no-overwrite," + (isMove ? "move" : "copy"),
+					"Content-Type": "application/json;charset=UTF-8"
 				},
-				data: JSON.stringify({"Location": sourceLocation}),
+				data: JSON.stringify({
+					"Location": sourceLocation,
+					"Name": name
+				}),
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
