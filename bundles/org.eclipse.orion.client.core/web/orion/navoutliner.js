@@ -197,8 +197,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection"); //$NON-NLS-0$
 				// add commands to the fave section heading
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent")); //$NON-NLS-1$ //$NON-NLS-0$
-				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent")); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.renameFave", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "favoritesContent", "Favorites")); //$NON-NLS-1$ //$NON-NLS-0$
+				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent", "Favorites")); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
 				var selectionId = this.favoritesSection.selectionNode.id;
 				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
