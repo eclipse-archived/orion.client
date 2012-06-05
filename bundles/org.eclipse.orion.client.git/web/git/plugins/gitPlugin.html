@@ -34,15 +34,16 @@
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitLogLocation}?page=1",
 				forceSingleItem: true
 			});
-			
+
 			provider.registerServiceProvider("orion.navigate.command", {}, {
 				name: "Git Remote",
 				id: "eclipse.git.remote",
 				tooltip: "Go to Git Remote",
 				nls: "git/nls/gitmessages",
-				validationProperties: [
-					{source: "Git:DefaultRemoteBranchLocation", variableName: "GitRemoteLocation"}
-				],
+				validationProperties: [{
+					source: "Git:DefaultRemoteBranchLocation", 
+					variableName: "GitRemoteLocation"
+				}],
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
 				forceSingleItem: true
 			});
@@ -56,9 +57,10 @@
 				id: "eclipse.git.status2",
 				tooltip: "Go to Git Status",
 				nls: "git/nls/gitmessages",
-				validationProperties: [
-					{source: "StatusLocation", variableName: "GitStatusLocation"}
-				],
+				validationProperties: [{
+					source: "StatusLocation|Clone:StatusLocation", 
+					variableName: "GitStatusLocation"
+				}],
 				uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}"
 			});
 			
@@ -69,6 +71,18 @@
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.remote"
 			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				name: "Switch to Remote",
+				id: "eclipse.orion.git.switchToRemote2",
+				tooltip: "Show the log for the corresponding remote tracking branch",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"},
+				],
+				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
+				forceSingleItem: true
+			});
 
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.repository",
@@ -76,7 +90,7 @@
 				tooltip: "Go to the git repository",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
-					source: "CloneLocation|Git:CloneLocation",
+					source: "Git:CloneLocation",
 					variableName: "GitRepoLocation"
 				}],
 				uriTemplate: "{OrionHome}/git/git-repository.html#{GitRepoLocation}"
@@ -88,7 +102,7 @@
 				tooltip: "Show this repository at eclipse.org",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
-					source: "GitUrl", 
+					source: "GitUrl|Clone:GitUrl", 
 					match: "git.eclipse.org/gitroot", 
 					variableName: "EclipseGitLocation", 
 					variableMatchPosition: "after"
@@ -102,7 +116,7 @@
 				nls: "git/nls/gitmessages",
 				tooltip: "Show this repository at GitHub",
 				validationProperties: [{
-					source: "GitUrl", 
+					source: "GitUrl|Clone:GitUrl", 
 					match: "github\.com.*\.git", 
 					variableName: "GitHubLocation", 
 					variableMatchPosition: "only",
