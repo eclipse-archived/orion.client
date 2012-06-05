@@ -221,26 +221,24 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	var exclusions = [];
 	var favoriteTarget = null;
 	
-	function _makeEmptyLinksMenu() {
+	function _emptyLinksMenu() {
 		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
 		}
 		if (linksMenu) {
+			var dropdown = dijit.byId("related"); //$NON-NLS-0$
+			if (dropdown) {
+				dropdown.closeDropDown();
+			}
 			// see http://bugs.dojotoolkit.org/ticket/10296
 			linksMenu.focusedChild = null;
 			dojo.forEach(linksMenu.getChildren(), function(child) {
 				linksMenu.removeChild(child);
 				child.destroy();
 			});
-			linksMenu.destroy();
-		} 
-		linksMenu = new dijit.Menu({
-			style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
-			id: "relatedLinksMenu" //$NON-NLS-0$
-		});
-		return linksMenu;
+		}
 	}
 	
 	function _addRelatedLinkCommand(command, invocation) {
@@ -301,7 +299,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
 			var alternateItemDeferred;
-			var menu = _makeEmptyLinksMenu();
+			_emptyLinksMenu();
 			var deferreds = [];
 			
 			// assemble the related links
