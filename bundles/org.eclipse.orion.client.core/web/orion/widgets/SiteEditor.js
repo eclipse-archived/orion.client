@@ -18,6 +18,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util
 		function(messages, require, dojo, dijit, mUtil, mCommands, mSection, mSiteMappingsTable) {
 
 var AUTOSAVE_INTERVAL = 8000;
+var ROOT = "/"; //$NON-NLS-0$
 
 /**
  * @name orion.widgets.SiteEditor
@@ -139,14 +140,24 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 				return a.FriendlyPath.toLowerCase().localeCompare(b.FriendlyPath.toLowerCase());
 			});
 		var self = this;
+		function addMapping(mapping) {
+			// If there is no root, use the root as the Virtual Path
+			var hasRoot = self.getSiteConfiguration().Mappings.some(function(m) {
+				return m.Source === ROOT;
+			});
+			if (!hasRoot) {
+				mapping.Source = ROOT; //$NON-NLS-0$
+			}
+			self.mappings.addMapping(mapping);
+		}
 		/**
 		 * @this An object from the choices array with shape {name:String, mapping:Object}
 		 */
 		var callback = function(data) {
-			self.mappings.addMapping(this.mapping);
+			addMapping(this.mapping);
 		};
 		var addUrl = function() {
-			self.mappings.addMapping({
+			addMapping({
 				Source: "/web/somePath", //$NON-NLS-0$
 				Target: "http://", //$NON-NLS-0$
 				FriendlyPath: "http://" //$NON-NLS-0$
