@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/treetable', 'orion/explorerNavHandler'], function(require, dojo, mTreeTable, mNavHandler){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/treetable', 'orion/explorerNavHandler', 'orion/commands'], function(messages, require, dojo, mTreeTable, mNavHandler, mCommands){
 
 var exports = {};
 
@@ -76,6 +76,54 @@ exports.Explorer = (function() {
 			if (rowId) {
 				return dojo.byId(rowId);
 			}
+		},
+		
+		/**
+		 * Collapse all the nodes in the explorer
+		 */
+		collapseAll: function() {
+			var topLevelNodes = this._navHandler.getTopLevelNodes();
+			for (var i = 0; i < topLevelNodes.length ; i++){
+				this.myTree.collapse(topLevelNodes[i]);
+			}
+		},
+		
+		/**
+		 * Expand all the nodes under a node in the explorer
+		 * @param nodeModel {Object} the node model to be expanded. If not provided the whole tree is expanded recursively
+		 */
+		expandAll: function(nodeModel) {
+			if(nodeModel){
+				this._expandRecursively(nodeModel);
+			} else {
+				if(!this._navHandler){
+					return;
+				}
+				//We already know what the top level children is under the root, from the navigation handler.
+				var topLevelNodes = this._navHandler.getTopLevelNodes();
+				for (var i = 0; i < topLevelNodes.length ; i++){
+					this._expandRecursively(topLevelNodes[i]);
+				}
+			}
+		},
+		
+		_expandRecursively: function(node){
+			//If a node is not expandable, we stop here.
+			if(!this._navHandler || !this._navHandler.isExpandable(node)){
+				return;
+			}
+			var that = this;
+			this.myTree.expand(node, function(){
+				that.model.getChildren(node, function(children){
+					if(children === undefined || children === null) {
+						return;
+					}
+					var len = children.length;
+					for (var i = 0; i < len ; i++){
+						that._expandRecursively(children[i]);
+					}
+				});
+			});
 		},
 		
 		/**
@@ -188,6 +236,47 @@ exports.Explorer = (function() {
 	};
 	return Explorer;
 }());
+
+/**
+ * Creates generic explorer commands, like expand all and collapse all.
+ * @param {orion.commands.CommandService} commandService the command service where the commands wil be added
+ * @param {Function} visibleWhen optional if not provided we always display the commands
+ */
+exports.createExplorerCommands = function(commandService, visibleWhen) {
+	function isVisible(item){
+		if( typeof(item.getItemCount) === "function"){
+			if(item.getItemCount() > 0){
+				return visibleWhen ? visibleWhen(item) : true; 
+			}
+			return false;
+		}
+		return false;
+	}
+	var expandAllCommand = new mCommands.Command({
+		tooltip : messages["Expand all"],
+		imageClass : "core-sprite-expandAll", //$NON-NLS-0$
+		id: "orion.explorer.expandAll", //$NON-NLS-0$
+		groupId: "orion.explorerGroup", //$NON-NLS-0$
+		visibleWhen : function(item) {
+			return isVisible(item);
+		},
+		callback : function(data) {
+			data.items.expandAll();
+	}});
+	var collapseAllCommand = new mCommands.Command({
+		tooltip : messages["Collapse all"],
+		imageClass : "core-sprite-collapseAll", //$NON-NLS-0$
+		id: "orion.explorer.collapseAll", //$NON-NLS-0$
+		groupId: "orion.explorerGroup", //$NON-NLS-0$
+		visibleWhen : function(item) {
+			return isVisible(item);
+		},
+		callback : function(data) {
+			data.items.collapseAll();
+	}});
+	commandService.addCommand(expandAllCommand);
+	commandService.addCommand(collapseAllCommand);
+};
 
 exports.ExplorerModel = (function() {
 	/**

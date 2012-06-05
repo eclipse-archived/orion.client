@@ -69,5 +69,7 @@ define({
 	"Are you sure you want to delete these ${0} favorites?": "Are you sure you want to delete these ${0} favorites?",
 	"You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.": "You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.",
 	"Tasks": "Tasks",
-	"Close": "Close"
+	"Close": "Close",
+	"Expand all": "Expand all",
+	"Collapse all": "Collapse all" 
 });

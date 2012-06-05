@@ -195,6 +195,10 @@ exports.ExplorerNavHandler = (function() {
 			this.refreshSelection();
 		},
 		
+		getTopLevelNodes: function(){
+			return this._modelIterator.firstLevelChildren;
+		},
+		
 		_inSelection: function(model){
 			for(var i = 0; i < this._selections.length; i++){
 				if(model === this._selections[i]){

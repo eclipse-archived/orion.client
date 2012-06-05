@@ -142,6 +142,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			this.selectionToolsId = selectionToolsId;
 			this.checkbox = false;
 			this.actionScopeId = actionScopeId;
+			mExplorer.createExplorerCommands(commandService);
 		}
 		
 		GitStatusExplorer.prototype.handleError = function(error) {
@@ -302,6 +303,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				canHide: true
 			});
 			
+			this.commandService.registerCommandContribution(unstagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(unstagedSection.actionsNode.id, "orion.explorer.collapseAll", 300); //$NON-NLS-1$ //$NON-NLS-0$
+			
 			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.stageCommand", 100); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.checkoutCommand", 200); //$NON-NLS-0$
 			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.showPatchCommand", 300); //$NON-NLS-0$
@@ -459,11 +463,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				UnstagedNavigator.prototype.isRowSelectable = function(modelItem){
 					return mGitUtil.isChange(modelItem);
 				};
-
+				//provide to the expandAll/collapseAll commands
+				UnstagedNavigator.prototype.getItemCount  = function(){
+					return unstagedSortedChanges.length;
+				};
 				return UnstagedNavigator;
 			}());
 			
-			new UnstagedNavigator(this.registry, this.unstagedSelection, "unstagedNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
+			var unstagedNavigator = new UnstagedNavigator(this.registry, this.unstagedSelection, "unstagedNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
+			this.commandService.renderCommands(unstagedSection.actionsNode.id, unstagedSection.actionsNode.id, unstagedNavigator, unstagedNavigator, "button"); //$NON-NLS-0$
 		};
 		
 		// Git staged changes
@@ -485,8 +493,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			});
 			
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
-			this.commandService.renderCommands(stagedSection.actionsNode.id, stagedSection.actionsNode.id, status, that, "button"); //$NON-NLS-0$
-			
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "orion.explorer.collapseAll", 300); //$NON-NLS-1$ //$NON-NLS-0$
+
 			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 			
 			if (!this.stagedOnce){
@@ -630,6 +639,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.registry = registry;
 					this.checkbox = false;
 					this.parentId = parentId;
+					this.status = status;
 					this.selection = selection;
 					this.actionScopeId = actionScopeId;
 					this.renderer = new StagedRenderer({registry: this.registry, /*actionScopeId: sectionItemActionScopeId, */cachePrefix: "StagedNavigator", checkbox: false}, this); //$NON-NLS-0$
@@ -642,11 +652,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				StagedNavigator.prototype.isRowSelectable = function(modelItem){
 					return mGitUtil.isChange(modelItem);
 				};
-				
+				//provide to the expandAll/collapseAll commands
+				StagedNavigator.prototype.getItemCount  = function(){
+					return stagedSortedChanges.length;
+				};
 				return StagedNavigator;
 			}());
 			
-			new StagedNavigator(this.registry, this.stagedSelection, "stagedNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
+			var stagedNavigator = new StagedNavigator(this.registry, this.stagedSelection, "stagedNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
+			this.commandService.renderCommands(stagedSection.actionsNode.id, stagedSection.actionsNode.id, stagedNavigator, stagedNavigator, "button"); //$NON-NLS-0$
 		};
 	
 		// Git commits
