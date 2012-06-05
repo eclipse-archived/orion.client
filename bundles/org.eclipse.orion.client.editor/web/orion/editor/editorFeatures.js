@@ -672,6 +672,28 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		}, 
 		init: function() {
 		
+			this.textView.setAction("lineStart", function() {
+				var editor = this.editor;
+				var model = editor.getModel();
+				var caretOffset = editor.getCaretOffset();
+				var lineIndex = model.getLineAtOffset(caretOffset);
+				var lineOffset = model.getLineStart(lineIndex);
+				var lineText = model.getLine(lineIndex);
+				var offset;
+				for (offset=0; offset<lineText.length; offset++) {
+					var c = lineText.charCodeAt(offset);
+					if (!(c === 32 || c === 9)) {
+						break;
+					}
+				}
+				offset += lineOffset;
+				if (caretOffset !== offset) {
+					editor.setSelection(offset, offset);
+					return true;
+				}
+				return false;
+			}.bind(this));
+		
 			// Block comment operations
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment");
 			this.textView.setAction("toggleLineComment", function() {
