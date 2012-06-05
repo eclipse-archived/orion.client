@@ -127,7 +127,7 @@ exports.EditorCommandFactory = (function() {
 					tooltip: messages["Save this file"],
 					id: "orion.save", //$NON-NLS-0$
 					callback: function(data) {
-						data.items.getTextView().invokeAction(messages['Save']);
+						data.items.getTextView().invokeAction("save"); //$NON-NLS-0$
 					}});
 				this.commandService.addCommand(saveCommand);
 				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mCommands.CommandKeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
