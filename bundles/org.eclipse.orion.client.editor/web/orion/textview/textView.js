@@ -14,22 +14,22 @@
 
 /*global window document navigator setTimeout clearTimeout setInterval clearInterval define */
 
-define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) {
+define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/** @private */
 	function addHandler(node, type, handler, capture) {
-		if (typeof node.addEventListener === "function") {
+		if (typeof node.addEventListener === "function") { //$NON-NLS-0$
 			node.addEventListener(type, handler, capture === true);
 		} else {
-			node.attachEvent("on" + type, handler);
+			node.attachEvent("on" + type, handler); //$NON-NLS-0$
 		}
 	}
 	/** @private */
 	function removeHandler(node, type, handler, capture) {
-		if (typeof node.removeEventListener === "function") {
+		if (typeof node.removeEventListener === "function") { //$NON-NLS-0$
 			node.removeEventListener(type, handler, capture === true);
 		} else {
-			node.detachEvent("on" + type, handler);
+			node.detachEvent("on" + type, handler); //$NON-NLS-0$
 		}
 	}
 	var userAgent = navigator.userAgent;
@@ -37,18 +37,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	if (document.selection && window.ActiveXObject && /MSIE/.test(userAgent)) {
 		isIE = document.documentMode ? document.documentMode : 7;
 	}
-	var isFirefox = parseFloat(userAgent.split("Firefox/")[1] || userAgent.split("Minefield/")[1]) || undefined;
-	var isOpera = userAgent.indexOf("Opera") !== -1;
-	var isChrome = userAgent.indexOf("Chrome") !== -1;
-	var isSafari = userAgent.indexOf("Safari") !== -1 && !isChrome;
-	var isWebkit = userAgent.indexOf("WebKit") !== -1;
-	var isPad = userAgent.indexOf("iPad") !== -1;
-	var isMac = navigator.platform.indexOf("Mac") !== -1;
-	var isWindows = navigator.platform.indexOf("Win") !== -1;
-	var isLinux = navigator.platform.indexOf("Linux") !== -1;
-	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function";
-	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function";
-	var platformDelimiter = isWindows ? "\r\n" : "\n";
+	var isFirefox = parseFloat(userAgent.split("Firefox/")[1] || userAgent.split("Minefield/")[1]) || undefined; //$NON-NLS-1$ //$NON-NLS-0$
+	var isOpera = userAgent.indexOf("Opera") !== -1; //$NON-NLS-0$
+	var isChrome = userAgent.indexOf("Chrome") !== -1; //$NON-NLS-0$
+	var isSafari = userAgent.indexOf("Safari") !== -1 && !isChrome; //$NON-NLS-0$
+	var isWebkit = userAgent.indexOf("WebKit") !== -1; //$NON-NLS-0$
+	var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
+	var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
+	var isLinux = navigator.platform.indexOf("Linux") !== -1; //$NON-NLS-0$
+	var isW3CEvents = typeof window.document.documentElement.addEventListener === "function"; //$NON-NLS-0$
+	var isRangeRects = (!isIE || isIE >= 9) && typeof window.document.createRange().getBoundingClientRect === "function"; //$NON-NLS-0$
+	var platformDelimiter = isWindows ? "\r\n" : "\n"; //$NON-NLS-1$ //$NON-NLS-0$
 	
 	/** 
 	 * Constructs a new Selection object.
@@ -111,7 +111,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		/** @private */
 		toString: function() {
-			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end");
+			return "start=" + this.start + " end=" + this.end + (this.caret ? " caret is at start" : " caret is at end"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		/** @private */
 		isEmpty: function() {
@@ -198,7 +198,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* reset to the appropriate value further down.
 			*/
 			if (isWebkit) {
-				clientDiv.style.width = (0x7FFFF).toString() + "px";
+				clientDiv.style.width = (0x7FFFF).toString() + "px"; //$NON-NLS-0$
 			}
 			var lineCount = model.getLineCount();
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
@@ -247,7 +247,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
-			if (from === "document") {
+			if (from === "document") { //$NON-NLS-0$
 				if (rect.x !== undefined) {
 					rect.x += - scroll.x + viewRect.left + viewPad.left;
 				}
@@ -256,7 +256,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			//At this point rect is in the widget coordinate space
-			if (to === "document") {
+			if (to === "document") { //$NON-NLS-0$
 				if (rect.x !== undefined) {
 					rect.x += scroll.x - viewRect.left - viewPad.left;
 				}
@@ -285,7 +285,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			this._destroyView();
 
-			var e = {type: "Destroy"};
+			var e = {type: "Destroy"}; //$NON-NLS-0$
 			this.onDestroy(e);
 
 			this._parent = null;
@@ -597,8 +597,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				options = this._defaultOptions();
 			} else if (arguments.length === 1) {
 				var arg = arguments[0];
-				if (typeof arg === "string") {
-					return this._clone(this["_" + arg]);
+				if (typeof arg === "string") { //$NON-NLS-0$
+					return this._clone(this["_" + arg]); //$NON-NLS-0$
 				}
 				options = arg;
 			} else {
@@ -611,7 +611,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			for (var option in options) {
 				if (options.hasOwnProperty(option)) {
-					options[option] = this._clone(this["_" + option]);
+					options[option] = this._clone(this["_" + option]); //$NON-NLS-0$
 				}
 			}
 			return options;
@@ -1108,7 +1108,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!div) { return; }
 			if (ruler) {
 				var location = ruler.getLocation();//"left" or "right"
-				var divRuler = location === "left" ? this._leftDiv : this._rightDiv;
+				var divRuler = location === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
 				var cells = divRuler.firstChild.rows[0].cells;
 				for (var i = 0; i < cells.length; i++) {
 					if (cells[i].firstChild._ruler === ruler) {
@@ -1120,7 +1120,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (ruler) {
 				div.rulerChanged = true;
 			}
-			if (!ruler || ruler.getOverview() === "page") {
+			if (!ruler || ruler.getOverview() === "page") { //$NON-NLS-0$
 				var child = div.firstChild;
 				while (child) {
 					var lineIndex = child.lineIndex;
@@ -1312,15 +1312,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		setModel: function(model) {
 			if (!model) { return; }
 			if (model === this._model) { return; }
-			this._model.removeEventListener("Changing", this._modelListener.onChanging);
-			this._model.removeEventListener("Changed", this._modelListener.onChanged);
+			this._model.removeEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.removeEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
 			var newLineCount = model.getLineCount();
 			var newCharCount = model.getCharCount();
 			var newText = model.getText();
 			var e = {
-				type: "ModelChanging",
+				type: "ModelChanging", //$NON-NLS-0$
 				text: newText,
 				start: 0,
 				removedCharCount: oldCharCount,
@@ -1331,7 +1331,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this.onModelChanging(e);
 			this._model = model;
 			e = {
-				type: "ModelChanged",
+				type: "ModelChanged", //$NON-NLS-0$
 				start: 0,
 				removedCharCount: oldCharCount,
 				addedCharCount: newCharCount,
@@ -1339,8 +1339,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				addedLineCount: newLineCount
 			};
 			this.onModelChanged(e); 
-			this._model.addEventListener("Changing", this._modelListener.onChanging);
-			this._model.addEventListener("Changed", this._modelListener.onChanged);
+			this._model.addEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.addEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
 			this._reset();
 			this._updatePage();
 		},
@@ -1355,14 +1355,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var defaultOptions = this._defaultOptions();
 			for (var option in options) {
 				if (options.hasOwnProperty(option)) {
-					var newValue = options[option], oldValue = this["_" + option];
+					var newValue = options[option], oldValue = this["_" + option]; //$NON-NLS-0$
 					if (this._compare(oldValue, newValue)) { continue; }
 					var update = defaultOptions[option] ? defaultOptions[option].update : null;
 					if (update) {
 						update.call(this, newValue);
 						continue;
 					}
-					this["_" + option] = this._clone(newValue);
+					this["_" + option] = this._clone(newValue); //$NON-NLS-0$
 				}
 			}
 		},
@@ -1572,7 +1572,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			if (isIE < 9) {
 				if (!this._getSelection().isEmpty()) {
-					var child = document.createElement("DIV");
+					var child = document.createElement("DIV"); //$NON-NLS-0$
 					var rootDiv = this._rootDiv;
 					rootDiv.appendChild(child);
 					rootDiv.removeChild(child);
@@ -1580,7 +1580,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
-					var color = "transparent";
+					var color = "transparent"; //$NON-NLS-0$
 					this._selDiv1.style.background = color;
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
@@ -1591,7 +1591,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			if (!this._ignoreFocus) {
-				this.onBlur({type: "Blur"});
+				this.onBlur({type: "Blur"}); //$NON-NLS-0$
 			}
 		},
 		_handleContextMenu: function (e) {
@@ -1602,8 +1602,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				// See bug 366312 and 376508.
 				this._updateDOMSelection();
 			}
-			if (this.isListening("ContextMenu")) {
-				var evt = this._createMouseEvent("ContextMenu", e);
+			if (this.isListening("ContextMenu")) { //$NON-NLS-0$
+				var evt = this._createMouseEvent("ContextMenu", e); //$NON-NLS-0$
 				evt.screenX = e.screenX;
 				evt.screenY = e.screenY;
 				this.onContextMenu(evt);
@@ -1648,9 +1648,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._ignoreBlur = false;
 				}, 0);
 			}
-			if (this.isListening("DragStart") && this._dragOffset !== -1) {
+			if (this.isListening("DragStart") && this._dragOffset !== -1) { //$NON-NLS-0$
 				this._isMouseDown = false;
-				this.onDragStart(this._createMouseEvent("DragStart", e));
+				this.onDragStart(this._createMouseEvent("DragStart", e)); //$NON-NLS-0$
 				this._dragOffset = -1;
 			} else {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -1659,16 +1659,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleDrag: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("Drag")) {
-				this.onDrag(this._createMouseEvent("Drag", e));
+			if (this.isListening("Drag")) { //$NON-NLS-0$
+				this.onDrag(this._createMouseEvent("Drag", e)); //$NON-NLS-0$
 			}
 		},
 		_handleDragEnd: function (e) {
 			if (!e) { e = window.event; }
 			this._dropTarget = false;
 			this._dragOffset = -1;
-			if (this.isListening("DragEnd")) {
-				this.onDragEnd(this._createMouseEvent("DragEnd", e));
+			if (this.isListening("DragEnd")) { //$NON-NLS-0$
+				this.onDragEnd(this._createMouseEvent("DragEnd", e)); //$NON-NLS-0$
 			}
 			if (isFirefox) {
 				this._fixCaret();
@@ -1677,7 +1677,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* selection is dropped onto itself. The fix is to detected the case and 
 				* call fixCaret() a second time.
 				*/
-				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) {
+				if (e.dataTransfer.dropEffect === "none" && !e.dataTransfer.mozUserCancelled) { //$NON-NLS-0$
 					this._fixCaret();
 				}
 			}
@@ -1686,9 +1686,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!e) { e = window.event; }
 			var prevent = true;
 			this._dropTarget = true;
-			if (this.isListening("DragEnter")) {
+			if (this.isListening("DragEnter")) { //$NON-NLS-0$
 				prevent = false;
-				this.onDragEnter(this._createMouseEvent("DragEnter", e));
+				this.onDragEnter(this._createMouseEvent("DragEnter", e)); //$NON-NLS-0$
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
@@ -1703,9 +1703,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_handleDragOver: function (e) {
 			if (!e) { e = window.event; }
 			var prevent = true;
-			if (this.isListening("DragOver")) {
+			if (this.isListening("DragOver")) { //$NON-NLS-0$
 				prevent = false;
-				this.onDragOver(this._createMouseEvent("DragOver", e));
+				this.onDragOver(this._createMouseEvent("DragOver", e)); //$NON-NLS-0$
 			}
 			/*
 			* Webkit will not send drop events if this event is not prevented, as spec in HTML5.
@@ -1713,7 +1713,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* event will result is loss of functionality (insertion mark, etc).
 			*/
 			if (isWebkit || prevent) {
-				if (prevent) { e.dataTransfer.dropEffect = "none"; }
+				if (prevent) { e.dataTransfer.dropEffect = "none"; } //$NON-NLS-0$
 				if (e.preventDefault) { e.preventDefault(); }
 				return false;
 			}
@@ -1721,15 +1721,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_handleDragLeave: function (e) {
 			if (!e) { e = window.event; }
 			this._dropTarget = false;
-			if (this.isListening("DragLeave")) {
-				this.onDragLeave(this._createMouseEvent("DragLeave", e));
+			if (this.isListening("DragLeave")) { //$NON-NLS-0$
+				this.onDragLeave(this._createMouseEvent("DragLeave", e)); //$NON-NLS-0$
 			}
 		},
 		_handleDrop: function (e) {
 			if (!e) { e = window.event; }
 			this._dropTarget = false;
-			if (this.isListening("Drop")) {
-				this.onDrop(this._createMouseEvent("Drop", e));
+			if (this.isListening("Drop")) { //$NON-NLS-0$
+				this.onDrop(this._createMouseEvent("Drop", e)); //$NON-NLS-0$
 			}
 			/*
 			* This event must be prevented otherwise the user agent will modify
@@ -1759,7 +1759,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			if (!this._ignoreFocus) {
-				this.onFocus({type: "Focus"});
+				this.onFocus({type: "Focus"}); //$NON-NLS-0$
 			}
 		},
 		_handleKeyDown: function (e) {
@@ -1915,7 +1915,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}, 0);
 			}
 			if (this._clickCount === 1) {
-				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !isOpera && this.isListening("DragStart"));
+				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !isOpera && this.isListening("DragStart")); //$NON-NLS-0$
 				if (result) { this._setGrab(target); }
 			} else {
 				/*
@@ -1941,12 +1941,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("MouseDown")) {
-				this.onMouseDown(this._createMouseEvent("MouseDown", e));
+			if (this.isListening("MouseDown")) { //$NON-NLS-0$
+				this.onMouseDown(this._createMouseEvent("MouseDown", e)); //$NON-NLS-0$
 			}
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
-				if (target.tagName !== "A") {
+				if (target.tagName !== "A") { //$NON-NLS-0$
 					this._setLinksVisible(false);
 				} else {
 					return;
@@ -1996,22 +1996,22 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseOver: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("MouseOver")) {
-				this.onMouseOver(this._createMouseEvent("MouseOver", e));
+			if (this.isListening("MouseOver")) { //$NON-NLS-0$
+				this.onMouseOver(this._createMouseEvent("MouseOver", e)); //$NON-NLS-0$
 			}
 		},
 		_handleMouseOut: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("MouseOut")) {
-				this.onMouseOut(this._createMouseEvent("MouseOut", e));
+			if (this.isListening("MouseOut")) { //$NON-NLS-0$
+				this.onMouseOut(this._createMouseEvent("MouseOut", e)); //$NON-NLS-0$
 			}
 		},
 		_handleMouseMove: function (e) {
 			if (!e) { e = window.event; }
 			var inClient = this._isClientDiv(e);
-			if (this.isListening("MouseMove")) {
+			if (this.isListening("MouseMove")) { //$NON-NLS-0$
 				if (inClient){
-					this.onMouseMove(this._createMouseEvent("MouseMove", e));
+					this.onMouseMove(this._createMouseEvent("MouseMove", e)); //$NON-NLS-0$
 				}
 			}
 			if (this._dropTarget) {
@@ -2072,13 +2072,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var model = this._model;
 			var caretLine = model.getLineAtOffset(this._getSelection().getCaret());
 			if (y < topEdge && caretLine !== 0) {
-				this._doAutoScroll("up", x, y - topEdge);
+				this._doAutoScroll("up", x, y - topEdge); //$NON-NLS-0$
 			} else if (y > bottomEdge && caretLine !== model.getLineCount() - 1) {
-				this._doAutoScroll("down", x, y - bottomEdge);
+				this._doAutoScroll("down", x, y - bottomEdge); //$NON-NLS-0$
 			} else if (x < leftEdge) {
-				this._doAutoScroll("left", x - leftEdge, y);
+				this._doAutoScroll("left", x - leftEdge, y); //$NON-NLS-0$
 			} else if (x > rightEdge) {
-				this._doAutoScroll("right", x - rightEdge, y);
+				this._doAutoScroll("right", x - rightEdge, y); //$NON-NLS-0$
 			} else {
 				this._endAutoScroll();
 				this._setSelectionTo(x, y, true);
@@ -2111,9 +2111,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_handleMouseUp: function (e) {
 			if (!e) { e = window.event; }
 			var left = e.which ? e.button === 0 : e.button === 1;
-			if (this.isListening("MouseUp")) {
+			if (this.isListening("MouseUp")) { //$NON-NLS-0$
 				if (this._isClientDiv(e) || (left && this._isMouseDown)) {
-					this.onMouseUp(this._createMouseEvent("MouseUp", e));
+					this.onMouseUp(this._createMouseEvent("MouseUp", e)); //$NON-NLS-0$
 				}
 			}
 			if (this._linksVisible) {
@@ -2281,7 +2281,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				element = element.parentNode;
 			}
 			var ruler = element ? element._ruler : null;
-			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") {
+			if (lineIndex === undefined && ruler && ruler.getOverview() === "document") { //$NON-NLS-0$
 				var clientHeight = this._getClientHeight ();
 				var lineCount = this._model.getLineCount ();
 				var viewPad = this._getViewPadding();
@@ -2294,19 +2294,19 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (ruler) {
 				switch (e.type) {
-					case "click":
+					case "click": //$NON-NLS-0$
 						if (ruler.onClick) { ruler.onClick(lineIndex, e); }
 						break;
-					case "dblclick": 
+					case "dblclick": //$NON-NLS-0$
 						if (ruler.onDblClick) { ruler.onDblClick(lineIndex, e); }
 						break;
-					case "mousemove": 
+					case "mousemove": //$NON-NLS-0$
 						if (ruler.onMouseMove) { ruler.onMouseMove(lineIndex, e); }
 						break;
-					case "mouseover": 
+					case "mouseover": //$NON-NLS-0$
 						if (ruler.onMouseOver) { ruler.onMouseOver(lineIndex, e); }
 						break;
-					case "mouseout": 
+					case "mouseout": //$NON-NLS-0$
 						if (ruler.onMouseOut) { ruler.onMouseOut(lineIndex, e); }
 						break;
 				}
@@ -2322,7 +2322,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._commitIME();
 				this._updatePage(oldY === scroll.y);
 				var e = {
-					type: "Scroll",
+					type: "Scroll", //$NON-NLS-0$
 					oldValue: {x: oldX, y: oldY},
 					newValue: scroll
 				};
@@ -2339,14 +2339,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_getModelOffset: function(node, offset) {
 			if (!node) { return; }
 			var lineNode;
-			if (node.tagName === "DIV") {
+			if (node.tagName === "DIV") { //$NON-NLS-0$
 				lineNode = node;
 			} else {
 				lineNode = node.parentNode.parentNode;
 			}
 			var lineOffset = 0;
 			var lineIndex = lineNode.lineIndex;
-			if (node.tagName !== "DIV") {
+			if (node.tagName !== "DIV") { //$NON-NLS-0$
 				var child = lineNode.firstChild;
 				while (child) {
 					var textNode = child.firstChild;
@@ -2373,8 +2373,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleTouchStart: function (e) {
 			if (this._touchScrollTimer) {
-				this._vScrollDiv.style.display = "none";
-				this._hScrollDiv.style.display = "none";
+				this._vScrollDiv.style.display = "none"; //$NON-NLS-0$
+				this._hScrollDiv.style.display = "none"; //$NON-NLS-0$
 				clearInterval(this._touchScrollTimer);
 				this._touchScrollTimer = null;
 			}
@@ -2396,8 +2396,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._touchCurrentY = touch.clientY;
 				var interval = 10;
 				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*20)) {
-					this._vScrollDiv.style.display = "block";
-					this._hScrollDiv.style.display = "block";
+					this._vScrollDiv.style.display = "block"; //$NON-NLS-0$
+					this._hScrollDiv.style.display = "block"; //$NON-NLS-0$
 					var self = this;
 					this._touchScrollTimer = setInterval(function() {
 						var deltaX = 0, deltaY = 0;
@@ -2410,8 +2410,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							self._touchStartY = self._touchCurrentY;
 						} else {
 							if (Math.abs(self._touchSpeedX) < 0.1 && Math.abs(self._touchSpeedY) < 0.1) {
-								self._vScrollDiv.style.display = "none";
-								self._hScrollDiv.style.display = "none";
+								self._vScrollDiv.style.display = "none"; //$NON-NLS-0$
+								self._hScrollDiv.style.display = "none"; //$NON-NLS-0$
 								clearInterval(self._touchScrollTimer);
 								self._touchScrollTimer = null;
 								return;
@@ -2450,13 +2450,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							if (action.handler) {
 								if (!action.handler()) {
 									if (action.defaultHandler) {
-										return typeof(action.defaultHandler()) === "boolean";
+										return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
 									} else {
 										return false;
 									}
 								}
 							} else if (action.defaultHandler) {
-								return typeof(action.defaultHandler()) === "boolean";
+								return typeof(action.defaultHandler()) === "boolean"; //$NON-NLS-0$
 							}
 						}
 					}
@@ -2478,7 +2478,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 				} else {
 					var removeTab = false;
-					if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) {
+					if (this._expandTab && args.unit === "character" && (caret - lineStart) % this._tabSize === 0) { //$NON-NLS-0$
 						var lineText = model.getText(lineStart, caret);
 						removeTab = !/[^ ]/.test(lineText); // Only spaces between line start and caret.
 					}
@@ -2506,7 +2506,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_doCursorNext: function (args) {
 			if (!args.select) {
-				if (this._clearSelection("next")) { return true; }
+				if (this._clearSelection("next")) { return true; } //$NON-NLS-0$
 			}
 			var model = this._model;
 			var selection = this._getSelection();
@@ -2525,7 +2525,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_doCursorPrevious: function (args) {
 			if (!args.select) {
-				if (this._clearSelection("previous")) { return true; }
+				if (this._clearSelection("previous")) { return true; } //$NON-NLS-0$
 			}
 			var model = this._model;
 			var selection = this._getSelection();
@@ -2729,11 +2729,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var verticalScrollOffset = this._getScroll().y;
 			var pixel;
 			switch (type) {
-				case "textStart": pixel = 0; break;
-				case "textEnd": pixel = verticalMaximum - clientHeight; break;
-				case "pageDown": pixel = verticalScrollOffset + clientHeight; break;
-				case "pageUp": pixel = verticalScrollOffset - clientHeight; break;
-				case "centerLine":
+				case "textStart": pixel = 0; break; //$NON-NLS-0$
+				case "textEnd": pixel = verticalMaximum - clientHeight; break; //$NON-NLS-0$
+				case "pageDown": pixel = verticalScrollOffset + clientHeight; break; //$NON-NLS-0$
+				case "pageUp": pixel = verticalScrollOffset - clientHeight; break; //$NON-NLS-0$
+				case "centerLine": //$NON-NLS-0$
 					var selection = this._getSelection();
 					var lineStart = model.getLineAtOffset(selection.start);
 					var lineEnd = model.getLineAtOffset(selection.end);
@@ -2756,14 +2756,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_doTab: function (args) {
 			if(!this._tabMode || this._readonly) { return; }
-			var text = "\t";
+			var text = "\t"; //$NON-NLS-0$
 			if (this._expandTab) {
 				var model = this._model;
 				var caret = this._getSelection().getCaret();
 				var lineIndex = model.getLineAtOffset(caret);
 				var lineStart = model.getLineStart(lineIndex);
 				var spaces = this._tabSize - ((caret - lineStart) % this._tabSize);
-				text = (new Array(spaces + 1)).join(" ");
+				text = (new Array(spaces + 1)).join(" "); //$NON-NLS-0$
 			}
 			this._doContent(text);
 			return true;
@@ -2815,12 +2815,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = this._getSelection();
 			var line;
 			var x = this._autoScrollX;
-			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") {
+			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-0$
 				var scroll = this._autoScrollY / this._getLineHeight();
 				scroll = scroll < 0 ? Math.floor(scroll) : Math.ceil(scroll);
 				line = this._model.getLineAtOffset(selection.getCaret());
 				line = Math.max(0, Math.min(this._model.getLineCount() - 1, line + scroll));
-			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") {
+			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
 				line = this._getYToLine(this._autoScrollY);
 				x += this._getOffsetToX(selection.getCaret());
 			}
@@ -2834,30 +2834,30 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
-			var c = " ";
-			var line = document.createElement("DIV");
-			line.style.lineHeight = "normal";
+			var c = " "; //$NON-NLS-0$
+			var line = document.createElement("DIV"); //$NON-NLS-0$
+			line.style.lineHeight = "normal"; //$NON-NLS-0$
 			var model = this._model;
 			var lineText = model.getLine(0);
-			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0};
+			var e = {type:"LineStyle", textView: this, 0: 0, lineText: lineText, lineStart: 0}; //$NON-NLS-0$
 			this.onLineStyle(e);
 			this._applyStyle(e.style, line);
-			line.style.position = "fixed";
-			line.style.left = "-1000px";
-			var span1 = document.createElement("SPAN");
+			line.style.position = "fixed"; //$NON-NLS-0$
+			line.style.left = "-1000px"; //$NON-NLS-0$
+			var span1 = document.createElement("SPAN"); //$NON-NLS-0$
 			span1.appendChild(document.createTextNode(c));
 			line.appendChild(span1);
-			var span2 = document.createElement("SPAN");
-			span2.style.fontStyle = "italic";
+			var span2 = document.createElement("SPAN"); //$NON-NLS-0$
+			span2.style.fontStyle = "italic"; //$NON-NLS-0$
 			span2.appendChild(document.createTextNode(c));
 			line.appendChild(span2);
-			var span3 = document.createElement("SPAN");
-			span3.style.fontWeight = "bold";
+			var span3 = document.createElement("SPAN"); //$NON-NLS-0$
+			span3.style.fontWeight = "bold"; //$NON-NLS-0$
 			span3.appendChild(document.createTextNode(c));
 			line.appendChild(span3);
-			var span4 = document.createElement("SPAN");
-			span4.style.fontWeight = "bold";
-			span4.style.fontStyle = "italic";
+			var span4 = document.createElement("SPAN"); //$NON-NLS-0$
+			span4.style.fontWeight = "bold"; //$NON-NLS-0$
+			span4.style.fontStyle = "italic"; //$NON-NLS-0$
 			span4.appendChild(document.createTextNode(c));
 			line.appendChild(span4);
 			parent.appendChild(line);
@@ -2885,10 +2885,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (fontStyle !== 0) {
 				style = {style: {}};
 				if ((fontStyle & 1) !== 0) {
-					style.style.fontStyle = "italic";
+					style.style.fontStyle = "italic"; //$NON-NLS-0$
 				}
 				if ((fontStyle & 2) !== 0) {
-					style.style.fontWeight = "bold";
+					style.style.fontWeight = "bold"; //$NON-NLS-0$
 				}
 			}
 			var trim = this._getLineTrim(line);
@@ -2896,26 +2896,26 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			// calculate pad and scroll width
 			var pad = this._getPadding(this._viewDiv);
-			var div1 = document.createElement("DIV");
-			div1.style.position = "fixed";
-			div1.style.left = "-1000px";
-			div1.style.paddingLeft = pad.left + "px";
-			div1.style.paddingTop = pad.top + "px";
-			div1.style.paddingRight = pad.right + "px";
-			div1.style.paddingBottom = pad.bottom + "px";
-			div1.style.width = "100px";
-			div1.style.height = "100px";
-			var div2 = document.createElement("DIV");
-			div2.style.width = "100%";
-			div2.style.height = "100%";
+			var div1 = document.createElement("DIV"); //$NON-NLS-0$
+			div1.style.position = "fixed"; //$NON-NLS-0$
+			div1.style.left = "-1000px"; //$NON-NLS-0$
+			div1.style.paddingLeft = pad.left + "px"; //$NON-NLS-0$
+			div1.style.paddingTop = pad.top + "px"; //$NON-NLS-0$
+			div1.style.paddingRight = pad.right + "px"; //$NON-NLS-0$
+			div1.style.paddingBottom = pad.bottom + "px"; //$NON-NLS-0$
+			div1.style.width = "100px"; //$NON-NLS-0$
+			div1.style.height = "100px"; //$NON-NLS-0$
+			var div2 = document.createElement("DIV"); //$NON-NLS-0$
+			div2.style.width = "100%"; //$NON-NLS-0$
+			div2.style.height = "100%"; //$NON-NLS-0$
 			div1.appendChild(div2);
 			parent.appendChild(div1);
 			var rect1 = div1.getBoundingClientRect();
 			var rect2 = div2.getBoundingClientRect();
-			div1.style.overflow = 'hidden';
-			div2.style.height = "200px";
+			div1.style.overflow = 'hidden'; //$NON-NLS-0$
+			div2.style.height = "200px"; //$NON-NLS-0$
 			var w1 = div2.offsetWidth;
-			div1.style.overflow = 'scroll';
+			div1.style.overflow = 'scroll'; //$NON-NLS-0$
 			var w2 = div2.offsetWidth;
 			parent.removeChild(div1);
 			var scrollWidth = w1 - w2;
@@ -2930,7 +2930,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
 			if (selection.isEmpty()) { return false; }
-			if (direction === "next") {
+			if (direction === "next") { //$NON-NLS-0$
 				selection.start = selection.end;
 			} else {
 				selection.end = selection.start;
@@ -2996,8 +2996,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_convertDelimiter: function (text, addTextFunc, addDelimiterFunc) {
 				var cr = 0, lf = 0, index = 0, length = text.length;
 				while (index < length) {
-					if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); }
-					if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); }
+					if (cr !== -1 && cr <= index) { cr = text.indexOf("\r", index); } //$NON-NLS-0$
+					if (lf !== -1 && lf <= index) { lf = text.indexOf("\n", index); } //$NON-NLS-0$
 					var start = index, end;
 					if (lf === -1 && cr === -1) {
 						addTextFunc(text.substring(index));
@@ -3028,96 +3028,96 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var bindings = this._keyBindings = [];
 
 			// Cursor Navigation
-			bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38), predefined: true});
-			bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40), predefined: true});
-			bindings.push({actionID: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true});
-			bindings.push({actionID: "charNext",	keyBinding: new KeyBinding(39), predefined: true});
+			bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "charPrevious",	keyBinding: new KeyBinding(37), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "charNext",	keyBinding: new KeyBinding(39), predefined: true}); //$NON-NLS-0$
 			if (isMac) {
-				bindings.push({actionID: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true});
-				bindings.push({actionID: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true});
-				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true});
-				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true});
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true});
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true});
-				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true});
-				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true});
-				bindings.push({actionID: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({actionID: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true});
-				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true});
-				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true});
-				bindings.push({actionID: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true});
-				bindings.push({actionID: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true});
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true});
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true});
+				bindings.push({actionID: "scrollPageUp",		keyBinding: new KeyBinding(33), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollPageDown",	keyBinding: new KeyBinding(34), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollTextStart",	keyBinding: new KeyBinding(36), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollTextEnd",		keyBinding: new KeyBinding(35), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollPageUp",	keyBinding: new KeyBinding(38, null, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "scrollPageDown",		keyBinding: new KeyBinding(40, null, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(37, null, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(39, null, null, null, true), predefined: true}); //$NON-NLS-0$
 				//TODO These two actions should be changed to paragraph start and paragraph end  when word wrap is implemented
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true});
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true});
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(38, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(40, null, null, true), predefined: true}); //$NON-NLS-0$
 			} else {
-				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33), predefined: true});
-				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34), predefined: true});
-				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(36), predefined: true});
-				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true});
-				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true});
-				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true});
-				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true});
-				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true});
+				bindings.push({actionID: "pageUp",		keyBinding: new KeyBinding(33), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "pageDown",	keyBinding: new KeyBinding(34), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineStart",	keyBinding: new KeyBinding(36), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineEnd",		keyBinding: new KeyBinding(35), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "wordPrevious",	keyBinding: new KeyBinding(37, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "wordNext",	keyBinding: new KeyBinding(39, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "textStart",	keyBinding: new KeyBinding(36, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "textEnd",		keyBinding: new KeyBinding(35, true), predefined: true}); //$NON-NLS-0$
 			}
 			if (isFirefox && isLinux) {
-				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true});
-				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true});
+				bindings.push({actionID: "lineUp",		keyBinding: new KeyBinding(38, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "lineDown",	keyBinding: new KeyBinding(40, true), predefined: true}); //$NON-NLS-0$
 			}
 
 			// Select Cursor Navigation
-			bindings.push({actionID: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true});
-			bindings.push({actionID: "selectLineDown",		keyBinding: new KeyBinding(40, null, true), predefined: true});
-			bindings.push({actionID: "selectCharPrevious",	keyBinding: new KeyBinding(37, null, true), predefined: true});
-			bindings.push({actionID: "selectCharNext",		keyBinding: new KeyBinding(39, null, true), predefined: true});
-			bindings.push({actionID: "selectPageUp",		keyBinding: new KeyBinding(33, null, true), predefined: true});
-			bindings.push({actionID: "selectPageDown",		keyBinding: new KeyBinding(34, null, true), predefined: true});
+			bindings.push({actionID: "selectLineUp",		keyBinding: new KeyBinding(38, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectLineDown",		keyBinding: new KeyBinding(40, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectCharPrevious",	keyBinding: new KeyBinding(37, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectCharNext",		keyBinding: new KeyBinding(39, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectPageUp",		keyBinding: new KeyBinding(33, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectPageDown",		keyBinding: new KeyBinding(34, null, true), predefined: true}); //$NON-NLS-0$
 			if (isMac) {
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, true, true), predefined: true});
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, true, true), predefined: true});
-				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, null, true, true), predefined: true});
-				bindings.push({actionID: "selectWordNext",	keyBinding: new KeyBinding(39, null, true, true), predefined: true});
-				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(36, null, true), predefined: true});
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
-				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true});
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true});
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true});
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, null, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectWordNext",	keyBinding: new KeyBinding(39, null, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(36, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextStart",	keyBinding: new KeyBinding(38, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(40, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(37, null, true, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(39, null, true, null, true), predefined: true}); //$NON-NLS-0$
 				//TODO These two actions should be changed to select paragraph start and select paragraph end  when word wrap is implemented
-				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true});
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",	keyBinding: new KeyBinding(38, null, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(40, null, true, true), predefined: true}); //$NON-NLS-0$
 			} else {
 				if (isLinux) {
-					bindings.push({actionID: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true});
-					bindings.push({actionID: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true});
+					bindings.push({actionID: "selectWholeLineUp",		keyBinding: new KeyBinding(38, true, true), predefined: true}); //$NON-NLS-0$
+					bindings.push({actionID: "selectWholeLineDown",		keyBinding: new KeyBinding(40, true, true), predefined: true}); //$NON-NLS-0$
 				}
-				bindings.push({actionID: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true});
-				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true});
-				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true});
-				bindings.push({actionID: "selectWordNext",		keyBinding: new KeyBinding(39, true, true), predefined: true});
-				bindings.push({actionID: "selectTextStart",		keyBinding: new KeyBinding(36, true, true), predefined: true});
-				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, true, true), predefined: true});
+				bindings.push({actionID: "selectLineStart",		keyBinding: new KeyBinding(36, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectLineEnd",		keyBinding: new KeyBinding(35, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectWordPrevious",	keyBinding: new KeyBinding(37, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectWordNext",		keyBinding: new KeyBinding(39, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextStart",		keyBinding: new KeyBinding(36, true, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "selectTextEnd",		keyBinding: new KeyBinding(35, true, true), predefined: true}); //$NON-NLS-0$
 			}
 
 			//Misc
-			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8), predefined: true});
-			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8, null, true), predefined: true});
-			bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46), predefined: true});
-			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true), predefined: true});
-			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true});
-			bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true});
-			bindings.push({actionID: "tab",			keyBinding: new KeyBinding(9), predefined: true});
-			bindings.push({actionID: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true});
-			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13), predefined: true});
-			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true});
-			bindings.push({actionID: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true});
-			bindings.push({actionID: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true});
+			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "deletePrevious",		keyBinding: new KeyBinding(8, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, true, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "tab",			keyBinding: new KeyBinding(9), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "shiftTab",			keyBinding: new KeyBinding(9, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "enter",			keyBinding: new KeyBinding(13, null, true), predefined: true}); //$NON-NLS-0$
+			bindings.push({actionID: "selectAll",		keyBinding: new KeyBinding('a', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+			bindings.push({actionID: "toggleTabMode",	keyBinding: new KeyBinding('m', true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 			if (isMac) {
-				bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true});
-				bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true});
-				bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true});
+				bindings.push({actionID: "deleteNext",		keyBinding: new KeyBinding(46, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "deleteWordPrevious",	keyBinding: new KeyBinding(8, null, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "deleteWordNext",		keyBinding: new KeyBinding(46, null, null, true), predefined: true}); //$NON-NLS-0$
 			}
 				
 			/*
@@ -3127,36 +3127,36 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			if (!isFirefox) {
 				var isMacChrome = isMac && isChrome;
-				bindings.push({actionID: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true});
-				bindings.push({actionID: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true});
-				bindings.push({actionID: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true});
+				bindings.push({actionID: null, keyBinding: new KeyBinding('u', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: null, keyBinding: new KeyBinding('i', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: null, keyBinding: new KeyBinding('b', !isMacChrome, false, false, isMacChrome), predefined: true}); //$NON-NLS-0$
 			}
 
 			if (isFirefox) {
-				bindings.push({actionID: "copy", keyBinding: new KeyBinding(45, true), predefined: true});
-				bindings.push({actionID: "paste", keyBinding: new KeyBinding(45, null, true), predefined: true});
-				bindings.push({actionID: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true});
+				bindings.push({actionID: "copy", keyBinding: new KeyBinding(45, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "paste", keyBinding: new KeyBinding(45, null, true), predefined: true}); //$NON-NLS-0$
+				bindings.push({actionID: "cut", keyBinding: new KeyBinding(46, null, true), predefined: true}); //$NON-NLS-0$
 			}
 
 			// Add the emacs Control+ ... key bindings.
 			if (isMac) {
-				bindings.push({actionID: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true});
-				bindings.push({actionID: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true});
-				bindings.push({actionID: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true});
-				bindings.push({actionID: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true});
-				bindings.push({actionID: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true});
-				bindings.push({actionID: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true});
-				bindings.push({actionID: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true});
-				bindings.push({actionID: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true});
-				bindings.push({actionID: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true});
+				bindings.push({actionID: "lineStart", keyBinding: new KeyBinding("a", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "lineEnd", keyBinding: new KeyBinding("e", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "lineUp", keyBinding: new KeyBinding("p", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "lineDown", keyBinding: new KeyBinding("n", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "charPrevious", keyBinding: new KeyBinding("b", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "charNext", keyBinding: new KeyBinding("f", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "deletePrevious", keyBinding: new KeyBinding("h", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "deleteNext", keyBinding: new KeyBinding("d", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+				bindings.push({actionID: "deleteLineEnd", keyBinding: new KeyBinding("k", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				if (isFirefox) {
-					bindings.push({actionID: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
-					bindings.push({actionID: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true});
-					bindings.push({actionID: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true});
+					bindings.push({actionID: "scrollPageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+					bindings.push({actionID: "deleteLineStart", keyBinding: new KeyBinding("u", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+					bindings.push({actionID: "deleteWordPrevious", keyBinding: new KeyBinding("w", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					bindings.push({actionID: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true});
-					bindings.push({actionID: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true});
-					bindings.push({actionID: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true});
+					bindings.push({actionID: "pageDown", keyBinding: new KeyBinding("v", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+					bindings.push({actionID: "centerLine", keyBinding: new KeyBinding("l", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
+					bindings.push({actionID: "enterNoCursor", keyBinding: new KeyBinding("o", false, false, false, true), predefined: true}); //$NON-NLS-1$ //$NON-NLS-0$
 					//TODO implement: y (yank), t (transpose)
 				}
 			}
@@ -3164,68 +3164,68 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			//1 to 1, no duplicates
 			var self = this;
 			this._actions = {
-				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}},
-				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}},
-				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}},
-				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}},
-				"charPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}},
-				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}},
-				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}},
-				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}},
-				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}},
-				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}},
-				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}},
-				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}},
-				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}},
-				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}},
-				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}},
-				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}},
-				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}},
+				"lineUp": {defaultHandler: function() {return self._doLineUp({select: false});}}, //$NON-NLS-0$
+				"lineDown": {defaultHandler: function() {return self._doLineDown({select: false});}}, //$NON-NLS-0$
+				"lineStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:false});}}, //$NON-NLS-0$
+				"lineEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:false});}}, //$NON-NLS-0$
+				"charPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"charNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"pageUp": {defaultHandler: function() {return self._doPageUp({select: false});}}, //$NON-NLS-0$
+				"pageDown": {defaultHandler: function() {return self._doPageDown({select: false});}}, //$NON-NLS-0$
+				"scrollPageUp": {defaultHandler: function() {return self._doScroll({type: "pageUp"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollPageDown": {defaultHandler: function() {return self._doScroll({type: "pageDown"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"wordNext": {defaultHandler: function() {return self._doCursorNext({select: false, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"textStart": {defaultHandler: function() {return self._doHome({select: false, ctrl:true});}}, //$NON-NLS-0$
+				"textEnd": {defaultHandler: function() {return self._doEnd({select: false, ctrl:true});}}, //$NON-NLS-0$
+				"scrollTextStart": {defaultHandler: function() {return self._doScroll({type: "textStart"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"scrollTextEnd": {defaultHandler: function() {return self._doScroll({type: "textEnd"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"centerLine": {defaultHandler: function() {return self._doScroll({type: "centerLine"});}}, //$NON-NLS-1$ //$NON-NLS-0$
 				
-				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}},
-				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}},
-				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}},
-				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}},
-				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}},
-				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}},
-				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}},
-				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}},
-				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}},
-				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}},
-				"selectWordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}},
-				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}},
-				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}},
-				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}},
+				"selectLineUp": {defaultHandler: function() {return self._doLineUp({select: true});}}, //$NON-NLS-0$
+				"selectLineDown": {defaultHandler: function() {return self._doLineDown({select: true});}}, //$NON-NLS-0$
+				"selectWholeLineUp": {defaultHandler: function() {return self._doLineUp({select: true, wholeLine: true});}}, //$NON-NLS-0$
+				"selectWholeLineDown": {defaultHandler: function() {return self._doLineDown({select: true, wholeLine: true});}}, //$NON-NLS-0$
+				"selectLineStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:false});}}, //$NON-NLS-0$
+				"selectLineEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:false});}}, //$NON-NLS-0$
+				"selectCharPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectCharNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectPageUp": {defaultHandler: function() {return self._doPageUp({select: true});}}, //$NON-NLS-0$
+				"selectPageDown": {defaultHandler: function() {return self._doPageDown({select: true});}}, //$NON-NLS-0$
+				"selectWordPrevious": {defaultHandler: function() {return self._doCursorPrevious({select: true, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectWordNext": {defaultHandler: function() {return self._doCursorNext({select: true, unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"selectTextStart": {defaultHandler: function() {return self._doHome({select: true, ctrl:true});}}, //$NON-NLS-0$
+				"selectTextEnd": {defaultHandler: function() {return self._doEnd({select: true, ctrl:true});}}, //$NON-NLS-0$
 
-				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}},
-				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}},
-				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}},
-				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}},
-				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}},
-				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}},
-				"tab": {defaultHandler: function() {return self._doTab();}},
-				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}},
-				"enter": {defaultHandler: function() {return self._doEnter();}},
-				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}},
-				"selectAll": {defaultHandler: function() {return self._doSelectAll();}},
-				"copy": {defaultHandler: function() {return self._doCopy();}},
-				"cut": {defaultHandler: function() {return self._doCut();}},
-				"paste": {defaultHandler: function() {return self._doPaste();}},
+				"deletePrevious": {defaultHandler: function() {return self._doBackspace({unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteNext": {defaultHandler: function() {return self._doDelete({unit:"character"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordPrevious": {defaultHandler: function() {return self._doBackspace({unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteWordNext": {defaultHandler: function() {return self._doDelete({unit:"word"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineStart": {defaultHandler: function() {return self._doBackspace({unit: "line"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"deleteLineEnd": {defaultHandler: function() {return self._doDelete({unit: "line"});}}, //$NON-NLS-1$ //$NON-NLS-0$
+				"tab": {defaultHandler: function() {return self._doTab();}}, //$NON-NLS-0$
+				"shiftTab": {defaultHandler: function() {return self._doShiftTab();}}, //$NON-NLS-0$
+				"enter": {defaultHandler: function() {return self._doEnter();}}, //$NON-NLS-0$
+				"enterNoCursor": {defaultHandler: function() {return self._doEnter({noCursor:true});}}, //$NON-NLS-0$
+				"selectAll": {defaultHandler: function() {return self._doSelectAll();}}, //$NON-NLS-0$
+				"copy": {defaultHandler: function() {return self._doCopy();}}, //$NON-NLS-0$
+				"cut": {defaultHandler: function() {return self._doCut();}}, //$NON-NLS-0$
+				"paste": {defaultHandler: function() {return self._doPaste();}}, //$NON-NLS-0$
 				
-				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}}
+				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}} //$NON-NLS-0$
 			};
 		},
 		_createLine: function(parent, div, document, lineIndex, model) {
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
-			var e = {type:"LineStyle", textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart};
+			var e = {type:"LineStyle", textView: this, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
 			this.onLineStyle(e);
-			var lineDiv = div || document.createElement("DIV");
+			var lineDiv = div || document.createElement("DIV"); //$NON-NLS-0$
 			if (!div || !this._compare(div.viewStyle, e.style)) {
 				this._applyStyle(e.style, lineDiv, div);
 				if (div) { div._trim = null; }
 				lineDiv.viewStyle = e.style;
-				lineDiv.setAttribute("role", "presentation");
+				lineDiv.setAttribute("role", "presentation"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			lineDiv.lineIndex = lineIndex;
 			var ranges = [];
@@ -3240,14 +3240,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* selection at the end of the line when the line is fully selected. 
 			* 3. The height of a div with only an empty span is zero.
 			*/
-			var c = " ";
+			var c = " "; //$NON-NLS-0$
 			if (!this._fullSelection && isIE < 9) {
 				/* 
 				* IE8 already selects extra space at end of a line fully selected,
 				* adding another space at the end of the line causes the selection 
 				* to look too big. The fix is to use a zero-width space (\uFEFF) instead. 
 				*/
-				c = "\uFEFF";
+				c = "\uFEFF"; //$NON-NLS-0$
 			}
 			if (isWebkit) {
 				/*
@@ -3257,7 +3257,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Note: To not use \uFEFF because in old version of Chrome this character 
 				* shows a glyph;
 				*/
-				c = "\u200C";
+				c = "\u200C"; //$NON-NLS-0$
 			}
 			ranges.push({text: c, style: this._metrics.largestFontStyle, ignoreChars: 1});
 			
@@ -3361,7 +3361,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (start >= end) { return; }
 			var tabSize = this._customTabSize, range;
 			if (tabSize && tabSize !== 8) {
-				var tabIndex = text.indexOf("\t", start);
+				var tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
 				while (tabIndex !== -1 && tabIndex < end) {
 					if (start < tabIndex) {
 						range = {text: text.substring(start, tabIndex), style: style};
@@ -3371,16 +3371,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
 					if (spacesCount > 0) {
 						//TODO hack to preserve text length in getDOMText()
-						var spaces = "\u00A0";
+						var spaces = "\u00A0"; //$NON-NLS-0$
 						for (var i = 1; i < spacesCount; i++) {
-							spaces += " ";
+							spaces += " "; //$NON-NLS-0$
 						}
 						range = {text: spaces, style: style, ignoreChars: spacesCount - 1};
 						data.ranges.push(range);
 						data.tabOffset += range.text.length;
 					}
 					start = tabIndex + 1;
-					tabIndex = text.indexOf("\t", start);
+					tabIndex = text.indexOf("\t", start); //$NON-NLS-0$
 				}
 			}
 			if (start < end) {
@@ -3390,15 +3390,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 		},
 		_createSpan: function(parent, document, text, style, ignoreChars) {
-			var isLink = style && style.tagName === "A";
+			var isLink = style && style.tagName === "A"; //$NON-NLS-0$
 			if (isLink) { parent.hasLink = true; }
-			var tagName = isLink && this._linksVisible ? "A" : "SPAN";
+			var tagName = isLink && this._linksVisible ? "A" : "SPAN"; //$NON-NLS-1$ //$NON-NLS-0$
 			var child = document.createElement(tagName);
 			child.appendChild(document.createTextNode(text));
 			this._applyStyle(style, child);
-			if (tagName === "A") {
+			if (tagName === "A") { //$NON-NLS-0$
 				var self = this;
-				addHandler(child, "click", function(e) { return self._handleLinkClick(e); }, false);
+				addHandler(child, "click", function(e) { return self._handleLinkClick(e); }, false); //$NON-NLS-0$
 			}
 			child.viewStyle = style;
 			if (ignoreChars) {
@@ -3409,16 +3409,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_createRuler: function(ruler, index) {
 			if (!this._clientDiv) { return; }
 			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
-			var div = document.createElement("DIV");
+			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
+			var div = document.createElement("DIV"); //$NON-NLS-0$
 			div._ruler = ruler;
 			div.rulerChanged = true;
-			div.style.position = "relative";
+			div.style.position = "relative"; //$NON-NLS-0$
 			var row = rulerParent.firstChild.rows[0];
 			var length = row.cells.length;
 			index = index === undefined || index < 0 || index > length ? length : index;
 			var cell = row.insertCell(index);
-			cell.vAlign = "top";
+			cell.vAlign = "top"; //$NON-NLS-0$
 			cell.appendChild(div);
 		},
 		_createView: function() {
@@ -3426,162 +3426,162 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var parent = this._parent;
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
 
-			var rootDiv = document.createElement("DIV");
+			var rootDiv = document.createElement("DIV"); //$NON-NLS-0$
 			this._rootDiv = rootDiv;
 			rootDiv.tabIndex = -1;
-			rootDiv.style.position = "absolute";
-			rootDiv.style.overflow = "hidden";
-			rootDiv.setAttribute("role", "application");
+			rootDiv.style.position = "absolute"; //$NON-NLS-0$
+			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
-			var leftDiv = document.createElement("DIV");
-			leftDiv.className = "textviewLeftRuler";
+			var leftDiv = document.createElement("DIV"); //$NON-NLS-0$
+			leftDiv.className = "textviewLeftRuler"; //$NON-NLS-0$
 			this._leftDiv = leftDiv;
 			leftDiv.tabIndex = -1;
-			leftDiv.style.overflow = "hidden";
-			leftDiv.style.MozUserSelect = "none";
-			leftDiv.style.WebkitUserSelect = "none";
-			leftDiv.style.position = "absolute";
-			leftDiv.style.cursor = "default";
-			leftDiv.setAttribute("aria-hidden", "true");
-			var table = document.createElement("TABLE");
+			leftDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			leftDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
+			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
+			leftDiv.style.position = "absolute"; //$NON-NLS-0$
+			leftDiv.style.cursor = "default"; //$NON-NLS-0$
+			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			var table = document.createElement("TABLE"); //$NON-NLS-0$
 			leftDiv.appendChild(table);
-			table.cellPadding = "0px";
-			table.cellSpacing = "0px";
-			table.border = "0px";
+			table.cellPadding = "0px"; //$NON-NLS-0$
+			table.cellSpacing = "0px"; //$NON-NLS-0$
+			table.border = "0px"; //$NON-NLS-0$
 			table.insertRow(0);
 			rootDiv.appendChild(leftDiv);
 
-			var viewDiv = document.createElement("DIV");
-			viewDiv.className = "textview";
+			var viewDiv = document.createElement("DIV"); //$NON-NLS-0$
+			viewDiv.className = "textview"; //$NON-NLS-0$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
-			viewDiv.style.overflow = "auto";
-			viewDiv.style.position = "absolute";
-			viewDiv.style.top = "0px";
-			viewDiv.style.borderWidth = "0px";
-			viewDiv.style.margin = "0px";
-			viewDiv.style.outline = "none";
+			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
+			viewDiv.style.position = "absolute"; //$NON-NLS-0$
+			viewDiv.style.top = "0px"; //$NON-NLS-0$
+			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
+			viewDiv.style.margin = "0px"; //$NON-NLS-0$
+			viewDiv.style.outline = "none"; //$NON-NLS-0$
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = document.createElement("DIV");
-			rightDiv.className = "textviewRightRuler";
+			var rightDiv = document.createElement("DIV"); //$NON-NLS-0$
+			rightDiv.className = "textviewRightRuler"; //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.tabIndex = -1;
-			rightDiv.style.overflow = "hidden";
-			rightDiv.style.MozUserSelect = "none";
-			rightDiv.style.WebkitUserSelect = "none";
-			rightDiv.style.position = "absolute";
-			rightDiv.style.cursor = "default";
-			rightDiv.setAttribute("aria-hidden", "true");
-			table = document.createElement("TABLE");
+			rightDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
+			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
+			rightDiv.style.position = "absolute"; //$NON-NLS-0$
+			rightDiv.style.cursor = "default"; //$NON-NLS-0$
+			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			table = document.createElement("TABLE"); //$NON-NLS-0$
 			rightDiv.appendChild(table);
-			table.cellPadding = "0px";
-			table.cellSpacing = "0px";
-			table.border = "0px";
+			table.cellPadding = "0px"; //$NON-NLS-0$
+			table.cellSpacing = "0px"; //$NON-NLS-0$
+			table.border = "0px"; //$NON-NLS-0$
 			table.insertRow(0);
 			rootDiv.appendChild(rightDiv);
 				
-			var scrollDiv = document.createElement("DIV");
+			var scrollDiv = document.createElement("DIV"); //$NON-NLS-0$
 			this._scrollDiv = scrollDiv;
-			scrollDiv.style.margin = "0px";
-			scrollDiv.style.borderWidth = "0px";
-			scrollDiv.style.padding = "0px";
+			scrollDiv.style.margin = "0px"; //$NON-NLS-0$
+			scrollDiv.style.borderWidth = "0px"; //$NON-NLS-0$
+			scrollDiv.style.padding = "0px"; //$NON-NLS-0$
 			viewDiv.appendChild(scrollDiv);
 			
 			if (isFirefox) {
-				var clipboardDiv = document.createElement("DIV");
+				var clipboardDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._clipboardDiv = clipboardDiv;
-				clipboardDiv.style.position = "fixed";
-				clipboardDiv.style.whiteSpace = "pre";
-				clipboardDiv.style.left = "-1000px";
+				clipboardDiv.style.position = "fixed"; //$NON-NLS-0$
+				clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
+				clipboardDiv.style.left = "-1000px"; //$NON-NLS-0$
 				rootDiv.appendChild(clipboardDiv);
 			
-				var clipDiv = document.createElement("DIV");
+				var clipDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._clipDiv = clipDiv;
-				clipDiv.style.position = "absolute";
-				clipDiv.style.overflow = "hidden";
-				clipDiv.style.margin = "0px";
-				clipDiv.style.borderWidth = "0px";
-				clipDiv.style.padding = "0px";
+				clipDiv.style.position = "absolute"; //$NON-NLS-0$
+				clipDiv.style.overflow = "hidden"; //$NON-NLS-0$
+				clipDiv.style.margin = "0px"; //$NON-NLS-0$
+				clipDiv.style.borderWidth = "0px"; //$NON-NLS-0$
+				clipDiv.style.padding = "0px"; //$NON-NLS-0$
 				rootDiv.appendChild(clipDiv);
 				
-				var clipScrollDiv = document.createElement("DIV");
+				var clipScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._clipScrollDiv = clipScrollDiv;
-				clipScrollDiv.style.position = "absolute";
-				clipScrollDiv.style.height = "1px";
-				clipScrollDiv.style.top = "-1000px";
+				clipScrollDiv.style.position = "absolute"; //$NON-NLS-0$
+				clipScrollDiv.style.height = "1px"; //$NON-NLS-0$
+				clipScrollDiv.style.top = "-1000px"; //$NON-NLS-0$
 				clipDiv.appendChild(clipScrollDiv);
 			}
 			
 			this._setFullSelection(this._fullSelection, true);
 
-			var clientDiv = document.createElement("DIV");
-			clientDiv.className = "textviewContent";
+			var clientDiv = document.createElement("DIV"); //$NON-NLS-0$
+			clientDiv.className = "textviewContent"; //$NON-NLS-0$
 			this._clientDiv = clientDiv;
-			clientDiv.style.whiteSpace = "pre";
-			clientDiv.style.position = "absolute";
-			clientDiv.style.borderWidth = "0px";
-			clientDiv.style.margin = "0px";
-			clientDiv.style.padding = "0px";
-			clientDiv.style.outline = "none";
-			clientDiv.style.zIndex = "1";
-			clientDiv.style.WebkitUserSelect = "text";
-			clientDiv.setAttribute("spellcheck", "false");
+			clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
+			clientDiv.style.position = "absolute"; //$NON-NLS-0$
+			clientDiv.style.borderWidth = "0px"; //$NON-NLS-0$
+			clientDiv.style.margin = "0px"; //$NON-NLS-0$
+			clientDiv.style.padding = "0px"; //$NON-NLS-0$
+			clientDiv.style.outline = "none"; //$NON-NLS-0$
+			clientDiv.style.zIndex = "1"; //$NON-NLS-0$
+			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-0$
+			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 			if (isPad) {
-				clientDiv.style.WebkitTapHighlightColor = "transparent";
+				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-0$
 			}
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
 			
 			if (isPad) {
-				var vScrollDiv = document.createElement("DIV");
+				var vScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._vScrollDiv = vScrollDiv;
-				vScrollDiv.style.position = "absolute";
-				vScrollDiv.style.borderWidth = "1px";
-				vScrollDiv.style.borderColor = "white";
-				vScrollDiv.style.borderStyle = "solid";
-				vScrollDiv.style.borderRadius = "4px";
-				vScrollDiv.style.backgroundColor = "black";
-				vScrollDiv.style.opacity = "0.5";
-				vScrollDiv.style.margin = "0px";
-				vScrollDiv.style.padding = "0px";
-				vScrollDiv.style.outline = "none";
-				vScrollDiv.style.zIndex = "3";
-				vScrollDiv.style.width = "8px";
-				vScrollDiv.style.display = "none";
+				vScrollDiv.style.position = "absolute"; //$NON-NLS-0$
+				vScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
+				vScrollDiv.style.borderColor = "white"; //$NON-NLS-0$
+				vScrollDiv.style.borderStyle = "solid"; //$NON-NLS-0$
+				vScrollDiv.style.borderRadius = "4px"; //$NON-NLS-0$
+				vScrollDiv.style.backgroundColor = "black"; //$NON-NLS-0$
+				vScrollDiv.style.opacity = "0.5"; //$NON-NLS-0$
+				vScrollDiv.style.margin = "0px"; //$NON-NLS-0$
+				vScrollDiv.style.padding = "0px"; //$NON-NLS-0$
+				vScrollDiv.style.outline = "none"; //$NON-NLS-0$
+				vScrollDiv.style.zIndex = "3"; //$NON-NLS-0$
+				vScrollDiv.style.width = "8px"; //$NON-NLS-0$
+				vScrollDiv.style.display = "none"; //$NON-NLS-0$
 				rootDiv.appendChild(vScrollDiv);
-				var hScrollDiv = document.createElement("DIV");
+				var hScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._hScrollDiv = hScrollDiv;
-				hScrollDiv.style.position = "absolute";
-				hScrollDiv.style.borderWidth = "1px";
-				hScrollDiv.style.borderColor = "white";
-				hScrollDiv.style.borderStyle = "solid";
-				hScrollDiv.style.borderRadius = "4px";
-				hScrollDiv.style.backgroundColor = "black";
-				hScrollDiv.style.opacity = "0.5";
-				hScrollDiv.style.margin = "0px";
-				hScrollDiv.style.padding = "0px";
-				hScrollDiv.style.outline = "none";
-				hScrollDiv.style.zIndex = "3";
-				hScrollDiv.style.height = "8px";
-				hScrollDiv.style.display = "none";
+				hScrollDiv.style.position = "absolute"; //$NON-NLS-0$
+				hScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
+				hScrollDiv.style.borderColor = "white"; //$NON-NLS-0$
+				hScrollDiv.style.borderStyle = "solid"; //$NON-NLS-0$
+				hScrollDiv.style.borderRadius = "4px"; //$NON-NLS-0$
+				hScrollDiv.style.backgroundColor = "black"; //$NON-NLS-0$
+				hScrollDiv.style.opacity = "0.5"; //$NON-NLS-0$
+				hScrollDiv.style.margin = "0px"; //$NON-NLS-0$
+				hScrollDiv.style.padding = "0px"; //$NON-NLS-0$
+				hScrollDiv.style.outline = "none"; //$NON-NLS-0$
+				hScrollDiv.style.zIndex = "3"; //$NON-NLS-0$
+				hScrollDiv.style.height = "8px"; //$NON-NLS-0$
+				hScrollDiv.style.display = "none"; //$NON-NLS-0$
 				rootDiv.appendChild(hScrollDiv);
 			}
 
 			if (isFirefox && !clientDiv.setCapture) {
-				var overlayDiv = document.createElement("DIV");
+				var overlayDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._overlayDiv = overlayDiv;
 				overlayDiv.style.position = clientDiv.style.position;
 				overlayDiv.style.borderWidth = clientDiv.style.borderWidth;
 				overlayDiv.style.margin = clientDiv.style.margin;
 				overlayDiv.style.padding = clientDiv.style.padding;
-				overlayDiv.style.cursor = "text";
-				overlayDiv.style.zIndex = "2";
+				overlayDiv.style.cursor = "text"; //$NON-NLS-0$
+				overlayDiv.style.zIndex = "2"; //$NON-NLS-0$
 				(this._clipDiv || rootDiv).appendChild(overlayDiv);
 			}
-			clientDiv.contentEditable = "true";
-			clientDiv.setAttribute("role", "textbox");
-			clientDiv.setAttribute("aria-multiline", "true");
+			clientDiv.contentEditable = "true"; //$NON-NLS-0$
+			clientDiv.setAttribute("role", "textbox"); //$NON-NLS-1$ //$NON-NLS-0$
+			clientDiv.setAttribute("aria-multiline", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
@@ -3606,7 +3606,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_destroyRuler: function(ruler) {
 			var side = ruler.getLocation();
-			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv;
+			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
 			if (rulerParent) {
 				var row = rulerParent.firstChild.rows[0];
 				var cells = row.cells;
@@ -3695,10 +3695,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var left,top,right,bottom;
 			if (window.getComputedStyle) {
 				var style = window.getComputedStyle(node, null);
-				left = style.getPropertyValue("border-left-width");
-				top = style.getPropertyValue("border-top-width");
-				right = style.getPropertyValue("border-right-width");
-				bottom = style.getPropertyValue("border-bottom-width");
+				left = style.getPropertyValue("border-left-width"); //$NON-NLS-0$
+				top = style.getPropertyValue("border-top-width"); //$NON-NLS-0$
+				right = style.getPropertyValue("border-right-width"); //$NON-NLS-0$
+				bottom = style.getPropertyValue("border-bottom-width"); //$NON-NLS-0$
 			} else if (node.currentStyle) {
 				left = node.currentStyle.borderLeftWidth;
 				top = node.currentStyle.borderTopWidth;
@@ -3743,14 +3743,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							range = document.body.createTextRange();
 							range.moveToElementText(lineChild);
 							range.collapse();
-							range.moveEnd("character", index + 1);
-							range.moveStart("character", index);
+							range.moveEnd("character", index + 1); //$NON-NLS-0$
+							range.moveStart("character", index); //$NON-NLS-0$
 							result = range.getBoundingClientRect();
 						} else {
 							var text = textNode.data;
 							lineChild.removeChild(textNode);
 							lineChild.appendChild(document.createTextNode(text.substring(0, index)));
-							var span = document.createElement("SPAN");
+							var span = document.createElement("SPAN"); //$NON-NLS-0$
 							span.appendChild(document.createTextNode(text.substring(index, index + 1)));
 							lineChild.appendChild(span);
 							lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
@@ -3813,7 +3813,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (window.clipboardData) {
 				//IE
 				clipboadText = [];
-				text = window.clipboardData.getData("Text");
+				text = window.clipboardData.getData("Text"); //$NON-NLS-0$
 				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 				text = clipboadText.join("");
 				if (handler) { handler(text); }
@@ -3822,7 +3822,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (isFirefox) {
 				this._ignoreFocus = true;
 				var clipboardDiv = this._clipboardDiv;
-				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>";
+				clipboardDiv.innerHTML = "<pre contenteditable=''></pre>"; //$NON-NLS-0$
 				clipboardDiv.firstChild.focus();
 				var self = this;
 				var _getText = function() {
@@ -3840,7 +3840,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				/* Do not try execCommand if middle-click is used, because if we do, we get the clipboard text, not the primary selection text. */
 				if (!isLinux || this._lastMouseButton !== 2) {
 					try {
-						result = document.execCommand("paste", false, null);
+						result = document.execCommand("paste", false, null); //$NON-NLS-0$
 					} catch (ex) {
 						/* Firefox can throw even when execCommand() works, see bug 362835. */
 						result = clipboardDiv.childNodes.length > 1 || clipboardDiv.firstChild && clipboardDiv.firstChild.childNodes.length > 0;
@@ -3881,7 +3881,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Note: setData is not allowed, not even during copy/cut event
 				*/
 				clipboadText = [];
-				text = event.clipboardData.getData("text/plain");
+				text = event.clipboardData.getData("text/plain"); //$NON-NLS-0$
 				this._convertDelimiter(text, function(t) {clipboadText.push(t);}, function() {clipboadText.push(delimiter);});
 				text = clipboadText.join("");
 				if (text && handler) {
@@ -3903,7 +3903,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (lineChild.ignoreChars) {
 						for (var i = 0; i < textNode.length; i++) {
 							var ch = textNode.data.substring(i, i + 1);
-							if (ch !== " ") {
+							if (ch !== " ") { //$NON-NLS-0$
 								text += ch;
 							}
 						}
@@ -4010,7 +4010,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return node;
 		},
 		_getOffset: function (offset, unit, direction) {
-			if (unit === "line") {
+			if (unit === "line") { //$NON-NLS-0$
 				var model = this._model;
 				var lineIndex = model.getLineAtOffset(offset);
 				if (direction > 0) {
@@ -4018,7 +4018,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				return model.getLineStart(lineIndex);
 			}
-			if (unit === "wordend") {
+			if (unit === "wordend") { //$NON-NLS-0$
 				return this._getOffset_W3C(offset, unit, direction);
 			}
 			return isIE ? this._getOffset_IE(offset, unit, direction) : this._getOffset_W3C(offset, unit, direction);
@@ -4030,7 +4030,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			function _isWhitespace(c) {
 				return c === 32 || c === 9;
 			}
-			if (unit === "word" || unit === "wordend") {
+			if (unit === "word" || unit === "wordend") { //$NON-NLS-1$ //$NON-NLS-0$
 				var model = this._model;
 				var lineIndex = model.getLineAtOffset(offset);
 				var lineText = model.getLine(lineIndex);
@@ -4050,13 +4050,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					while (offsetInLine < lineLength) {
 						c = lineText.charCodeAt(offsetInLine);
 						punctuation = _isPunctuation(c);
-						if (unit === "wordend") {
+						if (unit === "wordend") { //$NON-NLS-0$
 							if (!punctuation && previousPunctuation) { break; }
 						} else {
 							if (punctuation && !previousPunctuation) { break; }
 						}
 						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (unit === "wordend") {
+						if (unit === "wordend") { //$NON-NLS-0$
 							if (!letterOrDigit && previousLetterOrDigit) { break; }
 						} else {
 							if (letterOrDigit && !previousLetterOrDigit) { break; }
@@ -4074,13 +4074,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					while (0 < offsetInLine) {
 						c = lineText.charCodeAt(offsetInLine - 1);
 						punctuation = _isPunctuation(c);
-						if (unit === "wordend") {
+						if (unit === "wordend") { //$NON-NLS-0$
 							if (punctuation && !previousPunctuation) { break; }
 						} else {
 							if (!punctuation && previousPunctuation) { break; }
 						}
 						letterOrDigit  = !punctuation && !_isWhitespace(c);
-						if (unit === "wordend") {
+						if (unit === "wordend") { //$NON-NLS-0$
 							if (letterOrDigit && !previousLetterOrDigit) { break; }
 						} else {
 							if (!letterOrDigit && previousLetterOrDigit) { break; }
@@ -4128,7 +4128,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						} else {
 							range.moveToElementText(lineChild);
 							range.collapse();
-							range.moveEnd("character", offset - lineOffset);
+							range.moveEnd("character", offset - lineOffset); //$NON-NLS-0$
 						}
 						length = range.text.length;
 						range.moveEnd(unit, direction);
@@ -4149,10 +4149,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var left,top,right,bottom;
 			if (window.getComputedStyle) {
 				var style = window.getComputedStyle(node, null);
-				left = style.getPropertyValue("padding-left");
-				top = style.getPropertyValue("padding-top");
-				right = style.getPropertyValue("padding-right");
-				bottom = style.getPropertyValue("padding-bottom");
+				left = style.getPropertyValue("padding-left"); //$NON-NLS-0$
+				top = style.getPropertyValue("padding-top"); //$NON-NLS-0$
+				right = style.getPropertyValue("padding-right"); //$NON-NLS-0$
+				bottom = style.getPropertyValue("padding-bottom"); //$NON-NLS-0$
 			} else if (node.currentStyle) {
 				left = node.currentStyle.paddingLeft;
 				top = node.currentStyle.paddingTop;
@@ -4263,8 +4263,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 									range.setEnd(textNode, end);
 								} else {
 									range.moveToElementText(lineChild);
-									range.move("character", start);
-									range.moveEnd("character", end - start);
+									range.move("character", start); //$NON-NLS-0$
+									range.moveEnd("character", end - start); //$NON-NLS-0$
 								}
 								rects = range.getClientRects();
 								var found = false;
@@ -4291,8 +4291,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								range.setEnd(textNode, end);
 							} else {
 								range.moveToElementText(lineChild);
-								range.move("character", start);
-								range.moveEnd("character", end - start);
+								range.move("character", start); //$NON-NLS-0$
+								range.moveEnd("character", end - start); //$NON-NLS-0$
 							}
 							rect = range.getClientRects()[0];
 							//TODO test for character trailing (wrong for bidi)
@@ -4302,13 +4302,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						} else {
 							var newText = [];
 							for (var q = 0; q < nodeLength; q++) {
-								newText.push("<span>");
+								newText.push("<span>"); //$NON-NLS-0$
 								if (q === nodeLength - 1) {
 									newText.push(textNode.data.substring(q));
 								} else {
 									newText.push(textNode.data.substring(q, q + 1));
 								}
-								newText.push("</span>");
+								newText.push("</span>"); //$NON-NLS-0$
 							}
 							lineChild.innerHTML = newText.join("");
 							var rangeChild = lineChild.firstChild;
@@ -4368,80 +4368,80 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._onModelChanged(modelChangedEvent);
 				}
 			};
-			this._model.addEventListener("Changing", this._modelListener.onChanging);
-			this._model.addEventListener("Changed", this._modelListener.onChanged);
+			this._model.addEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.addEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
 			
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
 			var topNode = this._overlayDiv || clientDiv;
 			var grabNode = isIE ? document : window;
-			handlers.push({target: window, type: "resize", handler: function(e) { return self._handleResize(e);}});
-			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return self._handleBlur(e);}});
-			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e);}});
-			handlers.push({target: viewDiv, type: "focus", handler: function(e) { clientDiv.focus(); }});
-			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}});
-			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}});
-			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}});
-			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}});
-			handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e);}});
-			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}});
-			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}});
-			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}});
-			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}});
+			handlers.push({target: window, type: "resize", handler: function(e) { return self._handleResize(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "blur", handler: function(e) { return self._handleBlur(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e);}}); //$NON-NLS-0$
+			handlers.push({target: viewDiv, type: "focus", handler: function(e) { clientDiv.focus(); }}); //$NON-NLS-0$
+			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}}); //$NON-NLS-0$
 			if (isPad) {
-				handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e); }});
-				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e); }});
-				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e); }});
-				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }});
+				handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e); }}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e); }}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e); }}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e); }}); //$NON-NLS-0$
 			} else {
-				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
-				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}});
-				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}});
-				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}});
-				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}});
-				handlers.push({target: rootDiv, type: "mousedown", handler: function(e) { return self._handleRootMouseDown(e);}});
-				handlers.push({target: rootDiv, type: "mouseup", handler: function(e) { return self._handleRootMouseUp(e);}});
-				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}});
-				handlers.push({target: topNode, type: "drag", handler: function(e) { return self._handleDrag(e);}});
-				handlers.push({target: topNode, type: "dragend", handler: function(e) { return self._handleDragEnd(e);}});
-				handlers.push({target: topNode, type: "dragenter", handler: function(e) { return self._handleDragEnter(e);}});
-				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}});
-				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e);}});
-				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}});
-				handlers.push({target: this._clientDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }});
+				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}}); //$NON-NLS-0$
+				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}}); //$NON-NLS-0$
+				handlers.push({target: grabNode, type: "mouseup", handler: function(e) { return self._handleMouseUp(e);}}); //$NON-NLS-0$
+				handlers.push({target: grabNode, type: "mousemove", handler: function(e) { return self._handleMouseMove(e);}}); //$NON-NLS-0$
+				handlers.push({target: rootDiv, type: "mousedown", handler: function(e) { return self._handleRootMouseDown(e);}}); //$NON-NLS-0$
+				handlers.push({target: rootDiv, type: "mouseup", handler: function(e) { return self._handleRootMouseUp(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "dragstart", handler: function(e) { return self._handleDragStart(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "drag", handler: function(e) { return self._handleDrag(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "dragend", handler: function(e) { return self._handleDragEnd(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "dragenter", handler: function(e) { return self._handleDragEnter(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "dragover", handler: function(e) { return self._handleDragOver(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e);}}); //$NON-NLS-0$
+				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}}); //$NON-NLS-0$
+				handlers.push({target: this._clientDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
 				if (isFirefox && !isWindows) {
-					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }});
+					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }}); //$NON-NLS-0$
 				}
 				if (this._overlayDiv) {
-					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}});
-					handlers.push({target: this._overlayDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}});
-					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}});
-					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }});
+					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}}); //$NON-NLS-0$
+					handlers.push({target: this._overlayDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e);}}); //$NON-NLS-0$
+					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e);}}); //$NON-NLS-0$
+					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e); }}); //$NON-NLS-0$
 				}
 				if (!isW3CEvents) {
-					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return self._handleDblclick(e); }});
+					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return self._handleDblclick(e); }}); //$NON-NLS-0$
 				}
 			}
 
 			var leftDiv = this._leftDiv, rightDiv = this._rightDiv;
 			if (isIE) {
-				handlers.push({target: leftDiv, type: "selectstart", handler: function() {return false;}});
+				handlers.push({target: leftDiv, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
 			}
-			handlers.push({target: leftDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }});
-			handlers.push({target: leftDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: leftDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: leftDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: leftDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: leftDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e); }});
+			handlers.push({target: leftDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
+			handlers.push({target: leftDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: leftDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: leftDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: leftDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: leftDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
 			if (isIE) {
-				handlers.push({target: rightDiv, type: "selectstart", handler: function() {return false;}});
+				handlers.push({target: rightDiv, type: "selectstart", handler: function() {return false;}}); //$NON-NLS-0$
 			}
-			handlers.push({target: rightDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }});
-			handlers.push({target: rightDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: rightDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: rightDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: rightDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e); }});
-			handlers.push({target: rightDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e); }});
+			handlers.push({target: rightDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
+			handlers.push({target: rightDiv, type: "click", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: rightDiv, type: "dblclick", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: rightDiv, type: "mousemove", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: rightDiv, type: "mouseover", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
+			handlers.push({target: rightDiv, type: "mouseout", handler: function(e) { self._handleRulerEvent(e); }}); //$NON-NLS-0$
 			
 			for (var i=0; i<handlers.length; i++) {
 				var h = handlers[i];
@@ -4450,10 +4450,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_init: function(options) {
 			var parent = options.parent;
-			if (typeof(parent) === "string") {
+			if (typeof(parent) === "string") { //$NON-NLS-0$
 				parent = window.document.getElementById(parent);
 			}
-			if (!parent) { throw "no parent"; }
+			if (!parent) { throw "no parent"; } //$NON-NLS-0$
 			options.parent = parent;
 			options.model = options.model || new mTextModel.TextModel();
 			var defaultOptions = this._defaultOptions();
@@ -4465,7 +4465,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					} else {
 						value = defaultOptions[option].value;
 					}
-					this["_" + option] = value;
+					this["_" + option] = value; //$NON-NLS-0$
 				}
 			}
 			this._rulers = [];
@@ -4511,13 +4511,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._createView();
 		},
 		_isLinkURL: function(string) {
-			return string.toLowerCase().lastIndexOf(".css") === string.length - 4;
+			return string.toLowerCase().lastIndexOf(".css") === string.length - 4; //$NON-NLS-0$
 		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
 				return;
 			}
-			e.type = "Verify";
+			e.type = "Verify"; //$NON-NLS-0$
 			this.onVerify(e);
 
 			if (e.text === null || e.text === undefined) { return; }
@@ -4535,12 +4535,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selection.setCaret(e.start + e.text.length);
 				this._setSelection(selection, true);
 			}
-			this.onModify({type: "Modify"});
+			this.onModify({type: "Modify"}); //$NON-NLS-0$
 		},
 		_onModelChanged: function(modelChangedEvent) {
-			modelChangedEvent.type = "ModelChanged";
+			modelChangedEvent.type = "ModelChanged"; //$NON-NLS-0$
 			this.onModelChanged(modelChangedEvent);
-			modelChangedEvent.type = "Changed";
+			modelChangedEvent.type = "Changed"; //$NON-NLS-0$
 			var start = modelChangedEvent.start;
 			var addedCharCount = modelChangedEvent.addedCharCount;
 			var removedCharCount = modelChangedEvent.removedCharCount;
@@ -4587,9 +4587,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._updatePage();
 		},
 		_onModelChanging: function(modelChangingEvent) {
-			modelChangingEvent.type = "ModelChanging";
+			modelChangingEvent.type = "ModelChanging"; //$NON-NLS-0$
 			this.onModelChanging(modelChangingEvent);
-			modelChangingEvent.type = "Changing";
+			modelChangingEvent.type = "Changing"; //$NON-NLS-0$
 		},
 		_queueUpdatePage: function() {
 			if (this._updateTimer) { return; }
@@ -4670,22 +4670,22 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				//IE
 				clipboardText = [];
 				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
-				return window.clipboardData.setData("Text", clipboardText.join(""));
+				return window.clipboardData.setData("Text", clipboardText.join("")); //$NON-NLS-0$
 			}
 			/* Feature in Chrome, clipboardData.setData is no-op on Chrome even though it returns true */
 			if (isChrome || isFirefox || !event) {
-				var child = document.createElement("PRE");
-				child.style.position = "fixed";
-				child.style.left = "-1000px";
+				var child = document.createElement("PRE"); //$NON-NLS-0$
+				child.style.position = "fixed"; //$NON-NLS-0$
+				child.style.left = "-1000px"; //$NON-NLS-0$
 				this._convertDelimiter(text, 
 					function(t) {
 						child.appendChild(document.createTextNode(t));
 					}, 
 					function() {
-						child.appendChild(document.createElement("BR"));
+						child.appendChild(document.createElement("BR")); //$NON-NLS-0$
 					}
 				);
-				child.appendChild(document.createTextNode(" "));
+				child.appendChild(document.createTextNode(" ")); //$NON-NLS-0$
 				this._clientDiv.appendChild(child);
 				var range = document.createRange();
 				range.setStart(child.firstChild, 0);
@@ -4708,7 +4708,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				*/
 				this._ignoreCopy = true;
 				try {
-					result = document.execCommand("copy", false, null);
+					result = document.execCommand("copy", false, null); //$NON-NLS-0$
 				} catch (e) {}
 				this._ignoreCopy = false;
 				if (!result) {
@@ -4725,7 +4725,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				//webkit
 				clipboardText = [];
 				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
-				return event.clipboardData.setData("text/plain", clipboardText.join("")); 
+				return event.clipboardData.setData("text/plain", clipboardText.join("")); //$NON-NLS-0$
 			}
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
@@ -4794,17 +4794,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* selection at the end of some lines does not get redrawn.  The
 				* fix is to create a DOM element in the body to force a redraw.
 				*/
-				var child = document.createElement("DIV");
+				var child = document.createElement("DIV"); //$NON-NLS-0$
 				body.appendChild(child);
 				body.removeChild(child);
 				
 				range = body.createTextRange();
 				range.moveToElementText(startLineNode.parentNode);
-				range.moveStart("character", startLineOffset);
+				range.moveStart("character", startLineOffset); //$NON-NLS-0$
 				var endRange = body.createTextRange();
 				endRange.moveToElementText(endLineNode.parentNode);
-				endRange.moveStart("character", endLineOffset);
-				range.setEndPoint("EndToStart", endRange);
+				endRange.moveStart("character", endLineOffset); //$NON-NLS-0$
+				range.setEndPoint("EndToStart", endRange); //$NON-NLS-0$
 				this._ignoreSelect = false;
 				range.select();
 				this._ignoreSelect = true;
@@ -4813,14 +4813,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_setDOMFullSelection: function(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd) {
 			if (!this._selDiv1) { return; }
 			var selDiv = this._selDiv1;
-			selDiv.style.width = "0px";
-			selDiv.style.height = "0px";
+			selDiv.style.width = "0px"; //$NON-NLS-0$
+			selDiv.style.height = "0px"; //$NON-NLS-0$
 			selDiv = this._selDiv2;
-			selDiv.style.width = "0px";
-			selDiv.style.height = "0px";
+			selDiv.style.width = "0px"; //$NON-NLS-0$
+			selDiv.style.height = "0px"; //$NON-NLS-0$
 			selDiv = this._selDiv3;
-			selDiv.style.width = "0px";
-			selDiv.style.height = "0px";
+			selDiv.style.width = "0px"; //$NON-NLS-0$
+			selDiv.style.height = "0px"; //$NON-NLS-0$
 			if (startNode === endNode && startOffset === endOffset) { return; }
 			var model = this._model;
 			var viewPad = this._getViewPadding();
@@ -4871,29 +4871,29 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
 			var sel1Right = right;
 			var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
-			sel1Div.style.left = (sel1Left - hd) + "px";
-			sel1Div.style.top = (sel1Top - vd) + "px";
-			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
-			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px";
+			sel1Div.style.left = (sel1Left - hd) + "px"; //$NON-NLS-0$
+			sel1Div.style.top = (sel1Top - vd) + "px"; //$NON-NLS-0$
+			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
+			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px"; //$NON-NLS-0$
 			if (startNode === endNode) {
 				sel1Right = Math.min(r, right);
-				sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px";
+				sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
 			} else {
 				var sel3Left = left;
 				var sel3Top = Math.min(bottom, Math.max(top, endLineBounds.top));
 				var sel3Right = Math.min(right, Math.max(left, r));
 				var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
 				var sel3Div = this._selDiv3;
-				sel3Div.style.left = (sel3Left - hd) + "px";
-				sel3Div.style.top = (sel3Top - vd) + "px";
-				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px";
-				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px";
+				sel3Div.style.left = (sel3Left - hd) + "px"; //$NON-NLS-0$
+				sel3Div.style.top = (sel3Top - vd) + "px"; //$NON-NLS-0$
+				sel3Div.style.width = Math.max(0, sel3Right - sel3Left) + "px"; //$NON-NLS-0$
+				sel3Div.style.height = Math.max(0, sel3Bottom - sel3Top) + "px"; //$NON-NLS-0$
 				if (sel3Top - sel1Bottom > 0) {
 					var sel2Div = this._selDiv2;
-					sel2Div.style.left = (left - hd)  + "px";
-					sel2Div.style.top = (sel1Bottom - vd) + "px";
-					sel2Div.style.width = Math.max(0, right - left) + "px";
-					sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px";
+					sel2Div.style.left = (left - hd)  + "px"; //$NON-NLS-0$
+					sel2Div.style.top = (sel1Bottom - vd) + "px"; //$NON-NLS-0$
+					sel2Div.style.width = Math.max(0, right - left) + "px"; //$NON-NLS-0$
+					sel2Div.style.height = Math.max(0, sel3Top - sel1Bottom) + "px"; //$NON-NLS-0$
 				}
 			}
 		},
@@ -4925,7 +4925,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clientDiv.focus();
 			}
 			if (this._overlayDiv) {
-				this._overlayDiv.style.zIndex = visible ? "-1" : "1";
+				this._overlayDiv.style.zIndex = visible ? "-1" : "1"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			var line = this._getLineNext();
 			while (line) {
@@ -4934,7 +4934,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					while (lineChild) {
 						var next = lineChild.nextSibling;
 						var style = lineChild.viewStyle;
-						if (style && style.tagName === "A") {
+						if (style && style.tagName === "A") { //$NON-NLS-0$
 							line.replaceChild(this._createSpan(line, document, lineChild.firstChild.data, style), lineChild);
 						}
 						lineChild = next;
@@ -4951,7 +4951,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (!oldSelection.equals(selection)) {
 					this._selection = selection;
 					var e = {
-						type: "Selection",
+						type: "Selection", //$NON-NLS-0$
 						oldValue: {start:oldSelection.start, end:oldSelection.end},
 						newValue: {start:selection.start, end:selection.end}
 					};
@@ -4996,14 +4996,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (this._doubleClickSelection) {
 						if (offset >= this._doubleClickSelection.start) {
 							start = this._doubleClickSelection.start;
-							end = this._getOffset(offset, "wordend", +1);
+							end = this._getOffset(offset, "wordend", +1); //$NON-NLS-0$
 						} else {
-							start = this._getOffset(offset, "word", -1);
+							start = this._getOffset(offset, "word", -1); //$NON-NLS-0$
 							end = this._doubleClickSelection.end;
 						}
 					} else {
-						start = this._getOffset(offset, "word", -1);
-						end = this._getOffset(start, "wordend", +1);
+						start = this._getOffset(offset, "word", -1); //$NON-NLS-0$
+						end = this._getOffset(start, "wordend", +1); //$NON-NLS-0$
 					}
 				} else {
 					if (this._doubleClickSelection) {
@@ -5052,42 +5052,42 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			
 			if (!this._selDiv1 && (this._fullSelection && !isWebkit)) {
-				this._hightlightRGB = "Highlight";
-				var selDiv1 = document.createElement("DIV");
+				this._hightlightRGB = "Highlight"; //$NON-NLS-0$
+				var selDiv1 = document.createElement("DIV"); //$NON-NLS-0$
 				this._selDiv1 = selDiv1;
-				selDiv1.style.position = "absolute";
-				selDiv1.style.borderWidth = "0px";
-				selDiv1.style.margin = "0px";
-				selDiv1.style.padding = "0px";
-				selDiv1.style.outline = "none";
+				selDiv1.style.position = "absolute"; //$NON-NLS-0$
+				selDiv1.style.borderWidth = "0px"; //$NON-NLS-0$
+				selDiv1.style.margin = "0px"; //$NON-NLS-0$
+				selDiv1.style.padding = "0px"; //$NON-NLS-0$
+				selDiv1.style.outline = "none"; //$NON-NLS-0$
 				selDiv1.style.background = this._hightlightRGB;
-				selDiv1.style.width = "0px";
-				selDiv1.style.height = "0px";
-				selDiv1.style.zIndex = "0";
+				selDiv1.style.width = "0px"; //$NON-NLS-0$
+				selDiv1.style.height = "0px"; //$NON-NLS-0$
+				selDiv1.style.zIndex = "0"; //$NON-NLS-0$
 				parent.appendChild(selDiv1);
-				var selDiv2 = document.createElement("DIV");
+				var selDiv2 = document.createElement("DIV"); //$NON-NLS-0$
 				this._selDiv2 = selDiv2;
-				selDiv2.style.position = "absolute";
-				selDiv2.style.borderWidth = "0px";
-				selDiv2.style.margin = "0px";
-				selDiv2.style.padding = "0px";
-				selDiv2.style.outline = "none";
+				selDiv2.style.position = "absolute"; //$NON-NLS-0$
+				selDiv2.style.borderWidth = "0px"; //$NON-NLS-0$
+				selDiv2.style.margin = "0px"; //$NON-NLS-0$
+				selDiv2.style.padding = "0px"; //$NON-NLS-0$
+				selDiv2.style.outline = "none"; //$NON-NLS-0$
 				selDiv2.style.background = this._hightlightRGB;
-				selDiv2.style.width = "0px";
-				selDiv2.style.height = "0px";
-				selDiv2.style.zIndex = "0";
+				selDiv2.style.width = "0px"; //$NON-NLS-0$
+				selDiv2.style.height = "0px"; //$NON-NLS-0$
+				selDiv2.style.zIndex = "0"; //$NON-NLS-0$
 				parent.appendChild(selDiv2);
-				var selDiv3 = document.createElement("DIV");
+				var selDiv3 = document.createElement("DIV"); //$NON-NLS-0$
 				this._selDiv3 = selDiv3;
-				selDiv3.style.position = "absolute";
-				selDiv3.style.borderWidth = "0px";
-				selDiv3.style.margin = "0px";
-				selDiv3.style.padding = "0px";
-				selDiv3.style.outline = "none";
+				selDiv3.style.position = "absolute"; //$NON-NLS-0$
+				selDiv3.style.borderWidth = "0px"; //$NON-NLS-0$
+				selDiv3.style.margin = "0px"; //$NON-NLS-0$
+				selDiv3.style.padding = "0px"; //$NON-NLS-0$
+				selDiv3.style.outline = "none"; //$NON-NLS-0$
 				selDiv3.style.background = this._hightlightRGB;
-				selDiv3.style.width = "0px";
-				selDiv3.style.height = "0px";
-				selDiv3.style.zIndex = "0";
+				selDiv3.style.width = "0px"; //$NON-NLS-0$
+				selDiv3.style.height = "0px"; //$NON-NLS-0$
+				selDiv3.style.zIndex = "0"; //$NON-NLS-0$
 				parent.appendChild(selDiv3);
 				
 				/*
@@ -5097,25 +5097,25 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				*/
 				if (isFirefox && isMac) {
 					var style = window.getComputedStyle(selDiv3, null);
-					var rgb = style.getPropertyValue("background-color");
+					var rgb = style.getPropertyValue("background-color"); //$NON-NLS-0$
 					switch (rgb) {
-						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break;
-						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break;
-						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break;
-						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break;
-						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break;
-						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break;
-						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break;
-						default: rgb = "rgb(180, 213, 255)"; break;
+						case "rgb(119, 141, 168)": rgb = "rgb(199, 208, 218)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(127, 127, 127)": rgb = "rgb(198, 198, 198)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(255, 193, 31)": rgb = "rgb(250, 236, 115)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(243, 70, 72)": rgb = "rgb(255, 176, 139)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(255, 138, 34)": rgb = "rgb(255, 209, 129)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(102, 197, 71)": rgb = "rgb(194, 249, 144)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break; //$NON-NLS-1$ //$NON-NLS-0$
+						default: rgb = "rgb(180, 213, 255)"; break; //$NON-NLS-0$
 					}
 					this._hightlightRGB = rgb;
 					selDiv1.style.background = rgb;
 					selDiv2.style.background = rgb;
 					selDiv3.style.background = rgb;
 					if (!this._insertedSelRule) {
-						var stylesheet = document.createElement("STYLE");
-						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
-						stylesheet.appendChild(document.createTextNode("::-moz-selection {background: " + rgb + "; }"));
+						var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
+						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
+						stylesheet.appendChild(document.createTextNode("::-moz-selection {background: " + rgb + "; }")); //$NON-NLS-1$ //$NON-NLS-0$
 						head.insertBefore(stylesheet, head.firstChild);
 						this._insertedSelRule = true;
 					}
@@ -5127,7 +5127,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setReadOnly: function (readOnly) {
 			this._readonly = readOnly;
-			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false");
+			this._clientDiv.setAttribute("aria-readonly", readOnly ? "true" : "false"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		_setTabSize: function (tabSize, init) {
 			this._tabSize = tabSize;
@@ -5147,8 +5147,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setThemeClass: function (themeClass, init) {
 			this._themeClass = themeClass;
-			var viewContainerClass = "textviewContainer";
-			if (this._themeClass) { viewContainerClass += " " + this._themeClass; }
+			var viewContainerClass = "textviewContainer"; //$NON-NLS-0$
+			if (this._themeClass) { viewContainerClass += " " + this._themeClass; } //$NON-NLS-0$
 			this._rootDiv.className = viewContainerClass;
 			this._updateStyle(init);
 		},
@@ -5251,8 +5251,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._imeOffset = selection.start;
 		},
 		_unhookEvents: function() {
-			this._model.removeEventListener("Changing", this._modelListener.onChanging);
-			this._model.removeEventListener("Changed", this._modelListener.onChanged);
+			this._model.removeEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.removeEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
 			this._modelListener = null;
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];
@@ -5330,12 +5330,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var rootDiv = this._rootDiv;
 				var parentWidth = parent.clientWidth;
 				var parentHeight = parent.clientHeight;
-				rootDiv.style.width = parentWidth + "px";
-				rootDiv.style.height = parentHeight + "px";
+				rootDiv.style.width = parentWidth + "px"; //$NON-NLS-0$
+				rootDiv.style.height = parentHeight + "px"; //$NON-NLS-0$
 
 				/* Update view height in order to have client height computed */
 				var viewDiv = this._viewDiv;
-				viewDiv.style.height = Math.max(0, (parentHeight - viewPad.top - viewPad.bottom)) + "px";
+				viewDiv.style.height = Math.max(0, (parentHeight - viewPad.top - viewPad.bottom)) + "px"; //$NON-NLS-0$
 				clientHeight = this._getClientHeight();
 				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
@@ -5348,7 +5348,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					var nextChild = child.nextSibling;
 					if (!(lineStart <= lineIndex && lineIndex <= lineEnd) || child.lineRemoved || child.lineIndex === -1) {
 						if (this._mouseWheelLine === child) {
-							child.style.display = "none";
+							child.style.display = "none"; //$NON-NLS-0$
 							child.lineIndex = -1;
 						} else {
 							clientDiv.removeChild(child);
@@ -5385,7 +5385,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* reset to the appropriate value further down.
 				*/ 
 				if (isWebkit) {
-					clientDiv.style.width = (0x7FFFF).toString() + "px";
+					clientDiv.style.width = (0x7FFFF).toString() + "px"; //$NON-NLS-0$
 				}
 	
 				var rect;
@@ -5426,14 +5426,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				
 				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
 				var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
-				viewDiv.style.left = leftWidth + "px";
-				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px";
+				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-0$
+				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px"; //$NON-NLS-0$
 				if (this._rightDiv) {
-					this._rightDiv.style.left = (parentWidth - rightWidth) + "px"; 
+					this._rightDiv.style.left = (parentWidth - rightWidth) + "px"; //$NON-NLS-0$
 				}
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
-				scrollDiv.style.height = scrollHeight + "px";
+				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
 				/*
 				* TODO if frameHeightWithoutHScrollbar < scrollHeight  < frameHeightWithHScrollbar and the horizontal bar is visible, 
 				* then the clientWidth is wrong because the vertical scrollbar is showing. To correct code should hide both scrollbars 
@@ -5447,9 +5447,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				*/
 				scrollWidth = width;
 				if (!isIE || isIE >= 9) { width += viewPad.right; }
-				scrollDiv.style.width = width + "px";
+				scrollDiv.style.width = width + "px"; //$NON-NLS-0$
 				if (this._clipScrollDiv) {
-					this._clipScrollDiv.style.width = width + "px";
+					this._clipScrollDiv.style.width = width + "px"; //$NON-NLS-0$
 				}
 				/* Get the left scroll after setting the width of the scrollDiv as this can change the horizontal scroll offset. */
 				scroll = this._getScroll();
@@ -5460,16 +5460,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (this._vScrollDiv) {
 				var trackHeight = clientHeight - 8;
 				var thumbHeight = Math.max(15, Math.ceil(Math.min(1, trackHeight / (scrollHeight + viewPad.top + viewPad.bottom)) * trackHeight));
-				this._vScrollDiv.style.left = (leftWidth + clientWidth - 8) + "px";
-				this._vScrollDiv.style.top = Math.floor(Math.max(0, (scroll.y * trackHeight / scrollHeight))) + "px";
-				this._vScrollDiv.style.height = thumbHeight + "px";
+				this._vScrollDiv.style.left = (leftWidth + clientWidth - 8) + "px"; //$NON-NLS-0$
+				this._vScrollDiv.style.top = Math.floor(Math.max(0, (scroll.y * trackHeight / scrollHeight))) + "px"; //$NON-NLS-0$
+				this._vScrollDiv.style.height = thumbHeight + "px"; //$NON-NLS-0$
 			}
 			if (this._hScrollDiv) {
 				var trackWidth = clientWidth - 8;
 				var thumbWidth = Math.max(15, Math.ceil(Math.min(1, trackWidth / (this._maxLineWidth + viewPad.left + viewPad.right)) * trackWidth));
-				this._hScrollDiv.style.left = leftWidth + Math.floor(Math.max(0, Math.floor(scroll.x * trackWidth / this._maxLineWidth))) + "px";
-				this._hScrollDiv.style.top = (clientHeight - 9) + "px";
-				this._hScrollDiv.style.width = thumbWidth + "px";
+				this._hScrollDiv.style.left = leftWidth + Math.floor(Math.max(0, Math.floor(scroll.x * trackWidth / this._maxLineWidth))) + "px"; //$NON-NLS-0$
+				this._hScrollDiv.style.top = (clientHeight - 9) + "px"; //$NON-NLS-0$
+				this._hScrollDiv.style.width = thumbWidth + "px"; //$NON-NLS-0$
 			}
 			var left = scroll.x;	
 			var clipDiv = this._clipDiv;
@@ -5498,14 +5498,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (scroll.y + clientHeight === scrollHeight) { 
 					clipHeight += viewPad.bottom; 
 				}
-				clipDiv.style.left = clipLeft + "px";
-				clipDiv.style.top = clipTop + "px";
-				clipDiv.style.width = clipWidth + "px";
-				clipDiv.style.height = clipHeight + "px";
-				clientDiv.style.left = clientLeft + "px";
-				clientDiv.style.top = clientTop + "px";
-				clientDiv.style.width = scrollWidth + "px";
-				clientDiv.style.height = (clientHeight + top) + "px";
+				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
+				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
+				clipDiv.style.width = clipWidth + "px"; //$NON-NLS-0$
+				clipDiv.style.height = clipHeight + "px"; //$NON-NLS-0$
+				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
+				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
+				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$
+				clientDiv.style.height = (clientHeight + top) + "px"; //$NON-NLS-0$
 				if (overlayDiv) {
 					overlayDiv.style.left = clientDiv.style.left;
 					overlayDiv.style.top = clientDiv.style.top;
@@ -5521,12 +5521,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (clipTop === 0) { clipTop -= viewPad.top; }
 				if (clipRight === scrollWidth) { clipRight += viewPad.right; }
 				if (scroll.y + clientHeight === scrollHeight) { clipBottom += viewPad.bottom; }
-				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)";
-				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px";
-				clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px";
+				clientDiv.style.clip = "rect(" + clipTop + "px," + clipRight + "px," + clipBottom + "px," + clipLeft + "px)"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				clientDiv.style.left = (-left + leftWidth + viewPad.left) + "px"; //$NON-NLS-0$
+				clientDiv.style.width = (isWebkit ? scrollWidth : clientWidth + left) + "px"; //$NON-NLS-0$
 				if (!hScrollOnly) {
-					clientDiv.style.top = (-top + viewPad.top) + "px";
-					clientDiv.style.height = (clientHeight + top) + "px";
+					clientDiv.style.top = (-top + viewPad.top) + "px"; //$NON-NLS-0$
+					clientDiv.style.height = (clientHeight + top) + "px"; //$NON-NLS-0$
 				}
 				if (overlayDiv) {
 					overlayDiv.style.clip = clientDiv.style.clip;
@@ -5564,12 +5564,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
 				var offset = lineHeight;
-				if (div._ruler.getOverview() === "page") { offset += partialY; }
-				div.style.top = -offset + "px";
-				div.style.height = (rulerHeight + offset) + "px";
+				if (div._ruler.getOverview() === "page") { offset += partialY; } //$NON-NLS-0$
+				div.style.top = -offset + "px"; //$NON-NLS-0$
+				div.style.height = (rulerHeight + offset) + "px"; //$NON-NLS-0$
 				div = div.nextSibling;
 			}
-			divRuler.style.height = rulerHeight + "px";
+			divRuler.style.height = rulerHeight + "px"; //$NON-NLS-0$
 		},
 		_updateRuler: function (divRuler, topIndex, bottomIndex) {
 			if (!divRuler) { return; }
@@ -5589,8 +5589,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					widthDiv = child;
 					child = child.nextSibling;
 				} else {
-					widthDiv = document.createElement("DIV");
-					widthDiv.style.visibility = "hidden";
+					widthDiv = document.createElement("DIV"); //$NON-NLS-0$
+					widthDiv.style.visibility = "hidden"; //$NON-NLS-0$
 					div.appendChild(widthDiv);
 				}
 				var lineIndex, annotation;
@@ -5605,12 +5605,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							}
 						}
 						widthDiv.lineIndex = lineIndex;
-						widthDiv.style.height = (lineHeight + viewPad.top) + "px";
+						widthDiv.style.height = (lineHeight + viewPad.top) + "px"; //$NON-NLS-0$
 					}
 				}
 
 				var overview = ruler.getOverview(), lineDiv, frag, annotations;
-				if (overview === "page") {
+				if (overview === "page") { //$NON-NLS-0$
 					annotations = ruler.getAnnotations(topIndex, bottomIndex + 1);
 					while (child) {
 						lineIndex = child.lineIndex;
@@ -5624,7 +5624,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					frag = document.createDocumentFragment();
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
-							lineDiv = document.createElement("DIV");
+							lineDiv = document.createElement("DIV"); //$NON-NLS-0$
 							annotation = annotations[lineIndex];
 							if (annotation) {
 								this._applyStyle(annotation.style, lineDiv);
@@ -5634,7 +5634,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								lineDiv.annotation = annotation;
 							}
 							lineDiv.lineIndex = lineIndex;
-							lineDiv.style.height = lineHeight + "px";
+							lineDiv.style.height = lineHeight + "px"; //$NON-NLS-0$
 							frag.appendChild(lineDiv);
 						} else {
 							if (frag.firstChild) {
@@ -5669,11 +5669,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						for (var prop in annotations) {
 							lineIndex = prop >>> 0;
 							if (lineIndex < 0) { continue; }
-							lineDiv = document.createElement("DIV");
+							lineDiv = document.createElement("DIV"); //$NON-NLS-0$
 							annotation = annotations[prop];
 							this._applyStyle(annotation.style, lineDiv);
-							lineDiv.style.position = "absolute";
-							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px";
+							lineDiv.style.position = "absolute"; //$NON-NLS-0$
+							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineIndex * divHeight) + "px"; //$NON-NLS-0$
 							if (annotation.html) {
 								lineDiv.innerHTML = annotation.html;
 							}
@@ -5685,7 +5685,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					} else if (div._oldTrackHeight !== trackHeight) {
 						lineDiv = div.firstChild ? div.firstChild.nextSibling : null;
 						while (lineDiv) {
-							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px";
+							lineDiv.style.top = this._metrics.scrollWidth + lineHeight + Math.floor(lineDiv.lineIndex * divHeight) + "px"; //$NON-NLS-0$
 							lineDiv = lineDiv.nextSibling;
 						}
 					}
@@ -5697,13 +5697,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateStyle: function (init) {
 			if (!init && isIE) {
-				this._rootDiv.style.lineHeight = "normal";
+				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
 			var metrics = this._metrics = this._calculateMetrics();
 			if (isIE) {
-				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px";
+				this._rootDiv.style.lineHeight = (metrics.lineHeight - (metrics.lineTrim.top + metrics.lineTrim.bottom)) + "px"; //$NON-NLS-0$
 			} else {
-				this._rootDiv.style.lineHeight = "normal";
+				this._rootDiv.style.lineHeight = "normal"; //$NON-NLS-0$
 			}
 			if (!init) {
 				this.redraw();
