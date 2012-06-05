@@ -95,17 +95,34 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=371265
 	 */
 	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
+		constructor: function() {
+			var options = arguments[0] || {};
+			options.onKeyDown = dojo.hitch(this, function(evt) {
+				if (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE) {
+					if(this._anchorLocation) { 
+						if(evt.ctrlKey) {
+							window.open(this._anchorLocation);
+						} else {
+							window.location=this._anchorLocation;
+						}
+					}
+				}
+			});
+			this.inherited(arguments || [options]);
+		},
 	
 		// if it has a link and the anchor is already in the dom, style it with some padding.
 		postCreate: function() {
 			var anchor = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
 			if (anchor) {
 				dojo.addClass(anchor, "commandMenuItemAnchor"); //$NON-NLS-0$
+				this._anchorLocation = anchor.href;
 			}
 		},
 		
 		setLink: function(href, name) {
 			this.set("label", "<a class='commandMenuItemAnchor' href='"+href+"'>"+name+"</a>"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			this._anchorLocation = href;
 		},
 		
 		_onClick: function(evt) {
@@ -512,10 +529,32 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		 * @param targetNode {DOMElement} the dom node where the key bindings should be shown.
 		 */
 		showKeyBindings: function(targetNode) {
-			for (var binding in this._activeBindings) {
-				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
-					dojo.place("<span role='listitem'>"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var scopes = {};
+			var bindingString, binding;
+			for (var aBinding in this._activeBindings) {
+				binding = this._activeBindings[aBinding];
+				if (binding && binding.keyBinding && binding.command) {
+					// skip scopes and process at end
+					if (binding.keyBinding.scopeName) {
+						if (!scopes[binding.keyBinding.scopeName]) {
+							scopes[binding.keyBinding.scopeName] = [];
+						}
+						scopes[binding.keyBinding.scopeName].push(binding);
+					} else {
+						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				}
+			}
+			for (var scopedBinding in scopes) {
+				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
+					dojo.place("<h2>"+scopedBinding+"</h2>", targetNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ 
+					for (var i=0; i<scopes[scopedBinding].length; i++) {
+						binding = scopes[scopedBinding][i];
+						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}	
 			}
 		},
 		
@@ -1168,20 +1207,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				labelType: this.hrefCallback ? "html" : "text", //$NON-NLS-1$ //$NON-NLS-0$
 				label: this.name,
 				iconClass: this.imageClass,
-				hasLink: !!this.hrefCallback,
-				onKeyDown: function(evt) {
-					if(this.hrefCallback && (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE)) {
-						var link = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
-						if(link) { 
-							if(evt.ctrlKey) {
-								window.open(link);
-							} else {
-								window.location=link;
-							}
-						}
-						return;
-					}
-				}
+				hasLink: !!this.hrefCallback
 			});
 			if (this.tooltip) {
 				new CommandTooltip({
@@ -1351,11 +1377,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
 	 * @param {String|DomElement} domScope the element for which this key binding is active.  If not specified, the key
 	 *       binding is considered to be global.
+	 * @param {String} scopeName the name of the scope to be used when listing key bindings.  Must be specified if a domScope
+	 *       is specified.
 	 * 
 	 * @name orion.commands.CommandKeyBinding
 	 * @class
 	 */
-	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4, domScope) {
+	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4, domScope, scopeName) {
 		if (typeof(keyCode) === "string") { //$NON-NLS-0$
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
@@ -1367,8 +1395,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 		if (typeof(domScope) === "string") { //$NON-NLS-0$
 			this.domScope = dojo.byId(domScope);
+			this.scopeName = scopeName || domScope;
 		} else {
 			this.domScope = domScope;
+			this.scopeName = scopeName || domScope ? domScope.id : null;
 		}
 	}
 	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
