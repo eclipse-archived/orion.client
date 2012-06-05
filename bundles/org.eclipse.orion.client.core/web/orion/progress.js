@@ -164,8 +164,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				
 				if(!operations.Children || operations.Children.length==0){
 					this._switchIconTo("progressPane_empty"); //$NON-NLS-0$
-					this._progressPane.title = "Operations"; //$NON-NLS-0$
-					this._progressPane.alt = "Operations"; //$NON-NLS-0$
+					this._progressPane.title = messages["Operations"]; //$NON-NLS-0$
+					this._progressPane.alt = messages["Operations"]; //$NON-NLS-0$
 					if(dojo.hasAttr(this._progressPane, "aria-valuetext")) { //$NON-NLS-0$
 						dojo.removeAttr(this._progressPane, "aria-valuetext"); //$NON-NLS-0$
 					}
