@@ -420,10 +420,27 @@ orion.TextSearcher = (function() {
 			var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
 			var editor = this._editor;
 			var selection = editor.getSelection();
-			editor.setText(newStr, selection.start, selection.end);
-			editor.setSelection(selection.start , selection.start + newStr.length, true);
-			this.endUndo();
 			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
+			var start = selection ? selection.start : 0;
+			var end = selection ? selection.end : 0;
+			if(searchStr){
+				var result = editor.getModel().find({
+					string: searchStr,
+					start: start,
+					reverse: false,
+					wrap: this._wrapSearch,
+					regex: this._useRegExp,
+					wholeWord: this._wholeWord,
+					caseInsensitive: this._ignoreCase
+				}).next();
+				if(result){
+					start = result.start;
+					end = result.end;
+				}
+			}
+			editor.setText(newStr, start, end);
+			editor.setSelection(start , start + newStr.length, true);
+			this.endUndo();
 			if (this._findAfterReplace && searchStr){
 				this._doFind(searchStr, this.getSearchStartIndex(false), false, this._wrapSearch);
 			}
