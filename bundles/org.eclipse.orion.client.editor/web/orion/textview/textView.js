@@ -2745,6 +2745,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				pixel = Math.min(Math.max(0, pixel), verticalMaximum - clientHeight);
 				this._scrollView(0, pixel - verticalScrollOffset);
 			}
+			return true;
 		},
 		_doSelectAll: function (args) {
 			var model = this._model;
