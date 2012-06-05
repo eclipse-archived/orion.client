@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -29,14 +29,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.drawUserInterface(this.initialSettings);
 			this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
 			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.byId('location').innerHTML = 'Settings';
+			mGlobalCommands.setPageTarget({task: 'Settings'});
 		},
 		
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
 			var category = pageParams.category || "userSettings"; //$NON-NLS-0$
 			this.showById(category);
-			this.commandService.processURL(window.location.href);
+			
+			// The widgets might render commands, and this happens asynchronously.  Process the URL in a timeout.
+			window.setTimeout(dojo.hitch(this, function() {this.commandService.processURL(window.location.href);}), 0);
 			
 			
 //			var pageToolBar = dojo.byId( 'pageToolbar' );
@@ -173,8 +175,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				this.pluginWidget.destroyRecursive(true);
 			}
 
-			this.updateToolbar(id);
-			
 			var pluginNode = dojo.create( 'div', null, this.table ); //$NON-NLS-0$
 
 			this.pluginWidget = new orion.widgets.plugin.PluginList({
@@ -220,14 +220,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.selectedCategory.focus();
 
 			this.initPlugins(id);
-			
-			/* Need to init twice - because of a bug with command initialization where 
-			   the delete plugins are not showing. This is a temporary emergency fix 
-			   for M2 */
-			
-			this.initPlugins(id);
-			
-			
 		},
 
 		showById: function(id) {
