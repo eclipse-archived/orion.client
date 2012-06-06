@@ -216,6 +216,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 	}
 	
+	// Related links menu management.  The related drop down widget and its associated dropdown menu
+	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
+	// empty, we hide the dropdown.
 	var linksMenu;
 	var pageItem;
 	var exclusions = [];
@@ -238,6 +241,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				linksMenu.removeChild(child);
 				child.destroy();
 			});
+		}
+	}
+	
+	function _checkForEmptyLinksMenu() {
+		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if (linksMenu && dropdownNode) {
+			if (linksMenu.getChildren().length === 0) {
+				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+			} else {
+				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+			}
 		}
 	}
 	
@@ -381,6 +395,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				} 
 			}
 			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+				_checkForEmptyLinksMenu();
 				mUtil.forceLayout(related);
 			}));
 		}));
