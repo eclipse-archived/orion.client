@@ -350,7 +350,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					var position = dojo.indexOf(exclusions, info.id);
 					if (position < 0) {
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (info.name && info.uriTemplate) {
+						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
 							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
 							deferreds.push(deferred);
 							deferred.then(
