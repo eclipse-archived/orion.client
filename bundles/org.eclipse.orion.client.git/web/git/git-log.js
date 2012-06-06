@@ -94,21 +94,20 @@ var serviceRegistry;
 			if(fileURI){		
 				fileClient.read(fileURI, true).then(dojo.hitch(this, function(metadata) {
 					var title = branchName ? branchName + " on " + metadata.Name + " - Git Log" : metadata.Name + " - " + "Git Log";
-					var breadcrumbTarget = {};
-					breadcrumbTarget.Name = "Log ("+branchName+")";
-					breadcrumbTarget.Parents = [];
-					breadcrumbTarget.Parents[0] = {};
-					breadcrumbTarget.Parents[0].Name = metadata.Name;
-					breadcrumbTarget.Parents[0].ChildrenLocation = metadata.Git.CloneLocation;
-					breadcrumbTarget.Parents[1] = {};
-					breadcrumbTarget.Parents[1].Name = "Repositories"; //$NON-NLS-0$
-
-					mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: item, 
-						breadcrumbTarget: breadcrumbTarget,
+					var breadcrumbRootName;
+					var branchIdentifier = branchName ? " (" + branchName + ") " : "";
+					// adjust top name of breadcrumb segment
+					if (metadata.Parents && metadata.Parents.length > 0) {
+						var rootParent = metadata.Parents[metadata.Parents.length - 1];
+						breadcrumbRootName = "Log" + branchIdentifier + rootParent.Name;
+					} else {
+						breadcrumbRootName = "Log" + branchIdentifier + metadata.Name;
+					}
+					mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: metadata, breadcrumbRootName: breadcrumbRootName,
 						makeBreadcrumbLink: function(seg, location) {
-							seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+							makeHref(fileClient, seg, location, isRemote);
 						},
-						serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient, searchService: searcher}); 
+						serviceRegistry: serviceRegistry, commandService: commandService, searchService: searcher}); 
 					mGitCommands.updateNavTools(serviceRegistry, navigator, "pageActions", "selectionTools", navigator._lastTreeRoot); //$NON-NLS-1$ //$NON-NLS-0$
 					navigator.updateCommands();	
 					deferred.callback();
@@ -139,7 +138,7 @@ var serviceRegistry;
 							gitService.getGitBranch(clone.BranchLocation).then(
 								function(branches){
 									dojo.forEach(branches.Children, function(branch, i) {
-										if (branch.Current == true){
+										if (branch.Current === true){
 											resource.Clone.ActiveBranch = branch.CommitLocation;
 										}
 									});

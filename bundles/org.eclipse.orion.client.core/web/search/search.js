@@ -59,7 +59,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				fileClient.read(searchLoc.searchLocation, true).then(
 						dojo.hitch(this, function(metadata) {
 							mGlobalCommands.setPageTarget({task: "Search", target: metadata, serviceRegistry: serviceRegistry, 
-								commandService: commandService, searchService: searcher,
+								fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search",
 								makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);}});
 						}),
 						dojo.hitch(this, function(error) {
@@ -68,7 +68,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				);
 			} else {
 				mGlobalCommands.setPageTarget({task: "Search", serviceRegistry: serviceRegistry, 
-					commandService: commandService, searchService: searcher,
+					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search",
 					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);}});
 			}
 		}
