@@ -202,13 +202,19 @@ exports.EditorCommandFactory = (function() {
 									searchString = parsedParam.searchStr;
 								}
 							}
-							that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
 							if(parsedParam){
 								that._searcher.setOptions({useRegExp: parsedParam.useRegExp});
 								if(parsedParam.lineNumber){
-									editor.onGotoLine(parsedParam.lineNumber - 1, 0);
+									var offset = editor.getModel().getLineStart(parsedParam.lineNumber-1);
+									editor.moveSelection(offset, offset, function(){
+										that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+										that._searcher.findNext(true);
+										}, 
+									focus);
+								} else {
+									that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+									that._searcher.findNext(true);
 								}
-								that._searcher.findNext(true);
 							}
 							return true;
 						}
