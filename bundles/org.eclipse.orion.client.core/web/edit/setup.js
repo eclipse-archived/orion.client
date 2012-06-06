@@ -159,6 +159,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								// Contents
 								editor.setInput(fileURI, null, contents);
 								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
+								commandService.processURL(window.location.href);
 							}));
 						clearTimeout(progressTimeout);
 					});
@@ -533,7 +534,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	}
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		outlineService.emitOutline(editor.getText(), editor.getTitle());
-		commandService.processURL(window.location.href);
 	});
 	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
 		outlineService.setProvider(outlineProvider);
