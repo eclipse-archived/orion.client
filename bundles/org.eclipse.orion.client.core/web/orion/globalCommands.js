@@ -495,7 +495,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var name, firstSegmentName;
 		if (options.target) {  // we have metadata
 			if (options.searchService) {
-				options.searchService.setLocationByMetaData(options.target, {index: "first"}); //$NON-NLS-0$
+				options.searchService.setLocationByMetaData(options.target); //$NON-NLS-0$
 			}
 			if (options.fileService && !options.breadcrumbTarget) {
 				firstSegmentName = options.fileService.fileServiceName(options.target.Location);
