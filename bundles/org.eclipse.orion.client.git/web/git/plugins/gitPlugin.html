@@ -11,9 +11,9 @@
 			
 			var provider = new eclipse.PluginProvider();
 			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Status",
+				nameKey: "Git Status",
 				id: "eclipse.git.status",
-				tooltip: "Go to Git Status",
+				tooltipKey: "Go to Git Status",
 				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
@@ -24,9 +24,9 @@
 			});
 			
 			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Log",
+				nameKey: "Git Log",
 				id: "eclipse.git.log",
-				tooltip: "Go to Git Log",
+				tooltipKey: "Go to Git Log",
 				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:CommitLocation", variableName: "GitLogLocation"}
@@ -36,9 +36,9 @@
 			});
 
 			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Remote",
+				nameKey: "Git Remote",
 				id: "eclipse.git.remote",
-				tooltip: "Go to Git Remote",
+				tooltipKey: "Go to Git Remote",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "Git:DefaultRemoteBranchLocation", 
@@ -53,9 +53,9 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Git Status",
+				nameKey: "Git Status",
 				id: "eclipse.git.status2",
-				tooltip: "Go to Git Status",
+				tooltipKey: "Go to Git Status",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "StatusLocation|Clone:StatusLocation", 
@@ -73,9 +73,9 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Active Branch Log",
+				nameKey: "Active Branch Log",
 				id: "eclipse.orion.git.switchToCurrentLocal",
-				tooltip: "Show the log for the active local branch",
+				tooltipKey: "Show the log for the active local branch",
 				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
@@ -86,9 +86,9 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				name: "Remote Branch Log",
+				nameKey: "Remote Branch Log",
 				id: "eclipse.orion.git.switchToRemote2",
-				tooltip: "Show the log for the corresponding remote tracking branch",
+				tooltipKey: "Show the log for the corresponding remote tracking branch",
 				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"},
@@ -99,8 +99,8 @@
 
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.repository",
-				name: "Git Repository",
-				tooltip: "Go to the git repository",
+				nameKey: "Git Repository",
+				tooltipKey: "Go to the git repository",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "Git:CloneLocation",
@@ -111,8 +111,8 @@
 
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "orion.git.gotoEclipseGit",
-				name: "Show in eclipse.org",
-				tooltip: "Show this repository at eclipse.org",
+				nameKey: "Show in eclipse.org",
+				tooltipKey: "Show this repository at eclipse.org",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "GitUrl|Clone:GitUrl", 
@@ -125,9 +125,9 @@
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "orion.git.gotoGithub",
-				name: "Show in GitHub",
+				nameKey: "Show in GitHub",
 				nls: "git/nls/gitmessages",
-				tooltip: "Show this repository at GitHub",
+				tooltipKey: "Show this repository at GitHub",
 				validationProperties: [{
 					source: "GitUrl|Clone:GitUrl", 
 					match: "github\.com.*\.git", 
