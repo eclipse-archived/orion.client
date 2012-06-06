@@ -616,12 +616,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}
-			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
+			if(info.uriTemplate && info.nls && info.name){
 				require(['i18n!'+info.nls], function(commandMessages){
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					text = document.createTextNode(info.nameKey? commandMessages[info.nameKey]: info.name);
+					text = document.createTextNode(commandMessages[info.name]);
 					dojo.place(text, link, "only"); //$NON-NLS-0$
 				});
 			} else if (info.uriTemplate && info.name) {

@@ -14,31 +14,31 @@
 		
 		// Primary navigation links
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			nameKey: "Navigator",
+			name: "Navigator",
 			id: "orion.navigator",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/navigate/table.html#"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			nameKey: "Sites",
+			name: "Sites",
 			id: "orion.sites",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/sites/sites.html"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			nameKey: "Repositories",
+			name: "Repositories",
 			id: "orion.repositories",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/git/git-repository.html#"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			nameKey: "Console",
+			name: "Console",
 			id: "orion.console",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/console/consolePage.html"
 		});
 		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			nameKey: "Get Plugins",
+			name: "Get Plugins",
 			id: "orion.plugins.get",
 			nls: "orion/nls/messages",
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
@@ -46,7 +46,7 @@
 		
 		provider.registerServiceProvider("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
-			nameKey: "Navigator",
+			name: "Navigator",
 			nls: "orion/nls/messages",
 			tooltip: "Go to the navigator",
 			validationProperties: [{
