@@ -105,7 +105,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 						dojo.place(document.createTextNode(parents[i].Name), seg, "only"); //$NON-NLS-0$
 						this.path += parents[i].Name; 
 						if(this._makeHref) {
-							this._makeHref(seg , parents[i].ChildrenLocation);
+							this._makeHref(seg , parents[i].Location);
 						}
 						else {
 							seg.href = require.toUrl("navigate/table.html") +"#" + parents[i].ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
