@@ -216,6 +216,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 	}
 	
+	// Related links menu management.  The related drop down widget and its associated dropdown menu
+	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
+	// empty, we hide the dropdown.
 	var linksMenu;
 	var pageItem;
 	var exclusions = [];
@@ -238,6 +241,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				linksMenu.removeChild(child);
 				child.destroy();
 			});
+		}
+	}
+	
+	function _checkForEmptyLinksMenu() {
+		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if (linksMenu && dropdownNode) {
+			if (linksMenu.getChildren().length === 0) {
+				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+			} else {
+				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+			}
 		}
 	}
 	
@@ -336,7 +350,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					var position = dojo.indexOf(exclusions, info.id);
 					if (position < 0) {
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (info.name && info.uriTemplate) {
+						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
 							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
 							deferreds.push(deferred);
 							deferred.then(
@@ -381,6 +395,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				} 
 			}
 			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+				_checkForEmptyLinksMenu();
 				mUtil.forceLayout(related);
 			}));
 		}));
@@ -472,6 +487,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 * parameter is supplied, the target metadata name will be used if a name is not specified in the options.
 	 * @param {String} options.title the title to be used for the page.  Optional.  If not specified, a title
 	 * will be constructed using the task and/or name.
+	 * @param {String} options.breadcrumbRootName the name used for the breadcrumb root.  Optional.  If not
+	 * specified, the breadcrumbTarget, fileService, task, and name will be consulted to form a root name.
 	 * @param {Object} options.breadcrumbTarget the metadata used for the breadcrumb target. Optional.  If not
 	 * specified, options.target is used as the breadcrumb target.
 	 * @param {Boolean} options.isFavoriteTarget true if the target can be a favorite. Optional. If specified, 
@@ -488,24 +505,29 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 * @param {Object} options.searchService the searchService used for scoping the searchbox.  Optional.  If not 
 	 * specified, the searchbox will not be scoped.
 	 * @param {Object} options.fileService the fileService used for retrieving additional metadata and managing
-	 * the breadcrumb.  If not specified, there may be reduced support for multiple file implementations.
+	 * the breadcrumb for multiple file services.  If not specified, there may be reduced support for multiple file 
+	 * implementations.
 	 *
 	 */
 	function setPageTarget(options) {
-		var name, firstSegmentName;
+		var name;
+		var fileSystemRootName;
+		var breadcrumbRootName = options.breadcrumbRootName;
 		if (options.target) {  // we have metadata
 			if (options.searchService) {
 				options.searchService.setLocationByMetaData(options.target); //$NON-NLS-0$
 			}
 			if (options.fileService && !options.breadcrumbTarget) {
-				firstSegmentName = options.fileService.fileServiceName(options.target.Location);
+				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : "";
+				fileSystemRootName = fileSystemRootName +  options.fileService.fileServiceName(options.target.Location);
+				breadcrumbRootName = null;
 			} 
 			name = options.name || options.target.Name;
 			pageItem = options.target;
 			generateRelatedLinks(options.serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
 		} else {
 			if (!options.breadcrumbTarget) {
-				firstSegmentName = options.task || options.name;
+				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
 			}
 			name = options.name;
 		}
@@ -522,7 +544,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		new mBreadcrumbs.BreadCrumbs({
 			container: "location",  //$NON-NLS-0$
 			resource: options.breadcrumbTarget || options.target,
-			firstSegmentName: firstSegmentName,
+			rootSegmentName: breadcrumbRootName,
+			workspaceRootSegmentName: fileSystemRootName,
 			makeHref: options.makeBreadcrumbLink
 		});
 		if (options.target && options.isFavoriteTarget) {

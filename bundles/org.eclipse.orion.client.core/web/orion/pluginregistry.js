@@ -31,13 +31,14 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	var _currentMessageId = 0;
 	var _deferredResponses = {};
 	var _serviceRegistrations = {};
-		
-	function _callService(serviceId, method, params, deferred) {
+	
+	function _callService(serviceId, method, params) {
 		if (!_channel) {
 			throw new Error("plugin not connected");
 		}
 		var requestId = _currentMessageId++;
-		_deferredResponses[String(requestId)] = deferred;
+		var d = new Deferred();
+		_deferredResponses[String(requestId)] = d;
 		var message = {
 			id: requestId,
 			serviceId: serviceId,
@@ -45,6 +46,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			params: params
 		};
 		internalRegistry.postMessage(message, _channel);
+		return d.promise;
 	}
 
 	function _createServiceProxy(service) {
@@ -53,11 +55,13 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			service.methods.forEach(function(method) {
 				serviceProxy[method] = function() {
 					var params = Array.prototype.slice.call(arguments);
-					var d = new Deferred();
-					_self._load().then(function() {
-						_callService(service.serviceId, method, params, d);
-					});
-					return d.promise;
+					if (_loaded) {
+						return _callService(service.serviceId, method, params);
+					} else {
+						return _self._load().then(function() {
+							return _callService(service.serviceId, method, params);
+						});
+					}
 				};
 			});
 		}
@@ -97,6 +101,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 					
 					if (!_loaded) {
 						_loaded = true;
+						internalRegistry.dispatchEvent("pluginLoaded", _self); //$NON-NLS-0$
 						_deferredLoad.resolve(_self);
 					}
 					
@@ -350,6 +355,15 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 			},
 			postMessage: function(message, channel) {
 				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
+			},
+			dispatchEvent: function(type, plugin) {
+				try {
+					_pluginEventTarget.dispatchEvent(type, plugin);
+				} catch (e) {
+					if (console) {
+						console.log(e);
+					}
+				}
 			}
 	};
 	

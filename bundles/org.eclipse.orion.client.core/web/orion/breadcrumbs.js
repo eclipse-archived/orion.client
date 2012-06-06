@@ -17,7 +17,9 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 	 * @param {Object} options The options object which must specify the parent container
 	 * @param options.container The parent container for the bread crumb presentation
 	 * @param options.resource The current resource
-	 * @param options.firstSegmentName The name of the first segment
+	 * @param options.rootSegmentName The name to use for the root segment in lieu of the metadata name.  Optional.
+	 * @param options.workspaceRootSegmentName The name to use for the workspace root. If not specified, the workspace root
+	 * will not be shown.
 	 * @param [options.makeHref] The call back function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
 	 * @param [option.getFirstSegment] The call back function to make DOM node for the first segment in breadcrumb. 
 	 * @class Bread crumbs show the current position within a resource tree and allow navigation
@@ -39,13 +41,14 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			dojo.removeClass(container, "currentLocation"); //$NON-NLS-0$
 			this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
 			this._resource = options.resource|| null;
-			this._firstSegmentName = options.firstSegmentName;
+			this._rootSegmentName = options.rootSegmentName;
+			this._workspaceRootSegmentName = options.workspaceRootSegmentName;
 			this._makeHref = options.makeHref;
 			this.path = "";
 			this.render();
 		},
-		getNavigatorRootSegment: function(){
-			if (this._firstSegmentName) {
+		getNavigatorWorkspaceRootSegment: function(){
+			if (this._workspaceRootSegmentName) {
 				var seg;
 				if (this._resource && this._resource.Parents) {
 					seg = document.createElement('a'); //$NON-NLS-0$
@@ -57,8 +60,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				} else {
 					seg = document.createElement('span'); //$NON-NLS-0$
 				}
-				var segText = this._firstSegmentName;
-				dojo.place(document.createTextNode(segText), seg, "only"); //$NON-NLS-0$
+				dojo.place(document.createTextNode(this._workspaceRootSegmentName), seg, "only"); //$NON-NLS-0$
 				return seg;
 			}
 			return null;
@@ -75,7 +77,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				container.appendChild(crumbs);
 			}
 			var seg, slash;
-			seg = this.getNavigatorRootSegment();
+			seg = this.getNavigatorWorkspaceRootSegment();
 			if (seg) {
 				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
 				crumbs.appendChild(seg);
@@ -95,6 +97,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					return;
 				}
 			}
+			var firstSegmentName = this._rootSegmentName;
 			if (this._resource) {
 				if (this._resource.Parents) {
 				// walk up the parent chain and insert a crumb for each parent
@@ -102,7 +105,12 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					for (var i = parents.length; --i >= 0 ;){
 						seg = document.createElement('a'); //$NON-NLS-0$
 						dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
-						dojo.place(document.createTextNode(parents[i].Name), seg, "only"); //$NON-NLS-0$
+						if (firstSegmentName) {
+							dojo.place(document.createTextNode(firstSegmentName), seg, "only"); //$NON-NLS-0$
+							firstSegmentName = null;
+						} else {
+							dojo.place(document.createTextNode(parents[i].Name), seg, "only"); //$NON-NLS-0$
+						}
 						this.path += parents[i].Name; 
 						if(this._makeHref) {
 							this._makeHref(seg , parents[i].Location);
@@ -120,7 +128,12 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				}
 				//add a final entry for the current location
 				seg = document.createElement('span'); //$NON-NLS-0$
-				dojo.place(document.createTextNode(this._resource.Name), seg, "only"); //$NON-NLS-0$
+				if (firstSegmentName) {
+					dojo.place(document.createTextNode(firstSegmentName), seg, "only"); //$NON-NLS-0$
+					firstSegmentName = null;
+				} else {
+					dojo.place(document.createTextNode(this._resource.Name), seg, "only"); //$NON-NLS-0$
+				}				
 				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
 				this.path+=this._resource.Name;
 				crumbs.appendChild(seg);
@@ -128,7 +141,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 			if (crumbs.childNodes.length === 0) {
 				seg = document.createElement('a'); //$NON-NLS-0$
-				dojo.place(document.createTextNode(document.title), seg, "only"); //$NON-NLS-0$
+				dojo.place(document.createTextNode(firstSegmentName || document.title), seg, "only"); //$NON-NLS-0$
 				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
 				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
 				crumbs.appendChild(seg);

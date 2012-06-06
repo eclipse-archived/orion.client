@@ -49,14 +49,7 @@ orion.TextSearcher = (function() {
 			var that = this;
 			this._commandService.openParameterCollector("pageNavigationActions", function(parentDiv) { //$NON-NLS-0$
 	
-				// create the command span for Find
-				var span = document.createElement('span'); //$NON-NLS-0$
-				dojo.addClass(span, "parameters"); //$NON-NLS-0$
-				span.id = "localSearchFindCommands"; //$NON-NLS-0$
-				parentDiv.appendChild(span);
-				// td.noWrap = true;
-	
-				// create the input box for searc hterm
+				// create the input box for searchTerm
 				var searchStringDiv = document.createElement('input'); //$NON-NLS-0$
 				searchStringDiv.type = "text"; //$NON-NLS-0$
 				searchStringDiv.name = messages["Find:"];
@@ -70,6 +63,9 @@ orion.TextSearcher = (function() {
 				};
 				parentDiv.appendChild(searchStringDiv);
 				
+				that.createButton("Next", parentDiv, function() {that.findNext(true);});				
+				that.createButton("Previous", parentDiv, function() {that.findNext(false);});	
+				
 				// create replace text
 				var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
 				replaceStringDiv.type = "text"; //$NON-NLS-0$
@@ -81,27 +77,10 @@ orion.TextSearcher = (function() {
 					return that._handleKeyDown(evt, false);
 				};
 				parentDiv.appendChild(replaceStringDiv);
-	
-				// create the command span for Replace
-				span = document.createElement('span'); //$NON-NLS-0$
-				dojo.addClass(span, "parameters"); //$NON-NLS-0$
-				span.id = "localSearchReplaceCommands"; //$NON-NLS-0$
-				parentDiv.appendChild(span);
-	
-				// create all other span for commands : replace/find ,
-				// replace all
-				span = document.createElement('span'); //$NON-NLS-0$
-				span.id = "localSearchOtherCommands"; //$NON-NLS-0$
-				dojo.addClass(span, "parameters"); //$NON-NLS-0$
-				parentDiv.appendChild(span);
-	
-				// create Options button , which will bring a dialog
-				var optionTd = document.createElement('span'); //$NON-NLS-0$
-				dojo.addClass(optionTd, "parameters"); //$NON-NLS-0$
+				
+				that.createButton(messages["Replace"], parentDiv, function() {that.replace();});				
+				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	
 
-				// td.noWrap = true;
-				parentDiv.appendChild(optionTd);
-	
 				var optionMenu = dijit.byId("searchOptMenu"); //$NON-NLS-0$
 				if (optionMenu) {
 					optionMenu.destroy();
@@ -178,8 +157,8 @@ orion.TextSearcher = (function() {
 					label : messages["Options"],
 					dropDown : newMenu
 				});
-				dojo.addClass(menuButton.domNode, "parametersMenu"); //$NON-NLS-0$
-				dojo.place(menuButton.domNode, optionTd, "last"); //$NON-NLS-0$
+				dojo.addClass(menuButton.domNode, "findSlideoutMenu"); //$NON-NLS-0$
+				dojo.place(menuButton.domNode, parentDiv, "last"); //$NON-NLS-0$
 			},
 			function(){that.closeUI();});
 		},
@@ -254,6 +233,22 @@ orion.TextSearcher = (function() {
 			}
 		},
 		
+		createButton: function(text, parent, callback) {
+			var button  = dojo.create("span", {tabindex: "0", role: "button"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.connect(button, "onclick", this, callback); //$NON-NLS-0$
+			dojo.connect(button, "onkeypress", this, function(e) { //$NON-NLS-0$
+				if (e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {						
+					callback();			
+				} else if (e.keyCode === dojo.keys.ESCAPE) {
+					this.closeUI();
+				}
+			});
+			dojo.place(window.document.createTextNode(text), button, "last"); //$NON-NLS-0$
+			dojo.addClass(button, "findSlideoutButton"); //$NON-NLS-0$
+			
+			dojo.place(button, parent, "last"); //$NON-NLS-0$
+		},
+		
 		buildToolBar : function(defaultSearchStr, defaultReplaceStr) {
 			this._keyUpHandled = true;
 			var that = this;
@@ -269,11 +264,12 @@ orion.TextSearcher = (function() {
 				}, 10);				
 				return;
 			}
+
 			this._createActionTable();
 
 			// set the default value of replace string
 			if (typeof(defaultReplaceStr) === "string") { //$NON-NLS-0$
-				replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
+				var replaceDiv = document.getElementById("localSearchReplaceWith"); //$NON-NLS-0$
 				replaceDiv.value = defaultReplaceStr;
 			}
 			// set the default value of search string
@@ -284,58 +280,6 @@ orion.TextSearcher = (function() {
 				findDiv.focus();
 			}, 10);				
 
-			var findNextCommand = new mCommands.Command({
-				tooltip : messages["Find next match"],
-				imageClass : "core-sprite-move_down", //$NON-NLS-0$
-				id : "orion.search.findNext", //$NON-NLS-0$
-				groupId : "orion.searchGroup", //$NON-NLS-0$
-				callback : function() {
-					that.findNext(true);
-				}
-			});
-
-			var findPrevCommand = new mCommands.Command({
-				tooltip : messages["Find previous match"],
-				imageClass : "core-sprite-move_up", //$NON-NLS-0$
-				id : "orion.search.findPrev", //$NON-NLS-0$
-				groupId : "orion.searchGroup", //$NON-NLS-0$
-				callback : function() {
-					that.findNext(false);
-				}
-			});
-
-			var replaceCommand = new mCommands.Command({
-				name : messages["Replace"],
-				image : require.toUrl("images/replace.gif"), //$NON-NLS-0$
-				id : "orion.search.replace", //$NON-NLS-0$
-				groupId : "orion.searchGroup", //$NON-NLS-0$
-				callback : function() {
-					that.replace();
-				}
-			});
-
-			var replaceAllCommand = new mCommands.Command({
-				name : messages["Replace All"],
-				image : require.toUrl("images/replaceAll.gif"), //$NON-NLS-0$
-				id : "orion.search.replaceAll", //$NON-NLS-0$
-				groupId : "orion.searchGroup", //$NON-NLS-0$
-				callback : function() {
-					that.replaceAll();
-				}
-			});
-
-			this._commandService.addCommand(findNextCommand);
-			this._commandService.addCommand(findPrevCommand);
-			this._commandService.addCommand(replaceCommand);
-			this._commandService.addCommand(replaceAllCommand);
-
-			// Register command contributions
-			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findNext", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this._commandService.registerCommandContribution("localSearchFindCommands", "orion.search.findPrev", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replace", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			this._commandService.registerCommandContribution("localSearchReplaceCommands", "orion.search.replaceAll", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			this._commandService.renderCommands("localSearchFindCommands", "localSearchFindCommands", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this._commandService.renderCommands("localSearchReplaceCommands", "localSearchReplaceCommands", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
 		setOptions : function(options) {
