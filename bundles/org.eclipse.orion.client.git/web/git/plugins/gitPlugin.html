@@ -73,7 +73,20 @@
 			});
 			
 			provider.registerServiceProvider("orion.page.link.related", null, {
-				nameKey: "Switch to Remote",
+				nameKey: "Active Branch Log",
+				id: "eclipse.orion.git.switchToCurrentLocal",
+				tooltipKey: "Show the log for the active local branch",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
+					{source: "toRef:Type", match: "RemoteTrackingBranch"},
+				],
+				uriTemplate: "{OrionHome}/git/git-log.html#{GitBranchLocation}?page=1",
+				forceSingleItem: true
+			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				nameKey: "Remote Branch Log",
 				id: "eclipse.orion.git.switchToRemote2",
 				tooltipKey: "Show the log for the corresponding remote tracking branch",
 				nls: "git/nls/gitmessages",
