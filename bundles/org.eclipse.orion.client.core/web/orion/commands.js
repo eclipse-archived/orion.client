@@ -473,9 +473,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							onBlur: function() {dijit.popup.close(tooltipDialog);}
 						});		
 						var parameterArea = dojo.create("div"); //$NON-NLS-0$
+						var originalFocusNode = window.document.activeElement;
 						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 							dijit.popup.close(tooltipDialog);
 							tooltipDialog.destroyRecursive();
+							if (originalFocusNode) {
+								originalFocusNode.focus();
+							}
 						})(parameterArea);
 						tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
 						var menu = dijit.byId(commandInvocation.domParent.id);
