@@ -273,8 +273,6 @@ define({
 	"Force Push All": "Force Push All",
 	"Push commits and tags from your local branch into the remote branch overriding its current content": "Push commits and tags from your local branch into the remote branch overriding its current content",
 	"You're going to override content of the remote branch. This can cause the remote repository to lose commits.": "You're going to override content of the remote branch. This can cause the remote repository to lose commits.",
-	"Switch to Remote": "Switch to Remote",
-	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch",
 	"< Previous Page": "< Previous Page",
 	"Show previous page of git log": "Show previous page of git log",
 	"Next Page >": "Next Page >",
@@ -334,5 +332,9 @@ define({
 	"Skip Patch": "Skip Patch",
 	"Abort": "Abort",
 	"Abort Rebase": "Abort Rebase",
-	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered."
+	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered.",
+	"Active Branch Log": "Active Branch Log",
+	"Show the log for the active local branch": "Show the log for the active local branch",
+	"Remote Branch Log": "Remote Branch Log",
+	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch",
 });

@@ -1412,51 +1412,6 @@ var exports = {};
 		});
 		commandService.addCommand(nextLogPage);
 
-		var switchToCurrentLocal = new mCommands.Command({
-			name : "Switch to Active Local", //$NON-NLS-0$
-			tooltip: "Show the log for the active local branch", //$NON-NLS-0$
-			id : "eclipse.orion.git.switchToCurrentLocal", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				var item = data.items;
-				var clientDeferred = new dojo.Deferred();
-
-				var cloneLocation = item.CloneLocation;
-				if (cloneLocation == null){
-					var obj = JSON.parse(item.responseText);
-					cloneLocation = obj.JsonData.CloneLocation;
-				}
-				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				gitService.getGitClone(cloneLocation).then(function(clone, secondArg) {
-					gitService.getGitBranch(clone.Children[0].BranchLocation).then(function(branches){
-						dojo.forEach(branches.Children, function(branch, i) {
-							if (branch.Current == true){
-								clientDeferred.callback(require.toUrl("git/git-log.html") + "#" + branch.CommitLocation + "?page=1"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-								return;
-							}
-						}, displayErrorOnStatus);
-					}, displayErrorOnStatus);
-				});
-				return clientDeferred;
-			},
-			visibleWhen : function(item) {
-				if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
-					return true;
-				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch") //$NON-NLS-1$ //$NON-NLS-0$
-					return true;
-
-				try {
-					var obj = JSON.parse(item.responseText);
-					if (obj.JsonData)
-						return true;
-				} catch(error) {
-					//it is not JSON, just continue;
-				}
-
-				return false;
-			}
-		});
-		commandService.addCommand(switchToCurrentLocal);
-
 		var pushToCommand = new mCommands.Command({
 			name : messages["Push to..."],
 			tooltip: messages["Push from your local branch into the selected remote branch"],
