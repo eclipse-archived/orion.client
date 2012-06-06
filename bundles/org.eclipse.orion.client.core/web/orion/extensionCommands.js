@@ -55,7 +55,6 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				editors.push({
 					id: id,
 					name: serviceRef.getProperty("name"), //$NON-NLS-0$
-					nameKey: serviceRef.getProperty("nameKey"), //$NON-NLS-0$
 					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
 					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate") //$NON-NLS-1$ //$NON-NLS-0$
 				});
@@ -97,10 +96,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			if (editorContentTypes.length) {
 				var properties = {
 					name: editor.name || editor.id,
-					nameKey: editor.nameKey,
 					id: "eclipse.openWithCommand." + editor.id, //$NON-NLS-0$
 					tooltip: editor.name,
-					tooltipKey: editor.nameKey,
 					contentType: editorContentTypes,
 					uriTemplate: editor.uriTemplate,
 					nls: editor.nls,
@@ -356,10 +353,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		if(info.nls){
 			i18nUtil.getMessageBundle(info.nls).then(function(commandMessages){
 				var commandOptions = {
-						name: info.nameKey ? commandMessages[info.nameKey] : info.name,
+						name: commandMessages[info.name],
 						image: info.image,
 						id: info.id || info.name,
-						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
+						tooltip: info.tooltip ? commandMessages[info.tooltip] : null,
 						isEditor: info.isEditor
 				};
 				enhanceCommandOptions(commandOptions, deferred);

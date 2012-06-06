@@ -43,8 +43,8 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 
 	provider.registerServiceProvider('orion.navigate.command', null, {
 		id: 'orion.site.viewon',
-		nameKey: 'View on Site',
-		tooltipKey: 'View this file or folder on a web site hosted by Orion',
+		name: 'View on Site',
+		tooltip: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
 		forceSingleItem: true,
 		validationProperties: filesAndFoldersOnService(fileBase),
@@ -53,8 +53,8 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 
 	provider.registerServiceProvider('orion.page.link.related', null, {
 		id: 'orion.site.viewon',
-		nameKey: 'View on Site',
-		tooltipKey: 'View this file or folder on a web site hosted by Orion',
+		name: 'View on Site',
+		tooltip: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
 		validationProperties: filesAndFoldersOnService(fileBase),
 		uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
