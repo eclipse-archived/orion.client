@@ -1764,11 +1764,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleKeyDown: function (e) {
 			if (!e) { e = window.event; }
+			var modifier = false;
 			switch (e.keyCode) {
 				case 16: /* Shift */
 				case 17: /* Control */
 				case 18: /* Alt */
 				case 91: /* Command */
+					modifier = true;
 					break;
 				default:
 					this._setLinksVisible(false);
@@ -1795,7 +1797,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					this._startIME();
 				}
 			} else {
-				this._commitIME();
+				if (!modifier) {
+					this._commitIME();
+				}
 			}
 			/*
 			* Feature in Firefox. When a key is held down the browser sends 
@@ -3297,7 +3301,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								if (spanEnd >= changeStart) {
 									spanEnd -= changeCount;
 								}
-								var length = oldSpan.firstChild.data.length;
+								var t = oldSpan.firstChild.data;
+								var length = t ? t.length : 0;
 								if (oldEnd + length > spanEnd) { break; }
 								oldEnd += length;
 							}
