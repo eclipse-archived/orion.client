@@ -129,57 +129,74 @@ var serviceRegistry;
 				function(resp) {
 					var resource = resp;
 					gitService.getGitClone(resource.CloneLocation).then(
-						function(resp){			
-							resource.Clone = resp.Children[0];
-							resource.ContentLocation = resp.Children[0].ContentLocation;
-					 
-							//TODO if this were in the scope of the onload above, we would have the right file client instance.  Shouldn't need to
-							// create one each time.
-							var fileClient = new mFileClient.FileClient(serviceRegistry);
-							setPageInfo(fileClient, navigator, resource, searcher, commandService).then(
-								function(){
-									var processRemoteTrackingBranch = function(resource) {
-										dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-										var newRefEncoded = encodeURIComponent(resource.FullName);
-										gitService.getLog(resource.HeadLocation, newRefEncoded).then(function(scopedCommitsJsonData) {
-											navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
-											navigator.renderer.setOutgoingCommits([]);
-											gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query).then(function(jsonData) { //$NON-NLS-0$
-												resource.Children = jsonData.Children;
-												if(jsonData.NextLocation){
-													resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query; //$NON-NLS-0$
-												}
-												if(jsonData.PreviousLocation ){
-													resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query; //$NON-NLS-0$
-												}
-												navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															 //$NON-NLS-0$
-											});
-										});
-									};
-									if (resource.Type === "RemoteTrackingBranch"){ //$NON-NLS-0$
-										processRemoteTrackingBranch(resource);
-									} else if (resource.Type === "Commit" && resource.toRef.Type === "RemoteTrackingBranch"){ //$NON-NLS-1$ //$NON-NLS-0$
-										processRemoteTrackingBranch(resource.toRef);
-									} else if (resource.toRef){
-										if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1){
-											gitService.getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location).then(
-												function(remoteJsonData, secondArg) {
-													dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-													gitService.getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) { //$NON-NLS-0$
-														navigator.renderer.setIncomingCommits([]);
-														navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
-														navigator.loadCommitsList(dojo.hash(), resource);
-													});
-												},
-												function(error, ioArgs){
-													navigator.loadCommitsList(dojo.hash(), resource);
-												});
-										} else {
-											navigator.loadCommitsList(dojo.hash(), resource);
+						function(resp){
+							var clone = resp.Children[0];
+							
+							resource.Clone = clone;
+							resource.ContentLocation = clone.ContentLocation;
+							
+
+							gitService.getGitBranch(clone.BranchLocation).then(
+								function(branches){
+									dojo.forEach(branches.Children, function(branch, i) {
+										if (branch.Current == true){
+											resource.Clone.ActiveBranch = branch.CommitLocation;
 										}
-									} else {
-										navigator.loadCommitsList(dojo.hash(), resource);
-									}
+									});
+							 
+									//TODO if this were in the scope of the onload above, we would have the right file client instance.  Shouldn't need to
+									// create one each time.
+									var fileClient = new mFileClient.FileClient(serviceRegistry);
+									setPageInfo(fileClient, navigator, resource, searcher, commandService).then(
+										function(){
+											var processRemoteTrackingBranch = function(resource) {
+												dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+												var newRefEncoded = encodeURIComponent(resource.FullName);
+												gitService.getLog(resource.HeadLocation, newRefEncoded).then(function(scopedCommitsJsonData) {
+													navigator.renderer.setIncomingCommits(scopedCommitsJsonData.Children);
+													navigator.renderer.setOutgoingCommits([]);
+													gitService.doGitLog(resource.CommitLocation + "?" + new dojo._Url(path).query).then(function(jsonData) { //$NON-NLS-0$
+														resource.Children = jsonData.Children;
+														if(jsonData.NextLocation){
+															resource.NextLocation = resource.Location + "?" + new dojo._Url(jsonData.NextLocation).query; //$NON-NLS-0$
+														}
+														if(jsonData.PreviousLocation ){
+															resource.PreviousLocation  = resource.Location + "?" + new dojo._Url(jsonData.PreviousLocation).query; //$NON-NLS-0$
+														}
+														navigator.loadCommitsList(resource.CommitLocation + "?" + new dojo._Url(path).query, resource);															 //$NON-NLS-0$
+													});
+												});
+											};
+											if (resource.Type === "RemoteTrackingBranch"){ //$NON-NLS-0$
+												processRemoteTrackingBranch(resource);
+											} else if (resource.Type === "Commit" && resource.toRef.Type === "RemoteTrackingBranch"){ //$NON-NLS-1$ //$NON-NLS-0$
+												processRemoteTrackingBranch(resource.toRef);
+											} else if (resource.toRef){
+												if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1){
+													gitService.getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location).then(
+														function(remoteJsonData, secondArg) {
+															dojo.place(document.createTextNode("Getting git incoming changes..."), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+															gitService.getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) { //$NON-NLS-0$
+																navigator.renderer.setIncomingCommits([]);
+																navigator.renderer.setOutgoingCommits(scopedCommitsJsonData.Children);
+																navigator.loadCommitsList(dojo.hash(), resource);
+															});
+														},
+														function(error, ioArgs){
+															navigator.loadCommitsList(dojo.hash(), resource);
+														});
+												} else {
+													navigator.loadCommitsList(dojo.hash(), resource);
+												}
+											} else {
+												navigator.loadCommitsList(dojo.hash(), resource);
+											}
+										}
+									);
+							
+							
+							
+							
 								}
 							);
 						}
@@ -236,7 +253,6 @@ var serviceRegistry;
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.fetch", 100, "eclipse.gitGroup.page"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.fetchForce", 100, "eclipse.gitGroup.page"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.merge", 100, "eclipse.gitGroup.page"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.switchToCurrentLocal", 100, "eclipse.gitGroup.page");	 //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.push", 100, "eclipse.gitGroup.page"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "eclipse.orion.git.pushForce", 100, "eclipse.gitGroup.page"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.addTag", 3); //$NON-NLS-1$ //$NON-NLS-0$
