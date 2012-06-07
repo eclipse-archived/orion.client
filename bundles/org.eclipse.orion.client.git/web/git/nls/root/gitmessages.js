@@ -336,5 +336,5 @@ define({
 	"Active Branch Log": "Active Branch Log",
 	"Show the log for the active local branch": "Show the log for the active local branch",
 	"Remote Branch Log": "Remote Branch Log",
-	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch",
+	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch"
 });
