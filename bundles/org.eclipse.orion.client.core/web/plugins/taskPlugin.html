@@ -1,87 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script src="../requirejs/require.js"></script>
 	<script>
-		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			
-			function makeParentRelative(location) {
-				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
-					return location.substring(parent.location.href.indexOf(parent.location.host)+parent.location.host.length);
-				}
-				return location;
-			}
-			
-			var temp = document.createElement('a');
-			temp.href = "../task"
-			var base = makeParentRelative(temp.href);
-			
-			// testing that command service handles image-less actions properly
-			provider.registerServiceProvider("orion.core.operation", {
-				getOperations: function(options){
-					return dojo.xhrGet({
-						url: base , 
-						headers: {
-							"Orion-Version": "1"
-						},
-						content: options,
-						handleAs: "json",
-						timeout: options.Longpolling == true? 70000: 15000
-					});
-				},
-				getOperation: function(taskLocation){
-					return dojo.xhrGet({
-						url: taskLocation , 
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 15000
-					});
-				},
-				removeCompletedOperations: function(){
-					return dojo.xhrDelete({
-						url: base , 
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 15000
-					});
-				},
-				removeOperation: function(taskLocation){
-					return dojo.xhrDelete({
-						url: taskLocation , 
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 15000
-					});
-				},
-				cancelOperation: function(taskLocation){
-					return dojo.xhrPut({
-						url: taskLocation ,
-						putData: JSON.stringify({Cancel: true}),
-						headers: {
-							"Orion-Version": "1"
-						},
-						handleAs: "json",
-						timeout: 15000
-					});
-				}
-			}, {
-				name : "Tasks",
-				pattern: base
-			});
-			
-			
-			provider.connect();
-		};
+		/*global require eclipse*/
+		require({
+		  baseUrl: '..',
+		  paths: {
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+		require(['taskPlugin.js']);
 	</script>
 </head>
 <body>
