@@ -54,7 +54,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			dojo.style(this.domNode, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.attr(this.domNode, "tabIndex", "0"); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.connect(this.domNode, "onclick", function(evt) { //$NON-NLS-0$
-				if (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie) {
+				if (evt.target === that.titleNode || evt.target === that.twistie) {
 					that._changeExpandedState();
 				}
 			});
