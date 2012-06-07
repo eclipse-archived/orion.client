@@ -406,7 +406,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
-									navGridHolder: navGridHolder,
+									gridRenderer: {
+										navGridHolder: navGridHolder
+									},
 									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: hasConflict,
@@ -595,7 +597,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								
 								var diffOptions = {
-									navGridHolder: navGridHolder,
+									gridRenderer: {
+										navGridHolder: navGridHolder
+									},
 									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: hasConflict,

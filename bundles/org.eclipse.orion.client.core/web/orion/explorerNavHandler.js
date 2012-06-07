@@ -189,7 +189,7 @@ exports.ExplorerNavHandler = (function() {
 				this.topIterationNodes = topIterationNodes;
 			}
 			this._modelIterator.setTree(this.topIterationNodes);
-			if(!noReset){
+			if(!noReset && this.explorer.selection){
 				this._modelIterator.reset();
 			}
 			this.refreshSelection();
@@ -482,7 +482,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._onModelGrid(model, mouseEvt)){
 				return;
 			}
-			this.cursorOn(model);
+			this.cursorOn(model, true);
 			if(isPad){
 				this.setSelection(model, true);
 			} else if(this._ctrlKeyOn(mouseEvt)){
