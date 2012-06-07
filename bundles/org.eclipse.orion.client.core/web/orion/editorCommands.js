@@ -215,6 +215,8 @@ exports.EditorCommandFactory = (function() {
 									that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
 									that._searcher.findNext(true);
 								}
+							} else {
+								that._searcher.buildToolBar(searchString);
 							}
 							return true;
 						}
