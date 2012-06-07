@@ -9,109 +9,37 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-/*jslint sub:true*/
-define(['orion/textview/eventTarget', 'orion/preferences'], function(mEventTarget, mPreferences) {
+define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences', 'orion/serviceTracker'],
+	function(mEventTarget, Deferred, mPreferences, ServiceTracker) {
 var PreferencesService = mPreferences.PreferencesService;
-var ServiceTracker, ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
+var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
-
-/**
- * @name orion.cm.impl.ServiceTracker
- * @class Tracks services in the ServiceRegistry whose name matches serviceName.
- * @private
- */
-ServiceTracker = /** @ignore */ (function() {
-	var CLOSED = 0, OPENED = 1;
-	function ServiceTracker(serviceRegistry, serviceName) {
-		var refs = {};
-		var services = {};
-		var state = CLOSED;
-		var addedListener, removedListener;
-
-		function add(serviceRef) {
-			var id = serviceRef.getServiceId();
-			var serviceObject = this.addingService(serviceRef);
-			if (serviceObject) {
-				refs[id] = serviceRef;
-				services[id] = serviceObject;
-			}
-		}
-		function remove(serviceRef) {
-			var id = serviceRef.getServiceId();
-			var service = services[id];
-			delete refs[id];
-			delete services[id];
-			this.removedService(serviceRef, service);
-		}
-		function isTrackable(serviceRef) {
-			return serviceName === serviceRef.getName();
-		}
-
-		this.addingService = function(serviceRef) {
-			return serviceRegistry.getService(serviceRef);
-		};
-		this.close = function() {
-			if (state !== OPENED) {
-				throw 'Already closed'; //$NON-NLS-0$
-			}
-			state = CLOSED;
-			serviceRegistry.removeEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.removeEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
-			addedListener = null;
-			removedListener = null;
-			var self = this;
-			this.getServiceReferences().forEach(function(serviceRef) {
-				remove.call(self, serviceRef);
-			});
-		};
-		this.getServiceReferences = function() {
-			var refs = refs;
-			if (refs.length) {
-				return Object.keys(refs).map(function(serviceId) {
-					return refs[serviceId];
-				});
-			}
-			return null;
-		};
-		this.open = function() {
-			if (state !== CLOSED) {
-				throw 'Already open'; //$NON-NLS-0$
-			}
-			state = OPENED;
-			var self = this;
-			addedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					add.call(self, serviceRef);
-				}
-			};
-			removedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					remove.call(self, serviceRef);
-				}
-			};
-			serviceRegistry.addEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.addEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
-			serviceRegistry.getServiceReferences(serviceName).forEach(function(serviceRef) {
-				add.call(self, serviceRef);
-			});
-		};
-		this.removedService = function(serviceRef, service) {
-		};
-	}
-	return ServiceTracker;
-}());
+var MANAGED_SERVICE = 'orion.cm.managedservice'; //$NON-NLS-0$
 
 /**
  * @name orion.cm.impl.ManagedServiceTracker
  * @class Tracks ManagedServices in a ServiceRegistry. Delivers updated() notifications to tracked ManagedServices.
+ * This class also tracks the loading of {@link orion.pluginregistry.Plugin}s in a PluginRegistry, and provides 
+ * the following guarantee: if a Plugin is being loaded and it provides any ManagedServices, their updated() methods
+ * will be called prior to the Plugin's other service methods.
  * @private
  */
-ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
-	ServiceTracker.call(this, serviceRegistry, 'orion.cm.managedservice'); //$NON-NLS-0$
+ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry, store) {
+	ServiceTracker.call(this, serviceRegistry, MANAGED_SERVICE); //$NON-NLS-0$
 
 	var managedServiceRefs = {};
 	var managedServices = {};
+	var self = this;
+	var pluginLoadedListener = function(plugin) {
+		plugin.getServiceReferences().forEach(function(serviceRef) {
+			if (serviceRef.getName() === MANAGED_SERVICE) {
+				// Inject async updated() call to fulfill the guarantee
+				self.initialUpdated(serviceRef);
+			}
+		});
+	};
+	pluginRegistry.addEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
 	function add(pid, serviceRef, service) {
 		if (!managedServiceRefs[pid]) {
 			managedServiceRefs[pid] = [];
@@ -136,15 +64,26 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 			delete managedServices[pid];
 		}
 	}
+	function getManagedServiceReferences(pid) {
+		return managedServiceRefs[pid] || [];
+	}
 	function getManagedServices(pid) {
 		return managedServices[pid] || [];
 	}
-	function asyncUpdated(managedService, properties) {
-		var services = managedService instanceof Array ? managedService : [managedService];
+	function asyncUpdated(managedServiceRef, managedService, properties) {
+		function arr(v) {
+			return v instanceof Array ? v : [v];
+		}
+		var serviceRefs = arr(managedServiceRef), services = arr(managedService);
 		setTimeout(function() {
 			for (var i=0; i < services.length; i++) {
 				try {
-					services[i].updated(properties);
+					// Don't trigger a plugin load only to call updated(); pluginLoadedListener handles that case.
+					var pluginUrl = serviceRefs[i].getProperty('__plugin__'); //$NON-NLS-0$
+					var plugin = pluginUrl && pluginRegistry.getPlugin(pluginUrl);
+					if (!pluginUrl || (plugin && plugin.isLoaded())) {
+						services[i].updated(properties);
+					}
 				} catch(e) {
 					if (console) {
 						console.log(e);
@@ -162,14 +101,29 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 		add(pid, serviceRef, managedService);
 		var configuration = store.find(pid);
 		var properties = configuration && configuration.getProperties();
-		asyncUpdated(managedService, properties);
+		asyncUpdated(serviceRef, managedService, properties);
 		return managedService;
 	};
+	this.close = function() {
+		ServiceTracker.close.call();
+		pluginRegistry.removeEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
+	};
+	this.initialUpdated = function(managedServiceRef) {
+		var pid = managedServiceRef.getProperty(PROPERTY_PID);
+		var managedService = serviceRegistry.getService(managedServiceRef);
+		if (pid && managedService) {
+			var configuration = store.find(pid);
+			var properties = configuration && configuration.getProperties();
+			managedService.updated(properties); // async
+		}
+	};
 	this.notifyUpdated = function(configuration) {
-		asyncUpdated(getManagedServices(configuration.getPid()), configuration.getProperties());
+		var pid = configuration.getPid();
+		asyncUpdated(getManagedServiceReferences(pid), getManagedServices(pid), configuration.getProperties());
 	};
 	this.notifyDeleted = function(configuration) {
-		asyncUpdated(getManagedServices(configuration.getPid()), null);
+		var pid = configuration.getPid();
+		asyncUpdated(getManagedServiceReferences(pid), getManagedServices(pid), null);
 	};
 	this.removedService = function(serviceRef, service) {
 		var pid = serviceRef.getProperty(PROPERTY_PID);
@@ -201,11 +155,11 @@ ConfigAdminFactory = /** @ignore */ (function() {
 //};
 
 	/** @private */
-	function ConfigAdminFactory(serviceRegistry, prefsService) {
+	function ConfigAdminFactory(serviceRegistry, pluginRegistry, prefsService) {
 		this.serviceRegistry = serviceRegistry;
 		this.store = new ConfigStore(this, prefsService);
 		this.configAdmin = new ConfigAdminImpl(this, this.store);
-		this.tracker = new ManagedServiceTracker(serviceRegistry, this.store);
+		this.tracker = new ManagedServiceTracker(serviceRegistry, pluginRegistry, this.store);
 		this.tracker.open();
 		this.serviceRegistered = false;
 //		this.dispatcher = {};
@@ -266,7 +220,7 @@ ConfigStore = /** @ignore */ (function() {
 		this.configs = {};
 		this.pref = null;
 		var self = this;
-		this.initPromise = prefsService.getPreferences('cm/configurations', PreferencesService.USER_SCOPE).then( //$NON-NLS-0$
+		this.initPromise = prefsService.getPreferences('/cm/configurations', PreferencesService.USER_SCOPE).then( //$NON-NLS-0$
 			function(prefNode) {
 				self.pref = prefNode;
 				prefNode.keys().forEach(function(pid) {
