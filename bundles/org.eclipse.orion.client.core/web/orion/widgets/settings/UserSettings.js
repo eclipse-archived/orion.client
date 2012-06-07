@@ -248,8 +248,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							settingsWidget.accountFields[1].setValue( accountData.Name );
 							settingsWidget.accountFields[2].setValue( accountData.email );
 							
-							settingsWidget.gitFields[0].setValue( accountData.GitMail );
-							settingsWidget.gitFields[1].setValue( accountData.GitName );							
+							if( accountData.GitMail ){
+								settingsWidget.gitFields[0].setValue( accountData.GitMail );
+							}
+							
+							if( accountData.GitName ){
+								settingsWidget.gitFields[1].setValue( accountData.GitName );	
+							}
 						});
 						
 						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );
