@@ -302,7 +302,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 						} else if (parentItem.Type === "Diff") {
 							if(!parentItem.children){//lazy creation, this is required for selection model to be able to trverse into children
 								parentItem.children = [];
-								parentItem.children.push({parent: parentItem}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								parentItem.children.push({parent: parentItem, DiffLocation: parentItem.DiffLocation}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 							onComplete(parentItem.children); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							//onComplete([{parent: parentItem}]); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -369,17 +369,21 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 							window.setTimeout(function(){
 								var diffProvider = new mCompareContainer.DefaultDiffProvider(that.registry);
 								var diffOptions = {
-									navGridHolder: navGridHolder,
+									gridRenderer: {
+										navGridHolder: navGridHolder,
+										additionalCmdRender: function(gridHolder){
+											dojo.empty(diffActionWrapper.id);
+											that.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
+										},
+										before: true
+									},
 									commandSpanId: compareWidgetActionWrapper.id,
 									diffProvider: diffProvider,
 									hasConflicts: false,
 									readonly: true,
 									editableInComparePage: true,
 									complexURL: item.parent.DiffLocation,
-									callback : function(){
-										dojo.empty(diffActionWrapper.id);
-										that.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false); //$NON-NLS-0$
-									}
+									callback : function(){}
 								};
 								
 								var inlineCompareContainer = new mCompareContainer.toggleableCompareContainer(that.registry, "diffArea_" + item.parent.DiffLocation, "inline", diffOptions); //$NON-NLS-1$ //$NON-NLS-0$

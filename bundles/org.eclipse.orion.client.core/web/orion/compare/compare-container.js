@@ -132,7 +132,7 @@ exports.CompareContainer = (function() {
 				this.options.commandSpanId = typeof(options.commandSpanId) === "string" ? options.commandSpanId : this.options.commandSpanId; //$NON-NLS-0$
 				this.options.generateLink = (options.generateLink !== undefined &&  options.generateLink !== null) ? options.generateLink : this.options.generateLink;
 				this.options.editableInComparePage = (options.editableInComparePage !== undefined &&  options.editableInComparePage !== null) ? options.editableInComparePage : this.options.editableInComparePage;
-				this.options.navGridHolder = options.navGridHolder || this.options.navGridHolder;
+				this.options.gridRenderer = options.gridRenderer || this.options.gridRenderer;
 				this.options.readonly = (options.readonly !== undefined &&  options.readonly !== null) ? options.readonly : this.options.readonly;
 				this.options.onPage = (options.onPage !== undefined &&  options.onPage !== null) ? options.onPage : this.options.onPage;
 				this.options.wordLevelNav = (options.wordLevelNav !== undefined &&  options.wordLevelNav !== null) ? options.wordLevelNav : this.options.wordLevelNav;
@@ -301,7 +301,22 @@ exports.CompareContainer = (function() {
 				return;
 			}
 			dojo.empty(commandSpanId);
-			this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.navGridHolder); //$NON-NLS-0$
+			if(this.options.gridRenderer && this.options.gridRenderer.navGridHolder){
+				this.options.gridRenderer.navGridHolder.splice(0, this.options.gridRenderer.navGridHolder.length);
+				if(this.options.gridRenderer.additionalCmdRender){
+					if(this.options.gridRenderer.before){
+						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
+						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+					} else {
+						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
+					}
+				} else {
+					this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+				}
+			} else {
+				this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null); //$NON-NLS-0$
+			}
 		},
 		
 		generateLink: function(){	
