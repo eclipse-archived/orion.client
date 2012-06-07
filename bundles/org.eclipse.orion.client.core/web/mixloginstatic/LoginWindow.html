@@ -8,22 +8,31 @@
 <script src="js/htmlAuth.js"></script>
 <title>Login Page</title>
 </head>
-<body style="margin: 0; padding: 0;">
-	<div class="orion-login-container" id="login-window" style="display:none;">
+<body style="margin: 0; padding: 0; min-height:400px;">
+	<div class="orion-banner">
+		<div class="orion-nav-bar">
+			<div class="orion-logo"></div>
+		</div>
+	</div>
+	<div class="orion-login-container" id="login-window" style="display:none;min-height:400px;">
 		<div class="orion-landing-area">
 			<div id="errorWin"  class="orion-error" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
 					<div id="errorMessage">&nbsp;</div>
 			</div>
-			<div class="orion-banner"></div>
+
 			<div class="orion-welcome-area">
-				<div class="orion-welcome-area-text">
+				<div class="orion-slogan">
+					<div class="orion-slogan-highlight">Tools for the web</div>
+					<div class="orion-slogan-lowlight">on the web</div>
+				</div>
+				<!-- div class="orion-welcome-area-text">
 					<h1>Welcome to Orion</h1>
 					<div class="orion-welcome-area-text-content">Orion is a web based developer platform supporting editing, testing and deploying web applictions. Orion has built in Git support. So create an
 						account, clone a repository to OrionHub and start editing</div>
-				</div>
+				</div -->
 			</div>
 			<div class="orion-login" id="orionLogin">
-				<div class="orion-login-header">User Login</div>
+				<div class="orion-login-header">Log in</div>
 				<form>
 					<div class="orion-input-holder">
 						<input type="text" class="orion-text-input" name="login" id="login" value="username" onclick='focusUserField(event)' title="Username or email" autocomplete="on"
@@ -78,7 +87,7 @@
 
 			<div class="orion-open" id="orionOpen">
 				<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
-				<div id="openIDLogin" class="orion-open-header">Login with:</div>
+				<div id="openIDLogin" class="orion-open-header">Log in with:</div>
 				<div class="orion-open-images">
 					<a class="loginWindow googleIcon" href="javascript:confirmOpenId('https://www.google.com/accounts/o8/id')" aria-labelledby="openIDLogin googleLogin"> 
 						<div id="googleLogin" class="googleIcon" alt="Google" title="Google"></div>
