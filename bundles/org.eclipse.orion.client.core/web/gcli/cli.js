@@ -839,7 +839,7 @@ Requisition.prototype.getInputStatusMarkup = function(cursor) {
       }
     }
 
-    markup.push({ status: status, string: argTrace.char });
+    markup.push({ status: status, string: argTrace['char'] });
   }
 
   // De-dupe: merge entries where 2 adjacent have same status
