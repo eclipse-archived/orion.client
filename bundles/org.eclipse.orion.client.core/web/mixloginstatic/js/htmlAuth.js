@@ -92,6 +92,7 @@ window.onload = function() {
 					formatForNoUserCreation();
 				}
 				document.getElementById("login-window").style.display = '';
+				document.getElementById("login").focus();
 			}
 		}
 	};
@@ -119,8 +120,6 @@ window.onload = function() {
 	checkemailrequest.setRequestHeader("Orion-Version", "1");
 	checkemailrequest.send();
 
-	document.getElementById("login").focus();
-	
 };
 
 function setResetMessage(isError, message) {
