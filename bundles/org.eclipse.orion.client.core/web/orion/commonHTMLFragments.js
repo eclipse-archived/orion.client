@@ -57,7 +57,7 @@ define(['i18n!orion/nls/messages', 'require'],
 			'</div>' + //$NON-NLS-0$
 			'<div class="footerRightBlock">' + //$NON-NLS-0$
 				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">'+messages['FAQ']+'</a> | ' +  //$NON-NLS-0$
-				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.4" target="_blank">'+messages['Report a Bug']+'</a> | ' + //$NON-NLS-0$
+				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=0.5" target="_blank">'+messages['Report a Bug']+'</a> | ' + //$NON-NLS-0$
 				'<a href="http://www.eclipse.org/legal/privacy.php" target="_blank">'+messages['Privacy Policy']+'</a> | ' +  //$NON-NLS-0$
 				'<a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">'+messages['Terms of Use']+'</a> | '+  //$NON-NLS-0$
 				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">'+messages['Copyright Agent']+'</a>'+ //$NON-NLS-0$
