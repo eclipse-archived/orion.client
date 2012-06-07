@@ -637,7 +637,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			if (!this._contributionsByScopeId[scopeId]) {
 				this._contributionsByScopeId[scopeId] = {};
 			}
-			this._contributionsByScopeId.localSelectionService = selectionService;
+			this._contributionsByScopeId[scopeId].localSelectionService = selectionService;
 		},
 		
 		/**

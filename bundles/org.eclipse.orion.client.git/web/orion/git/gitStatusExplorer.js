@@ -300,7 +300,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				id: "unstagedSection", //$NON-NLS-0$
 				title: unstagedSortedChanges.length > 0 ? messages['Unstaged'] : messages["No Unstaged Changes"],
 				content: '<div id="unstagedNode"></div>', //$NON-NLS-0$
-				canHide: true
+				canHide: true,
+				onExpandCollapse: function(isExpanded, section) {
+					dojo.empty(section.selectionNode);
+					if (isExpanded) {
+						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}
 			});
 			
 			this.commandService.registerCommandContribution(unstagedSection.actionsNode.id, "orion.explorer.expandAll", 200); //$NON-NLS-1$ //$NON-NLS-0$
@@ -311,8 +317,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			this.commandService.registerCommandContribution(unstagedSection.selectionNode.id, "eclipse.orion.git.checkoutCommand", 300); //$NON-NLS-0$	
 
 			if (!this.unstagedOnce){
-				if (!this.unstagedSelection)
+				if (!this.unstagedSelection) {
 					this.unstagedSelection = new mSelection.Selection(this.registry, "orion.unstagedSection.selection"); //$NON-NLS-0$
+					this.commandService.registerSelectionService(unstagedSection.selectionNode.id, this.unstagedSelection);
+				}
 				
 				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(unstagedSection.selectionNode.id);
@@ -491,7 +499,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				title: stagedSortedChanges.length > 0 ? messages['Staged'] : messages["No Staged Changes"],
 				content: '<div id="stagedNode"></div>', //$NON-NLS-0$
 				slideout: true,
-				canHide: true
+				canHide: true,
+				onExpandCollapse: function(isExpanded, section) {
+					dojo.empty(section.selectionNode);
+					if (isExpanded) {
+						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", {"Clone": repository}); //$NON-NLS-0$ //$NON-NLS-1$
+					}
+				}
 			});
 			
 			this.commandService.registerCommandContribution(stagedSection.actionsNode.id, "eclipse.orion.git.commitCommand", 100); //$NON-NLS-0$
@@ -501,8 +515,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			this.commandService.registerCommandContribution(stagedSection.selectionNode.id, "eclipse.orion.git.unstageCommand", 100); //$NON-NLS-0$
 			
 			if (!this.stagedOnce){
-				if (!this.stagedSelection)
+				if (!this.stagedSelection) {
 					this.stagedSelection = new mSelection.Selection(this.registry, "orion.stagedSection.selection"); //$NON-NLS-0$
+					this.commandService.registerSelectionService(stagedSection.selectionNode.id, this.stagedSelection);
+				}
 				
 				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(stagedSection.selectionNode.id);

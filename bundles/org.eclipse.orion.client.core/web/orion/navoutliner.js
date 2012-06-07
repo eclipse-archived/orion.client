@@ -157,7 +157,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 
 		render: function(favorites, serviceRegistry) {
 			var commandService = this.commandService;
-
+			var that = this;
 			if (serviceRegistry) {
 				var allReferences = serviceRegistry.getServiceReferences("orion.core.file"); //$NON-NLS-0$
 				// top level folder outline if there is more than one file service.  We never show this if there is only one file service,
@@ -171,7 +171,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 							preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 							canHide: true,
 							useAuxStyle: true,
-							slideout: true
+							slideout: true,
+							onExpandCollapse: function(isExpanded, section) {
+								dojo.empty(section.selectionNode);
+								if (isExpanded) {
+									commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
+								}
+							}
 						});
 					}
 					this.explorer = new NavOutlineExplorer(serviceRegistry, this.fileSystemSelection);
@@ -193,7 +199,13 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: true,
 					useAuxStyle: true,
-					slideout: true
+					slideout: true,
+					onExpandCollapse: function(isExpanded, section) {
+						dojo.empty(section.selectionNode);
+						if (isExpanded) {
+							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
+						}
+					}
 				});
 				this.favoritesSelection = new mSelection.Selection(serviceRegistry, "orion.favorites.selection"); //$NON-NLS-0$
 				// add commands to the fave section heading
@@ -205,7 +217,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, selections, this, "button"); //$NON-NLS-0$
+						commandService.renderCommands(selectionId, selectionTools, selections, that, "button"); //$NON-NLS-0$
 					}
 				});
 			}
