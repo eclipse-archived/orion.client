@@ -68,7 +68,7 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 			style: "width:100%; height:100%", //$NON-NLS-0$
 			model: myTreeModel,
 			showRoot: false,
-			persist: true, // remember expanded state
+			persist: false, // disabled for now, these cookies can get really big
 			openOnClick: false,
 			getLabel: function(item) {
 				return item.Name;
