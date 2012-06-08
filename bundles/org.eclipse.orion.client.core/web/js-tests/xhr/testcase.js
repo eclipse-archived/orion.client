@@ -14,6 +14,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
 	var getTimeoutable = testHelpers.getTimeoutable;
+	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
 	/**
 	 * Fake version of XMLHttpRequest for testing without actual network accesses.
 	 */
@@ -21,6 +22,18 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		this.readyState = 0;
 		this.headers = {};
 		this.responseType = '';
+		this._sendFlag = false;
+		this._timeout = 0;
+		Object.defineProperty(this, 'timeout', {
+			get: function() {
+				return this._timeout;
+			},
+			set: function(value) {
+				if (isIE && (this.readyState !== this.OPENED || this._sendFlag)) {
+					throw new Error('IE: timeout must be set after calling open() but before calling send()');
+				}
+			}
+		});
 	}
 	MockXMLHttpRequest.prototype = {
 		UNSENT: 0,
@@ -38,6 +51,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 			if (this.readyState !== this.OPENED) {
 				throw new Error('send called out of order');
 			}
+			this._sendFlag = true;
 		},
 		setRequestHeader: function(name, value) {
 			if (this.readyState !== this.OPENED) {
@@ -56,7 +70,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		},
 		_setResponse: function(response) {
 			// Bug 381396: if this test is running in IE, emulate IE's non-support for 'response' attribute.
-			if (navigator.appName.indexOf("Microsoft Internet Explorer") === -1) {
+			if (!isIE) {
 				this.response = response;
 			}
 			if (this.responseType === '' || this.responseType === 'text') {
@@ -87,6 +101,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 	function OkXhr() {
 		MockXMLHttpRequest.apply(this, Array.prototype.slice.call(arguments));
 		this.send = function() {
+			MockXMLHttpRequest.prototype.send.call(this);
 			var self = this;
 			setTimeout(function() {
 				self._fakeComplete(200, 'success!');
@@ -99,6 +114,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 	function FailXhr() {
 		MockXMLHttpRequest.apply(this, Array.prototype.slice.call(arguments));
 		this.send = function() {
+			MockXMLHttpRequest.prototype.send.call(this);
 			var self = this;
 			setTimeout(function() {
 				self._fakeComplete(404, 'i failed', '404 Bogus Failure');
@@ -131,6 +147,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 	tests['test timeout causes reject'] = getTimeoutable(function() {
 		var timeoutingXhr = new OkXhr();
 		timeoutingXhr.send = function() {
+			MockXMLHttpRequest.prototype.send.call(this);
 			var self = this;
 			setTimeout(function() {
 				self._fakeTimeout();
@@ -192,6 +209,7 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		var d = new Deferred();
 		var headerCheckerXhr = new MockXMLHttpRequest();
 		headerCheckerXhr.send = function() {
+			MockXMLHttpRequest.prototype.send.call(this);
 			var headers = this._getRequestHeaders();
 			if (headers['X-Requested-With'] === 'XMLHttpRequest') {
 				d.resolve();
