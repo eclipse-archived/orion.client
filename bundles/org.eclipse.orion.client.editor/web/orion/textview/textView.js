@@ -4678,61 +4678,60 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
 				return window.clipboardData.setData("Text", clipboardText.join("")); //$NON-NLS-0$
 			}
-			/* Feature in Chrome, clipboardData.setData is no-op on Chrome even though it returns true */
-			if (isChrome || isFirefox || !event) {
-				var child = document.createElement("PRE"); //$NON-NLS-0$
-				child.style.position = "fixed"; //$NON-NLS-0$
-				child.style.left = "-1000px"; //$NON-NLS-0$
-				this._convertDelimiter(text, 
-					function(t) {
-						child.appendChild(document.createTextNode(t));
-					}, 
-					function() {
-						child.appendChild(document.createElement("BR")); //$NON-NLS-0$
-					}
-				);
-				child.appendChild(document.createTextNode(" ")); //$NON-NLS-0$
-				this._clientDiv.appendChild(child);
-				var range = document.createRange();
-				range.setStart(child.firstChild, 0);
-				range.setEndBefore(child.lastChild);
-				var sel = window.getSelection();
-				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
-				sel.addRange(range);
-				var self = this;
-				/** @ignore */
-				var cleanup = function() {
-					if (child && child.parentNode === self._clientDiv) {
-						self._clientDiv.removeChild(child);
-					}
-					self._updateDOMSelection();
-				};
-				var result = false;
-				/* 
-				* Try execCommand first, it works on firefox with clipboard permission,
-				* chrome 5, safari 4.
-				*/
-				this._ignoreCopy = true;
-				try {
-					result = document.execCommand("copy", false, null); //$NON-NLS-0$
-				} catch (e) {}
-				this._ignoreCopy = false;
-				if (!result) {
-					if (event) {
-						setTimeout(cleanup, 0);
-						return false;
-					}
-				}
-				/* no event and no permission, copy can not be done */
-				cleanup();
-				return true;
-			}
 			if (event && event.clipboardData) {
 				//webkit
 				clipboardText = [];
 				this._convertDelimiter(text, function(t) {clipboardText.push(t);}, function() {clipboardText.push(platformDelimiter);});
-				return event.clipboardData.setData("text/plain", clipboardText.join("")); //$NON-NLS-0$
+				if (event.clipboardData.setData("text/plain", clipboardText.join(""))) { //$NON-NLS-0$
+					return true;
+				}
 			}
+			var child = document.createElement("PRE"); //$NON-NLS-0$
+			child.style.position = "fixed"; //$NON-NLS-0$
+			child.style.left = "-1000px"; //$NON-NLS-0$
+			this._convertDelimiter(text, 
+				function(t) {
+					child.appendChild(document.createTextNode(t));
+				}, 
+				function() {
+					child.appendChild(document.createElement("BR")); //$NON-NLS-0$
+				}
+			);
+			child.appendChild(document.createTextNode(" ")); //$NON-NLS-0$
+			this._clientDiv.appendChild(child);
+			var range = document.createRange();
+			range.setStart(child.firstChild, 0);
+			range.setEndBefore(child.lastChild);
+			var sel = window.getSelection();
+			if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+			sel.addRange(range);
+			var self = this;
+			/** @ignore */
+			var cleanup = function() {
+				if (child && child.parentNode === self._clientDiv) {
+					self._clientDiv.removeChild(child);
+				}
+				self._updateDOMSelection();
+			};
+			var result = false;
+			/* 
+			* Try execCommand first, it works on firefox with clipboard permission,
+			* chrome 5, safari 4.
+			*/
+			this._ignoreCopy = true;
+			try {
+				result = document.execCommand("copy", false, null); //$NON-NLS-0$
+			} catch (e) {}
+			this._ignoreCopy = false;
+			if (!result) {
+				if (event) {
+					setTimeout(cleanup, 0);
+					return false;
+				}
+			}
+			/* no event and no permission, copy can not be done */
+			cleanup();
+			return true;
 		},
 		_setDOMSelection: function (startNode, startOffset, endNode, endOffset) {
 			var startLineNode, startLineOffset, endLineNode, endLineOffset;
