@@ -225,19 +225,6 @@ define(['domReady'], function(domReady) {
 		document.getElementById('newUserHeaderShown').style.visibility = 'hidden';
 	}
 
-	function focusUserField(event) {
-		if (event.currentTarget.value === 'username') {
-			event.currentTarget.value = '';
-		}
-	}
-
-	function focusPasswordField(event) {
-		event.currentTarget.type = 'password';
-		if (event.currentTarget.value === 'password' || event.currentTarget.value === 'retype password') {
-			event.currentTarget.value = '';
-		}
-	}
-
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		document.getElementById('orionOpen').style.top = '188px';
@@ -304,7 +291,6 @@ define(['domReady'], function(domReady) {
 
 
 		// TODO: Temporary --- old page logic
-		document.getElementById("login").onclick = focusUserField;
 		document.getElementById("login").onkeypress = function(event) {
 			if (event.keyCode === 13) {
 				confirmLogin();
@@ -313,7 +299,6 @@ define(['domReady'], function(domReady) {
 			}
 		};
 
-		document.getElementById("password").onfocus = focusPasswordField;
 		document.getElementById("password").onkeypress = function(event) {
 			if (event.keyCode === 13) {
 				confirmLogin();
@@ -328,9 +313,6 @@ define(['domReady'], function(domReady) {
 
 		document.getElementById("registerButton").onclick = revealRegistration;
 
-		document.getElementById("create_login").onclick = focusUserField;
-
-		document.getElementById("create_password").onfocus = focusPasswordField;
 		document.getElementById("create_password").onkeyup = function(event) {
 			if (event.keyCode === 13) {
 				confirmCreateUser();
@@ -339,7 +321,6 @@ define(['domReady'], function(domReady) {
 			}
 		};
 
-		document.getElementById("create_passwordRetype").onfocus = focusPasswordField;
 		document.getElementById("create_passwordRetype").onkeyup = function(event) {
 			if (event.keyCode === 13) {
 				confirmCreateUser();

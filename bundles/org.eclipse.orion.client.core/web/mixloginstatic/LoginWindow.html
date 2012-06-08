@@ -70,10 +70,10 @@ require(["LoginWindow.js"]);
 				<div class="orion-login-header">Log in</div>
 				<form>
 					<div class="orion-input-holder">
-						<input type="text" class="orion-text-input" name="login" id="login" value="username" title="Username or email" autocomplete="on" autofocus="true">
+						<input type="text" class="orion-text-input" name="login" id="login" placeholder="username" title="Username or email" autocomplete="on" autofocus="true">
 					</div>
 					<div class="orion-input-holder">
-						<input name="password" type="text" id="password" class="orion-text-input" value="password" title="Password">
+						<input name="password" type="password" id="password" class="orion-text-input" placeholder="password" title="Password">
 					</div>
 					<div class="orion-login-button-holder">
 						<input type="button" name="password" id="loginButton" class="orion-login-button" value="Sign in" tabindex="0">
@@ -97,13 +97,13 @@ require(["LoginWindow.js"]);
 				<div class="orion-login-header">Create an account</div>
 				<form>
 					<div class="orion-register-input-holder">
-						<input type="text" class="orion-text-input" value="username" title="Username or email" autocomplete="on" autofocus="autofocus" id="create_login">
+						<input type="text" class="orion-text-input" placeholder="username" title="Username or email" autocomplete="on" autofocus="autofocus" id="create_login">
 					</div>
 					<div class="orion-register-input-holder">
-						<input type="text" class="orion-text-input" value="password" title="password" autocomplete="on" id="create_password" aria-required="true">
+						<input type="password" class="orion-text-input" placeholder="password" title="password" autocomplete="on" id="create_password" aria-required="true">
 					</div>
 					<div class="orion-register-input-holder">
-						<input type="text" class="orion-text-input" value="retype password" title="retype password" autocomplete="on" name="passwordRetype" id="create_passwordRetype" aria-required="true">
+						<input type="password" class="orion-text-input" placeholder="retype password" title="retype password" autocomplete="on" name="passwordRetype" id="create_passwordRetype" aria-required="true">
 					</div>
 					<div class="orion-login-button-holder">
 						<input id="createButton" type="button" class="orion-login-button" value="Sign up" tabindex="0">
