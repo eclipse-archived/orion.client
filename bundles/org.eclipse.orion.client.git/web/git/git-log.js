@@ -103,7 +103,7 @@ var serviceRegistry;
 					} else {
 						breadcrumbRootName = "Log" + branchIdentifier + metadata.Name;
 					}
-					mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: metadata, breadcrumbRootName: breadcrumbRootName,
+					mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: item, breadcrumbTarget: metadata, breadcrumbRootName: breadcrumbRootName,
 						makeBreadcrumbLink: function(seg, location) {
 							makeHref(fileClient, seg, location, isRemote);
 						},
