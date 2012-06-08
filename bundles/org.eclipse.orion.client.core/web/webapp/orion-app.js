@@ -32,7 +32,7 @@ window.onload = function() {
 		installApp.addEventListener("click", function() {
 			var mozApps = navigator.mozApps;
 			if (mozApps) {
-				var installing = navigator.mozApps.install("/webapp/orion-manifest.webapp");
+				var installing = navigator.mozApps.install("http://orion.eclipse.org/webapp/orion-manifest.webapp");
 				installing.onsuccess = function(e) {
 					var installApp = document.getElementById("install-app");
 					installApp.textContent = "Orion App Already Installed";
