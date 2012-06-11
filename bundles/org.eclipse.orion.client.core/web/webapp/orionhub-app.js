@@ -17,7 +17,7 @@ window.onload = function() {
 		var installApp = document.getElementById("install-app");
 		installApp.disabled = false;
 		for (var i in request.result) {
-			if (request.result[i].manifest.name === "OrionHub Web Development") {
+			if (request.result[i].manifest.name === "OrionHub Web Development Environment") {
 				installApp.textContent = "OrionHub App Already Installed";
 				installApp.disabled = true;
 				return;
