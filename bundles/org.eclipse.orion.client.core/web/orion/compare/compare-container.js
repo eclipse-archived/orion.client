@@ -581,19 +581,18 @@ exports.TwoWayCompareContainer = (function() {
 			
 			setTitle : function(title, /*optional*/ metadata) {
 				var name;
-				if (title.charAt(0) === '*') { //$NON-NLS-0$
-					mGlobalCommands.setDirtyIndicator(true);
-					name = title.substring(1);
-				} else {
-					mGlobalCommands.setDirtyIndicator(false);
-				} 
 				if (metadata) {
 					name = metadata.Name;
 				}
 				mGlobalCommands.setPageTarget({task: messages["Compare"], name: name, target: metadata,
 							serviceRegistry: serviceRegistry, commandService: this._commandService,
 							searchService: this._searchService, fileService: this._fileClient});
-				var indexOfSlash = title.lastIndexOf("/"); //$NON-NLS-0$
+				if (title.charAt(0) === '*') { //$NON-NLS-0$
+					mGlobalCommands.setDirtyIndicator(true);
+					name = title.substring(1);
+				} else {
+					mGlobalCommands.setDirtyIndicator(false);
+				} 
 			},
 			
 			afterSave: function(){
