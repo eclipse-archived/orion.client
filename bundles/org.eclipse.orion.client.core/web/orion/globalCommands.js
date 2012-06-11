@@ -466,14 +466,19 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	}
 	
 	/**
-	 * Set a dirty indicator for the page.
+	 * Set a dirty indicator for the page.  An in-page indicator will always be set.  
+	 * If the document has a title (set via setPageTarget), then the title will also be updated
+	 * with a dirty indicator.
 	 */
 	function setDirtyIndicator(isDirty) {
-		if (title.charAt(0) === '*' && !isDirty) { //$NON-NLS-0$
-			title = title.substring(1);
-		}
-		if (isDirty && title.charAt(0) !== '*') { //$NON-NLS-0$
-			title = '*' + title; //$NON-NLS-0$
+		if (title) {
+			if (title.charAt(0) === '*' && !isDirty) { //$NON-NLS-0$
+				title = title.substring(1);
+			}
+			if (isDirty && title.charAt(0) !== '*') { //$NON-NLS-0$
+				title = '*' + title; //$NON-NLS-0$
+			}
+			window.document.title = title;
 		}
 
 		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
@@ -484,7 +489,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				dirty.innerHTML = ""; //$NON-NLS-0$
 			}
 		}
-		window.document.title = title;
 	}
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be
