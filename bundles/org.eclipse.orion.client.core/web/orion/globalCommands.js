@@ -223,6 +223,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	var pageItem;
 	var exclusions = [];
 	var favoriteTarget = null;
+	var title;
 	
 	function _emptyLinksMenu() {
 		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
@@ -468,7 +469,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 * Set a dirty indicator for the page.
 	 */
 	function setDirtyIndicator(isDirty) {
-		var dirty = dojo.byId("dirty");
+		if (title.charAt(0) === '*' && !isDirty) { //$NON-NLS-0$
+			title = title.substring(1);
+		}
+		if (isDirty && title.charAt(0) !== '*') { //$NON-NLS-0$
+			title = '*' + title; //$NON-NLS-0$
+		}
+
+		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
 		if (dirty) {
 			if (isDirty) {
 				dirty.innerHTML = "*"; //$NON-NLS-0$
@@ -476,6 +484,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				dirty.innerHTML = ""; //$NON-NLS-0$
 			}
 		}
+		window.document.title = title;
 	}
 	/**
 	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be
@@ -531,7 +540,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 			name = options.name;
 		}
-		var title = options.title;
+		title = options.title;
 		if (!title) {
 			if (name) {
 				title = name + " - "+ options.task;
