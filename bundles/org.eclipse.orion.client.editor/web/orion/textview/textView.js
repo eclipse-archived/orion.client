@@ -4416,7 +4416,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}}); //$NON-NLS-0$
 				handlers.push({target: this._clientDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
 				if (isFirefox && !isWindows) {
-					handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }}); //$NON-NLS-0$
+					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
+					if (MutationObserver) {
+						this._mutationObserver = new MutationObserver(function(mutations) { self._handleDataModified(mutations); });
+						this._mutationObserver.observe(clientDiv, {subtree: true, characterData: true});
+					} else {
+						handlers.push({target: this._clientDiv, type: "DOMCharacterDataModified", handler: function (e) { return self._handleDataModified(e); }}); //$NON-NLS-0$
+					}
 				}
 				if (this._overlayDiv) {
 					handlers.push({target: this._overlayDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e);}}); //$NON-NLS-0$
@@ -5264,6 +5270,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				removeHandler(h.target, h.type, h.handler);
 			}
 			this._handlers = null;
+			if (this._mutationObserver) {
+				this._mutationObserver.disconnect();
+				this._mutationObserver = null;
+			}
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
