@@ -759,6 +759,27 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			}
 		},
 		
+		/**
+		 * Destroy all DOM nodes and any other resources used by rendered commands.
+		 * This call does not remove the commands from the command registry.  Clients typically call this
+		 * function to empty a command area when a client wants to render the commands again due to some 
+		 * change in state.  
+		 * @param {String|DOMElement} parent The id or DOM node that should be emptied.
+		 */
+		destroy: function(parent) {
+			if (typeof(parent) === "string") { //$NON-NLS-0$
+				parent = dojo.byId(parent);
+			}
+			if (!parent) { 
+				throw "no parent";  //$NON-NLS-0$
+			}
+			var widgets = dijit.findWidgets(parent);
+			dojo.forEach(widgets, function(w) {
+				w.destroyRecursive();
+			});
+			dojo.empty(parent);
+		},
+		
 		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
