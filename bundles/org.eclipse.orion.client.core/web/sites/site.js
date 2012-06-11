@@ -43,7 +43,6 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
 				var site = editor && editor.getSiteConfiguration();
 				if (editor && site) {
-					mGlobalCommands.setDirtyIndicator(editor.isDirty());
 					var item = 	{};
 					item.Parents = [];
 					item.Name = site.Name;
@@ -56,6 +55,7 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 						},
 						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService
 					});
+					mGlobalCommands.setDirtyIndicator(editor.isDirty());
 				}
 			};
 			
