@@ -17,12 +17,12 @@ define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'o
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight',
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil",
         'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
 		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil) {
 	
 var exports = exports || {};
 	
@@ -529,8 +529,30 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				filteredProviders.push(serviceReference);
 			}
 		}
-		outlineService.setOutlineProviders(filteredProviders);
-		outliner.setOutlineProviders(filteredProviders);
+		var deferreds = [];
+		for(var i=0; i<filteredProviders.length; i++){
+			if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){
+				var deferred = new dojo.Deferred();
+				deferreds.push(deferred);
+				i18nUtil.getMessageBundle(filteredProviders[i].getProperty("nls")).then(dojo.hitch(this, function(i, deferred, commandMessages){
+					filteredProviders[i].displayName = commandMessages[filteredProviders[i].getProperty("nameKey")];
+					deferred.resolve();
+				}, i, deferred), dojo.hitch(this, function(i, deferred, error){
+					deferred.reject(error);
+				}, i, deferred));
+			} else {
+				filteredProviders[i].displayName = filteredProviders[i].getProperty("name");
+			}
+		}
+		if(deferreds.lenth==0){
+			outlineService.setOutlineProviders(filteredProviders);
+			outliner.setOutlineProviders(filteredProviders);
+		}else{
+			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+				outlineService.setOutlineProviders(filteredProviders);
+				outliner.setOutlineProviders(filteredProviders);
+			}));
+		}
 	}
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		outlineService.emitOutline(editor.getText(), editor.getTitle());

@@ -65,7 +65,8 @@ define(["orion/Deferred", "plugins/filePlugin/fileImpl", "domReady!", "orion/plu
 	var service = new FileServiceImpl(fileBase, workspaceBase);
 	//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
 	provider.registerServiceProvider("orion.core.file", service, {
-		Name: 'Orion Content',
+		NameKey: 'Orion Content',
+		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
 		pattern: patternBase
 	});
