@@ -14,8 +14,8 @@
 /*jslint browser:true*/
 
 define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/plugin'], 
-	function(messages, require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType) {
+		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/i18nUtil', 'orion/plugin'], 
+	function(messages, require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType, i18nUtil) {
 
 	var fileClient;
 
@@ -340,14 +340,27 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 				var ref = allReferences[i];
 				var service = serviceRegistry.getService(ref);
 				if (service) {
-					console.addCommand({
-						name: ref.getProperty("name"), //$NON-NLS-0$
-						description: ref.getProperty("description"), //$NON-NLS-0$
-						callback: contributedExecFunc(service),
-						returnType: 'string', //$NON-NLS-0$
-						parameters: ref.getProperty("parameters"), //$NON-NLS-0$
-						manual: ref.getProperty("manual") //$NON-NLS-0$
-					});
+					if(ref.getProperty("nls") && ref.getProperty("descriptionKey")){
+						i18nUtil.getMessageBundle(ref.getProperty("nls")).then(dojo.hitch(this, function(ref, commandMessages){
+							console.addCommand({
+								name: ref.getProperty("name"), //$NON-NLS-0$
+								description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
+								callback: contributedExecFunc(service),
+								returnType: 'string', //$NON-NLS-0$
+								parameters: ref.getProperty("parameters"), //$NON-NLS-0$
+								manual: ref.getProperty("manual") //$NON-NLS-0$
+							});
+						}, ref));
+					}else{
+						console.addCommand({
+							name: ref.getProperty("name"), //$NON-NLS-0$
+							description: ref.getProperty("description"), //$NON-NLS-0$
+							callback: contributedExecFunc(service),
+							returnType: 'string', //$NON-NLS-0$
+							parameters: ref.getProperty("parameters"), //$NON-NLS-0$
+							manual: ref.getProperty("manual") //$NON-NLS-0$
+						});
+					}
 				}
 			}
 		});
