@@ -105,18 +105,6 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			self._commandService.addCommand(convertCommand);
 		});
 
-		// Save command
-		var saveCommand = new mCommands.Command({
-				name: messages["Save"],
-				tooltip: messages["Save the site configuration"],
-				imageClass: "core-sprite-save", //$NON-NLS-0$
-				id: "orion.site.save", //$NON-NLS-0$
-				visibleWhen: function(item) {
-					return !!item.Location /*looks like a site config*/;
-				},
-				callback: dojo.hitch(this, this.save)});
-		this._commandService.addCommand(saveCommand);
-
 		this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
 	},
 	
