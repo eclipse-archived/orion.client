@@ -307,7 +307,9 @@ define(['domReady'], function(domReady) {
 			}
 		};
 
-		document.getElementById("loginButton").onclick = confirmLogin;
+		document.getElementById("loginButton").onclick = function() {
+			confirmLogin();
+		};
 
 		document.getElementById("resetUserLink").onclick = showResetUser;
 
