@@ -12,6 +12,7 @@
 
 
 define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/Deferred"], function(assert, mServiceregistry, mPluginregistry, Deferred) {
+	var Plugin = mPluginregistry.Plugin;
 	var tests = {};
 	
 	tests["test empty registry"] = function() {
@@ -352,5 +353,32 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			pluginRegistry.shutdown();
 		});
 	};
+
+	tests["test plugin states"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		// Eager-load case
+		return pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			var pluginLocation = plugin.getLocation();
+			assert.equal(plugin.getState(), Plugin.LOADED, "Plugin loaded (eager)");
+			pluginRegistry.shutdown();
+
+			// Lazy-load case
+			serviceRegistry = new mServiceregistry.ServiceRegistry();
+			pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+			return pluginRegistry.startup(["testPlugin.html"]).then(function() {
+				plugin = pluginRegistry.getPlugin(pluginLocation);
+				assert.equal(plugin.getState(), Plugin.INSTALLED, "Plugin installed");
+				return serviceRegistry.getService("test").test().then(function() {
+					assert.equal(plugin.getState(), Plugin.LOADED, "Plugin loaded (lazy)");
+					plugin.uninstall();
+					assert.equal(plugin.getState(), Plugin.UNINSTALLED, "Plugin uninstalled");
+					pluginRegistry.shutdown();
+				});
+			});
+		});
+	};
+
 	return tests;
 });
