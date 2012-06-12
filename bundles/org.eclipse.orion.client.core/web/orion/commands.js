@@ -852,6 +852,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
 							window.setTimeout(dojo.hitch({contributions: childContributions, emptyGroupMessage: group.emptyGroupMessage}, function() {
+								// it is possible that commands were destroyed by the time we get here.  Bail out if
+								// the parent menu has been destroyed.  We are reaching into the widget to make this
+								// determination.
+								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=382394
+								if (newMenu._destroyed) {
+									return;
+								}
 								commandService._render(this.contributions, newMenu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
