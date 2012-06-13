@@ -63,15 +63,9 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 			this._listRoot.children[i].linkLocation = require.toUrl("edit/edit.html") +"#" + this._listRoot.children[i].Location; //$NON-NLS-1$ //$NON-NLS-0$
 			this._listRoot.children[i].fullPathName = mSearchUtils.fullPathNameByMeta(this._listRoot.children[i].Parents);
 			this._listRoot.children[i].parentLocation =  mSearchUtils.path2FolderName(this._listRoot.children[i].Location, this._listRoot.children[i].Name, true);
-			//clone object without children
-			var fileClone = {};
-			for(var op in this._listRoot.children[i]){
-				if(op!=="nonnls") //$NON-NLS-0$
-					fileClone[op] = this._listRoot.children[i][op];
-			}
 			for(var j=0; j<this._listRoot.children[i].nonnls.length; j++){
 				this._listRoot.children[i].nonnls[j].type = "detail"; //$NON-NLS-0$
-				this._listRoot.children[i].nonnls[j].parent = fileClone;
+				this._listRoot.children[i].nonnls[j].parent = this._listRoot.children[i];//.parent is reserved for tree visitor
 				this._listRoot.children[i].nonnls[j].parentNum = i;
 				this._listRoot.children[i].nonnls[j].checked = true;
 			}
@@ -137,7 +131,9 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 		} else if (parentItem.type === "detail") { //$NON-NLS-0$
 			onComplete([]);
 		} else if (parentItem.type === "file") { //$NON-NLS-0$
-			 onComplete(parentItem.nonnls);
+			parentItem.children = parentItem.nonnls;//Tree iterator (visitor) requires .children property. But this will be improved in the future without requiring this property.
+			                                        //Addressed in https://bugs.eclipse.org/bugs/show_bug.cgi?id=380687#c2.
+			onComplete(parentItem.nonnls);
 		} else {
 			onComplete([]);
 		}
@@ -625,33 +621,34 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 				var options = {
 					readonly: true,
 					hasConflicts: false,
-					baseFile: {
+					newFile: {
 						Name: fileItem.Location,
 						Type: fType,
 						Content: fileItem.contents
 					},
-					newFile: {
+					baseFile: {
 						Name: fileItem.Location,
 						Type: fType,
 						Content: fileItem.checked ? mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, that.config) : fileItem.contents
 					}
 				};
+				
 				if(!that.twoWayCompareContainer){
 					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
 						parentDivID: uiFactory.getCompareDivID(),
 						showTitle: true,
-						leftTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.Name]),
-						rightTitle: dojo.string.substitute(messages["Original File (${0})"], [fileItem.Name]),
+						rightTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.Name]),
+						leftTitle: dojo.string.substitute(messages["Original File (${0})"], [fileItem.Name]),
 						showLineStatus: false
 					});
 					that.uiFactoryCompare.buildUI();
 					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
 					that.twoWayCompareContainer.startup();
 				} else {
-					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
 					dojo.empty(that.uiFactoryCompare.getTitleDivId());
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
+					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
