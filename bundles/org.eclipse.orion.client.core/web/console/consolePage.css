@@ -5,6 +5,7 @@
 @import "../css/ide.css";
 @import "../css/commands.css";
 @import "../css/sections.css";
+@import "../orion/widgets/Console.css";
 
 html,body {
 	height: 100%;
