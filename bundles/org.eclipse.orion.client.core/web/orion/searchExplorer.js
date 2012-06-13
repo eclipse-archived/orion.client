@@ -673,6 +673,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
 		this._replaceStr = this.model.queryObj.replace;
 		if(this.model.replaceMode()){
+			this._hasCheckedItems = true;
 			this.checkbox = true;
 			this.renderer = new SearchResultRenderer({checkbox: true, highlightSelection: false,
 				  getCheckedFunc: function(item){return that.getItemChecked(item);},
@@ -729,7 +730,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting;
+				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems;
 			}
 		});
 	
@@ -1057,14 +1058,38 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		return item.checked;
 	};
 	
-	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked, manually) {
-		if(!rowId){
-			this.onItemChecked(this.model._listRoot, checked, manually);
-			return;
+	SearchResultExplorer.prototype._checkedItem = function() {
+		for(var i = 0; i < this.model.indexedFileItems.length; i++){
+			if(this.model.indexedFileItems[i].checked){
+				return true;
+			}
+			if(!this.model.indexedFileItems[i].children){
+				continue;
+			}
+			for(var j = 0; j < this.model.indexedFileItems[i].children.length; j++){
+				if(this.model.indexedFileItems[i].children[j].checked){
+					return true;
+				}
+			}
 		}
-		var row = dojo.byId(rowId);
-		if(row && row._item){
-			this.onItemChecked(row._item, checked, manually);
+		return false;
+	};
+	
+	SearchResultExplorer.prototype.onRowChecked = function(rowId, checked, manually) {
+		var hasCheckedItems;
+		if(!rowId){
+			hasCheckedItems = checked;
+			this.onItemChecked(this.model._listRoot, checked, manually);
+		} else {
+			var row = dojo.byId(rowId);
+			if(row && row._item){
+				this.onItemChecked(row._item, checked, manually);
+			}
+			hasCheckedItems = this._checkedItem();
+		}
+		if(hasCheckedItems !== this._hasCheckedItems){
+			this._hasCheckedItems = hasCheckedItems;
+			this.initCommands();
 		}
 	};
 	
