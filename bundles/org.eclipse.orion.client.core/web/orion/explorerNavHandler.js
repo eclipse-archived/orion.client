@@ -163,7 +163,7 @@ exports.ExplorerNavHandler = (function() {
 			return this.explorer.myTree.isExpanded(this.model.getId(model));
 		},
 		
-		refreshSelection: function(){
+		refreshSelection: function(noScroll){
 			var that = this;
 			if(this.explorer.selection){
 				this.explorer.selection.getSelections(function(selections) {
@@ -172,7 +172,7 @@ exports.ExplorerNavHandler = (function() {
 						that._selections.push(selections[i]);
 					}
 					if(that._selections.length > 0){
-						that.cursorOn(that._selections[0], true);
+						that.cursorOn(that._selections[0], true, false, noScroll);
 					}
 				});
 			}
@@ -192,7 +192,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!noReset && this.explorer.selection){
 				this._modelIterator.reset();
 			}
-			this.refreshSelection();
+			this.refreshSelection(true);
 		},
 		
 		getTopLevelNodes: function(){
@@ -324,7 +324,7 @@ exports.ExplorerNavHandler = (function() {
 			return this._modelIterator.cursor();
 		},
 		
-		cursorOn: function(model, force, next){
+		cursorOn: function(model, force, next, noScroll){
 			var forward = next === undefined ? false : next;
 			var previousModel, currentModel;
 			if(model || force){
@@ -348,7 +348,7 @@ exports.ExplorerNavHandler = (function() {
 			this.moveColumn(null, 0);
 			this.toggleCursor(currentModel, true);
 			var currentRowDiv = this.getRowDiv();
-			if(currentRowDiv && !this._visible(currentRowDiv)) {
+			if(currentRowDiv && !noScroll && !this._visible(currentRowDiv)) {
 				currentRowDiv.scrollIntoView(!forward);
 			}
 			if(this.explorer.onCursorChanged){
@@ -482,7 +482,7 @@ exports.ExplorerNavHandler = (function() {
 			if(this._onModelGrid(model, mouseEvt)){
 				return;
 			}
-			this.cursorOn(model, true);
+			this.cursorOn(model, true, false, true);
 			if(isPad){
 				this.setSelection(model, true);
 			} else if(this._ctrlKeyOn(mouseEvt)){
