@@ -315,8 +315,9 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 					iframe.src = url;
 					iframe.onload = function() {
 						clearTimeout(loadTimeout);
-						setTimeout(sendTimeout, 2000);
+						setTimeout(sendTimeout, 5000);
 					};
+					iframe.sandbox = "allow-scripts allow-same-origin";
 					document.body.appendChild(iframe);
 					channel.target = iframe.contentWindow;
 					channel.close = function() {
