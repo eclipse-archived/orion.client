@@ -239,6 +239,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 			item.Parents = [];
 			item.Parents[0] = {};
 			item.Parents[0].Name = repository.Name;
+			item.Parents[0].Location = repository.Location;
 			item.Parents[0].ChildrenLocation = repository.Location;
 			item.Parents[1] = {};
 			item.Parents[1].Name = "Repositories"; //$NON-NLS-0$
