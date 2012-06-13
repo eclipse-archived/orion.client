@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define */
+/*global define navigator*/
 define(function() {
 	return {
 		load: function(name, parentRequire, onLoad, config) {
@@ -54,6 +54,12 @@ define(function() {
 							if ((match = NLS_REG_EXP.exec(name)) && prefix === match[1] && suffix === (match[3] || match[2])) {
 								locale = match[3] ? match[2] : "";
 								if (locale) {
+									// see Bug 381042 - [Globalization] Messages are loaded even if their language is not used
+									var userLocale = config.locale || (typeof navigator !== "undefined" ? (navigator.language || navigator.userLanguage) : null);
+									if (!userLocale || userLocale.indexOf(locale) !== 0) {
+										return;
+									}
+									// end
 									master[locale] = true;
 									if (!parentRequire.specified(name)) {
 										define(name, ['orion/i18n!' + name], function(bundle) { //$NON-NLS-0$
