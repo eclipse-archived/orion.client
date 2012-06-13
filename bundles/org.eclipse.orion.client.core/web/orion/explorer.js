@@ -226,7 +226,7 @@ exports.Explorer = (function() {
 					that.getNavHandler().refreshModel(that.getNavDict(), that.model, itemOrArray.children);
 				}
 				if(options && options.setFocus){
-					that.getNavHandler().cursorOn();
+					that.getNavHandler().cursorOn(null, false, false, true);
 				}
 			});
 		},
