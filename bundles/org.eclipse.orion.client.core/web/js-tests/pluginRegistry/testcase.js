@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define Worker*/
+/*global define navigator Worker*/
 
 
 define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/Deferred"], function(assert, mServiceregistry, mPluginregistry, Deferred) {
@@ -316,6 +316,27 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		});
 		return promise;
 	};
+	
+	if (navigator && navigator.userAgent && navigator.userAgent.indexOf("WebKit") !== -1) {
+		tests["test iframe sandbox"] = function() {
+			var storage = {};
+			var serviceRegistry = new mServiceregistry.ServiceRegistry();
+			var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+			
+			var plugins = pluginRegistry.getPlugins();
+			assert.equal(plugins.length, 0);
+			
+			var promise = pluginRegistry.installPlugin("testsandbox.html").then(function() {
+				throw new assert.AssertionError();
+			}, function(e) {
+				assert.ok(e.message.match(/Load timeout for plugin/));
+				plugins = pluginRegistry.getPlugins();
+				assert.equal(plugins.length, 0);
+				pluginRegistry.shutdown();
+			});
+			return promise;
+		};
+	}
 
 	return tests;
 });
