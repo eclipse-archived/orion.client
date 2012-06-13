@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/compare/nls/messages', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, dojo, dijit) {
+define(['i18n!orion/compare/nls/messages', 'orion/util', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mUtil, dojo, dijit) {
 
 
 var orion = orion || {};
@@ -157,6 +157,7 @@ orion.TwoWayCompareUIFactory = (function() {
 			topWidget.addChild(leftB);
 			topWidget.addChild(rightB);
 			topWidget.startup();
+			mUtil.forceLayout(this._parentDivID);
 		},
 		
 		destroy: function(){

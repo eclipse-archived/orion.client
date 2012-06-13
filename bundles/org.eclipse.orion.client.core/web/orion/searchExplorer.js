@@ -1120,7 +1120,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			dojo.when(fType, function(fType) {
 				var options = {
 					readonly: true,
-					onPage: true,
 					hasConflicts: false,
 					newFile: {
 						Name: fileItem.location,
