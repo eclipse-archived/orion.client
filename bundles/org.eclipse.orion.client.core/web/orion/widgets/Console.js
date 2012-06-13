@@ -59,9 +59,7 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 
 				var inputText = document.createElement("input"); //$NON-NLS-0$
 				inputText.id = "gcli-input"; //$NON-NLS-0$
-				inputText.style.background = "transparent"; //$NON-NLS-0$
-				inputText.style.fontFamily = "inherit"; //$NON-NLS-0$
-				inputText.style.fontSize = "inherit"; //$NON-NLS-0$
+				inputText.className = "inputText"; //$NON-NLS-0$
 				inputText.style.paddingLeft = "1em"; //$NON-NLS-0$
 				inputText.style.width = "100%"; //$NON-NLS-0$
 				inputDiv.appendChild(inputText);
@@ -80,34 +78,24 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 					this.onInputChange = this.onInputChange.bind(this);
 					this.arg = new mArgument.Argument();
 					this.element = mUtil.dom.createElement(this.document, 'div'); //$NON-NLS-0$
-					this.input = mUtil.dom.createElement(this.document, 'input'); //$NON-NLS-0$
-					this.input.type = 'text'; //$NON-NLS-0$
-					this.input.addEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
-					this.input.classList.add('gcli-field'); //$NON-NLS-0$
-					this.input.classList.add('gcli-field-directory'); //$NON-NLS-0$
-					this.element.appendChild(this.input);
+					this.element.className = "orion";
 					this.menu = new mMenu.Menu({ document: this.document, field: true });
 					this.element.appendChild(this.menu.element);
-					this.input.addEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
 					this.fieldChanged = mUtil.createEvent('DirectoryField.fieldChanged'); //$NON-NLS-0$
-					// i.e. Register this.onItemClick as the default action for a menu click
 					this.menu.onItemClick = this.onItemClick.bind(this);
 				}
 
 				CustomField.prototype = Object.create(mField.Field.prototype);
 				CustomField.prototype.destroy = function() {
 					mField.Field.prototype.destroy.call(this);
-					this.input.removeEventListener('keyup', this.onInputChange, false); //$NON-NLS-0$
 					this.menu.destroy();
 					delete this.element;
-					delete this.input;
 					delete this.menu;
 					delete this.document;
 					delete this.onInputChange;
 				};
 				CustomField.prototype.setConversion = function(conversion) {
 					this.arg = conversion.arg;
-					this.input.value = conversion.arg.text;
 					this.setMessage(conversion.message);
 					var items = [];
 					var predictions = conversion.getPredictions();
@@ -136,17 +124,11 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 					}
 				};
 				CustomField.prototype.onItemClick = function(ev) {
-					// TODO
-					this.item = ev.currentTarget.item;
-				//	this.arg = this.arg.beget(this.item.complete, { normalize: true });
+					var itemText = ev.currentTarget.querySelector(".gcli-menu-name").innerHTML; //$NON-NLS-0$
+					this.arg = this.arg.beget(itemText);
 					var conversion = this.type.parse(this.arg);
 					this.fieldChanged({ conversion: conversion });
 					this.setMessage(conversion.message);
-				};
-				CustomField.prototype.getConversion = function() {
-					// This tweaks the prefix/suffix of the argument to fit
-					this.arg = this.arg.beget(this.input.value, { prefixSpace: true });
-					return this.type.parse(this.arg);
 				};
 				CustomField.claim = function(type) {
 					return type instanceof CustomType ? mField.Field.MATCH + 1 : mField.Field.NO_MATCH;
