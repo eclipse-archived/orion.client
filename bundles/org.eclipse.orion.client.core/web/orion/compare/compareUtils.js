@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['dojo'], function(dojo) {
+define(['dojo', 'dijit'], function(dojo, dijit) {
 
 var orion = orion || {};
 
@@ -238,6 +238,21 @@ orion.compareUtils.parseCompareHash = function(hash) {
 		}
 	} 
 	return diffObj;
+};
+
+orion.compareUtils.destroyDijit = function(dijitId) {
+	var widget = dijit.byId(dijitId);
+	if(widget){
+		widget.destroyRecursive();
+	}
+};
+
+orion.compareUtils.getDijitSizeStyle = function(parentId) {
+	var marginBox = dojo.marginBox(parentId);
+	var styleH = marginBox.h + "px"; //$NON-NLS-0$
+	var styleW = "100%"; //$NON-NLS-0$
+	var styleStr = "height:" + styleH + ";width:" + styleW; //$NON-NLS-1$ //$NON-NLS-0$
+	return styleStr;
 };
 
 return orion.compareUtils;
