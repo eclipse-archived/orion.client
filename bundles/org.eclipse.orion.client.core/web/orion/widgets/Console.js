@@ -10,7 +10,7 @@
  *     Kris De Volder (VMWare) - initial API and implementation
  *******************************************************************************/
 
-/*global define*/
+/*global define Range*/
 /*jslint browser:true*/
 
 define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/argument', 'gcli/util', 'gcli/ui/menu'],
@@ -44,6 +44,13 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 			_init: function(input, output) {
 				if (!input) { throw messages["no input"]; }
 				if (!output) { throw messages["no output"]; }
+
+				if (!Range.prototype.createContextualFragment) {
+					var label = document.createElement("label"); //$NON-NLS-0$
+					label.innerText = messages["Sorry, the Console is not supported on your browser."];
+					output.appendChild(label);
+					return;
+				}
 
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
