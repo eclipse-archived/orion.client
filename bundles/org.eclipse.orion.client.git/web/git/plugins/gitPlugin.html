@@ -96,6 +96,18 @@
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
 				forceSingleItem: true
 			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				nameKey: "Git Repository",
+				id: "eclipse.git.repository2",
+				tooltipKey: "Go to the git repository",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "CloneLocation", variableName: "GitCloneLocation"},
+					{source: "Type", match: "Commit"}
+				],
+				uriTemplate: "{OrionHome}/git/git-repository.html#{GitCloneLocation}"
+			});
 
 			provider.registerServiceProvider("orion.page.link.related", null, {
 				id: "eclipse.git.repository",

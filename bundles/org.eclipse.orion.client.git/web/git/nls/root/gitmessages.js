@@ -333,8 +333,8 @@ define({
 	"Abort": "Abort",
 	"Abort Rebase": "Abort Rebase",
 	"Your changes to the selected files will be discarded and cannot be recovered.": "Your changes to the selected files will be discarded and cannot be recovered.",
-	"Active Branch Log": "Active Branch Log",
+	"Active Branch Log": "Git Log (Active Branch)",
 	"Show the log for the active local branch": "Show the log for the active local branch",
-	"Remote Branch Log": "Remote Branch Log",
+	"Remote Branch Log": "Git Log (Remote Branch)",
 	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch"
 });
