@@ -15,6 +15,55 @@
 define(['domReady'], function(domReady) {
 	var userCreationEnabled;
 
+	function injectPlaceholderShims() {
+		function textFocus(e) {
+			var input = e.target;
+			if (input.value === input.getAttribute('placeholder')) {
+				input.value = '';
+			}
+		}
+		function textBlur(e) {
+			var input = e.target;
+			if (input.value === '') {
+				input.value = input.getAttribute('placeholder');
+			}
+		}
+		function passwordFocus(e) {
+			var input = e.target;
+			if (input.value === input.getAttribute('placeholder')) {
+				input.value = '';
+				input.type = 'password';
+			}
+		}
+		function passwordBlur(e) {
+			var input = e.target;
+			if (input.value === '') {
+				input.value = input.getAttribute('placeholder');
+				input.type = 'text';
+			}
+		}
+		if (typeof document.createElement('input').placeholder === 'undefined') {
+			var inputs = document.getElementsByTagName('input');
+			for (var i=0 ; i < inputs.length; i++) {
+				var input = inputs[i];
+				var placeholderText = input.getAttribute('placeholder');
+				switch (placeholderText && input.type) {
+					case 'text':
+						input.value = placeholderText;
+						input.addEventListener('focus', textFocus);
+						input.addEventListener('blur', textBlur);
+						break;
+					case 'password':
+						input.value = placeholderText;
+						input.addEventListener('focus', passwordFocus);
+						input.addEventListener('blur', passwordBlur);
+						input.type = 'text';
+						break;
+				}
+			}
+		}
+	}
+
 	function getParam(key) {
 		var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
 		var results = regex.exec(window.location.href);
@@ -308,6 +357,8 @@ define(['domReady'], function(domReady) {
 		checkemailrequest.setRequestHeader("Orion-Version", "1");
 		checkemailrequest.send();
 
+
+		injectPlaceholderShims();
 
 		// TODO: Temporary --- old page logic
 		document.getElementById("login").onkeypress = function(event) {
