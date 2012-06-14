@@ -308,6 +308,8 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
 		dojo.empty( tableNode );
 	
+		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+		
 		if (!repositories || repositories.length === 0){
 			var titleWrapper = new mSection.Section(tableNode, {
 				id: "repositorySection", //$NON-NLS-0$
@@ -322,8 +324,6 @@ exports.GitRepositoryExplorer = (function() {
 
 		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
 		contentParent.innerHTML = '<list id="repositoryNode" class="mainPadding"></list>'; //$NON-NLS-0$
-
-		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 
 		this.decorateRepositories(repositories, mode).then(
 			function(){
