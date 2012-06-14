@@ -230,7 +230,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			var stop = false;
 			var parentDepth = -1;
 			var toRemove = [];
-			dojo.query(".treeTableRow").forEach(function(row, i) { //$NON-NLS-0$
+			dojo.query(".treeTableRow", this._parent).forEach(function(row, i) { //$NON-NLS-0$
 				if (stop) {
 					return;
 				}
