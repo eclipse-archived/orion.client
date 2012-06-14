@@ -267,7 +267,7 @@ exports.GitRepositoryExplorer = (function() {
 										}
 									}
 									
-									if (currentBranch.RemoteLocation[0] == null){
+									if (!currentBranch || currentBranch.RemoteLocation[0] == null){
 										that.decorateRepositories(repositories.slice(1), mode, deferred);
 										return;
 									};
@@ -636,6 +636,11 @@ exports.GitRepositoryExplorer = (function() {
 						currentBranch = branches[i];
 						break;
 					}
+				}
+				
+				if (!currentBranch){
+					progress.done();
+					return;
 				}
 				
 				var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
