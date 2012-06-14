@@ -62,5 +62,6 @@ define({
 	"View profile of ": "View profile of ",
 	"Profiles": "Profiles",
 	"Information Needed": "Information Needed",
-	"Cancel": "Cancel"
+	"Cancel": "Cancel",
+	"Sorry, the Console is not supported on your browser.": "Sorry, the Console is not supported on your browser."
 });
