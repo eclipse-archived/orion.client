@@ -11,11 +11,11 @@
  *******************************************************************************/
 /*global define window dijit */
 /*jslint browser:true devel:true */
-define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
+define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher'], 
-		function(messages, require, dojo, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
-				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher) {
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher'], 
+		function(messages, require, dojo, dijit, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
+				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mUtil, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher) {
 
 var exports = {};
 
@@ -882,6 +882,15 @@ exports.InlineCompareContainer = (function() {
 		this._highlighter = [];
 		this._highlighter.push( new exports.CompareStyler(this._registry));
 		this._editorDivId = editorDivId;
+		var editorContainer = dijit.byId(this._editorDivId);
+		if(!editorContainer){//If there is no dijit widget as the parent we need one sitting in the middle to listen to the resize event
+			mCompareUtils.destroyDijit(this._editorDivId + "_dijit_inline_compare");//Desteroy the existing dijit first 
+			var styleStr = mCompareUtils.getDijitSizeStyle(this._editorDivId);
+			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
+			wrapperWidget.placeAt(this._editorDivId);
+			mUtil.forceLayout(this._editorDivId);
+			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
+		}
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$
 		this.hasContent = false;
 	}
@@ -925,7 +934,6 @@ exports.InlineCompareContainer = (function() {
 		var editorContainerDomNode = dojo.byId(this._editorDivId);
 		var editorContainer = dijit.byId(this._editorDivId);
 		var that = this;
-		
 		var model = new mTextModel.TextModel(content, delim);
 
 		var textViewFactory = function() {

@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/compare/nls/messages', 'orion/util', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mUtil, dojo, dijit) {
+define(['i18n!orion/compare/nls/messages', 'orion/util', 'orion/compare/compareUtils', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mUtil, mCompareUtils, dojo, dijit) {
 
 
 var orion = orion || {};
@@ -147,11 +147,8 @@ orion.TwoWayCompareUIFactory = (function() {
 			this.destroy();
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
-			var marginBox = dojo.marginBox(this._parentDivID);
-			var styleH = marginBox.h + "px"; //$NON-NLS-0$
-			var styleW = marginBox.w + "px"; //$NON-NLS-0$
-			var styleStr = "height:" + styleH + ";width:" + styleW; //$NON-NLS-1$ //$NON-NLS-0$
-			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			var styleStr = mCompareUtils.getDijitSizeStyle(this._parentDivID);
+			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 		
 			topWidget.placeAt(this._parentDivID);
 			topWidget.addChild(leftB);
@@ -161,10 +158,7 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		destroy: function(){
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
+			mCompareUtils.destroyDijit(this._topWidgetId);
 		},
 		
 		getEditorParentDivId: function(left){
