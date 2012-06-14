@@ -69,7 +69,7 @@ define(['orion/Deferred'], function(Deferred) {
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
 			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
 		}
-		if (options.query && typeof options.query === 'object' && method === 'GET') { //$NON-NLS-1$ //$NON-NLS-0$
+		if (options.query && typeof options.query === 'object') { //$NON-NLS-0$
 			var queryObj = options.query, paramNames = Object.keys(queryObj);
 			var queryBuf = [];
 			for (i=0; i < paramNames.length; i++) {
