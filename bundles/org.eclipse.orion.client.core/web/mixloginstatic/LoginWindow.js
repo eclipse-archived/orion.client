@@ -13,6 +13,57 @@
 /*global define window*/
 
 define(['domReady'], function(domReady) {
+	var userCreationEnabled;
+
+	function injectPlaceholderShims() {
+		function textFocus(e) {
+			var input = e.target;
+			if (input.value === input.getAttribute('placeholder')) {
+				input.value = '';
+			}
+		}
+		function textBlur(e) {
+			var input = e.target;
+			if (input.value === '') {
+				input.value = input.getAttribute('placeholder');
+			}
+		}
+		function passwordFocus(e) {
+			var input = e.target;
+			if (input.value === input.getAttribute('placeholder')) {
+				input.value = '';
+				input.type = 'password';
+			}
+		}
+		function passwordBlur(e) {
+			var input = e.target;
+			if (input.value === '') {
+				input.value = input.getAttribute('placeholder');
+				input.type = 'text';
+			}
+		}
+		if (typeof document.createElement('input').placeholder === 'undefined') {
+			var inputs = document.getElementsByTagName('input');
+			for (var i=0 ; i < inputs.length; i++) {
+				var input = inputs[i];
+				var placeholderText = input.getAttribute('placeholder');
+				switch (placeholderText && input.type) {
+					case 'text':
+						input.value = placeholderText;
+						input.addEventListener('focus', textFocus);
+						input.addEventListener('blur', textBlur);
+						break;
+					case 'password':
+						input.value = placeholderText;
+						input.addEventListener('focus', passwordFocus);
+						input.addEventListener('blur', passwordBlur);
+						input.type = 'text';
+						break;
+				}
+			}
+		}
+	}
+
 	function getParam(key) {
 		var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
 		var results = regex.exec(window.location.href);
@@ -77,27 +128,27 @@ define(['domReady'], function(domReady) {
 	}
 
 	function setResetMessage(isError, message) {
-		document.getElementById("reset_errorMessage").innerHTML = message;
-		document.getElementById("reset_errorList").className = isError ? "loginError" : "loginInfo";
-		document.getElementById("reset_errorWin").style.display = '';
+		document.getElementById("errorMessage").innerHTML = message;
+		//document.getElementById("reset_errorList").className = isError ? "loginError" : "loginInfo";
+		document.getElementById("errorWin").style.visibility = '';
 	}
 
 	function confirmResetUser() {
 		var responseObject;
 		if (document.getElementById("reset").value === "" && document.getElementById("resetEmail").value === "") {
-			setResetMessage(true, "Provide user or email to reset.");
+			setResetMessage(true, "Provide username or email to reset.");
 			return;
 		}
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
-			document.getElementById("reset_errorWin").style.display = 'none';
+			document.getElementById("errorWin").style.visibility = 'hidden';
 			if (mypostrequest.readyState === 4) {
 				if (mypostrequest.status === 200) {
 					responseObject = JSON.parse(mypostrequest.responseText);
 					if (responseObject.Message) {
 						setResetMessage(false, responseObject.Message);
 					} else {
-						document.getElementById("reset_errorWin").style.display = 'none';
+						document.getElementById("errorWin").style.visibility = '';
 					}
 				} else {
 					try {
@@ -232,14 +283,30 @@ define(['domReady'], function(domReady) {
 		document.getElementById('orionOpen').style.paddingTop = '55px';
 	}
 
-
-	function showResetUser() {
-		document.getElementById('resetUser').style.display = '';
+	function revealResetUser() {
+		document.getElementById('orionLogin').style.visibility = 'hidden';
+		if (!userCreationEnabled) {
+			document.getElementById('orionRegister').style.visibility = 'hidden';
+			document.getElementById('orionReset').style.height = '212px';
+			document.getElementById('orionOpen').style.top = '251px';
+			document.getElementById('orionOpen').style.height = '50px';
+			document.getElementById('orionOpen').style.paddingTop = '17px';
+		}
+		document.getElementById('newUserHeaderShown').style.display = 'none';
+		document.getElementById('orionReset').style.visibility = '';
 	}
 
 	function hideResetUser() {
-		document.getElementById('resetUser').style.display = 'none';
-		document.getElementById("reset_errorWin").style.display = 'none';
+		document.getElementById('orionLogin').style.visibility = '';
+		if (userCreationEnabled) {
+			document.getElementById('orionRegister').style.visibility = '';
+		} else {
+			document.getElementById('orionOpen').style.top = '188px';
+			document.getElementById('orionOpen').style.height = '75px';
+			document.getElementById('orionOpen').style.paddingTop = '55px';
+		}
+		document.getElementById('newUserHeaderShown').style.display = '';
+		document.getElementById('orionReset').style.visibility = 'hidden';
 	}
 
 	domReady(function() {
@@ -257,7 +324,8 @@ define(['domReady'], function(domReady) {
 			if (checkusersrequest.readyState === 4) {
 				if (checkusersrequest.status === 200) {
 					var responseObject = JSON.parse(checkusersrequest.responseText);
-					if (responseObject.CanAddUsers === false) {
+					userCreationEnabled = responseObject.CanAddUsers;
+					if (!userCreationEnabled) {
 						formatForNoUserCreation();
 					}
 					document.getElementById("login-window").style.display = '';
@@ -290,6 +358,8 @@ define(['domReady'], function(domReady) {
 		checkemailrequest.send();
 
 
+		injectPlaceholderShims();
+
 		// TODO: Temporary --- old page logic
 		document.getElementById("login").onkeypress = function(event) {
 			if (event.keyCode === 13) {
@@ -311,7 +381,21 @@ define(['domReady'], function(domReady) {
 			confirmLogin();
 		};
 
-		document.getElementById("resetUserLink").onclick = showResetUser;
+		document.getElementById("resetUserLink").onclick = revealResetUser;
+
+		document.getElementById("reset").onkeypress = function(event) {
+			if (event.keyCode === 13) {
+				confirmResetUser();
+			}
+			return true;
+		};
+		
+		document.getElementById("resetEmail").onkeypress = function(event) {
+			if (event.keyCode === 13) {
+				confirmResetUser();
+			}
+			return true;
+		};
 
 		document.getElementById("registerButton").onclick = revealRegistration;
 

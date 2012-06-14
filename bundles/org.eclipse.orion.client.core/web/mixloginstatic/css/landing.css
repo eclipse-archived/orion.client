@@ -7,10 +7,14 @@ body {
 	overflow:hidden;
 }
 
-input::-moz-focus-inner /*Remove button padding in FF*/
-{ 
+/*Remove button padding in FF*/
+input::-moz-focus-inner {
     border: 0;
     padding: 0;
+}
+
+input[type="button"]:active {
+	padding: 0;
 }
 
 .orion-banner{
@@ -110,7 +114,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	min-height:400px;
 }
 
-.orion-login, .orion-register, .orion-open, .orion-signup, .orion-error{
+.orion-login, .orion-register, .orion-open, .orion-signup, .orion-reset, .orion-error{
 	border-radius: 4px;
 	border: solid 1px #CCC;
 }
@@ -123,7 +127,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	height: 101px;
 }
 
-.orion-login {
+.orion-login{
 	position: absolute;
 	top: 0;
 	left: 536px;
@@ -131,7 +135,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	height: 150px;
 }
 
-.orion-signup{
+.orion-signup, .orion-reset  {
 	position: absolute;
 	top: 0;
 	left: 536px;
@@ -139,13 +143,13 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	height: 222px;
 }
 
-.orion-login, .orion-register, .orion-open {
+.orion-login, .orion-register, .orion-open, .orion-signup, .orion-reset {
 	background: white;
 	/* box-shadow: 0 1px 0 rgba(0,0,0,.1); */
 	padding:10px;
 }
 
-.orion-login-header	{
+.orion-login-header, .orion-reset-header {
 	font-weight: bold;
 	font-size:15px;
 	padding-bottom: 10px;
@@ -165,7 +169,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	float:left;
 }
 
-.orion-register-header	{
+.orion-register-header{
 	font-weight: bold;
 	font-size:15px;
 	float:left;
@@ -176,6 +180,10 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	padding-bottom: 10px;
 	display:inline;
 	/* border-bottom: solid 1px #EEE; */
+}
+
+.orion-reset-note {
+	padding-bottom: 10px;
 }
 
 .orion-text-input {
@@ -200,7 +208,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 }
 
 
-.orion-register-input-holder {
+.orion-register-input-holder, .orion-reset-input-holder {
 	padding-bottom: 5px;
 	margin-bottom: 15px;
 	border-bottom: dashed 1px #DDD;
@@ -217,7 +225,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	float:left;
 }
 
-.orion-login-button {
+.orion-login-button, .orion-send-button {
 	background:#ffc000;
 	border-radius:4px;
 	height:30px;
@@ -229,20 +237,9 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	margin-left: 5px;
 }
 
-.orion-login-button:hover{
+.orion-login-button:hover, .orion-send-button:hover {
 	background:white;
 	color:#ffc000;
-}
-
-[if FireFox].orion-login-button {
-	background:#ffc000;
-	border-radius:4px;
-	height:30px;
-	width:80px;
-	border: solid 1px #CCC;
-	color:pink;
-	font-size:12px;
-	font-weight:bold;
 }
 
 .orion-register-button {
@@ -257,7 +254,7 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	margin-left: 5px;
 }
 
-.orion-register-button:hover{
+.orion-register-button:hover {
 	background:white;
 	color:#666;
 }
@@ -291,6 +288,13 @@ input::-moz-focus-inner /*Remove button padding in FF*/
 	font-size: 9pt;
 	color:#999;
 	margin-top:15px;
+	cursor: default;
+	text-decoration: underline;
+}
+
+.orion-forgot-password:hover{
+	color: #333;
+	text-decoration: none;
 }
 
 .orion-open {

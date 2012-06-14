@@ -78,8 +78,8 @@ require(["LoginWindow.js"]);
 					<div class="orion-login-button-holder">
 						<input type="button" name="password" id="loginButton" class="orion-login-button" value="Sign in" tabindex="0">
 					</div>
-					<div class="orion-login-forgot-holder" style="display:none;">
-						<span id="resetUserLink" class="orion-forgot-password" style="font-size: 0.85em;">Forgot password?</span>
+					<div class="orion-login-forgot-holder">
+						<a id="resetUserLink" class="orion-forgot-password">Forgot password?</a>
 					</div>
 				</form>
 			</div>
@@ -93,7 +93,7 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
-			<div class="orion-signup" id="newUserHeaderShown" style="padding: 10px; visibility: hidden;">
+			<div class="orion-signup" id="newUserHeaderShown" style="visibility: hidden;">
 				<div class="orion-login-header">Create an account</div>
 				<form>
 					<div class="orion-register-input-holder">
@@ -116,6 +116,25 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
+			<div class="orion-reset" id="orionReset" style="visibility: hidden;">
+				<div class="orion-reset-header">Reset Orion account</div>
+				<div class="orion-reset-note">Provide your username or email to reset your password.</div>
+				<form>
+					<div class="orion-reset-input-holder">
+						<input type="text" class="orion-text-input" id="reset" placeholder="username">
+					</div>
+					<div class="orion-reset-input-holder">
+						<input type="text" class="orion-text-input" id="resetEmail" placeholder="email">
+					</div>
+					<div class="orion-login-button-holder">
+						<input type="button" id="sendResetButton" class="orion-send-button" tabindex="0" value="Send">
+					</div>
+					<div class="orion-login-button-holder">
+						<input type="button" id="cancleResetButton" class="orion-cancel-button" tabindex="0" value="Cancel">
+					</div>
+				</form>
+			</div>
+
 			<div class="orion-open" id="orionOpen">
 				<!-- div class="orion-or-div">or</div><input type="submit" class="orion-google-button" value="Sign in with Google"><input type="submit" class="orion-openid-button" value="Sign in with OpenId" -->
 				<div id="openIDLogin" class="orion-open-header">Log in with:</div>
@@ -134,34 +153,7 @@ require(["LoginWindow.js"]);
 					</a>
 				</div>
 			</div>
-		</div>
-
-		<div id="resetUser" style="display: none;">
-			<div id="resetUserHr" class="hrloginWindow"></div>
-			<h3 class="loginWindow" id="newResetUserHeaderShown">Reset Orion Account</h3>
-			<p class="loginWindow" style="margin-left: 20px; margin-right: 20px;">You can reset your password providing your email OR your account name.</p>
-			<table class="loginWindow" role="presentation">
-				<tr>
-					<td class="loginWindow"><label class="loginWindow" id="resetLabel" for="reset">Account name: </label></td>
-					<td class="loginWindow"><input class="loginWindow" type="text" id="reset">
-					</td>
-				</tr>
-				<tr>
-					<td class="loginWindow"><label class="loginWindow" id="emailLabel" for="resetEmail">Email: </label></td>
-					<td class="loginWindow"><input class="loginWindow" id="resetEmail" type="text"></td>
-				</tr>
-				<tr id="reset_errorWin" style="display: none;" aria-atomic="true" aria-live="assertive">
-					<td colspan=2>
-						<ul id="reset_errorList">
-							<li id="reset_errorMessage">&nbsp;</li>
-						</ul></td>
-				</tr>
-				<tr>
-					<td class="loginWindow loginWindowButtonTd" colspan=2>
-						<button id="cancleResetButton" type='button' class="loginWindow">Cancel</button>
-						<button id="sendResetButton" class="loginWindow" type="submit">Send</button></td>
-				</tr>
-			</table> 
+			
 		</div>
 	</div>
 </body>
