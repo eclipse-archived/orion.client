@@ -168,13 +168,6 @@ a:hover {
 .toolComposite {
 }
 
-.taskTitle {
-	color:  #3087B3 !important;  /* overriding command framework values */
-	text-align: left !important;
-	font-weight: bold !important;
-	border: 1px solid transparent !important;
-}
-
 .taskDescription {
 	font-size: 8pt;
 	padding: 8px;

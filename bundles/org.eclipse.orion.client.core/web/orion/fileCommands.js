@@ -632,8 +632,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			tooltip: messages["Clone a git repository"],
 			description: messages["Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator."],
 			id: "orion.new.gitclone", //$NON-NLS-0$
-			hrefCallback: function(data) {
-				return window.location.protocol + "//" + window.location.host + "/git/git-repository.html#,cloneGitRepository=URL"; //$NON-NLS-0$
+			callback: function(data) {
+				window.location.href = window.location.protocol + "//" + window.location.host + "/git/git-repository.html#,cloneGitRepository=URL"; //$NON-NLS-0$
 			},
 			visibleWhen: canCreateProject
 		});

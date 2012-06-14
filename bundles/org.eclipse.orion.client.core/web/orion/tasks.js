@@ -73,11 +73,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 					var col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					this._commandService.registerCommandContribution("task"+i, this._tasks[i].commandId, 1); //$NON-NLS-0$
 					this._commandService.renderCommands("task"+i, col, this._item, this._handler, "button"); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.addClass(col, "taskTitle"); //$NON-NLS-0$
-					if (col.childNodes.length > 0) {
-						// I know I have only one command if I have any at all
-						dojo.addClass(col.childNodes[0], "taskTitle"); //$NON-NLS-0$
-					}
 					col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.addClass(col, "taskDescription"); //$NON-NLS-0$
 					var command = this._commandService.findCommand(this._tasks[i].commandId);
