@@ -20,6 +20,7 @@ input[type="button"]:active {
 .orion-banner{
 	margin: 0;
 	border: 0;
+	background: #333;
 	background: -webkit-linear-gradient(29deg, rgb(51, 51, 51) 0%,rgb(72, 72, 72) 100%);
 	background: -o-linear-gradient(29deg, rgb(51, 51, 51) 0%,rgb(72, 72, 72) 100%);
 	background: -ms-linear-gradient(29deg, rgb(51, 51, 51) 0%,rgb(72, 72, 72) 100%);
