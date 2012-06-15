@@ -192,8 +192,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							}
 							for (var i=0; i < selectedItems.length; i++) {
 								var location = targetFolder.Location;
-								var newName; // intentionally undefined.  Only use if we need.
 								var item = selectedItems[i];
+								var newName = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								if (isCopy && item.parent && item.parent.Location === location) {
 									newName = window.prompt(dojo.string.substitute(messages["Enter a new name for '${0}'"], [item.Name]), dojo.string.substitute(messages["Copy of ${0}"], [item.Name]));
@@ -817,7 +817,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							}
 							for (var i=0; i<bufferedSelection.length; i++) {
 								var location = bufferedSelection[i].Location;
-								var name = null;
+								var name = bufferedSelection[i].Name || null;
 								if (location) {
 									if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === item.Location) {
 										name = window.prompt(dojo.string.substitute(messages['Enter a new name for \'${0}\''], [bufferedSelection[i].Name]), dojo.string.substitute(messages['Copy of ${0}'], [bufferedSelection[i].Name]));
