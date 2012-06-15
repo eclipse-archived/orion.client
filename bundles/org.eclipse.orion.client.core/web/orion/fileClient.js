@@ -351,7 +351,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth"], fun
 		 * @param {String} targetLocation The location of the target folder.
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
-		copyFile: function(sourceLocation, targetLocation) {
+		copyFile: function(sourceLocation, targetLocation, name) {
 			var sourceService = this._getService(sourceLocation);
 			var targetService = this._getService(targetLocation);
 			
@@ -366,15 +366,19 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth"], fun
 				target += "/"; //$NON-NLS-0$
 			}
 			
-			var temp = sourceLocation;
-			if (isDirectory) {
-				temp = temp.substring(0, temp.length - 1);
+			if (name) {
+				target += encodeURIComponent(name);
+			} else {
+				var temp = sourceLocation;
+				if (isDirectory) {
+					temp = temp.substring(0, temp.length - 1);
+				}
+				target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			}
-			target += temp.substring(temp.lastIndexOf("/")+1); //$NON-NLS-0$
 			
 			if (isDirectory && target[target.length -1] !== "/") { //$NON-NLS-0$
 				target += "/"; //$NON-NLS-0$
-			}	
+			}
 
 			return _copy(sourceService, sourceLocation, targetService, target);
 		},
