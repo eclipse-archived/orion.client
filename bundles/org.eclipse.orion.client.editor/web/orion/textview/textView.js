@@ -2919,9 +2919,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var rect2 = div2.getBoundingClientRect();
 			div1.style.overflow = 'hidden'; //$NON-NLS-0$
 			div2.style.height = "200px"; //$NON-NLS-0$
-			var w1 = div2.offsetWidth;
+			var w1 = div1.clientWidth;
 			div1.style.overflow = 'scroll'; //$NON-NLS-0$
-			var w2 = div2.offsetWidth;
+			var w2 = div1.clientWidth;
 			parent.removeChild(div1);
 			var scrollWidth = w1 - w2;
 			pad = {
