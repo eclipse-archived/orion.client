@@ -234,6 +234,19 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		}, fail);
 	});
 
+	// Bug 382381
+	tests['test POST query params'] = getTimeoutable(function() {
+		return xhr('POST', '/', {
+			query: {
+				'foo': 3,
+				'bar': 'baz'
+			}
+		}, new OkXhr())
+		.then(function(result) {
+			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
+		}, fail);
+	});
+
 	tests['test GET query params encoding'] = getTimeoutable(function() {
 		return xhr('GET', '/', {
 			query: {
