@@ -146,6 +146,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		constructor : function() {
 			this.inherited(arguments);
 			this.options = arguments[0] || {};
+			this.showDelay = 1000;
 		},
 		
 		_onUnHover: function(evt){
@@ -190,7 +191,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 					this.polling = false;
 					this.close();
 				}
-			}), 1000);
+			}), this.showDelay + 500);
 		},
 		
 		_stillInDocument: function(node) {
