@@ -280,7 +280,7 @@ a:hover {
 	display: inline-block; 
 	vertical-align: middle; 
 	background-image: url(../images/core_sprites.png);
-	padding-left: 8px;
+	margin-left: 8px;
 	padding-right: 8px;
 	margin-right: 8px;
 }
