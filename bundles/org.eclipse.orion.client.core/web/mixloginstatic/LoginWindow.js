@@ -14,6 +14,7 @@
 
 define(['domReady'], function(domReady) {
 	var userCreationEnabled;
+	var registrationURI;
 
 	function injectPlaceholderShims() {
 		function textFocus(e) {
@@ -265,6 +266,11 @@ define(['domReady'], function(domReady) {
 	}
 
 	function revealRegistration() {
+		// If registrationURI is set and userCreation is not, open the URI in a new window
+		if (!userCreationEnabled && registrationURI) {
+			window.open(registrationURI);
+			return;
+		}
 		document.getElementById('orionLogin').style.visibility = 'hidden';
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		document.getElementById('newUserHeaderShown').style.visibility = '';
@@ -325,7 +331,8 @@ define(['domReady'], function(domReady) {
 				if (checkusersrequest.status === 200) {
 					var responseObject = JSON.parse(checkusersrequest.responseText);
 					userCreationEnabled = responseObject.CanAddUsers;
-					if (!userCreationEnabled) {
+					registrationURI = responseObject.RegistrationURI;
+					if (!userCreationEnabled && !registrationURI) {
 						formatForNoUserCreation();
 					}
 					document.getElementById("login-window").style.display = '';
