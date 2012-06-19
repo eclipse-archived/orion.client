@@ -2370,8 +2370,7 @@ var exports = {};
 		var resetCommand = new mCommands.Command({
 			name: messages['Reset'],
 			tooltip: messages['Reset the branch, discarding all staged and unstaged changes'],
-			imageClass: "git-sprite-refresh", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			imageClass: "core-sprite-refresh", //$NON-NLS-0$
 			id: "eclipse.orion.git.resetCommand", //$NON-NLS-0$
 			callback: function(data) {
 				var item = data.items;

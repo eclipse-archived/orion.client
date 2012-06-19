@@ -234,6 +234,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		this._urlBindings = {};
 		this._init(options);
 		this._parameterCollector = null;
+		this.showMenuIcons = false;
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
 		_init: function(options) {
@@ -1235,11 +1236,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 		_addMenuItem: function(parent, context, domNodeWrapperList) {
+			var showIcon = context.commandService.showMenuIcons;
 			context.domParent = parent.domNode;
 			var menuitem = new CommandMenuItem({
 				labelType: this.hrefCallback ? "html" : "text", //$NON-NLS-1$ //$NON-NLS-0$
 				label: this.name,
-				iconClass: this.imageClass,
+				iconClass: showIcon ? this.imageClass : null,
 				hasLink: !!this.hrefCallback
 			});
 			if (this.tooltip) {
@@ -1272,12 +1274,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			// we may need to refer back to the command.  
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
-			if (this.imageClass) {
-				dojo.addClass(menuitem.iconNode, this.spriteClass);
-			} else if (this.image) {
-				dojo.addClass(menuitem.iconNode, "commandMenuItem"); //$NON-NLS-0$
-				// reaching...
-				menuitem.iconNode.src = this.image;
+			if (showIcon) {
+				if (this.imageClass) {
+					dojo.addClass(menuitem.iconNode, this.spriteClass);
+				} else if (this.image) {
+					dojo.addClass(menuitem.iconNode, "commandMenuItem"); //$NON-NLS-0$
+					// reaching...
+					menuitem.iconNode.src = this.image;
+				}
 			}
 			context.domNode = menuitem.domNode;
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
@@ -1342,21 +1346,25 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			});
 
 			var choices = this.getChoices(items, handler, userData);
+			var showIcon = this.showMenuIcons;
+
 			for (var j=0; j<choices.length; j++) {
 				var choice = choices[j];
 				var menuitem;
 				if (choice.name) {
 					menuitem = new dijit.MenuItem({
 						label: choice.name,
-						iconClass: choice.imageClass,
+						iconClass: showIcon ? choice.imageClass : null,
 						onClick: this.makeChoiceCallback(choice, items)
 					});
-					if (choice.imageClass) {
-						dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite"); //$NON-NLS-0$
-					} else if (choice.image) {
-						dojo.addClass(menuitem.iconNode, "commandImage"); //$NON-NLS-0$
-						menuitem.iconNode.src = choice.image;
-					}			
+					if (showIcon) {
+						if (choice.imageClass) {
+							dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite"); //$NON-NLS-0$
+						} else if (choice.image) {
+							dojo.addClass(menuitem.iconNode, "commandImage"); //$NON-NLS-0$
+							menuitem.iconNode.src = choice.image;
+						}
+					}
 				} else {  // anything not named is a separator
 					menuitem = new dijit.MenuSeparator();
 				}
