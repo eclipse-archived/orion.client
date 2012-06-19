@@ -291,7 +291,7 @@ define(['domReady'], function(domReady) {
 
 	function revealResetUser() {
 		document.getElementById('orionLogin').style.visibility = 'hidden';
-		if (!userCreationEnabled) {
+		if (!userCreationEnabled && !registrationURI) {
 			document.getElementById('orionRegister').style.visibility = 'hidden';
 			document.getElementById('orionReset').style.height = '212px';
 			document.getElementById('orionOpen').style.top = '251px';
@@ -304,7 +304,7 @@ define(['domReady'], function(domReady) {
 
 	function hideResetUser() {
 		document.getElementById('orionLogin').style.visibility = '';
-		if (userCreationEnabled) {
+		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
 		} else {
 			document.getElementById('orionOpen').style.top = '188px';
