@@ -176,9 +176,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	/** @private */
 	showFavoritesImage : function(col) {
 		var image = new Image();
-		dojo.addClass(image, "commandSprite"); //$NON-NLS-0$
+		dojo.addClass(image, "modelDecorationSprite"); //$NON-NLS-0$
 		dojo.addClass(image, "core-sprite-makeFavorite"); //$NON-NLS-0$
-		dojo.addClass(image, "commandImage"); //$NON-NLS-0$
 		// without an image, chrome will draw a border  (?)
 		image.src = require.toUrl("images/none.png"); //$NON-NLS-0$
 		image.title = messages['Favorite'];

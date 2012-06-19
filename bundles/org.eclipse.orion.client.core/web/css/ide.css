@@ -120,8 +120,12 @@ a:hover {
 }
 
 .logo {
-	padding-top: 6px;
-	padding-right:5px;
+	background-image: url(../images/core_sprites.png);
+	background-repeat: no-repeat;
+	background-position: 0 -517px; 
+	width: 37px; height: 14px; 
+	margin-top: 6px;
+	margin-right:5px;
 }
 
 .primaryNav {
@@ -441,14 +445,14 @@ a:hover {
 
 .progressPane_operations {
 	margin-top: 4px;
-	background-image: url(../images/core_sprites.png);
-	background-position: -96px -328px; 
+	/* background-image: url(../images/core_sprites.png); 
+	background-position: -96px -328px; */
 	width: 16px; height: 16px; 
 }
 
 /* we don't sprite an animated gif */
 .progressPane_running {
-	margin-top: 4px;
+	margin-top: 8px;
 	background: url(../images/progress_running.gif) no-repeat center;  
 	width: 16px; height: 16px;
 }
@@ -618,7 +622,11 @@ a:hover {
    if drawn with straight edges and a darker background */
 
 .searchbox {
-	background: url('../images/glass.png') no-repeat #444 4px 3px; /* 777 */
+    background-image: url(../images/core_sprites.png);
+    background-repeat: no-repeat; 
+    background-position: 4px -297px; 
+    width: 12px; height: 12px;
+    background-color: #444;
 	border: 1px solid #222;
 	font-size: 11px;
 	width: 15em;
