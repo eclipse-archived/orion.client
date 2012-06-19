@@ -285,14 +285,33 @@ a:hover {
 	margin-right: 8px;
 }
 
+.thumbnail {
+	vertical-align: middle; 
+	padding: 0;
+	margin: 0;
+	margin-left: 8px; 
+	padding-right: 8px;
+	margin-right: 8px;
+	max-height: 24px;
+	max-width: 48px;
+}
+
 /* less hit-area since we aren't worried about touch */
 @media all and (min-device-width: 1025px) {
 	.modelDecorationSprite { 	
 		padding: 0;
-		padding-left: 2px;
-		padding-right: 2px;
 		margin: 0;
+		margin-left: 2px;
+		padding-right: 2px;
 		margin-right: 2px;
+	}
+	
+	.thumbnail {
+		margin-left: 2px; 
+		padding-right: 2px;
+		margin-right: 2px;
+		max-height: 24px;
+		max-width: 48px;
 	}
 	
 	.selectionCheckmarkSprite { 	
@@ -305,14 +324,6 @@ a:hover {
 	.checkColumn {
 		width: 22px;
 	}
-}
-
-.thumbnail {
-	vertical-align: middle; 
-	margin-left: 4px; 
-	margin-right: 4px;
-	max-height: 24px;
-	max-width: 48px;
 }
 
 .pane {
