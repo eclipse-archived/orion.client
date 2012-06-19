@@ -30,8 +30,8 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		
 		var that = this;
 		
-		this._expandImageClass = "core-sprite-twistie_open"; //$NON-NLS-0$
-		this._collapseImageClass = "core-sprite-twistie_closed"; //$NON-NLS-0$
+		this._expandImageClass = "core-sprite-openarrow"; //$NON-NLS-0$
+		this._collapseImageClass = "core-sprite-closedarrow"; //$NON-NLS-0$
 		this._twistieSpriteClass = "modelDecorationSprite"; //$NON-NLS-0$
 		
 		// ...

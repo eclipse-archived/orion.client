@@ -25,8 +25,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Va
 	var statusTypeMap = { 
 		"Missing":["gitImageSprite git-sprite-removal", messages['Unstaged removal']], //$NON-NLS-1$ //$NON-NLS-0$
 		"Removed":["gitImageSprite git-sprite-removal",messages['Staged removal']],	 //$NON-NLS-1$ //$NON-NLS-0$
-		"Modified":["gitImageSprite git-sprite-modification",messages['Unstaged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
-		"Changed":["gitImageSprite git-sprite-modification",messages['Staged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Modified":["gitImageSprite git-sprite-file",messages['Unstaged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
+		"Changed":["gitImageSprite git-sprite-file",messages['Staged change']],	 //$NON-NLS-1$ //$NON-NLS-0$
 	    "Untracked":["gitImageSprite git-sprite-addition",messages['Unstaged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
 		"Added":["gitImageSprite git-sprite-addition",messages['Staged addition']],	 //$NON-NLS-1$ //$NON-NLS-0$
 		"Conflicting":["gitImageSprite git-sprite-conflict-file", messages['Conflicting']]	 //$NON-NLS-1$ //$NON-NLS-0$

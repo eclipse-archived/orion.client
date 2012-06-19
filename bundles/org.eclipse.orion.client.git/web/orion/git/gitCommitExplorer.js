@@ -139,7 +139,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				var titleWrapper = new mSection.Section(tableNode, {
 					id: "commitSection", //$NON-NLS-0$
 					title: messages["No Commits"],
-					iconClass: "gitImageSprite git-sprite-modification" //$NON-NLS-0$
+					iconClass: "core-sprite-file" //$NON-NLS-0$
 				});
 				return;
 			}
@@ -342,7 +342,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 							var div = dojo.create( "div", {"class" : "sectionTableItem"}, td ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
 							var path = item.OldPath;
-						    var sprite = "git-sprite-modification"; //$NON-NLS-0$
+						    var sprite = "git-sprite-file"; //$NON-NLS-0$
 							if (item.ChangeType === "ADD"){ //$NON-NLS-0$
 								path = item.NewPath;
 								sprite = "git-sprite-addition"; //$NON-NLS-0$
