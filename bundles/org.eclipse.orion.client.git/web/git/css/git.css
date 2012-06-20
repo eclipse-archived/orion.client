@@ -7,13 +7,13 @@
 }
 
 .incomingCommitsdRow div {
-	background: url(../images/incoming_commit.gif);
+	background: url(../images/incoming_commit.png);
 	background-repeat: no-repeat;
 	background-position: left top; 
 }
 
 .outgoingCommitsdRow div {
-	background: url(../images/outgoing_commit.gif);
+	background: url(../images/outgoing_commit.png);
 	background-repeat: no-repeat;
 	background-position: left top; 
 }
