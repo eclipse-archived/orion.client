@@ -44,6 +44,10 @@
     width: 100%;
 }
 
+.gitMainDescription{
+	padding-left:8px;
+}
+
 pre {
 	margin-left: 10px;
     padding: 15px;
@@ -53,3 +57,5 @@ pre {
     white-space: pre-wrap;
     width: 60%
 }
+
+
