@@ -45,7 +45,7 @@ input[type="button"]:active {
 	float:right;
 	margin-right:20px;
 	margin-top:65px;
-	background-position: 0 -382px;
+	background-position: 0 -362px;
 }
 
 .orion-nav-bar{
@@ -53,9 +53,12 @@ input[type="button"]:active {
 	padding-right: 5px;
 }
 
+
+
+
 .orion-logo{
 	background: url('combined.png');
-	background-position: 0 -180px; 
+	background-position: 0 -160px; 
 	float:left;
 	height:86px;
 	width:114px;
@@ -68,7 +71,7 @@ input[type="button"]:active {
 	float:right;
 	margin-right:20px;
 	margin-top:65px;
-	background-position: 0 -316px;
+	background-position: 0 -296px;
 }
 
 
@@ -113,7 +116,7 @@ input[type="button"]:active {
 	height: 331px;
 	opacity: 0.8;
 	background: url('combined.png');
-	background-position: 0 -448px; 
+	background-position: 0 -428px; 
 }
 
 .orion-welcome-area-text {
@@ -202,6 +205,7 @@ input[type="button"]:active {
 	vertical-align: 8px;
 	padding-right: 20px;
 	float:left;
+	line-height: 48px;
 }
 
 .orion-register-header{
@@ -392,45 +396,51 @@ a.loginwindow {
 
 .yahooIcon{
 	background: url('combined.png');
-	background-position: -0px -829px; 
-	width: 40px; 
-	height: 41px;
-	float:left;
-	padding-right:15px;
-	opacity:0.5;
+	background-position: 0 -809px;
+	width: 50px; 
+	height: 25px;
+	margin-top: 2px;
+	margin-bottom: 3px;
+	opacity:0.7;
 }
 
 .yahooIcon:hover{
-	opacity:0.6;
+	opacity:1;
 }
 
 .openIdIcon{
-	background: url('combined.png');
-	background-position: 0 -90px; 
-	width: 40px; 
-	height: 40px;
-	float:left;
-	padding-right:15px;
-	opacity:0.5;
+	background: url('combined.png') no-repeat;
+	background-position: 0 -80px;
+	width: 30px; 
+	height: 30px;
+	opacity:0.7;
 }
 
 .openIdIcon:hover{
-	opacity:0.6;
+	opacity:1;
 }
 
 .googleIcon{
-	background: url('combined.png');
+	background: url('combined.png') no-repeat;
 	background-position: 0 0; 
-	width: 40px; 
-	height: 40px;
-	float:left;
-	padding-right:15px;
-	opacity:0.5;
+	width: 26px;
+	height: 30px;
+	margin-left: 4px;
+	opacity:0.7;
 }
 
 .googleIcon:hover{
-	opacity:0.6;
+	opacity:1;
 }
+
+.openIdWrapper{
+	padding:5px;
+	margin:5px;
+	border: 1px solid #CCC;
+	border-radius:4px;
+	float:left;
+}
+
 
 
 

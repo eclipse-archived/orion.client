@@ -285,8 +285,8 @@ define(['domReady'], function(domReady) {
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		document.getElementById('orionOpen').style.top = '188px';
-		document.getElementById('orionOpen').style.height = '75px';
-		document.getElementById('orionOpen').style.paddingTop = '55px';
+		document.getElementById('orionOpen').style.height = '85px';
+		document.getElementById('orionOpen').style.paddingTop = '45px';
 	}
 
 	function revealResetUser() {
@@ -308,8 +308,8 @@ define(['domReady'], function(domReady) {
 			document.getElementById('orionRegister').style.visibility = '';
 		} else {
 			document.getElementById('orionOpen').style.top = '188px';
-			document.getElementById('orionOpen').style.height = '75px';
-			document.getElementById('orionOpen').style.paddingTop = '55px';
+			document.getElementById('orionOpen').style.height = '85px';
+			document.getElementById('orionOpen').style.paddingTop = '45px';
 		}
 		document.getElementById('newUserHeaderShown').style.display = '';
 		document.getElementById('orionReset').style.visibility = 'hidden';
