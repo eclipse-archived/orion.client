@@ -19,14 +19,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	dojo.declare("orion.widgets.settings.Section", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 		
 		templateString: '<section role="region" aria-labelledby="Navigation-header">' + //$NON-NLS-0$
-							'<h3 data-dojo-attach-point="title">'+messages['Title']+'</h3>' + //$NON-NLS-2$ //$NON-NLS-0$
+							'<h3 data-dojo-attach-point="titleNode">'+messages['Title']+'</h3>' + //$NON-NLS-2$ //$NON-NLS-0$
 							'<div data-dojo-attach-point="sectionContent">' +  //$NON-NLS-0$
 							'</div>' +  //$NON-NLS-0$
 						'</section>', //$NON-NLS-0$
 								
 		postCreate: function(){
 			
-			this.title.innerHTML = this.sectionName;	
+			this.titleNode.innerHTML = this.sectionName;
 			
 			if( this.container ){
 				this.container.appendChild( this.domNode );
