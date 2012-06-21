@@ -395,12 +395,11 @@ a.loginwindow {
 }
 
 .yahooIcon{
-	background: url('combined.png');
+	background: url('combined.png') no-repeat;
 	background-position: 0 -809px;
-	width: 50px; 
-	height: 25px;
-	margin-top: 2px;
-	margin-bottom: 3px;
+	width: 35px; 
+	height: 29px;
+	margin-top: 6px;
 	opacity:0.7;
 }
 
@@ -411,22 +410,25 @@ a.loginwindow {
 .openIdIcon{
 	background: url('combined.png') no-repeat;
 	background-position: 0 -80px;
-	width: 30px; 
-	height: 30px;
+	width: 33px; 
+	height: 33px;
 	opacity:0.7;
+	margin-top:2px;
+	margin-left:2px;
 }
 
 .openIdIcon:hover{
 	opacity:1;
 }
 
-.googleIcon{
+.googleIcon{	
 	background: url('combined.png') no-repeat;
-	background-position: 0 0; 
-	width: 26px;
-	height: 30px;
-	margin-left: 4px;
-	opacity:0.7;
+	background-position: 0 0;
+	width: 28px;
+	height: 32px;
+	margin-left: 7px;
+	opacity: 0.7;
+	margin-top: 3px;
 }
 
 .googleIcon:hover{
@@ -440,14 +442,3 @@ a.loginwindow {
 	border-radius:4px;
 	float:left;
 }
-
-
-
-
-
-
-
-
-
-
-
