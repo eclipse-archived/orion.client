@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global window ArrayBuffer addEventListener removeEventListener self*/
+/*global window ArrayBuffer addEventListener removeEventListener self XMLHttpRequest*/
 
 /**
  * @private Don't jsdoc this.
@@ -79,6 +79,16 @@ eclipse.PluginProvider = function(metadata) {
 		return {services: services, metadata: _metadata || {}};		
 	}
 	
+	function jsonXMLHttpRequestReplacer(name, value) {
+		if (value && value instanceof XMLHttpRequest) {
+			return {
+				status: value.status, 
+				statusText: value.statusText
+			};
+		}
+		return value;
+	}
+	
 	function _handleRequest(event) {
 		
 		if (event.source !== _target ) {
@@ -97,7 +107,7 @@ eclipse.PluginProvider = function(metadata) {
 					response.result = result;
 					_publish(response);
 				}, function(error) {
-					response.error = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object 
+					response.error = error ? JSON.parse(JSON.stringify(error, jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
 					_publish(response);
 				}, function() {
 					_publish({requestId: message.id, method: "progress", params: Array.prototype.slice.call(arguments)}); //$NON-NLS-0$
@@ -107,7 +117,7 @@ eclipse.PluginProvider = function(metadata) {
 				_publish(response);
 			}
 		} catch (error) {
-			response.error = error ? JSON.parse(JSON.stringify(error)) : error; // sanitizing Error object
+			response.error = error ? JSON.parse(JSON.stringify(error, jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
 			_publish(response);
 		}
 	}
