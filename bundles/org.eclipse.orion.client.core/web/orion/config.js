@@ -220,7 +220,7 @@ ConfigStore = /** @ignore */ (function() {
 		this.configs = {};
 		this.pref = null;
 		var self = this;
-		this.initPromise = prefsService.getPreferences('/cm/configurations', PreferencesService.USER_SCOPE).then( //$NON-NLS-0$
+		this.initPromise = prefsService.getPreferences('/cm/configurations').then( //$NON-NLS-0$
 			function(prefNode) {
 				self.pref = prefNode;
 				prefNode.keys().forEach(function(pid) {
