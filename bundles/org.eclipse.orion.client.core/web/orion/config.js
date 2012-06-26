@@ -9,9 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences', 'orion/serviceTracker'],
-	function(mEventTarget, Deferred, mPreferences, ServiceTracker) {
+define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences', 'orion/serviceTracker', 'orion/pluginregistry'],
+	function(mEventTarget, Deferred, mPreferences, ServiceTracker, mPluginRegistry) {
 var PreferencesService = mPreferences.PreferencesService;
+var Plugin = mPluginRegistry.Plugin;
 var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
@@ -81,7 +82,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 					// Don't trigger a plugin load only to call updated(); pluginLoadedListener handles that case.
 					var pluginUrl = serviceRefs[i].getProperty('__plugin__'); //$NON-NLS-0$
 					var plugin = pluginUrl && pluginRegistry.getPlugin(pluginUrl);
-					if (!pluginUrl || (plugin && plugin.isLoaded())) {
+					if (!pluginUrl || (plugin && plugin.getState() === Plugin.LOADED)) {
 						services[i].updated(properties);
 					}
 				} catch(e) {
