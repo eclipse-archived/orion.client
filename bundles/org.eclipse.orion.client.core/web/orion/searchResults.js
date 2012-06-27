@@ -12,18 +12,19 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search results generator.
 	 * @name orion.searchResults.SearchResultsGenerator
 	 * @class A search results generator for display search results to an end user
 	 */
-	function SearchResultsGenerator(serviceRegistry, resultsId, commandService, fileService) {
+	function SearchResultsGenerator(serviceRegistry, resultsId, commandService, fileService, crawling) {
 		this.registry = serviceRegistry;
 		this.fileService = fileService;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
+		this.crawling = crawling;
 		this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService);
 	}
 
@@ -33,8 +34,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 			var foundValidHit = false;
 			var resultLocation = [];
 			dojo.empty(resultsNode);
-			var token = jsonData.responseHeader.params.q;
-			token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 			if (jsonData.response.numFound > 0) {
 				for (var i=0; i < jsonData.response.docs.length; i++) {
 					var hit = jsonData.response.docs[i];
@@ -43,7 +42,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 							foundValidHit = true;
 						}
 						var loc = hit.Location;
-						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
+						resultLocation.push({linkLocation: require.toUrl("edit/edit.html") +"#" + loc, location: loc, path: hit.Path ? hit.Path : loc, name: hit.Name, lastModified: hit.LastModified}); //$NON-NLS-1$ //$NON-NLS-0$
 						
 					}
 				}
@@ -64,15 +63,23 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
 		_search: function(resultsNode, query) {
-			var qObj = mSearchUtils.parseQueryStr(query);
-			try{
-				this.fileService.search(qObj.location, query).then(
-					dojo.hitch(this, function(jsonData) {
-						this._renderSearchResult(resultsNode, query, jsonData);
-					}));
-			}
-			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+			//For crawling search, temporary
+			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
+			if(this.crawling){
+				var self = this;
+				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query);
+				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
+			} else {
+				var qObj = mSearchUtils.parseQueryStr(query);
+				try{
+					this.fileService.search(qObj.location, query).then(
+						dojo.hitch(this, function(jsonData) {
+							this._renderSearchResult(resultsNode, query, jsonData);
+						}));
+				}
+				catch(error){
+					this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+				}
 			}
 		},
 
