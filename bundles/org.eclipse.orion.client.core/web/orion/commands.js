@@ -1001,8 +1001,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 								menuButton = new dijit.form.DropDownButton({
 										label: command.name,
-										dropDown: choicesMenu
-								        });
+										dropDown: choicesMenu,
+										postCreate: function() {
+											// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=383035#c1
+											dojo.connect(this._buttonNode, "mousedown", this, function(e) { //$NON-NLS-0$
+												this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
+											});
+											dijit.form.DropDownButton.prototype.postCreate.apply(this, Array.prototype.slice.call(arguments));
+										}});
 								dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
 								dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
 								dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
@@ -1013,9 +1019,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 								dojo.place(menuButton.domNode, parent, "last"); //$NON-NLS-0$
 								menuButton.eclipseCommand = command;
 								menuButton.eclipseChoices = choicesMenu;
-								dojo.connect(menuButton, "onClick", menuButton, function(event) { //$NON-NLS-0$
-									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
-								});
 							} else if (renderType === "menu") { //$NON-NLS-0$
 								// parent is already a menu
 								var popup = new dijit.PopupMenuItem({
