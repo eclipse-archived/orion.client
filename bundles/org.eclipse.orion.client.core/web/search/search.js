@@ -98,7 +98,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 
 			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, queryString, null, null,  /* no images */ false, /* client handle page nav area */ true);     
 			setPageInfo(serviceRegistry, fileClient, commandService, searcher);
-			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient); //$NON-NLS-0$
+			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, false/*crawling*/); //$NON-NLS-0$
 			searchResultsGenerator.loadResults(queryString);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
