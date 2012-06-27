@@ -108,6 +108,7 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 			["/authenticationPlugin.html", hostPrefix + "authenticationPlugin.html"],
 			["/login", hostPrefix + "login"],
 			["/loginstatic", hostPrefix + "loginstatic"],
+			["/useremailconfirmation", hostPrefix + "useremailconfirmation"],
 			["/site", hostPrefix + "site"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.git/web"],
 			["/gitapi", hostPrefix + "gitapi"],
