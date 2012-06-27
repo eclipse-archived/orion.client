@@ -44,6 +44,22 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		});
 		return promise;
 	};
+
+	tests["test install same plugin URL"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+
+		var promise1 = pluginRegistry.installPlugin("testPlugin.html");
+		var promise2 = pluginRegistry.installPlugin("testPlugin.html");
+		return promise1.then(function(plugin1) {
+			return promise2.then(function(plugin2) {
+				assert.equal(plugin1, plugin2, "Got the same Plugin instance");
+				plugin1.uninstall();
+				pluginRegistry.shutdown();
+			});
+		});
+	};
 	
 		tests["test install worker plugin"] = function() {
 		if (typeof(Worker) === "undefined") {
@@ -273,7 +289,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		});
 	};
 
-	tests["test pluginregistry events pluginAdded, pluginRemoved"] = function() {
+	tests["test pluginregistry events pluginLoaded"] = function() {
 		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
 		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
@@ -282,7 +298,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = new Deferred();
-		pluginRegistry.addEventListener("pluginAdded", function(plugin) {
+		pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
 			try {
 				assert.ok(!!plugin, "plugin not null");
 				assert.equal(plugin.getData().services.length, 1);
