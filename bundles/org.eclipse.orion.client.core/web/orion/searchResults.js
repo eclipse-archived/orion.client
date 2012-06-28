@@ -78,7 +78,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 						}));
 				}
 				catch(error){
-					this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
+						var self = this;
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query);
+						crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
+					} else {
+						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+					}
 				}
 			}
 		},
