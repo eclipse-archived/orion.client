@@ -18,6 +18,7 @@ define({
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
+	"Orion Editor": "Orion Editor",
 	"View on Site": "View on Site",
 	"View this file or folder on a web site hosted by Orion": "View this file or folder on a web site hosted by Orion",
 	"Show a list of all the keybindings on this page": "Show a list of all the keybindings on this page",

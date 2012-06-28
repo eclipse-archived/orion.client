@@ -92,7 +92,8 @@ window.onload = function() {
 	
 	provider.registerServiceProvider("orion.edit.editor", {}, {
 		id: "orion.editor",
-		name: "Orion Editor",
+		nameKey: "Orion Editor",
+		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 	
