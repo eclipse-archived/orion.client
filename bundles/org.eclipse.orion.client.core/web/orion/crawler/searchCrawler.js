@@ -81,6 +81,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype.search = function(onComplete){
 		var contentTypeService = this.registry.getService("orion.core.contenttypes");
 		var self = this;
+		self.registry.getService("orion.page.message").setProgressResult({Message: "Doing crawling search..."});
 		contentTypeService.getContentTypes().then(function(ct) {
 			self.contentTypesCache = ct;
 			var result = self._visitRecursively(self.queryObj.location+ "?depth=1").then(function(){
@@ -94,7 +95,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	};
 	
 	SearchCrawler.prototype._searchCompleted = function(){
-		console.log("Completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		console.log("Search Completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	};
 	
 	SearchCrawler.prototype._searchFiles = function(){
@@ -149,6 +150,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				self._hitCounter++;
 				console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
 				console.log(fileObj.Location);
+				self.registry.getService("orion.page.message").setProgressResult({Message: "Searching file: "+ fileObj.Name});
 			}
 			},
 			function(error) {
