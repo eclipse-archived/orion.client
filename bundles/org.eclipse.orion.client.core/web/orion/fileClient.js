@@ -14,7 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth"], function(messages, Deferred, mAuth){
+define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "orion/i18nUtil"], function(messages, Deferred, mAuth, i18nUtil){
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -193,6 +193,13 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth"], fun
 			_patterns[j] = new RegExp(patternString);			
 			_services[j] = serviceRegistry.getService(_references[j]);
 			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
+			
+			if(_references[j].getProperty("NameKey") && _references[j].getProperty("nls")){
+				i18nUtil.getMessageBundle(_references[j].getProperty("nls")).then(dojo.hitch(this, function(j, pluginMessages){
+					_fileSystemsRoots[j].Name = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
+					_names[j] = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
+				}, j));
+			}
 		}
 				
 		this._getServiceIndex = function(location) {

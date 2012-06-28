@@ -56,11 +56,11 @@ tr.treeTableRow td:first-child {
 }
 
 .treetable td {
-	padding: 16px 0 16px 16px;
+	padding: 10px 0 10px 10px;
 }
 
 .treetable th {
-	padding: 16px 0 0 16px;
+	padding: 10px 0 0 10px;
 }
 
 .urlCol {

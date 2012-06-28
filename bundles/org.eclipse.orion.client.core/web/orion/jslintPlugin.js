@@ -197,7 +197,8 @@ window.onload = function() {
 	});
 	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
 		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
-		name: "Flat outline",
+		nameKey: "Flat outline",
+		nls: "orion/editor/nls/messages",
 		id: "orion.edit.outliner.jslint"
 	});
 	//validationService.dispatchEvent = serviceProvider.dispatchEvent;
