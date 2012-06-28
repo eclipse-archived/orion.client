@@ -193,12 +193,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* Feature in WekKit. Webkit limits the width of the lines
 			* computed below to the width of the client div.  This causes
 			* the lines to be wrapped even though "pre" is set.  The fix
-			* is to set the width of the client div to a larger number
+			* is to set the width of the client div to a "auto"
 			* before computing the lines width.  Note that this value is
 			* reset to the appropriate value further down.
 			*/
 			if (isWebkit) {
-				clientDiv.style.width = (0x7FFFF).toString() + "px"; //$NON-NLS-0$
+				clientDiv.style.width = "auto"; //$NON-NLS-0$
 			}
 			var lineCount = model.getLineCount();
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
@@ -1752,7 +1752,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (isFirefox || isIE) {
 				if (this._selDiv1) {
-					var color = this._hightlightRGB;
+					var color = this._highlightRGB;
 					this._selDiv1.style.background = color;
 					this._selDiv2.style.background = color;
 					this._selDiv3.style.background = color;
@@ -3591,6 +3591,22 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._setReadOnly(this._readonly);
 			this._setThemeClass(this._themeClass, true);
 			this._setTabSize(this._tabSize, true);
+			if (!document.getElementById("_textviewStyle")) { //$NON-NLS-0$
+				var styleText = "";
+				if (isWebkit && this._metrics.scrollWidth > 0) {
+					styleText += "\n.textviewContainer ::-webkit-scrollbar-corner {background: #eeeeee;}"; //$NON-NLS-0$
+				}
+				if (isFirefox && isMac && this._highlightRGB && this._highlightRGB !== "Highlight") { //$NON-NLS-0$
+					styleText += "\n.textviewContainer ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				if (styleText) {
+					var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
+					stylesheet.id = "_textviewStyle"; //$NON-NLS-0$
+					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
+					stylesheet.appendChild(document.createTextNode(styleText));
+					head.insertBefore(stylesheet, head.firstChild);
+				}
+			}
 			this._hookEvents();
 			var rulers = this._rulers;
 			for (var i=0; i<rulers.length; i++) {
@@ -3660,7 +3676,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._rightDiv = null;
 			this._vScrollDiv = null;
 			this._hScrollDiv = null;
-			this._insertedSelRule = false;
 		},
 		_doAutoScroll: function (direction, x, y) {
 			this._autoScrollDir = direction;
@@ -5063,7 +5078,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			
 			if (!this._selDiv1 && (this._fullSelection && !isWebkit)) {
-				this._hightlightRGB = "Highlight"; //$NON-NLS-0$
+				this._highlightRGB = "Highlight"; //$NON-NLS-0$
 				var selDiv1 = document.createElement("DIV"); //$NON-NLS-0$
 				this._selDiv1 = selDiv1;
 				selDiv1.style.position = "absolute"; //$NON-NLS-0$
@@ -5071,7 +5086,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv1.style.margin = "0px"; //$NON-NLS-0$
 				selDiv1.style.padding = "0px"; //$NON-NLS-0$
 				selDiv1.style.outline = "none"; //$NON-NLS-0$
-				selDiv1.style.background = this._hightlightRGB;
+				selDiv1.style.background = this._highlightRGB;
 				selDiv1.style.width = "0px"; //$NON-NLS-0$
 				selDiv1.style.height = "0px"; //$NON-NLS-0$
 				selDiv1.style.zIndex = "0"; //$NON-NLS-0$
@@ -5083,7 +5098,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv2.style.margin = "0px"; //$NON-NLS-0$
 				selDiv2.style.padding = "0px"; //$NON-NLS-0$
 				selDiv2.style.outline = "none"; //$NON-NLS-0$
-				selDiv2.style.background = this._hightlightRGB;
+				selDiv2.style.background = this._highlightRGB;
 				selDiv2.style.width = "0px"; //$NON-NLS-0$
 				selDiv2.style.height = "0px"; //$NON-NLS-0$
 				selDiv2.style.zIndex = "0"; //$NON-NLS-0$
@@ -5095,7 +5110,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv3.style.margin = "0px"; //$NON-NLS-0$
 				selDiv3.style.padding = "0px"; //$NON-NLS-0$
 				selDiv3.style.outline = "none"; //$NON-NLS-0$
-				selDiv3.style.background = this._hightlightRGB;
+				selDiv3.style.background = this._highlightRGB;
 				selDiv3.style.width = "0px"; //$NON-NLS-0$
 				selDiv3.style.height = "0px"; //$NON-NLS-0$
 				selDiv3.style.zIndex = "0"; //$NON-NLS-0$
@@ -5119,17 +5134,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						case "rgb(140, 78, 184)": rgb = "rgb(232, 184, 255)"; break; //$NON-NLS-1$ //$NON-NLS-0$
 						default: rgb = "rgb(180, 213, 255)"; break; //$NON-NLS-0$
 					}
-					this._hightlightRGB = rgb;
+					this._highlightRGB = rgb;
 					selDiv1.style.background = rgb;
 					selDiv2.style.background = rgb;
 					selDiv3.style.background = rgb;
-					if (!this._insertedSelRule) {
-						var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
-						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
-						stylesheet.appendChild(document.createTextNode("::-moz-selection {background: " + rgb + "; }")); //$NON-NLS-1$ //$NON-NLS-0$
-						head.insertBefore(stylesheet, head.firstChild);
-						this._insertedSelRule = true;
-					}
 				}
 				if (!init) {
 					this._updateDOMSelection();
@@ -5395,12 +5403,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Feature in WekKit. Webkit limits the width of the lines
 				* computed below to the width of the client div.  This causes
 				* the lines to be wrapped even though "pre" is set.  The fix
-				* is to set the width of the client div to a larger number
+				* is to set the width of the client div to "auto"
 				* before computing the lines width.  Note that this value is
 				* reset to the appropriate value further down.
 				*/ 
 				if (isWebkit) {
-					clientDiv.style.width = (0x7FFFF).toString() + "px"; //$NON-NLS-0$
+					clientDiv.style.width = "auto"; //$NON-NLS-0$
 				}
 	
 				var rect;
