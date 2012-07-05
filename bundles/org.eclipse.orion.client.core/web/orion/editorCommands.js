@@ -182,8 +182,8 @@ exports.EditorCommandFactory = (function() {
 																		});
 				var that = this;
 				var findCommand =  new mCommands.Command({
-					name: "Find",
-					tooltip: "Find",
+					name: messages["Find"],
+					tooltip: messages["Find"],
 					id: "orion.editor.find", //$NON-NLS-0$
 					parameters: findParameter,
 					callback: function(data) {

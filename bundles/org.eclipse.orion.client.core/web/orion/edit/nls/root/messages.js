@@ -27,5 +27,6 @@ define({
 	"Go to specified line number": "Go to specified line number",
 	"Go to line:": "Go to line:",
 	"Undo": "Undo",
-	"Redo": "Redo"
+	"Redo": "Redo",
+	"Find": "Find"
 });
