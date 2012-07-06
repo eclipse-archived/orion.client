@@ -163,7 +163,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 				default:
 					var isCSS = this.isCSS;
 					var off = this.offset - 1;
-					if (48 <= c && c <= 57) {
+					if (!isCSS && 48 <= c && c <= 57) {
 						var floating = false, exponential = false, hex = false, firstC = c;
 						do {
 							c = this._read();
