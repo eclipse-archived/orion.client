@@ -63,5 +63,9 @@ define({
 	"Move Down": "Move Down",
 	"HostHint": "HostHint",
 	"Start": "Start",
-	"Stop": "Stop"
+	"Stop": "Stop",
+	"Optional; used to determine the URL where a started site can be accessed." : "Optional; used to determine the URL where a started site can be accessed.",
+	"Changes you make here won't affect the running site." : "Changes you make here won't affect the running site.",
+	"Stopped" : "Stopped",
+	"Started at " : "Started at "
 });
