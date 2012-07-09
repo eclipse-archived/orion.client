@@ -14,6 +14,7 @@ define({
 	"Compare": "Compare",
 	"View the side-by-side compare": "View the side-by-side compare",
 	"Working Directory Version": "Working Directory Version",
+	"Working Directory": "Working Directory",
 	"View the working directory version of the file": "View the working directory version of the file",
 	"Loading...": "Loading...",
 	"Repositories": "Repositories",
@@ -141,6 +142,7 @@ define({
 	"Commits": "Commits",
 	"Getting current branch": "Getting current branch",
 	"See Full Log": "See Full Log",
+	"See the full log": "See the full log",
 	"Getting commits for \"${0}\" branch": "Getting commits for \"${0}\" branch",
 	"Rendering commits": "Rendering commits",
 	"Getting outgoing commits": "Getting outgoing commits",
@@ -336,5 +338,7 @@ define({
 	"Active Branch Log": "Git Log (Active Branch)",
 	"Show the log for the active local branch": "Show the log for the active local branch",
 	"Remote Branch Log": "Git Log (Remote Branch)",
-	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch"
+	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch",
+	"See Full Status" : "See Full Status",
+	"See the status" : "See the status"
 });

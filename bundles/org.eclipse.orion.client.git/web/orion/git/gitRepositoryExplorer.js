@@ -395,13 +395,13 @@ exports.GitRepositoryExplorer = (function() {
 
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "workingDirectorySection", //$NON-NLS-0$
-			title: "Working Directory", //$NON-NLS-0$
+			title: messages["Working Directory"], //$NON-NLS-0$
 			content: '<list id="workingDirectoryNode" class="mainPadding"></list>' //$NON-NLS-0$
 		});
 		
 		that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 		that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-			{"ViewAllLink":"/git/git-status2.html#" + repository.StatusLocation, "ViewAllLabel": "See Full Status", "ViewAllTooltip": "See the status"}, that, "button");
+			{"ViewAllLink":"/git/git-status2.html#" + repository.StatusLocation, "ViewAllLabel": messages["See Full Status"], "ViewAllTooltip": messages["See the status"]}, that, "button");
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Loading status"); //$NON-NLS-0$
@@ -645,11 +645,11 @@ exports.GitRepositoryExplorer = (function() {
 				
 				var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 				
-				titleWrapper.setTitle("Commits for \"" + currentBranch.Name + "\" branch"); //$NON-NLS-1$ //$NON-NLS-0$
+				titleWrapper.setTitle(dojo.string.substitute(messages["Commits for \"${0}\" branch"], [currentBranch.Name])); //$NON-NLS-1$ //$NON-NLS-0$
 
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
-					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":messages["See Full Log"], "ViewAllTooltip":"See the full log"}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					{"ViewAllLink":"/git/git-log.html#" + currentBranch.CommitLocation + "?page=1", "ViewAllLabel":messages["See Full Log"], "ViewAllTooltip":messages["See the full log"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
 				if (tracksRemoteBranch){
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.fetch", 100); //$NON-NLS-0$
