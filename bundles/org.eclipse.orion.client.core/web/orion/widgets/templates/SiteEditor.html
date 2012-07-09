@@ -22,7 +22,7 @@
 							<td>
 								<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="hostHint" id="${id}_hostHint"
 									required="false" value="">
-								<em>Optional; used to determine the URL where a started site can be accessed.</em>
+								<em>${hostHintEm}</em>
 							</td>
 						</tr>
 						
@@ -33,7 +33,7 @@
 							<td>
 								<span dojoAttachPoint="hostingStatus"></span>
 								<span dojoAttachPoint="siteStartedWarning">
-									<em>Changes you make here won't affect the running site.</em>
+									<em>${siteStartedWarningEm}</em>
 								</span>
 							</td>
 						</tr>

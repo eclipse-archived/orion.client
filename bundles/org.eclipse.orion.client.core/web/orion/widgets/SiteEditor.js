@@ -70,6 +70,9 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		this.mappingsLabelText = messages["Mappings:"];
 		this.hostHintLabelText = messages["Hostname hint:"];
 		this.hostingStatusLabelText = messages["Status:"];
+		
+		this.hostHintEm = messages["Optional; used to determine the URL where a started site can be accessed."];
+		this.siteStartedWarningEm = messages["Changes you make here won't affect the running site."];
 	},
 	
 	postCreate: function() {
@@ -321,11 +324,11 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") { //$NON-NLS-0$
 			dojo.style(this.siteStartedWarning, {display: "block"}); //$NON-NLS-0$
-			this.hostingStatus.innerHTML = mUtil.safeText(hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1) + " at "); //$NON-NLS-0$
+			this.hostingStatus.innerHTML = mUtil.safeText(messages["Started at "]);
 			dojo.create("a", {href: hostStatus.URL, innerHTML: mUtil.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		} else {
+		} else if (hostStatus && hostStatus.Status === "stopped") {
 			dojo.style(this.siteStartedWarning, {display: "none"}); //$NON-NLS-0$
-			mUtil.setText(this.hostingStatus, hostStatus.Status[0].toLocaleUpperCase() + hostStatus.Status.substr(1));
+			mUtil.setText(this.hostingStatus, messages["Stopped"]);
 		}
 
 		setTimeout(dojo.hitch(this, function() {
