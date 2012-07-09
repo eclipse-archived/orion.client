@@ -340,5 +340,8 @@ define({
 	"Remote Branch Log": "Git Log (Remote Branch)",
 	"Show the log for the corresponding remote tracking branch": "Show the log for the corresponding remote tracking branch",
 	"See Full Status" : "See Full Status",
-	"See the status" : "See the status"
+	"See the status" : "See the status",
+	"Choose target location" : "Choose target location",
+	"Default target location" : "Default target location",
+	"Change..." : "Change..."
 });

@@ -253,7 +253,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 					commandInvocation.parameters.optionsRequested = false;
 					
 					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.place(window.document.createTextNode("More"), options, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.place(window.document.createTextNode(messages["More"]), options, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.addClass(options, "dismiss"); //$NON-NLS-0$
 					dojo.connect(options, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
 						commandInvocation.parameters.optionsRequested = true;
@@ -269,7 +269,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				}
 				// OK and cancel buttons
 				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(window.document.createTextNode("Submit"), ok, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.place(window.document.createTextNode(messages["Submit"]), ok, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.addClass(ok, "dismiss"); //$NON-NLS-0$
 				dojo.connect(ok, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
 					finish(this);

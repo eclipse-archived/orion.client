@@ -72,5 +72,8 @@ define({
 	"Tasks": "Tasks",
 	"Close": "Close",
 	"Expand all": "Expand all",
-	"Collapse all": "Collapse all" 
+	"Collapse all": "Collapse all",
+	"Search": "Search",
+	"Submit" : "Submit",
+	"More" : "More"
 });

@@ -33,6 +33,10 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		this.gitPathLabelText = messages["Existing directory:"];
 		this.gitNameLabelText = messages["New folder:"];
 		this.advancedShown = false;
+		
+		this.gitTargetLocationText = messages["Choose target location"];
+		this.gitDefaultTargetLocationText = messages["Default target location"];
+		this.gitChangeGitPathText = messages["Change..."];
 	},
 	postCreate : function(){
 		var that = this;
