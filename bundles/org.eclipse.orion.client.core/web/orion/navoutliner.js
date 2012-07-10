@@ -194,7 +194,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 			if (!this.favoritesSection) {
 				this.favoritesSection = new mSection.Section(this._parent, {
 					id: "favoritesSection", //$NON-NLS-0$
-					title: "Favorites", //$NON-NLS-0$
+					title: messages["Favorites"], //$NON-NLS-0$
 					content: '<div id="favoritesContent"></div>', //$NON-NLS-0$
 					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: true,

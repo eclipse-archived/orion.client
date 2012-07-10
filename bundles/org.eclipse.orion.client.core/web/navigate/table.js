@@ -67,7 +67,7 @@ dojo.addOnLoad(function(){
 					// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
 					// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
 					// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
-					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: "Create new content",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
 						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false}); //$NON-NLS-0$
 				} else {
