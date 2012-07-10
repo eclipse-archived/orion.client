@@ -589,7 +589,7 @@ eclipse.GitService = (function() {
 			});
 			return clientDeferred;
 		},
-		doMerge : function(gitHeadURI, commitName) {
+		doMerge : function(gitHeadURI, commitName, squash) {
 			var service = this;
 			var clientDeferred = new dojo.Deferred();
 			dojo.xhrPost({
@@ -598,7 +598,8 @@ eclipse.GitService = (function() {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				postData : dojo.toJson({
-					"Merge" : commitName //$NON-NLS-0$
+					"Merge" : commitName, //$NON-NLS-0$
+					"Squash" : squash
 				}),
 				handleAs : "json", //$NON-NLS-0$
 				timeout : 5000,
