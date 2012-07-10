@@ -89,5 +89,7 @@ define({
 	"Click on an item to make a selection, then use this menu to see what actions are available.": "Click on an item to make a selection, then use this menu to see what actions are available.",
 	"Actions": "Actions",
 	"Orion Content": "Orion Content",
-	" is not supportted in this file system": " is not supportted in this file system"
+	" is not supportted in this file system": " is not supportted in this file system",
+	"Create new content" : "Create new content",
+	"Favorites" : "Favorites"
 });
