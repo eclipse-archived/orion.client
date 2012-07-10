@@ -974,7 +974,7 @@ var exports = {};
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
+				gitService.doMerge(item.HeadLocation, item.Name, false).then(function(result){
 					var display = [];
 
 					if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1033,6 +1033,76 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(mergeCommand);
+		
+		var mergeSquashCommand = new mCommands.Command({
+			name : messages["Merge Squash"],
+			tooltip: messages["Squash the content of the branch to the index"],
+			imageClass: "git-sprite-merge", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id : "eclipse.orion.git.mergeSquash", //$NON-NLS-0$
+			callback: function(data) {
+				var item = data.items;
+				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				gitService.doMerge(item.HeadLocation, item.Name, true).then(function(result){
+					var display = [];
+
+					if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD_SQUASHED" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.query(".treeTableRow").forEach(function(node, i) { //$NON-NLS-0$
+							dojo.toggleClass(node, "incomingCommitsdRow", false); //$NON-NLS-0$
+						});
+						display.Severity = "Ok"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = result.jsonData.Result;
+						
+						dojo.hitch(explorer, explorer.changedItem)(item);
+					} else if(result.jsonData){
+						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+
+						display.Severity = "Warning"; //$NON-NLS-0$
+						display.HTML = true;
+						display.Message = "<span>" + result.jsonData.Result //$NON-NLS-0$
+							+ dojo.string.substitute(messages[". Go to ${0}."], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+							+ statusLocation +"\">"+messages["Git Status page"]+"</a>"])+"</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					} else if(result.error) {
+						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+						display.Severity = "Error"; //$NON-NLS-0$
+						if(result.error.responseText && JSON.parse(result.error.responseText)){
+							var resp = JSON.parse(result.error.responseText);
+							display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+						}else{
+							display.Message = result.error.message;
+						}
+						display.HTML = true;
+						display.Message ="<span>" + display.Message + dojo.string.substitute(messages['. Go to ${0}.'], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+							+ statusLocation + "\">"+messages['Git Status page']+"</a>"])+"</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					}
+
+					progressService.setProgressResult(display);
+				}, function (error, ioArgs) {
+						var display = [];
+
+						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+
+						display.Severity = "Error"; //$NON-NLS-0$
+						display.HTML = true;
+						display.Message = "<span>" + dojo.fromJson(ioArgs.xhr.responseText).DetailedMessage //$NON-NLS-0$
+						+ dojo.string.substitute(messages['. Go to ${0}.'], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+						+ statusLocation +"\">"+messages['Git Status page']+"</a>"])+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				});
+			},
+			visibleWhen : function(item) {
+				if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
+					return true;
+				if (item.Type === "Branch" && !item.Current) //$NON-NLS-0$
+					return true;
+				if (item.Type === "Commit" && item.toRef && item.toRef.Type === "RemoteTrackingBranch") //$NON-NLS-1$ //$NON-NLS-0$
+					return true;
+				return false;
+			}
+		});
+		commandService.addCommand(mergeSquashCommand);
 
 		var rebaseCommand = new mCommands.Command({
 			name : messages["Rebase"],
@@ -1694,7 +1764,7 @@ var exports = {};
 				var item = data.items;
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				gitService.doMerge(item.HeadLocation, item.Name).then(function(result){
+				gitService.doMerge(item.HeadLocation, item.Name, false).then(function(result){
 						var display = [];
 						
 						if (result.jsonData && (result.jsonData.Result == "FAST_FORWARD" || result.jsonData.Result == "ALREADY_UP_TO_DATE")){ //$NON-NLS-1$ //$NON-NLS-0$

@@ -343,5 +343,7 @@ define({
 	"See the status" : "See the status",
 	"Choose target location" : "Choose target location",
 	"Default target location" : "Default target location",
-	"Change..." : "Change..."
+	"Change..." : "Change...",
+	"Merge Squash": "Merge Squash",
+	"Squash the content of the branch to the index" : "Squash the content of the branch to the index"
 });
