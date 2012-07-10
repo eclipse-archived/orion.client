@@ -51,6 +51,13 @@ dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets.
 		this.buttonOk = messages['Start Transfer'];
 		this.locationLabelText = messages['Location:'];
 		sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
+		
+		this.preRadioDescriptionText = messages["If the same file exists in both the source and destination:"];
+		this.firstRadioLabelText = messages["Cancel the transfer"];
+		this.secondRadioLabelText = messages["Always overwrite destination"];
+		this.thirdRadioLabelText = messages["Overwrite if source is newer"];	
+		this.newLabelText = messages["New"];
+		this.addLabelText = messages["Add"];
 	},
 	postCreate: function() {
 		this.inherited(arguments);

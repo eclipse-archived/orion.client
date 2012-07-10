@@ -18,7 +18,7 @@
 					<div dojoType="dijit.form.ComboBox" store="sftpConnectionStore" style="display: inline-block; width: 88%;" dojoAttachPoint="sftpConnectionList" searchAttr="name">
 					</div>
 					<div dojoType="dijit.form.DropDownButton">
-					    <span>New</span>
+					    <span>${newLabelText}</span>
 			    		<div dojoType="dijit.TooltipDialog">
 							<div style="display: table">
 								<div style="display: table-row">
@@ -48,7 +48,7 @@
 								<div style="display: table-row">
 									<div style="display: table-cell; padding: 5"></div>
 									<div style="display: table-cell; padding: 5">
-										<button dojoAttachPoint="addSFTPConnection" type="submit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">Add</button>
+										<button dojoAttachPoint="addSFTPConnection" type="submit" dojoType="dijit.form.Button" style="padding: 20 0 10 0; float: right; clear: both;">${addLabelText}</button>
 									</div>
 								</div>
 							</div><!-- End inner table-->
@@ -67,15 +67,15 @@
 			<div style="display: table-row">
 				<div style="display: table-cell; padding: 5"></div>
 				<div style="display: table-cell; padding: 5">
-					<p>If the same file exists in both the source and destination:</p>
+					<p>${preRadioDescriptionText}</p>
 				    <input type="radio" dojoAttachPoint="overwriteCancel" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteCancel" checked value="overwriteCancel" />
-				    <label for="radioOne">Cancel the transfer</label>
+				    <label for="radioOne">${firstRadioLabelText}</label>
 				    <br />
 				    <input type="radio" dojoAttachPoint="overwriteAll" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteAll"/>
-				    <label for="radioOne">Always overwrite destination</label>
+				    <label for="radioOne">${secondRadioLabelText}</label>
 				    <br />
 				    <input type="radio" dojoAttachPoint="overwriteOlder" dojoType="dijit.form.RadioButton" name="overwriteOption" id="overwriteOlder"/>
-				    <label for="radioOne">Overwrite if source is newer</label>
+				    <label for="radioOne">${thirdRadioLabelText}</label>
 				</div>
 			</div><!-- End table row -->
 			<div style="display: table-row">
