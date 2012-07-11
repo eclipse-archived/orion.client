@@ -15,9 +15,34 @@
 define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(Deferred, mServiceregistry){
 var eclipse = eclipse || {};
 
+var INSTALLED = 1;
+var LOADED = 2;
+var UNINSTALLED = 3;
 /**
- * Creates a new plugin
- * @class Represents a single plugin in the plugin registry
+ * Creates a new plugin. This constructor is private and may only be called by the plugin registry.
+ * @class Represents a single plugin in the plugin registry.
+ * @description
+ * <p>A plugin can be in one of three states:</p>
+ * <dl>
+ * <dt>{@link orion.pluginregistry.Plugin.INSTALLED}</dt>
+ * <dd>The plugin is not running, and is present in the plugin registry.
+ * <p>From the <code>INSTALLED</code> state, the plugin will become <code>LOADED</code> if a service method provided by one
+ * of the plugin's service references is called through the service registry.</p>
+ * </dd>
+ *
+ * <dt>{@link orion.pluginregistry.Plugin.LOADED}</dt>
+ * <dd>The plugin is running, and is present in the plugin registry.
+ * <p>From the <code>LOADED</code> state, the plugin will become <code>UNINSTALLED</code> if its {@link #uninstall} method
+ * is called.</p>
+ * </dd>
+ *
+ * <dt>{@link orion.pluginregistry.Plugin.UNINSTALLED}</dt>
+ * <dd>The plugin is not running, and has been removed from the plugin registry.
+ * <p>Any services formerly provided by the plugin have been unregistered and cannot be called. Although uninstalled plugins
+ * do not appear in the plugin registry, they can be observed if references to a Plugin instance are kept after its
+ * {@link #uninstall} method has been called.
+ * <p>From the <code>UNINSTALLED</code> state, the plugin cannot change to any other state.</p>
+ * </dd>
  * @name orion.pluginregistry.Plugin
  */
 eclipse.Plugin = function(url, data, internalRegistry) {
@@ -26,7 +51,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	var _channel = null;
 	var _deferredLoad = new Deferred();
 	var _deferredUpdate = null;
-	var _loaded = false;
+	var _state = 0;
 	
 	var _currentMessageId = 0;
 	var _deferredResponses = {};
@@ -55,7 +80,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			service.methods.forEach(function(method) {
 				serviceProxy[method] = function() {
 					var params = Array.prototype.slice.call(arguments);
-					if (_loaded) {
+					if (_state === LOADED) {
 						return _callService(service.serviceId, method, params);
 					} else {
 						return _self._load().then(function() {
@@ -68,6 +93,27 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		return serviceProxy;
 	}
 	
+	function _setState(state) {
+		_state = state;
+		switch (state) {
+			case UNINSTALLED:
+				internalRegistry.dispatchEvent("pluginUninstalled", _self); //$NON-NLS-0$
+				break;
+			case INSTALLED:
+				internalRegistry.dispatchEvent("pluginInstalled", _self); //$NON-NLS-0$
+				break;
+			case LOADED:
+				internalRegistry.dispatchEvent("pluginLoaded", _self); //$NON-NLS-0$
+				break;
+		}
+	}
+
+	function checkNotUninstalled() {
+		if (_state === UNINSTALLED) {
+			throw new Error("Plugin is uninstalled");
+		}
+	}
+
 	function _parseData() {
 		var services = data.services;
 		if (services) {
@@ -101,9 +147,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 						internalRegistry.updatePlugin(_self);						
 					}
 					
-					if (!_loaded) {
-						_loaded = true;
-						internalRegistry.dispatchEvent("pluginLoaded", _self); //$NON-NLS-0$
+					if (_state === INSTALLED) {
+						_setState(LOADED);
 						_deferredLoad.resolve(_self);
 					}
 					
@@ -118,7 +163,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 					deferred = _deferredResponses[String(message.requestId)];
 					deferred.update.apply(deferred, message.params);	
 				} else if ("timeout"){
-					if (!_loaded) {
+					if (_state === INSTALLED) {
 						_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
 					}
 					
@@ -169,6 +214,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	 * @function
 	 */
 	this.uninstall = function() {
+		checkNotUninstalled();
 		for (var serviceId in _serviceRegistrations) {
 			if (_serviceRegistrations.hasOwnProperty(serviceId)) {
 				_serviceRegistrations[serviceId].unregister();
@@ -180,6 +226,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 			_channel = null;
 		}
 		internalRegistry.uninstallPlugin(this);
+		_setState(UNINSTALLED);
 	};
 	
 	/**
@@ -201,7 +248,8 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	};
 	
 	this.update = function() {
-		if (!_loaded) {
+		checkNotUninstalled();
+		if (_state === INSTALLED) {
 			return this._load();
 		}
 		
@@ -215,7 +263,23 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 		return _deferredUpdate.promise;
 	};
 	
+	/**
+	 * Returns this plugin's current state.
+	 * @name orion.pluginregistry.Plugin#getState
+	 * @returns {Number} This plugin's state. The value is one of:
+	 * <ul>
+	 * <li>{@link orion.pluginregistry.Plugin.INSTALLED}</li>
+	 * <li>{@link orion.pluginregistry.Plugin.LOADED}</li>
+	 * <li>{@link orion.pluginregistry.Plugin.UNINSTALLED}</li>
+	 * </ul>
+	 * @function
+	 */
+	this.getState = function() {
+		return _state;
+	};
+
 	this._load = function(isInstall, optTimeout) {
+		checkNotUninstalled();
 		if (!_channel) {
 			_channel = internalRegistry.connect(url, _responseHandler, optTimeout);
 			_deferredLoad.then(null, function() {
@@ -235,7 +299,62 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	if (data) {
 		_parseData();
 	}
+	_setState(INSTALLED);
 };
+
+/**
+ * State constant for the <code>INSTALLED</code> state.
+ * @name orion.pluginregistry.Plugin.INSTALLED
+ * @static
+ * @constant
+ * @type Number
+ */
+eclipse.Plugin.INSTALLED = INSTALLED;
+/**
+ * State constant for the <code>LOADED</code> state.
+ * @name orion.pluginregistry.Plugin.LOADED
+ * @static
+ * @constant
+ * @type Number
+ */
+eclipse.Plugin.LOADED = LOADED;
+/**
+ * State constant for the <code>UNINSTALLED</code> state.
+ * @name orion.pluginregistry.Plugin.UNINSTALLED
+ * @static
+ * @constant
+ * @type Number
+ */
+eclipse.Plugin.UNINSTALLED = UNINSTALLED;
+
+/**
+ * Dispatched when a plugin has been installed.
+ * @name orion.pluginregistry.PluginRegistry#PluginInstalled
+ * @event
+ * @param {String} type The type of this event. Its value is <code>'pluginInstalled'</code>.
+ * @param {orion.pluginregistry.Plugin} plugin The plugin that was installed.
+ */
+/**
+ * Dispatched when a plugin has been loaded.
+ * @name orion.pluginregistry.PluginRegistry#PluginLoaded
+ * @event
+ * @param {String} type The type of this event. Its value is <code>'pluginLoaded'</code>.
+ * @param {orion.pluginregistry.Plugin} plugin The plugin that was loaded.
+ */
+/**
+ * Dispatched when a plugin has been uninstalled.
+ * @name orion.pluginregistry.PluginRegistry#PluginUninstalled
+ * @event
+ * @param {String} type The type of this event. Its value is <code>'pluginUninstalled'</code>.
+ * @param {orion.pluginregistry.Plugin} plugin The plugin that was uninstalled.
+ */
+/**
+ * Dispatched when a plugin has been updated.
+ * @name orion.pluginregistry.PluginRegistry#PluginUpdated
+ * @event
+ * @param {String} type The type of this event. Its value is <code>'pluginUpdated'</code>.
+ * @param {orion.pluginregistry.Plugin} plugin The plugin that was updated.
+ */
 
 /**
  * Creates a new plugin registry.
@@ -347,7 +466,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				for (var i = 0; i < _plugins.length; i++) {
 					if (plugin === _plugins[i]) {
 						_plugins.splice(i,1);
-						_pluginEventTarget.dispatchEvent("pluginRemoved", plugin); //$NON-NLS-0$
 						break;
 					}
 				}
@@ -444,22 +562,20 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 				var pluginTracker = function(plugin) {
 					if (plugin.getLocation() === url) {
 						d.resolve(plugin);
-						_pluginEventTarget.removeEventListener("pluginAdded", pluginTracker); //$NON-NLS-0$
+						_pluginEventTarget.removeEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$
 					}
 				};
-				_pluginEventTarget.addEventListener("pluginAdded", pluginTracker); //$NON-NLS-0$
+				_pluginEventTarget.addEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$
 			}
 		} else {
 			plugin = new eclipse.Plugin(url, opt_data, internalRegistry);
 			_plugins.push(plugin);
 			if(plugin.getData()) {
 				_persist(plugin);
-				_pluginEventTarget.dispatchEvent("pluginAdded", plugin); //$NON-NLS-0$
 				d.resolve(plugin);
 			} else {				
 				plugin._load(true).then(function() {
 					_persist(plugin);
-					_pluginEventTarget.dispatchEvent("pluginAdded", plugin); //$NON-NLS-0$
 					d.resolve(plugin);
 				}, function(e) {
 					d.reject(e);
@@ -500,7 +616,6 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 		return null;
 	};
 	
-	// pluginAdded, pluginRemoved
 	this.addEventListener = function(eventName, listener) {
 		_pluginEventTarget.addEventListener(eventName, listener);
 	};
