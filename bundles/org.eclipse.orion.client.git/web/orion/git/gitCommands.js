@@ -1482,42 +1482,6 @@ var exports = {};
 		});
 		commandService.addCommand(nextLogPage);
 
-		var pushToCommand = new mCommands.Command({
-			name : messages["Push to..."],
-			tooltip: messages["Push from your local branch into the selected remote branch"],
-			imageClass: "git-sprite-push", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			id : "eclipse.orion.git.pushto", //$NON-NLS-0$
-			callback: function(data) {
-				var item = data.items;
-				var remotes = {};
-				for(var child_no in item.parent.parent.children){
-					if(item.parent.parent.children[child_no].Name === "Remote"){ //$NON-NLS-0$
-						remotes = item.parent.parent.children[child_no];
-					}
-				}
-
-				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var dialog = new orion.git.widgets.RemotePrompterDialog({
-					title: messages['Choose Branch'],
-					serviceRegistry: serviceRegistry,
-					gitClient: gitService,
-					treeRoot: remotes,
-					//hideNewBranch: true,
-					func: dojo.hitch(this, function(targetBranch, remote, newBranch) {
-						//TODO perform push here
-						console.info("Branch " + targetBranch + " remote " + remote + " new branch " + newBranch); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					})
-				});
-				dialog.startup();
-				dialog.show();
-			},
-			visibleWhen : function(item) {
-				return false && item.Type === "Branch" && item.Current; //TODO when committing to anothe branch is ready remofe "false &&" //$NON-NLS-0$
-			}
-		});
-		commandService.addCommand(pushToCommand);
-
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
 			tooltip: messages["Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes."],

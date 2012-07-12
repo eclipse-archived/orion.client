@@ -279,7 +279,6 @@ define({
 	"Show previous page of git log": "Show previous page of git log",
 	"Next Page >": "Next Page >",
 	"Show next page of git log": "Show next page of git log",
-	"Push to...": "Push to...",
 	"Push from your local branch into the selected remote branch": "Push from your local branch into the selected remote branch",
 	"Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.": "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
 	"The content of your active branch will be replaced with ": "The content of your active branch will be replaced with ",
