@@ -248,10 +248,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 					var testService = serviceRegistry.getService('test.bogus');
 					return testService.test().then(function() {
 						return testService.getCallOrder().then(function(callOrder) {
-							assert.strictEqual(callOrder[0], 'orion.cm.managedservice');
-							assert.strictEqual(callOrder[1], 'test.bogus');
-							// TODO use this test once __plugin__ support is implemented in service metadata.
-							// assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+							assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
 						});
 					});
 				});
