@@ -9,9 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/preferences', 'orion/serviceTracker', 'orion/pluginregistry'],
-	function(mEventTarget, Deferred, mPreferences, ServiceTracker, mPluginRegistry) {
-var PreferencesService = mPreferences.PreferencesService;
+define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/serviceTracker', 'orion/pluginregistry'],
+	function(mEventTarget, Deferred, ServiceTracker, mPluginRegistry) {
 var Plugin = mPluginRegistry.Plugin;
 var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
