@@ -107,12 +107,12 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	
 	validate : function(){
 		var selectedItems = this.treeWidget.getSelectedItems();
-		if(selectedItems.length==1){
+		if(selectedItems.length===1){
 			if(selectedItems[0].Type==="RemoteTrackingBranch"){ //$NON-NLS-0$
 				this.RemoteBrowserButton.disabled = false;
 				return;
 			}else if(selectedItems[0].Type==="Remote"){ //$NON-NLS-0$
-				if(this.newBranch.value!=""){
+				if(this.newBranch.value!==""){
 					this.RemoteBrowserButton.disabled = false;
 					return;
 				}
@@ -128,7 +128,14 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 			if(selectedItems[0].Type==="RemoteTrackingBranch"){ //$NON-NLS-0$
 				this.options.func(selectedItems[0], selectedItems[0].parent);
 			}else{
-				this.options.func(null, selectedItems[0], this.newBranch.value);
+				var id = selectedItems[0].CloneLocation.split("/")[4];
+				var newBranchObject = new Object();
+				newBranchObject.parent = selectedItems[0];
+				newBranchObject.FullName = "refs/remotes/" + selectedItems[0].Name + "/" + this.newBranch.value;
+				newBranchObject.Name = selectedItems[0].Name + "/" + this.newBranch.value;
+				newBranchObject.Type = "RemoteTrackingBranch";
+				newBranchObject.Location=  "/gitapi/remote/" + selectedItems[0].Name + "/" + this.newBranch.value + "/file/" + id;
+				this.options.func(null, selectedItems[0], newBranchObject);
 			}
 		}
 		delete this.options.func; //prevent performing this action twice (IE)
