@@ -275,6 +275,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		function reload(site) {
 			self._setSiteConfiguration(site);
+			self.setDirty(false);
 		}
 		this._siteClient.isSelfHostingSite(this.getSiteConfiguration()).then(function(isSelfHostingSite) {
 			self._isSelfHostingSite = isSelfHostingSite;
