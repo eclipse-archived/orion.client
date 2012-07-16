@@ -11,6 +11,7 @@
 /*global define*/
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var PROPERTY_CLASSES = 'classes', PROPERTY_DESIGNATES = 'designates'; //$NON-NLS-0$ //$NON-NLS-1$
+	var METATYPE_SERVICE = 'orion.cm.metatype';
 	var PropertyTypeImpl, ObjectClassImpl;
 
 	/**
@@ -26,7 +27,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 				array.forEach(func);
 			}
 		}
-		var tracker = new ServiceTracker(serviceRegistry, 'orion.metatype'); //$NON-NLS-0$
+		var tracker = new ServiceTracker(serviceRegistry, METATYPE_SERVICE); //$NON-NLS-0$
 		var ocsMap = this.ocsMap = {};	// OC Id {String} -> {ObjectClass}
 		var pidsMap = this.pidsMap = {}; // PID {String} -> {ObjectClass}
 		tracker.addingService = function(serviceRef) {
