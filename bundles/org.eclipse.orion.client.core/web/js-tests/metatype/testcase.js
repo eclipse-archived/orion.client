@@ -11,7 +11,7 @@
 /*global define*/
 define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/serviceregistry', 'orion/metatype'],
 		function(assert, Deferred, testHelpers, mServiceRegistry, mMetaType) {
-	var METATYPE_SERVICE = 'orion.metatype';
+	var METATYPE_SERVICE = 'orion.cm.metatype';
 
 	var serviceRegistry, metaTypeRegistry;
 	var setUp = function(storage) {
