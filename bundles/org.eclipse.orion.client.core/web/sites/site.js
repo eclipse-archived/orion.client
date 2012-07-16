@@ -106,7 +106,6 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 			commandService.registerCommandContribution("pageActions", "orion.site.start", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3); //$NON-NLS-1$ //$NON-NLS-0$
-			commandService.registerCommandContribution("pageActions", "orion.site.save", 4); //$NON-NLS-1$ //$NON-NLS-0$
 		});
 	});
 });
