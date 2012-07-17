@@ -379,12 +379,14 @@ var exports = {};
 			});
 		commandService.addCommand(linkRepoCommand);
 
+		var checkoutTagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages["Local Branch Name:"])]); //$NON-NLS-1$ //$NON-NLS-0$
 		var checkoutTagCommand = new mCommands.Command({
 			name: messages['Checkout'],
 			tooltip: messages["Checkout the current tag, creating a local branch based on its contents."],
 			imageClass: "git-sprite-checkout", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id: "eclipse.checkoutTag", //$NON-NLS-0$
+			parameters: checkoutTagNameParameters,
 			callback: function(data) {
 				var item = data.items;
 				function getBranchItem(){
@@ -398,25 +400,30 @@ var exports = {};
 					}
 					return item.parent.parent;
 				}
-
-				exports.getNewItemName(item, explorer, false, data.domNode.id, "tag_"+item.Name, function(name){ //$NON-NLS-0$
-					if(!name && name==""){
-						return;
-					}
-								
-					var repositoryLocation;
-					if (item.Repository != null) {
-						repositoryLocation = item.Repository.Location;
-					} else {
-						repositoryLocation = item.parent.parent.Location;
-					}
-					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					progressService.createProgressMonitor(serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, item.Name, name), //$NON-NLS-0$
+				
+				var checkoutTagFunction = function(repositoryLocation, itemName, name){
+					serviceRegistry.getService("orion.page.message").createProgressMonitor(serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, itemName, name), //$NON-NLS-0$
 							dojo.string.substitute(messages["Checking out tag ${0}"], [name])).deferred.then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(getBranchItem());
 					}, displayErrorOnStatus);
-				}, undefined, true);
+				};
 				
+				var repositoryLocation = (item.Repository != null) ? item.Repository.Location : item.parent.parent.Location;
+				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+					checkoutTagFunction(repositoryLocation, item.Name, data.parameters.valueFor("name")); //$NON-NLS-0$
+				} else {
+					//TODO Here should go some input validations, see bug: https://bugs.eclipse.org/bugs/show_bug.cgi?id=381735
+					if(!data.parameters.valueFor("name")){
+						return;
+					} else {
+						exports.getNewItemName(item, explorer, false, data.domNode.id, messages["Local Branch Name:"], function(name){
+							if (!name && name == "") {
+								return;
+							}		
+							checkoutTagFunction(repositoryLocation, item.Name, name);
+						});
+					}
+				}
 			},
 			visibleWhen: function(item){
 				return item.Type === "Tag"; //$NON-NLS-0$
