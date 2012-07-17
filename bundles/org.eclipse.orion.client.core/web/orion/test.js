@@ -12,6 +12,8 @@
 /*global define window console top self eclipse setTimeout*/
 
 define(['dojo', 'orion/assert'], function(dojo, assert) {
+	// Time to wait before declaring an async test failed.
+	var TIMEOUT = 8000;
 
 	function _serializeTasks(tasks) {
 		var length = tasks.length;
@@ -73,6 +75,17 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			}
 		}
 
+		function _testDone(name, result, startTime, message, stack) {
+			var obj = {result: result, elapsed: new Date().getTime() - startTime};
+			if (typeof message !== 'undefined') {
+				obj.message = message;
+			}
+			if (typeof stack !== 'undefined') {
+				obj.stack = stack;
+			}
+			_dispatchEvent("testDone", name, obj);
+		}
+
 		function _createTestWrapper(name, test) {
 			return function() {
 				_dispatchEvent("testStart", name);
@@ -80,17 +93,25 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 				try {
 					var testResult = test();
 					if (testResult && typeof testResult.then === "function") {
+						var calledBack = false;
+						setTimeout(function() {
+							if (!calledBack) {
+								_testDone(name, false, startTime, "Timed out");
+							}
+						}, TIMEOUT);
 						return testResult.then(function() {
-							_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
+							calledBack = true;
+							_testDone(name, true, startTime);
 						}, function(e) {
-							_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e && e.toString(), stack: e && (e.stack || e.stacktrace)});
+							calledBack = true;
+							_testDone(name, false, startTime, e && e.toString(), e && (e.stack || e.stacktrace));
 						});
 					} else {
-						_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
+						_testDone(name, true, startTime);
 						return testResult;
 					}
 				} catch(e) {
-					_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
+					_testDone(name, false, startTime, e.toString(), e.stack || e.stacktrace);
 					return e;
 				}
 			};
@@ -265,5 +286,6 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 
 	var exports = new Test();
 	exports.Test = Test;
+	exports.AsyncTimeout = TIMEOUT;
 	return exports;
 });
