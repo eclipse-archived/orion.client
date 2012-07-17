@@ -168,5 +168,30 @@ tests["test blow stack with exception"] = function() {
 		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 	});
 };
+
+tests["test timeout causes reject"] = function() {
+	var timeoutTest = {
+		"test timeout": function() {
+			return new dojo.Deferred();
+		}
+	};
+	var newTest = new mTest.Test();
+	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
+	var d = new dojo.Deferred();
+	var testDone = false;
+	newTest.addEventListener("testDone", function(name, obj) {
+		assert.strictEqual(obj.result, false, "Expected test failure");
+		testDone = true;
+		d.resolve();
+	});
+	newTest.useLocal = true;
+	newTest.run(timeoutTest);
+	setTimeout(function() {
+		if (!testDone) {
+			d.reject("Expected testDone to have called back by now");
+		}
+	}, mTest.AsyncTimeout + 500 /* wait for the timeout to elapse before declaring failure */);
+	return d;
+};
 return tests;
 });
