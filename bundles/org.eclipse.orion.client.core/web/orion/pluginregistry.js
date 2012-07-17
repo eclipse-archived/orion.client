@@ -19,7 +19,7 @@ var INSTALLED = 1;
 var LOADED = 2;
 var UNINSTALLED = 3;
 /**
- * Creates a new plugin. This constructor is private and may only be called by the plugin registry.
+ * Creates a new plugin. This constructor is private and should only be called by the plugin registry.
  * @class Represents a single plugin in the plugin registry.
  * @description
  * <p>A plugin can be in one of three states:</p>
@@ -201,7 +201,7 @@ eclipse.Plugin = function(url, data, internalRegistry) {
 	/**
 	 * Returns the declarative properties of this plugin
 	 * @name orion.pluginregistry.Plugin#getData
-	 * @return {Object} the service properties
+	 * @return {Object} The service properties
 	 * @function
 	 */
 	this.getData = function() {
@@ -328,31 +328,27 @@ eclipse.Plugin.LOADED = LOADED;
 eclipse.Plugin.UNINSTALLED = UNINSTALLED;
 
 /**
- * Dispatched when a plugin has been installed.
- * @name orion.pluginregistry.PluginRegistry#PluginInstalled
+ * Dispatched when a plugin has been installed. The type of this event is <code>'pluginInstalled'</code>.
+ * @name orion.pluginregistry.PluginRegistry#pluginInstalled
  * @event
- * @param {String} type The type of this event. Its value is <code>'pluginInstalled'</code>.
  * @param {orion.pluginregistry.Plugin} plugin The plugin that was installed.
  */
 /**
- * Dispatched when a plugin has been loaded.
- * @name orion.pluginregistry.PluginRegistry#PluginLoaded
+ * Dispatched when a plugin has been loaded. The type of this event is <code>'pluginLoaded'</code>.
+ * @name orion.pluginregistry.PluginRegistry#pluginLoaded
  * @event
- * @param {String} type The type of this event. Its value is <code>'pluginLoaded'</code>.
  * @param {orion.pluginregistry.Plugin} plugin The plugin that was loaded.
  */
 /**
- * Dispatched when a plugin has been uninstalled.
- * @name orion.pluginregistry.PluginRegistry#PluginUninstalled
+ * Dispatched when a plugin has been uninstalled. The type of this event is <code>'pluginUninstalled'</code>.
+ * @name orion.pluginregistry.PluginRegistry#pluginUninstalled
  * @event
- * @param {String} type The type of this event. Its value is <code>'pluginUninstalled'</code>.
  * @param {orion.pluginregistry.Plugin} plugin The plugin that was uninstalled.
  */
 /**
- * Dispatched when a plugin has been updated.
- * @name orion.pluginregistry.PluginRegistry#PluginUpdated
+ * Dispatched when a plugin has been updated. The type of this event is <code>'pluginUpdated'</code>.
+ * @name orion.pluginregistry.PluginRegistry#pluginUpdated
  * @event
- * @param {String} type The type of this event. Its value is <code>'pluginUpdated'</code>.
  * @param {orion.pluginregistry.Plugin} plugin The plugin that was updated.
  */
 
@@ -360,6 +356,11 @@ eclipse.Plugin.UNINSTALLED = UNINSTALLED;
  * Creates a new plugin registry.
  * @class The Orion plugin registry
  * @name orion.pluginregistry.PluginRegistry
+ * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to register plugin-provided services with.
+ * @param {Object} [opt_storage=localStorage] Target object to read and write plugin metadata from.
+ * @param {Boolean} [opt_visible=false] Whether a loaded plugin's iframe will be displayed. By default it is not displayed.
+ * @borrows orion.serviceregistry.EventTarget#addEventListener as #addEventListener
+ * @borrows orion.serviceregistry.EventTarget#removeEventListener as #removeEventListener
  */
 eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	var _storage = opt_storage || localStorage || {};
@@ -548,7 +549,8 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	 * Installs the plugin at the given location into the plugin registry
 	 * @name orion.pluginregistry.PluginRegistry#installPlugin
 	 * @param {String} url The location of the plugin
-	 * @param {Object} opt_data The plugin metadata
+	 * @param {Object} [opt_data] The plugin metadata
+	 * @returns A promise that will resolve when the plugin has been installed.
 	 * @function 
 	 */
 	this.installPlugin = function(url, opt_data) {
@@ -588,7 +590,7 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	/**
 	 * Returns all installed plugins
 	 * @name orion.pluginregistry.PluginRegistry#getPlugins
-	 * @return {Array} An array of all installed plugins.
+	 * @return {orion.pluginregistry.Plugin[]} An array of all installed plugins.
 	 * @function 
 	 */
 	this.getPlugins = function() {
@@ -602,10 +604,10 @@ eclipse.PluginRegistry = function(serviceRegistry, opt_storage, opt_visible) {
 	};
 
 	/**
-	 * Returns the installed plugin with the given URL, or null
-	 * if no such plugin is installed.
+	 * Returns the installed plugin with the given URL.
 	 * @name orion.pluginregistry.PluginRegistry#getPlugin
-	 * @return {orion.pluginregistry.Plugin} The installed plugin matching the given URL.
+	 * @return {orion.pluginregistry.Plugin} The installed plugin matching the given URL, or <code>null</code>
+	 * if no such plugin is installed.
 	 * @function 
 	 */
 	this.getPlugin = function(url) {

@@ -68,7 +68,7 @@ define(["orion/Deferred"], function(Deferred) {
 	ServiceReference.prototype.constructor = ServiceReference;
 
 	/**
-	 * Creates a new service registration
+	 * Creates a new service registration. This constructor is private and should only be called by the service registry.
 	 *
 	 * @name orion.serviceregistry.ServiceRegistration
 	 * @class A reference to a registered service in the Orion service registry
@@ -190,7 +190,8 @@ define(["orion/Deferred"], function(Deferred) {
 	EventTarget.prototype = /** @lends orion.serviceregistry.EventTarget.prototype */
 	{
 		/**
-		 * Dispatches a named event along with an arbitrarary set of parameters
+		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
+		 * will be passed to the event listener(s).
 		 * @param {String} eventName The event name
 		 */
 		dispatchEvent: function(eventName) {
@@ -325,7 +326,7 @@ define(["orion/Deferred"], function(Deferred) {
 		/**
 		 * Returns all references to the service with the given name
 		 * @param {String} name The name of the service to return
-		 * @returns {Array} An array of service references
+		 * @returns {orion.serviceregistry.ServiceReference[]} An array of service references
 		 */
 		getServiceReferences: function(name) {
 			if (name) {
@@ -344,6 +345,7 @@ define(["orion/Deferred"], function(Deferred) {
 		 * @param {String} name the name of the service being registered
 		 * @param {Object} implementation The service implementation
 		 * @param {Object} properties A JSON collection of declarative service properties
+		 * @returns {orion.serviceregistry.ServiceRegistration} A service registration object for the service.
 		 */
 		registerService: function(name, implementation, properties) {
 			var serviceId = this._entries.length;
@@ -364,7 +366,7 @@ define(["orion/Deferred"], function(Deferred) {
 		/**
 		 * Adds a listener for events on this registry
 		 * @param {String} eventName The name of the event to listen for
-		 * @param {Object} listener The listener to add
+		 * @param {Function} listener The listener to add
 		 */
 		addEventListener: function(eventName, listener) {
 			this._serviceEventTarget.addEventListener(eventName, listener);
@@ -373,7 +375,7 @@ define(["orion/Deferred"], function(Deferred) {
 		/**
 		 * Removes a listener for events on this registry
 		 * @param {String} eventName The name of the event to stop listening for
-		 * @param {Object} listener The listener to remove
+		 * @param {Function} listener The listener to remove
 		 */
 		removeEventListener: function(eventName, listener) {
 			this._serviceEventTarget.removeEventListener(eventName, listener);
