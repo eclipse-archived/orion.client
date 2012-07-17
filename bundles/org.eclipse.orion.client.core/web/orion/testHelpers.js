@@ -10,49 +10,42 @@
  ******************************************************************************/
 /*global define setTimeout*/
 define(['orion/Deferred'], function(Deferred) {
-	var DEFAULT_TIMEOUT = 3000;
 	/**
-	 * @name orion.test.makeTimeoutable
-	 * Wraps a promise-returning function into a timeoutable-promise-returning function. This is convenient for constructing
-	 * a testcase function that fails if an an expected promise never calls back.
-	 * @param {Function} func The test body function to be executed. Should return a promise.
-	 * @param {Number} [optTimeout=3000] How long to wait for a response before rejecting.
-	 * @returns {Function} A testcase function. When executed, it returns a promise that rejects if <code>func()</code>'s
-	 * promise does not call back within the specified amount of time.
+	 * Helper for generating a setup-invoke-teardown test case.
+	 * @name orion.test.makeTest
+	 * @param {Function} setUp Invoked before the testBody is attempted. This function can return a promise.
+	 * @param {Function} tearDown Invoked after the testBody has been attempted.
+	 * @param {Function} testBody The test body. This can return a promise or an immediate result.
+	 * @returns {Function} An asynchronous test function.
 	 */
-	function getTimeoutable(func, optTimeout) {
-		var timeout = typeof optTimeout === 'number' ? optTimeout : DEFAULT_TIMEOUT;
+	function makeTest(setUp, tearDown, testBody) {
 		return function() {
-			var wrapper = new Deferred();
-			var inner;
-			var innerPromiseFired = false;
-			try {
-				inner = func();
-				if (inner && inner.then) {
-					setTimeout(function() {
-						if (!innerPromiseFired) {
-							wrapper.reject('Timed out');
-						}
-					}, timeout);
-					inner.then(
-						function(result) {
-							innerPromiseFired = true;
-							wrapper.resolve(result);
-						}, function(err) {
-							innerPromiseFired = true;
-							wrapper.reject(err);
-						});
-				} else {
-					// func() didn't return a promise; continue
-					wrapper.resolve();
+			var d = new Deferred();
+			Deferred.when(setUp(), function() {
+				try {
+					var result = testBody();
+					if (result && result.then) {
+						return result.then(
+							function(r) {
+								tearDown();
+								d.resolve(r);
+							},
+							function(e) {
+								tearDown();
+								d.reject(e);
+							});
+					} else {
+						d.resolve(result);
+					}
+				} catch(e) {
+					tearDown();
+					d.reject(e);
 				}
-			} catch (e) {
-				throw e;
-			}
-			return wrapper;
+			});
+			return d;
 		};
 	}
 	return {
-		getTimeoutable: getTimeoutable
+		makeTest: makeTest
 	};
 });
