@@ -344,5 +344,6 @@ define({
 	"Default target location" : "Default target location",
 	"Change..." : "Change...",
 	"Merge Squash": "Merge Squash",
-	"Squash the content of the branch to the index" : "Squash the content of the branch to the index"
+	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
+	"Local Branch Name:" : "Local Branch Name:"
 });
