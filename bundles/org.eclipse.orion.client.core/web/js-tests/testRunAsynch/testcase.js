@@ -170,11 +170,13 @@ tests["test blow stack with exception"] = function() {
 };
 
 tests["test timeout causes reject"] = function() {
+	var timeout = 2000;
 	var timeoutTest = {
 		"test timeout": function() {
 			return new dojo.Deferred();
 		}
 	};
+	timeoutTest["test timeout"].timeout = timeout;
 	var newTest = new mTest.Test();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
 	var d = new dojo.Deferred();
@@ -190,7 +192,7 @@ tests["test timeout causes reject"] = function() {
 		if (!testDone) {
 			d.reject("Expected testDone to have called back by now");
 		}
-	}, mTest.AsyncTimeout + 500 /* wait for the timeout to elapse before declaring failure */);
+	}, timeout + 500 /* wait for our timeout to elapse before declaring failure */);
 	return d;
 };
 return tests;
