@@ -12,8 +12,8 @@
 /*global define window console top self eclipse setTimeout*/
 
 define(['dojo', 'orion/assert'], function(dojo, assert) {
-	// Time to wait before declaring an async test failed.
-	var TIMEOUT = 8000;
+	// Time to wait before declaring an async test failed. A test function can override this by defining a 'timeout' property.
+	var DEFAULT_TIMEOUT = 30000;
 
 	function _serializeTasks(tasks) {
 		var length = tasks.length;
@@ -98,7 +98,7 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 							if (!calledBack) {
 								_testDone(name, false, startTime, "Timed out");
 							}
-						}, TIMEOUT);
+						}, (typeof test.timeout === 'number' ? test.timeout : DEFAULT_TIMEOUT));
 						return testResult.then(function() {
 							calledBack = true;
 							_testDone(name, true, startTime);
@@ -286,6 +286,5 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 
 	var exports = new Test();
 	exports.Test = Test;
-	exports.AsyncTimeout = TIMEOUT;
 	return exports;
 });
