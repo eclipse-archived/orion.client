@@ -3416,6 +3416,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!this._clientDiv) { return; }
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
+			rulerParent.style.display = "block";
 			var div = document.createElement("DIV"); //$NON-NLS-0$
 			div._ruler = ruler;
 			div.rulerChanged = true;
@@ -3449,6 +3450,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.position = "absolute"; //$NON-NLS-0$
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
+			leftDiv.style.display = "none";
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			var table = document.createElement("TABLE"); //$NON-NLS-0$
 			leftDiv.appendChild(table);
@@ -3474,6 +3476,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.className = "textviewRightRuler"; //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.tabIndex = -1;
+			rightDiv.style.display = "none";
 			rightDiv.style.overflow = "hidden"; //$NON-NLS-0$
 			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
@@ -3639,6 +3642,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (index === cells.length) { return; }
 				row.cells[index]._ruler = undefined;
 				row.deleteCell(index);
+				if (cells.length !== 0) {
+					rulerParent.style.display = "none";
+				}
 			}
 		},
 		_destroyView: function() {
@@ -5342,11 +5348,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var top = Math.round((firstLine - lineStart) * lineHeight);
 			var partialY = this._partialY = Math.round((firstLine - topIndex) * lineHeight);
 			var scrollWidth, scrollHeight = lineCount * lineHeight;
-			var leftWidth, clientWidth, clientHeight;
+			var leftWidth, leftRect, clientWidth, clientHeight;
 			if (hScrollOnly) {
 				clientWidth = this._getClientWidth();
 				clientHeight = this._getClientHeight();
-				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
+				leftWidth = 0;
+				if (this._leftDiv) {
+					leftRect = this._leftDiv.getBoundingClientRect();
+					leftWidth = leftRect.right - leftRect.left;
+				}
 				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
 			} else {
 				var parent = this._parent;
@@ -5447,8 +5457,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
 				this._updateRuler(this._rightDiv, topIndex, bottomIndex);
 				
-				leftWidth = this._leftDiv ? this._leftDiv.scrollWidth : 0;
-				var rightWidth = this._rightDiv ? this._rightDiv.scrollWidth : 0;
+				leftWidth = 0;
+				if (this._leftDiv) {
+					leftRect = this._leftDiv.getBoundingClientRect();
+					leftWidth = leftRect.right - leftRect.left;
+				}
+				var rightWidth = 0;
+				if (this._rightDiv) {
+					var rightRect = this._rightDiv.getBoundingClientRect();
+					rightWidth = rightRect.right - rightRect.left;
+				}
 				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-0$
 				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px"; //$NON-NLS-0$
 				if (this._rightDiv) {
