@@ -39,7 +39,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 			}
 		});
 	};
-	pluginRegistry.addEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
+
 	function add(pid, serviceRef, service) {
 		if (!managedServiceRefs[pid]) {
 			managedServiceRefs[pid] = [];
@@ -104,10 +104,6 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 		asyncUpdated(serviceRef, managedService, properties);
 		return managedService;
 	};
-	this.close = function() {
-		ServiceTracker.close.call();
-		pluginRegistry.removeEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
-	};
 	this.initialUpdated = function(managedServiceRef) {
 		var pid = managedServiceRef.getProperty(PROPERTY_PID);
 		var managedService = serviceRegistry.getService(managedServiceRef);
@@ -124,6 +120,12 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 	this.notifyDeleted = function(configuration) {
 		var pid = configuration.getPid();
 		asyncUpdated(getManagedServiceReferences(pid), getManagedServices(pid), null);
+	};
+	this.onOpen = function() {
+		pluginRegistry.addEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
+	};
+	this.onClose = function() {
+		pluginRegistry.removeEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
 	};
 	this.removedService = function(serviceRef, service) {
 		var pid = serviceRef.getProperty(PROPERTY_PID);
