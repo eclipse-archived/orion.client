@@ -1578,16 +1578,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					rootDiv.removeChild(child);
 				}
 			}
-			if (isFirefox || isIE) {
-				if (this._selDiv1) {
-					var color = "transparent"; //$NON-NLS-0$
-					this._selDiv1.style.background = color;
-					this._selDiv2.style.background = color;
-					this._selDiv3.style.background = color;
-					if (window.getSelection) {
-						var sel = window.getSelection();
-						if (sel.rangeCount > 0) { sel.removeAllRanges(); }
-					}
+			if (this._selDiv1) {
+				var color = "lightgray"; //$NON-NLS-0$
+				this._selDiv1.style.background = color;
+				this._selDiv2.style.background = color;
+				this._selDiv3.style.background = color;
+				if (window.getSelection) {
+					var sel = window.getSelection();
+					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+				} else if (document.selection) {
+					this._ignoreSelect = false;
+					document.selection.empty();
+					this._ignoreSelect = true;
 				}
 			}
 			if (!this._ignoreFocus) {
@@ -1750,13 +1752,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			} else {
 				this._updateDOMSelection();
 			}
-			if (isFirefox || isIE) {
-				if (this._selDiv1) {
-					var color = this._highlightRGB;
-					this._selDiv1.style.background = color;
-					this._selDiv2.style.background = color;
-					this._selDiv3.style.background = color;
-				}
+			if (this._selDiv1) {
+				var color = this._highlightRGB;
+				this._selDiv1.style.background = color;
+				this._selDiv2.style.background = color;
+				this._selDiv3.style.background = color;
 			}
 			if (!this._ignoreFocus) {
 				this.onFocus({type: "Focus"}); //$NON-NLS-0$
@@ -1919,7 +1919,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}, 0);
 			}
 			if (this._clickCount === 1) {
-				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !isOpera && this.isListening("DragStart")); //$NON-NLS-0$
+				result = this._setSelectionTo(e.clientX, e.clientY, e.shiftKey, !isOpera && this._hasFocus && this.isListening("DragStart")); //$NON-NLS-0$
 				if (result) { this._setGrab(target); }
 			} else {
 				/*
@@ -3505,7 +3505,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
 				clipboardDiv.style.left = "-1000px"; //$NON-NLS-0$
 				rootDiv.appendChild(clipboardDiv);
-			
+			}
+
+			if (!isIE && !isPad) {
 				var clipDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._clipDiv = clipDiv;
 				clipDiv.style.position = "absolute"; //$NON-NLS-0$
@@ -4806,6 +4808,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			this._setDOMFullSelection(startNode, startOffset, startLineEnd, endNode, endOffset, endLineEnd);
 
+			if (!this._hasFocus) { return; }
 			var range;
 			if (window.getSelection) {
 				//W3C
@@ -5083,8 +5086,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				return;
 			}
 			
-			if (!this._selDiv1 && (this._fullSelection && !isWebkit)) {
-				this._highlightRGB = "Highlight"; //$NON-NLS-0$
+			if (!this._selDiv1 && (this._fullSelection && !isPad)) {
+				this._highlightRGB = isWebkit ? "transparent" : "Highlight"; //$NON-NLS-1$ //$NON-NLS-0$
 				var selDiv1 = document.createElement("DIV"); //$NON-NLS-0$
 				this._selDiv1 = selDiv1;
 				selDiv1.style.position = "absolute"; //$NON-NLS-0$
@@ -5291,7 +5294,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateDOMSelection: function () {
 			if (this._ignoreDOMSelection) { return; }
-			if (!this._clientDiv || !this._hasFocus) { return; }
+			if (!this._clientDiv) { return; }
 			var selection = this._getSelection();
 			var model = this._model;
 			var startLine = model.getLineAtOffset(selection.start);
