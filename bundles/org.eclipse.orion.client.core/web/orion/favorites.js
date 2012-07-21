@@ -32,11 +32,11 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 	FavoritesService.prototype = /** @lends orion.favorites.FavoritesService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this); //$NON-NLS-0$
+			this._serviceRegistration = this._registry.registerService(["orion.core.favorite", "orion.core.event"], this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
-			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
+			this.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
 		},
 	
 		/**

@@ -58,7 +58,7 @@ dojo.declare("orion.widgets.RegistryTree", [dijit.Tree], { //$NON-NLS-0$
 		var newPrefix = prefix + "|properties", //$NON-NLS-0$
 		    data = [];
 		
-		var propertyNames = reference.getPropertyNames();
+		var propertyNames = reference.getPropertyKeys();
 		for (var i =0; i < propertyNames.length; i++) {
 			var key = propertyNames[i];
 			var value = reference.getProperty(key);

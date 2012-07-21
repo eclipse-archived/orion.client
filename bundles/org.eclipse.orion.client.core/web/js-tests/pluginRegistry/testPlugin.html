@@ -6,8 +6,8 @@
 	<script type="text/javascript" src="../../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			var serviceProvider = provider.registerServiceProvider("test", {
+			var provider = new orion.PluginProvider();
+			provider.registerService(["test","orion.core.event"], {
 				test: function(echo) {
 					return echo;
 				},
@@ -20,7 +20,7 @@
 					return d;
 				},
 				testEvent: function(name) {
-					serviceProvider.dispatchEvent(name, name + "test");
+					this.dispatchEvent(name, name + "test");
 				}					
 			}, {name : "echotest"});
 			provider.connect();

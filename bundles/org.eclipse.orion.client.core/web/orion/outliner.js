@@ -194,7 +194,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 	function OutlineService(options) {
 		this._serviceRegistry = options.serviceRegistry;
 		this._preferences = options.preferences;
-		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this); //$NON-NLS-0$
+		this._serviceRegistration = this._serviceRegistry.registerService(["orion.edit.outline", "orion.core.event"], this); //$NON-NLS-0$
 		this._outlinePref = this._preferences.getPreferences("/edit/outline"); //$NON-NLS-0$
 		this._provider = new dojo.Deferred();
 	}
@@ -236,7 +236,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			var self = this;
 			dojo.when(this.getProvider(), function(provider) {
 				self._serviceRegistry.getService(provider).getOutline(contents, title).then(function(outline) {
-					self._serviceRegistration.dispatchEvent("outline", outline, title, provider.getProperty("id")); //$NON-NLS-1$ //$NON-NLS-0$
+					self.dispatchEvent("outline", outline, title, provider.getProperty("id")); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			});
 		}

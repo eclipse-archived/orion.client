@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define eclipse window parent document*/
 
-define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
-	var provider = new eclipse.PluginProvider();
+define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
+	var provider = new PluginProvider();
 
 	function makeParentRelative(location) {
 		try {
@@ -29,7 +29,7 @@ define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
 	var base = makeParentRelative(temp.href);
 
 	// testing that command service handles image-less actions properly
-	provider.registerServiceProvider("orion.core.operation", {
+	provider.registerService("orion.core.operation", {
 		getOperations: function(options) {
 			return xhr("GET", base, {
 				headers: {
