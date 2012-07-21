@@ -53,7 +53,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		
 		var _currentMessageId = 0;
 		var _deferredResponses = {};
-		var _serviceRegistrations = {};
+		var _services = {};
 		
 		function _callService(serviceId, method, params) {
 			if (!_channel) {
@@ -119,13 +119,14 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 					var serviceProxy = _createServiceProxy(service);
 					var properties = service.properties ? JSON.parse(JSON.stringify(service.properties)) : {};
 					properties.__plugin__ = _self.getLocation();
-					_serviceRegistrations[service.serviceId] = internalRegistry.registerService(service.type, serviceProxy, properties);
+					var registration = internalRegistry.registerService(service.names || service.type, serviceProxy, properties);
+					_services[service.serviceId] = {registration: registration, proxy: serviceProxy};
 				});
 			}	
 		}
 		
 		function _responseHandler(message) {
-			var serviceRegistration, deferred;
+			var deferred;
 			try {
 				if (message.method) {
 					if ("plugin" === message.method) { //$NON-NLS-0$
@@ -134,10 +135,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 							_parseData();
 						} else if (JSON.stringify(data) !== JSON.stringify(message.params[0])) {
 							// check if the data has been updated
-							for (var serviceId in _serviceRegistrations) {
-								if (_serviceRegistrations.hasOwnProperty(serviceId)) {
-									_serviceRegistrations[serviceId].unregister();
-									delete _serviceRegistrations[serviceId];
+							for (var serviceId in _services) {
+								if (_services.hasOwnProperty(serviceId)) {
+									_services[serviceId].registration.unregister();
+									delete _services[serviceId];
 								}
 							}
 							data = message.params[0];
@@ -155,8 +156,8 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 							_deferredUpdate = null;
 						}
 					} else if ("dispatchEvent" === message.method){ //$NON-NLS-0$
-						serviceRegistration = _serviceRegistrations[message.serviceId];
-						serviceRegistration.dispatchEvent.apply(serviceRegistration, message.params);		
+						var proxy = _services[message.serviceId].proxy;
+						proxy.dispatchEvent.apply(proxy, message.params);		
 					} else if ("progress" === message.method){ //$NON-NLS-0$
 						deferred = _deferredResponses[String(message.requestId)];
 						deferred.update.apply(deferred, message.params);	
@@ -185,6 +186,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 				console.log(e);
 			}
 		}
+		
+		this._getData = function() {
+			return data;
+		};
 	
 		/**
 		 * Returns the URL location of this plugin
@@ -197,13 +202,25 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		};
 		
 		/**
-		 * Returns the declarative properties of this plugin
-		 * @name orion.pluginregistry.Plugin#getData
-		 * @return {Object} The service properties
+		 * Returns the headers of this plugin
+		 * @name orion.pluginregistry.Plugin#getHeaders
+		 * @return {Object} The plugin headers
 		 * @function
 		 */
-		this.getData = function() {
-			return data;
+		this.getHeaders = function() {
+			return data ? data.headers : null;
+		};
+		
+		this.getName = function() {
+			return data ? data.headers["plugin.name"] || null : null;
+		};
+		
+		this.getVersion = function() {
+			return data ? data.headers["plugin.version"] || null : null;
+		};
+		
+		this.getLastModified = function() {
+			return new Date(); // TODO -- persist and retrieve...
 		};
 		
 		/**
@@ -213,10 +230,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		 */
 		this.uninstall = function() {
 			checkNotUninstalled();
-			for (var serviceId in _serviceRegistrations) {
-				if (_serviceRegistrations.hasOwnProperty(serviceId)) {
-					_serviceRegistrations[serviceId].unregister();
-					delete _serviceRegistrations[serviceId];
+			for (var serviceId in _services) {
+				if (_services.hasOwnProperty(serviceId)) {
+					_services[serviceId].registration.unregister();
+					delete _services[serviceId];
 				}
 			}
 			if (_channel) {
@@ -237,9 +254,9 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		this.getServiceReferences = function() {
 			var result = [];
 			var serviceId;
-			for (serviceId in _serviceRegistrations) {
-				if (_serviceRegistrations.hasOwnProperty(serviceId)) {
-					result.push(_serviceRegistrations[serviceId].getServiceReference());
+			for (serviceId in _services) {
+				if (_services.hasOwnProperty(serviceId)) {
+					result.push(_services[serviceId].registration.getServiceReference());
 				}
 			}
 			return result;
@@ -394,8 +411,8 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		
 		function _persist(plugin) {
 			var expiresSeconds = 60 * 60;
-			plugin.getData()._expires = new Date().getTime() + 1000 * expiresSeconds;
-			_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin.getData()); //$NON-NLS-0$
+			plugin._getData()._expires = new Date().getTime() + 1000 * expiresSeconds;
+			_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin._getData()); //$NON-NLS-0$
 		}
 	
 		var internalRegistry = {
@@ -556,7 +573,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 			var d = new Deferred();
 			var plugin = _getPlugin(url);
 			if (plugin) {
-				if(plugin.getData()) {
+				if(plugin.getHeaders()) {
 					d.resolve(plugin);
 				} else {
 					var pluginTracker = function(plugin) {
@@ -570,7 +587,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 			} else {
 				plugin = new Plugin(url, opt_data, internalRegistry);
 				_plugins.push(plugin);
-				if(plugin.getData()) {
+				if(plugin.getHeaders()) {
 					_persist(plugin);
 					d.resolve(plugin);
 				} else {				
@@ -594,7 +611,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		this.getPlugins = function() {
 			var result =[];
 			_plugins.forEach(function(plugin) {
-				if (plugin.getData()) {
+				if (plugin.getHeaders()) {
 					result.push(plugin);
 				}
 			});
@@ -610,7 +627,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		 */
 		this.getPlugin = function(url) {
 			var plugin = _getPlugin(url);
-			if (plugin && plugin.getData()) {
+			if (plugin && plugin.getHeaders()) {
 				return plugin;
 			}
 			return null;

@@ -10,7 +10,7 @@
 			var temp = document.createElement('a');
 			
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.navigate.command", {}, {
+			provider.registerService("orion.navigate.command", {}, {
 				nameKey: "Git Status",
 				id: "eclipse.git.status",
 				tooltipKey: "Go to Git Status",
@@ -23,7 +23,7 @@
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("orion.navigate.command", {}, {
+			provider.registerService("orion.navigate.command", {}, {
 				nameKey: "Git Log",
 				id: "eclipse.git.log",
 				tooltipKey: "Go to Git Log",
@@ -35,7 +35,7 @@
 				forceSingleItem: true
 			});
 
-			provider.registerServiceProvider("orion.navigate.command", {}, {
+			provider.registerService("orion.navigate.command", {}, {
 				nameKey: "Git Remote",
 				id: "eclipse.git.remote",
 				tooltipKey: "Go to Git Remote",
@@ -48,11 +48,11 @@
 				forceSingleItem: true
 			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.status"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				nameKey: "Git Status",
 				id: "eclipse.git.status2",
 				tooltipKey: "Go to Git Status",
@@ -64,15 +64,15 @@
 				uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.log"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.remote"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				nameKey: "Active Branch Log",
 				id: "eclipse.orion.git.switchToCurrentLocal",
 				tooltipKey: "Show the log for the active local branch",
@@ -85,7 +85,7 @@
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				nameKey: "Remote Branch Log",
 				id: "eclipse.orion.git.switchToRemote2",
 				tooltipKey: "Show the log for the corresponding remote tracking branch",
@@ -97,7 +97,7 @@
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				nameKey: "Git Repository",
 				id: "eclipse.git.repository2",
 				tooltipKey: "Go to the git repository",
@@ -109,7 +109,7 @@
 				uriTemplate: "{OrionHome}/git/git-repository.html#{GitCloneLocation}"
 			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.repository",
 				nameKey: "Git Repository",
 				tooltipKey: "Go to the git repository",
@@ -121,7 +121,7 @@
 				uriTemplate: "{OrionHome}/git/git-repository.html#{GitRepoLocation}"
 			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoEclipseGit",
 				nameKey: "Show in eclipse.org",
 				tooltipKey: "Show this repository at eclipse.org",
@@ -135,7 +135,7 @@
 				uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoGithub",
 				nameKey: "Show in GitHub",
 				nls: "git/nls/gitmessages",
@@ -152,7 +152,7 @@
 						
 			temp.href = "../../gitapi/diff/";
 			var base = temp.href;
-			provider.registerServiceProvider("orion.core.diff", {
+			provider.registerService("orion.core.diff", {
 				getDiffContent: function(diffURI){	
 					return dojo.xhrGet({
 						url: diffURI , 

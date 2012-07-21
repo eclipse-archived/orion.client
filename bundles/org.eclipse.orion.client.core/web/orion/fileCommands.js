@@ -877,7 +877,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			if (id !== "orion.navigateFromMetadata") { //$NON-NLS-0$
 				var impl = serviceRegistry.getService(commandsReferences[i]);
 				var info = {};
-				var propertyNames = commandsReferences[i].getPropertyNames();
+				var propertyNames = commandsReferences[i].getPropertyKeys();
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
 				}

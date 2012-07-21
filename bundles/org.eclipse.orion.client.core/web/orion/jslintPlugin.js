@@ -191,11 +191,11 @@ window.onload = function() {
 			}
 	};
 	
-	var provider = new eclipse.PluginProvider();
-	provider.registerServiceProvider("orion.edit.validator", validationService, {
+	var provider = new orion.PluginProvider();
+	provider.registerService("orion.edit.validator", validationService, {
 		contentType: ["application/javascript", "text/html"]
 	});
-	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
+	provider.registerService("orion.edit.outliner", outlineService, {
 		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
 		nameKey: "Flat outline",
 		nls: "orion/editor/nls/messages",

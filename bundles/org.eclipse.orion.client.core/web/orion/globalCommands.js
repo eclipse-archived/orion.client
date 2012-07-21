@@ -321,7 +321,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			for (var i=0; i<contributedLinks.length; i++) {
 				var info = {};
 				var j;
-				var propertyNames = contributedLinks[i].getPropertyNames();
+				var propertyNames = contributedLinks[i].getPropertyKeys();
 				for (j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 				}
@@ -376,7 +376,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 								var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
 								if (id === info.id) {
 									var navInfo = {};
-									propertyNames = commandsReferences[j].getPropertyNames();
+									propertyNames = commandsReferences[j].getPropertyKeys();
 									for (var k = 0; k < propertyNames.length; k++) {
 										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
 									}
@@ -633,7 +633,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			var locationObject = {OrionHome: hostName, Location: params.resource};
 			for (var i=0; i<navLinks.length; i++) {
 				var info = {};
-				var propertyNames = navLinks[i].getPropertyNames();
+				var propertyNames = navLinks[i].getPropertyKeys();
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}

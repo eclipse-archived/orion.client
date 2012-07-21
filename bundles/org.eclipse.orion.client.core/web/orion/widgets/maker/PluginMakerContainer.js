@@ -255,7 +255,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 		prepareJSContent: function(){	
 			var filecontent =	'/*global console eclipse CSSLint window*/\n\n' +  //$NON-NLS-0$
 								'window.onload = function() {\n' + //$NON-NLS-0$
-									'\tvar provider = new eclipse.PluginProvider();\n' + //$NON-NLS-0$
+									'\tvar provider = new orion.PluginProvider();\n' + //$NON-NLS-0$
 									'\tvar serviceImpl = {\n' + //$NON-NLS-0$
 											'\t\trun: function(text) {\n' + //$NON-NLS-0$
 												'\t\t\treturn text.split("").reverse().join("");\n' + //$NON-NLS-0$
@@ -265,7 +265,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/fileC
 										'\t\tname: "Reverse Text",\n' + //$NON-NLS-0$
 										'\t\tkey: ["e", true, true] // Ctrl+Shift+e\n' + //$NON-NLS-0$
 									'\t};\n' + //$NON-NLS-0$
-									'\tprovider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProperties);\n' + //$NON-NLS-0$
+									'\tprovider.registerService("orion.edit.command", serviceImpl, serviceProperties);\n' + //$NON-NLS-0$
 									'\tprovider.connect();\n' + //$NON-NLS-0$
 								'};'; //$NON-NLS-0$
 			return filecontent;

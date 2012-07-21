@@ -64,9 +64,9 @@ window.onload = function() {
 	}
 	
 	try {
-		var provider = new eclipse.PluginProvider();
+		var provider = new orion.PluginProvider();
 		// Register validator
-		provider.registerServiceProvider("orion.edit.validator",
+		provider.registerService("orion.edit.validator",
 			{	checkSyntax: checkSyntax
 			}, {
 				contentType: ["text/css"]
@@ -75,7 +75,7 @@ window.onload = function() {
 		// Register outline provider
 		var cssOutline = [];
 		addOutlineRule(cssOutline);
-		provider.registerServiceProvider("orion.edit.outliner",
+		provider.registerService("orion.edit.outliner",
 			{
 				// TODO outlines should be pushed, not pulled, so we can avoid parsing twice
 				getOutline: function(contents, title) {

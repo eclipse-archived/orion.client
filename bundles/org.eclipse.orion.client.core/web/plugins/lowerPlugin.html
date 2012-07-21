@@ -5,8 +5,8 @@
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.edit.command", {
+			var provider = new orion.PluginProvider();
+			provider.registerService("orion.edit.command", {
 				run : function(text) {
 					return text.toLowerCase();
 				}
