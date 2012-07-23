@@ -5,7 +5,7 @@
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
+			var provider = new orion.PluginProvider();
 			var serviceImpl = {
 				run : function(text, fullText, selection, fileName) {
 					var tokens = text.split(',');
@@ -35,7 +35,7 @@
 				contentType: ["text/css", "text/html"],
 				key : [ "b", true, true ]
 			};
-			provider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProps);
+			provider.registerService("orion.edit.command", serviceImpl, serviceProps);
 			provider.connect();
 		};
 	</script>

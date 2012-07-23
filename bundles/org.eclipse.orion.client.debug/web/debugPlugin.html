@@ -10,8 +10,8 @@
 			run: function(text) {}
 		};
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider(
+			var provider = new orion.PluginProvider();
+			provider.registerService(
 				"orion.page.link",
 				serviceImpl,
 				{

@@ -35,7 +35,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 					if (id === params.contentProvider) {
 						var impl = serviceRegistry.getService(contentProviders[i]);
 						var info = {};
-						var propertyNames = contentProviders[i].getPropertyNames();
+						var propertyNames = contentProviders[i].getPropertyKeys();
 						for (var j = 0; j < propertyNames.length; j++) {
 							info[propertyNames[j]] = contentProviders[i].getProperty(propertyNames[j]);
 						}
