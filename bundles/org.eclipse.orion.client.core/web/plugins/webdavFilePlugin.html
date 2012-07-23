@@ -37,9 +37,8 @@
 			temp.href = ".";
 			var base = temp.href;			
 			var service = new eclipse.DAVFileServiceImpl(base);
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.core.file", service, {Name:"WebDAV (".concat(base).concat(")"), top:base, pattern:base});
-			service.dispatchEvent = provider.dispatchEvent;
+			var provider = new orion.PluginProvider();
+			provider.registerService("orion.core.file", service, {Name:"WebDAV (".concat(base).concat(")"), top:base, pattern:base});
 			provider.connect();
 		};
 	</script>

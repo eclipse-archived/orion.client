@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define eclipse document*/
 
-define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
+define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
 	function PreferencesProvider(location) {
 		this.location = location;
 	}
@@ -46,7 +46,7 @@ define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
 	var location = temp.href;
 
 	var service = new PreferencesProvider(location);
-	var provider = new eclipse.PluginProvider();
-	provider.registerServiceProvider("orion.core.preference.provider", service, {});
+	var provider = new PluginProvider();
+	provider.registerService("orion.core.preference.provider", service, {});
 	provider.connect();
 });

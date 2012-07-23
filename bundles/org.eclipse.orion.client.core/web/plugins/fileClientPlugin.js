@@ -11,7 +11,7 @@
 
 /*global window document parent define console eclipse*/
 
-define(["orion/Deferred", "plugins/filePlugin/fileImpl", "domReady!", "orion/plugin"], function(Deferred, FileServiceImpl) {
+define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
 	function trace(implementation) {
 		var method;
 		var traced = {};
@@ -47,7 +47,7 @@ define(["orion/Deferred", "plugins/filePlugin/fileImpl", "domReady!", "orion/plu
 		return location;
 	}
 
-	var provider = new eclipse.PluginProvider();
+	var provider = new PluginProvider();
 
 	var temp = document.createElement('a');
 	temp.href = "../file";
@@ -63,13 +63,12 @@ define(["orion/Deferred", "plugins/filePlugin/fileImpl", "domReady!", "orion/plu
 
 
 	var service = new FileServiceImpl(fileBase, workspaceBase);
-	//provider.registerServiceProvider("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
-	provider.registerServiceProvider("orion.core.file", service, {
+	//provider.registerService("orion.core.file", trace(service), {Name:'Orion Content', top:fileBase, pattern:patternBase});
+	provider.registerService("orion.core.file", service, {
 		NameKey: 'Orion Content',
 		nls: 'orion/navigate/nls/messages',
 		top: fileBase,
 		pattern: patternBase
 	});
-	service.dispatchEvent = provider.dispatchEvent;
 	provider.connect();
 });

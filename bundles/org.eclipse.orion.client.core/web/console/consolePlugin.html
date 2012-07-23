@@ -8,8 +8,8 @@
 		/*global window*/
 		window.onload = function() {
 			var serviceImpl = { /* All data is in properties */ };
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.page.link", serviceImpl, {
+			var provider = new orion.PluginProvider();
+			provider.registerService("orion.page.link", serviceImpl, {
 				nameKey: "Console",
 				nls: "orion/nls/messages",
 				id: "orion.console",

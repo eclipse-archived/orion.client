@@ -23,11 +23,12 @@ define(["dojo"], function(dojo){
 	 * in one component can serve as the input of another component.
 	 */	
 	function Selection(serviceRegistry, selectionServiceId) {
-		if (!selectionServiceId)
+		if (!selectionServiceId) {
 			selectionServiceId = "orion.page.selection"; //$NON-NLS-0$
+		}
 		
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService(selectionServiceId, this);
+		this._serviceRegistration = serviceRegistry.registerService([selectionServiceId, "orion.core.event"], this);
 		this._selections = [];
 	}
 	 
@@ -68,7 +69,7 @@ define(["dojo"], function(dojo){
 			} else {
 				this._selections = null;
 			}
-			this._serviceRegistration.dispatchEvent("selectionChanged", this._getSingleSelection(), this._selections); //$NON-NLS-0$
+			this.dispatchEvent("selectionChanged", this._getSingleSelection(), this._selections); //$NON-NLS-0$
 		}
 	};
 	Selection.prototype.constructor = Selection;

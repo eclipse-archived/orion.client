@@ -297,7 +297,7 @@ exports.EditorCommandFactory = (function() {
 						var serviceReference = actionReferences[i];
 						var service = this.serviceRegistry.getService(actionReferences[i]);
 						var info = {};
-						var propertyNames = actionReferences[i].getPropertyNames();
+						var propertyNames = actionReferences[i].getPropertyKeys();
 						for (var j = 0; j < propertyNames.length; j++) {
 							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
 						}

@@ -10,41 +10,41 @@
 	window.onload = function() {
 		var serviceImpl = { /* All data is in properties */ };
 
-		var provider = new eclipse.PluginProvider();
+		var provider = new orion.PluginProvider();
 		
 		// Primary navigation links
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+		provider.registerService("orion.page.link", serviceImpl, {
 			nameKey: "Navigator",
 			id: "orion.navigator",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/navigate/table.html#"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+		provider.registerService("orion.page.link", serviceImpl, {
 			nameKey: "Sites",
 			id: "orion.sites",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/sites/sites.html"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+		provider.registerService("orion.page.link", serviceImpl, {
 			nameKey: "Repositories",
 			id: "orion.repositories",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/git/git-repository.html#"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+		provider.registerService("orion.page.link", serviceImpl, {
 			nameKey: "Console",
 			id: "orion.console",
 			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/console/consolePage.html"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
+		provider.registerService("orion.page.link", serviceImpl, {
 			nameKey: "Get Plugins",
 			id: "orion.plugins.get",
 			nls: "orion/nls/messages",
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
 		});
 		
-		provider.registerServiceProvider("orion.page.link.related", null, {
+		provider.registerService("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
 			nameKey: "Navigator",
 			nls: "orion/nls/messages",

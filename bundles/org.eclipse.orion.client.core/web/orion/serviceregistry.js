@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define console */
 
-define(["orion/Deferred"], function(Deferred) {
+define(["orion/Deferred", "orion/es5shim"], function(Deferred) {
 
 	/**
 	 * Creates a new service reference.
@@ -23,30 +23,18 @@ define(["orion/Deferred"], function(Deferred) {
 	 * @param {Object} properties A JSON object containing the service's declarative properties
 	 */
 
-	function ServiceReference(serviceId, name, properties) {
-		this.serviceId = serviceId;
-		this.name = name;
-		this.properties = properties;
+	function ServiceReference(serviceId, names, properties) {
+		this.properties = properties || {};
+		this.properties["service.id"] = serviceId;
+		this.properties["service.names"] = names;
 	}
+
 	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */
 	{
 		/**
-		 * Returns the symbolic id of this service.
-		 */
-		getServiceId: function() {
-			return this.serviceId;
-		},
-
-		/**
-		 * Returns the name of the service this reference provides.
-		 */
-		getName: function() {
-			return this.name;
-		},
-		/**
 		 * Returns the names of the declarative properties of this service.
 		 */
-		getPropertyNames: function() {
+		getPropertyKeys: function() {
 			var result = [];
 			var name;
 			for (name in this.properties) {
@@ -92,14 +80,6 @@ define(["orion/Deferred"], function(Deferred) {
 		},
 
 		/**
-		 * Dispatches an event to this service.
-		 * @param {String} eventName The name of the service event
-		 */
-		dispatchEvent: function(eventName) {
-			this.internalRegistry.dispatchEvent.apply(this.internalRegistry, [this.serviceId, eventName].concat(Array.prototype.slice.call(arguments, 1)));
-		},
-
-		/**
 		 * Returns a reference to this registered service.
 		 */
 		getServiceReference: function() {
@@ -141,9 +121,6 @@ define(["orion/Deferred"], function(Deferred) {
 	 */
 
 	function Service(serviceId, implementation, internalRegistry) {
-		this.serviceId = serviceId;
-		this.implementation = implementation;
-		this.internalRegistry = internalRegistry;
 		var method;
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {
@@ -151,29 +128,6 @@ define(["orion/Deferred"], function(Deferred) {
 			}
 		}
 	}
-
-	Service.prototype = /** @lends orion.serviceregistry.Service.prototype */
-	{
-
-		/**
-		 * Adds a listener to this service for a particular event.
-		 * @param {String} eventName The name of the event to listen for
-		 * @param {Object} listener The event listener
-		 */
-		addEventListener: function(eventName, listener) {
-			this.internalRegistry.addEventListener(this.serviceId, eventName, listener);
-		},
-
-		/**
-		 * Stops a listener from listening to a particular event on this service.
-		 * @param {String} eventName The name of the event to listen for
-		 * @param {Object} listener The event listener
-		 */
-		removeEventListener: function(eventName, listener) {
-			this.internalRegistry.removeEventListener(this.serviceId, eventName, listener);
-		}
-	};
-	Service.prototype.constructor = Service;
 
 
 	/**
@@ -264,37 +218,22 @@ define(["orion/Deferred"], function(Deferred) {
 				var entry = that._entries[serviceId];
 				if (entry) {
 					var reference = entry.reference;
-					var namedReferences = that._namedReferences[reference.getName()];
-					for (var i = 0; i < namedReferences.length; i++) {
-						if (namedReferences[i] === reference) {
-							if (namedReferences.length === 1) {
-								delete that._namedReferences[reference.getName()];
-							} else {
-								namedReferences.splice(i, 1);
+					var names = reference.getProperty("service.names");
+					names.forEach(function(name) {
+						var namedReferences = that._namedReferences[name];
+						for (var i = 0; i < namedReferences.length; i++) {
+							if (namedReferences[i] === reference) {
+								if (namedReferences.length === 1) {
+									delete that._namedReferences[name];
+								} else {
+									namedReferences.splice(i, 1);
+								}
+								break;
 							}
-							break;
 						}
-					}
+					});
 					that._entries[serviceId] = null;
 					that._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
-				}
-			},
-			dispatchEvent: function(serviceId, eventName) {
-				var entry = that._entries[serviceId];
-				if (entry) {
-					entry.eventTarget.dispatchEvent.apply(entry.eventTarget, [eventName].concat(Array.prototype.slice.call(arguments, 2)));
-				}
-			},
-			addEventListener: function(serviceId, eventName, listener) {
-				var entry = that._entries[serviceId];
-				if (entry) {
-					entry.eventTarget.addEventListener(eventName, listener);
-				}
-			},
-			removeEventListener: function(serviceId, eventName, listener) {
-				var entry = that._entries[serviceId];
-				if (entry) {
-					entry.eventTarget.removeEventListener(eventName, listener);
 				}
 			}
 		};
@@ -308,19 +247,18 @@ define(["orion/Deferred"], function(Deferred) {
 		 */
 		getService: function(nameOrServiceReference) {
 			var service;
-			if (typeof nameOrServiceReference === 'string') {
-				if (this._namedReferences[nameOrServiceReference]) {
-					for (var i = 0; i < this._namedReferences[nameOrServiceReference].length; i++) {
-						service = this._entries[this._namedReferences[nameOrServiceReference][i].getServiceId()].service;
-						if (service) {
-							break;
-						}
-					}
+			if (typeof nameOrServiceReference === "string") {
+				var references = this._namedReferences[nameOrServiceReference];
+				if (references) {
+					references.some(function(reference) {
+						service = this._entries[reference.getProperty("service.id")].service;
+						return !!service;
+					}, this);
 				}
 			} else {
-				service = this._entries[nameOrServiceReference.getServiceId()].service;
+				service = this._entries[nameOrServiceReference.getProperty("service.id")].service;
 			}
-			return service;
+			return service || null;
 		},
 
 		/**
@@ -333,31 +271,47 @@ define(["orion/Deferred"], function(Deferred) {
 				return this._namedReferences[name] ? this._namedReferences[name] : [];
 			}
 			var result = [];
-			for (var i = 0; i < this._entries.length; i++) {
-				if (this._entries[i]) {
-					result.push(this._entries[i].reference);
+			this._entries.forEach(function(entry) {
+				if (entry) {
+					result.push(entry.reference);
 				}
-			}
+			});
 			return result;
 		},
 		/**
 		 * Registers a service with this registry.
-		 * @param {String} name the name of the service being registered
+		 * @param {String|String[]} names the names of the service being registered
 		 * @param {Object} implementation The service implementation
 		 * @param {Object} properties A JSON collection of declarative service properties
 		 * @returns {orion.serviceregistry.ServiceRegistration} A service registration object for the service.
 		 */
-		registerService: function(name, implementation, properties) {
+		registerService: function(names, implementation, properties) {
 			var serviceId = this._entries.length;
-			var reference = new ServiceReference(serviceId, name, properties);
+			
+			if (typeof(names) === "string") {
+				names = [names];
+			}
+			
+			var reference = new ServiceReference(serviceId, names, properties);
 			var service = new Service(serviceId, implementation, this.internalRegistry);
+			
+			// try to provide/inject a dispatchEvent method if the service provides orion.core.event
+			if (names.indexOf("orion.core.event") !== -1) {
+				var eventTarget = new EventTarget();
+				implementation.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+				service.addEventListener = eventTarget.addEventListener.bind(eventTarget);
+				service.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);
+			}
 
-			this._namedReferences[name] = this._namedReferences[name] || [];
-			this._namedReferences[name].push(reference);
+			var namedReferences = this._namedReferences;
+			names.forEach(function(name) {
+				namedReferences[name] = namedReferences[name] || [];
+				namedReferences[name].push(reference);
+			});
+			
 			this._entries.push({
 				reference: reference,
-				service: service,
-				eventTarget: new EventTarget()
+				service: service
 			});
 			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service);
 			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
