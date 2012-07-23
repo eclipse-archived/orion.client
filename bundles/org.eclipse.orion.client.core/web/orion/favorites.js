@@ -12,7 +12,7 @@
  
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
+define(['require', 'dojo', 'orion/util', 'orion/EventTarget'], function(require, dojo, mUtil, EventTarget){
 
 	/**
 	 * Instantiates the favorites service. Clients should obtain the 
@@ -26,13 +26,14 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 	 */
 	function FavoritesService(serviceRegistry) {
 		this._favorites = [];
+		EventTarget.attach(this);
 		this._init(serviceRegistry);
 		this._initializeFavorites();
 	}
 	FavoritesService.prototype = /** @lends orion.favorites.FavoritesService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService(["orion.core.favorite", "orion.core.event"], this); //$NON-NLS-0$
+			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
