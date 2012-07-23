@@ -32,11 +32,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 	SavedSearches.prototype = /** @lends orion.searches.SavedSearches.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.savedSearches", this); //$NON-NLS-0$
+			this._serviceRegistration = this._registry.registerService(["orion.core.savedSearches","orion.core.event"], this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
-			this._serviceRegistration.dispatchEvent("searchesChanged", {searches: this._searches, registry: this._registry}); //$NON-NLS-0$
+			this.dispatchEvent("searchesChanged", {searches: this._searches, registry: this._registry}); //$NON-NLS-0$
 		},
 
 		

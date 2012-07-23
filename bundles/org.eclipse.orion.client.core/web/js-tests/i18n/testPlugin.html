@@ -6,12 +6,12 @@
 	<script>
 		/*global window eclipse*/
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
+			var provider = new orion.PluginProvider();
 			var name = "test/i18n/nls/message8";
 			var locale = typeof navigator === "undefined" ? "root" : (navigator.language || navigator.userLanguage || "root").toLowerCase();
 			var serviceName = "test/i18n/nls/" + locale + "/message8";
 
-			provider.registerServiceProvider("orion.i18n.message", {
+			provider.registerService("orion.i18n.message", {
 				getMessageBundle: function() {
 					return {
 						root: {
@@ -23,7 +23,7 @@
 				name: name
 			});
 	
-			provider.registerServiceProvider("orion.i18n.message", {
+			provider.registerService("orion.i18n.message", {
 				getMessageBundle: function() {
 					return {
 						test: "test-" + locale

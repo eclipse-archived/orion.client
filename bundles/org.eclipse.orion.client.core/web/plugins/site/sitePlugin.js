@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document eclipse parent window*/
-define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugin, siteImpl) {
+define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider, siteImpl) {
 	function qualify(url) {
 		var a = document.createElement('a');
 		a.href = url;
@@ -39,9 +39,9 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 	var workspaceBase = unqualify('../../workspace');
 	//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
 
-	var provider = new eclipse.PluginProvider();
+	var provider = new PluginProvider();
 
-	provider.registerServiceProvider('orion.navigate.command', null, {
+	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.site.viewon',
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
@@ -51,7 +51,7 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 		uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
 	});
 
-	provider.registerServiceProvider('orion.page.link.related', null, {
+	provider.registerService('orion.page.link.related', null, {
 		id: 'orion.site.viewon',
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
@@ -62,7 +62,7 @@ define(['../../orion/plugin.js', 'plugins/site/siteServiceImpl'], function(plugi
 
 	var host = document.createElement('a');
 	host.href = '/';
-	provider.registerServiceProvider('orion.site',
+	provider.registerService('orion.site',
 		new siteImpl.SiteImpl(fileBase, workspaceBase),
 		{	id: 'orion.site.default',
 			name: '' + host.hostname + ' Orion file system',

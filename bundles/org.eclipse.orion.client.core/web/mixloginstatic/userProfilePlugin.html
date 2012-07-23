@@ -5,8 +5,8 @@
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("profilePlugin", {
+			var provider = new orion.PluginProvider();
+			provider.registerService("profilePlugin", {
 				info : function() {
 					return {
 						name : "Manage OpenIds",

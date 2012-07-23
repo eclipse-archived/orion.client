@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define eclipse document*/
 
-define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
-	var provider = new eclipse.PluginProvider();
+define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
+	var provider = new PluginProvider();
 
 	function qualifyURL(url) {
 		var a = document.createElement('a');
@@ -69,6 +69,6 @@ define(["orion/xhr", "domReady!", "orion/plugin"], function(xhr) {
 	var serviceProps = {
 		name: "FORM+OpenId"
 	};
-	provider.registerServiceProvider("orion.core.auth", serviceImpl, serviceProps);
+	provider.registerService("orion.core.auth", serviceImpl, serviceProps);
 	provider.connect();
 });

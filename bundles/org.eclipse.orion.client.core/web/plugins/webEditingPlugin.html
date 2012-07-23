@@ -12,9 +12,9 @@
 <script>
 /*global window eclipse orion */
 window.onload = function() {
-	var provider = new eclipse.PluginProvider();
+	var provider = new orion.PluginProvider();
 	
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
+	provider.registerService("orion.core.contenttype", {}, {
 		contentTypes:
 			// Text types
 			[{	id: "text/plain",
@@ -90,39 +90,39 @@ window.onload = function() {
 			}]
 		});
 	
-	provider.registerServiceProvider("orion.edit.editor", {}, {
+	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
 		nameKey: "Orion Editor",
 		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 	
-	provider.registerServiceProvider("orion.navigate.openWith", {}, {
+	provider.registerService("orion.navigate.openWith", {}, {
 			editor: "orion.editor",
 			contentType: ["text/plain", "text/html", "text/css", "application/javascript", "application/json", "application/xml", "text/x-java-source"]});
 	
-	provider.registerServiceProvider("orion.navigate.openWith.default", {}, {
+	provider.registerService("orion.navigate.openWith.default", {}, {
 			editor: "orion.editor"});
 	
 	// Register content assist providers
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.CssContentAssistProvider(),
 		{	name: "CSS content assist",
 			contentType: ["text/css"]
 		});
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.JavaScriptContentAssistProvider(),
 		{	name: "JavaScript content assist",
 			contentType: ["application/javascript"]
 		});
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
 			contentType: ["text/html"]
 		});
 	
 	// Register syntax highlighting
-	provider.registerServiceProvider("orion.edit.highlighter", {},
+	provider.registerService("orion.edit.highlighter", {},
 		{	type: "grammar",
 			contentType: ["text/html"],
 			grammar: new orion.editor.HtmlGrammar()

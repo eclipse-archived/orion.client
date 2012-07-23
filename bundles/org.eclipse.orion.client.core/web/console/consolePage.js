@@ -14,7 +14,7 @@
 /*jslint browser:true*/
 
 define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bootstrap', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/i18nUtil', 'orion/plugin'], 
+		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/i18nUtil'], 
 	function(messages, require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType, i18nUtil) {
 
 	var fileClient;
