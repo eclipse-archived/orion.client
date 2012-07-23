@@ -1584,12 +1584,28 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._selDiv1.style.background = color;
 				this._selDiv2.style.background = color;
 				this._selDiv3.style.background = color;
+				/* Clear browser selection if selection is within clientDiv */
+				var temp;
 				if (window.getSelection) {
 					var sel = window.getSelection();
-					if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+					temp = sel.anchorNode;
+					while (temp) {
+						if (temp === this._clientDiv) {
+							if (sel.rangeCount > 0) { sel.removeAllRanges(); }
+							break;
+						}
+						temp = temp.parentNode;
+					}
 				} else if (document.selection) {
 					this._ignoreSelect = false;
-					document.selection.empty();
+					temp = document.selection.createRange().parentElement();
+					while (temp) {
+						if (temp === this._clientDiv) {
+							document.selection.empty();
+							break;
+						}
+						temp = temp.parentNode;
+					}
 					this._ignoreSelect = true;
 				}
 			}
