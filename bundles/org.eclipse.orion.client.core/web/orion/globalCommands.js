@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/settings/ThemeSheetWriter',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mFavorites, mContentTypes, URITemplate, PageUtil){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -569,6 +569,40 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		checkFavoritesButton(options.serviceRegistry, options.commandService);
 	}
 	
+	
+	function applyTheme(preferences){
+	
+		preferences.getPreferences('/themes', 2).then(function(prefs){
+			
+			var selected = prefs.get( 'selected' );
+			
+			if( selected ){
+				var ob = JSON.parse( selected );
+				
+				var styles = JSON.parse( prefs.get( 'styles' ) );
+				
+				for( var theme in styles ){
+					
+					var cssdata;
+					
+					if( styles[theme].name === ob.selected ){
+						cssdata = styles[theme];
+						var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
+						var css = sheetMaker.getSheet( cssdata );
+				
+						var stylesheet = document.createElement("STYLE");
+						stylesheet.appendChild(document.createTextNode(css));
+							
+						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+						head.appendChild(stylesheet);	
+						break;
+					}	
+				}
+			}		
+		});
+	}
+	
+	
 	/**
 	 * Generates the banner at the top of a page.
 	 * @name orion.globalCommands#generateBanner
@@ -576,6 +610,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 */
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
 		var text;
+		
+		applyTheme( prefsService );
 		
 		var target = "_self"; //$NON-NLS-0$
 		
