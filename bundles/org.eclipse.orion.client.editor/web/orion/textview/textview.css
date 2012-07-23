@@ -7,6 +7,8 @@
 	background-color: #eeeeee;
 	font-family: monospace;
 	font-size: 10pt;
+	min-width: 50px;
+	min-height: 50px;
 }
 
 .textviewContent {
