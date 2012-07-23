@@ -16,7 +16,7 @@ define([], function() {
 	 * @name orion.ServiceTracker
 	 * @class Simplifies the use of services within a service registry.
 	 * @description A ServiceTracker tracks matching services in the given service registry. Matching services are those
-	 * whose <em>service name</em> matches the given <code>serviceName</code>. The {@link #addingService} and 
+	 * whose <code>service.names</code> property contains the given <code>serviceName</code>. The {@link #addingService} and 
 	 * {@link #removedService} methods can be overridden to customize the service objects being tracked.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to track services of.
 	 * @param {String} serviceName The service name of services to be tracked.
@@ -29,7 +29,7 @@ define([], function() {
 		var addedListener, removedListener;
 
 		function add(serviceRef) {
-			var id = serviceRef.getServiceId();
+			var id = serviceRef.getProperty('service.id');
 			var serviceObject = this.addingService(serviceRef);
 			if (serviceObject) {
 				refs[id] = serviceRef;
@@ -37,14 +37,14 @@ define([], function() {
 			}
 		}
 		function remove(serviceRef) {
-			var id = serviceRef.getServiceId();
+			var id = serviceRef.getProperty('service.id');
 			var service = services[id];
 			delete refs[id];
 			delete services[id];
 			this.removedService(serviceRef, service);
 		}
 		function isTrackable(serviceRef) {
-			return serviceName === serviceRef.getName();
+			return serviceRef.getProperty('service.names').indexOf(serviceName) !== -1; //$NON-NLS-0$
 		}
 
 		/**

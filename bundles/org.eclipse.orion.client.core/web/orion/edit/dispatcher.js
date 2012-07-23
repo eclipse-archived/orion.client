@@ -81,17 +81,17 @@ define(['orion/edit/dispatcher'], function() {
 			this._initService(service, textView);
 		},
 		_wireServiceMethod: function(serviceReference, service, serviceMethod, textView, type) {
-			//console.log("  Add listener " + type + " for " + serviceReference.getServiceId());
+			//console.log("  Add listener " + type + " for " + serviceReference.getProperty('service.id'));
 			var listener = function(event) {
 				serviceMethod(event).then(/*No return value*/);
 			};
-			var serviceId = serviceReference.getServiceId();
+			var serviceId = serviceReference.getProperty('service.id');
 			this.serviceReferences[serviceId] = this.serviceReferences[serviceId] || [];
 			this.serviceReferences[serviceId].push([textView, type, listener]);
 			textView.addEventListener(type, listener);
 		},
 		_onServiceRemoved: function(serviceReference, service) {
-			var serviceId = serviceReference.getServiceId();
+			var serviceId = serviceReference.getProperty('service.id');
 			var serviceReferences = this.serviceReferences[serviceId];
 			if (serviceReferences) {
 				for (var i=0; i < serviceReferences.length; i++) {
