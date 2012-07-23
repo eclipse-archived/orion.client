@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorer', 'orion/EventTarget'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer, EventTarget){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -25,6 +25,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 	 */
 	function SavedSearches(serviceRegistry) {
 		this._searches = [];
+		EventTarget.attach(this);
 		this._init(serviceRegistry);
 		this._initializeSearches();
 	}
@@ -32,7 +33,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 	SavedSearches.prototype = /** @lends orion.searches.SavedSearches.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService(["orion.core.savedSearches","orion.core.event"], this); //$NON-NLS-0$
+			this._serviceRegistration = this._registry.registerService("orion.core.savedSearches", this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {

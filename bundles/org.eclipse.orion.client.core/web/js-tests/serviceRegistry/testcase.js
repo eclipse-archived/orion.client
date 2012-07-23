@@ -11,7 +11,7 @@
 /*global define console setTimeout*/
 
 
-define(["orion/assert", "orion/serviceregistry"], function(assert, mServiceRegistry) {
+define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(assert, mServiceRegistry, EventTarget) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
@@ -129,7 +129,12 @@ define(["orion/assert", "orion/serviceregistry"], function(assert, mServiceRegis
 				return count + 1;
 			}
 		};
-		var registration = registry.registerService(["testEvents", "orion.core.event"], impl);
+		var eventTarget = new EventTarget();
+		impl.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+		impl.addEventListener = eventTarget.addEventListener.bind(eventTarget);
+		impl.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);		
+		
+		var registration = registry.registerService(["testEvents"], impl);
 		assert.equal(1, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);
 

@@ -10,7 +10,7 @@
  *******************************************************************************/
  /*global define */
  
-define(["dojo"], function(dojo){
+define(["dojo","orion/EventTarget"], function(dojo, EventTarget){
 
 	/**
 	 * Constructs a new selection service. Clients should obtain a selection service
@@ -28,7 +28,8 @@ define(["dojo"], function(dojo){
 		}
 		
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService([selectionServiceId, "orion.core.event"], this);
+		EventTarget.attach(this);
+		this._serviceRegistration = serviceRegistry.registerService(selectionServiceId, this);
 		this._selections = [];
 	}
 	 

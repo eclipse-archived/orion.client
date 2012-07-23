@@ -127,18 +127,21 @@ define(function() {
 			var serviceId = _services.length;
 			_services[serviceId] = {names: names, methods: methods, implementation: implementation, properties: properties || {}};
 	
-			// try to provide/inject a dispatchEvent method if the service provides orion.core.event
-			if (names.indexOf("orion.core.event") !== -1) {
+			// try to provide/inject a plugin enabled dispatchEvent method if the service provides one
+			if (implementation && typeof implementation.dispatchEvent === "function") {
+				var originalDispatchEvent = implementation.dispatchEvent;
 				implementation.dispatchEvent = function(eventName) {
-					if (!_connected) {
-						throw new Error("Cannot dispatchEvent. Plugin Provider not connected");
+					var args = Array.prototype.slice.call(arguments);
+					if (_connected) {
+						var message = {
+							serviceId: serviceId,
+							method: "dispatchEvent", //$NON-NLS-0$
+							params: typeof eventName === "string" ? args : [eventName.type].concat(args)
+						};
+						_publish(message);
+
 					}
-					var message = {
-						serviceId: serviceId,
-						method: "dispatchEvent", //$NON-NLS-0$
-						params: [eventName].concat(Array.prototype.slice.call(arguments, 1))
-					};
-					_publish(message);
+					originalDispatchEvent.apply(implementation, args);
 				};
 			}
 		};

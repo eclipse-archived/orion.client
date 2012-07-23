@@ -12,7 +12,7 @@
 
 /*global define setTimeout clearTimeout addEventListener document console localStorage Worker*/
 
-define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(Deferred, mServiceregistry){
+define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/es5shim"], function(Deferred, mServiceregistry, EventTarget){
 	var INSTALLED = 1;
 	var LOADED = 2;
 	var UNINSTALLED = 3;
@@ -87,6 +87,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 						}
 					};
 				});
+				
+				if (serviceProxy.dispatchEvent) {
+					EventTarget.attach(serviceProxy);
+				}
 			}
 			return serviceProxy;
 		}
@@ -381,7 +385,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/es5shim"], function(De
 		var _storage = opt_storage || localStorage || {};
 		var _plugins = [];
 		var _channels = [];
-		var _pluginEventTarget = new mServiceregistry.EventTarget();
+		var _pluginEventTarget = new EventTarget();
 	
 		addEventListener("message", function(event) { //$NON-NLS-0$
 			var source = event.source;
