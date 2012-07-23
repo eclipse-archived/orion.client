@@ -33,7 +33,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 	var self = this;
 	var pluginLoadedListener = function(plugin) {
 		plugin.getServiceReferences().forEach(function(serviceRef) {
-			if (serviceRef.getName() === MANAGED_SERVICE) {
+			if (serviceRef.getProperty('service.names').indexOf(MANAGED_SERVICE) !== -1) {
 				// Inject async updated() call to fulfill the guarantee
 				self.initialUpdated(serviceRef);
 			}
