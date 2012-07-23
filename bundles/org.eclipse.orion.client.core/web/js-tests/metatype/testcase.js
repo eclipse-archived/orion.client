@@ -26,28 +26,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		metaTypeRegistry = null;
 	},
 	makeTest = function(body) {
-		return function() {
-			var d = new Deferred();
-			setUp().then(function() {
-				try {
-					var timeoutable = testHelpers.getTimeoutable(body);
-					var result = timeoutable();
-					return result.then(
-						function(r) {
-							tearDown();
-							d.resolve(r);
-						},
-						function(e) {
-							tearDown();
-							d.reject(e);
-						});
-				} catch(e) {
-					tearDown();
-					d.reject(e);
-				}
-			});
-			return d;
-		};
+		return testHelpers.makeTest(setUp, tearDown, body);
 	};
 
 	var tests = {};

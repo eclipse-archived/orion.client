@@ -10,10 +10,9 @@
  ******************************************************************************/
 
 /*global console define navigator setTimeout XMLHttpRequest*/
-define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
-		function(assert, mTest, testHelpers, Deferred, xhr, mEventTarget) {
+define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
+		function(assert, mTest, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
-	var getTimeoutable = testHelpers.getTimeoutable;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
 	/**
 	 * Fake version of XMLHttpRequest for testing without actual network accesses.
@@ -136,15 +135,15 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 	}
 
 	var tests = {};
-	tests['test GET resolve'] = getTimeoutable(function() {
+	tests['test GET resolve'] = function() {
 		return xhr('GET', '/', null, new OkXhr()).then(succeed, fail);
-	});
+	};
 
-	tests['test GET reject'] = getTimeoutable(function() {
+	tests['test GET reject'] = function() {
 		return xhr('GET', '/bogus/url/that/doesnt/exist', null, new FailXhr()).then(fail, succeed);
-	});
+	};
 
-	tests['test timeout causes reject'] = getTimeoutable(function() {
+	tests['test timeout causes reject'] = function() {
 		var timeoutingXhr = new OkXhr();
 		timeoutingXhr.send = function() {
 			MockXMLHttpRequest.prototype.send.call(this);
@@ -156,9 +155,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		return xhr('GET', '/', {
 				timeout: 25 // the value is not important here
 			}, timeoutingXhr).then(fail, succeed);
-	});
+	};
 
-	tests['test resolve value has expected shape'] = getTimeoutable(function() {
+	tests['test resolve value has expected shape'] = function() {
 		return xhr('GET', '/foo', {
 				data: 'my request body',
 				headers: {'X-Foo': 'bar'},
@@ -181,9 +180,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 				assert.equal(result.response, 'success!');
 				assert.ok(result.xhr instanceof MockXMLHttpRequest);
 			}, fail);
-	});
+	};
 
-	tests['test reject value has expected shape'] = getTimeoutable(function() {
+	tests['test reject value has expected shape'] = function() {
 		return xhr('GET', '/bar', {
 				data: 'my request body',
 				headers: {'X-Foo': 'bar'},
@@ -203,9 +202,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 				assert.equal(result.args.timeout, 1500);
 				assert.ok(result.xhr instanceof MockXMLHttpRequest);
 			});
-	});
+	};
 
-	tests['test \'X-Requested-With\' is set'] = getTimeoutable(function() {
+	tests['test \'X-Requested-With\' is set'] = function() {
 		var d = new Deferred();
 		var headerCheckerXhr = new MockXMLHttpRequest();
 		headerCheckerXhr.send = function() {
@@ -220,9 +219,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		};
 		xhr('GET', '/', null, headerCheckerXhr);
 		return d;
-	});
+	};
 
-	tests['test GET query params'] = getTimeoutable(function() {
+	tests['test GET query params'] = function() {
 		return xhr('GET', '/', {
 			query: {
 				'foo': 3,
@@ -232,10 +231,10 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
 		}, fail);
-	});
+	};
 
 	// Bug 382381
-	tests['test POST query params'] = getTimeoutable(function() {
+	tests['test POST query params'] = function() {
 		return xhr('POST', '/', {
 			query: {
 				'foo': 3,
@@ -245,9 +244,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
 		}, fail);
-	});
+	};
 
-	tests['test GET query params encoding'] = getTimeoutable(function() {
+	tests['test GET query params encoding'] = function() {
 		return xhr('GET', '/', {
 			query: {
 				'foo!bar': 31337,
@@ -257,9 +256,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null);
 		}, fail);
-	});
+	};
 
-	tests['test GET query params with fragment'] = getTimeoutable(function() {
+	tests['test GET query params with fragment'] = function() {
 		return xhr('GET', '/#some?junk&we?dont&care?about', {
 			query: {
 				'foo*bar': 'baz',
@@ -269,9 +268,9 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null);
 		}, fail);
-	});
+	};
 
-	tests['test GET query params with existing params and fragment'] = getTimeoutable(function() {
+	tests['test GET query params with existing params and fragment'] = function() {
 		return xhr('GET', '/?a%20=b#some?junk&we?dont&care?about', {
 			query: {
 				'foo*bar': 'baz'
@@ -280,23 +279,23 @@ define(["orion/assert", "orion/test", "orion/testHelpers", "orion/Deferred", "or
 		.then(function(result) {
 			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null);
 		}, fail);
-	});
+	};
 
-	tests['test GET with headers'] = getTimeoutable(function() {
+	tests['test GET with headers'] = function() {
 		return xhr('GET', '/', {
 			headers: {
 				'X-Foo-Bar': 'baz'
 			}
 		}, new OkXhr())
 		.then(succeed, fail);
-	});
+	};
 
-	tests['test open() exception causes reject'] = getTimeoutable(function() {
+	tests['test open() exception causes reject'] = function() {
 		var alreadyOpenXhr = new OkXhr();
 		alreadyOpenXhr.open('GET', '/foo');
 		// Since request is already OPEN the next call to open() will throw, and xhr should catch & reject
 		return xhr('GET', '/bar', null, alreadyOpenXhr).then(fail, succeed);
-	});
+	};
 
 return tests;
 });

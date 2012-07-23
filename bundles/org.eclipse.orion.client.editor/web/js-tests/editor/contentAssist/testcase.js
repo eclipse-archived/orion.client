@@ -9,10 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout*/
-define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
-		function(dojo, DeferredList, assert, testHelpers, mTextModel, mMockTextView, mContentAssist) {
+define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
+		function(dojo, DeferredList, assert, mTextModel, mMockTextView, mContentAssist) {
 	var Deferred = dojo.Deferred,
-		getTimeoutable = testHelpers.getTimeoutable,
 	    ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
@@ -88,27 +87,27 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion
 
 	var tests = {};
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
-	tests.testComputeProposals = getTimeoutable(function() {
+	tests.testComputeProposals = function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
 				computeProposals: getProposalsFunction
 			};
 		});
-	});
+	};
 
 	// Tests that 'getProposals' works as an alias of 'computeProposals' (backwards compatibility)
-	tests.testGetProposals = getTimeoutable(function() {
+	tests.testGetProposals = function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
 				getProposals: getProposalsFunction
 			};
 		});
-	});
+	};
 	
 	// Tests that active ContentAssist will call providers as we type.
-	tests.testFiltering = getTimeoutable(function() {
+	tests.testFiltering = function() {
 		var first = new Deferred(),
 		    second = new Deferred(),
 		    deferred = new DeferredList([first, second]);
@@ -156,10 +155,10 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion
 			});
 		});
 		return deferred;
-	});
+	};
 
 	// Tests that Activating, Deactivating events are fired as expected.
-	tests.testEvents1 = getTimeoutable(function() {
+	tests.testEvents1 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
@@ -178,10 +177,10 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion
 
 		});
 		return deferred;
-	});
+	};
 
 	// Tests that ProposalsComputed, ProposalsApplied events are fired as expected.
-	tests.testEvents2 = getTimeoutable(function() {
+	tests.testEvents2 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
@@ -215,7 +214,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/testHelpers', 'orion
 			});
 		});
 		return deferred;
-	});
+	};
 
 	// TODO Test ContentAssistMode
 //	tests.testContentAssistMode = function() {
