@@ -46,6 +46,22 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 		}
 	},
 	
+	_copyChildren : function(children) {
+		var newChildren = [];
+		for (var e in children) {
+			var child = children[e];
+			newChildren[e] = {
+				Directory: child.Directory, 
+				Length: child.Length, 
+				LocalTimeStamp: child.LocalTimeStamp,
+				Location: child.Location, 
+				ChildrenLocation: child.ChildrenLocation,
+				Name: child.Name
+			};
+		}
+		return newChildren;
+	},
+	
 	loadFolderList: function(path) {
 		path = mUtil.makeRelative(path);
 		this.treeRoot.Location = path;
@@ -55,7 +71,9 @@ dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widg
 					this.treeRoot[i] = loadedWorkspace[i];
 				}
 				// we don't filter out files because there are no files at the workspace root
-				mUtil.processNavigatorParent(this.treeRoot, loadedWorkspace.Children);
+				// We alsos need to copy the children of the loaded work space. Otherwise the tree model is not getting children once you opened the dialog and reopen it.
+				//Refer to https://bugs.eclipse.org/bugs/show_bug.cgi?id=382771#c2.
+				mUtil.processNavigatorParent(this.treeRoot, this._copyChildren(loadedWorkspace.Children));
 				this.createTree();
 			})
 		);
