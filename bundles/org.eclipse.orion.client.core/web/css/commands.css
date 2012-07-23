@@ -51,50 +51,7 @@
 	font-weight:bold;
 }
 
-.commandButton {
-	color: #222;
-	border: 1px solid #dedede;
-	background-color: #efefef;
-	text-align: center;
-	vertical-align: baseline;
-    cursor: pointer;
-    display: inline-block;
-    padding:6px;
-    padding-top: 4px; /* To align with Command Menu */
-    border-radius:1px;
-    line-height: 12px;
-    font-size:8pt;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
 
-.commandButtonOver {
-	background-color: #e6e6e6;
-	border: 1px solid #808080;
-}
-
-.commandMenu {
-    color: #222;
-	display: inline-block;
-	vertical-align: baseline;
-	margin: 0;
-	font-size:8pt;
-	font-weight:normal;
-	border: 1px solid #dedede;
-	background-color: #efefef;
-    cursor: pointer;
-    border-radius:1px;
-}
-
-.commandMenuItem {
-	border: 0;
-	padding: 0;
-	margin: 0;
-}
 
 .commandMenuItemAnchor {
 	padding-right: 40px;

@@ -206,13 +206,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 								messageService.setProgressResult( messages['User profile data successfully reset.'] );
 								
 								if( userdata.Name ){
-								
 									var userMenu = dijit.byId( 'logins' ); //$NON-NLS-0$
-									
 									userMenu.set( 'label', userdata.Name  ); //$NON-NLS-0$
-								
-								}
-								
+								}	
 							});
 						});
 					});
@@ -257,10 +253,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							}
 						});
 						
-						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );
-						
-						
-						
+						settingsWidget.setHash( settingsWidget.iframe, jsonData.Location );	
 					});
 				});
 			}
