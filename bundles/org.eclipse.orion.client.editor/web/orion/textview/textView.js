@@ -3458,8 +3458,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var rootDiv = document.createElement("DIV"); //$NON-NLS-0$
 			this._rootDiv = rootDiv;
 			rootDiv.tabIndex = -1;
-			rootDiv.style.position = "absolute"; //$NON-NLS-0$
+			rootDiv.style.position = "relative"; //$NON-NLS-0$
 			rootDiv.style.overflow = "hidden"; //$NON-NLS-0$
+			rootDiv.style.width = "100%"; //$NON-NLS-0$
+			rootDiv.style.height = "100%"; //$NON-NLS-0$
+			parent.style.overflow = "hidden"; //$NON-NLS-0$
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
@@ -5388,8 +5391,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var rootDiv = this._rootDiv;
 				var parentWidth = parent.clientWidth;
 				var parentHeight = parent.clientHeight;
-				rootDiv.style.width = parentWidth + "px"; //$NON-NLS-0$
-				rootDiv.style.height = parentHeight + "px"; //$NON-NLS-0$
 
 				/* Update view height in order to have client height computed */
 				var viewDiv = this._viewDiv;
