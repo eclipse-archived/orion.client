@@ -11,7 +11,7 @@
 /*jslint regexp: true */
 /*global define window console top self orion setTimeout*/
 
-define(['dojo', 'orion/assert'], function(dojo, assert) {
+define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, EventTarget) {
 	// Time to wait before declaring an async test failed. A test function can override this by defining a 'timeout' property.
 	var DEFAULT_TIMEOUT = 30000;
 
@@ -209,7 +209,8 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 							return _list("", obj);
 						}
 					};
-					var serviceProvider = provider.registerService(["orion.test.runner", "orion.core.event"], impl);
+					EventTarget.attach(impl);
+					var serviceProvider = provider.registerService("orion.test.runner", impl);
 	
 					provider.connect(function() {
 						that.addEventListener("runStart", function(name) { impl.dispatchEvent("runStart", name); });

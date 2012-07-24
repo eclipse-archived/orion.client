@@ -97,7 +97,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
 			var pluginInfo = {
 				location: plugin.getLocation(),
-				data: plugin.getData()
+				data: plugin.getHeaders()
 			};
 
 			assert.equal(pluginRegistry.getPlugins().length, 1);
@@ -213,8 +213,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
 				try {
 					assert.ok(!!plugin, "plugin not null");
-					assert.equal(plugin.getData().services.length, 1);
-					assert.equal(plugin.getData().services[0].properties.name, "echotest");
+					assert.equal(plugin.getServiceReferences().length, 1);
+					assert.equal(plugin.getServiceReferences()[0].getProperty("name"), "echotest");
 					promise.resolve();
 				} catch(e) {
 					promise.reject(e);
@@ -301,8 +301,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
 			try {
 				assert.ok(!!plugin, "plugin not null");
-				assert.equal(plugin.getData().services.length, 1);
-				assert.equal(plugin.getData().services[0].properties.name, "echotest");
+					assert.equal(plugin.getServiceReferences().length, 1);
+					assert.equal(plugin.getServiceReferences()[0].getProperty("name"), "echotest");
 				promise.resolve();
 			} catch(e) {
 				promise.reject(e);

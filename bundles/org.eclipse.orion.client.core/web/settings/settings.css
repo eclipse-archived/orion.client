@@ -478,3 +478,27 @@ input, textarea, select {
 	min-width:50px;
 	text-align:center;
 }
+
+
+/* - - - - - T H E M E  C H O O S E R - - - - - */
+
+
+.themeContainer{
+	margin:20px;
+	width: 450px;
+}
+
+.settingsLabel{
+	margin: 10px;
+	min-width: 145px;
+	display: inline-block;
+}
+
+
+
+
+
+
+
+
+

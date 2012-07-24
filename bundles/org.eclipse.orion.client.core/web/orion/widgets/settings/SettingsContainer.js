@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -122,6 +122,55 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.addCategory(item, this.initialSettings.length);
 		},
 		
+		addThemeBuilder: function() {
+
+			var item = {
+				id: "themeBuilder", //$NON-NLS-0$
+				innerHTML: 'Themes', // messages["Themes"],
+				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
+				role: "tab", //$NON-NLS-0$
+				tabindex: -1,
+				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
+				onclick: dojo.hitch( this, 'showThemeBuilder', "themeBuilder" ) //$NON-NLS-1$ //$NON-NLS-0$
+			};
+
+			this.addCategory(item, this.initialSettings.length);
+		},
+		
+		
+		showThemeBuilder: function(id){
+		
+
+			if (this.selectedCategory) {
+				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+				dojo.attr(this.selectedCategory, "aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.selectedCategory.tabIndex = -1;
+			}
+
+			if (id) {
+				this.selectedCategory = dojo.byId(id);
+			}
+			
+			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
+			this.selectedCategory.tabIndex = 0;
+			this.selectedCategory.focus();
+			
+			this.updateToolbar(id);
+		
+			if(this.themeWidget) {
+				this.themeWidget.destroy();
+			}
+		
+			this.themeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences });
+			
+			dojo.empty(this.table);
+
+			var themeNode = dojo.create( 'div', null, this.table );
+			
+			this.themeWidget.render(themeNode, 'INITIALIZE');
+		},
 		
 		showUserSettings: function(id){
 		
@@ -235,6 +284,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					this.showUserSettings(id);
 					break;
 					
+				case "themeBuilder":
+					this.showThemeBuilder(id);
+					break;
+					
 				default:
 					this.selectCategory(id);
 					break;
@@ -248,6 +301,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 
 			this.addUserSettings();
+			this.addThemeBuilder();
 			this.addPlugins();
 			this.processHash();
 

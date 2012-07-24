@@ -43,12 +43,11 @@
 			};
 
 			usersService.initProfile = function (userURI, pluginsEventName, dataEventName) {
-				var userService = this._serviceRegistration;
 				return this.getUserInfo(userURI, function (json) {
-					userService.dispatchEvent(pluginsEventName, {
+					usersService.dispatchEvent(pluginsEventName, {
 						"plugins": json.Plugins
 					});
-					userService.dispatchEvent(dataEventName, json);
+					usersService.dispatchEvent(dataEventName, json);
 				});
 			};
 
@@ -83,8 +82,11 @@
 					break;
 				}
 			};
+			usersService.dispatchEvent = function(){
+				// this method will get wrapped and delegated to the plugin
+			};
 
-			usersService._serviceRegistration = provider.registerService(["orion.core.user", "orion.core.event"], usersService);
+			provider.registerService("orion.core.user", usersService);
 			provider.connect();
 		};
 		</script>

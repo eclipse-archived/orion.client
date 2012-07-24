@@ -11,7 +11,7 @@
 
 /*global define */
 
-define([], function() {
+define(["orion/EventTarget"], function(EventTarget) {
 
 	/**
 	 * Creates a new problem service instance. Client should obtain the service
@@ -22,7 +22,8 @@ define([], function() {
 	 */
 	function ProblemService(serviceRegistry) {
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService(["orion.core.marker","orion.core.event"], this); //$NON-NLS-0$
+		EventTarget.attach(this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.core.marker", this); //$NON-NLS-0$
 	}
 
 	ProblemService.prototype = /** @lends orion.problems.ProblemService.prototype */ {

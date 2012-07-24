@@ -18,7 +18,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 
 	dojo.declare("orion.widgets.settings.TextField", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		// templateString: '<input type="text" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
+		 templateString: '<input type="text" style:"width:190px;" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
 		
 //		templateString: '<div><div>THIS IS A PLACEHOLDER</div></div>',
 		
@@ -31,7 +31,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 		
 		constructor: function(){
 			this.inherited( arguments );
-			console.log( 'c o n s t r u c t o r: ' + this.ui ); //$NON-NLS-0$
+//			console.log( 'c o n s t r u c t o r: ' + this.ui ); //$NON-NLS-0$
 		},
 		
 		setStorageItem: function(){
@@ -41,15 +41,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 		
 		change: function(){
 		
-			var value = this.selection.value;
+			if( this.selection && this.selection.value ){
+				var value = this.selection.value;
+			}
 		
 			this.setStorageItem( this.category, this.item, this.element, value, this.ui );
 		},
 		
 		postCreate: function(){
 			this.inherited( arguments );
-			
-			console.log( 'p o s t c r e a t e' ); //$NON-NLS-0$
 			
 //			this.textfield.name = this.ui;
 		}	

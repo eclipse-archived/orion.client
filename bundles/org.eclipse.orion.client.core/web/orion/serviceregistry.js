@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define console */
 
-define(["orion/Deferred", "orion/es5shim"], function(Deferred) {
+define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferred, EventTarget) {
 
 	/**
 	 * Creates a new service reference.
@@ -88,115 +88,37 @@ define(["orion/Deferred", "orion/es5shim"], function(Deferred) {
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-	function _createServiceCall(internalRegistry, serviceId, implementation, methodName) {
-		return function() {
-			var d;
-			if (internalRegistry.isRegistered(serviceId)) {
-				try {
-					var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-					if (result && typeof result.then === "function") {
-						return result;
-					} else {
-						d = new Deferred();
-						d.resolve(result);
-					}
-				} catch (e) {
-						d = new Deferred();
-						d.reject(e);
-				}
-				return d.promise;
-			}
-			throw new Error("Service was unregistered");
-		};
-	}
-
-	/**
-	 * Creates a new service instance.
-	 *
-	 * @name orion.serviceregistry.Service
-	 * @class A concrete service in the Orion service registry
-	 * @param {String} serviceId The symbolic id of this service
-	 * @param {Object} implementation An object implementing the service contract
-	 * @param {orion.serviceregistry.ServiceRegistry} internalRegistry A JSON object containing the service's declarative properties
-	 */
-
 	function Service(serviceId, implementation, internalRegistry) {
 		var method;
+
+		function _createServiceCall(methodName) {
+			return function() {
+				var d;
+				if (internalRegistry.isRegistered(serviceId)) {
+					try {
+						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
+						if (result && typeof result.then === "function") {
+							return result;
+						} else {
+							d = new Deferred();
+							d.resolve(result);
+						}
+					} catch (e) {
+							d = new Deferred();
+							d.reject(e);
+					}
+					return d.promise;
+				}
+				throw new Error("Service was unregistered");
+			};
+		}
+
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {
-				this[method] = _createServiceCall(internalRegistry, serviceId, implementation, method);
+				this[method] = _createServiceCall(method);
 			}
 		}
 	}
-
-
-	/**
-	 * Creates an Event Target
-	 *
-	 * @name orion.serviceregistry.EventTarget
-	 * @class Base for creating an Orion event target
-	 */
-
-	function EventTarget() {
-		this._namedlisteners = {};
-	}
-
-	EventTarget.prototype = /** @lends orion.serviceregistry.EventTarget.prototype */
-	{
-		/**
-		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
-		 * will be passed to the event listener(s).
-		 * @param {String} eventName The event name
-		 */
-		dispatchEvent: function(eventName) {
-			var listeners = this._namedlisteners[eventName];
-			if (listeners) {
-				for (var i = 0; i < listeners.length; i++) {
-					try {
-						var args = Array.prototype.slice.call(arguments, 1);
-						listeners[i].apply(null, args);
-					} catch (e) {
-						console.log(e); // for now, probably should dispatch an
-						// ("error", e)
-					}
-				}
-			}
-		},
-
-		/**
-		 * Adds an event listener for a named event
-		 * @param {String} eventName The event name
-		 * @param {Function} listener The function called when an event occurs
-		 */
-		addEventListener: function(eventName, listener) {
-			this._namedlisteners[eventName] = this._namedlisteners[eventName] || [];
-			this._namedlisteners[eventName].push(listener);
-		},
-
-		/**
-		 * Removes an event listener for a named event
-		 * @param {String} eventName The event name
-		 * @param {Function} listener The function called when an event occurs
-		 */
-		removeEventListener: function(eventName, listener) {
-			var listeners = this._namedlisteners[eventName];
-			if (listeners) {
-				for (var i = 0; i < listeners.length; i++) {
-					if (listeners[i] === listener) {
-						if (listeners.length === 1) {
-							delete this._namedlisteners[eventName];
-						} else {
-							listeners.splice(i, 1);
-						}
-						break;
-					}
-				}
-			}
-		}
-
-	};
-	EventTarget.prototype.constructor = EventTarget;
-
 
 	/**
 	 * Creates a new service registry
@@ -294,14 +216,6 @@ define(["orion/Deferred", "orion/es5shim"], function(Deferred) {
 			
 			var reference = new ServiceReference(serviceId, names, properties);
 			var service = new Service(serviceId, implementation, this.internalRegistry);
-			
-			// try to provide/inject a dispatchEvent method if the service provides orion.core.event
-			if (names.indexOf("orion.core.event") !== -1) {
-				var eventTarget = new EventTarget();
-				implementation.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
-				service.addEventListener = eventTarget.addEventListener.bind(eventTarget);
-				service.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);
-			}
 
 			var namedReferences = this._namedReferences;
 			names.forEach(function(name) {
@@ -341,8 +255,6 @@ define(["orion/Deferred", "orion/es5shim"], function(Deferred) {
 	return {
 		ServiceReference: ServiceReference,
 		ServiceRegistration: ServiceRegistration,
-		Service: Service,
-		EventTarget: EventTarget,
 		ServiceRegistry: ServiceRegistry
 	};
 });
