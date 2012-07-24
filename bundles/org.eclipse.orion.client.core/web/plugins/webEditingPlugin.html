@@ -89,6 +89,14 @@ window.onload = function() {
 				image: "../images/wtp/image.gif"
 			}]
 		});
+		
+	provider.registerService("orion.navigate.command", {}, {
+		name: "Raw",
+		id: "orion.view.raw",
+		tooltip: "Open the raw file or folder in the browser",
+		uriTemplate: "{OrionHome}/{Location}",
+		forceSingleItem: true
+	});
 	
 	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
