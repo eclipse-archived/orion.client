@@ -31,7 +31,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/util', 'd
 			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, this.containerNode); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-			link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(commitMessage0), link);
 
 			dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
