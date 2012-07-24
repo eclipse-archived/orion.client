@@ -186,35 +186,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		loginDialog.authenticatedService(SignInKey);
 	}
 
-	/**
-	 * Adds the DOM-related commands to the banner
-	 * @name orion.globalCommands#generateDomCommandsInBanner
-	 * @function
-	 */
-	function generateDomCommandsInBanner(commandService, handler, item, navHandler, navItem, ignoreForNow, clientManagesPageNav) {
-		// close any open slideouts because we are retargeting
-		commandService.closeParameterCollector();
-		var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
-		if (toolbar) {	
-			dojo.empty(toolbar);
-			// The render call may be synch (when called by page glue code that created the service)
-			// or asynch (when called after getting a service reference).
-			var retn = commandService.renderCommands(toolbar.id, toolbar, item || handler, handler, "button"); //$NON-NLS-0$
-			if (retn && retn.then) {
-				retn.then(function() {commandService.processURL(window.location.href);});
-			} else {
-				commandService.processURL(window.location.href);
-			} 
-		}
-		// now page navigation actions
-		if (!clientManagesPageNav) {
-			toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
-			if (toolbar) {	
-				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
-			}
-		}
-	}
 	
 	// Related links menu management.  The related drop down widget and its associated dropdown menu
 	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
@@ -614,24 +585,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		applyTheme( prefsService );
 		
 		var target = "_self"; //$NON-NLS-0$
-		
 		var parent = dojo.byId(parentId);
-		if (!parent) {
-			throw messages["could not find banner parent, id was "] + parentId;
-		}
-				
+		
 		if (!dojo.byId("staticBanner")) {
+			if (!parent) {
+				throw messages["could not find banner parent, id was "] + parentId;
+			}
 			// place the HTML fragment for the header.
-			dojo.place(commonHTML.topHTMLFragment, parent, "only"); //$NON-NLS-0$
+			dojo.place(commonHTML.topHTMLFragment, parent, "first"); //$NON-NLS-0$
 		}
 		
 		var toolbar = dojo.byId("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
 			dojo.addClass(toolbar, "toolComposite"); //$NON-NLS-0$
-		} else {
-			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar toolComposite layoutBlock"}, "titleArea", "after"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
 		}
 		
 		if (!dojo.byId("footerContent")) {
@@ -921,7 +888,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		startProgressService(serviceRegistry);
 
 		// force layout
-		mUtil.forceLayout(parent.parentNode);
+		if (parent) {
+			mUtil.forceLayout(parent.parentNode);
+		}
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", commandService, function() { //$NON-NLS-0$
 			commandService.processURL(window.location.href);
@@ -966,7 +935,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	return {
 		generateUserInfo: generateUserInfo,
 		generateRelatedLinks: generateRelatedLinks,
-		generateDomCommandsInBanner: generateDomCommandsInBanner,
 		generateBanner: generateBanner,
 		notifyAuthenticationSite: notifyAuthenticationSite,
 		setPendingAuthentication: setPendingAuthentication,

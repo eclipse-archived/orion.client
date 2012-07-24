@@ -18,7 +18,7 @@ define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'o
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil",
-        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer' ], 
+       'dojo/hash'], 
 		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
@@ -34,9 +34,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var problemService;
 	var outlineService;
 	var contentTypeService;
-	
-	document.body.style.visibility = "visible"; //$NON-NLS-0$
-	dojo.parser.parse();
 	
 	// Initialize the plugin registry
 	(function() {
@@ -54,8 +51,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 	
-	var splitArea = dijit.byId("topContainer"), //$NON-NLS-0$
-		outlineDomNode = dojo.byId("outline"), //$NON-NLS-0$
+	var outlineDomNode = dojo.byId("outline"), //$NON-NLS-0$
 		editorDomNode = dojo.byId("editor"), //$NON-NLS-0$
 		mainPane = dijit.byId("mainPane"), //$NON-NLS-0$
 		searchFloat = dojo.byId("searchFloat"); //$NON-NLS-0$
@@ -120,7 +116,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						var altPageTarget, name;
 						if (metadata) {
 							this._fileMetadata = metadata;
-							mGlobalCommands.generateDomCommandsInBanner(commandService, editor);
+							var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+							if (toolbar) {	
+								dojo.empty(toolbar);
+								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
+							}
+							toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
+							if (toolbar) {	
+								dojo.empty(toolbar);
+								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+							}
 							this.setTitle(metadata.Location);
 							this._contentType = contentTypeService.getFileContentType(metadata);
 							// page target is the file, but if any interesting links fail, try the parent folder metadata.
@@ -421,7 +426,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// splitter binding
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
 		editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
-				splitArea.toggle();
+				// splitArea.toggle();
 				return true;
 		}, {name: messages["Toggle Outliner"]}); //$NON-NLS-0$
 	};
@@ -497,12 +502,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);}); //$NON-NLS-0$
 	inputManager.setInput(dojo.hash(), editor);
 	
-	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
+	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		syntaxChecker.checkSyntax(inputManager.getContentType(), evt.title, evt.message, evt.contents);
 	});
+	
+	var filteredProviders;
 	
 	// Create outliner "gadget"
 	var outliner = new mOutliner.Outliner({parent: outlineDomNode,
@@ -510,9 +517,13 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		outlineService: serviceRegistry.getService("orion.edit.outline"), //$NON-NLS-0$
 		commandService: commandService,
 		selectionService: selection});
+	if (filteredProviders) {
+		outliner.setOutlineProviders(filteredProviders);
+	}
+		
 	function setOutlineProviders(fileContentType, title) {
-		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"), //$NON-NLS-0$
-		    filteredProviders = [];
+		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner");
+		filteredProviders = [];
 		for (var i=0; i < outlineProviders.length; i++) {
 			var serviceReference = outlineProviders[i],
 			    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
@@ -544,7 +555,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				filteredProviders[i].displayName = filteredProviders[i].getProperty("name");
 			}
 		}
-		if(deferreds.lenth==0){
+		if(deferreds.length==0){
 			outlineService.setOutlineProviders(filteredProviders);
 			outliner.setOutlineProviders(filteredProviders);
 		}else{
@@ -572,7 +583,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	document.onkeydown = function (evt){
 		evt = evt || window.event;
 		if(evt.ctrlKey && evt.keyCode  === 79){
-			splitArea.toggle();
+			// splitArea.toggle();
 			if(document.all){ 
 				evt.keyCode = 0;
 			}else{ 
