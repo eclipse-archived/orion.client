@@ -885,6 +885,8 @@ var exports = {};
 
 		var fetchForceCommand = new mCommands.Command({
 			name : messages["Force Fetch"],
+			imageClass: "git-sprite-fetch",
+			spriteClass: "gitCommandSprite",
 			tooltip: messages["Fetch from the remote branch into your remote tracking branch overriding its current content"],
 			id : "eclipse.orion.git.fetchForce", //$NON-NLS-0$
 			callback: function(data) {			
@@ -1868,6 +1870,47 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(cloneGitRepositoryCommand);
+		
+		var cloneGitRepositoryCommandPullReq = new mCommands.Command({
+			name : messages["Clone Repository"],
+			tooltip : messages["Clone an existing Git repository to a folder"],
+			id : "eclipse.cloneGitRepositoryPullReq", //$NON-NLS-0$
+			//parameters: cloneParameters,
+			callback : function(data) {
+				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+				var cloneFunction = function(gitUrl, path, name) {
+					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
+						var func = arguments.callee;
+						serviceRegistry.getService("orion.page.message").createProgressMonitor(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+								options.gitPrivateKey, options.gitPassphrase),
+								messages["Cloning repository: "] + gitUrl).deferred.then(function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
+								if (explorer.changedItem) {
+									dojo.hitch(explorer, explorer.changedItem)();
+								}
+							}, func, messages['Clone Git Repository']);
+						}, function(jsonData, secondArg) {
+							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages['Clone Git Repository']);
+						});
+					});
+				};
+				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+					serviceRegistry: serviceRegistry,
+					fileClient: fileClient,
+					url: data.userData,
+					alwaysShowAdvanced: false,
+					func: cloneFunction
+				});
+						
+				dialog.startup();
+				dialog.show();
+
+			},
+			visibleWhen : function(item) {
+				return true;
+			}
+		});
+		commandService.addCommand(cloneGitRepositoryCommandPullReq);
 
 		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", messages['New folder:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
