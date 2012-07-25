@@ -158,12 +158,10 @@ ConfigAdminFactory = /** @ignore */ (function() {
 
 	/** @private */
 	function ConfigAdminFactory(serviceRegistry, pluginRegistry, prefsService) {
-		this.serviceRegistry = serviceRegistry;
 		this.store = new ConfigStore(this, prefsService);
 		this.configAdmin = new ConfigAdminImpl(this, this.store);
 		this.tracker = new ManagedServiceTracker(serviceRegistry, pluginRegistry, this.store);
 		this.tracker.open();
-		this.serviceRegistered = false;
 //		this.dispatcher = {};
 //		AsyncEventTarget.addMixin(this.dispatcher);
 	}
@@ -171,10 +169,6 @@ ConfigAdminFactory = /** @ignore */ (function() {
 		getConfigurationAdmin: function() {
 			var self = this;
 			return this.store.initialize().then(function() {
-				if (!self.serviceRegistered) {
-					// TODO don't register this ourself
-					self.serviceRegistry.registerService('orion.cm.configadmin', self.configAdmin); //$NON-NLS-0$
-				}
 				return self.configAdmin;
 			});
 		},
