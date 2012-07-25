@@ -231,6 +231,14 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 	
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
 		/**
+		 * Returns the file service managing this location
+		 * @param location The location of the item 
+		 */
+		getService: function(location) {
+			return this._getService(location);
+		},
+		 
+		/**
 		 * Returns the name of the file service managing this location
 		 * @param location The location of the item 
 		 */

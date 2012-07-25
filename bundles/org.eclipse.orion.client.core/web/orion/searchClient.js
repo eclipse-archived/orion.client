@@ -13,7 +13,8 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'orion/crawler/searchCrawler', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], 
+function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search client.
@@ -40,40 +41,53 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 		 */
 		search: function(query, excludeFile, renderer) {
 			var qObj = mSearchUtils.parseQueryStr(query);
-			try {
-				this._fileService.search(qObj.location, query).then(function(jsonData) {
-					/**
-					 * transforms the jsonData so that the result conforms to the same
-					 * format as the favourites list. This way renderer implementation can
-					 * be reused for both.
-					 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
-					 */
-					var transform = function(jsonData) {
-						var transformed = [];
-						for (var i=0; i < jsonData.response.docs.length; i++) {
-							var hit = jsonData.response.docs[i];
-							transformed.push({name: hit.Name, 
-											  path: hit.Location, 
-											  folderName: mSearchUtils.path2FolderName(hit.Path, hit.Name),
-											  directory: hit.Directory, 
-											  lineNumber: hit.LineNumber});
-						}
-						return transformed;
-					};
-					var token = jsonData.responseHeader.params.q;
-					token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
-					//remove field name if present
-					token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
-					renderer(transform(jsonData), token);
-				}, function(error) {
-					renderer(null, null, error);
-				});
-			}
-			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+			var transform = function(jsonData) {
+				var transformed = [];
+				for (var i=0; i < jsonData.response.docs.length; i++) {
+					var hit = jsonData.response.docs[i];
+					transformed.push({name: hit.Name, 
+									  path: hit.Location, 
+									  folderName: mSearchUtils.path2FolderName(hit.Path ? hit.Path : hit.Location, hit.Name),
+									  directory: hit.Directory, 
+									  lineNumber: hit.LineNumber});
+				}
+				return transformed;
+			};
+			if(this._crawler){ //$NON-NLS-0$
+				this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+			} else {
+				try {
+					this._fileService.search(qObj.location, query).then(function(jsonData) {
+						/**
+						 * transforms the jsonData so that the result conforms to the same
+						 * format as the favourites list. This way renderer implementation can
+						 * be reused for both.
+						 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
+						 */
+						var token = jsonData.responseHeader.params.q;
+						token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
+						//remove field name if present
+						token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
+						renderer(transform(jsonData), token);
+					}, function(error) {
+						renderer(null, null, error);
+					});
+				}
+				catch(error){
+					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
+						this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+					} else {
+						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+					}
+				}
 			}
 		},
-						
+		getFileService: function(){
+			return this._fileService;
+		},
+		setCrawler: function(crawler){
+			this._crawler = crawler;
+		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
 			var errorText = document.createTextNode(response);
@@ -124,7 +138,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
 		 * @param {Boolean} [skipLocation] If true, do not use the location property of the searcher. Use "" as the location instead.
 		 */
-		createSearchQuery: function(query, nameQuery, sort, skipLocation)  {
+		createSearchQuery: function(query, nameQuery, sort, skipLocation, searchPrefix)  {
 			if (!sort) {
 				sort = "Path"; //$NON-NLS-0$
 			}
@@ -135,7 +149,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					searchStr: "NameLower:" + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
+					location: skipLocation ? "": this.location,
+					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
