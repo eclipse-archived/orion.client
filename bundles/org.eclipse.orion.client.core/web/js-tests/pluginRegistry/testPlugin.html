@@ -2,7 +2,6 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script src="../../orion/plugin.js"></script>
 	<script src="../../requirejs/require.js"></script>
 	<script>
 		/*global require orion window*/
@@ -12,8 +11,8 @@
 			  domReady: 'requirejs/domReady'
 		  }
 		});
-		require(["orion/Deferred", "orion/EventTarget", "domReady!"], function(Deferred, EventTarget) {
-			var provider = new orion.PluginProvider();
+		require(["orion/Deferred", "orion/EventTarget", "orion/plugin", "domReady!"], function(Deferred, EventTarget, PluginProvider) {
+			var provider = new PluginProvider();
 			var impl = {
 				test: function(echo) {
 					return echo;
