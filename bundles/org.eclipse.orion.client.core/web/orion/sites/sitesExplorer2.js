@@ -12,6 +12,7 @@
 define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorer', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
 		'orion/selection', 'orion/sites/siteUtils', 'orion/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
 		function(messages, i18nUtil, dojo, mExplorer, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable) {
+	var SiteServicesExplorer2, SitesRenderer2, SiteTreeModel;
 
 	/** 
 	 * Generates an explorer showing the sites on each site service.
@@ -50,10 +51,10 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 		SiteServicesExplorer2.prototype._getSiteConfigurations = function(siteServices, result, deferred){
 			var that = this;
 			
-			if (deferred == null)
+			if (!deferred)
 				deferred = new dojo.Deferred();
 			
-			if (result == null)
+			if (!result)
 				result = [];
 			
 			if (siteServices.length > 0) {
@@ -68,7 +69,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 			}
 			
 			return deferred;
-		},
+		};
 		
 		SiteServicesExplorer2.prototype.display = function(){
 			var that = this;
@@ -220,7 +221,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 		return SitesRenderer2;
 	}());
 	
-	var SiteTreeModel = (function() {
+	SiteTreeModel = (function() {
 		/**
 		 * @name orion.sites.SiteTreeModel
 		 * @class Tree model for powering a tree of site configurations.
