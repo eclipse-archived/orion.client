@@ -47,7 +47,6 @@ define({
 	"Add the file to this site": "Add the file to this site",
 	"View": "View",
 	"View the file on the site": "View the file on the site",
-	"Site Configurations on ": "Site Configurations on ",
 	"Started": "Started at",
 	"Unknown": "Unknown",
 	"Name": "Name",

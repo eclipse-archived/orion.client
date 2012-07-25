@@ -168,7 +168,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
            
 			var tableContainer = dojo.create( "div", { "class":"tablecontainer" }, entry); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var table = dojo.create( "table", {"class":"serviceTable"}, tableContainer ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place('<thead><tr><th scope="col" id="...">Item</th><th scope="col" id="...">'+messages['Value']+'</th></tr></thead>', table);  //$NON-NLS-2$ //$NON-NLS-0$
+			dojo.place('<thead><tr><th scope="col" id="...">'+messages['Item']+'</th><th scope="col" id="...">'+messages['Value']+'</th></tr></thead>', table);  //$NON-NLS-2$ //$NON-NLS-0$
 			dojo.place('<tfoot><tr><td></td></tr></tfoot>', table);  //$NON-NLS-0$
 			var tablebody = dojo.create( "tbody", null, table); //$NON-NLS-0$
 	    
