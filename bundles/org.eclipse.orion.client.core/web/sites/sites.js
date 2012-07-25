@@ -49,7 +49,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				mSiteCommands.createSiteCommands(serviceRegistry);
 			}
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: "Sites"});
 			
 			var explorer = new mSitesExplorer.SiteServicesExplorer2(serviceRegistry, selection, "table"); //$NON-NLS-0$
