@@ -5,8 +5,9 @@ of the room.  A page always has a fixed header but may have a fluid footer (at t
 a fixed footer on the bottom of the page.
 
 There are implied variables here.
-Footer height: 1.5em is used for margins.
-Header height:
+Footer height: 28px
+Toolbar height: 31px
+Header height: 60px
 */
 
 .content-fixedHeight {
@@ -90,6 +91,7 @@ Header height:
 	z-index: 500;
 	width: 33%;
 	margin-bottom: 28px;  /* footer height */   
+	margin-right: 8px; /* splitter height */
 }
 
 .auxPadding {
@@ -108,12 +110,37 @@ Header height:
 	top: 60px;
 	bottom: 0;
 	z-index: 500;
-	width: 66%;
+	width: 67%;
 	margin-bottom: 28px;  /* footer height */
 }
 
 .mainPadding {
 	padding-left: 4px;
 	padding-top: 4px;
+}
+
+.fixedToolbarHolder {
+	position: relative;
+	left: 0;
+	top: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.toolbarAssociate {
+	position: absolute;
+	top: 32px;
+ 	width: 100%;
+ 	bottom: 0;
+}
+
+.split {
+	position: absolute;
+	top: 60px;
+	bottom: 0;
+	left: 33%;
+	z-index: 800;
+	width: 4px;
+	background: red;
 }
 
