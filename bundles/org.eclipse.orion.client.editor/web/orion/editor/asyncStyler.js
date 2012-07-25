@@ -20,7 +20,8 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 	});
 
 	function isRelevant(serviceReference) {
-		return serviceReference.getName() === SERVICE_NAME && serviceReference.getProperty("type") === "highlighter";
+		return serviceReference.getProperty("service.names").indexOf(SERVICE_NAME) !== -1 &&
+				serviceReference.getProperty("type") === "highlighter";
 	}
 
 	/**

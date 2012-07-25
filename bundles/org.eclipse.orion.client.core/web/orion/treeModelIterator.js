@@ -88,7 +88,7 @@ exports.TreeModelIterator = (function() {
 			if(!next){
 				if(forceExpand && this._expandable(this._cursor) && this.forceExpandFunc){
 					var that = this;
-					return this.forceExpandFunc(this._cursor, "first", function(model){if(mdoel){that.setCursor(model);};});
+					return this.forceExpandFunc(this._cursor, "first", function(model){if(mdoel){that.setCursor(model);};}); //$NON-NLS-0$
 				}
 				next = this._findSibling(this._cursor, true);
 				if(next){
@@ -104,7 +104,7 @@ exports.TreeModelIterator = (function() {
 				previous = this._drillToLast(previous);
 			}
 			if(forceExpand && previous && this._expandable(previous) && this.forceExpandFunc && previous !== this._cursor.parent){
-				return this.forceExpandFunc(previous, "last", function(model){if(mdoel){that.setCursor(model);};});
+				return this.forceExpandFunc(previous, "last", function(model){if(mdoel){that.setCursor(model);};}); //$NON-NLS-0$
 			}
 			if(previous){
 				this.setCursor(previous);
@@ -161,6 +161,24 @@ exports.TreeModelIterator = (function() {
 			return this._onCollapse(model.parent);
 		},
 		
+		_scan: function(forward, from, to){
+			this.setCursor(from);
+			var selection = [];
+			selection.push(from);
+			while(true){
+				if(this.iterate(forward)){
+					selection.push(this.cursor());
+				} else {
+					break;
+				}
+				if(to === this.cursor()){
+					return selection;
+				}
+			}
+			selection = [];
+			return null;
+		},
+		
 		/**
 		 * Set the cursor to the given model
 		 * @param {Object} the given model
@@ -183,6 +201,22 @@ exports.TreeModelIterator = (function() {
 		
 		/**
 		 * Iterate from the current cursor
+		 * @param {object} from the model object that the selection range starts from. Will be included in the return array.
+		 * @param {object} to the model object that the selection range ends at. Will be included in the return array.
+		 * @returns {Array} The selection of models in the array.
+		 */
+		scan: function(from, to) {
+			var currentCursor = this.cursor();
+			var selection = this._scan(true, from, to);
+			if(!selection){
+				selection = this._scan(false, from, to);
+			}
+			this.setCursor(currentCursor);
+			return selection;
+		},
+		
+		/**
+		 * scan a selection range 
 		 * @param {boolean} forward the iteration direction. If true then iterate to next, otherwise previous.
 		 * @param {boolean} forceExpand optional. the flag for the current cursor to dive into its children. 
 		 *                  If the cursor has no children yet or its children are not expanded, this method will call forceExpandFunc.

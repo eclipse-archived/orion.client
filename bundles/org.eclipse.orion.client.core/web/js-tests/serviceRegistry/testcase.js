@@ -11,7 +11,7 @@
 /*global define console setTimeout*/
 
 
-define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert, mServiceRegistry) {
+define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(assert, mServiceRegistry, EventTarget) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
@@ -25,7 +25,7 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 			test : 1
 		});
 		var reference = registration.getServiceReference();
-		assert.equal("testRegister", reference.getName());
+		assert.equal("testRegister", reference.getProperty("service.names")[0]);
 		assert.equal(1, reference.getProperty("test"));
 
 		assert.equal(0, count);
@@ -106,28 +106,6 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 		
 	};
 
-//	tests.testGetServiceDelayed = function() {
-//		var count = 0;
-//		var registry = new mServiceRegistry.ServiceRegistry();
-//		registry.getService("testGetServiceDelayed", 0).then(null, function(e) {
-//			count++;
-//		});
-//		assert.equal(1, count);
-//
-//		registry.getService("testGetServiceDelayed").then(function(service) {
-//			return service.test();
-//		}).then(function(newcount) {
-//			count = newcount;
-//		});
-//		assert.equal(1, count);
-//		var registration = registry.registerService("testGetServiceDelayed", {
-//			test : function() {
-//				return count + 1;
-//			}
-//		});
-//		assert.equal(2, count);
-//	};
-
 	tests.testEvents = function() {
 		var count = 0;
 		var serviceAddedCount = 0;
@@ -146,11 +124,17 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 
 		assert.equal(0, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);
-		var registration = registry.registerService("testEvents", {
+		var impl = {
 			test : function() {
 				return count + 1;
 			}
-		});
+		};
+		var eventTarget = new EventTarget();
+		impl.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+		impl.addEventListener = eventTarget.addEventListener.bind(eventTarget);
+		impl.removeEventListener = eventTarget.removeEventListener.bind(eventTarget);		
+		
+		var registration = registry.registerService(["testEvents"], impl);
 		assert.equal(1, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);
 
@@ -160,70 +144,17 @@ define(["dojo", "orion/assert", "orion/serviceregistry"], function(dojo, assert,
 		};
 		service.addEventListener("event", eventHandler);
 		assert.equal(null, eventResult);
-		registration.dispatchEvent("nonevent", "bad");
+		impl.dispatchEvent("nonevent", "bad");
 		assert.equal(null, eventResult);
-		registration.dispatchEvent("event", "good");
+		impl.dispatchEvent("event", "good");
 		assert.equal("good", eventResult);
 		service.removeEventListener("event", eventHandler);
-		registration.dispatchEvent("event", "bad");
+		impl.dispatchEvent("event", "bad");
 		assert.equal("good", eventResult);
 
 		registration.unregister();
 		assert.equal(1, serviceAddedCount);
 		assert.equal(1, serviceRemovedCount);
-	};
-	
-	tests.testDojoPromiseProgressBasic = function() {
-		var a = new dojo.Deferred();
-		var b = new dojo.Deferred();
-		var called = false;
-		
-		setTimeout(function() {
-			a.resolve();
-			b.progress();
-			b.resolve();
-		}, 0);
-		
-		return a.then(function() {
-			return b.then(function(){
-				if (!called) {
-					assert.ok(called);
-					//console.log("Boo. ProgressBasic not called");
-				}
-			}, function(){
-				console.log("Unexpected");
-			}, function(){
-				called = true; 
-				//console.log("Yay. ProgressBasic called");
-			});
-		});
-	};
-	
-	// see http://bugs.dojotoolkit.org/ticket/14090
-	tests.testDojoPromiseProgressChain = function() {
-		var a = new dojo.Deferred();
-		var b = new dojo.Deferred();
-		var called = false;
-
-		setTimeout(function() {
-			a.resolve();
-			b.progress();
-			b.resolve();
-		}, 0);
-		
-		return a.then(function() {
-			return b;
-		}).then(function(){
-			if (!called) {
-				assert.ok(called);
-				//console.log("Boo. ProgressChain not called");
-			}
-		}, function(){
-			console.log("Unexpected");
-		}, function(){
-			called = true; 
-			//console.log("Yay. ProgressChain called");
-		});
 	};
 
 	return tests;

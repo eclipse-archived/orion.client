@@ -16,9 +16,9 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/Select', 'dijit/ColorPalette'], function(require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.Select", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.settings.Select", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		templateString: '<select data-dojo-attach-point="selection" data-dojo-attach-event="onchange:change"></select>',
+		templateString: '<select data-dojo-attach-point="selection" data-dojo-attach-event="onchange:change"></select>', //$NON-NLS-0$
 		
 		// category, item, element, ui - provided on construction
 		
@@ -29,14 +29,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 		
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
-			console.log( 'ColorPicker setStorageIem' );
+			console.log( 'ColorPicker setStorageIem' ); //$NON-NLS-0$
 		},
 		
 		change: function(){
 		
 			var value = this.selection.value;
-		
-		 	this.setStorageItem( this.category, this.item, this.element, value, this.ui );
+			
+			if( this.category ){
+				this.setStorageItem( this.category, this.item, this.element, value, this.ui );
+		 	}else{
+		 		this.setStorageItem( value );
+		 	}
 		},
 		
 		postCreate: function(){
@@ -45,7 +49,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 			var option = 0;
 			
 			for( option = 0; option < this.options.length; option++ ){
-				dojo.create("option", this.options[option], this.selection);
+				dojo.create("option", this.options[option], this.selection); //$NON-NLS-0$
 			}
 		}	
 	});

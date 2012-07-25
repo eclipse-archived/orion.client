@@ -15,48 +15,6 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	    ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
-	var tests = {};
-
-	/**
-	 * Wraps a test body to ensure a test failure if the promise doesn't resolve. This is convenient for asserting 
-	 * that some content assist API method gets called eventually.
-	 * @param {Function} func The test body (must return a promise).
-	 * @returns {Promise}
-	 */
-	function createTestWithTimeout(func) {
-		return function() {
-			var wrapper = new Deferred();
-			var inner = func();
-			var innerPromiseFired = false;
-			try {
-				inner = func();
-				setTimeout(function() {
-					if (!innerPromiseFired) {
-						var testName = '';
-						for (testName in tests) {
-							if (tests.hasOwnProperty(testName)) {
-								if (tests[testName] === func) {
-									break;
-								}
-							}
-						}
-						wrapper.reject('Timed out: ' + testName);
-					}
-				}, 3000);
-				inner.then(
-					function(result) {
-						innerPromiseFired = true;
-						wrapper.resolve(result);
-					}, function(err) {
-						innerPromiseFired = true;
-						wrapper.reject(err);
-					});
-			} catch (e) {
-				wrapper.reject(e);
-			}
-			return wrapper;
-		};
-	}
 
 	function withData(func) {
 		var view = new MockTextView({});
@@ -127,28 +85,29 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 		return deferred;
 	}
 
+	var tests = {};
 	// Tests that ContentAssist calls a provider's computeProposals() method with the expected parameters.
-	tests.testComputeProposals = createTestWithTimeout(function() {
+	tests.testComputeProposals = function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
 				computeProposals: getProposalsFunction
 			};
 		});
-	});
+	};
 
 	// Tests that 'getProposals' works as an alias of 'computeProposals' (backwards compatibility)
-	tests.testGetProposals = createTestWithTimeout(function() {
+	tests.testGetProposals = function() {
 		var text = 'this is the first line\nthis is the second line@@@';
 		return assertProviderInvoked(text, function(getProposalsFunction) {
 			return {
 				getProposals: getProposalsFunction
 			};
 		});
-	});
+	};
 	
 	// Tests that active ContentAssist will call providers as we type.
-	tests.testFiltering = createTestWithTimeout(function() {
+	tests.testFiltering = function() {
 		var first = new Deferred(),
 		    second = new Deferred(),
 		    deferred = new DeferredList([first, second]);
@@ -196,10 +155,10 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 			});
 		});
 		return deferred;
-	});
+	};
 
 	// Tests that Activating, Deactivating events are fired as expected.
-	tests.testEvents1 = createTestWithTimeout(function() {
+	tests.testEvents1 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
@@ -218,10 +177,10 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 
 		});
 		return deferred;
-	});
+	};
 
 	// Tests that ProposalsComputed, ProposalsApplied events are fired as expected.
-	tests.testEvents2 = createTestWithTimeout(function() {
+	tests.testEvents2 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
 		    deferred = new DeferredList([d1, d2]);
@@ -255,7 +214,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 			});
 		});
 		return deferred;
-	});
+	};
 
 	// TODO Test ContentAssistMode
 //	tests.testContentAssistMode = function() {

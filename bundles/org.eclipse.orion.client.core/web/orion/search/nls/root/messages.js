@@ -1,0 +1,82 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ ******************************************************************************/
+
+//NLS_CHARSET=UTF-8
+
+define({
+	"Find:": "Find:",
+	"Find With": "Find With",
+	"ReplaceWith:": "ReplaceWith:",
+	"Replace With": "Replace With",
+	"Show all": "Show all",
+	"Case sensitive": "Case sensitive",
+	"Wrap search": "Wrap search",
+	"Incremental search": "Incremental search",
+	"Whole Word": "Whole Word",
+	"Regular expression": "Regular expression",
+	"Find after replace": "Find after replace",
+	"Options": "Options",
+	"Find next match": "Find next match",
+	"Find previous match": "Find previous match",
+	"Replace": "Replace",
+	"Replace All": "Replace All",
+	"Not found": "Not found",
+	"Replacing all...": "Replacing all...",
+	" matches": " matches",
+	"Replaced ": "Replaced ",
+	"Nothing replaced": "Nothing replaced",
+	"Search ": "Search ",
+	"Type a keyword or wild card to search in ": "Type a keyword or wild card to search in ",
+	"Search failed.": "Search failed.",
+	"No matches found for ": "No matches found for ",
+	"Searching...": "Searching...",
+	"Resource has been changed by others.": "Resource has been changed by others.",
+	"Failed to write file.": "Failed to write file.",
+	"Results": "Results",
+	"Files ${0} of ${1} matching ${2}": "Files ${0} of ${1} matching ${2}",
+	"Replace ${0} with ${1} for files ${2} of ${3}": "Replace ${0} with ${1} for files ${2} of ${3}",
+	"Location": "Location",
+	"Click to compare": "Click to compare",
+	"Search again in this folder with \"${0}\"": "Search again in this folder with \"${0}\"",
+	"Files replaced": "Files replaced",
+	"Status": "Status",
+	"${0} out of ${1}  matches replaced.": "${0} out of ${1}  matches replaced.",
+	"Save Search": "Save Search",
+	"Save search query": "Save search query",
+	"Replace all matches with...": "Replace all matches with...",
+	"Apply Changes": "Apply Changes",
+	"Replace all selected matches": "Replace all selected matches",
+	"Hide Compare": "Hide Compare",
+	"Hide compare view of changes": "Hide compare view of changes",
+	"Show Compare": "Show Compare",
+	"Show compare view of changes": "Show compare view of changes",
+	"Search Again": "Search Again",
+	"Search again": "Search again",
+	"< Previous Page": "< Previous Page",
+	"Show previous page of search result": "Show previous page of search result",
+	"Next Page >": "Next Page >",
+	"Show next page of search result": "Show next page of search result",
+	"Next result": "Next result",
+	"Previous result": "Previous result",
+	"Expand all results": "Expand all results",
+	"Collapse all results": "Collapse all results",
+	"Writing files...": "Writing files...",
+	"Preparing preview...": "Preparing preview...",
+	"Replaced File (${0})": "Replaced File (${0})",
+	"Original File (${0})": "Original File (${0})",
+	"Sort by Name": "Sort by Name",
+	"Compare changes": "Compare changes",
+	"Search Results": "Search Results",
+	"Replace All Matches": "Replace All Matches",
+	"No matches": "No matches",
+	"Rename": "Rename",
+	"Searches": "Searches",
+	"You can save frequently used by searches by choosing ${0} in the search toolbar.": "You can save frequently used by searches by choosing ${0} in the search toolbar."
+});

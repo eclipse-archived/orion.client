@@ -81,7 +81,9 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 
 	function save(editor) {
 		editor.setInput(null, null, null, true);
-		window.alert("Save hook.");
+		setTimeout(function() {
+			window.alert("Save hook.");
+		}, 0);
 	}
 	
 	var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {

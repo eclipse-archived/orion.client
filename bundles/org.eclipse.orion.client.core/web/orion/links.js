@@ -32,7 +32,7 @@ define([], function(){
 	TextLinkService.prototype = /** @lends orion.links.TextLinkService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.textlink", this);
+			this._serviceRegistration = this._registry.registerService("orion.core.textlink", this); //$NON-NLS-0$
 		},
 		_replaceLink: function(text, result, pattern, words, anchor) {
 			var index = text.search(pattern);
@@ -45,15 +45,15 @@ define([], function(){
 			var remainder = text.replace(pattern, "");
 			var match = text.substring(0,text.length-remainder.length);
 			//replace matching text with anchor element
-			var segments = match.split(' ', words);
+			var segments = match.split(' ', words); //$NON-NLS-0$
 			if (segments.length === words ) {
-				var link = document.createElement('a');
+				var link = document.createElement('a'); //$NON-NLS-0$
 				var href= anchor;
 				//replace %i variables with words from matching phrase
 				for (var i = 0; i < words; i++) {
-					href = href.replace('%'+(i+1), segments[i]);
+					href = href.replace('%'+(i+1), segments[i]); //$NON-NLS-0$
 				}
-				link.setAttribute('href', href);
+				link.setAttribute('href', href); //$NON-NLS-0$
 				link.innerHTML = match;
 				result.appendChild(link);
 				text = remainder;
@@ -69,14 +69,14 @@ define([], function(){
 		 */
 		addLinks: function(text, parent) {
 			//define div if one isn't provided
-			var result = parent || document.createElement('div');
-			var linkScanners = this._registry.getServiceReferences("orion.core.linkScanner");
+			var result = parent || document.createElement('div'); //$NON-NLS-0$
+			var linkScanners = this._registry.getServiceReferences("orion.core.linkScanner"); //$NON-NLS-0$
 			if (linkScanners.length > 0) {
 				//TODO: support multiple scanners by picking the scanner with the first match
 				var linkScanner = linkScanners[0];
-				var pattern = new RegExp(linkScanner.getProperty("pattern"), "i");
-				var words= linkScanner.getProperty("words");
-				var anchor = linkScanner.getProperty("anchor");
+				var pattern = new RegExp(linkScanner.getProperty("pattern"), "i"); //$NON-NLS-1$ //$NON-NLS-0$
+				var words= linkScanner.getProperty("words"); //$NON-NLS-0$
+				var anchor = linkScanner.getProperty("anchor"); //$NON-NLS-0$
 				var index = text.search(pattern);
 				while (index >= 0) {
 					text = this._replaceLink(text, result, pattern, words, anchor);

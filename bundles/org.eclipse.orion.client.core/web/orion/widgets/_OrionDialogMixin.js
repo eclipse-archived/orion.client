@@ -15,17 +15,17 @@
  * Provides common functions (dojo bug workarounds) for Orion dialogs.
  */
 
-define(['dojo', 'dijit'], function(dojo, dijit) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit'], function(messages, dojo, dijit) {
 
-dojo.declare("orion.widgets._OrionDialogMixin", null, {
+dojo.declare("orion.widgets._OrionDialogMixin", null, { //$NON-NLS-0$
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title || "Information Needed";
-		this.buttonCancel = "Cancel";
+		this.title = this.options.title || messages["Information Needed"];
+		this.buttonCancel = messages["Cancel"];
 	},
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
+		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === dojo.keys.ENTER) {
 				this._onSubmit();
 			}

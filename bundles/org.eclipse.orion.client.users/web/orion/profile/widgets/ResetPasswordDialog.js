@@ -10,21 +10,21 @@
  ******************************************************************************/
 /* global dojo dijit */
 /* jslint browser:true */
-define(['dojo', 'dijit', 'dijit/Dialog', 'text!orion/profile/widgets/templates/ResetPasswordDialog.html'], function(dojo, dijit) {
+define(['i18n!profile/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'text!orion/profile/widgets/templates/ResetPasswordDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param func
  */
-dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], {
+dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], { //$NON-NLS-0$
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'profile/widgets/templates/ResetPasswordDialog.html'),
+	templateString : dojo.cache('orion', 'profile/widgets/templates/ResetPasswordDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 
 	constructor : function() {
 		this.inherited(arguments);
 		this.user = arguments[0].user;
 		this.func = arguments[0].func || function() {};
 		this.registry = arguments[0].registry;
-		this.title = "Change password for " + this.user.login;
+		this.title = messages["Change password for "] + this.user.login;
 	},
 	onHide : function() {
 		// This assumes we don't reuse the dialog
@@ -36,7 +36,7 @@ dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], {
 	},
 	postCreate : function() {
 		this.inherited(arguments);
-		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) {
+		dojo.connect(this, "onKeyPress", dojo.hitch(this, function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === dojo.keys.ENTER) {
 				this.domNode.focus(); // FF throws DOM error if textfield is
 										// focused after dialog closes
@@ -47,13 +47,13 @@ dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], {
 	execute : function() {
 
 		if (this.password.value !== this.passwordRetype.value) {
-			alert("Passwords don't match!");
+			alert(messages['Passwords don\'t match!']);
 			return;
 		}
 		
 		var dialog = this;
 		
-		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.login, dialog.password.value).then(dialog.func, function(response) {
+		this.registry.getService("orion.core.user").resetUserPassword(dialog.user.login, dialog.password.value).then(dialog.func, function(response) { //$NON-NLS-0$
 		  var message = response.message;
 		  try{
 			  if(response.responseText){
@@ -66,7 +66,7 @@ dojo.declare("orion.profile.widgets.ResetPasswordDialog", [ dijit.Dialog ], {
 			if (message) {
 				alert(message);
 			} else {
-				alert("Password reset failed");
+				alert(messages["Password reset failed"]);
 			}
 		});
 		

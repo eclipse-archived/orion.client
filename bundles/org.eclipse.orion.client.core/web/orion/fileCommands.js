@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionCommands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(require, dojo, mUtil, mCommands, mExtensionCommands){
+define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "orion/commands", "orion/extensionCommands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(messages, require, dojo, mUtil, mCommands, mExtensionCommands){
 
 	/**
 	 * Utility methods
@@ -34,11 +34,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		this.registry = registry;
 		this.favorites = [];
 		var self = this;
-		var service = this.registry.getService("orion.core.favorite");
+		var service = this.registry.getService("orion.core.favorite"); //$NON-NLS-0$
 		service.getFavorites().then(function(favs) {
 			self.cacheFavorites(favs.navigator);
 		});
-		service.addEventListener("favoritesChanged", function(favs) {
+		service.addEventListener("favoritesChanged", function(favs) { //$NON-NLS-0$
 			self.cacheFavorites(favs.navigator);
 		});
 	}
@@ -69,20 +69,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 	 * @function
 	 */
 	fileCommandUtils.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+		var service = registry.getService("orion.page.command"); //$NON-NLS-0$
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
-			dojo.empty(toolbar);
+			service.destroy(toolbar);
 		} else {
-			throw "could not find toolbar " + toolbarId;
+			throw messages["could not find toolbar "] + toolbarId;
 		}
-		var service = registry.getService("orion.page.command");
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
 			service.closeParameterCollector();
 			lastItemLoaded.Location = item.Location;
 		}
 
-		service.renderCommands(toolbar.id, toolbar, item, explorer, "button").then(function() {
+		service.renderCommands(toolbar.id, toolbar, item, explorer, "button").then(function() { //$NON-NLS-0$
 			if (lastItemLoaded.Location) {
 				service.processURL(window.location.href);
 			}
@@ -90,20 +90,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		if (selectionToolbarId) {
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
-				dojo.empty(selectionToolbarId);
-				service.renderCommands(selectionToolbarId, selectionToolbarId, null, explorer, "button"); 
+				service.destroy(selectionTools);
+				service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
 			}
 		}
 		
 		// Stuff we do only the first time
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
-			var selectionService = registry.getService("orion.page.selection");
-			selectionService.addEventListener("selectionChanged", function(singleSelection, selections) {
+			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
+			selectionService.addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-0$
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
-					dojo.empty(selectionTools);
-					registry.getService("orion.page.command").renderCommands(selectionTools.id, selectionTools, selections, explorer, "button");
+					service.destroy(selectionTools);
+					service.renderCommands(selectionTools.id, selectionTools, selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			});
 		}
@@ -120,17 +120,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
-		var progress = serviceRegistry.getService("orion.page.progress");
+		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		var errorHandler = function(error) {
 			progress.setProgressResult(error);
 		};
 		
 		function forceSingleItem(item) {
+			if (!item) {
+				return {};
+			}
 			if (dojo.isArray(item)) {
-				if (item.length > 1) {
-					item = {};
-				} else {
+				if (item.length === 1) {
 					item = item[0];
+				} else {
+					item = {};
 				}
 			}
 			return item;
@@ -148,9 +151,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		function stripPath(location) {
 			location = mUtil.makeRelative(location);
 			// get hash part and strip query off
-			var splits = location.split('#');
+			var splits = location.split('#'); //$NON-NLS-0$
 			var path = splits[splits.length-1];
-			var qIndex = path.indexOf("/?");
+			var qIndex = path.indexOf("/?"); //$NON-NLS-0$
 			if (qIndex > 0) {
 				//remove the query but not the trailing separator
 				path = path.substring(0, qIndex+1);
@@ -161,7 +164,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		function makeMoveCopyTargetChoices(items, userData, isCopy) {
 			items = dojo.isArray(items) ? items : [items];
 			var refreshFunc = function() {
-				this.changedItem(this.treeRoot);
+				this.changedItem(this.treeRoot, true);
 			};
 			var callback = function(selectedItems) {
 				if (!dojo.isArray(selectedItems)) {
@@ -179,7 +182,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			
 			var prompt = function(selectedItems) {
 				var dialog = new orion.widgets.DirectoryPrompterDialog({
-					title: "Choose a Folder",
+					title: messages["Choose a Folder"],
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,				
 					func: function(targetFolder) { 
@@ -189,11 +192,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 							}
 							for (var i=0; i < selectedItems.length; i++) {
 								var location = targetFolder.Location;
-								var newName; // intentionally undefined.  Only use if we need.
 								var item = selectedItems[i];
+								var newName = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
 								if (isCopy && item.parent && item.parent.Location === location) {
-									newName = window.prompt("Enter a new name for '" + item.Name+ "'", "Copy of " + item.Name);
+									newName = window.prompt(dojo.string.substitute(messages["Enter a new name for '${0}'"], [item.Name]), dojo.string.substitute(messages["Copy of ${0}"], [item.Name]));
 									// user cancelled?  don't copy this one
 									if (!newName) {
 										location = null;
@@ -237,7 +240,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				for (i=0; i<favorites.length; i++) {
 					var stripped = stripPath(favorites[i].path);
 					if (!contains(sourceLocations, stripped)) {
-						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback});
+						choices.push({name: favorites[i].name, imageClass: "core-sprite-makeFavorite", path: stripped, callback: callback}); //$NON-NLS-0$
 					}
 				}
 				if (favorites.length > 0) {
@@ -269,18 +272,18 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				var item = proposedPaths[i];
 				var displayPath = item.Name;
 				// we know we've left leading and trailing slash so slashes is splits + 1
-				var slashes = item.stripped.split('/').length + 1;
+				var slashes = item.stripped.split('/').length + 1; //$NON-NLS-0$
 				// but don't indent for leading or trailing slash
 				// TODO is there a smarter way to do this?
 				for (var j=0; j<slashes-2; j++) {
-					displayPath = "  " + displayPath;
+					displayPath = "  " + displayPath; //$NON-NLS-0$
 				}
 				choices.push({name: displayPath, path: item.stripped, callback: callback});
 			}
 			if (proposedPaths.length > 0) {
 				choices.push({});  //separator
 			}
-			choices.push({name: "Choose folder...", callback: prompt});
+			choices.push({name: messages["Choose folder..."], callback: prompt});
 			return choices;
 		}
 		
@@ -298,45 +301,68 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		};
 			
 		var renameCommand = new mCommands.Command({
-				name: "Rename",
-				tooltip: "Rename the selected files or folders",
-				imageClass: "core-sprite-rename",
-				id: "eclipse.renameResource",
+				name: messages["Rename"],
+				tooltip: messages["Rename the selected files or folders"],
+				imageClass: "core-sprite-rename", //$NON-NLS-0$
+				id: "eclipse.renameResource", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					item = forceSingleItem(item);
+					if (dojo.isArray(item)) {
+						return item.length === 1 && item[0].Name;
+					}
 					return item.Location;
 				},
 				callback: dojo.hitch(this, function(data) {
 					// we want to popup the edit box over the name in the explorer.
 					// if we can't find it, we'll pop it up over the command dom element.
-					var item = data.items;
+					var item = forceSingleItem(data.items);
 					var refNode = explorer.getNameNode(item);
 					if (!refNode) {
 						refNode = data.domNode;
 					}
-					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name, 
+					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
 						dojo.hitch(this, function(newText) {
 							fileClient.moveFile(item.Location, item.parent.Location, newText).then(
-								dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}), //refresh the root
+								dojo.hitch(explorer, function(newItem) {
+									var refreshItem;
+									var forceExpand = null;
+									if (item.parent.Projects) {
+										//special case for renaming a project. Use the treeroot as the refresh item.
+										refreshItem = this.treeRoot;
+										forceExpand = this.isExpanded(item) && item;
+									} else {
+										// refresh the parent, which will update the child paths. 
+										// refreshing the newItem would cause "not found" in the tree since a rename has occurred.
+										refreshItem = item.parent;
+										if (item.Directory) {
+											forceExpand = this.isExpanded(item) && newItem;
+										}
+									}
+									// Update the parent
+									this.changedItem(item.parent, true);
+									// If the renamed item was an expanded directory, force an expand.
+									if (forceExpand) {
+										this.changedItem(forceExpand, true);
+									}
+								}), 
 								errorHandler
 							);
 						}), 
-						null, null, "."
+						null, null, "." //$NON-NLS-0$
 					); 
 				})
 			});
 		commandService.addCommand(renameCommand);
 		
 		var deleteCommand = new mCommands.Command({
-			name: "Delete",
-			tooltip: "Delete the selected files or folders",
-			imageClass: "core-sprite-delete",
-			id: "eclipse.deleteFile",
+			name: messages["Delete"],
+			tooltip: messages["Delete the selected files or folders"],
+			imageClass: "core-sprite-delete", //$NON-NLS-0$
+			id: "eclipse.deleteFile", //$NON-NLS-0$
 			visibleWhen: oneOrMoreFilesOrFolders,
 			callback: function(data) {
 				var items = dojo.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? "Are you sure you want to delete '" + items[0].Name + "'?" : "Are you sure you want to delete these " + items.length + " items?";
-				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage, 
+				var confirmMessage = items.length === 1 ? dojo.string.substitute(messages["Are you sure you want to delete '${0}'?"], [items[0].Name]) : dojo.string.substitute(messages["Are you sure you want to delete these ${0} items?"], [items.length]);
+				serviceRegistry.getService("orion.page.dialog").confirm(confirmMessage,  //$NON-NLS-0$
 					dojo.hitch(explorer, function(doit) {
 						if (!doit) {
 							return;
@@ -345,7 +371,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 						var refresher = function(item) {
 							count++;
 							if (count === items.length) {
-								explorer.changedItem(item);
+								explorer.changedItem(item, true);
 							}
 						};
 						for (var i=0; i < items.length; i++) {
@@ -380,10 +406,10 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(deleteCommand);
 	
 		var downloadCommand = new mCommands.Command({
-			name: "Export as zip",
-			tooltip: "Create a zip file of the folder contents and download it",
-			imageClass: "core-sprite-exportzip",
-			id: "eclipse.downloadFile",
+			name: messages["Export as zip"],
+			tooltip: messages["Create a zip file of the folder contents and download it"],
+			imageClass: "core-sprite-exportzip", //$NON-NLS-0$
+			id: "eclipse.downloadFile", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.ExportLocation && item.Directory;},
@@ -406,7 +432,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 				}
 			}
 			if (refNode) {
-				mUtil.getUserText(domId+"EditBox", refNode, false, defaultName, 
+				mUtil.getUserText(domId+"EditBox", refNode, false, defaultName,  //$NON-NLS-0$
 					dojo.hitch(this, function(name) {
 						if (name) {
 							if (tempNode) {
@@ -423,56 +449,72 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			}
 		}
 		
-		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')]);
+		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var newFileCommand =  new mCommands.Command({
-			name: "New File",
-			tooltip: "Create a new file",
-			imageClass: "core-sprite-new_file",
-			id: "eclipse.newFile",
+			name: messages["New File"],
+			tooltip: messages["Create a new file"],
+			imageClass: "core-sprite-new_file", //$NON-NLS-0$
+			id: "eclipse.newFile", //$NON-NLS-0$
 			parameters: newFileNameParameters,
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createFile(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}),
-							errorHandler);
+				// Check selection service first, then use the provided item
+				explorer.selection.getSelections(function(selections) {
+					var item;
+					if (selections.length === 1 && selections[0].Directory) {
+						item = selections[0];
+					} else {
+						item = forceSingleItem(data.items);
 					}
-				};
-				if (data.parameters && data.parameters.valueFor('name')) {
-					createFunction(data.parameters.valueFor('name'));
-				} else {
-					getNewItemName(item, data.domNode.id, "New File", createFunction);
-				}
+					var createFunction = function(name) {
+						if (name) {
+							fileClient.createFile(item.Location, name).then(
+								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
+								errorHandler);
+						}
+					};
+					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+					} else {
+						getNewItemName(item, data.domNode.id, messages['New File'], createFunction);
+					}
+				});
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
 		commandService.addCommand(newFileCommand);
 		
-		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder')]);
+		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Folder name:'], messages['New Folder'])]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var newFolderCommand = new mCommands.Command({
-			name: "New Folder",
-			tooltip: "Create a new folder",
-			imageClass: "core-sprite-new_folder",
-			id: "eclipse.newFolder",
+			name: messages['New Folder'],
+			tooltip: messages["Create a new folder"],
+			imageClass: "core-sprite-new_folder", //$NON-NLS-0$
+			id: "eclipse.newFolder", //$NON-NLS-0$
 			parameters: newFolderNameParameters,
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createFolder(item.Location, name).then(
-							dojo.hitch(explorer, function() {this.changedItem(item);}),
-							errorHandler);
+				// Check selection service first, then use the provided item
+				explorer.selection.getSelections(function(selections) {
+					var item;
+					if (selections.length === 1 && selections[0].Directory) {
+						item = selections[0];
+					} else {
+						item = forceSingleItem(data.items);
 					}
-				};
-				if (data.parameters && data.parameters.valueFor('name')) {
-					createFunction(data.parameters.valueFor('name'));
-				} else {
-					getNewItemName(item, data.domNode.id, "New Folder", createFunction);
-				}
+					var createFunction = function(name) {
+						if (name) {
+							fileClient.createFolder(item.Location, name).then(
+								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
+								errorHandler);
+						}
+					};
+					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+					} else {
+						getNewItemName(item, data.domNode.id, messages['New Folder'], createFunction);
+					}
+				});
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
@@ -480,70 +522,161 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 	
 		commandService.addCommand(newFolderCommand);
 		
+		var canCreateProject = function(item) {
+			item = forceSingleItem(item);
+			return item.Location && mUtil.isAtRoot(item.Location);
+		};
+		
+		var createProjectFunction = function(name, populateFunction, progressMessage) {
+			if (name) {
+				var loadedWorkspace;
+				if (mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
+					loadedWorkspace = explorer.treeRoot;
+				} else {
+					loadedWorkspace = fileClient.loadWorkspace("");
+				}
+				progressMessage = progressMessage || messages["Creating folder"];
+				dojo.when(loadedWorkspace, function(workspace) {
+					var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
+					progress.showWhile(deferred, progressMessage).then(function(project) {
+						// we need folder metadata for the commands, not the project object
+						fileClient.read(project.ContentLocation, true).then(function(folder) {
+							if (populateFunction) {
+								populateFunction(folder);
+							}
+							explorer.loadResourceList("", true);
+						}, errorHandler);
+					}, 
+					errorHandler);
+				}, errorHandler);
+			}
+		};	
+		
 		var newProjectCommand = new mCommands.Command({
-			name: "New Folder",
+			name: messages["Folder"],
 			parameters: newFolderNameParameters,
-			tooltip: "Create a new folder",
-			imageClass: "core-sprite-new_folder",
-			id: "eclipse.newProject",
+			imageClass: "core-sprite-new_folder", //$NON-NLS-0$
+			tooltip: messages["Create an empty folder"],
+			description: messages["Create an empty folder on the Orion server.  You can import, upload, or create content in the editor."],
+			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
-				var createFunction = function(name) {
-					if (name) {
-						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name).then(
+				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+					createProjectFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+				} else {
+					getNewItemName(data.items, data.domNode.id, messages['New Folder'], createProjectFunction);
+				}
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newProjectCommand);
+		
+		var newTemplateProjectCommand = new mCommands.Command({
+			name: messages["Sample HTML5 Site"],
+			tooltip: messages["Generate a sample"],
+			description: messages["Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files."], 
+			id: "orion.new.template", //$NON-NLS-0$
+			callback: function(data) {
+				var projectName = "Hello World"; //$NON-NLS-0$
+				createProjectFunction(projectName,
+				function(folder) {
+					// this is a temporary hack so we can always find a site template, even when disconnected.
+					// it's built into a known path on the server.
+					var files = ["index.html", "hello.css", "hello.js"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					for (var i=0; i<files.length;  i++) {
+						fileClient.createFile(folder.Location, files[i]).then(function(newFileMetadata) {
+							mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/contentTemplates/helloWorld/"+newFileMetadata.Name}); //$NON-NLS-0$
+						}, errorHandler);
+					}
+				}, dojo.string.substitute(messages["Creating a folder for ${0}"], [projectName]));
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newTemplateProjectCommand);
+
+		var newSFTPProjectCommand = new mCommands.Command({
+			name: messages["SFTP Import"],
+			imageClass: "core-sprite-transferin", //$NON-NLS-0$
+			tooltip: messages["Import content from SFTP"],
+			description: messages["Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials."],
+			id: "orion.new.sftp", //$NON-NLS-0$
+			callback: function(data) {
+				var projectName = messages["Imported Content"];
+				createProjectFunction(projectName,
+				function(folder) {
+					data.commandService.runCommand("eclipse.importSFTPCommand", folder, explorer); //$NON-NLS-0$
+				}, dojo.string.substitute(messages['Creating a folder for ${0}'], [projectName]));
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newSFTPProjectCommand);
+		
+		var newZipProjectCommand = new mCommands.Command({
+			name: messages["Upload a Zip"],
+			tooltip: messages["Upload content from a local zip file"],
+			imageClass: "core-sprite-importzip", //$NON-NLS-0$
+			description: messages["Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file."],
+			id: "orion.new.zip", //$NON-NLS-0$
+			callback: function(data) {
+				var projectName = messages["Uploaded Content"];
+				createProjectFunction(projectName,
+				function(folder) {
+					data.commandService.runCommand("eclipse.importCommand", folder, explorer); //$NON-NLS-0$
+				}, messages["Creating an upload folder for "] + projectName);
+		},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newZipProjectCommand);
+		
+		var newGitClone = new mCommands.Command({
+			name: messages["Clone Git Repository"],
+			tooltip: messages["Clone a git repository"],
+			description: messages["Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator."],
+			id: "orion.new.gitclone", //$NON-NLS-0$
+			callback: function(data) {
+				window.location.href = window.location.protocol + "//" + window.location.host + "/git/git-repository.html#,cloneGitRepository=URL"; //$NON-NLS-0$
+			},
+			visibleWhen: canCreateProject
+		});
+		commandService.addCommand(newGitClone);
+
+		var linkProjectCommand = new mCommands.Command({
+			name: messages["Link to Server"],
+			tooltip: messages["Link to existing content on the server"],
+			description: messages["Create a folder that links to an existing folder on the server."],
+			imageClass: "core-sprite-link", //$NON-NLS-0$
+			id: "orion.new.linkProject", //$NON-NLS-0$
+			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New Folder'), new mCommands.CommandParameter('url', 'url', messages['Server path:'], '')]), //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			callback: function(data) {
+				var createFunction = function(name, url) {
+					if (name && url) {
+						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
 				};
-				if (data.parameters && data.parameters.valueFor('name')) {
-					createFunction(data.parameters.valueFor('name'));
+				if (data.parameters && data.parameters.valueFor('name') && data.parameters.valueFor('url')) { //$NON-NLS-1$ //$NON-NLS-0$
+					createFunction(data.parameters.valueFor('name'), data.parameters.valueFor('url')); //$NON-NLS-1$ //$NON-NLS-0$
 				} else {
-					getNewItemName(data.items, data.domNode.id, "New Folder", createFunction);
+					errorHandler(messages["The name and server location were not specified."]);
 				}
 			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Location && mUtil.isAtRoot(item.Location);}});
-	
-		commandService.addCommand(newProjectCommand);
-		
-		var linkProjectCommand = new mCommands.Command({
-			name: "Link Folder",
-			tooltip: "Create a folder that links to an existing folder on the server",
-			imageClass: "core-sprite-link",
-			id: "eclipse.linkProject",
-			callback: function(data) {
-				var dialog = new orion.widgets.NewItemDialog({
-					title: "Link Folder",
-					label: "Folder name:",
-					func:  function(name, url, create){
-						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, create).then(
-							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), //refresh the root
-							errorHandler);
-					},
-					advanced: true
-				});
-				dialog.startup();
-				dialog.show();
-			},
-			visibleWhen: function(item) {
-				item = forceSingleItem(item);
-				return item.Location && mUtil.isAtRoot(item.Location);}});
+			visibleWhen: canCreateProject});
 		commandService.addCommand(linkProjectCommand);
 		
 		var goUpCommand = new mCommands.Command({
-			name: "Go Up",
-			tooltip: "Move up to the parent folder",
-			imageClass: "core-sprite-move_up",
-			id: "eclipse.upFolder",
+			name: messages["Go Up"],
+			tooltip: messages["Move up to the parent folder"],
+			imageClass: "core-sprite-move_up", //$NON-NLS-0$
+			id: "eclipse.upFolder", //$NON-NLS-0$
 			callback: function(data) {
 				var item = forceSingleItem(data.items);
 				var parents = item.Parents;
 				if (parents) {
 					if (parents.length > 0) {
-						window.document.location="#" + parents[0].ChildrenLocation;
+						window.document.location="#" + parents[0].ChildrenLocation; //$NON-NLS-0$
 					} else {
 						// move to file system root
-						window.document.location="#";
+						window.document.location="#"; //$NON-NLS-0$
 					}
 				}
 			},
@@ -554,15 +687,15 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 
 					
 		var importCommand = new mCommands.Command({
-			name : "Import local file...",
-			tooltip: "Copy files and folders from your local file system",
-			imageClass: "core-sprite-importzip",
-			id: "eclipse.importCommand",
+			name : messages["Import local file..."],
+			tooltip: messages["Copy files and folders from your local file system"],
+			imageClass: "core-sprite-importzip", //$NON-NLS-0$
+			id: "eclipse.importCommand", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.ImportDialog({
 					importLocation: item.ImportLocation,
-					func: dojo.hitch(explorer, function() { this.changedItem(item); })
+					func: dojo.hitch(explorer, function() { this.changedItem(item, true); })
 				});
 				dialog.startup();
 				dialog.show();
@@ -573,20 +706,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(importCommand);
 	
 		var importSFTPCommand = new mCommands.Command({
-			name : "SFTP from...",
-			tooltip: "Copy files and folders from a specified SFTP connection",
-			imageClass: "core-sprite-transferin",
-			id: "eclipse.importSFTPCommand",
+			name : messages["SFTP from..."],
+			tooltip: messages["Copy files and folders from a specified SFTP connection"],
+			imageClass: "core-sprite-transferin", //$NON-NLS-0$
+			id: "eclipse.importSFTPCommand", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
-						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
-						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
+						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
-						progress.showWhile(deferred, "Importing from " + host).then(
+						progress.showWhile(deferred, messages["Importing from "] + host).then(
 							dojo.hitch(explorer, function() {
-								this.changedItem(this.treeRoot);
+								this.changedItem(this.treeRoot, true);
 							}),
 							errorHandler
 						);//refresh the root
@@ -601,19 +734,19 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(importSFTPCommand);
 	
 		var exportSFTPCommand = new mCommands.Command({
-			name : "SFTP to...",
-			tooltip: "Copy files and folders to a specified SFTP location",
-			imageClass: "core-sprite-transferout",
-			id: "eclipse.exportSFTPCommand",
+			name : messages["SFTP to..."],
+			tooltip: messages["Copy files and folders to a specified SFTP location"],
+			imageClass: "core-sprite-transferout", //$NON-NLS-0$
+			id: "eclipse.exportSFTPCommand", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
-						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp";
-						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password};
+						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
+						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progress.showWhile(deferred, "Exporting from " + host).then(
-							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot);}),
+						progress.showWhile(deferred, messages["Exporting from "] + host).then(
+							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot, true);}),
 							errorHandler);//refresh the root
 					}
 				});
@@ -626,9 +759,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(exportSFTPCommand);
 		
 		var copyCommand = new mCommands.Command({
-			name : "Copy to",
-			tooltip: "Copy files and folders to a specified location",
-			id: "eclipse.copyFile",
+			name : messages["Copy to"],
+			tooltip: "Copy files and folders to a specified location", //$NON-NLS-0$
+			id: "eclipse.copyFile", //$NON-NLS-0$
 			choiceCallback: function(items, userData) {
 				return makeMoveCopyTargetChoices(items, userData, true);
 			},
@@ -637,9 +770,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(copyCommand);
 		
 		var moveCommand = new mCommands.Command({
-			name : "Move to",
-			tooltip: "Move files and folders to a new location",
-			id: "eclipse.moveFile",
+			name : messages["Move to"],
+			tooltip: messages["Move files and folders to a new location"],
+			id: "eclipse.moveFile", //$NON-NLS-0$
 			choiceCallback: function(items, userData) {
 				return makeMoveCopyTargetChoices(items, userData, false);
 			},
@@ -649,11 +782,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		
 		var bufferedSelection = [];
 		var copyToBufferCommand = new mCommands.Command({
-				name: "Copy Items",
-				tooltip: "Copy the selected items to the copy/paste buffer",
-				id: "eclipse.copySelections",
+				name: messages["Copy Items"],
+				tooltip: messages["Copy the selected items to the copy/paste buffer"],
+				id: "eclipse.copySelections", //$NON-NLS-0$
 				callback: function() {
-					commandService.getSelectionService().getSelections(function(selections) {
+					explorer.selection.getSelections(function(selections) {
 						bufferedSelection = selections;
 					});
 				}
@@ -661,44 +794,55 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		commandService.addCommand(copyToBufferCommand);
 			
 		var pasteFromBufferCommand = new mCommands.Command({
-				name: "Paste Items",
-				tooltip: "Paste items from the copy/paste buffer",
-				id: "eclipse.pasteSelections",
-				callback: function() {
-					if (bufferedSelection.length > 0) {
-						// Do not allow pasting into the Root of the Workspace
-						if (mUtil.isAtRoot(this.treeRoot.Location)) {
-							errorHandler("Cannot paste into the Workspace root");
-							return;
+				name: messages["Paste Items"],
+				tooltip: messages["Paste items from the copy/paste buffer"],
+				id: "eclipse.pasteSelections", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					item = forceSingleItem(item);
+					return item.Directory && !mUtil.isAtRoot(item.Location);},
+				callback: function(data) {
+					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
+					explorer.selection.getSelections(function(selections) {
+						var item;
+						if (selections.length === 1 && selections[0].Directory) {
+							item = selections[0];
+						} else {
+							item = forceSingleItem(data.items);
 						}
-						for (var i=0; i<bufferedSelection.length; i++) {
-							var location = bufferedSelection[i].Location;
-							var name = null;
-							if (location) {
-								if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === explorer.treeRoot.Location) {
-									name = window.prompt("Enter a new name for '" + bufferedSelection[i].Name+ "'", "Copy of " + bufferedSelection[i].Name);
-									// user cancelled?  don't copy this one
-									if (!name) {
-										location = null;
-									}
-								}
+						if (bufferedSelection.length > 0) {
+							// Do not allow pasting into the Root of the Workspace
+							if (mUtil.isAtRoot(item.Location)) {
+								errorHandler(messages["Cannot paste into the root"]);
+								return;
+							}
+							for (var i=0; i<bufferedSelection.length; i++) {
+								var location = bufferedSelection[i].Location;
+								var name = bufferedSelection[i].Name || null;
 								if (location) {
-									fileClient.copyFile(location, explorer.treeRoot.Location, name).then(dojo.hitch(explorer, function() {
-										this.changedItem(this.treeRoot);
-									}), errorHandler);
+									if (bufferedSelection[i].parent && bufferedSelection[i].parent.Location === item.Location) {
+										name = window.prompt(dojo.string.substitute(messages['Enter a new name for \'${0}\''], [bufferedSelection[i].Name]), dojo.string.substitute(messages['Copy of ${0}'], [bufferedSelection[i].Name]));
+										// user cancelled?  don't copy this one
+										if (!name) {
+											location = null;
+										}
+									}
+									if (location) {
+										fileClient.copyFile(location, item.Location, name).then(dojo.hitch(explorer, function() {
+											this.changedItem(item, true);
+										}), errorHandler);
+									}
 								}
 							}
 						}
-					}
+					});
 				}
 			});
-		commandService.addCommand(pasteFromBufferCommand);
-		
+		commandService.addCommand(pasteFromBufferCommand);		
 	};
 	
 	var contentTypesCache;
 
-	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, fileGroup, selectionGroup) {
+	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
 		// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
 		
@@ -723,17 +867,17 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		//        arguments passed to run: (itemOrItems)
 		//          itemOrItems (object or array) - an array of items to which the item applies, or a single item if the info.forceSingleItem is true
 		//        the run function is assumed to perform all necessary action and the return is not used.
-		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
+		var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
 		
 		var fileCommands = [];
 		var i;
 		for (i=0; i<commandsReferences.length; i++) {
 			// Exclude any navigation commands themselves, since we are the navigator.
-			var id = commandsReferences[i].getProperty("id");
-			if (id !== "orion.navigateFromMetadata") {
+			var id = commandsReferences[i].getProperty("id"); //$NON-NLS-0$
+			if (id !== "orion.navigateFromMetadata") { //$NON-NLS-0$
 				var impl = serviceRegistry.getService(commandsReferences[i]);
 				var info = {};
-				var propertyNames = commandsReferences[i].getPropertyNames();
+				var propertyNames = commandsReferences[i].getPropertyKeys();
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = commandsReferences[i].getProperty(propertyNames[j]);
 				}
@@ -742,7 +886,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 		}
 		
 		function getContentTypes() {
-			return contentTypesCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) {
+			return contentTypesCache || serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(ct) { //$NON-NLS-0$
 				contentTypesCache = ct;
 				return contentTypesCache;
 			});
@@ -752,47 +896,41 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/extensionComma
 			var extensionGroupCreated = false;
 			var selectionGroupCreated = false;
 			var openWithGroupCreated = false;
+			var commandDeferreds = [];
 		
 			for (i=0; i < fileCommands.length; i++) {
 				var commandInfo = fileCommands[i].properties;
 				var service = fileCommands[i].service;
-				var commandOptions = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
-				var command = new mCommands.Command(commandOptions);
-				if (commandInfo.isEditor) {
-					command.isEditor = commandInfo.isEditor;
-				}
-				
-				if (commandInfo.forceSingleItem || commandInfo.uriTemplate) {
-					// single items go in the local actions column, grouped in their own unnamed group to get a separator
-					commandService.addCommand(command);
-					if (!extensionGroupCreated) {
-						extensionGroupCreated = true;
-						commandService.addCommandGroup("fileFolderCommands", "eclipse.fileCommandExtensions", 1000, null, fileGroup);
-					}
-					if (!openWithGroupCreated) {
-						openWithGroupCreated = true;
-						commandService.addCommandGroup("fileFolderCommands", "eclipse.openWith", 1000, "Open With", fileGroup + "/eclipse.fileCommandExtensions");
-					}
-					
-					if (commandInfo.isEditor) {
-						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions/eclipse.openWith");
-					} else {
-						commandService.registerCommandContribution("fileFolderCommands", command.id, i, fileGroup + "/eclipse.fileCommandExtensions");
-					}
-				} else {  
-					// items based on selection are added to the selections toolbar, grouped in their own unnamed group to get a separator
-					// TODO would we also want to add these to the menu above so that they are available for single selections?  
-					// For now we do not do this to reduce clutter, but we may revisit this.
-					commandService.addCommand(command);
-					if (!selectionGroupCreated) {
-						selectionGroupCreated = true;
-						commandService.addCommandGroup(selectionToolbarId, "eclipse.bulkFileCommandExtensions", 1000, null, selectionGroup);
-					}
-					commandService.registerCommandContribution(selectionToolbarId, command.id, i, selectionGroup + "/eclipse.bulkFileCommandExtensions");
-				}
+				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
+				commandDeferreds.push[commandDeferred];
+				commandDeferred.then(dojo.hitch(this,
+						function(i, commandInfo, commandOptions){
+							var command = new mCommands.Command(commandOptions);
+							if (commandInfo.isEditor) {
+								command.isEditor = commandInfo.isEditor;
+							}
+							
+							commandService.addCommand(command);
+							if (!extensionGroupCreated) {
+								extensionGroupCreated = true;
+								commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
+							}
+							if (!openWithGroupCreated) {
+								openWithGroupCreated = true;
+								commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-0$
+							}
+							if (commandInfo.isEditor) {
+								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
+							} else {
+								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
+							}
+						}, i, commandInfo));
+			}
+			new dojo.DeferredList(commandDeferreds).addBoth(function(){
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
 				explorer.updateCommands();
-			}
+			});
+
 		}));
 	};
 	

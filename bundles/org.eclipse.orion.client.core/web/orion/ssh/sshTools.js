@@ -21,13 +21,13 @@ eclipse.SshService = (function() {
 		if (serviceRegistry) {
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
-					"orion.net.ssh", this);
+					"orion.net.ssh", this); //$NON-NLS-0$
 		}
 	}
 
 	SshService.prototype = /** @lends eclipse.SshService.prototype */
 	{
-			_KNOWN_HOSTS: "known_hosts",
+			_KNOWN_HOSTS: "known_hosts", //$NON-NLS-0$
 
 			addKnownHosts: function(known_hosts, user){
 				if(!user){
@@ -36,7 +36,7 @@ eclipse.SshService = (function() {
 				var current_known_hosts = localStorage.getItem(user+this._KNOWN_HOSTS);
 				if(current_known_hosts){
 					if(current_known_hosts.indexOf(known_hosts)<0){
-						localStorage.setItem(user+this._KNOWN_HOSTS, current_known_hosts+"\n"+known_hosts);
+						localStorage.setItem(user+this._KNOWN_HOSTS, current_known_hosts+"\n"+known_hosts); //$NON-NLS-0$
 					}
 				}else{
 					localStorage.setItem(user+this._KNOWN_HOSTS, known_hosts);

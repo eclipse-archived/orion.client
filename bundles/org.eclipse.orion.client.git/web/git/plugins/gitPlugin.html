@@ -10,69 +10,124 @@
 			var temp = document.createElement('a');
 			
 			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Status",
+			provider.registerService("orion.navigate.command", {}, {
+				nameKey: "Git Status",
 				id: "eclipse.git.status",
-				tooltip: "Go to Git Status",
+				tooltipKey: "Go to Git Status",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:StatusLocation", variableName: "GitStatusLocation"},
 					{source: "Directory", match: true}
 				],
-				uriTemplate: "{OrionHome}/git/git-status.html#{GitStatusLocation}",
+				uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}",
 				forceSingleItem: true
 			});
 			
-			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Log",
+			provider.registerService("orion.navigate.command", {}, {
+				nameKey: "Git Log",
 				id: "eclipse.git.log",
-				tooltip: "Go to Git Log",
+				tooltipKey: "Go to Git Log",
+				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Git:CommitLocation", variableName: "GitLogLocation"}
 				],
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitLogLocation}?page=1",
 				forceSingleItem: true
 			});
-			
-			provider.registerServiceProvider("orion.navigate.command", {}, {
-				name: "Git Remote",
+
+			provider.registerService("orion.navigate.command", {}, {
+				nameKey: "Git Remote",
 				id: "eclipse.git.remote",
-				tooltip: "Go to Git Remote",
-				validationProperties: [
-					{source: "Git:DefaultRemoteBranchLocation", variableName: "GitRemoteLocation"}
-				],
+				tooltipKey: "Go to Git Remote",
+				nls: "git/nls/gitmessages",
+				validationProperties: [{
+					source: "Git:DefaultRemoteBranchLocation", 
+					variableName: "GitRemoteLocation"
+				}],
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
 				forceSingleItem: true
 			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.status"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
+				nameKey: "Git Status",
+				id: "eclipse.git.status2",
+				tooltipKey: "Go to Git Status",
+				nls: "git/nls/gitmessages",
+				validationProperties: [{
+					source: "StatusLocation|Clone:StatusLocation", 
+					variableName: "GitStatusLocation"
+				}],
+				uriTemplate: "{OrionHome}/git/git-status2.html#{GitStatusLocation}"
+			});
+			
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.log"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.remote"
 			});
+			
+			provider.registerService("orion.page.link.related", null, {
+				nameKey: "Active Branch Log",
+				id: "eclipse.orion.git.switchToCurrentLocal",
+				tooltipKey: "Show the log for the active local branch",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
+					{source: "toRef:Type", match: "RemoteTrackingBranch"},
+				],
+				uriTemplate: "{OrionHome}/git/git-log.html#{GitBranchLocation}?page=1",
+				forceSingleItem: true
+			});
+			
+			provider.registerService("orion.page.link.related", null, {
+				nameKey: "Remote Branch Log",
+				id: "eclipse.orion.git.switchToRemote2",
+				tooltipKey: "Show the log for the corresponding remote tracking branch",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"},
+				],
+				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
+				forceSingleItem: true
+			});
+			
+			provider.registerService("orion.page.link.related", null, {
+				nameKey: "Git Repository",
+				id: "eclipse.git.repository2",
+				tooltipKey: "Go to the git repository",
+				nls: "git/nls/gitmessages",
+				validationProperties: [
+					{source: "CloneLocation", variableName: "GitCloneLocation"},
+					{source: "Type", match: "Commit"}
+				],
+				uriTemplate: "{OrionHome}/git/git-repository.html#{GitCloneLocation}"
+			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.repository",
-				name: "Git Repository",
-				tooltip: "Go to the git repository",
+				nameKey: "Git Repository",
+				tooltipKey: "Go to the git repository",
+				nls: "git/nls/gitmessages",
 				validationProperties: [{
-					source: "CloneLocation|Git:CloneLocation",
+					source: "Git:CloneLocation",
 					variableName: "GitRepoLocation"
 				}],
 				uriTemplate: "{OrionHome}/git/git-repository.html#{GitRepoLocation}"
 			});
 
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoEclipseGit",
-				name: "Show in eclipse.org",
-				tooltip: "Show this repository at eclipse.org",
+				nameKey: "Show in eclipse.org",
+				tooltipKey: "Show this repository at eclipse.org",
+				nls: "git/nls/gitmessages",
 				validationProperties: [{
-					source: "GitUrl", 
+					source: "GitUrl|Clone:GitUrl", 
 					match: "git.eclipse.org/gitroot", 
 					variableName: "EclipseGitLocation", 
 					variableMatchPosition: "after"
@@ -80,12 +135,13 @@
 				uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}"
 			});
 			
-			provider.registerServiceProvider("orion.page.link.related", null, {
+			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoGithub",
-				name: "Show in GitHub",
-				tooltip: "Show this repository at GitHub",
+				nameKey: "Show in GitHub",
+				nls: "git/nls/gitmessages",
+				tooltipKey: "Show this repository at GitHub",
 				validationProperties: [{
-					source: "GitUrl", 
+					source: "GitUrl|Clone:GitUrl", 
 					match: "github\.com.*\.git", 
 					variableName: "GitHubLocation", 
 					variableMatchPosition: "only",
@@ -96,7 +152,7 @@
 						
 			temp.href = "../../gitapi/diff/";
 			var base = temp.href;
-			provider.registerServiceProvider("orion.core.diff", {
+			provider.registerService("orion.core.diff", {
 				getDiffContent: function(diffURI){	
 					return dojo.xhrGet({
 						url: diffURI , 

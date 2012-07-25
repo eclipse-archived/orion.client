@@ -12,8 +12,16 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, dojo, mServiceregistry, mPreferences, mPluginRegistry) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry) {
+
+	var once; // Deferred
+
 	function startup() {
+		if (once) {
+			return once;
+		}
+		once = new Deferred();
+	
 		// initialize service registry and EAS services
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
 	
@@ -21,20 +29,20 @@ define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		return preferences.getPreferences("/plugins").then(function(pluginsPreference) {
+		return preferences.getPreferences("/plugins").then(function(pluginsPreference) { //$NON-NLS-0$
 			var pluginURLs = pluginsPreference.keys();
 			for (var i=0; i < pluginURLs.length; ++i) {				
-				if (pluginURLs[i].indexOf("://") === -1) {
+				if (pluginURLs[i].indexOf("://") === -1) { //$NON-NLS-0$
 					pluginURLs[i] = require.toUrl(pluginURLs[i]);
 				}
 			}		
 			return pluginRegistry.startup(pluginURLs);
 		}).then(function() {
-			if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) {
-				return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) {
+			if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
+				return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
 					var pluginURLs = pluginsPreference.keys();
 					for (var i=0; i < pluginURLs.length; ++i) {				
-						if (pluginURLs[i].indexOf("://") === -1) {
+						if (pluginURLs[i].indexOf("://") === -1) { //$NON-NLS-0$
 							pluginURLs[i] = require.toUrl(pluginURLs[i]);
 						}
 					}		
@@ -42,15 +50,24 @@ define(['require', 'dojo', 'orion/serviceregistry', 'orion/preferences', 'orion/
 				});
 			}
 		}).then(function() {
-			dojo.addOnWindowUnload(function() {
-				pluginRegistry.shutdown();
-			});
+			var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
+			if (auth) {
+				auth.getUser().then(function(user) {
+					if (!user) {
+						auth.getAuthForm(window.location.href).then(function(formURL) {
+							window.location = formURL;
+						});
+					}
+				});
+			}
 		}).then(function() {
-			return {
+			var result = {
 				serviceRegistry: serviceRegistry,
 				preferences: preferences,
 				pluginRegistry: pluginRegistry
 			};
+			once.resolve(result);
+			return result;
 		});
 	}
 	return {startup: startup};

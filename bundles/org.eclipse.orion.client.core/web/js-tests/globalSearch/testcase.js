@@ -35,7 +35,7 @@ define(["dojo", "orion/assert", "orion/searchUtils"], function(dojo, assert, mSe
 	 */
 	function replaceFile(fileContentText, fileModel, inFileQuery, replaceString) {
 		var newContents = [];
-		mSearchUtils.generateNewContents(fileContentText.split("\n"), newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
+		mSearchUtils.generateNewContents(fileModel.contents,/*fileContentText.split("\n"),*/ newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
 		return newContents.join("\n");
 	}
 	

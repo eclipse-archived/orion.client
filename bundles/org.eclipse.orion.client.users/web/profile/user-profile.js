@@ -20,7 +20,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var pluginRegistry = core.pluginRegistry;
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 	
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
@@ -28,19 +28,19 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			
 			var profile = new mProfile.Profile({
 				registry: serviceRegistry,
 				pluginRegistry: pluginRegistry,
-				profilePlaceholder: dojo.byId('table'),
+				profilePlaceholder: dojo.byId('table'), //$NON-NLS-0$
 				commandService: commandService,
-				pageActionsPlaceholder: dojo.byId('pageActions'),
+				pageActionsPlaceholder: dojo.byId('pageActions'), //$NON-NLS-0$
 				usersClient: usersClient
 			});
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, profile);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, profile); //$NON-NLS-0$
 			mGlobalCommands.generateDomCommandsInBanner(commandService, profile);
 		});
 	});

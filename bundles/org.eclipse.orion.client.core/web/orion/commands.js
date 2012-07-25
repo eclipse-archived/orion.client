@@ -11,7 +11,7 @@
 
  /*global define window Image */
  
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(require, dojo, dijit, mUtil, PageUtil){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
 
 	/*
 	 * stateless helper function
@@ -27,10 +27,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				dojo.removeClass(this, overClass);
 			}
 		};
-		dojo.connect(domNode, "onmouseover", domNode, makeActive);
-		dojo.connect(focusNode, "onfocus", domNode, makeActive);
-		dojo.connect(domNode, "onmouseout", domNode, makeInactive);
-		dojo.connect(focusNode, "onblur", domNode, makeInactive);
+		dojo.connect(domNode, "onmouseover", domNode, makeActive); //$NON-NLS-0$
+		dojo.connect(focusNode, "onfocus", domNode, makeActive); //$NON-NLS-0$
+		dojo.connect(domNode, "onmouseout", domNode, makeInactive); //$NON-NLS-0$
+		dojo.connect(focusNode, "onblur", domNode, makeInactive); //$NON-NLS-0$
 	}
 
 	/**
@@ -87,13 +87,46 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	/**
 	 * Override the dijit MenuItem so that the inherited click behavior is not used.
 	 * This is done when the command is defined with a link, so that the normal browser
-	 * link behavior (and interpretations of various mouse clicks) is used.
+	 * link behavior (and interpretations of various mouse clicks) is used.  We also style
+	 * link specially (padding, etc.) to help reduce the difference in perceived
+	 * responsive area (the menu item) with the actual area (the link)
 	 * 
 	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350584
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=371265
 	 */
 	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
+		constructor: function() {
+			var options = arguments[0] || {};
+			options.onKeyDown = dojo.hitch(this, function(evt) {
+				if (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE) {
+					if(this._anchorLocation) { 
+						if(evt.ctrlKey) {
+							window.open(this._anchorLocation);
+						} else {
+							window.location=this._anchorLocation;
+						}
+					}
+				}
+			});
+			this.inherited(arguments || [options]);
+		},
+	
+		// if it has a link and the anchor is already in the dom, style it with some padding.
+		postCreate: function() {
+			var anchor = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
+			if (anchor) {
+				dojo.addClass(anchor, "commandMenuItemAnchor"); //$NON-NLS-0$
+				this._anchorLocation = anchor.href;
+			}
+		},
+		
+		setLink: function(href, name) {
+			this.set("label", "<a class='commandMenuItemAnchor' href='"+href+"'>"+name+"</a>"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			this._anchorLocation = href;
+		},
+		
 		_onClick: function(evt) {
-			if (!this.hrefCallback) {
+			if (!this.hasLink) {
 				this.inherited(arguments);
 			}
 		}
@@ -113,6 +146,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		constructor : function() {
 			this.inherited(arguments);
 			this.options = arguments[0] || {};
+			this.showDelay = 1000;
 		},
 		
 		_onUnHover: function(evt){
@@ -139,7 +173,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			// Override the dijit default ARIA role of alert, which causes undesirable behaviour.
 			window.setTimeout(function() {
 				if(dijit._masterTT) {
-					dojo.removeAttr(dijit._masterTT.containerNode, "role");
+					dojo.removeAttr(dijit._masterTT.containerNode, "role"); //$NON-NLS-0$
 				}
 			}, this.showDelay + 1);
 		},
@@ -157,7 +191,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					this.polling = false;
 					this.close();
 				}
-			}), 1000);
+			}), this.showDelay + 500);
 		},
 		
 		_stillInDocument: function(node) {
@@ -181,7 +215,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			if (this.options.commandParent) {
 				if (dijit.byId(this.options.commandParent.id)) {
 					// this is a menu
-					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();}));
+					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();})); //$NON-NLS-0$
 				}				
 			}
 		}
@@ -195,46 +229,47 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 */
 	function CommandService(options) {
 		this._commandList = {};
-		this._contributionsByDomNode = {};
+		this._contributionsByScopeId = {};
 		this._activeBindings = {};
 		this._urlBindings = {};
 		this._init(options);
 		this._parameterCollector = null;
+		this.showMenuIcons = false;
 	}
 	CommandService.prototype = /** @lends orion.commands.CommandService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.page.command", this);
-			this._selection = options.selection;
-			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){
+			this._serviceRegistration = this._registry.registerService("orion.page.command", this); //$NON-NLS-0$
+			this._defaultSelectionService = options.selection;
+			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){ //$NON-NLS-0$
 				evt = evt || window.event;
 				// bindings are ignored if we are in a text field or editor
-				if (evt.target.contentEditable === "true") {
+				if (evt.target.contentEditable === "true") { //$NON-NLS-0$
 					return;
 				}
 				var tagType = evt.target.nodeName.toLowerCase();
-				if (tagType === 'input') {
+				if (tagType === 'input') { //$NON-NLS-0$
 					var inputType = evt.target.type.toLowerCase();
 					// Any HTML5 input type that involves typing text should be ignored
 					switch (inputType) {
-						case "text":
-						case "password":
-						case "search":
-						case "color":
-						case "date":
-						case "datetime":
-						case "datetime-local":
-						case "email":
-						case "month":
-						case "number":
-						case "range":
-						case "tel":
-						case "time":
-						case "url":
-						case "week":
+						case "text": //$NON-NLS-0$
+						case "password": //$NON-NLS-0$
+						case "search": //$NON-NLS-0$
+						case "color": //$NON-NLS-0$
+						case "date": //$NON-NLS-0$
+						case "datetime": //$NON-NLS-0$
+						case "datetime-local": //$NON-NLS-0$
+						case "email": //$NON-NLS-0$
+						case "month": //$NON-NLS-0$
+						case "number": //$NON-NLS-0$
+						case "range": //$NON-NLS-0$
+						case "tel": //$NON-NLS-0$
+						case "time": //$NON-NLS-0$
+						case "url": //$NON-NLS-0$
+						case "week": //$NON-NLS-0$
 							return;
 					}
-				} else if (tagType === 'textarea') {
+				} else if (tagType === 'textarea') { //$NON-NLS-0$
 					return;
 				}
 				this._processKey(evt);
@@ -318,27 +353,39 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * Run the command with the specified commandId.
 		 *
 		 * @param {String} commandId the id of the command to run.
+		 * @param {Object} the item on which the command should run.
+		 * @param {Object} the handler for the command.
 		 *
 		 * Note:  The current implementation will only run the command if a URL binding has been
-		 * specified.  
+		 * specified, or if an item to run the command against has been specified.  
 		 */
-		runCommand: function(commandId) {
-			//TODO should we be keeping invocation context for commands without bindings? 
-			var binding = this._urlBindings[commandId];
-			if (binding && binding.command) {
-				if (binding.command.callback) {
+		runCommand: function(commandId, item, handler) {
+			if (item) {
+				var command = this._commandList[commandId];
+				var enabled = command.visibleWhen ? command.visibleWhen(item) : true;
+				if (enabled && command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._invoke(binding.invocation);
+						this._invoke(new CommandInvocation(this, handler, item, null, command));
 					}), 0);
+				}
+			} else {
+				//TODO should we be keeping invocation context for commands without bindings? 
+				var binding = this._urlBindings[commandId];
+				if (binding && binding.command) {
+					if (binding.command.callback) {
+						window.setTimeout(dojo.hitch(this, function() {
+							this._invoke(binding.invocation);
+						}), 0);
+					}
 				}
 			}
 		},
 		
 		/**
-		 * Return the selection service that is being used when commands should apply against a selection.
+		 * Return the default selection service that is being used when commands should apply against a selection.
 		 */
 		getSelectionService: function() {
-			return this._selection;
+			return this._defaultSelectionService;
 		},
 		
 		/**
@@ -427,10 +474,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						var tooltipDialog = new dijit.TooltipDialog({
 							onBlur: function() {dijit.popup.close(tooltipDialog);}
 						});		
-						var parameterArea = dojo.create("div");
+						var parameterArea = dojo.create("div"); //$NON-NLS-0$
+						var originalFocusNode = window.document.activeElement;
 						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-							dijit.popup.close(tooltipDialog);})(parameterArea);
-						tooltipDialog.set("content", parameterArea);
+							dijit.popup.close(tooltipDialog);
+							tooltipDialog.destroyRecursive();
+							if (originalFocusNode) {
+								originalFocusNode.focus();
+							}
+						})(parameterArea);
+						tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
 						var menu = dijit.byId(commandInvocation.domParent.id);
 						var pos;
 						if (menu) {
@@ -457,7 +510,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 				}
 			} else {
-				window.console.log("Client attempted to invoke command without an available (rendered) command invocation");
+				window.console.log("Client attempted to invoke command without an available (rendered) command invocation"); //$NON-NLS-0$
 			}
 		},
 		
@@ -482,10 +535,32 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * @param targetNode {DOMElement} the dom node where the key bindings should be shown.
 		 */
 		showKeyBindings: function(targetNode) {
-			for (var binding in this._activeBindings) {
-				if (this._activeBindings[binding] && this._activeBindings[binding].keyBinding && this._activeBindings[binding].command) {
-					dojo.place("<span role='listitem'>"+mUtil.getUserKeyString(this._activeBindings[binding].keyBinding)+" = "+this._activeBindings[binding].command.name+"<br></span>", targetNode, "last");
+			var scopes = {};
+			var bindingString, binding;
+			for (var aBinding in this._activeBindings) {
+				binding = this._activeBindings[aBinding];
+				if (binding && binding.keyBinding && binding.command) {
+					// skip scopes and process at end
+					if (binding.keyBinding.scopeName) {
+						if (!scopes[binding.keyBinding.scopeName]) {
+							scopes[binding.keyBinding.scopeName] = [];
+						}
+						scopes[binding.keyBinding.scopeName].push(binding);
+					} else {
+						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				}
+			}
+			for (var scopedBinding in scopes) {
+				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
+					dojo.place("<h2>"+scopedBinding+"</h2>", targetNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ 
+					for (var i=0; i<scopes[scopedBinding].length; i++) {
+						binding = scopes[scopedBinding][i];
+						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
+				}	
 			}
 		},
 		
@@ -510,13 +585,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * @param {String} parentPath The path of parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
+		 * @param {String} emptyGroupMessage A message to show if the group is empty and the user activates the UI element
+		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
 		 */	
 		 
-		addCommandGroup: function(scopeId, groupId, position, title, parentPath) {
-			if (!this._contributionsByDomNode[scopeId]) {
-				this._contributionsByDomNode[scopeId] = {};
+		addCommandGroup: function(scopeId, groupId, position, title, parentPath, emptyGroupMessage) {
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
 			}
-			var parentTable = this._contributionsByDomNode[scopeId];
+			var parentTable = this._contributionsByScopeId[scopeId];
 			if (parentPath) {
 				parentTable = this._createEntryForPath(parentTable, parentPath);		
 			} 
@@ -528,16 +605,17 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				if (position) {
 					parentTable[groupId].position = position;
 				}
+				parentTable[groupId].emptyGroupMessage = emptyGroupMessage;
 			} else {
 				// create new group definition
-				parentTable[groupId] = {title: title, position: position, children: {}};
+				parentTable[groupId] = {title: title, position: position, emptyGroupMessage: emptyGroupMessage, children: {}};
 				parentTable.sortedContributions = null;
 			}
 		},
 		
 		_createEntryForPath: function(parentTable, parentPath) {
 			if (parentPath) {
-				var segments = parentPath.split("/");
+				var segments = parentPath.split("/"); //$NON-NLS-0$
 				for (var i = 0; i < segments.length; i++) {
 					if (segments[i].length > 1) {
 						if (!parentTable[segments[i]]) {
@@ -552,11 +630,23 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		/**
+		 * Register a selection service that should be used for certain command scopes.
+		 * @param {String} scopeId The id describing the scope for which this selection service applies.  Required.
+		 *  Only contributions made to this scope will use the selection service.
+		 * @param {orion.selection.Selection} selectionService the selection service for the scope.
+		 */
+		registerSelectionService: function(scopeId, selectionService) {
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
+			}
+			this._contributionsByScopeId[scopeId].localSelectionService = selectionService;
+		},
+		
+		/**
 		 * Register a command contribution, which identifies how a command appears
 		 * on a page and how it is invoked.
-		 * @param {String} scopeId The id of a DOM element in which the command should be visible.  Required.
-		 *  When commands are rendered for a particular element, the command will be shown only if its scopeId
-		 *  matches the id being rendered.
+		 * @param {String} scopeId The id describing the scope of the command.  Required.
+		 *  This scope id is used when rendering commands.
 		 * @param {String} commandId the id of the command.  Required.
 		 * @param {Number} position the relative position of the command within its parent.  Required.
 		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
@@ -567,10 +657,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
-			if (!this._contributionsByDomNode[scopeId]) {
-				this._contributionsByDomNode[scopeId] = {};
+			if (!this._contributionsByScopeId[scopeId]) {
+				this._contributionsByScopeId[scopeId] = {};
 			}
-			var parentTable = this._contributionsByDomNode[scopeId];
+			var parentTable = this._contributionsByScopeId[scopeId];
 			if (parentPath) {
 				parentTable = this._createEntryForPath(parentTable, parentPath);		
 			} 
@@ -599,10 +689,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		},
 		
 		_isLastChildSeparator: function(parent, style) {
-			if (style === "tool" || style === "button") {
-				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator");
+			if (style === "tool" || style === "button") { //$NON-NLS-1$ //$NON-NLS-0$
+				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator"); //$NON-NLS-0$
 			}
-			if (style === "menu") {
+			if (style === "menu") { //$NON-NLS-0$
 				var menuChildren = parent.getChildren();
 				return menuChildren.length > 0 && (menuChildren[menuChildren.length-1] instanceof dijit.MenuSeparator);
 			}
@@ -623,36 +713,43 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  The caller
 		 *  must supply the parent menu.
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
+		 * @param {Array} domNodeWrapperList Optional an array used to record any DOM nodes that are rendered during this call.
+		 *  If an array is provided, then as commands are rendered, an object will be created to represent the command's node.  
+		 *  The object will always have the property "domNode" which contains the node created for the command.  If the command is
+		 *  rendered using other means (toolkit widget) then the optional property "widget" should contain the toolkit
+		 *  object that represents the specified dom node.
 		 */	
-		renderCommands: function(scopeId, parent, items, handler, renderType, userData) {
-			if (typeof(scopeId) !== "string") {
-				throw "a scope id for rendering must be specified";
+		renderCommands: function(scopeId, parent, items, handler, renderType, userData, domNodeWrapperList) {
+			if (typeof(scopeId) !== "string") { //$NON-NLS-0$
+				throw "a scope id for rendering must be specified"; //$NON-NLS-0$
 			}
-			if (typeof(parent) === "string") {
+			if (typeof(parent) === "string") { //$NON-NLS-0$
 				parent = dojo.byId(parent);
 			}
 			if (!parent) { 
-				throw "no parent"; 
+				throw "no parent";  //$NON-NLS-0$
 			}
 
-			if (!items) {
+			var contributions = this._contributionsByScopeId[scopeId];
+
+			if (!items && contributions) {
+				var selectionService = contributions.localSelectionService || this._defaultSelectionService;
 				var cmdService = this;
-				if (this._selection) {
-					this._selection.getSelections(function(selections) {
+				if (selectionService) {
+					selectionService.getSelections(function(selections) {
 						cmdService.renderCommands(scopeId, parent, selections, handler, renderType, userData);
 					});
 				}
 				return;
 			} 
-			var contributions = this._contributionsByDomNode[scopeId];
 			if (contributions) {
-				this._render(this._contributionsByDomNode[scopeId], parent, items, handler, renderType, userData);
+				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData, domNodeWrapperList);
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-				if (renderType === "tool" || renderType === "button") {
+				if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 					if (this._isLastChildSeparator(parent, renderType)) {
 						parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
 					}
-				} else if (renderType=== "menu") {
+				} else if (renderType=== "menu") { //$NON-NLS-0$
 					if (this._isLastChildSeparator(parent, renderType)) {
 						var child = parent.getChildren()[parent.getChildren().length-1];
 						parent.removeChild(child);
@@ -664,34 +761,59 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			}
 		},
 		
-		_render: function(contributions, parent, items, handler, renderType, userData) {
+		/**
+		 * Destroy all DOM nodes and any other resources used by rendered commands.
+		 * This call does not remove the commands from the command registry.  Clients typically call this
+		 * function to empty a command area when a client wants to render the commands again due to some 
+		 * change in state.  
+		 * @param {String|DOMElement} parent The id or DOM node that should be emptied.
+		 */
+		destroy: function(parent) {
+			if (typeof(parent) === "string") { //$NON-NLS-0$
+				parent = dojo.byId(parent);
+			}
+			if (!parent) { 
+				throw "no parent";  //$NON-NLS-0$
+			}
+			var widgets = dijit.findWidgets(parent);
+			dojo.forEach(widgets, function(w) {
+				w.destroyRecursive();
+			});
+			dojo.empty(parent);
+		},
+		
+		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
 			// sort the items
 			var sortedByPosition = contributions.sortedContributions;
 			if (!sortedByPosition) {
 				sortedByPosition = [];
+				var pushedItem = false;
 				for (var key in contributions) {
 				    if (!contributions.hasOwnProperty || contributions.hasOwnProperty(key)) {
 						var item = contributions[key];
-						if (item && typeof(item.position) === "number") {
+						if (item && typeof(item.position) === "number") { //$NON-NLS-0$
 							item.id = key;
 							sortedByPosition.push(item);
+							pushedItem = true;
 						}
 					}
 				}
-				sortedByPosition.sort(function(a,b) {
-					return a.position-b.position;
-				});
-				contributions.sortedContributions = sortedByPosition;
+				if (pushedItem) {
+					sortedByPosition.sort(function(a,b) {
+						return a.position-b.position;
+					});
+					contributions.sortedContributions = sortedByPosition;
+				}
 			}
 			// now traverse the sorted contributions and render as we go
 			for (var i = 0; i < sortedByPosition.length; i++) {
 				var id, menuButton, invocation;
-				if (sortedByPosition[i].children) {
+				if (sortedByPosition[i].children && Object.getOwnPropertyNames(sortedByPosition[i].children).length > 0) {
 					var group = sortedByPosition[i];
 					var children;
 					var childContributions = sortedByPosition[i].children;
 					var commandService = this;
-					if (renderType === "tool" || renderType === "button") {
+					if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 						if (group.title) {
 							// We need a named menu button.  We used to first render into the menu and only 
 							// add a menu button in the dom when we knew it was needed.  For performance, though, we need
@@ -705,44 +827,45 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							// still cause ripple but helps with cases like the "More" menu which is always last.
 							
 							var newMenu= new dijit.Menu({
-								style: "display: none;"
+								style: "display: none;" //$NON-NLS-0$
 							});
 							menuButton = new dijit.form.DropDownButton({
-								label: group.title === "*" ? "Actions" : group.title, // TODO undocumented hack
-								showLabel:  group.title !== "*",
-								style: "visibility: hidden;",
+								label: group.title === "*" ? messages["Actions"] : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
+								showLabel:  group.title !== "*", //$NON-NLS-0$
+								style: "visibility: hidden;", //$NON-NLS-0$
 								dropDown: newMenu
 						        });
-							dojo.addClass(menuButton.domNode, "commandMenu");
+							dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
+							if(domNodeWrapperList){
+								//we need to add the menuButton as the optional widget param
+								mNavUtils.generateNavGrid(domNodeWrapperList, menuButton.domNode, menuButton);
+							}
 							var menuParent = parent;
-							if (parent.nodeName.toLowerCase() === "ul") {
-								menuParent = dojo.create("li", {}, parent);
+							if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+								menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
 							} else {
-								dojo.addClass(menuButton.domNode, "commandMargins");
+								dojo.addClass(menuButton.domNode, "commandMargins"); //$NON-NLS-0$
 							}
-							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip
+							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
 							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-							if (group.title === "*") {
-								dojo.addClass(menuButton.domNode, "textless");
-								new CommandTooltip({
-									connectId: [menuButton.focusNode],
-									label: "Actions menu",
-									position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
-									commandParent: parent,
-									commandService: this
-								});
-							}
 							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
-							dojo.place(menuButton.domNode, menuParent, "last");
+							dojo.place(menuButton.domNode, menuParent, "last"); //$NON-NLS-0$
 							// we'll need to identify a menu with the dom id of its original parent
 							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
 							// render the children asynchronously
-							window.setTimeout(dojo.hitch(this, function() {
-								commandService._render(childContributions, newMenu, items, handler, "menu", userData); 
+							window.setTimeout(dojo.hitch({contributions: childContributions, emptyGroupMessage: group.emptyGroupMessage}, function() {
+								// it is possible that commands were destroyed by the time we get here.  Bail out if
+								// the parent menu has been destroyed.  We are reaching into the widget to make this
+								// determination.
+								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=382394
+								if (newMenu._destroyed) {
+									return;
+								}
+								commandService._render(this.contributions, newMenu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								children = newMenu.getChildren();
-								if (this._isLastChildSeparator(newMenu, "menu")) {
+								if (commandService._isLastChildSeparator(newMenu, "menu")) { //$NON-NLS-0$
 									var trailingSep = children[children.length-1];
 									newMenu.removeChild(trailingSep);
 									trailingSep.destroy();
@@ -750,9 +873,32 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								}
 								// now determine if we actually needed the menu or not
 								if (children.length === 0) {
-									menuButton.destroyRecursive();
+									if (this.emptyGroupMessage) {
+										dojo.connect(menuButton.focusNode, "onclick", this, function() { //$NON-NLS-0$
+											//Show the empty group message.
+											var tooltipDialog = new dijit.TooltipDialog({
+												content: "<p>"+this.emptyGroupMessage+"</p>",
+												onMouseLeave: function() {
+													dijit.popup.close(tooltipDialog);
+													tooltipDialog.destroyRecursive();
+												}
+											});		
+											dijit.popup.open({popup: tooltipDialog, around: menuButton.domNode});
+											// in case the user's mouse never entered this popup and thus couldn't leave
+											window.setTimeout(function() {
+												dijit.popup.close(tooltipDialog);
+												tooltipDialog.destroyRecursive();
+											}, 15000);
+										});
+										dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+									} else {
+										if(domNodeWrapperList){
+											mNavUtils.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+										}
+										menuButton.destroyRecursive();
+									}
 								} else {
-									dojo.style(menuButton.domNode, "visibility", "visible");
+									dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 								}
 							}), 0);
 						} else {  
@@ -763,7 +909,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
-							commandService._render(childContributions, parent, items, handler, renderType, userData); 
+							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 	
 							// make sure that more than just the separator got rendered before rendering a trailing separator
 							if (parent.childNodes.length > 0) {
@@ -784,15 +930,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								popup: subMenu
 							});
 							parent.addChild(groupPopup);
-							// asynchronously populate the menu
-							window.setTimeout(dojo.hitch(this, function() {
-								commandService._render(childContributions, subMenu, items, handler, renderType, userData); 
-								if (subMenu.getChildren().length === 0) {
-									groupPopup.set("label", "removeme");
-									parent.removeChild(groupPopup);
-									groupPopup.destroyRecursive();
-								}
-							}), 0);
+							commandService._render(childContributions, subMenu, items, handler, renderType, userData, domNodeWrapperList); 
+							if (subMenu.getChildren().length === 0) {
+								groupPopup.set("label", "removeme"); //$NON-NLS-1$ //$NON-NLS-0$
+								parent.removeChild(groupPopup);
+								groupPopup.destroyRecursive();
+							}
 						} else {  
 							// menu items with leading and trailing separators
 							// don't render a separator if there is nothing preceding, or if the last thing was a separator
@@ -802,7 +945,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								parent.addChild(menuSep);
 							}
 							// synchronously render the children since order matters
-							commandService._render(childContributions, parent, items, handler, renderType, userData); 
+							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
 							var menuChildren = parent.getChildren();
 							if (menuChildren[menuChildren.length - 1] !== menuSep) {
@@ -853,24 +996,30 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 						// special case.  The item wants to provide a set of choices
 						if (command.choiceCallback) {
 							var choicesMenu = new dijit.Menu({
-								style: "display: none;"
+								style: "display: none;" //$NON-NLS-0$
 							});
-							if (renderType === "tool" || renderType === "button") {
+							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 								menuButton = new dijit.form.DropDownButton({
 										label: command.name,
-										dropDown: choicesMenu
-								        });
+										dropDown: choicesMenu,
+										postCreate: function() {
+											// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=383035#c1
+											dojo.connect(this._buttonNode, "mousedown", this, function(e) { //$NON-NLS-0$
+												this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
+											});
+											dijit.form.DropDownButton.prototype.postCreate.apply(this, Array.prototype.slice.call(arguments));
+										}});
+								dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
+								dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
+								dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
 								if (command.image) {
-									dojo.addClass(menuButton.iconNode, "commandImage");
+									dojo.addClass(menuButton.iconNode, "commandImage"); //$NON-NLS-0$
 									menuButton.iconNode.src = command.image;
 								}
-								dojo.place(menuButton.domNode, parent, "last");
+								dojo.place(menuButton.domNode, parent, "last"); //$NON-NLS-0$
 								menuButton.eclipseCommand = command;
 								menuButton.eclipseChoices = choicesMenu;
-								dojo.connect(menuButton, "onClick", menuButton, function(event) {
-									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
-								});
-							} else if (renderType === "menu") {
+							} else if (renderType === "menu") { //$NON-NLS-0$
 								// parent is already a menu
 								var popup = new dijit.PopupMenuItem({
 									label: command.name,
@@ -880,19 +1029,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 								popup.eclipseCommand = command;
 								popup.eclipseChoices = choicesMenu;
 								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
-								dojo.connect(parent, "_openPopup", popup, function(event) {
+								dojo.connect(parent, "_openPopup", popup, function(event) { //$NON-NLS-0$
 									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
 								});
 							}
 						} else {
-							if (renderType === "tool") {
-								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addTool(parent, id, invocation);	
-							} else if (renderType === "button") {
-								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item
-								command._addButton(parent, id, invocation);	
-							} else if (renderType === "menu") {
-								command._addMenuItem(parent, invocation);
+							if (renderType === "tool") { //$NON-NLS-0$
+								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item //$NON-NLS-0$
+								command._addTool(parent, id, invocation, domNodeWrapperList);	
+							} else if (renderType === "button") { //$NON-NLS-0$
+								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item //$NON-NLS-0$
+								command._addButton(parent, id, invocation, domNodeWrapperList);	
+							} else if (renderType === "menu") { //$NON-NLS-0$
+								command._addMenuItem(parent, invocation, domNodeWrapperList);
 							}
 						}
 					} 
@@ -908,10 +1057,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * would use when rendering different groups of commands.
 		 */
 		generateSeparatorImage: function(parent) {
-			var sep = dojo.create("span", null, parent, "last");
-			dojo.addClass(sep, "core-sprite-sep");  // location in sprite
-			dojo.addClass(sep, "imageSprite");  // sets sprite background
-			dojo.addClass(sep, "commandSeparator");
+			var sep;
+			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+				sep = dojo.create("li", null, parent, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				sep = dojo.create("span", null, parent, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			dojo.addClass(sep, "core-sprite-sep");  // location in sprite //$NON-NLS-0$
+			dojo.addClass(sep, "imageSprite");  // sets sprite background //$NON-NLS-0$
+			dojo.addClass(sep, "commandSeparator"); //$NON-NLS-0$
 			return sep;
 		}
 
@@ -919,10 +1073,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	CommandService.prototype.constructor = CommandService;
 	
 	function addImageToElement(command, element, name) {
-		dojo.addClass(element, "commandImage");
+		dojo.addClass(element, "commandImage"); //$NON-NLS-0$
 		var node;
 		if (command.imageClass) {
-			node = dojo.create("span", {}, element, "last");
+			node = dojo.create("span", {}, element, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.addClass(node, command.spriteClass);
 			dojo.addClass(node, command.imageClass);
 		} else {
@@ -931,7 +1085,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			node.name = name;
 			node.id = name;
 			node.src = command.image;	
-			dojo.place(node, element, "last");
+			dojo.place(node, element, "last"); //$NON-NLS-0$
 		}
 		return node;
 	}
@@ -979,18 +1133,19 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
 														// A choice is an object with a name, callback, and optional image
-			this.image = options.image || require.toUrl("images/none.png");
+			this.image = options.image || require.toUrl("images/none.png"); //$NON-NLS-0$
 			this.imageClass = options.imageClass;   // points to the location in a sprite
-			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites
+			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;
+			this.description = options.description;
 		},
 		/*
 		 *  Adds a "tool" representation for the command.  
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is an image button.  If there is no image button, use bolded text button.
 		 */
-		_addTool: function(parent, name, context) {
+		_addTool: function(parent, name, context, domNodeWrapperList) {
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
@@ -999,18 +1154,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					return;
 				}
 			} else {
-				element = dojo.create("span", {tabindex: "0", role: "button"});
+				element = dojo.create("span", {tabindex: domNodeWrapperList ? "-1" : "0", role: "button"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
-					dojo.place(text, element, "last");
-					dojo.addClass(element, "commandMissingImageButton commandButton");
+					dojo.place(text, element, "last"); //$NON-NLS-0$
+					dojo.addClass(element, "commandMissingImageButton commandButton"); //$NON-NLS-0$
 				} else {
 					image = addImageToElement(this, element, name);
 					// ensure there is accessible text describing this image
 					this._addAccessibleLabel(element);
 				}
 				this._hookCallback(element, context);
-				_setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			
+				_setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			 //$NON-NLS-1$ //$NON-NLS-0$
 
 			}
 			context.domNode = element;
@@ -1019,17 +1174,18 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				new CommandTooltip({
 					connectId: [element],
 					label: this.tooltip,
-					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandParent: parent,
 					commandService: context.commandService
 				});
 			}
-			if (parent.nodeName.toLowerCase() === "ul") {
-				parent = dojo.create("li", {}, parent);
+			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
 			} else {
-				dojo.addClass(element, "commandMargins");
+				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
 			}
-			dojo.place(element, parent, "last");
+			dojo.place(element, parent, "last"); //$NON-NLS-0$
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 	
 		/*
@@ -1037,7 +1193,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 *  For href commands, this is just a link.
 		 *  For non-href commands, this is a text button.  If there is no name, use an image.
 		 */
-		_addButton: function(parent, name, context) {
+		_addButton: function(parent, name, context, domNodeWrapperList) {
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
@@ -1046,17 +1202,17 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 					return;
 				}
 			} else {
-				element = dojo.create("span", {tabindex: "0", role: "button"});
+				element = dojo.create("span", {tabindex: "0", role: "button"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._hookCallback(element, context);
 				var overClass;
 				if (this.name) {
-					dojo.place(window.document.createTextNode(this.name), element, "last");
-					dojo.addClass(element, "commandButton");
-					overClass = "commandButtonOver";
+					dojo.place(window.document.createTextNode(this.name), element, "last"); //$NON-NLS-0$
+					dojo.addClass(element, "commandButton"); //$NON-NLS-0$
+					overClass = "commandButtonOver"; //$NON-NLS-0$
 				} else {
 					// TODO we need a way to force a button contribution to look like a tool.  This is a very rare case.
 					addImageToElement(this, element, name);
-					overClass = "commandImageOver";
+					overClass = "commandImageOver"; //$NON-NLS-0$
 					// ensure there is accessible text describing this image
 					this._addAccessibleLabel(element);
 				}
@@ -1067,40 +1223,29 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				new CommandTooltip({
 					connectId: [element],
 					label: this.tooltip,
-					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands
+					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandParent: parent,
 					commandService: context.commandService
 				});
 			}
 			context.domParent = parent;
 			context.domNode = element;
-			if (parent.nodeName.toLowerCase() === "ul") {
-				parent = dojo.create("li", {}, parent);
+			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
 			} else {
-				dojo.addClass(element, "commandMargins");
+				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
 			}
-			dojo.place(element, parent, "last");
+			dojo.place(element, parent, "last"); //$NON-NLS-0$
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
-		_addMenuItem: function(parent, context) {
+		_addMenuItem: function(parent, context, domNodeWrapperList) {
+			var showIcon = context.commandService.showMenuIcons;
 			context.domParent = parent.domNode;
 			var menuitem = new CommandMenuItem({
-				labelType: this.hrefCallback ? "html" : "text",
+				labelType: this.hrefCallback ? "html" : "text", //$NON-NLS-1$ //$NON-NLS-0$
 				label: this.name,
-				iconClass: this.imageClass,
-				hrefCallback: !!this.hrefCallback,
-				onKeyDown: function(evt) {
-					if(this.hrefCallback && (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE)) {
-						var link = dojo.query("a", this.domNode)[0];
-						if(link) { 
-							if(evt.ctrlKey) {
-								window.open(link);
-							} else {
-								window.location=link;
-							}
-						}
-						return;
-					}
-				}
+				iconClass: showIcon ? this.imageClass : null,
+				hasLink: !!this.hrefCallback
 			});
 			if (this.tooltip) {
 				new CommandTooltip({
@@ -1115,10 +1260,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				if (loc) {
 					if (loc.then) {
 						loc.then(dojo.hitch(this, function(l) { 
-							menuitem.set("label", "<a href='"+l+"'>"+this.name+"</a>");
+							menuitem.setLink(l, this.name); 
 						}));
 					} else if (loc) {
-						menuitem.set("label", "<a href='"+loc+"'>"+this.name+"</a>");
+						menuitem.setLink(loc, this.name);
 					} else {
 						return;
 					}
@@ -1132,24 +1277,26 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			// we may need to refer back to the command.  
 			menuitem.eclipseCommand = this;
 			parent.addChild(menuitem);
-			if (this.imageClass) {
-				dojo.addClass(menuitem.iconNode, this.spriteClass);
-			} else if (this.image) {
-				dojo.addClass(menuitem.iconNode, "commandMenuItem");
-				// reaching...
-				menuitem.iconNode.src = this.image;
+			if (showIcon) {
+				if (this.imageClass) {
+					dojo.addClass(menuitem.iconNode, this.spriteClass);
+				} else if (this.image) {
+					dojo.addClass(menuitem.iconNode, "commandMenuItem"); //$NON-NLS-0$
+					// reaching...
+					menuitem.iconNode.src = this.image;
+				}
 			}
 			context.domNode = menuitem.domNode;
-
+			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 		
 		/*
 		 * stateless helper
 		 */
 		 _makeLink: function(context) {
-			var element = dojo.create("a", {tabindex: "0"});
-			dojo.addClass(element, "commandLink");
-			dojo.place(window.document.createTextNode(this.name), element, "last");
+			var element = dojo.create("a", {tabindex: "0"}); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.addClass(element, "commandLink"); //$NON-NLS-0$
+			dojo.place(window.document.createTextNode(this.name), element, "last"); //$NON-NLS-0$
 			var href = this.hrefCallback.call(context.handler, context);
 			if (href.then){
 				href.then(function(l){
@@ -1167,11 +1314,11 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * stateless helper
 		 */
 		_hookCallback: function(domNode, context) {
-			dojo.connect(domNode, "onclick", this, function() {
+			dojo.connect(domNode, "onclick", this, function() { //$NON-NLS-0$
 				context.commandService._invoke(context);
 			});
 			// onClick events do not register for spans when using the keyboard
-			dojo.connect(domNode, "onkeypress", this, function(e) {
+			dojo.connect(domNode, "onkeypress", this, function(e) { //$NON-NLS-0$
 				if (e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {						
 					context.commandService._invoke(context);					
 				}				
@@ -1184,7 +1331,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		_addAccessibleLabel: function(element) {
 			var label = this.name || this.tooltip;
 			if (label) {
-				dojo.attr(element, "aria-label", label);
+				dojo.attr(element, "aria-label", label); //$NON-NLS-0$
 			}
 		},
 		
@@ -1202,21 +1349,25 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			});
 
 			var choices = this.getChoices(items, handler, userData);
+			var showIcon = this.showMenuIcons;
+
 			for (var j=0; j<choices.length; j++) {
 				var choice = choices[j];
 				var menuitem;
 				if (choice.name) {
 					menuitem = new dijit.MenuItem({
 						label: choice.name,
-						iconClass: choice.imageClass,
+						iconClass: showIcon ? choice.imageClass : null,
 						onClick: this.makeChoiceCallback(choice, items)
 					});
-					if (choice.imageClass) {
-						dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite");
-					} else if (choice.image) {
-						dojo.addClass(menuitem.iconNode, "commandImage");
-						menuitem.iconNode.src = choice.image;
-					}			
+					if (showIcon) {
+						if (choice.imageClass) {
+							dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite"); //$NON-NLS-0$
+						} else if (choice.image) {
+							dojo.addClass(menuitem.iconNode, "commandImage"); //$NON-NLS-0$
+							menuitem.iconNode.src = choice.image;
+						}
+					}
 				} else {  // anything not named is a separator
 					menuitem = new dijit.MenuSeparator();
 				}
@@ -1255,12 +1406,12 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * externally.
 		 */
 		hasImage: function() {
-			return this.imageClass || this.image !== require.toUrl("images/none.png");
+			return this.imageClass || this.image !== require.toUrl("images/none.png"); //$NON-NLS-0$
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
 
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	/**
 	 * Temporary copy of editor key binding.  Will be removed in the next released.
 	 * @param {String|Number} keyCode the key code.
@@ -1268,12 +1419,16 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * @param {Boolean} mod2 the secondary modifier (usually Shift).
 	 * @param {Boolean} mod3 the third modifier (usually Alt).
 	 * @param {Boolean} mod4 the fourth modifier (usually Control on the Mac).
+	 * @param {String|DomElement} domScope the element for which this key binding is active.  If not specified, the key
+	 *       binding is considered to be global.
+	 * @param {String} scopeName the name of the scope to be used when listing key bindings.  Must be specified if a domScope
+	 *       is specified.
 	 * 
 	 * @name orion.commands.CommandKeyBinding
 	 * @class
 	 */
-	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4) {
-		if (typeof(keyCode) === "string") {
+	function CommandKeyBinding (keyCode, mod1, mod2, mod3, mod4, domScope, scopeName) {
+		if (typeof(keyCode) === "string") { //$NON-NLS-0$
 			this.keyCode = keyCode.toUpperCase().charCodeAt(0);
 		} else {
 			this.keyCode = keyCode;
@@ -1282,6 +1437,13 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
+		if (typeof(domScope) === "string") { //$NON-NLS-0$
+			this.domScope = dojo.byId(domScope);
+			this.scopeName = scopeName || domScope;
+		} else {
+			this.domScope = domScope;
+			this.scopeName = scopeName || domScope ? domScope.id : null;
+		}
 	}
 	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
 		/**
@@ -1297,7 +1459,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 				if (this.mod2 !== e.shiftKey) { return false; }
 				if (this.mod3 !== e.altKey) { return false; }
 				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
-				return true;
+				// if no scope specified, a match has been found
+				if (!this.domScope) {
+					return true;
+				}
+				// check that the keybinding is in the right scope
+				var node = e.target;
+				while (node) {
+			        if (node === window.document) {
+			            return false;
+			        }
+			        if (node === this.domScope) {
+						return true;
+			        }
+			        node = node.parentNode;
+				}
 			}
 			return false;
 		},
@@ -1314,6 +1490,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 			if (this.mod2 !== kb.mod2) { return false; }
 			if (this.mod3 !== kb.mod3) { return false; }
 			if (this.mod4 !== kb.mod4) { return false; }
+			if (this.domScope !== kb.domScope) { return false; }
 			return true;
 		}
 	};
@@ -1342,7 +1519,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		match: function (url) {
 			//ensure this is only the hash portion
 			var params = PageUtil.matchResourceParameters(url);
-			if (typeof params[this.token] !== "undefined") {
+			if (typeof params[this.token] !== "undefined") { //$NON-NLS-0$
 				this.parameterValue = params[this.token];
 				return this;
 			}
@@ -1355,18 +1532,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 	 * A CommandParameter defines a parameter that is required by a command.
 	 *
 	 * @param {String} name the name of the parameter
-	 * @param {String} type the type of the parameter, one of the HTML5 input types
+	 * @param {String} type the type of the parameter, one of the HTML5 input types, or "boolean"
 	 * @param {String} [label] the (optional) label that should be used when showing the parameter
 	 * @param {String} [value] the (optional) default value for the parameter
+	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
+	 *
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
 	 */
-	function CommandParameter (name, type, label, value) {
+	function CommandParameter (name, type, label, value, lines) {
 		this.name = name;
 		this.type = type;
 		this.label = label;
 		this.value = value;
+		this.lines = lines || 1;
 	}
 	CommandParameter.prototype = /** @lends orion.commands.CommandParameter.prototype */ {
 		/**
@@ -1427,7 +1607,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 * Update the stored parameters by running the stored function if one has been supplied.
 		 */
 		updateParameters: function(commandInvocation) {
-			if (typeof this.getParameters === "function") {
+			if (typeof this.getParameters === "function") { //$NON-NLS-0$
 				this._storeParameters(this.getParameters(commandInvocation));
 			}
 		},
@@ -1513,7 +1693,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'dijit/Menu'
 		 makeCopy: function() {
 			var parameters = [];
 			this.forEach(function(parm) {
-				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value);
+				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines);
 				parameters.push(newParm);
 			});
 			return new ParametersDescription(parameters, this._options, this.getParameters);

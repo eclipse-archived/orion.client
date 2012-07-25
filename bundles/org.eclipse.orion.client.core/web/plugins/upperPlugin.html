@@ -5,7 +5,7 @@
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
+			var provider = new orion.PluginProvider();
 			var serviceImpl = {
 				run : function(text) {
 					return text.toUpperCase();
@@ -16,7 +16,7 @@
 				img : "../images/gear.gif",
 				key : [ "u", true ]
 			};
-			provider.registerServiceProvider("orion.edit.command", serviceImpl, serviceProps);
+			provider.registerService("orion.edit.command", serviceImpl, serviceProps);
 			provider.connect();
 		};
 	</script>

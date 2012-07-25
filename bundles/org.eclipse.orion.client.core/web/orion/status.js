@@ -23,7 +23,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 	 */
 	function StatusReportingService(serviceRegistry, operationsClient, domId, progressDomId, notificationContainerDomId) {
 		this._serviceRegistry = serviceRegistry;
-		this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.page.message", this); //$NON-NLS-0$
 		this._operationsClient = operationsClient;
 		this.notificationContainerDomId = notificationContainerDomId;
 		this.domId = domId;
@@ -35,17 +35,17 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 	
 		_init: function() {
 			// this is a cheat, all dom ids should be passed in
-			var closeButton = dojo.byId("closeNotifications");
+			var closeButton = dojo.byId("closeNotifications"); //$NON-NLS-0$
 			if (closeButton && !this._hookedClose) {
-				dojo.connect(closeButton, "onclick", this, function() {
+				dojo.connect(closeButton, "onclick", this, function() { //$NON-NLS-0$
 					this.setProgressMessage("");
-					dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+					dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 				});	
 				// onClick events do not register for spans when using the keyboard
-				dojo.connect(closeButton, "onkeypress", this, function(e) {
+				dojo.connect(closeButton, "onkeypress", this, function(e) { //$NON-NLS-0$
 					if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
 						this.setProgressMessage("");
-						dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+						dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 					}				
 				});
 			}
@@ -60,26 +60,26 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		setMessage : function(msg, timeout, isAccessible) {
 			this._init();
 			this.currentMessage = msg;
-			if(typeof(isAccessible) === "boolean") {
+			if(typeof(isAccessible) === "boolean") { //$NON-NLS-0$
 				var that = this;
 				var node = dojo.byId(this.domId);
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
-				var readSetting = dojo.attr(node, "aria-live");
-				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off");
-				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 100);
-				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 200);
+				var readSetting = dojo.attr(node, "aria-live"); //$NON-NLS-0$
+				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 100); //$NON-NLS-0$
+				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 200); //$NON-NLS-0$
 			}
 			else { 
-				dojo.place(window.document.createTextNode(msg), this.domId, "only"); 
+				dojo.place(window.document.createTextNode(msg), this.domId, "only");  //$NON-NLS-0$
 			}
-			if (typeof(timeout) === "number") {
+			if (typeof(timeout) === "number") { //$NON-NLS-0$
 				var that = this;
 				window.setTimeout(function() {
 					var node = dojo.byId(that.domId);
-					var text = typeof(node.textContent) === "string" ? node.textContent : node.innerText;
+					var text = typeof(node.textContent) === "string" ? node.textContent : node.innerText; //$NON-NLS-0$
 					if (text === msg) {
-						dojo.place(window.document.createTextNode(""), that.domId, "only");
+						dojo.place(window.document.createTextNode(""), that.domId, "only"); //$NON-NLS-0$
 					}
 				}, timeout);
 			}
@@ -104,24 +104,24 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				//it is not JSON, just continue;
 			}
 			var message = status.Message || status;
-			var color = "red";
+			var color = "red"; //$NON-NLS-0$
 			if (status.Severity) {
 				switch (status.Severity) {
-				case "Warning":
-					color = "#FFCC00";
+				case "Warning": //$NON-NLS-0$
+					color = "#FFCC00"; //$NON-NLS-0$
 					break;
-				case "Error":
-					color = "red";
+				case "Error": //$NON-NLS-0$
+					color = "red"; //$NON-NLS-0$
 					break;
-				case "Info":
-				case "Ok":
-					color = "green";
+				case "Info": //$NON-NLS-0$
+				case "Ok": //$NON-NLS-0$
+					color = "green"; //$NON-NLS-0$
 					break;
 				}
 			}
-			var span = dojo.create("span", {style: {color: color}}); 
+			var span = dojo.create("span", {style: {color: color}});  //$NON-NLS-0$
 			dojo.place(window.document.createTextNode(message), span);
-			dojo.place(span, this.domId, "only");
+			dojo.place(span, this.domId, "only"); //$NON-NLS-0$
 		},
 		
 		/**
@@ -131,14 +131,16 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		setProgressMessage : function(message) {
 			this._init();
 			this.currentMessage = message;
-			var image = dojo.create("span", {"class": "imageSprite core-sprite-progress"});
-			dojo.place(image, this.progressDomId, "only");
-			dojo.place(window.document.createTextNode(message), this.progressDomId, "last");
-			dojo.addClass(this.notificationContainerDomId, "progressNormal");
-			if (message.length > 0) {
-				dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
-			} else {
-				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive");
+			var image = dojo.create("span", {"class": "imageSprite core-sprite-progress"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.place(image, this.progressDomId, "only"); //$NON-NLS-0$
+			dojo.place(window.document.createTextNode(message), this.progressDomId, "last"); //$NON-NLS-0$
+			dojo.addClass(this.notificationContainerDomId, "progressNormal"); //$NON-NLS-0$
+			if (message && message.length > 0) {
+				dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
+			} else if(this._progressMonitors && this._progressMonitors.length > 0){
+				this._renderOngoingMonitors();
+			}else{
+				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			}
 			mUtil.forceLayout(this.notificationContainerDomId);
 		},
@@ -161,38 +163,38 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			}
 			this._init();
 			var msg = status.Message || status;
-			var imageClass = "imageSprite core-sprite-info";
-			var extraClass = "progressInfo";
-			var removedClasses = "progressWarning progressError progressNormal";
-			var alt = "info";
+			var imageClass = "imageSprite core-sprite-info"; //$NON-NLS-0$
+			var extraClass = "progressInfo"; //$NON-NLS-0$
+			var removedClasses = "progressWarning progressError progressNormal"; //$NON-NLS-0$
+			var alt = "info"; //$NON-NLS-0$
 			if (status.Severity) {
 				switch (status.Severity) {
-				case "Warning":
-					imageClass = "imageSprite core-sprite-warning";
-					alt = "warning";
-					extraClass="progressWarning";
-					removedClasses = "progressInfo progressError progressNormal";
+				case "Warning": //$NON-NLS-0$
+					imageClass = "imageSprite core-sprite-warning"; //$NON-NLS-0$
+					alt = "warning"; //$NON-NLS-0$
+					extraClass="progressWarning"; //$NON-NLS-0$
+					removedClasses = "progressInfo progressError progressNormal"; //$NON-NLS-0$
 					break;
-				case "Error":
-					imageClass = "imageSprite core-sprite-error";
-					alt = "error";
-					extraClass="progressError";
-					removedClasses = "progressWarning progressInfo progressNormal";
+				case "Error": //$NON-NLS-0$
+					imageClass = "imageSprite core-sprite-error"; //$NON-NLS-0$
+					alt = "error"; //$NON-NLS-0$
+					extraClass="progressError"; //$NON-NLS-0$
+					removedClasses = "progressWarning progressInfo progressNormal"; //$NON-NLS-0$
 					break;
 				}
 			}
-			var image = dojo.create("span", {"class": imageClass});
-			dojo.place(image, this.progressDomId, "only");
+			var image = dojo.create("span", {"class": imageClass}); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.place(image, this.progressDomId, "only"); //$NON-NLS-0$
 			if (status.HTML) { // msg is HTML to be inserted directly
-				dojo.place(msg, this.progressDomId, "last");
+				dojo.place(msg, this.progressDomId, "last"); //$NON-NLS-0$
 			} else {  // msg is plain text
-				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last");
+				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				if (extraClass && this.progressDomId !== this.domId) {
 					dojo.addClass(this.notificationContainerDomId, extraClass);
 					dojo.removeClass(this.notificationContainerDomId, removedClasses);
 				}
 			}
-			dojo.addClass(this.notificationContainerDomId, "slideContainerActive");
+			dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			mUtil.forceLayout(this.notificationContainerDomId);
 		},
 		
@@ -210,9 +212,113 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				});
 			}
 			return deferred;
+		},
+		
+		_lastProgressId: 0,
+		_progressMonitors: {length: 0},
+		
+		/**
+		 * Creates a ProgressMonitor that will be displayed on the status area.
+		 * @param {dojo.Deferred} deferred [optional] that updates this monitor
+		 * @param {String} message [optional] messaged to be shown until deferred is not resolved
+		 * @returns {ProgressMonitor}
+		 */
+		createProgressMonitor: function(deferred, message){
+			return new ProgressMonitor(this, ++this._lastProgressId, deferred, message);
+		},
+		
+		_renderOngoingMonitors: function(){
+			if(this._progressMonitors.length > 0){
+				var msg = "";
+				var isFirst = true;
+				for(var progressMonitorId in this._progressMonitors){
+					if(this._progressMonitors[progressMonitorId].status){
+						if(!isFirst)
+							msg+=", "; //$NON-NLS-0$
+						msg+=this._progressMonitors[progressMonitorId].status;
+						isFirst = false;
+					}
+				}
+				this.setProgressMessage(msg);
+			} else {
+				this.setProgressMessage("");
+			}
+		},
+		
+		_beginProgressMonitor: function(monitor){
+			this._progressMonitors[monitor.progressId] = monitor;
+			this._progressMonitors.length++;
+			this._renderOngoingMonitors();
+		},
+		
+		_workedProgressMonitor: function(monitor){
+			this._progressMonitors[monitor.progressId] = monitor;
+			this._renderOngoingMonitors();
+		},
+		
+		_doneProgressMonitor: function(monitor){
+			delete this._progressMonitors[monitor.progressId];
+			this._progressMonitors.length--;
+			if(monitor.status){
+				this.setProgressResult(monitor.status);
+			}else{				
+				this._renderOngoingMonitors();
+			}
 		}
+		
 	};
 	StatusReportingService.prototype.constructor = StatusReportingService;
+	
+	function ProgressMonitor(statusService, progressId, deferred, message){
+		this.statusService = statusService;
+		this.progressId = progressId;
+		if(deferred){
+			this.deferred = deferred;
+			this.begin(message);
+			var that = this;
+			deferred.then(
+					function(response, secondArg){
+						dojo.hitch(that, that.done)();
+					},
+					function(error, secondArg){
+						dojo.hitch(that, that.done)();
+					});
+		}
+	}
+	
+	ProgressMonitor.prototype = new dojo.Deferred();
+	
+	/**
+	 * Starts the progress monitor. Message will be shown in the status area.
+	 * @param {String} message
+	 */
+	ProgressMonitor.prototype.begin = function(message){
+				this.status = message;
+				this.statusService._beginProgressMonitor(this);
+			};
+	/**
+	 * Sets the progress monitor as done. If no status is provided the message will be
+	 * removed from the status.
+	 * @param {String|dojoError|orionError} status [optional] The error to display. Can be a simple String,
+	 * or an error object from a dojo XHR error callback, or the body of an error response 
+	 * from the Orion server.
+	 */
+	ProgressMonitor.prototype.done = function(status){
+				this.status = status;
+				this.statusService._doneProgressMonitor(this);
+			};
+	/**
+	 * Changes the message in the monitor.
+	 * @param {String} message
+	 */
+	ProgressMonitor.prototype.worked = function(message){
+				this.status = message;
+				this.statusService._workedProgressMonitor(this);
+			};
+	
+	ProgressMonitor.prototype.constructor = ProgressMonitor;
+
 	//return module exports
-	return {StatusReportingService: StatusReportingService};
+	return {StatusReportingService: StatusReportingService,
+			ProgressMonitor: ProgressMonitor};
 });

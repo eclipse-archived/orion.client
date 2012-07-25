@@ -12,10 +12,10 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil',
-	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu'], 
-        function(require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mFavorites, mContentTypes, URITemplate, PageUtil){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/settings/ThemeSheetWriter',
+	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -26,12 +26,12 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 
 
 	function qualifyURL(url){
-	    var a = document.createElement('a');
+	    var a = document.createElement('a'); //$NON-NLS-0$
 	    a.href = url; // set string url
 	    return a.href;
 	}
 
-	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html'));
+	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
 	var loginDialog = new orion.widgets.LoginDialog();
 	var userMenu = new orion.widgets.UserMenu({loginDialog: loginDialog});
@@ -53,11 +53,25 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	}
 	
 	function startProgressService(serviceRegistry){
-		var progressService = serviceRegistry.getService("orion.page.progress");
+		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if(progressService) {
-			dojo.hitch(progressService, progressService.init)("progressPane");
+			dojo.hitch(progressService, progressService.init)("progressPane"); //$NON-NLS-0$
 		}
 	}
+	
+	function setUserName(registry, dropdown){
+			
+			var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
+			if (authService !== null) {
+				authService.getUser().then(function(jsonData){
+					if( jsonData.Name ){
+						dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+					}else if( jsonData.login ){
+						dropdown.set( 'label', jsonData.login ); //$NON-NLS-0$
+					}						
+				});
+			}
+		}
 
 	/**
 	 * Adds the user-related commands to the toolbar
@@ -66,33 +80,34 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	 */
 	function generateUserInfo(serviceRegistry) {
 		
-		var authServices = serviceRegistry.getServiceReferences("orion.core.auth");
+		var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
 		authenticationIds = [];
-		var userMenuPlaceholder = dojo.byId("userMenu");
+		var userMenuPlaceholder = dojo.byId("userMenu"); //$NON-NLS-0$
 		if(!userMenuPlaceholder){
 			return;
 		}
 		
-		if(!dijit.byId('logins')){
-			var menuButton = new dijit.form.DropDownButton({
-				id: "logins",
+		if(!dijit.byId('logins')){ //$NON-NLS-0$
+			var menuButton = new orion.widgets.UserMenuDropDown({
+				id: "logins", //$NON-NLS-0$
 				dropDown: userMenu,
-				label: "Options", 
-				showLabel: false
+				label: messages["Options"], 
+				showLabel: true
 			});
-			dojo.addClass(menuButton.domNode, "commandMenu");
-			dojo.place(menuButton.domNode, userMenuPlaceholder, "only");
+			dojo.place(menuButton.domNode, userMenuPlaceholder, "only"); //$NON-NLS-0$
 			if(menuButton.valueNode) {
 		        dojo.destroy(menuButton.valueNode);
 			}
-			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) {
-				dojo.removeAttr(menuButton.titleNode, "title");
+			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
+				dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
 			}
 			new mCommands.CommandTooltip({
 				connectId: [menuButton.focusNode],
-				label: "Options",
-				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands
+				label: messages['Options'],
+				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
+			
+			setUserName( serviceRegistry, menuButton );
 		}
 		
 		for(var i=0; i<authServices.length; i++){
@@ -106,11 +121,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 							loginDialog.addUserItem(key, authService, label, jsonData);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						}, 
-						function(errorData){
+						function(errorData, jsonData){
 							loginDialog.addUserItem(key, authService, label);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						});
-						window.addEventListener("storage", function(e){
+						window.addEventListener("storage", function(e){ //$NON-NLS-0$
 							if(authRendered[key] === localStorage.getItem(key)){
 								return;
 							}
@@ -139,13 +154,13 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		for(i in services){
 			if(services.hasOwnProperty(i)){
 				//open prompt if there is at least one pending authentication
-				var userInfo = dojo.byId('userInfo');
-				if(!userInfo.innerHTML){
+				var userMenu = dojo.byId('userMenu'); //$NON-NLS-0$
+				if(!userMenu.innerHTML){
 					window.setTimeout(function(){ //wait a few milliseconds for the content to generate 
 						try{
 							dijit.popup.open({
 								popup: loginDialog,
-								around: dojo.byId('userInfo')
+								around: userMenu //$NON-NLS-0$
 							});
 						}catch(e){}
 					}, 500);
@@ -153,7 +168,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 					try{
 						dijit.popup.open({
 							popup: loginDialog,
-							around: dojo.byId('userInfo')
+							around: userMenu //$NON-NLS-0$
 						});	
 					}catch(e){}
 				}
@@ -179,12 +194,12 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	function generateDomCommandsInBanner(commandService, handler, item, navHandler, navItem, ignoreForNow, clientManagesPageNav) {
 		// close any open slideouts because we are retargeting
 		commandService.closeParameterCollector();
-		var toolbar = dojo.byId("pageActions");
+		var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 		if (toolbar) {	
 			dojo.empty(toolbar);
 			// The render call may be synch (when called by page glue code that created the service)
 			// or asynch (when called after getting a service reference).
-			var retn = commandService.renderCommands(toolbar.id, toolbar, item || handler, handler, "button");
+			var retn = commandService.renderCommands(toolbar.id, toolbar, item || handler, handler, "button"); //$NON-NLS-0$
 			if (retn && retn.then) {
 				retn.then(function() {commandService.processURL(window.location.href);});
 			} else {
@@ -193,60 +208,73 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		}
 		// now page navigation actions
 		if (!clientManagesPageNav) {
-			toolbar = dojo.byId("pageNavigationActions");
+			toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				dojo.empty(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text
+				commandService.renderCommands(toolbar.id, toolbar, navItem || item || handler, navHandler || handler, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 			}
 		}
 	}
 	
+	// Related links menu management.  The related drop down widget and its associated dropdown menu
+	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
+	// empty, we hide the dropdown.
 	var linksMenu;
 	var pageItem;
 	var exclusions = [];
 	var favoriteTarget = null;
+	var title;
 	
-	function _makeEmptyLinksMenu() {
-		var related = dojo.byId("relatedLinks");
+	function _emptyLinksMenu() {
+		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
 		}
 		if (linksMenu) {
+			var dropdown = dijit.byId("related"); //$NON-NLS-0$
+			if (dropdown) {
+				dropdown.closeDropDown();
+			}
 			// see http://bugs.dojotoolkit.org/ticket/10296
 			linksMenu.focusedChild = null;
 			dojo.forEach(linksMenu.getChildren(), function(child) {
 				linksMenu.removeChild(child);
 				child.destroy();
 			});
-			linksMenu.destroy();
-		} 
-		linksMenu = new dijit.Menu({
-			style: "display: none;",
-			id: "relatedLinksMenu"
-		});
-		return linksMenu;
+		}
+	}
+	
+	function _checkForEmptyLinksMenu() {
+		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if (linksMenu && dropdownNode) {
+			if (linksMenu.getChildren().length === 0) {
+				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+			} else {
+				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+			}
+		}
 	}
 	
 	function _addRelatedLinkCommand(command, invocation) {
 		if (!linksMenu) {
 			linksMenu = new dijit.Menu({
-				style: "display: none;",
-				id: "relatedLinksMenu"
+				style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
+				id: "relatedLinksMenu" //$NON-NLS-0$
 			});
 		}
 		command._addMenuItem(linksMenu, invocation);
 
-		var menuButton = dijit.byId("related");
-		var domNode = dojo.byId("relatedLinks");
+		var menuButton = dijit.byId("related"); //$NON-NLS-0$
+		var domNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
 		if (domNode && !menuButton) {
-			menuButton = new dijit.form.DropDownButton({
-				id: "related",
-				label: "Related pages",
+			menuButton = new orion.widgets.UserMenuDropDown({
+				id: "related", //$NON-NLS-0$
+				label: messages["Related"],
 				dropDown: linksMenu
 			});
-			dojo.addClass(menuButton.domNode, "commandMenu");
-			dojo.place(menuButton.domNode, domNode, "only");
+			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
 			mUtil.forceLayout(domNode);
 		}	
 	}
@@ -262,11 +290,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			if (contentTypesCache) {
 				return contentTypesCache;
 			}
-			var contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+			var contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 			if (!contentTypeService) {
 				contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-				contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
+				contentTypeService = serviceRegistry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 			}
 			return contentTypeService.getContentTypes().then(function(ct) {
 				contentTypesCache = ct;
@@ -274,105 +302,111 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			});
 		}
 
-		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related");
+		var contributedLinks = serviceRegistry.getServiceReferences("orion.page.link.related"); //$NON-NLS-0$
 		if (contributedLinks.length <= 0) {
 			return;
 		}
-		var related = dojo.byId("relatedLinks");
+		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
 		}
 		
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
-			var menu = _makeEmptyLinksMenu();
-			var foundLink = false;
+			var alternateItemDeferred;
+			_emptyLinksMenu();
+			var deferreds = [];
+			
 			// assemble the related links
 			for (var i=0; i<contributedLinks.length; i++) {
 				var info = {};
 				var j;
-				var propertyNames = contributedLinks[i].getPropertyNames();
+				var propertyNames = contributedLinks[i].getPropertyKeys();
 				for (j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = contributedLinks[i].getProperty(propertyNames[j]);
 				}
 				if (info.id) {
+					function enhanceCommand(command){
+						if (command) {
+							if (!command.visibleWhen || command.visibleWhen(item)) {
+								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
+								_addRelatedLinkCommand(command, invocation);
+							} else if (typeof alternateItem === "function") { //$NON-NLS-0$
+								if (!alternateItemDeferred) {
+									alternateItemDeferred = alternateItem();
+								}
+								dojo.when(alternateItemDeferred, dojo.hitch(command, function (newItem) {
+									if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
+										if (!this.visibleWhen || this.visibleWhen(newItem)) {
+											_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
+										}
+									}
+								}));
+							}
+						} 
+					}
+					
 					var command = null;
 					// exclude anything in the list of exclusions
 					var position = dojo.indexOf(exclusions, info.id);
 					if (position < 0) {
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
-						if (info.name && info.uriTemplate) {
-							command = new mCommands.Command(mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true));
+						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
+							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
+							deferreds.push(deferred);
+							deferred.then(
+									dojo.hitch(this, function(commandOptions){
+										var command = new mCommands.Command(commandOptions);
+										enhanceCommand(command);
+									}));
+							continue;
 						}
 						// If we couldn't compose one, see if one is already registered.
 						if (!command) {
 							command = commandService.findCommand(info.id);
+							if(command){
+								enhanceCommand(command);
+								continue;
+							}
 						}
 						// If it's not registered look for it in orion.navigate.command and create it
 						if (!command) {
-							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command");
+							var commandsReferences = serviceRegistry.getServiceReferences("orion.navigate.command"); //$NON-NLS-0$
 							for (j=0; j<commandsReferences.length; j++) {
-								var id = commandsReferences[j].getProperty("id");
+								var id = commandsReferences[j].getProperty("id"); //$NON-NLS-0$
 								if (id === info.id) {
 									var navInfo = {};
-									propertyNames = commandsReferences[j].getPropertyNames();
+									propertyNames = commandsReferences[j].getPropertyKeys();
 									for (var k = 0; k < propertyNames.length; k++) {
 										navInfo[propertyNames[k]] = commandsReferences[j].getProperty(propertyNames[k]);
 									}
-									var commandOptions = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true);
-									command = new mCommands.Command(commandOptions);
+									deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true);
+									deferreds.push(deferred);
+									deferred.then(
+											dojo.hitch(this, function(commandOptions){
+												command = new mCommands.Command(commandOptions);
+												enhanceCommand(command);
+											}));
 									break;
 								}
 							}
 						} 
-						if (command) {
-							if (!command.visibleWhen || command.visibleWhen(item)) {
-								foundLink = true;
-								var invocation = new mCommands.CommandInvocation(commandService, item, item, null, command);
-								command._addMenuItem(menu, invocation);
-							} else {
-								if (typeof alternateItem === "function") {
-									// asynch call to consider an alternate target item for just this command
-									window.setTimeout(dojo.hitch(command, function() {
-										dojo.when(alternateItem(), dojo.hitch(this, function (newItem) {
-											if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
-												if (this.visibleWhen(newItem)) {
-													_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
-												}
-											}
-										}));
-									}), 0);
-								}
-							}
-						} 
+
 					}
 				} 
 			}
-			var menuButton = dijit.byId("related");
-			if (menuButton) {
-				menuButton.destroy();
-			}
-			if (foundLink) {
-				menuButton = new dijit.form.DropDownButton({
-					id: "related",
-					label: "Related pages",
-					dropDown: menu
-				});
-				dojo.addClass(menuButton.domNode, "commandMenu");
-				dojo.place(menuButton.domNode, related, "only");
-			}	
-			mUtil.forceLayout(related);
+			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+				_checkForEmptyLinksMenu();
+				mUtil.forceLayout(related);
+			}));
 		}));
 	}
 	
-	function renderGlobalCommands(commandService, handler, pageItem) {
-		var globalTools = dojo.byId("globalActions");
+	function renderGlobalCommands(commandService) {
+		var globalTools = dojo.byId("globalActions"); //$NON-NLS-0$
 		if (globalTools) {	
 			dojo.empty(globalTools);
-			// need to have some item associated with the command
-			var item = dojo.isArray(pageItem) ? pageItem[0] : pageItem;
-			item = item || handler || {};
-			commandService.renderCommands(globalTools.id, globalTools, item, handler, "tool");
+			commandService.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
 		}
 	}
 	
@@ -384,11 +418,188 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		exclusions = excluded;
 	}
 	
-	function setPageTarget(item, serviceRegistry, commandService, /*optional*/ alternateItem, /* optional */ pageFavoriteTarget) {
-		pageItem = item;
-		generateRelatedLinks(serviceRegistry, item, exclusions, commandService, alternateItem);
-		favoriteTarget = pageFavoriteTarget;
-		// in the future we should do breadcrumb management and search scoping here
+	function makeFavorite(serviceRegistry) {
+		var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
+		//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
+		if (!favoriteService) {
+			favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
+			favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
+		}
+		if (favoriteTarget && favoriteTarget.Location) {
+			favoriteService.hasFavorite(favoriteTarget.ChildrenLocation || favoriteTarget.Location).then(function(result) {
+				if (!result) {
+					favoriteService.makeFavorites([favoriteTarget]);
+					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" has been added to the favorites list."], 2000); //$NON-NLS-0$
+				} else {
+					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" is already a favorite."], 2000); //$NON-NLS-0$
+				}
+			});
+		} 
+	}
+	
+	// Hook up favorites button
+	function checkFavoritesButton(serviceRegistry, commandService) {
+		var faveButton = dojo.byId("pageFavorite"); //$NON-NLS-0$
+		if (faveButton) {
+			if (favoriteTarget && favoriteTarget.Location) {
+				dojo.addClass(faveButton, "bannerButton"); //$NON-NLS-0$
+				dojo.connect(faveButton, "onclick", this, function() { //$NON-NLS-0$
+					makeFavorite(serviceRegistry);
+				});
+				// onClick events do not register for spans when using the keyboard
+				dojo.connect(faveButton, "onkeypress", this, function(e) { //$NON-NLS-0$
+					if (e.keyCode === dojo.keys.ENTER) {						
+						makeFavorite(serviceRegistry);
+					}
+				});
+				new mCommands.CommandTooltip({
+					connectId: [faveButton],
+					label: messages["Add to the favorites list"],
+					position: ["below", "left", "right", "above"], // below since this is at top of page. //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					commandService: commandService
+				});
+				dojo.style(faveButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				dojo.style(faveButton, "visibility", "hidden"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+		}
+	}
+	
+	/**
+	 * Set a dirty indicator for the page.  An in-page indicator will always be set.  
+	 * If the document has a title (set via setPageTarget), then the title will also be updated
+	 * with a dirty indicator.
+	 */
+	function setDirtyIndicator(isDirty) {
+		if (title) {
+			if (title.charAt(0) === '*' && !isDirty) { //$NON-NLS-0$
+				title = title.substring(1);
+			}
+			if (isDirty && title.charAt(0) !== '*') { //$NON-NLS-0$
+				title = '*' + title; //$NON-NLS-0$
+			}
+			window.document.title = title;
+		}
+
+		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
+		if (dirty) {
+			if (isDirty) {
+				dirty.innerHTML = "*"; //$NON-NLS-0$
+			} else {
+				dirty.innerHTML = ""; //$NON-NLS-0$
+			}
+		}
+	}
+	/**
+	 * Set the target of the page so that common infrastructure (breadcrumbs, related menu, etc.) can be
+	 * added for the page.
+	 * @param {Object} options The target options object.
+	 * @param {String} options.task the name of the user task that the page represents.
+	 * @param {Object} options.target the metadata describing the page resource target.  Optional.
+	 * @param {String} options.name the name of the resource that is showing on the page.  Optional.  If a target
+	 * parameter is supplied, the target metadata name will be used if a name is not specified in the options.
+	 * @param {String} options.title the title to be used for the page.  Optional.  If not specified, a title
+	 * will be constructed using the task and/or name.
+	 * @param {String} options.breadcrumbRootName the name used for the breadcrumb root.  Optional.  If not
+	 * specified, the breadcrumbTarget, fileService, task, and name will be consulted to form a root name.
+	 * @param {Object} options.breadcrumbTarget the metadata used for the breadcrumb target. Optional.  If not
+	 * specified, options.target is used as the breadcrumb target.
+	 * @param {Boolean} options.isFavoriteTarget true if the target can be a favorite. Optional. If specified, 
+	 * a favorites button will be added to the banner.  
+	 * @param {Function} options.makeAlternate a function that can supply alternate metadata for the related
+	 * pages menu if the target does not validate against a contribution.  Optional.
+	 * @param {Function} options.makeBreadcrumbLink a function that will supply a breadcrumb link based on a location
+	 * shown in a breadcrumb.  Optional.  If not specified, and if a target is specified, the breadcrumb link will
+	 * refer to the Navigator.
+	 * @param {Object} options.serviceRegistry the registry to use for obtaining any unspecified services.  Optional.  
+	 * If not specified, then any banner elements requiring Orion services will not be provided.
+	 * @param {Object} options.commandService the commandService used for accessing related page commands.  Optional.
+	 * If not specified, a related page menu will not be shown.
+	 * @param {Object} options.searchService the searchService used for scoping the searchbox.  Optional.  If not 
+	 * specified, the searchbox will not be scoped.
+	 * @param {Object} options.fileService the fileService used for retrieving additional metadata and managing
+	 * the breadcrumb for multiple file services.  If not specified, there may be reduced support for multiple file 
+	 * implementations.
+	 *
+	 */
+	function setPageTarget(options) {
+		var name;
+		var fileSystemRootName;
+		var breadcrumbRootName = options.breadcrumbRootName;
+		if (options.target) {  // we have metadata
+			if (options.searchService) {
+				options.searchService.setLocationByMetaData(options.target); //$NON-NLS-0$
+			}
+			if (options.fileService && !options.breadcrumbTarget) {
+				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : "";
+				fileSystemRootName = fileSystemRootName +  options.fileService.fileServiceName(options.target.Location);
+				breadcrumbRootName = null;
+			} 
+			name = options.name || options.target.Name;
+			pageItem = options.target;
+			generateRelatedLinks(options.serviceRegistry, options.target, exclusions, options.commandService, options.makeAlternate);
+		} else {
+			if (!options.breadcrumbTarget) {
+				breadcrumbRootName = breadcrumbRootName || options.task || options.name;
+			}
+			name = options.name;
+		}
+		title = options.title;
+		if (!title) {
+			if (name) {
+				title = name + " - "+ options.task;
+			} else {
+				title = options.task;
+			}
+		} 
+		window.document.title = title;
+		dojo.empty("location"); //$NON-NLS-0$
+		new mBreadcrumbs.BreadCrumbs({
+			container: "location",  //$NON-NLS-0$
+			resource: options.breadcrumbTarget || options.target,
+			rootSegmentName: breadcrumbRootName,
+			workspaceRootSegmentName: fileSystemRootName,
+			makeHref: options.makeBreadcrumbLink
+		});
+		if (options.target && options.isFavoriteTarget) {
+			favoriteTarget = options.target;
+		} else {
+			favoriteTarget = null;
+		}
+		checkFavoritesButton(options.serviceRegistry, options.commandService);
+	}
+	
+	
+	function applyTheme(preferences){
+	
+		preferences.getPreferences('/themes', 2).then(function(prefs){
+			
+			var selected = prefs.get( 'selected' );
+			
+			if( selected ){
+				var ob = JSON.parse( selected );
+				
+				var styles = JSON.parse( prefs.get( 'styles' ) );
+				
+				for( var theme in styles ){
+					
+					var cssdata;
+					
+					if( styles[theme].name === ob.selected ){
+						cssdata = styles[theme];
+						var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
+						var css = sheetMaker.getSheet( cssdata );
+				
+						var stylesheet = document.createElement("STYLE");
+						stylesheet.appendChild(document.createTextNode(css));
+							
+						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+						head.appendChild(stylesheet);	
+						break;
+					}	
+				}
+			}		
+		});
 	}
 	
 	
@@ -398,27 +609,37 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 	 * @function
 	 */
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
-		// this needs to come from somewhere but I'm not going to do a separate get for it
-		
 		var text;
 		
-		var target = "_self";
+		applyTheme( prefsService );
+		
+		var target = "_self"; //$NON-NLS-0$
 		
 		var parent = dojo.byId(parentId);
 		if (!parent) {
-			throw "could not find banner parent, id was " + parentId;
+			throw messages["could not find banner parent, id was "] + parentId;
 		}
 				
-		// place the HTML fragment from above.
-		dojo.place(commonHTML.topHTMLFragment, parent, "only");
+		if (!dojo.byId("staticBanner")) {
+			// place the HTML fragment for the header.
+			dojo.place(commonHTML.topHTMLFragment, parent, "only"); //$NON-NLS-0$
+		}
 		
-		var toolbar = dojo.byId("pageToolbar");
+		var toolbar = dojo.byId("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
-			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only");
-			dojo.addClass(toolbar, "toolComposite");
+			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
+			dojo.addClass(toolbar, "toolComposite"); //$NON-NLS-0$
 		} else {
-			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar toolComposite layoutBlock"}, "titleArea", "after");
-			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only");
+			toolbar = dojo.create ("div", {id: "pageToolbar", "class": "toolbar toolComposite layoutBlock"}, "titleArea", "after"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
+		}
+		
+		if (!dojo.byId("footerContent")) {
+			// Needs cleanup
+			var footer = dojo.byId("footer"); //$NON-NLS-0$
+			if (footer) {
+				dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
+			}
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
@@ -426,11 +647,11 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 
 		
 		// place an empty div for keyAssist
-		dojo.place('<div id="keyAssist" style="display: none" class="keyAssistFloat" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last");
+		dojo.place('<div id="keyAssist" style="display: none" class="keyAssistFloat" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 
 		
 		// generate primary nav links. 
-		var primaryNav = dojo.byId("primaryNav");
+		var primaryNav = dojo.byId("primaryNav"); //$NON-NLS-0$
 		if (primaryNav) {
 			// Note that the shape of the "orion.page.link" extension is not in any shape or form that could be considered final.
 			// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
@@ -441,117 +662,65 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			//     required attribute: id - the id of the navigation link
 			//     required attribute: uriTemplate - the URL for the navigation link
 			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
-			var navLinks= serviceRegistry.getServiceReferences("orion.page.link");
+			var navLinks= serviceRegistry.getServiceReferences("orion.page.link"); //$NON-NLS-0$
 			var params = PageUtil.matchResourceParameters(window.location.href);
 			// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			var hostName = window.location.protocol + "//" + window.location.host;
+			var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
 			var locationObject = {OrionHome: hostName, Location: params.resource};
 			for (var i=0; i<navLinks.length; i++) {
 				var info = {};
-				var propertyNames = navLinks[i].getPropertyNames();
+				var propertyNames = navLinks[i].getPropertyKeys();
 				for (var j = 0; j < propertyNames.length; j++) {
 					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
 				}
-				if (info.uriTemplate && info.name) {
+			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
+				require(['i18n!'+info.nls], function(commandMessages){
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
-					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last");
+					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					text = document.createTextNode(info.nameKey? commandMessages[info.nameKey]: info.name);
+					dojo.place(text, link, "only"); //$NON-NLS-0$
+				});
+			} else if (info.uriTemplate && info.name) {
+					var uriTemplate = new URITemplate(info.uriTemplate);
+					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					text = document.createTextNode(info.name);
-					dojo.place(text, link, "only");
+					dojo.place(text, link, "only"); //$NON-NLS-0$
 				}
 			}
 		}
 		
 		// hook up search box behavior
-		var searchField = dojo.byId("search");
+		var searchField = dojo.byId("search"); //$NON-NLS-0$
 		if (!searchField) {
-			throw "failed to generate HTML for banner";
+			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
-		dojo.connect(searchField, "onkeypress", function(e){
+		dojo.connect(searchField, "onkeypress", function(e){ //$NON-NLS-0$
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
 						var query = searcher.createSearchQuery(searchField.value);
-						window.location = require.toUrl("search/search.html") + "#"+query;
+						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				} else {
-					window.alert("Can't search: no search service is available");
+					window.alert(messages["Can't search: no search service is available"]);
 				}
 			}
 		});
 		
-		// Put page title in title area.  
-		var title = dojo.byId("pageTitle");
-		if (title) {
-			text = document.createTextNode(document.title);
-			dojo.place(text, title, "last");
-		}
-		
-		function makeFavorite() {
-			var favoriteService = serviceRegistry.getService("orion.core.favorite");
-			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
-			if (!favoriteService) {
-				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
-				favoriteService = serviceRegistry.getService("orion.core.favorite");
-			}
-			if (favoriteTarget && favoriteTarget.Location) {
-				favoriteService.hasFavorite(favoriteTarget.ChildrenLocation || favoriteTarget.Location).then(function(result) {
-					if (!result) {
-						favoriteService.makeFavorites([favoriteTarget]);
-						serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " has been added to the favorites list.", 2000);
-					} else {
-						serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + " is already a favorite.", 2000);
-					}
-				});
-			} else {
-				var url = window.location.pathname + window.location.hash;
-				favoriteService.hasFavorite(url).then(function(result) {
-					if (!result) {
-						favoriteService.addFavoriteUrl(url);
-						serviceRegistry.getService("orion.page.message").setMessage(url + " has been added to the favorites list.", 2000);
-					} else {
-						serviceRegistry.getService("orion.page.message").setMessage(url + " is already a favorite.", 2000);
-					}
-				});
-			}
-		}
-		
-		// Hook up favorites button
-		var faveButton = dojo.byId("pageFavorite");
-		if (faveButton) {
-			dojo.addClass(faveButton, "commandButton");
-			dojo.connect(faveButton, "onclick", this, function() {
-				makeFavorite();
-			});
-			// onClick events do not register for spans when using the keyboard
-			dojo.connect(faveButton, "onkeypress", this, function(e) {
-				if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
-					makeFavorite();
-				}
-			});
-			dojo.connect(faveButton, "onmouseover", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
-			dojo.connect(faveButton, "onfocus", faveButton, function() {dojo.addClass(this, "commandButtonOver");});
-			dojo.connect(faveButton, "onmouseout", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
-			dojo.connect(faveButton, "onblur", faveButton, function() {dojo.removeClass(this, "commandButtonOver");});
-			new mCommands.CommandTooltip({
-				connectId: [faveButton],
-				label: "Add this page to the favorites list",
-				position: ["below", "left", "right", "above"], // below since this is at top of page.
-				commandParent: parent,
-				commandService: commandService
-			});
-
-		}
-
-		
-		// Assemble global commands
+		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
+		// make favorite
 		var favoriteCommand = new mCommands.Command({
-			name: "Make Favorite",
-			tooltip: "Add to the favorites list",
-			imageClass: "core-sprite-makeFavorite",
-			id: "orion.makeFavorite",
+			name: messages["Make Favorite"],
+			tooltip: messages['Add to the favorites list'],
+			imageClass: "core-sprite-makeFavorite", //$NON-NLS-0$
+			id: "orion.makeFavorite", //$NON-NLS-0$
 			visibleWhen: function(item) {
 				var items = dojo.isArray(item) ? item : [item];
+				if (items.length === 0) {
+					return false;
+				}
 				for (var i=0; i < items.length; i++) {
 					if (!items[i].Location) {
 						return false;
@@ -560,13 +729,13 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				return true;},
 			callback: function(data) {
 				var items = dojo.isArray(data.items) ? data.items : [data.items];
-				var favService = serviceRegistry.getService("orion.core.favorite");
+				var favService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 				var doAdd = function(item) {
 					return function(result) {
 						if (!result) {
 							favService.makeFavorites(item);
 						} else {
-							serviceRegistry.getService("orion.page.message").setMessage(item.Name + " is already a favorite.", 2000);
+							serviceRegistry.getService("orion.page.message").setMessage(item.Name + messages[' is already a favorite.'], 2000); //$NON-NLS-0$
 						}
 					};
 				};
@@ -577,17 +746,18 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			}});
 		commandService.addCommand(favoriteCommand);
 	
+		// open resource
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
-			var favoriteService = serviceRegistry.getService("orion.core.favorite");
+			var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 			if (!favoriteService) {
 				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 				//service must be accessed via the registry so we get async behaviour
-				favoriteService = serviceRegistry.getService("orion.core.favorite");
+				favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			}
 			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:searcher.defaultRenderer, favoriteService:favoriteService});
 			if (editor) {
-				dojo.connect(dialog, "onHide", function() {
+				dojo.connect(dialog, "onHide", function() { //$NON-NLS-0$
 					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
 				});
 			}
@@ -595,81 +765,81 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		};
 			
 		var openResourceCommand = new mCommands.Command({
-			name: "Find File Named...",
-			tooltip: "Choose a file by name and open an editor on it",
-			id: "eclipse.openResource",
+			name: messages["Find File Named..."],
+			tooltip: messages["Choose a file by name and open an editor on it"],
+			id: "eclipse.openResource", //$NON-NLS-0$
 			callback: function(data) {
 				openResourceDialog(searcher, serviceRegistry, editor);
 			}});
 			
 		// set binding in editor and a general one for other pages
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), "Find File Named...");
-			editor.getTextView().setAction("Find File Named...", function() {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);
+			editor.getTextView().setAction(openResourceCommand.id, function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
-				});
+				}, openResourceCommand);
 		}
 		
 		commandService.addCommand(openResourceCommand);
-		commandService.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new mCommands.CommandKeyBinding('f', true, true));
+		commandService.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new mCommands.CommandKeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
-			name: "Toggle banner and footer",
-			tooltip: "Hide or show the page banner and footer",
-			id: "orion.toggleTrim",
+			name: messages["Toggle banner and footer"],
+			tooltip: messages["Hide or show the page banner and footer"],
+			id: "orion.toggleTrim", //$NON-NLS-0$
 			callback: function() {
 				var layoutWidget = dijit.byId(parent.parentNode.id);
 				if (layoutWidget) {
 					var header = parent;
-					var footer = dojo.byId("footer");
-					if (header.style.display === "none") {
-						header.style.display = "block";
-						footer.style.display = "block";
+					var footer = dojo.byId("footer"); //$NON-NLS-0$
+					if (header.style.display === "none") { //$NON-NLS-0$
+						header.style.display = "block"; //$NON-NLS-0$
+						footer.style.display = "block"; //$NON-NLS-0$
 					} else {
-						header.style.display = "none";
-						footer.style.display = "none";
+						header.style.display = "none"; //$NON-NLS-0$
+						footer.style.display = "none"; //$NON-NLS-0$
 					}
 					layoutWidget.layout();
 				}
 				return true;
 			}});
 		commandService.addCommand(toggleBanner);
-		commandService.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new mCommands.CommandKeyBinding("m", true, true));
+		commandService.registerCommandContribution("globalActions", "orion.toggleTrim", 100, null, true, new mCommands.CommandKeyBinding("m", true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), "Toggle Trim");
-			editor.getTextView().setAction("Toggle Trim", toggleBanner.callback);
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
+			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
 				
-		var keyAssistNode = dojo.byId("keyAssist");
-		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){ 
+		var keyAssistNode = dojo.byId("keyAssist"); //$NON-NLS-0$
+		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){  //$NON-NLS-0$
 			if (e.charOrCode === dojo.keys.ESCAPE) {
-				keyAssistNode.style.display = "none";
+				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			}
 		}));
-		dojo.connect(document, "onclick", dojo.hitch(this, function(e) {
+		dojo.connect(document, "onclick", dojo.hitch(this, function(e) { //$NON-NLS-0$
 			var clickNode =  e.target || e.originalTarget || e.srcElement; 
-			if (clickNode && clickNode.id !== "keyAssist") {
-				keyAssistNode.style.display = "none";
+			if (clickNode && clickNode.id !== "keyAssist") { //$NON-NLS-0$
+				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			}
 		}));
 		if (editor) {
-			editor.getTextView().addEventListener("MouseDown", function() {
-				keyAssistNode.style.display = "none";
+			editor.getTextView().addEventListener("MouseDown", function() { //$NON-NLS-0$
+				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			});
 		}
 		
 		if (escapeProvider) {
 			var keyAssistEscHandler = {
 				isActive: function() {
-					return keyAssistNode.style.display === "block";
+					return keyAssistNode.style.display === "block"; //$NON-NLS-0$
 				},
 				
 				cancel: function() {
 					if (this.isActive()) {
-						keyAssistNode.style.display = "none";
+						keyAssistNode.style.display = "none"; //$NON-NLS-0$
 						return true;
 					}
 					return false;   // not handled
@@ -677,90 +847,111 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 			};
 			escapeProvider.addHandler(keyAssistEscHandler);
 		}
+		//	Open configuration page, Ctrl+Shift+F1
+		var configDetailsCommand = new mCommands.Command({
+			name: messages["System Configuration Details"],
+			tooltip: messages["System Config Tooltip"],
+			id: "orion.configDetailsPage", //$NON-NLS-0$
+			hrefCallback: function() {
+				return require.toUrl("help/about.html"); //$NON-NLS-0$
+			}});
+					
+		commandService.addCommand(configDetailsCommand);
+		commandService.registerCommandContribution("globalActions", "orion.configDetailsPage", 100,  null, true, new mCommands.CommandKeyBinding(112, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+		//	Background Operations Page, Ctrl+Shift+O
+		var operationsCommand = new mCommands.Command({
+			name: messages["Background Operations"],
+			tooltip: messages["Background Operations Tooltip"],
+			id: "orion.backgroundOperations", //$NON-NLS-0$
+			hrefCallback: function() {
+				return require.toUrl("operations/list.html"); //$NON-NLS-0$
+			}});
+					
+		commandService.addCommand(operationsCommand);
+		commandService.registerCommandContribution("globalActions", "orion.backgroundOperations", 100,  null, true, new mCommands.CommandKeyBinding('o', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 		
+		// Key assist
 		var keyAssistCommand = new mCommands.Command({
-			name: "Show Keys",
-			tooltip: "Show a list of all the keybindings on this page",
-			id: "eclipse.keyAssist",
+			name: messages["Show Keys"],
+			tooltip: messages["Show a list of all the keybindings on this page"],
+			id: "eclipse.keyAssist", //$NON-NLS-0$
 			callback: function() {
-				if (keyAssistNode.style.display === "none") {
+				if (keyAssistNode.style.display === "none") { //$NON-NLS-0$
 					dojo.empty(keyAssistNode);
 					if (editor) {
-						dojo.place("<h2>Editor</h2>", keyAssistNode, "last");
+						dojo.place("<h2>"+messages["Editor"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ //$NON-NLS-2$
 						var editorActions = editor.getTextView().getActions(false);
 						for(var i=0; i<editorActions.length; i++) {
-							var actionName = editorActions[i];
-							var bindings = editor.getTextView().getKeyBindings(actionName);
+							var actionID = editorActions[i], actionName = actionID;
+							var textView = editor.getTextView();
+							var actionDescription = textView.getActionDescription(actionID);
+							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
+							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
-								dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last");
+								dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					}
-					dojo.place("<h2>Global</h2>", keyAssistNode, "last");
+					dojo.place("<h2>"+messages["Global"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					commandService.showKeyBindings(keyAssistNode);
-					keyAssistNode.style.display = "block";
+					keyAssistNode.style.display = "block"; //$NON-NLS-0$
 				} else {
-					keyAssistNode.style.display = "none";
+					keyAssistNode.style.display = "none"; //$NON-NLS-0$
 				}
 				return true;
 			}});
 		commandService.addCommand(keyAssistCommand);
-		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true));
+		commandService.registerCommandContribution("globalActions", "eclipse.keyAssist", 100, null, true, new mCommands.CommandKeyBinding(191, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		if (editor) {
-			var isMac = window.navigator.platform.indexOf("Mac") !== -1;
-			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), "Show Keys");
-			editor.getTextView().setAction("Show Keys", keyAssistCommand.callback);
+			var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding(191, false, true, !isMac, isMac), keyAssistCommand.id);
+			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		}
 		
 		userMenu.setKeyAssist(keyAssistCommand.callback);
-		
-		renderGlobalCommands(commandService, handler, pageItem);
+		checkFavoritesButton(serviceRegistry, commandService);
+
+		renderGlobalCommands(commandService);
 		
 		generateUserInfo(serviceRegistry);
 		
-		// generate the footer. 
-		// TODO The footer div id should not be assumed here
-		if (commonHTML.bottomHTMLFragment) {
-			var footer = dojo.byId("footer");
-			if (footer) {
-				dojo.place(commonHTML.bottomHTMLFragment, footer, "only");
-			}
-		}
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
 
 		// force layout
 		mUtil.forceLayout(parent.parentNode);
 		//every time the user manually changes the hash, we need to load the workspace with that name
-		dojo.subscribe("/dojo/hashchange", commandService, function() {
+		dojo.subscribe("/dojo/hashchange", commandService, function() { //$NON-NLS-0$
 			commandService.processURL(window.location.href);
 		});
 		
 		function setTarget(target){
 			target = target;
 			
-			dojo.query(".targetSelector").forEach(function(node, index, arr){
+			dojo.query(".targetSelector").forEach(function(node, index, arr){ //$NON-NLS-0$
 				node.target = target;
   			});	
 		}
 		
 		function readTargetPreference(){
 		
-			prefsService.getPreferences('/settings', 2).then( function(prefs){	
+			prefsService.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
 			
-				var data = prefs.get("General");
+				var data = prefs.get("General"); //$NON-NLS-0$
 					
 				if( data !== undefined ){
 					
 					var storage = JSON.parse( data );
 					
 					if(storage){
-						var target = prefsService.getSetting( storage, "Navigation", "Links" );
+						var target = prefsService.getSetting( storage, "Navigation", "Links" ); //$NON-NLS-1$ //$NON-NLS-0$
 						
-						if( target === "Open in new tab" ){
-							target = "_blank";
+						if( target === "Open in new tab" ){ //$NON-NLS-0$
+							target = "_blank"; //$NON-NLS-0$
 						}else{
-							target = "_self";
+							target = "_self"; //$NON-NLS-0$
 						}
 						
 						setTarget( target );
@@ -768,8 +959,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 				}
 			});
 		}
-		
-		readTargetPreference();
+		window.setTimeout(function() {readTargetPreference();}, 0);
 	}
 	
 	//return the module exports
@@ -782,6 +972,7 @@ define(['require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands
 		setPendingAuthentication: setPendingAuthentication,
 		getAuthenticationIds: getAuthenticationIds,
 		setPageTarget: setPageTarget,
+		setDirtyIndicator: setDirtyIndicator,
 		setPageCommandExclusions: setPageCommandExclusions,
 		authenticatedService: authenticatedService
 	};

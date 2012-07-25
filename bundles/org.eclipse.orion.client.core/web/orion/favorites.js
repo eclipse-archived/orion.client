@@ -12,7 +12,7 @@
  
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
+define(['require', 'dojo', 'orion/util', 'orion/EventTarget'], function(require, dojo, mUtil, EventTarget){
 
 	/**
 	 * Instantiates the favorites service. Clients should obtain the 
@@ -26,21 +26,18 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 	 */
 	function FavoritesService(serviceRegistry) {
 		this._favorites = [];
-		this._searches = [];
+		EventTarget.attach(this);
 		this._init(serviceRegistry);
 		this._initializeFavorites();
 	}
 	FavoritesService.prototype = /** @lends orion.favorites.FavoritesService.prototype */ {
 		_init: function(options) {
 			this._registry = options.serviceRegistry;
-			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this);
+			this._serviceRegistration = this._registry.registerService("orion.core.favorite", this); //$NON-NLS-0$
 		},
 		
 		_notifyListeners: function() {
-			// FIXME: it is bogus that we separate favorites and searches
-			// we need a general representation and let the UI (and user) sort out
-			// how it is filtered or organized
-			this._serviceRegistration.dispatchEvent("favoritesChanged", {navigator: this._favorites, search: this._searches, registry: this._registry});
+			this.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
 		},
 	
 		/**
@@ -67,8 +64,8 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			this.addFavorite(url, url, false, true);
 		},
 						
-		addFavorite: function(theName, thePath, isDirectory, isExternalResource) {
-			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true, "isExternalResource": isExternalResource });
+		addFavorite: function(theName, thePath, isDirectory) {
+			this._favorites.push({ "name": theName, "path": thePath, "directory": isDirectory, "isFavorite": true }); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._favorites.sort(this._sorter);
 			this._storeFavorites();
 			this._notifyListeners();
@@ -105,13 +102,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		
-		addFavoriteSearch: function(theName, theQuery) {
-			this._searches.push({ "name": theName, "query": theQuery, "isSearch": true });
-			this._searches.sort(this._sorter);
-			this._storeSearches();
-			this._notifyListeners();
-		},
-		
 		hasFavorite: function(path) {
 			for (var i in this._favorites) {
 				if (this._favorites[i].path === path) {
@@ -122,7 +112,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		/** @private special characters in regex */
-		_SPECIAL_CHARS : "^$\\+[]().",
+		_SPECIAL_CHARS : "^$\\+[]().", //$NON-NLS-0$
 
 		
 		/**
@@ -152,17 +142,17 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			var convertedQuery = "";
 			for (i = 0; i < queryText.length; i++) {
 				var c = queryText.charAt(i);
-				if (c === "*") {
-					convertedQuery += ".*";
-				} else if (c === "?") {
-					convertedQuery += ".?";
+				if (c === "*") { //$NON-NLS-0$
+					convertedQuery += ".*"; //$NON-NLS-0$
+				} else if (c === "?") { //$NON-NLS-0$
+					convertedQuery += ".?"; //$NON-NLS-0$
 				} else if (this._SPECIAL_CHARS.indexOf(c) >= 0) {
-					convertedQuery += ("\\" + c);
+					convertedQuery += ("\\" + c); //$NON-NLS-0$
 				} else {
 					convertedQuery += c;
 				}
 			}
-			convertedQuery += ".*";
+			convertedQuery += ".*"; //$NON-NLS-0$
 			var regex = new RegExp(convertedQuery);
 			
 			// for now, just search the beginning, but we need to support
@@ -175,43 +165,13 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 			}
 			return result;
 		},
-
-		removeSearch: function(query) {
-			for (var i in this._searches) {
-				if (this._searches[i].query === query) {
-					this._searches.splice(i, 1);
-					break;
-				}
-			}
-			this._searches.sort(this._sorter);
-			this._storeSearches();
-			this._notifyListeners();
-		},
-					
-		renameSearch: function(query, newName) {
-			var changed = false;
-			for (var i in this._searches) {
-				if (this._searches[i].query === query) {
-					var search = this._searches[i];
-					if (search.name !== newName) {
-						search.name = newName;
-						changed = true;
-					}
-				}
-			}
-			if (changed) {
-				this._searches.sort(this._sorter);
-				this._storeSearches();
-				this._notifyListeners();
-			}
-		},
 		
 		_initializeFavorites: function () {
 			var favorites = this;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) { 
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 				var i;
-				var navigate = prefs.get("navigate");
-				if (typeof navigate === "string") {
+				var navigate = prefs.get("navigate"); //$NON-NLS-0$
+				if (typeof navigate === "string") { //$NON-NLS-0$
 					navigate = JSON.parse(navigate);
 				}
 				if (navigate) {
@@ -220,16 +180,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 						favorites._favorites.push(navigate[i]);
 					}
 				}
-				var search = prefs.get("search");
-				if (typeof search === "string") {
-					search = JSON.parse(search);
-				}
-				if (search) {
-					for (i in search) {
-						search[i].isSearch = true; // migration code, may not been stored
-						favorites._searches.push(search[i]);
-					}
-				}
+
 				favorites._favorites.sort(favorites._sorter);
 				favorites._notifyListeners();
 			});
@@ -237,15 +188,8 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		
 		_storeFavorites: function() {
 			var storedFavorites = this._favorites;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
-				prefs.put("navigate", storedFavorites);
-			}); 
-		},
-		
-		_storeSearches: function() {
-			var storedSearches = this._searches;
-			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){
-				prefs.put("search", storedSearches);
+			this._registry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs){ //$NON-NLS-1$ //$NON-NLS-0$
+				prefs.put("navigate", storedFavorites); //$NON-NLS-0$
 			}); 
 		},
 		
@@ -262,7 +206,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil){
 		},
 		
 		getFavorites: function() {
-			return {navigator: this._favorites, search: this._searches};
+			return {navigator: this._favorites};
 		}
 	};
 	FavoritesService.prototype.constructor = FavoritesService;

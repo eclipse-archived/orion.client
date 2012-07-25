@@ -14,9 +14,9 @@
 /* This InputBuilder widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widgets/settings/Select", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit, mUtil, mCommands) {
+define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widgets/settings/Select", "orion/widgets/settings/TextField", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.InputBuilder", null, {
+	dojo.declare("orion.widgets.settings.InputBuilder", null, { //$NON-NLS-0$
 	
 		constructor: function( preferences ){
 			this.preferences = preferences;
@@ -24,7 +24,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 		
 		setStorageItem: function(category, subCategory, element, value, ui) {
 		
-			this.preferences.getPreferences('/settings', 2).then(function(prefs){
+			this.preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
 
 				var subcategories = JSON.parse ( prefs.get( category ) );
 	
@@ -53,7 +53,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 
 //			var subcategories = JSON.parse(localStorage.getItem(category));
 			
-			this.preferences.getPreferences('/settings', 2).then(function(prefs){
+			this.preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
 					var subcategories = JSON.parse( prefs.get( category ) );
 					
 					for (var sub = 0; sub < subcategories.length; sub++) {
@@ -74,7 +74,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 
 		processInputType: function(category, label, item, node, ui) {
 		
-			var picker = dojo.create("div", null, node);
+			var picker = dojo.create("div", null, node); //$NON-NLS-0$
 			
 			var builder = this;
 
@@ -85,7 +85,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 			
 				switch (item.input) {
 
-					case "combo":
+					case "combo": //$NON-NLS-0$
 		
 						var options = [];
 		
@@ -99,7 +99,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 							};		
 							
 							if (comboLabel === setting) {
-								set.selected = 'selected';
+								set.selected = 'selected'; //$NON-NLS-0$
 							}
 		
 							options.push(set);
@@ -111,23 +111,42 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 							element:item.label, 
 							ui:ui, 
 							options:options,
-							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												 //$NON-NLS-0$
 						}, picker );
 		
 						break;
 		
-					case "color":
+					case "color": //$NON-NLS-0$
 		
 						new orion.widgets.settings.ColorPicker({
-							label: "   ",
+							label: "   ", //$NON-NLS-0$
 							name: item.label,
 							category:category,
 							item:label,
 							setting: setting,
-							setStorageItem: dojo.hitch( builder, 'setStorageItem' )
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' ) //$NON-NLS-0$
 						}, picker);
 		
 						break;
+						
+						
+					case "textfield": //$NON-NLS-0$
+					
+						new orion.widgets.settings.TextField({ 
+							category:category, 
+							item:label, 
+							element:item.label, 
+							ui:ui, 
+							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												 //$NON-NLS-0$
+						}, picker );
+					
+						break;
+						
+					case "textstring": //$NON-NLS-0$
+					
+						break;
+					
+						
 					}
 				});
 			} 

@@ -11,16 +11,16 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(require, dojo, dijit) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(messages, require, dojo, dijit) {
 
 /**
  * @param options {{ 
  *     func: function
  * }}
  */
-dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], { //$NON-NLS-0$
 	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'git/widgets/templates/CloneGitRepositoryDialog.html'),
+	templateString: dojo.cache('orion', 'git/widgets/templates/CloneGitRepositoryDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -28,11 +28,15 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title ? this.options.title : "Clone Git Repository";
-		this.gitUrlLabelText = "Repository URL:";
-		this.gitPathLabelText = "Existing directory:";
-		this.gitNameLabelText = "New folder:";
+		this.title = this.options.title ? this.options.title : messages["Clone Git Repository"];
+		this.gitUrlLabelText = messages["Repository URL:"];
+		this.gitPathLabelText = messages["Existing directory:"];
+		this.gitNameLabelText = messages["New folder:"];
 		this.advancedShown = false;
+		
+		this.gitTargetLocationText = messages["Choose target location"];
+		this.gitDefaultTargetLocationText = messages["Default target location"];
+		this.gitChangeGitPathText = messages["Change..."];
 	},
 	postCreate : function(){
 		var that = this;
@@ -41,16 +45,16 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 			this.gitUrl.value = this.options.url;
 		}
 		if(this.options.advancedOnly){
-			this.Basic.style.display="none";
+			this.Basic.style.display="none"; //$NON-NLS-0$
 			this.Advanced.style.display="";
 			setTimeout(function(){that.gitName.focus();}, 400);
 		}
 		
-		dojo.connect(this.changeGitPath, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog));
-		dojo.connect(this.isExistingProject, "onchange", null, dojo.hitch(this, this.showExistingFolder));
-		dojo.connect(this.gitName, "onfocus", null, dojo.hitch(this, this.showNewProject));
-		dojo.connect(this.advancedLink, "onclick", null, dojo.hitch(this, this.showAdvanced));
-		dojo.connect(this.advancedLinkHide, "onclick", null, dojo.hitch(this, this.hideAdvanced));
+		dojo.connect(this.changeGitPath, "onclick", null, dojo.hitch(this, this.openDirectoryPickerDialog)); //$NON-NLS-0$
+		dojo.connect(this.isExistingProject, "onchange", null, dojo.hitch(this, this.showExistingFolder)); //$NON-NLS-0$
+		dojo.connect(this.gitName, "onfocus", null, dojo.hitch(this, this.showNewProject)); //$NON-NLS-0$
+		dojo.connect(this.advancedLink, "onclick", null, dojo.hitch(this, this.showAdvanced)); //$NON-NLS-0$
+		dojo.connect(this.advancedLinkHide, "onclick", null, dojo.hitch(this, this.hideAdvanced)); //$NON-NLS-0$
 		if (this.options.alwaysShowAdvanced) {
 			this.showAdvanced();
 		}
@@ -67,14 +71,14 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 	showAdvanced: function(){
 		this.advancedShown = true;
 		this.Advanced.style.display="";
-		this.advancedLink.style.display="none";
+		this.advancedLink.style.display="none"; //$NON-NLS-0$
 		this.advancedLinkHide.style.display="";
 	},
 	hideAdvanced: function(){
 		this.advancedShown = false;
-		this.Advanced.style.display="none";
+		this.Advanced.style.display="none"; //$NON-NLS-0$
 		this.advancedLink.style.display="";
-		this.advancedLinkHide.style.display="none";
+		this.advancedLinkHide.style.display="none"; //$NON-NLS-0$
 		
 	},
 	showExistingFolder: function(){
@@ -91,17 +95,17 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		this.isExistingProject.checked = true; 
 		var self = this;
 		var dialog = new orion.widgets.DirectoryPrompterDialog({
-				title: "Choose a Folder",
+				title: messages["Choose a Folder"],
 				serviceRegistry: this.options.serviceRegistry,
 				fileClient: this.options.fileClient,	
 				func: dojo.hitch(this, function(targetFolder) {
 					if (targetFolder && targetFolder.Location) {
 						this.gitPath.value = targetFolder.Location;
-						this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#" + targetFolder.ChildrenLocation+"'>" + targetFolder.Name + "</a>";
+						this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#" + targetFolder.ChildrenLocation+"'>" + targetFolder.Name + "</a>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var currentFolder = targetFolder;
 						
 						while(currentFolder.parent && !currentFolder.parent.Projects){
-							this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#"+currentFolder.parent.ChildrenLocation+"'>" + currentFolder.parent.Name + "</a>/" + this.shownGitPath.innerHTML;
+							this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#"+currentFolder.parent.ChildrenLocation+"'>" + currentFolder.parent.Name + "</a>/" + this.shownGitPath.innerHTML; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							currentFolder = currentFolder.parent;
 						}
 					}

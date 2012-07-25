@@ -7,6 +7,16 @@
 	height: 0px;
 }
 
+.search_primaryColumn {
+	padding-left: 0 !important;
+	vertical-align: baseline;
+	width: 45px;
+}
+
+.search_secondaryColumn{
+	color: #666666;	
+}
+
 .search_mainpane {
     margin: 0;
     padding-left: 0px;

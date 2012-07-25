@@ -2,8 +2,8 @@
 
 importScripts("../../orion/Deferred.js");
 importScripts("../../orion/plugin.js");
-var provider = new eclipse.PluginProvider();
-var serviceProvider = provider.registerServiceProvider("test", {
+var provider = new orion.PluginProvider();
+var serviceProvider = provider.registerService("test", {
 	test: function(echo) {
 		return echo;
 	},

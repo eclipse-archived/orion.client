@@ -1,30 +1,34 @@
 @import "../org.dojotoolkit/dojo/resources/dojo.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/nihilo.css";
+@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/Tree.css";
+@import "../org.dojotoolkit/dijit/themes/claro/Tree.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/layout/BorderContainer.css";
+@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/form/Common.css";
+@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 
-@import "../org.dojotoolkit/dijit/themes/nihilo/form/Button.css";
+@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 
 @import "../css/ide.css";
 
 @import "../css/commands.css";
 
+@import "../css/sections.css";
+
 html,body {
 	height: 100%;
 }
 
-h1 {
-	position: relative;
-	margin-top: 18px;
-}
-
 .statusPane {
 	font-weight: bold;
+}
+
+.sites {
+	min-width: 800px;
+	max-width: 900px;
+	padding-left: 20px;
+	padding-right: 40px;
 }
 
 .domCommandToolbar {
@@ -35,16 +39,28 @@ tr.treeTableRow td:first-child {
 	padding-left: 16px !important;
 }
 
+.treeTableRow {
+	vertical-align: baseline;
+}
+
+.newSiteRow > td {
+	background-color: #f4f4f4;
+}
+
+.newSiteCol {
+	font-weight: bold;
+}
+
 .treetable th {
 	font-weight: bold;
 }
 
 .treetable td {
-	padding: 16px 0 16px 16px;
+	padding: 10px 0 10px 10px;
 }
 
 .treetable th {
-	padding: 16px 0 0 16px;
+	padding: 10px 0 0 10px;
 }
 
 .urlCol {

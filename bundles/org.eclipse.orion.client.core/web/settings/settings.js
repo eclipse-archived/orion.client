@@ -13,20 +13,21 @@
 /*global define dojo dijit orion window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'], function(require, dojo, mBootstrap, mStatus, mCommands, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'], function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
+			var pluginRegistry = core.pluginRegistry;
 
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var commandService = new mCommands.CommandService({
 				serviceRegistry: serviceRegistry
 			});
@@ -37,22 +38,26 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 
 				commandService: commandService,
 				fileService: fileClient
 			});
+			
+			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
 
 			var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
-			preferencesStatusService.setMessage("Loading...");
+			preferencesStatusService.setMessage(messages["Loading..."]);
 			
 			/* Note 'pageActions' is the attach id for commands in the toolbar */
 			
 			var containerParameters = { preferences: preferences, 
+										registry: serviceRegistry,
 										preferencesStatusService: preferencesStatusService,
 										commandService: commandService,
 										preferenceDialogService: preferenceDialogService,
 										settingsCore: core,
-										pageActions: "pageActions" };
+										pageActions: "pageActions", //$NON-NLS-0$
+										userClient: usersClient };
 
-			var settingsContainer = new orion.widgets.settings.SettingsContainer( containerParameters, dojo.byId( "selectionAgent" ) );
+			var settingsContainer = new orion.widgets.settings.SettingsContainer( containerParameters, dojo.byId( "selectionAgent" ) ); //$NON-NLS-0$
 			settingsContainer.startup();
 
 			preferencesStatusService.setMessage("");

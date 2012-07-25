@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
-		function(require, dojo, dijit) {
+		function(messages, require, dojo, dijit) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -24,10 +24,10 @@ define(['require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox',
  * @param {String} [options.title] Text to display in the dialog's titlebar.
  * @param {orion.searchClient.Searcher} options.searcher The searcher to use for displaying results.
  */
-var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin],
+var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], //$NON-NLS-0$
 		/** @lends orion.widgets.OpenResourceDialog.prototype */ {
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'widgets/templates/OpenResourceDialog.html'),
+	templateString : dojo.cache('orion', 'widgets/templates/OpenResourceDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	SEARCH_DELAY: 500,
 	timeoutId: null,
@@ -45,44 +45,44 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.options = arguments[0];
 		this.searcher = this.options && this.options.searcher;
 		if (!this.searcher) {
-			throw new Error("Missing required argument: searcher");
+			throw new Error("Missing required argument: searcher"); //$NON-NLS-0$
 		}
 		this.searchRenderer = this.options && this.options.searchRenderer;
-		if (!this.searchRenderer || typeof(this.searchRenderer.makeRenderFunction) !== "function") {
-			throw new Error("Missing required argument: searchRenderer");
+		if (!this.searchRenderer || typeof(this.searchRenderer.makeRenderFunction) !== "function") { //$NON-NLS-0$
+			throw new Error(messages['Missing required argument: searchRenderer']);
 		}
 		this.favService = this.options.favoriteService;
 		if (!this.favService) {
-			throw new Error("Missing required argument: favService");
+			throw new Error(messages['Missing required argument: favService']);
 		}
 	},
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || "Find File Named";
-		this.selectFile = "Type the name of a file to open (? = any character, * = any string):";
-		this.searchPlaceHolder = "Search";
+		this.options.title = this.options.title || messages['Find File Named'];
+		this.selectFile = messages['Type the name of a file to open (? = any character, * = any string):'];
+		this.searchPlaceHolder = messages['Search'];
 		this.inherited(arguments);
 	},
 	
 	/** @private */
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this.resourceName, "onChange", this, function(evt) {
+		dojo.connect(this.resourceName, "onChange", this, function(evt) { //$NON-NLS-0$
 			this.time = +new Date();
 			clearTimeout(this.timeoutId);
 			this.timeoutId = setTimeout(dojo.hitch(this, this.checkSearch), 0);
 		});
-		dojo.connect(this.resourceName, "onKeyPress", this, function(evt) {
+		dojo.connect(this.resourceName, "onKeyPress", this, function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === dojo.keys.ENTER && this.results) {
-				var links = dojo.query("a", this.results);
+				var links = dojo.query("a", this.results); //$NON-NLS-0$
 				if (links.length > 0) {
 					window.open(links[0].href);
 					this.hide();
 				}
 			}
 		});
-		dojo.connect(this,"onKeyPress",this,function(evt) {
+		dojo.connect(this,"onKeyPress",this,function(evt) { //$NON-NLS-0$
 			var favlinks, links, text, currentFocus, favCurrentSelectionIndex, currentSelectionIndex;
 			var incrementFocus = function(currList, index, nextEntry) {
 				if (index < currList.length - 1) {
@@ -100,8 +100,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			};
 			
 			if (evt.keyCode === dojo.keys.DOWN_ARROW || evt.keyCode === dojo.keys.UP_ARROW) {
-				links = dojo.query("a", this.results);
-				favlinks = dojo.query("a", this.favresults);
+				links = dojo.query("a", this.results); //$NON-NLS-0$
+				favlinks = dojo.query("a", this.favresults); //$NON-NLS-0$
 				currentFocus = dijit.getFocus();
 				currentSelectionIndex = links.indexOf(currentFocus.node);
 				favCurrentSelectionIndex = favlinks.indexOf(currentFocus.node);
@@ -117,11 +117,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 				} else {
 					if (favCurrentSelectionIndex >= 0) {
 						// jump to text box if index === 0
-						text = this.resourceName && this.resourceName.get("textbox");
+						text = this.resourceName && this.resourceName.get("textbox"); //$NON-NLS-0$
 						dijit.focus(decrementFocus(favlinks, favCurrentSelectionIndex, text));
 					} else if (currentSelectionIndex >= 0) {
 						// jump to text box if index === 0 and favlinks is empty
-						text = this.resourceName && this.resourceName.get("textbox");
+						text = this.resourceName && this.resourceName.get("textbox"); //$NON-NLS-0$
 						dijit.focus(decrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[favlinks.length-1] : text));
 					} else if (links.length > 0) {
 						// coming from the text box go to end of list
@@ -134,7 +134,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 				dojo.stopEvent(evt);
 			}
 		});
-		dojo.connect(this, "onMouseUp", function(e) {
+		dojo.connect(this, "onMouseUp", function(e) { //$NON-NLS-0$
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
 		});
@@ -143,13 +143,13 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	
 	/** @private kick off initial population of favorites */
 	populateFavorites: function() {
-		dojo.place("<div>Populating favorites&#x2026;</div>", this.favresults, "only");
+		dojo.place("<div>"+messages['Populating favorites&#x2026;']+"</div>", this.favresults, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 		
 		// initially, show all favorites
 		this.favService.getFavorites().then(this.showFavorites());
 		// need to add the listener since favorites may not 
 		// have been initialized after first getting the favorites
-		this.favService.addEventListener("favoritesChanged", this.showFavorites());
+		this.favService.addEventListener("favoritesChanged", this.showFavorites()); //$NON-NLS-0$
 	},
 	
 	/** 
@@ -168,7 +168,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 					dojo.hitch(that, that.decorateResult), that.showFavoritesImage);
 			renderFunction(favs);
 			if (favs && favs.length > 0) {
-				dojo.place("<hr/>", that.favresults, "last");
+				dojo.place("<hr/>", that.favresults, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		};
 	},
@@ -176,14 +176,13 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	/** @private */
 	showFavoritesImage : function(col) {
 		var image = new Image();
-		dojo.addClass(image, "commandSprite");
-		dojo.addClass(image, "core-sprite-makeFavorite");
-		dojo.addClass(image, "commandImage");
+		dojo.addClass(image, "modelDecorationSprite"); //$NON-NLS-0$
+		dojo.addClass(image, "core-sprite-makeFavorite"); //$NON-NLS-0$
 		// without an image, chrome will draw a border  (?)
-		image.src = require.toUrl("images/none.png");
-		image.title = "Favorite";
+		image.src = require.toUrl("images/none.png"); //$NON-NLS-0$
+		image.title = messages['Favorite'];
 		col.appendChild(image);
-		dojo.style(image, "verticalAlign", "middle");
+		dojo.style(image, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$
 	},
 	
 	/** @private */
@@ -194,13 +193,13 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			this.time = now;
 			this.doSearch();
 		} else {
-			this.timeoutId = setTimeout(dojo.hitch(this, "checkSearch"), 50);
+			this.timeoutId = setTimeout(dojo.hitch(this, "checkSearch"), 50); //$NON-NLS-0$
 		}
 	},
 	
 	/** @private */
 	doSearch: function() {
-		var text = this.resourceName && this.resourceName.get("value");
+		var text = this.resourceName && this.resourceName.get("value"); //$NON-NLS-0$
 
 		var showFavs = this.showFavorites();
 		// update favorites
@@ -210,11 +209,11 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 
 		// don't do a server-side query for an empty text box
 		if (text) {
-			dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
+			dojo.place("<div>"+messages['Searching&#x2026;']+"</div>", this.results, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {
-				var query = that.searcher.createSearchQuery(null, text, "NameLower");
+				var query = that.searcher.createSearchQuery(null, text, "NameLower"); //$NON-NLS-0$
 				var renderFunction = that.searchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult));
 				that.searcher.search(query, false, renderFunction);
 			}, 0);
@@ -224,13 +223,13 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	/** @private */
 	decorateResult: function(resultsDiv) {
 		var widget = this;
-		dojo.query("a", resultsDiv).forEach(function(link) {
-			dojo.connect(link, "onmouseup", function(evt) {
+		dojo.query("a", resultsDiv).forEach(function(link) { //$NON-NLS-0$
+			dojo.connect(link, "onmouseup", function(evt) { //$NON-NLS-0$
 				if (!dojo.mouseButtons.isMiddle(evt) && !dojo.isCopyKey(evt)) {
 					widget.hide();
 				}
 			});
-			dojo.connect(link,"onkeyup",widget,function(evt) {
+			dojo.connect(link,"onkeyup",widget,function(evt) { //$NON-NLS-0$
 				if (evt.keyCode === dojo.keys.ENTER) {
 					widget.hide();
 				}

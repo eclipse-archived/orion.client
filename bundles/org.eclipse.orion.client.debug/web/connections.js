@@ -24,9 +24,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 	function modelUpdated() {
 		model.getRoot(function(root) {
 			model.getChildren(root, function(children) {
-				treeWidget.refreshAndExpand(root, children);
+				treeWidget.refresh(root, children, true);
 				for (var i = 0; i < children.length; i++) {
-					treeWidget.refreshAndExpand(children[i], children[i].getChildren());
+					treeWidget.refresh(children[i], children[i].getChildren(), true);
 				}
 			});
 		});

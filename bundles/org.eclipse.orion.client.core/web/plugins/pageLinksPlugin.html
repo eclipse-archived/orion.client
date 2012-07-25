@@ -2,44 +2,53 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="../orion/i18n.js"></script>
+	<script src="../orion/plugin.js"></script>
 	<script>
 	/*global eclipse window*/
-	var VERSION = "0.5";
+	var VERSION = "1.0";
 	
 	window.onload = function() {
 		var serviceImpl = { /* All data is in properties */ };
 
-		var provider = new eclipse.PluginProvider();
-		var messages = new eclipse.I18nMessages("nls/messages");
+		var provider = new orion.PluginProvider();
 		
 		// Primary navigation links
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Navigator,
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Navigator",
 			id: "orion.navigator",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/navigate/table.html#"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Sites,
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Sites",
 			id: "orion.sites",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/sites/sites.html"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages.Repositories,
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Repositories",
 			id: "orion.repositories",
+			nls: "orion/nls/messages",
 			uriTemplate: "{OrionHome}/git/git-repository.html#"
 		});
-		provider.registerServiceProvider("orion.page.link", serviceImpl, {
-			name: messages["Get Plugins"],
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Console",
+			id: "orion.console",
+			nls: "orion/nls/messages",
+			uriTemplate: "{OrionHome}/console/consolePage.html"
+		});
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Get Plugins",
 			id: "orion.plugins.get",
+			nls: "orion/nls/messages",
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
 		});
 		
-		provider.registerServiceProvider("orion.page.link.related", null, {
+		provider.registerService("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
-			name: messages.Navigator,
-			tooltip: messages["Go to the navigator"],
+			nameKey: "Navigator",
+			nls: "orion/nls/messages",
+			tooltip: "Go to the navigator",
 			validationProperties: [{
 				source: "ChildrenLocation|ContentLocation",
 				variableName: "NavigatorLocation",

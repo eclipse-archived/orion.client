@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(dojo, dijit) {
+define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -20,29 +20,29 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 
 	function getUserKeyString(binding) {
 		var userString = "";
-		var isMac = navigator.platform.indexOf("Mac") !== -1;
+		var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	
 		if (binding.mod1) {
 			if (isMac) {
-				userString+="Cmd+";
+				userString+="Cmd+"; //$NON-NLS-0$
 			} else {
-				userString+="Ctrl+";
+				userString+="Ctrl+"; //$NON-NLS-0$
 			}
 		}
 		if (binding.mod2) {
-			userString += "Shift+";
+			userString += "Shift+"; //$NON-NLS-0$
 		}
 		if (binding.mod3) {
-			userString += "Alt+";
+			userString += "Alt+"; //$NON-NLS-0$
 		}
 		if (binding.mod4 && isMac) {
-			userString += "Ctrl+";
+			userString += "Ctrl+"; //$NON-NLS-0$
 		}
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
 		for (var keyName in dojo.keys) {
-			if (typeof(dojo.keys[keyName] === "number")) {
+			if (typeof(dojo.keys[keyName] === "number")) { //$NON-NLS-0$
 				if (dojo.keys[keyName] === binding.keyCode) {
 					return userString+keyName;
 				}
@@ -51,34 +51,34 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		var character;
 		switch (binding.keyCode) {
 			case 59:
-				character = binding.mod2 ? ":" : ";";
+				character = binding.mod2 ? ":" : ";"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 61:
-				character = binding.mod2 ? "+" : "=";
+				character = binding.mod2 ? "+" : "="; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 188:
-				character = binding.mod2 ? "<" : ",";
+				character = binding.mod2 ? "<" : ","; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 190:
-				character = binding.mod2 ? ">" : ".";
+				character = binding.mod2 ? ">" : "."; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 191:
-				character = binding.mod2 ? "?" : "/";
+				character = binding.mod2 ? "?" : "/"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 192:
-				character = binding.mod2 ? "~" : "`";
+				character = binding.mod2 ? "~" : "`"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 219:
-				character = binding.mod2 ? "{" : "[";
+				character = binding.mod2 ? "{" : "["; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 220:
-				character = binding.mod2 ? "|" : "\\";
+				character = binding.mod2 ? "|" : "\\"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 221:
-				character = binding.mod2 ? "}" : "]";
+				character = binding.mod2 ? "}" : "]"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 222:
-				character = binding.mod2 ? '"' : "'";
+				character = binding.mod2 ? '"' : "'"; //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			}
 		if (character) {
@@ -94,7 +94,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 */
 	function openDialog(dialog, refNode) {
 		dialog.startup();
-		if (typeof refNode === "string") {
+		if (typeof refNode === "string") { //$NON-NLS-0$
 			var node = dojo.byId(refNode);
 			if (!node) {
 				node = dijit.byId(refNode);
@@ -111,8 +111,8 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (refNode) {
 			var pos= dojo.position(refNode); 
 			// reaching into internal methods.  It seems there is not a public way.
-			dialog._setStyleAttr("left:" + (pos.x + 16) + "px !important;");
-			dialog._setStyleAttr("top:" + (pos.y + 16) + "px !important;");
+			dialog._setStyleAttr("left:" + (pos.x + 16) + "px !important;"); //$NON-NLS-1$ //$NON-NLS-0$
+			dialog._setStyleAttr("top:" + (pos.y + 16) + "px !important;"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		dialog.show();
 	}
@@ -122,10 +122,10 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		var handler = function(isKeyEvent) {
 			return function(event) {
 				var editBox = dijit.byId(id),
-					newValue = editBox.get("value");
+					newValue = editBox.get("value"); //$NON-NLS-0$
 				if (isKeyEvent && event.keyCode === dojo.keys.ESCAPE) {
 					if (shouldHideRefNode) {
-						dojo.style(refNode, "display", "inline");
+						dojo.style(refNode, "display", "inline"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 					// editBox.getPromptMessage(false);  // to get rid of prompting tooltip
 					editBox.destroyRecursive();
@@ -139,7 +139,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 				} else if (!editBox.isValid() || (!isInitialValid && newValue === initialText)) {
 					// No change; restore the old refnode
 					if (shouldHideRefNode) {
-						dojo.style(refNode, "display", "inline");
+						dojo.style(refNode, "display", "inline"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				} else {
 					onComplete(newValue);
@@ -159,13 +159,13 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 			value: initialText || ""
 			// promptMessage: promptMessage  // ignore until we can reliably dismiss this on destroy
 		});
-		dojo.place(editBox.domNode, refNode, "after");
-		dojo.addClass(editBox.domNode, "userEditBoxPrompt");
+		dojo.place(editBox.domNode, refNode, "after"); //$NON-NLS-0$
+		dojo.addClass(editBox.domNode, "userEditBoxPrompt"); //$NON-NLS-0$
 		if (shouldHideRefNode) {
-			dojo.style(refNode, "display", "none");
+			dojo.style(refNode, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 		}				
-		dojo.connect(editBox, "onKeyDown", handler(true));
-		dojo.connect(editBox, "onBlur", handler(false));
+		dojo.connect(editBox, "onKeyDown", handler(true)); //$NON-NLS-0$
+		dojo.connect(editBox, "onBlur", handler(false)); //$NON-NLS-0$
 		window.setTimeout(function() { 
 			editBox.focus(); 
 			if (initialText) {
@@ -188,7 +188,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @function
 	 */
 	function openInNewWindow(event) {
-		var isMac = window.navigator.platform.indexOf("Mac") !== -1;
+		var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 		return (isMac && event.metaKey) || (!isMac && event.ctrlKey);
 	}
 	
@@ -211,7 +211,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		if (!location) {
 			return location;
 		}
-		var hostName = window.location.protocol + "//" + window.location.host;
+		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
 		if (location.indexOf(hostName) === 0) {
 			return location.substring(hostName.length);
 		}
@@ -223,9 +223,9 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 			return location;
 		}
 		
-		var hostName = window.location.protocol + "//" + window.location.host;
-		if (location.charAt(0) !== "/") {
-			location = "/" + location;
+		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
+		if (location.charAt(0) !== "/") { //$NON-NLS-0$
+			location = "/" + location; //$NON-NLS-0$
 		}
 		return (hostName + location);
 	}
@@ -240,7 +240,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		// TODO better way?
 		// I thought it should be the line below but is actually the root of all workspaces
 		//  return relative == '/file/';
-		return relative.indexOf('/workspace') === 0;
+		return relative.indexOf('/workspace') === 0; //$NON-NLS-0$
 	}
 	
 	
@@ -276,7 +276,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @function
 	 */
 	function getText(node) {
-		return typeof(node.textContent) !== "undefined" ? node.textContent : node.innerText;
+		return typeof(node.textContent) !== "undefined" ? node.textContent : node.innerText; //$NON-NLS-0$
 	}
 	
 	/**
@@ -297,49 +297,11 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @param {String} text
 	 */
 	function setText(node, text) {
-		if (typeof(node.textContent) !== "undefined") {
+		if (typeof(node.textContent) !== "undefined") { //$NON-NLS-0$
 			node.textContent = text;
 		} else {
 			node.innerText = text;
 		}
-	}
-	
-	/**
-	 * Create a stylized pane heading.
-	 * @param {DomNode} parent the parent node of the title element
-	 * @param {String} the string to use as the heading id. It will also be used to prefix any generated id's.
-	 * @param {String} headingLabel the pane heading text
-	 * @param {Boolean} isAuxStyle specifies whether heading is in an auxiliary pane or main pane
-	 * @param {String} headingId the id for the heading label.  Optional
-	 * @param {String} commandId the id for command tools.  Optional
-	 * @param {Object} command service for rendering commands.  Optional, no commands are rendered if not specified.
-	 * @param {Object} the handler for commands.  Optional.  
-	 */
-	function createPaneHeading(parent, id, headingLabel, isAuxStyle, headingId, commandId, commandService, handler) {
-		headingId = headingId || id+"heading";
-		commandId = commandId || id+"commands";
-		var paneHeadingFragment = 
-			'<div class="toolComposite" id="' + id + '">' +
-				'<div class="layoutLeft" id="' + id + '"><span class="paneTitle" id="' + headingId + '">' + headingLabel + '</span></div>' +
-				'<ul class="layoutRight commandList sectionActions" id="' + commandId + '"></ul>' +
-				'<div id="' + parent.id + 'slideContainer" class="layoutBlock slideParameters slideContainer">' +
-					'<span id="' + parent.id + 'slideOut" class="slide">' +
-						'<span id="' + parent.id + 'pageCommandParameters" class="parameters"></span>' +
-						'<span id="' + parent.id + 'pageCommandDismiss" class="parametersDismiss"></span>' +
-					'</span>' +
-				'</div>'+
-			'</div>';
-			
-		dojo.place(paneHeadingFragment, parent, "last");
-		if (isAuxStyle) {
-			dojo.addClass(id, "auxpaneHeading");
-		} else {
-			dojo.addClass(id, "paneHeading");
-		}
-		if (commandService) {
-			commandService.renderCommands(commandId, dojo.byId(commandId), handler, handler, "button");
-		}
-		return dojo.byId(id);
 	}
 	
 	/**
@@ -348,12 +310,12 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 * @param {DomNode} node the node triggering new layout.
 	 */
 	function forceLayout(node) {
-		if (typeof node === "string") {
+		if (typeof node === "string") { //$NON-NLS-0$
 			node = dojo.byId(node);
 		}
 		while (node) {
 			var widget = dijit.byId(node.id);
-			if (widget && typeof widget.layout === "function") {
+			if (widget && typeof widget.layout === "function") { //$NON-NLS-0$
 				widget.layout();
 				return;
 			}
@@ -366,7 +328,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 	 */
 	function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
 		var etag = targetMetadata.ETag;
-		var args = { "ETag" : etag };
+		var args = { "ETag" : etag }; //$NON-NLS-0$
 		fileClient.write(targetMetadata.Location, contents, args).then(
 			function(result) {
 				if (afterSave) {
@@ -378,7 +340,7 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 				// expected error - HTTP 412 Precondition Failed 
 				// occurs when file is out of sync with the server
 				if (error.status === 412) {
-					var forceSave = window.confirm("Resource is out of sync with the server. Do you want to save it anyway?");
+					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 					if (forceSave) {
 						// repeat save operation, but without ETag 
 						fileClient.write(targetMetadata.Location, contents).then(
@@ -412,12 +374,13 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		var splitLines = [];
 		while (true) {
 			if (cr !== -1 && cr <= index) { 
-				cr = text.indexOf("\r", index); 
+				cr = text.indexOf("\r", index);  //$NON-NLS-0$
 			}
 			if (lf !== -1 && lf <= index) { 
-				lf = text.indexOf("\n", index); 
+				lf = text.indexOf("\n", index);  //$NON-NLS-0$
 			}
 			if (lf === -1 && cr === -1) {
+				splitLines.push(text.substring(start));
 				break; 
 			}
 			var offset = 1;
@@ -439,11 +402,6 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		return splitLines;
 	}
 	
-	function formatMessage(msg) {
-		var args = arguments;
-		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
-	}
-	
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
@@ -458,10 +416,8 @@ define(['dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(
 		getText: getText,
 		safeText: safeText,
 		setText: setText,
-		createPaneHeading: createPaneHeading,
 		forceLayout: forceLayout,
 		saveFileContents: saveFileContents,
-		splitFile: splitFile,
-		formatMessage: formatMessage
+		splitFile: splitFile
 	};
 });

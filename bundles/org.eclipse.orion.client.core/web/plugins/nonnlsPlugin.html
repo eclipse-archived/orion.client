@@ -3,12 +3,10 @@
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="../orion/i18n.js"></script>
 	<script>
 		window.onload = function() {
-			var provider = new eclipse.PluginProvider();
-			var messages = new eclipse.I18nMessages("nls/messages");
-			var serviceProvider = provider.registerServiceProvider("orion.edit.validator",
+			var provider = new orion.PluginProvider();
+			var serviceProvider = provider.registerService("orion.edit.validator",
 			  {
 			     checkSyntax: function(title, contents) {
 			     
@@ -63,7 +61,7 @@
 				         for(var j=0; j<strings.length; j++){
 							if(!nonnls[j]){
 								problems.push({
-					             reason: messages.formatMessage(messages["Non externalized string literal 0"], strings[j][0]),
+					             reason: "Non externalized string literal " + strings[j][0],
 					             line: i + 1,
 					             character: strings[j].index + 1,
 					             end: strings[j].index + strings[j][0].length,
@@ -78,8 +76,22 @@
 			  },
 			  {
 			     contentType: ["application/javascript"],
-			     gosiasValidator: true
 			  });
+			
+			provider.registerService('orion.navigate.command', null, {
+				id: 'orion.nonnls.externalize',
+				nameKey: 'Strings Xtrnalizr',
+				tooltipKey: 'Externalize Strings from JavaScript files in this folder',
+				nls: 'orion/navigate/nls/messages',
+				forceSingleItem: true,
+				validationProperties:
+							[
+								{	source: 'Directory'
+								}
+							],
+				uriTemplate: '{OrionHome}/stringexternalizer/search.html#{Location}'
+			});
+			
 			provider.connect();
 		};
 	</script>

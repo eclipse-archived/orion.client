@@ -11,19 +11,19 @@
 /*global dojo dijit localStorage widgets */
 /*jslint browser:true*/
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(dojo, dijit) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/ComboBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/SFTPConnectionDialog.html'], function(messages, dojo, dijit) {
 
-if (!localStorage.getItem("orion.sftpConnections")) {
+if (!localStorage.getItem("orion.sftpConnections")) { //$NON-NLS-0$
 	var defaultItems = { 
-		identifier: 'name',
-		label: 'name',
+		identifier: 'name', //$NON-NLS-0$
+		label: messages['name'],
 		items: []
 	};
-	localStorage.setItem("orion.sftpConnections", JSON.stringify(defaultItems));
+	localStorage.setItem("orion.sftpConnections", JSON.stringify(defaultItems)); //$NON-NLS-0$
 }
 
 // have to make this a global for now
- window.sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections"));
+ window.sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
 
 /**
  * @param options {{ 
@@ -33,9 +33,9 @@ if (!localStorage.getItem("orion.sftpConnections")) {
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], { //$NON-NLS-0$
 	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'widgets/templates/SFTPConnectionDialog.html'),
+	templateString: dojo.cache('orion', 'widgets/templates/SFTPConnectionDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	constructor : function() {
 		this.inherited(arguments);
@@ -43,27 +43,34 @@ dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets.
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = "SFTP Transfer";
-		this.sftpHostLabelText= "Remote host:";
-		this.sftpPathLabelText= "Remote path:";
-		this.sftpUserLabelText= "User name:";
-		this.sftpPasswordLabelText= "Password:";
-		this.buttonOk = "Start Transfer";
-		this.locationLabelText = "Location:";
-		sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections"));
+		this.title = "SFTP Transfer"; //$NON-NLS-0$
+		this.sftpHostLabelText= messages['Remote host:'];
+		this.sftpPathLabelText= messages['Remote path:'];
+		this.sftpUserLabelText= messages['User name:'];
+		this.sftpPasswordLabelText= messages['Password:'];
+		this.buttonOk = messages['Start Transfer'];
+		this.locationLabelText = messages['Location:'];
+		sftpConnectionStoreData= JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
+		
+		this.preRadioDescriptionText = messages["If the same file exists in both the source and destination:"];
+		this.firstRadioLabelText = messages["Cancel the transfer"];
+		this.secondRadioLabelText = messages["Always overwrite destination"];
+		this.thirdRadioLabelText = messages["Overwrite if source is newer"];	
+		this.newLabelText = messages["New"];
+		this.addLabelText = messages["Add"];
 	},
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this.addSFTPConnection, "onClick", null, dojo.hitch(this, this.onAddConnection));
+		dojo.connect(this.addSFTPConnection, "onClick", null, dojo.hitch(this, this.onAddConnection)); //$NON-NLS-0$
 	},
 	execute: function() {
 		var selected = this.sftpConnectionList.value;
-		var splits = selected.split("@");
+		var splits = selected.split("@"); //$NON-NLS-0$
 		if (splits.length !== 2) {
 			return;
 		}
 		var user = splits[0];
-		var separator = splits[1].indexOf("/");
+		var separator = splits[1].indexOf("/"); //$NON-NLS-0$
 		if (separator <= 0) {
 			return;
 		}
@@ -73,16 +80,16 @@ dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets.
 	},
 	_computeOverwriteValue: function() {
 		if (this.overwriteCancel.checked) {
-			return "no-overwrite";
+			return "no-overwrite"; //$NON-NLS-0$
 		} else if (this.overwriteOlder.checked) {
-			return "overwrite-older";
+			return "overwrite-older"; //$NON-NLS-0$
 		}
 		//by default pass no options
 		return "";
 	},
 	onAddConnection: function() {
-		var newConnection = {name: this.sftpUser.value+"@"+this.sftpHost.value+this.sftpPath.value};
-		var connections = JSON.parse(localStorage.getItem("orion.sftpConnections"));
+		var newConnection = {name: this.sftpUser.value+"@"+this.sftpHost.value+this.sftpPath.value}; //$NON-NLS-0$
+		var connections = JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
 		//make sure we don't already have an entry with this name
 		var found = false;
 		for (var i = 0; i < connections.items.length; i++) {
@@ -94,8 +101,8 @@ dojo.declare("orion.widgets.SFTPConnectionDialog", [dijit.Dialog, orion.widgets.
 		//if we have a new value, add it to the list and to the storage
 		if (!found) {
 			connections.items.unshift(newConnection);
-			localStorage.setItem("orion.sftpConnections", JSON.stringify(connections));
-			this.sftpConnectionList.set("value", newConnection.name);
+			localStorage.setItem("orion.sftpConnections", JSON.stringify(connections)); //$NON-NLS-0$
+			this.sftpConnectionList.set("value", newConnection.name); //$NON-NLS-0$
 		}
 	}
 });

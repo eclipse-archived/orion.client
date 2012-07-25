@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], function(require, dojo,
+define(['i18n!orion/operations/nls/messages',  'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], function(messages, require, dojo,
 		mExplorer, mOperationsCommands) {
 	var exports = {};
 
@@ -91,21 +91,21 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 		
 		OperationsRenderer.prototype.getCellHeaderElement = function(col_no){
 			
-			if (this.options['minimal'])
+			if (this.options['minimal']) //$NON-NLS-0$
 				return;
 			
 			switch(col_no){
 				case 0: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Name</h2>"});
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Name"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					break;
 				case 1:
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Actions</h2>"});
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Actions"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					break;
 				case 2: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Status</h2>"});
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Status"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					break;
 				case 3: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>Scheduled</h2>"});
+					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Scheduled"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					break;
 
 			}
@@ -134,36 +134,36 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 		OperationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 			switch(col_no){
 			case 0:
-				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Name});
-				var div = dojo.create("div", null, col, "only");
-				var span = dojo.create("span", {innerHTML: item.Name, className: "primaryColumn"}, div, "last");
+				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Name}); //$NON-NLS-1$ //$NON-NLS-0$
+				var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				var span = dojo.create("span", {innerHTML: item.Name, className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-				dojo.place(document.createTextNode(item.Name), span, "only");
+				dojo.place(document.createTextNode(item.Name), span, "only"); //$NON-NLS-0$
 				
-				var operationIcon = dojo.create("span", null, div, "first");
-				dojo.addClass(operationIcon, "imageSprite");
+				var operationIcon = dojo.create("span", null, div, "first"); //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.addClass(operationIcon, "imageSprite"); //$NON-NLS-0$
 				
 				var result =  this.parseProgressResult(item.Result);
 				
 				if(result.Severity){
 					switch (result.Severity) {
-						case "Warning":
-							dojo.addClass(operationIcon, "core-sprite-warning");
+						case "Warning": //$NON-NLS-0$
+							dojo.addClass(operationIcon, "core-sprite-warning"); //$NON-NLS-0$
 							return col;
-						case "Error":
-							dojo.addClass(operationIcon, "core-sprite-error");
+						case "Error": //$NON-NLS-0$
+							dojo.addClass(operationIcon, "core-sprite-error"); //$NON-NLS-0$
 							return col;
 					}
 				}
 				
 				if(item.Running===true)
-					dojo.addClass(operationIcon, "core-sprite-start");
+					dojo.addClass(operationIcon, "core-sprite-start"); //$NON-NLS-0$
 				else if(item.Canceled===true)
-					dojo.addClass(operationIcon, "core-sprite-stop");
+					dojo.addClass(operationIcon, "core-sprite-stop"); //$NON-NLS-0$
 				else if(item.Failed===true)
-					dojo.addClass(operationIcon, "core-sprite-error");
+					dojo.addClass(operationIcon, "core-sprite-error"); //$NON-NLS-0$
 				else
-					dojo.addClass(operationIcon, "core-sprite-ok");
+					dojo.addClass(operationIcon, "core-sprite-ok"); //$NON-NLS-0$
 				
 				return col;
 				break;
@@ -174,16 +174,16 @@ define([ 'require', 'dojo', 'orion/explorer', 'orion/operationsCommands' ], func
 				var result =  this.parseProgressResult(item.Result);
 				var message = result.Message || item.Message;
 				if(result.DetailedMessage && result.DetailedMessage!=="")
-					message += ": " + result.DetailedMessage;
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: message});
+					message += ": " + result.DetailedMessage; //$NON-NLS-0$
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: message}); //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 3:
 				if(item.Created && parseInt(item.Created)>0){
-					return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML:  dojo.date.locale.format(
+					return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML:  dojo.date.locale.format( //$NON-NLS-1$ //$NON-NLS-0$
 							new Date(parseInt(item.Created)),
-							{selector: "datetime", formatLength: "medium"})});
+							{selector: "datetime", formatLength: "medium"})}); //$NON-NLS-1$ //$NON-NLS-0$
 				}
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"});
+				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		};
 		
