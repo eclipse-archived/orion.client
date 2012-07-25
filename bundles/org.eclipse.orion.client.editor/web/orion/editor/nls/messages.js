@@ -13,6 +13,14 @@
 
 /*global define*/
 
-define(['orion/textview/util'], function(mUtil){
-	return mUtil.getNlsBundle("orion/textview/nls/messages");
+define(['orion/textview/i18n!orion/editor/nls/messages'], function(bundle) {
+	var result = {
+		root: true
+	};
+	Object.keys(bundle).forEach(function(key) {
+		if (typeof result[key] === 'undefined') {
+			result[key] = bundle[key];
+		}
+	});
+	return result;
 });

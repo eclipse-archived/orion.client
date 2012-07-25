@@ -37,19 +37,27 @@
 		
 		require(["site.js"]);
 		</script>
-<body style="visibility:hidden" class="nihilo">
-	<div id="eclipse.edit-site" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
+	</head>
+	
+	
+<body style="height: 100%; visibility:hidden" class="claro">
+	<div id="orion.site" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
 		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
 		</div>
-		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" gutters="false" design="headline" liveSplitters="false" splitter="false" role="main">
-			<div class="toolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
+		<div id="centerPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" gutters="false" splitter="false" role="main">
+			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
 			</div>
-			<div class="mainpane" id="site" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
+			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">		
+				<div id="mainNode" class="settings mainPadding">
+					<div id="site" class="displayTable" style="padding-bottom: 20px;">
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
 		</div>
 	</div>
+</body>	
 	
 </body>
 </html>

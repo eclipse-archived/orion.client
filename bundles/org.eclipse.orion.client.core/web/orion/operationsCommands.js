@@ -11,8 +11,8 @@
 
 /*global window widgets eclipse:true serviceRegistry dojo */
 /*browser:true*/
-define(['require', 'dojo', 'orion/commands'], 
-        function(require, dojo, mCommands) {
+define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands'], 
+        function(messages, require, dojo, mCommands) {
 	/**
 	 * @namespace The global container for eclipse APIs.
 	 */ 
@@ -26,26 +26,26 @@ define(['require', 'dojo', 'orion/commands'],
 			if (toolbar) {
 				dojo.empty(toolbar);
 			} else {
-				throw "could not find toolbar " + toolbarId;
+				throw messages["could not find toolbar "] + toolbarId;
 			}
-			var service = registry.getService("orion.page.command");
-			service.renderCommands(toolbarId, toolbar, item, explorer, "button");  
+			var service = registry.getService("orion.page.command"); //$NON-NLS-0$
+			service.renderCommands(toolbarId, toolbar, item, explorer, "button");   //$NON-NLS-0$
 			if (selectionToolbarId) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); 
+					service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
 				}
 			}
 
 			// Stuff we do only the first time
 			if (!doOnce) {
 				doOnce = true;
-				registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+				registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {
 						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button");
+						registry.getService("orion.page.command").renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 			}
@@ -54,11 +54,11 @@ define(['require', 'dojo', 'orion/commands'],
 		exports.createOperationsCommands = function(serviceRegistry, commandService, explorer, operationsClient){
 		
 			var removeCompletedOperationsCommand = new mCommands.Command({
-				name : "Remove Completed",
-				tooltip : "Remove all completed operations",
-				id : "eclipse.removeCompletedOperations",
+				name : messages["Remove Completed"],
+				tooltip : messages["Remove all completed operations"],
+				id : "eclipse.removeCompletedOperations", //$NON-NLS-0$
 				callback : function(data) {
-					var progress = serviceRegistry.getService("orion.page.progress");
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					operationsClient.removeCompletedOperations().then(dojo.hitch(progress, function(item){
 						progress.removeCompletedOperations();
 					}));
@@ -70,13 +70,13 @@ define(['require', 'dojo', 'orion/commands'],
 			commandService.addCommand(removeCompletedOperationsCommand);
 			
 			var removeOperationCommand = new mCommands.Command({
-				name : "Remove",
-				tooltip : "Remove operations from the operations list.",
-				imageClass: "core-sprite-delete",
-				id : "eclipse.removeOperation",
+				name : messages["Remove"],
+				tooltip : messages["Remove operations from the operations list."],
+				imageClass: "core-sprite-delete", //$NON-NLS-0$
+				id : "eclipse.removeOperation", //$NON-NLS-0$
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
-					var progress = serviceRegistry.getService("orion.page.progress");
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
 						operationsClient.removeOperation(item.Location).then(dojo.hitch(progress, function(item){
@@ -98,10 +98,10 @@ define(['require', 'dojo', 'orion/commands'],
 			commandService.addCommand(removeOperationCommand);
 			
 			var cancelOperationCommand = new mCommands.Command({
-				name : "Cancel",
-				tooltip : "Cancel operations from the operations list.",
-				imageClass: "core-sprite-stop",
-				id : "eclipse.cancelOperation",
+				name : messages["Cancel"],
+				tooltip : messages["Cancel operations from the operations list."],
+				imageClass: "core-sprite-stop", //$NON-NLS-0$
+				id : "eclipse.cancelOperation", //$NON-NLS-0$
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
 					for (var i=0; i < items.length; i++) {

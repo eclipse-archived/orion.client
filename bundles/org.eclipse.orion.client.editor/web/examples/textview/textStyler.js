@@ -12,7 +12,7 @@
 
 /*global document window navigator define */
 
-define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
+define("examples/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 
 	var JS_KEYWORDS =
 		["break",
@@ -94,15 +94,16 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 	var KEYWORD = 2;
 	var NUMBER = 3;
 	var STRING = 4;
-	var SINGLELINE_COMMENT = 5;
-	var MULTILINE_COMMENT = 6;
-	var DOC_COMMENT = 7;
-	var WHITE = 8;
-	var WHITE_TAB = 9;
-	var WHITE_SPACE = 10;
-	var HTML_MARKUP = 11;
-	var DOC_TAG = 12;
-	var TASK_TAG = 13;
+	var MULTILINE_STRING = 5;
+	var SINGLELINE_COMMENT = 6;
+	var MULTILINE_COMMENT = 7;
+	var DOC_COMMENT = 8;
+	var WHITE = 9;
+	var WHITE_TAB = 10;
+	var WHITE_SPACE = 11;
+	var HTML_MARKUP = 12;
+	var DOC_TAG = 13;
+	var TASK_TAG = 14;
 
 	// Styles 
 	var singleCommentStyle = {styleClass: "token_singleline_comment"};
@@ -162,7 +163,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				default:
 					var isCSS = this.isCSS;
 					var off = this.offset - 1;
-					if (48 <= c && c <= 57) {
+					if (!isCSS && 48 <= c && c <= 57) {
 						var floating = false, exponential = false, hex = false, firstC = c;
 						do {
 							c = this._read();
@@ -212,7 +213,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 		nextToken: function() {
 			this.startOffset = this.offset;
 			while (true) {
-				var c = this._read();
+				var c = this._read(), result;
 				switch (c) {
 					case -1: return null;
 					case 47:	// SLASH -> comment
@@ -251,35 +252,57 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 						this._unread(c);
 						return UNKOWN;
 					case 39:	// SINGLE QUOTE -> char const
+						result = STRING;
 						while(true) {
 							c = this._read();
 							switch (c) {
 								case 39:
-									return STRING;
+									return result;
 								case 13:
 								case 10:
 								case -1:
 									this._unread(c);
-									return STRING;
+									return result;
 								case 92: // BACKSLASH
 									c = this._read();
+									switch (c) {
+										case 10: result = MULTILINE_STRING; break;
+										case 13:
+											result = MULTILINE_STRING;
+											c = this._read();
+											if (c !== 10) {
+												this._unread(c);
+											}
+											break;
+									}
 									break;
 							}
 						}
 						break;
 					case 34:	// DOUBLE QUOTE -> string
+						result = STRING;
 						while(true) {
 							c = this._read();
 							switch (c) {
 								case 34: // DOUBLE QUOTE
-									return STRING;
+									return result;
 								case 13:
 								case 10:
 								case -1:
 									this._unread(c);
-									return STRING;
+									return result;
 								case 92: // BACKSLASH
 									c = this._read();
+									switch (c) {
+										case 10: result = MULTILINE_STRING; break;
+										case 13:
+											result = MULTILINE_STRING;
+											c = this._read();
+											if (c !== 10) {
+												this._unread(c);
+											}
+											break;
+									}
 									break;
 							}
 						}
@@ -628,13 +651,20 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				if (offset < commentStart) {
 					this._parse(text.substring(offset - start, commentStart - start), offset, styles);
 				}
-				var style = comments[i].type === DOC_COMMENT ? docCommentStyle : multiCommentStyle;
-				if (this.whitespacesVisible || this.detectHyperlinks) {
-					var s = Math.max(offset, commentStart);
-					var e = Math.min(end, commentEnd);
-					this._parseComment(text.substring(s - start, e - start), s, styles, style, comments[i].type);
+				var type = comments[i].type, style;
+				switch (type) {
+					case DOC_COMMENT: style = docCommentStyle; break;
+					case MULTILINE_COMMENT: style = multiCommentStyle; break;
+					case MULTILINE_STRING: style = stringStyle; break;
+				}
+				var s = Math.max(offset, commentStart);
+				var e = Math.min(end, commentEnd);
+				if ((type === DOC_COMMENT || type === MULTILINE_COMMENT) && (this.whitespacesVisible || this.detectHyperlinks)) {
+					this._parseComment(text.substring(s - start, e - start), s, styles, style, type);
+				} else if (type === MULTILINE_STRING && this.whitespacesVisible) {
+					this._parseString(text.substring(s - start, e - start), s, styles, stringStyle);
 				} else {
-					styles.push({start: commentStart, end: commentEnd, style: style});
+					styles.push({start: s, end: e, style: style});
 				}
 				offset = commentEnd;
 			}
@@ -660,6 +690,7 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 				switch (token) {
 					case KEYWORD: style = keywordStyle; break;
 					case NUMBER: style = numberStyle; break;
+					case MULTILINE_STRING:
 					case STRING:
 						if (this.whitespacesVisible) {
 							this._parseString(scanner.getData(), tokenStart, styles, stringStyle);
@@ -807,17 +838,14 @@ define("examples/textview/textStyler", ['i18n!orion/textview/nls/messages', 'ori
 			scanner.setText(text);
 			var result = [];
 			while ((token = scanner.nextToken())) {
-				if (token === MULTILINE_COMMENT || token === DOC_COMMENT) {
-					var comment = {
+				if (token === MULTILINE_COMMENT || token === DOC_COMMENT || token === MULTILINE_STRING) {
+					result.push({
 						start: scanner.getStartOffset() + offset,
 						end: scanner.getOffset() + offset,
 						type: token
-					};
-					result.push(comment);
-					//TODO can we avoid this work if edition does not overlap comment?
-					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
+					});
 				}
-				if (token === SINGLELINE_COMMENT) {
+				if (token === SINGLELINE_COMMENT || token === MULTILINE_COMMENT || token === DOC_COMMENT) {
 					//TODO can we avoid this work if edition does not overlap comment?
 					this._computeTasks(token, scanner.getStartOffset() + offset, scanner.getOffset() + offset);
 				}

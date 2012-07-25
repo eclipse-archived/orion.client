@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010."/>
+<meta name="copyright" content="Copyright (c) IBM Corporation and others 2010, 2012."/>
 <meta http-equiv="PRAGMA" content="NO-CACHE"/>
 <meta http-equiv="Expires" content="-1"/>
 <meta http-equiv='X-UA-Compatible' content='IE=EmulateIE7,IE=edge'/>
 <title>Orion TextView Demo</title>
 <link rel="stylesheet" type="text/css" href="demo.css" />
+<!-- Note if running this standalone you will need to copy requirejs from bundles/org.eclipse.orion.client.core/web/ -->
 <script type="text/javascript" src="../../requirejs/require.js"></script>
 <script type="text/javascript">
 	require({
@@ -14,7 +15,7 @@
 	  paths: {
 		  text: 'requirejs/text',
 		  i18n: 'requirejs/i18n',
-		  tests: '/js-tests',
+		  tests: 'js-tests',
 		  domReady: 'requirejs/domReady'
 	  }
 	});

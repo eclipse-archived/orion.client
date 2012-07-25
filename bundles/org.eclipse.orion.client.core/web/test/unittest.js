@@ -73,7 +73,7 @@ UnitTestRenderer.prototype = {
 			link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
 			dojo.place(document.createTextNode(item.Name), link, "only");
 			expandImg.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id, nameId, require.toUrl("images/expanded-gray.png"), require.toUrl("images/collapsed-gray.png"));
+				this.tableTree.toggle(tableRow.id);
 			});
 		} else {
 			col = document.createElement('td');

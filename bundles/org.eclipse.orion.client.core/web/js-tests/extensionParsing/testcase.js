@@ -206,7 +206,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	tests.testVariableOverwrite = function() {
 		var validationProperty = {
 			source: "AlternateLocation",
-			variableName: "Location",
+			variableName: "Location"
 		};
 		var validator = mExtensionCommands._makeValidator(makeInfo(validationProperty, "{Location}"), serviceRegistry, contentTypesCache);
 		assert.equal(validator.getURI(item1), item1.Location);		

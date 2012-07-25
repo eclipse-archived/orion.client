@@ -22,13 +22,14 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	 * @param {orion.textview.TextView} textView
 	 * @param {orion.textview.AnnotationModel} annotationModel
 	 * @param {String} [fileName] Deprecated.
+	 * @param {Boolean} [allowAsync=true]
 	 * @returns {Dojo.Deferred}
 	 */
-	function createStyler(serviceRegistry, contentTypeService, contentType, textView, annotationModel, fileName) {
+	function createStyler(serviceRegistry, contentTypeService, contentType, textView, annotationModel, fileName, allowAsync) {
 		// Returns a promise (if provider matches) or null (if it doesn't match).
 		function getPromise(provider, extension) {
-			var contentTypeIds = provider.getProperty("contentType"),
-			    fileTypes = provider.getProperty("fileTypes"); // backwards compatibility
+			var contentTypeIds = provider.getProperty("contentType"), //$NON-NLS-0$
+			    fileTypes = provider.getProperty("fileTypes"); // backwards compatibility //$NON-NLS-0$
 			if (contentTypeIds) {
 				return contentTypeService.isSomeExtensionOf(contentType, contentTypeIds).then(
 					function (isMatch) {
@@ -41,18 +42,21 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			}
 			return null;
 		}
+		function isAllowed(provider) {
+			return allowAsync || provider.getProperty("type") !== "highlighter"; //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		function createDefaultStyler(contentType) {
 			var styler = null;
 			switch (contentType && contentType.id) {
-				case "application/javascript":
-				case "application/json":
-					styler = new mTextStyler.TextStyler(textView, "js", annotationModel);
+				case "application/javascript": //$NON-NLS-0$
+				case "application/json": //$NON-NLS-0$
+					styler = new mTextStyler.TextStyler(textView, "js", annotationModel); //$NON-NLS-0$
 					break;
-				case "text/x-java-source":
-					styler = new mTextStyler.TextStyler(textView, "java", annotationModel);
+				case "text/x-java-source": //$NON-NLS-0$
+					styler = new mTextStyler.TextStyler(textView, "java", annotationModel); //$NON-NLS-0$
 					break;
-				case "text/css":
-					styler = new mTextStyler.TextStyler(textView, "css", annotationModel);
+				case "text/css": //$NON-NLS-0$
+					styler = new mTextStyler.TextStyler(textView, "css", annotationModel); //$NON-NLS-0$
 					break;
 			}
 			if (styler) {
@@ -70,13 +74,13 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		}
 
 		// Check services
-		var extension = fileName && fileName.split(".").pop().toLowerCase();
-		var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.highlighter");
+		var extension = fileName && fileName.split(".").pop().toLowerCase(); //$NON-NLS-0$
+		var serviceRefs = serviceRegistry.getServiceReferences("orion.edit.highlighter"); //$NON-NLS-0$
 		var grammars = [], promises = [];
 		for (var i=0; i < serviceRefs.length; i++) {
 			var serviceRef = serviceRefs[i];
-			if (serviceRef.getProperty("type") === "grammar") {
-				grammars.push(serviceRef.getProperty("grammar"));
+			if (serviceRef.getProperty("type") === "grammar") { //$NON-NLS-1$ //$NON-NLS-0$
+				grammars.push(serviceRef.getProperty("grammar")); //$NON-NLS-0$
 			}
 			var promise = getPromise(serviceRef, extension);
 			if (promise) {
@@ -88,19 +92,19 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			var provider;
 			for (var i = promises.length - 1; i >= 0; i--) {
 				var promise = promises[i][1];
-				if (promise) {
+				if (promise && isAllowed(promise)) {
 					provider = promise;
 					break;
 				}
 			}
 			var styler;
 			if (provider) {
-				var type = provider.getProperty("type");
-				if (type === "highlighter") {
+				var type = provider.getProperty("type"); //$NON-NLS-0$
+				if (type === "highlighter") { //$NON-NLS-0$
 					styler = new mAsyncStyler.AsyncStyler(textView, serviceRegistry, annotationModel);
 					styler.setContentType(contentType);
-				} else if (type === "grammar" || typeof type === "undefined") {
-					var grammar = provider.getProperty("grammar");
+				} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
 					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
 				}
 			}
@@ -125,9 +129,12 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		 * @param {orion.textview.AnnotationModel} annotationModel
 		 * @param {String} [fileName] <i>Deprecated.</i> For backwards compatibility only, service-contributed highlighters
 		 * will be checked against the file extension instead of contentType.
+		 * @param {Boolean} [allowAsync=true] If true, plugin-contributed asynchronous highlighters (i.e. <code>type == "highlighter"</code>
+		 * will be consulted. If false, only rule-based highlighters will be consulted.
 		 * @returns {dojo.Deferred} A promise that is resolved when this highlighter has been set up.
 		 */
-		setup: function(fileContentType, textView, annotationModel, fileName) {
+		setup: function(fileContentType, textView, annotationModel, fileName, allowAsync) {
+			allowAsync = typeof allowAsync === "undefined" ? true : allowAsync; //$NON-NLS-0$
 			if (this.styler) {
 				if (this.styler.destroy) {
 					this.styler.destroy();
@@ -135,8 +142,8 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 				this.styler = null;
 			}
 			var self = this;
-			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contenttypes"),
-				fileContentType, textView, annotationModel, fileName).then(
+			return createStyler(this.serviceRegistry, this.serviceRegistry.getService("orion.core.contenttypes"), //$NON-NLS-0$
+				fileContentType, textView, annotationModel, fileName, allowAsync).then(
 					function(styler) {
 						self.styler = styler;
 						return styler;

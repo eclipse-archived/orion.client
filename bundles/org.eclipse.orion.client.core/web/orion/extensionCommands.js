@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate){
+define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
 	 * Utility methods
@@ -24,18 +24,18 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	var extensionCommandUtils  = {};
 	
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var nonHash = window.location.href.split('#')[0];
+	var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 	var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
-	    if (item === null || typeof(item) !== 'object') {
+	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$
 	        return item;
 	      }
 	
 	    var temp = item.constructor(); // changed
 	
 	    for(var key in item){
-			if(key!=="children" && key!=="Children") {
+			if(key!=="children" && key!=="Children") { //$NON-NLS-1$ //$NON-NLS-0$
 				temp[key] = clone(item[key]);
 			}
 	    }
@@ -48,29 +48,31 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	 */
 	extensionCommandUtils._createOpenWithCommands = function(serviceRegistry, contentTypes) {
 		function getEditors() {
-			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor");
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.edit.editor"); //$NON-NLS-0$
 			var editors = [];
 			for (var i=0; i < serviceReferences.length; i++) {
-				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id");
+				var serviceRef = serviceReferences[i], id = serviceRef.getProperty("id"); //$NON-NLS-0$
 				editors.push({
 					id: id,
-					name: serviceRef.getProperty("name"),
-					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate")
+					name: serviceRef.getProperty("name"), //$NON-NLS-0$
+					nameKey: serviceRef.getProperty("nameKey"), //$NON-NLS-0$
+					nls: serviceRef.getProperty("nls"), //$NON-NLS-0$
+					uriTemplate: serviceRef.getProperty("orionTemplate") || serviceRef.getProperty("uriTemplate") //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
 			return editors;
 		}
 
 		function getEditorOpenWith(serviceRegistry, editor) {
-			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith");
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith"); //$NON-NLS-0$
 			var types = [];
 			for (var i=0; i < openWithReferences.length; i++) {
 				var ref = openWithReferences[i];
-				if (ref.getProperty("editor") === editor.id) {
-					var ct = ref.getProperty("contentType");
+				if (ref.getProperty("editor") === editor.id) { //$NON-NLS-0$
+					var ct = ref.getProperty("contentType"); //$NON-NLS-0$
 					if (ct instanceof Array) {
 						types = types.concat(ct);
-					} else if (ct !== null && typeof ct !== "undefined") {
+					} else if (ct !== null && typeof ct !== "undefined") { //$NON-NLS-0$
 						types.push(ct);
 					}
 				}
@@ -78,9 +80,9 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			return types;
 		}
 		function getDefaultEditor(serviceRegistry) {
-			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith.default");
+			var openWithReferences = serviceRegistry.getServiceReferences("orion.navigate.openWith.default"); //$NON-NLS-0$
 			for (var i=0; i < openWithReferences.length; i++) {
-				return {editor: openWithReferences[i].getProperty("editor")};
+				return {editor: openWithReferences[i].getProperty("editor")}; //$NON-NLS-0$
 			}
 			return null;
 		}
@@ -95,12 +97,15 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 			if (editorContentTypes.length) {
 				var properties = {
 					name: editor.name || editor.id,
-					id: "eclipse.openWithCommand." + editor.id,
+					nameKey: editor.nameKey,
+					id: "eclipse.openWithCommand." + editor.id, //$NON-NLS-0$
 					tooltip: editor.name,
+					tooltipKey: editor.nameKey,
 					contentType: editorContentTypes,
 					uriTemplate: editor.uriTemplate,
+					nls: editor.nls,
 					forceSingleItem: true,
-					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand
+					isEditor: (isDefaultEditor ? "default": "editor") // Distinguishes from a normal fileCommand //$NON-NLS-1$ //$NON-NLS-0$
 				};
 				fileCommands.push({properties: properties, service: {}});
 			}
@@ -121,8 +126,8 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				if (!match) {  // value doesn't matter, just the presence of the property is enough
 					value = item[key];
 					valid = true;
-				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string
-					if (!typeof(item[key] === 'string')) {
+				} else if (typeof(match) === 'string') {  // the value is a regular expression that should match some string //$NON-NLS-0$
+					if (!typeof(item[key] === 'string')) { //$NON-NLS-0$
 						// can't pattern match on a non-string
 						return false;
 					}
@@ -130,11 +135,11 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 						var patternMatch = new RegExp(match).exec(item[key]);
 						if (patternMatch) {
 							var firstMatch = patternMatch[0];
-							if (validationProperty.variableMatchPosition === "before") {
+							if (validationProperty.variableMatchPosition === "before") { //$NON-NLS-0$
 								value = item[key].substring(0, patternMatch.index);
-							} else if (validationProperty.variableMatchPosition === "after") {
+							} else if (validationProperty.variableMatchPosition === "after") { //$NON-NLS-0$
 								value = item[key].substring(patternMatch.index + firstMatch.length);
-							} else if (validationProperty.variableMatchPosition === "only") {
+							} else if (validationProperty.variableMatchPosition === "only") { //$NON-NLS-0$
 								value = firstMatch;
 							} else {  // "all"
 								value = item[key];
@@ -166,7 +171,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 								invalid = true;
 							}
 							if (invalid) {
-								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]);
+								window.console.log("Invalid replacements specified in validation property.  " + validationProperty.replacements[i]); //$NON-NLS-0$
 							}
 						}
 					}
@@ -179,20 +184,20 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 		function matchSinglePattern(item, propertyName, validationProperty, validator){
 			var value = validationProperty.match;
 			var key, keyLastSegments;
-			if (propertyName.indexOf("|") >= 0) {
+			if (propertyName.indexOf("|") >= 0) { //$NON-NLS-0$
 				// the pipe means that any one of the piped properties can match
-				key = propertyName.substring(0, propertyName.indexOf("|"));
-				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1);
+				key = propertyName.substring(0, propertyName.indexOf("|")); //$NON-NLS-0$
+				keyLastSegments = propertyName.substring(propertyName.indexOf("|")+1); //$NON-NLS-0$
 				// if key matches, we can stop.  No match is not a failure, look in the next segments.
 				if (matchSinglePattern(item, key, validationProperty, validator)) {
 					return true;
 				} else {
 					return matchSinglePattern(item, keyLastSegments, validationProperty, validator);
 				}
-			} else if (propertyName.indexOf(":") >= 0) {
+			} else if (propertyName.indexOf(":") >= 0) { //$NON-NLS-0$
 				// the colon is used to drill into a property
-				key = propertyName.substring(0, propertyName.indexOf(":"));
-				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1);
+				key = propertyName.substring(0, propertyName.indexOf(":")); //$NON-NLS-0$
+				keyLastSegments = propertyName.substring(propertyName.indexOf(":")+1); //$NON-NLS-0$
 				// must have key and then check the next value
 				if (item[key]) {
 					return matchSinglePattern(item[key], keyLastSegments, validationProperty, validator);
@@ -216,7 +221,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							return false;
 						} 
 					} else {
-						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified.");
+						window.console.log("Invalid validationProperties in " + info.id + ".  No source property specified."); //$NON-NLS-1$ //$NON-NLS-0$
 						return false;
 					}
 				}
@@ -241,7 +246,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	
 		var validator = {info: info};
 		validator.validationFunction =  dojo.hitch(validator, function(items){
-			if (typeof validationItemConverter === "function") {
+			if (typeof validationItemConverter === "function") { //$NON-NLS-0$
 				items = validationItemConverter.call(this, items);
 			}
 			if (items) {
@@ -291,7 +296,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 							if (!item[validationProperty.variableName]) {
 								variableExpansions[validationProperty.variableName] = this[validationProperty.variableName];
 							} else {
-								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata.");
+								window.console.log("Variable name " + validationProperty.variableName + " in the extension " + this.info.id + " conflicts with an existing property in the item metadata."); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					}
@@ -308,47 +313,69 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
 	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, contentTypesMap, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
-		var commandOptions = {
-			name: info.name,
-			image: info.image,
-			id: info.id || info.name,
-			tooltip: info.tooltip,
-			isEditor: info.isEditor
-		};
-		var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, contentTypesMap, validationItemConverter);
-		commandOptions.visibleWhen = validator.validationFunction;
 		
-		if (createNavigateCommandCallback) {
-			if (validator.generatesURI()) {
-				commandOptions.hrefCallback = dojo.hitch(validator, function(data){
-					var item = dojo.isArray(data.items) ? data.items[0] : data.items;
-					return this.getURI(item);
-				});
-			} else {
-				commandOptions.callback = dojo.hitch(info, function(data){
-					var shallowItemsClone;
-					if (this.forceSingleItem) {
-						var item = dojo.isArray() ? data.items[0] : data.items;
-						shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
-					} else {
-						if (dojo.isArray(data.items)) {
-							shallowItemsClone = [];
-							for (var j = 0; j<data.items.length; j++) {
-								shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
-							}
+		var deferred = new dojo.Deferred();
+		
+		function enhanceCommandOptions(commandOptions, deferred){
+			var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, contentTypesMap, validationItemConverter);
+			commandOptions.visibleWhen = validator.validationFunction;
+			
+			if (createNavigateCommandCallback) {
+				if (validator.generatesURI()) {
+					commandOptions.hrefCallback = dojo.hitch(validator, function(data){
+						var item = dojo.isArray(data.items) ? data.items[0] : data.items;
+						return this.getURI(item);
+					});
+				} else {
+					commandOptions.callback = dojo.hitch(info, function(data){
+						var shallowItemsClone;
+						if (this.forceSingleItem) {
+							var item = dojo.isArray() ? data.items[0] : data.items;
+							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
 						} else {
-							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
+							if (dojo.isArray(data.items)) {
+								shallowItemsClone = [];
+								for (var j = 0; j<data.items.length; j++) {
+									shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
+								}
+							} else {
+								shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
+							}
 						}
-					}
-					if(serviceOrReference.run) {
-						serviceOrReference.run(shallowItemsClone);
-					} else if (serviceRegistry) {
-						serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
-					}
-				});
-			}  // otherwise the caller will make an appropriate callback for the extension
+						if(serviceOrReference.run) {
+							serviceOrReference.run(shallowItemsClone);
+						} else if (serviceRegistry) {
+							serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
+						}
+					});
+				}  // otherwise the caller will make an appropriate callback for the extension
+			}
+			deferred.resolve(commandOptions);
 		}
-		return commandOptions;
+		
+		if(info.nls){
+			i18nUtil.getMessageBundle(info.nls).then(function(commandMessages){
+				var commandOptions = {
+						name: info.nameKey ? commandMessages[info.nameKey] : info.name,
+						image: info.image,
+						id: info.id || info.name,
+						tooltip: info.tooltipKey ? commandMessages[info.tooltipKey] : info.tooltip,
+						isEditor: info.isEditor
+				};
+				enhanceCommandOptions(commandOptions, deferred);
+			});
+		} else {
+			var commandOptions = {
+					name: info.name,
+					image: info.image,
+					id: info.id || info.name,
+					tooltip: info.tooltip,
+					isEditor: info.isEditor
+			};
+			enhanceCommandOptions(commandOptions, deferred);
+		}
+		
+		return deferred;
 	};
 	
 	extensionCommandUtils.getOpenWithCommands = function(commandService) {

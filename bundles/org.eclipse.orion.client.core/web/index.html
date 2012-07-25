@@ -2,7 +2,6 @@
 <html style="height: 100%;">
 	<head>
 		<title>Welcome to Orion</title>
-		<link rel="stylesheet" type="text/css" href="index.css" />
 		<script src="requirejs/require.js"></script>
 		<script type="text/javascript">
 		/*global require*/
@@ -40,29 +39,6 @@
 		require(["index.js"]);
 		</script>
 </head>
-	<body style="height: 100%; visibility:hidden;" class="nihilo">
-	
-	<div dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" class="orionPage">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div dojoType="dijit.layout.BorderContainer" design="headline" persist="false" gutters="false" region="center" splitter="false" role="main">
-			<!--<div dojoType="dijit.layout.ContentPane" id="feed" region="top" class="mainpane" style="height: 33%">
-				<div dojoType="dojox.widget.FeedPortlet" title="Orion News" id="orionfeed" url="http://planetorion.org/news/feed/" maxResults="5" openNew="false" showFeedTitle="false">
-				</div>		
-			</div>-->
-			<div dojoType="dijit.layout.BorderContainer" id="bottom" splitter="false" persist="false" gutters="false" region="center" class="landingPanelContainer">
-				<div dojoType="dijit.layout.ContentPane" region="center" class="landingPanel">
-					<div style="padding: 8px;">
-						<h2 class="landingHeading">Get Started</h2>
-						<div id="tasks"></div>
-					</div>
-				</div>			
-
-			</div>
-		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
-		</div>
-
-	</div>
+	<body style="height: 100%; visibility:hidden;">
 	</body>
 </html>

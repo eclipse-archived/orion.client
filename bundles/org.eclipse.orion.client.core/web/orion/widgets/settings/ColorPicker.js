@@ -13,12 +13,12 @@
 
 define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/DropDownButton', 'dijit/ColorPalette'], function(require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.ColorPicker", dijit.form.DropDownButton, {
+	dojo.declare("orion.widgets.settings.ColorPicker", dijit.form.DropDownButton, { //$NON-NLS-0$
 	
 		
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
-			console.log( 'ColorPicker setStorageIem' );
+			console.log( 'ColorPicker setStorageIem' ); //$NON-NLS-0$
 		},
 		
 		postCreate: function(){
@@ -31,7 +31,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 				item: this.item,
 				element: this.name,
 				identifier: this.name,
-				setStorageItem: dojo.hitch( this, 'setStorageItem' ),
+				setStorageItem: dojo.hitch( this, 'setStorageItem' ), //$NON-NLS-0$
 				colornode: this,
 
 				onChange: function(color) {
@@ -42,21 +42,21 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 					var ui = this.ui;
 	
 					this.setStorageItem(category, subCategory, element, color, ui);	
-					this.colornode.set('label', "");
+					this.colornode.set('label', ""); //$NON-NLS-0$
 		
-					dojo.style(this.colornode.domNode.firstChild, "background", color);
+					dojo.style(this.colornode.domNode.firstChild, "background", color); //$NON-NLS-0$
 				}
 			});
 			
-			dojo.style(this.domNode.firstChild, "border", "1px solid #AAA");
-			dojo.style(this.domNode.firstChild, "padding", "2px");
-			dojo.style(this.domNode.firstChild, "padding-right", "3px");
-			dojo.style(this.domNode.firstChild, "background", this.setting);
-			dojo.style(this.domNode.firstChild, "height", "12px");
-			dojo.style(this.domNode.firstChild, "width", "12px");
+			dojo.style(this.domNode.firstChild, "border", "1px solid #AAA"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style(this.domNode.firstChild, "padding", "2px"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style(this.domNode.firstChild, "padding-right", "3px"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style(this.domNode.firstChild, "background", this.setting); //$NON-NLS-0$
+			dojo.style(this.domNode.firstChild, "height", "12px"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.style(this.domNode.firstChild, "width", "12px"); //$NON-NLS-1$ //$NON-NLS-0$
 
-			var elements = dojo.query('.dijitArrowButtonInner', this.domNode);
-			dojo.removeClass(elements[0], 'dijitArrowButtonInner');
+			var elements = dojo.query('.dijitArrowButtonInner', this.domNode); //$NON-NLS-0$
+			dojo.removeClass(elements[0], 'dijitArrowButtonInner'); //$NON-NLS-0$
 		}
 		
 	});

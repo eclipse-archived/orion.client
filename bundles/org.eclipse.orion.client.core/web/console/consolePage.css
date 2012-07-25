@@ -1,0 +1,20 @@
+@import "../org.dojotoolkit/dojo/resources/dojo.css";
+@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
+@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
+@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
+@import "../css/ide.css";
+@import "../css/commands.css";
+@import "../css/sections.css";
+@import "../orion/widgets/Console.css";
+
+html,body {
+	height: 100%;
+}
+
+#console-input {
+	font-family: "Courier New", "Lucida Console", monospace;
+	font-size: 13px;
+}
+#console-output {
+	overflow: hidden;
+}

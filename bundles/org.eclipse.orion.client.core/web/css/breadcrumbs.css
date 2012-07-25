@@ -2,6 +2,7 @@
 	font-size: 8pt;
 	text-decoration: none;
 	color: #3087B3;
+	padding-top:2px;
 }
 
 a.breadcrumb:hover {
@@ -15,12 +16,20 @@ a.breadcrumb:visited {
 	color: #3087B3;
 }
 
+.breadcrumbSeparator {
+	font-size: 8pt;
+	text-decoration: none;
+	color: #333;
+	font-weight: bold;
+}
+
 .currentLocation {
 	font-weight: bold;
-	font-size: 10pt;
-	color: #808080;
+	font-size: 8pt;
+	color: #444;
 	text-decoration: none;
 	text-wrap: normal;
+	line-height:10pt;
 }
 
 a.currentLocation:hover {

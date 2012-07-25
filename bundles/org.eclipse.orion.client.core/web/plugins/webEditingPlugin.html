@@ -12,9 +12,9 @@
 <script>
 /*global window eclipse orion */
 window.onload = function() {
-	var provider = new eclipse.PluginProvider();
+	var provider = new orion.PluginProvider();
 	
-	provider.registerServiceProvider("orion.core.contenttype", {}, {
+	provider.registerService("orion.core.contenttype", {}, {
 		contentTypes:
 			// Text types
 			[{	id: "text/plain",
@@ -26,19 +26,19 @@ window.onload = function() {
 				"extends": "text/plain",
 				name: "HTML",
 				extension: ["html", "htm"],
-				image: "../images/wtp/html.gif"
+				image: "../images/html.gif"
 			},
 			{	id: "text/css",
 				"extends": "text/plain",
 				name: "CSS",
 				extension: ["css"],
-				image: "../images/wtp/stylesheet.gif"
+				image: "../images/stylesheet.gif"
 			},
 			{	id: "application/javascript",
 				"extends": "text/plain",
 				name: "JavaScript",
 				extension: ["js"],
-				image: "../images/wtp/javascript.gif"
+				image: "../images/javascript.gif"
 			},
 			{	id: "application/json",
 				"extends": "text/plain",
@@ -89,39 +89,48 @@ window.onload = function() {
 				image: "../images/wtp/image.gif"
 			}]
 		});
+		
+	provider.registerService("orion.navigate.command", {}, {
+		name: "Raw",
+		id: "orion.view.raw",
+		tooltip: "Open the raw file or folder in the browser",
+		uriTemplate: "{OrionHome}{Location}",
+		forceSingleItem: true
+	});
 	
-	provider.registerServiceProvider("orion.edit.editor", {}, {
+	provider.registerService("orion.edit.editor", {}, {
 		id: "orion.editor",
-		name: "Orion Editor",
+		nameKey: "Orion Editor",
+		nls: "orion/nls/messages",
 		uriTemplate: "../edit/edit.html#{Location,params*}",
 		orionTemplate: "../edit/edit.html#{,Location,params*}"});
 	
-	provider.registerServiceProvider("orion.navigate.openWith", {}, {
+	provider.registerService("orion.navigate.openWith", {}, {
 			editor: "orion.editor",
 			contentType: ["text/plain", "text/html", "text/css", "application/javascript", "application/json", "application/xml", "text/x-java-source"]});
 	
-	provider.registerServiceProvider("orion.navigate.openWith.default", {}, {
+	provider.registerService("orion.navigate.openWith.default", {}, {
 			editor: "orion.editor"});
 	
 	// Register content assist providers
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.CssContentAssistProvider(),
 		{	name: "CSS content assist",
 			contentType: ["text/css"]
 		});
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.JavaScriptContentAssistProvider(),
 		{	name: "JavaScript content assist",
 			contentType: ["application/javascript"]
 		});
-	provider.registerServiceProvider("orion.edit.contentAssist",
+	provider.registerService("orion.edit.contentAssist",
 		new orion.editor.HTMLContentAssistProvider(),
 		{	name: "HTML content assist",
 			contentType: ["text/html"]
 		});
 	
 	// Register syntax highlighting
-	provider.registerServiceProvider("orion.edit.highlighter", {},
+	provider.registerService("orion.edit.highlighter", {},
 		{	type: "grammar",
 			contentType: ["text/html"],
 			grammar: new orion.editor.HtmlGrammar()

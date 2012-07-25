@@ -9,14 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
+ /*globals define console setTimeout*/
+define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], function(messages, mAuth, Deferred){
 	
 	function _doServiceCall(operationsService, funcName, funcArgs) {
-		var clientDeferred = new dojo.Deferred();
+		var clientDeferred = new Deferred();
 		operationsService[funcName].apply(operationsService, funcArgs).then(
 			//on success, just forward the result to the client
 			function(result) {
-				clientDeferred.callback(result);
+				clientDeferred.resolve(result);
 			},
 			//on failure we might need to retry
 			function(error) {
@@ -25,16 +26,16 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 						//try again
 						operationsService[funcName].apply(operationsService, funcArgs).then(
 							function(result) {
-								clientDeferred.callback(result);
+								clientDeferred.resolve(result);
 							},
 							function(error) {
-								clientDeferred.errback(error);
+								clientDeferred.reject(error);
 							}
 						);
 					});
 				} else {
 					//forward other errors to client
-					clientDeferred.errback(error);
+					clientDeferred.reject(error);
 				}
 			}
 		);
@@ -42,7 +43,7 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	}
 	
 	function _getOperations(operationsService, options){
-		return _doServiceCall(operationsService, "getOperations", [options]);
+		return _doServiceCall(operationsService, "getOperations", [options]); //$NON-NLS-0$
 	}
 	
 	function NoMatchingOperationsClient(location){
@@ -50,8 +51,8 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	}
 	
 	function returnNoMatchingError(){
-		var result = new dojo.Deferred();
-		result.errback("No Matching OperationService for location:" + this._location);
+		var result = new Deferred();
+		result.reject(messages["No Matching OperationService for location:"] + this._location);
 		return result;
 	}
 	
@@ -70,15 +71,15 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		this._patterns = [];
 		this._operationListeners = [];
 		this._currentLongpollingIds = [];
-		var operationsServices = serviceRegistry.getServiceReferences("orion.core.operation");
+		var operationsServices = serviceRegistry.getServiceReferences("orion.core.operation"); //$NON-NLS-0$
 		for(var i=0; i<operationsServices.length; i++){
 			var servicePtr = operationsServices[i];
 			var operationsService = serviceRegistry.getService(servicePtr);
 			this._services[i] = operationsService;
 			
-			var patternString = operationsServices[i].getProperty("pattern") || ".*";
-			if (patternString[0] !== "^") {
-				patternString = "^" + patternString;
+			var patternString = operationsServices[i].getProperty("pattern") || ".*"; //$NON-NLS-1$ //$NON-NLS-0$
+			if (patternString[0] !== "^") { //$NON-NLS-0$
+				patternString = "^" + patternString; //$NON-NLS-0$
 			}
 			this._patterns[i] = new RegExp(patternString);
 		}
@@ -97,20 +98,9 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	}
 	
 	function _mergeOperations(lists){
-		if(lists.length===1){
-			if(lists[0][0])
-				return lists[0][1];
-			console.error(lists[0][1]);
-			return {Children: []};
-		}
 		var result = {Children: []};
-		for(var i=0; i<lists.length; i++){
-			if(!lists[i][0]){
-				console.error(lists[i][1]);
-				continue;
-			}
-			if(lists[i][1] && lists[i][1].Children)
-				result.Children = result.Children.concat(lists[i][1].Children);
+		for(var i=0; i < lists.length; i++){
+			result.Children = result.Children.concat(lists[i].Children);
 		}
 		return result;
 	}
@@ -121,25 +111,27 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 		if(longpollingId){
 			args.LongpollingId = longpollingId;
 		}
-		_doServiceCall(service, "getOperations", [args]).then(function(result){
+		_doServiceCall(service, "getOperations", [args]).then(function(result){ //$NON-NLS-0$
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
 			listener(result, longpollingId);
 			if(result.LongpollingId){
 				that._currentLongpollingIds.push(result.LongpollingId);
-				dojo.hitch(that, _registerOperationChangeListener)(service, listener, result.LongpollingId);
-			} else
-				dojo.hitch(that, _registerOperationChangeListener)(service, listener, longpollingId);
+				_registerOperationChangeListener.bind(that)(service, listener, result.LongpollingId);
+			} else {
+				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
+			}
 			
 		}, function(error){
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
-			if("timeout"===error.dojoType)				
-				dojo.hitch(that, _registerOperationChangeListener)(service, listener, longpollingId);
-			else
-				setTimeout(function(){dojo.hitch(that, _registerOperationChangeListener)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
+			if("timeout"===error.dojoType) { //$NON-NLS-0$
+				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
+			} else {
+				setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
+			}
 		});
 	}
 	
@@ -151,66 +143,56 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 	
 	OperationsClient.prototype = {
 			getOperations: function(){
-				var result = new dojo.Deferred();
+				var result = new Deferred();
 				var results = [];
-				if(this._services.length<1){
-					result.errback("No operations services registered.");
-					return result;
-				}
+
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i]);
 				}
-				new dojo.DeferredList(results).then(function(lists){
+				new Deferred().all(results).then(function(lists){
 					result.resolve(_mergeOperations(lists));
 				});
 				return result;
 			},
 			getRunningOperations: function(){
-				var result = new dojo.Deferred();
+				var result = new Deferred();
 				var results = [];
-				if(this._services.length<1){
-					result.errback("No operations services registered.");
-					return result;
-				}
+
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i], {RunningOnly: true});
 				}
-				new dojo.DeferredList(results).then(function(lists){
+				new Deferred().all(results).then(function(lists){
 					result.resolve(_mergeOperations(lists));
 				});
 				return result;
 			},
 			getOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments); //$NON-NLS-0$
 			},
 			removeCompletedOperations: function(){
 				var results = [];
-				if(this._services.length<1){
-					result.errback("No operations services registered.");
-					return result;
-				}
 				for(var i=0; i<this._services.length; i++){
-					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations");
+					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations"); //$NON-NLS-0$
 				}
-				return new dojo.DeferredList(results);
+				return new Deferred().all(results);
 			},
 			
 			removeOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "removeOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "removeOperation", arguments); //$NON-NLS-0$
 			},
 			
 			cancelOperation: function(operationLocation){
-				return _doServiceCall(this._getService(operationLocation), "cancelOperation", arguments);
+				return _doServiceCall(this._getService(operationLocation), "cancelOperation", arguments); //$NON-NLS-0$
 			},
 	
 			addOperationChangeListener: function(listener){
 				this._operationListeners.push(listener);
 				if(this._operationListeners.length===1){
 					if(this._services.length<1){
-						throw "No operations services registered.";
+						throw messages["No operations services registered."];
 					}
 					for(var i=0; i<this._services.length; i++){
-						dojo.hitch(this, _registerOperationChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
+						_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));
 					}
 				}
 			},
@@ -231,10 +213,10 @@ define(["dojo", "orion/auth", "dojo/DeferredList"], function(dojo, mAuth){
 			resetChangeListeners: function(){
 				this._currentLongpollingIds = [];
 				if(this._services.length<1){
-					throw "No operations services registered.";
+					throw messages['No operations services registered.'];
 				}
 				for(var i=0; i<this._services.length; i++){
-					dojo.hitch(this, _registerOperationChangeListener)(this._services[i], dojo.hitch(this, _notifyChangeListeners));
+					_registerOperationChangeListener.bind(this)(this._services[i], _notifyChangeListeners.bind(this));
 				}
 			}
 	};

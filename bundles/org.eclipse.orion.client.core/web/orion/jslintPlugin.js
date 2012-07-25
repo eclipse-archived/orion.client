@@ -13,8 +13,8 @@
 /*global eclipse JSLINT require window*/
 window.onload = function() {
 	function jslint(contents) {
-		JSLINT(contents, {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, newcap: true, nomen: false,
-				onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false});
+		JSLINT(contents, {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true,
+				nomen: false, onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false});
 		return JSLINT.data();
 	}
 	
@@ -191,13 +191,14 @@ window.onload = function() {
 			}
 	};
 	
-	var provider = new eclipse.PluginProvider();
-	provider.registerServiceProvider("orion.edit.validator", validationService, {
+	var provider = new orion.PluginProvider();
+	provider.registerService("orion.edit.validator", validationService, {
 		contentType: ["application/javascript", "text/html"]
 	});
-	provider.registerServiceProvider("orion.edit.outliner", outlineService, {
+	provider.registerService("orion.edit.outliner", outlineService, {
 		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
-		name: "Flat outline",
+		nameKey: "Flat outline",
+		nls: "orion/editor/nls/messages",
 		id: "orion.edit.outliner.jslint"
 	});
 	//validationService.dispatchEvent = serviceProvider.dispatchEvent;

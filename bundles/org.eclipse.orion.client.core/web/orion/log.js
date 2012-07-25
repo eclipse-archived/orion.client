@@ -11,7 +11,7 @@
 
 /*global define window */
 
-define(["dojo"], function(dojo){
+define(['i18n!orion/nls/messages', "dojo"], function(messages, dojo){
 
 var exports = {};
 
@@ -22,7 +22,7 @@ var exports = {};
  */
 exports.LogService = function(serviceRegistry) {
 	this._serviceRegistry = serviceRegistry;
-	this._serviceRegistration = serviceRegistry.registerService("orion.core.log", this);
+	this._serviceRegistration = serviceRegistry.registerService("orion.core.log", this); //$NON-NLS-0$
 };
  
 exports.LogService.prototype = /** @lends orion.log.LogService.prototype */ {
@@ -33,7 +33,7 @@ exports.LogService.prototype = /** @lends orion.log.LogService.prototype */ {
 	info : function(message) {
 		// TODO temporary implementation uses status line
 		// obviously not the real answer
-		this._serviceRegistry.getService("orion.page.message").setMessage("LOG: " + message);
+		this._serviceRegistry.getService("orion.page.message").setMessage(messages["LOG: "] + message); //$NON-NLS-0$
 	}
 };
 

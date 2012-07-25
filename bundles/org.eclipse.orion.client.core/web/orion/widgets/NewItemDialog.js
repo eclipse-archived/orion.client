@@ -12,7 +12,7 @@
 /*jslint browser:true*/
 
 
-define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(dojo, dijit) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/CheckBox', 'dijit/form/Form', 'dijit/form/ValidationTextBox', 'dojo/data/ItemFileReadStore',  'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/NewItemDialog.html'], function(messages, dojo, dijit) {
 
 /**
  * @param options {{ 
@@ -22,9 +22,9 @@ define(['dojo', 'dijit', 'dijit/Dialog', 'dijit/form/CheckBox', 'dijit/form/Chec
  *     [advanced]: boolean  // Whether to show advanced controls. Default is false
  * }}
  */
-dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], {
+dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], { //$NON-NLS-0$
 	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'widgets/templates/NewItemDialog.html'),
+	templateString: dojo.cache('orion', 'widgets/templates/NewItemDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	constructor : function() {
 		//this.inherited(arguments);
@@ -33,18 +33,18 @@ dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionD
 	},
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.itemNameLabelText = this.options.label || "Name:";
+		this.itemNameLabelText = this.options.label || messages['Name:'];
 	},
 	postCreate: function() {
 		this.inherited(arguments);
 
 		if (this.options.advanced) {
-			this.itemAdvancedInfo.style.display = "table-row";
-			this.itemAdvancedInfo1.style.display = "table-row";
-			dojo.connect(this.itemURL, "onkeyup", null, dojo.hitch(this, this.onURLChange));
+			this.itemAdvancedInfo.style.display = "table-row"; //$NON-NLS-0$
+			this.itemAdvancedInfo1.style.display = "table-row"; //$NON-NLS-0$
+			dojo.connect(this.itemURL, "onkeyup", null, dojo.hitch(this, this.onURLChange)); //$NON-NLS-0$
 		} else {
-			this.itemAdvancedInfo.style.display = "none";
-			this.itemAdvancedInfo1.style.display = "none";
+			this.itemAdvancedInfo.style.display = "none"; //$NON-NLS-0$
+			this.itemAdvancedInfo1.style.display = "none"; //$NON-NLS-0$
 		}
 	},
 
@@ -54,26 +54,26 @@ dojo.declare("orion.widgets.NewItemDialog", [dijit.Dialog, orion.widgets._OrionD
 		this.newItemButton.focus();
 		if (this.options.advanced) {
 			url = this.itemURL.value.replace(/^\s+|\s+$/g, '');
-			if (this.createCheckbox.get('disabled')) {
+			if (this.createCheckbox.get('disabled')) { //$NON-NLS-0$
 				create = false;
 			} else {
-				create = this.createCheckbox.get('checked');
+				create = this.createCheckbox.get('checked'); //$NON-NLS-0$
 			}
 		}
 		this.options.func(this.itemName.value, (url && url !== "") ? url : undefined, create);
 	},
 	onURLChange : function(evt) {
 		var url = this.itemURL.value;
-		if (url.match(new RegExp("^file://"))) {
-			this.createCheckbox.set('disabled', false);
+		if (url.match(new RegExp("^file://"))) { //$NON-NLS-0$
+			this.createCheckbox.set('disabled', false); //$NON-NLS-0$
 			return;
 		}
-		var remoteRegExp = new RegExp('^[a-zA-Z][a-zA-Z]+\:\/\/.+');
+		var remoteRegExp = new RegExp('^[a-zA-Z][a-zA-Z]+\:\/\/.+'); //$NON-NLS-0$
 		if (url.match(remoteRegExp)) {
-			this.createCheckbox.set('disabled', true);
+			this.createCheckbox.set('disabled', true); //$NON-NLS-0$
 			return;
 		} else {
-			this.createCheckbox.set('disabled', false);
+			this.createCheckbox.set('disabled', false); //$NON-NLS-0$
 			return;
 		}
 	}

@@ -15,51 +15,56 @@
 /*
  * Glue code for site.html
  */
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/siteService', 'orion/siteCommands', 'orion/siteTree', 'orion/treetable', 'orion/PageUtil',
+define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/PageUtil',
 	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
-	function(dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteService, mSiteCommands, mSiteTree, mTreeTable, PageUtil) {
+	function(messages, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteClient, mSiteCommands, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible";
+			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 			
-			// Register services
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		
-			var fileClient = new mFileClient.FileClient(serviceRegistry, function(reference) {
-				var pattern = reference.getProperty("pattern");
-				return pattern && pattern.indexOf("/") === 0;
-			});
-			var siteService = new mSiteService.SiteService(serviceRegistry);
+			var siteLocation = PageUtil.matchResourceParameters().resource;
+			var siteClient = mSiteClient.forLocation(serviceRegistry, siteLocation);
+			var fileClient = siteClient._getFileClient();
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
-			
+			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+
 			var updateTitle = function() {
-				var editor = dijit.byId("site-editor");
+				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
 				var site = editor && editor.getSiteConfiguration();
 				if (editor && site) {
-					var location = dojo.byId("location");
-					dojo.place(document.createTextNode(site.Name), location, "only");
-					document.title = site.Name + (editor.isDirty() ? "* " : "") + " - Edit Site";
-					mUtil.forceLayout(location);
+					var item = 	{};
+					item.Parents = [];
+					item.Name = site.Name;
+					item.Parents[0] = {};
+					item.Parents[0].Name = "Sites";
+					item.Parents[0].Location = "";
+					mGlobalCommands.setPageTarget({task: "Edit Site", target: site, breadcrumbTarget: item,
+						makeBreadcrumbLink: function(seg, location){
+							seg.href = "/sites/sites.html"; //$NON-NLS-0$
+						},
+						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService
+					});
+					mGlobalCommands.setDirtyIndicator(editor.isDirty());
 				}
 			};
 			
 			var onHashChange = function() {
 				var params = PageUtil.matchResourceParameters();
 				var resource = params.resource;
-				var editor = dijit.byId("site-editor");
+				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
 				if (resource && resource !== editor.getResource()) {
-					var doit = !editor.isDirty() || confirm("There are unsaved changes. Do you still want to navigate away?");
+					var doit = !editor.isDirty() || confirm(messages['There are unsaved changes. Do you still want to navigate away?']);
 					if (doit) {
 						editor.load(resource).then(
 							function() {
@@ -68,7 +73,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 					}
 				}
 			};
-			dojo.subscribe("/dojo/hashchange", null, onHashChange);
+			dojo.subscribe("/dojo/hashchange", null, onHashChange); //$NON-NLS-0$
 			
 			// Initialize the widget
 			var widget;
@@ -76,39 +81,31 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/comm
 				widget = new orion.widgets.SiteEditor({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
-					siteService: siteService,
+					siteClient: siteClient,
 					commandService: commandService,
 					statusService: statusService,
 					progressService: progressService,
-					commandsContainer: dojo.byId("pageActions"),
-					id: "site-editor"});
-				dojo.place(widget.domNode, dojo.byId("site"), "only");
+					commandsContainer: dojo.byId("pageActions"), //$NON-NLS-0$
+					id: "site-editor"}); //$NON-NLS-0$
+				dojo.place(widget.domNode, dojo.byId("site"), "only"); //$NON-NLS-1$ //$NON-NLS-0$
 				widget.startup();
 				
-				dojo.connect(widget, "onSuccess", updateTitle);
-				dojo.connect(widget, "setDirty", updateTitle);
+				dojo.connect(widget, "onSuccess", updateTitle); //$NON-NLS-0$
+				dojo.connect(widget, "setDirty", updateTitle); //$NON-NLS-0$
 				
 				onHashChange();
 			}());
 			
 			window.onbeforeunload = function() {
 				if (widget.isDirty()) {
-					return "There are unsaved changes.";
+					return messages['There are unsaved changes.'];
 				}
 			};
-			
-			// Hook up commands stuff
-			var refresher = dojo.hitch(widget, widget._setSiteConfiguration);
-			var errorHandler = dojo.hitch(statusService, statusService.setProgressResult);
-			mSiteCommands.createSiteCommands(serviceRegistry, {
-				startCallback: refresher,
-				stopCallback: refresher,
-				errorCallback: errorHandler
-			});
-			commandService.registerCommandContribution("pageActions", "orion.site.start", 1);
-			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2);
-			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3);
-			commandService.registerCommandContribution("pageActions", "orion.site.save", 4);
+
+			mSiteCommands.createSiteCommands(serviceRegistry);
+			commandService.registerCommandContribution("pageActions", "orion.site.start", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3); //$NON-NLS-1$ //$NON-NLS-0$
 		});
 	});
 });

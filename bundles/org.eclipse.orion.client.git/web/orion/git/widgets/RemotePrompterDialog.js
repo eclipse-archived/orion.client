@@ -11,7 +11,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['dojo', 'dijit', 'orion/util', 'orion/explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(dojo, dijit, mUtil, mExplorer) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'orion/util', 'orion/explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(messages, dojo, dijit, mUtil, mExplorer) {
 
 /**
 * @param options {{
@@ -19,11 +19,11 @@ define(['dojo', 'dijit', 'orion/util', 'orion/explorer', 'dijit/Dialog', 'dijit/
 	}}
  */
  
-dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], {
+dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 	treeWidget : null,
 	treeRoot : {},
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'git/widgets/templates/RemotePrompterDialog.html'),
+	templateString : dojo.cache('orion', 'git/widgets/templates/RemotePrompterDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	constructor : function() {
 		this.inherited(arguments);
 		this.options = arguments[0] || {};
@@ -32,17 +32,17 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	
 	postMixInProperties : function() {
 		this.inherited(arguments);
-		this.title = this.options.title || "Choose a Folder";
-		this.newBranchText = "New Branch:";
-		this.buttonOk = "OK";	
+		this.title = this.options.title || messages['Choose a Folder'];
+		this.newBranchText = messages["New Branch:"];
+		this.buttonOk = messages["OK"];	
 	},
 	
 	postCreate : function() {
 		this.inherited(arguments);
 		this.loadRemoteChildren(this.treeRoot);
-		dojo.connect(this.newBranch, "onchange", dojo.hitch(this, this.validate));
+		dojo.connect(this.newBranch, "onchange", dojo.hitch(this, this.validate)); //$NON-NLS-0$
 		if(this.options.hideNewBranch){
-			this.newBranchSection.style.display = "none";
+			this.newBranchSection.style.display = "none"; //$NON-NLS-0$
 		}
 	},
 	
@@ -55,32 +55,32 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	createTree : function(myTreeModel){
 		
 		this.treeWidget = new orion.widgets.ExplorerTree({
-			style: "width:100%; height:100%",
+			style: "width:100%; height:100%", //$NON-NLS-0$
 			model: myTreeModel,
-			region: "center",
+			region: "center", //$NON-NLS-0$
 			showRoot: false,
 			persist: true, // remember expanded state
 			openOnClick: false,
 			getLabel: function(item) {
-				if(item.Type === "RemoteTrackingBranch" && !item.Id){
-					return item.Name + " [New branch]";
+				if(item.Type === "RemoteTrackingBranch" && !item.Id){ //$NON-NLS-0$
+					return item.Name + messages[" [New branch]"];
 				}
 				return item.Name;
 			},
 			getIconClass: function(/* dojo.data.Item */ item, /* Boolean */ opened){
 				if (item.BranchLocation && item.RemoteLocation) {
-					return "gitRepoItem";
+					return "gitRepoItem"; //$NON-NLS-0$
 				}
 				if(item.GroupNode){
-					return item.Name==="Branch" ? "gitBranchesItem" : "gitRemotesItem";
+					return item.Name==="Branch" ? "gitBranchesItem" : "gitRemotesItem"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
-				if(item.Type === "Branch" || item.Type === "RemoteTrackingBranch"){
-					return "gitBranchItem";
+				if(item.Type === "Branch" || item.Type === "RemoteTrackingBranch"){ //$NON-NLS-1$ //$NON-NLS-0$
+					return "gitBranchItem"; //$NON-NLS-0$
 				}
-				if(item.Type === "Remote"){
-					return "gitRemoteItem";
+				if(item.Type === "Remote"){ //$NON-NLS-0$
+					return "gitRemoteItem"; //$NON-NLS-0$
 				}
-				return "gitDefaultItem";
+				return "gitDefaultItem"; //$NON-NLS-0$
 							
 			}
 		});	
@@ -92,7 +92,7 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 		
 		this.treeWidget._selectNode = function(/**dijit._TreeNode*/ node) {
 			tree._inheritedSelectNode(node);
-			if(node.item && node.item.Type==="Remote"){
+			if(node.item && node.item.Type==="Remote"){ //$NON-NLS-0$
 				self.newBranch.disabled = false;
 			}else{
 				self.newBranch.disabled = true;
@@ -107,12 +107,12 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 	
 	validate : function(){
 		var selectedItems = this.treeWidget.getSelectedItems();
-		if(selectedItems.length==1){
-			if(selectedItems[0].Type==="RemoteTrackingBranch"){
+		if(selectedItems.length===1){
+			if(selectedItems[0].Type==="RemoteTrackingBranch"){ //$NON-NLS-0$
 				this.RemoteBrowserButton.disabled = false;
 				return;
-			}else if(selectedItems[0].Type==="Remote"){
-				if(this.newBranch.value!=""){
+			}else if(selectedItems[0].Type==="Remote"){ //$NON-NLS-0$
+				if(this.newBranch.value!==""){
 					this.RemoteBrowserButton.disabled = false;
 					return;
 				}
@@ -125,10 +125,17 @@ dojo.declare("orion.git.widgets.RemotePrompterDialog", [ dijit.Dialog, orion.wid
 		var selectedItems = this.treeWidget.getSelectedItems();
 		this.onHide();
 		if(this.options.func){
-			if(selectedItems[0].Type==="RemoteTrackingBranch"){
+			if(selectedItems[0].Type==="RemoteTrackingBranch"){ //$NON-NLS-0$
 				this.options.func(selectedItems[0], selectedItems[0].parent);
 			}else{
-				this.options.func(null, selectedItems[0], this.newBranch.value);
+				var id = selectedItems[0].CloneLocation.split("/")[4];
+				var newBranchObject = new Object();
+				newBranchObject.parent = selectedItems[0];
+				newBranchObject.FullName = "refs/remotes/" + selectedItems[0].Name + "/" + this.newBranch.value;
+				newBranchObject.Name = selectedItems[0].Name + "/" + this.newBranch.value;
+				newBranchObject.Type = "RemoteTrackingBranch";
+				newBranchObject.Location=  "/gitapi/remote/" + selectedItems[0].Name + "/" + this.newBranch.value + "/file/" + id;
+				this.options.func(null, selectedItems[0], newBranchObject);
 			}
 		}
 		delete this.options.func; //prevent performing this action twice (IE)
@@ -172,7 +179,7 @@ var GitClonesModel = function() {
 		else if (item.GroupNode){
 			return true;
 		}
-		else if (item.Type === "Remote"){
+		else if (item.Type === "Remote"){ //$NON-NLS-0$
 			return true;
 		}
 		return false;
@@ -185,7 +192,7 @@ var GitClonesModel = function() {
 			// remove all non valid chars to make a dom id. 
 			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
 		} else {
-			result = "ROOT";
+			result = "ROOT"; //$NON-NLS-0$
 		}
 		return result;
 	};
@@ -203,20 +210,20 @@ var GitClonesModel = function() {
 		}
 		else if (parentItem.BranchLocation && parentItem.RemoteLocation){
 					parentItem.children = [ {
-						GroupNode : "true",
+						GroupNode : "true", //$NON-NLS-0$
 						Location : parentItem.BranchLocation,
-						Name : "Branches",
+						Name : "Branches", //$NON-NLS-0$
 						parent : parentItem
 					}, {
-						GroupNode : "true",
+						GroupNode : "true", //$NON-NLS-0$
 						Location : parentItem.RemoteLocation,
 						BranchLocation : parentItem.BranchLocation,
-						Name : "Remotes",
+						Name : "Remotes", //$NON-NLS-0$
 						parent : parentItem
 					}, {
-						GroupNode: "true",
+						GroupNode: "true", //$NON-NLS-0$
 						Location: parentItem.TagLocation,
-						Name: "Tags",
+						Name: "Tags", //$NON-NLS-0$
 						parent: parentItem
 					} ]; 
 			onComplete(parentItem.children);
@@ -232,7 +239,7 @@ var GitClonesModel = function() {
 				})
 			);
 		}
-		else if (parentItem.Type === "Remote"){
+		else if (parentItem.Type === "Remote"){ //$NON-NLS-0$
 			this.gitClient.getGitBranch(parentItem.Location).then( 
 				dojo.hitch(this, function(children) {
 					parentItem.children = children.Children;

@@ -14,25 +14,27 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder'], function(require, dojo, dijit, mUtil, mCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, PageUtil) {
 
-	dojo.declare("orion.widgets.settings.SplitSelectionLayout", [dijit._Widget, dijit._Templated], {
+	dojo.declare("orion.widgets.settings.SplitSelectionLayout", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 
 		widgetsInTemplate: true,
 
-		templateString: '<div style="height:100%;">' + 
-							'<div data-dojo-type="dijit.layout.BorderContainer" style="height:100%;" data-dojo-props="design:\'heading\', gutters:false, liveSplitters:false">' + 
-								'<div class="auxpane" id="categories" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:\'leading\', splitter:false"  style="width: 150px;">' + 
-									'<div id="categoryNode">' + '<h1 id="content-title">Categories</h1>' + 
-										'<ul class="navbar" data-dojo-attach-point="navbar" role="tablist" aria-labelledby="content-title"></ul>' + 
-									'</div>' + 
-								'</div>' +
-								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'">' + 
-									'<div data-dojo-attach-point="mainNode" class="settings" role="tabpanel">' + 
-									'<div data-dojo-attach-point="table" class="displayTable">' + 
-								'</div>' + 
-							'</div>' + 
-						'</div>',
+		templateString: '<div style="height:100%;">' +  //$NON-NLS-0$
+							'<div data-dojo-type="dijit.layout.BorderContainer" style="height:100%;" data-dojo-props="design:\'heading\', gutters:false, liveSplitters:false">' +  //$NON-NLS-0$
+								'<div class="auxpane" id="categories" data-dojo-type="dijit.layout.ContentPane" data-dojo-props="region:\'leading\', splitter:false"  style="width: 150px;">' +  //$NON-NLS-0$
+									'<div id="categoryNode" class="auxPadding" style="padding-left:0;padding-top:10px;">' + 
+										'<ul class="navbar" data-dojo-attach-point="navbar" role="tablist" aria-labelledby="content-title"></ul>' +  //$NON-NLS-0$
+									'</div>' +  //$NON-NLS-0$
+								'</div>' + //$NON-NLS-0$
+								'<div data-dojo-type="dijit.layout.ContentPane" class="mainpane"  data-dojo-props="region:\'center\'">' +  //$NON-NLS-0$
+//								'<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">' +
+									'<div data-dojo-attach-point="mainNode" class="settings" role="tabpanel">' +  //$NON-NLS-0$
+									'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
+//								'</div>' +  //$NON-NLS-0$
+							'</div>' +  //$NON-NLS-0$
+							'<div id="pageToolbar" style="display:none"/>' +
+						'</div>', //$NON-NLS-0$
 
 		itemToIndexMap: null,
 
@@ -44,7 +46,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 			this.itemToIndexMap = {};
 			this.manageDefaultData(this.initialSettings);
 			this.drawUserInterface(this.initialSettings);
-			dojo.subscribe("/dojo/hashchange", this, "processHash");
+			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 
 		// The knowledge that "pageActions" is the toolbar is something only "page glue" code should know.
@@ -67,7 +69,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 			var category = this.initialSettings[settingsIndex].category;
 
-			dojo.create("h1", {
+			dojo.create("h1", { //$NON-NLS-0$
 				id: category,
 				innerHTML: category
 			}, this.table);
@@ -77,7 +79,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 
 
 		addCategory: function(item, index) {
-			dojo.create("li", item, this.navbar);
+			dojo.create("li", item, this.navbar); //$NON-NLS-0$
 			this.itemToIndexMap[item.id] = index;
 		},
 
@@ -85,15 +87,15 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 		selectCategory: function(id) {
 
 			if (this.selectedCategory) {
-				dojo.removeClass(this.selectedCategory, "navbar-item-selected");
-				dojo.attr(this.selectedCategory, "aria-selected", "false");
+				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+				dojo.attr(this.selectedCategory, "aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
 				this.selectedCategory.tabIndex = -1;
 			}
 
 			this.selectedCategory = dojo.byId(id);
-			dojo.addClass(this.selectedCategory, "navbar-item-selected");
-			dojo.attr(this.selectedCategory, "aria-selected", "true");
-			dojo.attr(this.mainNode, "aria-labelledby", id);
+			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 			this.updateToolbar(id);
@@ -108,28 +110,28 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageU
 				var item = {
 					innerHTML: settings[count].category,
 					id: itemId,
-					"class": 'navbar-item',
-					role: "tab",
+					"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
+					role: "tab", //$NON-NLS-0$
 					tabindex: -1,
-					"aria-selected": "false",
-					onclick: dojo.hitch( this, "selectCategory", itemId )
+					"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
+					onclick: dojo.hitch( this, "selectCategory", itemId ) //$NON-NLS-0$
 				};
 
 				this.addCategory(item, count);
 			}
 			
 			var that = this;
-			dojo.connect(this.navbar, "onkeypress", function(evt) {
+			dojo.connect(this.navbar, "onkeypress", function(evt) { //$NON-NLS-0$
 				if (evt.keyCode === dojo.keys.LEFT_ARROW || evt.keyCode === dojo.keys.UP_ARROW) {
 					if (that.selectedCategory.previousSibling) {
-						var click = document.createEvent("MouseEvents");
-						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+						var click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
 						that.selectedCategory.previousSibling.dispatchEvent(click);
 					}
 				} else if (evt.keyCode === dojo.keys.RIGHT_ARROW || evt.keyCode === dojo.keys.DOWN_ARROW) {
 					if (that.selectedCategory.nextSibling) {
-						var click = document.createEvent("MouseEvents");
-						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+						var click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
 						that.selectedCategory.nextSibling.dispatchEvent(click);
 					}
 				}

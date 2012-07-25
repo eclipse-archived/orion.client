@@ -23,14 +23,14 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		document.body.style.visibility = "visible";
+		document.body.style.visibility = "visible"; //$NON-NLS-0$
 		dojo.parser.parse();
 
 		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea");
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		new mProgress.ProgressService(serviceRegistry, operationsClient);
 
 		// ...
@@ -40,59 +40,42 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 
-		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands");
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer);
+		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 
 		// define commands
-		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools");
-		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient);
+		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
+		mGitCommands.createGitClonesCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", fileClient); //$NON-NLS-1$ //$NON-NLS-0$
 
 		// define the command contributions - where things appear, first the groups
-		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100);
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup");
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true));
+		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// object contributions
-		commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000);
-		
-		var showDiffCommand = new mCommands.Command({
-			name: messages["Compare"],
-			tooltip: messages["View the side-by-side compare"],
-			imageClass: "git-sprite-open_compare",
-			spriteClass: "gitCommandSprite",
-			id: "eclipse.orion.git.diff.showFullCompare",
-			hrefCallback: function(data) {
-				return require.toUrl("compare/compare.html") +"?readonly#" + data.items.DiffLocation;
-			},
-			visibleWhen: function(item) {
-				return item.Type === "Diff";
-			}
-		});		
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeTag", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 
-		commandService.addCommand(showDiffCommand);
-		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showFullCompare", 1000);
-		
-		showDiffCommand = new mCommands.Command({
+		var showDiffCommand = new mCommands.Command({
 			name: messages["Working Directory Version"],
 			tooltip: messages["View the working directory version of the file"],
-			imageClass: "git-sprite-open_compare",
-			spriteClass: "gitCommandSprite",
-			id: "eclipse.orion.git.diff.showCurrent",
+			imageClass: "git-sprite-open_compare", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			id: "eclipse.orion.git.diff.showCurrent", //$NON-NLS-0$
 			hrefCallback: function(data) {
-				return require.toUrl("edit/edit.html") +"#" + data.items.ContentLocation;
+				return require.toUrl("edit/edit.html") +"#" + data.items.ContentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen: function(item) {
-				return item.Type === "Diff";
+				return item.Type === "Diff"; //$NON-NLS-0$
 			}
 		});		
 
 		commandService.addCommand(showDiffCommand);
-		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000);	
+		commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.diff.showCurrent", 2000);	 //$NON-NLS-1$ //$NON-NLS-0$
 
 		explorer.display(dojo.hash());
 
 		//every time the user manually changes the hash, we need to load the commit with that name
-		dojo.subscribe("/dojo/hashchange", explorer, function() {
+		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
 			explorer.display(dojo.hash());
 		});
 	});

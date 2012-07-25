@@ -12,8 +12,8 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
-		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/OpenCommitDialog.html'], function(require, dojo, dijit, mUtil) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/OpenCommitDialog.html'], function(messages, require, dojo, dijit, mUtil) {
 
 /**
  * Usage: <code>new orion.git.widgets.OpenCommitDialog(options).show();</code>
@@ -21,10 +21,10 @@ define(['require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/Te
  * @name orion.git.widgets.OpenCommitDialog
  * @class A dialog that searches for commits by name.
  */
-var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin],
+var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], //$NON-NLS-0$
 		/** @lends orion.git.widgets.OpenCommitDialog.prototype */ {
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'git/widgets/templates/OpenCommitDialog.html'),
+	templateString : dojo.cache('orion', 'git/widgets/templates/OpenCommitDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	SEARCH_DELAY: 500,
 	timeoutId: null,
@@ -40,12 +40,12 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 
 		this.serviceRegistry = this.options.serviceRegistry;
 		if (!this.serviceRegistry) {
-			throw new Error("Missing required argument: serviceRegistry");
+			throw new Error("Missing required argument: serviceRegistry"); //$NON-NLS-0$
 		}
 		
 		this.repositories = this.options.repositories;
 		if (!this.repositories) {
-			throw new Error("Missing required argument: repositories");
+			throw new Error("Missing required argument: repositories"); //$NON-NLS-0$
 		}
 		
 		this.commitName = this.options.commitName;
@@ -53,35 +53,35 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || "Find Commit";
-		this.selectFile = "Type the commit name (sha1):";
-		this.searchPlaceHolder = "Search";
+		this.options.title = this.options.title || messages["Find Commit"];
+		this.selectFile = messages["Type the commit name (sha1):"];
+		this.searchPlaceHolder = messages["Search"];
 		this.inherited(arguments);
 	},
 	
 	/** @private */
 	postCreate: function() {
 		this.inherited(arguments);
-		dojo.connect(this.resourceName, "onChange", this, function(evt) {
+		dojo.connect(this.resourceName, "onChange", this, function(evt) { //$NON-NLS-0$
 			this.time = +new Date();
 			clearTimeout(this.timeoutId);
 			this.timeoutId = setTimeout(dojo.hitch(this, this.checkSearch), 0);
 		});
-		dojo.connect(this.resourceName, "onKeyPress", this, function(evt) {
+		dojo.connect(this.resourceName, "onKeyPress", this, function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === dojo.keys.ENTER && this.results) {
-				var links = dojo.query("a", this.results);
+				var links = dojo.query("a", this.results); //$NON-NLS-0$
 				if (links.length > 0) {
 					window.open(links[0].href);
 					this.hide();
 				}
 			}
 		});
-		dojo.connect(this, "onMouseUp", function(e) {
+		dojo.connect(this, "onMouseUp", function(e) { //$NON-NLS-0$
 			// WebKit focuses <body> after link is clicked; override that
 			e.target.focus();
 		});
 		
-		this.resourceName.set("value", this.commitName);
+		this.resourceName.set("value", this.commitName); //$NON-NLS-0$
 	},
 	
 	/** @private */
@@ -92,7 +92,7 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			this.time = now;
 			this.doSearch();
 		} else {
-			this.timeoutId = setTimeout(dojo.hitch(this, "checkSearch"), 50);
+			this.timeoutId = setTimeout(dojo.hitch(this, "checkSearch"), 50); //$NON-NLS-0$
 		}
 	},
 	
@@ -102,8 +102,8 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			deferred = new dojo.Deferred();
 		
 		if (repositories.length > 0) {
-			that.serviceRegistry.getService("orion.git.provider").doGitLog(
-				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1").then(
+			that.serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
+				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1").then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
 					deferred.callback(resp.Children[0]);
 				},
@@ -120,14 +120,14 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 	
 	/** @private */
 	doSearch: function() {
-		var text = this.resourceName && this.resourceName.get("value");
+		var text = this.resourceName && this.resourceName.get("value"); //$NON-NLS-0$
 
 		// don't do a server-side query for an empty text box
 		if (text) {
-			dojo.place("<div>Searching&#x2026;</div>", this.results, "only");
+			dojo.place("<div>"+messages["Searching&#x2026;"]+"</div>", this.results, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 			var that = this;
 			
-			this.serviceRegistry.getService("orion.page.message").setProgressMessage("Looking for the commit");
+			this.serviceRegistry.getService("orion.page.message").setProgressMessage(messages["Looking for the commit"]); //$NON-NLS-0$
 			this._findCommitLocation(this.repositories, text).then(
 				function(resp){
 					var commit = resp;
@@ -135,56 +135,56 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 					that.displayCommit(commit, that.results);
 				},
 				function(error) {
-					dojo.place("<div>No commits found</div>", that.results, "only");
-					that.serviceRegistry.getService("orion.page.message").setProgressMessage("");
+					dojo.place("<div>"+"No commits found"+"</div>", that.results, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					that.serviceRegistry.getService("orion.page.message").setProgressMessage(""); //$NON-NLS-0$
 				}
 			);
 		}
 	},
 	
 	displayCommit: function(commit, parentNode){	
-		var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, parentNode);
+		var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, parentNode); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
-		var link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode);
+		var link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dojo.place(document.createTextNode(commitMessage0), link);
 		
-		dojo.connect(link, "onclick", link, dojo.hitch(this, function() {
+		dojo.connect(link, "onclick", link, dojo.hitch(this, function() { //$NON-NLS-0$
 			this.hide();
 		}));
 
-		dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
-		dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: " commit: " + commit.Name}, tableNode );
+		dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: messages[' commit: '] + commit.Name}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		if (commit.Parents && commit.Parents.length > 0){
-			dojo.create( "div", null, tableNode );
+			dojo.create( "div", null, tableNode ); //$NON-NLS-0$
 			
-			dojo.place(document.createTextNode("parent: "), tableNode);
-			var parentLink = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode);
+			dojo.place(document.createTextNode(messages['parent: ']), tableNode);
+			var parentLink = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(commit.Parents[0].Name), parentLink);
 			
-			dojo.connect(parentLink, "onclick", parentLink, dojo.hitch(this, function() {
+			dojo.connect(parentLink, "onclick", parentLink, dojo.hitch(this, function() { //$NON-NLS-0$
 				this.hide();
 			}));
 		}
 
-		dojo.create( "div", {"style":"padding-top:15px"}, tableNode );
+		dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		if (commit.AuthorImage) {
-			var authorImage = dojo.create("span", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode);
+			var authorImage = dojo.create("span", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var image = new Image();
 			image.src = commit.AuthorImage;
 			image.name = commit.AuthorName;
 			image.width = 35;
 			image.height = 35;
-			dojo.place(image, authorImage, "first");
+			dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 		}
 		
-		dojo.create( "span", { "class":"gitSecondaryDescription", 
-			innerHTML: " authored by " + commit.AuthorName + " (" + commit.AuthorEmail
-			+ ") on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, tableNode );
-		dojo.create( "div", null, tableNode );
-		dojo.create( "span", { "class":"gitSecondaryDescription", 
-			innerHTML: "committed by " + commit.CommitterName  + " (" + commit.CommitterEmail + ")"}, tableNode );
+		dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			innerHTML: dojo.string.substitute(messages[" authored by ${0} (${1})) on ${2}"], [commit.AuthorName , commit.AuthorEmail,
+			dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})])}, tableNode ); //$NON-NLS-0$
+		dojo.create( "div", null, tableNode ); //$NON-NLS-0$
+		dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			innerHTML: dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail])}, tableNode );
 	},
 	
 	/**

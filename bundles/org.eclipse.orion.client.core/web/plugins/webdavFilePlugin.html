@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
+	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011,2012." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script type="text/javascript" src="filePlugin/webdavImpl.js"></script>
 	<script type="text/javascript">
+		/*global window console dojo eclipse */
+		/*jslint browser:true*/
 		window.onload = function() {
 			function trace(implementation) {
 				var method;
@@ -35,13 +37,29 @@
 			temp.href = ".";
 			var base = temp.href;			
 			var service = new eclipse.DAVFileServiceImpl(base);
-			var provider = new eclipse.PluginProvider();
-			provider.registerServiceProvider("orion.core.file", service, {Name:'WebDAV contents', top:base, pattern:base});
-			service.dispatchEvent = provider.dispatchEvent;
+			var provider = new orion.PluginProvider();
+			provider.registerService("orion.core.file", service, {Name:"WebDAV (".concat(base).concat(")"), top:base, pattern:base});
 			provider.connect();
 		};
 	</script>
 </head>
 <body>
+<h1>WebDAV Orion FileSystem plugin</h1>
+This plugin provides support for a WebDAV file system plugin.  The plugin and associated files must be placed in the WebDAV server directory
+and installed as a plugin within Orion.<p>
+Certain files are needed for the plugin to be successfully loaded and these files can be placed in the same directory as the webdavFilePlugin.html.
+Once the files are added, this file must be modified as follows<p>
+<h3> Change from:<h3>
+<code>
+	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script type="text/javascript" src="filePlugin/webdavImpl.js"></script>
+</code>
+<h3> Change to:<h3>
+<code>
+	<script type="text/javascript" src="dojo.js.uncompressed.js"></script>
+	<script type="text/javascript" src="plugin.js"></script>
+	<script type="text/javascript" src="webdavImpl.js"></script>
+</code>
 </body>
 </html>

@@ -12,7 +12,7 @@
  ******************************************************************************/
  
  /*global define eclipse */
-define(['dojo'], function(dojo) {
+define(['i18n!profile/nls/messages', 'dojo'], function(messages, dojo) {
 
 
 function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item) {
@@ -20,15 +20,15 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		if (toolbar) {
 			dojo.empty(toolbar);
 		} else {
-			throw "could not find toolbar " + toolbarId;
+			throw messages["could not find toolbar "] + toolbarId;
 		}
-		var commandService = registry.getService("orion.page.command");
-		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button");
+		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
+		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); //$NON-NLS-0$
 		if (selectionToolbarId) {
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
 				dojo.empty(selectionTools);
-				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");
+				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); //$NON-NLS-0$
 			}
 		}
 
@@ -36,11 +36,11 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		// Stuff we do only the first time
 		if (!eclipse.doOnce) {
 			eclipse.doOnce = true;
-			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) {
+			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					dojo.empty(selectionTools);
-					commandService.renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button");
+					commandService.renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button"); //$NON-NLS-0$
 				}
 			});
 		}

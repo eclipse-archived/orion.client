@@ -9,9 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*jslint regexp: true */
-/*global define window console top self eclipse setTimeout*/
+/*global define window console top self orion setTimeout*/
 
-define(['dojo', 'orion/assert'], function(dojo, assert) {
+define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, EventTarget) {
+	// Time to wait before declaring an async test failed. A test function can override this by defining a 'timeout' property.
+	var DEFAULT_TIMEOUT = 30000;
 
 	function _serializeTasks(tasks) {
 		var length = tasks.length;
@@ -73,6 +75,17 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			}
 		}
 
+		function _testDone(name, result, startTime, message, stack) {
+			var obj = {result: result, elapsed: new Date().getTime() - startTime};
+			if (typeof message !== 'undefined') {
+				obj.message = message;
+			}
+			if (typeof stack !== 'undefined') {
+				obj.stack = stack;
+			}
+			_dispatchEvent("testDone", name, obj);
+		}
+
 		function _createTestWrapper(name, test) {
 			return function() {
 				_dispatchEvent("testStart", name);
@@ -80,17 +93,25 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 				try {
 					var testResult = test();
 					if (testResult && typeof testResult.then === "function") {
+						var calledBack = false;
+						setTimeout(function() {
+							if (!calledBack) {
+								_testDone(name, false, startTime, "Timed out");
+							}
+						}, (typeof test.timeout === 'number' ? test.timeout : DEFAULT_TIMEOUT));
 						return testResult.then(function() {
-							_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
+							calledBack = true;
+							_testDone(name, true, startTime);
 						}, function(e) {
-							_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
+							calledBack = true;
+							_testDone(name, false, startTime, e && e.toString(), e && (e.stack || e.stacktrace));
 						});
 					} else {
-						_dispatchEvent("testDone", name, {result: true, elapsed: new Date().getTime() - startTime});
+						_testDone(name, true, startTime);
 						return testResult;
 					}
 				} catch(e) {
-					_dispatchEvent("testDone", name, {result: false, elapsed: new Date().getTime() - startTime, message: e.toString(), stack: e.stack || e.stacktrace});
+					_testDone(name, false, startTime, e.toString(), e.stack || e.stacktrace);
 					return e;
 				}
 			};
@@ -169,16 +190,16 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 			var _run = _createRunWrapper("", obj);
 			var that = this;
 			
-			if (!this.useLocal && top !== self && typeof(eclipse) !== "undefined" && eclipse.PluginProvider) {
+			if (!this.useLocal && top !== self && typeof(orion) !== "undefined" && orion.PluginProvider) {
 				var result = new dojo.Deferred();
 				try {
 					if (window._gTestPluginProviderRegistered) {
 						result.reject("Error: skipping test provider -- only one top-level test provider is allowed");
 						return result;
 					}
-					var provider = new eclipse.PluginProvider();
+					var provider = new orion.PluginProvider();
 					window._gTestPluginProviderRegistered = true;
-					var serviceProvider = provider.registerServiceProvider("orion.test.runner", {
+					var impl = {
 						run: function() {
 							var testName = arguments[0] || optTestName;
 							dojo.when(_run(testName), dojo.hitch(result, "resolve"));
@@ -187,13 +208,15 @@ define(['dojo', 'orion/assert'], function(dojo, assert) {
 						list: function() {
 							return _list("", obj);
 						}
-					});
+					};
+					EventTarget.attach(impl);
+					var serviceProvider = provider.registerService("orion.test.runner", impl);
 	
 					provider.connect(function() {
-						that.addEventListener("runStart", function(name) { serviceProvider.dispatchEvent("runStart", name); });
-						that.addEventListener("runDone", function(name, obj) { serviceProvider.dispatchEvent("runDone", name, obj); });
-						that.addEventListener("testStart", function(name) { serviceProvider.dispatchEvent("testStart", name); });
-						that.addEventListener("testDone", function(name, obj) { serviceProvider.dispatchEvent("testDone", name, obj); });
+						that.addEventListener("runStart", function(name) { impl.dispatchEvent("runStart", name); });
+						that.addEventListener("runDone", function(name, obj) { impl.dispatchEvent("runDone", name, obj); });
+						that.addEventListener("testStart", function(name) { impl.dispatchEvent("testStart", name); });
+						that.addEventListener("testDone", function(name, obj) { impl.dispatchEvent("testDone", name, obj); });
 						//that.addConsoleListeners();
 					}, function() {
 						if (!that.hasEventListener()) {

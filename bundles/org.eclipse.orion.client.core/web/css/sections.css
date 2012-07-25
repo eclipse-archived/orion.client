@@ -7,32 +7,70 @@
 	padding-right: 10px;
 }
 
+.sectionTitle {
+	margin-top: 5px;
+}
+
 .sectionTable {
-	padding-top: 10px;
+	overflow-x: hidden;
+	padding-right: 10px;
 	padding-left: 10px;
+	width: 98%;
 }
 
 .sectionTableItem {
-	padding-top: 5px;
-	padding-bottom: 5px;
-	width: 100%;
+	padding: 8px;
 }
 
 .sectionTableItemActions {
 	float: right;
 	position: relative;
 	color: #666;
-	font-size: 0.9em;
+}
+
+.sectionExplorerActions {
+	text-align: right;
+	padding-right:4px;
+}
+
+.sectionActions {
+	font-size: 8pt;
+	font-weight: normal;
+	margin-top: 2px;
+	vertical-align: baseline;
+}
+
+.sectionAnchor{
+	line-height:16px;
+	font-size:10pt;
+	color: #222;
+	font-weight:normal;
+}
+
+.displayTable {
+	padding: 10px 20px
 }
 
 .sectionWrapper {
 	margin-top: 15px;
 	padding-top: 5px;
 	padding-left: 5px;
-    border: 1px solid #e6e6e6;
-    background: #f8f8f8;
+	border-bottom: 2px solid #E6E6E6;
+	margin-right: 8px;
+	min-height: 26px;
+	vertical-align: middle;
+	font-weight: bold;
+	color: gray;
+	padding-bottom:3px;
+	margin-bottom:5px;
+}
+
+.sectionWrapperAux {
+    /* background-color: #fafafa;
+	border: 1px solid #ebebeb; */
 }
 
 .sectionProgress {
     text-decoration: blink;
+    visibility: hidden;
 }

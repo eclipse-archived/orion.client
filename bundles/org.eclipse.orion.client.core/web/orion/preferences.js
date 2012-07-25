@@ -11,8 +11,7 @@
 
 /*global define window localStorage */
 
-define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require, dojo, mAuth){
-
+define(['require', 'orion/Deferred', 'orion/xhr', 'orion/es5shim'], function(require, Deferred, xhr){
 	/**
 	 * Constructs a new preferences instance. This constructor is not
 	 * intended to be used by clients. Preferences should instead be
@@ -47,7 +46,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				}
 			}
 			this._dirty = [];
-			return new dojo.DeferredList(flushes);
+			return new Deferred().all(flushes);
 		},
 		
 		_scheduleFlush: function(store) {
@@ -59,12 +58,12 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				return;
 			}
 			this._flushPending = true;
-			window.setTimeout(dojo.hitch(this, function() {
+			window.setTimeout(function() {
 				if (this._flushPending) {
 					this._flushPending = false;
 					this._flush();
 				}
-			}),0);
+			}.bind(this), 0);
 		},
 		
 		_getCached: function() {
@@ -73,7 +72,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 				for (var i=0; i < this._stores.length; ++i) {
 					var store = this._stores[i];
 					for (var j in store) {
-						if (store.hasOwnProperty(j) && typeof(this._cached[j]) === "undefined" ) {
+						if (store.hasOwnProperty(j) && typeof(this._cached[j]) === "undefined" ) { //$NON-NLS-0$
 							this._cached[j] = store[j];
 						}
 					}
@@ -167,7 +166,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 					};
 				}(i)));
 			}
-			return new dojo.DeferredList(storeList).then(function(){
+			return new Deferred().all(storeList).then(function(){
 				that._cached = null;
 				that._getCached();
 			});
@@ -223,12 +222,12 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	
 	function UserPreferencesProvider(serviceRegistry) {
 		this._currentPromises = {};
-		this._cache = new Cache("/orion/preferences/user", 60*60);
+		this._cache = new Cache("/orion/preferences/user", 60*60); //$NON-NLS-0$
 		
 		this._service = null;
 		this.available = function() {
 			if (!this._service) {
-				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider");
+				var references = serviceRegistry.getServiceReferences("orion.core.preference.provider"); //$NON-NLS-0$
 				if (references.length > 0) {
 					this._service = serviceRegistry.getService(references[0]);
 				}
@@ -242,7 +241,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			if (this._currentPromises[name]) {
 				return this._currentPromises[name];
 			}
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = null;
 			if (optForce) {
 				this._cache.remove(name);
@@ -259,15 +258,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 					delete that._currentPromises[name];
 					d.resolve(data);
 				}, function (error) {
-					if (error.status === 401) {
-						delete that._currentPromises[name];
-						d.resolve({});
-						
-						// retry
-						mAuth.handleAuthenticationError(error, function(){
-							that.get(name);
-						});
-					} else if (error.status === 404) {
+					if (error.status === 404) {
 						var data = {};
 						that._cache.set(name, data);
 						delete that._currentPromises[name];
@@ -282,32 +273,15 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		},
 		
 		put: function(name, data) {
-			var d = new dojo.Deferred();
 			this._cache.set(name, data);
-			var that = this;
-			this._service.put(name, data).then(function() {
-				d.resolve();
-			}, function(error) {
-				if (error.status === 401) {
-					mAuth.handleAuthenticationError(error, function(){
-						that._service.put(name, data).then(function() {
-							d.resolve();
-						}, function() {
-							d.resolve();
-						});				
-					});
-				} else {
-					d.resolve(); // consider throwing here
-				}
-			});
-			return d;
+			return this._service.put(name, data);
 		}
 	};
 	
 	function DefaultPreferencesProvider(location) {
 		this._location = location;
 		this._currentPromise = null;
-		this._cache = new Cache("/orion/preferences/default", 60*60);
+		this._cache = new Cache("/orion/preferences/default", 60*60); //$NON-NLS-0$
 	}
 	
 	DefaultPreferencesProvider.prototype = {
@@ -316,7 +290,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			if (this._currentPromise) {
 				return this._currentPromise;
 			}
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = null;
 			if (optForce) {
 				this._cache.remove(name);
@@ -328,40 +302,28 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			} else {
 				this._currentPromise = d;
 				var that = this;
-				dojo.xhrGet({
-					url: this._location,
+				xhr("GET", this._location, { //$NON-NLS-0$
 					headers: {
-						"Orion-Version": "1"
+						"Orion-Version": "1" //$NON-NLS-0$
 					},
-					handleAs: "json",
-					timeout: 15000,
-					load: function(data, ioArgs) {
-						that._cache.set(name, data[name] || {});
+					timeout: 15000
+				}).then(function(result) {
+					var data = JSON.parse(result.response);
+					that._cache.set(name, data[name] || {});
+					that._currentPromise = null;
+					d.resolve(data[name]|| {});
+				}, function(error) {
+					if (error.xhr.status === 401 || error.xhr.status === 404 ) {
+						that._cache.set(name, {});
 						that._currentPromise = null;
-						d.resolve(data[name]|| {});
-					},
-					error: function(response, ioArgs) {
-						if (ioArgs.xhr.status === 401) {
-							that._currentPromise = null;
-							d.resolve({});
-							d = new dojo.Deferred();
-							that._currentPromise = d;
-							var currentXHR = this;
-							mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-								dojo.xhrGet(currentXHR); // retry GET							
-							});
-						} else if (ioArgs.xhr.status === 404) {
-							that._cache.set(name, {});
-							that._currentPromise = null;
-							d.resolve({});
+						d.resolve({});
+					} else {
+						that._currentPromise = null;
+						var data = that._cache.get(name, true);
+						if (data !== null) {
+							d.resolve(data[name] || {});
 						} else {
-							that._currentPromise = null;
-							var data = that._cache.get(name, true);
-							if (data !== null) {
-								d.resolve(data[name] || {});
-							} else {
-								d.resolve({});
-							}
+							d.resolve({});
 						}
 					}
 				});
@@ -369,19 +331,19 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			return d;
 		},
 		put: function(name, data) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			d.resolve();
 			return d;
 		}
 	};
 	
 	function LocalPreferencesProvider() {
-		this._cache = new Cache("/orion/preferences/local", -1);
+		this._cache = new Cache("/orion/preferences/local", -1); //$NON-NLS-0$
 	}
 	
 	LocalPreferencesProvider.prototype = {
 		get: function(name) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			var cached = this._cache.get(name);
 			if (cached !== null) {
 				d.resolve(cached);
@@ -391,7 +353,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 			return d;
 		},
 		put: function(name, data) {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			this._cache.set(name, data);
 			d.resolve();
 			return d;
@@ -412,12 +374,12 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		this._userProvider = new UserPreferencesProvider(serviceRegistry);
 		this._localProvider = new LocalPreferencesProvider();
 		
-		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref";
-		if (defaultPreferencesLocation.indexOf("://") === -1) {
+		defaultPreferencesLocation = defaultPreferencesLocation || "defaults.pref"; //$NON-NLS-0$
+		if (defaultPreferencesLocation.indexOf("://") === -1) { //$NON-NLS-0$
 			defaultPreferencesLocation = require.toUrl(defaultPreferencesLocation);
 		}
 		this._defaultsProvider = new DefaultPreferencesProvider(defaultPreferencesLocation);
-		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this);
+		this._serviceRegistration = serviceRegistry.registerService("orion.core.preference", this); //$NON-NLS-0$
 	}
 	
 	PreferencesService.DEFAULT_SCOPE = 1;
@@ -427,8 +389,8 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 	PreferencesService.prototype = /** @lends orion.preferences.PreferencesService.prototype */ {
 	
 		listenForChangedSettings: function( callback ){
-			window.addEventListener("storage", callback, false);
-			return "/orion/preferences/local/settings";
+			window.addEventListener("storage", callback, false); //$NON-NLS-0$
+			return "/orion/preferences/local/settings"; //$NON-NLS-0$
 		},
 		
 		/**
@@ -437,7 +399,7 @@ define(['require', 'dojo', 'orion/auth', 'dojo/DeferredList'], function(require,
 		 */
 		getPreferences: function(name, optScope) {
 			
-			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) {
+			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) { //$NON-NLS-0$
 				optScope = PreferencesService.DEFAULT_SCOPE | PreferencesService.LOCAL_SCOPE | PreferencesService.USER_SCOPE;
 			}
 			var providers = [];
