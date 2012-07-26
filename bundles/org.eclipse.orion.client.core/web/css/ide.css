@@ -583,9 +583,9 @@ h2 {
 }
 
 .keyAssistFloat {
+	color: white;
 	display: none;
-	background: #404040;
-	color: #FFD900;
+	background: #333;
 	position: fixed;
 	left: 44px;
 	top: 60px;
@@ -595,7 +595,7 @@ h2 {
 }
 
 .keyAssistFloat h2 {
-	color: #FFD900;
+	color: white;
 }
 
 #tree {
