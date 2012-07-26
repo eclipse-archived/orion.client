@@ -68,18 +68,45 @@ define(function() {
 			return value;
 		}
 		
+		function _createListener(serviceId, eventName) {
+			return function() {
+				if (_connected) {
+					var message = {
+						serviceId: serviceId,
+						method: "dispatchEvent", //$NON-NLS-0$
+						params: [eventName].concat(Array.prototype.slice.call(arguments))
+					};
+					_publish(message);
+				}
+            };
+        }
+		
 		function _handleRequest(event) {
 			if (event.source !== _target ) {
 				return;
 			}
 			var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data)); //$NON-NLS-0$
 			var serviceId = message.serviceId;
-			var service = _services[serviceId].implementation;
-			var method = service[message.method];
+			var methodName = message.method;
+			var params = message.params;
+			var service = _services[serviceId];
+			var implementation = service.implementation;
+			var method = implementation[methodName];
+			
+			var type;
+			if (methodName==="addEventListener") {
+				type = params[0];
+				service.listeners[type] = service.listeners[type] || _createListener(serviceId, type);
+				params = [type, service.listeners[type]]; 
+			} else if (methodName==="removeEventListener") {
+				type = params[0];
+				params = [type, service.listeners[type]];
+				delete service.listeners[type];
+			}
 			
 			var response = {id: message.id, result: null, error: null};		
 			try {
-				var promiseOrResult = method.apply(service, message.params);
+				var promiseOrResult = method.apply(implementation, params);
 				if(promiseOrResult && typeof promiseOrResult.then === "function"){ //$NON-NLS-0$
 					promiseOrResult.then(function(result) {
 						response.result = result;
@@ -123,27 +150,8 @@ define(function() {
 					methods.push(method);
 				}
 			}
-			
 			var serviceId = _services.length;
-			_services[serviceId] = {names: names, methods: methods, implementation: implementation, properties: properties || {}};
-	
-			// try to provide/inject a plugin enabled dispatchEvent method if the service provides one
-			if (implementation && typeof implementation.dispatchEvent === "function") {
-				var originalDispatchEvent = implementation.dispatchEvent;
-				implementation.dispatchEvent = function(eventName) {
-					var args = Array.prototype.slice.call(arguments);
-					if (_connected) {
-						var message = {
-							serviceId: serviceId,
-							method: "dispatchEvent", //$NON-NLS-0$
-							params: typeof eventName === "string" ? args : [eventName.type].concat(args)
-						};
-						_publish(message);
-
-					}
-					originalDispatchEvent.apply(implementation, args);
-				};
-			}
+			_services[serviceId] = {names: names, methods: methods, implementation: implementation, properties: properties || {}, listeners: {}};
 		};
 		this.registerServiceProvider = this.registerService; // (deprecated) backwards compatibility only
 		

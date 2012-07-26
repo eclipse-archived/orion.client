@@ -9,16 +9,16 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*jslint regexp: true */
-/*global define window console top self orion setTimeout*/
+/*global define window console top self setTimeout*/
 
-define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, EventTarget) {
+define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', 'orion/es5shim'], function(Deferred, assert, EventTarget, PluginProvider) {
 	// Time to wait before declaring an async test failed. A test function can override this by defining a 'timeout' property.
 	var DEFAULT_TIMEOUT = 30000;
 
 	function _serializeTasks(tasks) {
 		var length = tasks.length;
 		var current = 0;
-		var promise = new dojo.Deferred();
+		var promise = new Deferred();
 
 		function _next() {
 			while(current !== length) {
@@ -190,19 +190,19 @@ define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, Eve
 			var _run = _createRunWrapper("", obj);
 			var that = this;
 			
-			if (!this.useLocal && top !== self && typeof(orion) !== "undefined" && orion.PluginProvider) {
-				var result = new dojo.Deferred();
+			if (!this.useLocal && top !== self) {
+				var result = new Deferred();
 				try {
 					if (window._gTestPluginProviderRegistered) {
 						result.reject("Error: skipping test provider -- only one top-level test provider is allowed");
 						return result;
 					}
-					var provider = new orion.PluginProvider();
+					var provider = new PluginProvider();
 					window._gTestPluginProviderRegistered = true;
 					var impl = {
 						run: function() {
 							var testName = arguments[0] || optTestName;
-							dojo.when(_run(testName), dojo.hitch(result, "resolve"));
+							Deferred.when(_run(testName), result.resolve.bind(result));
 							return result;
 						},
 						list: function() {
@@ -210,7 +210,7 @@ define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, Eve
 						}
 					};
 					EventTarget.attach(impl);
-					var serviceProvider = provider.registerService("orion.test.runner", impl);
+					provider.registerService("orion.test.runner", impl);
 	
 					provider.connect(function() {
 						that.addEventListener("runStart", function(name) { impl.dispatchEvent("runStart", name); });
@@ -222,7 +222,7 @@ define(['dojo', 'orion/assert', 'orion/EventTarget'], function(dojo, assert, Eve
 						if (!that.hasEventListener()) {
 							that.addConsoleListeners();
 						}
-						dojo.when(_run(optTestName), dojo.hitch(result, "resolve"));
+						Deferred.when(_run(optTestName), result.resolve.bind(result));
 					});
 					return result;
 				} catch (e) {

@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred"], 
-		function(messages, require, mSearchUtils, mContentTypes, Deferred) {
+define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred", "orion/auth"], 
+		function(messages, require, mSearchUtils, mContentTypes, Deferred, mAuth) {
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -70,8 +70,11 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		//this.searchFileTypes = ["js", "css", "java", "txt", "HTML"];
 		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
 		this.fileLocations = [];
+		this.fileSkeleton = [];
 		this._hitCounter = 0;
 		this._totalCounter = 0;
+		this._searchOnName = options && options.searchOnName;
+		this._location = options && options.location;
 	}
 	
 	/**
@@ -90,6 +93,53 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 					var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
 					onComplete({response: response});
 				//});
+			});
+		});
+	};
+	
+	/**
+	 * Search file name on the query string from the file skeleton.
+	 * @param {String} queryStr The query string. This is temporary for now. The format is "?sort=Path asc&rows=40&start=0&q=keyword+Location:/file/e/bundles/*"
+	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
+	 */
+	SearchCrawler.prototype.searchName = function(queryStr, onComplete){
+		this.queryObj = mSearchUtils.parseQueryStr(queryStr, true);
+		var results = [];
+		var self = this;
+		if(this.fileSkeleton.length > 0){
+			for (var i = 0; i < this.fileSkeleton.length ; i++){
+				var lineString = this.fileSkeleton[i].Name.toLowerCase();
+				var result;
+				if(this.queryObj.inFileQuery.wildCard){
+					result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);
+				} else {
+					result = mSearchUtils.searchOnelineLiteral(this.queryObj.inFileQuery, lineString, true);
+				}
+				if(result){
+					results.push(this.fileSkeleton[i]);
+				}
+			}
+			var response = {numFound: results.length, docs: results };
+			onComplete({response: response});
+		}
+	};
+	
+	/**
+	 * Do search based on this.queryObj.
+	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
+	 */
+	SearchCrawler.prototype.buildSkeleton = function(onComplete){
+		this._buildingSkeleton = true;
+		var contentTypeService = this.registry.getService("orion.core.contenttypes");
+		var self = this;
+		self.registry.getService("orion.page.message").setProgressResult({Message: "Building scheleton..."});
+		contentTypeService.getContentTypes().then(function(ct) {
+			self.contentTypesCache = ct;
+			var result = self._visitRecursively(self._location+ "?depth=1").then(function(){
+					this._buildingSkeleton = false;
+					self.registry.getService("orion.page.message").setProgressResult({Message: "Building scheleton finished."});
+					//var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
+					//onComplete({response: response});
 			});
 		});
 	};
@@ -117,10 +167,13 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 			var len = children.length;
 			for (var i = 0; i < children.length ; i++){
 				if(children[i].Directory!==undefined && children[i].Directory===false){
-					var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
-					if(contentType && contentType.extends === "text/plain"){
-						//self.fileLocations.push(children[i].Location);
-						results.push(self._sniffSearch(children[i]));
+					if(self._searchOnName){
+						results.push(self._buildSingleSkeleton(children[i]));
+					} else {
+						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
+						if(contentType && contentType.extends === "text/plain"){
+							results.push(self._sniffSearch(children[i]));
+						}
 					}
 				} else if (children[i].Location) {
 					results.push(self._visitRecursively(children[i].ChildrenLocation));
@@ -157,6 +210,16 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 			}
 		);
+	};
+	
+	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){
+		this._totalCounter++;
+		this.fileSkeleton.push(fileObj);
+		console.log("skeltoned files : "+ this._totalCounter);
+		console.log(fileObj.Location);
+		var df = new Deferred();
+		df.resolve(this._totalCounter);
+		return df;
 	};
 	
 	SearchCrawler.prototype.constructor = SearchCrawler;

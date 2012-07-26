@@ -88,8 +88,23 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					};
 				});
 				
-				if (serviceProxy.dispatchEvent) {
-					EventTarget.attach(serviceProxy);
+				if (serviceProxy.addEventListener && serviceProxy.removeEventListener) {
+					var eventTarget = new EventTarget();
+					serviceProxy.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+					var _addEventListener = serviceProxy.addEventListener;
+					serviceProxy.addEventListener = function(type, listener) {
+						if (!eventTarget._namedlisteners[type]) {
+							_addEventListener(type);
+						}
+						eventTarget.addEventListener(type, listener);
+					};
+					var _removeEventListener = serviceProxy.removeEventListener;
+					serviceProxy.removeEventListener = function(type, listener) {
+						eventTarget.removeEventListener(type, listener);
+						if (eventTarget._namedlisteners[type]) {
+							_removeEventListener(type);
+						}
+					};
 				}
 			}
 			return serviceProxy;
@@ -462,7 +477,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						document.body.appendChild(iframe);
 						channel.target = iframe.contentWindow;
 						channel.close = function() {
-							document.body.removeChild(iframe);
+							if (iframe) {
+								document.body.removeChild(iframe);
+								iframe = null;
+							}
 						};
 					}
 					_channels.push(channel);

@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
+define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
-		function(messages, require, dojo, dijit) {
+		function(messages, mSearchCrawler, require, dojo, dijit) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -46,6 +46,12 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.searcher = this.options && this.options.searcher;
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher"); //$NON-NLS-0$
+		}
+		this.searcher.setCrawler(null);
+		this._forceUseCrawler = false;
+		this.fileService = this.searcher.getFileService();
+		if (!this.fileService) {
+			throw new Error(messages['Missing required argument: fileService']);
 		}
 		this.searchRenderer = this.options && this.options.searchRenderer;
 		if (!this.searchRenderer || typeof(this.searchRenderer.makeRenderFunction) !== "function") { //$NON-NLS-0$
@@ -139,6 +145,14 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			e.target.focus();
 		});
 		this.populateFavorites();
+		var self = this;
+		setTimeout(function() {
+			if(self._forceUseCrawler || !self.fileService.getService(self.searcher.location)["search"]){//$NON-NLS-0$
+				var crawler = new mSearchCrawler.SearchCrawler(self.searcher.registry, self.fileService, "", {searchOnName: true, location: self.searcher.location}); 
+				self.searcher.setCrawler(crawler);
+				crawler.buildSkeleton();
+			}
+		}, 0);
 	},
 	
 	/** @private kick off initial population of favorites */
@@ -213,7 +227,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {
-				var query = that.searcher.createSearchQuery(null, text, "NameLower"); //$NON-NLS-0$
+				var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", false, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-0$
 				var renderFunction = that.searchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult));
 				that.searcher.search(query, false, renderFunction);
 			}, 0);
