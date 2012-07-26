@@ -61,8 +61,11 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {orion.metatype.ObjectClass} The object class, or <code>null</code> if no object class 
 		 * has been designated for the given PID.
 		 */
-		getObjectClass: function(pid) {
+		getObjectClassForPid: function(pid) {
 			return this.pidsMap[pid] || null;
+		},
+		getObjectClass: function(classId) {
+			return this.ocsMap[classId] || null;
 		}
 	};
 
