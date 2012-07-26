@@ -445,6 +445,7 @@ h2 {
 	vertical-align:middle;
 	font-size:11px;
 	font-weight:bold;
+	z-index: 800;
 }
 
 .slideParameters {
@@ -456,18 +457,6 @@ h2 {
 	display: block;
 }
 
-.slide {
-	text-align: left;
-	vertical-align: middle;
-	clear: both;
-	opacity: 0;
-	height: 0;
- 	transition: opacity .5s ease-out;
-	-o-transition: opacity .5s ease-out;
-	-moz-transition: opacity .5s ease-out;
-	-webkit-transition: opacity .5s ease-out;   
-}
-
 .activeCommand {
 	background-color: #e3e3e3;
 	border: 1px solid #9a9a9a;
@@ -475,11 +464,6 @@ h2 {
 
 /* marker used by parameter collectors to identify commands */
 .commandMarker {
-}
-
-.slideActive {
-	opacity: 1;
-	height: auto;
 }
 
 .bannerMenu {

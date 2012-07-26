@@ -36,8 +36,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				if (this._activeElements.parameterArea) {
 					dojo.empty(this._activeElements.parameterArea);
 				}
-				if (this._activeElements.parameterContainer) {
-					dojo.removeClass(this._activeElements.parameterContainer, "slideActive"); //$NON-NLS-0$
+				if (this._activeElements.slideContainer) {
 					dojo.removeClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
 				}
 				if (this._activeElements.dismissArea) {
@@ -46,7 +45,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				if (this._activeElements.commandNode) {
 					dojo.removeClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
 				}
-				mUtil.forceLayout(this._activeElements.parameterContainer);
+				if (this._activeElements.toolbarTarget && this._activeElements.toolbarTargetY) {
+					dojo.style(this._activeElements.toolbarTarget, {"top": this._activeElements.toolbarTargetY + "px", "bottom": 0});  //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$ 
+				}
 				if (this._activeElements.onClose) {
 					this._activeElements.onClose();
 				}
@@ -80,9 +81,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 			}
 			if (toolbarNode) {
 				elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0]; //$NON-NLS-0$
-				elements.parameterContainer = dojo.query(".slide", toolbarNode)[0]; //$NON-NLS-0$
 				elements.parameterArea = dojo.query(".parameters", toolbarNode)[0]; //$NON-NLS-0$
 				elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0]; //$NON-NLS-0$
+				if (toolbarNode.parentNode) {
+					elements.toolbarTarget = dojo.query(".toolbarTarget", toolbarNode.parentNode)[0]; //$NON-NLS-0$
+					if (elements.toolbarTarget) {
+						var posParent = dojo.position(toolbarNode.parentNode);
+						var pos = dojo.position(elements.toolbarTarget);
+						elements.toolbarTargetY = pos.y - posParent.y;
+						elements.toolbarParentY = posParent.y;
+					}
+				}
 			}
 			return elements;
 		},
@@ -103,7 +112,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 			this._activeElements = null;
 			// determine  the closest parameter container to the command.
 			this._activeElements = this._findParameterElements(commandNode);
-			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer && this._activeElements.parameterContainer) {
+			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer) {
 				this._activeElements.onClose = onClose;
 				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
 				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
@@ -127,8 +136,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				}
 				// all parameters have been generated.  Activate the area.
 				dojo.addClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
-				dojo.addClass(this._activeElements.parameterContainer, "slideActive"); //$NON-NLS-0$
-				mUtil.forceLayout(this._activeElements.parameterContainer);
+				if (this._activeElements.toolbarTarget && this._activeElements.toolbarTargetY) {
+					var pos = dojo.position(this._activeElements.slideContainer);
+					dojo.style(this._activeElements.toolbarTarget, {"top": pos.y + pos.h - this._activeElements.toolbarParentY + 8 + "px", "bottom": 0}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+				}
+
 				if (focusNode) {
 					this._oldFocusNode = window.document.activeElement;
 					window.setTimeout(function() {
