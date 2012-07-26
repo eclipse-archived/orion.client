@@ -67,10 +67,8 @@ define(['i18n!orion/nls/messages', 'require'],
 
 	function slideoutHTMLFragment(id) { 
 		return '<div id="'+id+'slideContainer" class="layoutBlock slideParameters slideContainer">' + //$NON-NLS-1$ //$NON-NLS-0$
-			'<span id="'+id+'pageParameterArea" class="slide">' + //$NON-NLS-1$ //$NON-NLS-0$
-				'<span id="'+id+'pageCommandParameters" class="layoutLeft parameters"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
-				'<span id="'+id+'pageCommandDismiss" class="layoutRight parametersDismiss"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
-			'</span>' + //$NON-NLS-0$
+			'<span id="'+id+'pageCommandParameters" class="layoutLeft parameters"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<span id="'+id+'pageCommandDismiss" class="layoutRight parametersDismiss"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>'; //$NON-NLS-0$
 	}
 	
