@@ -9,9 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window*/
+/*global define*/
 
-define(function() {
+define(['orion/Deferred'], function(Deferred) {
 	/**
 	 * Creates an Event Target
 	 *
@@ -29,21 +29,36 @@ define(function() {
 		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
 		 * will be passed to the event listener(s).
 		 * @param {String} eventName The event name
+		 * @returns {Deferred} A deferred that resolves when all event listeners have been notified, and all async-aware
+		 * listeners (if any) have resolved.
 		 */
 		dispatchEvent: function(eventName) {
 			var listeners = this._namedlisteners[eventName];
-			if (listeners) {
-				for (var i = 0; i < listeners.length; i++) {
-					try {
-						var args = Array.prototype.slice.call(arguments, 1);
-						listeners[i].apply(null, args);
-					} catch (e) {
-						if (window.console) {
-							window.console.log(e); // for now, probably should dispatch an ("error", e)
-						}
+			if (!listeners) {
+				var d = new Deferred();
+				d.resolve();
+				return d;
+			}
+
+			var deferreds = [];
+			for (var i = 0; i < listeners.length; i++) {
+				try {
+					var args = Array.prototype.slice.call(arguments, 1);
+					var listenerDeferred = listeners[i].apply(null, args);
+					if (listenerDeferred && typeof listenerDeferred.then === 'function') {
+						deferreds.push(listenerDeferred);
+					}
+				} catch (e) {
+					if (typeof console !== 'undefined') {
+						console.log(e); // for now, probably should dispatch an ("error", e)
 					}
 				}
 			}
+			return new Deferred().all(deferreds, function(e) {
+				if (typeof console !== 'undefined') {
+					console.log(e);
+				}
+			});
 		},
 
 		/**
