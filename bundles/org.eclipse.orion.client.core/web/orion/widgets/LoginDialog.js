@@ -136,14 +136,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/ut
 					}
 					h2.innerHTML += this.getHostname(loginForm);
 				} else if (authService.getAuthForm) {
-					dojo.hitch(_self, function(h2, i) {
-						authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm) {
-							if (_self.authenticatedServices[i].label) {
-								h2.innerHTML = _self.authenticatedServices[i].label + "<br>"; //$NON-NLS-0$
-							}
-							h2.innerHTML += _self.getHostname(loginForm);
-						});
-					})(h2, i);
+					if(eclipse && eclipse.globalCommandUtils){
+						dojo.hitch(_self, function(h2, i) {
+							authService.getAuthForm(eclipse.globalCommandUtils.notifyAuthenticationSite).then(function(loginForm) {
+								if (_self.authenticatedServices[i].label) {
+									h2.innerHTML = _self.authenticatedServices[i].label + "<br>"; //$NON-NLS-0$
+								}
+								h2.innerHTML += _self.getHostname(loginForm);
+							});
+						})(h2, i);
+					}
 				} else {
 					h2.innerHTML = this.authenticatedServices[i].label ? this.authenticatedServices[i].label : i;
 				}

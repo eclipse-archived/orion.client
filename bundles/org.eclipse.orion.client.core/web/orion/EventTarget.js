@@ -38,7 +38,9 @@ define(function() {
 						var args = Array.prototype.slice.call(arguments, 1);
 						listeners[i].apply(null, args);
 					} catch (e) {
-						console.log(e); // for now, probably should dispatch an
+						if (console) {
+							console.log(e); // for now, probably should dispatch an
+						}
 						// ("error", e)
 					}
 				}
