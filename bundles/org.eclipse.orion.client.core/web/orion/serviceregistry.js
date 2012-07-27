@@ -88,28 +88,18 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-	function Service(serviceId, implementation, internalRegistry) {
+	function Service(serviceId, implementation, internalRegistry, registered) {
 		var method;
 
 		function _createServiceCall(methodName) {
 			return function() {
-				var d;
-				if (internalRegistry.isRegistered(serviceId)) {
-					try {
-						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-						if (result && typeof result.then === "function") {
-							return result;
-						} else {
-							d = new Deferred();
-							d.resolve(result);
-						}
-					} catch (e) {
-							d = new Deferred();
-							d.reject(e);
+				var args = arguments;
+				return registered.then(function() {
+					if (internalRegistry.isRegistered(serviceId)) {
+						return implementation[methodName].apply(implementation, Array.prototype.slice.call(args));
 					}
-					return d.promise;
-				}
-				throw new Error("Service was unregistered");
+					throw new Error("Service was unregistered");
+				});
 			};
 		}
 
@@ -215,7 +205,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			}
 			
 			var reference = new ServiceReference(serviceId, names, properties);
-			var service = new Service(serviceId, implementation, this.internalRegistry);
+			var registered = new Deferred();
+			var service = new Service(serviceId, implementation, this.internalRegistry, registered);
 
 			var namedReferences = this._namedReferences;
 			names.forEach(function(name) {
@@ -227,7 +218,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 				reference: reference,
 				service: service
 			});
-			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service);
+			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service).then(registered.resolve);
 			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
 		},
 
