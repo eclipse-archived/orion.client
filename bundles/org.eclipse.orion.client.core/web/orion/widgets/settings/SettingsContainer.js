@@ -500,7 +500,103 @@ initialSettings: [
 					}],
 					"setting": messages['Bold'] //$NON-NLS-0$
 				}]
-			}]
+			},
+			{
+				"ui": 'Annotations Ruler',  //$NON-NLS-0$
+				"label":'Annotations Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "lightgrey" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Folding Ruler',  //$NON-NLS-0$
+				"label":'Folding Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#000000" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Overview Ruler',  //$NON-NLS-0$
+				"label":'Overview Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Line Number Ruler',  //$NON-NLS-0$
+				"label":'Line Number Ruler', //$NON-NLS-0$
+				"items": [
+				
+				/* Don't think this is necessary {
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},*/
+				{
+					"ui": 'Even Rows Color', //$NON-NLS-0$
+					"label": 'Even Rows Color', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Even Rows Background', //$NON-NLS-0$
+					"label": 'Even Rows Background', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Odd Rows Color', //$NON-NLS-0$
+					"label": 'Odd Rows Color', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Odd Rows Background', //$NON-NLS-0$
+					"label":'Odd Rows Background', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			}
+			
+			]
 		}]
 
 	});
