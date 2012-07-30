@@ -74,6 +74,11 @@ a:hover {
     min-height:20px;
 }
 
+/* splitter - typically the color of the title area */
+.split {
+	background: #efefef;
+}
+
 /* Row selection */
 
 .checkedRow {
@@ -135,9 +140,11 @@ a.currentLocation:hover {
 	background: #fbfbfb;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
 	background: -moz-linear-gradient(top, #fbfbfb 0%, #fbfbfb 100%);
-    overflow-x: auto;
-    min-width: 200px;
-    padding-top: 16px;
+}
+
+.mainpane {
+	border: 0;
+	background: #ffffff;
 }
 
 
