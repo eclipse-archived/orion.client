@@ -675,6 +675,26 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		});
 		
+		// hook up split behavior
+		var splitter = dojo.query(".split")[0];
+		if (splitter) {
+			var side = dojo.query(".sidePanelLayout")[0];
+			var main = dojo.query(".mainPanelLayout")[0];
+			if (side && main) {
+				// initial position - do we have a pref?  otherwise attach the pieces and make visible.
+				var pos = dojo.position(splitter);
+				dojo.style(side, {"right": pos.x, "display": "block"});
+				dojo.style(main, {"left": pos.x+pos.width, "display": "block"});
+				
+				// mouse down 
+					// if in toggle then close aux (reposition and store(
+					// otherwise start tracking
+				// mouse move track
+				// mouse up reposition and store
+				// reposition and store = animate and save pref, try a css transition.
+			}
+		}
+		
 		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
 		// make favorite
 		var favoriteCommand = new mCommands.Command({
