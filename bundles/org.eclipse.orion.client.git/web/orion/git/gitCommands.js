@@ -402,8 +402,10 @@ var exports = {};
 				}
 				
 				var checkoutTagFunction = function(repositoryLocation, itemName, name){
-					serviceRegistry.getService("orion.page.message").createProgressMonitor(serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, itemName, name), //$NON-NLS-0$
-							dojo.string.substitute(messages["Checking out tag ${0}"], [name])).deferred.then(function() {
+					var deferred = serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, itemName, name); //$NON-NLS-0$
+					serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+							dojo.string.substitute(messages["Checking out tag ${0}"], [name]));
+					deferred.then(function() {
 						dojo.hitch(explorer, explorer.changedItem)(getBranchItem());
 					}, displayErrorOnStatus);
 				};
@@ -566,9 +568,11 @@ var exports = {};
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					progressService.createProgressMonitor(gitService.doPush(item.Location, "", false, false,
+					var deferred = gitService.doPush(item.Location, "", false, false,
 							options.gitSshUsername, options.gitSshPassword, options.knownHosts, options.gitPrivateKey,
-							options.gitPassphrase), messages["Removing remote branch: "] + item.Name).deferred.then(function(remoteJsonData) {
+							options.gitPassphrase);
+					progressService.createProgressMonitor(deferred, messages["Removing remote branch: "] + item.Name);
+					deferred.then(function(remoteJsonData) {
 						exports.handleProgressServiceResponse(remoteJsonData, options, serviceRegistry, function(jsonData) {
 							if (jsonData.Result.Severity == "Ok") //$NON-NLS-0$
 								dojo.hitch(explorer, explorer.changedItem)(item.parent);
@@ -660,13 +664,15 @@ var exports = {};
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 					var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					
-					statusService.createProgressMonitor(gitService.doPull(path, false,
+					var pullDeferred = gitService.doPull(path, false,
 							options.gitSshUsername,
 							options.gitSshPassword,
 							options.knownHosts,
 							options.gitPrivateKey,
-							options.gitPassphrase), messages["Pulling : "] + path).deferred.then(function(jsonData) {
+							options.gitPassphrase);
+ 
+					statusService.createProgressMonitor(pullDeferred, messages["Pulling : "] + path);
+					pullDeferred.then(function(jsonData) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 							if (item.Type === "Clone") { //$NON-NLS-0$
 								dojo.hitch(explorer, explorer.changedItem)(item);
@@ -832,12 +838,14 @@ var exports = {};
 					function(options) {
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-						statusService.createProgressMonitor(gitService.doFetch(path, false,
+						var deferred = gitService.doFetch(path, false,
 								options.gitSshUsername,
 								options.gitSshPassword,
 								options.knownHosts,
 								options.gitPrivateKey,
-								options.gitPassphrase), messages["Fetching remote: "] + path).deferred.then(
+								options.gitPassphrase);
+						statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + path);
+						deferred.then(
 							function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 									function() {
@@ -922,12 +930,14 @@ var exports = {};
 					function(options) {
 						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-						statusService.createProgressMonitor(gitService.doFetch(path, true,
+						var deferred = gitService.doFetch(path, true,
 								options.gitSshUsername,
 								options.gitSshPassword,
 								options.knownHosts,
 								options.gitPrivateKey,
-								options.gitPassphrase), messages['Fetching remote: '] + path).deferred.then(
+								options.gitPassphrase);
+						statusService.createProgressMonitor(deferred, messages['Fetching remote: '] + path);
+						deferred.then(
 							function(jsonData, secondArg) {
 								exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 									function() {
@@ -1123,8 +1133,10 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				progressService.createProgressMonitor(serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN"), //$NON-NLS-1$ //$NON-NLS-0$
-				item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']).deferred.then(function(jsonData){
+				var deferred = serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN"); //$NON-NLS-1$ //$NON-NLS-0$
+				progressService.createProgressMonitor(deferred, 
+				item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']);
+				deferred.then(function(jsonData){
 					var display = [];
 					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -1234,9 +1246,11 @@ var exports = {};
 				
 				var handlePush = function(options, location, ref, name, force){
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					progressService.createProgressMonitor(gitService.doPush(location, ref, true, force, //$NON-NLS-0$
+					var deferred = gitService.doPush(location, ref, true, force, //$NON-NLS-0$
 							options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-							options.gitPrivateKey, options.gitPassphrase), messages['Pushing remote: '] + name).deferred.then(
+							options.gitPrivateKey, options.gitPassphrase);
+					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name);
+					deferred.then(
 						function(jsonData){
 							exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 								function() {
@@ -1397,9 +1411,11 @@ var exports = {};
 				
 				var handlePush = function(options, location, ref, name, force){
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					progressService.createProgressMonitor(gitService.doPush(location, ref, true, force, //$NON-NLS-0$
+					var deferred = gitService.doPush(location, ref, true, force, //$NON-NLS-0$
 							options.gitSshUsername, options.gitSshPassword, options.knownHosts,
-							options.gitPrivateKey, options.gitPassphrase), messages['Pushing remote: '] + name).deferred.then(
+							options.gitPrivateKey, options.gitPassphrase);
+					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name)
+					deferred.then(
 						function(jsonData){
 							exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
 								function() {
@@ -1557,7 +1573,9 @@ var exports = {};
 						messages["All unstaged and staged changes will be discarded and cannot be recovered. Are you sure?"])){
 					var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-					progressService.createProgressMonitor(service.resetIndex(item.IndexLocation, item.Name), messages["Resetting index..."]).deferred.then(
+					var deferred = service.resetIndex(item.IndexLocation, item.Name);
+					progressService.createProgressMonitor(deferred, messages["Resetting index..."]);
+					deferred.then(
 						function(result){
 							var display = {};
 							display.Severity = "Info"; //$NON-NLS-0$
@@ -1837,9 +1855,11 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-								options.gitPrivateKey, options.gitPassphrase),
-								messages["Cloning repository: "] + gitUrl).deferred.then(function(jsonData, secondArg) {
+						var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+								options.gitPrivateKey, options.gitPassphrase);
+						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+								messages["Cloning repository: "] + gitUrl);
+						deferred.then(function(jsonData, secondArg) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 								if (explorer.changedItem) {
 									dojo.hitch(explorer, explorer.changedItem)();
@@ -1881,9 +1901,11 @@ var exports = {};
 				var cloneFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 						var func = arguments.callee;
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
-								options.gitPrivateKey, options.gitPassphrase),
-								messages["Cloning repository: "] + gitUrl).deferred.then(function(jsonData, secondArg) {
+						var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath, options.gitSshUsername, options.gitSshPassword, options.knownHosts, //$NON-NLS-0$
+								options.gitPrivateKey, options.gitPassphrase);
+						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+								messages["Cloning repository: "] + gitUrl);
+						deferred.then(function(jsonData, secondArg) {
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
 								if (explorer.changedItem) {
 									dojo.hitch(explorer, explorer.changedItem)();
@@ -1924,8 +1946,10 @@ var exports = {};
 				var initRepositoryFunction = function(gitUrl, path, name) {
 					exports.getDefaultSshOptions(serviceRegistry).then(function(options){
 						var func = arguments.callee;
-						serviceRegistry.getService("orion.page.message").createProgressMonitor(gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath), //$NON-NLS-0$
-								messages["Initializing repository: "] + name).deferred.then(function(jsonData, secondArg){
+						var deferred = gitService.cloneGitRepository(name, gitUrl, path, explorer.defaultPath); //$NON-NLS-0$
+						serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
+								messages["Initializing repository: "] + name);
+						deferred.then(function(jsonData, secondArg){
 							exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData){
 								if(explorer.changedItem)
 									dojo.hitch(explorer, explorer.changedItem)();
@@ -2166,10 +2190,12 @@ var exports = {};
 				
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				
-				if (items.length === 1){				
+				if (items.length === 1){
+					var deferred = serviceRegistry.getService("orion.git.provider").stage(items[0].indexURI); //$NON-NLS-0$ 
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").stage(items[0].indexURI), //$NON-NLS-0$
-						messages["Staging changes"]).deferred.then(
+						deferred,
+						messages["Staging changes"])
+					deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(items);
 						}, displayErrorOnStatus
@@ -2180,9 +2206,11 @@ var exports = {};
 						paths[i] = items[i].name;
 					}
 					
+					var deferred = serviceRegistry.getService("orion.git.provider").stageMultipleFiles(data.userData.Clone.IndexLocation, paths);
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").stageMultipleFiles(data.userData.Clone.IndexLocation, paths), //$NON-NLS-0$
-						"Staging changes").deferred.then( //$NON-NLS-0$
+						deferred, //$NON-NLS-0$
+						"Staging changes");
+					deferred.then( //$NON-NLS-0$
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(items);
 						}, displayErrorOnStatus
@@ -2216,9 +2244,11 @@ var exports = {};
 				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 
 				if (items.length === 1){				
+					var deferred = serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name);
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name), //$NON-NLS-0$
-						messages['Staging changes']).deferred.then(
+						deferred, //$NON-NLS-0$
+						messages['Staging changes']);
+					deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(items);
 						}, displayErrorOnStatus
@@ -2229,9 +2259,11 @@ var exports = {};
 						paths[i] = items[i].name;
 					}
 					
+					var deferred = serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths); //$NON-NLS-0$
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths), //$NON-NLS-0$
-						messages['Staging changes']).deferred.then(
+						deferred,
+						messages['Staging changes']);
+					deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(items);
 						}, displayErrorOnStatus
@@ -2267,9 +2299,11 @@ var exports = {};
 				
 				var commitFunction = function(body){		
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+					var deferred =serviceRegistry.getService("orion.git.provider").commitAll(item.Clone.HeadLocation, null, dojo.toJson(body)); //$NON-NLS-0$ 
 					progressService.createProgressMonitor(
-						serviceRegistry.getService("orion.git.provider").commitAll(item.Clone.HeadLocation, null, dojo.toJson(body)), //$NON-NLS-0$
-						messages["Committing changes"]).deferred.then(
+						deferred,
+						messages["Committing changes"]);
+					deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(item);
 						}, displayErrorOnStatus
@@ -2327,9 +2361,11 @@ var exports = {};
 							return;
 						}
 						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+						var deferred = serviceRegistry.getService("orion.git.provider").unstageAll(item.IndexLocation, "HARD"); //$NON-NLS-1$ //$NON-NLS-0$ 
 						progressService.createProgressMonitor(
-							serviceRegistry.getService("orion.git.provider").unstageAll(item.IndexLocation, "HARD"), //$NON-NLS-1$ //$NON-NLS-0$
-							messages["Resetting local changes"]).deferred.then(
+							deferred,
+							messages["Resetting local changes"]);
+						deferred.then(
 							function(jsonData){
 								dojo.hitch(explorer, explorer.changedItem)(item);
 							}, displayErrorOnStatus
@@ -2369,9 +2405,11 @@ var exports = {};
 							paths[i] = items[i].name;
 						}
 						
+						var deferred = serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths); //$NON-NLS-0$
 						progressService.createProgressMonitor(
-							serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), //$NON-NLS-0$
-							messages['Resetting local changes']).deferred.then(
+							deferred,
+							messages['Resetting local changes']);
+						deferred.then(
 							function(jsonData){
 								dojo.hitch(explorer, explorer.changedItem)(items);
 							}, displayErrorOnStatus
@@ -2478,9 +2516,11 @@ var exports = {};
 		function _rebase(HeadLocation, action){
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			
+			var deferred = serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action); //$NON-NLS-0$ 
 			progressService.createProgressMonitor(
-				serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), //$NON-NLS-0$
-				action).deferred.then(
+				deferred,
+				action);
+			deferred.then(
 				function(jsonData){
 					if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var display = [];
