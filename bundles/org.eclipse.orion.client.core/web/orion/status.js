@@ -286,8 +286,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 		}
 	}
 	
-	ProgressMonitor.prototype = new dojo.Deferred();
-	
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.
 	 * @param {String} message
