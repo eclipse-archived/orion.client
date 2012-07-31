@@ -1747,7 +1747,11 @@ var exports = {};
 					function(clone){
 						var url = clone.Children[0].GitUrl;
 						var sha1 = data.items.Name;
-						var pullRequestUrl = window.location.protocol + "//" + window.location.host + "/" + "git/pullRequest.html#" + url + "_" + sha1;
+						
+						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+						
+						var pullRequestUrl = orionHome + "/git/pullRequest.html#" + url + "_" + sha1;
 						var dialog = new orion.git.widgets.GetPullRequestUrlDialog({
 							title: messages["Pull Request"],
 							url: pullRequestUrl
