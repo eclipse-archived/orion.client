@@ -345,5 +345,8 @@ define({
 	"Change..." : "Change...",
 	"Merge Squash": "Merge Squash",
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
-	"Local Branch Name:" : "Local Branch Name:"
+	"Local Branch Name:" : "Local Branch Name:",
+	"Pull Request url for this commit" : "Pull Request url for this commit",
+	"Pull Request" : "Pull Request",
+	"Pull Request Url" : "Pull Request Url"
 });

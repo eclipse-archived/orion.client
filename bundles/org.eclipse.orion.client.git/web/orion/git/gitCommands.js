@@ -13,7 +13,7 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 
+        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/GetPullRequestUrlDialog', 
         'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
         function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils) {
 
@@ -1734,7 +1734,37 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(cherryPickCommand);
+		
+		var getPullRequestUrlCommand = new mCommands.Command({
+			name : messages["Pull Request Url"],
+			tooltip: messages["Pull Request url for this commit"],
+			id : "eclipse.orion.git.getPullRequestUrl", //$NON-NLS-0$
+			imageClass: "git-sprite-cherry_pick", //$NON-NLS-0$
+			spriteClass: "gitCommandSprite", //$NON-NLS-0$
+			callback: function(data) {
+				var service = serviceRegistry.getService("orion.git.provider");
+				service.getGitClone(data.items.CloneLocation).then(
+					function(clone){
+						var url = clone.Children[0].GitUrl;
+						var sha1 = data.items.Name;
+						var pullRequestUrl = window.location.protocol + "//" + window.location.host + "/" + "git/pullRequest.html#" + url + "_" + sha1;
+						var dialog = new orion.git.widgets.GetPullRequestUrlDialog({
+							title: messages["Pull Request"],
+							url: pullRequestUrl
+						});
+						dialog.startup();
+						dialog.show();
+					}
+				);
+			},
+			visibleWhen : function(item) {
+				return item.Type === "Commit"; //$NON-NLS-0$
+			}
+		});
+	
+		commandService.addCommand(getPullRequestUrlCommand);
 	};
+	
 
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
