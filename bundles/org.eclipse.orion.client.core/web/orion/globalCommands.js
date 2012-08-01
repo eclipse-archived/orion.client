@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/settings/ThemeSheetWriter',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/settings/ThemeSheetWriter',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -681,17 +681,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			var side = dojo.query(".sidePanelLayout")[0];
 			var main = dojo.query(".mainPanelLayout")[0];
 			if (side && main) {
-				// initial position - do we have a pref?  otherwise attach the pieces and make visible.
-				var pos = dojo.position(splitter);
-				dojo.style(side, {"right": pos.x, "display": "block"});
-				dojo.style(main, {"left": pos.x+pos.width, "display": "block"});
-				
-				// mouse down 
-					// if in toggle then close aux (reposition and store(
-					// otherwise start tracking
-				// mouse move track
-				// mouse up reposition and store
-				// reposition and store = animate and save pref, try a css transition.
+				new mSplitter.Splitter({node: splitter, sidePanel: side, mainPanel: main});
 			}
 		}
 		

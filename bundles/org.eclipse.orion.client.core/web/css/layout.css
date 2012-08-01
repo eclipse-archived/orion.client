@@ -17,7 +17,7 @@ Header height: 60px
     top: 60px;  /* header height */
     bottom: 0;
     left: 0;
-    right: 0;
+    width: 100%;
 	margin-bottom: 28px;  /* footer height */   
 }
 
@@ -90,6 +90,13 @@ Header height: 60px
 	height: 100%;
 }
 
+.sidePanelLayoutAnimation {
+	-webkit-transition: width 0.5s ease;
+	-moz-transition: width 0.5s ease;
+	-o-transition: width 0.5s ease;
+	transition: width 0.5s ease;
+}
+
 .sidePanelPadding {
 	padding-left: 8px;
 	padding-top: 2px;
@@ -104,6 +111,13 @@ Header height: 60px
 	z-index: 500;
 	width: 66%;
 	height: 100%;
+}
+
+.mainPanelLayoutAnimation {
+	-webkit-transition: width 0.5s ease;
+	-moz-transition: width 0.5s ease;
+	-o-transition: width 0.5s ease;
+	transition: width 0.5s ease;
 }
 
 .fixedToolbarHolder {
@@ -132,5 +146,19 @@ Header height: 60px
 	z-index: 800;
 	width: 4px;
 	margin-right: 4px;
+	cursor: e-resize;
 }
+
+.splitThumbLayout {
+	position: relative;
+	left: 0;
+	height: 2em;
+	top: 49%;
+	cursor: pointer;
+}
+
+.splitLayoutAnimation {
+	background: transparent !important;
+}
+
 
