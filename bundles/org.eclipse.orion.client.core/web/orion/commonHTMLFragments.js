@@ -24,7 +24,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	
-	'<header role="banner">' + //$NON-NLS-0$
+	'<header id="banner" role="banner">' + //$NON-NLS-0$
 		//Top row:  Logo + discovery links + user
 		'<div id="staticBanner" class="layoutBlock topRowBanner">' + //$NON-NLS-0$
 			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="'+messages['Orion Home']+'"></a>' + //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

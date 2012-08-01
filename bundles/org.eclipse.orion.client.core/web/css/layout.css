@@ -8,6 +8,9 @@ There are implied variables here.
 Footer height: 28px
 Toolbar height: 31px
 Header height: 60px
+
+The transition delays used for splitter animation (0.5) have a relationship with the animation delay used
+by the splitter bar.  If these values change, then change the delay in the splitter.
 */
 
 .content-fixedHeight {
@@ -97,10 +100,11 @@ Header height: 60px
 	transition: width 0.5s ease;
 }
 
-.sidePanelPadding {
-	padding-left: 8px;
-	padding-top: 2px;
-    padding-bottom: 8px;
+.sidePanelMargins {
+	margin-left: 8px;
+	margin-top: 2px;
+    margin-bottom: 8px;
+    width: auto;
 }
 
 .mainPanelLayout {
@@ -169,5 +173,3 @@ Header height: 60px
 	-ms-user-select: none;
 	user-select: none;
 }
-
-

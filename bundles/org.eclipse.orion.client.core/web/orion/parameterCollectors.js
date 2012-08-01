@@ -12,8 +12,8 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton'], 
-        function(messages, require, dojo, dijit, mCommands, mUtil){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton'], 
+        function(messages, require, dojo, dijit) {
 
 	
 	/**
@@ -21,9 +21,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 	 * @class CommandParameterCollector can collect parameters in a way that is integrated with the 
 	 * common header elements of pages or sections.
 	 * @name orion.parameterCollectors.CommandParameterCollector
+	 * @param toolbarLayout  
 	 */	
-	function CommandParameterCollector () {
+	function CommandParameterCollector (getElementsFunction, toolbarLayoutFunction) {
 		this._activeContainer = null;
+		this._getElementsFunction = getElementsFunction;
+		this._toolbarLayoutFunction = toolbarLayoutFunction;
 	}
 	
 	CommandParameterCollector.prototype =  {
@@ -45,9 +48,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				if (this._activeElements.commandNode) {
 					dojo.removeClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
 				}
-				if (this._activeElements.toolbarTarget && this._activeElements.toolbarTargetY) {
-					dojo.style(this._activeElements.toolbarTarget, {"top": this._activeElements.toolbarTargetY + "px", "bottom": 0});  //$NON-NLS-0$  //$NON-NLS-1$ //$NON-NLS-2$ 
-				}
+				this._toolbarLayoutFunction(this._activeElements);
 				if (this._activeElements.onClose) {
 					this._activeElements.onClose();
 				}
@@ -59,42 +60,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 			this._activeElements = null;
 		},
 		
-		_findParameterElements: function(commandOrToolbar) {
-			var elements = {};
-			var toolbarNode = null;
-			if (typeof commandOrToolbar === "string") { //$NON-NLS-0$
-				commandOrToolbar = dojo.byId(commandOrToolbar);
-			}
-			var node = commandOrToolbar;
-			// the trickiest part is finding where to start looking (section or main toolbar).
-			// We need to walk up until we find a "toolComposite"
-
-			while (node) {
-				if (dojo.hasClass(node, "toolComposite")) { //$NON-NLS-0$
-					toolbarNode = node;
-					break;
-				}
-				node = node.parentNode;
-			}
-			if (dojo.hasClass(commandOrToolbar, "commandMarker")) { //$NON-NLS-0$
-				elements.commandNode = commandOrToolbar;
-			}
-			if (toolbarNode) {
-				elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0]; //$NON-NLS-0$
-				elements.parameterArea = dojo.query(".parameters", toolbarNode)[0]; //$NON-NLS-0$
-				elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0]; //$NON-NLS-0$
-				if (toolbarNode.parentNode) {
-					elements.toolbarTarget = dojo.query(".toolbarTarget", toolbarNode.parentNode)[0]; //$NON-NLS-0$
-					if (elements.toolbarTarget) {
-						var posParent = dojo.position(toolbarNode.parentNode);
-						var pos = dojo.position(elements.toolbarTarget);
-						elements.toolbarTargetY = pos.y - posParent.y;
-						elements.toolbarParentY = posParent.y;
-					}
-				}
-			}
-			return elements;
-		},
 		
 		/**
 		 * Open a parameter collector and return the dom node where parameter 
@@ -110,8 +75,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 			}
 			this.close();
 			this._activeElements = null;
-			// determine  the closest parameter container to the command.
-			this._activeElements = this._findParameterElements(commandNode);
+			// determine the closest parameter container to the command.
+			this._activeElements = this._getElementsFunction(commandNode);
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer) {
 				this._activeElements.onClose = onClose;
 				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
@@ -136,10 +101,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands',
 				}
 				// all parameters have been generated.  Activate the area.
 				dojo.addClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
-				if (this._activeElements.toolbarTarget && this._activeElements.toolbarTargetY) {
-					var pos = dojo.position(this._activeElements.slideContainer);
-					dojo.style(this._activeElements.toolbarTarget, {"top": pos.y + pos.h - this._activeElements.toolbarParentY + 8 + "px", "bottom": 0}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
-				}
+				this._toolbarLayoutFunction(this._activeElements);
 
 				if (focusNode) {
 					this._oldFocusNode = window.document.activeElement;

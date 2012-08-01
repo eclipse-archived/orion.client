@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true*/
-/*global define eclipse:true orion:true dojo dijit window*/
+/*global define eclipse:true orion:true dojo window*/
 
 define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
@@ -53,7 +53,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	
 	var outlineDomNode = dojo.byId("outline"), //$NON-NLS-0$
 		editorDomNode = dojo.byId("editor"), //$NON-NLS-0$
-		mainPane = dijit.byId("mainPane"), //$NON-NLS-0$
 		searchFloat = dojo.byId("searchFloat"); //$NON-NLS-0$
 
 	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
@@ -67,9 +66,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			tabSize: 4,
 			readonly: isReadOnly
 		});
-		dojo.connect(mainPane, "resize", dojo.hitch(this, function (e){ //$NON-NLS-0$
-			textView.resize();
-		}));
 		return textView;
 	};
 	
@@ -118,12 +114,12 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							this._fileMetadata = metadata;
 							var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
-								dojo.empty(toolbar);
+								commandService.destroy(toolbar);
 								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
 							}
 							toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
 							if (toolbar) {	
-								dojo.empty(toolbar);
+								commandService.destroy(toolbar);
 								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 							}
 							this.setTitle(metadata.Location);
@@ -422,13 +418,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}, 0);
 			return true;
 		}, {name: messages["Search Files"]}); //$NON-NLS-0$
-		
-		// splitter binding
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
-		editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
-				// splitArea.toggle();
-				return true;
-		}, {name: messages["Toggle Outliner"]}); //$NON-NLS-0$
 	};
 	
 	// Content Assist
@@ -540,7 +529,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				filteredProviders.push(serviceReference);
 			}
 		}
-		var deferreds = [];
+		var deferreds = []; 
 		for(var i=0; i<filteredProviders.length; i++){
 			if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){
 				var deferred = new dojo.Deferred();

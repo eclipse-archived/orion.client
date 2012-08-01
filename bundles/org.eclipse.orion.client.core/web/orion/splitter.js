@@ -37,6 +37,7 @@ define(['require', 'dojo'], function(require, dojo) {
 			
 		_init: function(options) {
 			this._tracking = null;
+			this._resizeListeners = [];
 			this._animationDelay = 520;  // longer than CSS transitions in layout.css
 			function nodeFromOption(value) {
 				var node = value;
@@ -61,13 +62,6 @@ define(['require', 'dojo'], function(require, dojo) {
 			dojo.connect(this._node, "onmousedown", this, this._mouseDown); //$NON-NLS-0$
 			dojo.connect(window, "onmouseup", this, this._mouseUp); //$NON-NLS-0$
 			dojo.connect(window, "onresize", this, this._resize);  //$NON-NLS-0$
-			// Ctrl+o handler for toggling side panel 
-			dojo.connect(document, "onkeydown", this, function(event) {
-				if (event.ctrlKey && event.keyCode  === 79) {
-					this._thumbDown();
-					stop(event);				
-				} 
-			});
 		},
 		/**
 		 * Toggle the open/closed state of the side panel.
@@ -84,22 +78,37 @@ define(['require', 'dojo'], function(require, dojo) {
 				this._thumbDown();
 			}
 		 },
+		 /**
+		 * Adds an event listener for resizing the main and side panels.
+		 * @param {Function} listener The function called when a resize occurs
+		 */
+		 addResizeListener: function(listener) {
+			this._resizeListeners.push(listener);
+		 },
 		
 		_adjustToSplitPosition: function() {
 			var pos = dojo.position(this._node);
 			this._splitWidth = pos.w;
 			this._splitLeft = pos.x;
-			dojo.style(this._sideNode, {width: "auto", right: this._splitLeft - 1 +"px", display: "block"}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
+			dojo.style(this._sideNode, {width: this._splitLeft + "px", right: this._splitLeft - 1 +"px", display: "block"}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
 			dojo.style(this._node, {left: this._splitLeft + "px"}); //$NON-NLS-0$ 
 			this._resize();
 		},
 		
-		_resize: function(event) {
+		_resize: function(delay) {
+			delay = delay || 0;
 			var pos = dojo.position(this._node.parentNode);
 			this._totalWidth = pos.w;
 			pos = dojo.position(this._node);
 			dojo.style(this._mainNode, {width: (this._totalWidth - pos.x - pos.w) +"px"}); //$NON-NLS-0$ 
+			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(); }), delay);
 		},
+		
+		_notifyResizeListeners: function() {
+			for (var i = 0; i <this._resizeListeners.length; i++) {
+				this._resizeListeners[i]();
+			}
+		}, 
 		
 		_thumbDown: function() {
 			if (this._closed) {
@@ -107,14 +116,14 @@ define(['require', 'dojo'], function(require, dojo) {
 				this._addAnimation();
 				dojo.style(this._sideNode, {width: this._splitLeft+"px"}); //$NON-NLS-0$ 
 				dojo.style(this._node, {left: this._splitLeft+"px"}); //$NON-NLS-0$
-				this._resize();
+				this._resize(this._animationDelay);
 				this._removeAnimation();
 			} else {
 				this._closed = true;
 				this._addAnimation();
 				dojo.style(this._sideNode, {width: 0}); 
 				dojo.style(this._node, {left: "1px"}); //$NON-NLS-0$ 
-				this._resize();
+				this._resize(this._animationDelay);
 				this._removeAnimation();
 			}
 		},

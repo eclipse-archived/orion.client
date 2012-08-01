@@ -897,7 +897,7 @@ exports.InlineCompareContainer = (function() {
 			var styleStr = mCompareUtils.getDijitSizeStyle(this._editorDivId);
 			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
 			wrapperWidget.placeAt(this._editorDivId);
-			mUtil.forceLayout(this._editorDivId);
+			wrapperWidget.layout();
 			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
 		}
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$

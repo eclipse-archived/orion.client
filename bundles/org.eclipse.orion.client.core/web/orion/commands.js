@@ -756,8 +756,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 						child.destroy();
 					}
 				}
-				// TODO should the caller have to do this?
-				mUtil.forceLayout(parent);
 			}
 		},
 		
