@@ -9,14 +9,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
+/*global define document dojo window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'dojo', 'dijit', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes',
-        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
-		function(messages, dojo, dijit, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
+        'dojo/parser'], 
+		function(messages, dojo, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
@@ -37,7 +37,7 @@ dojo.addOnLoad(function(){
 
 		// global commands
 		mGlobalCommands.setPageCommandExclusions(["eclipse.openWith", "orion.navigateFromMetadata"]); //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-navigate", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		
 		var treeRoot = {
 			children:[]
@@ -81,17 +81,6 @@ dojo.addOnLoad(function(){
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
 		
-		// navigator-specific commands
-		var toggleOutlineCommand = new mCommands.Command({
-			name: messages["Toggle Left Pane"],
-			tooltip: messages["Open or close the left pane"],
-			id: "eclipse.toggleSplitter", //$NON-NLS-0$
-			callback: function() {
-				var splitArea = dijit.byId("eclipse.navigate-table"); //$NON-NLS-0$
-				splitArea.toggle();}
-		});
-		commandService.addCommand(toggleOutlineCommand);
-				
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("pageActions", "orion.new", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.addCommandGroup("pageActions", "orion.gitGroup", 200); //$NON-NLS-1$ //$NON-NLS-0$
@@ -99,7 +88,6 @@ dojo.addOnLoad(function(){
 		commandService.addCommandGroup("selectionTools", "orion.importExportGroup", 100, null, "orion.selectionGroup");		 //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.addCommandGroup("selectionTools", "orion.newResources", 101, null, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		// commands that don't appear but have keybindings
-		commandService.registerCommandContribution("pageActions", "eclipse.toggleSplitter", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.copySelections", 1, null, true, new mCommands.CommandKeyBinding('c', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.pasteSelections", 1, null, true, new mCommands.CommandKeyBinding('v', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
