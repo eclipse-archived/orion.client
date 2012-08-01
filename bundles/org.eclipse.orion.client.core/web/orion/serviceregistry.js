@@ -88,7 +88,23 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-	function Service(serviceId, implementation, internalRegistry, registered) {
+	function DeferredService(implementation) {
+		var method;
+
+		function _createServiceCall(methodName) {
+			return function() {
+				return Deferred.when(implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments)));
+			};
+		}
+
+		for (method in implementation) {
+			if (typeof implementation[method] === 'function') {
+				this[method] = _createServiceCall(method);
+			}
+		}
+	}
+	
+	function RegisteredService(serviceId, implementation, internalRegistry, registered) {
 		var method;
 
 		function _createServiceCall(methodName) {
@@ -204,10 +220,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 				names = [names];
 			}
 			
-			var reference = new ServiceReference(serviceId, names, properties);
+			var deferredService = new DeferredService(implementation);
 			var registered = new Deferred();
-			var service = new Service(serviceId, implementation, this.internalRegistry, registered);
-
+			var registeredService = new RegisteredService(serviceId, deferredService, this.internalRegistry, registered);
+			
+			var reference = new ServiceReference(serviceId, names, properties);
 			var namedReferences = this._namedReferences;
 			names.forEach(function(name) {
 				namedReferences[name] = namedReferences[name] || [];
@@ -216,9 +233,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			
 			this._entries.push({
 				reference: reference,
-				service: service
+				service: registeredService
 			});
-			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service).then(registered.resolve);
+	
+			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, deferredService).then(registered.resolve);
 			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
 		},
 
