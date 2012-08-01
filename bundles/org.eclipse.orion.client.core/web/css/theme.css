@@ -79,6 +79,14 @@ a:hover {
 	background: #efefef;
 }
 
+.splitTracking {
+	background: #dedede;
+}
+
+.splitThumb {
+	background: #cdcdcd;
+}
+
 /* Row selection */
 
 .checkedRow {
