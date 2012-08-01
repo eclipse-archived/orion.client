@@ -555,13 +555,17 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				filteredProviders[i].displayName = filteredProviders[i].getProperty("name");
 			}
 		}
-		if(deferreds.length==0){
+		if(deferreds.length===0){
 			outlineService.setOutlineProviders(filteredProviders);
-			outliner.setOutlineProviders(filteredProviders);
+			if (outliner) {
+				outliner.setOutlineProviders(filteredProviders);
+			}
 		}else{
 			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
 				outlineService.setOutlineProviders(filteredProviders);
-				outliner.setOutlineProviders(filteredProviders);
+				if (outliner) {
+					outliner.setOutlineProviders(filteredProviders);
+				}
 			}));
 		}
 	}
