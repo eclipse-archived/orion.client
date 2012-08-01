@@ -246,7 +246,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			});
 			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
 			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
-			mUtil.forceLayout(domNode);
 		}	
 	}
 	
@@ -368,7 +367,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
 				_checkForEmptyLinksMenu();
-				mUtil.forceLayout(related);
 			}));
 		}));
 	}
@@ -573,6 +571,63 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 	}
 	
+	function getToolbarElements(toolNode) {
+		var elements = {};
+		var toolbarNode = null;
+		if (typeof toolNode === "string") { //$NON-NLS-0$
+			toolNode = dojo.byId(toolNode);
+		}
+		var node = toolNode;
+		// the trickiest part is finding where to start looking (section or main toolbar).
+		// We need to walk up until we find a "toolComposite"
+
+		while (node) {
+			if (dojo.hasClass(node, "toolComposite")) { //$NON-NLS-0$
+				toolbarNode = node;
+				break;
+			}
+			node = node.parentNode;
+		}
+		if (dojo.hasClass(toolNode, "commandMarker")) { //$NON-NLS-0$
+			elements.commandNode = toolNode;
+		}
+		if (toolbarNode) {
+			elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0]; //$NON-NLS-0$
+			elements.parameterArea = dojo.query(".parameters", toolbarNode)[0]; //$NON-NLS-0$
+			elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0]; //$NON-NLS-0$
+			elements.notifications = dojo.query("#notificationArea", toolbarNode)[0]; //$NON-NLS-0$
+			if (toolbarNode.parentNode) {
+				elements.toolbarTarget = dojo.query(".toolbarTarget", toolbarNode.parentNode)[0]; //$NON-NLS-0$
+				if (elements.toolbarTarget) {
+					var posParent = dojo.position(toolbarNode.parentNode);
+					var pos = dojo.position(elements.toolbarTarget);
+					elements.toolbarTargetY = pos.y - posParent.y;
+					elements.toolbarParentY = posParent.y;
+				}
+			}
+		}
+		return elements;
+	}
+	
+	function layoutToolbarElements(elements) {
+		if (elements.toolbarTarget && elements.toolbarTargetY) {
+			var heightExtras = 0;
+			var pos;
+			if (elements.notifications && dojo.hasClass(elements.notifications, "slideContainerActive")) { //$NON-NLS-0$
+				pos = dojo.position(elements.notifications);
+				heightExtras += pos.h;
+			}
+			if (elements.slideContainer && dojo.hasClass(elements.slideContainer, "slideContainerActive")) { //$NON-NLS-0$
+				pos = dojo.position(elements.slideContainer);
+				heightExtras += pos.h;
+			}
+			if (heightExtras > 0) {
+				heightExtras += 8;  // padding
+			}
+			dojo.style(elements.toolbarTarget, {"top": elements.toolbarTargetY + heightExtras + "px", "bottom": 0}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+		}
+	}
+	
 	
 	/**
 	 * Generates the banner at the top of a page.
@@ -587,7 +642,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var target = "_self"; //$NON-NLS-0$
 		var parent = dojo.byId(parentId);
 		
-		if (!dojo.byId("staticBanner")) {
+		if (!dojo.byId("staticBanner")) { //$NON-NLS-0$
 			if (!parent) {
 				throw messages["could not find banner parent, id was "] + parentId;
 			}
@@ -600,16 +655,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
 		}
 		
-		if (!dojo.byId("footerContent")) {
-			// Needs cleanup
-			var footer = dojo.byId("footer"); //$NON-NLS-0$
-			if (footer) {
-				dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
-			}
+		var footer = dojo.byId("footer"); //$NON-NLS-0$
+		if (footer) {
+			dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
-		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector());
+		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
 
 		
 		// place an empty div for keyAssist
@@ -675,13 +727,39 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		});
 		
-		// hook up split behavior
-		var splitter = dojo.query(".split")[0];
-		if (splitter) {
+		// hook up split behavior - the splitter widget and the associated global command/key bindings.
+		var splitter;
+		var splitNode = dojo.query(".split")[0];
+		if (splitNode) {
 			var side = dojo.query(".sidePanelLayout")[0];
 			var main = dojo.query(".mainPanelLayout")[0];
 			if (side && main) {
-				new mSplitter.Splitter({node: splitter, sidePanel: side, mainPanel: main});
+				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main});
+				var toggleSidePanelCommand = new mCommands.Command({
+					name: "Toggle side panel",
+					tooltip:"Open or close the side panel",
+					id: "orion.toggleSidePane", //$NON-NLS-0$
+					callback: function() {
+						splitter.toggleSidePanel();}
+				});
+				commandService.addCommand(toggleSidePanelCommand);
+				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		
+				// editor specific behavior if needed
+				if (editor) {
+					splitter.addResizeListener(function() {
+						editor.getTextView().resize();
+					});
+				
+					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
+					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
+						splitter.toggleSidePanel();
+						return true;
+					}, {name:"Toggle Outliner"}); 
+				}
+				
+				
+				
 			}
 		}
 		
@@ -766,19 +844,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			tooltip: messages["Hide or show the page banner and footer"],
 			id: "orion.toggleTrim", //$NON-NLS-0$
 			callback: function() {
-				var layoutWidget = dijit.byId(parent.parentNode.id);
-				if (layoutWidget) {
-					var header = parent;
-					var footer = dojo.byId("footer"); //$NON-NLS-0$
-					if (header.style.display === "none") { //$NON-NLS-0$
-						header.style.display = "block"; //$NON-NLS-0$
-						footer.style.display = "block"; //$NON-NLS-0$
-					} else {
-						header.style.display = "none"; //$NON-NLS-0$
-						footer.style.display = "none"; //$NON-NLS-0$
-					}
-					layoutWidget.layout();
-				}
+				var header = dojo.byId("banner"); //$NON-NLS-0$
+				var footer = dojo.byId("footer"); //$NON-NLS-0$
+				if (header.style.display === "none") { //$NON-NLS-0$
+					header.style.display = "block"; //$NON-NLS-0$
+					footer.style.display = "block"; //$NON-NLS-0$
+				} else {
+					header.style.display = "none"; //$NON-NLS-0$
+					footer.style.display = "none"; //$NON-NLS-0$
+				}	
 				return true;
 			}});
 		commandService.addCommand(toggleBanner);
@@ -896,10 +970,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
 
-		// force layout
-		if (parent) {
-			mUtil.forceLayout(parent.parentNode);
-		}
 		//every time the user manually changes the hash, we need to load the workspace with that name
 		dojo.subscribe("/dojo/hashchange", commandService, function() { //$NON-NLS-0$
 			commandService.processURL(window.location.href);
@@ -945,6 +1015,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		generateUserInfo: generateUserInfo,
 		generateRelatedLinks: generateRelatedLinks,
 		generateBanner: generateBanner,
+		getToolbarElements: getToolbarElements,
+		layoutToolbarElements: layoutToolbarElements,
 		notifyAuthenticationSite: notifyAuthenticationSite,
 		setPendingAuthentication: setPendingAuthentication,
 		getAuthenticationIds: getAuthenticationIds,

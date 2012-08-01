@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window Image */
  
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
+define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlobalCommands) {
 	
 	/**
 	 * Service for reporting status
@@ -39,16 +39,21 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			if (closeButton && !this._hookedClose) {
 				dojo.connect(closeButton, "onclick", this, function() { //$NON-NLS-0$
 					this.setProgressMessage("");
-					dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 				});	
 				// onClick events do not register for spans when using the keyboard
 				dojo.connect(closeButton, "onkeypress", this, function(e) { //$NON-NLS-0$
 					if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
 						this.setProgressMessage("");
-						dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 					}				
 				});
 			}
+		},
+		
+		_getNotifierElements: function() {
+			if (!this._notifierElements) {
+				this._notifierElements = mGlobalCommands.getToolbarElements(this.notificationContainerDomId);
+			}
+			return this._notifierElements;
 		},
 		/**
 		 * Displays a status message to the user.
@@ -144,7 +149,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			}else{
 				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			}
-			mUtil.forceLayout(this.notificationContainerDomId);
+			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**
@@ -197,7 +202,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				}
 			}
 			dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
-			mUtil.forceLayout(this.notificationContainerDomId);
+			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**

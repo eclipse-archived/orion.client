@@ -305,25 +305,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 	}
 	
 	/**
-	 * Force a layout in the parent tree of the specified node, if there are layout managers assigned.
-	 *
-	 * @param {DomNode} node the node triggering new layout.
-	 */
-	function forceLayout(node) {
-		if (typeof node === "string") { //$NON-NLS-0$
-			node = dojo.byId(node);
-		}
-		while (node) {
-			var widget = dijit.byId(node.id);
-			if (widget && typeof widget.layout === "function") { //$NON-NLS-0$
-				widget.layout();
-				return;
-			}
-			node = node.parentNode;
-		}
-	}
-	
-	/**
 	 * Utility method for saving file contents to a specified location
 	 */
 	function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
@@ -416,7 +397,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		getText: getText,
 		safeText: safeText,
 		setText: setText,
-		forceLayout: forceLayout,
 		saveFileContents: saveFileContents,
 		splitFile: splitFile
 	};
