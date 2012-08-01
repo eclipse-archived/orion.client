@@ -98,6 +98,9 @@ define([], function() {
 			addedListener = /** @ignore */ function(serviceRef, service) {
 				if (isTrackable(serviceRef)) {
 					add.call(self, serviceRef);
+					if (typeof self.onServiceAdded === 'function') {
+						return self.onServiceAdded(serviceRef, service);
+					}
 				}
 			};
 			removedListener = /** @ignore */ function(serviceRef, service) {
@@ -117,8 +120,8 @@ define([], function() {
 	}
 	ServiceTracker.prototype = {
 		/**
-		 * Called when a service is being added to this ServiceTracker. Subclasses may override this method. The
-		 * default implementation returns the result of calling {@link orion.serviceregistry.ServiceRegistry#getService}
+		 * Called to customize a service object being added to this ServiceTracker. Subclasses may override this method.
+		 * The default implementation returns the result of calling {@link orion.serviceregistry.ServiceRegistry#getService}
 		 * passing the service reference.
 		 * @name orion.ServiceTracker#addingService
 		 * @function
@@ -141,6 +144,18 @@ define([], function() {
 		 * @function
 		 */
 		onClose: null,
+		/**
+		 * Called when a service is being added to this ServiceTracker. Subclasses can override this method to take part
+		 * in the service's <code>'serviceAdded'</code> phase.
+		 * @name orion.ServiceTracker#onServiceAdded
+		 * @function
+		 * @param {orion.serviceregistry.ServiceReference} serviceRef
+		 * @param {orion.serviceregistry.Service} service
+		 * @returns {Deferred|undefined} This method can optionally return a deferred. If it does, the returned deferred
+		 * will be added to the service's <code>serviceAdded</code> listener queue; in other words, the returned deferred
+		 * must resolve before any calls to the service's methods can proceed.
+		 */
+		onServiceAdded: null,
 		/**
 		 * Called when a service has been removed from this ServiceTracker. Subclasses may override this method.
 		 * The default implementation does nothing.

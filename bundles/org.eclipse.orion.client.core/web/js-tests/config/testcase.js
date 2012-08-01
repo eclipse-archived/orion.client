@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
+/*global define setTimeout*/
 define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
 		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
@@ -19,14 +19,18 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			this.map = {};
 		}
 		PrefNode.prototype = {
+			clear: function() {
+				this.map = {};
+			},
 			keys: function() {
 				return Object.keys(this.map);
 			},
 			get: function(key) {
-				return this.map[key];
+				var value = this.map[key];
+				return typeof value === 'object' ? JSON.parse(value) : undefined;
 			},
 			put: function(key, value) {
-				this.map[key] = value;
+				this.map[key] = JSON.stringify(value);
 			},
 			remove: function(key) {
 				delete this.map[key];
@@ -34,29 +38,25 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		};
 		this.getPreferences = function(name, scope) {
 			var d = new Deferred();
-			var prefNode = new PrefNode();
-			d.resolve(prefNode);
+			setTimeout(function() {
+				var prefNode = new PrefNode();
+				d.resolve(prefNode);
+			}, 100);
 			return d;
 		};
 	}
 
-	var serviceRegistry, pluginRegistry, pluginStorage, mockPrefs, factory, configAdmin;
+	var serviceRegistry, pluginRegistry, pluginStorage, configAdmin;
 	var setUp = function(storage) {
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
+		configAdmin = new ConfigAdminFactory(serviceRegistry, new MockPrefsService()).getConfigurationAdmin();
 		pluginStorage = arguments.length ? storage : {};
 		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, pluginStorage);
-		mockPrefs = new MockPrefsService();
-		factory = new ConfigAdminFactory(serviceRegistry, pluginRegistry, mockPrefs);
-		return factory.getConfigurationAdmin().then(function(admin) {
-			configAdmin = admin;
-		});
 	},
 	tearDown = function() {
 		serviceRegistry = null;
 		pluginRegistry = null;
 		pluginStorage = null;
-		mockPrefs = null;
-		factory = null;
 		configAdmin = null;
 	},
 	makeTest = function(body) {
@@ -66,79 +66,89 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 	var tests = {};
 	tests['test ConfigurationAdmin.getConfiguration()'] = makeTest(function() {
 		var pid = 'test.pid';
-		var configuration = configAdmin.getConfiguration(pid);
-		assert.strictEqual(configuration.getPid(), pid);
+		return configAdmin.getConfiguration(pid).then(function(configuration) {
+			assert.strictEqual(configuration.getPid(), pid);
+		});
 	});
 
 	tests['test ConfigurationAdmin.listConfigurations()'] = makeTest(function() {
-		var configs = [];
+		var configPromises = [];
 		for (var i=0; i < 10; i++) {
-			configs.push( configAdmin.getConfiguration('orion.test.pid' + (i+1)) );
+			configPromises.push( configAdmin.getConfiguration('orion.test.pid' + (i+1)) );
 		}
-		configAdmin.listConfigurations().forEach(function(config) {
-			assert.ok(configs.some(function(config2) {
-				return config2.getPid() === config.getPid();
-			}), 'Configuration with pid ' + config.getPid() + ' was found');
+		Deferred.all(configPromises, function(configs) {
+			configAdmin.listConfigurations().forEach(function(config) {
+				assert.ok(configs.some(function(config2) {
+					return config2.getPid() === config.getPid();
+				}), 'Configuration with pid ' + config.getPid() + ' was found');
+			});
 		});
 	});
 
 	tests['test Configuration.update(), .getProperties()'] = makeTest(function() {
 		var pid = 'test.pid';
-		var configuration = configAdmin.getConfiguration(pid);
-		var properties = configuration.getProperties();
-		assert.strictEqual(configuration.getPid(), pid);
-		assert.strictEqual(properties, null);
-		configuration.update({
-			str: 'blort',
-			num: 42,
-			nil: null
+		return configAdmin.getConfiguration(pid).then(function(configuration) {
+			var properties = configuration.getProperties();
+			assert.strictEqual(configuration.getPid(), pid);
+			assert.strictEqual(properties, null);
+			configuration.update({
+				str: 'blort',
+				num: 42,
+				nil: null
+			});
+			properties = configuration.getProperties();
+			assert.ok(properties);
+			assert.strictEqual(properties.pid, pid);
+			assert.strictEqual(properties.str, 'blort');
+			assert.strictEqual(properties.num, 42);
+			assert.strictEqual(properties.nil, null);
 		});
-		properties = configuration.getProperties();
-		assert.strictEqual(properties.pid, pid);
-		assert.strictEqual(properties.str, 'blort');
-		assert.strictEqual(properties.num, 42);
-		assert.strictEqual(properties.nil, null);
 	});
 
 	tests['test Configuration.remove()'] = makeTest(function() {
 		var pid = 'test.pid';
-		var configuration = configAdmin.getConfiguration(pid);
-		configuration.update({
-			str: 'blort'
+		return configAdmin.getConfiguration(pid).then(function(configuration) {
+			configuration.update({
+				str: 'blort'
+			});
+			var properties = configuration.getProperties();
+			assert.ok(properties);
+			assert.strictEqual(properties.pid, pid);
+			assert.strictEqual(properties.str, 'blort');
+			configuration.remove();
+			return configAdmin.getConfiguration(pid).then(function(configuration) {
+				assert.strictEqual(configuration.getProperties(), null);
+			});
 		});
-		var properties = configuration.getProperties();
-		assert.strictEqual(properties.pid, pid);
-		assert.strictEqual(properties.str, 'blort');
-		configuration.remove();
-		assert.strictEqual(configAdmin.getConfiguration(pid).getProperties(), null);
 	});
 
 	tests['test ManagedService.updated() called after registering ManagedService'] = makeTest(function() {
 		var pid = 'test.pid';
-		var d = new Deferred();
-		var configuration = configAdmin.getConfiguration(pid);
-		configuration.update({
-			str: 'zot',
-			num: 42,
-			nil: null
-		});
-		// this registration should cause a call to updated(props)
-		serviceRegistry.registerService(MANAGED_SERVICE, 
-			{	updated: function(properties) {
-					try {
-						assert.strictEqual(properties.pid, pid);
-						assert.strictEqual(properties.str, 'zot');
-						assert.strictEqual(properties.num, 42);
-						assert.strictEqual(properties.nil, null);
-						d.resolve();
-					} catch (e) {
-						d.reject(e);
-					}
-				}
-			},
-			{	pid: pid
+		return configAdmin.getConfiguration(pid).then(function(configuration) {
+			var d = new Deferred();
+			configuration.update({
+				str: 'zot',
+				num: 42,
+				nil: null
 			});
-		return d;
+			// this registration should cause a call to updated(props)
+			serviceRegistry.registerService(MANAGED_SERVICE, 
+				{	updated: function(properties) {
+						try {
+							assert.strictEqual(properties.pid, pid);
+							assert.strictEqual(properties.str, 'zot');
+							assert.strictEqual(properties.num, 42);
+							assert.strictEqual(properties.nil, null);
+							d.resolve();
+						} catch (e) {
+							d.reject(e);
+						}
+					}
+				},
+				{	pid: pid
+				});
+			return d;
+		});
 	});
 
 	tests['test ManagedService.updated(null) called for nonexistent config'] = makeTest(function() {
@@ -176,10 +186,11 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			},
 			{	pid: pid
 			});
-		var config = configAdmin.getConfiguration(pid);
-		// 2nd call happens after this:
-		config.update({
-			'test': 'whee'
+		configAdmin.getConfiguration(pid).then(function(config) {
+			// 2nd call happens after this:
+			config.update({
+				'test': 'whee'
+			});
 		});
 		return d;
 	});
@@ -203,13 +214,14 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			},
 			{	pid: pid
 			});
-		var config = configAdmin.getConfiguration(pid);
-		// 2nd call updated(..) happens after this:
-		config.update({
-			'test': 'whee'
+		configAdmin.getConfiguration(pid).then(function(config) {
+			// 2nd call updated(..) happens after this:
+			config.update({
+				'test': 'whee'
+			});
+			// 3rd call happens after this
+			config.remove();
 		});
-		// 3rd call happens after this
-		config.remove();
 		return d;
 	});
 
@@ -219,16 +231,15 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			pluginRegistry.shutdown();
 			// Create a new PluginRegistry (using the same storage as the old one so it gets our plugin data),
 			// and new ServiceRegistry, ConfigAdmin, etc.
-			return setUp(pluginStorage).then(function() {
-				// This loads the plugin's data from the storage
-				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
-					// At this point our plugin's data is in the registry, but the plugin is not loaded.
-					// Lazy-load it by invoking a service method
-					var testService = serviceRegistry.getService('test.bogus');
-					return testService.test().then(function() {
-						return testService.getCallOrder().then(function(callOrder) {
-							assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
-						});
+			setUp(pluginStorage);
+			// This loads the plugin's data from the storage
+			return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
+				// At this point our plugin's data is in the registry, but the plugin is not loaded.
+				// Lazy-load it by invoking a service method
+				var testService = serviceRegistry.getService('test.bogus');
+				return testService.test().then(function() {
+					return testService.getCallOrder().then(function(callOrder) {
+						assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
 					});
 				});
 			});
