@@ -582,20 +582,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			 return messages["There are unsaved changes."];
 		}
 	};
-			
-	// Ctrl+o handler for toggling outline 
-	document.onkeydown = function (evt){
-		evt = evt || window.event;
-		if(evt.ctrlKey && evt.keyCode  === 79){
-			// splitArea.toggle();
-			if(document.all){ 
-				evt.keyCode = 0;
-			}else{ 
-				evt.preventDefault();
-				evt.stopPropagation();
-			}					
-		} 
-	};
 };
 return exports;
 });

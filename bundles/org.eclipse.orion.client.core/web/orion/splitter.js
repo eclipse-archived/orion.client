@@ -12,8 +12,18 @@
 
 define(['require', 'dojo'], function(require, dojo) {
 
+	function stop(event) {
+		if (window.document.all) { 
+			event.keyCode = 0;
+		} else { 
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	}
+
 	/**
-	 * Constructs a new Splitter with the given options.
+	 * Constructs a new Splitter with the given options.  A splitter manages the layout
+	 * of two panels, a side panel and a main panel.  A toggle button will open or close the side panel.
 	 * @param {Object} options The options object which must specify the split dom node
 	 * @param options.node The node for the splitter presentation.  Required.
 	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
@@ -24,6 +34,7 @@ define(['require', 'dojo'], function(require, dojo) {
 		this._init(options);		
 	}
 	Splitter.prototype = /** @lends orion.splitter.Splitter.prototype */ {
+			
 		_init: function(options) {
 			this._tracking = null;
 			this._animationDelay = 520;  // longer than CSS transitions in layout.css
@@ -44,40 +55,66 @@ define(['require', 'dojo'], function(require, dojo) {
 			dojo.place("<div id='splitThumb' class='splitThumb splitThumbLayout'></div>", this._node, "only"); //$NON-NLS-0$ //$NON-NLS-1$
 			// initial position - do we have a pref?  Closed?  Otherwise attach the pieces and make visible.
 			this._closed = false;
+			this._adjustToSplitPosition();
+			dojo.style(this._mainNode, {display: "block"}); //$NON-NLS-0$ 
+			this._thumb = dojo.query("#splitThumb", this._node)[0]; //$NON-NLS-0$
+			dojo.connect(this._node, "onmousedown", this, this._mouseDown); //$NON-NLS-0$
+			dojo.connect(window, "onmouseup", this, this._mouseUp); //$NON-NLS-0$
+			dojo.connect(window, "onresize", this, this._resize);  //$NON-NLS-0$
+			// Ctrl+o handler for toggling side panel 
+			dojo.connect(document, "onkeydown", this, function(event) {
+				if (event.ctrlKey && event.keyCode  === 79) {
+					this._thumbDown();
+					stop(event);				
+				} 
+			});
+		},
+		/**
+		 * Toggle the open/closed state of the side panel.
+		 */			
+		toggleSidePanel: function() {
+			this._thumbDown();		
+		},
+		
+		/**
+		 * Close the side panel.  This function has no effect if the side panel is already closed.
+		 */
+		 openSidePanel: function() {
+			if (!this._closed) {
+				this._thumbDown();
+			}
+		 },
+		
+		_adjustToSplitPosition: function() {
 			var pos = dojo.position(this._node);
 			this._splitWidth = pos.w;
 			this._splitLeft = pos.x;
 			dojo.style(this._sideNode, {width: "auto", right: this._splitLeft - 1 +"px", display: "block"}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
 			dojo.style(this._node, {left: this._splitLeft + "px"}); //$NON-NLS-0$ 
-			this.resize();
-			dojo.style(this._mainNode, {display: "block"}); //$NON-NLS-0$ 
-			this._thumb = dojo.query("#splitThumb", this._node)[0]; //$NON-NLS-0$
-			dojo.connect(this._node, "onmousedown", this, this.mouseDown); //$NON-NLS-0$
-			dojo.connect(this._node, "onmouseup", this, this.mouseUp); //$NON-NLS-0$
-			dojo.connect(window, "onresize", this, this.resize);  //$NON-NLS-0$
+			this._resize();
 		},
 		
-		resize: function(event) {
+		_resize: function(event) {
 			var pos = dojo.position(this._node.parentNode);
 			this._totalWidth = pos.w;
 			pos = dojo.position(this._node);
 			dojo.style(this._mainNode, {width: (this._totalWidth - pos.x - pos.w) +"px"}); //$NON-NLS-0$ 
 		},
 		
-		thumbDown: function(event) {
+		_thumbDown: function() {
 			if (this._closed) {
 				this._closed = false;
 				this._addAnimation();
 				dojo.style(this._sideNode, {width: this._splitLeft+"px"}); //$NON-NLS-0$ 
 				dojo.style(this._node, {left: this._splitLeft+"px"}); //$NON-NLS-0$
-				this.resize();
+				this._resize();
 				this._removeAnimation();
 			} else {
 				this._closed = true;
 				this._addAnimation();
 				dojo.style(this._sideNode, {width: 0}); 
 				dojo.style(this._node, {left: "1px"}); //$NON-NLS-0$ 
-				this.resize();
+				this._resize();
 				this._removeAnimation();
 			}
 		},
@@ -99,23 +136,34 @@ define(['require', 'dojo'], function(require, dojo) {
 			dojo.addClass(this._thumb, "splitLayoutAnimation"); //$NON-NLS-0$ 
 		},
 		
-		mouseDown: function(event) {
+		_mouseDown: function(event) {
+			if (event.target === this._thumb) {
+				return this._thumbDown(event);
+			}
 			if (this._tracking) {
 				return;
 			}
-			if (event.target === this._thumb) {
-				return this.thumbDown(event);
-			}
 			dojo.addClass(this._node, "splitTracking"); //$NON-NLS-0$
-			this._tracking = dojo.connect(this._node, "onmousemove", this, this.mouseMove); //$NON-NLS-0$
+			dojo.addClass(this._mainNode, "panelTracking"); //$NON-NLS-0$
+			dojo.addClass(this._sideNode, "panelTracking"); //$NON-NLS-0$
+			this._tracking = dojo.connect(window, "onmousemove", this, this._mouseMove); //$NON-NLS-0$
 		},
 		
-		mouseOver: function(event) {
+		_mouseMove: function(event) {
+			if (this._tracking) {
+				dojo.style(this._node, {left: event.clientX + "px"}); //$NON-NLS-0$ 
+				this._adjustToSplitPosition();
+				stop(event);
+			}
 		},
 		
-		mouseUp: function(event) {
+		_mouseUp: function(event) {
 			if (this._tracking) {
 				dojo.disconnect(this._tracking);
+				this._tracking = null;
+				dojo.removeClass(this._node, "splitTracking"); //$NON-NLS-0$
+				dojo.removeClass(this._mainNode, "panelTracking"); //$NON-NLS-0$
+				dojo.removeClass(this._sideNode, "panelTracking"); //$NON-NLS-0$
 			}
 		}
 	};
