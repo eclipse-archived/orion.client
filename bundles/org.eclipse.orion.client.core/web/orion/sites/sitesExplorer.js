@@ -250,7 +250,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 		/** @returns {Deferred} */
 		ViewOnSiteTreeModel.createViewOnSiteModelItems = function(siteService, file) {
 			return siteService.getSiteConfigurations().then(function(siteConfigurations) {
-				return new Deferred().all(siteConfigurations.map(function(site) {
+				return Deferred.all(siteConfigurations.map(function(site) {
 					return isFileRunningOnSite(siteService, site, file);
 				})).then(function(isRunningOns) {
 					return createModelItems(siteConfigurations, isRunningOns);
