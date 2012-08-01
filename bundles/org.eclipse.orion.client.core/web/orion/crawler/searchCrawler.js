@@ -157,7 +157,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				results.push(self._sniffSearch(self.fileLocations[i]));
 			}
 		}
-		return new Deferred().all(results);
+		return Deferred.all(results);
 	};
 		
 	SearchCrawler.prototype._visitRecursively = function(directoryLocation){
@@ -179,7 +179,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 					results.push(self._visitRecursively(children[i].ChildrenLocation));
 				}
 			}
-			return new Deferred().all(results);
+			return Deferred.all(results);
 		});
 	};
 

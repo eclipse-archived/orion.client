@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define*/
+/*global define console*/
 
 define(['orion/Deferred'], function(Deferred) {
 	/**
@@ -54,7 +54,7 @@ define(['orion/Deferred'], function(Deferred) {
 					}
 				}
 			}
-			return new Deferred().all(deferreds, function(e) {
+			return Deferred.all(deferreds, function(e) {
 				if (typeof console !== 'undefined') {
 					console.log(e);
 				}

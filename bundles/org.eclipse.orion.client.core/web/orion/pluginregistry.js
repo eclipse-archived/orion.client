@@ -562,9 +562,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					installList.push(plugin._load(false, 5000)); // _load(false) because we want to ensure the plugin is updated
 				}
 			});
-			
-			var d = new Deferred();
-			return d.all(installList, function(){});
+			return Deferred.all(installList, function(){});
 		};
 		
 		/**
