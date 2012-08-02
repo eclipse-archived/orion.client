@@ -143,28 +143,24 @@ define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], f
 	
 	OperationsClient.prototype = {
 			getOperations: function(){
-				var result = new Deferred();
 				var results = [];
 
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i]);
 				}
-				new Deferred().all(results).then(function(lists){
-					result.resolve(_mergeOperations(lists));
+				return Deferred.all(results).then(function(lists){
+					return _mergeOperations(lists);
 				});
-				return result;
 			},
 			getRunningOperations: function(){
-				var result = new Deferred();
 				var results = [];
 
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _getOperations(this._services[i], {RunningOnly: true});
 				}
-				new Deferred().all(results).then(function(lists){
-					result.resolve(_mergeOperations(lists));
+				return Deferred.all(results).then(function(lists){
+					return _mergeOperations(lists);
 				});
-				return result;
 			},
 			getOperation: function(operationLocation){
 				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments); //$NON-NLS-0$
@@ -174,7 +170,7 @@ define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], f
 				for(var i=0; i<this._services.length; i++){
 					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations"); //$NON-NLS-0$
 				}
-				return new Deferred().all(results);
+				return Deferred.all(results);
 			},
 			
 			removeOperation: function(operationLocation){

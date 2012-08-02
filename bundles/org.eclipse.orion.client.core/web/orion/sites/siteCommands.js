@@ -82,8 +82,9 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 			imageClass: "core-sprite-edit", //$NON-NLS-0$
 			id: "orion.site.edit", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				if (item instanceof Array && item.length == 1)
+				if (item instanceof Array && item.length === 1) {
 					item = item[0];
+				}
 				
 				return item.HostingStatus;
 			},
@@ -123,7 +124,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 					var siteService = mSiteClient.forLocation(serviceRegistry, location);
 					return siteService.updateSiteConfiguration(location, newItem);
 				});
-				progressService.showWhile(new Deferred().all(starts))
+				progressService.showWhile(Deferred.all(starts))
 					.then(unwrap(data.items))
 					.then(userData.startCallback, userData.errorCallback);
 			}});
@@ -157,7 +158,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 					var siteService = mSiteClient.forLocation(serviceRegistry, location);
 					return siteService.updateSiteConfiguration(location, newItem);
 				});
-				progressService.showWhile(new Deferred().all(stops))
+				progressService.showWhile(Deferred.all(stops))
 					.then(unwrap(data.items))
 					.then(userData.stopCallback, userData.errorCallback);
 			}});
@@ -190,7 +191,7 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 							var siteService = mSiteClient.forLocation(serviceRegistry, location);
 							return siteService.deleteSiteConfiguration(location);
 						});
-						new Deferred().all(deletes).then(unwrap(data.items)).then(userData.deleteCallback, userData.errorCallback);
+						Deferred.all(deletes).then(unwrap(data.items)).then(userData.deleteCallback, userData.errorCallback);
 					}
 				});
 			}});

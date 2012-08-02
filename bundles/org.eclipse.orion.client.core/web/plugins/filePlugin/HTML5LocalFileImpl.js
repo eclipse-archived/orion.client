@@ -125,8 +125,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			return this._getEntry(location).then(function(dirEntry) {
 				return readEntries(dirEntry);
 			}).then(function(entries) {
-				var d = new orion.Deferred();
-				return d.all(entries.map(createFile));
+				return orion.Deferred.all(entries.map(createFile));
 			});
 		},
 
@@ -154,8 +153,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 					result = file;
 					return readEntries(dirEntry);
 				}).then(function(entries) {
-					var d = new orion.Deferred();
-					return d.all(entries.map(createFile));
+					return orion.Deferred.all(entries.map(createFile));
 				}).then(function(children) {
 					if (children) {
 						result.Children = children;
