@@ -93,7 +93,20 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 
 		function _createServiceCall(methodName) {
 			return function() {
-				return Deferred.when(implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments)));
+					var d;
+					try {
+						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
+						if (result && typeof result.then === "function") {
+							return result;
+						} else {
+							d = new Deferred();
+							d.resolve(result);
+						}
+					} catch (e) {
+							d = new Deferred();
+							d.reject(e);
+					}
+					return d.promise;
 			};
 		}
 
