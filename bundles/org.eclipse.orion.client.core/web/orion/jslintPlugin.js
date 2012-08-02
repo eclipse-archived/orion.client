@@ -12,9 +12,11 @@
 /*jslint forin:true regexp:false*/
 /*global eclipse JSLINT require window*/
 window.onload = function() {
+	var validationOptions = {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true,
+				nomen: false, onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false};
+
 	function jslint(contents) {
-		JSLINT(contents, {bitwise: false, eqeqeq: true, es5: true, immed: true, indent: 1, maxerr: 300, newcap: true,
-				nomen: false, onevar: false, plusplus: false, regexp: true, strict: false, undef: true, white: false});
+		JSLINT(contents, validationOptions);
 		return JSLINT.data();
 	}
 	
@@ -61,69 +63,87 @@ window.onload = function() {
 		fixWith(errors, "error");
 		return isBogus(error) ? null : error;
 	}
-	
+
 	var validationService = {
-			checkSyntax : function(title, contents) {
-				var result = jslint(contents);
-				//this.dispatchEvent("syntaxChecked", {title: title, result: result});
-				var problems = [];
-				var i;
-				if (result.errors) {
-					var errors = result.errors;
-					for (i=0; i < errors.length; i++) {
-						var error = errors[i];
-						if (error) {
-							var start = error.character - 1,
-							    end = start + 1;
-							if (error.evidence) {
-								var index = error.evidence.substring(start).search(/.\b/);
-								if (index > -1) {
-									end += index;
-								}
-							}
-							// Convert to format expected by validation service
-							error.description = error.reason;
-							error.start = error.character;
-							error.end = end;
-							error = cleanup(error);
-							if (error) { problems.push(error); }
-						}
-					}
+		// ManagedService
+		updated: function(properties) {
+			if (properties && typeof properties.options === "string") {
+				var options = properties.options;
+				if (!/^\s*$/.test(options)) {
+					var optionsMap = {};
+					options.split(/,/).forEach(function(option) {
+						var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
+						var name = match[1], value = match[2];
+						optionsMap[name] = !!value;
+					});
+					validationOptions = optionsMap;
+					console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
+						return k + ':' + optionsMap[k];
+					}).join(','));
 				}
-				if (result.functions) {
-					var functions = result.functions;
-					var lines;
-					for (i=0; i < functions.length; i++) {
-						var func = functions[i];
-						var unused = func.unused;
-						if (!unused || unused.length === 0) {
-							continue;
-						}
-						if (!lines) {
-							lines = contents.split(/\r?\n/);
-						}
-						var nameGuessed = func.name[0] === '"';
-						var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
-						var line = lines[func.line - 1];
-						for (var j=0; j < unused.length; j++) {
-							// Find "function" token in line based on where fName appears.
-							// nameGuessed implies "foo:function()" or "foo = function()", and !nameGuessed implies "function foo()"
-							var nameIndex = line.indexOf(name);
-							var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
-							if (funcIndex !== -1) {
-								problems.push({
-									reason: "Function declares unused variable '" + unused[j] + "'.",
-									line: func.line,
-									character: funcIndex + 1,
-									end: funcIndex + "function".length,
-									severity: "warning"
-								});
-							}
-						}
-					}
-				}
-				return { problems: problems };
 			}
+		},
+		checkSyntax : function(title, contents) {
+			var result = jslint(contents);
+			//this.dispatchEvent("syntaxChecked", {title: title, result: result});
+			var problems = [];
+			var i;
+			if (result.errors) {
+				var errors = result.errors;
+				for (i=0; i < errors.length; i++) {
+					var error = errors[i];
+					if (error) {
+						var start = error.character - 1,
+						    end = start + 1;
+						if (error.evidence) {
+							var index = error.evidence.substring(start).search(/.\b/);
+							if (index > -1) {
+								end += index;
+							}
+						}
+						// Convert to format expected by validation service
+						error.description = error.reason;
+						error.start = error.character;
+						error.end = end;
+						error = cleanup(error);
+						if (error) { problems.push(error); }
+					}
+				}
+			}
+			if (result.functions) {
+				var functions = result.functions;
+				var lines;
+				for (i=0; i < functions.length; i++) {
+					var func = functions[i];
+					var unused = func.unused;
+					if (!unused || unused.length === 0) {
+						continue;
+					}
+					if (!lines) {
+						lines = contents.split(/\r?\n/);
+					}
+					var nameGuessed = func.name[0] === '"';
+					var name = nameGuessed ? func.name.substring(1, func.name.length - 1) : func.name;
+					var line = lines[func.line - 1];
+					for (var j=0; j < unused.length; j++) {
+						// Find "function" token in line based on where fName appears.
+						// nameGuessed implies "foo:function()" or "foo = function()", and !nameGuessed implies "function foo()"
+						var nameIndex = line.indexOf(name);
+						var funcIndex = nameGuessed ? line.indexOf("function", nameIndex) : line.lastIndexOf("function", nameIndex);
+						if (funcIndex !== -1) {
+							problems.push({
+								reason: "Function declares unused variable '" + unused[j] + "'.",
+								line: func.line,
+								character: funcIndex + 1,
+								end: funcIndex + "function".length,
+								severity: "warning"
+							});
+						}
+					}
+				}
+			}
+			return { problems: problems };
+		}
 	};
 	
 	// Converts jslint's "functions" list to a flat outline model
@@ -192,8 +212,9 @@ window.onload = function() {
 	};
 	
 	var provider = new orion.PluginProvider();
-	provider.registerService("orion.edit.validator", validationService, {
-		contentType: ["application/javascript", "text/html"]
+	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], validationService, {
+		contentType: ["application/javascript", "text/html"],
+		pid: "jslint.config"
 	});
 	provider.registerService("orion.edit.outliner", outlineService, {
 		contentType: ["application/javascript", "text/html"],	// TODO separate out HTML outline
@@ -201,6 +222,21 @@ window.onload = function() {
 		nls: "orion/editor/nls/messages",
 		id: "orion.edit.outliner.jslint"
 	});
+	provider.registerService("orion.core.setting",
+		{},
+		{	settings: [
+				{	pid: 'jslint.config',
+					name: 'JSLint Validator',
+					tags: 'validation javascript js jslint'.split(' '),
+					properties: [
+						{	id: 'options',
+							name: 'Default Options',
+							type: 'string'
+						}
+					]
+				}
+			]
+		});
 	//validationService.dispatchEvent = serviceProvider.dispatchEvent;
 	provider.connect();
 
