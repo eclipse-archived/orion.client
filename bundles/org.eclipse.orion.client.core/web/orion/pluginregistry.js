@@ -141,7 +141,29 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					var registration = internalRegistry.registerService(service.names || service.type, serviceProxy, properties);
 					_services[service.serviceId] = {registration: registration, proxy: serviceProxy};
 				});
-			}	
+			}
+			if (!data._lastModified) {
+				data._lastModified = new Date().getTime();
+			}
+		}
+		
+		function _checkForUpdate(newData) {
+			if (data.headers && newData.headers) {
+				if (JSON.stringify(data.headers) !== JSON.stringify(newData.headers)) {
+					return true;
+				}
+			} else if (data.headers || newData.headers) {
+				return true;
+			}
+			
+			if (data.services && newData.services) {
+				if (JSON.stringify(data.services) !== JSON.stringify(newData.services)) {
+					return true;
+				}
+			} else if (data.services || newData.services) {
+				return true;
+			}
+			return false;
 		}
 		
 		function _responseHandler(message) {
@@ -152,7 +174,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						if (!data) {
 							data = message.params[0];
 							_parseData();
-						} else if (JSON.stringify(data) !== JSON.stringify(message.params[0])) {
+						} else if (_checkForUpdate(message.params[0])) {
 							// check if the data has been updated
 							for (var serviceId in _services) {
 								if (_services.hasOwnProperty(serviceId)) {
@@ -160,7 +182,13 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 									delete _services[serviceId];
 								}
 							}
-							data = message.params[0];
+							data = {};
+							if (message.params[0].headers) {
+								data.headers = message.params[0].headers;
+							}
+							if (message.params[0].services) {
+								data.services = message.params[0].services;
+							}
 							_parseData();
 							internalRegistry.updatePlugin(_self);						
 						}
@@ -227,19 +255,19 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function
 		 */
 		this.getHeaders = function() {
-			return data ? data.headers : null;
+			return data && data.headers ? data.headers : {};
 		};
 		
 		this.getName = function() {
-			return data ? data.headers["plugin.name"] || null : null;
+			return this.getHeaders()["plugin.name"] || this.getLocation();
 		};
 		
 		this.getVersion = function() {
-			return data ? data.headers["plugin.version"] || null : null;
+			return this.getHeaders()["plugin.version"] || "0.0.0";
 		};
 		
 		this.getLastModified = function() {
-			return new Date(); // TODO -- persist and retrieve...
+			return data && data._lastModified ? data._lastModified : 0;
 		};
 		
 		/**
@@ -552,7 +580,6 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
 				if (pluginData && pluginData._expires && pluginData._expires > new Date().getTime()) {
 					if (_getPlugin(pluginURL) === null) {
-						delete pluginData._expires;
 						_plugins.push(new Plugin(pluginURL, pluginData, internalRegistry));
 					}
 				} else {
