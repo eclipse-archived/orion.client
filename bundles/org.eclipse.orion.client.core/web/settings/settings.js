@@ -13,7 +13,13 @@
 /*global define dojo dijit orion window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'], function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient',
+		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/config',
+		'orion/metatype', 'orion/settings/settingsRegistry',
+		'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 
+		'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'],
+		function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
+			mDialogs, mGlobalCommands, mConfig, mMetaType, SettingsRegistry) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -44,6 +50,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 			var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
+			var settingsRegistry = new SettingsRegistry(serviceRegistry, new mMetaType.MetaTypeRegistry(serviceRegistry));
+
 			preferencesStatusService.setMessage(messages["Loading..."]);
 			
 			/* Note 'pageActions' is the attach id for commands in the toolbar */
@@ -55,7 +63,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 										preferenceDialogService: preferenceDialogService,
 										settingsCore: core,
 										pageActions: "pageActions", //$NON-NLS-0$
-										userClient: usersClient };
+										userClient: usersClient,
+										settingsRegistry: settingsRegistry
+										};
 
 			var settingsContainer = new orion.widgets.settings.SettingsContainer( containerParameters, dojo.byId( "selectionAgent" ) ); //$NON-NLS-0$
 			settingsContainer.startup();

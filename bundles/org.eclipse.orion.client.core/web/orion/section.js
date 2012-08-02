@@ -142,7 +142,14 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		setContent: function(content){
 			this._contentParent.innerHTML = content;
 		},
-		
+
+		/**
+		 * @returns The dom node that holds the section contents.
+		 */
+		getContentElement: function() {
+			return this._contentParent;
+		},
+
 		createProgressMonitor: function(){
 			return new ProgressMonitor(this);
 		},

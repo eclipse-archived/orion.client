@@ -165,7 +165,10 @@ exports.Explorer = (function() {
 				renderer: this.renderer,
 				indent: options ? options.indent: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
-				tableStyle: "mainPadding" //$NON-NLS-0$
+				tableStyle: "mainPadding", //$NON-NLS-0$,
+				tableElement: options ? options.tableElement : undefined,
+				tableBodyElement: options ? options.tableBodyElement : undefined,
+				tableRowElement: options ? options.tableRowElement : undefined
 			});
 			this.renderer._initializeUIState();
 			if(this.selectionPolicy === "cursorOnly"){ //$NON-NLS-0$
@@ -680,7 +683,7 @@ exports.SelectionRenderer = (function(){
 		this.explorer = explorer;
 	}
 	SelectionRenderer.prototype = new exports.ExplorerRenderer();
-	
+
 	SelectionRenderer.prototype.renderTableHeader = function(tableNode){
 		var thead = document.createElement('thead'); //$NON-NLS-0$
 		var row = document.createElement('tr'); //$NON-NLS-0$
@@ -742,15 +745,19 @@ exports.SelectionRenderer = (function(){
 		}
 		
 	};
-	
+
 	/**
 	 * Override to return a dom element containing table header, preferably <code>th</code>
+	 * @name orion.explorer.SelectionRenderer#getCellHeaderElement
+	 * @function
 	 * @param col_no number of column
 	 */
 	SelectionRenderer.prototype.getCellHeaderElement = function(col_no){};
 
 	/**
-	 * Override to return a dom element containing table cell, preferable <code>td</td>
+	 * Override to return a dom element containing table cell, preferable <code>td</code>
+	 * @name orion.explorer.SelectionRenderer#getCellElement
+	 * @function
 	 * @param col_no number of column
 	 * @param item item to be rendered
 	 * @param tableRow the current table row
