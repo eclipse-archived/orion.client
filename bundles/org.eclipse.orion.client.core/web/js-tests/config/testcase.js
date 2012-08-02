@@ -16,11 +16,11 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 
 	function MockPrefsService() {
 		function PrefNode() {
-			this.map = {};
+			this.map = Object.create(null);
 		}
 		PrefNode.prototype = {
 			clear: function() {
-				this.map = {};
+				this.map = Object.create(null);
 			},
 			keys: function() {
 				return Object.keys(this.map);
@@ -72,15 +72,21 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 	});
 
 	tests['test ConfigurationAdmin.listConfigurations()'] = makeTest(function() {
+		// create some configs
 		var configPromises = [];
-		for (var i=0; i < 10; i++) {
+		for (var i=0; i < 5; i++) {
 			configPromises.push( configAdmin.getConfiguration('orion.test.pid' + (i+1)) );
 		}
-		Deferred.all(configPromises, function(configs) {
-			configAdmin.listConfigurations().forEach(function(config) {
-				assert.ok(configs.some(function(config2) {
-					return config2.getPid() === config.getPid();
-				}), 'Configuration with pid ' + config.getPid() + ' was found');
+		return Deferred.all(configPromises).then(function(createdConfigs) {
+			return configAdmin.listConfigurations().then(function(listedConfigs) {
+				assert.equal(createdConfigs.length, 5);
+				assert.equal(listedConfigs.length, 5);
+				assert.ok(createdConfigs.every(function(config) {
+					assert.ok(listedConfigs.some(function(config2) {
+						return config2.getPid() === config.getPid();
+					}), 'Configuration with pid ' + config.getPid() + ' was found');
+					return true;
+				}));
 			});
 		});
 	});
