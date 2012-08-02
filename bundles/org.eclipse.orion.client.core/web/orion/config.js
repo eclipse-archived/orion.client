@@ -175,12 +175,14 @@ ConfigAdminImpl = /** @ignore */ (function() {
  * @class Manages Configurations and handles persisting them to preferences.
  * @private
  */
+var CONFIG_PREF_NODE = '/cm/configurations'; //$NON-NLS-0$
 ConfigStore = /** @ignore */ (function() {
 	function ConfigStore(factory, prefsService) {
 		this.factory = factory;
 		this.prefsService = prefsService;
-		this.configs = {}; /* PID -> Configuration */
-		this.prefs = {}; /* PID -> Preferences node */
+		this.configs = Object.create(null); /* PID -> Configuration */
+		this.prefs = Object.create(null); /* PID -> Preferences node */
+		this.prefRoot = null;
 	}
 	ConfigStore.prototype = {
 		_createConfig: function(properties) {
@@ -191,14 +193,20 @@ ConfigStore = /** @ignore */ (function() {
 		},
 		isNodeLoaded: function(pid) {
 			var node = this.prefs[pid];
-			return node && node.state() === 'resolve';
+			return node && node.state() === 'resolve'; //$NON-NLS-0$
 		},
 		loadNode: function(pid) {
-			if (!this.prefs[pid]) {
-				this.prefs[pid] = this.prefsService.getPreferences('/cm/configurations/' + pid); //$NON-NLS-0$
+			if (typeof pid !== 'string') { //$NON-NLS-0$
+				throw new Error('Invalid pid: ' + pid); //$NON-NLS-0$
 			}
+			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
+			this.prefs[pid] = this.prefs[pid] || this.prefsService.getPreferences(CONFIG_PREF_NODE + '/' + pid); //$NON-NLS-0$
 			var self = this;
-			return this.prefs[pid].then(function(prefNode) {
+			return Deferred.all([this.prefRoot, this.prefs[pid]]).then(function(result) {
+				var prefRoot = result[0], prefNode = result[1];
+				if (!prefRoot.get(pid)) {
+					prefRoot.put(pid, true);
+				}
 				var props = prefNode.get('properties'); //$NON-NLS-0$
 				if (props) {
 					self.configs[pid] = self._createConfig(props);
@@ -213,22 +221,19 @@ ConfigStore = /** @ignore */ (function() {
 				if (!configuration) {
 					configuration = new ConfigImpl(self.factory, self, pid);
 					self.configs[pid] = configuration;
-					prefNode.put('properties', configuration.getProperties()); // only pid
+					// only pid is in the properties here
+					prefNode.put('properties', configuration.getProperties()); //$NON-NLS-0$
 				}
 				return configuration;
 			});
 		},
 		list: function() {
 			var self = this;
-			return this.prefsService.getPreferences('/cm/configurations').then(function(allPrefs) {
-				Object.keys(allPrefs).forEach(function(pid) {
-					if (!self.configs[pid]) {
-						self.configs[pid] = self._createConfig(allPrefs.get(pid));
-					}
-				});
-			}).then(function() {
-				return Object.keys(self.configs).map(function(pid) {
-					return self.configs[pid];
+			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
+			return this.prefRoot.then(function(prefRoot) {
+				var pids = prefRoot.keys();
+				return Deferred.all(pids.map(self.loadNode.bind(self))).then(function() {
+					return pids.map(self._find.bind(self));
 				});
 			});
 		},
@@ -236,13 +241,16 @@ ConfigStore = /** @ignore */ (function() {
 			delete this.configs[pid];
 			var self = this;
 			this.loadNode(pid).then(function(prefNode) {
-				prefNode.clear(); // TODO we want this to remove the whole PID pref node, but I don't think it does..
+				// TODO want to remove the whole node here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386582
+				// TODO remove from list
+				prefNode.clear();
 				//delete self.prefs[pid];
 			});
 		},
 		save: function(pid, configuration) {
+			var properties = configuration.getProperties();
 			this.loadNode(pid).then(function(prefNode) {
-				prefNode.put('properties', configuration.getProperties()); //$NON-NLS-0$
+				prefNode.put('properties', properties); //$NON-NLS-0$
 			});
 		}
 	};
@@ -272,19 +280,28 @@ ConfigImpl = /** @ignore */ (function() {
 	function ConfigImpl(factory, store, pidOrProps) {
 		this.factory = factory;
 		this.store = store;
-		if (typeof pidOrProps === 'object') { //$NON-NLS-0$
+		if (pidOrProps !== null && typeof pidOrProps === 'object') { //$NON-NLS-0$
 			this.pid = pidOrProps[PROPERTY_PID];
 			setProperties(this, pidOrProps);
-		} else {
+		} else if (typeof pidOrProps === 'string') { //$NON-NLS-0$
 			this.pid = pidOrProps;
 			this.properties = null;
+		} else {
+			throw new Error('Invalid pid/properties ' + pidOrProps); //$NON-NLS-0$
 		}
 	}
 	ConfigImpl.prototype = {
+		_checkRemoved: function() {
+			if (this._removed) {
+				throw new Error('Configuration was removed'); //$NON-NLS-0$
+			}
+		},
 		getPid: function() {
+			this._checkRemoved();
 			return this.pid;
 		},
 		getProperties: function() {
+			this._checkRemoved();
 			var props = null;
 			if (this.properties) {
 				props = clone(this.properties);
@@ -293,11 +310,14 @@ ConfigImpl = /** @ignore */ (function() {
 			return props;
 		},
 		remove: function() {
+			this._checkRemoved();
 			var self = this;
-			this.store.remove(this.pid);
 			self.factory.notifyDeleted(self);
+			this.store.remove(this.pid);
+			this._removed = true;
 		},
 		update: function(props) {
+			this._checkRemoved();
 			setProperties(this, props);
 			var self = this;
 			this.store.save(this.pid, this);
