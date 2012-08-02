@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
+define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
-		function(messages, mSearchCrawler, require, dojo, dijit) {
+		function(messages, mSearchCrawler, mContentTypes, require, dojo, dijit) {
 /**
  * Usage: <code>new widgets.OpenResourceDialog(options).show();</code>
  * 
@@ -44,6 +44,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		this.time = 0;
 		this.options = arguments[0];
 		this.searcher = this.options && this.options.searcher;
+		this.contentTypeService = new mContentTypes.ContentTypeService(this.searcher.registry);
 		if (!this.searcher) {
 			throw new Error("Missing required argument: searcher"); //$NON-NLS-0$
 		}
@@ -178,7 +179,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			if (favs.navigator) {
 				favs = favs.navigator;
 			}
-			var renderFunction = that.searchRenderer.makeRenderFunction(that.favresults, false, 
+			var renderFunction = that.searchRenderer.makeRenderFunction(that.contentTypeService, that.favresults, false, 
 					dojo.hitch(that, that.decorateResult), that.showFavoritesImage);
 			renderFunction(favs);
 			if (favs && favs.length > 0) {
@@ -228,7 +229,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			var that = this;
 			setTimeout(function() {
 				var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", false, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-0$
-				var renderFunction = that.searchRenderer.makeRenderFunction(that.results, false, dojo.hitch(that, that.decorateResult));
+				var renderFunction = that.searchRenderer.makeRenderFunction(that.contentTypeService, that.results, false, dojo.hitch(that, that.decorateResult));
 				that.searcher.search(query, false, renderFunction);
 			}, 0);
 		}

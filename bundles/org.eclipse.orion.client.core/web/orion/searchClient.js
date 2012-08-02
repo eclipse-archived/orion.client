@@ -192,8 +192,18 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 			 *   This function is passed a <td> element.
 			 * @returns a render function.
 			 */
-			makeRenderFunction: function(resultsNode, heading, onResultReady, decorator) {
+			makeRenderFunction: function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
 				
+				function _isText(fileName) {
+					if(!contentTypeService){
+						return true;
+					}
+					var contentType = contentTypeService.getFilenameContentType(fileName);
+					if(contentType && contentType.extends === "text/plain"){
+						return true;
+					}
+					return false;
+				}
 				/**
 				 * Displays links to resources under the given DOM node.
 				 * @param [{name, path, lineNumber, directory, isExternalResource}] resources array of resources.  
@@ -278,14 +288,17 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 								// should open link in new tab, but for now, follow the behavior of navoutliner.js
 								loc = resource.path;
 							} else {
-								loc	= resource.directory ? 
-										require.toUrl("navigate/table.html") + "#" + resource.path :  //$NON-NLS-1$ //$NON-NLS-0$
-										require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+								if(resource.directory){
+									loc = require.toUrl("navigate/table.html") + "#" + resource.path;  //$NON-NLS-1$ //$NON-NLS-0$
+								} else if(!_isText(resource.name)){
+									loc = resource.path;
+								} else {
+									loc	= require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+								}
 								if (loc === "#") { //$NON-NLS-0$
 									loc = "";
 								}
 							}
-		
 							resourceLink.setAttribute('href', loc); //$NON-NLS-0$
 							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,'')); //$NON-NLS-0$
 							dojo.style(resourceLink, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$
