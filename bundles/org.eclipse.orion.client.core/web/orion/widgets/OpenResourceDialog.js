@@ -151,7 +151,14 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			if(self._forceUseCrawler || !self.fileService.getService(self.searcher.location)["search"]){//$NON-NLS-0$
 				var crawler = new mSearchCrawler.SearchCrawler(self.searcher.registry, self.fileService, "", {searchOnName: true, location: self.searcher.location}); 
 				self.searcher.setCrawler(crawler);
-				crawler.buildSkeleton();
+				crawler.buildSkeleton(function(){
+													dojo.addClass("crawlingProgress", "progressPane_running_dialog");//$NON-NLS-2$ //$NON-NLS-0$
+													dojo.byId("crawlingProgress").title = messages['Building file skeleton...'];
+												}, 
+									  function(){
+													dojo.removeClass("crawlingProgress", "progressPane_running_dialog");//$NON-NLS-2$ //$NON-NLS-0$
+													dojo.byId("crawlingProgress").title = "";//$NON-NLS-2$ 
+												});
 			}
 		}, 0);
 	},
@@ -165,6 +172,10 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		// need to add the listener since favorites may not 
 		// have been initialized after first getting the favorites
 		this.favService.addEventListener("favoritesChanged", this.showFavorites()); //$NON-NLS-0$
+	},
+	
+	onCancel: function(){
+		console.log("cancelled");
 	},
 	
 	/** 
@@ -228,7 +239,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {
-				var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", false, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-0$
+				var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", false, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 				var renderFunction = that.searchRenderer.makeRenderFunction(that.contentTypeService, that.results, false, dojo.hitch(that, that.decorateResult));
 				that.searcher.search(query, false, renderFunction);
 			}, 0);

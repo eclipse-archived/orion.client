@@ -69,5 +69,6 @@ define({
 	"Always overwrite destination" : "Always overwrite destination",
 	"Overwrite if source is newer" : "Overwrite if source is newer",
 	"New" : "New",
+	"Building file skeleton..." : "Building file skeleton...",
 	"Add" : "Add"
 });
