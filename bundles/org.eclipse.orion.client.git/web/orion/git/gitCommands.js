@@ -1342,7 +1342,7 @@ var exports = {};
 												gitClient: gitService,
 												dialog: dialog2,
 												location: item.RemoteLocation[0].Children[0].Name,
-												func: dojo.hitch(this, function(){handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", path, true);})
+												func: dojo.hitch(this, function(){handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", path, false);})
 											});
 										}
 										
