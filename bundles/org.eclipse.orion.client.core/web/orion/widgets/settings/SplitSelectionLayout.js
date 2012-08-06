@@ -92,12 +92,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				this.selectedCategory.tabIndex = -1;
 			}
 
-			this.selectedCategory = dojo.byId(id);
+			if (id) {
+				this.selectedCategory = dojo.byId(id);
+			}
+
 			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
 			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
+		},
+
+		showSettings: function(id) {
+			this.selectCategory(id);
 			this.updateToolbar(id);
 			this.displaySettings(id);
 		},
@@ -114,7 +121,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					role: "tab", //$NON-NLS-0$
 					tabindex: -1,
 					"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-					onclick: dojo.hitch( this, "selectCategory", itemId ) //$NON-NLS-0$
+					onclick: dojo.hitch( this, "showSettings", itemId ) //$NON-NLS-0$
 				};
 
 				this.addCategory(item, count);

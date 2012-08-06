@@ -11,5 +11,6 @@
 //NLS_CHARSET=UTF-8
 
 define({
-	"foo": "foo"
+	"Searching file:": "Searching file:",
+	"is not supportted in this file system": "is not supportted in this file system"
 });

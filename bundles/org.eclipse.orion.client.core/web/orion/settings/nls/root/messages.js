@@ -101,5 +101,6 @@ define({
 	"Value": "Value",
 	"JavaScript Object": "JavaScript Object",
 	"click here, then check javascript console to drill down": "click here, then check javascript console to drill down",
-	"Item" : "Item"
+	"Item" : "Item",
+	PluginSettings: 'Plugin Settings'
 });
