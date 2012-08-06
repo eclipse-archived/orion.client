@@ -81,9 +81,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 							function(resp){
 								loadingDeferred.callback();
 								var repositories = resp.Children;
-								
 								that.initTitleBar(commits[0], repositories[0]);
-				
 								that.displayCommit(commits[0]);
 								that.displayTags(commits[0]);
 								that.displayDiffs(commits[0]);
@@ -108,8 +106,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		
 		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
-			var item;
-			var pageTitle;
+			var item = {};
+			
+			commit.GitUrl = repository.GitUrl;
+			commit.ContentLocation = repository.ContentLocation;
 			
 			if (commit){
 				item = {};
@@ -122,12 +122,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				item.Parents[1] = {};
 				item.Parents[1].Name = messages["Repositories"];
 			}
-			mGlobalCommands.setPageTarget({task: "Commit", target: repository, 
+			mGlobalCommands.setPageTarget({task: "Commit", target: commit, 
 				breadcrumbTarget: item, 
 				makeBreadcrumbLink: function(seg, location) {
 					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
 				},
-				serviceRegistry: this.registry, commandService: this.commandService});
+				serviceRegistry: that.registry, commandService: that.commandService}
+			);
 		};
 		
 		GitCommitExplorer.prototype.displayCommit = function(commit){
@@ -221,7 +222,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			return [commitMessage0, commitMessage1];
 		};
-		
+
 		// Git tags
 
 		GitCommitExplorer.prototype.displayTags = function(commit){
