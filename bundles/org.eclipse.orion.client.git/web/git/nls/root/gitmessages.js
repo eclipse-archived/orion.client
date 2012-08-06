@@ -23,7 +23,7 @@ define({
 	"Show in eclipse.org": "Show in eclipse.org",
 	"Show this repository at eclipse.org": "Show this repository at eclipse.org",
 	"Show in GitHub": "Show in GitHub",
-	"Show this repository at GitHub": "Show this repository at GitHub",
+	"Show this repository in GitHub": "Show this repository in GitHub",
 	"Commit Details": "Commit Details",
 	"No Commits": "No Commits",
 	"commit: 0": "commit: ${0}",
@@ -348,5 +348,12 @@ define({
 	"Local Branch Name:" : "Local Branch Name:",
 	"Pull Request url for this commit" : "Pull Request url for this commit",
 	"Pull Request" : "Pull Request",
-	"Pull Request Url" : "Pull Request Url"
+	"Pull Request Url" : "Pull Request Url",
+	"Show Commit in GitHub" : "Show Commit in GitHub",
+	"Show Repository in GitHub" : "Show Repository in GitHub",
+	"Show this commit in GitHub": "Show this commit in GitHub",
+	"Show Commit in eclipse.org": "Show Commit in eclipse.org",
+	"Show this commit in eclipse.org" : "Show this commit in eclipse.org",
+	"Show Repository in eclipse.org":"Show Repository in eclipse.org",
+	"Show this repository in eclipse.org":"Show this repository in eclipse.org"
 });
