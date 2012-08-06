@@ -123,8 +123,8 @@
 
 			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoEclipseGit",
-				nameKey: "Show in eclipse.org",
-				tooltipKey: "Show this repository at eclipse.org",
+				nameKey: "Show Repository in eclipse.org",
+				tooltipKey: "Show this repository in eclipse.org",
 				nls: "git/nls/gitmessages",
 				validationProperties: [{
 					source: "GitUrl|Clone:GitUrl", 
@@ -137,9 +137,9 @@
 			
 			provider.registerService("orion.page.link.related", null, {
 				id: "orion.git.gotoGithub",
-				nameKey: "Show in GitHub",
+				nameKey: "Show Repository in GitHub",
 				nls: "git/nls/gitmessages",
-				tooltipKey: "Show this repository at GitHub",
+				tooltipKey: "Show this repository in GitHub",
 				validationProperties: [{
 					source: "GitUrl|Clone:GitUrl", 
 					match: "github\.com.*\.git", 
@@ -148,6 +148,42 @@
 					replacements: [{pattern: ":", replacement: "/"}, {pattern: ".git$", replacement: ""}]
 				}],
 				uriTemplate: "https://{GitHubLocation}"
+			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoGithubCommit",
+				nameKey: "Show Commit in GitHub",
+				nls: "git/nls/gitmessages",
+				tooltipKey: "Show this commit in GitHub",
+				validationProperties: [{
+					source: "GitUrl", 
+					match: "github\.com.*\.git", 
+					variableName: "GitHubLocation", 
+					variableMatchPosition: "only",
+					replacements: [{pattern: ":", replacement: "/"}, {pattern: ".git$", replacement: ""}]
+				},
+				{source: "Type", match: "Commit"},
+				{source: "Name", variableName: "commitName"}
+				],
+				uriTemplate: "https://{GitHubLocation}/commit/{commitName}"
+			});
+			
+			provider.registerServiceProvider("orion.page.link.related", null, {
+				id: "orion.git.gotoEclipseGitCommit",
+				nameKey: "Show Commit in eclipse.org",
+				nls: "git/nls/gitmessages",
+				tooltipKey: "Show this commit in eclipse.org",
+				validationProperties: [{
+					source: "GitUrl", 
+					match: "git.eclipse.org/gitroot", 
+					variableName: "EclipseGitLocation", 
+					variableMatchPosition: "after"
+				},
+				{source: "Type", match: "Commit"},
+				{source: "Name", variableName: "commitName"},
+				{source: "Branch", variableName: "branchName"}
+				],
+				uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}/commit/?h={branchName}&id={commitName}"
 			});
 						
 			temp.href = "../../gitapi/diff/";
