@@ -180,10 +180,9 @@
 					variableMatchPosition: "after"
 				},
 				{source: "Type", match: "Commit"},
-				{source: "Name", variableName: "commitName"},
-				{source: "Branch", variableName: "branchName"}
+				{source: "Name", variableName: "commitName"}
 				],
-				uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}/commit/?h={branchName}&id={commitName}"
+				uriTemplate: "http://git.eclipse.org/c{EclipseGitLocation}/commit/?id={commitName}"
 			});
 						
 			temp.href = "../../gitapi/diff/";

@@ -104,6 +104,33 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			);
 		};
 		
+		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
+			var that = this;
+			var item = {};
+			
+			commit.GitUrl = repository.GitUrl;
+			commit.ContentLocation = repository.ContentLocation;
+			
+			if (commit){
+				item = {};
+				item.Name = commit.Name;
+				item.Parents = [];
+				item.Parents[0] = {};
+				item.Parents[0].Name = repository.Name;
+				item.Parents[0].Location = repository.Location;
+				item.Parents[0].ChildrenLocation = repository.Location;
+				item.Parents[1] = {};
+				item.Parents[1].Name = messages["Repositories"];
+			}
+			mGlobalCommands.setPageTarget({task: "Commit", target: commit, 
+				breadcrumbTarget: item, 
+				makeBreadcrumbLink: function(seg, location) {
+					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
+				},
+				serviceRegistry: that.registry, commandService: that.commandService}
+			);
+		};
+		
 		GitCommitExplorer.prototype.displayCommit = function(commit){
 			
 			var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
@@ -195,54 +222,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			return [commitMessage0, commitMessage1];
 		};
-		
-		// related pages
-		
-		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
-			var that = this;
-				that.registry.getService("orion.git.provider").getGitRemote(repository.RemoteLocation).then(
-					function(remote){
-						commit.GitUrl = remote.Children[0].GitUrl;
-						commit.ContentLocation = repository.ContentLocation;
-						var branches = commit.Branches;
-						if(branches){
-							for(var i=0; i<branches.length; i++){
-								var splitted = branches[i].FullName.split("/");
-								if(splitted[1] === "remotes"){
-									var name = splitted[2];
-									var remoteBranch = splitted[3];
-									for(var j=0;j<remote.Children.length;j++){
-										if(name === remote.Children[j].Name){
-											var gitUrl = remote.Children[j].GitUrl;
-											commit.GitUrl = gitUrl;
-											commit.Branch = remoteBranch;	
-										}
-									}
-								}
-							}
-						}
-						var item = {};
-						if (commit){
-							item = {};
-							item.Name = commit.Name;
-							item.Parents = [];
-							item.Parents[0] = {};
-							item.Parents[0].Name = repository.Name;
-							item.Parents[0].Location = repository.Location;
-							item.Parents[0].ChildrenLocation = repository.Location;
-							item.Parents[1] = {};
-							item.Parents[1].Name = messages["Repositories"];
-						}
-						mGlobalCommands.setPageTarget({task: "Commit", target: commit, 
-						breadcrumbTarget: item, 
-						makeBreadcrumbLink: function(seg, location) {
-							seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
-						},
-						serviceRegistry: that.registry, commandService: that.commandService});
-					});
-		};
-		
-		
+
 		// Git tags
 
 		GitCommitExplorer.prototype.displayTags = function(commit){
