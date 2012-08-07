@@ -355,5 +355,8 @@ define({
 	"Show Commit in eclipse.org": "Show Commit in eclipse.org",
 	"Show this commit in eclipse.org" : "Show this commit in eclipse.org",
 	"Show Repository in eclipse.org":"Show Repository in eclipse.org",
-	"Show this repository in eclipse.org":"Show this repository in eclipse.org"
+	"Show this repository in eclipse.org":"Show this repository in eclipse.org",
+	"Ask for review" : "Ask for review",
+	"Ask for review tooltip" : "Send email with request for commit review",
+	"Reviewer name" : "Reviewer name"
 });

@@ -1654,6 +1654,47 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(removeTagCommand);
+		
+		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])]); //$NON-NLS-1$ //$NON-NLS-0$
+		
+		var askForReviewCommand = new mCommands.Command({
+			name: messages["Ask for review"],
+			tooltip: messages["Ask for review tooltip"],
+			imageClass: "core-sprite-tag", //$NON-NLS-0$
+			id: "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
+			parameters: notificationParameters,
+			callback: function(data) {
+				var item = data.items;
+				
+				var headLocation = item.Location.replace(item.Name, "HEAD"); 
+				var authorName = item.AuthorName;
+				var commitName = item.Name;
+				var commitMessage = item.Message;
+				var reviewerName = data.parameters.valueFor("reviewer");
+				
+				serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation).then(
+					function(clone){
+						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+						var pullRequestUrl = orionHome + "/git/pullRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+
+						serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, pullRequestUrl, authorName, commitMessage).then(
+							function(result) {
+								var display = {};
+								display.Severity = "Ok"; //$NON-NLS-0$
+								display.HTML = false;
+								display.Message = result.Result;
+								serviceRegistry.getService("orion.page.message").setProgressResult(display);
+							}, displayErrorOnStatus
+						);
+					}
+				);
+			},
+			visibleWhen: function(item) {
+				return item.Type === "Commit"; //$NON-NLS-0$
+			}
+		});
+		commandService.addCommand(askForReviewCommand);
 
 		var cherryPickCommand = new mCommands.Command({
 			name : messages["Cherry-Pick"],
