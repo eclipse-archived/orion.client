@@ -16,10 +16,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		var navbar = '#333';
 		var button = '#777777';
-		var location = '#DEDEDE';
+		var location = '#EFEFEF';
 		var selection = 'FEC';
 		var sidepanel = '#FBFBFB';
-		var navtext = '#FBFBFB';
+		var navtext = '#bfbfbf';
 		var content = '#3087B3';
 		var search = '#444';
 		
@@ -167,7 +167,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var currentLocation = new ThemeClass.ThemeClass( 'currentLocation' );
 			currentLocation.style.fontWeight = 'bold';
 			currentLocation.style.fontSize = '8pt';
-			currentLocation.style.color = this.content;
+			currentLocation.style.color = '#444'; // should be a separate themeable item but hard coded for now.
 			currentLocation.style.textDecoration = 'none';
 			currentLocation.style.textWrap = 'normal';
 			currentLocation.style.lineHeight = '10pt';

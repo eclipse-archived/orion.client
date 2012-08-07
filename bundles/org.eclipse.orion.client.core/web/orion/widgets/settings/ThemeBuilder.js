@@ -67,10 +67,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.settings.navbar = new Family( 'NavBar', '#333' );
 			this.settings.button = new Family( 'Button', '#777777' );
-			this.settings.location = new Family( 'Location', '#DEDEDE' ); 
+			this.settings.location = new Family( 'Location', '#efefef' ); 
 			this.settings.selection = new Family( 'Selection', '#FEC' );
 			this.settings.sidepanel = new Family( 'Side', '#FBFBFB' ); 
-			this.settings.navtext = new Family( 'Navtext', '#FBFBFB' );
+			this.settings.navtext = new Family( 'Navtext', '#bfbfbf' );
 			this.settings.content = new Family( 'ContentText', '#3087B3' );
 			this.settings.search = new Family( 'Search', '#444' );
 			
@@ -148,21 +148,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
 
-				var cat = prefs.get( 'styles' );
-				
-				var selectedTheme = { 'selected':'Orion' };
-				
-				if( cat === undefined ){
+				var cat = prefs.get( 'styles' ); //$NON-NLS-0$
+				var selectedTheme = { 'selected':'Orion' }; //$NON-NLS-0$  //$NON-NLS-1$
+				if (!cat){
 					var themes = new ThemeData.ThemeData();
 					var styles = themes.getStyles();
-					prefs.put( 'styles', JSON.stringify(styles) );
-					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+					prefs.put( 'styles', JSON.stringify(styles) ); //$NON-NLS-0$
+					prefs.put( 'selected', JSON.stringify(selectedTheme) ); //$NON-NLS-0$
 					builder.styleset = styles;
 					builder.addThemePicker();
-				}
-				
-				
-				
+				}	
 			} );
 		}
 		

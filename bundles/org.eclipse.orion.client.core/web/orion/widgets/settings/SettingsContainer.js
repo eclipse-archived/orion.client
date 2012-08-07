@@ -30,8 +30,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.itemToIndexMap = {};
 			this.toolbar = dojo.byId( this.pageActions );
 			this.manageDefaultData(this.initialSettings);
-			this.drawUserInterface(this.initialSettings);
-			this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
+			// hack/workaround.  We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
+			// to build the UI until there are settings to be found there.
+			window.setTimeout(dojo.hitch(this, function() {
+				this.drawUserInterface(this.initialSettings);
+				this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
+			}), 100);
 			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: 'Settings'});
 		},
@@ -49,7 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 //			
 //			dojo.removeNode( pageToolBar.parentNode.removeChild(pageToolBar) );
 		},
-
+		
 		displaySettings: function(id) {
 			var settingsIndex = this.itemToIndexMap[id];
 
@@ -329,7 +333,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 						var cat = prefs.get( category );
 						
-						if( cat === undefined ){
+						if (!cat){
 						
 							var subcategories = [];
 		
@@ -575,7 +579,7 @@ initialSettings: [
 					"ui": 'Even Rows Color', //$NON-NLS-0$
 					"label": 'Even Rows Color', //$NON-NLS-0$
 					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				{
 					"ui": 'Even Rows Background', //$NON-NLS-0$
@@ -587,7 +591,7 @@ initialSettings: [
 					"ui": 'Odd Rows Color', //$NON-NLS-0$
 					"label": 'Odd Rows Color', //$NON-NLS-0$
 					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				{
 					"ui": 'Odd Rows Background', //$NON-NLS-0$
