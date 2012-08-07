@@ -21,10 +21,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#333';
 		StyleSet.prototype.button = '#777777';
-		StyleSet.prototype.location = '#DEDEDE';
+		StyleSet.prototype.location = '#efefef';
 		StyleSet.prototype.selection = 'FEC';
 		StyleSet.prototype.sidepanel = '#FBFBFB';
-		StyleSet.prototype.navtext = '#FBFBFB';
+		StyleSet.prototype.navtext = '#bfbfbf';
 		StyleSet.prototype.content = '#3087B3';
 		StyleSet.prototype.search = '#444';
 
@@ -34,10 +34,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			orion.name = 'Orion';
 			orion.navbar = '#333';
 			orion.button = '#777777';
-			orion.location = '#DEDEDE';
+			orion.location = '#efefef';
 			orion.selection = 'FEC';
 			orion.sidepanel = '#FBFBFB';
-			orion.navtext = '#FBFBFB';
+			orion.navtext = '#bfbfbf';
 			orion.content = '#3087B3';
 			orion.search = '#444';
 
