@@ -254,8 +254,9 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @return {Object} The plugin headers
 		 * @function
 		 */
-		this.getHeaders = function() {
-			return data && data.headers ? data.headers : {};
+		this.getHeaders = function(falsy) {
+			var noData = falsy ? null : {};
+			return data && data.headers ? data.headers : noData;
 		};
 		
 		this.getName = function() {
@@ -620,7 +621,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			var d = new Deferred();
 			var plugin = _getPlugin(url);
 			if (plugin) {
-				if(plugin.getHeaders()) {
+				if(plugin.getHeaders(true)) {
 					d.resolve(plugin);
 				} else {
 					var pluginTracker = function(plugin) {
@@ -634,7 +635,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			} else {
 				plugin = new Plugin(url, opt_data, internalRegistry);
 				_plugins.push(plugin);
-				if(plugin.getHeaders()) {
+				if(plugin.getHeaders(true)) {
 					_persist(plugin);
 					d.resolve(plugin);
 				} else {				
@@ -658,7 +659,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		this.getPlugins = function() {
 			var result =[];
 			_plugins.forEach(function(plugin) {
-				if (plugin.getHeaders()) {
+				if (plugin.getHeaders(true)) {
 					result.push(plugin);
 				}
 			});
@@ -674,7 +675,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 */
 		this.getPlugin = function(url) {
 			var plugin = _getPlugin(url);
-			if (plugin && plugin.getHeaders()) {
+			if (plugin && plugin.getHeaders(true)) {
 				return plugin;
 			}
 			return null;
