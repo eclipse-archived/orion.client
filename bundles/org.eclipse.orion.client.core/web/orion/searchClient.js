@@ -118,10 +118,12 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 			}
 			if(searchInputDom && searchInputDom.placeholder){
 				searchInputDom.value = "";
-				if(locationName.length > 23){
-					searchInputDom.placeholder = messages["Search "] + locationName.substring(0, 20) + "..."; //$NON-NLS-1$
+				var placeHolder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
+				
+				if(placeHolder.length > 30){
+					searchInputDom.placeholder = placeHolder.substring(0, 27) + "..."; //$NON-NLS-1$
 				} else {
-					searchInputDom.placeholder = messages['Search '] + locationName;
+					searchInputDom.placeholder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
 				}
 			}
 			if(searchInputDom && searchInputDom.title){

@@ -32,6 +32,10 @@
 	border-bottom: 1px solid #e6e6e6;
 }
 
+.lightTreeTableRow{
+	overflow: hidden;
+}
+
 .stretch {
 	float: left;
 	position: relative;
@@ -46,6 +50,10 @@
 
 .gitMainDescription{
 	padding-left:8px;
+}
+
+.gitSecondaryDescription{
+	padding-top:10px;
 }
 
 pre {
