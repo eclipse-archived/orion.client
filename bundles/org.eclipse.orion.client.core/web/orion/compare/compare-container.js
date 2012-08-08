@@ -626,9 +626,7 @@ exports.TwoWayCompareContainer = (function() {
 		this._rightTextView = this._rightEditor.getTextView();
 		var that = this;
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
-				                    function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
-		this._rightTextView.addRuler(this._overviewRuler);
-		var that = this;
+                function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
 		window.onbeforeunload = function() {
 			if (that._leftEditor.isDirty()) {
 				return messages["There are unsaved changes."];
@@ -748,8 +746,6 @@ exports.TwoWayCompareContainer = (function() {
 			editor.setInput(fileObj.Name);
 			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
 		}
-			
-		textView.addRuler(new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"})); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		textView.addEventListener("Selection", function(evt) { //$NON-NLS-0$
 			if(evt.newValue){
@@ -796,6 +792,18 @@ exports.TwoWayCompareContainer = (function() {
 		}
 	};
 
+	TwoWayCompareContainer.prototype.addRulers = function(){
+		if(this._rightTextView && this._leftTextView && !this._hasRuler){
+			var that = this;
+			this._leftTextViewRuler= new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._rightTextViewRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._leftTextView.addRuler(this._leftTextViewRuler);
+			this._rightTextView.addRuler(this._rightTextViewRuler);
+			this._rightTextView.addRuler(this._overviewRuler);
+			this._hasRuler = true;
+		}
+	};
+	
 	TwoWayCompareContainer.prototype.setEditor = function(onsave){	
 		var input = this.options.baseFile.Content;
 		var output = this.options.newFile.Content;
@@ -829,6 +837,7 @@ exports.TwoWayCompareContainer = (function() {
 			this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftEditor, this, 2);
 			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
 			this.renderCommands();
+			this.addRulers();
 			if(!this.options.readonly)
 				this._inputManager.setInput(this.options.newFile.URL , this._leftEditor);
 		}
