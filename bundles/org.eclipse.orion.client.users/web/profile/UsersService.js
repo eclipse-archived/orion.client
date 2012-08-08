@@ -41,7 +41,7 @@ eclipse.UsersService = (function() {
 						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
-							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							service.dispatchEvent(onLoad, jsonData);
 					}
 					return jsonData.users;
 				},
@@ -68,7 +68,7 @@ eclipse.UsersService = (function() {
 							if(typeof onLoad === "function") //$NON-NLS-0$
 								onLoad(jsonData, secondArg);
 							else
-								service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+								service.dispatchEvent(onLoad, jsonData);
 						}
 					},
 					error : function(error, ioArgs) {
@@ -99,7 +99,7 @@ eclipse.UsersService = (function() {
 						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
-							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							service.dispatchEvent(onLoad, jsonData);
 					}
 					return jsonData;
 				},
@@ -124,7 +124,7 @@ eclipse.UsersService = (function() {
 						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
-							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							service.dispatchEvent(onLoad, jsonData);
 					}
 				},
 				error : function(error, ioArgs) {
@@ -161,7 +161,7 @@ eclipse.UsersService = (function() {
 						if(typeof onLoad === "function") //$NON-NLS-0$
 							return onLoad(jsonData, secondArg);
 						else{
-							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							service.dispatchEvent(onLoad, jsonData);
 							return jsonData;
 						}
 					} else {
@@ -196,7 +196,7 @@ eclipse.UsersService = (function() {
 						if(typeof onLoad === "function") //$NON-NLS-0$
 							onLoad(jsonData, secondArg);
 						else
-							service._serviceRegistration.dispatchEvent(onLoad, jsonData);
+							service.dispatchEvent(onLoad, jsonData);
 					}
 					
 					return jsonData;
