@@ -203,7 +203,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			var commandButton = new ThemeClass.ThemeClass( 'commandButton' );
 			commandButton.style.color = '#222';
-			commandButton.style.border = '1px solid ' + this.location;
+			commandButton.style.border = '1px solid #dedede'; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386702#c2 
 			commandButton.style.backgroundColor = '#efefef';
 			commandButton.style.textAlign = 'center';
 			commandButton.style.verticalAlign = 'baseline';
@@ -234,7 +234,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			commandMenu.style.margin = '0';
 			commandMenu.style.fontSize = '8pt';
 			commandMenu.style.fontWeight = 'normal';
-			commandMenu.style.border = '1px solid ' + this.location;
+			commandMenu.style.border = '1px solid #dedede'; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386702#c2
 			commandMenu.style.backgroundColor = '#efefef';
 		    commandMenu.style.cursor = 'pointer';
 		    commandMenu.style.borderRadius = '1px';
