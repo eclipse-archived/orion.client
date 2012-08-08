@@ -890,6 +890,29 @@ eclipse.GitService = (function() {
 			});
 			return clientDeferred;
 		},
+		sendCommitReviewRequest: function(commit, location, login, url, authorName, message){
+			var service = this;
+			var clientDeferred = new dojo.Deferred();
+			dojo.xhrPost({
+				url: location , 
+				handleAs: "json", //$NON-NLS-0$
+				timeout: 15000,
+				postData : dojo.toJson({
+					"PullReqCommit": commit,
+					"PullReqUrl" : url, //$NON-NLS-0$
+					"PullReqNotifyLogin" : login, //$NON-NLS-0$	
+					"PullReqAuthorName" : authorName,
+					"PullReqMessage" : message
+				}),
+				load: function(jsonData, xhrArgs) {
+					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
+				},
+				error: function(error, ioArgs) {
+					dojo.hitch(service, service._handleGitServiceResponseError)(clientDeferred, this, error, ioArgs);
+				}
+			});
+			return clientDeferred;
+		},
 		_getGitServiceResponse: function(clientDeferred, jsonData, xhrArgs){
 			if(xhrArgs && xhrArgs.xhr.status === 202){
 				var deferred = new dojo.Deferred();
