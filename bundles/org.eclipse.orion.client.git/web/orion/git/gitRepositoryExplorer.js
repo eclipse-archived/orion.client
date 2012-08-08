@@ -11,8 +11,8 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mSection, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -227,36 +227,40 @@ exports.GitRepositoryExplorer = (function() {
 	
 	// Git repo
 	
-	GitRepositoryExplorer.prototype.decorateRepositories = function(repositories, mode, deferred){
+	GitRepositoryExplorer.prototype.decorateRepository = function(repository, mode, deferred){
 		var that = this;
 		if (deferred == null){
 			deferred = new dojo.Deferred();
 		}
 		
-		if (repositories.length > 0) {
-			this.registry.getService("orion.core.file").loadWorkspace(repositories[0].ContentLocation + "?parts=meta").then( //$NON-NLS-1$ //$NON-NLS-0$
+		if(!mode){
+			mode = "full";
+		}
+		
+		
+		this.registry.getService("orion.core.file").loadWorkspace(repository.ContentLocation + "?parts=meta").then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
-					repositories[0].Content = {};
+					repository.Content = {};
 					
 					var path = "root / "; //$NON-NLS-0$
-					if (resp.Parents != null)
+					if (resp.Parents !== null)
 						for (var i=resp.Parents.length; i>0; i--){
 							path += resp.Parents[i-1].Name + " / "; //$NON-NLS-0$
 						}
+						
 					path += resp.Name;
-					
-					repositories[0].Content.Path = path;
+					repository.Content.Path = path;
 					
 					if (mode !== "full"){ //$NON-NLS-0$
-						that.decorateRepositories(repositories.slice(1), mode, deferred);
+						deferred.callback();
 						return;
 					}
 					
-					that.registry.getService("orion.git.provider").getGitStatus(repositories[0].StatusLocation).then( //$NON-NLS-0$
+					that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation).then( //$NON-NLS-0$
 						function(resp){
-							repositories[0].Status = resp;
+							repository.Status = resp;
 
-							that.registry.getService("orion.git.provider").getGitBranch(repositories[0].BranchLocation).then( //$NON-NLS-0$
+							that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
 								function(resp){
 									var branches = resp.Children;
 									var currentBranch;
@@ -267,99 +271,136 @@ exports.GitRepositoryExplorer = (function() {
 										}
 									}
 									
-									if (!currentBranch || currentBranch.RemoteLocation[0] == null){
-										that.decorateRepositories(repositories.slice(1), mode, deferred);
+									if (!currentBranch || currentBranch.RemoteLocation[0] === null){
+										deferred.callback();
 										return;
 									};
 									
-									var tracksRemoteBranch = (currentBranch.RemoteLocation.length == 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+									var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 									
 									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
 										that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 											function(resp){
-												repositories[0].CommitsToPush = resp.Children.length;
+												if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+												else { repository.CommitsToPush = resp.Children.length; }
+												deferred.callback();
+												return;
+											}, function(resp){
+												deferred.errback();
+												return;
 											}
 										);
 									} else {
 										that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
 											function(resp){	
-												repositories[0].CommitsToPush = resp.Children.length;
+												if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+												else { repository.CommitsToPush = resp.Children.length; }
+												deferred.callback();
+												return;
+											}, function(resp){
+												deferred.errback();
+												return;
 											}
 										);	
 									}
-									
-									that.decorateRepositories(repositories.slice(1), mode, deferred);
+								}, function(resp){
+									deferred.errback();
+									return;
 								}
 							);
+						}, function(resp){
+							deferred.errback();
+							return;
 						}	
 					);
-				}
+				}, function(resp){
+					deferred.errback();
+					return;
+				 }
 			);
-		} else {
-			deferred.callback();
-		}
 		
 		return deferred;
 	};
 	
 	GitRepositoryExplorer.prototype.displayRepositories = function(repositories, mode, links){
 		var that = this;
-		
-		var tableNode = dojo.byId( 'table' );	 //$NON-NLS-0$
-		dojo.empty( tableNode );
-	
 		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		
-		if (!repositories || repositories.length === 0){
-			var titleWrapper = new mSection.Section(tableNode, {
-				id: "repositorySection", //$NON-NLS-0$
-				title: "Repository",
-				iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
-			});
-			titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
-			that.loadingDeferred.callback();
-			progressService.setProgressMessage("");
-			return;
-		}
-
-		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
-		contentParent.innerHTML = '<list id="repositoryNode" class="mainPadding"></list>'; //$NON-NLS-0$
-
-		this.decorateRepositories(repositories, mode).then(
-			function(){
-				for(var i=0; i<repositories.length;i++){
-					that.renderRepository(repositories[i], i, repositories.length, mode, links);
+		var dynamicContentModel = new mDynamicContent.DynamicContentModel(repositories,
+			function(i){
+				return that.decorateRepository.bind(that)(repositories[i]);
+			}
+		);
+		
+		var dcExplorer = new mDynamicContent.DynamicContentExplorer(dynamicContentModel);
+		var repositoryRenderer = {
+		
+			initialRender : function(){
+				var tableNode = dojo.byId('table');	 //$NON-NLS-0$
+				dojo.empty(tableNode);
+				
+				if(!repositories || repositories.length === 0){
+					var titleWrapper = new mSection.Section(tableNode, {
+						id: "repositorySection", //$NON-NLS-0$
+						title: "Repository",
+						iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
+					});
+					titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
+					that.loadingDeferred.callback();
+					progressService.setProgressMessage("");
+					return;
 				}
+				
+				var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
+				contentParent.innerHTML = '<list id="repositoryNode" class="mainPadding"></list>'; //$NON-NLS-0$
+			},
+			
+			cleanupRender : function(){
 				that.loadingDeferred.callback();
 				progressService.setProgressMessage("");
 			},
-			function(){
-				that.loadingDeferred.errback();
-				progressService.setProgressMessage("");
+			
+			renderBeforeItemPopulation : function(i){
+				var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((repositories.length === 1) ? "" : ((i % 2) ? "darkTreeTableRow" : "lightTreeTableRow"))}, dojo.byId("repositoryNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+				
+				var detailsView = dojo.create( "div", { "class":"stretch" }, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var title = dojo.create( "span", { "class":"gitMainDescription"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				
+				if (links){
+					var link = dojo.create("a", {"class": "navlinkonpage", href: "/git/git-repository.html#" + repositories[i].Location}, title); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.place(document.createTextNode(repositories[i].Name), link);
+				} else { dojo.place(document.createTextNode(repositories[i].Name), title); }
+				
+				//create indicator
+				this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
+				
+				dojo.create("div", null, detailsView);
+				dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : (repositories[i].GitUrl != null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]) }, detailsView);
+				dojo.create("div", null, detailsView);
+				dojo.create("span", { "id" : "location"+i, "class":"gitSecondaryDescription" }, detailsView);
+				
+				dojo.create("div", {"style" : "padding-top:10px"}, detailsView);
+				dojo.create("span", {"id":"workspaceState"+i, "class":"gitSecondaryDescription", "style" : "padding-left:10px"}, detailsView);
+				dojo.create("span", {"id":"commitsState"+i, "class":"gitSecondaryDescription", "style" : "padding-left:10px"}, detailsView);
+				
+				if (mode === "full"){
+					var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					that.commandService.renderCommands(that.actionScopeId, actionsArea, repositories[i], that, "tool"); //$NON-NLS-0$
+				}
+			},
+			
+			renderAfterItemPopulation : function(i){
+				that.renderRepository(repositories[i], i, repositories.length, mode, links);
 			}
-		);
+		};
+		
+		dcExplorer.use(repositoryRenderer);
+		dcExplorer.render();
 	};
 	
 	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, mode, links){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((length == 1) ? "" : ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow"))}, dojo.byId("repositoryNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
-		
-		var detailsView = dojo.create( "div", { "class":"stretch" }, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
-		if (links){
-			link = dojo.create("a", {"class": "navlinkonpage", href: "/git/git-repository.html#" + repository.Location}, title); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(document.createTextNode(repository.Name), link);
-		} else {
-			dojo.place(document.createTextNode(repository.Name), title);
-		}
-
-		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: (repository.GitUrl != null ? "git url: " + repository.GitUrl : messages["(no remote)"]) }, detailsView );
-		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: messages["location: "] + repository.Content.Path }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
+		dojo.byId("location"+index).innerHTML = messages["location: "] + repository.Content.Path;
 		var status = repository.Status;
 		
 		if (mode === "full"){ //$NON-NLS-0$
@@ -369,17 +410,11 @@ exports.GitRepositoryExplorer = (function() {
 			var workspaceState = ((unstaged > 0 || staged > 0) 
 				? dojo.string.substitute(messages["${0} file(s) to stage and ${1} file(s) to commit."], [unstaged, staged])
 				: messages["Nothing to commit."]);
-			dojo.create( "div", {"style":"padding-top:10px"}, detailsView );		 //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.create( "span", { "class":"gitSecondaryDescription", "style":"padding-left:10px", innerHTML: workspaceState}, detailsView ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			dojo.byId("workspaceState"+index).innerHTML = workspaceState;
 			
 			var commitsState = repository.CommitsToPush;
-			dojo.create( "span", { "class":"gitSecondaryDescription", "style":"padding-left:10px",  //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				innerHTML: ((commitsState > 0 ) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."])}, detailsView );
-		}
-		
-		if (mode === "full"){
-			var actionsArea = dojo.create( "div", {"id":"repositoryActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands(this.actionScopeId, actionsArea, repository, this, "tool"); //$NON-NLS-0$
+			dojo.byId("commitsState"+index).innerHTML = ((commitsState > 0) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);	
 		}
 	};
 	
