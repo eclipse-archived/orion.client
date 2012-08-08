@@ -1210,6 +1210,9 @@ var exports = {};
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.push", //$NON-NLS-0$
 			callback: function(data) {
+				//previously saved target branch
+				var itemTargetBranch = data.targetBranch;
+			
 				var target;
 				var item = data.items;
 				var path = dojo.hash();
@@ -1297,6 +1300,11 @@ var exports = {};
 						
 								result.then(
 									function(remotes){
+										if(itemTargetBranch){
+											handlePush(options, itemTargetBranch.Location, "HEAD", itemTargetBranch.Name, false);
+											return;
+										}
+									
 										var dialog = new orion.git.widgets.RemotePrompterDialog({
 											title: messages["Choose Branch"],
 											serviceRegistry: serviceRegistry,
@@ -1316,11 +1324,13 @@ var exports = {};
 													var locationToUpdate = "/gitapi/config/" + "branch." + item.Name + ".remote"  + "/clone/file/" + parts[4];
 													gitService.addCloneConfigurationProperty(locationToChange,"branch." + item.Name + ".remote" ,target.parent.Name).then(
 														function(){
+															commandInvocation.targetBranch = target;
 															handlePush(options, target.Location, "HEAD",target.Name, false);
 														}, function(err){
 															if(err.status == 409){ //when confing entry is already defined we have to edit it
 																gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name).then(
 																	function(){
+																		commandInvocation.targetBranch = target;
 																		handlePush(options, target.Location, "HEAD",target.Name, false);
 																	}
 																);
@@ -1340,7 +1350,10 @@ var exports = {};
 												gitClient: gitService,
 												dialog: dialog2,
 												location: item.RemoteLocation[0].Children[0].Name,
-												func: dojo.hitch(this, function(){handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", path, false);})
+												func: dojo.hitch(this, function(){
+													commandInvocation.targetBranch = item.RemoteLocation[0].Children[0];
+													handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", path, false);
+												})
 											});
 										}
 										
