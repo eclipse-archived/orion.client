@@ -14,8 +14,7 @@ var eclipse;
 /*browser:true*/
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links',
-	    'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'dojo/hash'], 
 		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mUtil, PageUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
@@ -23,8 +22,6 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 mBootstrap.startup().then(function(core) {
 	var serviceRegistry = core.serviceRegistry;
 	var preferences = core.preferences;
-	document.body.style.visibility = "visible"; //$NON-NLS-0$
-	dojo.parser.parse();
 	
 	new mDialogs.DialogService(serviceRegistry);
 	var selection = new mSelection.Selection(serviceRegistry);
@@ -41,7 +38,7 @@ mBootstrap.startup().then(function(core) {
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
 	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
+	mGlobalCommands.generateBanner("orion-repository", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 	
 	// define commands
 	mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$

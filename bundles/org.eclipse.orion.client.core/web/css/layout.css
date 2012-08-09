@@ -110,7 +110,6 @@ by the splitter bar.  If these values change, then change the delay in the split
 .mainPanelLayout {
 	display: block;
 	position: absolute;
-	overflow-x: auto;
 	right: 0;
 	z-index: 500;
 	width: 66%;
@@ -141,6 +140,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 
 .hasSplit {
    display: none;
+   overflow-x: auto;
 }
 
 .splitLayout {
@@ -148,8 +148,8 @@ by the splitter bar.  If these values change, then change the delay in the split
 	left: 33%;
 	height: 100%;
 	z-index: 800;
-	width: 4px;
-	margin-right: 4px;
+	width: 3px;
+	margin-right: 3px;
 	cursor: e-resize;
 }
 
