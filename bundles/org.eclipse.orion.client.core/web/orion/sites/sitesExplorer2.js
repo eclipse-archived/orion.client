@@ -95,7 +95,6 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 					
 					commandService.registerCommandContribution(that.pageActionsWrapperId, 'orion.site.create', 100); //$NON-NLS-0$
 					
-					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.edit', 10); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.delete', 40); //$NON-NLS-0$
