@@ -12,4 +12,6 @@
 
 @import "../css/images.css";
 
+@import "../css/sections.css"; /* for outliner */
+
 @import "../orion/editor/editor.css";
