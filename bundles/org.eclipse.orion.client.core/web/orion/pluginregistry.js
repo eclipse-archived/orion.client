@@ -659,9 +659,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		this.getPlugins = function() {
 			var result =[];
 			_plugins.forEach(function(plugin) {
-				if (plugin.getHeaders(true)) {
+				// TODO: what was the purpose of this test?
+//				if (plugin.getHeaders(true)) {
 					result.push(plugin);
-				}
+//				}
 			});
 			return result;
 		};
