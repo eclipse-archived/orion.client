@@ -170,9 +170,13 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "orion.site.delete", //$NON-NLS-0$
 			visibleWhen: function(items) {
-				return wrap(items).every(function(item) {
-					return item.HostingStatus && item.HostingStatus.Status === "stopped"; //$NON-NLS-0$
-				});
+				var siteArray = wrap(items);
+				if (siteArray.length > 0) {
+					return siteArray.every(function(item) {
+						return item.HostingStatus && item.HostingStatus.Status === "stopped"; //$NON-NLS-0$
+					});
+				}
+				return false;
 			},
 			/**
 			 * @param {Function} [data.userData.deleteCallback]
