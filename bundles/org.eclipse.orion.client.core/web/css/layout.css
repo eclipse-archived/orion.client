@@ -173,3 +173,28 @@ by the splitter bar.  If these values change, then change the delay in the split
 	-ms-user-select: none;
 	user-select: none;
 }
+
+/* command layout */
+
+/* spacing for commands in a list */
+.commandList {
+	padding: 0;
+	margin-left: 0;
+	margin-right: 0;
+	list-style-type: none;
+	vertical-align: baseline;
+}
+
+.commandList li {
+	float: left;
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+/* for commands not in a list we add margins for backward compatibility */
+.commandMargins {
+	margin-left: 4px;
+	margin-right: 4px;
+}
+
+
