@@ -46,7 +46,26 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 			});
 			
 			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
-
+			// would be nice to have a "restore defaults" command for each settings page but until that can be done,
+			// add a command with a "secret key binding" for blowing away the preferences.
+			var clearPrefsCommand  = new mCommands.Command({
+				name: "Clear themes and editor settings", 
+				tooltip: "Clear all settings associated with editor themes and window themes", 
+				id: "orion.clearThemes", //$NON-NLS-0$
+				callback: function(data) {
+					preferences.getPreferences('/themes', 2).then(function(prefs) { //$NON-NLS-0$
+						prefs.put("styles", null); //$NON-NLS-0$
+						prefs.put("selected", null); //$NON-NLS-0$
+						preferencesStatusService.setMessage("Theme settings have been cleared.");
+					});
+					preferences.getPreferences('/settings', 2).then(function(prefs) { //$NON-NLS-0$
+						prefs.put("JavaScript Editor", null); //$NON-NLS-0$ // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386765
+						preferencesStatusService.setMessage("Theme settings have been cleared.");
+					});
+				}});
+			commandService.addCommand(clearPrefsCommand);
+			// add as a binding only command
+			commandService.registerCommandContribution("globalActions", "orion.clearThemes", 1,  null, true, new mCommands.CommandKeyBinding('t', true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
 			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 

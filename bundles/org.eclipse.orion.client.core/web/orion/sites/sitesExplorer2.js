@@ -191,7 +191,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 							dojo.place(document.createTextNode(status.URL), link, "last"); //$NON-NLS-0$
 							mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 							
-							dojo.place(document.createTextNode(".)"), statusField, "last");
+							dojo.place(document.createTextNode(")"), statusField, "last");
 							
 							var inlineAction = dojo.create("span", {"style" : "padding-left:10px;"}, statusField, "last");
 							this.registry.getService('orion.page.command').renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
@@ -201,13 +201,13 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 							
 							link.href = status.URL;
 						} else {
-							var statusString = "(" + status.Status.substring(0,1).toUpperCase() + status.Status.substring(1) + ".)";
+							var statusString = "(" + status.Status.substring(0,1).toUpperCase() + status.Status.substring(1) + ")";
 							dojo.place(document.createTextNode(statusString), statusField, "last"); //$NON-NLS-0$
 							
 							var inlineAction = dojo.create("span", {"style" : "padding-left:10px"}, statusField, "last");
 							this.registry.getService('orion.page.command').renderCommands("DefaultActionWrapper", inlineAction, item, this.explorer, "button", this.explorer.getRefreshHandler(), navGridHolder); //$NON-NLS-1$ //$NON-NLS-0$
 							
-							dojo.place(document.createTextNode("this site."), statusField, "last"); //$NON-NLS-0$
+							dojo.place(document.createTextNode("this site"), statusField, "last"); //$NON-NLS-0$
 						}
 					} else {
 						dojo.place(document.createTextNode(messages["Unknown"]), statusField, "last"); //$NON-NLS-1$

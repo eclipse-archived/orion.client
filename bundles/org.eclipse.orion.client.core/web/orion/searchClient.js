@@ -201,7 +201,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 						return true;
 					}
 					var contentType = contentTypeService.getFilenameContentType(fileName);
-					if(contentType && contentType.extends === "text/plain"){
+					if(contentType && contentType['extends'] === "text/plain"){
 						return true;
 					}
 					return false;

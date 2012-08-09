@@ -67,10 +67,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.settings.navbar = new Family( 'NavBar', '#333' );
 			this.settings.button = new Family( 'Button', '#777777' );
-			this.settings.location = new Family( 'Location', '#DEDEDE' ); 
+			this.settings.location = new Family( 'Location', '#efefef' ); 
 			this.settings.selection = new Family( 'Selection', '#FEC' );
 			this.settings.sidepanel = new Family( 'Side', '#FBFBFB' ); 
-			this.settings.navtext = new Family( 'Navtext', '#FBFBFB' );
+			this.settings.navtext = new Family( 'Navtext', '#bfbfbf' );
 			this.settings.content = new Family( 'ContentText', '#3087B3' );
 			this.settings.search = new Family( 'Search', '#444' );
 			
@@ -117,7 +117,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 													'</div>' +
 												'</div>' +
 												'<canvas id="orionui" width="800" height="380"></canvas>' +
-												'<div id="pickercontainer" style="display:show;">' +
+												'<div id="pickercontainer" style="display:block;">' +
 													'<span class="settingsLabel">Theme:</span>' + 
 													'<div id="themepicker"></div>' +
 												'</div>' +
@@ -148,21 +148,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
 
-				var cat = prefs.get( 'styles' );
-				
-				var selectedTheme = { 'selected':'Orion' };
-				
-				if( cat === undefined ){
+				var cat = prefs.get( 'styles' ); //$NON-NLS-0$
+				var selectedTheme = prefs.get( 'selected' );
+				if (!cat){
 					var themes = new ThemeData.ThemeData();
 					var styles = themes.getStyles();
-					prefs.put( 'styles', JSON.stringify(styles) );
-					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+					prefs.put( 'styles', JSON.stringify(styles) ); //$NON-NLS-0$
 					builder.styleset = styles;
-					builder.addThemePicker();
 				}
-				
-				
-				
+				if (!selectedTheme) {
+					selectedTheme = { 'selected':'Orion' }; //$NON-NLS-0$  //$NON-NLS-1$
+					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+				}
+				builder.addThemePicker();
 			} );
 		}
 		
@@ -676,7 +674,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var builder = this;
 			
-			this.preferences.getPreferences('/themes', 2).then(function(prefs){ //$NON-NLS-0$
+			this.preferences.getPreferences('/themes', 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
 
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
@@ -695,6 +693,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					   Going to make sure */
 				
 					styles = builder.styleset; 
+				}
+				
+				if(!selection) {
+					selection = { 'selected':'Orion' };	
 				}
 			
 				if( styles ){
@@ -717,21 +719,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						themebuilder.styles = styles;
 					}	
 				}
-			} );	
-			
-			if( selection ){	
-				this.select( selection.selected );
-			}
-			
-			var picker = document.getElementById( 'themepicker' );
-			
-			if(!this.themeSelect){
-				this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-				this.themeSelect.setStorageItem = dojo.hitch( themebuilder, 'select' );
 				
-				var saver = document.getElementById( 'themesaver' );
-				new orion.widgets.settings.TextField({}, saver );	
-			}
+				if( selection ){	
+					this.select( selection.selected );
+				}
+			
+				var picker = document.getElementById( 'themepicker' );
+				
+				if(!this.themeSelect){
+					this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
+					this.themeSelect.setStorageItem = dojo.hitch( themebuilder, 'select' );
+					
+					var saver = document.getElementById( 'themesaver' );
+					new orion.widgets.settings.TextField({}, saver );	
+				}
+			} ));	
 		}
 		
 		ThemeBuilder.prototype.addThemePicker = addThemePicker;
@@ -781,8 +783,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		ThemeBuilder.prototype.render = render;
 		
 		function destroy(){
-			dijit.byId( 'themepicker' ).destroyRecursive();
-			dijit.byId( 'themesaver' ).destroyRecursive();
+			var picker = dijit.byId( 'themepicker' );
+			if (picker) {
+				picker.destroyRecursive();
+			}
+			var saver = dijit.byId( 'themesaver' );
+			if (saver) {
+				saver.destroyRecursive();
+			}
 		}
 		
 		ThemeBuilder.prototype.destroy = destroy;
