@@ -26,7 +26,6 @@ var exports = {};
 	var doOnce = false;
 
 	exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item, pageNavId) {
-		// we should be using orion.globalCommands#generateDomCommandsInBanner rather than managing these toolbars ourself
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
 			dojo.empty(toolbar);

@@ -16,13 +16,12 @@
 			require(["settings.js"]);
 		</script>
 	</head>
-	<body style="visibility:hidden;" class="claro">
-		<div id="orion.settings" class="orionPage" dojotype="dijit.layout.BorderContainer" design="headline" gutters="false">
-			<div class="banner" id="banner" dojotype="dijit.layout.ContentPane" region="top"></div>
-			<div id="centerPane" dojotype="dijit.layout.ContentPane" region="center" role="main">
-				<div id="selectionAgent"></div>
-			</div>
-			<div class="footer" id="footer" dojotype="dijit.layout.ContentPane" region="bottom" splitter="false"></div>
+	
+		<body id="orion-settings" style="height: 100%;" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div id="selectionAgent" class="settings" style="height:100%;"></div>
 		</div>
-	</body>
+		<div class="footer-fixed-bottom footer" id="footer">
+		</div>
+	</body>	
 </html>

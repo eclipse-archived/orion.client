@@ -13,8 +13,7 @@
 /*jslint */
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/sitesExplorer', 'orion/PageUtil',
-		'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+		'orion/sites/sitesExplorer', 'orion/PageUtil','dojo/hash', 'dojo/date/locale'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
 			mSiteUtils, mSiteCommands, mSitesExplorer, PageUtil) {
 
@@ -22,8 +21,6 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = 'visible'; //$NON-NLS-0$
-			dojo.parser.parse();
 
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
@@ -62,7 +59,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			});
 
 			processParameters();
-			mGlobalCommands.generateBanner('banner', serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner('orion-viewSites', serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		});
 	});
 });

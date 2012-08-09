@@ -165,7 +165,6 @@ exports.Explorer = (function() {
 				renderer: this.renderer,
 				indent: options ? options.indent: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
-				tableStyle: "mainPadding", //$NON-NLS-0$,
 				tableElement: options ? options.tableElement : undefined,
 				tableBodyElement: options ? options.tableBodyElement : undefined,
 				tableRowElement: options ? options.tableRowElement : undefined
