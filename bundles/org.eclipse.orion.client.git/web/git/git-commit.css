@@ -12,9 +12,9 @@
 
 @import "../settings/settings.css";
 
-@import "../css/ide.css";
+@import "../css/layout.css";
 
-@import "../css/breadcrumbs.css";
+@import "../css/ide.css";
 
 @import "../css/commands.css";
 

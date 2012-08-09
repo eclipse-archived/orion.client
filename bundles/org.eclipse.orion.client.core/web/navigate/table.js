@@ -20,7 +20,6 @@ define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/se
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
 
 dojo.addOnLoad(function(){
-	dojo.parser.parse();
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
