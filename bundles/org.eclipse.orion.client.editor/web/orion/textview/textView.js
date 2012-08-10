@@ -3669,7 +3669,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (index === cells.length) { return; }
 				row.cells[index]._ruler = undefined;
 				row.deleteCell(index);
-				if (cells.length !== 0) {
+				if (cells.length === 0) {
 					rulerParent.style.display = "none";
 				}
 			}
