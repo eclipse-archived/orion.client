@@ -254,17 +254,27 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @return {Object} The plugin headers
 		 * @function
 		 */
-		this.getHeaders = function(falsy) {
-			var noData = falsy ? null : {};
-			return data && data.headers ? data.headers : noData;
+		this.getHeaders = function() {
+			if (data) {
+				return data.headers || {};
+			}
+			return null;
 		};
 		
 		this.getName = function() {
-			return this.getHeaders()["plugin.name"] || this.getLocation();
+			var headers = this.getHeaders();
+			if (headers) {
+				return headers["plugin.name"] || "";
+			}
+			return null;
 		};
 		
 		this.getVersion = function() {
-			return this.getHeaders()["plugin.version"] || "0.0.0";
+			var headers = this.getHeaders();
+			if (headers) {
+				return headers["plugin.version"] || "0.0.0";
+			}
+			return null;
 		};
 		
 		this.getLastModified = function() {
@@ -621,7 +631,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			var d = new Deferred();
 			var plugin = _getPlugin(url);
 			if (plugin) {
-				if(plugin.getHeaders(true)) {
+				if(plugin.getHeaders()) {
 					d.resolve(plugin);
 				} else {
 					var pluginTracker = function(plugin) {
@@ -635,7 +645,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			} else {
 				plugin = new Plugin(url, opt_data, internalRegistry);
 				_plugins.push(plugin);
-				if(plugin.getHeaders(true)) {
+				if(plugin.getHeaders()) {
 					_persist(plugin);
 					d.resolve(plugin);
 				} else {				
@@ -659,10 +669,9 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		this.getPlugins = function() {
 			var result =[];
 			_plugins.forEach(function(plugin) {
-				// TODO: what was the purpose of this test?
-//				if (plugin.getHeaders(true)) {
+				if (plugin.getHeaders()) {
 					result.push(plugin);
-//				}
+				}
 			});
 			return result;
 		};
@@ -676,7 +685,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 */
 		this.getPlugin = function(url) {
 			var plugin = _getPlugin(url);
-			if (plugin && plugin.getHeaders(true)) {
+			if (plugin && plugin.getHeaders()) {
 				return plugin;
 			}
 			return null;
