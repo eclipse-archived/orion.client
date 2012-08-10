@@ -248,79 +248,91 @@ exports.GitRepositoryExplorer = (function() {
 		
 		this.registry.getService("orion.core.file").loadWorkspace(repository.ContentLocation + "?parts=meta").then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
-					repository.Content = {};
-					
-					var path = "root / "; //$NON-NLS-0$
-					if (resp.Parents !== null)
-						for (var i=resp.Parents.length; i>0; i--){
-							path += resp.Parents[i-1].Name + " / "; //$NON-NLS-0$
+					try{
+						repository.Content = {};
+						
+						var path = "root / "; //$NON-NLS-0$
+						if (resp.Parents !== null)
+							for (var i=resp.Parents.length; i>0; i--){
+								path += resp.Parents[i-1].Name + " / "; //$NON-NLS-0$
+							}
+							
+						path += resp.Name;
+						repository.Content.Path = path;
+						
+						if (mode !== "full"){ //$NON-NLS-0$
+							deferred.callback();
+							return;
 						}
 						
-					path += resp.Name;
-					repository.Content.Path = path;
-					
-					if (mode !== "full"){ //$NON-NLS-0$
-						deferred.callback();
-						return;
-					}
-					
-					that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation).then( //$NON-NLS-0$
-						function(resp){
-							repository.Status = resp;
-
-							that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
-								function(resp){
-									var branches = resp.Children;
-									var currentBranch;
-									for (var i=0; i<branches.length; i++){
-										if (branches[i].Current){
-											currentBranch = branches[i];
-											break;
+						that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation).then( //$NON-NLS-0$
+							function(resp){
+								try{
+									repository.Status = resp;
+		
+									that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
+										function(resp){
+											try{
+												var branches = resp.Children || [];
+												var currentBranch;
+												for (var i=0; i<branches.length; i++){
+													if (branches[i].Current){
+														currentBranch = branches[i];
+														break;
+													}
+												}
+												
+												if (!currentBranch || currentBranch.RemoteLocation[0] === null){
+													deferred.callback();
+													return;
+												}
+												
+												var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
+												
+												if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
+													that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+														function(resp){
+															if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+															else { repository.CommitsToPush = resp.Children.length; }
+															deferred.callback();
+															return;
+														}, function(resp){
+															deferred.errback();
+															return;
+														}
+													);
+												} else {
+													that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
+														function(resp){	
+															if(resp.Children === undefined) { repository.CommitsToPush = 0; }
+															else { repository.CommitsToPush = resp.Children.length; }
+															deferred.callback();
+															return;
+														}, function(resp){
+															deferred.errback();
+															return;
+														}
+													);	
+												}
+											}catch(e){
+												deferred.errback();
+											}
+										}, function(resp){
+											deferred.errback();
+											return;
 										}
-									}
-									
-									if (!currentBranch || currentBranch.RemoteLocation[0] === null){
-										deferred.callback();
-										return;
-									};
-									
-									var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
-									
-									if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-										that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-											function(resp){
-												if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-												else { repository.CommitsToPush = resp.Children.length; }
-												deferred.callback();
-												return;
-											}, function(resp){
-												deferred.errback();
-												return;
-											}
-										);
-									} else {
-										that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
-											function(resp){	
-												if(resp.Children === undefined) { repository.CommitsToPush = 0; }
-												else { repository.CommitsToPush = resp.Children.length; }
-												deferred.callback();
-												return;
-											}, function(resp){
-												deferred.errback();
-												return;
-											}
-										);	
-									}
-								}, function(resp){
+									);
+								}catch(e){
 									deferred.errback();
-									return;
 								}
-							);
-						}, function(resp){
-							deferred.errback();
-							return;
-						}	
-					);
+							}, function(resp){
+								deferred.errback();
+								return;
+							}	
+						);
+					}catch(e){
+						deferred.errback(e);
+					}
 				}, function(resp){
 					deferred.errback();
 					return;
