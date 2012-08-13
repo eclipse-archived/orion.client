@@ -2,6 +2,8 @@
 
 @import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
+@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
+
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";

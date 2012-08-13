@@ -1176,7 +1176,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
-				window.setTimeout(function(){that.renderer.focus();}, 100);
+				window.setTimeout(function(){
+					dijit.byId(that.getParentDivId()).resize();
+					that.renderer.focus();
+				}, 100);
 			});
 		});
 	};

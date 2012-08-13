@@ -17,11 +17,15 @@
 		</script>
 	</head>
 	
-		<body id="orion-settings" style="height: 100%;" class="claro orionPage">
+	<body id="orion-settings" style="height: 100%;" class="claro orionPage">
 		<div class="content-fixedHeight">
-			<div id="selectionAgent" class="settings" style="height:100%;"></div>
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget">
+					<div id="selectionAgent" class="dijitManagesLayout settings"></div>
+				</div>
+			</div>
 		</div>
-		<div class="footer-fixed-bottom footer" id="footer">
-		</div>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
 	</body>	
 </html>

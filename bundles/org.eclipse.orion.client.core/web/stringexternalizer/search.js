@@ -13,7 +13,9 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/globalCommands', 'orion/contentTypes'], 
+        'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient', 
+        'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/globalCommands', 
+        'orion/contentTypes', 'dojo/hash', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
 
@@ -48,6 +50,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
+			
+			// we use internal border containers so we need dojo to parse.
+			dojo.parser.parse();
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -60,7 +65,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-			mGlobalCommands.generateBanner("externalizeResults", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-externalizeResults", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
 			
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient); //$NON-NLS-0$
 			var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({parent: "favoriteProgress", serviceRegistry: serviceRegistry, fileClient: fileClient, commandService: commandService, setConfig: dojo.hitch(searchResultsGenerator, searchResultsGenerator.setConfig)}); //$NON-NLS-0$
