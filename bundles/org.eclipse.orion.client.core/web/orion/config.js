@@ -63,7 +63,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 			try {
 				service.updated(properties);
 			} catch(e) {
-				if (typeof console !== 'undefined') {
+				if (typeof console !== 'undefined') { //$NON-NLS-0$
 					console.log(e);
 				}
 			}
@@ -107,31 +107,12 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
  * @private
  */
 ConfigAdminFactory = /** @ignore */ (function() {
-//	var DELETED = 'deleted', UPDATED = 'updated';
-//	function _createConfigEvent(type, pid) {
-//		return {type: type, pid: pid};
-//	}
-//var AsyncEventTarget = {
-//	addMixin: function(object) {
-//		mEventTarget.EventTarget.addMixin(object);
-//		var syncDispatchEvent = object.dispatchEvent;
-//		object.dispatchEvent = function() {
-//			var args = Array.prototype.slice.call(arguments);
-//			setTimeout(function() {
-//				syncDispatchEvent.apply(object, args);
-//			}, 0);
-//		};
-//	}
-//};
-
 	/** @private */
 	function ConfigAdminFactory(serviceRegistry, prefsService) {
 		this.store = new ConfigStore(this, prefsService);
 		this.configAdmin = new ConfigAdminImpl(this, this.store);
 		this.tracker = new ManagedServiceTracker(serviceRegistry, this.store);
 		this.tracker.open();
-//		this.dispatcher = {};
-//		AsyncEventTarget.addMixin(this.dispatcher);
 	}
 	ConfigAdminFactory.prototype = {
 		getConfigurationAdmin: function() {
@@ -139,11 +120,9 @@ ConfigAdminFactory = /** @ignore */ (function() {
 		},
 		notifyDeleted: function(configuration) {
 			this.tracker.notifyDeleted(configuration);
-//			this.dispatcher.dispatchEvent(_createConfigEvent(DELETED, self.pid));
 		},
 		notifyUpdated: function(configuration) {
 			this.tracker.notifyUpdated(configuration);
-//			self.dispatcher.dispatchEvent(_createConfigEvent(UPDATED, self.pid));
 		}
 	};
 	return ConfigAdminFactory;
