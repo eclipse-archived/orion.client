@@ -34,7 +34,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 		changeProperty: function() {},
 		updateField: function(modelValue) {}
 	});
-	var PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [PropertyWidget, orion.widgets.settings.LabeledTextfield], { //$NON-NLS-0$
+	var PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
 		postCreate: function() {
 			this.inherited(arguments);
 			var type = this.property.getType();
@@ -51,7 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 			this.myfield.value = value;
 		}
 	});
-	var PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [PropertyWidget, orion.widgets.settings.LabeledCheckbox], { //$NON-NLS-0$
+	var PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
 		},
