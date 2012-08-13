@@ -531,7 +531,7 @@ h2 {
 	top: 60px;
 	padding: 4px;
 	float: left;
-	z-index:10;
+	z-index:1000;
 }
 
 .keyAssistFloat h2 {
