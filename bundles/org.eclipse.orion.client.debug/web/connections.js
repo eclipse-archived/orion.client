@@ -294,13 +294,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible";
-			dojo.parser.parse();
-
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("orion-debugConnections", serviceRegistry, commandService, preferences, searcher);
 
 			var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 			if (!isChrome) {
@@ -382,7 +379,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 				// the following are intentionally commented
 //				commandService.registerCommandContribution("pageActions", "orion.debugConnections.connect", 2);
 //				commandService.registerCommandContribution("connectionCommands", "orion.debugConnections.disconnect", 1);
-				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
+//				mGlobalCommands.generateDomCommandsInBanner(commandService, {});
 				refreshAvailableTabs();
 			});
 		});
