@@ -852,12 +852,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			callback: function() {
 				var header = dojo.byId("banner"); //$NON-NLS-0$
 				var footer = dojo.byId("footer"); //$NON-NLS-0$
+				var content = dojo.query(".content-fixedHeight")[0];
 				if (header.style.display === "none") { //$NON-NLS-0$
 					header.style.display = "block"; //$NON-NLS-0$
 					footer.style.display = "block"; //$NON-NLS-0$
+					dojo.removeClass(content, "content-fixedHeight-maximized");
 				} else {
 					header.style.display = "none"; //$NON-NLS-0$
 					footer.style.display = "none"; //$NON-NLS-0$
+					dojo.addClass(content, "content-fixedHeight-maximized");
 				}	
 				return true;
 			}});
