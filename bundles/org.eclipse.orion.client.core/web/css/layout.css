@@ -24,6 +24,11 @@ by the splitter bar.  If these values change, then change the delay in the split
 	margin-bottom: 28px;  /* footer height */   
 }
 
+.content-fixedHeight-maximized {
+	top: 0;
+	margin-bottom: 0;
+}
+
 .content-fluid {
 }
 
