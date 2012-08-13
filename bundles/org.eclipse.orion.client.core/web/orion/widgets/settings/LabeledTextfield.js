@@ -43,6 +43,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
         },
         
         postCreate: function(){
+			this.inherited(arguments);
 
             this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
             
