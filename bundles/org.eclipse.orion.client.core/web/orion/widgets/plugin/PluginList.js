@@ -22,7 +22,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<div id="pluginSectionHeader" data-dojo-attach-point="pluginSectionHeader" class="sectionWrapper sectionWrapperAux toolComposite">' + 
 								'<div class="sectionAnchor sectionTitle layoutLeft" data-dojo-attach-point="pluginTitle"></div>' + 
-								'<div class="itemCount layoutLeft" data-dojo-attach-point="pluginCount">0</div>' + 
+								'<div class="sectionItemCount layoutLeft" data-dojo-attach-point="pluginCount">0</div>' + 
 								'<div id="pluginCommands" data-dojo-attach-point="pluginCommands" class="layoutRight sectionActions"></div>' +
 							'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 

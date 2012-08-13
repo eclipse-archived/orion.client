@@ -375,19 +375,6 @@ list>*,grid>* {
 	position: relative;
 }
 
-.itemCount {
-	padding: 2px;
-	border-radius: 4px;
-	border: 1px solid #CCC;
-	background: white;
-	float: left;
-	color: #AAA;
-	margin-top: 4px;
-	font-size: 8px;
-	font-weight: normal;
-	margin-left: 5px;
-}
-
 .serviceCount {
 	padding-left: 3px;
 	padding-right: 3px;

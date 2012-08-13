@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: IBM Corporation - initial API and implementation
+ ******************************************************************************/
 /*global define document orion*/
 define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', 'orion/i18nUtil',
 		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/Select'],
@@ -165,18 +175,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 	}
 	SettingsList.prototype = {
 		_makeSection: function(parent, sectionId, settings) {
-			var title = document.createElement('div'); //$NON-NLS-0$
-			var pluginSettings = document.createElement('div'); //$NON-NLS-0$
-			pluginSettings.className = 'layoutLeft'; //$NON-NLS-0$
-			pluginSettings.innerHTML = messages.PluginSettings;
-
-			var count = document.createElement('div'); //$NON-NLS-0$
-			count.innerHTML = settings.length;
-			count.className = 'itemCount layoutLeft'; //$NON-NLS-0$
-			title.appendChild(pluginSettings);
-			title.appendChild(count);
-
-			var section = new Section(parent, {id: sectionId, title: title.innerHTML, useAuxStyle: true});
+			var section = new Section(parent, {id: sectionId, title: messages.PluginSettings, useAuxStyle: true,
+				getItemCount: function() { return settings.length; } });
 			return section;
 		},
 		render: function(parent, serviceRegistry, settingsRegistry) {

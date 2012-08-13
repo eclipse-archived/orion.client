@@ -72,7 +72,12 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		}
 		
 		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
+
+		// Add item count
+		if (typeof options.getItemCount === "function") { //$NON-NLS-0$
+			var count = dojo.create("div", {"class": "layoutLeft sectionItemCount", innerHTML: options.getItemCount(this)}, this.domNode); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
 		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 		
