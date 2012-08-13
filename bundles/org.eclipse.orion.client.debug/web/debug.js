@@ -21,13 +21,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/fileClien
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible";
-			dojo.parser.parse();
-
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			mGlobalCommands.generateBanner("toolbar", serviceRegistry, commandService, preferences, searcher);
+			mGlobalCommands.generateBanner("orion-debug", serviceRegistry, commandService, preferences, searcher);
 
 			var isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 			if (!isChrome) {
