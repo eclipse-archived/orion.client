@@ -129,6 +129,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	top: 0;
 	height: 100%;
 	width: 100%;
+	overflow-y: none;
 }
 
 .toolbarTarget {
@@ -136,6 +137,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	top: 32px;
  	width: 100%;
  	bottom: 0;
+ 	overflow-y: auto;
 }
 
 .hasSplit {
