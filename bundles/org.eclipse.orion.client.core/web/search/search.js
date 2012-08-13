@@ -14,7 +14,7 @@
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
         'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 'orion/contentTypes',
-        'dojo/hash', 'dijit/layout/BorderContainer'], 
+        'dojo/hash', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
 
@@ -75,6 +75,10 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
+			
+			// we use internal border containers so we need dojo to parse.
+			dojo.parser.parse();
+
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -89,7 +93,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
-			mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandService, preferences, searcher, searcher, null, null); //$NON-NLS-0$
 			
 			var queryString =extractQueryString();
 			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$

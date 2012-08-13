@@ -728,7 +728,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0];
-		var layoutWidget = dijit.byId(dijitLayout.id);
+		var layoutWidget;
+		if (dijitLayout && dijitLayout.id) {
+			layoutWidget = dijit.byId(dijitLayout.id);
+		}
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitter;
 		var splitNode = dojo.query(".split")[0];
@@ -748,21 +751,28 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// editor specific behavior if needed
-				if (editor) {
+				if (editor || layoutWidget) {
 					var already = false;
 					splitter.addResizeListener(function() {
-						editor.getTextView().resize();
-						if (!already) {
-							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=387130
-							already = true;
-							editor.getTextView().update(true);
+						if (editor) {
+							editor.getTextView().resize();
+							if (!already) {
+								// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=387130
+								already = true;
+								editor.getTextView().update(true);
+							}
+						}
+						if (layoutWidget) {
+							layoutWidget.resize();
 						}
 					});
-					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
-					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
-						splitter.toggleSidePanel();
-						return true;
-					}, {name:"Toggle Outliner"});
+					if (editor) {
+						editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
+						editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
+							splitter.toggleSidePanel();
+							return true;
+						}, {name:"Toggle Outliner"});
+					}
 				}
 			}
 		}
@@ -771,7 +781,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if (layoutWidget) {
 			window.setTimeout(function() {layoutWidget.layout();}, 10);
 		}
-		
+			
 		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
 		// make favorite
 		var favoriteCommand = new mCommands.Command({
@@ -866,7 +876,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					dojo.addClass(content, "content-fixedHeight-maximized");
 				}	
 				if (layoutWidget) {
-					window.setTimeout(function() {layoutWidget.layout();}, 10);
+					window.setTimeout(function() {layoutWidget.resize();}, 10);
 				}
 				return true;
 			}});

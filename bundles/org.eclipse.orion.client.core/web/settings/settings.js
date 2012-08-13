@@ -15,7 +15,7 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient',
 		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/config',
-		'orion/metatype', 'orion/settings/settingsRegistry', 'dojo/hash', 'dojo/date/locale', 
+		'orion/metatype', 'orion/settings/settingsRegistry', 'dojo/hash', 'dojo/parser', 'dojo/date/locale', 
 		'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'],
 		function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
 			mDialogs, mGlobalCommands, mConfig, mMetaType, SettingsRegistry) {
@@ -26,6 +26,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var pluginRegistry = core.pluginRegistry;
+			// we use internal border containers so we need dojo to parse.
+			dojo.parser.parse();
 
 			// Register services
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
