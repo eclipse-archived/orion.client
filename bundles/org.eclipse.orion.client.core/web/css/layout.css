@@ -145,6 +145,12 @@ by the splitter bar.  If these values change, then change the delay in the split
  	overflow-y: auto;
 }
 
+.dijitManagesLayout {
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
 .hasSplit {
    display: none;
    overflow-x: auto;

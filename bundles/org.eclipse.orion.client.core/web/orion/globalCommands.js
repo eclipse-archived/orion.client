@@ -726,7 +726,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			}
 		});
-		
+		// layout behavior.  Special handling for pages that use dijit for interior layout.
+		var dijitLayout = dojo.query(".dijitManagesLayout")[0];
+		var layoutWidget = dijit.byId(dijitLayout.id);
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitter;
 		var splitNode = dojo.query(".split")[0];
@@ -756,17 +758,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							editor.getTextView().update(true);
 						}
 					});
-				
 					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
 					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
 						splitter.toggleSidePanel();
 						return true;
-					}, {name:"Toggle Outliner"}); 
+					}, {name:"Toggle Outliner"});
 				}
-				
-				
-				
 			}
+		}
+		
+		// trigger a layout for pages that still manage inner content with dijit layouts.
+		if (layoutWidget) {
+			window.setTimeout(function() {layoutWidget.layout();}, 10);
 		}
 		
 		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
@@ -862,6 +865,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					footer.style.display = "none"; //$NON-NLS-0$
 					dojo.addClass(content, "content-fixedHeight-maximized");
 				}	
+				if (layoutWidget) {
+					window.setTimeout(function() {layoutWidget.layout();}, 10);
+				}
 				return true;
 			}});
 		commandService.addCommand(toggleBanner);

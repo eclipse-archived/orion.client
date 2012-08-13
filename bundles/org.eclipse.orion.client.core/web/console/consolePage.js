@@ -258,7 +258,6 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
 			dojo.parser.parse();
 
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
