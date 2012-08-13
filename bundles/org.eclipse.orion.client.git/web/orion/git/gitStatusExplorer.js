@@ -130,6 +130,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 		/**
 		 * Creates a new Git status explorer.
 		 * @class Git status explorer
+		 * @name orion.git.GitStatusExplorer
+		 * @param registry
+		 * @param commandService
+		 * @param linkService
+		 * @param selection
+		 * @param parentId
+		 * @param toolbarId
+		 * @param selectionToolsId
+		 * @param actionScopeId
 		 */
 		function GitStatusExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId){
 			this.parentId = parentId;

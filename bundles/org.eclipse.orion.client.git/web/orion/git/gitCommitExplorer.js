@@ -21,6 +21,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		/**
 		 * Creates a new Git commit explorer.
 		 * @class Git commit explorer
+		 * @name orion.git.GitCommitExplorer
+		 * @param registry
+		 * @param commandService
+		 * @param linkService
+		 * @param selection
+		 * @param parentId
+		 * @param toolbarId
+		 * @param sectionToolsId
+		 * @param actionScopeId
 		 */
 		function GitCommitExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId){
 			this.parentId = parentId;

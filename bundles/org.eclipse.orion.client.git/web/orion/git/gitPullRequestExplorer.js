@@ -23,6 +23,11 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 		/**
 		 * Creates a new Git Pull Request explorer.
 		 * @class Git Pull Request explorer
+		 * @name orion.git.GitPullRequestExplorer
+		 * @param fileClient
+		 * @param commandService
+		 * @param serviceRegistry
+		 * @param gitClient
 		 */
 		function GitPullRequestExplorer(fileClient, commandService, serviceRegistry, gitClient){
 			this.fileClient = fileClient;
