@@ -744,11 +744,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				});
 				commandService.addCommand(toggleSidePanelCommand);
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
+
 				// editor specific behavior if needed
 				if (editor) {
+					var already = false;
 					splitter.addResizeListener(function() {
 						editor.getTextView().resize();
+						if (!already) {
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=387130
+							already = true;
+							editor.getTextView().update(true);
+						}
 					});
 				
 					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
