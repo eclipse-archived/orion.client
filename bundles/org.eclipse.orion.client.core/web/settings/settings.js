@@ -15,8 +15,7 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient',
 		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/config',
-		'orion/metatype', 'orion/settings/settingsRegistry',
-		'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 
+		'orion/metatype', 'orion/settings/settingsRegistry', 'dojo/hash', 'dojo/parser', 'dojo/date/locale', 
 		'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'],
 		function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
 			mDialogs, mGlobalCommands, mConfig, mMetaType, SettingsRegistry) {
@@ -27,8 +26,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var pluginRegistry = core.pluginRegistry;
-
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
+			// we use internal border containers so we need dojo to parse.
 			dojo.parser.parse();
 
 			// Register services
@@ -67,7 +65,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 			// add as a binding only command
 			commandService.registerCommandContribution("globalActions", "orion.clearThemes", 1,  null, true, new mCommands.CommandKeyBinding('t', true, true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var preferenceDialogService = new mDialogs.DialogService(serviceRegistry);
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-settings", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
 			var settingsRegistry = new SettingsRegistry(serviceRegistry, new mMetaType.MetaTypeRegistry(serviceRegistry));
 

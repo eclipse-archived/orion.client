@@ -11,7 +11,7 @@
 
 define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
-	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/profile/widgets/NewUserDialog',
+	        'dojo/hash', 'dojo/date/locale','orion/profile/widgets/NewUserDialog',
 	        'orion/profile/widgets/ResetPasswordDialog'], 
 			function(messages, require, dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mSelection, mSearchClient, mFileClient, mGlobalCommands, mUsersList, mUsersUtil) {
 
@@ -19,8 +19,6 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
 		
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
@@ -30,11 +28,10 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
-		
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, usersList, usersList); //$NON-NLS-0$
-			mGlobalCommands.generateDomCommandsInBanner(commandService, usersList);
-		
+	
 			var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+			mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandService, preferences, searcher, usersList, usersList); //$NON-NLS-0$	
 			
 			var createUserCommand = new mCommands.Command({
 				name: messages["Create User"],
@@ -118,8 +115,6 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 			});
 			commandService.addCommand(changePasswordCommand);
 			
-			
-		
 			// define the command contributions - where things appear, first the groups
 			commandService.addCommandGroup("pageActions", "eclipse.usersGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
@@ -130,7 +125,6 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 			commandService.registerCommandContribution("userCommands", "eclipse.changePassword", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("selectionTools", "eclipse.deleteUser", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-		
 			usersList.loadUsers();
 			mUsersUtil.updateNavTools(serviceRegistry, usersList, "pageActions", "selectionTools", {});	 //$NON-NLS-1$ //$NON-NLS-0$
 		});

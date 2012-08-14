@@ -1176,7 +1176,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
-				window.setTimeout(function(){that.renderer.focus();}, 100);
+				window.setTimeout(function(){
+					dijit.byId(that.getParentDivId()).resize();
+					that.renderer.focus();
+				}, 100);
 			});
 		});
 	};
@@ -1228,15 +1231,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	
 	SearchResultExplorer.prototype.initCommands = function(){	
 		var that = this;
-		dojo.empty("pageActions"); //$NON-NLS-0$
+		this._commandService.destroy("pageActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageActions", "pageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		dojo.empty("pageNavigationActions"); //$NON-NLS-0$
+		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		if(this.model.replaceMode() || this._reporting){
-			mUtil.forceLayout("pageNavigationActions"); //$NON-NLS-0$
-			return;
-		}
+		
 		var optionMenu = dijit.byId("globalSearchOptMenu"); //$NON-NLS-0$
 		if (optionMenu) {
 			optionMenu.destroy();
@@ -1269,7 +1269,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		});
 		dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
 		dojo.place(menuButton.domNode, "pageNavigationActions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
-		mUtil.forceLayout("pageNavigationActions"); //$NON-NLS-0$
 	};
 	
 	SearchResultExplorer.prototype.reportStatus = function(message) {

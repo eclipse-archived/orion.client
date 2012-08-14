@@ -9,6 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global window define */
 
 define(['dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(dojo, dijit) {
 
@@ -29,9 +30,7 @@ orion.SearchUIFactory = (function() {
 				topWidget.destroyRecursive();
 			}
 			
-			var marginBox = dojo.marginBox(this._parentDivID);
-
-			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, width: marginBox.w, height: marginBox.h, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
+			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.addClass(matchWidget.domNode, 'topBorder'); //$NON-NLS-0$

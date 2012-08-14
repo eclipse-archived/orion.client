@@ -324,8 +324,16 @@ exports.EditorCommandFactory = (function() {
 						// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
 						// metadata, because we'll generate again once we know.
 						if (input.getFileMetadata()) {
-							mGlobalCommands.generateDomCommandsInBanner(this.commandService, editor);
-						}
+							var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+							if (toolbar) {	
+								this.commandService.destroy(toolbar);
+								this.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
+							}
+							toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
+							if (toolbar) {	
+								this.commandService.destroy(toolbar);
+								this.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+							}						}
 					}));
 				}));
 			}

@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global window define document */
 
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
+define(['require', 'dojo'], function(require, dojo) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
@@ -93,7 +93,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					// don't need the breadcrumb style because we are here.
 					dojo.removeClass(seg, "breadcrumb"); //$NON-NLS-0$
 					dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
-					mUtil.forceLayout(container);
 					return;
 				}
 			}
@@ -146,7 +145,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
 				crumbs.appendChild(seg);
 			}
-			mUtil.forceLayout(container);
 		}
 	};
 	BreadCrumbs.prototype.constructor = BreadCrumbs;

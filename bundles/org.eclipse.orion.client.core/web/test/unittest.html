@@ -41,28 +41,21 @@
 		require(["unittest.js"]);
 		</script>
    </head>
-
-    <body style="height: 100%; visibility:hidden" class="claro">
-    
-    <div id="eclipse.unittest" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false" liveSplitters="true">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false" gutters="false">
-			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
-			</div>
-			<div class="mainpane" id="rightPane" dojoType="dijit.layout.ContentPane" splitter="false"region="center" role="main">
-				<div id="test-overview">
-					<!-- info about test goes here -->
-				</div>
-				<div id="test-tree">
-					<!-- tree content goes here -->
+	<body id="orion-unittest" style="height: 100%;" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget">
+					<div id="test-overview">
+						<!-- info about test goes here -->
+					</div>
+					<div id="test-tree">
+						<!-- tree content goes here -->
+					</div>
 				</div>
 			</div>
 		</div>
-		
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
-
-	</div>
-</body>
+	</body>
 </html>

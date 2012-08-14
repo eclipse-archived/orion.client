@@ -18,7 +18,7 @@
 
 define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 
-	        'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+	        'dojo/hash'], 
 			function(messages, require, dojo, mBootstrap, mUtil, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
 			mGlobalCommands, URITemplate, PageUtil) {
 
@@ -139,15 +139,11 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 				}
 			});
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-delegatedContent", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			dojo.subscribe("/dojo/hashchange", this, function() { //$NON-NLS-0$
 				loadContent();
 			});
 			loadContent();
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
-
-
 		});
 	});
 });

@@ -13,7 +13,7 @@
 /*global define*/
 
 define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/commands', 'orion/selection', 'orion/fileClient', 'orion/searchClient', 'orion/operationsClient', 'orion/status', 'orion/progress', 'orion/globalCommands',
-        'orion/operationsTable', 'orion/operationsCommands', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+        'orion/operationsTable', 'orion/operationsCommands'], 
 		function(messages, require, dojo, mBootstrap, mCommands, mSelection, mFileClient, mSearchClient, mOperationsClient, mStatus, mProgress, mGlobalCommands, mOperationsTable, mOperationsCommands) {
 
 	dojo.addOnLoad(function() {
@@ -31,7 +31,8 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstra
 			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools", "operationItems"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// global commands
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-operationList", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.setPageTarget({task: "Operations"});
 			mOperationsCommands.createOperationsCommands(serviceRegistry, commandService, operationsTable, operationsClient);
 			
 			commandService.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100); //$NON-NLS-1$ //$NON-NLS-0$
@@ -77,9 +78,6 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstra
 					dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
 				}
 			}, false);
-			
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
 		});
 	});
 	

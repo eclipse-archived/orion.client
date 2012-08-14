@@ -74,6 +74,19 @@ a:hover {
     min-height:20px;
 }
 
+/* splitter - typically the color of the title area */
+.split {
+	background: #efefef;
+}
+
+.splitTracking {
+	background: #dedede;
+}
+
+.splitThumb {
+	background: #cdcdcd;
+}
+
 /* Row selection */
 
 .checkedRow {
@@ -135,9 +148,11 @@ a.currentLocation:hover {
 	background: #fbfbfb;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fbfbfb), color-stop(100%,#fbfbfb));
 	background: -moz-linear-gradient(top, #fbfbfb 0%, #fbfbfb 100%);
-    overflow-x: auto;
-    min-width: 200px;
-    padding-top: 16px;
+}
+
+.mainpane {
+	border: 0;
+	background: #ffffff;
 }
 
 
@@ -215,3 +230,146 @@ a.currentLocation:hover {
 	padding: 0;
 	margin: 0;
 }
+
+.commandImage {
+	border: 1px solid transparent;
+    border-radius: 2px;
+	background-color: transparent;
+	vertical-align: baseline;
+	cursor: pointer;
+	display: inline-block;
+	padding: 1px;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandImageOver {
+	background-color: #e6e6e6;
+	border: 1px solid #808080;
+}
+
+/* should be used in conjunction with .commandButton when a tool has no icon. */
+.commandMissingImageButton {
+	font-weight:bold;
+}
+
+.commandMenuItemAnchor {
+	padding-right: 40px;
+}
+
+.commandLink {
+	display: inline-block;
+	vertical-align: baseline;
+	padding: 2px;  /* other commands have 1px plus a border, so we need 2 */
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.commandSeparator {
+	padding: 2px;
+}
+
+.commandActive {
+	background-color: #e6e6e6 !important;
+	border: 1px solid #808080 !important;
+    border-radius: 2px !important;
+}
+
+
+/* placeholders for possible hover states on command items */
+.commandActiveItem {
+}
+
+.commandInactiveItem {
+}
+
+/* dijit overrides related to theming */
+/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
+/* buttons */
+.claro .dijitButton .dijitButtonNode,
+.claro .dijitDropDownButton .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNode,
+.claro .dijitToggleButton .dijitButtonNode {
+  background-color: transparent;
+  background-image: none;
+  border: 1px solid transparent;
+  box-shadow: none;
+  border-radius: 3px;
+  padding: 0;
+  padding-bottom: 3px;
+  color: #222;
+  margin: 0;
+}
+
+.claro .commandMenu .dijitButtonNode {
+  color: #222;
+}
+
+/* button hover */
+.claro .dijitButtonHover .dijitButtonNode,
+.claro .dijitDropDownButtonHover .dijitButtonNode,
+.claro .dijitComboButton .dijitButtonNodeHover,
+.claro .dijitComboButton .dijitDownArrowButtonHover,
+.claro .dijitToggleButtonHover .dijitButtonNode {
+    background-color: #e3e3e3;
+    color: black;
+	border: 1px solid #808080;
+ }
+
+/* arrow buttons*/
+.claro .dijitArrowButtonInner {
+	background-position: 0 -422px;	
+	width: 5px; height: 3px;
+	background-image: url(../images/core_sprites.png); 
+	display: inline-block; 
+	margin: 1px;
+	vertical-align: middle; 
+}
+
+/* menus and menu items */
+
+.claro .dijitMenu {
+   background-color: #FFFFFF;
+   border: 1px solid #9a9a9a;
+}
+
+.claro .dijitMenuItem {
+   outline: none;
+   padding-top:4px;
+}
+
+.claro .dijitMenuSeparatorTop {
+	height: auto;
+	margin-top: 1px;
+	border-bottom: 1px solid #DDD;
+}
+
+.claro .dijitMenuItemLabel {
+	position: relative;
+	padding: 5px;
+}
+
+.claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
+   background-color: #e3e3e3;
+   color: black;
+   background-image: none;
+}
+
+/* tooltips */
+.claro .dijitTooltip {
+	max-width: 300px;
+}
+
+.claro .dijitTooltipContainer {
+  /* the part with the text */
+  background-color: #ffffff;
+  background-image: none;
+ }

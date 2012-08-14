@@ -41,17 +41,18 @@
 	</script>
 </head>
 
-<body style="visibility:hidden;" class="claro">
-	<div id="orion-debugConnections" dojotype="dijit.layout.BorderContainer" design="headline" gutters="false" style="width: 100%; height: 100%;">
-		<div class="mainToolbar" id="toolbar" dojotype="dijit.layout.ContentPane" region="top">
+	<body id="orion-debugConnections" style="height: 100%;" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="toolbarTarget">
+					<div id="orion-debugMessaging-toExtension"></div>
+					<div id="orion-debugMessaging-toPage"></div>
+					<div id="debugConnections-table"></div>
+				</div>
+			</div>
 		</div>
-		<div id="orion-debugConnectionsMainPane" dojotype="dijit.layout.ContentPane" region="center" class="mainpane">
-			<div id="orion-debugMessaging-toExtension"></div>
-			<div id="orion-debugMessaging-toPage"></div>
-			<div id="debugConnections-table"></div>
-		</div>
-		<div class="footer" id="footer" dojotype="dijit.layout.ContentPane" region="bottom" splitter="false">
-		</div>
-	</div>
-</body>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
+	</body>
+
 </html>

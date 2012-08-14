@@ -39,24 +39,21 @@
 		require(["view.js"]);
 		</script>
 	</head>
-<body style="visibility:hidden;" class="claro">
-	<div id="orion-sites" class="orionPage" dojoType="dijit.layout.BorderContainer" design="headline" gutters="false">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div id="centerPane" dojoType="dijit.layout.BorderContainer" gutters="false" region="center" design="headline" liveSplitters="false" splitter="false" role="main">
-			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
-			</div>
-			<div class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center">
-				<div id="mainNode" class="sites mainPadding">
+	
+	<body id="orion-viewSites" style="height: 100%;" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div class="fixedToolbarHolder mainpane mainPanelLayout">
+				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+				<div id="mainNode" class="sites toolbarTarget">
 					<div id="viewOnSiteCaption"></div>
 					<div id="table" class="displayTable">
 					</div>
 				</div>
 			</div>
 		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
-	</div>
+	</body>	
 	
 </body>
 </html>

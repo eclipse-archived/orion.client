@@ -33,51 +33,6 @@ h2 {
 
 
 
-.layoutBlock {
-	clear: both;
-	margin: 0;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	padding-left: 8px;
-	padding-right: 8px;
-	vertical-align: baseline;
-}
-
-/* These classes are used pervasively in the UI to achieve left/right floats.  Please do not add extra styling to
-   to these classes, but rather add additional classes as needed for non-float needs.
-*/
-.layoutLeft {
-	float: left;
-	margin: 0;
-}
-
-.layoutRight {
-	float: right;
-	margin: 0;
-}
-
-.spacingLeft {
-	margin-left: 5px;
-}
-
-.spacingRight {
-	margin-right: 5px;
-}
-
-.clear {
-	clear: both;
-}
-
-.footerBlock {
-	float: left;
-	margin: 4px;
-}
-
-.footerRightBlock {
-	float: right;
-	margin: 4px;
-}
-
 .navlink {
 	display: inline-block;
 	padding: 2px;
@@ -293,7 +248,6 @@ h2 {
 	color: black;
 }
 
-
 .auxPadding {
 	padding-left: 8px;
 	padding-top: 2px;
@@ -348,16 +302,6 @@ h2 {
   background: #a0a0a0;
 }
  
-.mainpane {
-    background: #FFFFFF;
-	overflow: auto;
-}
-
-.mainPadding {
-	padding-left: 4px;
-	padding-top: 4px;
-}
-
 .help {
 	font-weight: bold;
 	font-size: 1.2em;
@@ -462,7 +406,7 @@ h2 {
 }
 
 .mainToolbar {
- 	min-height: 30px;
+ 	height: 31px;
  	background: #ffffff;
 	border-bottom: 1px solid #ebebeb;
 }
@@ -501,6 +445,7 @@ h2 {
 	vertical-align:middle;
 	font-size:11px;
 	font-weight:bold;
+	z-index: 800;
 }
 
 .slideParameters {
@@ -512,18 +457,6 @@ h2 {
 	display: block;
 }
 
-.slide {
-	text-align: left;
-	vertical-align: middle;
-	clear: both;
-	opacity: 0;
-	height: 0;
- 	transition: opacity .5s ease-out;
-	-o-transition: opacity .5s ease-out;
-	-moz-transition: opacity .5s ease-out;
-	-webkit-transition: opacity .5s ease-out;   
-}
-
 .activeCommand {
 	background-color: #e3e3e3;
 	border: 1px solid #9a9a9a;
@@ -531,11 +464,6 @@ h2 {
 
 /* marker used by parameter collectors to identify commands */
 .commandMarker {
-}
-
-.slideActive {
-	opacity: 1;
-	height: auto;
 }
 
 .bannerMenu {
@@ -603,7 +531,7 @@ h2 {
 	top: 60px;
 	padding: 4px;
 	float: left;
-	z-index:10;
+	z-index:1000;
 }
 
 .keyAssistFloat h2 {

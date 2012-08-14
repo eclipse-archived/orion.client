@@ -619,7 +619,11 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
 		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.options.readonly ,createLineStyler , this.options.newFile);
 		if( this.options.onPage){
-			mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._leftEditor , null, null, null, true, true);
+			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+			if (toolbar) {	
+				this._commandService.destroy(toolbar);
+				this._commandService.renderCommands(toolbar.id, toolbar, null, this._leftEditor, "button"); //$NON-NLS-0$
+			}
 		}
 		this._leftTextView = this._leftEditor.getTextView();
 		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this.options.baseFile);
@@ -897,7 +901,7 @@ exports.InlineCompareContainer = (function() {
 			var styleStr = mCompareUtils.getDijitSizeStyle(this._editorDivId);
 			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
 			wrapperWidget.placeAt(this._editorDivId);
-			mUtil.forceLayout(this._editorDivId);
+			wrapperWidget.layout();
 			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
 		}
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$

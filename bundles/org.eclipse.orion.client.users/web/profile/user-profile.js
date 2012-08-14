@@ -11,8 +11,7 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
-	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress',
-	        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
+	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress'], 
 			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress) {
 
 	dojo.addOnLoad(function() {
@@ -20,9 +19,7 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			var pluginRegistry = core.pluginRegistry;
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
-	
+
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			var fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
@@ -40,8 +37,17 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 				usersClient: usersClient
 			});
 			
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, profile); //$NON-NLS-0$
-			mGlobalCommands.generateDomCommandsInBanner(commandService, profile);
+			mGlobalCommands.generateBanner("orion-profile", serviceRegistry, commandService, preferences, searcher, profile); //$NON-NLS-0$
+			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+			if (toolbar) {	
+				commandService.destroy(toolbar);
+				commandService.renderCommands(toolbar.id, toolbar, profile, profile, "button"); //$NON-NLS-0$
+			}
+			toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
+			if (toolbar) {	
+				commandService.destroy(toolbar);
+				commandService.renderCommands(toolbar.id, toolbar, profile, profile, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
+			}
 		});
 	});
 });
