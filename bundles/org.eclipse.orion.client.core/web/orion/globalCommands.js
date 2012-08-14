@@ -500,7 +500,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				options.searchService.setLocationByMetaData(options.target); //$NON-NLS-0$
 			}
 			if (options.fileService && !options.breadcrumbTarget) {
-				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : "";
+				fileSystemRootName = breadcrumbRootName ? breadcrumbRootName + " " : "";  //$NON-NLS-0$
 				fileSystemRootName = fileSystemRootName +  options.fileService.fileServiceName(options.target.Location);
 				breadcrumbRootName = null;
 			} 
@@ -541,14 +541,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	
 	function applyTheme(preferences){
 	
-		preferences.getPreferences('/themes', 2).then(function(prefs){
+		preferences.getPreferences('/themes', 2).then(function(prefs){ //$NON-NLS-0$
 			
-			var selected = prefs.get( 'selected' );
+			var selected = prefs.get( 'selected' ); //$NON-NLS-0$
 			
 			if( selected ){
 				var ob = JSON.parse( selected );
 				
-				var styles = JSON.parse( prefs.get( 'styles' ) );
+				var styles = JSON.parse( prefs.get( 'styles' ) ); //$NON-NLS-0$
 				
 				for( var theme in styles ){
 					
@@ -559,10 +559,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 						var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
 						var css = sheetMaker.getSheet( cssdata );
 				
-						var stylesheet = document.createElement("STYLE");
+						var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
 						stylesheet.appendChild(document.createTextNode(css));
 							
-						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+						var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
 						head.appendChild(stylesheet);	
 						break;
 					}	
@@ -727,17 +727,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		});
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
-		var dijitLayout = dojo.query(".dijitManagesLayout")[0];
+		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;
 		if (dijitLayout && dijitLayout.id) {
 			layoutWidget = dijit.byId(dijitLayout.id);
 		}
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitter;
-		var splitNode = dojo.query(".split")[0];
+		var splitNode = dojo.query(".split")[0]; //$NON-NLS-0$
 		if (splitNode) {
-			var side = dojo.query(".sidePanelLayout")[0];
-			var main = dojo.query(".mainPanelLayout")[0];
+			var side = dojo.query(".sidePanelLayout")[0]; //$NON-NLS-0$
+			var main = dojo.query(".mainPanelLayout")[0]; //$NON-NLS-0$
 			if (side && main) {
 				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main});
 				var toggleSidePanelCommand = new mCommands.Command({
@@ -847,7 +847,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			
 		// set binding in editor and a general one for other pages
 		if (editor) {
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("f", true, true, false), openResourceCommand.id);   //$NON-NLS-0$
 			editor.getTextView().setAction(openResourceCommand.id, function() {
 					openResourceDialog(searcher, serviceRegistry, editor);
 					return true;
@@ -865,15 +865,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			callback: function() {
 				var header = dojo.byId("banner"); //$NON-NLS-0$
 				var footer = dojo.byId("footer"); //$NON-NLS-0$
-				var content = dojo.query(".content-fixedHeight")[0];
+				var content = dojo.query(".content-fixedHeight")[0]; //$NON-NLS-0$
 				if (header.style.display === "none") { //$NON-NLS-0$
 					header.style.display = "block"; //$NON-NLS-0$
 					footer.style.display = "block"; //$NON-NLS-0$
-					dojo.removeClass(content, "content-fixedHeight-maximized");
+					dojo.removeClass(content, "content-fixedHeight-maximized"); //$NON-NLS-0$
 				} else {
 					header.style.display = "none"; //$NON-NLS-0$
 					footer.style.display = "none"; //$NON-NLS-0$
-					dojo.addClass(content, "content-fixedHeight-maximized");
+					dojo.addClass(content, "content-fixedHeight-maximized"); //$NON-NLS-0$
 				}	
 				if (editor) {
 					editor.getTextView().resize();
@@ -972,7 +972,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							}
 						}
 					}
-					dojo.place("<h2>"+messages["Global"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					dojo.place("<h2>"+messages["Global"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					commandService.showKeyBindings(keyAssistNode);
 					keyAssistNode.style.display = "block"; //$NON-NLS-0$
 				} else {
@@ -1008,7 +1008,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			
 			dojo.query(".targetSelector").forEach(function(node, index, arr){ //$NON-NLS-0$
 				node.target = target;
-  			});	
+			});	
 		}
 		
 		function readTargetPreference(){
