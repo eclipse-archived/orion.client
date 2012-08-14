@@ -42,8 +42,9 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	
 	/** @private */
 	postMixInProperties : function() {
-		this.options.title = this.options.title || messages["Pull Request"];
-		this.selectFile = messages["Pull Request url for this commit"];
+		this.options.title = this.options.title || messages["Contribution Review Request"];
+		this.selectFile = messages["Paste link in email or IM"];
+		this.reviewerName = messages["or sent the link to the reviewer"];
 
 		this.inherited(arguments);
 	},
@@ -67,6 +68,12 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	onHide: function() {
 		clearTimeout(this.timeoutId);
 		this.inherited(arguments);
+	},
+	
+	execute: function() {
+		if(this.options.func)
+			this.options.func(this.ReviewerName.value);
+		delete this.options.func; //prevent performing this action twice (IE)
 	}
 	
 });

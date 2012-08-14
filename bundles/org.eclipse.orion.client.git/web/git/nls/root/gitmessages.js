@@ -346,9 +346,7 @@ define({
 	"Merge Squash": "Merge Squash",
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
 	"Local Branch Name:" : "Local Branch Name:",
-	"Pull Request url for this commit" : "Pull Request url for this commit",
-	"Pull Request" : "Pull Request",
-	"Pull Request Url" : "Pull Request Url",
+	"Paste link in email or IM" : "Paste link in email or IM",
 	"Show Commit in GitHub" : "Show Commit in GitHub",
 	"Show Repository in GitHub" : "Show Repository in GitHub",
 	"Show this commit in GitHub": "Show this commit in GitHub",
@@ -358,5 +356,7 @@ define({
 	"Show this repository in eclipse.org":"Show this repository in eclipse.org",
 	"Ask for review" : "Ask for review",
 	"Ask for review tooltip" : "Send email with request for commit review",
-	"Reviewer name" : "Reviewer name"
+	"Reviewer name" : "Reviewer name",
+	"Contribution Review Request" : "Contribution Review Request",
+	"or sent the link to the reviewer" : "or sent the link to the reviewer"
 });
