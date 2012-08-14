@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document */
+/*global window define document localStorage */
 
 define(['require', 'dojo'], function(require, dojo) {
 
@@ -39,6 +39,7 @@ define(['require', 'dojo'], function(require, dojo) {
 			this._tracking = null;
 			this._resizeListeners = [];
 			this._animationDelay = 520;  // longer than CSS transitions in layout.css
+			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
 			function nodeFromOption(value) {
 				var node = value;
 				if (typeof(value) === "string") { //$NON-NLS-0$
@@ -54,11 +55,18 @@ define(['require', 'dojo'], function(require, dojo) {
 			if (!this._mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
 		
 			dojo.place("<div id='splitThumb' class='splitThumb splitThumbLayout'></div>", this._node, "only"); //$NON-NLS-0$ //$NON-NLS-1$
-			// initial position - do we have a pref?  Closed?  Otherwise attach the pieces and make visible.
-			this._closed = false;
-			this._adjustToSplitPosition();
-			dojo.style(this._mainNode, {display: "block"}); //$NON-NLS-0$ 
+			this._initializeFromStoredSettings();
 			this._thumb = dojo.query("#splitThumb", this._node)[0]; //$NON-NLS-0$
+			
+			if (this._closed) {
+				this._closed = false;  // _thumbDown will toggle it, so turn it off and then call _thumbDown.
+				this._thumbDown();
+			} else {
+				this._adjustToSplitPosition();
+			}
+			dojo.style(this._node, {visibility: "visible"}); //$NON-NLS-0$ 
+			dojo.style(this._mainNode, {display: "block"}); //$NON-NLS-0$ 
+			dojo.style(this._sideNode, {display: "block"}); //$NON-NLS-0$ 
 			dojo.connect(this._node, "onmousedown", this, this._mouseDown); //$NON-NLS-0$
 			dojo.connect(window, "onmouseup", this, this._mouseUp); //$NON-NLS-0$
 			dojo.connect(window, "onresize", this, this._resize);  //$NON-NLS-0$
@@ -85,11 +93,26 @@ define(['require', 'dojo'], function(require, dojo) {
 		 addResizeListener: function(listener) {
 			this._resizeListeners.push(listener);
 		 },
-		
-		_adjustToSplitPosition: function() {
+		 
+		 /* We use local storage vs. prefs because we don't presume the user wants the same window
+		    positioning across browsers and devices.
+		  */
+		 _initializeFromStoredSettings: function() {
+			this._closed = localStorage.getItem(this._prefix+"/toggleState") === "closed";  //$NON-NLS-1$ //$NON-NLS-0$
+			var pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
+			if (pos) {
+				this._splitLeft = parseInt(pos, 10);
+			}
+			
+		 },
+		 
+		_adjustToSplitPosition: function(updateStorage) {
 			var pos = dojo.position(this._node);
 			this._splitWidth = pos.w;
-			this._splitLeft = pos.x;
+			if (updateStorage || !this._splitLeft){
+				this._splitLeft = pos.x;
+				localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
+			}
 			dojo.style(this._sideNode, {width: this._splitLeft + "px", right: this._splitLeft - 1 +"px", display: "block"}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
 			dojo.style(this._node, {left: this._splitLeft + "px"}); //$NON-NLS-0$ 
 			this._resize();
@@ -126,6 +149,8 @@ define(['require', 'dojo'], function(require, dojo) {
 				this._resize(this._animationDelay);
 				this._removeAnimation();
 			}
+			localStorage.setItem(this._prefix+"/toggleState", this._closed ? "closed" : null);  //$NON-NLS-1$  //$NON-NLS-0$
+
 		},
 		
 		_removeAnimation: function() {
@@ -160,8 +185,9 @@ define(['require', 'dojo'], function(require, dojo) {
 		
 		_mouseMove: function(event) {
 			if (this._tracking) {
+				this._splitLeft = event.clientX;
 				dojo.style(this._node, {left: event.clientX + "px"}); //$NON-NLS-0$ 
-				this._adjustToSplitPosition();
+				this._adjustToSplitPosition(true);
 				stop(event);
 			}
 		},

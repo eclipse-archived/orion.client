@@ -165,6 +165,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	width: 3px;
 	margin-right: 3px;
 	cursor: e-resize;
+	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
 .splitThumbLayout {
