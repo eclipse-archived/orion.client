@@ -9,10 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation 
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
-/*global define*/
+/*global console define*/
 define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
 	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
+	var badServiceError = SERVICE_NAME + " service must be an event emitter";
 	mAnnotations.AnnotationType.registerType(HIGHLIGHT_ERROR_ANNOTATION, {
 		title: messages.syntaxError,
 		html: "<div class='annotationHTML error'></div>",
@@ -222,17 +223,29 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 			}
 		},
 		addServiceListener: function(service) {
-			service.addEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
-			this.services.push(service);
-			if (service.setContentType && this.contentType) {
-				service.setContentType(this.contentType);
+			if (typeof service.addEventListener === "function") {
+				service.addEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
+				this.services.push(service);
+				if (service.setContentType && this.contentType) {
+					service.setContentType(this.contentType);
+				}
+			} else {
+				if (typeof console !== "undefined") {
+					console.log(new Error(badServiceError));
+				}
 			}
 		},
 		removeServiceListener: function(service) {
-			service.removeEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
-			var serviceIndex = this.services.indexOf(service);
-			if (serviceIndex !== -1) {
-				this.services.splice(serviceIndex, 1);
+			if (typeof service.removeEventListener === "function") {
+				service.removeEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
+				var serviceIndex = this.services.indexOf(service);
+				if (serviceIndex !== -1) {
+					this.services.splice(serviceIndex, 1);
+				}
+			} else {
+				if (typeof console !== "undefined") {
+					console.log(new Error(badServiceError));
+				}
 			}
 		}
 	};
