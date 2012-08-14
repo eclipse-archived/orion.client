@@ -1689,7 +1689,7 @@ var exports = {};
 		});
 		commandService.addCommand(removeTagCommand);
 		
-		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])]); //$NON-NLS-1$ //$NON-NLS-0$
+		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var askForReviewCommand = new mCommands.Command({
 			name: messages["Ask for review"],
@@ -1698,31 +1698,47 @@ var exports = {};
 			id: "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
 			parameters: notificationParameters,
 			callback: function(data) {
+				var sendNotificationFunction = function(reviewerName){
+					var item = data.items;
+					var headLocation = item.Location.replace(item.Name, "HEAD"); 
+					var authorName = item.AuthorName;
+					var commitName = item.Name;
+					var commitMessage = item.Message;
+					serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation).then(
+						function(clone){
+							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+							var pullRequestUrl = orionHome + "/git/pullRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+							serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, pullRequestUrl, authorName, commitMessage).then(
+								function(result) {
+									var display = {};
+									display.Severity = "Ok"; //$NON-NLS-0$
+									display.HTML = false;
+									display.Message = result.Result;
+									serviceRegistry.getService("orion.page.message").setProgressResult(display);
+								}, displayErrorOnStatus
+							);
+						}
+					);
+				};
+			if (data.parameters.valueFor("reviewer") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+				sendNotificationFunction(data.parameters.valueFor("reviewer")); //$NON-NLS-0$
+			} else {
 				var item = data.items;
-				
-				var headLocation = item.Location.replace(item.Name, "HEAD"); 
-				var authorName = item.AuthorName;
-				var commitName = item.Name;
-				var commitMessage = item.Message;
-				var reviewerName = data.parameters.valueFor("reviewer");
-				
 				serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation).then(
 					function(clone){
-						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+					var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 						var pullRequestUrl = orionHome + "/git/pullRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
-
-						serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, pullRequestUrl, authorName, commitMessage).then(
-							function(result) {
-								var display = {};
-								display.Severity = "Ok"; //$NON-NLS-0$
-								display.HTML = false;
-								display.Message = result.Result;
-								serviceRegistry.getService("orion.page.message").setProgressResult(display);
-							}, displayErrorOnStatus
-						);
-					}
-				);
+						var dialog = new orion.git.widgets.GetPullRequestUrlDialog({
+							title: messages["Contribution Review Request"],
+							url: pullRequestUrl,
+							func: sendNotificationFunction
+							});
+							dialog.startup();
+							dialog.show();
+					},displayErrorOnStatus);
+			}
 			},
 			visibleWhen: function(item) {
 				return item.Type === "Commit"; //$NON-NLS-0$
@@ -1809,39 +1825,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(cherryPickCommand);
-		
-		var getPullRequestUrlCommand = new mCommands.Command({
-			name : messages["Pull Request Url"],
-			tooltip: messages["Pull Request url for this commit"],
-			id : "eclipse.orion.git.getPullRequestUrl", //$NON-NLS-0$
-			imageClass: "git-sprite-cherry_pick", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			callback: function(data) {
-				var service = serviceRegistry.getService("orion.git.provider");
-				service.getGitClone(data.items.CloneLocation).then(
-					function(clone){
-						var url = clone.Children[0].GitUrl;
-						var sha1 = data.items.Name;
-						
-						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-						
-						var pullRequestUrl = orionHome + "/git/pullRequest.html#" + url + "_" + sha1;
-						var dialog = new orion.git.widgets.GetPullRequestUrlDialog({
-							title: messages["Pull Request"],
-							url: pullRequestUrl
-						});
-						dialog.startup();
-						dialog.show();
-					}
-				);
-			},
-			visibleWhen : function(item) {
-				return item.Type === "Commit"; //$NON-NLS-0$
-			}
-		});
-	
-		commandService.addCommand(getPullRequestUrlCommand);
 	};
 	
 
