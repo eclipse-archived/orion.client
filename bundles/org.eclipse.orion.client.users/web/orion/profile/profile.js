@@ -127,7 +127,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				this.iframes = new Array();
 			}
 			this.pageActionsPlaceholder =  dojo.byId('pageActions'); //$NON-NLS-0$
-			dojo.empty(this.pageActionsPlaceholder);
+			this.commandService.destroy(this.pageActionsPlaceholder);
 			
 			this.profileForm = new dijit.form.Form({id: "profileForm"});			 //$NON-NLS-0$
 			
@@ -308,7 +308,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				breadcrumbTarget.Name = profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="" ? profile.lastJSON.Name : profile.lastJSON.login; //$NON-NLS-0$
 				mGlobalCommands.setPageTarget({task: "User Profile", breadcrumbTarget: breadcrumbTarget});
 			
-				dojo.empty(this.pageActionsPlaceholder);
+				this.commandService.destroy(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup(this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup", 100); //$NON-NLS-0$
 				for(var i=0; i<content.actions.length; i++){
 					var info = content.actions[i];
