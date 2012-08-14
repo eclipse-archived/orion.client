@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define confirm eclipse*/
-define(["orion/plugin", "profile/UsersService", "dojo", "domReady!"], function(PluginProvider, UsersService, dojo) {
+define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginProvider, UsersService) {
 	var usersService = new UsersService();
 	var provider = new PluginProvider();
 
@@ -55,13 +55,13 @@ define(["orion/plugin", "profile/UsersService", "dojo", "domReady!"], function(P
 	usersService.fire = function (action, url, jsonData) {
 		switch (action) {
 		case "saveProfile":
-			return this.updateUserInfo(url, jsonData, dojo.hitch(this, function (url, jsonResp) {
+			return this.updateUserInfo(url, jsonData, function (url, jsonResp) {
 				this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
 				return (jsonResp && jsonResp.Message) ? jsonResp : {
 					Message: "Profile saved!",
 					status: 200
 				};
-			}, url));
+			}.bind(this, url));
 			break;
 		case "resetProfile":
 			return this.getUserInfo(url, "userInfoChanged");
@@ -73,13 +73,13 @@ define(["orion/plugin", "profile/UsersService", "dojo", "domReady!"], function(P
 			}
 			break;
 		default:
-			return this.updateUserInfo(url, jsonData, dojo.hitch(this, function (url, jsonResp) {
+			return this.updateUserInfo(url, jsonData, function (url, jsonResp) {
 				this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
 				return (jsonResp && jsonResp.Message) ? jsonResp : {
 					Message: "Profile saved!",
 					status: 200
 				};
-			}, url));
+			}.bind(this, url));
 			break;
 		}
 	};
