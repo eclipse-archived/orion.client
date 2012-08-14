@@ -8,11 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define handleAuthenticationError*/
+define(["orion/Deferred", "dojo"], function(Deferred, dojo) {
 
-/** @namespace The global container for eclipse APIs. */
-var eclipse = eclipse || {};
-
-eclipse.UsersService = (function() {
 	/**
 	 * @class Provides operations on users and users groups.
 	 * @name eclipse.UsersService
@@ -142,8 +140,8 @@ eclipse.UsersService = (function() {
 			
 
 			if(data.password!==data.passwordRetype){
-				var ret = new dojo.Deferred();
-				ret.errback({message: messages["Passwords do not match!"]});
+				var ret = new Deferred();
+				ret.reject({message: messages["Passwords do not match!"]});
 				return ret;
 			}
 
@@ -210,4 +208,4 @@ eclipse.UsersService = (function() {
 		}
 	};
 	return UsersService;
-}());
+});
