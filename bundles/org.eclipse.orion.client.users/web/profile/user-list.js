@@ -31,7 +31,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 	
 			var usersList = new mUsersList.UsersList(serviceRegistry, selection, searcher, "usersList", "pageActions", "selectionTools", "userCommands"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-			mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandService, preferences, searcher, usersList, usersList); //$NON-NLS-0$	
+			mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandService, preferences, searcher, usersList); //$NON-NLS-0$	
 			
 			var createUserCommand = new mCommands.Command({
 				name: messages["Create User"],

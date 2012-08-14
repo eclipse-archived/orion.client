@@ -51,7 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		updateToolbar: function(id){
 			if(this.pluginCommands) {
-				dojo.empty(this.pluginCommands);
+				this.commandService.destroy(this.pluginCommands);
 			}
 		},
 				

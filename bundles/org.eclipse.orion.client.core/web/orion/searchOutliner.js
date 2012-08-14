@@ -264,7 +264,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
-						dojo.empty(selectionTools);
+						commandService.destroy(selectionTools);
 						commandService.renderCommands(selectionId, selectionTools, selections, this, "button"); //$NON-NLS-0$
 					}
 				});

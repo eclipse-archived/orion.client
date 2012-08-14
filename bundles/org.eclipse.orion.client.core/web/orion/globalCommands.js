@@ -374,7 +374,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	function renderGlobalCommands(commandService) {
 		var globalTools = dojo.byId("globalActions"); //$NON-NLS-0$
 		if (globalTools) {	
-			dojo.empty(globalTools);
+			commandService.destroy(globalTools);
 			commandService.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
 		}
 	}
