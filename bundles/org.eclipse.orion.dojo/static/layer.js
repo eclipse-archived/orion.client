@@ -36,19 +36,16 @@ dojo.require("dijit.form.FilteringSelect");
 dojo.require("dijit.Menu"); 
 dojo.require("dijit.MenuItem"); 
 dojo.require("dijit.ProgressBar");  
-dojo.require("dijit.TitlePane"); 
 dojo.require("dijit.Tree");  
 dojo.require("dijit.tree.ForestStoreModel");  
 dojo.require("dijit.tree.TreeStoreModel");  
 dojo.require("dijit._Widget");  
 dojo.require("dijit._Templated");  
 
-dojo.require("dojox.layout.ToggleSplitter");    
 dojo.require("dojox.form.FileUploader");  
 
 //These requires are our own widgets, they perhaps deserve their own layer
 //which would need to be regenerated each build.
-//dojo.require("widgets.eWebBorderContainer");   
 //dojo.require("widgets.ImportDialog");  
 //dojo.require("widgets.NewItemDialog");  
 //dojo.require("widgets.OpenResourceDialog");  
