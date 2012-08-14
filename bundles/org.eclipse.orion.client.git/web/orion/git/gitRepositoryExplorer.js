@@ -19,7 +19,14 @@ exports.GitRepositoryExplorer = (function() {
 	
 	/**
 	 * Creates a new Git repository explorer.
-	 * @class Git repository explorerpadd
+	 * @class Git repository explorer
+	 * @name orion.git.GitRepositoryExplorer
+	 * @param registry
+	 * @param commandService
+	 * @param linkService
+	 * @param selection
+	 * @param parentId
+	 * @param actionScopeId
 	 */
 	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, actionScopeId){
 		this.parentId = parentId;

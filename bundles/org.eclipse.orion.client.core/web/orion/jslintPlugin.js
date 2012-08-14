@@ -74,7 +74,7 @@ window.onload = function() {
 					options.split(/,/).forEach(function(option) {
 						var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
 						var name = match[1], value = match[2];
-						optionsMap[name] = !!value;
+						optionsMap[name] = value;
 					});
 					validationOptions = optionsMap;
 					console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
