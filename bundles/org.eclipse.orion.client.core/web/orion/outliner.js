@@ -117,7 +117,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 				});
 				this._commandService.registerCommandContribution(this.outlineSection.selectionNode.id, "eclipse.edit.outline.switch", 1); //$NON-NLS-0$
 			}
-			dojo.empty(this.outlineSection.selectionNode.id);
+			this._commandService.destroy(this.outlineSection.selectionNode.id);
 			if (outlineProviders.length > 1) {
 				this._commandService.renderCommands(this.outlineSection.selectionNode.id, this.outlineSection.selectionNode.id, {}, this, "button"); //$NON-NLS-0$
 			}

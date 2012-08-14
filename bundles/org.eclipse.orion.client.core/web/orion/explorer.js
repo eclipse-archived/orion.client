@@ -627,11 +627,11 @@ exports.ExplorerRenderer = (function() {
 				
 				var actionsWrapperId = node.id + "actionswrapper"; //$NON-NLS-0$
 				var actionsWrapper = dojo.byId(actionsWrapperId);
-				
-				dojo.empty(actionsWrapper);
+				var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$ 
+				commandService.destroy(actionsWrapper);
 				// contact the command service to render appropriate commands here.
 				if (this.actionScopeId) {
-					registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
+					commandService.renderCommands(this.actionScopeId, actionsWrapper, node._item, this.explorer, "tool"); //$NON-NLS-0$
 				}
 			});
 		},

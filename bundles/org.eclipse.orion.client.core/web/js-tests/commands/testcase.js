@@ -196,8 +196,8 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	function init(testId) {
 		window.console.log("Initializing data for test " + testId);
 		contributionId = testId;
-		dojo.empty(parentDiv);
-		dojo.empty(parentUl);
+		commandService.destroy(parentDiv);
+		commandService.destroy(parentUl);
 		parentMenu.focusedChild = null;
 		dojo.forEach(parentMenu.getChildren(), function(child) {
 			parentMenu.removeChild(child);

@@ -187,12 +187,13 @@ exports.GitRepositoryExplorer = (function() {
 	
 	var updatePageActions = function(registry, toolbarId, scopeId, item){
 		var toolbar = dojo.byId(toolbarId);
+		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		if (toolbar) {
-			dojo.empty(toolbar);
+			commandService.destroy(toolbar);
 		} else {
 			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
 		}
-		registry.getService("orion.page.command").renderCommands(scopeId, toolbar, item, null, "button");  //$NON-NLS-0$
+		commandService.renderCommands(scopeId, toolbar, item, null, "button");  //$NON-NLS-0$
 	};
 	
 	GitRepositoryExplorer.prototype.initTitleBar = function(resource, sectionName){

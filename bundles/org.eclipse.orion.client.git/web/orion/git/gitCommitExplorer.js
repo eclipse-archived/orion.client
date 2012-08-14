@@ -382,7 +382,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 									gridRenderer: {
 										navGridHolder: navGridHolder,
 										additionalCmdRender: function(gridHolder){
-											dojo.empty(diffActionWrapper.id);
+											that.commandService.destroy(diffActionWrapper.id);
 											that.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
 										},
 										before: true

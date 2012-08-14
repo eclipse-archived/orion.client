@@ -22,18 +22,18 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 		var doOnce = false;
 
 		exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
+			var service = registry.getService("orion.page.command"); //$NON-NLS-0$
 			var toolbar = dojo.byId(toolbarId);
 			if (toolbar) {
-				dojo.empty(toolbar);
+				service.destroy(toolbar);
 			} else {
 				throw messages["could not find toolbar "] + toolbarId;
 			}
-			var service = registry.getService("orion.page.command"); //$NON-NLS-0$
 			service.renderCommands(toolbarId, toolbar, item, explorer, "button");   //$NON-NLS-0$
 			if (selectionToolbarId) {
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
-					dojo.empty(selectionTools);
+					service.destroy(selectionTools);
 					service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
 				}
 			}
@@ -44,8 +44,9 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionToolbarId);
 					if (selectionTools) {
-						dojo.empty(selectionTools);
-						registry.getService("orion.page.command").renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+						var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
+						commandService.destroy(selectionTools);
+						commandService.renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button"); //$NON-NLS-0$
 					}
 				});
 			}

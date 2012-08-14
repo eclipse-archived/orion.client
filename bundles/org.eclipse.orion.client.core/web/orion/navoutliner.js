@@ -173,7 +173,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 							useAuxStyle: true,
 							slideout: true,
 							onExpandCollapse: function(isExpanded, section) {
-								dojo.empty(section.selectionNode);
+								commandService.destroy(section.selectionNode);
 								if (isExpanded) {
 									commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
 								}
@@ -201,7 +201,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 					useAuxStyle: true,
 					slideout: true,
 					onExpandCollapse: function(isExpanded, section) {
-						dojo.empty(section.selectionNode);
+						commandService.destroy(section.selectionNode);
 						if (isExpanded) {
 							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
 						}
@@ -216,7 +216,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
-						dojo.empty(selectionTools);
+						commandService.destroy(selectionTools);
 						commandService.renderCommands(selectionId, selectionTools, selections, that, "button"); //$NON-NLS-0$
 					}
 				});

@@ -312,7 +312,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				content: '<div id="unstagedNode"></div>', //$NON-NLS-0$
 				canHide: true,
 				onExpandCollapse: function(isExpanded, section) {
-					dojo.empty(section.selectionNode);
+					that.commandService.destroy(section.selectionNode);
 					if (isExpanded) {
 						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
@@ -335,7 +335,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(unstagedSection.selectionNode.id);
 					if (selectionTools) {
-						dojo.empty(selectionTools);
+						that.commandService.destroy(selectionTools);
 						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
@@ -511,7 +511,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				slideout: true,
 				canHide: true,
 				onExpandCollapse: function(isExpanded, section) {
-					dojo.empty(section.selectionNode);
+					that.commandService.destroy(section.selectionNode);
 					if (isExpanded) {
 						that.commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button", {"Clone": repository}); //$NON-NLS-0$ //$NON-NLS-1$
 					}
@@ -533,7 +533,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(stagedSection.selectionNode.id);
 					if (selectionTools) {
-						dojo.empty(selectionTools);
+						that.commandService.destroy(selectionTools);
 						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
