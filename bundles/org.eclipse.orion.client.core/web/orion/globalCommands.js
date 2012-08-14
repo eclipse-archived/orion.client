@@ -875,6 +875,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					footer.style.display = "none"; //$NON-NLS-0$
 					dojo.addClass(content, "content-fixedHeight-maximized");
 				}	
+				if (editor) {
+					editor.getTextView().resize();
+				}
 				if (layoutWidget) {
 					window.setTimeout(function() {layoutWidget.resize();}, 10);
 				}
