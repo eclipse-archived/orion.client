@@ -1,3 +1,7 @@
+/*
+	Items that should appear on top of other orion visual components should have a z-index of 100 or greater.
+*/
+
 @import "./theme.css";
 
 html {
@@ -432,8 +436,6 @@ h2 {
 	padding-left: 8px;
 }
 
-
-
 .slideContainer {
 	height: auto;
 	width: 97%;
@@ -445,7 +447,7 @@ h2 {
 	vertical-align:middle;
 	font-size:11px;
 	font-weight:bold;
-	z-index: 800;
+	z-index: 50;
 }
 
 .slideParameters {
@@ -519,7 +521,7 @@ h2 {
 	max-width: 650px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
-	z-index: 10;
+	z-index: 100;
 }
 
 .keyAssistFloat {
@@ -531,7 +533,7 @@ h2 {
 	top: 60px;
 	padding: 4px;
 	float: left;
-	z-index:1000;
+	z-index:100;
 }
 
 .keyAssistFloat h2 {
@@ -628,7 +630,7 @@ h2 {
 	top: 100px;
 	left: 100px;
 	border: 2px inset #DDD;
-	z-index:10;
+	z-index:100;
 	cursor: default;
 	overflow: auto;
 	height: 150px;
