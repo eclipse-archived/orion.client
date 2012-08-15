@@ -16,17 +16,17 @@ There are implied LESS variables here, for now set up as layout classes that liv
 hard-coded numbers elsewhere.
 */
 
-/* var HeaderHeight */
+/* $HeaderHeight */
 .headerLayout {
 	height: 60px;
 }
 
-/* var FooterHeight */
+/* $FooterHeight */
 .footerLayout {
 	height: 28px;
 }
 
-/* var ToolbarHeight */
+/* $ToolbarHeight */
 .toolbarLayout {
 	height: 31px;
 }
@@ -35,11 +35,11 @@ hard-coded numbers elsewhere.
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 60px;  /* HeaderHeight */
+    top: 60px;  /* $HeaderHeight */
     bottom: 0;
     left: 0;
     width: 100%;
-	margin-bottom: 28px;  /* FooterHeight */   
+	margin-bottom: 28px;  /* $FooterHeight */   
 }
 
 .content-fixedHeight-maximized {
@@ -148,7 +148,7 @@ hard-coded numbers elsewhere.
 
 .toolbarTarget {
 	position: absolute;
-	top: 32px;  /* ToolbarHeight + 1 */
+	top: 32px;  /* $ToolbarHeight + 1 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
