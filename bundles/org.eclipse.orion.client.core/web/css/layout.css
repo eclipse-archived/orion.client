@@ -105,6 +105,7 @@ under 100 are used to achieve layering of the header, footer, and splitters.
 	-moz-transition: width 0.5s ease;
 	-o-transition: width 0.5s ease;
 	transition: width 0.5s ease;
+	z-index: 50;
 }
 
 .sidePanelMargins {

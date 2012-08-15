@@ -28,6 +28,8 @@ define(['require', 'dojo'], function(require, dojo) {
 	 * @param options.node The node for the splitter presentation.  Required.
 	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
 	 * @param options.mainPanel The node for the main panel.  Required.
+	 * @param options.noMainPanelAnimate Set to true if the main panel should not animate.
+	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=387223
 	 * @name orion.splitter.Splitter
 	 */
 	function Splitter(options) {
@@ -38,7 +40,8 @@ define(['require', 'dojo'], function(require, dojo) {
 		_init: function(options) {
 			this._tracking = null;
 			this._resizeListeners = [];
-			this._animationDelay = 520;  // longer than CSS transitions in layout.css
+			this._animateMainPane = !options.noMainPanelAnimate;
+			this._animationDelay = 501;  // longer than CSS transitions in layout.css
 			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
 			function nodeFromOption(value) {
 				var node = value;
@@ -48,7 +51,7 @@ define(['require', 'dojo'], function(require, dojo) {
 				return node;
 			}
 			this._node = nodeFromOption(options.node);
-			if (!this._node) { throw "no dom node for spliiter found"; } //$NON-NLS-0$
+			if (!this._node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
 			this._sideNode = nodeFromOption(options.sidePanel);
 			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
 			this._mainNode = nodeFromOption(options.mainPanel);
@@ -88,7 +91,8 @@ define(['require', 'dojo'], function(require, dojo) {
 		 },
 		 /**
 		 * Adds an event listener for resizing the main and side panels.
-		 * @param {Function} listener The function called when a resize occurs
+		 * @param {Function} listener The function called when a resize occurs.  The DOM node that has
+		 * been resized is passed as an argument.
 		 */
 		 addResizeListener: function(listener) {
 			this._resizeListeners.push(listener);
@@ -118,18 +122,20 @@ define(['require', 'dojo'], function(require, dojo) {
 			this._resize();
 		},
 		
-		_resize: function(delay) {
-			delay = delay || 0;
+		_resize: function(animationDelay) {
+			animationDelay = animationDelay || 0;
+			var delayMain = this._animateMainPane ? animationDelay : 0;
 			var pos = dojo.position(this._node.parentNode);
 			this._totalWidth = pos.w;
 			pos = dojo.position(this._node);
 			dojo.style(this._mainNode, {width: (this._totalWidth - pos.x - pos.w) +"px"}); //$NON-NLS-0$ 
-			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(); }), delay);
+			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._mainNode); }), delayMain);
+			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._sideNode); }), animationDelay);
 		},
 		
-		_notifyResizeListeners: function() {
+		_notifyResizeListeners: function(node) {
 			for (var i = 0; i <this._resizeListeners.length; i++) {
-				this._resizeListeners[i]();
+				this._resizeListeners[i](node);
 			}
 		}, 
 		
@@ -157,7 +163,9 @@ define(['require', 'dojo'], function(require, dojo) {
 			// in a timeout to ensure the animations are complete.
 			window.setTimeout(dojo.hitch(this, function() {
 				dojo.removeClass(this._sideNode, "sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-				dojo.removeClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+				if (this._animateMainPane) {
+					dojo.removeClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+				}
 				dojo.removeClass(this._node, "splitLayoutAnimation"); //$NON-NLS-0$ 
 				dojo.removeClass(this._thumb, "splitLayoutAnimation"); //$NON-NLS-0$ 
 			}), this._animationDelay);
@@ -165,7 +173,9 @@ define(['require', 'dojo'], function(require, dojo) {
 		
 		_addAnimation: function() {
 			dojo.addClass(this._sideNode, "sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-			dojo.addClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+			if (this._animateMainPane) {
+				dojo.addClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+			}
 			dojo.addClass(this._node, "splitLayoutAnimation"); //$NON-NLS-0$ 
 			dojo.addClass(this._thumb, "splitLayoutAnimation"); //$NON-NLS-0$ 
 		},
