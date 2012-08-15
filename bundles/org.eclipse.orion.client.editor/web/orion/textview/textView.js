@@ -3493,6 +3493,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
 			viewDiv.style.position = "absolute"; //$NON-NLS-0$
 			viewDiv.style.top = "0px"; //$NON-NLS-0$
+			viewDiv.style.bottom = "0px"; //$NON-NLS-0$
 			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			viewDiv.style.margin = "0px"; //$NON-NLS-0$
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
@@ -3508,6 +3509,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.position = "absolute"; //$NON-NLS-0$
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
+			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			table = document.createElement("TABLE"); //$NON-NLS-0$
 			rightDiv.appendChild(table);
@@ -5383,6 +5385,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var partialY = this._partialY = Math.round((firstLine - topIndex) * lineHeight);
 			var scrollWidth, scrollHeight = lineCount * lineHeight;
 			var leftWidth, leftRect, clientWidth, clientHeight;
+			var parent = this._parent;
+			var parentWidth = parent.clientWidth;
+			var parentHeight = parent.clientHeight;
 			if (hScrollOnly) {
 				clientWidth = this._getClientWidth();
 				clientHeight = this._getClientHeight();
@@ -5393,13 +5398,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
 			} else {
-				var parent = this._parent;
-				var parentWidth = parent.clientWidth;
-				var parentHeight = parent.clientHeight;
 
-				/* Update view height in order to have client height computed */
 				var viewDiv = this._viewDiv;
-				viewDiv.style.height = Math.max(0, (parentHeight - viewPad.top - viewPad.bottom)) + "px"; //$NON-NLS-0$
 				clientHeight = this._getClientHeight();
 				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
@@ -5499,10 +5499,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					rightWidth = rightRect.right - rightRect.left;
 				}
 				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-0$
-				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px"; //$NON-NLS-0$
-				if (this._rightDiv) {
-					this._rightDiv.style.left = (parentWidth - rightWidth) + "px"; //$NON-NLS-0$
-				}
+				viewDiv.style.right = rightWidth + "px"; //$NON-NLS-0$
+
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
 				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
@@ -5572,8 +5570,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
 				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
-				clipDiv.style.width = clipWidth + "px"; //$NON-NLS-0$
-				clipDiv.style.height = clipHeight + "px"; //$NON-NLS-0$
+				clipDiv.style.right = (parentWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
+				clipDiv.style.bottom = (parentHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
 				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
 				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
 				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$
