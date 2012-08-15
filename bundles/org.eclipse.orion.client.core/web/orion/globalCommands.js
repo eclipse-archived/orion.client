@@ -739,7 +739,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			var side = dojo.query(".sidePanelLayout")[0]; //$NON-NLS-0$
 			var main = dojo.query(".mainPanelLayout")[0]; //$NON-NLS-0$
 			if (side && main) {
-				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main});
+				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, noMainPanelAnimate: !!editor});
 				var toggleSidePanelCommand = new mCommands.Command({
 					name: "Toggle side panel",
 					tooltip:"Open or close the side panel",
@@ -750,10 +750,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				commandService.addCommand(toggleSidePanelCommand);
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-				// editor specific behavior if needed
+				// editor and layout specific behavior if needed
 				if (editor || layoutWidget) {
-					splitter.addResizeListener(function() {
-						if (editor) {
+					splitter.addResizeListener(function(node) {
+						if (editor && node === main) {
 							editor.getTextView().resize();
 						}
 						if (layoutWidget) {
