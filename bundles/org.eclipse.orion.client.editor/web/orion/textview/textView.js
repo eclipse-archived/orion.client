@@ -2898,6 +2898,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var h3 = spanRect3.bottom - spanRect3.top;
 			var h4 = spanRect4.bottom - spanRect4.top;
 			var fontStyle = 0;
+			var invalid = (lineRect.bottom - lineRect.top) <= 0;
 			var lineHeight = Math.max(1, lineRect.bottom - lineRect.top);
 			if (h2 > h1) {
 				fontStyle = 1;
@@ -2952,7 +2953,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				right: rect1.right - rect2.right,
 				bottom: rect1.bottom - rect2.bottom
 			};
-			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth};
+			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth, invalid: invalid};
 		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
@@ -4652,7 +4653,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			modelChangingEvent.type = "Changing"; //$NON-NLS-0$
 		},
 		_queueUpdatePage: function() {
-			if (this._updateTimer) { return; }
+			if (this._updateTimer || this._ignoreQueueUpdate) { return; }
 			var self = this;
 			this._updateTimer = setTimeout(function() { 
 				self._updateTimer = null;
@@ -5365,6 +5366,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			var clientDiv = this._clientDiv;
 			if (!clientDiv) { return; }
+			if (this._metrics.invalid) {
+				this._ignoreQueueUpdate = true;
+				this._updateStyle();
+				this._ignoreQueueUpdate = false;
+			}
 			var model = this._model;
 			var scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
