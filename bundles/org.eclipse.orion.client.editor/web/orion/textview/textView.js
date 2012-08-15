@@ -5394,7 +5394,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
 			} else {
 				var parent = this._parent;
-				var rootDiv = this._rootDiv;
 				var parentWidth = parent.clientWidth;
 				var parentHeight = parent.clientHeight;
 
