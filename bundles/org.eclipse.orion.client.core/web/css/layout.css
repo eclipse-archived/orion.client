@@ -11,6 +11,9 @@ Header height: 60px
 
 The transition delays used for splitter animation (0.5) have a relationship with the animation delay used
 by the splitter bar.  If these values change, then change the delay in the splitter.
+
+Items that should appear on top of other orion visual components should have a z-index of 100 or greater.  Values
+under 100 are used to achieve layering of the header, footer, and splitters.
 */
 
 .content-fixedHeight {
@@ -35,7 +38,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 .nav-fixed-top {
 	position: fixed;
 	top: 0;
-	z-index: 1000;
+	z-index: 50;
 	right: 0;
 	left: 0;
 }
@@ -43,7 +46,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 .footer-fixed-bottom {
 	position: fixed;
 	bottom: 0;
-	z-index: 1000;
+	z-index: 50;
 	right: 0;
 	left: 0;
 	height: 28px;
@@ -93,7 +96,6 @@ by the splitter bar.  If these values change, then change the delay in the split
 	position: absolute;
 	left: 0;
     overflow: auto;
-	z-index: 500;
 	width: 33%;
 	height: 100%;
 }
@@ -116,7 +118,6 @@ by the splitter bar.  If these values change, then change the delay in the split
 	display: block;
 	position: absolute;
 	right: 0;
-	z-index: 500;
 	width: 66%;
 	height: 100%;
 }
@@ -161,7 +162,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	position: absolute;
 	left: 33%;
 	height: 100%;
-	z-index: 800;
+	z-index: 50;
 	width: 3px;
 	margin-right: 3px;
 	cursor: e-resize;
