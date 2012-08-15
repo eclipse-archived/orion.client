@@ -17,3 +17,19 @@
 	font-weight: bold;
 	color: #FF0000;
 }
+
+.test-passed {
+	background-color: #11FF11;
+}
+
+.test-failed {
+	background-color: #FF1111;
+}
+
+#test-overview {
+	margin: 8px;
+}
+
+#test-tree {
+	margin: 8px;
+}
