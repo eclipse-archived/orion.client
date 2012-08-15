@@ -42,16 +42,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
-			var category = pageParams.category || "userSettings"; //$NON-NLS-0$
-			this.showById(category);
 			
-			// The widgets might render commands, and this happens asynchronously.  Process the URL in a timeout.
+			var container = this;
+			
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+
+				var selection = prefs.get( 'selection' );
+				
+				var category = pageParams.category || selection; //$NON-NLS-0$
+				container.showById(category);
+				
+			} );
+			
 			window.setTimeout(dojo.hitch(this, function() {this.commandService.processURL(window.location.href);}), 0);
-			
-			
-//			var pageToolBar = dojo.byId( 'pageToolbar' );
-//			
-//			dojo.removeNode( pageToolBar.parentNode.removeChild(pageToolBar) );
 		},
 		
 		displaySettings: function(id) {
@@ -271,33 +274,61 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.initPluginSettings(id);
 		},
+		
+		selectCategory: function(id) {
+
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+				prefs.put( 'selection', id );
+			} );
+
+			if (this.selectedCategory) {
+				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+				dojo.attr(this.selectedCategory, "aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.selectedCategory.tabIndex = -1;
+			}
+
+			if (id) {
+				this.selectedCategory = dojo.byId(id);
+			}
+
+			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
+			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
+			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
+			this.selectedCategory.tabIndex = 0;
+			this.selectedCategory.focus();
+			
+			window.location = '#,category=' + id;			
+		},
 
 		showById: function(id) {
-			this.updateToolbar(id);
-			
-			switch(id){
-			
-				case "plugins": //$NON-NLS-0$
-					this.showPlugins(id);
-					break;
+		
 				
-				case "userSettings": //$NON-NLS-0$
-					this.showUserSettings(id);
-					break;
-					
-				case "themeBuilder":
-					this.showThemeBuilder(id);
-					break;
-					
-				case "pluginSettings":
-					this.showPluginSettings(id);
-					break;
-
-				default:
-					this.selectCategory(id);
-					break;
 			
-			}
+			this.updateToolbar(id);
+				
+				switch(id){
+				
+					case "plugins": //$NON-NLS-0$
+						this.showPlugins(id);
+						break;
+					
+					case "userSettings": //$NON-NLS-0$
+						this.showUserSettings(id);
+						break;
+						
+					case "themeBuilder":
+						this.showThemeBuilder(id);
+						break;
+						
+					case "pluginSettings":
+						this.showPluginSettings(id);
+						break;
+	
+					default:
+						this.selectCategory(id);
+						break;
+				
+				}	
 		},
 
 		drawUserInterface: function(settings) {
@@ -360,6 +391,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							prefs.put( category, JSON.stringify(subcategories) );	
 						}
 					}
+			} );
+			
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+				
+				var selection = prefs.get( 'selection' );
+				
+				if (!selection) {
+					prefs.put( 'selection', 'userSettings' );
+				}
 			} );
 		},
 

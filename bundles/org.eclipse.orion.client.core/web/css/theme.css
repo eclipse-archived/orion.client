@@ -152,7 +152,13 @@ a.currentLocation:hover {
 
 .mainpane {
 	border: 0;
-	background: #ffffff;
+	background: white;
+}
+
+.mainToolbar {
+ 	height: 31px;
+ 	background: #ffffff;
+	border-bottom: 1px solid #ebebeb;
 }
 
 
@@ -294,6 +300,7 @@ a.currentLocation:hover {
 /* dijit overrides related to theming */
 /* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
 /* buttons */
+
 .claro .dijitButton .dijitButtonNode,
 .claro .dijitDropDownButton .dijitButtonNode,
 .claro .dijitComboButton .dijitButtonNode,
