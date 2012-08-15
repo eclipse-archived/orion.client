@@ -752,15 +752,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 
 				// editor specific behavior if needed
 				if (editor || layoutWidget) {
-					var already = false;
 					splitter.addResizeListener(function() {
 						if (editor) {
 							editor.getTextView().resize();
-							if (!already) {
-								// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=387130
-								already = true;
-								editor.getTextView().update(true);
-							}
 						}
 						if (layoutWidget) {
 							layoutWidget.resize();
