@@ -156,11 +156,9 @@ a.currentLocation:hover {
 }
 
 .mainToolbar {
- 	height: 31px;
  	background: #ffffff;
 	border-bottom: 1px solid #ebebeb;
 }
-
 
 /* Searchbox in the top navigation area seems a difficult thing to 
    get right. I've worked with a range of colors. What I notice is that
