@@ -24,6 +24,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		StyleSet.prototype.location = '#efefef';
 		StyleSet.prototype.selection = 'FEC';
 		StyleSet.prototype.sidepanel = '#FBFBFB';
+		StyleSet.prototype.mainpanel = 'white';
 		StyleSet.prototype.navtext = '#bfbfbf';
 		StyleSet.prototype.content = '#3087B3';
 		StyleSet.prototype.search = '#444';
@@ -37,6 +38,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			orion.location = '#efefef';
 			orion.selection = 'FEC';
 			orion.sidepanel = '#FBFBFB';
+			orion.mainpanel = 'white';
 			orion.navtext = '#bfbfbf';
 			orion.content = '#3087B3';
 			orion.search = '#444';
@@ -51,6 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			eire.location = 'darkseagreen';
 			eire.selection = 'moccasin';
 			eire.sidepanel = 'aliceblue';
+			eire.mainpanel = 'white';
 			eire.navtext = '#FBFBFB';
 			eire.content = 'darkgreen';
 			eire.search = 'darkgreen';
@@ -65,6 +68,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			avril.location = 'pink';
 			avril.selection = 'lavender';
 			avril.sidepanel = 'seashell';
+			avril.mainpanel = 'white';
 			avril.navtext = '#FBFBFB';
 			avril.content = 'mediumorchid';
 			avril.search = 'violet';
@@ -79,6 +83,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			blue.location = 'skyblue';
 			blue.selection = 'lavender';
 			blue.sidepanel = 'aliceblue';
+			blue.mainpanel = 'white';
 			blue.navtext = '#FBFBFB';
 			blue.content = 'royalblue';
 			blue.search = 'royalblue';
@@ -93,6 +98,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			vanilla.location = 'cornsilk';
 			vanilla.selection = 'lemonchiffon';
 			vanilla.sidepanel = 'white';
+			vanilla.mainpanel = 'white';
 			vanilla.navtext = 'lemonchiffon';
 			vanilla.content = 'chocolate';
 			vanilla.search = 'moccasin';
@@ -107,6 +113,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			beetlejuice.location = 'darkslateblue';
 			beetlejuice.selection = 'silver';
 			beetlejuice.sidepanel = 'lavender';
+			beetlejuice.mainpanel = 'white';
 			beetlejuice.navtext = '#FBFBFB';
 			beetlejuice.content = 'mediumslateblue';
 			beetlejuice.search = '#444';
@@ -117,6 +124,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		function getStyles(){
 			return this.styles;
 		}
+		
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
 
@@ -124,6 +132,5 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			ThemeData:ThemeData,
 			getStyles:getStyles
 		};
-
 	}
 );
