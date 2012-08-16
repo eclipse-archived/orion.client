@@ -152,9 +152,13 @@ a.currentLocation:hover {
 
 .mainpane {
 	border: 0;
-	background: #ffffff;
+	background: white;
 }
 
+.mainToolbar {
+ 	background: #ffffff;
+	border-bottom: 1px solid #ebebeb;
+}
 
 /* Searchbox in the top navigation area seems a difficult thing to 
    get right. I've worked with a range of colors. What I notice is that
@@ -294,6 +298,7 @@ a.currentLocation:hover {
 /* dijit overrides related to theming */
 /* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
 /* buttons */
+
 .claro .dijitButton .dijitButtonNode,
 .claro .dijitDropDownButton .dijitButtonNode,
 .claro .dijitComboButton .dijitButtonNode,

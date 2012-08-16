@@ -258,52 +258,12 @@ h2 {
     padding-bottom: 8px;
 }
 
-.claro .dijitBorderContainer {
-	border: 0;
-	padding: 0;
-}
-
-.claro .dijitContentPane {
-	padding: 0;
-	margin: 0;
-	outline: 0;
-}
-
 .claro .dijitDialogTitleBar {
     background: white;
     color: black;
     font: 8px;
     outline: 0 none;
     padding: 5px 6px 3px;
-}
-
-/* splitters */
-
-.claro .dijitSplitterV, .claro .dijitGutterV {
-  background: #e3e3e3;
-  width: 3px;
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.claro .dijitSplitterVActive {
-  font-size: 1px;
-  background-color: #cccccc;
-}
-
-.claro .dijitSplitterV .dijitSplitterThumb {	
-  background-color: #bbbbbb;
-  height: 16px;
-  left: 0px;
-  width: 3px;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-}
-
-.claro .dijitSplitterVHover .dijitSplitterThumb {
-  background: #a0a0a0;
 }
  
 .help {
@@ -393,42 +353,11 @@ h2 {
 	background: inherit;
 }
 
-.toolbar {
-	vertical-align: middle;
-	min-height: 32px;
-	width: 100%;
-	color: #222;
-	border-bottom: 1px solid whitesmoke;
-}
-
-.auxToolbar {
-    background: #f8f8f8;
- 	min-height: 32px;
-	width: 100%;
-	color: #222222;
-	border-bottom: 1px solid #e4e4e4;
-}
-
-.mainToolbar {
- 	height: 31px;
- 	background: #ffffff;
-	border-bottom: 1px solid #ebebeb;
-}
-
-.pageTitle {
-	font-size: 13px;
-	vertical-align: top;
-	margin-top:4px;
-	font-weight:bold;
-	color: #666666;
-}
-
 .footer {
 	text-align: left;
 	width: 100%;
 	border: 0;
 	padding: 0;
-	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
 }
 
@@ -494,21 +423,10 @@ h2 {
 	border: 1px solid #808080;
 }
 
-
-
 .toolbarButton {
 	border: 0;
 	padding: 0;
 	height: 20px;
-}
-
-.toolbarTest {
-/*	background: #fff url("../images/titleBarTest.png")  repeat-x top left; */
-	border:1px solid #bfbfbf;
-	cursor: default;
-	font-size: 0.9em;
-	font-weight: bold;
-	color: #6d6d6d;
 }
 
 .searchFloat {
@@ -710,22 +628,6 @@ h2 {
 	padding-bottom: 2px;
 	list-style-type: none;
 	white-space: nowrap; /*wrapping makes indented list hard to read*/
-}
-
-.test-passed {
-	background-color: #11FF11;
-}
-
-.test-failed {
-	background-color: #FF1111;
-}
-
-#test-overview {
-	margin: 8px;
-}
-
-#test-tree {
-	margin: 8px;
 }
 
 .uploadContainer{
