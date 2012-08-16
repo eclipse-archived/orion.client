@@ -227,6 +227,11 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService.Name : _names[i];
 		};
+		
+		this._getServiceRootURL = function(location) {
+			var i = this._getServiceIndex(location);
+			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
+		};
 	}
 	
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
@@ -244,6 +249,14 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 		 */
 		fileServiceName: function(location) {
 			return this._getServiceName(location);
+		},
+		 
+		/**
+		 * Returns the root url of the file service managing this location
+		 * @param location The location of the item 
+		 */
+		fileServiceRootURL: function(location) {
+			return this._getServiceRootURL(location);
 		},
 		 
 		/**
