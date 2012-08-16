@@ -129,7 +129,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							slideout: true
 			});
 			
-			var desc = { src: "../mixlogin/manageopenids", style: "border: 0px; width: 500px" };
+			//var desc = { src: "../mixlogin/manageopenids", style: "border: 0px; width: 500px" };
+			var desc = { src: "../mixloginstatic/manageOpenids.html", style: "border: 0px; width: 500px" };
 			
 			this.iframe = dojo.create("iframe", desc, dojo.byId( 'iFrameContent' ) ); //$NON-NLS-0$
 			

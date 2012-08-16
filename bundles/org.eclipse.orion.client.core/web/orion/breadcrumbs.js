@@ -139,7 +139,7 @@ define(['require', 'dojo'], function(require, dojo) {
 			} 
 			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 			if (crumbs.childNodes.length === 0) {
-				seg = document.createElement('a'); //$NON-NLS-0$
+				seg = document.createElement('span'); //$NON-NLS-0$
 				dojo.place(document.createTextNode(firstSegmentName || document.title), seg, "only"); //$NON-NLS-0$
 				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
 				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$

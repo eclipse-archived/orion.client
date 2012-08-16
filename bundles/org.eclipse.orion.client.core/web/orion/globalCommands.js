@@ -652,6 +652,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		var toolbar = dojo.byId("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
+			dojo.addClass(toolbar, "toolbarLayout"); //$NON-NLS-0$
 			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
 		}
 		
@@ -750,17 +751,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				commandService.addCommand(toggleSidePanelCommand);
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-				// editor specific behavior if needed
+				// editor and layout specific behavior if needed
 				if (editor || layoutWidget) {
-					var already = false;
-					splitter.addResizeListener(function() {
-						if (editor) {
+					splitter.addResizeListener(function(node) {
+						if (editor && node === main) {
 							editor.getTextView().resize();
-							if (!already) {
-								// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=387130
-								already = true;
-								editor.getTextView().update(true);
-							}
 						}
 						if (layoutWidget) {
 							layoutWidget.resize();

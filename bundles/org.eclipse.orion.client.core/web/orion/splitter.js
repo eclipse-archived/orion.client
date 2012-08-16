@@ -38,7 +38,7 @@ define(['require', 'dojo'], function(require, dojo) {
 		_init: function(options) {
 			this._tracking = null;
 			this._resizeListeners = [];
-			this._animationDelay = 520;  // longer than CSS transitions in layout.css
+			this._animationDelay = 501;  // longer than CSS transitions in layout.css
 			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
 			function nodeFromOption(value) {
 				var node = value;
@@ -48,7 +48,7 @@ define(['require', 'dojo'], function(require, dojo) {
 				return node;
 			}
 			this._node = nodeFromOption(options.node);
-			if (!this._node) { throw "no dom node for spliiter found"; } //$NON-NLS-0$
+			if (!this._node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
 			this._sideNode = nodeFromOption(options.sidePanel);
 			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
 			this._mainNode = nodeFromOption(options.mainPanel);
@@ -88,7 +88,8 @@ define(['require', 'dojo'], function(require, dojo) {
 		 },
 		 /**
 		 * Adds an event listener for resizing the main and side panels.
-		 * @param {Function} listener The function called when a resize occurs
+		 * @param {Function} listener The function called when a resize occurs.  The DOM node that has
+		 * been resized is passed as an argument.
 		 */
 		 addResizeListener: function(listener) {
 			this._resizeListeners.push(listener);
@@ -118,18 +119,19 @@ define(['require', 'dojo'], function(require, dojo) {
 			this._resize();
 		},
 		
-		_resize: function(delay) {
-			delay = delay || 0;
+		_resize: function(animationDelay) {
+			animationDelay = animationDelay || 0;
 			var pos = dojo.position(this._node.parentNode);
 			this._totalWidth = pos.w;
 			pos = dojo.position(this._node);
 			dojo.style(this._mainNode, {width: (this._totalWidth - pos.x - pos.w) +"px"}); //$NON-NLS-0$ 
-			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(); }), delay);
+			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._mainNode); }), animationDelay);
+			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._sideNode); }), animationDelay);
 		},
 		
-		_notifyResizeListeners: function() {
+		_notifyResizeListeners: function(node) {
 			for (var i = 0; i <this._resizeListeners.length; i++) {
-				this._resizeListeners[i]();
+				this._resizeListeners[i](node);
 			}
 		}, 
 		

@@ -4,24 +4,42 @@ The model is one of a "side panel" defaulting to 1/3 width on the left and a "ma
 of the room.  A page always has a fixed header but may have a fluid footer (at the bottom of content) or
 a fixed footer on the bottom of the page.
 
-There are implied variables here.
-Footer height: 28px
-Toolbar height: 31px
-Header height: 60px
-
 The transition delays used for splitter animation (0.5) have a relationship with the animation delay used
 by the splitter bar.  If these values change, then change the delay in the splitter.
+
+Items that should appear on top of other orion visual components should have a z-index of 100 or greater.  Values
+under 100 are used to achieve layering of the header, footer, and splitters.
 */
+
+/*
+There are implied LESS variables here, for now set up as layout classes that live here and refer to the
+hard-coded numbers elsewhere.
+*/
+
+/* $HeaderHeight */
+.headerLayout {
+	height: 60px;
+}
+
+/* $FooterHeight */
+.footerLayout {
+	height: 28px;
+}
+
+/* $ToolbarHeight */
+.toolbarLayout {
+	height: 31px;
+}
 
 .content-fixedHeight {
 	clear: both;
 	overflow: hidden;
     position: absolute;
-    top: 60px;  /* header height */
+    top: 60px;  /* $HeaderHeight */
     bottom: 0;
     left: 0;
     width: 100%;
-	margin-bottom: 28px;  /* footer height */   
+	margin-bottom: 28px;  /* $FooterHeight */   
 }
 
 .content-fixedHeight-maximized {
@@ -32,18 +50,10 @@ by the splitter bar.  If these values change, then change the delay in the split
 .content-fluid {
 }
 
-.nav-fixed-top {
-	position: fixed;
-	top: 0;
-	z-index: 1000;
-	right: 0;
-	left: 0;
-}
-
 .footer-fixed-bottom {
 	position: fixed;
 	bottom: 0;
-	z-index: 1000;
+	z-index: 50;
 	right: 0;
 	left: 0;
 	height: 28px;
@@ -93,7 +103,6 @@ by the splitter bar.  If these values change, then change the delay in the split
 	position: absolute;
 	left: 0;
     overflow: auto;
-	z-index: 500;
 	width: 33%;
 	height: 100%;
 }
@@ -103,6 +112,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	-moz-transition: width 0.5s ease;
 	-o-transition: width 0.5s ease;
 	transition: width 0.5s ease;
+	z-index: 50;
 }
 
 .sidePanelMargins {
@@ -116,7 +126,6 @@ by the splitter bar.  If these values change, then change the delay in the split
 	display: block;
 	position: absolute;
 	right: 0;
-	z-index: 500;
 	width: 66%;
 	height: 100%;
 }
@@ -139,7 +148,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 
 .toolbarTarget {
 	position: absolute;
-	top: 32px;
+	top: 32px;  /* $ToolbarHeight + 1 */
  	width: 100%;
  	bottom: 0;
  	overflow-y: auto;
@@ -161,7 +170,7 @@ by the splitter bar.  If these values change, then change the delay in the split
 	position: absolute;
 	left: 33%;
 	height: 100%;
-	z-index: 800;
+	z-index: 50;
 	width: 3px;
 	margin-right: 3px;
 	cursor: e-resize;
