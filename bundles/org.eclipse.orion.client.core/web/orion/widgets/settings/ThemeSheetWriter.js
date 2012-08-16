@@ -19,21 +19,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		var location = '#EFEFEF';
 		var selection = 'FEC';
 		var sidepanel = '#FBFBFB';
+		var mainpanel = 'white';
 		var navtext = '#bfbfbf';
 		var content = '#3087B3';
 		var search = '#444';
+		var mainToolbar = 'green';
 		
-		function ThemeSheetWriter(){
-		}
+		function ThemeSheetWriter(){}
 		
 		ThemeSheetWriter.prototype.navbar = navbar;
 		ThemeSheetWriter.prototype.button = button;
 		ThemeSheetWriter.prototype.location = location;
 		ThemeSheetWriter.prototype.selection = selection;
 		ThemeSheetWriter.prototype.sidepanel = sidepanel;
+		ThemeSheetWriter.prototype.mainpanel = mainpanel;
 		ThemeSheetWriter.prototype.navtext = navtext;
 		ThemeSheetWriter.prototype.content = content;
 		ThemeSheetWriter.prototype.search = search;
+		ThemeSheetWriter.prototype.mainToolbar = mainToolbar;
 		
 		function writeNavigationStyle(){
 		
@@ -309,6 +312,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			auxpane.style.paddingTop = '16px';
 			
 			styles.push( auxpane );
+			
+			var mainpane = new ThemeClass.ThemeClass( 'mainpane' );
+			mainpane.style.background = this.mainpanel;
+			mainpane.style.border = 0;
+			
+			styles.push( mainpane );
+			
+			var mainToolbar = new ThemeClass.ThemeClass( 'mainToolbar' );
+			mainToolbar.style.background = this.mainToolbar;
+			mainToolbar.style.height = '31px';
+			mainToolbar.style.borderBottom = '1px solid #ebebeb';
+			
+			styles.push( mainToolbar );
+		
 
 			for( var s in styles ){
 				styleBlock = styleBlock + styles[s].toString();
@@ -336,18 +353,22 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				this.location = settings.location.value;
 				this.selection = settings.selection.value;
 				this.sidepanel = settings.sidepanel.value;
+				this.mainpanel = settings.mainpanel.value;
 				this.navtext = settings.navtext.value;
 				this.search = settings.search.value;
 				this.content = settings.content.value;
+				this.mainToolbar = settings.content.mainToolbar;
 			}else{
 				this.navbar = settings.navbar;
 				this.button = settings.button;
 				this.location = settings.location;
 				this.selection = settings.selection;
 				this.sidepanel = settings.sidepanel;
+				this.mainpanel = settings.mainpanel;
 				this.navtext = settings.navtext;
 				this.search = settings.search;
 				this.content = settings.content;
+				this.mainToolbar = settings.mainToolbar;
 			}
 			
 			var sheet = this.writeNavigationStyle() + this.writeLocationStyle() + this.writeMainStyle() + this.writeButtonStyle();

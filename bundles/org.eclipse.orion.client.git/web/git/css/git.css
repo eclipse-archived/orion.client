@@ -93,6 +93,7 @@
 .git-sprite-file{ background-position: 0 -144px; width: 16px; height: 16px; } 
 .git-sprite-incoming_commit{ background-position: 0 -162px; width: 16px; height: 16px; } 
 .git-sprite-merge{ background-position: 0 -180px; width: 16px; height: 16px; } 
+.git-sprite-merge_squash{ background: url( ../images/mergesquash.png ) no-repeat top left; width: 16px; height: 16px; }
 .git-sprite-notsure{ background-position: 0 -198px; width: 16px; height: 16px; } 
 .git-sprite-outgoing_commit{ background-position: 0 -216px; width: 16px; height: 16px; } 
 .git-sprite-pull{ background-position: 0 -234px; width: 16px; height: 16px; } 

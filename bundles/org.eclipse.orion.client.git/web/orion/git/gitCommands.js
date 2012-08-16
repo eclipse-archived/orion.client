@@ -1053,7 +1053,7 @@ var exports = {};
 		var mergeSquashCommand = new mCommands.Command({
 			name : messages["Merge Squash"],
 			tooltip: messages["Squash the content of the branch to the index"],
-			imageClass: "git-sprite-merge", //$NON-NLS-0$
+			imageClass: "git-sprite-merge_squash", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			id : "eclipse.orion.git.mergeSquash", //$NON-NLS-0$
 			callback: function(data) {
