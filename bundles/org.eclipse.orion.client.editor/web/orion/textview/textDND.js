@@ -113,7 +113,10 @@ define("orion/textview/textDND", [], function() { //$NON-NLS-0$
 		_onDragOver: function(e) {
 			var types = e.event.dataTransfer.types;
 			if (types) {
-				var allowed = types.contains ? types.contains("text/plain") : types.indexOf("text/plain") !== -1; //$NON-NLS-1$ //$NON-NLS-0$
+				var allowed = !this._view.getOptions("readonly"); //$NON-NLS-0$
+				if (allowed) {
+					allowed = types.contains ? types.contains("text/plain") : types.indexOf("text/plain") !== -1; //$NON-NLS-1$ //$NON-NLS-0$
+				}
 				if (!allowed) {
 					e.event.dataTransfer.dropEffect = "none"; //$NON-NLS-0$
 				}

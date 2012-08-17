@@ -19,11 +19,8 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 			mBootstrap.startup().then(function(core) {
 				var serviceRegistry = core.serviceRegistry;
 				var preferences = core.preferences;
-				
-				document.body.style.visibility = "visible"; //$NON-NLS-0$
+				// we use internal border containers so we need dojo to parse.
 				dojo.parser.parse();
-				// initialize service registry and EAS services
-
 				var commandService = new mCommands.CommandService({
 					serviceRegistry: serviceRegistry
 				});
@@ -37,7 +34,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 				var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 
-				mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+				mGlobalCommands.generateBanner("orion-compare", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 				var uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
 					parentDivID: "compareContainer", //$NON-NLS-0$
 					showTitle: true,

@@ -21,6 +21,15 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		/**
 		 * Creates a new Git commit explorer.
 		 * @class Git commit explorer
+		 * @name orion.git.GitCommitExplorer
+		 * @param registry
+		 * @param commandService
+		 * @param linkService
+		 * @param selection
+		 * @param parentId
+		 * @param toolbarId
+		 * @param sectionToolsId
+		 * @param actionScopeId
 		 */
 		function GitCommitExplorer(registry, commandService, linkService, selection, parentId, toolbarId, selectionToolsId, actionScopeId){
 			this.parentId = parentId;
@@ -81,9 +90,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 							function(resp){
 								loadingDeferred.callback();
 								var repositories = resp.Children;
-								
 								that.initTitleBar(commits[0], repositories[0]);
-				
 								that.displayCommit(commits[0]);
 								that.displayTags(commits[0]);
 								that.displayDiffs(commits[0]);
@@ -108,8 +115,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 		
 		GitCommitExplorer.prototype.initTitleBar = function(commit, repository){
 			var that = this;
-			var item;
-			var pageTitle;
+			var item = {};
+			
+			commit.GitUrl = repository.GitUrl;
+			commit.ContentLocation = repository.ContentLocation;
 			
 			if (commit){
 				item = {};
@@ -122,12 +131,13 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 				item.Parents[1] = {};
 				item.Parents[1].Name = messages["Repositories"];
 			}
-			mGlobalCommands.setPageTarget({task: "Commit", target: repository, 
+			mGlobalCommands.setPageTarget({task: "Commit", target: commit, 
 				breadcrumbTarget: item, 
 				makeBreadcrumbLink: function(seg, location) {
 					seg.href = "/git/git-repository.html#" + (location ? location : ""); //$NON-NLS-0$
 				},
-				serviceRegistry: this.registry, commandService: this.commandService});
+				serviceRegistry: that.registry, commandService: that.commandService}
+			);
 		};
 		
 		GitCommitExplorer.prototype.displayCommit = function(commit){
@@ -221,7 +231,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 			
 			return [commitMessage0, commitMessage1];
 		};
-		
+
 		// Git tags
 
 		GitCommitExplorer.prototype.displayTags = function(commit){
@@ -372,7 +382,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', '
 									gridRenderer: {
 										navGridHolder: navGridHolder,
 										additionalCmdRender: function(gridHolder){
-											dojo.empty(diffActionWrapper.id);
+											that.commandService.destroy(diffActionWrapper.id);
 											that.commandService.renderCommands("itemLevelCommands", diffActionWrapper.id, item.parent, that, "tool", false, gridHolder); //$NON-NLS-0$
 										},
 										before: true

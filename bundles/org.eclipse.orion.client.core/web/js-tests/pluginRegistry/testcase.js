@@ -97,7 +97,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
 			var pluginInfo = {
 				location: plugin.getLocation(),
-				data: plugin.getHeaders()
+				data: plugin._getData()
 			};
 
 			assert.equal(pluginRegistry.getPlugins().length, 1);

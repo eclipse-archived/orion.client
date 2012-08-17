@@ -279,7 +279,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		}
 		this._siteClient.isSelfHostingSite(this.getSiteConfiguration()).then(function(isSelfHostingSite) {
 			self._isSelfHostingSite = isSelfHostingSite;
-			dojo.empty(self._commandsContainer);
+			self._commandService.destroy(self._commandsContainer);
 			var userData = {
 				site: self._siteConfiguration,
 				startCallback: reload,

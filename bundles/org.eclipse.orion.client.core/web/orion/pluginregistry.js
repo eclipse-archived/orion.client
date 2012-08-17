@@ -88,8 +88,23 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					};
 				});
 				
-				if (serviceProxy.dispatchEvent) {
-					EventTarget.attach(serviceProxy);
+				if (serviceProxy.addEventListener && serviceProxy.removeEventListener) {
+					var eventTarget = new EventTarget();
+					serviceProxy.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
+					var _addEventListener = serviceProxy.addEventListener;
+					serviceProxy.addEventListener = function(type, listener) {
+						if (!eventTarget._namedlisteners[type]) {
+							_addEventListener(type);
+						}
+						eventTarget.addEventListener(type, listener);
+					};
+					var _removeEventListener = serviceProxy.removeEventListener;
+					serviceProxy.removeEventListener = function(type, listener) {
+						eventTarget.removeEventListener(type, listener);
+						if (eventTarget._namedlisteners[type]) {
+							_removeEventListener(type);
+						}
+					};
 				}
 			}
 			return serviceProxy;
@@ -126,7 +141,29 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					var registration = internalRegistry.registerService(service.names || service.type, serviceProxy, properties);
 					_services[service.serviceId] = {registration: registration, proxy: serviceProxy};
 				});
-			}	
+			}
+			if (!data._lastModified) {
+				data._lastModified = new Date().getTime();
+			}
+		}
+		
+		function _checkForUpdate(newData) {
+			if (data.headers && newData.headers) {
+				if (JSON.stringify(data.headers) !== JSON.stringify(newData.headers)) {
+					return true;
+				}
+			} else if (data.headers || newData.headers) {
+				return true;
+			}
+			
+			if (data.services && newData.services) {
+				if (JSON.stringify(data.services) !== JSON.stringify(newData.services)) {
+					return true;
+				}
+			} else if (data.services || newData.services) {
+				return true;
+			}
+			return false;
 		}
 		
 		function _responseHandler(message) {
@@ -137,7 +174,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						if (!data) {
 							data = message.params[0];
 							_parseData();
-						} else if (JSON.stringify(data) !== JSON.stringify(message.params[0])) {
+						} else if (_checkForUpdate(message.params[0])) {
 							// check if the data has been updated
 							for (var serviceId in _services) {
 								if (_services.hasOwnProperty(serviceId)) {
@@ -145,7 +182,13 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 									delete _services[serviceId];
 								}
 							}
-							data = message.params[0];
+							data = {};
+							if (message.params[0].headers) {
+								data.headers = message.params[0].headers;
+							}
+							if (message.params[0].services) {
+								data.services = message.params[0].services;
+							}
 							_parseData();
 							internalRegistry.updatePlugin(_self);						
 						}
@@ -212,19 +255,30 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function
 		 */
 		this.getHeaders = function() {
-			return data ? data.headers : null;
+			if (data) {
+				return data.headers || {};
+			}
+			return null;
 		};
 		
 		this.getName = function() {
-			return data ? data.headers["plugin.name"] || null : null;
+			var headers = this.getHeaders();
+			if (headers) {
+				return headers["plugin.name"] || "";
+			}
+			return null;
 		};
 		
 		this.getVersion = function() {
-			return data ? data.headers["plugin.version"] || null : null;
+			var headers = this.getHeaders();
+			if (headers) {
+				return headers["plugin.version"] || "0.0.0";
+			}
+			return null;
 		};
 		
 		this.getLastModified = function() {
-			return new Date(); // TODO -- persist and retrieve...
+			return data && data._lastModified ? data._lastModified : 0;
 		};
 		
 		/**
@@ -462,7 +516,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						document.body.appendChild(iframe);
 						channel.target = iframe.contentWindow;
 						channel.close = function() {
-							document.body.removeChild(iframe);
+							if (iframe) {
+								document.body.removeChild(iframe);
+								iframe = null;
+							}
 						};
 					}
 					_channels.push(channel);
@@ -534,7 +591,6 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
 				if (pluginData && pluginData._expires && pluginData._expires > new Date().getTime()) {
 					if (_getPlugin(pluginURL) === null) {
-						delete pluginData._expires;
 						_plugins.push(new Plugin(pluginURL, pluginData, internalRegistry));
 					}
 				} else {
@@ -544,9 +600,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					installList.push(plugin._load(false, 5000)); // _load(false) because we want to ensure the plugin is updated
 				}
 			});
-			
-			var d = new Deferred();
-			return d.all(installList, function(){});
+			return Deferred.all(installList, function(){});
 		};
 		
 		/**

@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred"], 
-		function(messages, require, mSearchUtils, mContentTypes, Deferred) {
+define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred", "orion/auth"], 
+		function(messages, require, mSearchUtils, mContentTypes, Deferred, mAuth) {
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -23,7 +23,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + messages[" is not supportted in this file system"];
+			throw funcName + " " + messages['is not supportted in this file system'];
 		}
 		var clientDeferred = new Deferred();
 		fileService[funcName].apply(fileService, funcArgs).then(
@@ -67,11 +67,13 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	function SearchCrawler(	serviceRegistry, fileClient, queryStr, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
-		//this.searchFileTypes = ["js", "css", "java", "txt", "HTML"];
-		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
 		this.fileLocations = [];
+		this.fileSkeleton = [];
 		this._hitCounter = 0;
 		this._totalCounter = 0;
+		this._searchOnName = options && options.searchOnName;
+		this.queryObj = this._searchOnName ? null: mSearchUtils.parseQueryStr(queryStr);
+		this._location = options && options.location;
 	}
 	
 	/**
@@ -79,14 +81,13 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
 	 */
 	SearchCrawler.prototype.search = function(onComplete){
-		var contentTypeService = this.registry.getService("orion.core.contenttypes");
+		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
 		var self = this;
-		self.registry.getService("orion.page.message").setProgressResult({Message: "Doing crawling search..."});
 		contentTypeService.getContentTypes().then(function(ct) {
 			self.contentTypesCache = ct;
-			var result = self._visitRecursively(self.queryObj.location+ "?depth=1").then(function(){
+			var result = self._visitRecursively(self.queryObj.location+ "?depth=1").then(function(){ //$NON-NLS-0$
 				//self._searchFiles().then(function(){
-					self._searchCompleted();
+					self._sort(self.fileLocations);
 					var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
 					onComplete({response: response});
 				//});
@@ -94,8 +95,64 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		});
 	};
 	
+	/**
+	 * Search file name on the query string from the file skeleton.
+	 * @param {String} queryStr The query string. This is temporary for now. The format is "?sort=Path asc&rows=40&start=0&q=keyword+Location:/file/e/bundles/*"
+	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
+	 */
+	SearchCrawler.prototype.searchName = function(queryStr, onComplete){
+		if(queryStr){
+			this.queryObj = mSearchUtils.parseQueryStr(queryStr, true);
+		}
+		if(onComplete){
+			this.onSearchNameComplete = onComplete;
+		}
+		var results = [];
+		this._sort(this.fileSkeleton);
+		if(this.fileSkeleton.length > 0){
+			for (var i = 0; i < this.fileSkeleton.length ; i++){
+				var lineString = this.fileSkeleton[i].Name.toLowerCase();
+				var result;
+				if(this.queryObj.inFileQuery.wildCard){
+					result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);
+				} else {
+					result = mSearchUtils.searchOnelineLiteral(this.queryObj.inFileQuery, lineString, true);
+				}
+				if(result){
+					results.push(this.fileSkeleton[i]);
+					if(results.length >= this.queryObj.rows){
+						break;
+					}
+				}
+			}
+			var response = {numFound: results.length, docs: results };
+			this.onSearchNameComplete({response: response});
+		}
+	};
+	
+	/**
+	 * Do search based on this.queryObj.
+	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
+	 */
+	SearchCrawler.prototype.buildSkeleton = function(onBegin, onComplete){
+		this._buildingSkeleton = true;
+		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		var self = this;
+		onBegin();
+		contentTypeService.getContentTypes().then(function(ct) {
+			self.contentTypesCache = ct;
+			var result = self._visitRecursively(self._location+ "?depth=1").then(function(){ //$NON-NLS-0$
+					this._buildingSkeleton = false;
+					onComplete();
+					if(self.queryObj){
+						self.searchName();
+					}
+			});
+		});
+	};
+	
 	SearchCrawler.prototype._searchCompleted = function(){
-		console.log("Search Completed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+		console.log("Search Completed.");//$NON-NLS-0$
 	};
 	
 	SearchCrawler.prototype._searchFiles = function(){
@@ -107,7 +164,17 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				results.push(self._sniffSearch(self.fileLocations[i]));
 			}
 		}
-		return new Deferred().all(results);
+		return Deferred.all(results);
+	};
+		
+	SearchCrawler.prototype._sort = function(fileArray){
+		fileArray.sort(function(a, b) {
+			var n1 = a.Name && a.Name.toLowerCase();
+			var n2 = b.Name && b.Name.toLowerCase();
+			if (n1 < n2) { return -1; }
+			if (n1 > n2) { return 1; }
+			return 0;
+		}); 
 	};
 		
 	SearchCrawler.prototype._visitRecursively = function(directoryLocation){
@@ -117,16 +184,19 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 			var len = children.length;
 			for (var i = 0; i < children.length ; i++){
 				if(children[i].Directory!==undefined && children[i].Directory===false){
-					var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
-					if(contentType && contentType.extends === "text/plain"){
-						//self.fileLocations.push(children[i].Location);
-						results.push(self._sniffSearch(children[i]));
+					if(self._searchOnName){
+						results.push(self._buildSingleSkeleton(children[i]));
+					} else {
+						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
+						if(contentType && contentType['extends'] === "text/plain"){ //$NON-NLS-0$ //$NON-NLS-0$
+							results.push(self._sniffSearch(children[i]));
+						}
 					}
 				} else if (children[i].Location) {
 					results.push(self._visitRecursively(children[i].ChildrenLocation));
 				}
 			}
-			return new Deferred().all(results);
+			return Deferred.all(results);
 		});
 	};
 
@@ -148,15 +218,28 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 			if(self._hitOnceWithinFile(jsonData)){
 				self.fileLocations.push(fileObj);
 				self._hitCounter++;
-				console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
-				console.log(fileObj.Location);
-				self.registry.getService("orion.page.message").setProgressResult({Message: "Searching file: "+ fileObj.Name});
+				//console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
+				//console.log(fileObj.Location);
+				self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 			}
 			},
 			function(error) {
 				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 			}
 		);
+	};
+	
+	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){
+		this._totalCounter++;
+		this.fileSkeleton.push(fileObj);
+		if(this.queryObj && this._totalCounter%100 == 0){
+			this.searchName();
+		}
+		//console.log("skeltoned files : "+ this._totalCounter);
+		//console.log(fileObj.Location);
+		var df = new Deferred();
+		df.resolve(this._totalCounter);
+		return df;
 	};
 	
 	SearchCrawler.prototype.constructor = SearchCrawler;

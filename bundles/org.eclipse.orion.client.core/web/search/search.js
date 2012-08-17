@@ -14,7 +14,7 @@
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
         'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 'orion/contentTypes',
-        'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+        'dojo/hash', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
 				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
 
@@ -75,7 +75,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			window.document.body.style.visibility = "visible"; //$NON-NLS-0$
+			
+			// we use internal border containers so we need dojo to parse.
 			dojo.parser.parse();
 
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
@@ -92,11 +93,14 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
 			var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandService, preferences, searcher, searcher, null, null); //$NON-NLS-0$
 			
 			var queryString =extractQueryString();
-
-			mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, queryString, null, null,  /* no images */ false, /* client handle page nav area */ true);     
+			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+			if (toolbar) {	
+				commandService.destroy(toolbar);
+				commandService.renderCommands(toolbar.id, toolbar, queryString, searcher, "button"); //$NON-NLS-0$
+			}
 			setPageInfo(serviceRegistry, fileClient, commandService, searcher);
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, false/*crawling*/); //$NON-NLS-0$
 			searchResultsGenerator.loadResults(queryString);
@@ -105,7 +109,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				setPageInfo(serviceRegistry, fileClient, commandService, searcher);
 				var query = extractQueryString();
 				searchResultsGenerator.loadResults(query);
-				mGlobalCommands.generateDomCommandsInBanner(commandService, searcher, query, null, null,  /* no images */ false, /* client handle page nav area */ true);     
+				var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+				if (toolbar) {	
+					commandService.destroy(toolbar);
+					commandService.renderCommands(toolbar.id, toolbar, query, searcher, "button"); //$NON-NLS-0$
+				}
 			});
 		});
 	});

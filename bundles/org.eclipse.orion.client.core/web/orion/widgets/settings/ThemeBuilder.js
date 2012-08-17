@@ -67,10 +67,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.settings.navbar = new Family( 'NavBar', '#333' );
 			this.settings.button = new Family( 'Button', '#777777' );
-			this.settings.location = new Family( 'Location', '#DEDEDE' ); 
+			this.settings.location = new Family( 'Location', '#efefef' ); 
 			this.settings.selection = new Family( 'Selection', '#FEC' );
 			this.settings.sidepanel = new Family( 'Side', '#FBFBFB' ); 
-			this.settings.navtext = new Family( 'Navtext', '#FBFBFB' );
+			this.settings.mainpanel = new Family( 'Main', 'white' ); 
+			this.settings.navtext = new Family( 'Navtext', '#bfbfbf' );
 			this.settings.content = new Family( 'ContentText', '#3087B3' );
 			this.settings.search = new Family( 'Search', '#444' );
 			
@@ -100,8 +101,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			});
 			
+			var guideCommand = new mCommands.Command({
+				name: 'Guide',
+				tooltip: 'Check Guide',
+				id: "orion.checkGuide", //$NON-NLS-0$
+				callback: dojo.hitch(this, function(data){
+					this.guide(data.items);
+				})
+			
+			});
+			
 //			this.commandService.addCommand(revertCommand);
 //			this.commandService.registerCommandContribution('themeCommands', "orion.reverttheme", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this.commandService.addCommand(guideCommand);
+			this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 2); //$NON-NLS-1$ //$NON-NLS-0$
@@ -117,7 +131,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 													'</div>' +
 												'</div>' +
 												'<canvas id="orionui" width="800" height="380"></canvas>' +
-												'<div id="pickercontainer" style="display:show;">' +
+												'<div id="pickercontainer" style="display:block;">' +
 													'<span class="settingsLabel">Theme:</span>' + 
 													'<div id="themepicker"></div>' +
 												'</div>' +
@@ -148,21 +162,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
 
-				var cat = prefs.get( 'styles' );
-				
-				var selectedTheme = { 'selected':'Orion' };
-				
-				if( cat === undefined ){
+				var cat = prefs.get( 'styles' ); //$NON-NLS-0$
+				var selectedTheme = prefs.get( 'selected' );
+				if (!cat){
 					var themes = new ThemeData.ThemeData();
 					var styles = themes.getStyles();
-					prefs.put( 'styles', JSON.stringify(styles) );
-					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+					prefs.put( 'styles', JSON.stringify(styles) ); //$NON-NLS-0$
 					builder.styleset = styles;
-					builder.addThemePicker();
 				}
-				
-				
-				
+				if (!selectedTheme) {
+					selectedTheme = { 'selected':'Orion' }; //$NON-NLS-0$  //$NON-NLS-1$
+					prefs.put( 'selected', JSON.stringify(selectedTheme) );
+				}
+				builder.addThemePicker();
 			} );
 		}
 		
@@ -296,19 +308,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			OVERVIEW = false;
 		
-			this.refresh();
+//			this.refresh();
 		
 			var coordinates = getCoordinates( e );
 			    
 			var x = coordinates.x;
 			var y = coordinates.y;
 			
-			over = [];
+//			over = [];
 		
 			for( var z = 0; z < zones.length; z++ ){	
 		
 				if( zones[z].mouseOver( x, y ) ){	
 					 zones[z].id = z;
+					 over = [];
+					 this.refresh();
 					 over.push(zones[z]);
 				}
 			}
@@ -349,7 +363,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						break;
 						
 					default:
-						this.refresh();
+					
+						// this.refresh();
 						break;
 				
 				}
@@ -388,23 +403,61 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 				var component = components[c];
 				
-				if( familyShown( families, component.family ) === false ){
-				
+				if( familyShown( families, component.family ) === false && component.description ){
+					
 					var labely = TOP + 10 + ( count * 28 );
 					
 					var originx = component.x-padding + ( component.width + (2*padding) ) * 0.5;
 					var originy = ( component.y-padding + ( component.height + (2*padding) )/2 );
 					
 					ctx.beginPath();
-					ctx.moveTo( originx, originy );
-					ctx.lineTo( originx, labely -4 );
-					ctx.lineTo( UI_SIZE + 50, labely -4 );
-					ctx.strokeStyle = '#cc0000';
-					ctx.lineWidth = 1;
-					ctx.stroke();
 					
-					Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+					switch( component.family ){
 					
+						case 'Main':
+						
+							/* This is a hack to stop lines overlapping - ideally this software needs a layout
+								routine. Not pleased to do this. */
+
+							ctx.beginPath();
+							ctx.moveTo( originx + 70 , labely -4 );
+							ctx.lineTo( UI_SIZE + 50, labely -4 );
+							ctx.strokeStyle = '#cc0000';
+							ctx.lineWidth = 1;
+							ctx.stroke();
+							
+							Component.drawArc( ctx, originx + 70 , labely -4, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+
+							break;
+							
+							
+						case 'Side':
+						
+							ctx.beginPath();
+							ctx.moveTo( originx + 30 , labely -4 );
+							ctx.lineTo( UI_SIZE + 50, labely -4 );
+							ctx.strokeStyle = '#cc0000';
+							ctx.lineWidth = 1;
+							ctx.stroke();
+							
+							Component.drawArc( ctx, originx + 30 , labely -4, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+
+							break;
+							
+						default: 
+						
+							ctx.moveTo( originx, originy );
+							ctx.lineTo( originx, labely -4 );
+							ctx.lineTo( UI_SIZE + 50, labely -4 );
+							ctx.strokeStyle = '#cc0000';
+							ctx.lineWidth = 1;
+							ctx.stroke();
+							
+							Component.drawArc( ctx, originx, originy, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+							
+							break;
+					}
+
 					ctx.closePath();
 					ctx.globalAlpha = 1; 
 					
@@ -433,7 +486,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			position = dojo.position( 'themeContainer' );	
 	
 			if( !canvas ){
-				canvas = document.getElementById('orionui');
+				canvas = document.getElementById( 'orionui' );
 				ctx = canvas.getContext( '2d' );
 				canvas.addEventListener( "mousedown", dojo.hitch( this, 'mouseDown' ), false );	
 				canvas.addEventListener( "mousemove", mouseMove, false );
@@ -500,13 +553,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				breadcrumb.description = 'Content Text';
 				breadcrumb.family = settings.content.name;
 				
+				var rightpanel = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP + 30, UI_SIZE * 0.6 -1, UI_SIZE - CONTENT_TOP + TOP -31, settings.mainpanel.value );
+				rightpanel.description = 'Main Panel';
+				rightpanel.family = settings.mainpanel.name;
+				
 				zones.push( navbar );
+				zones.push( username );
 				zones.push( search );
 				zones.push( crumbbar );
 				zones.push( button );
+
+				zones.push( rightpanel );
+				
 				zones.push( selection );
-				zones.push( navigator );
-				zones.push( username );
+				
 				zones.push( breadcrumb );
 				
 				for( var count=0; count < 3; count++ ){
@@ -519,6 +579,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					zones.push( content );
 				}
 				
+				
+				zones.push( navigator );
 				zones.push( sidepanel );
 				
 				for( count=0; count < 3; count++ ){
@@ -541,9 +603,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					}
 				}
 			}
+			
 			/* Toolbar */
 				
-			var horizontalLine = Component.drawLine( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP + 30, LEFT + UI_SIZE, CONTENT_TOP + 30, 2, '#DEDEDE' );   
+			var horizontalLine = Component.drawLine( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP + 30, LEFT + UI_SIZE, CONTENT_TOP + 30, 2, '#DEDEDE' );
+			
 			var verticalLine = Component.drawLine( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP, LEFT + UI_SIZE * 0.4, TOP + UI_SIZE, 2, '#DEDEDE' );   
 		    
 		    /* Section */
@@ -552,8 +616,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			var section = Component.drawText( ctx, 'Section', LEFT + 20, CONTENT_TOP + 23, '8pt Lucida', '#333' );        
 		
-			var sectionline = Component.drawLine( ctx, LEFT + 10, CONTENT_TOP + 29, LEFT + UI_SIZE * 0.4 - 10, CONTENT_TOP + 29, 2, '#DEDEDE' );
-		  
+		
+			var sectionline = Component.drawLine( ctx, LEFT + 10, CONTENT_TOP + 29, LEFT + UI_SIZE * 0.4 - 10, CONTENT_TOP + 29, 2, '#DEDEDE' );		  
 		        
 			var buttonText = Component.drawText( ctx, 'Button', LEFT + UI_SIZE * 0.4 + 8, CONTENT_TOP + 19, '8pt Lucida', '#333' );        
 			
@@ -597,6 +661,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				newtheme.location = this.settings.location.value;
 				newtheme.selection = this.settings.selection.value;
 				newtheme.sidepanel = this.settings.sidepanel.value; 
+				newtheme.mainpanel = this.settings.mainpanel.value;
 				newtheme.navtext = this.settings.navtext.value;
 				newtheme.content = this.settings.content.value;
 				newtheme.search = this.settings.search.value;
@@ -633,6 +698,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		ThemeBuilder.prototype.revert = revert;
 		
+		function guide(data){	
+		
+			this.refresh();
+			OVERVIEW = true;
+			this.drawOutline();
+		
+//			dojo.byId( 'pickercontainer' ).style.display = '';
+//			dojo.byId( 'savecontainer' ).style.display = 'none';
+		}
+		
+		ThemeBuilder.prototype.guide = guide;
+		
 		function select( name ){
 		
 			previous = this.settings;
@@ -647,6 +724,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					this.settings.location.value = this.styles[s].location;
 					this.settings.selection.value = this.styles[s].selection;
 					this.settings.sidepanel.value = this.styles[s].sidepanel;
+					this.settings.mainpanel.value = this.styles[s].mainpanel;
 					this.settings.navtext.value = this.styles[s].navtext;
 					this.settings.content.value = this.styles[s].content;
 					this.settings.search.value = this.styles[s].search;
@@ -676,7 +754,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var builder = this;
 			
-			this.preferences.getPreferences('/themes', 2).then(function(prefs){ //$NON-NLS-0$
+			this.preferences.getPreferences('/themes', 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
 
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
@@ -695,6 +773,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					   Going to make sure */
 				
 					styles = builder.styleset; 
+				}
+				
+				if(!selection) {
+					selection = { 'selected':'Orion' };	
 				}
 			
 				if( styles ){
@@ -717,21 +799,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						themebuilder.styles = styles;
 					}	
 				}
-			} );	
-			
-			if( selection ){	
-				this.select( selection.selected );
-			}
-			
-			var picker = document.getElementById( 'themepicker' );
-			
-			if(!this.themeSelect){
-				this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-				this.themeSelect.setStorageItem = dojo.hitch( themebuilder, 'select' );
 				
-				var saver = document.getElementById( 'themesaver' );
-				new orion.widgets.settings.TextField({}, saver );	
-			}
+				if( selection ){	
+					this.select( selection.selected );
+				}
+			
+				var picker = document.getElementById( 'themepicker' );
+				
+				if(!this.themeSelect){
+					this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
+					this.themeSelect.setStorageItem = dojo.hitch( themebuilder, 'select' );
+					
+					var saver = document.getElementById( 'themesaver' );
+					new orion.widgets.settings.TextField({}, saver );	
+				}
+			} ));	
 		}
 		
 		ThemeBuilder.prototype.addThemePicker = addThemePicker;
@@ -781,8 +863,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		ThemeBuilder.prototype.render = render;
 		
 		function destroy(){
-			dijit.byId( 'themepicker' ).destroyRecursive();
-			dijit.byId( 'themesaver' ).destroyRecursive();
+			var picker = dijit.byId( 'themepicker' );
+			if (picker) {
+				picker.destroyRecursive();
+			}
+			var saver = dijit.byId( 'themesaver' );
+			if (saver) {
+				saver.destroyRecursive();
+			}
 		}
 		
 		ThemeBuilder.prototype.destroy = destroy;

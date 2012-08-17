@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window Image */
  
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
+define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlobalCommands) {
 	
 	/**
 	 * Service for reporting status
@@ -39,16 +39,21 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			if (closeButton && !this._hookedClose) {
 				dojo.connect(closeButton, "onclick", this, function() { //$NON-NLS-0$
 					this.setProgressMessage("");
-					dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 				});	
 				// onClick events do not register for spans when using the keyboard
 				dojo.connect(closeButton, "onkeypress", this, function(e) { //$NON-NLS-0$
 					if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
 						this.setProgressMessage("");
-						dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 					}				
 				});
 			}
+		},
+		
+		_getNotifierElements: function() {
+			if (!this._notifierElements) {
+				this._notifierElements = mGlobalCommands.getToolbarElements(this.notificationContainerDomId);
+			}
+			return this._notifierElements;
 		},
 		/**
 		 * Displays a status message to the user.
@@ -67,8 +72,12 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				// this should be done by toggling that instead
 				var readSetting = dojo.attr(node, "aria-live"); //$NON-NLS-0$
 				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				window.setTimeout(function() { dojo.place(window.document.createTextNode(msg), that.domId, "only"); }, 100); //$NON-NLS-0$
-				window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 200); //$NON-NLS-0$
+				window.setTimeout(function() {
+					if (msg === that.currentMessage) {
+						dojo.place(window.document.createTextNode(msg), that.domId, "only"); //$NON-NLS-0$
+						window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 100); //$NON-NLS-0$
+					}
+				}, 100);
 			}
 			else { 
 				dojo.place(window.document.createTextNode(msg), this.domId, "only");  //$NON-NLS-0$
@@ -76,9 +85,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			if (typeof(timeout) === "number") { //$NON-NLS-0$
 				var that = this;
 				window.setTimeout(function() {
-					var node = dojo.byId(that.domId);
-					var text = typeof(node.textContent) === "string" ? node.textContent : node.innerText; //$NON-NLS-0$
-					if (text === msg) {
+					if (msg === that.currentMessage) {
 						dojo.place(window.document.createTextNode(""), that.domId, "only"); //$NON-NLS-0$
 					}
 				}, timeout);
@@ -142,7 +149,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			}else{
 				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			}
-			mUtil.forceLayout(this.notificationContainerDomId);
+			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**
@@ -195,7 +202,7 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 				}
 			}
 			dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
-			mUtil.forceLayout(this.notificationContainerDomId);
+			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
 		/**
@@ -285,8 +292,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					});
 		}
 	}
-	
-	ProgressMonitor.prototype = new dojo.Deferred();
 	
 	/**
 	 * Starts the progress monitor. Message will be shown in the status area.

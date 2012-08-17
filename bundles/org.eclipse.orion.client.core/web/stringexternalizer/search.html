@@ -43,24 +43,22 @@
 	  	 	
    </head>
    
-    <body style="height: 100%; visibility:hidden" class="claro" spellcheck="false">
-    <div id="orion.searchResults" class="orionPage" dojoType="orion.widgets.eWebBorderContainer" design="headline" gutters="false" persist="true" liveSplitters="true">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div id="leftPane" dojoType="dijit.layout.BorderContainer" region="leading" design="headline" style="width: 20%" liveSplitters="false" gutters="false" splitter="true">
-			<div id="favorites" class="auxpane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-				<div id="favoriteProgress" class="auxPadding"></div>
+     <body id="orion-externalizeResults" style="height: 100%;" class="claro orionPage" spellcheck="false">
+		<div class="content-fixedHeight">
+			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
+				<div class="sidePanelMargins" id="favoriteProgress"></div>
+			</div>
+			<div class="split splitLayout"></div>
+			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<div class="fixedToolbarHolder">
+					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+					<div class="toolbarTarget" tabindex="0">
+						<div class="mainpane dijitManagesLayout" id="results" tabindex="0" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false">
+						</div>
+					</div>	
+				</div>
 			</div>
 		</div>
-		<div id="rightPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false" gutters="false" role="main">
-			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
-			</div>
-			<div class="mainpane" tabindex="0" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false">
-				<div id="results"></div>
-			</div>
-		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
-		</div>
-	</div>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
 	</body>
 </html>

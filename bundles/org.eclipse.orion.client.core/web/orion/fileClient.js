@@ -14,7 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "orion/i18nUtil"], function(messages, Deferred, mAuth, i18nUtil){
+define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "orion/i18nUtil", "orion/es5shim"], function(messages, Deferred, mAuth, i18nUtil){
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -99,7 +99,7 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 					}
 					results[i] = _copy(sourceService, childSourceLocation, targetService, childTargetLocation);
 				}
-				return new Deferred().all(results);
+				return Deferred.all(results);
 			});
 		});
 	}
@@ -195,10 +195,10 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 			_names[j] = _references[j].getProperty("Name"); //$NON-NLS-0$
 			
 			if(_references[j].getProperty("NameKey") && _references[j].getProperty("nls")){
-				i18nUtil.getMessageBundle(_references[j].getProperty("nls")).then(dojo.hitch(this, function(j, pluginMessages){
+				i18nUtil.getMessageBundle(_references[j].getProperty("nls")).then(function(j, pluginMessages){
 					_fileSystemsRoots[j].Name = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
 					_names[j] = pluginMessages[_references[j].getProperty("NameKey")]; //$NON-NLS-0$
-				}, j));
+				}.bind(this, j));
 			}
 		}
 				
@@ -227,15 +227,36 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 			var i = this._getServiceIndex(location);
 			return i === -1 ? _allFileSystemsService.Name : _names[i];
 		};
+		
+		this._getServiceRootURL = function(location) {
+			var i = this._getServiceIndex(location);
+			return i === -1 ? _allFileSystemsService.Location : _fileSystemsRoots[i].Location;
+		};
 	}
 	
 	FileClient.prototype = /**@lends orion.fileClient.FileClient.prototype */ {
+		/**
+		 * Returns the file service managing this location
+		 * @param location The location of the item 
+		 */
+		getService: function(location) {
+			return this._getService(location);
+		},
+		 
 		/**
 		 * Returns the name of the file service managing this location
 		 * @param location The location of the item 
 		 */
 		fileServiceName: function(location) {
 			return this._getServiceName(location);
+		},
+		 
+		/**
+		 * Returns the root url of the file service managing this location
+		 * @param location The location of the item 
+		 */
+		fileServiceRootURL: function(location) {
+			return this._getServiceRootURL(location);
 		},
 		 
 		/**
@@ -449,4 +470,3 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 	//return the module exports
 	return {FileClient: FileClient};
 });
-

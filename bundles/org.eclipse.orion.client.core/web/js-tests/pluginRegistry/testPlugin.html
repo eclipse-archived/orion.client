@@ -2,18 +2,23 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script src="../../orion/Deferred.js"></script>
-	<script src="../../orion/plugin.js"></script>
+	<script src="../../requirejs/require.js"></script>
 	<script>
-	/*global window orion*/
-		window.onload = function() {
-			var provider = new orion.PluginProvider();
-			provider.registerService(["test"], {
+		/*global require orion window*/
+		require({
+		  baseUrl: '../..',
+		  paths: {
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+		require(["orion/Deferred", "orion/EventTarget", "orion/plugin", "domReady!"], function(Deferred, EventTarget, PluginProvider) {
+			var provider = new PluginProvider();
+			var impl = {
 				test: function(echo) {
 					return echo;
 				},
 				testPromise: function(echo) {
-					var d = new orion.Deferred();
+					var d = new Deferred();
 					window.setTimeout(function() {
 						d.progress("progress");
 						d.resolve(echo);
@@ -22,13 +27,12 @@
 				},
 				testEvent: function(name) {
 					this.dispatchEvent(name, name + "test");
-				},
-				dispatchEvent: function(eventName) {
-					// the plugin infrastructure will chain this
 				}
-			}, {name : "echotest"});
+			};
+			EventTarget.attach(impl);
+			provider.registerService("test", impl, {name : "echotest"});
 			provider.connect();
-		};
+		});
 	</script>
 </head>
 <body>

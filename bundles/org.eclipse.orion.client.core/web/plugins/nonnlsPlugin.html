@@ -5,9 +5,16 @@
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 		window.onload = function() {
+			var validatorEnabled = true;
+
 			var provider = new orion.PluginProvider();
-			var serviceProvider = provider.registerService("orion.edit.validator",
+			var serviceProvider = provider.registerService(["orion.edit.validator", "orion.cm.managedservice"],
 			  {
+			     updated: function(properties) {
+				     if (properties && typeof properties.enabled !== 'undefined') {
+				        validatorEnabled = !!properties.enabled;
+				     }
+			     },
 			     checkSyntax: function(title, contents) {
 			     
 				     function getExcluded(exlRegExp){
@@ -33,7 +40,11 @@
 				excluded = excluded.concat(getExcluded(new RegExp("//.*\\r?\\n*", "gm")), contents);
 				excluded = excluded.concat(getExcluded(new RegExp("define\\(\\[[^\\]]*\\]", "gm")), contents);
 				excluded = excluded.concat(getExcluded(new RegExp("messages\\[[^\\]]*\\]", "gmi")), contents);
-			     
+
+			       if (!validatorEnabled) {
+			           return {problems: []};
+			       }
+
 			       var problems = [];
 			       var stringRegExp = /("(\\"|[^"])+")|('(\\'|[^'])+')/g;
 			       var nonnlsRegExp = /\/\/\$NON-NLS-[0-9]+\$/g;
@@ -76,6 +87,7 @@
 			  },
 			  {
 			     contentType: ["application/javascript"],
+			     pid: 'nonnls.config'
 			  });
 			
 			provider.registerService('orion.navigate.command', null, {
@@ -91,9 +103,26 @@
 							],
 				uriTemplate: '{OrionHome}/stringexternalizer/search.html#{Location}'
 			});
-			
-			provider.connect();
-		};
+
+			provider.registerService("orion.core.setting",
+				{},
+				{	settings: [
+						{	pid: 'nonnls.config',
+							name: 'NLS Validator',
+							tags: 'validation javascript js nls'.split(' '),
+							properties: [
+								{	id: 'enabled',
+									name: 'Warn on unexternalized strings',
+									defaultValue: true,
+									type: 'boolean'
+								}
+							]
+						}
+					]
+				});
+	
+				provider.connect();
+			};
 	</script>
 </head>
 <body>

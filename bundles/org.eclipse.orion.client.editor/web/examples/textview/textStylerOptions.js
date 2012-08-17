@@ -18,6 +18,8 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 	var CATEGORY = "JavaScript Editor";
 	var USER_THEME = "userTheme";
 	
+	
+	
 	var preferences;
 
 	/**
@@ -64,6 +66,7 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 			return value;
 		}, 
 		_getStyleSheet: function (subcategories, theme, sUtil) {
+			console.log( subcategories );
 			var result = [];
 			result.push("");
 			
@@ -87,16 +90,66 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 			result.push("." + theme + " .textview {");
 			result.push("\tbackground-color: " + background + ";");
 			result.push("}");
+			
+			// Annotations Ruler
+			
+			var annotationsBackground = this.preferences.getSetting(subcategories, "Annotations Ruler", "Background");
+			console.log( annotationsBackground );
+			result.push("." + theme + ".ruler.annotations{");
+			result.push("\tbackground-color: " + 'red' + ";");
+			result.push("}");
 
 			//ruler
 			result.push("." + theme + " .ruler {");
-			result.push("\tbackground-color: " + background + ";");
+			result.push("\tbackground-color: " + annotationsBackground + ";");
 			result.push("}");
+			
+			//rulerLines
+			var lineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Background");
+			var lineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Color");
+			result.push("." + theme + " .rulerLines {");
+			result.push("\tcolor: " + lineNumberForeground + ";");
+			result.push("\tbackground-color: " + lineNumberBackground + ";");
+			result.push("}");
+			
+			var evenlineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Even Rows Background");
+			var evenlineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Even Rows Color");
+			result.push("." + theme + " .rulerLines.even {");
+			result.push("\tcolor: " + evenlineNumberForeground + ";");
+			result.push("\tbackground-color: " + evenlineNumberBackground + ";");
+			result.push("}");
+
+			var oddlineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Odd Rows Background");
+			var oddlineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Odd Rows Color");
+			result.push("." + theme + " .rulerLines.even {");
+			result.push("\tcolor: " + oddlineNumberForeground + ";");
+			result.push("\tbackground-color: " + oddlineNumberBackground + ";");
+			result.push("}");
+
+			var overviewBackground = this.preferences.getSetting(subcategories, "Overview Ruler", "Background");
+			var overviewForeground = this.preferences.getSetting(subcategories, "Overview Ruler", "Color");
+			result.push("." + theme + " .ruler.overview {");
+			result.push("\tcolor: " + overviewForeground + ";");
+			result.push("\tbackground-color: " + overviewBackground + ";");
+			result.push("}");
+
+			var foldingBackground = this.preferences.getSetting(subcategories, "Folding Ruler", "Background");
+			var foldingForeground = this.preferences.getSetting(subcategories, "Folding Ruler", "Color");
+			result.push("." + theme + " .ruler.folding {");
+			result.push("\tcolor: " + foldingForeground + ";");
+			result.push("\tbackground-color: " + foldingBackground + ";");
+			result.push("}");
+
+
+			
+
 
 			var _this = this;
 			var styler = this._styler;
 			function defineRule(token, settingName) {
 				var className = styler.getClassNameForToken(token);
+				console.log( className );
+				
 				if (className) {
 					var color = preferences.getSetting(subcategories, settingName, "Color");
 					var weight = preferences.getSetting(subcategories, settingName, "Weight").toLowerCase();

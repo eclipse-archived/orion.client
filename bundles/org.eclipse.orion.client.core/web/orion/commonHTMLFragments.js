@@ -24,7 +24,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	// BEGIN TOP BANNER FRAGMENT
 	var topHTMLFragment =
 	
-	'<header role="banner">' + //$NON-NLS-0$
+	'<header id="banner" role="banner" class="headerLayout">' + //$NON-NLS-0$
 		//Top row:  Logo + discovery links + user
 		'<div id="staticBanner" class="layoutBlock topRowBanner">' + //$NON-NLS-0$
 			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="'+messages['Orion Home']+'"></a>' + //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -32,14 +32,13 @@ define(['i18n!orion/nls/messages', 'require'],
 			'<div class="layoutRight">' + //$NON-NLS-0$
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
-				'<input type="text" id="search" placeholder="Search" title="'+messages['Type a keyword or wild card to search in root']+'" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
+				'<input type="text" id="search" placeholder="'+messages['Search']+'" title="'+messages['Type a keyword or wild card to search in root']+'" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
 				// '<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' + //$NON-NLS-0$
 				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
 		//Title area
 		'<div id="titleArea" class="layoutBlock titleArea">' + //$NON-NLS-0$
-			'<div class="layoutLeft pageTitle"></div>' + //$NON-NLS-0$
 			'<div class="clear" style="padding-bottom:5px;display:inline;"><span id="location" class="currentLocation"></span><span id="dirty" class="currentLocation"></span></div>' + //$NON-NLS-0$
 			'<div class="layoutRight pageNav">' + //$NON-NLS-0$
 				'<span id="pageFavorite" tabindex="0" role="button" aria-label="'+messages['Add this page to the favorites list']+'" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' + //$NON-NLS-2$ //$NON-NLS-0$
@@ -51,7 +50,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	// BEGIN BOTTOM BANNER FRAGMENT
 	// styling of the surrounding div (text-align, etc) is in ide.css "footer"
 	var bottomHTMLFragment = 
-		'<footer id="footerContent" class="layoutBlock" role="contentinfo">' + //$NON-NLS-0$
+		'<footer id="footerContent" class="layoutBlock footerLayout" role="contentinfo">' + //$NON-NLS-0$
 			'<div class="footerBlock">' + //$NON-NLS-0$
 				messages['Orion is in Beta. Please try it out but BEWARE your data may be lost.'] +
 			'</div>' + //$NON-NLS-0$
@@ -67,10 +66,8 @@ define(['i18n!orion/nls/messages', 'require'],
 
 	function slideoutHTMLFragment(id) { 
 		return '<div id="'+id+'slideContainer" class="layoutBlock slideParameters slideContainer">' + //$NON-NLS-1$ //$NON-NLS-0$
-			'<span id="'+id+'pageParameterArea" class="slide">' + //$NON-NLS-1$ //$NON-NLS-0$
-				'<span id="'+id+'pageCommandParameters" class="layoutLeft parameters"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
-				'<span id="'+id+'pageCommandDismiss" class="layoutRight parametersDismiss"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
-			'</span>' + //$NON-NLS-0$
+			'<span id="'+id+'pageCommandParameters" class="layoutLeft parameters"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<span id="'+id+'pageCommandDismiss" class="layoutRight parametersDismiss"></span>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>'; //$NON-NLS-0$
 	}
 	

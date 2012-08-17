@@ -13,7 +13,8 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/auth', 'orion/util', 'orion/searchUtils', 'orion/crawler/searchCrawler', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], 
+function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search client.
@@ -40,40 +41,53 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 		 */
 		search: function(query, excludeFile, renderer) {
 			var qObj = mSearchUtils.parseQueryStr(query);
-			try {
-				this._fileService.search(qObj.location, query).then(function(jsonData) {
-					/**
-					 * transforms the jsonData so that the result conforms to the same
-					 * format as the favourites list. This way renderer implementation can
-					 * be reused for both.
-					 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
-					 */
-					var transform = function(jsonData) {
-						var transformed = [];
-						for (var i=0; i < jsonData.response.docs.length; i++) {
-							var hit = jsonData.response.docs[i];
-							transformed.push({name: hit.Name, 
-											  path: hit.Location, 
-											  folderName: mSearchUtils.path2FolderName(hit.Path, hit.Name),
-											  directory: hit.Directory, 
-											  lineNumber: hit.LineNumber});
-						}
-						return transformed;
-					};
-					var token = jsonData.responseHeader.params.q;
-					token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
-					//remove field name if present
-					token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
-					renderer(transform(jsonData), token);
-				}, function(error) {
-					renderer(null, null, error);
-				});
-			}
-			catch(error){
-				this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+			var transform = function(jsonData) {
+				var transformed = [];
+				for (var i=0; i < jsonData.response.docs.length; i++) {
+					var hit = jsonData.response.docs[i];
+					transformed.push({name: hit.Name, 
+									  path: hit.Location, 
+									  folderName: mSearchUtils.path2FolderName(hit.Path ? hit.Path : hit.Location, hit.Name),
+									  directory: hit.Directory, 
+									  lineNumber: hit.LineNumber});
+				}
+				return transformed;
+			};
+			if(this._crawler){ //$NON-NLS-0$
+				this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+			} else {
+				try {
+					this._fileService.search(qObj.location, query).then(function(jsonData) {
+						/**
+						 * transforms the jsonData so that the result conforms to the same
+						 * format as the favourites list. This way renderer implementation can
+						 * be reused for both.
+						 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
+						 */
+						var token = jsonData.responseHeader.params.q;
+						token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
+						//remove field name if present
+						token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
+						renderer(transform(jsonData), token);
+					}, function(error) {
+						renderer(null, null, error);
+					});
+				}
+				catch(error){
+					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
+						this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+					} else {
+						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
+					}
+				}
 			}
 		},
-						
+		getFileService: function(){
+			return this._fileService;
+		},
+		setCrawler: function(crawler){
+			this._crawler = crawler;
+		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
 			var errorText = document.createTextNode(response);
@@ -96,7 +110,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 				this.setLocationByURL(noneRootMeta.Location);
 				locationName = noneRootMeta.Name;
 			} else if(meta){
-				locationName = this._fileService.fileServiceName(meta && meta.Location);
+				if(this._fileService.getService(meta.Location)["search"]){
+					//this.setLocationByURL("");
+					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
+				} else {
+					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
+				}
+				locationName = this._fileService.fileServiceName(meta.Location);
 			}
 			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
 			if(!locationName){
@@ -104,10 +124,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 			}
 			if(searchInputDom && searchInputDom.placeholder){
 				searchInputDom.value = "";
-				if(locationName.length > 23){
-					searchInputDom.placeholder = messages["Search "] + locationName.substring(0, 20) + "..."; //$NON-NLS-1$
+				var placeHolder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
+				
+				if(placeHolder.length > 30){
+					searchInputDom.placeholder = placeHolder.substring(0, 27) + "..."; //$NON-NLS-1$
 				} else {
-					searchInputDom.placeholder = messages['Search '] + locationName;
+					searchInputDom.placeholder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
 				}
 			}
 			if(searchInputDom && searchInputDom.title){
@@ -124,7 +146,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
 		 * @param {Boolean} [skipLocation] If true, do not use the location property of the searcher. Use "" as the location instead.
 		 */
-		createSearchQuery: function(query, nameQuery, sort, skipLocation)  {
+		createSearchQuery: function(query, nameQuery, sort, skipLocation, searchPrefix)  {
 			if (!sort) {
 				sort = "Path"; //$NON-NLS-0$
 			}
@@ -135,7 +157,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					searchStr: "NameLower:" + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
+					location: skipLocation ? "": this.location,
+					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
@@ -177,8 +200,18 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 			 *   This function is passed a <td> element.
 			 * @returns a render function.
 			 */
-			makeRenderFunction: function(resultsNode, heading, onResultReady, decorator) {
+			makeRenderFunction: function(contentTypeService, resultsNode, heading, onResultReady, decorator) {
 				
+				function _isText(fileName) {
+					if(!contentTypeService){
+						return true;
+					}
+					var contentType = contentTypeService.getFilenameContentType(fileName);
+					if(contentType && contentType['extends'] === "text/plain"){
+						return true;
+					}
+					return false;
+				}
 				/**
 				 * Displays links to resources under the given DOM node.
 				 * @param [{name, path, lineNumber, directory, isExternalResource}] resources array of resources.  
@@ -263,14 +296,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/aut
 								// should open link in new tab, but for now, follow the behavior of navoutliner.js
 								loc = resource.path;
 							} else {
-								loc	= resource.directory ? 
-										require.toUrl("navigate/table.html") + "#" + resource.path :  //$NON-NLS-1$ //$NON-NLS-0$
-										require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+								if(resource.directory){
+									loc = require.toUrl("navigate/table.html") + "#" + resource.path;  //$NON-NLS-1$ //$NON-NLS-0$
+								} else if(!_isText(resource.name)){
+									loc = resource.path;
+								} else {
+									loc	= require.toUrl("edit/edit.html") + "#" + resource.path; //$NON-NLS-1$ //$NON-NLS-0$
+								}
 								if (loc === "#") { //$NON-NLS-0$
 									loc = "";
 								}
 							}
-		
 							resourceLink.setAttribute('href', loc); //$NON-NLS-0$
 							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,'')); //$NON-NLS-0$
 							dojo.style(resourceLink, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$

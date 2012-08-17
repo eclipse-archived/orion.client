@@ -88,13 +88,12 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-	function Service(serviceId, implementation, internalRegistry) {
+	function DeferredService(implementation) {
 		var method;
 
 		function _createServiceCall(methodName) {
 			return function() {
-				var d;
-				if (internalRegistry.isRegistered(serviceId)) {
+					var d;
 					try {
 						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
 						if (result && typeof result.then === "function") {
@@ -108,8 +107,28 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 							d.reject(e);
 					}
 					return d.promise;
-				}
-				throw new Error("Service was unregistered");
+			};
+		}
+
+		for (method in implementation) {
+			if (typeof implementation[method] === 'function') {
+				this[method] = _createServiceCall(method);
+			}
+		}
+	}
+	
+	function RegisteredService(serviceId, implementation, internalRegistry, registered) {
+		var method;
+
+		function _createServiceCall(methodName) {
+			return function() {
+				var args = arguments;
+				return registered.then(function() {
+					if (internalRegistry.isRegistered(serviceId)) {
+						return implementation[methodName].apply(implementation, Array.prototype.slice.call(args));
+					}
+					throw new Error("Service was unregistered");
+				});
 			};
 		}
 
@@ -214,9 +233,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 				names = [names];
 			}
 			
+			var deferredService = new DeferredService(implementation);
+			var registered = new Deferred();
+			var registeredService = new RegisteredService(serviceId, deferredService, this.internalRegistry, registered);
+			
 			var reference = new ServiceReference(serviceId, names, properties);
-			var service = new Service(serviceId, implementation, this.internalRegistry);
-
 			var namedReferences = this._namedReferences;
 			names.forEach(function(name) {
 				namedReferences[name] = namedReferences[name] || [];
@@ -225,9 +246,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			
 			this._entries.push({
 				reference: reference,
-				service: service
+				service: registeredService
 			});
-			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, service);
+	
+			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, deferredService).then(registered.resolve);
 			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
 		},
 

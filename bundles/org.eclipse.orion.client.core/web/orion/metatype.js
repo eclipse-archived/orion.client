@@ -61,8 +61,11 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {orion.metatype.ObjectClass} The object class, or <code>null</code> if no object class 
 		 * has been designated for the given PID.
 		 */
-		getObjectClass: function(pid) {
+		getObjectClassForPid: function(pid) {
 			return this.pidsMap[pid] || null;
+		},
+		getObjectClass: function(classId) {
+			return this.ocsMap[classId] || null;
 		}
 	};
 
@@ -113,6 +116,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		this.id = attrJson.id;
 		this.name = attrJson.name || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
+		this.defaultValue = attrJson.defaultValue || null;
 		if (!this.id) {
 			throw 'Missing "id" property: ' + JSON.stringify(attrJson); //$NON-NLS-0$
 		}
@@ -129,6 +133,9 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		},
 		getType: function() {
 			return this.type;
+		},
+		getDefaultValue: function() {
+			return this.defaultValue;
 		}
 	};
 
@@ -184,6 +191,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * <li><code>'number'</code></li>
 		 * <li><code>'string'</code></li>
 		 * </ul>
+		 */
+		/**
+		 * @name orion.metatype.PropertyType#getDefaultValue
+		 * @function
+		 * @description Returns the default value.
+		 * @returns {Object} The default value, or <code>null</code> if no default exists.
 		 */
 	return {
 		MetaTypeRegistry: MetaTypeRegistry

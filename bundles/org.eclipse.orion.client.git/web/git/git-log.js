@@ -14,7 +14,7 @@
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
         'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/git-commit-navigator', 'orion/git/gitCommands',
-	    'orion/links', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'], 
+	    'orion/links', 'dojo/hash'], 
 		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mAuth, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitCommitNavigator, mGitCommands, mLinks) {
 
@@ -209,8 +209,6 @@ var serviceRegistry;
 		mBootstrap.startup().then(function(core) {
 			serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
 			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -231,7 +229,7 @@ var serviceRegistry;
 			
 			mGlobalCommands.setPageCommandExclusions(["eclipse.git.remote", "eclipse.git.log"]); //$NON-NLS-1$ //$NON-NLS-0$
 			// global commands
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, navigator); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-gitlog", serviceRegistry, commandService, preferences, searcher, navigator); //$NON-NLS-0$
 			
 			//TODO this should be removed and contributed by a plug-in
 			mGitCommands.createFileCommands(serviceRegistry, commandService, navigator, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$

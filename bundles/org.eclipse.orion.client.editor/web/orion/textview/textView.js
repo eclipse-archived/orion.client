@@ -2912,6 +2912,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var h3 = spanRect3.bottom - spanRect3.top;
 			var h4 = spanRect4.bottom - spanRect4.top;
 			var fontStyle = 0;
+			var invalid = (lineRect.bottom - lineRect.top) <= 0;
 			var lineHeight = Math.max(1, lineRect.bottom - lineRect.top);
 			if (h2 > h1) {
 				fontStyle = 1;
@@ -2966,7 +2967,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				right: rect1.right - rect2.right,
 				bottom: rect1.bottom - rect2.bottom
 			};
-			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth};
+			return {lineHeight: lineHeight, largestFontStyle: style, lineTrim: trim, viewPadding: pad, scrollWidth: scrollWidth, invalid: invalid};
 		},
 		_clearSelection: function (direction) {
 			var selection = this._getSelection();
@@ -3506,6 +3507,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.overflow = "auto"; //$NON-NLS-0$
 			viewDiv.style.position = "absolute"; //$NON-NLS-0$
 			viewDiv.style.top = "0px"; //$NON-NLS-0$
+			viewDiv.style.bottom = "0px"; //$NON-NLS-0$
 			viewDiv.style.borderWidth = "0px"; //$NON-NLS-0$
 			viewDiv.style.margin = "0px"; //$NON-NLS-0$
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
@@ -3521,6 +3523,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.position = "absolute"; //$NON-NLS-0$
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
+			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			table = document.createElement("TABLE"); //$NON-NLS-0$
 			rightDiv.appendChild(table);
@@ -3684,7 +3687,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (index === cells.length) { return; }
 				row.cells[index]._ruler = undefined;
 				row.deleteCell(index);
-				if (cells.length !== 0) {
+				if (cells.length === 0) {
 					rulerParent.style.display = "none";
 				}
 			}
@@ -4505,7 +4508,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}}); //$NON-NLS-0$
 				handlers.push({target: this._clientDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
-				if (isFirefox && !isWindows) {
+				if (isFirefox && (!isWindows || isFirefox >= 15)) {
 					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
 					if (MutationObserver) {
 						this._mutationObserver = new MutationObserver(function(mutations) { self._handleDataModified(mutations); });
@@ -4694,7 +4697,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			modelChangingEvent.type = "Changing"; //$NON-NLS-0$
 		},
 		_queueUpdate: function() {
-			if (this._updateTimer) { return; }
+			if (this._updateTimer || this._ignoreQueueUpdate) { return; }
 			var self = this;
 			this._updateTimer = setTimeout(function() { 
 				self._updateTimer = null;
@@ -5429,6 +5432,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			var clientDiv = this._clientDiv;
 			if (!clientDiv) { return; }
+			if (this._metrics.invalid) {
+				this._ignoreQueueUpdate = true;
+				this._updateStyle();
+				this._ignoreQueueUpdate = false;
+			}
 			var model = this._model;
 			var scroll = this._getScroll();
 			var viewPad = this._getViewPadding();
@@ -5441,6 +5449,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var partialY = this._partialY = Math.round((firstLine - topIndex) * lineHeight);
 			var scrollWidth, scrollHeight = lineCount * lineHeight;
 			var leftWidth, leftRect, clientWidth, clientHeight;
+			var parent = this._parent;
+			var parentWidth = parent.clientWidth;
+			var parentHeight = parent.clientHeight;
 			if (hScrollOnly) {
 				clientWidth = this._getClientWidth();
 				clientHeight = this._getClientHeight();
@@ -5451,14 +5462,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
 			} else {
-				var parent = this._parent;
-				var rootDiv = this._rootDiv;
-				var parentWidth = parent.clientWidth;
-				var parentHeight = parent.clientHeight;
 
-				/* Update view height in order to have client height computed */
 				var viewDiv = this._viewDiv;
-				viewDiv.style.height = Math.max(0, (parentHeight - viewPad.top - viewPad.bottom)) + "px"; //$NON-NLS-0$
 				clientHeight = this._getClientHeight();
 				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
@@ -5559,10 +5564,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					rightWidth = rightRect.right - rightRect.left;
 				}
 				viewDiv.style.left = leftWidth + "px"; //$NON-NLS-0$
-				viewDiv.style.width = Math.max(0, parentWidth - leftWidth - rightWidth - viewPad.left - viewPad.right) + "px"; //$NON-NLS-0$
-				if (this._rightDiv) {
-					this._rightDiv.style.left = (parentWidth - rightWidth) + "px"; //$NON-NLS-0$
-				}
+				viewDiv.style.right = rightWidth + "px"; //$NON-NLS-0$
+
 				/* Need to set the height first in order for the width to consider the vertical scrollbar */
 				var scrollDiv = this._scrollDiv;
 				scrollDiv.style.height = scrollHeight + "px"; //$NON-NLS-0$
@@ -5635,8 +5638,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				clipDiv.style.left = clipLeft + "px"; //$NON-NLS-0$
 				clipDiv.style.top = clipTop + "px"; //$NON-NLS-0$
-				clipDiv.style.width = clipWidth + "px"; //$NON-NLS-0$
-				clipDiv.style.height = clipHeight + "px"; //$NON-NLS-0$
+				clipDiv.style.right = (parentWidth - clipWidth - clipLeft) + "px"; //$NON-NLS-0$
+				clipDiv.style.bottom = (parentHeight - clipHeight - clipTop) + "px"; //$NON-NLS-0$
 				clientDiv.style.left = clientLeft + "px"; //$NON-NLS-0$
 				clientDiv.style.top = clientTop + "px"; //$NON-NLS-0$
 				clientDiv.style.width = scrollWidth + "px"; //$NON-NLS-0$

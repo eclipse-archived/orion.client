@@ -13,17 +13,20 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 	/**
 	 * Generates a section
 	 * 
-	 * @param parent parent node
-	 * @param options.id [required] id of the section header
-	 * @param options.title [required] title of the section
-	 * @param options.preferenceService [optional] used to store the hidden/shown state of the section if specified
-	 * @param options.iconClass [optional] the class of the icon decorating section, no icon displayed if not provided
-	 * @param options.content [optional] content of the section in HTML. May be set later using setContent()
-	 * @param options.slideout {boolean} [optional] if true section will contain generated slideout
-	 * @param options.canHide {boolean} [optional] if true section may be hidden
-	 * @param options.hidden {boolean} [optional] if true section will be hidden at first display
-	 * @param options.useAuxStyle {boolean} [optional] if true the section will be styled for an auxiliary pane
-	 * @param options.onExpandCollapse {function} [optional] a function that will be called when the expanded/collapsed state changes
+	 * @name orion.widgets.Section
+	 * @class Generates a section
+	 * @param parent {DomNode} parent node
+	 * @param options.id {String} id of the section header
+	 * @param options.title {String} title (in HTML) of the section
+	 * @param [options.preferenceService] used to store the hidden/shown state of the section if specified
+	 * @param [options.iconClass] the class of the icon decorating section, no icon displayed if not provided
+	 * @param [options.getItemCount] {Function} function to return the count of items in the section. If not provided, no count is shown.
+	 * @param [options.content] {String} content of the section in HTML. May be set later using {@link #setContent()}
+	 * @param [options.slideout] {Boolean} if true section will contain generated slideout
+	 * @param [options.canHide] {Boolean} if true section may be hidden
+	 * @param [options.hidden] {Boolean} if true section will be hidden at first display
+	 * @param [options.useAuxStyle] {Boolean} if true the section will be styled for an auxiliary pane
+	 * @param [options.onExpandCollapse] {Function} a function that will be called when the expanded/collapsed state changes
 	 * @returns Section object
 	 */
 	function Section(parent, options) {
@@ -72,7 +75,12 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		}
 		
 		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
+
+		// Add item count
+		if (typeof options.getItemCount === "function") { //$NON-NLS-0$
+			var count = dojo.create("div", {"class": "layoutLeft sectionItemCount", innerHTML: options.getItemCount(this)}, this.domNode); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+		}
+
 		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 		
@@ -125,7 +133,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		this._loading = {};
 	}
 	
-	Section.prototype = {
+	Section.prototype = /** @lends orion.widgets.Section.prototype */ {
 			
 		/**
 		 * Changes the title of section
@@ -142,7 +150,14 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		setContent: function(content){
 			this._contentParent.innerHTML = content;
 		},
-		
+
+		/**
+		 * @returns The dom node that holds the section contents.
+		 */
+		getContentElement: function() {
+			return this._contentParent;
+		},
+
 		createProgressMonitor: function(){
 			return new ProgressMonitor(this);
 		},

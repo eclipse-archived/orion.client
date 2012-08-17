@@ -2,11 +2,11 @@
 
 @import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
-@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
+@import "../css/layout.css";
 
 @import "../css/ide.css";
 
-@import "../css/commands.css";
+@import "../css/images.css";
 
 .testSuccess {
 	line-height: 20px;	
@@ -16,4 +16,20 @@
 	line-height: 20px;	
 	font-weight: bold;
 	color: #FF0000;
+}
+
+.test-passed {
+	background-color: #11FF11;
+}
+
+.test-failed {
+	background-color: #FF1111;
+}
+
+#test-overview {
+	margin: 8px;
+}
+
+#test-tree {
+	margin: 8px;
 }

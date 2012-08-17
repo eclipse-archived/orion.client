@@ -2,95 +2,21 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<script src="../orion/plugin.js"></script>
-		<script src="UsersService.js"></script>
-		<script src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-		<!--Authentication -->
+		<script src="../requirejs/require.js"></script>
 		<script>
-		/*global window dojo eclipse orion confirm*/
-		window.onload = function () {
-			var usersService = new eclipse.UsersService();
-			var provider = new orion.PluginProvider();
+		/*global require*/
+		require({
+		  baseUrl: '..',
+		
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'
+		  }
+		});
 
-			usersService.info = function () {
-				return {
-					name: "User profile"
-				};
-			};
-
-
-			usersService.getDivContent = function () {
-				var content = {
-					"actions": [{
-						"id": "saveProfileButton",
-						"name": "Save Profile",
-						"tooltip": "Save Profile",
-						"action": "saveProfile"
-					}, {
-						"id": "resetProfileButton",
-						"name": "Reset",
-						"tooltip": "Reset Profile Information",
-						"action": "resetProfile"
-					}, {
-						"id": "deleteProfileButton",
-						"name": "Delete Profile",
-						"tooltip": "Delete Profile",
-						"action": "deleteProfile"
-					}]
-				};
-
-				return content;
-			};
-
-			usersService.initProfile = function (userURI, pluginsEventName, dataEventName) {
-				return this.getUserInfo(userURI, function (json) {
-					usersService.dispatchEvent(pluginsEventName, {
-						"plugins": json.Plugins
-					});
-					usersService.dispatchEvent(dataEventName, json);
-				});
-			};
-
-			usersService.fire = function (action, url, jsonData) {
-				switch (action) {
-				case "saveProfile":
-					return this.updateUserInfo(url, jsonData, dojo.hitch(this, function (url, jsonResp) {
-						this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
-						return (jsonResp && jsonResp.Message) ? jsonResp : {
-							Message: "Profile saved!",
-							status: 200
-						};
-					}, url));
-					break;
-				case "resetProfile":
-					return this.getUserInfo(url, "userInfoChanged");
-					break;
-				case "deleteProfile":
-					var login = jsonData.login ? jsonData.login : url;
-					if (confirm("Do you really want to delete user " + login + "?")) {
-						return this.deleteUser(url, "userDeleted");
-					}
-					break;
-				default:
-					return this.updateUserInfo(url, jsonData, dojo.hitch(this, function (url, jsonResp) {
-						this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
-						return (jsonResp && jsonResp.Message) ? jsonResp : {
-							Message: "Profile saved!",
-							status: 200
-						};
-					}, url));
-					break;
-				}
-			};
-			usersService.dispatchEvent = function(){
-				// this method will get wrapped and delegated to the plugin
-			};
-
-			provider.registerService("orion.core.user", usersService);
-			provider.connect();
-		};
+		require(['userservicePlugin.js']);
 		</script>
 	</head>
 	<body></body>
-
 </html>

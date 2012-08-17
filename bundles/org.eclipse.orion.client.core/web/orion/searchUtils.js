@@ -33,7 +33,7 @@ orion.searchUtils = orion.searchUtils || {};
  * @name orion.searchUtils#parseQueryStr
  * @function
  */
-orion.searchUtils.parseQueryStr = function(queryStr) {
+orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 	var indexOfQMark = queryStr.indexOf("?"); //$NON-NLS-0$
 	var indexOfQWqual = queryStr.indexOf("q="); //$NON-NLS-0$
 	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
@@ -46,7 +46,7 @@ orion.searchUtils.parseQueryStr = function(queryStr) {
 		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
 		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
 		if(qIndex >= 0){
-			orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj);
+			orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
 		} else if(rIndex >= 0){
 			queryObj.replace = splitQ[i].substring(rIndex+8);
 		} else {
@@ -113,7 +113,7 @@ orion.searchUtils.generateSearchQuery = function(options) {
 	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 };
 
-orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj) {
+orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj, fromStart) {
 	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
 	queryObj.location = "";
 	queryObj.searchStr = locAndSearchStr;
@@ -129,10 +129,10 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
-	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr);
+	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
 };
 
-orion.searchUtils.generateInFileQuery = function(searchStr) {
+orion.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
 	var inFileQuery = {};
 	inFileQuery.originalSearchStr = searchStr;
 	var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
@@ -148,7 +148,11 @@ orion.searchUtils.generateInFileQuery = function(searchStr) {
 		inFileQuery.wildCard = false;
 	} else {
 		inFileQuery.searchStr =searchStr.toLowerCase();
-		var regexp = mRegex.parse("/" + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
+		var prefix = "";
+		if(fromStart){
+			prefix = "^";
+		}
+		var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 		if (regexp) {
 			var pattern = regexp.pattern;
 			var flags = regexp.flags;

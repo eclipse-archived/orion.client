@@ -13,6 +13,8 @@
  
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
 
+	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+
 	/*
 	 * stateless helper function
 	 */
@@ -242,35 +244,76 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			this._serviceRegistration = this._registry.registerService("orion.page.command", this); //$NON-NLS-0$
 			this._defaultSelectionService = options.selection;
 			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){ //$NON-NLS-0$
-				evt = evt || window.event;
-				// bindings are ignored if we are in a text field or editor
-				if (evt.target.contentEditable === "true") { //$NON-NLS-0$
-					return;
-				}
-				var tagType = evt.target.nodeName.toLowerCase();
-				if (tagType === 'input') { //$NON-NLS-0$
-					var inputType = evt.target.type.toLowerCase();
-					// Any HTML5 input type that involves typing text should be ignored
-					switch (inputType) {
-						case "text": //$NON-NLS-0$
-						case "password": //$NON-NLS-0$
-						case "search": //$NON-NLS-0$
-						case "color": //$NON-NLS-0$
-						case "date": //$NON-NLS-0$
-						case "datetime": //$NON-NLS-0$
-						case "datetime-local": //$NON-NLS-0$
-						case "email": //$NON-NLS-0$
-						case "month": //$NON-NLS-0$
-						case "number": //$NON-NLS-0$
-						case "range": //$NON-NLS-0$
-						case "tel": //$NON-NLS-0$
-						case "time": //$NON-NLS-0$
-						case "url": //$NON-NLS-0$
-						case "week": //$NON-NLS-0$
-							return;
+				function isContentKey(e) {
+					// adapted from handleKey in http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/bundles/org.eclipse.swt/Eclipse%20SWT%20Custom%20Widgets/common/org/eclipse/swt/custom/StyledText.java
+					if (isMac) {
+						// COMMAND+ALT combinations produce characters on the mac, but COMMAND or COMMAND+SHIFT do not.
+						if (e.metaKey && !e.altKey) {
+							return false;
+						}
+					} else {
+						// CTRL or ALT combinations are not characters, however both of them together (CTRL+ALT)
+						// are the Alt Gr key on some keyboards.  See Eclipse bug 20953. If together, they might
+						// be a character.
+						if (e.ctrlKey && !e.altKey) {
+							return false;
+						}
+						if (e.altKey && !e.ctrlKey) {
+							return false;
+						}
 					}
-				} else if (tagType === 'textarea') { //$NON-NLS-0$
-					return;
+					if (e.char) {
+						return e.char.length > 0;  // empty string for non characters
+					} else if (e.charCode || e.keyCode) {
+						var keyCode= e.charCode || e.keyCode;
+						// anything below SPACE is not a character except for line delimiter keys, tab, and delete.
+						switch (keyCode) {
+							case 8:  // backspace
+							case 9:  // tab
+							case 13: // enter
+							case 46: // delete
+								return true;
+							default:
+								return (keyCode >= 32 && keyCode < 112) || // space key and above until function keys
+									keyCode > 123; // above function keys  
+						}
+					}
+					// If we can't identify as a character, assume it's not
+					return false;
+				}
+				
+				evt = evt || window.event;
+				if (isContentKey(evt)) {
+					// bindings that are text content keys are ignored if we are in a text field or editor
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=375058
+					if (evt.target.contentEditable === "true") { //$NON-NLS-0$
+						return;
+					}
+					var tagType = evt.target.nodeName.toLowerCase();
+					if (tagType === 'input') { //$NON-NLS-0$
+						var inputType = evt.target.type.toLowerCase();
+						// Any HTML5 input type that involves typing text should be ignored
+						switch (inputType) {
+							case "text": //$NON-NLS-0$
+							case "password": //$NON-NLS-0$
+							case "search": //$NON-NLS-0$
+							case "color": //$NON-NLS-0$
+							case "date": //$NON-NLS-0$
+							case "datetime": //$NON-NLS-0$
+							case "datetime-local": //$NON-NLS-0$
+							case "email": //$NON-NLS-0$
+							case "month": //$NON-NLS-0$
+							case "number": //$NON-NLS-0$
+							case "range": //$NON-NLS-0$
+							case "tel": //$NON-NLS-0$
+							case "time": //$NON-NLS-0$
+							case "url": //$NON-NLS-0$
+							case "week": //$NON-NLS-0$
+								return;
+						}
+					} else if (tagType === 'textarea') { //$NON-NLS-0$
+						return;
+					}
 				}
 				this._processKey(evt);
 			}));
@@ -756,8 +799,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 						child.destroy();
 					}
 				}
-				// TODO should the caller have to do this?
-				mUtil.forceLayout(parent);
 			}
 		},
 		
@@ -1410,8 +1451,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		}
 	};  // end Command prototype
 	Command.prototype.constructor = Command;
-
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+	
 	/**
 	 * Temporary copy of editor key binding.  Will be removed in the next released.
 	 * @param {String|Number} keyCode the key code.

@@ -69,6 +69,9 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id; //$NON-NLS-0$
 			this._tableStyle = options.tableStyle;
+			this._tableElement = options.tableElement || "table";
+			this._tableBodyElement = options.tableBodyElement || "tbody";
+			this._tableRowElement = options.tableRowElement || "tr";
 			
 			// Generate the table
 			this._root = this._treeModel.getRoot(function (root) {
@@ -86,13 +89,13 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		
 		_generate: function(children, indentLevel) {
 			dojo.empty(this._parent);
-			var table = document.createElement('table'); //$NON-NLS-0$
+			var table = document.createElement(this._tableElement); //$NON-NLS-0$
 			table.id = this._id;
 			if (this._tableStyle) {
 				dojo.addClass(table, this._tableStyle);
 			}
 			this._renderer.initTable(table, this);
-			var tbody = document.createElement('tbody'); //$NON-NLS-0$
+			var tbody = document.createElement(this._tableBodyElement); //$NON-NLS-0$
 			tbody.id = this._id+"tbody"; //$NON-NLS-0$
 			this._generateChildren(children, indentLevel, tbody, "last"); //$NON-NLS-0$
 			table.appendChild(tbody);
@@ -102,7 +105,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		
 		_generateChildren: function(children, indentLevel, referenceNode, position) {
 			for (var i in children) {
-				var row = document.createElement('tr'); //$NON-NLS-0$
+				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				row.id = this._treeModel.getId(children[i]);
 				row._depth = indentLevel;
 				// This is a perf problem and potential leak because we're bashing a dom node with
