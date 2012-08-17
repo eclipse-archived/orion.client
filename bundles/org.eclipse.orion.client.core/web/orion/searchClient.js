@@ -110,7 +110,13 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				this.setLocationByURL(noneRootMeta.Location);
 				locationName = noneRootMeta.Name;
 			} else if(meta){
-				locationName = this._fileService.fileServiceName(meta && meta.Location);
+				if(this._fileService.getService(meta.Location)["search"]){
+					//this.setLocationByURL("");
+					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
+				} else {
+					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
+				}
+				locationName = this._fileService.fileServiceName(meta.Location);
 			}
 			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
 			if(!locationName){
