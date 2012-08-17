@@ -30,6 +30,9 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 				return typeof value === 'object' ? JSON.parse(value) : undefined;
 			},
 			put: function(key, value) {
+				if (value === null) {
+					throw new Error('Preferences does not allow null values');
+				}
 				this.map[key] = JSON.stringify(value);
 			},
 			remove: function(key) {
