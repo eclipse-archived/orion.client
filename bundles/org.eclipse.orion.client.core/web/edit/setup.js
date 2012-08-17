@@ -414,7 +414,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				searchFloat.style.display = "block"; //$NON-NLS-0$
 				var query = searcher.createSearchQuery(searchPattern, null, "Name", true); //$NON-NLS-0$
 				var renderer = searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);
-				searcher.search(query, inputManager.getInput(), renderer);
+				searcher.search(query, inputManager.getInput(), renderer, true);
 			}, 0);
 			return true;
 		}, {name: messages["Search Files"]}); //$NON-NLS-0$
