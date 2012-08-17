@@ -640,7 +640,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewPad = this._getViewPadding();
 			var lineIndex = this._getYToLine(y - scroll.y + viewRect.top + viewPad.top);
 			x += -scroll.x + viewRect.left + viewPad.left;
-			var offset = this._getXToOffset(lineIndex, x);
+			y -= this._getLinePixel(lineIndex);
+			var offset = this._getXToOffset(lineIndex, x, y);
 			return offset;
 		},
 		/**
@@ -2411,7 +2412,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var touch = touches[0];
 				this._touchStartX = touch.clientX;
 				this._touchStartY = touch.clientY;
-				this._lastTouchOffset = this._getXToOffset(this._getYToLine(touch.clientY), touch.clientX);
+				var x = touch.clientX;
+				var lineIndex = this._getYToLine(touch.clientY);
+				var y = this.convert({y: touch.clientY}, "page", "document").y - this._getLinePixel(lineIndex);
+				this._lastTouchOffset = this._getXToOffset(lineIndex, x, y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
 			}
@@ -2644,7 +2648,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				x = this._getOffsetToX(offset) + scrollX;
 			}
 			if (lineIndex + 1 < model.getLineCount()) {
-				selection.extend(this._getXToOffset(lineIndex + 1, x - scrollX));
+				selection.extend(this._getXToOffset(lineIndex + 1, x - scrollX, 0));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
 			} else {
@@ -2668,7 +2672,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				x = this._getOffsetToX(offset) + scrollX;
 			}
 			if (lineIndex > 0) {
-				selection.extend(this._getXToOffset(lineIndex - 1, x - scrollX));
+				selection.extend(this._getXToOffset(lineIndex - 1, x - scrollX, this._getLineHeight(lineIndex - 1) - 1));
 				if (!args.select) { selection.collapse(); }
 				this._setSelection(selection, true, true);
 			} else {
@@ -2697,7 +2701,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (x === -1 || (args.select && isIE)) {
 					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x));
+				selection.extend(this._getXToOffset(caretLine + scrollLines, x - scroll.x, 0));
 				if (!args.select) { selection.collapse(); }
 				var verticalMaximum = lineCount * lineHeight;
 				var scrollOffset = scroll.y + scrollLines * lineHeight;
@@ -2724,7 +2728,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (x === -1 || (args.select && isIE)) {
 					x = this._getOffsetToX(caret) + scroll.x;
 				}
-				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x));
+				selection.extend(this._getXToOffset(caretLine - scrollLines, x - scroll.x, this._getLineHeight(caretLine - scrollLines) - 1));
 				if (!args.select) { selection.collapse(); }
 				var scrollOffset = Math.max(0, scroll.y - scrollLines * lineHeight);
 				this._setSelection(selection, true, true, scrollOffset - scroll.y);
@@ -2842,18 +2846,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_autoScroll: function () {
 			var selection = this._getSelection();
-			var line;
-			var x = this._autoScrollX;
+			var line, x = this._autoScrollX, y = this._autoScrollY;
 			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-0$
 				var scroll = this._autoScrollY / this._getLineHeight();
 				scroll = scroll < 0 ? Math.floor(scroll) : Math.ceil(scroll);
 				line = this._model.getLineAtOffset(selection.getCaret());
 				line = Math.max(0, Math.min(this._model.getLineCount() - 1, line + scroll));
 			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
-				line = this._getYToLine(this._autoScrollY);
+				line = this._getYToLine(y);
 				x += this._getOffsetToX(selection.getCaret());
 			}
-			selection.extend(this._getXToOffset(line, x));
+			selection.extend(this._getXToOffset(line, x, this.convert({y: y}, "page", "document").y - this._getLinePixel(line)));
 			this._setSelection(selection, true);
 		},
 		_autoScrollTimer: function () {
@@ -4274,7 +4277,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return child.lineIndex;
 		},
-		_getXToOffset: function (lineIndex, x) {
+		_getXToOffset: function (lineIndex, x, y) {
 			var model = this._model;
 			var lineStart = model.getLineStart(lineIndex);
 			var lineEnd = model.getLineEnd(lineIndex);
@@ -4288,6 +4291,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
 			}
 			var lineRect = this._getLineBoundingClientRect(child, true);
+			y += lineRect.top;
 			if (x < lineRect.left) { x = lineRect.left; }
 			if (x > lineRect.right) { x = lineRect.right; }
 			/*
@@ -4337,7 +4341,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				rects = _getClientRects(lineChild);
 				for (var j = 0; j < rects.length; j++) {
 					var rect = rects[j];
-					if (rect.left <= x && x < rect.right) {
+					if (rect.left <= x && x < rect.right && rect.top <= y && y < rect.bottom) {
 						var range, start, end;
 						if (isIE || isRangeRects) {
 							range = isRangeRects ? document.createRange() : document.body.createTextRange();
@@ -4361,7 +4365,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 									rect = rects[k];
 									var rangeLeft = rect.left * logicalXDPI / deviceXDPI - deltaX;
 									var rangeRight = rect.right * logicalXDPI / deviceXDPI - deltaX;
-									if (rangeLeft <= x && x < rangeRight) {
+									var rangeTop = rect.top * logicalXDPI / deviceXDPI;
+									var rangeBottom = rect.bottom * logicalXDPI / deviceXDPI;
+									if (rangeLeft <= x && x < rangeRight && rangeTop <= y && y < rangeBottom) {
 										found = true;
 										break;
 									}
@@ -4440,6 +4446,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			y -= viewRect.top + viewPad.top;
+			y += this._getScroll().y;
 			var lineHeight, lineIndex = 0;
 			if (this._lineHeight) {
 				//TODO [perf] calculate from top index
@@ -4450,7 +4457,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			} else {
 				lineHeight = this._getLineHeight();
-				lineIndex = Math.floor((y + this._getScroll().y) / lineHeight);
+				lineIndex = Math.floor(y / lineHeight);
 			}
 			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
@@ -5089,7 +5096,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = this._getSelection();
 			var lineIndex = this._getYToLine(y);
 			if (this._clickCount === 1) {
-				offset = this._getXToOffset(lineIndex, x);
+				offset = this._getXToOffset(lineIndex, x, this.convert({y: y}, "page", "document").y - this._getLinePixel(lineIndex));
 				if (drag && !extent) {
 					if (selection.start <= offset && offset < selection.end) {
 						this._dragOffset = offset;
@@ -5102,7 +5109,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var word = (this._clickCount & 1) === 0;
 				var start, end;
 				if (word) {
-					offset = this._getXToOffset(lineIndex, x);
+					offset = this._getXToOffset(lineIndex, x, this.convert({y: y}, "page", "document").y - this._getLinePixel(lineIndex));
 					if (this._doubleClickSelection) {
 						if (offset >= this._doubleClickSelection.start) {
 							start = this._doubleClickSelection.start;
@@ -5138,6 +5145,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setFullSelection: function(fullSelection, init) {
 			this._fullSelection = fullSelection;
+			if (this._wrapMode) {
+				this._fullSelection = false;
+			}
 			if (isWebkit) {
 				this._fullSelection = true;
 			}
@@ -5460,7 +5470,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					leftRect = this._leftDiv.getBoundingClientRect();
 					leftWidth = leftRect.right - leftRect.left;
 				}
-				scrollWidth = Math.max(this._maxLineWidth, clientWidth);
+				scrollWidth = clientWidth;
+				if (!this._wrapMode) {
+					scrollWidth = Math.max(this._maxLineWidth, scrollWidth);
+				}
 			} else {
 
 				var viewDiv = this._viewDiv;
@@ -5522,8 +5535,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					lineWidth = child.lineWidth;
 					if (lineWidth === undefined) {
 						rect = this._getLineBoundingClientRect(child);
-						this._lineHeight[child.lineIndex] = Math.ceil(rect.bottom - rect.top);
 						lineWidth = child.lineWidth = Math.ceil(rect.right - rect.left);
+						if (this._lineHeight) {
+							this._lineHeight[child.lineIndex] = Math.ceil(rect.bottom - rect.top);
+						}
 					}
 					if (lineWidth >= this._maxLineWidth) {
 						this._maxLineWidth = lineWidth;
