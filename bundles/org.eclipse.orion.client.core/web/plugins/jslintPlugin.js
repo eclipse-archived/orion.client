@@ -73,13 +73,19 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 					var optionsMap = {};
 					options.split(/,/).forEach(function(option) {
 						var match = /\s*(\w+)\s*:\s*(\w+)\s*/.exec(option); // name:value
-						var name = match[1], value = match[2];
-						optionsMap[name] = value;
+						if (match === null) {
+							console.log('JSLINT ignoring bad option: ' + option);
+						} else {
+							var name = match[1], value = match[2];
+							optionsMap[name] = value;
+						}
 					});
-					validationOptions = optionsMap;
-					console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
-						return k + ':' + optionsMap[k];
-					}).join(','));
+					if (Object.keys(optionsMap).length > 0) {
+						validationOptions = optionsMap;
+						console.log('JSLINT using custom options: ' + Object.keys(validationOptions).map(function(k) {
+							return k + ':' + optionsMap[k];
+						}).join(','));
+					}
 				}
 			}
 		},
