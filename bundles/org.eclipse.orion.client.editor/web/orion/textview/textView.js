@@ -4466,7 +4466,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				handlers.push({target: topNode, type: "dragleave", handler: function(e) { return self._handleDragLeave(e);}}); //$NON-NLS-0$
 				handlers.push({target: topNode, type: "drop", handler: function(e) { return self._handleDrop(e);}}); //$NON-NLS-0$
 				handlers.push({target: this._clientDiv, type: isFirefox ? "DOMMouseScroll" : "mousewheel", handler: function(e) { return self._handleMouseWheel(e); }}); //$NON-NLS-1$ //$NON-NLS-0$
-				if (isFirefox && !isWindows) {
+				if (isFirefox && (!isWindows || isFirefox >= 15)) {
 					var MutationObserver = window.MutationObserver || window.MozMutationObserver;
 					if (MutationObserver) {
 						this._mutationObserver = new MutationObserver(function(mutations) { self._handleDataModified(mutations); });
