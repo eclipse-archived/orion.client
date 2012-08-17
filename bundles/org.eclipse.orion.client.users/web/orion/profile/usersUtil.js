@@ -16,18 +16,18 @@ define(['i18n!profile/nls/messages', 'dojo'], function(messages, dojo) {
 
 
 function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item) {
+		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {
-			dojo.empty(toolbar);
+			commandService.destroy(toolbar);
 		} else {
 			throw messages["could not find toolbar "] + toolbarId;
 		}
-		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); //$NON-NLS-0$
 		if (selectionToolbarId) {
 			var selectionTools = dojo.byId(selectionToolbarId);
 			if (selectionTools) {
-				dojo.empty(selectionTools);
+				commandService.destroy(selectionTools);
 				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); //$NON-NLS-0$
 			}
 		}
@@ -39,7 +39,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
-					dojo.empty(selectionTools);
+					commandService.destroy(selectionTools);
 					commandService.renderCommands(selectionToolbarId, selectionTools, selections, explorer, "button"); //$NON-NLS-0$
 				}
 			});

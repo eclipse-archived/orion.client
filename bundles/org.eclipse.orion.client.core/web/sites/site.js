@@ -17,15 +17,13 @@
  */
 define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/util', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/PageUtil',
-	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/SiteEditor'], 
+	'dojo/hash','orion/widgets/SiteEditor'], 
 	function(messages, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mUtil, mSiteClient, mSiteCommands, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			document.body.style.visibility = "visible"; //$NON-NLS-0$
-			dojo.parser.parse();
 			
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
@@ -37,7 +35,7 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 			var siteClient = mSiteClient.forLocation(serviceRegistry, siteLocation);
 			var fileClient = siteClient._getFileClient();
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.generateBanner("orion-site", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
 			var updateTitle = function() {
 				var editor = dijit.byId("site-editor"); //$NON-NLS-0$

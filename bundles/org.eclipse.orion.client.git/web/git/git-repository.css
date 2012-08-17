@@ -2,14 +2,11 @@
 
 @import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
-@import
-	"../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
-
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 
-@import "../org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
+@import "../css/layout.css";
 
 @import "../settings/settings.css";
 
@@ -17,9 +14,7 @@
 
 @import "../css/UploaderFileList.css";
 
-@import "../css/breadcrumbs.css";
-
-@import "../css/commands.css";
+@import "../css/images.css";
 
 @import "../css/sections.css";
 

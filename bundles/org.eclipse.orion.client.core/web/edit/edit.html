@@ -42,30 +42,22 @@
 		</script>
     </head>
 
-    <body class="claro" style="height: 100%; visibility:hidden" spellcheck="false">
-	
-    <div id ="topContainer" class="orionPage" dojoType="orion.widgets.eWebBorderContainer" design="headline" gutters="false" persist="true" style="overflow: hidden; width: 100%; height: 100%;">
-		<div id="banner" class="banner" dojoType="dijit.layout.ContentPane" region="top">
-		</div>
-		<div id="leftPane" dojoType="dijit.layout.BorderContainer" region="leading" design="headline" style="width: 20%" liveSplitters="false" gutters="false" splitter="true">
-			<div id="outlineContainer" class="auxpane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-				<div id="outline" class="auxPadding"></div>
+    <body id="orion-editor" style="height: 100%;" spellcheck="false" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
+				<div id="outline" class="sidePanelMargins"></div>
 			</div>
-		</div>
-		<div id="rightPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" liveSplitters="false" splitter="false" gutters="false" role="main">
-			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
-			</div>
-			<div id="mainPane" class="mainpane" dojoType="dijit.layout.ContentPane" splitter="false"region="center" style="overflow:hidden">
-				<div id="searchFloat" class="searchFloat">
-				</div>
-				<div id="editor" style="width: 100%; height: 100%;">
+			<div class="split splitLayout"></div>
+			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<div class="fixedToolbarHolder">
+					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+					<div id="searchFloat" class="searchFloat"></div>
+					<div id="editor" class="toolbarTarget"></div>
 				</div>
 			</div>
 		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
+		<div class="footer-fixed-bottom footer" id="footer">
 		</div>
-	</div>
-	
 	<div id="contentassist" class="contentassist" role="listbox" tabindex="-1"></div>
 </body>
 </html>

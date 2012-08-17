@@ -44,46 +44,22 @@
 		</script>
    </head>
 
-    <body style="height: 100%;" class="claro">
-    
-	<div id="eclipse.navigate-table" class="orionPage" dojoType="orion.widgets.eWebBorderContainer" design="headline" gutters="false" persist="true" liveSplitters="true">
-		<div class="banner" id="banner" dojoType="dijit.layout.ContentPane" region="top">
-			<header role="banner">
-				<div id="staticBanner" class="layoutBlock topRowBanner">
-					<a id="home" class="layoutLeft logo" href="../navigate/table.html" aria-label="Orion Home"></a>
-					<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>
-					<div class="layoutRight">
-						<div id="globalActions" class="spacingLeft layoutLeft"></div>
-						<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>
-						<input type="text" id="search" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">
-						<div id="userMenu" class="spacingLeft layoutLeft"></div>
-					</div>
-				</div>
-				<div id="titleArea" class="layoutBlock titleArea">
-					<div class="layoutLeft pageTitle"></div>
-					<div class="clear" style="padding-bottom:5px;display:inline;"><span id="location" class="currentLocation">Loading...</span><span id="dirty" class="currentLocation"></span></div>
-					<div class="layoutRight pageNav">
-						<span id="pageFavorite" tabindex="0" style="visibility: hidden;" role="button" aria-label="Add this page to the favorites list" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>
-					</div>
-				</div>
-			</header>
-		</div>
-		<div id="leftPane" dojoType="dijit.layout.BorderContainer" region="leading" design="headline" style="height: 100%; width: 40%;" liveSplitters="false" gutters="false" splitter="true">
-			<div id="navOutline" class="auxpane" dojoType="dijit.layout.ContentPane" region="center" splitter="false">
-				<div class = "auxPadding" id="favorites"></div>
-				<div class = "auxPadding" id="gettingStarted"></div>
+    <body id="orion-navigate" style="height: 100%;" class="claro orionPage">
+		<div class="content-fixedHeight">
+			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
+				<div class="sidePanelMargins" id="favorites"></div>
+				<div class="sidePanelMargins" id="gettingStarted"></div>
+			</div>
+			<div class="split splitLayout"></div>
+			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<div class="fixedToolbarHolder">
+					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+					<div class="toolbarTarget" tabindex="0"  id="explorer-tree">
+						<p>Welcome to Orion.  To get started, try creating a project using one of the links on the left.</p>
+					</div>				
 			</div>
 		</div>
-		<div id="rightPane" dojoType="dijit.layout.BorderContainer" region="center" design="headline" style="height: 100%;" liveSplitters="false" splitter="false" gutters="false" role="main">
-			<div class="mainToolbar" id="pageToolbar" dojoType="dijit.layout.ContentPane" splitter="false" region="top">
-			</div>
-			<div class="mainpane" tabindex="0"  id="explorer-tree" dojoType="dijit.layout.ContentPane" splitter="false" region="center">
-				<p>Welcome to Orion.  To get started, try creating a project using one of the links on the left.</p>
-			</div>
+		<div class="footer-fixed-bottom footer" id="footer"></div>
 		</div>
-		<div class="footer" id="footer" dojoType="dijit.layout.ContentPane" region="bottom" splitter="false">
-		</div>
-	</div>
-	
-</body>
+	</body>
 </html>

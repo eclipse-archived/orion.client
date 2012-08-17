@@ -23,7 +23,7 @@ define({
 	"Show in eclipse.org": "Show in eclipse.org",
 	"Show this repository at eclipse.org": "Show this repository at eclipse.org",
 	"Show in GitHub": "Show in GitHub",
-	"Show this repository at GitHub": "Show this repository at GitHub",
+	"Show this repository in GitHub": "Show this repository in GitHub",
 	"Commit Details": "Commit Details",
 	"No Commits": "No Commits",
 	"commit: 0": "commit: ${0}",
@@ -345,5 +345,18 @@ define({
 	"Change..." : "Change...",
 	"Merge Squash": "Merge Squash",
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
-	"Local Branch Name:" : "Local Branch Name:"
+	"Local Branch Name:" : "Local Branch Name:",
+	"Paste link in email or IM" : "Paste link in email or IM",
+	"Show Commit in GitHub" : "Show Commit in GitHub",
+	"Show Repository in GitHub" : "Show Repository in GitHub",
+	"Show this commit in GitHub": "Show this commit in GitHub",
+	"Show Commit in eclipse.org": "Show Commit in eclipse.org",
+	"Show this commit in eclipse.org" : "Show this commit in eclipse.org",
+	"Show Repository in eclipse.org":"Show Repository in eclipse.org",
+	"Show this repository in eclipse.org":"Show this repository in eclipse.org",
+	"Ask for review" : "Ask for review",
+	"Ask for review tooltip" : "Send email with request for commit review",
+	"Reviewer name" : "Reviewer name",
+	"Contribution Review Request" : "Contribution Review Request",
+	"or sent the link to the reviewer" : "or sent the link to the reviewer"
 });

@@ -18,10 +18,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 	dojo.declare("orion.widgets.settings.LabeledTextfield",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
-		templateString: '<div>' +  //$NON-NLS-0$
+		templateString: '<div class="setting-property">' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
-								'<span data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
-								'<input type="text" name="myname" data-dojo-attach-point="myfield" data-dojo-attach-event="onchange:change"/>' + //$NON-NLS-0$
+								'<span class="setting-label" data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<input class="setting-control" type="text" name="myname" data-dojo-attach-point="myfield" data-dojo-attach-event="onchange:change"/>' + //$NON-NLS-0$
 							'</label>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
 						
@@ -43,6 +43,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
         },
         
         postCreate: function(){
+			this.inherited(arguments);
 
             this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
             

@@ -32,7 +32,7 @@ define({
 	" matches": " matches",
 	"Replaced ": "Replaced ",
 	"Nothing replaced": "Nothing replaced",
-	"Search ": "Search ",
+	"Search ${0}": "Search ${0}",
 	"Type a keyword or wild card to search in ": "Type a keyword or wild card to search in ",
 	"Search failed.": "Search failed.",
 	"No matches found for ": "No matches found for ",

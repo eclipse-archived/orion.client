@@ -1,3 +1,7 @@
+/*
+	Items that should appear on top of other orion visual components should have a z-index of 100 or greater.
+*/
+
 @import "./theme.css";
 
 html {
@@ -32,51 +36,6 @@ h2 {
 }
 
 
-
-.layoutBlock {
-	clear: both;
-	margin: 0;
-	padding-top: 2px;
-	padding-bottom: 2px;
-	padding-left: 8px;
-	padding-right: 8px;
-	vertical-align: baseline;
-}
-
-/* These classes are used pervasively in the UI to achieve left/right floats.  Please do not add extra styling to
-   to these classes, but rather add additional classes as needed for non-float needs.
-*/
-.layoutLeft {
-	float: left;
-	margin: 0;
-}
-
-.layoutRight {
-	float: right;
-	margin: 0;
-}
-
-.spacingLeft {
-	margin-left: 5px;
-}
-
-.spacingRight {
-	margin-right: 5px;
-}
-
-.clear {
-	clear: both;
-}
-
-.footerBlock {
-	float: left;
-	margin: 4px;
-}
-
-.footerRightBlock {
-	float: right;
-	margin: 4px;
-}
 
 .navlink {
 	display: inline-block;
@@ -293,22 +252,10 @@ h2 {
 	color: black;
 }
 
-
 .auxPadding {
 	padding-left: 8px;
 	padding-top: 2px;
     padding-bottom: 8px;
-}
-
-.claro .dijitBorderContainer {
-	border: 0;
-	padding: 0;
-}
-
-.claro .dijitContentPane {
-	padding: 0;
-	margin: 0;
-	outline: 0;
 }
 
 .claro .dijitDialogTitleBar {
@@ -318,46 +265,7 @@ h2 {
     outline: 0 none;
     padding: 5px 6px 3px;
 }
-
-/* splitters */
-
-.claro .dijitSplitterV, .claro .dijitGutterV {
-  background: #e3e3e3;
-  width: 3px;
-  border: 0;
-  padding: 0;
-  margin: 0;
-}
-
-.claro .dijitSplitterVActive {
-  font-size: 1px;
-  background-color: #cccccc;
-}
-
-.claro .dijitSplitterV .dijitSplitterThumb {	
-  background-color: #bbbbbb;
-  height: 16px;
-  left: 0px;
-  width: 3px;
-  margin: 0;
-  padding: 0;
-  cursor: pointer;
-}
-
-.claro .dijitSplitterVHover .dijitSplitterThumb {
-  background: #a0a0a0;
-}
  
-.mainpane {
-    background: #FFFFFF;
-	overflow: auto;
-}
-
-.mainPadding {
-	padding-left: 4px;
-	padding-top: 4px;
-}
-
 .help {
 	font-weight: bold;
 	font-size: 1.2em;
@@ -414,6 +322,18 @@ h2 {
 	width: 16px; height: 16px;
 }
 
+.progressPane_running_dialog {
+	vertical-align: middle;
+	background: url(../images/progress_running.gif) no-repeat center;  
+	width: 16px; height: 16px;
+}
+
+.progressPane_finished_dialog {
+	vertical-align: middle;
+	background: url(../images/none.png) no-repeat center;  
+	width: 16px; height: 16px;
+}
+
 .progressPane_error {
 	margin-top: 4px;
 	background-image: url(../images/core_sprites.png);
@@ -433,50 +353,17 @@ h2 {
 	background: inherit;
 }
 
-.toolbar {
-	vertical-align: middle;
-	min-height: 32px;
-	width: 100%;
-	color: #222;
-	border-bottom: 1px solid whitesmoke;
-}
-
-.auxToolbar {
-    background: #f8f8f8;
- 	min-height: 32px;
-	width: 100%;
-	color: #222222;
-	border-bottom: 1px solid #e4e4e4;
-}
-
-.mainToolbar {
- 	min-height: 30px;
- 	background: #ffffff;
-	border-bottom: 1px solid #ebebeb;
-}
-
-.pageTitle {
-	font-size: 13px;
-	vertical-align: top;
-	margin-top:4px;
-	font-weight:bold;
-	color: #666666;
-}
-
 .footer {
 	text-align: left;
 	width: 100%;
 	border: 0;
 	padding: 0;
-	min-height: 2.5em; 
 	border-top: 1px solid #dbdbdb
 }
 
 .toolbarLabel {
 	padding-left: 8px;
 }
-
-
 
 .slideContainer {
 	height: auto;
@@ -489,6 +376,7 @@ h2 {
 	vertical-align:middle;
 	font-size:11px;
 	font-weight:bold;
+	z-index: 50;
 }
 
 .slideParameters {
@@ -500,18 +388,6 @@ h2 {
 	display: block;
 }
 
-.slide {
-	text-align: left;
-	vertical-align: middle;
-	clear: both;
-	opacity: 0;
-	height: 0;
- 	transition: opacity .5s ease-out;
-	-o-transition: opacity .5s ease-out;
-	-moz-transition: opacity .5s ease-out;
-	-webkit-transition: opacity .5s ease-out;   
-}
-
 .activeCommand {
 	background-color: #e3e3e3;
 	border: 1px solid #9a9a9a;
@@ -519,11 +395,6 @@ h2 {
 
 /* marker used by parameter collectors to identify commands */
 .commandMarker {
-}
-
-.slideActive {
-	opacity: 1;
-	height: auto;
 }
 
 .bannerMenu {
@@ -552,21 +423,10 @@ h2 {
 	border: 1px solid #808080;
 }
 
-
-
 .toolbarButton {
 	border: 0;
 	padding: 0;
 	height: 20px;
-}
-
-.toolbarTest {
-/*	background: #fff url("../images/titleBarTest.png")  repeat-x top left; */
-	border:1px solid #bfbfbf;
-	cursor: default;
-	font-size: 0.9em;
-	font-weight: bold;
-	color: #6d6d6d;
 }
 
 .searchFloat {
@@ -579,23 +439,23 @@ h2 {
 	max-width: 650px;
 	border: 1px solid #bfbfbf;
 	padding: 4px;
-	z-index: 10;
+	z-index: 100;
 }
 
 .keyAssistFloat {
+	color: white;
 	display: none;
-	background: #404040;
-	color: #FFD900;
+	background: #333;
 	position: fixed;
 	left: 44px;
 	top: 60px;
 	padding: 4px;
 	float: left;
-	z-index:10;
+	z-index:100;
 }
 
 .keyAssistFloat h2 {
-	color: #FFD900;
+	color: white;
 }
 
 #tree {
@@ -688,7 +548,7 @@ h2 {
 	top: 100px;
 	left: 100px;
 	border: 2px inset #DDD;
-	z-index:10;
+	z-index:100;
 	cursor: default;
 	overflow: auto;
 	height: 150px;
@@ -768,22 +628,6 @@ h2 {
 	padding-bottom: 2px;
 	list-style-type: none;
 	white-space: nowrap; /*wrapping makes indented list hard to read*/
-}
-
-.test-passed {
-	background-color: #11FF11;
-}
-
-.test-failed {
-	background-color: #FF1111;
-}
-
-#test-overview {
-	margin: 8px;
-}
-
-#test-tree {
-	margin: 8px;
 }
 
 .uploadContainer{

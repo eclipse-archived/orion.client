@@ -176,8 +176,8 @@ orion.TextSearcher = (function() {
 		},
 		
 		_handleKeyDown: function(evt, fromSearch){
-			var ctrlKey = this.isMac ? evt.metaKey : evt.ctrlKey;
-			if(ctrlKey &&  evt.keyCode === 70/*"f"*/ ) {
+			var ctrlKeyOnly = (this.isMac ? evt.metaKey : evt.ctrlKey) && !evt.altKey && !evt.shiftKey;
+			if(ctrlKeyOnly && evt.keyCode === 70/*"f"*/ ) {
 				this._keyUpHandled = fromSearch;
 				if( evt.stopPropagation ) { 
 					evt.stopPropagation(); 
@@ -185,7 +185,7 @@ orion.TextSearcher = (function() {
 				evt.cancelBubble = true;
 				return false;
 			}
-			if((ctrlKey &&  evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
+			if((ctrlKeyOnly && evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
 				if( evt.stopPropagation ) { 
 					evt.stopPropagation(); 
 				}
@@ -194,7 +194,7 @@ orion.TextSearcher = (function() {
 				this._keyUpHandled = fromSearch;
 				return false;
 			}
-			if( ctrlKey &&  evt.keyCode === 82 /*"r"*/){
+			if( ctrlKeyOnly &&  evt.keyCode === 82 /*"r"*/){
 				if( evt.stopPropagation ) { 
 					evt.stopPropagation(); 
 				}

@@ -14,7 +14,11 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands',
+		'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'orion/settings/ui/PluginSettings',
+		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
+		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
+		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -26,26 +30,33 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.itemToIndexMap = {};
 			this.toolbar = dojo.byId( this.pageActions );
 			this.manageDefaultData(this.initialSettings);
-			this.drawUserInterface(this.initialSettings);
-			this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
+			// hack/workaround.  We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
+			// to build the UI until there are settings to be found there.
+			window.setTimeout(dojo.hitch(this, function() {
+				this.drawUserInterface(this.initialSettings);
+				this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
+			}), 100);
 			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: 'Settings'});
 		},
 		
 		processHash: function() {
 			var pageParams = PageUtil.matchResourceParameters();
-			var category = pageParams.category || "userSettings"; //$NON-NLS-0$
-			this.showById(category);
 			
-			// The widgets might render commands, and this happens asynchronously.  Process the URL in a timeout.
-			window.setTimeout(dojo.hitch(this, function() {this.commandService.processURL(window.location.href);}), 0);
+			var container = this;
 			
-			
-//			var pageToolBar = dojo.byId( 'pageToolbar' );
-//			
-//			dojo.removeNode( pageToolBar.parentNode.removeChild(pageToolBar) );
-		},
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
 
+				var selection = prefs.get( 'selection' );
+				
+				var category = pageParams.category || selection; //$NON-NLS-0$
+				container.showById(category);
+				
+			} );
+			
+			window.setTimeout(dojo.hitch(this, function() {this.commandService.processURL(window.location.href);}), 0);
+		},
+		
 		displaySettings: function(id) {
 			var settingsIndex = this.itemToIndexMap[id];
 
@@ -70,21 +81,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				var section = dojo.create("section", { //$NON-NLS-0$
 					id: subcategory[sub].label, 
 					role: "region",  //$NON-NLS-0$
-					"aria-labelledby": subcategory[sub].label.replace(/ /g,"") + "-header" //$NON-NLS-1$ //$NON-NLS-0$
+					"aria-labelledby": subcategory[sub].label.replace(/ /g,"") + "-header", //$NON-NLS-1$ //$NON-NLS-0$
+					className: 'setting-row'
 				}, this.table);
 
 				dojo.create("h3", { //$NON-NLS-0$
 					id: subcategory[sub].label.replace(/ /g,"") + "-header", //$NON-NLS-0$
+					className: 'setting-header',
 					innerHTML: subcategory[sub].ui
 				}, section);
 
-				var outer = dojo.create("div", null, section); //$NON-NLS-0$
+				var outer = dojo.create("div", {className: 'setting-content'}, section); //$NON-NLS-0$
 
 				for (var item = 0; item < subcategory[sub].items.length; item++) {
 
-					var inner = dojo.create("div", null, outer); //$NON-NLS-0$
+					var inner = dojo.create("div", {className: 'setting-property'}, outer); //$NON-NLS-0$
 					var label = dojo.create("label", null, inner); //$NON-NLS-0$
 					dojo.create("span", { //$NON-NLS-0$
+						className: 'setting-label',
 						innerHTML: subcategory[sub].items[item].label + ":" //$NON-NLS-0$
 					}, label);
 					this.inputBuilder.processInputType(category, subcategory[sub].label, subcategory[sub].items[item], label, subcategory[sub].ui);
@@ -136,26 +150,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.addCategory(item, this.initialSettings.length);
 		},
-		
+
+		addPluginSettings: function() {
+			var item = {
+				id: "pluginSettings", //$NON-NLS-0$
+				innerHTML: messages.PluginSettings,
+				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
+				role: "tab", //$NON-NLS-0$
+				tabindex: -1,
+				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
+				onclick: this.showPluginSettings.bind(this, "pluginSettings") //$NON-NLS-0$
+			};
+			this.addCategory(item, this.initialSettings.length);
+		},
 		
 		showThemeBuilder: function(id){
 		
-
-			if (this.selectedCategory) {
-				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
-				dojo.attr(this.selectedCategory, "aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.selectedCategory.tabIndex = -1;
-			}
-
-			if (id) {
-				this.selectedCategory = dojo.byId(id);
-			}
-			
-			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
-			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
-			this.selectedCategory.tabIndex = 0;
-			this.selectedCategory.focus();
+			this.selectCategory(id);
 			
 			this.updateToolbar(id);
 		
@@ -174,25 +185,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		showUserSettings: function(id){
 		
-			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
-				var navigate = prefs.get(messages["JavaScript Editor"]);					
-			} );
+//			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
+//				var navigate = prefs.get(messages["JavaScript Editor"]);
+//			} );
 
-			if (this.selectedCategory) {
-				dojo.removeClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
-				dojo.attr(this.selectedCategory, "aria-selected", "false"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.selectedCategory.tabIndex = -1;
-			}
-
-			if (id) {
-				this.selectedCategory = dojo.byId(id);
-			}
-
-			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
-			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
-			this.selectedCategory.tabIndex = 0;
-			this.selectedCategory.focus();
+			this.selectCategory(id);
 
 			dojo.empty(this.table);
 
@@ -238,6 +235,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.pluginWidget.startup();
 		},
 
+	initPluginSettings: function(id) {
+		dojo.empty(this.table);
+
+//		if (this.pluginSettingsWidget) {
+//			this.pluginSettingsWidget.destroy();
+//		}
+
+		this.pluginSettingsWidget = new SettingsList({
+			parent: this.table,
+			serviceRegistry: this.registry,
+			settingsRegistry: this.settingsRegistry
+		});
+		// starts itself. will also remove previous version of itself
+	},
 
 /*	showPlugins - iterates over the plugin array, reads
 	meta-data and creates a dom entry for each plugin.
@@ -247,9 +258,27 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	pattern. */
 
 		showPlugins: function(id) {
+
+//			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
+//				var navigate = prefs.get(messages["JavaScript Editor"]);
+//			} );
+
+			this.selectCategory(id);
+
+			this.initPlugins(id);
+		},
+
+		// Creates the RHS content of plugins settings and stuff
+		showPluginSettings: function(id) {
+			this.selectCategory(id);
+
+			this.initPluginSettings(id);
+		},
 		
-			var td = this.preferences.getPreferences('/settings', 2).then( function(prefs){		 //$NON-NLS-0$
-				var navigate = prefs.get(messages["JavaScript Editor"]);					
+		selectCategory: function(id) {
+
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+				prefs.put( 'selection', id );
 			} );
 
 			if (this.selectedCategory) {
@@ -267,32 +296,39 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
-
-			this.initPlugins(id);
+			
+			window.location = '#,category=' + id;			
 		},
 
 		showById: function(id) {
-			this.updateToolbar(id);
-			
-			switch(id){
-			
-				case "plugins": //$NON-NLS-0$
-					this.showPlugins(id);
-					break;
+		
 				
-				case "userSettings": //$NON-NLS-0$
-					this.showUserSettings(id);
-					break;
-					
-				case "themeBuilder":
-					this.showThemeBuilder(id);
-					break;
-					
-				default:
-					this.selectCategory(id);
-					break;
 			
-			}
+			this.updateToolbar(id);
+				
+				switch(id){
+				
+					case "plugins": //$NON-NLS-0$
+						this.showPlugins(id);
+						break;
+					
+					case "userSettings": //$NON-NLS-0$
+						this.showUserSettings(id);
+						break;
+						
+					case "themeBuilder":
+						this.showThemeBuilder(id);
+						break;
+						
+					case "pluginSettings":
+						this.showPluginSettings(id);
+						break;
+	
+					default:
+						this.selectCategory(id);
+						break;
+				
+				}	
 		},
 
 		drawUserInterface: function(settings) {
@@ -303,6 +339,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.addUserSettings();
 			this.addThemeBuilder();
 			this.addPlugins();
+			this.addPluginSettings();
 			this.processHash();
 
 			/* Adjusting width of mainNode - the css class is shared 
@@ -327,7 +364,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 						var cat = prefs.get( category );
 						
-						if( cat === undefined ){
+						if (!cat){
 						
 							var subcategories = [];
 		
@@ -354,6 +391,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							prefs.put( category, JSON.stringify(subcategories) );	
 						}
 					}
+			} );
+			
+			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
+				
+				var selection = prefs.get( 'selection' );
+				
+				if (!selection) {
+					prefs.put( 'selection', 'userSettings' );
+				}
 			} );
 		},
 
@@ -500,7 +546,103 @@ initialSettings: [
 					}],
 					"setting": messages['Bold'] //$NON-NLS-0$
 				}]
-			}]
+			},
+			{
+				"ui": 'Annotations Ruler',  //$NON-NLS-0$
+				"label":'Annotations Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "lightgrey" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Folding Ruler',  //$NON-NLS-0$
+				"label":'Folding Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#000000" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Overview Ruler',  //$NON-NLS-0$
+				"label":'Overview Ruler', //$NON-NLS-0$
+				"items": [{
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			},
+			{
+				"ui": 'Line Number Ruler',  //$NON-NLS-0$
+				"label":'Line Number Ruler', //$NON-NLS-0$
+				"items": [
+				
+				/* Don't think this is necessary {
+					"ui": messages["Color"], //$NON-NLS-0$
+					"label": messages['Color'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": messages["Background"], //$NON-NLS-0$
+					"label": messages['Background'], //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},*/
+				{
+					"ui": 'Even Rows Color', //$NON-NLS-0$
+					"label": 'Even Rows Color', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Even Rows Background', //$NON-NLS-0$
+					"label": 'Even Rows Background', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Odd Rows Color', //$NON-NLS-0$
+					"label": 'Odd Rows Color', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				{
+					"ui": 'Odd Rows Background', //$NON-NLS-0$
+					"label":'Odd Rows Background', //$NON-NLS-0$
+					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
+					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				]
+			}
+			
+			]
 		}]
 
 	});

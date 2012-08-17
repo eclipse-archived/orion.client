@@ -14,8 +14,7 @@
 
 define(['require', 'dojo', 'dijit', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
 		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable', "orion/URITemplate", 
-		"orion/PageUtil",
-        'dojo/hash', 'dojo/parser','dijit/form/Button'],
+		'orion/PageUtil', 'dojo/hash', 'dijit/form/Button'],
         function(require, dojo, dijit, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
             mTreetable, URITemplate, mPageUtil) {
 	
@@ -130,14 +129,12 @@ dojo.addOnLoad(function() {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		document.body.style.visibility = "visible";
-		dojo.parser.parse();
 		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 		var fileClient = new mFileClient.FileClient(serviceRegistry);
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		// global banner
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher);
+		mGlobalCommands.generateBanner("orion-unittest", serviceRegistry, commandService, preferences, searcher);
 		
 		function runTests(testSelectionURI) {
 			// testSelectionURI specifies a test file and optionally a specific test

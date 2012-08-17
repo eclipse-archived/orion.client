@@ -3,10 +3,10 @@
 @import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
+@import "../css/layout.css";
 @import "../css/ide.css";
 @import "../css/sections.css";
-@import "../css/breadcrumbs.css";
-@import "../css/commands.css";
+@import "../css/images.css";
 @import "./services.css";
 
 html,body {
@@ -179,7 +179,7 @@ ul,menu,dir {
 	border-bottom: 1px dotted #BFBFBF;
 }
 
-.settings section {
+.setting-row {
 	color: #222;
 	border-bottom: 1px solid whiteSmoke;
 	display: -webkit-box;
@@ -190,7 +190,7 @@ ul,menu,dir {
 	margin-right: 16px;
 }
 
-.settings section>h3 {
+.setting-header {
 	margin-top:0px;
 	vertical-align: middle;
 	width: 170px;
@@ -198,16 +198,16 @@ ul,menu,dir {
 	padding-left:10px;
 }
 
-.settings section>div {
+.setting-content {
 	margin: 0;
 	vertical-align: middle;
 }
 
-.settings section>div>div {
+.setting-property {
 	margin: 10px 0;
 }
 
-.settings section>div>div>label>span {
+.setting-label {
 	min-width: 145px;
 	display: inline-block;
 }
@@ -375,19 +375,6 @@ list>*,grid>* {
 	position: relative;
 }
 
-.pluginCount {
-	padding: 2px;
-	border-radius: 4px;
-	border: 1px solid #CCC;
-	background: white;
-	float: left;
-	color: #AAA;
-	margin-top: 4px;
-	font-size: 8px;
-	font-weight: normal;
-	margin-left: 5px;
-}
-
 .serviceCount {
 	padding-left: 3px;
 	padding-right: 3px;
@@ -424,7 +411,7 @@ list>*,grid>* {
 	/* margin-left: 63px; */
 }
 
-input, textarea, select {
+.setting-control {
 	display: inline-block;
 	width: 200px;
 	padding: 4px;

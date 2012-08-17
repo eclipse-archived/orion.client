@@ -154,7 +154,7 @@ orion.TwoWayCompareUIFactory = (function() {
 			topWidget.addChild(leftB);
 			topWidget.addChild(rightB);
 			topWidget.startup();
-			mUtil.forceLayout(this._parentDivID);
+			topWidget.layout();
 		},
 		
 		destroy: function(){

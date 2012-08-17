@@ -46,7 +46,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/es5shim'], function(req
 				}
 			}
 			this._dirty = [];
-			return new Deferred().all(flushes);
+			return Deferred.all(flushes);
 		},
 		
 		_scheduleFlush: function(store) {
@@ -166,7 +166,7 @@ define(['require', 'orion/Deferred', 'orion/xhr', 'orion/es5shim'], function(req
 					};
 				}(i)));
 			}
-			return new Deferred().all(storeList).then(function(){
+			return Deferred.all(storeList).then(function(){
 				that._cached = null;
 				that._getCached();
 			});

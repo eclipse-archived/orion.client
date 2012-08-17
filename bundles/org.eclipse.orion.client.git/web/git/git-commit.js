@@ -14,8 +14,7 @@ var eclipse;
 /*browser:true*/
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-	'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links', 'orion/contentTypes',
-	'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/eWebBorderContainer'],
+	'orion/git/gitCommitExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/links', 'orion/contentTypes', 'dojo/hash'],
 	function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
 		mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
 		mGitCommitExplorer, mGitCommands, mGitClient, mLinks, mContentTypes) {
@@ -23,8 +22,6 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		document.body.style.visibility = "visible"; //$NON-NLS-0$
-		dojo.parser.parse();
 
 		new mDialogs.DialogService(serviceRegistry);
 		var selection = new mSelection.Selection(serviceRegistry);
@@ -41,7 +38,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 
 		var explorer = new mGitCommitExplorer.GitCommitExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageActions", null, "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		mGlobalCommands.generateBanner("banner", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
+		mGlobalCommands.generateBanner("orion-git-commit", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 
 		// define commands
 		mGitCommands.createFileCommands(serviceRegistry, commandService, explorer, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -50,6 +47,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.getPullRequestUrl", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// object contributions

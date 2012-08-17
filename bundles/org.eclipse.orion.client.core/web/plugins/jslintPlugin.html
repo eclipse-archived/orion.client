@@ -3,9 +3,20 @@
 <head>
 	<title>JSLint plugin</title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="../orion/jslintworker.js"></script>
-	<script type="text/javascript" src="../orion/jslintPlugin.js"></script>
+	<script src="../requirejs/require.js"></script>
+	<script>
+		/*global require*/
+		require({
+		  baseUrl: '..',
+		  paths: {
+			  text: 'requirejs/text',
+			  i18n: 'requirejs/i18n',
+			  domReady: 'requirejs/domReady'
+		  }
+		});
+
+		require(['jslintPlugin.js']);
+	</script>
 </head>
 <body>
 </body>

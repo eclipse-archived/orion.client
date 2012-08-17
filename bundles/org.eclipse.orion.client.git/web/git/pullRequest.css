@@ -2,21 +2,17 @@
 
 @import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 
-@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
-
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 
-@import "../org.dojotoolkit/dojox/layout/resources/ToggleSplitter.css";
-
 @import "../settings/settings.css";
+
+@import "../css/layout.css";
 
 @import "../css/ide.css";
 
-@import "../css/breadcrumbs.css";
-
-@import "../css/commands.css";
+@import "../css/images.css";
 
 @import "../css/sections.css";
 
@@ -30,6 +26,10 @@
 
 .darkTreeTableRow {
 	border-bottom: 1px solid #e6e6e6;
+}
+
+.lightTreeTableRow{
+	overflow: hidden;
 }
 
 .stretch {
@@ -46,6 +46,10 @@
 
 .gitMainDescription{
 	padding-left:8px;
+}
+
+.gitSecondaryDescription{
+	padding-top:10px;
 }
 
 pre {

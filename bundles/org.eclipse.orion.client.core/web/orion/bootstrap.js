@@ -12,7 +12,7 @@
 /*global define document dojo dijit window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry) {
+define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences', 'orion/pluginregistry', 'orion/config'], function(require, Deferred, mServiceregistry, mPreferences, mPluginRegistry, mConfig) {
 
 	var once; // Deferred
 
@@ -29,6 +29,8 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
+		var configAdmin = new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin();
+		serviceRegistry.registerService("orion.cm.configadmin", configAdmin);
 		return preferences.getPreferences("/plugins").then(function(pluginsPreference) { //$NON-NLS-0$
 			var pluginURLs = pluginsPreference.keys();
 			for (var i=0; i < pluginURLs.length; ++i) {				

@@ -95,12 +95,12 @@
 
 /* The added block in the new file/left side, lightest green */
 .annotationLine.addedBlockDiff {
-	background-color: #D2FFD2; /*#EFFFEF;*/
+	background-color: #B3E8B3;
 }
 
 /* The current added block in the new file/left side, 2nd lightest green */
 .annotationLine.currentAddedBlockDiff {
-	background-color: #B0FFB0;
+	background-color: #8EDD8E;
 }
 
 /* The deleted block in the old file/right side, lightest red */
@@ -145,12 +145,12 @@
 
 /* The added word in the new file/left side, 3rd lightest green */
 .annotationRange.addedWordDiff {
-	background-color: #99EE99;
+	background-color: #63CF63;
 }
 
 /* The current added word in the new file/left side, darkest green */
 .annotationRange.currentAddedWordDiff {
-	background-color: #33DD33;
+	background-color: #31A231;
 }
 
 /* The deleted word in the old file/right side, 3rd lightest red */

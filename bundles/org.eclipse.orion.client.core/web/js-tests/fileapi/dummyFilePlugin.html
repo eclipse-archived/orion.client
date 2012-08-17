@@ -5,6 +5,7 @@
 	<script type="text/javascript" src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script type="text/javascript" src="../../orion/plugin.js"></script>
 	<script>
+	/*global window dojo orion*/
 		window.onload = function() {
 			var provider = new orion.PluginProvider();
 			provider.registerService("orion.file", {
@@ -42,9 +43,9 @@
 									});
 								}
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				},
@@ -72,9 +73,9 @@
 									responseText: xhr.responseText
 								});
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				},
@@ -102,9 +103,9 @@
 									responseText: xhr.responseText
 								});
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				},
@@ -115,7 +116,7 @@
 						url = url.substring(0, url.length-1);
 					}
 					var name = url.substring(url.lastIndexOf("/")+1, url.length);
-					var url = url.substring(0, url.lastIndexOf("/")+1);
+					url = url.substring(0, url.lastIndexOf("/")+1);
 					var header;
 					try {
 						xhr.open("POST", url);
@@ -137,9 +138,9 @@
 									responseText: xhr.responseText
 								});
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				},
@@ -177,9 +178,9 @@
 									});
 								}
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				}	
@@ -187,7 +188,7 @@
 				root: (function() {
 					var temp = document.createElement('a');
 					temp.href = '.';
-	       			return temp.href
+					return temp.href;
 				}())
 			});
 			provider.connect();

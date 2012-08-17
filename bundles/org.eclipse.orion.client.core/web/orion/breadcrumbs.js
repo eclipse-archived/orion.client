@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global window define document */
 
-define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
+define(['require', 'dojo'], function(require, dojo) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
@@ -93,7 +93,6 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 					// don't need the breadcrumb style because we are here.
 					dojo.removeClass(seg, "breadcrumb"); //$NON-NLS-0$
 					dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
-					mUtil.forceLayout(container);
 					return;
 				}
 			}
@@ -140,13 +139,12 @@ define(['require', 'dojo', 'orion/util'], function(require, dojo, mUtil) {
 			} 
 			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 			if (crumbs.childNodes.length === 0) {
-				seg = document.createElement('a'); //$NON-NLS-0$
+				seg = document.createElement('span'); //$NON-NLS-0$
 				dojo.place(document.createTextNode(firstSegmentName || document.title), seg, "only"); //$NON-NLS-0$
 				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
 				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
 				crumbs.appendChild(seg);
 			}
-			mUtil.forceLayout(container);
 		}
 	};
 	BreadCrumbs.prototype.constructor = BreadCrumbs;

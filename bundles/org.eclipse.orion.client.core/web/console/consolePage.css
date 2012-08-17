@@ -2,8 +2,9 @@
 @import "../org.dojotoolkit/dijit/themes/claro/claro.css";
 @import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
+@import "../css/layout.css";
 @import "../css/ide.css";
-@import "../css/commands.css";
+@import "../css/images.css";
 @import "../css/sections.css";
 @import "../orion/widgets/Console.css";
 

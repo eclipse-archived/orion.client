@@ -3,9 +3,9 @@
 @import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
+@import "../css/layout.css";
 @import "../css/ide.css";
-@import "../css/breadcrumbs.css";
-@import "../css/commands.css";
+@import "../css/images.css";
 
 html,body {
 	height: 100%;

@@ -619,16 +619,18 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
 		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.options.readonly ,createLineStyler , this.options.newFile);
 		if( this.options.onPage){
-			mGlobalCommands.generateDomCommandsInBanner(this._commandService, this._leftEditor , null, null, null, true, true);
+			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+			if (toolbar) {	
+				this._commandService.destroy(toolbar);
+				this._commandService.renderCommands(toolbar.id, toolbar, null, this._leftEditor, "button"); //$NON-NLS-0$
+			}
 		}
 		this._leftTextView = this._leftEditor.getTextView();
 		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this.options.baseFile);
 		this._rightTextView = this._rightEditor.getTextView();
 		var that = this;
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
-				                    function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
-		this._rightTextView.addRuler(this._overviewRuler);
-		var that = this;
+                function(lineIndex, ruler){that._diffNavigator.matchPositionFromOverview(lineIndex);});
 		window.onbeforeunload = function() {
 			if (that._leftEditor.isDirty()) {
 				return messages["There are unsaved changes."];
@@ -748,8 +750,6 @@ exports.TwoWayCompareContainer = (function() {
 			editor.setInput(fileObj.Name);
 			this._highlighter[columnIndex].highlight(fileObj.Name , fileObj.Type, editor);
 		}
-			
-		textView.addRuler(new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"})); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		textView.addEventListener("Selection", function(evt) { //$NON-NLS-0$
 			if(evt.newValue){
@@ -796,6 +796,18 @@ exports.TwoWayCompareContainer = (function() {
 		}
 	};
 
+	TwoWayCompareContainer.prototype.addRulers = function(){
+		if(this._rightTextView && this._leftTextView && !this._hasRuler){
+			var that = this;
+			this._leftTextViewRuler= new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._rightTextViewRuler = new mCompareRulers.LineNumberCompareRuler(this._diffNavigator, 0, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this._leftTextView.addRuler(this._leftTextViewRuler);
+			this._rightTextView.addRuler(this._rightTextViewRuler);
+			this._rightTextView.addRuler(this._overviewRuler);
+			this._hasRuler = true;
+		}
+	};
+	
 	TwoWayCompareContainer.prototype.setEditor = function(onsave){	
 		var input = this.options.baseFile.Content;
 		var output = this.options.newFile.Content;
@@ -829,6 +841,7 @@ exports.TwoWayCompareContainer = (function() {
 			this._highlighter[0].highlight(this.options.newFile.Name, this.options.newFile.Type, this._leftEditor, this, 2);
 			this._highlighter[1].highlight(this.options.baseFile.Name, this.options.baseFile.Type, this._rightEditor, this, 2);
 			this.renderCommands();
+			this.addRulers();
 			if(!this.options.readonly)
 				this._inputManager.setInput(this.options.newFile.URL , this._leftEditor);
 		}
@@ -888,7 +901,7 @@ exports.InlineCompareContainer = (function() {
 			var styleStr = mCompareUtils.getDijitSizeStyle(this._editorDivId);
 			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
 			wrapperWidget.placeAt(this._editorDivId);
-			mUtil.forceLayout(this._editorDivId);
+			wrapperWidget.layout();
 			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
 		}
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$

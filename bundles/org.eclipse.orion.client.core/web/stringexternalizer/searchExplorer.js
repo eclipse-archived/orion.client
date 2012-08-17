@@ -493,12 +493,11 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 	
 	SearchResultExplorer.prototype.initCommands = function(){
 		var that = this;
-		dojo.empty("pageActions"); //$NON-NLS-0$
+		this._commandService.destroy("pageActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageActions", "pageActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		dojo.empty("pageNavigationActions"); //$NON-NLS-0$
+		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		mUtil.forceLayout("pageNavigationActions"); //$NON-NLS-0$
 	};
 	
 	SearchResultExplorer.prototype.replacePreview = function(init, comparing) {
@@ -652,7 +651,10 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}
-				window.setTimeout(function(){that.renderer.focus();}, 100);
+				window.setTimeout(function(){
+					dijit.byId(that.getParentDivId()).resize();
+					that.renderer.focus();
+				}, 100);
 			});
 		});
 	};
