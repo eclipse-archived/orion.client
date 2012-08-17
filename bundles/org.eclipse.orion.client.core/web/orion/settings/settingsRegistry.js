@@ -13,11 +13,33 @@
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var METATYPE_SERVICE = 'orion.cm.metatype', SETTING_SERVICE = 'orion.core.setting'; //$NON-NLS-0$ //$NON-NLS-1$
 	var SETTINGS_PROP = 'settings'; //$NON-NLS-0$
+
+	/**
+	 * @param {Object} value
+	 * @param {orion.metatype.PropertyType} propertyType
+	 */
+	function equalsDefaultValue(value, propertyType) {
+		var defaultValue = propertyType.getDefaultValue();
+		var result = value === defaultValue;
+		if (propertyType.getType() === 'string') { //$NON-NLS-0$
+			result = result || (value === '' && defaultValue === null);
+		}
+		return result;
+	}
+
 	/**
 	 * @name orion.settings.Setting
 	 * @class Represents the definition of a setting.
 	 * @description Represents the definition of a setting.
 	 */
+		/**
+		 * @name orion.settings.Setting#isDefaults
+		 * @function
+		 * @description
+		 * @param {Object} properties A map of PropertyType IDs to values.
+		 * @returns {Boolean} <code>true</code> if <code>properties</code> contains a key for each of this setting's
+		 * PropertyTypes, and the corresponding value equals the PropertyType's default value.
+		 */
 		/**
 		 * @name orion.settings.Setting#getPid
 		 * @function
@@ -62,7 +84,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		getPid: function() { return this.pid; },
 		getObjectClassId: function() { return this.classId; },
 		getPropertyTypes: function() { return this.properties; },
-		getTags: function() { return this.tags || []; }
+		getTags: function() { return this.tags || []; },
+		isDefaults: function(properties) {
+			return this.getPropertyTypes().every(function(propertyType) {
+				return equalsDefaultValue(properties[propertyType.getId()], propertyType);
+			});
+		}
 	};
 
 	/**
