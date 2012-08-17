@@ -5452,13 +5452,37 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var viewPad = this._getViewPadding();
 			var lineCount = model.getLineCount();
 			var lineHeight = this._getLineHeight();
-			var firstLine = Math.max(0, scroll.y) / lineHeight;
-			var topIndex = Math.floor(firstLine);
-			var lineStart = Math.max(0, topIndex - 1);
-			var top = Math.round((firstLine - lineStart) * lineHeight);
-			var partialY = this._partialY = Math.round((firstLine - topIndex) * lineHeight);
-			var scrollWidth, scrollHeight = lineCount * lineHeight;
-			var leftWidth, leftRect, clientWidth, clientHeight;
+			/*
+			* topIndex - top line index of the view (maybe be particialy visible)
+			* lineStart - top line minus one line (if any)
+			* partialY - portion of the top line that the is NOT visible.
+			* top - partialY plus height of the line before top line (if any)
+			*/
+			var topIndex, lineStart, top, partialY,
+				leftWidth, leftRect,
+				clientWidth, clientHeight, scrollWidth, scrollHeight;
+			if (this._lineHeight) {
+				var h = 0, lh;
+				var l = 0;
+				while (h + (lh = this._getLineHeight(l)) <= scroll.y) {
+					h += lh;
+					l++;
+				}
+				topIndex = l;
+				lineStart = Math.max(0, topIndex - 1);
+				partialY = top = scroll.y - h;
+				if (topIndex > 0) {
+					top += this._getLineHeight(topIndex - 1);
+				}
+			} else {
+				var firstLine = Math.max(0, scroll.y) / lineHeight;
+				topIndex = Math.floor(firstLine);
+				lineStart = Math.max(0, topIndex - 1);
+				top = Math.round((firstLine - lineStart) * lineHeight);
+				partialY = Math.round((firstLine - topIndex) * lineHeight);
+			}
+			scrollHeight = lineCount * lineHeight;//TODO calculate for VLH
+			this._partialY = partialY;
 			var parent = this._parent;
 			var parentWidth = parent.clientWidth;
 			var parentHeight = parent.clientHeight;
