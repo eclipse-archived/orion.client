@@ -38,8 +38,9 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 		 * @param {String} query URI of the query to run.
 		 * @param {String} [excludeFile] URI of a file to exclude from the result listing.
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
+		 * @param {Boolean} [keyWordSearch] If true, do keyword search. Otherwise do name search.
 		 */
-		search: function(query, excludeFile, renderer) {
+		search: function(query, excludeFile, renderer, keyWordSearch) {
 			var qObj = mSearchUtils.parseQueryStr(query);
 			var transform = function(jsonData) {
 				var transformed = [];
@@ -53,7 +54,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				}
 				return transformed;
 			};
-			if(this._crawler){ //$NON-NLS-0$
+			if(this._crawler && !keyWordSearch){ //$NON-NLS-0$
 				this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
 			} else {
 				try {
@@ -76,6 +77,9 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				catch(error){
 					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
 						this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && keyWordSearch){ //$NON-NLS-0${
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, query);
+						crawler.search(function(jsonData){renderer(transform(jsonData), null);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 					}
@@ -97,6 +101,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 		setLocationByMetaData: function(meta, useParentLocation){
 			var locationName = "";
 			var noneRootMeta = null;
+			this._searchRootLocation = this._fileService.fileServiceRootURL(meta.Location);
 			if(useParentLocation && meta && meta.Parents && meta.Parents.length > 0){
 				if(useParentLocation.index === "last"){ //$NON-NLS-0$
 					noneRootMeta = meta.Parents[meta.Parents.length-1];
@@ -107,15 +112,10 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				noneRootMeta = meta;
 			} 
 			if(noneRootMeta){
-				this.setLocationByURL(noneRootMeta.Location);
+				this.setLocationbyURL(noneRootMeta.Location);
 				locationName = noneRootMeta.Name;
 			} else if(meta){
-				if(this._fileService.getService(meta.Location)["search"]){
-					//this.setLocationByURL("");
-					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
-				} else {
-					this.setLocationByURL(this._fileService.fileServiceRootURL(meta.Location));
-				}
+				this.setLocationbyURL(this._searchRootLocation);
 				locationName = this._fileService.fileServiceName(meta.Location);
 			}
 			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
@@ -136,17 +136,26 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				searchInputDom.title = messages["Type a keyword or wild card to search in "] + locationName;
 			}
 		},
-		setLocationByURL: function(locationURL){
-			this.location = locationURL;
+		setLocationbyURL: function(locationURL){
+			this._searchLocation = locationURL;
+		},
+		setRootLocationbyURL: function(locationURL){
+			this._searchRootLocation = locationURL;
+		},
+		getSearchLocation: function(){
+			return this._searchLocation;
+		},
+		getSearchRootLocation: function(){
+			return this._searchRootLocation;
 		},
 		/**
 		 * Returns a query URL for a search.
 		 * @param {String} query The text to search for, or null when searching purely on file name
 		 * @param {String} [nameQuery] The name of a file to search for
 		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
-		 * @param {Boolean} [skipLocation] If true, do not use the location property of the searcher. Use "" as the location instead.
+		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
-		createSearchQuery: function(query, nameQuery, sort, skipLocation, searchPrefix)  {
+		createSearchQuery: function(query, nameQuery, sort, useRoot, searchPrefix)  {
 			if (!sort) {
 				sort = "Path"; //$NON-NLS-0$
 			}
@@ -157,14 +166,14 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 				return  mSearchUtils.generateSearchQuery({sort: sort,
 					rows: 100,
 					start: 0,
-					location: skipLocation ? "": this.location,
+					location: useRoot ? this._searchRootLocation: this._searchLocation,
 					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
 			return  mSearchUtils.generateSearchQuery({sort: sort,
 				rows: 40,
 				start: 0,
 				searchStr: this._luceneEscape(query, true),
-				location: skipLocation ? "": this.location});
+				location: useRoot ? this._searchRootLocation: this._searchLocation});
 		},
 		/**
 		 * Escapes all characters in the string that require escaping in Lucene queries.
