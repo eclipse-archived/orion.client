@@ -29,8 +29,6 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		// we read settings and wait for the plugin registry to fully startup before continuing
 		var preferences = new mPreferences.PreferencesService(serviceRegistry);
 		var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry);
-		var configAdmin = new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin();
-		serviceRegistry.registerService("orion.cm.configadmin", configAdmin);
 		return preferences.getPreferences("/plugins").then(function(pluginsPreference) { //$NON-NLS-0$
 			var pluginURLs = pluginsPreference.keys();
 			for (var i=0; i < pluginURLs.length; ++i) {				
@@ -51,6 +49,9 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 					return pluginRegistry.startup(pluginURLs);
 				});
 			}
+		}).then(function() {
+			var configAdmin = new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin();
+			serviceRegistry.registerService("orion.cm.configadmin", configAdmin); //$NON-NLS-0$
 		}).then(function() {
 			var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (auth) {

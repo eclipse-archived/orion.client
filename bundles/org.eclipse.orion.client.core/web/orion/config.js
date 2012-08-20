@@ -159,14 +159,11 @@ ConfigStore = /** @ignore */ (function() {
 	function ConfigStore(factory, prefsService) {
 		this.factory = factory;
 		this.prefsService = prefsService;
-		this.configs = Object.create(null); /* PID -> Configuration */
-		this.prefs = Object.create(null); /* PID -> Preferences node */
-		this.prefRoot = null;
+		this.configs = Object.create(null); // PID -> Configuration
+		this.prefs = Object.create(null); // PID -> Deferred Preferences node
+		this.prefRoot = null; // Deferred Preferences node
 	}
 	ConfigStore.prototype = {
-		_createConfig: function(properties) {
-			return new ConfigImpl(this.factory, this, properties);
-		},
 		_find: function(pid) {
 			return this.configs[pid] || null;
 		},
@@ -174,21 +171,27 @@ ConfigStore = /** @ignore */ (function() {
 			var node = this.prefs[pid];
 			return node && node.state() === 'resolve'; //$NON-NLS-0$
 		},
+		loadRoot: function() {
+			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
+			return this.prefRoot;
+		},
 		loadNode: function(pid) {
 			if (typeof pid !== 'string') { //$NON-NLS-0$
 				throw new Error('Invalid pid: ' + pid); //$NON-NLS-0$
 			}
-			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
 			this.prefs[pid] = this.prefs[pid] || this.prefsService.getPreferences(CONFIG_PREF_NODE + '/' + pid); //$NON-NLS-0$
 			var self = this;
-			return Deferred.all([this.prefRoot, this.prefs[pid]]).then(function(result) {
+			return Deferred.all([this.loadRoot(), this.prefs[pid]]).then(function(result) {
 				var prefRoot = result[0], prefNode = result[1];
 				if (!prefRoot.get(pid)) {
 					prefRoot.put(pid, true);
 				}
-				var props = prefNode.get('properties'); //$NON-NLS-0$
-				if (props) {
-					self.configs[pid] = self._createConfig(props);
+				if (!self.configs[pid]) {
+					var props = prefNode.get('properties'); //$NON-NLS-0$
+					if (typeof props === 'object' && props !== null && Object.keys(props).length > 0) { //$NON-NLS-0$
+						props[PROPERTY_PID] = pid;
+						self.configs[pid] = new ConfigImpl(self.factory, self, props);
+					}
 				}
 				return prefNode;
 			});
@@ -201,15 +204,14 @@ ConfigStore = /** @ignore */ (function() {
 					configuration = new ConfigImpl(self.factory, self, pid);
 					self.configs[pid] = configuration;
 					// only pid is in the properties here
-					prefNode.put('properties', configuration.getProperties()); //$NON-NLS-0$
+					prefNode.put('properties', configuration.getProperties(true) || {}); //$NON-NLS-0$
 				}
 				return configuration;
 			});
 		},
 		list: function() {
 			var self = this;
-			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
-			return this.prefRoot.then(function(prefRoot) {
+			return this.loadRoot().then(function(prefRoot) {
 				var pids = prefRoot.keys();
 				return Deferred.all(pids.map(self.loadNode.bind(self))).then(function() {
 					return pids.map(self._find.bind(self));
@@ -217,19 +219,20 @@ ConfigStore = /** @ignore */ (function() {
 			});
 		},
 		remove: function(pid) {
-			delete this.configs[pid];
 			var self = this;
-			this.loadNode(pid).then(function(prefNode) {
-				// TODO want to remove the whole node here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386582
-				// TODO remove from list
+			Deferred.all([this.loadRoot(), this.loadNode(pid)]).then(function(result) {
+				var prefRoot = result[0], prefNode = result[1];
+				// TODO want to remove the whole prefNode here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386582
 				prefNode.clear();
-				//delete self.prefs[pid];
+				delete self.configs[pid];
+				prefRoot.remove(pid);
+				delete self.prefs[pid];
 			});
 		},
 		save: function(pid, configuration) {
-			var properties = configuration.getProperties();
+			var properties = configuration.getProperties(true);
 			this.loadNode(pid).then(function(prefNode) {
-				prefNode.put('properties', properties); //$NON-NLS-0$
+				prefNode.put('properties', properties || {}); //$NON-NLS-0$
 			});
 		}
 	};
@@ -279,12 +282,14 @@ ConfigImpl = /** @ignore */ (function() {
 			this._checkRemoved();
 			return this.pid;
 		},
-		getProperties: function() {
+		getProperties: function(omitPid) {
 			this._checkRemoved();
 			var props = null;
 			if (this.properties) {
 				props = clone(this.properties);
-				props[PROPERTY_PID] = this.pid;
+				if (!omitPid) {
+					props[PROPERTY_PID] = this.pid;
+				}
 			}
 			return props;
 		},
@@ -301,6 +306,9 @@ ConfigImpl = /** @ignore */ (function() {
 			var self = this;
 			this.store.save(this.pid, this);
 			self.factory.notifyUpdated(self);
+		},
+		toString: function() {
+			return '[ConfigImpl pid: ' + this.pid + ', properties: ' + JSON.stringify(this.properties) + ']';
 		}
 	};
 	return ConfigImpl;

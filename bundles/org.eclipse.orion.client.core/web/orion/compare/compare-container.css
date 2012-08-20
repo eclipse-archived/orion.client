@@ -89,18 +89,24 @@
 	height: 100%;
 }
 
+.claro .dijitContentPane {
+	padding: 0;
+	margin: 0;
+	outline: 0;
+}
+
 /*** Styles for diff annotations ***/
 
 /** Styles for normal diff blocks **/
 
 /* The added block in the new file/left side, lightest green */
 .annotationLine.addedBlockDiff {
-	background-color: #B3E8B3
+	background-color: #B3E8B3;
 }
 
 /* The current added block in the new file/left side, 2nd lightest green */
 .annotationLine.currentAddedBlockDiff {
-	background-color: #55CC55
+	background-color: #8EDD8E;
 }
 
 /* The deleted block in the old file/right side, lightest red */
@@ -145,7 +151,7 @@
 
 /* The added word in the new file/left side, 3rd lightest green */
 .annotationRange.addedWordDiff {
-	background-color: #35B335;
+	background-color: #63CF63;
 }
 
 /* The current added word in the new file/left side, darkest green */
