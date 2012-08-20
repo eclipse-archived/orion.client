@@ -71,6 +71,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.settings.selection = new Family( 'Selection', '#FEC' );
 			this.settings.sidepanel = new Family( 'Side', '#FBFBFB' ); 
 			this.settings.mainpanel = new Family( 'Main', 'white' ); 
+			this.settings.toolpanel = new Family( 'Tools', 'white' ); 
 			this.settings.navtext = new Family( 'Navtext', '#bfbfbf' );
 			this.settings.content = new Family( 'ContentText', '#3087B3' );
 			this.settings.search = new Family( 'Search', '#444' );
@@ -82,7 +83,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.initializeStorage();
 			
 			var revertCommand = new mCommands.Command({
-				name: 'Revert',
+				name: 'Cancel',
 				tooltip: 'Revert Theme',
 				id: "orion.reverttheme", //$NON-NLS-0$
 				callback: dojo.hitch(this, function(data){
@@ -111,16 +112,38 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			});
 			
-//			this.commandService.addCommand(revertCommand);
-//			this.commandService.registerCommandContribution('themeCommands', "orion.reverttheme", 1); //$NON-NLS-1$ //$NON-NLS-0$
-			
 			this.commandService.addCommand(guideCommand);
-			this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution('themeCommands', "orion.checkGuide", 1); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this.commandService.addCommand(revertCommand);
+			this.commandService.registerCommandContribution('themeCommands', "orion.reverttheme", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			this.commandService.addCommand(updateCommand);
-			this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 2); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution('themeCommands', "orion.applytheme", 3); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 
+		function applyColor(){
+		
+			var newcolor = document.getElementById( 'colorstring' ).value;
+			
+			if( this.themebuilder.validateHex( newcolor ) ){
+			
+				zones[SELECTED_ZONE.id].fill = newcolor;
+				this.themebuilder.updateFamily( zones[SELECTED_ZONE.id].family, newcolor );
+				OVERVIEW = false;
+				this.themebuilder.refresh();
+				zones[SELECTED_ZONE.id].glow( UI_SIZE, TOP );
+				this.themebuilder.drawPicker( ctx, zones[SELECTED_ZONE.id] );
+				
+				dojo.byId( 'pickercontainer' ).style.display = 'none';
+				dojo.byId( 'savecontainer' ).style.display = '';
+			
+				console.log( 'apply color' );
+			}
+		}
+
+		ThemeBuilder.prototype.applyColor = applyColor;
+		
 
 		ThemeBuilder.prototype.template =	'<div id="themeContainer">' +
 												'<div class="sectionWrapper toolComposite">' +
@@ -140,6 +163,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 													'<span class="settingsLabel">New theme name:</span>' + 
 													'<div id="themesaver"></div>' +
 												'</div>' +
+												'<div id="stringcontainer" style="position:absolute;left:425px;top:360px;display:none;">' +
+														'<span>OR HEX: </span>' + 
+														'<div id="colorstring"></div>' +
+														'<button style="margin-left:5px;height:17px;margin-top:0;" type="button" id="colorButton"}">ok</button>' + 
+													'</div>' +
 											'</div>';
 		
 		var colornames = [["white", "seashell", "cornsilk", "lemonchiffon","lightyellow", "palegreen", "paleturquoise", "aliceblue", "lavender", "plum"],
@@ -180,6 +208,22 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		
 		ThemeBuilder.prototype.initializeStorage = initializeStorage;
+		
+		function validateHex(hexcode){
+		
+		     var regColorcode = /^(#)?([0-9a-fA-F]{3})([0-9a-fA-F]{3})?$/;
+		     
+		     var validity = true;
+		
+		     if( regColorcode.test(hexcode) === false ){
+		     
+		     	validity = false;
+		     }
+		     
+		     return validity;
+		}
+		
+		ThemeBuilder.prototype.validateHex = validateHex;
 		
 		/* MOUSE EVENTS */
 
@@ -276,8 +320,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x+190, TOP + 20, 10, '#333' );   
 		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 45, '8pt Lucida', '#333' ); 
 		    Component.drawRectangle( ctx, LEFT + x + 80, TOP + 36, 30, 10, component.fill, null );	    
-		    Component.drawText( ctx, 'COLOR STRING: ', LEFT + x, TOP + 65, '8pt Lucida', '#333' );    
-		    Component.drawText( ctx, component.fill, LEFT + x + 80, TOP + 65, '8pt Lucida', '#333' );     
+		    Component.drawText( ctx, 'COLOR STRING:  ', LEFT + x, TOP + 65, '8pt Lucida', '#333' );    
+		    Component.drawText( ctx, '  ' + component.fill, LEFT + x + 80, TOP + 65, '8pt Lucida', '#333' );     
 		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x + 190, TOP + 20, 10, '#333' );       
 		    Component.drawLine( ctx, LEFT + x, TOP + 80, LEFT + x + 190, TOP + 80, 5, '#333' );    
 		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 105, 'bold 8pt Lucida', '#333' ); 
@@ -300,6 +344,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					}
 				}
 			}
+			
+			var stringcontainer = document.getElementById( 'stringcontainer' );
+				stringcontainer.style.display = '';
+				stringcontainer.zIndex = 1;
+
+				
+				var colorstring = document.getElementById( 'colorstring' );
+				
+				if( !this.colfld ){
+					this.colfld = new orion.widgets.settings.TextField({}, colorstring );
+					this.colfld.width( '100px' );
+				}
+				var colorButton = document.getElementById( 'colorButton' );
+				colorButton.themebuilder = this;
+				colorButton.onclick = this.applyColor;
+				
+
 		}
 		
 		ThemeBuilder.prototype.drawPicker = drawPicker;
@@ -308,14 +369,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			OVERVIEW = false;
 		
-//			this.refresh();
-		
 			var coordinates = getCoordinates( e );
 			    
 			var x = coordinates.x;
 			var y = coordinates.y;
-			
-//			over = [];
 		
 			for( var z = 0; z < zones.length; z++ ){	
 		
@@ -351,7 +408,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						
 						dojo.byId( 'pickercontainer' ).style.display = 'none';
 						dojo.byId( 'savecontainer' ).style.display = '';
-						
 						break;
 						
 					case 'RECTANGLE':
@@ -363,8 +419,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						break;
 						
 					default:
-					
-						// this.refresh();
 						break;
 				
 				}
@@ -470,6 +524,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			}
 			
 			Component.drawText( ctx, 'CLICK DIAGRAM TO STYLE', LEFT + 5 + x, labely + 50, 'bold 8pt Lucida', '#cc0000' );
+			Component.drawText( ctx, 'PRESS APPLY BUTTON TO', LEFT + 5 + x, labely + 65, 'bold 8pt Lucida', '#cc0000' );
+			Component.drawText( ctx, 'APPLY PREVIEW', LEFT + 5 + x, labely + 80, 'bold 8pt Lucida', '#cc0000' );
+			
+			var stringcontainer = document.getElementById( 'stringcontainer' );
+				stringcontainer.style.display = 'none';
 		}
 		
 		ThemeBuilder.prototype.overview = overview;
@@ -557,15 +616,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				rightpanel.description = 'Main Panel';
 				rightpanel.family = settings.mainpanel.name;
 				
+				var toolpanel = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP, UI_SIZE * 0.6 -1, 30, settings.toolpanel.value );
+				toolpanel.description = 'Tool Panel';
+				toolpanel.family = settings.toolpanel.name;
+				
 				zones.push( navbar );
 				zones.push( username );
 				zones.push( search );
+				zones.push( toolpanel );
 				zones.push( crumbbar );
+				
+				zones.push( selection );
+				
 				zones.push( button );
 
 				zones.push( rightpanel );
-				
-				zones.push( selection );
 				
 				zones.push( breadcrumb );
 				
@@ -661,6 +726,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				newtheme.location = this.settings.location.value;
 				newtheme.selection = this.settings.selection.value;
 				newtheme.sidepanel = this.settings.sidepanel.value; 
+				newtheme.toolpanel = this.settings.toolpanel.value;
 				newtheme.mainpanel = this.settings.mainpanel.value;
 				newtheme.navtext = this.settings.navtext.value;
 				newtheme.content = this.settings.content.value;
@@ -692,6 +758,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		ThemeBuilder.prototype.apply = apply;
 
 		function revert(data){	
+			this.initializeStorage();
+			this.guide();
 			dojo.byId( 'pickercontainer' ).style.display = '';
 			dojo.byId( 'savecontainer' ).style.display = 'none';
 		}
@@ -725,6 +793,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					this.settings.selection.value = this.styles[s].selection;
 					this.settings.sidepanel.value = this.styles[s].sidepanel;
 					this.settings.mainpanel.value = this.styles[s].mainpanel;
+					this.settings.toolpanel.value = this.styles[s].toolpanel;
 					this.settings.navtext.value = this.styles[s].navtext;
 					this.settings.content.value = this.styles[s].content;
 					this.settings.search.value = this.styles[s].search;
