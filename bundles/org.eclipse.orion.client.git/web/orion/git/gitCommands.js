@@ -13,7 +13,7 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/GetPullRequestUrlDialog', 
+        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/AddRemoteRepositoryPrompterDialog'], 
         function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils) {
 
@@ -1708,8 +1708,8 @@ var exports = {};
 						function(clone){
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-							var pullRequestUrl = orionHome + "/git/pullRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
-							serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, pullRequestUrl, authorName, commitMessage).then(
+							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+							serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, reviewRequestUrl, authorName, commitMessage).then(
 								function(result) {
 									var display = {};
 									display.Severity = "Ok"; //$NON-NLS-0$
@@ -1729,10 +1729,10 @@ var exports = {};
 					function(clone){
 					var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-						var pullRequestUrl = orionHome + "/git/pullRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
-						var dialog = new orion.git.widgets.GetPullRequestUrlDialog({
+						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+						var dialog = new orion.git.widgets.ReviewRequestDialog({
 							title: messages["Contribution Review Request"],
-							url: pullRequestUrl,
+							url: reviewRequestUrl,
 							func: sendNotificationFunction
 							});
 							dialog.startup();
@@ -1983,10 +1983,10 @@ var exports = {};
 		});
 		commandService.addCommand(cloneGitRepositoryCommand);
 		
-		var cloneGitRepositoryCommandPullReq = new mCommands.Command({
+		var cloneGitRepositoryCommandReviewReq = new mCommands.Command({
 			name : messages["Clone Repository"],
 			tooltip : messages["Clone an existing Git repository to a folder"],
-			id : "eclipse.cloneGitRepositoryPullReq", //$NON-NLS-0$
+			id : "eclipse.cloneGitRepositoryReviewReq", //$NON-NLS-0$
 			//parameters: cloneParameters,
 			callback : function(data) {
 				var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -2024,12 +2024,12 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(cloneGitRepositoryCommandPullReq);
+		commandService.addCommand(cloneGitRepositoryCommandReviewReq);
 
-		var addRemotePullRequestCommand = new mCommands.Command({
+		var addRemoteReviewRequestCommand = new mCommands.Command({
 			name : messages["Add Remote"],
 			tooltip : messages["Add a new remote to the repository"],
-			id : "eclipse.addRemotePullRequestCommand", //$NON-NLS-0$
+			id : "eclipse.addRemoteReviewRequestCommand", //$NON-NLS-0$
 			imageClass: "git-sprite-fetch", //$NON-NLS-0$
 			spriteClass: "gitCommandSprite", //$NON-NLS-0$
 			callback : function(data) {
@@ -2126,7 +2126,7 @@ var exports = {};
 				return true;
 			}
 		});
-		commandService.addCommand(addRemotePullRequestCommand);
+		commandService.addCommand(addRemoteReviewRequestCommand);
 
 		var initRepositoryParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("folderName", "text", messages['New folder:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
