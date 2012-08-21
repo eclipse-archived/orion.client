@@ -4,8 +4,8 @@
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2012." >
 	<meta http-equiv="Content-Language" content="en-us">
 	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-	<title>Git Pull Request</title>
-	<link rel="stylesheet" type="text/css" href="pullRequest.css" />
+	<title>Git Review Request</title>
+	<link rel="stylesheet" type="text/css" href="reviewRequest.css" />
 	<link rel="shortcut icon" href="/commit.ico" />
 	<script type="text/javascript" src="../requirejs/require.js"></script>
 	<script type="text/javascript">
@@ -38,16 +38,20 @@
 		    domReady: 'requirejs/domReady'
 		  }
 		});
-		require(["pullRequest.js"]);
+		require(["reviewRequest.js"]);
 		</script>
 </head>
 
-	<body id="orion-pullRequest" style="height: 100%;" class="claro orionPage">
+	<body id="orion-reviewRequest" style="height: 100%;" class="claro orionPage">
 		<div class="content-fixedHeight">
 			<div class="fixedToolbarHolder mainpane mainPanelLayout">
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
 				<div id="mainNode" class="toolbarTarget">
+					<div id="welcomeDiv" class="displayTable settings">
+					</div>
 					<div id="commitDiv" class="displayTable settings">
+					</div>
+					<div id="moreOptionsDiv" class="displayTable settings">To review the commit you can also
 					</div>
 					<div id="fetchDiv" class="displayTable settings">
 					</div>
