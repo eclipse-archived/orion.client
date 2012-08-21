@@ -23,7 +23,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		var navtext = '#bfbfbf';
 		var content = '#3087B3';
 		var search = '#444';
-		var mainToolbar = 'green';
+		var toolpanel = 'white';
 		
 		function ThemeSheetWriter(){}
 		
@@ -36,7 +36,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		ThemeSheetWriter.prototype.navtext = navtext;
 		ThemeSheetWriter.prototype.content = content;
 		ThemeSheetWriter.prototype.search = search;
-		ThemeSheetWriter.prototype.mainToolbar = mainToolbar;
+		ThemeSheetWriter.prototype.toolpanel = toolpanel;
 		
 		function writeNavigationStyle(){
 		
@@ -320,7 +320,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			styles.push( mainpane );
 			
 			var mainToolbar = new ThemeClass.ThemeClass( 'mainToolbar' );
-			mainToolbar.style.background = this.mainToolbar;
+			mainToolbar.style.background = this.toolpanel;
 			mainToolbar.style.height = '31px';
 			mainToolbar.style.borderBottom = '1px solid #ebebeb';
 			
@@ -357,7 +357,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				this.navtext = settings.navtext.value;
 				this.search = settings.search.value;
 				this.content = settings.content.value;
-				this.mainToolbar = settings.content.mainToolbar;
+				this.toolpanel = settings.toolpanel.value;
 			}else{
 				this.navbar = settings.navbar;
 				this.button = settings.button;
@@ -368,7 +368,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				this.navtext = settings.navtext;
 				this.search = settings.search;
 				this.content = settings.content;
-				this.mainToolbar = settings.mainToolbar;
+				this.toolpanel = settings.toolpanel;
 			}
 			
 			var sheet = this.writeNavigationStyle() + this.writeLocationStyle() + this.writeMainStyle() + this.writeButtonStyle();

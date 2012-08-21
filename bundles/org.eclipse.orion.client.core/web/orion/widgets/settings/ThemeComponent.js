@@ -132,13 +132,15 @@ Component.prototype.render = render;
 							this.over = true;
 						}
 					}
+					
+					
 		
 					break;
 					
 				case 'ELLIPSE':
 				
-					if( mouseX > this.x - this.radius  && mouseX < ( this.x + this.radius ) ){
-						if( mouseY > this.y - this.radius && mouseY < ( this.y + this.radius ) ){
+					if( mouseX > this.x -5 - this.radius  && mouseX < ( this.x -5 + this.radius ) ){
+						if( mouseY > this.y -5 - this.radius && mouseY < ( this.y -5 + this.radius ) ){
 							this.over = true;
 						}
 					}
