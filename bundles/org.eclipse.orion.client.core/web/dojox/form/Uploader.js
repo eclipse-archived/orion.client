@@ -1,8 +1,7 @@
-define(["dojo", "dijit", "dojox", "dojox/form/uploader/Base"], function(dojo, dijit, dojox) {
+define(["i18n!orion/widgets/nls/messages", "dojo", "dijit", "dojox", "dojox/form/uploader/Base"], function(messages, dojo, dijit, dojox) {
 
 	//
 	// TODO:
-	//		i18n
 	//		label via innerHTML
 	//		Doc and or test what can be extended.
 	//		Doc custom file events
@@ -46,7 +45,7 @@ dojo.declare("dojox.form.Uploader", [dojox.form.uploader.Base], {
 	//
 	//	label: String
 	//		The text used in the button that when clicked, opens a system Browse Dialog.
-	label:"Upload...",
+	label: messages["Upload..."],
 	//
 	// url: String
 	//		The url targeted for upload. An absolute URL is preferred. Relative URLs are
