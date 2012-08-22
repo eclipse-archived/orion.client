@@ -39,6 +39,7 @@ define({
 	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
 	"New File": "New File",
 	"Create a new file": "Create a new file",
+	"Name:" : "Name:",
 	"New Folder": "New Folder",
 	"Folder name:": "Folder name:",
 	"Create a new folder": "Create a new folder",
