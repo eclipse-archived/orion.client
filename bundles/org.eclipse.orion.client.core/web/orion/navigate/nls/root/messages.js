@@ -24,6 +24,8 @@ define({
 	"Choose folder...": "Choose folder...",
 	"Rename": "Rename",
 	"Rename the selected files or folders": "Rename the selected files or folders",
+	"Compare Each Other": "Compare Each Other",
+	"Compare the selected 2 files with each other": "Compare the selected 2 files with each other",
 	"Delete": "Delete",
 	"Unknown item": "Unknown item",
 	"Make Favorite": "Make Favorite",
