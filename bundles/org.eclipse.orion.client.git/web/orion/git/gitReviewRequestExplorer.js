@@ -18,33 +18,33 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 		function(messages, require, dojo, dijit , mSection, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands, mNavUtils) {
 	var exports = {};
 
-	exports.GitPullRequestExplorer = (function() {
+	exports.GitReviewRequestExplorer = (function() {
 
 		/**
-		 * Creates a new Git Pull Request explorer.
-		 * @class Git Pull Request explorer
-		 * @name orion.git.GitPullRequestExplorer
+		 * Creates a new Git Review Request explorer.
+		 * @class Git Review Request explorer
+		 * @name orion.git.GitReviewRequestExplorer
 		 * @param fileClient
 		 * @param commandService
 		 * @param serviceRegistry
 		 * @param gitClient
 		 */
-		function GitPullRequestExplorer(fileClient, commandService, serviceRegistry, gitClient){
+		function GitReviewRequestExplorer(fileClient, commandService, serviceRegistry, gitClient){
 			this.fileClient = fileClient;
 			this.registry = serviceRegistry;
 			this.gitClient = gitClient;
 			this.commandService = commandService;
 		}
 		
-		GitPullRequestExplorer.prototype.changedItem = function(parent, children) {
+		GitReviewRequestExplorer.prototype.changedItem = function(parent, children) {
 			this.redisplay();
 		};
 		
-		GitPullRequestExplorer.prototype.redisplay = function(){
+		GitReviewRequestExplorer.prototype.redisplay = function(){
 			this.display(dojo.hash());
 		};
 		
-		GitPullRequestExplorer.prototype.display = function(remote_sha){
+		GitReviewRequestExplorer.prototype.display = function(remote_sha){
 			this.progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			this.loadingDeferred = new dojo.Deferred();
 			var that = this;
@@ -64,6 +64,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			this.url = params[2];
 			this.initTitleBar(params[1], params[0]);
 			
+			dojo.empty(dojo.byId("welcomeDiv"));
 			dojo.empty(dojo.byId("cloneDiv"));
 			dojo.empty(dojo.byId("commitDiv"));
 			dojo.empty(dojo.byId("fetchDiv"));
@@ -71,11 +72,14 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			
 			this.fileClient.loadWorkspace().then(
 				function(workspace){
+					that.defaultPath = workspace.ChildrenLocation;
 					that.commandService.registerCommandContribution("fetch", "eclipse.orion.git.fetch", 200);
 					that.commandService.registerCommandContribution("fetch", "eclipse.orion.git.fetchForce", 250);
-					that.commandService.registerCommandContribution("add", "eclipse.addRemotePullRequestCommand", 300);
+					that.commandService.registerCommandContribution("add", "eclipse.addRemoteReviewRequestCommand", 300);
 					var tableNode = dojo.byId("cloneDiv");
 					
+					dojo.create("div", {"class" : "stretch", id : "instruction", style: "width: 500px height: 100px" }, dojo.byId("welcomeDiv"));
+					dojo.create("div", {id : "instruction1", style: "padding-top: 20px" }, dojo.byId("welcomeDiv"));
 					var titleWrapper1 = new mSection.Section(dojo.byId("commitDiv"), {
 						id: "open commit from existing repository", //$NON-NLS-0$
 						title: "Commit not found", //$NON-NLS-0$
@@ -109,23 +113,35 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						content: '<div id="remoteNode" class="mainPadding"></list>' //$NON-NLS-0$
 					});
 					
+					dojo.byId("commitDiv").style.display = " none ";
+					dojo.byId("fetchDiv").style.display = " none ";
+					dojo.byId("remoteDiv").style.display = " none ";
+					
 					that.renderCloneSection(params);
 					if(workspace.Children.length === 0){
 						dojo.byId("addTitle").innerHTML = "There are no repositories in the workspace";
+						var text =  "You are trying to review contribution " + params[1] + " from " + params[0] +  " <br><br>Unfortunately the commit can not be found in your workspace. To see it try one of the following: ";
+						dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text}, dojo.byId("instruction"));
+						dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML: "<br>"}, dojo.byId("instruction"));
+						dojo.byId("commitDiv").style.display = " none ";
+						dojo.byId("fetchDiv").style.display = " none ";
+						dojo.byId("remoteDiv").style.display = " none ";
+					
 					}
-					that.renderSections(workspace.Children, params[0], params[2], params[1]);
+				that.renderSections(workspace.Children, params[0], params[2], params[1]);
 				}
+				
 			);
 		};
 		
-		GitPullRequestExplorer.prototype.renderCloneSection = function(params){
+		GitReviewRequestExplorer.prototype.renderCloneSection = function(params){
 			var that = this;
-			that.commandService.registerCommandContribution("clone", "eclipse.cloneGitRepositoryPullReq", 200);
+			that.commandService.registerCommandContribution("clone", "eclipse.cloneGitRepositoryReviewReq", 200);
 			that.commandService.renderCommands("clone", dojo.byId("cloneNode"), "clone", that, "button", params[0]);;
 			dojo.create("span", { style: "padding: 0px; text-align: left;", class: "gitMainDescription", innerHTML : " using " + params[0] },  dojo.byId("cloneNode"));
 		};
 		
-		GitPullRequestExplorer.prototype.renderSections = function(repositories, url1, url2, sha){
+		GitReviewRequestExplorer.prototype.renderSections = function(repositories, url1, url2, sha){
 			var that = this;
 
 			var findCommitLocation = function (repositories, commitName, deferred, that) {
@@ -148,9 +164,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 				
 				return deferred;
 			};
-
-			
 			if (repositories.length > 0) {
+				dojo.empty(dojo.byId("instruction"));
+				var text =  "You are trying to review contribution " + sha + " from " + url1 +  " <br><br>Unfortunately the commit can not be found in your workspace. To see it try one of the following: ";
+				dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text}, dojo.byId("instruction"));
 				repositories[0].Content = {};
 				var path = "root / "; //$NON-NLS-0$
 				if (repositories[0].Parents !== null && repositories[0].Parents !== undefined){
@@ -185,7 +202,12 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 											var link2 = dojo.create("a", {style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: repositories[0].Name , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
 											dojo.create("span", {class: "gitSecondaryDescription", innerHTML: "location: " + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
 											var link = dojo.create("a", {id : resp.Children[0].Id + "a", style: "padding: 0px; text-align: left; width: 50px", innerHTML: "Open Commit", href: commitPageURL },  dojo.byId(resp.Children[0].Id + "divCommands"));
-											dojo.byId("open commit from existing repositoryTitle").innerHTML = "Open Commit";
+											dojo.byId("open commit from existing repositoryTitle").innerHTML = "The commit can be found on the following repositories";
+											dojo.byId("commitDiv").style.display = " block ";
+											dojo.byId("moreOptionsDiv").style.display = " block ";
+											dojo.empty(dojo.byId("instruction"));
+											var text2 =  "You are trying to review contribution " + sha + " from " + url1;
+											dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text2}, dojo.byId("instruction"));
 											
 											var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
 											    commit: that.currentCommit.Children[0],
@@ -236,7 +258,22 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 											dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: resp.Children[0].Name + "    " , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
 											dojo.create("span", {class: "gitSecondaryDescription", innerHTML: "location: " + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
 											that.commandService.renderCommands("fetch", dojo.byId(resp.Children[0].Id + "divCommands"), remotes.Children[index], that, "tool");
-											dojo.byId("fetch sectionTitle").innerHTML = "Fetch from repository with the remote attached";
+											dojo.byId("fetch sectionTitle").innerHTML = "Try to update your repositories";
+											dojo.byId("fetchDiv").style.display = " block ";
+											dojo.empty(dojo.byId("instruction"));
+											var style = dojo.style("commitDiv", "display");
+											var text2;
+											if(style === "block"){
+												dojo.byId("moreOptionsDiv").style.display = " block ";
+												text2 =  "You are trying to review contribution " + sha + " from " + url1;
+											}
+											if(style === "none"){
+												text2 = "You are trying to review contribution " + sha + " from " + url1 +  " <br><br>Unfortunately the commit can not be found in your workspace. To see it try one of the following: ";												
+												dojo.byId("moreOptionsDiv").style.display = " none ";
+											}
+											dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text2}, dojo.byId("instruction"));
+
+											
 										}
 									);	
 								} else {
@@ -247,7 +284,19 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 									dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: resp.Children[0].Name + "    " , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
 									dojo.create("span", {class: "gitSecondaryDescription", innerHTML: "location: " + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
 									that.commandService.renderCommands("add", dojo.byId(resp.Children[0].Id + "divCommands"), resp.Children[0], that, "tool",  url1);
-									dojo.byId("addTitle").innerHTML = "Attach remote " + url1 + " to existing repository and fetch";
+									dojo.byId("addTitle").innerHTML = "Attach the remote to one of existing repositories";
+									dojo.byId("remoteDiv").style.display = " block ";
+									dojo.byId("moreOptionsDiv").style.display = " block ";
+									var style = dojo.style("commitDiv", "display");
+									var text2;
+									if(style === "block"){
+										dojo.byId("moreOptionsDiv").style.display = " block ";
+										text2 =  "You are trying to review contribution " + sha + " from " + url1;
+									}
+									if(style === "none"){
+										text2 = "You are trying to review contribution " + sha + " from " + url1 +  " <br><br>Unfortunately the commit can not be found in your workspace. To see it try one of the following: ";												
+										dojo.byId("moreOptionsDiv").style.display = " none ";
+									}
 									for(var i=0;i<remotes.Children.length;i++){
 										dojo.create("div", {}, dojo.byId(resp.Children[0].Id + "div"));
 										resp.Children[0].RemoteLocation = "/gitapi/remote" + repositories[0].Location;
@@ -255,7 +304,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 									}
 								}
 								
-								that.renderSections(repositories.slice(1), url1, url2, sha);	
+								that.renderSections(repositories.slice(1), url1, url2, sha);
 							}
 						);
 					}
@@ -263,19 +312,19 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			}
 		};
 		
-		GitPullRequestExplorer.prototype.initTitleBar = function(commit, url){
-			var title = "Pull Request for " + commit + " on " + url;
+		GitReviewRequestExplorer.prototype.initTitleBar = function(commit, url){
+			var title = "Contribution Review Request for " + commit + " on " + url;
 			
 			var item = {};
 			item.Name = title;
 			
 			mGlobalCommands.setPageTarget({
-				task: "Pull Request",
+				task: "Contribution Review Request",
 				breadcrumbTarget: item
 			});
 		};
 		
-		return GitPullRequestExplorer;
+		return GitReviewRequestExplorer;
 	}());
 	
 	return exports;
