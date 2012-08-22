@@ -47,7 +47,6 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("pageActions", "eclipse.gitGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.cherryPick", 100, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.getPullRequestUrl", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.askForReviewCommand", 101, "eclipse.gitGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("pageActions", "eclipse.orion.git.openCommitCommand", 102, "eclipse.gitGroup", true, new mCommands.CommandKeyBinding('h', true, true)); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
