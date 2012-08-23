@@ -876,7 +876,7 @@ exports.InlineCompareContainer = (function() {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._registry = serviceRegistry;
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
-		this._fileClient = this._registry.getService("orion.core.file"); //$NON-NLS-0$
+		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._statusService = this._registry.getService("orion.page.message"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		this.setOptions({readonly: true});
