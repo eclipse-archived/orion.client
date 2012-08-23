@@ -898,11 +898,11 @@ eclipse.GitService = (function() {
 				handleAs: "json", //$NON-NLS-0$
 				timeout: 15000,
 				postData : dojo.toJson({
-					"PullReqCommit": commit,
-					"PullReqUrl" : url, //$NON-NLS-0$
-					"PullReqNotifyLogin" : login, //$NON-NLS-0$	
-					"PullReqAuthorName" : authorName,
-					"PullReqMessage" : message
+					"ReviewReqCommit": commit,
+					"ReviewReqUrl" : url, //$NON-NLS-0$
+					"ReviewReqNotifyLogin" : login, //$NON-NLS-0$	
+					"ReviewReqAuthorName" : authorName,
+					"ReviewMessage" : message
 				}),
 				load: function(jsonData, xhrArgs) {
 					dojo.hitch(service, service._getGitServiceResponse)(clientDeferred, jsonData, xhrArgs);
