@@ -24,9 +24,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	 */
 
 	function ServiceReference(serviceId, names, properties) {
-		this.properties = properties || {};
-		this.properties["service.id"] = serviceId;
-		this.properties["service.names"] = names;
+		this._properties = properties || {};
+		this._properties["service.id"] = serviceId;
+		this._properties["service.names"] = names;
 	}
 
 	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */
@@ -37,8 +37,8 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		getPropertyKeys: function() {
 			var result = [];
 			var name;
-			for (name in this.properties) {
-				if (this.properties.hasOwnProperty(name)) {
+			for (name in this._properties) {
+				if (this._properties.hasOwnProperty(name)) {
 					result.push(name);
 				}
 			}
@@ -50,7 +50,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		 * @param {String} propertyName The name of the service property to return
 		 */
 		getProperty: function(propertyName) {
-			return this.properties[propertyName];
+			return this._properties[propertyName];
 		}
 	};
 	ServiceReference.prototype.constructor = ServiceReference;
@@ -66,9 +66,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	 */
 
 	function ServiceRegistration(serviceId, serviceReference, internalRegistry) {
-		this.serviceId = serviceId;
-		this.serviceReference = serviceReference;
-		this.internalRegistry = internalRegistry;
+		this._serviceId = serviceId;
+		this._serviceReference = serviceReference;
+		this._internalRegistry = internalRegistry;
 	}
 	ServiceRegistration.prototype = /** @lends orion.serviceregistry.ServiceRegistration.prototype */
 	{
@@ -76,14 +76,14 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		 * Unregister this service registration.
 		 */
 		unregister: function() {
-			this.internalRegistry.unregisterService(this.serviceId);
+			this._internalRegistry.unregisterService(this._serviceId);
 		},
 
 		/**
 		 * Returns a reference to this registered service.
 		 */
 		getServiceReference: function() {
-			return this.serviceReference;
+			return this._serviceReference;
 		}
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
@@ -151,7 +151,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		this._namedReferences = {};
 		this._serviceEventTarget = new EventTarget();
 		var that = this;
-		this.internalRegistry = {
+		this._internalRegistry = {
 			isRegistered: function(serviceId) {
 				return that._entries[serviceId] ? true : false;
 			},
@@ -235,7 +235,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			
 			var deferredService = new DeferredService(implementation);
 			var registered = new Deferred();
-			var registeredService = new RegisteredService(serviceId, deferredService, this.internalRegistry, registered);
+			var registeredService = new RegisteredService(serviceId, deferredService, this._internalRegistry, registered);
 			
 			var reference = new ServiceReference(serviceId, names, properties);
 			var namedReferences = this._namedReferences;
@@ -250,7 +250,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			});
 	
 			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, deferredService).then(registered.resolve);
-			return new ServiceRegistration(serviceId, reference, this.internalRegistry);
+			return new ServiceRegistration(serviceId, reference, this._internalRegistry);
 		},
 
 		/**
