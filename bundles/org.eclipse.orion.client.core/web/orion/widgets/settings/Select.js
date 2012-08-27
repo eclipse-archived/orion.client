@@ -32,6 +32,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 			console.log( 'ColorPicker setStorageIem' ); //$NON-NLS-0$
 		},
 		
+		getSelected: function(){
+			return this.selection.value;
+		},
+		
 		change: function(){
 		
 			var value = this.selection.value;
