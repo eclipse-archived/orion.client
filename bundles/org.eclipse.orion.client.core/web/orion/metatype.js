@@ -11,14 +11,14 @@
 /*global define*/
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var PROPERTY_CLASSES = 'classes', PROPERTY_DESIGNATES = 'designates'; //$NON-NLS-0$ //$NON-NLS-1$
-	var METATYPE_SERVICE = 'orion.cm.metatype';
+	var METATYPE_SERVICE = 'orion.cm.metatype'; //$NON-NLS-0$
 	var PropertyTypeImpl, ObjectClassImpl;
 
 	/**
 	 * @name orion.metatype.MetaTypeRegistry
-	 * @class
-	 * @description
-	 * @param {orion.serviceRegistry.ServiceRegistry} serviceRegistry
+	 * @class Maintains a registry of metatype information.
+	 * @description A MetaTypeRegistry provides access to metatype information from the service registry.
+	 * @param {orion.serviceRegistry.ServiceRegistry} serviceRegistry The service registry to monitor.
 	 */
 	function MetaTypeRegistry(serviceRegistry) {
 		function forEach(serviceRef, propertyName, func) {
@@ -64,6 +64,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		getObjectClassForPid: function(pid) {
 			return this.pidsMap[pid] || null;
 		},
+		/**
+		 * Returns the object class with the given ID.
+		 * @param {String} classId The object class ID to look up.
+		 * @returns {orion.metatype.ObjectClass} The object class, or <code>null</code> if no object class 
+		 * with the given ID exists.
+		 */
 		getObjectClass: function(classId) {
 			return this.ocsMap[classId] || null;
 		}
