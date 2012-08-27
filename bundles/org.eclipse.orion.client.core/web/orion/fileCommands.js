@@ -366,11 +366,16 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							if(contentType1 && contentType1['extends'] === "text/plain" && contentType2 && contentType2['extends'] === "text/plain"){
 								return true;
 							}
+						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
+							return false;
 						}
 					}
 					return false;
 				},
 				hrefCallback: function(data) {
+					if(data.items[0].Directory && data.items[1].Directory){
+						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location;
+					}
 					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true});
 				}
 			});
@@ -472,7 +477,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			}
 		}
 		
-		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Name:'], messages['New File'])]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var newFileCommand =  new mCommands.Command({
 			name: messages["New File"],

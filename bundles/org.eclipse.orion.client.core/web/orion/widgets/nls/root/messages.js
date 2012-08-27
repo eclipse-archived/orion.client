@@ -70,5 +70,6 @@ define({
 	"Overwrite if source is newer" : "Overwrite if source is newer",
 	"New" : "New",
 	"Building file skeleton..." : "Building file skeleton...",
-	"Add" : "Add"
+	"Add" : "Add",
+	"Upload..." : "Upload..."
 });

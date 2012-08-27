@@ -72,7 +72,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._hitCounter = 0;
 		this._totalCounter = 0;
 		this._searchOnName = options && options.searchOnName;
-		this.queryObj = this._searchOnName ? null: mSearchUtils.parseQueryStr(queryStr);
+		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
+		this.queryObj = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.parseQueryStr(queryStr);
 		this._location = options && options.location;
 	}
 	
@@ -137,15 +138,15 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype.buildSkeleton = function(onBegin, onComplete){
 		this._buildingSkeleton = true;
 		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
-		var self = this;
+		var that = this;
 		onBegin();
 		contentTypeService.getContentTypes().then(function(ct) {
-			self.contentTypesCache = ct;
-			var result = self._visitRecursively(self._location+ "?depth=1").then(function(){ //$NON-NLS-0$
-					this._buildingSkeleton = false;
+			that.contentTypesCache = ct;
+			var result = that._visitRecursively(that._location+ "?depth=1").then(function(){ //$NON-NLS-0$
+					that._buildingSkeleton = false;
 					onComplete();
-					if(self.queryObj){
-						self.searchName();
+					if(that.queryObj && !that._buildSkeletonOnly){
+						that.searchName();
 					}
 			});
 		});
@@ -186,7 +187,12 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				if(children[i].Directory!==undefined && children[i].Directory===false){
 					if(self._searchOnName){
 						results.push(self._buildSingleSkeleton(children[i]));
-					} else {
+					} else if(self._buildSkeletonOnly){
+						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
+						if(contentType && contentType['extends'] === "text/plain"){ //$NON-NLS-0$ //$NON-NLS-0$
+							results.push(self._buildSingleSkeleton(children[i]));
+						}
+					}else {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
 						if(contentType && contentType['extends'] === "text/plain"){ //$NON-NLS-0$ //$NON-NLS-0$
 							results.push(self._sniffSearch(children[i]));
@@ -232,7 +238,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){
 		this._totalCounter++;
 		this.fileSkeleton.push(fileObj);
-		if(this.queryObj && this._totalCounter%100 == 0){
+		if(this.queryObj && !this._buildSkeletonOnly && this._totalCounter%100 == 0){
 			this.searchName();
 		}
 		//console.log("skeltoned files : "+ this._totalCounter);
