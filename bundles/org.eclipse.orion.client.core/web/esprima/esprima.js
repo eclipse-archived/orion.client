@@ -1,4 +1,12 @@
 /*
+
+  Original copyright is below.  This is version git tag: 310927be9f.
+  Further modifications:
+  Author: Andy Clement (VMware) - recovery support
+
+
+  Original copyright:
+
   Copyright (C) 2012 Ariya Hidayat <ariya.hidayat@gmail.com>
   Copyright (C) 2012 Mathias Bynens <mathias@qiwi.be>
   Copyright (C) 2012 Joost-Wim Boekesteijn <joost-wim@boekesteijn.nl>
@@ -331,6 +339,42 @@ parseStatement: true, parseSourceElement: true */
 
     function nextChar() {
         return source[index++];
+    }
+    
+    
+    function isNewlineOrSemicolon(ch) {
+      return ch===';' || ch==='\n';
+    }
+    
+    /**
+     * rewind the lex position to the most recent newline or semicolon.  If that turns out
+     * to be the same position as the most recent parsing of a statement was attempted at, 
+     * don't rewind (because it will fail in the same way).  If it turns out to be the same
+     * position as where we last rewound to, don't do it.  Clears the buffer and sets the
+     * index in order to continue lexing from the new position.
+     */
+    function rewind() {
+        var idx = index;
+        while (idx>0 && !isNewlineOrSemicolon(source[idx])) {
+            idx--;
+        }
+        if (idx<=extra.statementStart) {
+            return;
+        }
+        var doRewind = false;
+        if (extra.lastRewindLocation) {
+            doRewind = true;
+        } else {
+            var v = extra.lastRewindLocation;
+            if (v!==idx) {
+              doRewind=true;
+            }
+        }	        
+        if (doRewind) {
+	        index = idx;
+	        buffer = null;
+	        extra.lastRewindLocation = index;
+        }
     }
 
     // 7.4 Comments
@@ -1288,7 +1332,10 @@ parseStatement: true, parseSourceElement: true */
         }
 
         token = lookahead();
-        if (token.type !== Token.EOF && !match('}')) {
+        if (token.type !== Token.EOF && !match('}')) {        
+            if (extra.errors) {
+                rewind();
+            }
             throwUnexpected(token);
         }
         return;
@@ -1574,11 +1621,89 @@ parseStatement: true, parseSourceElement: true */
 
         return args;
     }
+    
+    // TODO refactor
+    /**
+     * From a position 'idx' in the source this function moves back through the source until
+     * it finds a non-whitespace (including newlines) character.  It will jump over block comments.
+     * Returns an object with properties: index - the index it rewound to.  lineChange - boolean indicating
+     * if a line was crossed during rewind.
+     */
+    function rewindToInterestingChar(idx) {
+        var done = false;
+        var lineChange=false;
+        var ch;
+        while (!done) {
+          ch = source[idx];
+          if (ch==='/') {
+            // possibly rewind over a block comment
+            if (idx>2 && source[idx-1]==='*') {
+                // it is, let's reverse over it
+                idx = idx - 2;
+                var skippedComment = false;
+                while (!skippedComment) {
+                    ch = source[idx];
+                    if (ch === '*') {
+                        if (idx>0 && source[idx-1]==='/') {
+                            skippedComment=true;
+                        }
+                    } else if (ch==='\n') {
+                        lineChange=true;
+                    }
+                    if (idx === 0) {
+                        skippedComment = true; // error scenario, hit front of array before finding /*
+                    }
+                    idx--;                
+                }
+            } else {
+              done=true;
+            }
+          } else 
+          if (ch==='\n') {
+              lineChange=true;
+          } else if (!isWhiteSpace(ch)) {
+              done=true;
+          }
+          if (!done) {
+              idx--;
+          }
+        }
+        return {"index":idx,"lineChange":lineChange};
+    }
+    
+    /**
+     * When a problem occurs in parseNonComputedProperty, attempt to reposition 
+     * the lexer to continue processing.
+     * Example: '(foo.)' we will hit the ')' instead of discovering a property and consuming the ')'
+     * will cause the parse of the paretheses to fail, so 'unconsume' it.
+     * Basically rewind by one token if punctuation (type 7) is hit and the char before it was
+     * a dot.  This will enable the enclosing parse rule to consume the punctuation.
+     */
+    function attemptRecoveryNonComputedProperty(token) {
+        if (token.value && token.type===Token.Punctuator) {
+            var rewindInfo = rewindToInterestingChar(index-token.value.length-1);
+            var idx = rewindInfo.index;
+            var ch= source[idx];
+            // Check if worth rewinding
+            // Special case:
+            // "foo.\n(foo())\n" - don't really want that to parse as "foo(foo())"
+            if (ch==='.' && rewindInfo.lineChange && token.value==='(') {
+                // do not recover in this case
+            } else if (ch==='.') {
+	            index = idx+1;
+	            buffer=null;
+            }
+        }
+    }
+
 
     function parseNonComputedProperty() {
         var token = lex();
 
         if (!isIdentifierName(token)) {
+            if (extra.errors) {
+                attemptRecoveryNonComputedProperty(token);
+            }
             throwUnexpected(token);
         }
 
@@ -2159,6 +2284,20 @@ parseStatement: true, parseSourceElement: true */
             expression: expr
         };
     }
+    
+    /**
+     * add the error if not already reported.
+     */
+    function pushError(error) {
+        var len = extra.errors.length;
+        for (var e=0; e < len; e++) {
+            var existingError = extra.errors[e];
+            if (existingError.index === error.index && existingError.message === error.message) {
+                return; // do not add duplicate
+            }
+        }
+        extra.errors.push(error);
+    }
 
     // 12.5 If statement
 
@@ -2171,9 +2310,32 @@ parseStatement: true, parseSourceElement: true */
 
         test = parseExpression();
 
-        expect(')');
+        // needs generalizing to a 'expect A but don't consume if you hit B or C'
+        try {
+            expect(')');
+        } catch (e) {
+            if (extra.errors) {
+	            pushError(e);
+	            // If a { was hit instead of a ) then don't consume it, let us assume a ')' was 
+	            // missed and the consequent block is OK
+	            if (source[e.index] === '{') {
+	              index=e.index;
+	              buffer=null;
+	            // activating this block will mean the following statement is parsed as a consequent.
+	            // without it the statement is considered not at all part of the if at all
+	//            } else {
+	//              rewind();
+	            }
+            } else {
+                throw e;
+            }
+        }
 
         consequent = parseStatement();
+        // required because of the check in wrapTracking that returns nothing if node is undefined
+        if (!consequent) {
+            consequent = null;
+        }
 
         if (matchKeyword('else')) {
             lex();
@@ -2746,7 +2908,7 @@ parseStatement: true, parseSourceElement: true */
         expr = parseExpression();
 
         // 12.12 Labelled Statements
-        if ((expr.type === Syntax.Identifier) && match(':')) {
+        if (expr && (expr.type === Syntax.Identifier) && match(':')) {
             lex();
 
             if (Object.prototype.hasOwnProperty.call(state.labelSet, expr.name)) {
@@ -2763,8 +2925,9 @@ parseStatement: true, parseSourceElement: true */
                 body: labeledBody
             };
         }
-
+        
         consumeSemicolon();
+
 
         return {
             type: Syntax.ExpressionStatement,
@@ -3308,6 +3471,29 @@ parseStatement: true, parseSourceElement: true */
 
         var wrapTracking;
 
+        function wrapThrow(parseFunction) {
+            return function () {
+                try {
+                    return parseFunction.apply(null, arguments);
+                } catch (e) {
+					pushError(e);
+					return null;
+                }
+            };
+        }
+        
+        function wrapThrowParseStatement(parseFunction) {
+            return function () {
+                extra.statementStart = index; // record where attempting to parse statement from
+                try {
+                    return parseFunction.apply(null, arguments);
+                } catch (e) {
+					pushError(e);
+//					return null;
+                }
+            };
+        }
+
         if (extra.comments) {
             extra.skipComment = skipComment;
             skipComment = scanComment;
@@ -3318,7 +3504,7 @@ parseStatement: true, parseSourceElement: true */
             createLiteral = createRawLiteral;
         }
 
-        if (extra.range || extra.loc) {
+        if (extra.range || extra.loc || extra.errors) {
 
             wrapTracking = wrapTrackingFunction(extra.range, extra.loc);
 
@@ -3358,6 +3544,7 @@ parseStatement: true, parseSourceElement: true */
             extra.parseUnaryExpression = parseUnaryExpression;
             extra.parseVariableDeclaration = parseVariableDeclaration;
             extra.parseVariableIdentifier = parseVariableIdentifier;
+            extra.consumeSemicolon = consumeSemicolon;
 
             parseAdditiveExpression = wrapTracking(extra.parseAdditiveExpression);
             parseAssignmentExpression = wrapTracking(extra.parseAssignmentExpression);
@@ -3396,6 +3583,14 @@ parseStatement: true, parseSourceElement: true */
             parseVariableDeclaration = wrapTracking(extra.parseVariableDeclaration);
             parseVariableIdentifier = wrapTracking(extra.parseVariableIdentifier);
         }
+        
+        if (extra.errors) {
+            parseStatement = wrapThrowParseStatement(parseStatement);
+            parseExpression = wrapThrow(parseExpression);
+            // this enables 'foo.<EOF>' to return something
+            parseNonComputedProperty = wrapThrow(parseNonComputedProperty);
+            consumeSemicolon = wrapThrow(consumeSemicolon);
+        }
 
         if (typeof extra.tokens !== 'undefined') {
             extra.advance = advance;
@@ -3415,7 +3610,7 @@ parseStatement: true, parseSourceElement: true */
             createLiteral = extra.createLiteral;
         }
 
-        if (extra.range || extra.loc) {
+        if (extra.range || extra.loc || extra.errors) {
             parseAdditiveExpression = extra.parseAdditiveExpression;
             parseAssignmentExpression = extra.parseAssignmentExpression;
             parseBitwiseANDExpression = extra.parseBitwiseANDExpression;
@@ -3452,6 +3647,7 @@ parseStatement: true, parseSourceElement: true */
             parseUnaryExpression = extra.parseUnaryExpression;
             parseVariableDeclaration = extra.parseVariableDeclaration;
             parseVariableIdentifier = extra.parseVariableIdentifier;
+            consumeSemicolon = extra.consumeSemicolon;
         }
 
         if (typeof extra.scanRegExp === 'function') {
