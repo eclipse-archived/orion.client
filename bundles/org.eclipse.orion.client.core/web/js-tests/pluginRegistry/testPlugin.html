@@ -12,7 +12,13 @@
 		  }
 		});
 		require(["orion/Deferred", "orion/EventTarget", "orion/plugin", "domReady!"], function(Deferred, EventTarget, PluginProvider) {
-			var provider = new PluginProvider();
+			var headers = {
+				name: "test plugin",
+				description: "This is a test plugin",
+				license: "http://eclipse.org/org/documents/edl-v10.php",
+				website: "http://eclipse.org/orion"
+			};
+			var provider = new PluginProvider(headers);
 			var impl = {
 				test: function(echo) {
 					return echo;
