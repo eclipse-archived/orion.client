@@ -90,7 +90,7 @@ a:hover {
 /* Row selection */
 
 .checkedRow {
-	background-color: #ffeecc !important; /* was e3e3e3 */
+	background: #ffeecc !important; /* was e3e3e3 */
 }
 
 .navbar-item-selected {

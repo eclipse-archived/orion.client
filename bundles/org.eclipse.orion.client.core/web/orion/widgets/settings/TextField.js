@@ -43,6 +43,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 			dojo.style( this.textfield, 'width', value );
 		},
 		
+		setValue: function( value ){
+			this.textfield.value = value;
+		},
+		
 		change: function(){
 		
 			if( this.selection && this.selection.value ){

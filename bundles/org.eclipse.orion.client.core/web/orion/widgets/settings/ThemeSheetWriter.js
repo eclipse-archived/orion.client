@@ -292,7 +292,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			styles.push( searchboxFocus );
 			
 			var checkedRow = new ThemeClass.ThemeClass( 'checkedRow' );
-			checkedRow.style.background = this.selection; /* was e3e3e3 */
+//			checkedRow.style.background = this.selection; /* was e3e3e3 */
+			checkedRow.style.cssText = 'background:' + this.selection + ' !important;';
 			
 			styles.push( checkedRow );
 			
