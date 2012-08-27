@@ -75,6 +75,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.settings.navtext = new Family( 'Navtext', '#bfbfbf' );
 			this.settings.content = new Family( 'ContentText', '#3087B3' );
 			this.settings.search = new Family( 'Search', '#444' );
+			this.settings.lines = new Family( 'Lines', '#E6E6E6' );
 			
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
@@ -316,15 +317,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			var x = UI_SIZE + 40;
 			
-		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt Lucida', '#333' );
+		    Component.drawText( ctx, component.description.toUpperCase(), LEFT + x, TOP + 10, 'bold 9pt sans-serif', '#333' );
 		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x+190, TOP + 20, 10, '#333' );   
-		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 45, '8pt Lucida', '#333' ); 
+		    Component.drawText( ctx, 'COLOR:', LEFT + x, TOP + 45, '8pt sans-serif', '#333' ); 
 		    Component.drawRectangle( ctx, LEFT + x + 80, TOP + 36, 30, 10, component.fill, null );	    
-		    Component.drawText( ctx, 'COLOR STRING:  ', LEFT + x, TOP + 65, '8pt Lucida', '#333' );    
-		    Component.drawText( ctx, '  ' + component.fill, LEFT + x + 80, TOP + 65, '8pt Lucida', '#333' );     
+		    Component.drawText( ctx, 'COLOR STRING:  ', LEFT + x, TOP + 65, '8pt sans-serif', '#333' );    
+		    Component.drawText( ctx, '  ' + component.fill, LEFT + x + 80, TOP + 65, '8pt sans-serif', '#333' );     
 		    Component.drawLine( ctx, LEFT + x, TOP + 20, LEFT + x + 190, TOP + 20, 10, '#333' );       
 		    Component.drawLine( ctx, LEFT + x, TOP + 80, LEFT + x + 190, TOP + 80, 5, '#333' );    
-		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 105, 'bold 8pt Lucida', '#333' ); 
+		    Component.drawText( ctx, 'NEW COLOR:', LEFT + x, TOP + 105, 'bold 8pt sans-serif', '#333' ); 
 		    
 		    if( ARCS === true){
 			    for( var row = 0; row < 7; row ++ ){
@@ -515,7 +516,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					ctx.closePath();
 					ctx.globalAlpha = 1; 
 					
-					Component.drawText( ctx, component.description.toUpperCase(), LEFT + 5 + x, labely, 'bold 8pt Lucida', '#333' );	
+					Component.drawText( ctx, component.description.toUpperCase(), LEFT + 5 + x, labely, 'bold 8pt sans-serif', '#333' );	
 					
 					if( component.family ){ families.push( component.family ); }
 					
@@ -523,9 +524,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				}
 			}
 			
-			Component.drawText( ctx, 'CLICK DIAGRAM TO STYLE', LEFT + 5 + x, labely + 50, 'bold 8pt Lucida', '#cc0000' );
-			Component.drawText( ctx, 'PRESS APPLY BUTTON TO', LEFT + 5 + x, labely + 65, 'bold 8pt Lucida', '#cc0000' );
-			Component.drawText( ctx, 'APPLY PREVIEW', LEFT + 5 + x, labely + 80, 'bold 8pt Lucida', '#cc0000' );
+			Component.drawText( ctx, 'CLICK DIAGRAM TO STYLE', LEFT + 5 + x, labely + 50, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, 'PRESS APPLY BUTTON TO', LEFT + 5 + x, labely + 65, 'bold 8pt sans-serif', '#cc0000' );
+			Component.drawText( ctx, 'APPLY PREVIEW', LEFT + 5 + x, labely + 80, 'bold 8pt sans-serif', '#cc0000' );
 			
 			var stringcontainer = document.getElementById( 'stringcontainer' );
 				stringcontainer.style.display = 'none';
@@ -600,15 +601,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				search.description = 'Search Box';
 				search.family = settings.search.name;
 				
-				var navigator =Component.drawText( ctx, 'Navigator', LEFT + 50, TOP + 20, '8pt Lucida', settings.navtext.value );   
+				var navigator =Component.drawText( ctx, 'Navigator', LEFT + 50, TOP + 20, '8pt sans-serif', settings.navtext.value );   
 				navigator.description = 'Navigation Text';
 				navigator.family = settings.navtext.name;
 				
-				var username = Component.drawText( ctx, 'UserName', LEFT + UI_SIZE - 70, TOP + 20, '8pt Lucida', settings.navtext.value );
+				var username = Component.drawText( ctx, 'UserName', LEFT + UI_SIZE - 70, TOP + 20, '8pt sans-serif', settings.navtext.value );
 				username.description = 'Navigation Text';
 				username.family = settings.navtext.name;
 				
-				var breadcrumb = Component.drawText( ctx, 'Orion Content', LEFT + 5, TOP + BANNER_HEIGHT + 18, '8pt Lucida', settings.content.value );
+				var breadcrumb = Component.drawText( ctx, 'Orion Content', LEFT + 5, TOP + BANNER_HEIGHT + 18, '8pt sans-serif', settings.content.value );
 				breadcrumb.description = 'Content Text';
 				breadcrumb.family = settings.content.name;
 				
@@ -638,7 +639,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 					/* Section Items */
 					
-					var content = Component.drawText( ctx, 'org.eclipse.orion.content', LEFT + UI_SIZE * 0.4 + 20, CONTENT_TOP + 56 + ( 20 * count ), '8pt Lucida', settings.content.value ); 
+					var content = Component.drawText( ctx, 'org.eclipse.orion.content', LEFT + UI_SIZE * 0.4 + 20, CONTENT_TOP + 56 + ( 20 * count ), '8pt sans-serif', settings.content.value ); 
 					content.description = 'Content Text';
 					content.family = settings.content.name;
 					zones.push( content );
@@ -652,7 +653,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				
 					/* Section Items */
 					
-					var item =Component.drawText( ctx, 'Item', LEFT + 15, CONTENT_TOP + 44 + ( 20 * count ), '8pt Lucida', settings.content.value ); 
+					var item =Component.drawText( ctx, 'Item', LEFT + 15, CONTENT_TOP + 44 + ( 20 * count ), '8pt sans-serif', settings.content.value ); 
 					item.description = 'Content Text';
 					item.family = settings.content.name;
 					zones.push( item );
@@ -679,12 +680,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		    
 		    var downArrow = Component.drawTriangle( ctx, LEFT + 10, CONTENT_TOP + 17, LEFT + 16, CONTENT_TOP + 17, LEFT + 13, CONTENT_TOP + 22, '#333' );
 		
-			var section = Component.drawText( ctx, 'Section', LEFT + 20, CONTENT_TOP + 23, '8pt Lucida', '#333' );        
+			var section = Component.drawText( ctx, 'Section', LEFT + 20, CONTENT_TOP + 23, '8pt sans-serif', '#333' );        
 		
 		
 			var sectionline = Component.drawLine( ctx, LEFT + 10, CONTENT_TOP + 29, LEFT + UI_SIZE * 0.4 - 10, CONTENT_TOP + 29, 2, '#DEDEDE' );		  
 		        
-			var buttonText = Component.drawText( ctx, 'Button', LEFT + UI_SIZE * 0.4 + 8, CONTENT_TOP + 19, '8pt Lucida', '#333' );        
+			var buttonText = Component.drawText( ctx, 'Button', LEFT + UI_SIZE * 0.4 + 8, CONTENT_TOP + 19, '8pt sans-serif', '#333' );        
 			
 			for( var twisty = 0; twisty < 3; twisty++ ){
 				Component.drawTriangle( ctx, LEFT + UI_SIZE * 0.4 + 10, CONTENT_TOP + 50 + (twisty*20), 
