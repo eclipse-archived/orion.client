@@ -34,7 +34,7 @@ define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/oper
 				var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 
 				mGlobalCommands.generateBanner("orion-compare-tree", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-				var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compareContainer", commandService); //$NON-NLS-0$
+				var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandService); //$NON-NLS-0$
 				compareTreeExplorer.startup(dojo.hash());
 
 				// every time the user manually changes the hash, we need to load the diff.

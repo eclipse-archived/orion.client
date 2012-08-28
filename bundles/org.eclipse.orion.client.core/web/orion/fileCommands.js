@@ -367,7 +367,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 								return true;
 							}
 						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
-							return false;
+							return true;
 						}
 					}
 					return false;
