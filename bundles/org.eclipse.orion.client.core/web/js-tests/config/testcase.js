@@ -81,6 +81,9 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			configPromises.push( configAdmin.getConfiguration('orion.test.pid' + (i+1)) );
 		}
 		return Deferred.all(configPromises).then(function(createdConfigs) {
+			createdConfigs.forEach(function(config, i) {
+				config.update({foo: i});
+			});
 			return configAdmin.listConfigurations().then(function(listedConfigs) {
 				assert.equal(createdConfigs.length, 5);
 				assert.equal(listedConfigs.length, 5);
@@ -124,10 +127,20 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			assert.ok(properties);
 			assert.strictEqual(properties.pid, pid);
 			assert.strictEqual(properties.str, 'blort');
-			configuration.remove();
-			return configAdmin.getConfiguration(pid).then(function(configuration) {
-				assert.strictEqual(configuration.getProperties(), null);
-			});
+			return configuration.remove()
+				.then(configAdmin.listConfigurations.bind(configAdmin))
+				.then(function(listedConfigs) {
+					assert.ok(listedConfigs.every(function(config) {
+						return config !== null;
+					}), 'No null configuration in list');
+					assert.ok(listedConfigs.every(function(config) {
+						return config && pid !== config.getPid();
+					}), 'Removed configuration is not in list');
+				}).then(function() {
+					return configAdmin.getConfiguration(pid).then(function(configuration) {
+						assert.strictEqual(configuration.getProperties(), null);
+					});
+				});
 		});
 	});
 

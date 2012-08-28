@@ -167,10 +167,6 @@ ConfigStore = /** @ignore */ (function() {
 		_find: function(pid) {
 			return this.configs[pid] || null;
 		},
-		isNodeLoaded: function(pid) {
-			var node = this.prefs[pid];
-			return node && node.state() === 'resolve'; //$NON-NLS-0$
-		},
 		loadRoot: function() {
 			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
 			return this.prefRoot;
@@ -214,13 +210,20 @@ ConfigStore = /** @ignore */ (function() {
 			return this.loadRoot().then(function(prefRoot) {
 				var pids = prefRoot.keys();
 				return Deferred.all(pids.map(self.loadNode.bind(self))).then(function() {
-					return pids.map(self._find.bind(self));
+					var currentConfigs = [];
+					for (var i=0; i < pids.length; i++) {
+						var config = self._find(pids[i]);
+						if (config && config.getProperties() !== null) {
+							currentConfigs.push(config);
+						}
+					}
+					return currentConfigs;
 				});
 			});
 		},
 		remove: function(pid) {
 			var self = this;
-			Deferred.all([this.loadRoot(), this.loadNode(pid)]).then(function(result) {
+			return Deferred.all([this.loadRoot(), this.loadNode(pid)]).then(function(result) {
 				var prefRoot = result[0], prefNode = result[1];
 				// TODO want to remove the whole prefNode here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386582
 				prefNode.clear();
@@ -297,8 +300,9 @@ ConfigImpl = /** @ignore */ (function() {
 			this._checkRemoved();
 			var self = this;
 			self.factory.notifyDeleted(self);
-			this.store.remove(this.pid);
+			var promise = this.store.remove(this.pid);
 			this._removed = true;
+			return promise;
 		},
 		update: function(props) {
 			this._checkRemoved();
