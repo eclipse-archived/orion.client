@@ -44,7 +44,7 @@ var ReviewRequestDialog = dojo.declare("orion.git.widgets.ReviewRequestDialog", 
 	postMixInProperties : function() {
 		this.options.title = this.options.title || messages["Contribution Review Request"];
 		this.selectFile = messages["Paste link in email or IM"];
-		this.reviewerName = messages["or sent the link to the reviewer"];
+		this.reviewerName = messages["Send the link to the reviewer"];
 
 		this.inherited(arguments);
 	},
