@@ -294,8 +294,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 		
 		GitReviewRequestExplorer.prototype.sshCheck = function(remote){
 				var url = remote;
-				var isSsh = remote.split(":")[0];
-				if(isSsh === "ssh"){
+				var scheme = new dojo._Url(url).scheme;
+				if(scheme === "ssh"){
 					var indexOfAt = url.indexOf("@");
 					if(indexOfAt !== -1){
 						var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);

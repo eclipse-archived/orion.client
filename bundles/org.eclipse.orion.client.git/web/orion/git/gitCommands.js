@@ -1700,8 +1700,8 @@ var exports = {};
 			callback: function(data) {
 				var sshCheck = function(gitUrl){
 					var url = gitUrl;
-					var isSsh = gitUrl.split(":")[0];
-					if(isSsh === "ssh"){
+					var scheme = new dojo._Url(url).scheme;
+					if(scheme === "ssh"){
 						var indexOfAt = url.indexOf("@");
 						if(indexOfAt !== -1){
 							var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
