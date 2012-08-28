@@ -72,12 +72,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 */
 	function SettingImpl(json) {
 		this.pid = json.pid;
-		this.isRef = typeof json.classId === 'string';
-		this.classId = this.isRef ? json.classId : this.pid + '.type';
-		this.name = typeof json.name === 'string' ? json.name : null;
+		this.isRef = typeof json.classId === 'string'; //$NON-NLS-0$
+		this.classId = this.isRef ? json.classId : this.pid + '.type'; //$NON-NLS-0$
+		this.name = typeof json.name === 'string' ? json.name : null; //$NON-NLS-0$
 		this.properties = null;
 		this.tags = json.tags;
-		if (!this.pid) { throw new Error('Missing "pid" property'); }
+		if (!this.pid) { throw new Error('Missing "pid" property'); } //$NON-NLS-0$
 	}
 	SettingImpl.prototype = {
 		getName: function() { return this.name; },
@@ -153,9 +153,9 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 
 	/**
 	 * @name orion.settings.SettingsRegistry
-	 * @class
-	 * @description
-	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to consult.
+	 * @class Maintains a registry of settings.
+	 * @description A SettingsRegistry provides access to information about settings registered with the service registry.
+	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to monitor.
 	 * @param {orion.metatype.MetaTypeRegistry} metaTypeRegistry The metatype registry to look up Object Classes in.
 	 */
 	function SettingsRegistry(serviceRegistry, metaTypeRegistry) {
@@ -164,6 +164,10 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		tracker.open();
 	}
 	SettingsRegistry.prototype = /** @lends orion.settings.SettingsRegistry.prototype */ {
+		/**
+		 * Returns all settings.
+		 * @returns {orion.settings.Setting[]}
+		 */
 		getSettings: function() {
 			var settingsMap = this.settingsMap;
 			return Object.keys(settingsMap).map(function(pid) {
