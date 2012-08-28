@@ -362,5 +362,5 @@ define({
 	"Ask for review tooltip" : "Send email with request for commit review",
 	"Reviewer name" : "Reviewer name",
 	"Contribution Review Request" : "Contribution Review Request",
-	"or sent the link to the reviewer" : "or sent the link to the reviewer"
+	"Send the link to the reviewer" : "Send the link to the reviewer"
 });
