@@ -51,8 +51,9 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			var that = this;
 			var params = [];
 			var n = remote_sha.lastIndexOf("_");
-			params[0] = remote_sha.substring(0,n);
+			var url = remote_sha.substring(0,n);
 			params[1] = remote_sha.substring(n+1);
+			params[0] = this.sshCheck(url);
 			var redundant = params[0].split(".");
 			var index = redundant.length - 1;
 			if(redundant[index] === "git"){
@@ -64,7 +65,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			}
 			this.url = params[2];
 			this.initTitleBar(params[1], params[0]);
-			
+
 			dojo.empty(dojo.byId("welcomeDiv"));
 			dojo.empty(dojo.byId("cloneDiv"));
 			dojo.empty(dojo.byId("commitDiv"));
@@ -137,7 +138,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			var that = this;
 			that.progressService.setProgressMessage("");
 			that.commandService.registerCommandContribution("clone", "eclipse.cloneGitRepositoryReviewReq", 200);
-			that.commandService.renderCommands("clone", dojo.byId("cloneNode"), "clone", that, "button", params[0]);;
+			that.commandService.renderCommands("clone", dojo.byId("cloneNode"), "clone", that, "button", params[0]);
 			dojo.create("span", { style: "padding: 0px; text-align: left;", class: "gitMainDescription", innerHTML : " using " + params[0] },  dojo.byId("cloneNode"));
 		};
 		
@@ -182,8 +183,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 							function(remotes){
 								var foundRemote = false;
 								for(var i=0;i<remotes.Children.length;i++){
-									if(remotes.Children[i].GitUrl === url1 || remotes.Children[i].GitUrl === url2)
+									var url = that.sshCheck(remotes.Children[i].GitUrl);
+									if(url === url1 || url === url2){
 										foundRemote = true;
+									}
 								}
 								if(foundRemote){
 									findCommitLocation(repositories, sha, null, that).then(	
@@ -238,7 +241,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 										function(){
 											var index;
 											for(var i=0;i<remotes.Children.length;i++){
-												if(remotes.Children[i].GitUrl === url1 || remotes.Children[i].GitUrl === url2){
+												var url = that.sshCheck(remotes.Children[i].GitUrl);
+												if(url === url1 || url === url2){
 													index = i;
 												}
 											}
@@ -287,6 +291,19 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 				breadcrumbTarget: item
 			});
 		};
+		
+		GitReviewRequestExplorer.prototype.sshCheck = function(remote){
+				var url = remote;
+				var isSsh = remote.split(":")[0];
+				if(isSsh === "ssh"){
+					var indexOfAt = url.indexOf("@");
+					if(indexOfAt !== -1){
+						var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
+						url = urlNoUser;
+					}
+				}
+				return url;
+			};
 		
 		return GitReviewRequestExplorer;
 	}());
