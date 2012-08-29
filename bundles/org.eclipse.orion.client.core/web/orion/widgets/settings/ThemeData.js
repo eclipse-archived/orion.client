@@ -21,7 +21,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#333';
 		StyleSet.prototype.button = '#777777';
-		StyleSet.prototype.location = '#efefef';
+		StyleSet.prototype.location = '#333';
+		StyleSet.prototype.breadcrumb = '#3087B3';
+		StyleSet.prototype.separator = '#333';
 		StyleSet.prototype.selection = 'FEC';
 		StyleSet.prototype.sidepanel = '#FBFBFB';
 		StyleSet.prototype.mainpanel = 'white';
@@ -44,6 +46,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			orion.navtext = '#bfbfbf';
 			orion.content = '#3087B3';
 			orion.search = '#444';
+			orion.breadcrumb = '#3087B3';
+			orion.separator = '#333';
 
 			this.styles.push( orion );			
 
@@ -60,6 +64,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			eire.navtext = '#FBFBFB';
 			eire.content = 'darkgreen';
 			eire.search = 'darkgreen';
+			eire.breadcrumb = '#3087B3';
+			eire.separator = 'seagreen';
 			
 			this.styles.push( eire );
 			
@@ -76,6 +82,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			avril.navtext = '#FBFBFB';
 			avril.content = 'mediumorchid';
 			avril.search = 'violet';
+			avril.breadcrumb = '#3087B3';
+			avril.separator = 'plum';
 			
 			this.styles.push( avril );
 			
@@ -92,6 +100,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			blue.navtext = '#FBFBFB';
 			blue.content = 'royalblue';
 			blue.search = 'royalblue';
+			blue.breadcrumb = '#3087B3';
+			blue.separator = 'cornflowerblue';
 			
 			this.styles.push( blue );
 			
@@ -108,6 +118,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			vanilla.navtext = 'lemonchiffon';
 			vanilla.content = 'chocolate';
 			vanilla.search = 'moccasin';
+			vanilla.breadcrumb = '#3087B3';
+			vanilla.separator = 'sandybrown';
 			
 			this.styles.push( vanilla );
 			
@@ -124,8 +136,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			beetlejuice.navtext = '#FBFBFB';
 			beetlejuice.content = 'mediumslateblue';
 			beetlejuice.search = '#444';
+			beetlejuice.breadcrumb = '#3087B3';
+			beetlejuice.separator = 'indigo';
 			
 			this.styles.push( beetlejuice );
+			
+			var red = new StyleSet();
+			
+			red.name = 'Red';
+			red.navbar = '#CD2127';
+			red.button = '#777777';
+			red.location = '#D85F56';
+			red.selection = 'lightcoral';
+			red.sidepanel = '#EFDAB2';
+			red.mainpanel = '#FDFADD';
+			red.toolpanel = '#FDFADD';
+			red.navtext = '#FBFBFB';
+			red.content = 'darkred';
+			red.search = '#D85F56';
+			red.breadcrumb = 'darkred';
+			red.separator = '#CD2127';
+			
+			this.styles.push( red );
+			
 		}
 		
 		function getStyles(){
