@@ -9,12 +9,26 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/explorer', 'orion/explorerNavHandler', 'orion/util', 'orion/fileClient', 'orion/commands', 
-		'orion/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils'], 
-		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mUtil, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils) {
+		'orion/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection', 'orion/navigationUtils'], 
+		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mUtil, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection, mNavUtils) {
 	/**
 	 * Creates a new compare tree explorer.
 	 * @name orion.CompareTreeExplorer
 	 */
+	function CompareTreeModel(rootPath, fetchItems, root) {
+		this.rootPath = rootPath;
+		this.fetchItems = fetchItems;
+		this.root = root;
+	}
+	
+	CompareTreeModel.prototype = new mExplorer.ExplorerFlatModel();
+	
+	CompareTreeModel.prototype.getId = function(item){
+		return item.fileURL;
+	};
+
+	CompareTreeModel.prototype.constructor = CompareTreeModel;
+
 	function CompareTreeExplorerRenderer(options, explorer){
 		this._init(options);
 		this.options = options;
@@ -29,10 +43,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 1: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["New Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				break;
-			case 2: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["Base Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 		}
 	};
@@ -70,6 +81,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			
 			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(displayName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
 				window.open(linkRef);
 			});
@@ -82,38 +94,17 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			return col;
 		case 1:
 			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-			if(item.type === "removed"){
-				return col;
+			if(!item.fullPathName){
+				return;
 			}
 			var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			//var linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation;
-			var linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL
-			var fileService = this.explorer._fileServiceNameNew;
+			var linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation;
+			//var linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL
+			var fileService = this.explorer.getFileServiceName(item);
 			dojo.place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
-				window.open(linkRef);
-			});
-			dojo.connect(span, "onmouseover", span, function() { //$NON-NLS-0$
-				span.style.cursor ="pointer"; //$NON-NLS-0$
-			});
-			dojo.connect(span, "onmouseout", span, function() { //$NON-NLS-0$
-				span.style.cursor ="default"; //$NON-NLS-0$
-			});
-			return col;
-		case 2:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-			if(item.type === "added"){
-				return col;
-			}
-			var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			//var linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation;
-			var linkRef = require.toUrl("edit/edit.html") + "#" + (item.type === "modified" ? item.fileURLBase : item.fileURL);
-			var fileService = this.explorer._fileServiceNameBase;
-			dojo.place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
 			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
 				window.open(linkRef);
 			});
@@ -130,6 +121,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorerRenderer.prototype.constructor = CompareTreeExplorerRenderer;
 	
 	function CompareTreeExplorer(registry, parentId, commandService){
+		this.selection = new mSelection.Selection(registry, "orion.compare.selection"); 
 		this.registry = registry;
 		this._commandService = commandService;
 		this._fileClient = new mFileClient.FileClient(this.registry);
@@ -161,7 +153,8 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		console.log(files[0].URL );
 		console.log(files[1].URL);
 		if(files[1].Content !== files[0].Content){
-			this._compareResults.push({type: "modified", fileURL: files[0].URL, fileURLBase: files[1].URL});
+			this._compareResults.push({type: "modified", fileURL: files[0].URL, fileURLBase: files[1].URL, name: files[0].name});
+			this._renderUI();		
 			console.log("Different files..." );
 		} else {
 			console.log("Same files..." );
@@ -174,13 +167,14 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		if(currentIndex === this._sameFiles.length){
 			var that = this;
 			if(this._compareResults.length > 0){
-				this._loadOneFileMetaData(0,function(){that._renderUI();});
+				this._loadOneFileMetaData(0,function(){that._renderUI(); that._addOptions()});
 			}
 			console.log("completed compare");
 			this.reportStatus("");	
 		} else {
 			this.reportStatus("Comparing " + this._sameFiles[currentIndex].fileNew.Location);	
-			this._getFileContent([{URL: this._sameFiles[currentIndex].fileNew.Location}, {URL: this._sameFiles[currentIndex].fileBase.Location}], 0, currentIndex);
+			this._getFileContent([{URL: this._sameFiles[currentIndex].fileNew.Location, name: this._sameFiles[currentIndex].fileNew.Name}, 
+					{URL: this._sameFiles[currentIndex].fileBase.Location, name: this._sameFiles[currentIndex].fileBase.Name}], 0, currentIndex);
 		}
 	};
 	
@@ -245,6 +239,13 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		});
 	};
 	
+	CompareTreeExplorer.prototype.getFileServiceName = function(item) {
+		if(item.type === "removed"){
+			return this._fileServiceNameBase;
+		}
+		return this._fileServiceNameNew;
+	};
+
 	CompareTreeExplorer.prototype._compareSkeletons = function(currentIndex) {
 		this._compareResults = [];
 		this._sameFiles = [];//To buffer a list of file pairs that have the same relative location
@@ -267,14 +268,17 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 				}
 			}
 			if(!hasSameFile){//If a file in the new file skeleton has no partner in the base file skeleton, it is treatede as added file.
-				this._compareResults.push({type: "added", fileURL: curResItemNew.Location});
+				this._compareResults.push({type: "added", fileURL: curResItemNew.Location, name: curResItemNew.Name});
 			}
 		}
 		for( var j = 0; j < skeletonBase.length; j++){//Loop on the base file skeleton(the opne to compare with) to filter out those that do not have "_hasSameFile" property.
 			var curResItemBase = skeletonBase[j];
 			if(!curResItemBase._hasSameFile){
-				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location});
+				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location, name: curResItemBase.Name});
 			}
+		}
+		if(this._compareResults.length > 0){
+			this._renderUI();
 		}
 		this._testSameFiles(0);
 	};
@@ -315,8 +319,47 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		this.prepareResults(twoFolders);
 	};
 
+	CompareTreeExplorer.prototype._addOptions = function() {
+		var that = this;
+		var optionMenu = dijit.byId("compareTreeOptMenu"); //$NON-NLS-0$
+		if (optionMenu) {
+			optionMenu.destroy();
+		}
+		var newMenu = new dijit.Menu({
+			style : "display: none;", //$NON-NLS-0$
+			id : "compareTreeOptMenu" //$NON-NLS-0$
+		});
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: messages["Sort by folders"],
+			checked: false,
+			onChange : function(checked) {
+				that._sortByFolder = checked;
+				that._renderUI();
+			}
+		}));
+		var menuButton = new dijit.form.DropDownButton({
+			label : messages["Options"],
+			dropDown : newMenu
+		});
+		dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
+		dojo.place(menuButton.domNode, "pageNavigationActions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+	};
+
 	CompareTreeExplorer.prototype._renderUI = function() {
-		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel(null, null, this._compareResults), {selectionPolicy: "cursorOnly", setFocus: true});
+	var that = this;
+		this._compareResults.sort( function(item1, item2){
+				var name1 = that._sortByFolder ? (that.getFileServiceName(item1) + item1.fullPathName).toLowerCase(): item1.name.toLowerCase();
+				var name2 = that._sortByFolder ? (that.getFileServiceName(item2) + item2.fullPathName).toLowerCase(): item2.name.toLowerCase();
+				if (name1 > name2) {
+					return 1;
+				} else if (name1 < name2) {
+					return -1;
+				} else {
+					return 0;
+				}
+			});
+		this.createTree(this.parentId, new CompareTreeModel(null, null, this._compareResults), {selectionPolicy: "cursorOnly", setFocus: true});
 	};
 	
 	CompareTreeExplorer.prototype.constructor = CompareTreeExplorer;

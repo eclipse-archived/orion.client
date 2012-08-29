@@ -30,8 +30,9 @@ define({
 	"ERROR: ": "ERROR: ",
 	"Compare...": "Compare...",
 	"files changed": " files changed",
-	"New Location": "New Location",
-	"Base Location": "Base Location",
+	"Location": "Location",
+	"Options": "Options",
+	"Sort by folders": "Sort by folders",
 	"Line 0 : Col 0": "Line 0 : Col 0",
 	"No Matching DiffService for location:": "No Matching DiffService for location:"
 });
