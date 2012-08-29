@@ -17,6 +17,58 @@
    or table */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/TooltipDialog', 'orion/widgets/plugin/ServiceCarousel'], function(messages, require, dojo, dijit, mUtil, mCommands) {
+
+		/*	formatLocationAsPluginName - temporary function - 
+		the current plugins don't provide useful enough, or 
+		consistent meta-data to use for descriptions - so this 
+		function derives what it can from naming patterns seen in
+		existing commonly used plugin urls. */
+
+	function formatLocationAsPluginName(location) {
+	
+		function wordToUpper(strSentence) {
+	
+			function convertToUpper() {
+				return arguments[0].toUpperCase();
+			}
+	
+			return strSentence.toLowerCase().replace(/\b[a-z]/g, convertToUpper);
+		}
+	
+		var divides = location.split("/"); //$NON-NLS-0$
+		var last = divides[divides.length - 1];
+		last = last.split(".html")[0]; //$NON-NLS-0$
+		last = last.replace(/([a-z])([A-Z])/, "$1 $2"); //$NON-NLS-0$
+		last = wordToUpper(last);
+		last = last.replace('plugin', ''); //$NON-NLS-0$
+		last = last.replace('Plugin', ''); //$NON-NLS-0$
+	
+		if (last === '') {
+			last = location;
+		}
+		return last;
+	}
+	
+	function createServiceDescriptions(plugin) {
+		var serviceDescriptions = [];
+		plugin.getServiceReferences().forEach(function(reference) {
+			var serviceDescription = {
+				service: reference.getProperty("service.names").join(" "),
+				items: []
+			};
+	
+			reference.getPropertyKeys().forEach(function(name) {
+				var item = {
+					item: name,
+					value: reference.getProperty(name)
+				};
+				serviceDescription.items.push(item);
+			});
+			serviceDescriptions.push(serviceDescription);
+		});
+		return serviceDescriptions;
+	}
+
 	
 	dojo.declare("orion.widgets.plugin.PluginEntry", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -29,82 +81,39 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 									'<div class="stretch" data-dojo-attach-point="detailsView">' + //$NON-NLS-0$
 										'<span data-dojo-attach-point="pluginTitle" class="plugin-title"></span>' + //$NON-NLS-0$
 										'<div></div>' + //$NON-NLS-0$
-										'<span class="plugin-description">'+messages['A plugin for Eclipse Orion']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
-										'<a class="plugin-link" style="font-size:11px" data-dojo-attach-point="pluginLink">'+messages['Plugin Link']+'</a>' + //$NON-NLS-2$ //$NON-NLS-0$
+										'<span class="plugin-description" data-dojo-attach-point="pluginDescription"></span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div data-dojo-attach-point="pluginLinks" style="font-size:11px"></div>' + //$NON-NLS-0$
 									'</div>' + //$NON-NLS-0$
 									'<span class="plugin-commands" data-dojo-attach-point="commandSpan"></span>' + //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
 							'</div>'+ //$NON-NLS-0$
 							'<div class="plugin-service-item" data-dojo-attach-point="serviceContainer"></div>' + //$NON-NLS-0$
 						'</list>', //$NON-NLS-0$
-
-		services: null,
 		serviceDescriptions: null,
-		
-		/*	formatPluginName - temporary function - 
-		the current plugins don't provide useful enough, or 
-		consistent meta-data to use for descriptions - so this 
-		function derives what it can from naming patterns seen in
-		existing commonly used plugin urls. */
-
-		formatPluginName: function( location ){
-		
-			function wordToUpper(strSentence) {
-		
-				function convertToUpper() {
-					return arguments[0].toUpperCase();
-				}
-		
-				return strSentence.toLowerCase().replace(/\b[a-z]/g, convertToUpper);
-			}
-		
-			var divides = location.split( "/" ); //$NON-NLS-0$
-			var last = divides[divides.length-1];
-			last = last.split( ".html" )[0]; //$NON-NLS-0$
-			last = last.replace( /([a-z])([A-Z])/, "$1 $2"); //$NON-NLS-0$
-			last = wordToUpper( last );
-			last = last.replace( 'plugin', '' ); //$NON-NLS-0$
-			last = last.replace( 'Plugin', '' ); //$NON-NLS-0$
-			
-			if( last === '' ){
-				last = location;
-			}
-			
-			return last;
+		addPluginLink: function(name, url)  {
+			var link = dojo.create("a",{class: "plugin-link", style: "margin-right: 5px;", href: url, title: name, innerHTML: name}, this.pluginLinks);
 		},
-		
-		getServiceDescriptions: function(){
-			this.services = this.plugin.getServiceReferences();
-				
-			var rcount=0;
-			this.serviceDescriptions = [];	
-				
-			for( rcount;rcount<this.services.length;rcount++ ){
-			
-				var s = { 'service': this.services[rcount].name }; //$NON-NLS-0$
-				var props = [];
-				var properties = this.services[rcount].properties;
-
-				for( var pItem in properties ){
-					if( pItem ){
-						var item = { 'item':pItem, 'value':properties[pItem] }; //$NON-NLS-1$ //$NON-NLS-0$
-						props.push(item);
-					}
-				}
-				
-				s.items = props;
-				this.serviceDescriptions.push(s);
-			}
-		},
-		
-		postCreate: function(){		
-			this.getServiceDescriptions();				
+		postCreate: function(){	
+			var headers = this.plugin.getHeaders();
 			var location = this.plugin.getLocation();
-			var name = this.formatPluginName( location );
-			this.pluginTitle.innerHTML = name;
-			this.pluginLink.href = location;
-			this.commandSpan.id = name;
+			this.pluginTitle.textContent = headers.name || formatLocationAsPluginName(location);
+			this.pluginDescription.textContent = headers.description || messages['A plugin for Eclipse Orion'];
+
+			// Plugin Links
+			this.addPluginLink("Plugin", location);
+			if (headers.website) {
+				this.addPluginLink("Website", headers.website);
+			}
+			if (headers.license) {
+				this.addPluginLink("License", headers.license);
+			}
+			if (headers.login) {
+				this.addPluginLink("Login", headers.login);
+			}
+			
+			this.commandSpan.id = location;
 			this.commandService.renderCommands("pluginCommand", this.commandSpan, location, this, "tool"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.serviceDescriptions = createServiceDescriptions(this.plugin);				
 			this.carousel = new orion.widgets.plugin.ServiceCarousel({serviceData:this.serviceDescriptions}, this.serviceContainer );
 			this.carousel.startup();
 		}

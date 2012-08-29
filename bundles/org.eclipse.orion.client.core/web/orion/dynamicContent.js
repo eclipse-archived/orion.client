@@ -11,7 +11,7 @@
  define(['dojo', 'dijit'], function(dojo, dijit){
  
 	/**
-	* Default progress indicator in form of a simple spinner.
+	* Progress indicator in form of a simple spinner.
 	*
 	* @param id [required] unique identifier, e.g. the row number in which the spinner is created
 	* @param anchor [required] father DOM node for the created spinner
@@ -63,6 +63,60 @@
 	// add constructor
 	ProgressSpinner.prototype.constructor = ProgressSpinner;
  
+ 	/**
+	* Default progress indicator in form of three dots.
+	*
+	* @param id [required] unique identifier, e.g. the row number in which the spinner is created
+	* @param anchor [required] father DOM node for the created spinner
+	*
+	* @returns ProgressDots object
+	*/
+	function ProgressDots(id, anchor){
+		if(id === undefined){ throw new Error("Missing reqired argument: id"); }
+		if(anchor === undefined){ throw new Error("Missing reqired argument: anchor"); }
+		
+		this._id = id;
+		this._anchor = anchor;
+		
+		// we add a prefix for the id label
+		this._prefix = "progressDots:";
+	}
+	
+	ProgressDots.prototype = {
+		
+		/**
+		* [interface] starts the progress indicator
+		*/
+		start: function(){
+			dojo.create("span", {"id":this._prefix+this._id, "style":"text-decoration:blink;", innerHTML:" ..."}, this._anchor);
+		},
+		
+		/**
+		* [interface] stops the progress indicator
+		*/
+		stop: function(){
+			dojo.destroy(dojo.byId(this._prefix+this._id));
+		},
+		
+		/**
+		* [interface] renders the progress indicator after an population error
+		*/
+		error: function(err){
+			var indicator = dojo.byId(this._prefix+this._id);
+			dojo.destroy(indicator);
+			
+			dojo.create("img", {"src":"/images/problem.gif"}, this._anchor);
+			
+			new dijit.Tooltip({
+				connectId: [this._prefix+this._id],
+				label: err
+			});
+		}
+	};
+	
+	// add constructor
+	ProgressDots.prototype.constructor = ProgressDots;
+ 
 	/**
 	* Dynamic content model which handles the population logic
 	*
@@ -110,7 +164,7 @@
 	
 	DynamicContentRenderer.prototype = {
 		// default progress indicator
-		progressIndicator : ProgressSpinner,
+		progressIndicator : ProgressDots,
 		
 		// default setup properties
 		setupProperties : {
@@ -221,6 +275,7 @@
 		DynamicContentModel : DynamicContentModel,
 		DynamicContentExplorer : DynamicContentExplorer,
 		DynamicContentRenderer : DynamicContentRenderer,
-		ProgressSpinner : ProgressSpinner
+		ProgressSpinner : ProgressSpinner,
+		ProgressDots : ProgressDots
 	};
  });

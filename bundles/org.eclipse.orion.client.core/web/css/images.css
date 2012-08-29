@@ -10,6 +10,22 @@
    display: inline-block;
 }
 
+.compareAdditionSprite {
+	background-image: url(../images/compare-addition.gif);  
+   	vertical-align: middle;
+   	display: inline-block;
+	width: 16px; 
+	height: 16px;
+}
+
+.compareRemovalSprite {
+	background-image: url(../images/compare-removal.gif);  
+   	vertical-align: middle;
+   	display: inline-block;
+	width: 16px; 
+	height: 16px;
+}
+
 .imageSprite {
    background-image: url(../images/core_sprites.png);
    display: inline-block;

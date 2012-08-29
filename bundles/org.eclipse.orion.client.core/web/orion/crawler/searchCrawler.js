@@ -73,6 +73,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._totalCounter = 0;
 		this._searchOnName = options && options.searchOnName;
 		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
+		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
 		this.queryObj = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.parseQueryStr(queryStr);
 		this._location = options && options.location;
 	}
@@ -181,6 +182,9 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype._visitRecursively = function(directoryLocation){
 		var results = [];
 		var self = this;
+		if(this._fetchChildrenCallBack){
+			this._fetchChildrenCallBack(directoryLocation);
+		}
 		return _doServiceCall(self.fileClient, "fetchChildren", [directoryLocation]).then(function(children) { //$NON-NLS-0$
 			var len = children.length;
 			for (var i = 0; i < children.length ; i++){
@@ -188,10 +192,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 					if(self._searchOnName){
 						results.push(self._buildSingleSkeleton(children[i]));
 					} else if(self._buildSkeletonOnly){
-						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
-						if(contentType && contentType['extends'] === "text/plain"){ //$NON-NLS-0$ //$NON-NLS-0$
-							results.push(self._buildSingleSkeleton(children[i]));
-						}
+						results.push(self._buildSingleSkeleton(children[i]));
 					}else {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, self.contentTypesCache);
 						if(contentType && contentType['extends'] === "text/plain"){ //$NON-NLS-0$ //$NON-NLS-0$
