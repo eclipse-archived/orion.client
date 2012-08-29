@@ -1698,6 +1698,18 @@ var exports = {};
 			id: "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
 			parameters: notificationParameters,
 			callback: function(data) {
+				var sshCheck = function(gitUrl){
+					var url = gitUrl;
+					var scheme = new dojo._Url(url).scheme;
+					if(scheme === "ssh"){
+						var indexOfAt = url.indexOf("@");
+						if(indexOfAt !== -1){
+							var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
+							url = urlNoUser;
+						}
+					}
+					return url;
+				};
 				var sendNotificationFunction = function(reviewerName){
 					var item = data.items;
 					var headLocation = item.Location.replace(item.Name, "HEAD"); 
@@ -1708,7 +1720,8 @@ var exports = {};
 						function(clone){
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+							var url = sshCheck(clone.Children[0].GitUrl);
+							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 							serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, reviewRequestUrl, authorName, commitMessage).then(
 								function(result) {
 									var display = {};
@@ -1729,7 +1742,8 @@ var exports = {};
 					function(clone){
 					var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + clone.Children[0].GitUrl + "_" + item.Name;
+						var url = sshCheck(clone.Children[0].GitUrl);
+						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 						var dialog = new orion.git.widgets.ReviewRequestDialog({
 							title: messages["Contribution Review Request"],
 							url: reviewRequestUrl,

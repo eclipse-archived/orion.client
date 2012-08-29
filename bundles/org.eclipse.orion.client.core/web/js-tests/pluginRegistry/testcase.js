@@ -369,6 +369,20 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			pluginRegistry.shutdown();
 		});
 	};
+	
+	tests["test plugin headers"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		return pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			var headers = plugin.getHeaders();
+			assert.equal(headers.name, "test plugin");
+			assert.equal(headers.description, "This is a test plugin");
+			plugin.uninstall();
+			pluginRegistry.shutdown();
+		});
+	};
+	
 
 	tests["test plugin states"] = function() {
 		var storage = {};
