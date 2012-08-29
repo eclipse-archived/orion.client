@@ -29,6 +29,9 @@ define({
 	"There are unsaved changes.": "There are unsaved changes.",
 	"ERROR: ": "ERROR: ",
 	"Compare...": "Compare...",
+	"files changed": " files changed",
+	"New Location": "New Location",
+	"Base Location": "Base Location",
 	"Line 0 : Col 0": "Line 0 : Col 0",
 	"No Matching DiffService for location:": "No Matching DiffService for location:"
 });
