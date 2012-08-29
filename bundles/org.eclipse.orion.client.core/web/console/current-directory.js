@@ -45,6 +45,15 @@ define(['dojo', 'orion/bootstrap', 'orion/fileClient'], function (dojo, mBootstr
 	}
 	exports.withCurrentTreeNode = withCurrentTreeNode;
 
+	/* 
+	 * Similar to withCurrentTreeNode, but will not retrieve the tree node
+	 * corresponding to the current hash if currentTreeNode is null.
+	 */
+	function getCurrentTreeNode() {
+		return currentTreeNode;
+	}
+	exports.getCurrentTreeNode = getCurrentTreeNode;
+
 	function setCurrentTreeNode(node) {
 		currentTreeNode = node;
 	}
