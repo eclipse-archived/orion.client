@@ -1,6 +1,7 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012 VMware, Inc.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,6 +9,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andrew Eisenberg (VMware) - added entry for esprima tests
  *******************************************************************************/
 /*global console TestCase require jstestdriver*/
 var requireJSConfig = {
@@ -113,6 +115,7 @@ OrionTestCase("xhr", "/js-tests/xhr/test.html");
 OrionTestCase("config", "/js-tests/config/test.html");
 OrionTestCase("metatype", "/js-tests/metatype/test.html");
 OrionTestCase("setting", "/js-tests/settings/test.html");
+OrionTestCase("esprima-content-assist", "/js-tests/esprima/esprimaJsContentAssistTests.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");
