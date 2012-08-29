@@ -14,12 +14,12 @@ define({
 	"Changed to: ${0}": "Changed to: ${0}",
 	"${0} is not a directory": "${0} is not a directory",
 	"${0} was not found": "${0} was not found",
-	"Change current directory": "Change current directory",
-	"Directory": "Directory",
-	"Edit a file": "Edit a file",
-	"File": "File",
-	"Show a list of files in the current directory": "Show a list of files in the current directory",
-	"Print current directory": "Print current directory",
+	"Changes the current directory": "Changes the current directory",
+	"The name of the directory": "The name of the directory",
+	"Edits a file": "Edits a file",
+	"The name of the file": "The name of the file",
+	"Lists the files in the current directory": "Lists the files in the current directory",
+	"Prints the current directory location": "Prints the current directory location",
 	"'${0}' is not valid": "'${0}' is not valid",
 	"File service error: ${0}": "File service error: ${0}"
 });

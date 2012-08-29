@@ -17,7 +17,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 		'orion/widgets/Console', 'console/current-directory', 'console/paramType-file', 'orion/i18nUtil'], 
 	function(messages, require, dojo, dijit, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType, i18nUtil) {
 
-	var fileClient;
+	var fileClient, output;
 
 	var resolveError = function(result, error) {
 		result.resolve(dojo.string.substitute(messages['File service error: ${0}'], ["<em>" + error + "</em>"])); //$NON-NLS-2$ //$NON-NLS-1$
@@ -37,12 +37,11 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 		result = result || [];
 		if (node.Name) {
 			if (node.Directory) {
-				result.push(node.Name);
-				result.push('/'); //$NON-NLS-0$
-			} else { 
-				result.push('<a href="/edit/edit.html#' + node.Location + '">'); //$NON-NLS-1$ //$NON-NLS-0$
-				result.push(node.Name); //TODO html escape sequences?
-				result.push('</a>'); //$NON-NLS-0$
+				//TODO html escape sequences in Name?
+				result.push('<a href="#' + node.Location + '" class="lsDirectory">' + node.Name + '</a>'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+			} else {
+				//TODO html escape sequences in Name?
+				result.push('<a href="/edit/edit.html#' + node.Location + '" target="_blank">' + node.Name + '</a>'); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			result.push('<br>'); //$NON-NLS-0$
 		}
@@ -52,8 +51,8 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 	function formatFullPath(node) {
 		var path = fileClient.fileServiceName(node.Location) || "";
 		var parents = node.Parents;
-		// TODO it could be useful to make the path segments link to something
-		// useful, see breadcrumb.js for an idea
+		// TODO it could be useful to make the path segments link to something,
+		// see breadcrumb.js for an idea
 		if (parents) {
 			path += '/'; //$NON-NLS-0$
 			for (var i = parents.length; --i >= 0 ;){
@@ -109,6 +108,24 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 			function(node) {
 				formatLs(node, [], function(buffer) {
 					result.resolve(buffer.join(''));
+					/*
+					 * GCLI changes the target for all <a> tags contained in a result to _blank,
+					 * to force clicked links to open in a new window or tab.  However for links
+					 * that are created by this command to represent directories, selection should
+					 * happen within the same page since it just changes the page hash.
+					 *
+					 * To work around this GCLI behavior do a pass of all links created by this
+					 * command to represent directories and change their targets back to _self.
+					 * This must be done asynchronously to ensure that it runs after GCLI has done
+					 * its initial conversion of targets to _blank.
+					 */
+					setTimeout(function() {
+						var links = output.querySelectorAll(".lsDirectory"); //$NON-NLS-0$
+						for (var i = 0; i < links.length; i++) {
+							links[i].setAttribute('target', '_self'); //$NON-NLS-1$ //$NON-NLS-0$
+							links[i].className = '';
+						}
+					}, 1);
 				});
 			},
 			function(error) {
@@ -120,6 +137,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 
 	/* implementaton of the 'cd' command */
 
+	var hashUpdated = false;
 	function cdExec(args, context) {
 		var targetDirName = args.directory;
 		if (typeof(targetDirName) !== "string") { //$NON-NLS-0$
@@ -130,26 +148,29 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 			function(node) {
 				if (targetDirName === '..') { //$NON-NLS-0$
 					fileClient.loadWorkspace(node.Location).then(
-						dojo.hitch(this, function(metadata) {
-							if (!metadata.Parents) {
+						dojo.hitch(this, function(fullNode) {
+							if (!fullNode.Parents) {
 								/* changing to the root where file services are mounted */
 								mCurrentDirectory.setCurrentTreeNode(null);
+								hashUpdated = true;
 								dojo.hash('#'); //$NON-NLS-0$
 								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>/</b>"])); //$NON-NLS-1$
-							} else if (metadata.Parents.length === 0) {
+							} else if (fullNode.Parents.length === 0) {
 								/* changing to the root directory within the current file service */
 								// TODO: computing the parent location based on the current location may not always be valid
 								mCurrentDirectory.setCurrentTreeNode(null);
-								var index = metadata.Location.indexOf('/', 1); //$NON-NLS-0$
-								var hash = metadata.Location.substr(0, index);
+								var index = fullNode.Location.indexOf('/', 1); //$NON-NLS-0$
+								var hash = fullNode.Location.substr(0, index);
+								hashUpdated = true;
 								dojo.hash(hash);
-								var buffer = fileClient.fileServiceName(metadata.Location);
+								var buffer = fileClient.fileServiceName(fullNode.Location);
 								result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
 							} else {
-								var parentLocation = metadata.Parents[0].Location;
+								var parentLocation = fullNode.Parents[0].Location;
 								fileClient.loadWorkspace(parentLocation).then(
 									dojo.hitch(this, function(parentMetadata) {
 										mCurrentDirectory.setCurrentTreeNode(parentMetadata);
+										hashUpdated = true;
 										dojo.hash(parentMetadata.Location);
 										var buffer = formatFullPath(parentMetadata);
 										result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
@@ -174,10 +195,11 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 									if (child.Directory) {
 										found = true;
 										mCurrentDirectory.setCurrentTreeNode(child);
+										hashUpdated = true;
 										dojo.hash(child.Location);
 										fileClient.loadWorkspace(child.Location).then(
-											dojo.hitch(this, function(metadata) {
-												var buffer = formatFullPath(metadata);
+											dojo.hitch(this, function(childNode) {
+												var buffer = formatFullPath(childNode);
 												result.resolve(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
 											}),
 											dojo.hitch(this, function(error) {
@@ -214,8 +236,8 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 		mCurrentDirectory.withCurrentTreeNode(
 			function(node) {
 				fileClient.loadWorkspace(node.Location).then(
-					dojo.hitch(this, function(metadata) {
-						var buffer = formatFullPath(metadata);
+					dojo.hitch(this, function(fullNode) {
+						var buffer = formatFullPath(fullNode);
 						result.resolve("<b>" + buffer + "</b>"); //$NON-NLS-1$ //$NON-NLS-0$
 					}),
 					dojo.hitch(this, function(error) {
@@ -266,9 +288,9 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 			mGlobalCommands.generateBanner("orion-consolePage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: "Console"});
 
-			var console = new mConsole.Console(dojo.byId("console-input"), dojo.byId("console-output")); //$NON-NLS-1$ //$NON-NLS-0$
 			/* the Console creates a child of console-input, resize to give it a height */
-			dijit.byId("centerPane").resize(); //$NON-NLS-0$
+			output = dojo.byId("console-output"); //$NON-NLS-0$
+			var console = new mConsole.Console(dojo.byId("console-input"), output); //$NON-NLS-0$
 
 			/* add the locally-defined types */
 			var directoryType = new mFileParamType.ParamTypeFile("directory", true, false); //$NON-NLS-0$
@@ -279,35 +301,35 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 			/* add the locally-defined commands */
 			console.addCommand({
 				name: 'cd', //$NON-NLS-0$
-				description: messages['Change current directory'],
+				description: messages['Changes the current directory'],
 				callback: cdExec,
 				returnType: 'string', //$NON-NLS-0$
 				parameters: [{
 					name: 'directory', //$NON-NLS-0$
 					type: 'directory', //$NON-NLS-0$
-					description: messages['Directory']
+					description: messages['The name of the directory']
 				}]
 			});
 			console.addCommand({
 				name: 'edit', //$NON-NLS-0$
-				description: messages['Edit a file'],
+				description: messages['Edits a file'],
 				callback: editExec,
 				returnType: 'string', //$NON-NLS-0$
 				parameters: [{
 					name: 'file', //$NON-NLS-0$
 					type: 'file', //$NON-NLS-0$
-					description: messages['File']
+					description: messages['The name of the file']
 				}]
 			});
 			console.addCommand({
 				name: 'ls', //$NON-NLS-0$
-				description: messages['Show a list of files in the current directory'],
+				description: messages['Lists the files in the current directory'],
 				callback: lsExec,
 				returnType: 'string' //$NON-NLS-0$
 			});
 			console.addCommand({
 				name: 'pwd', //$NON-NLS-0$
-				description: messages['Print current directory'],
+				description: messages['Prints the current directory location'],
 				callback: pwdExec,
 				returnType: 'string' //$NON-NLS-0$
 			});
@@ -350,7 +372,7 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 								manual: ref.getProperty("manual") //$NON-NLS-0$
 							});
 						}, ref));
-					}else{
+					} else {
 						console.addCommand({
 							name: ref.getProperty("name"), //$NON-NLS-0$
 							description: ref.getProperty("description"), //$NON-NLS-0$
@@ -362,6 +384,25 @@ define(['i18n!orion/console/nls/messages', 'require', 'dojo', 'dijit', 'orion/bo
 					}
 				}
 			}
+
+			dojo.subscribe("/dojo/hashchange", function(newHash) { //$NON-NLS-0$
+				if (hashUpdated) {
+					hashUpdated = false;
+					return;
+				}
+				if (newHash.length === 0) {
+					mCurrentDirectory.setCurrentTreeNode(null);
+					console.output(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>/</b>"])); //$NON-NLS-1$
+					return;
+				}
+				fileClient.loadWorkspace(newHash).then(
+					dojo.hitch(this, function(newNode) {
+						mCurrentDirectory.setCurrentTreeNode(newNode);
+						var buffer = formatFullPath(newNode);
+						console.output(dojo.string.substitute(messages['Changed to: ${0}'], ["<b>" + buffer + "</b>"])); //$NON-NLS-2$ //$NON-NLS-1$
+					})
+				);
+			});
 		});
 	});
 });

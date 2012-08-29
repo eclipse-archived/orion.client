@@ -13,11 +13,18 @@
 /*global define Range*/
 /*jslint browser:true*/
 
-define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/ui/field', 'gcli/argument', 'gcli/util', 'gcli/ui/menu'],
-	function(messages, mGCLI, mTypes, mBasicTypes, mField, mArgument, mUtil, mMenu) {
+define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/argument', 'gcli/ui/fields',
+		'gcli/ui/fields/menu', 'gcli/util', 'gcli/settings', 'gcli/canon', 'gcli/cli', 'gcli/commands/help'],
+	function(messages, mGCLI, mTypes, mBasicTypes, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mBasicTypes.DeferredType.prototype);
+	CustomType.prototype.defer = function() {
+		return mBasicTypes.BlankType;
+	};
+	CustomType.prototype.getBlank = function() {
+		return new mTypes.Conversion(undefined, new mArgument.BlankArgument(), mTypes.Status.VALID);
+	};
 
 	var orion = {};
 	orion.console = {};
@@ -45,56 +52,49 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 				if (!input) { throw messages["no input"]; }
 				if (!output) { throw messages["no output"]; }
 
-				if (!Range.prototype.createContextualFragment) {
-					var label = document.createElement("label"); //$NON-NLS-0$
-					label.innerText = messages["Sorry, the Console is not supported on your browser."];
-					output.appendChild(label);
-					return;
-				}
-
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
 				outputDiv.style.height = "100%"; //$NON-NLS-0$
 				outputDiv.style.width = "100%"; //$NON-NLS-0$
 				output.appendChild(outputDiv);
 
-				var inputDiv = document.createElement("div"); //$NON-NLS-0$
-				inputDiv.id = "gcli-input-area"; //$NON-NLS-0$
-				inputDiv.style.height = "100%"; //$NON-NLS-0$
-				inputDiv.style.width = "100%"; //$NON-NLS-0$
-				input.appendChild(inputDiv);
-
 				var inputText = document.createElement("input"); //$NON-NLS-0$
+				inputText.type = "text"; //$NON-NLS-0$
 				inputText.id = "gcli-input"; //$NON-NLS-0$
-				inputText.className = "inputText"; //$NON-NLS-0$
-				inputText.style.paddingLeft = "1em"; //$NON-NLS-0$
 				inputText.style.width = "100%"; //$NON-NLS-0$
-				inputDiv.appendChild(inputText);
+				inputText.style.height = "100%"; //$NON-NLS-0$
+				input.appendChild(inputText);
 
-				var rowCompleteDiv = document.createElement("div"); //$NON-NLS-0$
-				rowCompleteDiv.id = "gcli-row-complete"; //$NON-NLS-0$
-				rowCompleteDiv.style.position = "absolute"; //$NON-NLS-0$
-				rowCompleteDiv.style.top = "2px"; //$NON-NLS-0$
-				rowCompleteDiv.style.zIndex = "-1000"; //$NON-NLS-0$
-				inputDiv.appendChild(rowCompleteDiv);
+				mSettings.getSetting('hideIntro').value = true; //$NON-NLS-0$
+				mSettings.getSetting('eagerHelper').value = 2; //$NON-NLS-0$
 
-				mGCLI.createView();
+				/*
+				 * Create the console asynchronously to ensure that the client finishes its
+				 * layout before GCLI computes the locations for its created widgets.
+				 */
+				var self = this;
+				setTimeout(function() {
+					mGCLI.createDisplay();
+					self.output("For a list of available commands type 'help'.");
+				});
+				mHelp.startup();
+				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
 
 				function CustomField(type, options) {
-					mField.Field.call(this, type, options);
-					this.onInputChange = this.onInputChange.bind(this);
-					this.arg = new mArgument.Argument();
-					this.element = mUtil.dom.createElement(this.document, 'div'); //$NON-NLS-0$
-					this.element.className = "orion";
-					this.menu = new mMenu.Menu({ document: this.document, field: true });
-					this.element.appendChild(this.menu.element);
-					this.fieldChanged = mUtil.createEvent('DirectoryField.fieldChanged'); //$NON-NLS-0$
+					mFields.Field.call(this, type, options);
+					this.isImportant = true;
+					this.element = mUtil.createElement(this.document, 'div'); //$NON-NLS-0$
+					this.element.className = 'orion'; //$NON-NLS-0$
+					this.menu = new mMenu.Menu({document: this.document, field: true, type: type});
 					this.menu.onItemClick = this.onItemClick.bind(this);
+					this.element.appendChild(this.menu.element);
+					this.onFieldChange = mUtil.createEvent('CustomField.fieldChanged'); //$NON-NLS-0$
+					this.onInputChange = this.onInputChange.bind(this);
 				}
 
-				CustomField.prototype = Object.create(mField.Field.prototype);
+				CustomField.prototype = Object.create(mFields.Field.prototype);
 				CustomField.prototype.destroy = function() {
-					mField.Field.prototype.destroy.call(this);
+					mFields.Field.prototype.destroy.call(this);
 					this.menu.destroy();
 					delete this.element;
 					delete this.menu;
@@ -102,7 +102,6 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 					delete this.onInputChange;
 				};
 				CustomField.prototype.setConversion = function(conversion) {
-					this.arg = conversion.arg;
 					this.setMessage(conversion.message);
 					var items = [];
 					var predictions = conversion.getPredictions();
@@ -131,17 +130,15 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 					}
 				};
 				CustomField.prototype.onItemClick = function(ev) {
-					var itemText = ev.currentTarget.querySelector(".gcli-menu-name").innerHTML; //$NON-NLS-0$
-					this.arg = this.arg.beget(itemText);
-					var conversion = this.type.parse(this.arg);
-					this.fieldChanged({ conversion: conversion });
+					var conversion = ev.conversion;
+					this.onFieldChange({ conversion: conversion });
 					this.setMessage(conversion.message);
 				};
 				CustomField.claim = function(type) {
-					return type instanceof CustomType ? mField.Field.MATCH + 1 : mField.Field.NO_MATCH;
+					return type instanceof CustomType ? mFields.Field.MATCH + 1 : mFields.Field.NO_MATCH;
 				};
 
-				mField.addField(CustomField);
+				mFields.addField(CustomField);
 			},
 			addCommand: function(command) {
 				if (!command.exec) {
@@ -191,6 +188,12 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 					};
 				}
 				mTypes.registerType(NewType);
+			},
+			output: function(content) {
+				var output = new mCli.Output();
+				var commandOutputManager = mCanon.commandOutputManager;
+				commandOutputManager.onOutput({output: output});
+				output.complete(content);
 			}
 		};
 		return Console;

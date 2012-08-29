@@ -1,11 +1,3 @@
 .orion .gcli-menu-field {
-  border: 1px solid #aaa;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 5px;
-}
-
-.inputText {
-  background: transparent;
-  font-family: inherit;
-  font-size: inherit;
+  border: 0;
 }
