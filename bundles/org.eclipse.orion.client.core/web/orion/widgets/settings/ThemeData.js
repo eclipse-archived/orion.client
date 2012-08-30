@@ -20,7 +20,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#333';
-		StyleSet.prototype.button = '#777777';
+		StyleSet.prototype.button = '#EFEFEF';
 		StyleSet.prototype.location = '#333';
 		StyleSet.prototype.breadcrumb = '#3087B3';
 		StyleSet.prototype.separator = '#333';
@@ -37,7 +37,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var orion = new StyleSet();
 			orion.name = 'Orion';
 			orion.navbar = '#333';
-			orion.button = '#777777';
+			orion.button = '#EFEFEF';
 			orion.location = '#efefef';
 			orion.selection = 'FEC';
 			orion.sidepanel = '#FBFBFB';
@@ -158,6 +158,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			red.separator = '#CD2127';
 			
 			this.styles.push( red );
+			
+			var blue = new StyleSet();
+			
+			blue.name = 'Blue';
+			blue.navbar = '#425069';
+			
+			blue.search = '#768DB8';
+			
+			blue.breadcrumb = '#7F99C0';
+			blue.separator = '#CD2127';
+			blue.location = '#7F99C0';
+			
+			blue.button = 'lavender';
+			
+			blue.selection = '#9AAABF';
+			blue.sidepanel = '#9AAABF';
+			blue.mainpanel = 'white';
+			blue.toolpanel = '#FEFEFE';
+			blue.navtext = '#FBFBFB';
+			blue.content = '#3B5998';
+			
+			
+			this.styles.push( blue );
 			
 		}
 		
