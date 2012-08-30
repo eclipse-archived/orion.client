@@ -11,8 +11,8 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mFilterSearchBox, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -623,7 +623,7 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 	
-	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(titleWrapper, remotes, repository, deferred, anyRemoteBranch){
+	GitRepositoryExplorer.prototype.displayRemoteBranches2 = function(titleWrapper, remotes, repository, deferred, anyRemoteBranch, previousRemoteBranches){
 		var that = this;
 		if (deferred == null)
 			deferred = new dojo.Deferred();
@@ -636,7 +636,28 @@ exports.GitRepositoryExplorer = (function() {
 						remoteBranches[i].Repository = repository;
 						that.renderRemoteBranch(remoteBranches[i], i);
 					}
-					that.displayRemoteBranches2(titleWrapper, remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)));
+					
+					//concat with previous branches to get full list for the search box
+					if(previousRemoteBranches){
+						remoteBranches = previousRemoteBranches.concat(remoteBranches);
+					}
+					
+					if(remotes.length === 1){
+						//add filter/search box after all branches are rendered
+						var remoteBranchesSearchBox = new mFilterSearchBox.FilterSearchBox({
+							items : remoteBranches,
+							renderItem : function(branch){
+								that.renderRemoteBranch.bind(that)(branch);
+							},
+							sectionId : "remoteBranchSection",
+							itemNode : "remoteBranchNode",
+							placeHolder : messages["Filter remote branches"]
+						});
+						
+						remoteBranchesSearchBox.render();
+					}
+					
+					that.displayRemoteBranches2(titleWrapper, remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)), remoteBranches);
 				}, function () {
 					
 				}

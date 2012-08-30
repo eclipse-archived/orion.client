@@ -84,6 +84,9 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 		
+		// add filter search box
+		dojo.create("div", {"id" : options.id + "FilterSearchBox"}, this.domNode);
+		
 		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
