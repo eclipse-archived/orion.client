@@ -95,13 +95,10 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', "orion/widge
 		
 							var set = {
 								value: comboLabel,
-								innerHTML: comboLabel
+								label: comboLabel,
+								selected: (comboLabel === setting)
 							};		
 							
-							if (comboLabel === setting) {
-								set.selected = 'selected'; //$NON-NLS-0$
-							}
-		
 							options.push(set);
 						}
 						
