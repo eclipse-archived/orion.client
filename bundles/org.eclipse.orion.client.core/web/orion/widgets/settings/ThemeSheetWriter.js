@@ -62,17 +62,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			styles.push( topRowBanner );
 			
 			var a = new ThemeClass.ThemeClass( 'a' );
-			a.style.cursor = 'hand';
 			a.style.textDecoration = 'none';
-			a.style.color = this.navtext;
+			a.style.color = this.content;
 			
 			styles.push( a );
 
-			var aVisited = new ThemeClass.ThemeClass( 'a:visited' );
+			var navlink = new ThemeClass.ThemeClass( 'navlink' );
+			navlink.style.display = 'inline-block';
+			navlink.style.padding = '2px';
+			navlink.style.color = this.content;
+			
+			styles.push( navlink );
+
+
+		/*	var aVisited = new ThemeClass.ThemeClass( 'a:visited' );
 			aVisited.style.color = this.content;
 			
 			styles.push( aVisited );
-			
+				
 			var aActive = new ThemeClass.ThemeClass( 'a:active' );
 			aActive.style.color = this.content;
 			
@@ -82,7 +89,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			aHover.style.textDecoration = 'underline';
 			aHover.style.color = this.content;
 			
-			styles.push( aHover );
+			styles.push( aHover ); */
 			
 			var primaryNav = new ThemeClass.ThemeClass( 'primaryNav' );
 			primaryNav.style.color = this.navtext;
@@ -132,7 +139,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		    titleArea.style.border = '0';
 		    titleArea.style.background = this.location;
 			titleArea.style.background = '-webkit-gradient(linear, left top, left bottom, color-stop(0%,' + this.location + '), color-stop(100%,' + this.location + '))';
-//		    titleArea.style.background = '-moz-linear-gradient(top, ' + this.location + ' 0%, ' + this.location + ' 100%)';
 		    titleArea.style.borderBottom = '1px solid ' + this.location ;
 		    titleArea.style.minHeight = '20px';
 		    
@@ -154,10 +160,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			styles.push( aBreadcrumbHover );
 			
-			var aBreadcrumbVisited = new ThemeClass.ThemeClass( 'a.breadcrumb:visited' );
-			aBreadcrumbVisited.style.color = this.content;
-			
-			styles.push( aBreadcrumbVisited );
+//			var aBreadcrumbVisited = new ThemeClass.ThemeClass( 'a.breadcrumb:visited' );
+//			aBreadcrumbVisited.style.color = this.content;
+//			
+//			styles.push( aBreadcrumbVisited );
 
 			var breadcrumbSeparator = new ThemeClass.ThemeClass( 'breadcrumbSeparator' );
 			breadcrumbSeparator.style.fontSize = '8pt';
@@ -170,7 +176,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var currentLocation = new ThemeClass.ThemeClass( 'currentLocation' );
 			currentLocation.style.fontWeight = 'bold';
 			currentLocation.style.fontSize = '8pt';
-			currentLocation.style.color = '#444'; // should be a separate themeable item but hard coded for now.
+			currentLocation.style.color = this.navbar; // should be a separate themeable item but hard coded for now.
 			currentLocation.style.textDecoration = 'none';
 			currentLocation.style.textWrap = 'normal';
 			currentLocation.style.lineHeight = '10pt';
@@ -185,6 +191,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			currentLocationHover.style.borderBottom = '0';
 			
 			styles.push( currentLocationHover );
+			
+			var navlinkonpage = new ThemeClass.ThemeClass( 'navlinkonpage' );
+			navlinkonpage.style.color = this.content;
+			
+			styles.push( navlinkonpage );
 			
 			for( var s in styles ){
 				styleBlock = styleBlock + styles[s].toString();
@@ -207,7 +218,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var commandButton = new ThemeClass.ThemeClass( 'commandButton' );
 			commandButton.style.color = '#222';
 			commandButton.style.border = '1px solid #dedede'; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386702#c2 
-			commandButton.style.backgroundColor = '#efefef';
+			commandButton.style.backgroundColor = this.button;
 			commandButton.style.textAlign = 'center';
 			commandButton.style.verticalAlign = 'baseline';
 			commandButton.style.cursor = 'pointer';
@@ -271,7 +282,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			searchbox.style.width = '12px'; 
 			searchbox.style.height = '12px';
 		    searchbox.style.backgroundColor = this.search;
-			searchbox.style.border = '1px solid #222';
+			searchbox.style.border = '1px solid ' + this.search;
 			searchbox.style.fontSize = '11px';
 			searchbox.style.width = '15em';
 			searchbox.style.height = '16px';
@@ -292,7 +303,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			styles.push( searchboxFocus );
 			
 			var checkedRow = new ThemeClass.ThemeClass( 'checkedRow' );
-			checkedRow.style.background = this.selection; /* was e3e3e3 */
+//			checkedRow.style.background = this.selection; /* was e3e3e3 */
+			checkedRow.style.cssText = 'background-color:' + this.selection + ' !important;';
 			
 			styles.push( checkedRow );
 			

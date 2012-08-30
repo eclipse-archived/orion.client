@@ -54,6 +54,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		var familyname;
 		var familyvalue;
+
 		
 		Family.prototype.name = familyname;
 		Family.prototype.value = familyvalue;
@@ -63,11 +64,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	
 			this.settings = [];
 		
-			init();
+			init();	
 			
 			this.settings.navbar = new Family( 'NavBar', '#333' );
-			this.settings.button = new Family( 'Button', '#777777' );
+			this.settings.button = new Family( 'Button', '#333' );
 			this.settings.location = new Family( 'Location', '#efefef' ); 
+			this.settings.breadcrumb = new Family( 'Breadcrumb', '#3087B3' ); 
+			this.settings.separator = new Family( 'Separator', '#333' ); 
 			this.settings.selection = new Family( 'Selection', '#FEC' );
 			this.settings.sidepanel = new Family( 'Side', '#FBFBFB' ); 
 			this.settings.mainpanel = new Family( 'Main', 'white' ); 
@@ -145,6 +148,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 		ThemeBuilder.prototype.applyColor = applyColor;
 		
+		var AUTONAME = false;
+		
+		ThemeBuilder.prototype.AUTONAME = AUTONAME;
 
 		ThemeBuilder.prototype.template =	'<div id="themeContainer">' +
 												'<div class="sectionWrapper toolComposite">' +
@@ -409,6 +415,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						
 						dojo.byId( 'pickercontainer' ).style.display = 'none';
 						dojo.byId( 'savecontainer' ).style.display = '';
+						
+						if( this.AUTONAME === false ){
+							var currentTheme = dijit.byId( 'themepicker' ).getSelected();
+							dijit.byId( 'themesaver' ).setValue( currentTheme );
+							this.AUTONAME = true;
+						}
+						
 						break;
 						
 					case 'RECTANGLE':
@@ -555,13 +568,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			Component.drawRectangle( ctx, LEFT, TOP, UI_SIZE - 0.5, UI_SIZE, null, '#CCC' );
 			
-			var img = new Image();  
 			
-		    img.onload = function(){  
-				ctx.drawImage(img, LEFT + 5, TOP + 8);  
-		    };
-		    
-		    img.src = 'orion-transparent.png'; 
 			
 			if( INITIALIZE === true ){
 			
@@ -573,31 +580,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				navbar.description = 'Navigation Bar';	
 				navbar.family = settings.navbar.name;
 				
-				 /* Button */
-		
-				var button = Component.roundRect( ctx, LEFT + UI_SIZE * 0.4 + 5, CONTENT_TOP + 5, 37, 20, 2, '#EFEFEF', settings.button.value );
-				button.description = 'Button';
-				button.family = settings.button.name;
-				
 				/* Breadcrumb */
 				
 				var crumbbar = Component.drawRectangle( ctx, LEFT, TOP + BANNER_HEIGHT, UI_SIZE, NAV_HEIGHT, settings.location.value );
 				crumbbar.description = 'Breadcrumb Bar';
 				crumbbar.family = settings.location.name;
 				
-				/* Selection bar */
-			
-				var selection = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4 + 5, CONTENT_TOP + 62, UI_SIZE * 0.6 -10, 20, settings.selection.value );
-				selection.description = 'Selection bar';
-				selection.family = settings.selection.name;
-				
 				/* Side panel */
 				
 				var sidepanel = Component.drawRectangle( ctx, LEFT, CONTENT_TOP, UI_SIZE * 0.4, UI_SIZE - CONTENT_TOP + TOP, settings.sidepanel.value );
 				sidepanel.description = 'Side Panel';
 				sidepanel.family = settings.sidepanel.name;
-				
-				var search = Component.roundRect( ctx, LEFT + UI_SIZE - 145, TOP + 10, 70, 12, 5, settings.search.value, '#222222' );
+					
+				var search = Component.roundRect( ctx, LEFT + UI_SIZE - 145, TOP + 10, 70, 12, 5, settings.search.value, settings.search.value );
 				search.description = 'Search Box';
 				search.family = settings.search.name;
 				
@@ -609,31 +604,49 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				username.description = 'Navigation Text';
 				username.family = settings.navtext.name;
 				
-				var breadcrumb = Component.drawText( ctx, 'Orion Content', LEFT + 5, TOP + BANNER_HEIGHT + 18, '8pt sans-serif', settings.content.value );
-				breadcrumb.description = 'Content Text';
+				var breadcrumb = Component.drawText( ctx, 'Breadcrumb', LEFT + 5, TOP + BANNER_HEIGHT + 18, '8pt sans-serif', settings.content.value );
+				breadcrumb.description = 'Breadcrumb Text';
 				breadcrumb.family = settings.content.name;
+				
+				var separator = Component.drawText( ctx, '/', LEFT + 68, TOP + BANNER_HEIGHT + 18, '8pt sans-serif', '#333' );
+				separator.description = 'Content Text';
+				separator.family = settings.separator.name;
+				
+				var location = Component.drawText( ctx, 'Location', LEFT + 74, TOP + BANNER_HEIGHT + 18, '8pt sans-serif', settings.content.value );
+				location.description = 'Content Text';
+				location.family = settings.navbar.name;
 				
 				var rightpanel = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP + 30, UI_SIZE * 0.6 -1, UI_SIZE - CONTENT_TOP + TOP -31, settings.mainpanel.value );
 				rightpanel.description = 'Main Panel';
 				rightpanel.family = settings.mainpanel.name;
 				
+				/* Selection bar */
+			
+				var selection = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4 + 5, CONTENT_TOP + 62, UI_SIZE * 0.6 -10, 20, settings.selection.value );
+				selection.description = 'Selection bar';
+				selection.family = settings.selection.name;
+				
 				var toolpanel = Component.drawRectangle( ctx, LEFT + UI_SIZE * 0.4, CONTENT_TOP, UI_SIZE * 0.6 -1, 30, settings.toolpanel.value );
 				toolpanel.description = 'Tool Panel';
 				toolpanel.family = settings.toolpanel.name;
+				
+				 /* Button */
+		
+				var button = Component.roundRect( ctx, LEFT + UI_SIZE * 0.4 + 5, CONTENT_TOP + 5, 37, 20, 2, '#EFEFEF', settings.button.value );
+				button.description = 'Button';
+				button.family = settings.button.name;
 				
 				zones.push( navbar );
 				zones.push( username );
 				zones.push( search );
 				zones.push( toolpanel );
 				zones.push( crumbbar );
-				
-				zones.push( selection );
-				
-				zones.push( button );
 
 				zones.push( rightpanel );
 				
-				zones.push( breadcrumb );
+				zones.push( selection );
+				
+				zones.push( location );
 				
 				for( var count=0; count < 3; count++ ){
 					
@@ -647,6 +660,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				
 				
 				zones.push( navigator );
+				
+				zones.push( button );
+				
 				zones.push( sidepanel );
 				
 				for( count=0; count < 3; count++ ){
@@ -660,6 +676,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				}
 				
 				INITIALIZE = false;
+				
+				var img = new Image();  
+			
+			    img.onload = function(){  
+					ctx.drawImage(img, LEFT + 5, TOP + 8);  
+			    };
+			    
+			    img.src = 'orion-transparent.png'; 
+				
+				
+				
+				zones.push( breadcrumb );
+				
+				
 				
 			}else{
 			
@@ -725,6 +755,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				newtheme.navbar = this.settings.navbar.value;
 				newtheme.button = this.settings.button.value;
 				newtheme.location = this.settings.location.value;
+				newtheme.breadcrumb = this.settings.breadcrumb.value;
+				newtheme.separator = this.settings.separator.value;
 				newtheme.selection = this.settings.selection.value;
 				newtheme.sidepanel = this.settings.sidepanel.value; 
 				newtheme.toolpanel = this.settings.toolpanel.value;
@@ -733,8 +765,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				newtheme.content = this.settings.content.value;
 				newtheme.search = this.settings.search.value;
 				
-				this.styles.push( newtheme );
+				var existingTheme = false;
 				
+				for( var s in this.styles ){
+					if( this.styles[s].name === newtheme.name ){
+						this.styles[s] = newtheme;
+						existingTheme = true;
+						break;
+					}
+				}
+				
+				if( !existingTheme ){
+					this.styles.push( newtheme );
+				}
 				themename = newtheme.name;
 				
 				if( dojo.byId( 'themesaver' ).value ){
@@ -754,6 +797,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			dojo.byId( 'savecontainer' ).style.display = 'none';
 			dojo.byId( 'pickercontainer' ).style.display = '';
 			this.updateThemePicker(themename);
+			this.AUTONAME = false;
 		}
 		
 		ThemeBuilder.prototype.apply = apply;
@@ -763,6 +807,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.guide();
 			dojo.byId( 'pickercontainer' ).style.display = '';
 			dojo.byId( 'savecontainer' ).style.display = 'none';
+			this.AUTONAME = false;
 		}
 		
 		ThemeBuilder.prototype.revert = revert;
@@ -772,9 +817,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.refresh();
 			OVERVIEW = true;
 			this.drawOutline();
-		
-//			dojo.byId( 'pickercontainer' ).style.display = '';
-//			dojo.byId( 'savecontainer' ).style.display = 'none';
 		}
 		
 		ThemeBuilder.prototype.guide = guide;
@@ -791,6 +833,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					this.settings.navbar.value = this.styles[s].navbar;
 					this.settings.button.value = this.styles[s].button;
 					this.settings.location.value = this.styles[s].location;
+					this.settings.breadcrumb.value = this.styles[s].breadcrumb;
+					this.settings.separator.value = this.styles[s].separator;
 					this.settings.selection.value = this.styles[s].selection;
 					this.settings.sidepanel.value = this.styles[s].sidepanel;
 					this.settings.mainpanel.value = this.styles[s].mainpanel;
@@ -811,7 +855,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		}
 		
 		ThemeBuilder.prototype.select = select;
-
 		
 		
 		function addThemePicker(){
