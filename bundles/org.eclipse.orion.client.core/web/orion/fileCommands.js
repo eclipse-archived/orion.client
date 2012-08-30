@@ -354,10 +354,10 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		commandService.addCommand(renameCommand);
 		
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-		var compareCommand = new mCommands.Command({
-				name: messages["Compare Each Other"],
+		var compareWithEachOtherCommand = new mCommands.Command({
+				name: messages["Compare with each other"],
 				tooltip: messages["Compare the selected 2 files with each other"],
-				id: "eclipse.compareEachOther", //$NON-NLS-0$
+				id: "eclipse.compareWithEachOther", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					if (dojo.isArray(item)) {
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
@@ -379,7 +379,36 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true});
 				}
 			});
-		commandService.addCommand(compareCommand);
+		commandService.addCommand(compareWithEachOtherCommand);
+		
+		var compareWithCommand = new mCommands.Command({
+			name : messages["Compare with..."],
+			tooltip: messages["Compare the selected folder with a specified folder"], 
+			id: "eclipse.compareWith", //$NON-NLS-0$
+			visibleWhen: function(item) {
+				if (dojo.isArray(item)) {
+					if(item.length === 1 && item[0].Directory){
+						return true;
+					}
+				}
+				return false;
+			},
+			callback: function(data) {
+				var dialog = new orion.widgets.DirectoryPrompterDialog({
+					title: messages["Choose a Folder"],
+					serviceRegistry: serviceRegistry,
+					fileClient: fileClient,				
+					func: function(targetFolder) { 
+						if (targetFolder && targetFolder.Location) {
+							window.open(require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + targetFolder.Location);
+						}
+					}
+				});
+				dialog.startup();
+				dialog.show();
+			} 
+		});
+		commandService.addCommand(compareWithCommand);
 		
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete"],
