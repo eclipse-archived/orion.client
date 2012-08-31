@@ -40,7 +40,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorerRenderer.prototype.getCellHeaderElement = function(col_no){
 		switch(col_no){
 			case 0: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 1: 
 				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -277,6 +277,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location, name: curResItemBase.Name});
 			}
 		}
+		this._totalFiles = this._compareResults.length + this._sameFiles.length;
 		if(this._compareResults.length > 0){
 			this._renderUI();
 		}
