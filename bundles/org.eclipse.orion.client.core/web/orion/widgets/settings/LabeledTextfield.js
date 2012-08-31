@@ -16,7 +16,7 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(messages, require, dojo, dijit, mUtil, mCommands) {
 
-	dojo.declare("orion.widgets.settings.LabeledTextfield",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
+	dojo.declare("orion.widgets.settings.LabeledTextfield", [dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
 		templateString: '<div class="setting-property">' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
