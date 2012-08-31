@@ -57,6 +57,25 @@
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
 
+		provider.registerService("orion.core.setting", null, {
+			settings: [
+				{	pid: "nav.config",
+					name: "Navigation",
+					properties: [
+						{	id: "links.newtab",
+							name: "Links",
+							type: "boolean",
+							defaultValue: true,
+							options: [
+								{value: true, label: "Open in new tab"},
+								{value: false, label: "Open in same tab"}
+							]
+						}
+					]
+				}
+			]
+		});
+
 		provider.connect();
 	};
 	</script>

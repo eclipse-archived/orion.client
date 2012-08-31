@@ -121,6 +121,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		}
 		this.id = attrJson.id;
 		this.name = attrJson.name || null;
+		this.options = attrJson.options || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
 		this.defaultValue = attrJson.defaultValue || null;
 		if (!this.id) {
@@ -129,6 +130,13 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		if (!isType(this.type)) {
 			throw 'Invalid "type": ' + this.type; //$NON-NLS-0$
 		}
+		if (this.options) {
+			this.options.forEach(function(option) {
+				if (typeof option.value === 'undefined') { //$NON-NLS-0$
+					throw 'Missing option value: ' + JSON.stringify(option); //$NON-NLS-0$
+				}
+			});
+		}
 	};
 	PropertyTypeImpl.prototype = {
 		getId: function() {
@@ -136,6 +144,16 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		},
 		getName: function() {
 			return this.name;
+		},
+		getOptionLabels: function() {
+			return this.options && this.options.map(function(o) {
+				return o.label;
+			});
+		},
+		getOptionValues: function() {
+			return this.options && this.options.map(function(o) {
+				return o.value;
+			});
 		},
 		getType: function() {
 			return this.type;
@@ -186,6 +204,20 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @function
 		 * @description Returns the description.
 		 * @returns {String} The name, or <code>null</code>.
+		 */
+		/**
+		 * @name orion.metatype.PropertyType#getOptionValues
+		 * @function
+		 * @description Returns the option values that this property can take.
+		 * @returns {Object[]|null} The option values. The ordering of the returned array matches the ordering of the labels
+		 * array returned by {@link #getOptionLabels}. If there are no option values available, <code>null</code> is returned.
+		 */
+		/**
+		 * @name orion.metatype.PropertyType#getOptionLabels
+		 * @function
+		 * @description Returns a list of labels for option values.
+		 * @returns {String[]|null} The option labels. The ordering of the returned array matches the ordering of the values
+		 * array returned by {@link #getOptionValues}. If there are no option labels available, <code>null</code> is returned.
 		 */
 		/**
 		 * @name orion.metatype.PropertyType#getType
