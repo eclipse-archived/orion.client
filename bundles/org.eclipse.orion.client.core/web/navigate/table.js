@@ -110,7 +110,8 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 3, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 4, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.compareEachOther", 6, "orion.selectionGroup"); 
+		commandService.registerCommandContribution("selectionTools", "eclipse.compareWithEachOther", 6, "orion.selectionGroup"); 
+		commandService.registerCommandContribution("selectionTools", "eclipse.compareWith", 7, "orion.selectionGroup"); 
 		commandService.registerCommandContribution("selectionTools", "eclipse.importCommand", 1, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.downloadFile", 2, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.importSFTPCommand", 3, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

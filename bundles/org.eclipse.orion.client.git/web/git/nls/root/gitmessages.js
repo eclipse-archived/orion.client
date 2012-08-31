@@ -346,6 +346,8 @@ define({
 	"Merge Squash": "Merge Squash",
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
 	"Local Branch Name:" : "Local Branch Name:",
+	"Filter items" : "Filter items",
+	"Filter remote branches" : "Filter remote branches",
 	"Paste link in email or IM" : "Paste link in email or IM",
 	"Show Commit in GitHub" : "Show Commit in GitHub",
 	"Show Repository in GitHub" : "Show Repository in GitHub",
