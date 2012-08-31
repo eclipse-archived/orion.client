@@ -217,8 +217,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		this.checkbox = false;
 		this.renderer = new FileRenderer({actionScopeId: options.actionScopeId, checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, this, this.commandService, this.contentTypeService); //$NON-NLS-0$
 		this.preferences = options.preferences;
-		this.setTarget();
-		this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
+
+		var renderer = this.renderer;
+		this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
+			{	updated: function(properties) {
+					var target;
+					if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+						target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					} else {
+						target = "_blank"; //$NON-NLS-0$
+					}
+					renderer.setTarget(target);
+				}
+			}, {pid: "nav.config"}); //$NON-NLS-0$
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
@@ -258,40 +269,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			} else if(this.treeRoot.Parents[0].ChildrenLocation){
 				window.location.href = "#" + this.treeRoot.Parents[0].ChildrenLocation; //$NON-NLS-0$
 			}
-		}
-	};
-	
-	FileExplorer.prototype.setTarget = function(){
-	
-		var preferences = this.preferences;	
-		var renderer = this.renderer;
-	
-		this.preferences.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
-		
-			var data = prefs.get("General"); //$NON-NLS-0$
-			
-			if( data !== undefined ){
-					
-				var storage = JSON.parse( data );
-				
-				if(storage){
-					var target = preferences.getSetting( storage, "Navigation", "Links" ); //$NON-NLS-1$ //$NON-NLS-0$
-					
-					if( target === "Open in new tab" ){ //$NON-NLS-0$
-						target = "_blank"; //$NON-NLS-0$
-					}else{
-						target = "_self"; //$NON-NLS-0$
-					}
-					
-					renderer.setTarget( target );
-				}
-			}
-		});
-	};
-	
-	FileExplorer.prototype.onStorage = function (e) {
-		if( e.key === this.storageKey ){
-			this.setTarget();
 		}
 	};
 	

@@ -228,7 +228,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
-				commandService: this.commandService
+				commandService: this.commandService,
+				registry: this.registry
 //				toolbarID: "pageActions" //$NON-NLS-0$
 			}, pluginNode);
 			
@@ -426,11 +427,6 @@ initialSettings: [
 //							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" } ]}
 //				]
 //			},
-			{"category": messages["General"], //$NON-NLS-0$
-				"subcategory": [{ "ui": messages['Navigation'], "label": messages["Navigation"], //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-				"items": [{ "ui": messages['Links'], "label": messages["Links"], "input": "combo", "values": [{"label": messages['Open in same tab']}, {"label": messages["Open in new tab"]}], "setting": messages["Open in same tab"] } ] } //$NON-NLS-12$ //$NON-NLS-10$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-				]
-			},
 			{"category": messages['JavaScript Editor'], //$NON-NLS-0$
 			"subcategory": [{
 				"ui": messages["Font"], //$NON-NLS-0$
