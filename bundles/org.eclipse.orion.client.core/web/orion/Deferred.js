@@ -22,9 +22,14 @@
 
 define(function() {
 	var head, tail, remainingHead, remainingTail, running = false;
+	var NOQUEUE = true;
 
 	// handles deferred notification without blowing the stack
 	function queueNotification(notify) {
+		if (NOQUEUE) {
+			notify();
+			return;
+		}
 		if (running) {
 			if (!head) {
 				head = {
@@ -85,6 +90,7 @@ define(function() {
 					try {
 						var listenerResult = listener[methodName](result);
 						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
+							listener.cancel = listenerResult.cancel;
 							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
 							continue;
 						}
@@ -114,10 +120,14 @@ define(function() {
 				return canceled ? result.message : null;
 			}
 			canceled = true;
-			reason = reason || "canceled";
 			if (optOnCancel) {
-				reason = optOnCancel(reason) || reason;
+				try {
+					reason = optOnCancel(reason) || reason;
+				} catch(e) {
+					// do not let this error escape
+				}
 			}
+			reason = reason || "canceled";
 			state = "rejected"; //$NON-NLS-0$
 			result = new Error(reason); //$NON-NLS-0$
 			queueNotification(notify);
@@ -162,9 +172,11 @@ define(function() {
 				resolve: onResolve,
 				reject: onReject,
 				progress: onProgress,
-				deferred: new Deferred()
+				cancel: this.cancel,
+				deferred: new Deferred(function(reason) {
+					return listener.cancel && listener.cancel(reason);
+				})
 			};
-			listener.deferred.promise.cancel = this.cancel;
 			if (head) {
 				tail.next = listener;
 			} else {

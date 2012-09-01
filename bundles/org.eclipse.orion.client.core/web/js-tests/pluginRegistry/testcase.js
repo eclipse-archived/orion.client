@@ -61,7 +61,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		});
 	};
 	
-		tests["test install worker plugin"] = function() {
+	tests["test install worker plugin"] = function() {
 		if (typeof(Worker) === "undefined") {
 			return;
 		}
@@ -166,6 +166,33 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		});
 		return promise;
 	};
+	
+	tests["test plugin service call promise cancel"] = function() {
+		var storage = {};
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
+		
+		assert.equal(pluginRegistry.getPlugins().length, 0);
+		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
+		
+		var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			var cancelPromise = serviceRegistry.getService("test").testCancel();
+			cancelPromise.cancel("test");
+			return cancelPromise.then(function(result) {
+				assert.ok(false);
+			}, function(error) {
+				assert.ok(cancelPromise.isCanceled());
+				return true;
+			}).then(function() {
+				return serviceRegistry.getService("test").testCancel(true);
+			}).then(function(result) {
+				assert.equal(result, "test");
+				pluginRegistry.shutdown();
+			});
+		});
+		return promise;
+	};
+	
 	
 	tests["test plugin event"] = function() {
 		var storage = {};
