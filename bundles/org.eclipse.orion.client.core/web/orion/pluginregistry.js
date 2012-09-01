@@ -59,8 +59,17 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			if (!_channel) {
 				throw new Error("plugin not connected");
 			}
-			var requestId = _currentMessageId++;
-			var d = new Deferred();
+			var requestId = _currentMessageId++;			
+			var onCancel = function(reason) {
+				if (_state === LOADED) {
+					internalRegistry.postMessage({
+						id: requestId,
+						cancel: typeof reason === "string" ? reason : "canceled"
+					}, _channel);
+				}
+			};
+			
+			var d = new Deferred(onCancel);
 			_deferredResponses[String(requestId)] = d;
 			var message = {
 				id: requestId,
@@ -207,7 +216,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						proxy.dispatchEvent.apply(proxy, message.params);		
 					} else if ("progress" === message.method){ //$NON-NLS-0$
 						deferred = _deferredResponses[String(message.requestId)];
-						deferred.update.apply(deferred, message.params);	
+						deferred.progress.apply(deferred, message.params);	
 					} else if ("timeout"){
 						if (_state === INSTALLED) {
 							_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
