@@ -1,13 +1,15 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2010, 2011 IBM Corporation and others.
+ * Copyright (c) 2012 VMware, Inc.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  *
- * Contributors:
+ * Contributors: 
  *     IBM Corporation - initial API and implementation
+ *     Andrew Eisenberg - rename jsContentAssist to jsTemplateContentAssist
  *******************************************************************************/
 /*global examples orion:true window define*/
 /*jslint browser:true devel:true*/
@@ -22,10 +24,10 @@ define([
 	"orion/editor/editor",
 	"orion/editor/editorFeatures",
 	"orion/editor/contentAssist",
-	"orion/editor/jsContentAssist",
+	"orion/editor/jsTemplateContentAssist",
 	"orion/editor/cssContentAssist"],
 
-function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSContentAssist, mCSSContentAssist){
+function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGrammar, mEditor, mEditorFeatures, mContentAssist, mJSTemplateContentAssist, mCSSContentAssist){
 	
 	var editorDomNode = document.getElementById("editor");
 	
@@ -45,7 +47,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		}
 	};
 	var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
-	var jsContentAssistProvider = new mJSContentAssist.JavaScriptContentAssistProvider();
+	var jsTemplateContentAssistProvider = new mJSTemplateContentAssist.JSTemplateContentAssistProvider();
 	
 	// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 	var syntaxHighlighter = {
@@ -151,7 +153,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		if (/\.css$/.test(contentName)) {
 			contentAssist.setProviders([cssContentAssistProvider]);
 		} else if (/\.js$/.test(contentName)) {
-			contentAssist.setProviders([jsContentAssistProvider]);
+			contentAssist.setProviders([jsTemplateContentAssistProvider]);
 		}
 	});
 	// end of code to run when content changes.

@@ -65,12 +65,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		_search: function(resultsNode, query) {
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
+			var qObj = mSearchUtils.parseQueryStr(query);
+			this.crawling = qObj.useCrawler;
 			if(this.crawling){
 				var self = this;
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query);
 				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
 			} else {
-				var qObj = mSearchUtils.parseQueryStr(query);
 				try{
 					this.fileService.search(qObj.location, query).then(
 						dojo.hitch(this, function(jsonData) {

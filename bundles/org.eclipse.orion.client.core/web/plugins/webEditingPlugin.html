@@ -6,7 +6,7 @@
 <script src="../orion/plugin.js"></script>
 <script src="../orion/textview/global.js"></script>
 <script src="../orion/editor/cssContentAssist.js"></script>
-<script src="../orion/editor/jsContentAssist.js"></script>
+<script src="../orion/editor/jsTemplateContentAssist.js"></script>
 <script src="../orion/editor/htmlGrammar.js"></script>
 <script src="../orion/editor/htmlContentAssist.js"></script>
 <script>
@@ -119,7 +119,7 @@ window.onload = function() {
 			contentType: ["text/css"]
 		});
 	provider.registerService("orion.edit.contentAssist",
-		new orion.editor.JavaScriptContentAssistProvider(),
+		new orion.editor.JSTemplateContentAssistProvider(),
 		{	name: "JavaScript content assist",
 			contentType: ["application/javascript"]
 		});

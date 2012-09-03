@@ -52,7 +52,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 						properties: [
 							{	id: 'myprop0'
 							}
-						]
+						],
 					}
 				],
 				designates: [
@@ -83,7 +83,11 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 							},
 							{	id: 'myprop1',
 								name: 'Property 1',
-								type: 'boolean'
+								type: 'boolean',
+								options: [
+									{value: true,  label: 'Option A'},
+									{value: false, label: 'Option B'}
+								]
 							}
 						]
 					}
@@ -108,6 +112,8 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.strictEqual(props[1].getId(), 'myprop1');
 		assert.strictEqual(props[1].getName(), 'Property 1');
 		assert.strictEqual(props[1].getType(), 'boolean');
+		assert.deepEqual(props[1].getOptionLabels(), ['Option A', 'Option B']);
+		assert.deepEqual(props[1].getOptionValues(), [true, false]);
 	});
 	tests['test register & unregister separately'] = makeTest(function() {
 		serviceRegistry.registerService(METATYPE_SERVICE, {},

@@ -33,6 +33,7 @@ define(['i18n!orion/nls/messages', 'require'],
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
 				'<input type="text" id="search" placeholder="'+messages['Search']+'" title="'+messages['Type a keyword or wild card to search in root']+'" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
+				'<div id="searchOptions" class="layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
 				// '<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' + //$NON-NLS-0$
 				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$

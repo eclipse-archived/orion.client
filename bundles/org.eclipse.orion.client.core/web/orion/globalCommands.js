@@ -249,6 +249,33 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}	
 	}
 	
+	function _addSearchOptions(searcher) {
+		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
+		if (optionMenu) {
+			optionMenu.destroy();
+		}
+		var newMenu = new dijit.Menu({
+			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
+			id : "searchOptionsMenu" //$NON-NLS-0$
+		});
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: "Reg expression",
+			checked: false,
+			onChange : function(checked) {
+				searcher._regEx = checked;
+			}
+		}));
+		var menuButton = new orion.widgets.UserMenuDropDown({
+			label : "",
+			id : "searchOptionsDropDown", //$NON-NLS-0$
+			dropDown : newMenu
+		});
+		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
+		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+	}
+	
 	/**
 	 * Adds the related links to the banner
 	 * @name orion.globalCommands#generateRelatedLinks
@@ -727,6 +754,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			}
 		});
+		_addSearchOptions(searcher);
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;

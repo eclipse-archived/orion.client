@@ -11,11 +11,6 @@
  *******************************************************************************/
 
 /*global window ArrayBuffer addEventListener removeEventListener self XMLHttpRequest define*/
-
-/**
- * @private Don't jsdoc this.
- */
-
 (function() {
 	var global = this;
 	if (!global.define) {
@@ -34,6 +29,7 @@ define(function() {
 		var _services = [];
 		var _conditions = [];
 		var _connected = false;
+		var _activePromises = {};
 		var _target = null;
 	
 		function _publish(message) {
@@ -86,6 +82,16 @@ define(function() {
 				return;
 			}
 			var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data)); //$NON-NLS-0$
+			if (typeof message.cancel === "string") {
+				var promise = _activePromises[message.id];
+				if (promise) {
+					delete _activePromises[message.id];
+					if(promise.cancel) {
+						promise.cancel(message.cancel);
+					}
+				}
+				return;
+			}	
 			var serviceId = message.serviceId;
 			var methodName = message.method;
 			var params = message.params;
@@ -108,12 +114,17 @@ define(function() {
 			try {
 				var promiseOrResult = method.apply(implementation, params);
 				if(promiseOrResult && typeof promiseOrResult.then === "function"){ //$NON-NLS-0$
+					_activePromises[message.id] = promiseOrResult;
 					promiseOrResult.then(function(result) {
+						delete _activePromises[message.id];
 						response.result = result;
 						_publish(response);
 					}, function(error) {
-						response.error = error ? JSON.parse(JSON.stringify(error, _jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
-						_publish(response);
+						if (_activePromises[message.id]) {
+							delete _activePromises[message.id];
+							response.error = error ? JSON.parse(JSON.stringify(error, _jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
+							_publish(response);
+						}
 					}, function() {
 						_publish({requestId: message.id, method: "progress", params: Array.prototype.slice.call(arguments)}); //$NON-NLS-0$
 					});

@@ -169,7 +169,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 					location: useRoot ? this._searchRootLocation: this._searchLocation,
 					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
-			return  mSearchUtils.generateSearchQuery({sort: sort,
+			return  mSearchUtils.generateSearchQuery({sort: sort, regEx: this._regEx,
 				rows: 40,
 				start: 0,
 				searchStr: this._luceneEscape(query, true),
