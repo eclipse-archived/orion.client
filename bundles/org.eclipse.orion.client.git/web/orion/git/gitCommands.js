@@ -1594,6 +1594,38 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(nextLogPage);
+		
+		var previousTagPage = new mCommands.Command({
+			name : messages["< Previous Page"],
+			tooltip : messages["Show previous page of git tags"],
+			id : "eclipse.orion.git.previousTagPage",
+			hrefCallback : function(data) {
+				return require.toUrl("git/git-repository.html") + "#" + data.items.PreviousLocation;
+			},
+			visibleWhen : function(item){
+				if(item.Type === "Tag"){
+					return item.PreviousLocation !== undefined;
+				}
+				return false;
+			}
+		});
+		commandService.addCommand(previousTagPage);
+		
+		var nextTagPage = new mCommands.Command({
+			name : messages["Next Page >"],
+			tooltip : messages["Show next page of git tags"],
+			id : "eclipse.orion.git.nextTagPage",
+			hrefCallback : function(data){
+				return require.toUrl("git/git-repository.html") + "#" + data.items.NextLocation;
+			},
+			visibleWhen : function(item){
+				if(item.Type == "Tag"){
+					return item.NextLocation !== undefined;
+				}
+				return false;
+			}
+		});
+		commandService.addCommand(nextTagPage);
 
 		var resetIndexCommand = new mCommands.Command({
 			name : messages['Reset'],
