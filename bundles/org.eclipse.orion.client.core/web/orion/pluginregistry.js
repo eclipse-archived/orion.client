@@ -102,7 +102,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					serviceProxy.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
 					var _addEventListener = serviceProxy.addEventListener;
 					serviceProxy.addEventListener = function(type, listener) {
-						if (!eventTarget._namedlisteners[type]) {
+						if (!eventTarget._namedListeners[type]) {
 							_addEventListener(type);
 						}
 						eventTarget.addEventListener(type, listener);
@@ -110,7 +110,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					var _removeEventListener = serviceProxy.removeEventListener;
 					serviceProxy.removeEventListener = function(type, listener) {
 						eventTarget.removeEventListener(type, listener);
-						if (eventTarget._namedlisteners[type]) {
+						if (eventTarget._namedListeners[type]) {
 							_removeEventListener(type);
 						}
 					};
@@ -643,7 +643,8 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				if(plugin.getHeaders()) {
 					d.resolve(plugin);
 				} else {
-					var pluginTracker = function(plugin) {
+					var pluginTracker = function(event) {
+						var plugin = event.plugin;
 						if (plugin.getLocation() === url) {
 							d.resolve(plugin);
 							_pluginEventTarget.removeEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$
