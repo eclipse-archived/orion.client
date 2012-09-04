@@ -64,7 +64,10 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 			if (!event.type) {
 				throw new Error("unspecified type");
 			}
-			var listeners = this._namedListeners[event.type];
+			var listeners = _namedListeners[event.type];
+			if (!listeners) {
+				return;
+			}
 			listeners.forEach(function(listener) {
 				try {
 					if(typeof listener === "function") {
