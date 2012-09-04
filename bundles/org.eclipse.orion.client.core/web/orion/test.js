@@ -255,7 +255,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 		var top;
 		
 		this.addEventListener("runStart", function(event) {
-			var name = event.name ? event.name : "<top>";
+			var name = event.prefix ? event.prefix : "<top>";
 			if (!top) {
 				top = name;
 			}
@@ -263,7 +263,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 			times[name] = new Date().getTime();
 		});
 		this.addEventListener("runDone", function(event) {
-			var name = event.name ? event.name : "<top>";
+			var name = event.prefix ? event.prefix : "<top>";
 			var result = [];
 			result.push("[Test Run] - " + name + " done - ");
 			if (name === top) {
