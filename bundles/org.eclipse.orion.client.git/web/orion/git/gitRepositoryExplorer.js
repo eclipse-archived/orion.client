@@ -28,13 +28,14 @@ exports.GitRepositoryExplorer = (function() {
 	 * @param parentId
 	 * @param actionScopeId
 	 */
-	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, actionScopeId){
+	function GitRepositoryExplorer(registry, commandService, linkService, selection, parentId, pageNavId, actionScopeId){
 		this.parentId = parentId;
 		this.registry = registry;
 		this.linkService = linkService;
 		this.commandService = commandService;
 		this.selection = selection;
 		this.parentId = parentId;
+		this.pageNavId = pageNavId;
 		this.actionScopeId = actionScopeId;
 		this.checkbox = false;
 	}
@@ -112,6 +113,13 @@ exports.GitRepositoryExplorer = (function() {
 		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
 		this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
 			function(resp){
+				
+				// render navigation commands
+				var pageNav = dojo.byId(that.pageNavId);
+				if(pageNav){
+					dojo.empty(that.pageNavId);
+					that.commandService.renderCommands(that.pageNavId, pageNav, resp, that, "button");
+				}
 				
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
@@ -887,131 +895,150 @@ exports.GitRepositoryExplorer = (function() {
 
 	// Git tags
 	
-	GitRepositoryExplorer.prototype.decorateTags = function(tags, deferred){
-		var that = this;
-		if (deferred == null)
+	GitRepositoryExplorer.prototype.decorateTag = function(tag, deferred){
+		if(deferred == null){
 			deferred = new dojo.Deferred();
-		
-		if (tags.length > 0) {
-			this.registry.getService("orion.git.provider").doGitLog(tags[0].CommitLocation + "?page=1&pageSize=1").then( //$NON-NLS-1$ //$NON-NLS-0$
-				function(resp){
-					tags[0].Commit = resp.Children[0];
-					that.decorateTags(tags.slice(1), deferred);
-				}
-			);
-		} else {
-			deferred.callback();
 		}
+		
+		this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1").then(
+			function(resp){
+				tag.Commit = resp.Children[0];
+				deferred.callback();
+			}, function(err){
+				deferred.errback();
+			}
+		);
 		
 		return deferred;
 	};
 	
 	GitRepositoryExplorer.prototype.displayTags = function(repository, mode){
-		
-		var tagLocation = repository.TagLocation;		
 		var that = this;
+		var href = window.location.href;
+		var getParameters = dojo.queryToObject(href.substring(href.indexOf('?') + 1));
 		
-		var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
+		// default page values
+		var page = 1, pageSize = 20;
 		
+		// override defaults
+		if(getParameters.page) { page = getParameters.page; }
+		if(getParameters.pageSize) { pageSize = getParameters.pageSize; }
+		
+		// render section even before initialRender
+		var tableNode = dojo.byId("table");
 		var titleWrapper = new mSection.Section(tableNode, {
-			id: "tagSection", //$NON-NLS-0$
-			iconClass: "gitImageSprite git-sprite-tag", //$NON-NLS-0$
-			title: ("Tags" + (mode === "full" ? "" : " (5 most recent)")), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			content: '<list id="tagNode" class="mainPadding"></list>', //$NON-NLS-0$
-			canHide: true,
-			hidden: true,
-			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
-		}); 
+			id : "tagSection",
+			iconClass : "gitImageSprite git-sprite-tag",
+			title : ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
+			content : '<list id="tagNode" class="mainPadding"></list>',
+			canHide : true,
+			hidden : true,
+			preferenceService : that.registry.getService("orion.core.preference")
+		});
+						
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin(messages["Getting tags"]);
-		
-		this.registry.getService("orion.git.provider").getGitBranch(tagLocation + (mode === "full" ? "" : "?commits=1&page=1&pageSize=5")).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				
+		this.registry.getService("orion.git.provider").getGitBranch(repository.TagLocation + (mode === "full" ? "?page="+page+"&pageSize="+pageSize : "?page=1&pageSize=5")).then(
 			function(resp){
-				var tags = resp.Children.slice(0, 5);
-				if (mode === 'full') //$NON-NLS-0$
-					tags = resp.Children;
+				var tags = resp.Children;
 				
-				progress.done();
-				if (mode !== "full" && tags.length !== 0){ //$NON-NLS-0$
-					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
-					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
-							{"ViewAllLink":"/git/git-repository.html#" + tagLocation + "?page=1", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all tags"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				}
-
-				if (tags.length === 0) {
-					titleWrapper.setTitle(messages['No Tags']);
-					return;
-				}
-				
-				for(var i=0; i<tags.length ;i++){
-					tags[i].Repository = repository;
-					that.renderTag(tags[i], i);
+				var dynamicContentModel = new mDynamicContent.DynamicContentModel(tags,
+					function(i){
+						return that.decorateTag.bind(that)(tags[i]);
+					});
+						
+				var dcExplorer = new mDynamicContent.DynamicContentExplorer(dynamicContentModel);
+				var tagRenderer = {
+					initialRender : function(){
+						progress.done();
+						
+						if (mode !== "full" && tags.length !== 0){ //$NON-NLS-0$
+							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
+							that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id,
+									{"ViewAllLink":"/git/git-repository.html#" + repository.TagLocation + "?page=1&pageSize=20", "ViewAllLabel":messages['View All'], "ViewAllTooltip":messages["View all tags"]}, that, "button"); //$NON-NLS-7$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						}
+		
+						if (tags.length === 0) {
+							titleWrapper.setTitle(messages['No Tags']);
+						}
+					},
+					
+					renderBeforeItemPopulation : function(i){
+						var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((i % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("tagNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+						
+						var detailsView = dojo.create( "div", { "id":"tagDetailsView"+i, "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tags[i].Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						
+						this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
+						
+						dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+						
+						var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						that.commandService.renderCommands(that.actionScopeId, actionsArea, tags[i], that, "tool");	 //$NON-NLS-0$
+					},
+					
+					renderAfterItemPopulation : function(i){
+						that.renderTag(tags[i], i);
+					}			
 				};
-			}, function(error){
+				
+				dcExplorer.use(tagRenderer);
+				dcExplorer.render();
+			
+			}, function(err){
 				progress.done();
-				dojo.hitch(that, that.handleError)(error);
+				dojo.hitch(that, that.handleError)(err);
 			}
 		);
 	};
 			
-	GitRepositoryExplorer.prototype.renderTag = function(tag, index){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("tagNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+	GitRepositoryExplorer.prototype.renderTag = function(tag, i){
+		var description = dojo.create( "span", { "class":"tag-description"}, dojo.byId("tagDetailsView"+i) ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						
+		var commit = tag.Commit;
 		
-		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tag.Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
-		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		
-		if (tag.Commit){
-			var description = dojo.create( "span", { "class":"tag-description"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = dojo.create("a", {"class": "navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, description); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.place(document.createTextNode(commit.Message), link);	
+		dojo.place(document.createTextNode(messages[" by "] + commit.AuthorName + messages[" on "] + 
+			dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})), description, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+						
+		var _timer;
+						
+		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+		    commit: commit,
+		    onMouseLeave: function(){
+		    	if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+		          },
+		          onMouseEnter: function(){
+		    	clearTimeout(_timer);
+		          }
+		});
+						
+		dojo.connect(link, "onmouseover", link, function() { //$NON-NLS-0$
+			clearTimeout(_timer);
 			
-			var commit = tag.Commit.Children[0];
-			var link = dojo.create("a", {"class": "navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, description); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(document.createTextNode(commit.Message), link);	
-			dojo.place(document.createTextNode(messages[" by "] + commit.AuthorName + messages[" on "] + 
-				dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})), description, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			var _timer;
-			
-			var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-			    commit: commit,
-			    onMouseLeave: function(){
-			    	if(dijit.popup.hide)
-						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-					dijit.popup.close(tooltipDialog);
-	            },
-	            onMouseEnter: function(){
-			    	clearTimeout(_timer);
-	            }
-			});
-			
-			dojo.connect(link, "onmouseover", link, function() { //$NON-NLS-0$
-				clearTimeout(_timer);
-				
-				_timer = setTimeout(function(){
-					dijit.popup.open({
-						popup: tooltipDialog,
-						around: link,
-						orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					});
-				}, 600);
-			});
-			
-			dojo.connect(link, "onmouseout", link, function() { //$NON-NLS-0$
-				clearTimeout(_timer);
-				
-				_timer = setTimeout(function(){
-					if(dijit.popup.hide)
-						dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-					dijit.popup.close(tooltipDialog);
-				}, 200);
-			});
-				
-		}
-
-		var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.commandService.renderCommands(this.actionScopeId, actionsArea, tag, this, "tool");	 //$NON-NLS-0$
+			_timer = setTimeout(function(){
+				dijit.popup.open({
+					popup: tooltipDialog,
+					around: link,
+					orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				});
+			}, 600);
+		});
+						
+		dojo.connect(link, "onmouseout", link, function() { //$NON-NLS-0$
+			clearTimeout(_timer);
+							
+			_timer = setTimeout(function(){
+				if(dijit.popup.hide)
+					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+				dijit.popup.close(tooltipDialog);
+			}, 200);
+		});
 	};
 	
 	// Git Remotes
