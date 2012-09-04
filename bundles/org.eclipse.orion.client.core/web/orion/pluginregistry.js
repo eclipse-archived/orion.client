@@ -123,13 +123,13 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			_state = state;
 			switch (state) {
 				case UNINSTALLED:
-					internalRegistry.dispatchEvent("pluginUninstalled", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginUninstalled", plugin:_self}); //$NON-NLS-0$
 					break;
 				case INSTALLED:
-					internalRegistry.dispatchEvent("pluginInstalled", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginInstalled", plugin:_self}); //$NON-NLS-0$
 					break;
 				case LOADED:
-					internalRegistry.dispatchEvent("pluginLoaded", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginLoaded", plugin:_self}); //$NON-NLS-0$
 					break;
 			}
 		}
@@ -558,14 +558,14 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				},
 				updatePlugin: function(plugin) {
 					_persist(plugin);
-					_pluginEventTarget.dispatchEvent("pluginUpdated", plugin); //$NON-NLS-0$
+					_pluginEventTarget.dispatchEvent({type:"pluginUpdated", plugin: plugin}); //$NON-NLS-0$
 				},
 				postMessage: function(message, channel) {
 					channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
 				},
-				dispatchEvent: function(type, plugin) {
+				dispatchEvent: function(event) {
 					try {
-						_pluginEventTarget.dispatchEvent(type, plugin);
+						_pluginEventTarget.dispatchEvent(event);
 					} catch (e) {
 						if (console) {
 							console.log(e);

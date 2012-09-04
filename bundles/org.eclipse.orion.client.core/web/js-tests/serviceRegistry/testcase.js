@@ -139,17 +139,17 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 		assert.equal(0, serviceRemovedCount);
 
 		var service = registry.getService(registration.getServiceReference());
-		var eventHandler = function(result) {
-			eventResult = result;
+		var eventHandler = function(event) {
+			eventResult = event.result;
 		};
 		service.addEventListener("event", eventHandler);
 		assert.equal(null, eventResult);
-		impl.dispatchEvent("nonevent", "bad");
+		impl.dispatchEvent({type:"nonevent", result:"bad"});
 		assert.equal(null, eventResult);
-		impl.dispatchEvent("event", "good");
+		impl.dispatchEvent({type:"event", result: "good"});
 		assert.equal("good", eventResult);
 		service.removeEventListener("event", eventHandler);
-		impl.dispatchEvent("event", "bad");
+		impl.dispatchEvent({type:"event", result:"bad"});
 		assert.equal("good", eventResult);
 
 		registration.unregister();

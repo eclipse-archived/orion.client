@@ -174,7 +174,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 						}
 					});
 					that._entries[serviceId] = null;
-					that._serviceEventTarget.dispatchEvent("serviceRemoved", reference, entry.service);
+					that._serviceEventTarget.dispatchEvent({type:"serviceRemoved", serviceReference: reference, service: entry.service});
 				}
 			}
 		};
@@ -249,7 +249,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 				service: registeredService
 			});
 	
-			this._serviceEventTarget.dispatchEvent("serviceAdded", reference, deferredService).then(registered.resolve);
+			this._serviceEventTarget.dispatchEvent({type:"serviceAdded", serviceReference: reference, service:deferredService}).then(registered.resolve);
 			return new ServiceRegistration(serviceId, reference, this._internalRegistry);
 		},
 

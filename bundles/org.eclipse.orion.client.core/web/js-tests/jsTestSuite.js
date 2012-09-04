@@ -76,8 +76,8 @@ jstestdriver.pluginRegistrar.register({
 
 				for (var i = 0; i < references.length; i++) {
 					var service = loaderServiceRegistry.getService(references[i]);
-					service.addEventListener("testDone", function (testName, testResult) {
-						onTestDone(new jstestdriver.TestResult(testCaseName, testName, testResult.result ? "passed" : "failed", testResult.message || "", "", testResult.elapsed));
+					service.addEventListener("testDone", function (event) {
+						onTestDone(new jstestdriver.TestResult(testCaseName, event.name, event.result ? "passed" : "failed", event.message || "", "", event.elapsed));
 					});
 					testRunDeferreds.push(service.run());
 				}

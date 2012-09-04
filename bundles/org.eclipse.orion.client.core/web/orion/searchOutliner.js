@@ -37,7 +37,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 		},
 		
 		_notifyListeners: function() {
-			this.dispatchEvent("searchesChanged", {searches: this._searches, registry: this._registry}); //$NON-NLS-0$
+			this.dispatchEvent({type:"searchesChanged", searches: this._searches, registry: this._registry}); //$NON-NLS-0$
 		},
 
 		
@@ -235,8 +235,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 			}));
 
 			savedSearches.addEventListener("searchesChanged", dojo.hitch(searchOutliner, //$NON-NLS-0$
-				function(searches) {
-					this.render(searches.searches, searches.registry);
+				function(event) {
+					this.render(event.searches, event.registry);
 				}));
 		}
 	}
@@ -261,11 +261,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 				this.commandService.registerCommandContribution(selectionId, "eclipse.renameSearch", 1, null, false, new mCommands.CommandKeyBinding(113, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
 				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
 				commandService.registerSelectionService(selectionId, this.searchSelection);
-				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
+				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
 						commandService.destroy(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, selections, this, "button"); //$NON-NLS-0$
+						commandService.renderCommands(selectionId, selectionTools, event.selections, this, "button"); //$NON-NLS-0$
 					}
 				});
 			}
