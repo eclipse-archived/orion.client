@@ -102,12 +102,14 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 					var testResult = test();
 					if (testResult && typeof testResult.then === "function") {
 						var calledBack = false;
+						var d = new Deferred();
 						setTimeout(function() {
 							if (!calledBack) {
-								_testDone(name, false, startTime, "Timed out");
+								d.reject("Timed out");
 							}
 						}, (typeof test.timeout === 'number' ? test.timeout : DEFAULT_TIMEOUT));
-						return testResult.then(function() {
+						testResult.then(d.resolve, d.reject);
+						return d.then(function() {
 							calledBack = true;
 							_testDone(name, true, startTime);
 						}, function(e) {
