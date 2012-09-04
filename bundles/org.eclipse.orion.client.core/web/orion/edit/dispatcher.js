@@ -26,11 +26,11 @@ define(['orion/edit/dispatcher'], function() {
 
 		var self = this;
 		this.listener = {
-			onServiceAdded: function(serviceReference, service) {
-				self._onServiceAdded(serviceReference, service);
+			onServiceAdded: function(event) {
+				self._onServiceAdded(event.serviceReference, event.service);
 			},
-			onServiceRemoved: function(serviceReference, service) {
-				self._onServiceRemoved(serviceReference, service);
+			onServiceRemoved: function(event) {
+				self._onServiceRemoved(event.serviceReference, event.service);
 			}
 		};
 		this.serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded); //$NON-NLS-0$

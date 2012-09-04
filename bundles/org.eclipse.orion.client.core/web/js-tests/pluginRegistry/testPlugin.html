@@ -33,7 +33,10 @@
 					return d;
 				},
 				testEvent: function(name) {
-					this.dispatchEvent(name, name + "test");
+					this.dispatchEvent({
+						type: name,
+						result: name + "test"
+					});
 				},
 				testCancel: function(resolve) {
 					var d = new Deferred(function(reason) {

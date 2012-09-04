@@ -60,35 +60,40 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 
 	function Test() {
 		var _namedListeners = {};
-		function _dispatchEvent(eventName) {
-			var listeners = _namedListeners[eventName];
-			if (listeners) {
-				for ( var i = 0; i < listeners.length; i++) {
-					try {
-						var args = Array.prototype.slice.call(arguments, 1);
-						listeners[i].apply(null, args);
-					} catch (e) {
-						console.log(e); // for now, probably should dispatch an
-										// ("error", e)
-					}
-				}
+		function _dispatchEvent(event) {
+			if (!event.type) {
+				throw new Error("unspecified type");
 			}
+			var listeners = this._namedListeners[event.type];
+			listeners.forEach(function(listener) {
+				try {
+					if(typeof listener === "function") {
+						listener(event);
+					} else {
+						listener.handleEvent(event);
+					}
+				} catch (e) {
+					if (typeof console !== 'undefined') {
+						console.log(e); // for now, probably should dispatch an ("error", e)
+					}
+				}			
+			});
 		}
 
 		function _testDone(name, result, startTime, message, stack) {
-			var obj = {result: result, elapsed: new Date().getTime() - startTime};
+			var event = {type: "testDone", name: name, result: result, elapsed: new Date().getTime() - startTime};
 			if (typeof message !== 'undefined') {
-				obj.message = message;
+				event.message = message;
 			}
 			if (typeof stack !== 'undefined') {
-				obj.stack = stack;
+				event.stack = stack;
 			}
-			_dispatchEvent("testDone", name, obj);
+			_dispatchEvent(event);
 		}
 
 		function _createTestWrapper(name, test) {
 			return function() {
-				_dispatchEvent("testStart", name);
+				_dispatchEvent({type:"testStart", name: name});
 				var startTime = new Date().getTime();
 				try {
 					var testResult = test();
@@ -120,7 +125,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 		function _createRunWrapper(prefix, obj) {
 			return function(optTestName) {
 				var tasks = [];
-				_dispatchEvent("runStart", prefix);
+				_dispatchEvent({type:"runStart", prefix: prefix});
 				for ( var property in obj) {
 					if (property.match(/^test/)) {
 						var name = prefix ? prefix + "." + property : property;
@@ -136,7 +141,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 				}
 
 				return _serializeTasks(tasks).then(function(){
-					_dispatchEvent("runDone", prefix);
+					_dispatchEvent({type:"runDone", prefix: prefix});
 				});
 			};
 		}	
@@ -213,10 +218,10 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 					provider.registerService("orion.test.runner", impl);
 	
 					provider.connect(function() {
-						that.addEventListener("runStart", function(name) { impl.dispatchEvent("runStart", name); });
-						that.addEventListener("runDone", function(name, obj) { impl.dispatchEvent("runDone", name, obj); });
-						that.addEventListener("testStart", function(name) { impl.dispatchEvent("testStart", name); });
-						that.addEventListener("testDone", function(name, obj) { impl.dispatchEvent("testDone", name, obj); });
+						that.addEventListener("runStart", function(event) { impl.dispatchEvent(event); });
+						that.addEventListener("runDone", function(event) { impl.dispatchEvent(event); });
+						that.addEventListener("testStart", function(event) { impl.dispatchEvent(event); });
+						that.addEventListener("testDone", function(event) { impl.dispatchEvent(event); });
 						//that.addConsoleListeners();
 					}, function() {
 						if (!that.hasEventListener()) {
@@ -244,16 +249,16 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 		var failures = 0;
 		var top;
 		
-		this.addEventListener("runStart", function(name) {
-			name = name ? name : "<top>";
+		this.addEventListener("runStart", function(event) {
+			var name = event.name ? event.name : "<top>";
 			if (!top) {
 				top = name;
 			}
 			console.log("[Test Run] - " + name + " start");
 			times[name] = new Date().getTime();
 		});
-		this.addEventListener("runDone", function(name, obj) {
-			name = name ? name : "<top>";
+		this.addEventListener("runDone", function(event) {
+			var name = event.name ? event.name : "<top>";
 			var result = [];
 			result.push("[Test Run] - " + name + " done - ");
 			if (name === top) {
@@ -263,23 +268,23 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 			delete times[name];
 			console.log(result.join(""));
 		});
-		this.addEventListener("testStart", function(name) {
-			times[name] = new Date().getTime();
+		this.addEventListener("testStart", function(event) {
+			times[event.name] = new Date().getTime();
 			testCount++;
 		});
-		this.addEventListener("testDone", function(name, obj) {
+		this.addEventListener("testDone", function(event) {
 			var result = [];
-			result.push(obj.result ? " [passed] " : " [failed] ");
-			if (!obj.result) {
+			result.push(event.result ? " [passed] " : " [failed] ");
+			if (!event.result) {
 				failures++;
 			}
-			result.push(name);
-			result.push(" (" + (new Date().getTime() - times[name]) / 1000 + "s)");
-			delete times[name];
-			if (!obj.result) {
-				result.push("\n  " + obj.message);
-				if (obj.stack) {
-					result.push("\n Stack Trace:\n" + obj.stack);
+			result.push(event.name);
+			result.push(" (" + (new Date().getTime() - times[event.name]) / 1000 + "s)");
+			delete times[event.name];
+			if (!event.result) {
+				result.push("\n  " + event.message);
+				if (event.stack) {
+					result.push("\n Stack Trace:\n" + event.stack);
 				}
 			}
 			console.log(result.join(""));

@@ -81,10 +81,10 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 	/**
 	 * @returns {Deferred} A deferred that resolves once the managed service's updated() method has been called
 	 */
-	this.onServiceAdded = function(serviceRef, managedService) {
+	this.onServiceAdded = function(serviceRef, service) {
 		var pid = serviceRef.getProperty(PROPERTY_PID);
 		return store.get(pid).then(function(configuration) {
-			asyncUpdated(serviceRef, managedService, (configuration && configuration.getProperties()));
+			asyncUpdated(serviceRef, service, (configuration && configuration.getProperties()));
 		});
 	};
 	this.notifyUpdated = function(configuration) {

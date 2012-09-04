@@ -11,7 +11,7 @@
  *     Andy Clement (vmware) - bug 344614
  *******************************************************************************/
 /*jslint browser:true*/
-/*global define orion window dojo dijit*/
+/*global define orion window dojo dijit console*/
 
 define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion/contentTypes', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
 		'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/OpenResourceDialog.html'], 
@@ -188,7 +188,8 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 	 */
 	showFavorites: function() {
 		var that = this;
-		return function(favs) {
+		return function(event) {
+			var favs = event;
 			if (favs.navigator) {
 				favs = favs.navigator;
 			}

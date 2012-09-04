@@ -203,8 +203,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);
 		
 		var eventListenerCalls = 0;
-		function eventListener(result) {
-			if (result === "echotest") {
+		function eventListener(event) {
+			if (event.result === "echotest") {
 				eventListenerCalls++;
 			}
 		}
@@ -237,7 +237,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			pluginRegistry.shutdown();
 			serviceRegistry = new mServiceregistry.ServiceRegistry();
 			pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
-			pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
+			pluginRegistry.addEventListener("pluginLoaded", function(event) {
+				var plugin = event.plugin;
 				try {
 					assert.ok(!!plugin, "plugin not null");
 					assert.equal(plugin.getServiceReferences().length, 1);
@@ -296,7 +297,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			serviceRegistry = new mServiceregistry.ServiceRegistry();
 			pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
 			var listenerCalls = 0;
-			pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
+			pluginRegistry.addEventListener("pluginLoaded", function() {
 				assert.equal(++listenerCalls, 1);
 				// Our loading handler invokes testOrdering2 method of the plugin that is loading
 				serviceRegistry.getService("testOrdering").testOrdering1();
@@ -325,7 +326,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
 		
 		var promise = new Deferred();
-		pluginRegistry.addEventListener("pluginLoaded", function(plugin) {
+		pluginRegistry.addEventListener("pluginLoaded", function(event) {
+			var plugin = event.plugin;
 			try {
 				assert.ok(!!plugin, "plugin not null");
 					assert.equal(plugin.getServiceReferences().length, 1);
