@@ -38,8 +38,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		service.getFavorites().then(function(favs) {
 			self.cacheFavorites(favs.navigator);
 		});
-		service.addEventListener("favoritesChanged", function(favs) { //$NON-NLS-0$
-			self.cacheFavorites(favs.navigator);
+		service.addEventListener("favoritesChanged", function(event) { //$NON-NLS-0$
+			self.cacheFavorites(event.navigator);
 		});
 	}
 	FavoriteFoldersCache.prototype = {
@@ -99,11 +99,11 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
 			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
-			selectionService.addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-0$
+			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					service.destroy(selectionTools);
-					service.renderCommands(selectionTools.id, selectionTools, selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					service.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			});
 		}

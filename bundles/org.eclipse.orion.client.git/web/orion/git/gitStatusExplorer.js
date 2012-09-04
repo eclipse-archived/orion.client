@@ -332,11 +332,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.commandService.registerSelectionService(unstagedSection.selectionNode.id, this.unstagedSelection);
 				}
 				
-				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
+				this.registry.getService("orion.unstagedSection.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(unstagedSection.selectionNode.id);
 					if (selectionTools) {
 						that.commandService.destroy(selectionTools);
-						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
+						that.commandService.renderCommands(unstagedSection.selectionNode.id, selectionTools, event.selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.unstagedOnce = true;
@@ -530,11 +530,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/selection',
 					this.commandService.registerSelectionService(stagedSection.selectionNode.id, this.stagedSelection);
 				}
 				
-				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
+				this.registry.getService("orion.stagedSection.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(stagedSection.selectionNode.id);
 					if (selectionTools) {
 						that.commandService.destroy(selectionTools);
-						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
+						that.commandService.renderCommands(stagedSection.selectionNode.id, selectionTools, event.selections, that, "button", {"Clone": repository}); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 				this.stagedOnce = true;

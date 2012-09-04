@@ -30,7 +30,7 @@ define(["orion/EventTarget"], function(EventTarget) {
 		// provider
 		_setProblems: function(problems) {
 			this.problems = problems;
-			this.dispatchEvent("problemsChanged", problems); //$NON-NLS-0$
+			this.dispatchEvent({type:"problemsChanged", problems:problems}); //$NON-NLS-0$
 		}	    
 	};
 	ProblemService.prototype.constructor = ProblemService;
