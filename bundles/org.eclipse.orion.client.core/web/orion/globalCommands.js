@@ -1034,31 +1034,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			});	
 		}
 		
-		function readTargetPreference(){
-		
-			prefsService.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
-			
-				var data = prefs.get("General"); //$NON-NLS-0$
-					
-				if( data !== undefined ){
-					
-					var storage = JSON.parse( data );
-					
-					if(storage){
-						var target = prefsService.getSetting( storage, "Navigation", "Links" ); //$NON-NLS-1$ //$NON-NLS-0$
-						
-						if( target === "Open in new tab" ){ //$NON-NLS-0$
+		function readTargetPreference(serviceRegistry){
+			serviceRegistry.registerService("orion.cm.managedservice", //$NON-NLS-0$
+				{	updated: function(properties) {
+						var target;
+						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
 							target = "_blank"; //$NON-NLS-0$
-						}else{
-							target = "_self"; //$NON-NLS-0$
 						}
-						
-						setTarget( target );
+						setTarget(target);
 					}
-				}
-			});
+				}, {pid: "nav.config"}); //$NON-NLS-0$
 		}
-		window.setTimeout(function() {readTargetPreference();}, 0);
+		window.setTimeout(function() {readTargetPreference(serviceRegistry);}, 0);
 	}
 	
 	//return the module exports
