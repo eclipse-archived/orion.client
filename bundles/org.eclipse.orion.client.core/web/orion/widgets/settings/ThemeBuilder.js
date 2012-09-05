@@ -898,12 +898,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 						var set = {
 							value: styles[theme].name,
-							innerHTML: styles[theme].name
+							label: styles[theme].name
 						};	
 						
 						if( selection ){	
 							if( styles[theme].name === selection.selected ){
-								set.selected = 'selected';
+								set.selected = true;
 							}
 						}
 						
