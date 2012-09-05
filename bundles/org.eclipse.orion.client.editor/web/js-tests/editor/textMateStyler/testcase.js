@@ -184,7 +184,10 @@ define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyl
 		}
 	}
 	
-	
+	function assertEmptyRegex(r) {
+		// See ECMA-262 v5.1, "15.10.4.1 new RegExp(pattern, flags)"
+		assert.ok(r.source === "" || r.source === "(?:)", "Regex is empty");
+	}
 	
 	
 	
@@ -195,7 +198,7 @@ define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyl
 	// "Extended" regex syntax with whitespace and comments.
 	tests["test: Util.toRegex() - (?x)X and (?x:X)"] = function() {
 		var regex1 = mTextMateStyler.RegexUtil.toRegExp("", false);
-		assert.equal(regex1.source, "");
+		assertEmptyRegex(regex1);
 		
 		var regex2 = mTextMateStyler.RegexUtil.toRegExp("(?x)(a+  #fizz  \r\n     b)?", false);
 		assert.equal(regex2.source, "(a+b)?");
@@ -238,7 +241,7 @@ define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyl
 	tests["test: Util.groupify()"] = function() {
 		var result1 = mTextMateStyler.RegexUtil.groupify(new RegExp("")),
 		    regex1 = result1[0];
-		assert.equal(regex1.source, "");
+		assertEmptyRegex(regex1);
 		
 		var result2 = mTextMateStyler.RegexUtil.groupify(/()/),
 		    regex2 = result2[0], 

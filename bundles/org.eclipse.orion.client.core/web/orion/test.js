@@ -102,12 +102,14 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 					var testResult = test();
 					if (testResult && typeof testResult.then === "function") {
 						var calledBack = false;
+						var d = new Deferred();
 						setTimeout(function() {
 							if (!calledBack) {
-								_testDone(name, false, startTime, "Timed out");
+								d.reject("Timed out");
 							}
 						}, (typeof test.timeout === 'number' ? test.timeout : DEFAULT_TIMEOUT));
-						return testResult.then(function() {
+						testResult.then(d.resolve, d.reject);
+						return d.then(function() {
 							calledBack = true;
 							_testDone(name, true, startTime);
 						}, function(e) {
@@ -253,7 +255,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 		var top;
 		
 		this.addEventListener("runStart", function(event) {
-			var name = event.name ? event.name : "<top>";
+			var name = event.prefix ? event.prefix : "<top>";
 			if (!top) {
 				top = name;
 			}
@@ -261,7 +263,7 @@ define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', '
 			times[name] = new Date().getTime();
 		});
 		this.addEventListener("runDone", function(event) {
-			var name = event.name ? event.name : "<top>";
+			var name = event.prefix ? event.prefix : "<top>";
 			var result = [];
 			result.push("[Test Run] - " + name + " done - ");
 			if (name === top) {
