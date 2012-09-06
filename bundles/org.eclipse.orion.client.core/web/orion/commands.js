@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/*jslint sub:true*/
  /*global define window Image */
  
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
@@ -262,8 +262,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							return false;
 						}
 					}
-					if (e.char) {
-						return e.char.length > 0;  // empty string for non characters
+					if (e['char']) { //$NON-NLS-0$
+						return e['char'].length > 0;  // empty string for non characters //$NON-NLS-0$
 					} else if (e.charCode || e.keyCode) {
 						var keyCode= e.charCode || e.keyCode;
 						// anything below SPACE is not a character except for line delimiter keys, tab, and delete.
