@@ -78,7 +78,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
 						this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
 					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && keyWordSearch){ //$NON-NLS-0${
-						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, query);
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, query, {childrenLocation: this.getChildrenLocation()});
 						crawler.search(function(jsonData){renderer(transform(jsonData), null);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
@@ -114,9 +114,11 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 			if(noneRootMeta){
 				this.setLocationbyURL(noneRootMeta.Location);
 				locationName = noneRootMeta.Name;
+				this._childrenLocation = noneRootMeta.ChildrenLocation;
 			} else if(meta){
 				this.setLocationbyURL(this._searchRootLocation);
 				locationName = this._fileService.fileServiceName(meta.Location);
+				this._childrenLocation = meta.ChildrenLocation;
 			}
 			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
 			if(!locationName){
@@ -142,11 +144,17 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 		setRootLocationbyURL: function(locationURL){
 			this._searchRootLocation = locationURL;
 		},
+		setChildrenLocationbyURL: function(locationURL){
+			this._childrenLocation = locationURL;
+		},
 		getSearchLocation: function(){
 			return this._searchLocation;
 		},
 		getSearchRootLocation: function(){
 			return this._searchRootLocation;
+		},
+		getChildrenLocation: function(){
+			return this._childrenLocation;
 		},
 		/**
 		 * Returns a query URL for a search.
@@ -172,7 +180,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 			return  mSearchUtils.generateSearchQuery({sort: sort, regEx: this._regEx,
 				rows: 40,
 				start: 0,
-				searchStr: this._luceneEscape(query, true),
+				searchStr: (this._regEx ? query : this._luceneEscape(query, true)),
 				location: useRoot ? this._searchRootLocation: this._searchLocation});
 		},
 		/**

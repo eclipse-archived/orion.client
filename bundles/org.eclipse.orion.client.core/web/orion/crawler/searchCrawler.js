@@ -76,6 +76,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
 		this.queryObj = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.parseQueryStr(queryStr);
 		this._location = options && options.location;
+		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
 	}
 	
 	/**
@@ -87,7 +88,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		var self = this;
 		contentTypeService.getContentTypes().then(function(ct) {
 			self.contentTypesCache = ct;
-			var result = self._visitRecursively(self.queryObj.location+ "?depth=1").then(function(){ //$NON-NLS-0$
+			var result = self._visitRecursively(self._childrenLocation).then(function(){ //$NON-NLS-0$
 				//self._searchFiles().then(function(){
 					self._sort(self.fileLocations);
 					var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
@@ -143,7 +144,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		onBegin();
 		contentTypeService.getContentTypes().then(function(ct) {
 			that.contentTypesCache = ct;
-			var result = that._visitRecursively(that._location+ "?depth=1").then(function(){ //$NON-NLS-0$
+			var result = that._visitRecursively(that._childrenLocation).then(function(){ //$NON-NLS-0$
 					that._buildingSkeleton = false;
 					onComplete();
 					if(that.queryObj && !that._buildSkeletonOnly){
@@ -222,12 +223,12 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._totalCounter++;
 		var self = this;
 		return _doServiceCall(self.fileClient, "read", [fileObj.Location]).then(function(jsonData) { //$NON-NLS-0$
+			self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 			if(self._hitOnceWithinFile(jsonData)){
 				self.fileLocations.push(fileObj);
 				self._hitCounter++;
 				//console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
 				//console.log(fileObj.Location);
-				self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 			}
 			},
 			function(error) {
