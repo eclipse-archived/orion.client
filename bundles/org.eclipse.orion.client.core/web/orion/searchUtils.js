@@ -104,7 +104,7 @@ orion.searchUtils.generateSearchQuery = function(options) {
 		}
 		if(options.searchStr){
 			searchStr = options.searchStr;
-			searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
+			//searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
 		}
 		if(options.location){
 			loc = options.location;
@@ -134,7 +134,8 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 				loc = loc.substring(0, loc.length-1);
 			}
 			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
+			queryObj.searchStr = splitStr[0];
+			//queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
