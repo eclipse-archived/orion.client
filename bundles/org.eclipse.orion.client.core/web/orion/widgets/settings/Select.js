@@ -65,7 +65,7 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 					data.selected = 'selected'; //$NON-NLS-0$
 				}
 				var element = dojo.create("option", data, this.selection); //$NON-NLS-0$
-				element.textContent = option.label;
+				element.textContent = typeof option.label === "string" ? option.label : option.value;
 			}
 		}	
 	});
