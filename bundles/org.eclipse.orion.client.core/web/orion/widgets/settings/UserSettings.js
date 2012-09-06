@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledRepositoryLink', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, mGitCredentialsStorage) {
 
 	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -34,6 +34,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 								'<div></div>' +
 								
 							'</div>' + //$NON-NLS-0$
+							
+							'<div data-dojo-attach-point="gitTable">' +  //$NON-NLS-0$
+								'<div class="sectionWrapper toolComposite">' +
+									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['Git Credentials']+'</div>' + 
+									'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
+								'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
+								'<div data-dojo-attach-point="gitSections">' + //$NON-NLS-0$
+								
+								'</sections>' + //$NON-NLS-0$
+								'<div></div>' +
+								
+							'</div>' + //$NON-NLS-0$
+							
 							'<div data-dojo-attach-point="linkedSection"></div>' +
 						'</div>', //$NON-NLS-0$
 						
@@ -42,6 +55,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				iframe.src = iframe.src.substr(0, iframe.src.indexOf("#")) + "#" + hash; //$NON-NLS-1$ //$NON-NLS-0$
 			}else{
 				iframe.src = iframe.src + "#" + hash; //$NON-NLS-0$
+			}
+		},
+		
+		refreshGitCredentials : function(){
+			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			if(gitCredentialsStorage.isBrowserEnabled()){
+				this.gitCredentialsFields[0].setChecked(gitCredentialsStorage.isUserEnabled());
 			}
 		},
 		
@@ -101,7 +121,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.gitFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Git Email Address']} ) );
 			this.gitFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Git Username']} ) );
 			
-			var gitSection = new orion.widgets.settings.Section( {sectionName:messages['Git Credentials'], container: this.sections, sections: this.gitFields } );
+			var gitSection = new orion.widgets.settings.Section( {sectionName:messages["Git Config"], container: this.sections, sections: this.gitFields } );
 			
 			var updateCommand = new mCommands.Command({
 				name: messages["Update"],
@@ -114,10 +134,59 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			});
 			
 			this.commandService.addCommand(updateCommand);
-
-			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			
+			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('profileCommands', dojo.byId( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+			
+			//--------- git credentials -------------------------------
+			this.gitCredentialsFields = [];
+			
+			this.gitCredentialsFields.push( new orion.widgets.settings.LabeledCheckbox( {fieldlabel:messages["Enable Key Storage"]} ) );
+			
+			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			if(gitCredentialsStorage.isBrowserEnabled()){
+				var repositories = gitCredentialsStorage.getRepositories();
+				
+				for(var i=0; i<repositories.length; ++i){
+					if(!gitCredentialsStorage.getPrompt(repositories[i])){
+						this.gitCredentialsFields.push( new orion.widgets.settings.LabeledRepositoryLink( {fieldlabel: repositories[i]} ) );
+					}
+				}
+			}
+			
+			var gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:messages["Authentication"], container: this.gitSections, sections: this.gitCredentialsFields} );
+			
+			var clearCredentials = new mCommands.Command({
+				name: messages["Reset"],
+				tooltip: messages["Reset Git Credentials"],
+				id: "orion.clearGitCredentials",
+				callback: dojo.hitch(this, function(data){
+					var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+					if(gitCredentialsStorage.isBrowserEnabled()){
+						gitCredentialsStorage.clearCredentials();
+						
+						var messageService = this.registry.getService("orion.page.message");
+						messageService.setProgressResult("Git credentials successfully cleared.");
+						this.refreshGitCredentials();
+					}
+				})
+			});
+			
+			var updateGitCredentialsCommand = new mCommands.Command({
+				name: messages["Update"],
+				tooltip: messages["Update Git Credentials"],
+				id: "orion.updateGitCredentials", //$NON-NLS-0$
+				callback: dojo.hitch(this, function(data){
+					this.updateGitCredentials(data.items);
+				})
+			
+			});
+			
+			this.commandService.addCommand(updateGitCredentialsCommand);
+			this.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			
+			this.commandService.addCommand(clearCredentials);
+			this.commandService.registerCommandContribution('gitProfileCommands', "orion.clearGitCredentials", 2);
+			this.commandService.renderCommands('gitProfileCommands', dojo.byId( 'gitCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 							id: "linkedAccountSection", //$NON-NLS-0$
@@ -213,7 +282,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							});
 						});
 					});
-				}		
+				}	
+			}
+		},
+		
+		updateGitCredentials : function(data){
+			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
+			
+			// git authentication update
+			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			if(gitCredentialsStorage.isBrowserEnabled()){
+				if( this.gitCredentialsFields[0].isChecked() ){
+					if(window.confirm(messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"])){
+						gitCredentialsStorage.userEnable();
+					} else { return; }
+				} else { gitCredentialsStorage.userDisable(); }
+				
+				messageService.setProgressResult( messages['Git Credentials successfully reset.'] );
 			}
 		},
 		
@@ -258,6 +343,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					});
 				});
 			}
+			
+			// git authentication startup
+			this.refreshGitCredentials();
 		}
 	});
 });
