@@ -362,5 +362,8 @@ define({
 	"Ask for review tooltip" : "Send email with request for commit review",
 	"Reviewer name" : "Reviewer name",
 	"Contribution Review Request" : "Contribution Review Request",
-	"Send the link to the reviewer" : "Send the link to the reviewer"
+	"Send the link to the reviewer" : "Send the link to the reviewer",
+	"Private key file (optional):" : "Private key file (optional):",
+	"Don't prompt me again:" : "Don't prompt me again:",
+	"Your private key will be saved in the browser for further use" : "Your private key will be saved in the browser for further use"
 });
