@@ -11,7 +11,7 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/settings/ThemeComponent', 'orion/widgets/settings/ThemeData', 'orion/widgets/themes/container/ThemeSheetWriter'], 
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/container/ThemeData', 'orion/widgets/themes/container/ThemeSheetWriter'], 
 	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, Component, ThemeData, ThemeSheetWriter ) {
 
 		var TOP = 10;
