@@ -30,7 +30,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 	};
 
 	var tests = {};
-	tests['test reject ObjectClass with no properties'] = makeTest(function() {
+	tests['test reject ObjectClassDefinition with no properties'] = makeTest(function() {
 		serviceRegistry.registerService(METATYPE_SERVICE, {},
 			{	classes: [
 					{	id: 'myclass'
@@ -43,16 +43,16 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 				]
 			});
 		// myclass has no propertes and so should've been rejected
-		assert.ok(!metaTypeRegistry.getObjectClassForPid('mypid'), 'Expected no ObjectClass');
+		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mypid'), 'Expected no ObjectClassDefinition');
 	});
-	tests['test contribute barebones ObjectClass'] = makeTest(function() {
+	tests['test contribute barebones ObjectClassDefinition'] = makeTest(function() {
 		serviceRegistry.registerService(METATYPE_SERVICE, {},
 			{	classes: [
 					{	id: 'myclass',
 						properties: [
 							{	id: 'myprop0'
 							}
-						],
+						]
 					}
 				],
 				designates: [
@@ -61,17 +61,17 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 					}
 				]
 			});
-		var oc = metaTypeRegistry.getObjectClassForPid('mypid');
-		assert.ok(!!oc);
-		assert.strictEqual(oc.getId(), 'myclass');
-		var props = oc.getPropertyTypes();
+		var ocd = metaTypeRegistry.getObjectClassDefinitionForPid('mypid');
+		assert.ok(!!ocd);
+		assert.strictEqual(ocd.getId(), 'myclass');
+		var props = ocd.getPropertyTypes();
 		assert.strictEqual(props.length, 1);
 		assert.ok(!!props[0]);
 		assert.strictEqual(props[0].getId(), 'myprop0');
 		assert.strictEqual(props[0].getName(), null);
 		assert.strictEqual(props[0].getType(), 'string');
 	});
-	tests['test contribute bigger ObjectClass'] = makeTest(function() {
+	tests['test contribute bigger ObjectClassDefinition'] = makeTest(function() {
 		serviceRegistry.registerService(METATYPE_SERVICE, {},
 			{	classes: [
 					{	id: 'myclass',
@@ -98,11 +98,11 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 					}
 				]
 			});
-		var oc = metaTypeRegistry.getObjectClassForPid('mypid');
-		assert.ok(!!oc);
-		assert.strictEqual(oc.getId(), 'myclass');
-		assert.strictEqual(oc.getName(), 'My Class');
-		var props = oc.getPropertyTypes();
+		var ocd = metaTypeRegistry.getObjectClassDefinitionForPid('mypid');
+		assert.ok(!!ocd);
+		assert.strictEqual(ocd.getId(), 'myclass');
+		assert.strictEqual(ocd.getName(), 'My Class');
+		var props = ocd.getPropertyTypes();
 		assert.strictEqual(props.length, 2);
 		assert.ok(!!props[0]);
 		assert.strictEqual(props[0].getId(), 'myprop0');
@@ -126,7 +126,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 					}
 				]
 			});
-		assert.ok(!metaTypeRegistry.getObjectClassForPid('mypid'));
+		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mypid'));
 		var designateRegistration = serviceRegistry.registerService(METATYPE_SERVICE, {},
 			{	designates: [
 					{	pid: 'mypid',
@@ -134,9 +134,9 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 					}
 				]
 			});
-		assert.ok(metaTypeRegistry.getObjectClassForPid('mypid'));
+		assert.ok(metaTypeRegistry.getObjectClassDefinitionForPid('mypid'));
 		designateRegistration.unregister();
-		assert.ok(!metaTypeRegistry.getObjectClassForPid('mypid'));
+		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mypid'));
 	});
 	return tests;
 });

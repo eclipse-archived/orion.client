@@ -47,7 +47,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {String}
 		 */
 		/**
-		 * @name orion.settings.Setting#getObjectClassId
+		 * @name orion.settings.Setting#getObjectClassDefinitionId
 		 * @function
 		 * @description
 		 * @returns {String}
@@ -82,7 +82,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	SettingImpl.prototype = {
 		getName: function() { return this.name; },
 		getPid: function() { return this.pid; },
-		getObjectClassId: function() { return this.classId; },
+		getObjectClassDefinitionId: function() { return this.classId; },
 		getPropertyTypes: function() { return this.properties; },
 		getTags: function() { return this.tags || []; },
 		isDefaults: function(properties) {
@@ -100,22 +100,22 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 
 		function _addSetting(settingJson) {
 			var setting = new SettingImpl(settingJson);
-			var classId = setting.getObjectClassId();
+			var classId = setting.getObjectClassDefinitionId();
 			var serviceProperties = {
 				designates: [{
 					pid: setting.getPid(),
 					classId: classId
 				}]
 			};
-			if (!setting.isRef && !metaTypeRegistry.getObjectClass(classId)) {
-				// The ObjectClass doesn't exist yet so we'll define it here
+			if (!setting.isRef && !metaTypeRegistry.getObjectClassDefinition(classId)) {
+				// The ObjectClassDefinition doesn't exist yet so we'll define it here
 				serviceProperties.classes = [{
 					id: classId,
 					properties: settingJson.properties
 				}];
 			}
 			serviceRegistrations[setting.getPid()] = serviceRegistry.registerService(METATYPE_SERVICE, {}, serviceProperties);
-			var ocd = metaTypeRegistry.getObjectClass(classId);
+			var ocd = metaTypeRegistry.getObjectClassDefinition(classId);
 			setting.properties = ocd.getPropertyTypes();
 			settingsMap[setting.getPid()] = setting;
 		}
@@ -156,7 +156,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	 * @class Maintains a registry of settings.
 	 * @description A SettingsRegistry provides access to information about settings registered with the service registry.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The service registry to monitor.
-	 * @param {orion.metatype.MetaTypeRegistry} metaTypeRegistry The metatype registry to look up Object Classes in.
+	 * @param {orion.metatype.MetaTypeRegistry} metaTypeRegistry The metatype registry to look up Object Class Definitions in.
 	 */
 	function SettingsRegistry(serviceRegistry, metaTypeRegistry) {
 		this.settingsMap = {};
