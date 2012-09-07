@@ -30,7 +30,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 	makeTest = testHelpers.makeTest.bind(null, setUp, tearDown);
 
 	var tests = {};
-	tests['test setting refs existing ObjectClass'] = makeTest(function() {
+	tests['test setting refs existing ObjectClassDefinition'] = makeTest(function() {
 		serviceRegistry.registerService(METATYPE_SERVICE, {},
 			{	classes: [
 					{	id: 'myclass',
@@ -51,11 +51,11 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		var settings = settingsRegistry.getSettings();
 		assert.equal(settings.length, 1);
 		assert.equal(settings[0].getPid(), 'mysetting');
-		assert.equal(settings[0].getObjectClassId(), 'myclass');
+		assert.equal(settings[0].getObjectClassDefinitionId(), 'myclass');
 		assert.equal(settings[0].getName(), null);
-		var objectClass = metaTypeRegistry.getObjectClassForPid('mysetting');
+		var objectClass = metaTypeRegistry.getObjectClassDefinitionForPid('mysetting');
 
-		assert.equal(objectClass.getId(), 'myclass', 'ObjectClass is designated for setting\'s PID');
+		assert.equal(objectClass.getId(), 'myclass', 'ObjectClassDefinition is designated for setting\'s PID');
 		assert.equal(objectClass.getPropertyTypes().length, 2);
 		assert.equal(objectClass.getPropertyTypes()[0].getId(), 'prop1');
 		assert.equal(objectClass.getPropertyTypes()[1].getId(), 'prop2');
@@ -67,7 +67,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
-		assert.ok(!metaTypeRegistry.getObjectClassForPid('mysetting'), 'ObjectClass no longer designated for PID');
+		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mysetting'), 'ObjectClassDefinition no longer designated for PID');
 	});
 	tests['test setting with implicit MetaType'] = makeTest(function() {
 		var serviceRegistration = serviceRegistry.registerService(SETTING_SERVICE, {},
@@ -86,8 +86,8 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.equal(settings.length, 1);
 		assert.equal(settings[0].getPid(), 'mysetting');
 		assert.equal(settings[0].getName(), 'My great setting');
-		var objectClassId = settings[0].getObjectClassId();
-		var objectClass = metaTypeRegistry.getObjectClassForPid('mysetting');
+		var objectClassId = settings[0].getObjectClassDefinitionId();
+		var objectClass = metaTypeRegistry.getObjectClassDefinitionForPid('mysetting');
 		assert.ok(objectClass, 'Setting\'s PID is designated');
 
 		assert.equal(objectClass.getId(), objectClassId);
@@ -101,8 +101,8 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
-		assert.ok(!metaTypeRegistry.getObjectClassForPid('mysetting'), 'Setting\'s PID no longer designated');
-		assert.ok(!metaTypeRegistry.getObjectClass(objectClassId), 'ObjectClass was removed');
+		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mysetting'), 'Setting\'s PID no longer designated');
+		assert.ok(!metaTypeRegistry.getObjectClassDefinition(objectClassId), 'ObjectClassDefinition was removed');
 	});
 	return tests;
 });
