@@ -15,10 +15,10 @@
    category, the right shows the resulting HTML for that category. */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'orion/settings/ui/PluginSettings',
+		'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate',
 		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
-		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList) {
+		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -298,7 +298,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 			
-			window.location = '#,category=' + id;			
+			var params = PageUtil.matchResourceParameters();
+			if (params.category !== id) {
+				params.category = id;
+				delete params.resource;
+				window.location = new URITemplate("#,{params*}").expand({ //$NON-NLS-0$
+					params: params
+				});
+			}
 		},
 
 		showById: function(id) {

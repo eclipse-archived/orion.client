@@ -76,10 +76,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 	FileRenderer.prototype.setTarget = function(target){
 		this.target = target;
-		
-		dojo.query(".targetSelector").forEach(function(node, index, arr){ //$NON-NLS-0$
-			node.target = target;
-		});
 	};
 	
 	FileRenderer.prototype.getCellElement = function(col_no, item, tableRow){

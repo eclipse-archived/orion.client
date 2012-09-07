@@ -150,7 +150,7 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 		var self = this;
 		setTimeout(function() {
 			if(self._forceUseCrawler || !self.fileService.getService(self.searcher.getSearchLocation())["search"]){//$NON-NLS-0$
-				var searchLoc = self._searchOnRoot ? self.searcher.getSearchRootLocation() : self.searcher.getSearchLocation();
+				var searchLoc = self._searchOnRoot ? self.searcher.getSearchRootLocation() : self.searcher.getChildrenLocation();
 				var crawler = new mSearchCrawler.SearchCrawler(self.searcher.registry, self.fileService, "", {searchOnName: true, location: searchLoc}); 
 				self.searcher.setCrawler(crawler);
 				crawler.buildSkeleton(function(){

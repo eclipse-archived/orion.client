@@ -91,7 +91,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						'</list>', //$NON-NLS-0$
 		serviceDescriptions: null,
 		addPluginLink: function(name, url)  {
-			var link = dojo.create("a",{class: "plugin-link", style: "margin-right: 5px;", href: url, title: name, innerHTML: name}, this.pluginLinks);
+			var link = dojo.create("a",{'class': "plugin-link", style: "margin-right: 5px;", href: url, title: name, innerHTML: name}, this.pluginLinks);
 		},
 		postCreate: function(){	
 			var headers = this.plugin.getHeaders();
