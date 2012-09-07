@@ -99,7 +99,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		var first = new Deferred(),
 			d = first,
 			i, recurses = 0,
-			max = 15000;
+			max = 2000;
 
 		function returnPromise() {
 			recurses++;
@@ -111,7 +111,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		first.resolve();
 
 		return d.then(function() {
-			assert.equal(first.state(), "resolved");
+			assert.ok(first.isResolved());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
@@ -120,7 +120,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		var first = new Deferred(),
 			d = first,
 			i, recurses = 0,
-			max = 15000;
+			max = 2000;
 
 		function returnValue() {
 			recurses++;
@@ -133,7 +133,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		first.resolve();
 
 		return d.then(function() {
-			assert.equal(first.state(), "resolved");
+			assert.ok(first.isResolved());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
@@ -142,7 +142,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		var first = new Deferred(),
 			d = first,
 			i, recurses = 0,
-			max = 15000;
+			max = 2000;
 
 		function throwException() {
 			recurses++;
@@ -150,15 +150,15 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		}
 
 		for (i = 0; i < max; i++) {
-			d = d.then(throwException, throwException);
+			d = d.then(null, throwException);
 		}
 
-		first.resolve();
+		first.reject();
 
 		return d.then(function() {
 			assert.ok(false, "Expected an exception");
 		}, function() {
-			assert.equal(first.state(), "resolved");
+			assert.ok(first.isRejected());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
@@ -185,14 +185,6 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		result.cancel();
 		return result;
 	};
-
-
-	function trace(fn, message) {
-		return function() {
-			console.log(message);
-			return fn.apply(null, arguments);
-		};
-	}
 
 	tests["test cancel abc"] = function() {
 		var a = new Deferred();
