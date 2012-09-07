@@ -73,8 +73,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
 				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
 			} else {
+				var queryToService = query;
+				if(qObj.searchStrWithWhiteSpace){
+					queryToService = query.replace(qObj.searchStr, qObj.searchStrWithWhiteSpace);
+				}
 				try{
-					this.fileService.search(qObj.location, query).then(
+					this.fileService.search(qObj.location, queryToService).then(
 						dojo.hitch(this, function(jsonData) {
 							this._renderSearchResult(resultsNode, query, jsonData);
 						}));
