@@ -209,7 +209,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	};
 
 	SearchCrawler.prototype._hitOnceWithinFile = function( fileContentText){
-		var lineString = fileContentText;//.toLowerCase();
+		var lineString = fileContentText.toLowerCase();
 		var result;
 		if(this.queryObj.inFileQuery.wildCard){
 			result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);

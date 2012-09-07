@@ -139,6 +139,12 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
+	//If the search string contains white space, we should add this special property. 
+	//The property's value is basically the original search string with the double quato at both end.
+	//It is the caller's responsibility to decide wether this property has to be used or not.
+	if(queryObj.searchStr.indexOf(" ") >= 0){
+		queryObj.searchStrWithWhiteSpace = "\"" + queryObj.searchStr + "\"";
+	}
 	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
 };
 
