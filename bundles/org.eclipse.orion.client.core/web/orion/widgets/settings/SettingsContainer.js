@@ -15,7 +15,7 @@
    category, the right shows the resulting HTML for that category. */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate',
+		'orion/PageUtil', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate',
 		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
 		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate) {
