@@ -15,7 +15,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
-        function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils, mGitCredentialsStorage) {
+        function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils, GitCredentialsStorage) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -95,7 +95,7 @@ var exports = {};
 				onDone(name);
 			}
 		}
-	}
+	};
 
 	exports.handleKnownHostsError = function(serviceRegistry, errorData, options, func){
 		if(confirm(dojo.string.substitute(messages["Would you like to add ${0} key for host ${1} to continue operation? Key fingerpt is ${2}."],
@@ -116,7 +116,7 @@ var exports = {};
 
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
 		var repository = errorData.Url;
-		var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+		var gitCredentialsStorage = new GitCredentialsStorage();
 		var loadedPrivateKey = "", loadedPassphrase = "";
 						
 		if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
@@ -220,8 +220,8 @@ var exports = {};
 			
 			try {
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-			} catch (Exception) {
-				display.Message = error.message;
+			} catch (e) {
+				display.Message = e.message;
 			}
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -260,7 +260,7 @@ var exports = {};
 				var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then( //$NON-NLS-1$ //$NON-NLS-0$
 					function(){
-						var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+						var gitCredentialsStorage = new GitCredentialsStorage();
 						var loadedPrivateKey = "", loadedPassphrase = "";
 						
 						if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
@@ -275,7 +275,7 @@ var exports = {};
 			return def;
 		}
 		
-		var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+		var gitCredentialsStorage = new GitCredentialsStorage();
 		if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
 			var loadedPrivateKey = gitCredentialsStorage.getPrivateKey(repository);
 			var loadedPassphrase = gitCredentialsStorage.getPassphrase(repository);
@@ -327,7 +327,7 @@ var exports = {};
 		if(jsonData.HttpCode == 500 || jsonData.HttpCode == 400){
 			var repository = jsonData.JsonData.Url;
 			
-			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			var gitCredentialsStorage = new GitCredentialsStorage();
 			if(gitCredentialsStorage.isEnabled()){
 				gitCredentialsStorage.erasePrivateKey(repository);
 				gitCredentialsStorage.erasePassphrase(repository);
@@ -366,8 +366,8 @@ var exports = {};
 			
 			try {
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-			} catch (Exception) {
-				display.Message = error.message;
+			} catch (e) {
+				display.Message = e.message;
 			}
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -1512,7 +1512,7 @@ var exports = {};
 					var deferred = gitService.doPush(location, ref, true, force, //$NON-NLS-0$
 							options.gitSshUsername, options.gitSshPassword, options.knownHosts,
 							options.gitPrivateKey, options.gitPassphrase);
-					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name)
+					progressService.createProgressMonitor(deferred, messages['Pushing remote: '] + name);
 					deferred.then(
 						function(jsonData){
 							exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
@@ -2516,7 +2516,7 @@ var exports = {};
 					var deferred = serviceRegistry.getService("orion.git.provider").stage(items[0].indexURI); //$NON-NLS-0$ 
 					progressService.createProgressMonitor(
 						deferred,
-						messages["Staging changes"])
+						messages["Staging changes"]);
 					deferred.then(
 						function(jsonData){
 							dojo.hitch(explorer, explorer.changedItem)(items);
@@ -2874,7 +2874,7 @@ var exports = {};
 					
 				}, displayErrorOnStatus
 			);
-		};
+		}
 	};
 
 }());

@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/git/GitCredentialsStorage'], function(messages, require, dojo, dijit, mUtil, mCommands, mGitCredentialsStorage) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/git/GitCredentialsStorage'], function(messages, require, dojo, dijit, mUtil, mCommands, GitCredentialsStorage) {
 
 	dojo.declare("orion.widgets.settings.LabeledRepositoryLink",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
@@ -30,7 +30,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		},
         
         change: function(){
-        	var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+        	var gitCredentialsStorage = new GitCredentialsStorage();
         	if(gitCredentialsStorage.isBrowserEnabled()){
         		gitCredentialsStorage.erasePrompt(this.mylabel.innerHTML);
         	}

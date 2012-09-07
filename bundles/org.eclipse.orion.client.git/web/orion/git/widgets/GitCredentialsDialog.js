@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo dijit widgets FileReader*/
+/*global dojo dijit widgets FileReader define orion*/
 /*jslint browser:true*/
-define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Tooltip', 'orion/git/GitCredentialsStorage', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GitCredentialsDialog.html'], function(messages, dojo, dijit, Tooltip, mGitCredentialsStorage) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Tooltip', 'orion/git/GitCredentialsStorage', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GitCredentialsDialog.html'], function(messages, dojo, dijit, Tooltip, GitCredentialsStorage) {
 
 
 /**
@@ -155,7 +155,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 					loadedPrivateKey = e.target.result;
 					
 					//save key
-					var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+					var gitCredentialsStorage = new GitCredentialsStorage();
 					if(gitCredentialsStorage.isEnabled() && self.gitSavePrivateKey.checked){
 						gitCredentialsStorage.setPrivateKey(repository, loadedPrivateKey);
 						gitCredentialsStorage.setPassphrase(repository, self.gitPassphrase.value);
@@ -169,7 +169,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			reader.readAsText(this.privateKeyFile);
 		} else if(loadedPrivateKey){
 				//save key
-				var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+				var gitCredentialsStorage = new GitCredentialsStorage();
 				if(gitCredentialsStorage.isEnabled() && self.gitSavePrivateKey.checked){
 					gitCredentialsStorage.setPrivateKey(repository, loadedPrivateKey);
 					gitCredentialsStorage.setPassphrase(repository, self.gitPassphrase.value);
