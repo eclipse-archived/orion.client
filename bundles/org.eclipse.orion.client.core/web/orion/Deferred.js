@@ -22,14 +22,8 @@
 
 define(function() {
 	var head, tail, remainingHead, remainingTail, running = false;
-	var NOQUEUE = true;
 
-	// handles deferred notification without blowing the stack
 	function queueNotification(notify) {
-		if (NOQUEUE) {
-			notify();
-			return;
-		}
 		if (running) {
 			if (!head) {
 				head = {
@@ -78,14 +72,14 @@ define(function() {
 	}
 
 	function Deferred(optOnCancel) {
-		var result, state, head, tail, canceled = false, promise;
+		var result, state, head, tail, canceled = false, _this = this;
 
 		function notify() {
 			while (head) {
 				var listener = head;
 				head = head.next;
 				var deferred = listener.deferred;
-				var methodName = (state === "resolved") ? "resolve" : "reject";
+				var methodName = _this.isResolved() ? "resolve" : "reject";
 				if (listener[methodName]) {
 					try {
 						var listenerResult = listener[methodName](result);
@@ -114,42 +108,23 @@ define(function() {
 			}
 			return false;
 		}
-
-		this.cancel = function(reason, strict) {
-			if (checkFulfilled(strict)) {
-				return canceled ? result.message : null;
-			}
-			canceled = true;
-			if (optOnCancel) {
-				try {
-					reason = optOnCancel(reason) || reason;
-				} catch(e) {
-					// do not let this error escape
-				}
-			}
-			reason = reason || "canceled";
-			state = "rejected"; //$NON-NLS-0$
-			result = new Error(reason); //$NON-NLS-0$
-			queueNotification(notify);
-			return reason;
-		};
-
-		this.resolve = function(value, strict) {
-			if (!checkFulfilled(strict)) {	
-				state = "resolved"; //$NON-NLS-0$
-				result = value;
-				queueNotification(notify);
-			}
-			return promise;
-		};
-
+		
 		this.reject = function(error, strict) {
 			if (!checkFulfilled(strict)) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
 				queueNotification(notify);
 			}
-			return promise;
+			return _this.promise;
+		};
+		
+		this.resolve = function(value, strict) {
+			if (!checkFulfilled(strict)) {	
+				state = "resolved"; //$NON-NLS-0$
+				result = value;
+				queueNotification(notify);
+			}
+			return _this.promise;
 		};
 
 		this.progress = function(update, strict) {
@@ -157,14 +132,32 @@ define(function() {
 				var listener = head;
 				while (listener) {
 					if (listener.progress) {
-						try {
-							listener.progress(update);
-						} catch (e) {}
+						listener.progress(update);
 					}
 					listener = listener.next;
 				}
 			}
-			return promise;
+			return _this.promise;
+		};
+
+		this.cancel = function(reason, strict) {
+			if (!checkFulfilled(strict)) {
+				canceled = true;
+				if (optOnCancel) {
+					reason = optOnCancel(reason) || reason;
+				}
+				reason = reason || new Error("canceled"); //$NON-NLS-0$
+				queueNotification(_this.reject.bind(_this, reason));
+				return reason;
+			}
+			var listener = head;
+			while(listener) {
+				if (listener.canceled) {
+					notify();
+					return listener.cancel && listener.cancel(reason);
+				}
+				listener = listener.next;
+			}
 		};
 		
 		this.then = function(onResolve, onReject, onProgress) {
@@ -174,6 +167,7 @@ define(function() {
 				progress: onProgress,
 				cancel: this.cancel,
 				deferred: new Deferred(function(reason) {
+					listener.canceled = true;
 					return listener.cancel && listener.cancel(reason);
 				})
 			};
@@ -205,7 +199,7 @@ define(function() {
 			return canceled;
 		};
 
-		promise = {
+		this.promise = {
 			then: this.then,
 			cancel: this.cancel,
 			isResolved: this.isResolved,
@@ -213,7 +207,6 @@ define(function() {
 			isFulfilled: this.isFulfilled,
 			isCanceled: this.isCanceled
 		};
-		this.promise = promise;
 		
 		//for jQuery compatibility
 		this.notify = this.progress;
@@ -226,7 +219,13 @@ define(function() {
 	Deferred.all = function(promises, optOnError) {
 		var count = promises.length,
 			result = [],
-			deferred = new Deferred();
+			deferred = new Deferred(function(reason) {
+				promises.forEach(function(promise) {
+					if (promise.cancel) {
+						promise.cancel(reason);
+					}
+				});
+			});
 
 		function onResolve(i, value) {
 			if (!deferred.isFulfilled()) {
