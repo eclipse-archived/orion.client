@@ -405,7 +405,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		runCommand: function(commandId, item, handler) {
 			if (item) {
 				var command = this._commandList[commandId];
-				var enabled = command.visibleWhen ? command.visibleWhen(item) : true;
+				var enabled = command && (command.visibleWhen ? command.visibleWhen(item) : true);
 				if (enabled && command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
 						this._invoke(new CommandInvocation(this, handler, item, null, command));
@@ -1179,7 +1179,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 			this.spriteClass = options.spriteClass || "commandSprite"; // defines the background image containing sprites //$NON-NLS-0$
 			this.visibleWhen = options.visibleWhen;
 			this.parameters = options.parameters;
-			this.description = options.description;
 		},
 		/*
 		 *  Adds a "tool" representation for the command.  

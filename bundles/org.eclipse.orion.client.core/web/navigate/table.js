@@ -14,10 +14,10 @@
 
 define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil','orion/contentTypes',
+        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes',
         'dojo/parser'], 
 		function(messages, dojo, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
-				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, URITemplate, mContentTypes) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
@@ -26,7 +26,7 @@ dojo.addOnLoad(function(){
 		var selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
+		var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		new mSsh.SshService(serviceRegistry);
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
@@ -49,26 +49,39 @@ dojo.addOnLoad(function(){
 		
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();
+			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
+			var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+			var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, isFavoriteTarget: true,
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService});
 				var isAtRoot = mUtil.isAtRoot(explorer.treeRoot.Location) ;
 				if (isAtRoot && !dojo.byId("gettingStartedTasks")) { //$NON-NLS-0$
-					// TODO eventually we may expose an extension point or this, but right now we don't have a good story for 
-					// how a plugin can add content to the workspace.  So we have only internal/canned creation tasks.
-					var tasks = [
-						{commandId: "orion.new.template"}, //$NON-NLS-0$
-						{commandId: "orion.new.sftp"}, //$NON-NLS-0$
-						{commandId: "orion.new.zip"}, //$NON-NLS-0$
-						{commandId: "orion.new.gitclone"}, //$NON-NLS-0$
-						{commandId: "orion.new.project"} //$NON-NLS-0$
-					];
+					// create a command that represents each "orion.navigate.content" extension point
+					var newContentContributions = serviceRegistry.getServiceReferences("orion.navigate.content"); //$NON-NLS-0$
+					var tasks = [];
+					for (var i=0; i<newContentContributions.length; i++) {
+						var contribution = newContentContributions[i];
+						var href = null;
+						var id = contribution.getProperty("id"); //$NON-NLS-0$
+						var template = contribution.getProperty("uriTemplate"); //$NON-NLS-0$
+						if (template) {
+							var uriTemplate = new URITemplate(template);
+							href = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
+						}
+						var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, contribution.getProperty("command"), explorer, fileClient, progress, contribution.getProperty("folder"), contribution.getProperty("parameters"));
+						wrappingCommand.contentDescription = contribution.getProperty("description"); //$NON-NLS-0$
+						commandService.addCommand(wrappingCommand);
+						tasks.push({commandId: id});
+					}
 					// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
 					// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
 					// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
 					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
-						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false}); //$NON-NLS-0$
+						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false,
+						descriptionProperty: "contentDescription"}); //$NON-NLS-0$
 				} else {
 					dojo.empty("gettingStarted"); //$NON-NLS-0$
 				}
@@ -99,10 +112,7 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("pageActions", "eclipse.upFolder", 3, null, true, new mCommands.CommandKeyBinding(38, false, false, true)); //$NON-NLS-1$ //$NON-NLS-0$
 		// new project creation in the toolbar (in a group)
 		commandService.registerCommandContribution("pageActions", "orion.new.project", 1, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "orion.new.zip", 2, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "orion.new.sftp", 3, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "orion.new.template", 4, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("pageActions", "orion.new.linkProject", 5, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("pageActions", "orion.new.linkProject", 2, "orion.new"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 		// selection based command contributions in nav toolbar
 		commandService.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -112,9 +122,9 @@ dojo.addOnLoad(function(){
 		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.compareWithEachOther", 6, "orion.selectionGroup"); 
 		commandService.registerCommandContribution("selectionTools", "eclipse.compareWith", 7, "orion.selectionGroup"); 
-		commandService.registerCommandContribution("selectionTools", "eclipse.importCommand", 1, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("selectionTools", "orion.import", 1, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.downloadFile", 2, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.importSFTPCommand", 3, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("selectionTools", "orion.importSFTP", 3, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.exportSFTPCommand", 4, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
