@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledRepositoryLink', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, mGitCredentialsStorage) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledRepositoryLink', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, GitCredentialsStorage) {
 
 	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -59,7 +59,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		},
 		
 		refreshGitCredentials : function(){
-			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			var gitCredentialsStorage = new GitCredentialsStorage();
 			if(gitCredentialsStorage.isBrowserEnabled()){
 				this.gitCredentialsFields[0].setChecked(gitCredentialsStorage.isUserEnabled());
 			}
@@ -142,7 +142,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.gitCredentialsFields.push( new orion.widgets.settings.LabeledCheckbox( {fieldlabel:messages["Enable Key Storage"]} ) );
 			
-			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			var gitCredentialsStorage = new GitCredentialsStorage();
 			if(gitCredentialsStorage.isBrowserEnabled()){
 				var repositories = gitCredentialsStorage.getRepositories();
 				
@@ -160,7 +160,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				tooltip: messages["Reset Git Credentials"],
 				id: "orion.clearGitCredentials",
 				callback: dojo.hitch(this, function(data){
-					var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+					var gitCredentialsStorage = new GitCredentialsStorage();
 					if(gitCredentialsStorage.isBrowserEnabled()){
 						gitCredentialsStorage.clearCredentials();
 						
@@ -290,7 +290,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			
 			// git authentication update
-			var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+			var gitCredentialsStorage = new GitCredentialsStorage();
 			if(gitCredentialsStorage.isBrowserEnabled()){
 				if( this.gitCredentialsFields[0].isChecked() ){
 					if(window.confirm(messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"])){

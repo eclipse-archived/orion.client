@@ -10,7 +10,7 @@
  *******************************************************************************/
  /*global define console window document navigator */
  
- define(['dojo'], function(dojo){
+ define(function(){
  
 	/**
 	 * Local storage support class.
@@ -227,7 +227,9 @@
 			for(var i=0; i<keys.length; ++i){
 				if(keys[i] !== "isUserEnabled"){
 					var repository = keys[i].substring(0, keys[i].indexOf("::"));
-					if(dojo.indexOf(result, repository) < 0){ result.push(repository); }
+					if(result.indexOf(repository) === -1){
+						result.push(repository);
+					}
 				}
 			}
 			
@@ -237,7 +239,5 @@
 	
 	GitCredentialsStorage.prototype.constructor = GitCredentialsStorage;
  
-	return {
-		GitCredentialsStorage : GitCredentialsStorage
-	};
+	return GitCredentialsStorage;
  });
