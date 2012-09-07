@@ -47,6 +47,13 @@
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
 				forceSingleItem: true
 			});
+			
+			provider.registerService("orion.navigate.content", null, {
+				id: "orion.content.gitClone",
+				name: "Clone Git Repository",
+				description: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
+				uriTemplate: "{OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
+			});
 
 			provider.registerService("orion.page.link.related", null, {
 				id: "eclipse.git.status"
@@ -79,7 +86,7 @@
 				nls: "git/nls/gitmessages",
 				validationProperties: [
 					{source: "Clone:ActiveBranch", variableName: "GitBranchLocation"},
-					{source: "toRef:Type", match: "RemoteTrackingBranch"},
+					{source: "toRef:Type", match: "RemoteTrackingBranch"}
 				],
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitBranchLocation}?page=1",
 				forceSingleItem: true
@@ -91,7 +98,7 @@
 				tooltipKey: "Show the log for the corresponding remote tracking branch",
 				nls: "git/nls/gitmessages",
 				validationProperties: [
-					{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"},
+					{source: "toRef:RemoteLocation:0:Children:0:CommitLocation", variableName: "GitRemoteLocation"}
 				],
 				uriTemplate: "{OrionHome}/git/git-log.html#{GitRemoteLocation}?page=1",
 				forceSingleItem: true
