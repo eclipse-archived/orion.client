@@ -8,32 +8,30 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define*/
-(function() {
-	var global = this;
-	if (!global.define) {
-		global.define = function(f) {
-			global.orion = global.orion || {};
-			global.orion.Deferred = f();
-			delete global.define;
-		};
+/*global exports module define*/
+(function(root, factory) { // UMD
+	if (typeof exports === 'object') {
+		module.exports = factory();
+	} else if (typeof define === 'function' && define.amd) {
+		define(factory);
+	} else {
+		root.orion = root.orion || {};
+		root.orion.Deferred = factory();
 	}
-}());
-
-define(function() {
+}(this, function() {
 	var head, tail, remainingHead, remainingTail, running = false;
 
-	function queueNotification(notify) {
+	function enqueue(fn) {
 		if (running) {
 			if (!head) {
 				head = {
-					notify: notify,
+					fn: fn,
 					next: null
 				};
 				tail = head;
 			} else {
 				tail.next = {
-					notify: notify,
+					fn: fn,
 					next: null
 				};
 				tail = tail.next;
@@ -42,8 +40,8 @@ define(function() {
 		}
 		running = true;
 		do {
-			while (notify) {
-				notify();
+			while (fn) {
+				fn();
 				if (remainingHead) {
 					if (!head) {
 						head = remainingHead;
@@ -55,16 +53,16 @@ define(function() {
 				if (head) {
 					remainingHead = head.next;
 					remainingTail = tail;
-					notify = head.notify;
+					fn = head.fn;
 					head = tail = null;
 				} else {
-					notify = null;
+					fn = null;
 				}
 			}
 			running = false;
 		} while (running);
 	}
-	
+
 	function noReturn(fn) {
 		return function() {
 			fn.apply(null, arguments);
@@ -72,14 +70,15 @@ define(function() {
 	}
 
 	function Deferred(optOnCancel) {
-		var result, state, head, tail, canceled = false, _this = this;
+		var result, state, head, tail, canceled = false,
+			_this = this;
 
 		function notify() {
 			while (head) {
 				var listener = head;
 				head = head.next;
 				var deferred = listener.deferred;
-				var methodName = _this.isResolved() ? "resolve" : "reject";
+				var methodName = _this.isResolved() ? "resolve" : "reject"; //$NON-NLS-0$ $NON-NLS-1$
 				if (listener[methodName]) {
 					try {
 						var listenerResult = listener[methodName](result);
@@ -108,21 +107,21 @@ define(function() {
 			}
 			return false;
 		}
-		
+
 		this.reject = function(error, strict) {
 			if (!checkFulfilled(strict)) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
-				queueNotification(notify);
+				enqueue(notify);
 			}
 			return _this.promise;
 		};
-		
+
 		this.resolve = function(value, strict) {
-			if (!checkFulfilled(strict)) {	
+			if (!checkFulfilled(strict)) {
 				state = "resolved"; //$NON-NLS-0$
 				result = value;
-				queueNotification(notify);
+				enqueue(notify);
 			}
 			return _this.promise;
 		};
@@ -147,19 +146,20 @@ define(function() {
 					reason = optOnCancel(reason) || reason;
 				}
 				reason = reason || new Error("canceled"); //$NON-NLS-0$
-				queueNotification(_this.reject.bind(_this, reason));
+				enqueue(_this.reject.bind(_this, reason));
 				return reason;
 			}
 			var listener = head;
-			while(listener) {
-				if (listener.canceled) {
+			while (listener) {
+				if (listener.canceling) {
+					delete listener.canceling;
 					notify();
 					return listener.cancel && listener.cancel(reason);
 				}
 				listener = listener.next;
 			}
 		};
-		
+
 		this.then = function(onResolve, onReject, onProgress) {
 			var listener = {
 				resolve: onResolve,
@@ -167,7 +167,7 @@ define(function() {
 				progress: onProgress,
 				cancel: this.cancel,
 				deferred: new Deferred(function(reason) {
-					listener.canceled = true;
+					listener.canceling = true;
 					return listener.cancel && listener.cancel(reason);
 				})
 			};
@@ -178,17 +178,17 @@ define(function() {
 			}
 			tail = listener;
 			if (state) {
-				queueNotification(notify);
+				enqueue(notify);
 			}
 			return listener.deferred.promise;
 		};
 
 		this.isResolved = function() {
-			return state === "resolved";
+			return state === "resolved"; //$NON-NLS-0$
 		};
 
 		this.isRejected = function() {
-			return state === "rejected";
+			return state === "rejected"; //$NON-NLS-0$
 		};
 
 		this.isFulfilled = function() {
@@ -207,7 +207,7 @@ define(function() {
 			isFulfilled: this.isFulfilled,
 			isCanceled: this.isCanceled
 		};
-		
+
 		//for jQuery compatibility
 		this.notify = this.progress;
 		this.state = function() {
@@ -272,4 +272,4 @@ define(function() {
 	};
 
 	return Deferred;
-});
+}));
