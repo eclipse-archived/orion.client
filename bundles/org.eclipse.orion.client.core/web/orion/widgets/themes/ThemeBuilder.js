@@ -11,7 +11,7 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/settings/ThemeComponent', 'orion/widgets/settings/ThemeData', 'orion/widgets/settings/ThemeSheetWriter'], 
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/container/ThemeData', 'orion/widgets/themes/container/ThemeSheetWriter'], 
 	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, Component, ThemeData, ThemeSheetWriter ) {
 
 		var TOP = 10;
@@ -24,6 +24,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		var SELECTED_ZONE = null;
 		var OVERVIEW = true;
 		var INITIALIZE = true;
+		var OUTLINEDATA = false;
 		var ARCS = true;
 		
 		var zones = [];
@@ -34,6 +35,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		var over = null;
 		
 		var previous;
+		
+		var dataset;
 		
 		function init(){
 			SELECTED_ZONE = null;
@@ -82,8 +85,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
-			
-			
+					
 			this.initializeStorage();
 			
 			var revertCommand = new mCommands.Command({
@@ -248,7 +250,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		function refresh(){
 			this.clear();
-			this.drawOutline();
+			
+			if( OUTLINEDATA === true ){
+				this.drawOutlineData();
+			}else{
+	
+				this.drawOutline();			
+			}
+			
+//			this.drawOutline();
 		}
 		
 		ThemeBuilder.prototype.refresh = refresh;
@@ -553,6 +563,103 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		ThemeBuilder.prototype.getCurrentSettings = getCurrentSettings;
 		
+		
+		function addData( data ){
+		
+			this.settings = [];
+			
+			var defaultValue;
+			
+			OUTLINEDATA = true;
+		
+			if( data ){
+		
+				this.dataset = data;
+				
+				for( var shapecount =0; shapecount < data.shapes.length; shapecount++ ){
+				
+					if( data.shapes[shapecount].fill ){ defaultValue = data.shapes[shapecount].fill; }else{ defaultValue = data.shapes[shapecount].line; };
+				
+					this.settings[data.shapes[shapecount].name] = new Family( data.shapes[shapecount].family, defaultValue );
+				}
+			}
+		}
+		
+		ThemeBuilder.prototype.addData = addData;
+		
+		
+		function drawShape( shapedata, fillcolor, linecolor ){
+		
+			var shape;
+		
+			switch( shapedata.type ){
+			
+				case 'RECTANGLE':				
+					shape = Component.drawRectangle( ctx, shapedata.x, shapedata.y, shapedata.width, shapedata.height, fillcolor, linecolor );
+					break;
+					
+				case 'TEXT':
+					shape = Component.drawText( ctx, shapedata.label, shapedata.x, shapedata.y, '9pt sans-serif', fillcolor );
+					break;			
+			
+				case 'ROUNDRECTANGLE':
+					Component.roundRect( ctx, shapedata.x, shapedata.y, shapedata.width, shapedata.height, fillcolor, linecolor );
+					break;
+					
+				case 'LINE':
+					Component.drawLine( ctx, shapedata.x, shapedata.y, shapedata.width, shapedata.height, shapedata.linewidth, fillcolor, linecolor );
+					break;
+			}
+			
+			shape.description = shapedata.name;
+			shape.family = shapedata.family;
+			
+			shape.paintchip = false;
+			
+			zones.push(shape);
+			
+			if( OVERVIEW ){
+//				overview( ctx, zones );
+			}
+		}
+		
+		ThemeBuilder.prototype.drawShape = drawShape;
+
+		function drawOutlineData( data ){
+		
+			this.addData( data );
+			
+			position = dojo.position( 'themeContainer' );	
+	
+			if( !canvas ){
+				canvas = document.getElementById( 'orionui' );
+				ctx = canvas.getContext( '2d' );
+				canvas.addEventListener( "mousedown", dojo.hitch( this, 'mouseDown' ), false );	
+				canvas.addEventListener( "mousemove", mouseMove, false );
+				canvas.addEventListener( "mouseup", mouseUp, false );
+			}
+			
+			if( INITIALIZE === true ){
+			
+				for( var item in this.dataset.shapes ){
+					this.drawShape( this.dataset.shapes[item], this.dataset.shapes[item].fill, this.dataset.shapes[item].line );
+				}
+				
+				INITIALIZE = false;
+				
+			}else{
+			
+				for( var z in zones ){
+					if( !zones[z].paintchip ){
+						zones[z].render();
+					}
+				}
+			}
+		}
+		
+		ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
+		
+		
 
 		function drawOutline(){
 			
@@ -568,8 +675,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			Component.drawRectangle( ctx, LEFT, TOP, UI_SIZE - 0.5, UI_SIZE, null, '#CCC' );
 			
-			
-			
+	
 			if( INITIALIZE === true ){
 			
 				var settings = this.getCurrentSettings();
@@ -596,7 +702,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				search.description = 'Search Box';
 				search.family = settings.search.name;
 				
-				var navigator =Component.drawText( ctx, 'Navigator', LEFT + 50, TOP + 20, '8pt sans-serif', settings.navtext.value );   
+				var navigator = Component.drawText( ctx, 'Navigator', LEFT + 50, TOP + 20, '8pt sans-serif', settings.navtext.value );   
 				navigator.description = 'Navigation Text';
 				navigator.family = settings.navtext.name;
 				
@@ -641,11 +747,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				zones.push( search );
 				zones.push( toolpanel );
 				zones.push( crumbbar );
-
-				zones.push( rightpanel );
-				
+				zones.push( rightpanel );		
 				zones.push( selection );
-				
 				zones.push( location );
 				
 				for( var count=0; count < 3; count++ ){
@@ -685,11 +788,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			    
 			    img.src = 'orion-transparent.png'; 
 				
-				
-				
 				zones.push( breadcrumb );
-				
-				
+	
 				
 			}else{
 			
@@ -816,7 +916,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			this.refresh();
 			OVERVIEW = true;
-			this.drawOutline();
+			
+			if( OUTLINEDATA === true ){
+				this.drawOutlineData();
+			}else{
+	
+				this.drawOutline();			
+			}
+			
+//			this.drawOutline();
 		}
 		
 		ThemeBuilder.prototype.guide = guide;
@@ -940,12 +1048,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 				var set = {
 					value: this.styles[theme].name,
-					innerHTML: this.styles[theme].name
+					label: this.styles[theme].name
 				};	
 				
 				if( selection ){	
 					if( this.styles[theme].name === selection ){
-						set.selected = 'selected';
+						set.selected = true;
 					}
 				}
 				
@@ -966,14 +1074,34 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			if( state && state === 'INITIALIZE' ){ INITIALIZE = true; }
 			anchor.innerHTML = this.template;	
+			
+			if( OUTLINEDATA === true ){
+				this.drawOutlineData();
+			}else{
 	
-			this.drawOutline();			
+				this.drawOutline();			
+			}
+			
 			this.addThemePicker();
 		
 			this.commandService.renderCommands('themeCommands', document.getElementById( 'revertCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 		}
 		
 		ThemeBuilder.prototype.render = render;
+		
+		function renderData( anchor, state, data ){
+		
+			if( state && state === 'INITIALIZE' ){ INITIALIZE = true; }
+			anchor.innerHTML = this.template;	
+	
+			this.drawOutlineData(data);			
+//			this.addThemePicker();
+		
+			this.commandService.renderCommands('themeCommands', document.getElementById( 'revertCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+		}
+		
+		ThemeBuilder.prototype.renderData = renderData;
+		
 		
 		function destroy(){
 			var picker = dijit.byId( 'themepicker' );
