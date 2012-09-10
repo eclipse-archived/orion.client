@@ -57,7 +57,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		pluginStorage = arguments.length ? storage : {};
 		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, pluginStorage);
 		if (typeof omitConfigAdmin === 'undefined' || !omitConfigAdmin) {
-			return new ConfigAdminFactory(serviceRegistry, preferences).getConfigurationAdmin().then(
+			return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
 				function(createdConfigAdmin) {
 					configAdmin = createdConfigAdmin;
 				});
@@ -269,6 +269,33 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			});
 		});
 	});
+
+	// Similar to previous test, but ConfigAdmin is registered after PluginRegistry has started up.
+	tests['test plugin load updated() call ordering -- late registration'] = (function() {
+		return testHelpers.makeTest(setUp.bind(null, {} /*no storage*/, true /*no config admin*/), tearDown, function() {
+			return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
+				pluginRegistry.shutdown();
+				setUp(pluginStorage, true /*don't create config admin*/);
+				assert.ok(!configAdmin, 'no config admin yet');
+				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
+					var plugin = pluginRegistry.getPlugin('testManagedServicePlugin.html');
+					assert.ok(plugin);
+					assert.strictEqual(plugin.getState(), Plugin.INSTALLED);
+					// Finally register ConfigAdmin
+					return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
+						function(createdConfigAdmin) {
+							configAdmin = createdConfigAdmin;
+							var testService = serviceRegistry.getService('test.bogus');
+							return testService.test().then(function() {
+								return testService.getCallOrder().then(function(callOrder) {
+									assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+								});
+							});
+						});
+				});
+			});
+		});
+	}());
 
 return tests;
 });

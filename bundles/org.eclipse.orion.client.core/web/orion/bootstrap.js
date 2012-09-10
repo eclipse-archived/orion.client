@@ -50,7 +50,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 				});
 			}
 		}).then(function() {
-			return new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin().then(
+			return new mConfig.ConfigurationAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
 				serviceRegistry.registerService.bind(serviceRegistry, "orion.cm.configadmin") //$NON-NLS-0$
 			);
 		}).then(function() {
