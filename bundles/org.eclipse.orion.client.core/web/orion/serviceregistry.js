@@ -23,10 +23,11 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 	 * @param {Object} properties A JSON object containing the service's declarative properties
 	 */
 
-	function ServiceReference(serviceId, names, properties) {
+	function ServiceReference(serviceId, objectClass, properties) {
 		this._properties = properties || {};
+		this._properties.objectClass = objectClass;
 		this._properties["service.id"] = serviceId;
-		this._properties["service.names"] = names;
+		this._properties["service.names"] = objectClass;
 	}
 
 	ServiceReference.prototype = /** @lends orion.serviceregistry.ServiceReference.prototype */
@@ -70,6 +71,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		this._serviceReference = serviceReference;
 		this._internalRegistry = internalRegistry;
 	}
+
 	ServiceRegistration.prototype = /** @lends orion.serviceregistry.ServiceRegistration.prototype */
 	{
 		/**
@@ -83,18 +85,23 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		 * Returns a reference to this registered service.
 		 */
 		getServiceReference: function() {
+			if (!this._internalRegistry.isRegistered(this._serviceId)) {
+				throw new Error("already unregistered");
+			}
 			return this._serviceReference;
 		}
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
 
-	function DeferredService(implementation) {
-		var method;
+	function DeferredService(implementation, isRegistered) {
 
 		function _createServiceCall(methodName) {
 			return function() {
 					var d;
 					try {
+						if (!isRegistered()) {
+							throw new Error("Service was unregistered");
+						}
 						var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
 						if (result && typeof result.then === "function") {
 							return result;
@@ -110,6 +117,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 			};
 		}
 
+		var method;
 		for (method in implementation) {
 			if (typeof implementation[method] === 'function') {
 				this[method] = _createServiceCall(method);
@@ -117,26 +125,9 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		}
 	}
 	
-	function RegisteredService(serviceId, implementation, internalRegistry, registered) {
-		var method;
-
-		function _createServiceCall(methodName) {
-			return function() {
-				var args = arguments;
-				return registered.then(function() {
-					if (internalRegistry.isRegistered(serviceId)) {
-						return implementation[methodName].apply(implementation, Array.prototype.slice.call(args));
-					}
-					throw new Error("Service was unregistered");
-				});
-			};
-		}
-
-		for (method in implementation) {
-			if (typeof implementation[method] === 'function') {
-				this[method] = _createServiceCall(method);
-			}
-		}
+	function ServiceEvent(type, serviceReference) {
+		this.type = type;
+		this.serviceReference = serviceReference;
 	}
 
 	/**
@@ -148,37 +139,39 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 
 	function ServiceRegistry() {
 		this._entries = [];
-		this._namedReferences = {};
+		this._typedReferences = {};
 		this._serviceEventTarget = new EventTarget();
-		var that = this;
+		var _this = this;
 		this._internalRegistry = {
 			isRegistered: function(serviceId) {
-				return that._entries[serviceId] ? true : false;
+				return _this._entries[serviceId] ? true : false;
 			},
 			unregisterService: function(serviceId) {
-				var entry = that._entries[serviceId];
-				if (entry) {
-					var reference = entry.reference;
-					var names = reference.getProperty("service.names");
-					names.forEach(function(name) {
-						var namedReferences = that._namedReferences[name];
-						for (var i = 0; i < namedReferences.length; i++) {
-							if (namedReferences[i] === reference) {
-								if (namedReferences.length === 1) {
-									delete that._namedReferences[name];
-								} else {
-									namedReferences.splice(i, 1);
-								}
-								break;
+				var entry = _this._entries[serviceId];
+				if (!entry) {
+					throw new Error("already unregistered");
+				}				
+				var reference = entry.reference;
+				_this._serviceEventTarget.dispatchEvent(new ServiceEvent("unregistering", reference));
+				_this._entries[serviceId] = null;
+				var objectClass = reference.getProperty("objectClass");
+				objectClass.forEach(function(type) {
+					var typedReferences = _this._typedReferences[type];
+					for (var i = 0; i < typedReferences.length; i++) {
+						if (typedReferences[i] === reference) {
+							if (typedReferences.length === 1) {
+								delete _this._typedReferences[type];
+							} else {
+								typedReferences.splice(i, 1);
 							}
+							break;
 						}
-					});
-					that._entries[serviceId] = null;
-					that._serviceEventTarget.dispatchEvent({type:"serviceRemoved", serviceReference: reference, service: entry.service});
-				}
+					}
+				});
 			}
 		};
 	}
+	
 	ServiceRegistry.prototype = /** @lends orion.serviceregistry.ServiceRegistry.prototype */
 	{
 
@@ -186,10 +179,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		 * Returns the service with the given name or reference.
 		 * @param {String|orion.serviceregistry.ServiceReference} nameOrServiceReference The service name or a service reference
 		 */
-		getService: function(nameOrServiceReference) {
+		getService: function(typeOrServiceReference) {
 			var service;
-			if (typeof nameOrServiceReference === "string") {
-				var references = this._namedReferences[nameOrServiceReference];
+			if (typeof typeOrServiceReference === "string") {
+				var references = this._typedReferences[typeOrServiceReference];
 				if (references) {
 					references.some(function(reference) {
 						service = this._entries[reference.getProperty("service.id")].service;
@@ -197,7 +190,10 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 					}, this);
 				}
 			} else {
-				service = this._entries[nameOrServiceReference.getProperty("service.id")].service;
+				var entry = this._entries[typeOrServiceReference.getProperty("service.id")];
+				if (entry) {
+					service = entry.service;
+				}
 			}
 			return service || null;
 		},
@@ -209,7 +205,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		 */
 		getServiceReferences: function(name) {
 			if (name) {
-				return this._namedReferences[name] ? this._namedReferences[name] : [];
+				return this._typedReferences[name] ? this._typedReferences[name] : [];
 			}
 			var result = [];
 			this._entries.forEach(function(entry) {
@@ -221,36 +217,37 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		},
 		/**
 		 * Registers a service with this registry.
-		 * @param {String|String[]} names the names of the service being registered
-		 * @param {Object} implementation The service implementation
+		 * @param {String|String[]} types the types of the service being registered
+		 * @param {Object} service The service implementation
 		 * @param {Object} properties A JSON collection of declarative service properties
 		 * @returns {orion.serviceregistry.ServiceRegistration} A service registration object for the service.
 		 */
-		registerService: function(names, implementation, properties) {
-			var serviceId = this._entries.length;
-			
-			if (typeof(names) === "string") {
-				names = [names];
+		registerService: function(types, service, properties) {
+			if (typeof service === "undefined" ||  service === null) {
+				throw new Error("invalid service");
 			}
 			
-			var deferredService = new DeferredService(implementation);
-			var registered = new Deferred();
-			var registeredService = new RegisteredService(serviceId, deferredService, this._internalRegistry, registered);
+			if (typeof types === "string") {
+				types = [types];
+			} else if (!Array.isArray(types)) {
+				types = [];
+			}
 			
-			var reference = new ServiceReference(serviceId, names, properties);
-			var namedReferences = this._namedReferences;
-			names.forEach(function(name) {
-				namedReferences[name] = namedReferences[name] || [];
-				namedReferences[name].push(reference);
+			var serviceId = this._entries.length;			
+			var reference = new ServiceReference(serviceId, types, properties);
+			var typedReferences = this._typedReferences;
+			types.forEach(function(name) {
+				typedReferences[name] = typedReferences[name] || [];
+				typedReferences[name].push(reference);
 			});
-			
+			var deferredService = new DeferredService(service, this._internalRegistry.isRegistered.bind(null, serviceId));
 			this._entries.push({
 				reference: reference,
-				service: registeredService
+				service: deferredService
 			});
-	
-			this._serviceEventTarget.dispatchEvent({type:"serviceAdded", serviceReference: reference, service:deferredService}).then(registered.resolve);
-			return new ServiceRegistration(serviceId, reference, this._internalRegistry);
+			var internalRegistry = this._internalRegistry;
+			this._serviceEventTarget.dispatchEvent(new ServiceEvent("registered", reference));
+			return new ServiceRegistration(serviceId, reference, internalRegistry);
 		},
 
 		/**
@@ -275,8 +272,6 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 
 	//return the module exports
 	return {
-		ServiceReference: ServiceReference,
-		ServiceRegistration: ServiceRegistration,
 		ServiceRegistry: ServiceRegistry
 	};
 });

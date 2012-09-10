@@ -57,8 +57,8 @@ define([], function() {
 				throw 'Already closed'; //$NON-NLS-0$
 			}
 			state = CLOSED;
-			serviceRegistry.removeEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.removeEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
+			serviceRegistry.removeEventListener('registered', addedListener); //$NON-NLS-0$
+			serviceRegistry.removeEventListener('unregistering', removedListener); //$NON-NLS-0$
 			addedListener = null;
 			removedListener = null;
 			var self = this;
@@ -99,7 +99,7 @@ define([], function() {
 				if (isTrackable(event.serviceReference)) {
 					add.call(self, event.serviceReference);
 					if (typeof self.onServiceAdded === 'function') {
-						return self.onServiceAdded(event.serviceReference, event.service);
+						return self.onServiceAdded(event.serviceReference, self.serviceRegistry.getService(event.serviceReference));
 					}
 				}
 			};
@@ -108,8 +108,8 @@ define([], function() {
 					remove.call(self, event.serviceReference);
 				}
 			};
-			serviceRegistry.addEventListener('serviceAdded', addedListener); //$NON-NLS-0$
-			serviceRegistry.addEventListener('serviceRemoved', removedListener); //$NON-NLS-0$
+			serviceRegistry.addEventListener('registered', addedListener); //$NON-NLS-0$
+			serviceRegistry.addEventListener('unregistering', removedListener); //$NON-NLS-0$
 			serviceRegistry.getServiceReferences(serviceName).forEach(function(serviceRef) {
 				add.call(self, serviceRef);
 			});
