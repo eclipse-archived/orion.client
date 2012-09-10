@@ -126,7 +126,6 @@ Component.prototype.render = render;
 			switch( this.type ){
 				case 'RECTANGLE':
 				case 'ROUNDRECTANGLE':
-				case 'TEXT':
 					if( mouseX > this.x && mouseX < ( this.x + this.width ) ){
 						if( mouseY > this.y && mouseY < ( this.y + this.height ) ){
 							this.over = true;
@@ -135,10 +134,18 @@ Component.prototype.render = render;
 		
 					break;
 					
+				case 'TEXT':
+					if( mouseX > this.x && mouseX < ( this.x + this.width ) ){
+						if( mouseY > this.y - 16 && mouseY < ( this.y -16 + this.height ) ){
+							this.over = true;
+						}
+					}
+					break;
+					
 				case 'ELLIPSE':
 				
-					if( mouseX > this.x - this.radius  && mouseX < ( this.x + this.radius ) ){
-						if( mouseY > this.y - this.radius && mouseY < ( this.y + this.radius ) ){
+					if( mouseX > this.x -5 - this.radius  && mouseX < ( this.x -5 + this.radius ) ){
+						if( mouseY > this.y -5 - this.radius && mouseY < ( this.y -5 + this.radius ) ){
 							this.over = true;
 						}
 					}
@@ -245,32 +252,34 @@ Component.prototype.render = render;
 
 			var padding = 6;
 			
+			var originy = ( this.y-padding + (this.height + (2*padding) )/2 );
+			
 			switch( this.type ){
 				case 'RECTANGLE':
 				case 'ROUNDRECTANGLE':
+					break;
+					
 				case 'TEXT':
-					if( this.over ){
-						// roundRect(this.context, this.x-padding, this.y-padding, this.width + (2*padding), this.height + (2*padding), 1, null, '#cc0000');
-					}
-					
-					var originx = this.x-padding + ( this.width + (2*padding) ) * 0.5;
-					var originy = ( this.y-padding + (this.height + (2*padding) )/2 );
-					
-					this.context.beginPath();
-					this.context.moveTo( originx, originy );
-					this.context.lineTo( width + 30, originy );
-					this.context.lineTo( width + 30, top + 7 );
-					this.context.lineTo( width + 45, top + 7 );
-					this.context.strokeStyle = '#cc0000';
-					this.context.lineWidth = 1;
-					this.context.stroke();
-					
-					drawArc( this.context, originx, originy, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
-					
-					this.context.closePath();
-					
+				
+					originy = originy -8;
 					break;
 			}
+			
+			var originx = this.x-padding + ( this.width + (2*padding) ) * 0.5;
+			
+			this.context.beginPath();
+			this.context.moveTo( originx, originy );
+			this.context.lineTo( width + 30, originy );
+			this.context.lineTo( width + 30, top + 7 );
+			this.context.lineTo( width + 45, top + 7 );
+			this.context.strokeStyle = '#cc0000';
+			this.context.lineWidth = 1;
+			this.context.stroke();
+			
+			drawArc( this.context, originx, originy, 3, 0, 2 * Math.PI, false, null, '#cc0000' );
+			
+			this.context.closePath();
+
 		}	
 		
 		

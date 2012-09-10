@@ -17,10 +17,11 @@
 }
 
 a {
-	cursor: hand;
 	text-decoration: none;
 	color: #3087B3;
 }
+
+/* REAL PROBLEMS WITH THESE IN THEMING - AND WE WERE NOT CHANGING THEM IN ANY CASE 
 
 a:visited {
 	color: #3087B3;
@@ -34,7 +35,7 @@ a:hover {
 	cursor: hand;
 	text-decoration: underline;
 	color: #3087B3;
-}
+} */
 
 /* Navigation text */
 
@@ -115,9 +116,9 @@ a.breadcrumb:hover {
 	cursor: pointer;
 }
 
-a.breadcrumb:visited {
+/* a.breadcrumb:visited {
 	color: #3087B3;
-}
+} */
 
 .breadcrumbSeparator {
 	font-size: 8pt;
@@ -180,6 +181,7 @@ a.currentLocation:hover {
 	color:#999;
 	padding:0;
 	padding-left:20px;
+	padding-right:16px;
 	margin-left:5px;
 	margin-top:6px !important;
 	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;

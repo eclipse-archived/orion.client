@@ -9,9 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document orion*/
-define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', 'orion/i18nUtil',
-		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/Select'],
-		function(messages, mExplorer, mSection, i18nUtil, dojo, dijit) {
+define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', 'orion/i18nUtil', 'orion/Deferred',
+		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield',
+		'orion/widgets/settings/LabeledSelect'],
+		function(messages, mExplorer, mSection, i18nUtil, Deferred, dojo, dijit) {
 	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
 
 	var PropertyWidget = dojo.declare('orion.widgets.settings.SettingWidget', [dijit._Widget], { //$NON-NLS-0$
@@ -33,8 +34,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 		},
 		changeProperty: function() {},
 		updateField: function(modelValue) {}
-	});
-	var PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
+	}),
+	PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
 		postCreate: function() {
 			this.inherited(arguments);
 			var type = this.property.getType();
@@ -50,26 +51,65 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 		updateField: function(value) {
 			this.myfield.value = value;
 		}
-	});
-	var PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
+	}),
+	PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
 		},
 		updateField: function(value) {
 			this.myfield.checked = value;
 		}
-	});
-	var PropertiesWidget = dojo.declare('orion.widgets.settings.PropertiesWidget', [dijit._Container, dijit._WidgetBase], { //$NON-NLS-0$
+	}),
+	PropertySelect = dojo.declare('orion.widgets.settings.PropertySelect', [orion.widgets.settings.LabeledSelect, PropertyWidget], { //$NON-NLS-0$
+		postCreate: function() {
+			var values = this.property.getOptionValues(), labels = this.property.getOptionLabels();
+			this.options = values.map(function(value, i) {
+				var label = (typeof labels[i] === 'string' ? labels[i] : value); //$NON-NLS-0$
+				return {value: label, label: label};
+			});
+			this.inherited(arguments);
+		},
+		change: function(event) {
+			this.inherited(arguments);
+			var selectedOptionValue = this.property.getOptionValues()[this.getSelectedIndex()];
+			if (typeof selectedOptionValue !== 'undefined') { //$NON-NLS-0$
+				this.changeProperty(selectedOptionValue);
+			}
+		},
+		updateField: function(value) {
+			this.inherited(arguments);
+			var index = this.property.getOptionValues().indexOf(value);
+			if (index !== -1) {
+				this.setSelectedIndex(index);
+			}
+		}
+	}),
+	PropertiesWidget = dojo.declare('orion.widgets.settings.PropertiesWidget', [dijit._Container, dijit._WidgetBase], { //$NON-NLS-0$
 		buildRendering: function() {
 			this.inherited(arguments);
-			var setting = this.setting;
 			var serviceRegistry = this.serviceRegistry;
 			var self = this;
-			var configAdmin = serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
-			configAdmin.getConfiguration(setting.getPid()).then(function(configuration) {
-				self.set('configuration', configuration); //$NON-NLS-0$
+			this.configAdmin = serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
+			this.initConfiguration().then(function(configuration) {
 				self.createChildren(configuration);
 			});
+		},
+		/** Creates a new configuration if necessary */
+		initConfiguration: function() {
+			var configuration = this.configuration;
+			if (!configuration) {
+				var self = this;
+				this.configPromise = this.configPromise || this.configAdmin.getConfiguration(this.setting.getPid())
+					.then(function(resolvedConfiguration) {
+						self.configuration = resolvedConfiguration;
+						return resolvedConfiguration;
+					});
+				return this.configPromise;
+			} else {
+				var d = new Deferred();
+				d.resolve(configuration);
+				return d;
+			}
 		},
 		createChildren: function(configuration) {
 			var self = this;
@@ -79,33 +119,36 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 					changeProperty: self.changeProperty.bind(self, property)
 				};
 				var widget;
-				// TODO if property.getOptionValues(), use a Select
-				switch (property.getType()) {
-					case 'boolean': //$NON-NLS-0$
-						widget = new PropertyCheckbox(options);
-						break;
-					case 'number': //$NON-NLS-0$
-					case 'string': //$NON-NLS-0$
-						widget = new PropertyTextField(options);
-						break;
+				if (property.getOptionValues()) {
+					// Enumeration
+					widget = new PropertySelect(options);
+				} else {
+					switch (property.getType()) {
+						case 'boolean': //$NON-NLS-0$
+							widget = new PropertyCheckbox(options);
+							break;
+						case 'number': //$NON-NLS-0$
+						case 'string': //$NON-NLS-0$
+							widget = new PropertyTextField(options);
+							break;
+					}
 				}
 				self.addChild(widget);
 			});
 		},
 		changeProperty: function(propertyType, value) {
-			var configuration = this.configuration;
-			var setting = this.setting;
-			var props = configuration.getProperties() || {};
-			props[propertyType.getId()] = value;
-			var isDefaultConfig = setting.getPropertyTypes().every(function(propertyType) {
-				return props[propertyType.getId()] === propertyType.getDefaultValue();
-			});
-			if (isDefaultConfig) {
-				configuration.remove();
-				this.configuration = null;
-			} else {
-				configuration.update(props);
-			}
+			this.initConfiguration().then(function(configuration) {
+				var setting = this.setting;
+				var props = configuration.getProperties() || {};
+				props[propertyType.getId()] = value;
+				if (setting.isDefaults(props)) {
+					configuration.remove();
+					this.configuration = null;
+					this.configPromise = null;
+				} else {
+					configuration.update(props);
+				}
+			}.bind(this));
 		}
 	});
 

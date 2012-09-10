@@ -20,7 +20,7 @@ define(['orion/Deferred'], function(Deferred) {
 	 */
 
 	function EventTarget() {
-		this._namedlisteners = {};
+		this._namedListeners = {};
 	}
 
 	EventTarget.prototype = /** @lends orion.EventTarget.prototype */
@@ -28,12 +28,15 @@ define(['orion/Deferred'], function(Deferred) {
 		/**
 		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
 		 * will be passed to the event listener(s).
-		 * @param {String} eventName The event name
+		 * @param {Object} event The event to dispatch. The event object MUST have a type field
 		 * @returns {Deferred} A deferred that resolves when all event listeners have been notified, and all async-aware
 		 * listeners (if any) have resolved.
 		 */
-		dispatchEvent: function(eventName) {
-			var listeners = this._namedlisteners[eventName];
+		dispatchEvent: function(event) {
+			if (!event.type) {
+				throw new Error("unspecified type");
+			}
+			var listeners = this._namedListeners[event.type];
 			if (!listeners) {
 				var d = new Deferred();
 				d.resolve();
@@ -41,10 +44,9 @@ define(['orion/Deferred'], function(Deferred) {
 			}
 
 			var deferreds = [];
-			for (var i = 0; i < listeners.length; i++) {
+			listeners.forEach(function(listener) {
 				try {
-					var args = Array.prototype.slice.call(arguments, 1);
-					var listenerDeferred = listeners[i].apply(null, args);
+					var listenerDeferred = (typeof listener === "function") ? listener(event) : listener.handleEvent(event);
 					if (listenerDeferred && typeof listenerDeferred.then === 'function') {
 						deferreds.push(listenerDeferred);
 					}
@@ -52,8 +54,9 @@ define(['orion/Deferred'], function(Deferred) {
 					if (typeof console !== 'undefined') {
 						console.log(e); // for now, probably should dispatch an ("error", e)
 					}
-				}
-			}
+				}			
+			});
+
 			return Deferred.all(deferreds, function(e) {
 				if (typeof console !== 'undefined') {
 					console.log(e);
@@ -67,8 +70,10 @@ define(['orion/Deferred'], function(Deferred) {
 		 * @param {Function} listener The function called when an event occurs
 		 */
 		addEventListener: function(eventName, listener) {
-			this._namedlisteners[eventName] = this._namedlisteners[eventName] || [];
-			this._namedlisteners[eventName].push(listener);
+			if (typeof listener === "function" || listener.handleEvent) {
+				this._namedListeners[eventName] = this._namedListeners[eventName] || [];
+				this._namedListeners[eventName].push(listener);
+			}
 		},
 
 		/**
@@ -77,12 +82,12 @@ define(['orion/Deferred'], function(Deferred) {
 		 * @param {Function} listener The function called when an event occurs
 		 */
 		removeEventListener: function(eventName, listener) {
-			var listeners = this._namedlisteners[eventName];
+			var listeners = this._namedListeners[eventName];
 			if (listeners) {
 				for (var i = 0; i < listeners.length; i++) {
 					if (listeners[i] === listener) {
 						if (listeners.length === 1) {
-							delete this._namedlisteners[eventName];
+							delete this._namedListeners[eventName];
 						} else {
 							listeners.splice(i, 1);
 						}

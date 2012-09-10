@@ -70,7 +70,7 @@ define(["dojo","orion/EventTarget"], function(dojo, EventTarget){
 			} else {
 				this._selections = null;
 			}
-			this.dispatchEvent("selectionChanged", this._getSingleSelection(), this._selections); //$NON-NLS-0$
+			this.dispatchEvent({type:"selectionChanged", selection: this._getSingleSelection(), selections: this._selections}); //$NON-NLS-0$
 		}
 	};
 	Selection.prototype.constructor = Selection;

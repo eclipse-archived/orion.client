@@ -13,17 +13,17 @@
 /*global define orion window dojo dijit*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
-		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GetPullRequestUrlDialog.html'], function(messages, require, dojo, dijit, mUtil) {
+		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/ReviewRequestDialog.html'], function(messages, require, dojo, dijit, mUtil) {
 
 /**
- * Usage: <code>new orion.git.widgets.GetPullRequestUrlDialog(options).show();</code>
+ * Usage: <code>new orion.git.widgets.ReviewRequestDialog(options).show();</code>
  * 
- * @name orion.git.widgets.GetPullRequestUrlDialog
+ * @name orion.git.widgets.ReviewRequestDialog
  */
-var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], //$NON-NLS-0$
-		/** @lends orion.git.widgets.GetPullRequestUrlDialog.prototype */ {
+var ReviewRequestDialog = dojo.declare("orion.git.widgets.ReviewRequestDialog", [dijit.Dialog, orion.widgets._OrionDialogMixin], //$NON-NLS-0$
+		/** @lends orion.git.widgets.ReviewRequestDialog.prototype */ {
 	widgetsInTemplate : true,
-	templateString : dojo.cache('orion', 'git/widgets/templates/GetPullRequestUrlDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
+	templateString : dojo.cache('orion', 'git/widgets/templates/ReviewRequestDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 	
 	SEARCH_DELAY: 500,
 	timeoutId: null,
@@ -44,7 +44,7 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	postMixInProperties : function() {
 		this.options.title = this.options.title || messages["Contribution Review Request"];
 		this.selectFile = messages["Paste link in email or IM"];
-		this.reviewerName = messages["or sent the link to the reviewer"];
+		this.reviewerName = messages["Send the link to the reviewer"];
 
 		this.inherited(arguments);
 	},
@@ -52,7 +52,7 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	/** @private */
 	postCreate: function() {
 		this.inherited(arguments);
-		this.PullReqUrl.set("value", this.options.url);
+		this.ReviewReqUrl.set("value", this.options.url);
 	},
 	
 	
@@ -61,7 +61,7 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	 */
 	show: function() {
 		this.inherited(arguments);
-		this.PullReqUrl.focus();
+		this.ReviewReqUrl.focus();
 	},
 	
 	/** @private */
@@ -77,5 +77,5 @@ var GetPullRequestUrlDialog = dojo.declare("orion.git.widgets.GetPullRequestUrlD
 	}
 	
 });
-return GetPullRequestUrlDialog;
+return ReviewRequestDialog;
 });

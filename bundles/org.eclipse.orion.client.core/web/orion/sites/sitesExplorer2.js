@@ -109,11 +109,11 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 					that._updatePageActions(that.registry, siteServiceRefs[0]); //$NON-NLS-1$ //$NON-NLS-0$
 					
 					if (!that.doOnce){
-						that.registry.getService("orion.page.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
+						that.registry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 							var selectionTools = dojo.byId(that.selectionActionsWrapperId);
 							if (selectionTools) {
 								commandService.destroy(selectionTools);						
-								commandService.renderCommands(that.selectionActionsWrapperId, selectionTools, selections, that, "button", that.getRefreshHandler()); //$NON-NLS-1$ //$NON-NLS-0$
+								commandService.renderCommands(that.selectionActionsWrapperId, selectionTools, event.selections, that, "button", that.getRefreshHandler()); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						});
 						

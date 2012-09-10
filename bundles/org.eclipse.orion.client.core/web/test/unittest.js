@@ -173,16 +173,16 @@ dojo.addOnLoad(function() {
 				var times = {};
 				var testCount = 0;
 				var _top;
-				service.addEventListener("runStart", function(name) {
-					var n = name ? name : "<top>";
+				service.addEventListener("runStart", function(event) {
+					var n = event.name ? event.name : "<top>";
 					if (!_top) {
 						_top = n;
 					}
 	//				console.log("[Test Run] - " + name + " start");
 					times[n] = new Date().getTime();
 				});
-				service.addEventListener("runDone", function(name, obj) {
-					var n = name ? name : "<top>";
+				service.addEventListener("runDone", function(event) {
+					var n = event.name ? event.name : "<top>";
 	//				var result = [];
 	//				result.push("[Test Run] - " + name + " done - ");
 	//				result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");
@@ -190,22 +190,22 @@ dojo.addOnLoad(function() {
 					delete times[n];
 	//				console.log(result.join(""));
 				});
-				service.addEventListener("testStart", function(name) {
-					times[name] = new Date().getTime();
+				service.addEventListener("testStart", function(event) {
+					times[event.name] = new Date().getTime();
 					testCount++;
 				});
-				service.addEventListener("testDone", function(name, obj) {
+				service.addEventListener("testDone", function(event) {
 	//				var result = [];
 	//				result.push(obj.result ? " [passed] " : " [failed] ");
 	//				result.push(name);
-					var millis = new Date().getTime() - times[name];
+					var millis = new Date().getTime() - times[event.name];
 	//				result.push(" (" + (millis) / 1000 + "s)");
-					delete times[name];
+					delete times[event.name];
 	//				if (!obj.result) {
 	//					result.push("\n  " + obj.message);
 	//				}
 	//				console.log(result.join(""));
-					root.children.push({"Name":name, result: obj.result, message: obj.message, stack: obj.stack, millis: millis});
+					root.children.push({"Name":event.name, result: event.result, message: event.message, stack: event.stack, millis: millis});
 					myTree.refresh(root, root.children);
 				});	
 				if (specificTest) {

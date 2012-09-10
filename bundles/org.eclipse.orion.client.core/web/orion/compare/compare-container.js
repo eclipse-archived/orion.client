@@ -13,9 +13,9 @@
 /*jslint browser:true devel:true */
 define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher'], 
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/util', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 
 		function(messages, require, dojo, dijit, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
-				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mUtil, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher) {
+				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mUtil, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher, mFileClient) {
 
 var exports = {};
 
@@ -26,25 +26,40 @@ exports.DefaultDiffProvider = (function() {
 	}	
 	DefaultDiffProvider.prototype = {
 		_resolveComplexDiff: function(complexURL, onlyDiff, errorCallback) {
-			if(!this._diffProvider){
-				console.log("A diff provider is needed for compound diff URL"); //$NON-NLS-0$
-				return;
+			var compareTwoIndex = complexURL.indexOf(","); //$NON-NLS-0$
+			if(compareTwoIndex > 0){
+				var fileLocNew = complexURL.substring(0, compareTwoIndex);
+				var fileLocBase = complexURL.substring(compareTwoIndex+1);
+				var that = this;
+				var dl = new dojo.DeferredList([ that._getContentType(fileLocBase), that._getContentType(fileLocNew) ]);
+				dl.then(function(results) {
+					var baseFileContentType = results[0][1];
+					var newFileContentType = results[1][1];
+					that.callBack({ baseFile:{URL: fileLocBase, Name: that._resolveFileName(fileLocBase), Type: baseFileContentType},
+					 			newFile:{URL: fileLocNew, Name: that._resolveFileName(fileLocNew), Type: newFileContentType}
+							 });
+				}, errorCallback);
+			} else {
+				if(!this._diffProvider){
+					console.log("A diff provider is needed for compound diff URL"); //$NON-NLS-0$
+					return;
+				}
+				var that = this;
+				that._diffProvider.getDiffContent(complexURL).then(function(jsonData, secondArg) {
+					if (that._hasConflicts) {
+						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
+					} else {
+						that._diffContent = jsonData;
+					}
+					if (onlyDiff){
+						that.callBack({ 
+				 			diff: that._diffContent
+						 });
+					} else {
+						that._resolveComplexFileURL(complexURL);
+					}
+				}, errorCallback);
 			}
-			var that = this;
-			that._diffProvider.getDiffContent(complexURL).then(function(jsonData, secondArg) {
-				if (that._hasConflicts) {
-					that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
-				} else {
-					that._diffContent = jsonData;
-				}
-				if (onlyDiff){
-					that.callBack({ 
-			 			diff: that._diffContent
-					 });
-				} else {
-					that._resolveComplexFileURL(complexURL);
-				}
-			}, errorCallback);
 		},
 		
 		//temporary
@@ -398,7 +413,8 @@ exports.CompareContainer = (function() {
 				} else {
 					if(that.options.callback)
 						that.options.callback(that.options.baseFile.Name, that.options.newFile.Name);
-					that.getFileContent([that.options.baseFile/*, that.options.newFile*/], 0);
+					that.options.diffContent ? that.getFileContent([that.options.baseFile/*, that.options.newFile*/], 0) : 
+					                           that.getFileContent([that.options.baseFile, that.options.newFile], 0);
 				}
 			}, that.options.errorCallback);
 		},
@@ -497,7 +513,7 @@ exports.TwoWayCompareContainer = (function() {
 		// TODO this is probably not a good idea, 
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337740
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
-		this._fileClient = this._registry.getService("orion.core.file"); //$NON-NLS-0$
+		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
 		this._uiFactory = uiFactory;
 		if(!this._uiFactory){
@@ -860,7 +876,7 @@ exports.InlineCompareContainer = (function() {
 		this._diffNavigator = new mDiffTreeNavigator.DiffTreeNavigator("word"); //$NON-NLS-0$
 		this._registry = serviceRegistry;
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
-		this._fileClient = this._registry.getService("orion.core.file"); //$NON-NLS-0$
+		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._statusService = this._registry.getService("orion.page.message"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		this.setOptions({readonly: true});

@@ -13,7 +13,7 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/settings/ThemeSheetWriter',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter',
 	'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
         function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
 
@@ -247,6 +247,33 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
 			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
 		}	
+	}
+	
+	function _addSearchOptions(searcher) {
+		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
+		if (optionMenu) {
+			optionMenu.destroy();
+		}
+		var newMenu = new dijit.Menu({
+			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
+			id : "searchOptionsMenu" //$NON-NLS-0$
+		});
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: "Reg expression",
+			checked: false,
+			onChange : function(checked) {
+				searcher._regEx = checked;
+			}
+		}));
+		var menuButton = new orion.widgets.UserMenuDropDown({
+			label : "",
+			id : "searchOptionsDropDown", //$NON-NLS-0$
+			dropDown : newMenu
+		});
+		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
+		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	/**
@@ -727,6 +754,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			}
 		});
+		_addSearchOptions(searcher);
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;
@@ -1006,31 +1034,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			});	
 		}
 		
-		function readTargetPreference(){
-		
-			prefsService.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
-			
-				var data = prefs.get("General"); //$NON-NLS-0$
-					
-				if( data !== undefined ){
-					
-					var storage = JSON.parse( data );
-					
-					if(storage){
-						var target = prefsService.getSetting( storage, "Navigation", "Links" ); //$NON-NLS-1$ //$NON-NLS-0$
-						
-						if( target === "Open in new tab" ){ //$NON-NLS-0$
+		function readTargetPreference(serviceRegistry){
+			serviceRegistry.registerService("orion.cm.managedservice", //$NON-NLS-0$
+				{	updated: function(properties) {
+						var target;
+						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
 							target = "_blank"; //$NON-NLS-0$
-						}else{
-							target = "_self"; //$NON-NLS-0$
 						}
-						
-						setTarget( target );
+						setTarget(target);
 					}
-				}
-			});
+				}, {pid: "nav.config"}); //$NON-NLS-0$
 		}
-		window.setTimeout(function() {readTargetPreference();}, 0);
+		window.setTimeout(function() {readTargetPreference(serviceRegistry);}, 0);
 	}
 	
 	//return the module exports

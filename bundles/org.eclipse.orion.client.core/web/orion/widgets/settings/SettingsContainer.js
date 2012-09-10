@@ -15,10 +15,10 @@
    category, the right shows the resulting HTML for that category. */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/widgets/settings/ThemeBuilder', 'orion/settings/ui/PluginSettings',
+		'orion/PageUtil', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate',
 		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
-		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList) {
+		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -228,7 +228,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
 				dialogService: this.preferenceDialogService,
-				commandService: this.commandService
+				commandService: this.commandService,
+				registry: this.registry
 //				toolbarID: "pageActions" //$NON-NLS-0$
 			}, pluginNode);
 			
@@ -297,7 +298,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 			
-			window.location = '#,category=' + id;			
+			var params = PageUtil.matchResourceParameters();
+			if (params.category !== id) {
+				params.category = id;
+				delete params.resource;
+				window.location = new URITemplate("#,{params*}").expand({ //$NON-NLS-0$
+					params: params
+				});
+			}
 		},
 
 		showById: function(id) {
@@ -426,11 +434,6 @@ initialSettings: [
 //							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" } ]}
 //				]
 //			},
-			{"category": messages["General"], //$NON-NLS-0$
-				"subcategory": [{ "ui": messages['Navigation'], "label": messages["Navigation"], //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-				"items": [{ "ui": messages['Links'], "label": messages["Links"], "input": "combo", "values": [{"label": messages['Open in same tab']}, {"label": messages["Open in new tab"]}], "setting": messages["Open in same tab"] } ] } //$NON-NLS-12$ //$NON-NLS-10$ //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-				]
-			},
 			{"category": messages['JavaScript Editor'], //$NON-NLS-0$
 			"subcategory": [{
 				"ui": messages["Font"], //$NON-NLS-0$

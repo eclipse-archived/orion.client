@@ -39,6 +39,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(re
 			console.log( 'TextField setStorageIem' ); //$NON-NLS-0$
 		},
 		
+		width: function( value ){
+			dojo.style( this.textfield, 'width', value );
+		},
+		
+		setValue: function( value ){
+			this.textfield.value = value;
+		},
+		
 		change: function(){
 		
 			if( this.selection && this.selection.value ){

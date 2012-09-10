@@ -25,6 +25,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 	 * @param {String} options.title The title of the task list
 	 * @param {String} options.description A description of the task list shown the user
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
+	 * @param {Boolean} options.collapsed Whether the list should be initially collapsed
+	 * @param {Object} options.item  The item used as the target when running a task command
+	 * @param {Object} options.handler The handler when running a task command
+	 * @param {orion.commands.CommandService} The command service used for running commands
+	 * @param {String} options.descriptionProperty The name of the property on the command that will provide the description.  Optional.  
+	 * 	The command tooltip will be used as the description if no descriptionProperty is provided.
 	 */
 	function TaskList(options) {
 		var parent = options.parent;
@@ -44,6 +50,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 		this._item = options.item;
 		this._handler = options.handler;
 		this._commandService = options.commandService;
+		this._descriptionProperty = options.descriptionProperty;
 		
 		var commandService = this._commandService;
 		var taskList = this;
@@ -81,7 +88,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 					dojo.addClass(col, "taskDescription"); //$NON-NLS-0$
 					var command = this._commandService.findCommand(this._tasks[i].commandId);
 					if (command) {
-						dojo.place(document.createTextNode(command.description || command.tooltip), col, "last"); //$NON-NLS-0$
+						var description = this._descriptionProperty ? command[this._descriptionProperty] : command.tooltip;
+						dojo.place(document.createTextNode(description), col, "last"); //$NON-NLS-0$
 					}
 				}
 			}

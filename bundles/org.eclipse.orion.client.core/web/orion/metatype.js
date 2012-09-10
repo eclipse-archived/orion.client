@@ -11,14 +11,14 @@
 /*global define*/
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var PROPERTY_CLASSES = 'classes', PROPERTY_DESIGNATES = 'designates'; //$NON-NLS-0$ //$NON-NLS-1$
-	var METATYPE_SERVICE = 'orion.cm.metatype';
-	var PropertyTypeImpl, ObjectClassImpl;
+	var METATYPE_SERVICE = 'orion.cm.metatype'; //$NON-NLS-0$
+	var PropertyTypeImpl, ObjectClassDefinitionImpl;
 
 	/**
 	 * @name orion.metatype.MetaTypeRegistry
-	 * @class
-	 * @description
-	 * @param {orion.serviceRegistry.ServiceRegistry} serviceRegistry
+	 * @class Maintains a registry of metatype information.
+	 * @description A MetaTypeRegistry provides access to metatype information from the service registry.
+	 * @param {orion.serviceRegistry.ServiceRegistry} serviceRegistry The service registry to monitor.
 	 */
 	function MetaTypeRegistry(serviceRegistry) {
 		function forEach(serviceRef, propertyName, func) {
@@ -28,25 +28,25 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			}
 		}
 		var tracker = new ServiceTracker(serviceRegistry, METATYPE_SERVICE); //$NON-NLS-0$
-		var ocsMap = this.ocsMap = {};	// OC Id {String} -> {ObjectClass}
-		var pidsMap = this.pidsMap = {}; // PID {String} -> {ObjectClass}
+		var ocdsMap = this.ocdsMap = {}; // OCD Id {String} -> {ObjectClassDefinition}
+		var pidsMap = this.pidsMap = {}; // PID {String} -> {ObjectClassDefinition}
 		tracker.addingService = function(serviceRef) {
-			forEach(serviceRef, PROPERTY_CLASSES, function(oc) {
-				var ocImpl = new ObjectClassImpl(oc);
-				ocsMap[ocImpl.getId()] = ocImpl;
+			forEach(serviceRef, PROPERTY_CLASSES, function(ocd) {
+				var ocdImpl = new ObjectClassDefinitionImpl(ocd);
+				ocdsMap[ocdImpl.getId()] = ocdImpl;
 			});
 			forEach(serviceRef, PROPERTY_DESIGNATES, function(designate) {
 				var pid = designate.pid, ocId = designate.classId;
 				if (pid && ocId) {
-					// Assume the ObjectClass has been defined already, either by this service or a service registered earlier.
-					pidsMap[pid] = ocsMap[ocId];
+					// Assume the ObjectClassDefinition has been defined already, either by this service or a service registered earlier.
+					pidsMap[pid] = ocdsMap[ocId];
 				}
 			});
 			return serviceRegistry.getService(serviceRef);
 		};
 		tracker.removedService = function(serviceRef, service) {
-			forEach(serviceRef, PROPERTY_CLASSES, function(oc) {
-				delete ocsMap[oc.id];
+			forEach(serviceRef, PROPERTY_CLASSES, function(ocd) {
+				delete ocdsMap[ocd.id];
 			});
 			forEach(serviceRef, PROPERTY_DESIGNATES, function(designate) {
 				delete pidsMap[designate.pid];
@@ -56,24 +56,30 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	}
 	MetaTypeRegistry.prototype = /** @lends orion.metatype.MetaTypeRegistry.prototype */ {
 		/**
-		 * Returns the object class for a given PID.
+		 * Returns the Object Class Definition for a given PID.
 		 * @param {String} pid The PID to look up.
-		 * @returns {orion.metatype.ObjectClass} The object class, or <code>null</code> if no object class 
+		 * @returns {orion.metatype.ObjectClassDefinition} The OCD, or <code>null</code> if no OCD
 		 * has been designated for the given PID.
 		 */
-		getObjectClassForPid: function(pid) {
+		getObjectClassDefinitionForPid: function(pid) {
 			return this.pidsMap[pid] || null;
 		},
-		getObjectClass: function(classId) {
-			return this.ocsMap[classId] || null;
+		/**
+		 * Returns the Object Class Definition with the given ID.
+		 * @param {String} classId The Object Class Definition ID to look up.
+		 * @returns {orion.metatype.ObjectClassDefinition} The OCD or <code>null</code> if no OCD
+		 * with the given ID exists.
+		 */
+		getObjectClassDefinition: function(classId) {
+			return this.ocdsMap[classId] || null;
 		}
 	};
 
 	/**
-	 * @name orion.metatype.impl.ObjectClassImpl
+	 * @name orion.metatype.impl.ObjectClassDefinitionImpl
 	 * @private
 	 */
-	ObjectClassImpl = /** @ignore */ function(ocdJson) {
+	ObjectClassDefinitionImpl = /** @ignore */ function(ocdJson) {
 		this.id = ocdJson.id;
 		this.name = ocdJson.name || null;
 		var props = ocdJson.properties;
@@ -88,7 +94,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			this.props.push(new PropertyTypeImpl(props[i]));
 		}
 	};
-	ObjectClassImpl.prototype = {
+	ObjectClassDefinitionImpl.prototype = {
 		getPropertyTypes: function() {
 			return this.props;
 		},
@@ -115,6 +121,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		}
 		this.id = attrJson.id;
 		this.name = attrJson.name || null;
+		this.options = attrJson.options || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
 		this.defaultValue = attrJson.defaultValue || null;
 		if (!this.id) {
@@ -123,6 +130,13 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		if (!isType(this.type)) {
 			throw 'Invalid "type": ' + this.type; //$NON-NLS-0$
 		}
+		if (this.options) {
+			this.options.forEach(function(option) {
+				if (typeof option.value === 'undefined') { //$NON-NLS-0$
+					throw 'Missing option value: ' + JSON.stringify(option); //$NON-NLS-0$
+				}
+			});
+		}
 	};
 	PropertyTypeImpl.prototype = {
 		getId: function() {
@@ -130,6 +144,16 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		},
 		getName: function() {
 			return this.name;
+		},
+		getOptionLabels: function() {
+			return this.options && this.options.map(function(o) {
+				return o.label;
+			});
+		},
+		getOptionValues: function() {
+			return this.options && this.options.map(function(o) {
+				return o.value;
+			});
 		},
 		getType: function() {
 			return this.type;
@@ -140,28 +164,28 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	};
 
 	/**
-	 * @name orion.metatype.ObjectClass
+	 * @name orion.metatype.ObjectClassDefinition
 	 * @class Describes a kind of object.
-	 * @description An <code>ObjectClass</code> describes a kind of object. <p>It typically serves to describe
+	 * @description An <code>ObjectClassDefinition</code> describes a kind of object. <p>It typically serves to describe
 	 * what properties may appear in a {@link orion.cm.ConfigurationProperties} dictionary.</p>
 	 */
 		/**
-		 * @name orion.metatype.ObjectClass#getPropertyTypes
+		 * @name orion.metatype.ObjectClassDefinition#getPropertyTypes
 		 * @function
 		 * @description Returns the property types.
-		 * @returns {orion.metatype.PropertyType[]} The property types of this object class.
+		 * @returns {orion.metatype.PropertyType[]} The property types of this Object Class Definition.
 		 */
 		/**
-		 * @name orion.metatype.ObjectClass#getId
+		 * @name orion.metatype.ObjectClassDefinition#getId
 		 * @function
 		 * @description Returns the id.
-		 * @returns {String} The id of this object class.
+		 * @returns {String} The id of this Object Class Definition.
 		 */
 		/**
-		 * @name orion.metatype.ObjectClass#getName
+		 * @name orion.metatype.ObjectClassDefinition#getName
 		 * @function
 		 * @description Returns the name.
-		 * @returns {String} The name of this object class. May be <code>null</code>.
+		 * @returns {String} The name of this Object Class Definition. May be <code>null</code>.
 		 */
 	/**
 	 * @name orion.metatype.PropertyType
@@ -180,6 +204,20 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @function
 		 * @description Returns the description.
 		 * @returns {String} The name, or <code>null</code>.
+		 */
+		/**
+		 * @name orion.metatype.PropertyType#getOptionValues
+		 * @function
+		 * @description Returns the option values that this property can take.
+		 * @returns {Object[]|null} The option values. The ordering of the returned array matches the ordering of the labels
+		 * array returned by {@link #getOptionLabels}. If there are no option values available, <code>null</code> is returned.
+		 */
+		/**
+		 * @name orion.metatype.PropertyType#getOptionLabels
+		 * @function
+		 * @description Returns a list of labels for option values.
+		 * @returns {String[]|null} The option labels. The ordering of the returned array matches the ordering of the values
+		 * array returned by {@link #getOptionValues}. If there are no option labels available, <code>null</code> is returned.
 		 */
 		/**
 		 * @name orion.metatype.PropertyType#getType
