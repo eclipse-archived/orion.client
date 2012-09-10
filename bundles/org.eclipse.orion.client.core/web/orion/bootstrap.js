@@ -50,8 +50,9 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 				});
 			}
 		}).then(function() {
-			var configAdmin = new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin();
-			serviceRegistry.registerService("orion.cm.configadmin", configAdmin); //$NON-NLS-0$
+			return new mConfig.ConfigurationAdminFactory(serviceRegistry, preferences).getConfigurationAdmin().then(
+				serviceRegistry.registerService.bind(serviceRegistry, "orion.cm.configadmin") //$NON-NLS-0$
+			);
 		}).then(function() {
 			var auth = serviceRegistry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (auth) {

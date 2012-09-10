@@ -57,9 +57,8 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 	function getManagedServices(pid) {
 		return managedServices[pid] || [];
 	}
-	function asyncUpdated(managedServiceRef, managedService, properties) {
-		function arr(v) { return Array.isArray(v) ? v : [v]; }
-		arr(managedService).forEach(function(service) {
+	function asyncUpdated(serviceRefs, services, properties) {
+		services.forEach(function(service) {
 			try {
 				service.updated(properties);
 			} catch(e) {
@@ -78,14 +77,10 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, store) {
 		add(pid, serviceRef, managedService);
 		return managedService;
 	};
-	/**
-	 * @returns {Deferred} A deferred that resolves once the managed service's updated() method has been called
-	 */
 	this.onServiceAdded = function(serviceRef, service) {
 		var pid = serviceRef.getProperty(PROPERTY_PID);
-		return store.get(pid).then(function(configuration) {
-			asyncUpdated(serviceRef, service, (configuration && configuration.getProperties()));
-		});
+		var configuration = store._find(pid);
+		asyncUpdated([serviceRef], [service], (configuration && configuration.getProperties()));
 	};
 	this.notifyUpdated = function(configuration) {
 		var pid = configuration.getPid();
@@ -112,11 +107,15 @@ ConfigAdminFactory = /** @ignore */ (function() {
 		this.store = new ConfigStore(this, prefsService);
 		this.configAdmin = new ConfigAdminImpl(this, this.store);
 		this.tracker = new ManagedServiceTracker(serviceRegistry, this.store);
-		this.tracker.open();
 	}
 	ConfigAdminFactory.prototype = {
+		// TODO this should be synchronous but requires sync Prefs API
 		getConfigurationAdmin: function() {
-			return this.configAdmin;
+			var self = this;
+			return this.configAdmin._init().then(function(configAdmin) {
+				self.tracker.open();
+				return configAdmin;
+			});
 		},
 		notifyDeleted: function(configuration) {
 			this.tracker.notifyDeleted(configuration);
@@ -139,6 +138,12 @@ ConfigAdminImpl = /** @ignore */ (function() {
 		this.store = store;
 	}
 	ConfigAdminImpl.prototype = {
+		_init: function() {
+			var self = this;
+			return this.store._init().then(function() {
+				return self;
+			});
+		},
 		getConfiguration: function(pid) {
 			return this.store.get(pid);
 		},
@@ -160,83 +165,56 @@ ConfigStore = /** @ignore */ (function() {
 		this.factory = factory;
 		this.prefsService = prefsService;
 		this.configs = Object.create(null); // PID -> Configuration
-		this.prefs = Object.create(null); // PID -> Deferred Preferences node
-		this.prefRoot = null; // Deferred Preferences node
+		this.pref = null; // Preferences node. Pref keys are PIDs, pref values are properties objects.
+		var self = this;
+		this.initPromise = this.prefsService.getPreferences(CONFIG_PREF_NODE).then(function(pref) {	
+			self.pref = pref;
+			pref.keys().forEach(function(pid) {
+				if (!self.configs[pid]) {
+					var properties = pref.get(pid);
+					if (typeof properties === 'object' && properties !== null && Object.keys(properties).length > 0) { //$NON-NLS-0$
+						properties[PROPERTY_PID] = pid;
+						self.configs[pid] = new ConfigImpl(self.factory, self, properties);
+					}
+				}
+			});
+		});
 	}
 	ConfigStore.prototype = {
+		_init: function() {
+			return this.initPromise;
+		},
 		_find: function(pid) {
 			return this.configs[pid] || null;
 		},
-		loadRoot: function() {
-			this.prefRoot = this.prefRoot || this.prefsService.getPreferences(CONFIG_PREF_NODE);
-			return this.prefRoot;
-		},
-		loadNode: function(pid) {
-			if (typeof pid !== 'string') { //$NON-NLS-0$
-				throw new Error('Invalid pid: ' + pid); //$NON-NLS-0$
-			}
-			this.prefs[pid] = this.prefs[pid] || this.prefsService.getPreferences(CONFIG_PREF_NODE + '/' + pid); //$NON-NLS-0$
-			var self = this;
-			return Deferred.all([this.loadRoot(), this.prefs[pid]]).then(function(result) {
-				var prefRoot = result[0], prefNode = result[1];
-				if (!prefRoot.get(pid)) {
-					prefRoot.put(pid, true);
-				}
-				if (!self.configs[pid]) {
-					var props = prefNode.get('properties'); //$NON-NLS-0$
-					if (typeof props === 'object' && props !== null && Object.keys(props).length > 0) { //$NON-NLS-0$
-						props[PROPERTY_PID] = pid;
-						self.configs[pid] = new ConfigImpl(self.factory, self, props);
-					}
-				}
-				return prefNode;
-			});
-		},
 		get: function(pid) {
-			var self = this;
-			return this.loadNode(pid).then(function(prefNode) {
-				var configuration = self._find(pid);
-				if (!configuration) {
-					configuration = new ConfigImpl(self.factory, self, pid);
-					self.configs[pid] = configuration;
-					// only pid is in the properties here
-					prefNode.put('properties', configuration.getProperties(true) || {}); //$NON-NLS-0$
-				}
-				return configuration;
-			});
+			var configuration = this._find(pid);
+			if (!configuration) {
+				// only pid is in the properties here
+				configuration = new ConfigImpl(this.factory, this, pid);
+				this.configs[pid] = configuration;
+				this.pref.put(pid, configuration.getProperties(true) || {}); //$NON-NLS-0$
+			}
+			return configuration;
 		},
 		list: function() {
 			var self = this;
-			return this.loadRoot().then(function(prefRoot) {
-				var pids = prefRoot.keys();
-				return Deferred.all(pids.map(self.loadNode.bind(self))).then(function() {
-					var currentConfigs = [];
-					for (var i=0; i < pids.length; i++) {
-						var config = self._find(pids[i]);
-						if (config && config.getProperties() !== null) {
-							currentConfigs.push(config);
-						}
-					}
-					return currentConfigs;
-				});
+			var currentConfigs = [];
+			this.pref.keys().forEach(function(pid) {
+				var config = self._find(pid);
+				if (config && config.getProperties() !== null) {
+					currentConfigs.push(config);
+				}
 			});
+			return currentConfigs;
 		},
 		remove: function(pid) {
-			var self = this;
-			return Deferred.all([this.loadRoot(), this.loadNode(pid)]).then(function(result) {
-				var prefRoot = result[0], prefNode = result[1];
-				// TODO want to remove the whole prefNode here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=386582
-				prefNode.clear();
-				delete self.configs[pid];
-				prefRoot.remove(pid);
-				delete self.prefs[pid];
-			});
+			this.pref.remove(pid);
+			delete this.configs[pid];
 		},
 		save: function(pid, configuration) {
 			var properties = configuration.getProperties(true);
-			this.loadNode(pid).then(function(prefNode) {
-				prefNode.put('properties', properties || {}); //$NON-NLS-0$
-			});
+			this.pref.put(pid, properties || {});
 		}
 	};
 	return ConfigStore;
@@ -298,18 +276,15 @@ ConfigImpl = /** @ignore */ (function() {
 		},
 		remove: function() {
 			this._checkRemoved();
-			var self = this;
-			self.factory.notifyDeleted(self);
-			var promise = this.store.remove(this.pid);
+			this.factory.notifyDeleted(this);
+			this.store.remove(this.pid);
 			this._removed = true;
-			return promise;
 		},
 		update: function(props) {
 			this._checkRemoved();
 			setProperties(this, props);
-			var self = this;
 			this.store.save(this.pid, this);
-			self.factory.notifyUpdated(self);
+			this.factory.notifyUpdated(this);
 		},
 		toString: function() {
 			return '[ConfigImpl pid: ' + this.pid + ', properties: ' + JSON.stringify(this.properties) + ']';
@@ -361,13 +336,13 @@ ConfigImpl = /** @ignore */ (function() {
 	 * @description Gets the configuration having the given PID, creating a new one if necessary. Newly created configurations
 	 * have <code>null</code> properties.
 	 * @param {String} pid
-	 * @returns {orion.cm.Configuration} A deferred resolving to the {@link orion.cm.Configuration}.
+	 * @returns {orion.cm.Configuration} The configuration.
 	 */
 	/**
 	 * @name listConfigurations
 	 * @methodOf orion.cm.ConfigurationAdmin.prototype
 	 * @description Returns all Configurations having non-<code>null</code> properties.
-	 * @returns {orion.cm.Configuration[]} A deferred resolving to an array of configurations.
+	 * @returns {orion.cm.Configuration[]} An array of configurations.
 	 */
 
 /**
