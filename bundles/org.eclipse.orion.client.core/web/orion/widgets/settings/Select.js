@@ -20,18 +20,30 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 	
 		templateString: '<select class="setting-control" data-dojo-attach-point="selection" data-dojo-attach-event="onchange:change"></select>', //$NON-NLS-0$
 		
-		// category, item, element, ui - provided on construction
+		// category, item, element, ui, options - provided on construction
 		
 		category: null,
 		item: null,
 		element: null,
 		ui: null,
+		options: null, // Array of {value, label, selected (optional)}
 		
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
-			console.log( 'ColorPicker setStorageIem' ); //$NON-NLS-0$
 		},
 		
+		getSelected: function(){
+			return this.selection.value;
+		},
+
+		getSelectedIndex: function() {
+			return this.selection.selectedIndex;
+		},
+
+		setSelectedIndex: function(index) {
+			this.selection.selectedIndex = index;
+		},
+
 		change: function(){
 		
 			var value = this.selection.value;
@@ -46,10 +58,14 @@ define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/
 		postCreate: function(){
 			this.inherited( arguments );
 			
-			var option = 0;
-			
-			for( option = 0; option < this.options.length; option++ ){
-				dojo.create("option", this.options[option], this.selection); //$NON-NLS-0$
+			for( var i = 0; i < this.options.length; i++ ){
+				var option = this.options[i];
+				var data = {value: option.value};
+				if (option.selected) {
+					data.selected = 'selected'; //$NON-NLS-0$
+				}
+				var element = dojo.create("option", data, this.selection); //$NON-NLS-0$
+				element.textContent = typeof option.label === "string" ? option.label : option.value;
 			}
 		}	
 	});

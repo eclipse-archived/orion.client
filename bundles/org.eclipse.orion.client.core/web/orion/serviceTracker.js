@@ -95,17 +95,17 @@ define([], function() {
 			}
 			state = OPENED;
 			var self = this;
-			addedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					add.call(self, serviceRef);
+			addedListener = /** @ignore */ function(event) {
+				if (isTrackable(event.serviceReference)) {
+					add.call(self, event.serviceReference);
 					if (typeof self.onServiceAdded === 'function') {
-						return self.onServiceAdded(serviceRef, service);
+						return self.onServiceAdded(event.serviceReference, event.service);
 					}
 				}
 			};
-			removedListener = /** @ignore */ function(serviceRef, service) {
-				if (isTrackable(serviceRef)) {
-					remove.call(self, serviceRef);
+			removedListener = /** @ignore */ function(event) {
+				if (isTrackable(event.serviceReference)) {
+					remove.call(self, event.serviceReference);
 				}
 			};
 			serviceRegistry.addEventListener('serviceAdded', addedListener); //$NON-NLS-0$

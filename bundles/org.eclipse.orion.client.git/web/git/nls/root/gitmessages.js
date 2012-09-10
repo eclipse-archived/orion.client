@@ -277,8 +277,10 @@ define({
 	"You're going to override content of the remote branch. This can cause the remote repository to lose commits.": "You're going to override content of the remote branch. This can cause the remote repository to lose commits.",
 	"< Previous Page": "< Previous Page",
 	"Show previous page of git log": "Show previous page of git log",
+	"Show previous page of git tags" : "Show previous page of git tags",
 	"Next Page >": "Next Page >",
 	"Show next page of git log": "Show next page of git log",
+	"Show next page of git tags" : "Show next page of git tags",
 	"Push from your local branch into the selected remote branch": "Push from your local branch into the selected remote branch",
 	"Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.": "Reset your active branch to the state of the selected branch. Discard all staged and unstaged changes.",
 	"The content of your active branch will be replaced with ": "The content of your active branch will be replaced with ",
@@ -346,6 +348,8 @@ define({
 	"Merge Squash": "Merge Squash",
 	"Squash the content of the branch to the index" : "Squash the content of the branch to the index",
 	"Local Branch Name:" : "Local Branch Name:",
+	"Filter items" : "Filter items",
+	"Filter remote branches" : "Filter remote branches",
 	"Paste link in email or IM" : "Paste link in email or IM",
 	"Show Commit in GitHub" : "Show Commit in GitHub",
 	"Show Repository in GitHub" : "Show Repository in GitHub",
@@ -358,5 +362,8 @@ define({
 	"Ask for review tooltip" : "Send email with request for commit review",
 	"Reviewer name" : "Reviewer name",
 	"Contribution Review Request" : "Contribution Review Request",
-	"or sent the link to the reviewer" : "or sent the link to the reviewer"
+	"Send the link to the reviewer" : "Send the link to the reviewer",
+	"Private key file (optional):" : "Private key file (optional):",
+	"Don't prompt me again:" : "Don't prompt me again:",
+	"Your private key will be saved in the browser for further use" : "Your private key will be saved in the browser for further use"
 });

@@ -4,7 +4,7 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script src="../../requirejs/require.js"></script>
 	<script>
-		/*global require orion window*/
+		/*global require orion window console*/
 		require({
 		  baseUrl: '../..',
 		  paths: {
@@ -12,7 +12,14 @@
 		  }
 		});
 		require(["orion/Deferred", "orion/EventTarget", "orion/plugin", "domReady!"], function(Deferred, EventTarget, PluginProvider) {
-			var provider = new PluginProvider();
+			var headers = {
+				name: "test plugin",
+				description: "This is a test plugin",
+				license: "http://eclipse.org/org/documents/edl-v10.php",
+				website: "http://eclipse.org/orion"
+			};
+			var provider = new PluginProvider(headers);
+			var returnReason;
 			var impl = {
 				test: function(echo) {
 					return echo;
@@ -26,11 +33,23 @@
 					return d;
 				},
 				testEvent: function(name) {
-					this.dispatchEvent(name, name + "test");
+					this.dispatchEvent({
+						type: name,
+						result: name + "test"
+					});
+				},
+				testCancel: function(resolve) {
+					var d = new Deferred(function(reason) {
+						returnReason = reason;
+					});				
+					if(resolve) {
+						d.resolve(returnReason);
+					}
+					return d;
 				}
 			};
 			EventTarget.attach(impl);
-			provider.registerService("test", impl, {name : "echotest"});
+			provider.registerService("test", impl, {name : "echotest", change: "tested"});
 			provider.connect();
 		});
 	</script>

@@ -44,32 +44,39 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			return {searchStr: searchStr, searchLocation: searchLocation};
 		}
 		
-		function makeHref(fileClient, seg, location, searchStr){
-			if(!location || location === "" || location === "root"){ //$NON-NLS-0$
-				seg.href = require.toUrl("search/search.html") + "#" + searchStr; //$NON-NLS-1$ //$NON-NLS-0$
-			} else {
-				seg.href = require.toUrl("search/search.html") + "#" + searchStr + "+Location:" + location + "*"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
+		function makeHref(fileClient, seg, location, searchStr, searcher){
+			var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location;
+			seg.href = require.toUrl("search/search.html") + "#" + searchStr + "+Location:" + searchLocation + "*"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	
-		function setPageInfo(serviceRegistry, fileClient, commandService, searcher){
+		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, query){
 			var searchLoc = parseHash();
-			
 			if(searchLoc.searchLocation){
-				fileClient.read(searchLoc.searchLocation, true).then(
+				if(searchLoc.searchLocation === fileClient.fileServiceRootURL(searchLoc.searchLocation)){
+					searcher.setRootLocationbyURL(searchLoc.searchLocation);
+					searcher.setLocationbyURL(searchLoc.searchLocation);
+					mGlobalCommands.setPageTarget({task: "Search", serviceRegistry: serviceRegistry, 
+						commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc.searchLocation),
+						makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
+						searcher.setChildrenLocationbyURL(searchLoc.searchLocation);
+						searchResultsGenerator.loadResults(query);
+				} else {
+					fileClient.read(searchLoc.searchLocation, true).then(
 						dojo.hitch(this, function(metadata) {
 							mGlobalCommands.setPageTarget({task: "Search", target: metadata, serviceRegistry: serviceRegistry, 
 								fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search",
-								makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);}});
+								makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
+								searchResultsGenerator.loadResults(query);
 						}),
 						dojo.hitch(this, function(error) {
 							window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
 						})
-				);
+					);
+				}
 			} else {
 				mGlobalCommands.setPageTarget({task: "Search", serviceRegistry: serviceRegistry, 
 					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search",
-					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr);}});
+					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
 			}
 		}
 		mBootstrap.startup().then(function(core) {
@@ -101,14 +108,14 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				commandService.destroy(toolbar);
 				commandService.renderCommands(toolbar.id, toolbar, queryString, searcher, "button"); //$NON-NLS-0$
 			}
-			setPageInfo(serviceRegistry, fileClient, commandService, searcher);
-			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, false/*crawling*/); //$NON-NLS-0$
-			searchResultsGenerator.loadResults(queryString);
+			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
+			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, queryString);
+			//searchResultsGenerator.loadResults(queryString);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
-				setPageInfo(serviceRegistry, fileClient, commandService, searcher);
 				var query = extractQueryString();
-				searchResultsGenerator.loadResults(query);
+				setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, query);
+				//searchResultsGenerator.loadResults(query);
 				var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 				if (toolbar) {	
 					commandService.destroy(toolbar);

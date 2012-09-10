@@ -43,10 +43,10 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			this._selectionService = options.selectionService;
 			var self = this;
 			dojo.when(this._outlineService, function(service) {
-				service.addEventListener("outline", function(outlineModel, title, providerId) { //$NON-NLS-0$
-					self.providerId = providerId;
+				service.addEventListener("outline", function(event) { //$NON-NLS-0$
+					self.providerId = event.providerId;
 					self._renderHeadingAndMenu(self.outlineProviders);
-					self._renderOutline.apply(self, Array.prototype.slice.call(arguments));
+					self._renderOutline(event.outline, event.title);
 				});
 			});
 			
@@ -237,7 +237,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			var self = this;
 			dojo.when(this.getProvider(), function(provider) {
 				self._serviceRegistry.getService(provider).getOutline(contents, title).then(function(outline) {
-					self.dispatchEvent("outline", outline, title, provider.getProperty("id")); //$NON-NLS-1$ //$NON-NLS-0$
+					self.dispatchEvent({type:"outline", outline: outline, title: title, providerId: provider.getProperty("id")}); //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			});
 		}

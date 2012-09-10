@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "orion/commands", "orion/extensionCommands", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(messages, require, dojo, mUtil, mCommands, mExtensionCommands){
+define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "orion/commands", "orion/extensionCommands", 'orion/contentTypes', 'orion/compare/compareUtils', "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(messages, require, dojo, mUtil, mCommands, mExtensionCommands, mContentTypes, mCompareUtils){
 
 	/**
 	 * Utility methods
@@ -38,8 +38,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		service.getFavorites().then(function(favs) {
 			self.cacheFavorites(favs.navigator);
 		});
-		service.addEventListener("favoritesChanged", function(favs) { //$NON-NLS-0$
-			self.cacheFavorites(favs.navigator);
+		service.addEventListener("favoritesChanged", function(event) { //$NON-NLS-0$
+			self.cacheFavorites(event.navigator);
 		});
 	}
 	FavoriteFoldersCache.prototype = {
@@ -99,15 +99,98 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		if (!favoritesCache) {
 			favoritesCache = new FavoriteFoldersCache(registry);
 			var selectionService = registry.getService("orion.page.selection"); //$NON-NLS-0$
-			selectionService.addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-0$
+			selectionService.addEventListener("selectionChanged", function(event) { //$NON-NLS-0$
 				var selectionTools = dojo.byId(selectionToolbarId);
 				if (selectionTools) {
 					service.destroy(selectionTools);
-					service.renderCommands(selectionTools.id, selectionTools, selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
+					service.renderCommands(selectionTools.id, selectionTools, event.selections, explorer, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			});
 		}
 	};
+	
+	function errorHandler(serviceRegistry, error) {
+		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		progress.setProgressResult(error);
+	}
+
+	
+	function getNewItemName(explorer, item, domId, defaultName, onDone) {
+		var refNode, name, tempNode;
+		if (item.Location === explorer.treeRoot.Location) {
+			refNode = dojo.byId(domId);
+		} else {
+			var nodes = explorer.makeNewItemPlaceHolder(item, domId);
+			if (nodes) {
+				refNode = nodes.refNode;
+				tempNode = nodes.tempNode;
+			} else {
+				refNode = dojo.byId(domId);
+			}
+		}
+		if (refNode) {
+			mUtil.getUserText(domId+"EditBox", refNode, false, defaultName,  //$NON-NLS-0$
+				dojo.hitch(this, function(name) {
+					if (name) {
+						if (tempNode) {
+							tempNode.parentNode.removeChild(tempNode);
+						}
+						onDone(name);
+					}
+				})); 
+		} else {
+			name = window.prompt(defaultName);
+			if (name) {
+				onDone(name);
+			}
+		}
+	}
+	
+	function forceSingleItem(item) {
+		if (!item) {
+			return {};
+		}
+		if (dojo.isArray(item)) {
+			if (item.length === 1) {
+				item = item[0];
+			} else {
+				item = {};
+			}
+		}
+		return item;
+	}
+
+	
+	function canCreateProject(item) {
+		item = forceSingleItem(item);
+		return item.Location && mUtil.isAtRoot(item.Location);
+	}
+		
+	function createProject(explorer, fileClient, progress, name, populateFunction, progressMessage) {
+		if (name) {
+			var loadedWorkspace;
+			if (mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
+				loadedWorkspace = explorer.treeRoot;
+			} else {
+				loadedWorkspace = fileClient.loadWorkspace("");
+			}
+			progressMessage = progressMessage || messages["Creating folder"];
+			dojo.when(loadedWorkspace, function(workspace) {
+				var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
+				progress.showWhile(deferred, progressMessage).then(function(project) {
+					// we need folder metadata for the commands, not the project object
+					fileClient.read(project.ContentLocation, true).then(function(folder) {
+						if (populateFunction) {
+							populateFunction(folder);
+						}
+						explorer.loadResourceList("", true);
+					}, errorHandler);
+				}, 
+				errorHandler);
+			}, errorHandler);
+		}
+	}
+
 
 	/**
 	 * Creates the commands related to file management.
@@ -121,24 +204,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
 		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-		var errorHandler = function(error) {
-			progress.setProgressResult(error);
-		};
-		
-		function forceSingleItem(item) {
-			if (!item) {
-				return {};
-			}
-			if (dojo.isArray(item)) {
-				if (item.length === 1) {
-					item = item[0];
-				} else {
-					item = {};
-				}
-			}
-			return item;
-		}
-		
+
 		function contains(arr, item) {
 			for (var i=0; i<arr.length; i++) {
 				if (arr[i] === item) {
@@ -353,6 +419,63 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			});
 		commandService.addCommand(renameCommand);
 		
+		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		var compareWithEachOtherCommand = new mCommands.Command({
+				name: messages["Compare with each other"],
+				tooltip: messages["Compare the selected 2 files with each other"],
+				id: "eclipse.compareWithEachOther", //$NON-NLS-0$
+				visibleWhen: function(item) {
+					if (dojo.isArray(item)) {
+						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
+							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
+							var contentType2 = contentTypeService.getFilenameContentType(item[1].Name);
+							if(contentType1 && contentType1['extends'] === "text/plain" && contentType2 && contentType2['extends'] === "text/plain"){
+								return true;
+							}
+						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
+							return true;
+						}
+					}
+					return false;
+				},
+				hrefCallback: function(data) {
+					if(data.items[0].Directory && data.items[1].Directory){
+						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location;
+					}
+					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true});
+				}
+			});
+		commandService.addCommand(compareWithEachOtherCommand);
+		
+		var compareWithCommand = new mCommands.Command({
+			name : messages["Compare with..."],
+			tooltip: messages["Compare the selected folder with a specified folder"], 
+			id: "eclipse.compareWith", //$NON-NLS-0$
+			visibleWhen: function(item) {
+				if (dojo.isArray(item)) {
+					if(item.length === 1 && item[0].Directory){
+						return true;
+					}
+				}
+				return false;
+			},
+			callback: function(data) {
+				var dialog = new orion.widgets.DirectoryPrompterDialog({
+					title: messages["Choose a Folder"],
+					serviceRegistry: serviceRegistry,
+					fileClient: fileClient,				
+					func: function(targetFolder) { 
+						if (targetFolder && targetFolder.Location) {
+							window.open(require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + targetFolder.Location);
+						}
+					}
+				});
+				dialog.startup();
+				dialog.show();
+			} 
+		});
+		commandService.addCommand(compareWithCommand);
+		
 		var deleteCommand = new mCommands.Command({
 			name: messages["Delete"],
 			tooltip: messages["Delete the selected files or folders"],
@@ -418,38 +541,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			}});
 		commandService.addCommand(downloadCommand);
 		
-		function getNewItemName(item, domId, defaultName, onDone) {
-			var refNode, name, tempNode;
-			if (item.Location === explorer.treeRoot.Location) {
-				refNode = dojo.byId(domId);
-			} else {
-				var nodes = explorer.makeNewItemPlaceHolder(item, domId);
-				if (nodes) {
-					refNode = nodes.refNode;
-					tempNode = nodes.tempNode;
-				} else {
-					refNode = dojo.byId(domId);
-				}
-			}
-			if (refNode) {
-				mUtil.getUserText(domId+"EditBox", refNode, false, defaultName,  //$NON-NLS-0$
-					dojo.hitch(this, function(name) {
-						if (name) {
-							if (tempNode) {
-								tempNode.parentNode.removeChild(tempNode);
-							}
-							onDone(name);
-						}
-					})); 
-			} else {
-				name = window.prompt(defaultName);
-				if (name) {
-					onDone(name);
-				}
-			}
-		}
-		
-		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', 'Name:', 'New File')]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var newFileNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Name:'], messages['New File'])]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var newFileCommand =  new mCommands.Command({
 			name: messages["New File"],
@@ -476,7 +568,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
 						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
 					} else {
-						getNewItemName(item, data.domNode.id, messages['New File'], createFunction);
+						getNewItemName(explorer, item, data.domNode.id, messages['New File'], createFunction);
 					}
 				});
 			},
@@ -512,7 +604,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
 						createFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
 					} else {
-						getNewItemName(item, data.domNode.id, messages['New Folder'], createFunction);
+						getNewItemName(explorer, item, data.domNode.id, messages['New Folder'], createFunction);
 					}
 				});
 			},
@@ -522,35 +614,27 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	
 		commandService.addCommand(newFolderCommand);
 		
-		var canCreateProject = function(item) {
-			item = forceSingleItem(item);
-			return item.Location && mUtil.isAtRoot(item.Location);
-		};
-		
-		var createProjectFunction = function(name, populateFunction, progressMessage) {
-			if (name) {
-				var loadedWorkspace;
-				if (mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
-					loadedWorkspace = explorer.treeRoot;
-				} else {
-					loadedWorkspace = fileClient.loadWorkspace("");
+	
+		var importZipURLCommand = new mCommands.Command({
+			name: "Import a Zip",
+			tooltip: "Import a zip file from a URL and unzip the content",
+			id: "orion.importZipURL", //$NON-NLS-0$
+			callback: function(data) {
+				var item = forceSingleItem(data.items);
+				// this is a temporary hack until we implement import from zip, for now use the old code
+				// that canned content.  Totally fake.
+				var files = ["index.html", "hello.css", "hello.js"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				for (var i=0; i<files.length;  i++) {
+					fileClient.createFile(item.Location, files[i]).then(function(newFileMetadata) {
+						mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/contentTemplates/helloWorld/"+newFileMetadata.Name}); //$NON-NLS-0$
+					}, errorHandler);
 				}
-				progressMessage = progressMessage || messages["Creating folder"];
-				dojo.when(loadedWorkspace, function(workspace) {
-					var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
-					progress.showWhile(deferred, progressMessage).then(function(project) {
-						// we need folder metadata for the commands, not the project object
-						fileClient.read(project.ContentLocation, true).then(function(folder) {
-							if (populateFunction) {
-								populateFunction(folder);
-							}
-							explorer.loadResourceList("", true);
-						}, errorHandler);
-					}, 
-					errorHandler);
-				}, errorHandler);
-			}
-		};	
+			},
+			visibleWhen: function(item) {
+				item = forceSingleItem(item);
+				return item.Directory && !mUtil.isAtRoot(item.Location);}
+		});
+		commandService.addCommand(importZipURLCommand);
 		
 		var newProjectCommand = new mCommands.Command({
 			name: messages["Folder"],
@@ -561,84 +645,17 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
 				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					createProjectFunction(data.parameters.valueFor('name')); //$NON-NLS-0$
+					createProject(explorer, fileClient, progress, data.parameters.valueFor('name')); //$NON-NLS-0$
 				} else {
-					getNewItemName(data.items, data.domNode.id, messages['New Folder'], createProjectFunction);
+					getNewItemName(data.items, data.domNode.id, messages['New Folder'], function(name) {
+						createProject(explorer, fileClient, progress, name);
+					});
 				}
 			},
 			visibleWhen: canCreateProject
 		});
 		commandService.addCommand(newProjectCommand);
 		
-		var newTemplateProjectCommand = new mCommands.Command({
-			name: messages["Sample HTML5 Site"],
-			tooltip: messages["Generate a sample"],
-			description: messages["Generate an HTML5 \"Hello World\" website, including JavaScript, HTML, and CSS files."], 
-			id: "orion.new.template", //$NON-NLS-0$
-			callback: function(data) {
-				var projectName = "Hello World"; //$NON-NLS-0$
-				createProjectFunction(projectName,
-				function(folder) {
-					// this is a temporary hack so we can always find a site template, even when disconnected.
-					// it's built into a known path on the server.
-					var files = ["index.html", "hello.css", "hello.js"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					for (var i=0; i<files.length;  i++) {
-						fileClient.createFile(folder.Location, files[i]).then(function(newFileMetadata) {
-							mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/contentTemplates/helloWorld/"+newFileMetadata.Name}); //$NON-NLS-0$
-						}, errorHandler);
-					}
-				}, dojo.string.substitute(messages["Creating a folder for ${0}"], [projectName]));
-			},
-			visibleWhen: canCreateProject
-		});
-		commandService.addCommand(newTemplateProjectCommand);
-
-		var newSFTPProjectCommand = new mCommands.Command({
-			name: messages["SFTP Import"],
-			imageClass: "core-sprite-transferin", //$NON-NLS-0$
-			tooltip: messages["Import content from SFTP"],
-			description: messages["Import content from an SFTP location into an Orion folder.  You will be prompted for the SFTP location and credentials."],
-			id: "orion.new.sftp", //$NON-NLS-0$
-			callback: function(data) {
-				var projectName = messages["Imported Content"];
-				createProjectFunction(projectName,
-				function(folder) {
-					data.commandService.runCommand("eclipse.importSFTPCommand", folder, explorer); //$NON-NLS-0$
-				}, dojo.string.substitute(messages['Creating a folder for ${0}'], [projectName]));
-			},
-			visibleWhen: canCreateProject
-		});
-		commandService.addCommand(newSFTPProjectCommand);
-		
-		var newZipProjectCommand = new mCommands.Command({
-			name: messages["Upload a Zip"],
-			tooltip: messages["Upload content from a local zip file"],
-			imageClass: "core-sprite-importzip", //$NON-NLS-0$
-			description: messages["Upload content from a local zip file into an Orion folder.  You will be prompted for the local zip file."],
-			id: "orion.new.zip", //$NON-NLS-0$
-			callback: function(data) {
-				var projectName = messages["Uploaded Content"];
-				createProjectFunction(projectName,
-				function(folder) {
-					data.commandService.runCommand("eclipse.importCommand", folder, explorer); //$NON-NLS-0$
-				}, messages["Creating an upload folder for "] + projectName);
-		},
-			visibleWhen: canCreateProject
-		});
-		commandService.addCommand(newZipProjectCommand);
-		
-		var newGitClone = new mCommands.Command({
-			name: messages["Clone Git Repository"],
-			tooltip: messages["Clone a git repository"],
-			description: messages["Go to the Orion repositories page to provide a git repository URL.  Once the repository is created, it will appear in the Navigator."],
-			id: "orion.new.gitclone", //$NON-NLS-0$
-			callback: function(data) {
-				window.location.href = window.location.protocol + "//" + window.location.host + "/git/git-repository.html#,cloneGitRepository=URL"; //$NON-NLS-0$
-			},
-			visibleWhen: canCreateProject
-		});
-		commandService.addCommand(newGitClone);
-
 		var linkProjectCommand = new mCommands.Command({
 			name: messages["Link to Server"],
 			tooltip: messages["Link to existing content on the server"],
@@ -690,7 +707,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			name : messages["Import local file..."],
 			tooltip: messages["Copy files and folders from your local file system"],
 			imageClass: "core-sprite-importzip", //$NON-NLS-0$
-			id: "eclipse.importCommand", //$NON-NLS-0$
+			id: "orion.import", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.ImportDialog({
@@ -709,7 +726,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			name : messages["SFTP from..."],
 			tooltip: messages["Copy files and folders from a specified SFTP connection"],
 			imageClass: "core-sprite-transferin", //$NON-NLS-0$
-			id: "eclipse.importSFTPCommand", //$NON-NLS-0$
+			id: "orion.importSFTP", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
@@ -841,6 +858,51 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	};
 	
 	var contentTypesCache;
+	
+	fileCommandUtils.createNewContentCommand = function(id, name, href, commandId, explorer, fileClient, progress, folderName, parameters) {
+		var parametersArray = [];
+		if (folderName) {
+			parametersArray.push(new mCommands.CommandParameter("folderName", "text", messages['Folder name:'], folderName)); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		if (parameters && parameters.length) {
+			for (var i=0; i<parameters.length; i++) {
+				parametersArray.push(new mCommands.CommandParameter(parameters[i].name, parameters[i].type, parameters[i].label, parameters[i].defaultValue));
+			}
+		}
+		var parameterDescription = null;
+		if (parametersArray.length > 0) {
+			parameterDescription = new mCommands.ParametersDescription(parametersArray);
+		}
+
+		var newContentCommand = new mCommands.Command({
+			name: name,
+			parameters: parameterDescription,
+			id: id,
+			callback: function(data) {
+				if (href) {
+					window.open(href);
+				} else {
+					if (data.parameters && data.parameters.valueFor('folderName')) { //$NON-NLS-0$
+						var newFolderName = data.parameters.valueFor('folderName'); //$NON-NLS-0$
+						createProject(explorer, fileClient, progress, newFolderName, 
+							function(folder) {
+								data.commandService.runCommand(commandId, folder, explorer); //$NON-NLS-0$
+							}, 
+							"Creating content in " + newFolderName); 
+					} else {
+						getNewItemName(explorer, data.items, data.domNode.id, folderName, function(name) {
+								createProject(explorer, fileClient, progress, name,
+								function(folder) {
+									data.commandService.runCommand(commandId, folder, explorer); //$NON-NLS-0$
+								}, "Creating content in " + name);
+							});
+					}
+				}
+			},
+			visibleWhen: canCreateProject
+		});
+		return newContentCommand;
+	};
 
 	fileCommandUtils.createAndPlaceFileCommandsExtension = function(serviceRegistry, commandService, explorer, toolbarId, selectionToolbarId, commandGroup) {
 		// Note that the shape of the "orion.navigate.command" extension is not in any shape or form that could be considered final.
@@ -894,7 +956,6 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		dojo.when(getContentTypes(), dojo.hitch(this, function() {
 			fileCommands = fileCommands.concat(mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache));
 			var extensionGroupCreated = false;
-			var selectionGroupCreated = false;
 			var openWithGroupCreated = false;
 			var commandDeferreds = [];
 		
@@ -902,7 +963,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				var commandInfo = fileCommands[i].properties;
 				var service = fileCommands[i].service;
 				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
-				commandDeferreds.push[commandDeferred];
+				commandDeferreds.push(commandDeferred);
 				commandDeferred.then(dojo.hitch(this,
 						function(i, commandInfo, commandOptions){
 							var command = new mCommands.Command(commandOptions);

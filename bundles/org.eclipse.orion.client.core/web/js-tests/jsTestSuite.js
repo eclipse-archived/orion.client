@@ -1,6 +1,7 @@
 /*******************************************************************************
  * @license
  * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012 VMware, Inc.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,6 +9,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andrew Eisenberg (VMware) - added entry for esprima tests
  *******************************************************************************/
 /*global console TestCase require jstestdriver*/
 var requireJSConfig = {
@@ -74,8 +76,8 @@ jstestdriver.pluginRegistrar.register({
 
 				for (var i = 0; i < references.length; i++) {
 					var service = loaderServiceRegistry.getService(references[i]);
-					service.addEventListener("testDone", function (testName, testResult) {
-						onTestDone(new jstestdriver.TestResult(testCaseName, testName, testResult.result ? "passed" : "failed", testResult.message || "", "", testResult.elapsed));
+					service.addEventListener("testDone", function (event) {
+						onTestDone(new jstestdriver.TestResult(testCaseName, event.name, event.result ? "passed" : "failed", event.message || "", "", event.elapsed));
 					});
 					testRunDeferreds.push(service.run());
 				}
@@ -105,7 +107,7 @@ OrionTestCase("editor", "/js-tests/editor/test.html");
 OrionTestCase("textMateStyler", "/js-tests/editor/textMateStyler/test.html");
 OrionTestCase("textview", "/js-tests/textview/test.html");
 OrionTestCase("contentAssist", "/js-tests/editor/contentAssist/test.html");
-OrionTestCase("jsContentAssist", "/js-tests/jsContentAssist/test.html");
+OrionTestCase("jsTemplateContentAssist", "/js-tests/jsTemplateContentAssist/test.html");
 OrionTestCase("contentTypes", "/js-tests/contentTypes/test.html");
 OrionTestCase("commands", "/js-tests/commands/test.html");
 OrionTestCase("extensionParsing", "/js-tests/extensionParsing/test.html");
@@ -113,6 +115,7 @@ OrionTestCase("xhr", "/js-tests/xhr/test.html");
 OrionTestCase("config", "/js-tests/config/test.html");
 OrionTestCase("metatype", "/js-tests/metatype/test.html");
 OrionTestCase("setting", "/js-tests/settings/test.html");
+OrionTestCase("esprima-content-assist", "/js-tests/esprima/esprimaJsContentAssistTests.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");

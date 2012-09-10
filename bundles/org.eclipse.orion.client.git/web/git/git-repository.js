@@ -37,7 +37,7 @@ mBootstrap.startup().then(function(core) {
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
-	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var explorer = new mGitRepositoryExplorer.GitRepositoryExplorer(serviceRegistry, commandService, linkService, /* selection */ null, "artifacts", "pageNavigationActions", "itemLevelCommands"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	mGlobalCommands.generateBanner("orion-repository", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 	
 	// define commands
@@ -82,6 +82,10 @@ mBootstrap.startup().then(function(core) {
 	commandService.registerCommandContribution("itemLevelCommands", "eclipse.removeRemote", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.deleteConfigEntryCommand", 1000); //$NON-NLS-1$ //$NON-NLS-0$
 	commandService.registerCommandContribution("itemLevelCommands", "eclipse.orion.git.editConfigEntryCommand", 200); //$NON-NLS-1$ //$NON-NLS-0$
+	
+	// page navigation contributions
+	commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.previousTagPage", 1);
+	commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.nextTagPage", 2);
 	
 	// add commands specific for the page	
 	var viewAllCommand = new mCommands.Command({

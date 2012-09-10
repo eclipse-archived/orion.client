@@ -19,11 +19,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 	 * @name orion.searchResults.SearchResultsGenerator
 	 * @class A search results generator for display search results to an end user
 	 */
-	function SearchResultsGenerator(serviceRegistry, resultsId, commandService, fileService, crawling) {
+	function SearchResultsGenerator(serviceRegistry, resultsId, commandService, fileService, searcher, crawling) {
 		this.registry = serviceRegistry;
 		this.fileService = fileService;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
+		this.searcher = searcher;
 		this.crawling = crawling;
 		this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService);
 	}
@@ -65,14 +66,19 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		_search: function(resultsNode, query) {
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
+			var qObj = mSearchUtils.parseQueryStr(query);
+			this.crawling = qObj.useCrawler;
 			if(this.crawling){
 				var self = this;
-				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query);
+				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
 				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
 			} else {
-				var qObj = mSearchUtils.parseQueryStr(query);
+				var queryToService = query;
+				if(qObj.searchStrWithWhiteSpace){
+					queryToService = query.replace(qObj.searchStr, qObj.searchStrWithWhiteSpace);
+				}
 				try{
-					this.fileService.search(qObj.location, query).then(
+					this.fileService.search(qObj.location, queryToService).then(
 						dojo.hitch(this, function(jsonData) {
 							this._renderSearchResult(resultsNode, query, jsonData);
 						}));
@@ -80,7 +86,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				catch(error){
 					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
 						var self = this;
-						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query);
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
 						crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
