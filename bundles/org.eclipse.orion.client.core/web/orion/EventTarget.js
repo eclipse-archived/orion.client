@@ -11,14 +11,13 @@
  *******************************************************************************/
 /*global define console*/
 
-define(['orion/Deferred'], function(Deferred) {
+define(function() {
 	/**
 	 * Creates an Event Target
 	 *
 	 * @name orion.EventTarget
 	 * @class Base for creating an Orion event target
 	 */
-
 	function EventTarget() {
 		this._namedListeners = {};
 	}
@@ -29,7 +28,7 @@ define(['orion/Deferred'], function(Deferred) {
 		 * Dispatches a named event along with an arbitrary set of arguments. Any arguments after <code>eventName</code>
 		 * will be passed to the event listener(s).
 		 * @param {Object} event The event to dispatch. The event object MUST have a type field
-		 * @returns {Deferred} A deferred that resolves when all event listeners have been notified, and all async-aware
+		 * @returns {boolean} false if the event has been canceled and any associated default action should not be performed
 		 * listeners (if any) have resolved.
 		 */
 		dispatchEvent: function(event) {
@@ -37,31 +36,22 @@ define(['orion/Deferred'], function(Deferred) {
 				throw new Error("unspecified type");
 			}
 			var listeners = this._namedListeners[event.type];
-			if (!listeners) {
-				var d = new Deferred();
-				d.resolve();
-				return d;
+			if (listeners) {
+				listeners.forEach(function(listener) {
+					try {
+						if (typeof listener === "function") {
+							listener(event);
+						} else {
+							listener.handleEvent(event);
+						}
+					} catch (e) {
+						if (typeof console !== 'undefined') {
+							console.log(e); // for now, probably should dispatch an ("error", e)
+						}
+					}			
+				});
 			}
-
-			var deferreds = [];
-			listeners.forEach(function(listener) {
-				try {
-					var listenerDeferred = (typeof listener === "function") ? listener(event) : listener.handleEvent(event);
-					if (listenerDeferred && typeof listenerDeferred.then === 'function') {
-						deferreds.push(listenerDeferred);
-					}
-				} catch (e) {
-					if (typeof console !== 'undefined') {
-						console.log(e); // for now, probably should dispatch an ("error", e)
-					}
-				}			
-			});
-
-			return Deferred.all(deferreds, function(e) {
-				if (typeof console !== 'undefined') {
-					console.log(e);
-				}
-			});
+			return !event.defaultPrevented;
 		},
 
 		/**
