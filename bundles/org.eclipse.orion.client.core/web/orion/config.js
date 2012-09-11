@@ -37,7 +37,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 				var pid = serviceRef.getProperty(PROPERTY_PID);
 				var managedService = serviceRegistry.getService(serviceRef);
 				if (pid && managedService) {
-					var configuration = store.get(pid);
+					var configuration = store._find(pid);
 					var properties = configuration && configuration.getProperties();
 					managedServiceUpdates.push(managedService.updated(properties));
 				}
