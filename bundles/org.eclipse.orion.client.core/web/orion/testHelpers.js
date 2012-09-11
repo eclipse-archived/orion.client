@@ -35,6 +35,7 @@ define(['orion/Deferred'], function(Deferred) {
 								d.reject(e);
 							});
 					} else {
+						tearDown();
 						d.resolve(result);
 					}
 				} catch(e) {
