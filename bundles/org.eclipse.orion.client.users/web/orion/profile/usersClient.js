@@ -29,6 +29,9 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		getUserInfo: function(userURI, onLoad){
 			return this._doServiceCall("getUserInfo", arguments); //$NON-NLS-0$
 		},
+		getUsersListSubset : function(start, rows, onLoad) {
+			return this._doServiceCall("getUsersListSubset", arguments); //$NON-NLS-0$
+		},
 		getUsersList : function(onLoad) {
 			return this._doServiceCall("getUsersList", arguments); //$NON-NLS-0$
 		},
