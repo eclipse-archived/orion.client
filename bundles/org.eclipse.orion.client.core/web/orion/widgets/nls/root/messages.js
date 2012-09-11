@@ -71,5 +71,6 @@ define({
 	"New" : "New",
 	"Building file skeleton..." : "Building file skeleton...",
 	"Add" : "Add",
-	"Upload..." : "Upload..."
+	"Upload..." : "Upload...",
+	"For a list of available commands type '${0}'.": "For a list of available commands type '${0}'."
 });

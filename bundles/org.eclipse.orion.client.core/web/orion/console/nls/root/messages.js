@@ -11,6 +11,7 @@
 //NLS_CHARSET=UTF-8
 
 define({
+	"Console": "Console",
 	"Changed to: ${0}": "Changed to: ${0}",
 	"${0} is not a directory": "${0} is not a directory",
 	"${0} was not found": "${0} was not found",
