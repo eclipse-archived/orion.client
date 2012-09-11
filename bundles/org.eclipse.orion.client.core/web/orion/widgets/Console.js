@@ -13,18 +13,12 @@
 /*global define Range*/
 /*jslint browser:true*/
 
-define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/types/basic', 'gcli/argument', 'gcli/ui/fields',
-		'gcli/ui/fields/menu', 'gcli/util', 'gcli/settings', 'gcli/canon', 'gcli/cli', 'gcli/commands/help'],
-	function(messages, mGCLI, mTypes, mBasicTypes, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
+define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
+		"gcli/ui/fields/menu", "gcli/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help"],
+	function(messages, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
 
 	function CustomType(typeSpec) {}
-	CustomType.prototype = Object.create(mBasicTypes.DeferredType.prototype);
-	CustomType.prototype.defer = function() {
-		return mBasicTypes.BlankType;
-	};
-	CustomType.prototype.getBlank = function() {
-		return new mTypes.Conversion(undefined, new mArgument.BlankArgument(), mTypes.Status.VALID);
-	};
+	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
 
 	var orion = {};
 	orion.console = {};
@@ -46,100 +40,7 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 		function Console(input, output) {
 			this._init(input, output);
 		}
-		Console.prototype = /** @lends orion.console.Console.prototype */{			
-			/** @private */
-			_init: function(input, output) {
-				if (!input) { throw messages["no input"]; }
-				if (!output) { throw messages["no output"]; }
-
-				var outputDiv = document.createElement("div"); //$NON-NLS-0$
-				outputDiv.id = "gcli-display"; //$NON-NLS-0$
-				outputDiv.style.height = "100%"; //$NON-NLS-0$
-				outputDiv.style.width = "100%"; //$NON-NLS-0$
-				output.appendChild(outputDiv);
-
-				var inputText = document.createElement("input"); //$NON-NLS-0$
-				inputText.type = "text"; //$NON-NLS-0$
-				inputText.id = "gcli-input"; //$NON-NLS-0$
-				inputText.style.width = "100%"; //$NON-NLS-0$
-				inputText.style.height = "100%"; //$NON-NLS-0$
-				input.appendChild(inputText);
-
-				mSettings.getSetting('hideIntro').value = true; //$NON-NLS-0$
-				mSettings.getSetting('eagerHelper').value = 2; //$NON-NLS-0$
-
-				/*
-				 * Create the console asynchronously to ensure that the client finishes its
-				 * layout before GCLI computes the locations for its created widgets.
-				 */
-				var self = this;
-				setTimeout(function() {
-					mGCLI.createDisplay();
-					self.output("For a list of available commands type 'help'.");
-				});
-				mHelp.startup();
-				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
-
-				function CustomField(type, options) {
-					mFields.Field.call(this, type, options);
-					this.isImportant = true;
-					this.element = mUtil.createElement(this.document, 'div'); //$NON-NLS-0$
-					this.element.className = 'orion'; //$NON-NLS-0$
-					this.menu = new mMenu.Menu({document: this.document, field: true, type: type});
-					this.menu.onItemClick = this.onItemClick.bind(this);
-					this.element.appendChild(this.menu.element);
-					this.onFieldChange = mUtil.createEvent('CustomField.fieldChanged'); //$NON-NLS-0$
-					this.onInputChange = this.onInputChange.bind(this);
-				}
-
-				CustomField.prototype = Object.create(mFields.Field.prototype);
-				CustomField.prototype.destroy = function() {
-					mFields.Field.prototype.destroy.call(this);
-					this.menu.destroy();
-					delete this.element;
-					delete this.menu;
-					delete this.document;
-					delete this.onInputChange;
-				};
-				CustomField.prototype.setConversion = function(conversion) {
-					this.setMessage(conversion.message);
-					var items = [];
-					var predictions = conversion.getPredictions();
-					predictions.forEach(function(item) {
-						if (!item.hidden) {
-							items.push({
-								name: item.name,
-								complete: item.name,
-								description: item.description || ''
-							});
-						}
-					}, this);
-					this.menu.show(items);
-
-					if (conversion.then) {
-						/*
-						 * We only got a 'provisional' conversion. When caches are filled
-						 * we'll get a callback and should try again.
-						 */
-						var that = this;
-						conversion.then(function () {
-							if (that.element) { //if there's no UI yet => ignore.
-								that.setConversion(that.getConversion());
-							}
-						});
-					}
-				};
-				CustomField.prototype.onItemClick = function(ev) {
-					var conversion = ev.conversion;
-					this.onFieldChange({ conversion: conversion });
-					this.setMessage(conversion.message);
-				};
-				CustomField.claim = function(type) {
-					return type instanceof CustomType ? mFields.Field.MATCH + 1 : mFields.Field.NO_MATCH;
-				};
-
-				mFields.addField(CustomField);
-			},
+		Console.prototype = /** @lends orion.console.Console.prototype */ {			
 			addCommand: function(command) {
 				if (!command.exec) {
 					command.exec = command.callback;
@@ -194,6 +95,101 @@ define(['i18n!orion/widgets/nls/messages', 'gcli/index', 'gcli/types', 'gcli/typ
 				var commandOutputManager = mCanon.commandOutputManager;
 				commandOutputManager.onOutput({output: output});
 				output.complete(content);
+			},
+			
+			/** @private */
+
+			_init: function(input, output) {
+				if (!input) {throw "no input";} //$NON-NLS-0$
+				if (!output) {throw "no output";} //$NON-NLS-0$
+
+				var outputDiv = document.createElement("div"); //$NON-NLS-0$
+				outputDiv.id = "gcli-display"; //$NON-NLS-0$
+				outputDiv.style.height = "100%"; //$NON-NLS-0$
+				outputDiv.style.width = "100%"; //$NON-NLS-0$
+				output.appendChild(outputDiv);
+
+				var inputText = document.createElement("input"); //$NON-NLS-0$
+				inputText.type = "text"; //$NON-NLS-0$
+				inputText.id = "gcli-input"; //$NON-NLS-0$
+				inputText.style.width = "100%"; //$NON-NLS-0$
+				inputText.style.height = "100%"; //$NON-NLS-0$
+				input.appendChild(inputText);
+
+				mSettings.getSetting("hideIntro").value = true; //$NON-NLS-0$
+				mSettings.getSetting("eagerHelper").value = 2; //$NON-NLS-0$
+
+				/*
+				 * Create the console asynchronously to ensure that the client finishes its
+				 * layout before GCLI computes the locations for its created widgets.
+				 */
+				var self = this;
+				setTimeout(function() {
+					mGCLI.createDisplay();
+					self.output(messages["For a list of available commands type '${0}'."].replace("${0}", ["<b>help</b>"])); //$NON-NLS-1$ //$NON-NLS-0$
+				});
+				mHelp.startup();
+				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
+
+				function CustomField(type, options) {
+					mFields.Field.call(this, type, options);
+					this.isImportant = true;
+					this.element = mUtil.createElement(this.document, "div"); //$NON-NLS-0$
+					this.element.className = "orion"; //$NON-NLS-0$
+					this.menu = new mMenu.Menu({document: this.document, field: true, type: type});
+					this.menu.onItemClick = this.onItemClick.bind(this);
+					this.element.appendChild(this.menu.element);
+					this.onFieldChange = mUtil.createEvent("CustomField.fieldChanged"); //$NON-NLS-0$
+					this.onInputChange = this.onInputChange.bind(this);
+				}
+
+				CustomField.prototype = Object.create(mFields.Field.prototype);
+				CustomField.prototype.destroy = function() {
+					mFields.Field.prototype.destroy.call(this);
+					this.menu.destroy();
+					delete this.element;
+					delete this.menu;
+					delete this.document;
+					delete this.onInputChange;
+				};
+				CustomField.prototype.setConversion = function(conversion) {
+					this.setMessage(conversion.message);
+					var items = [];
+					var predictions = conversion.getPredictions();
+					predictions.forEach(function(item) {
+						if (!item.hidden) {
+							items.push({
+								name: item.name,
+								complete: item.name,
+								description: item.description || ""
+							});
+						}
+					}, this);
+					this.menu.show(items);
+
+					if (conversion.then) {
+						/*
+						 * We only got a 'provisional' conversion. When caches are filled
+						 * we'll get a callback and should try again.
+						 */
+						var self = this;
+						conversion.then(function () {
+							if (self.element) { // if there's no UI yet then ignore
+								self.setConversion(self.getConversion());
+							}
+						});
+					}
+				};
+				CustomField.prototype.onItemClick = function(ev) {
+					var conversion = ev.conversion;
+					this.onFieldChange({conversion: conversion});
+					this.setMessage(conversion.message);
+				};
+				CustomField.claim = function(type) {
+					return type instanceof CustomType ? mFields.Field.MATCH + 1 : mFields.Field.NO_MATCH;
+				};
+
+				mFields.addField(CustomField);
 			}
 		};
 		return Console;
