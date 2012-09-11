@@ -49,6 +49,33 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 
 	UsersService.prototype = /** @lends eclipse.FileService.prototype */
 	{
+		getUsersListSubset : function(start, rows, onLoad) {
+			var service = this;
+			var uri = "../users?start=" + start + "&rows=" + rows;
+			return xhr("GET", uri, { //$NON-NLS-1$ 
+				headers : {
+					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				timeout: 15000
+			}).then(function(result) {
+				var jsonData = getJSON(result.response);
+				if (onLoad){
+					if(typeof onLoad === "function") //$NON-NLS-0$
+						onLoad(jsonData);
+					else
+						service.dispatchEvent(onLoad, jsonData);
+				}
+				return jsonData;
+			}, function(result) {
+				var error = getError(result);
+				if(!service.info) {
+					handleAuthenticationError(error, function(){
+						service.getUsersListSubset(start, rows, onLoad); // retry GET
+					});
+				}
+				return error;
+			});
+		},
 		getUsersList : function(onLoad) {
 			var service = this;
 			return xhr("GET", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
