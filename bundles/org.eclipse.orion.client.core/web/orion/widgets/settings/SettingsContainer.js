@@ -9,7 +9,7 @@
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global dojo dijit widgets orion  window console define localStorage*/
-/*jslint browser:true*/
+/*jslint browser:true sub:true*/
 
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
@@ -274,20 +274,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.pluginWidget.startup();
 		},
 
-	initPluginSettings: function(id) {
-		dojo.empty(this.table);
+		initPluginSettings: function(id) {
+			dojo.empty(this.table);
 
-//		if (this.pluginSettingsWidget) {
-//			this.pluginSettingsWidget.destroy();
-//		}
+			if (this.pluginSettingsWidget) {
+				this.pluginSettingsWidget.destroy();
+			}
 
-		this.pluginSettingsWidget = new SettingsList({
-			parent: this.table,
-			serviceRegistry: this.registry,
-			settingsRegistry: this.settingsRegistry
-		});
-		// starts itself. will also remove previous version of itself
-	},
+			this.pluginSettingsWidget = new SettingsList({
+				parent: this.table,
+				serviceRegistry: this.registry,
+				settingsRegistry: this.settingsRegistry
+			});
+			// starts itself. will also remove previous version of itself
+		},
 
 /*	showPlugins - iterates over the plugin array, reads
 	meta-data and creates a dom entry for each plugin.
