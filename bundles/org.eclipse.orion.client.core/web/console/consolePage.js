@@ -14,11 +14,12 @@
 /*jslint browser:true*/
 
 define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Console", "console/currentDirectory", "console/paramType-file", "orion/i18nUtil"], 
-	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType, i18nUtil) {
+		"orion/widgets/Console", "console/currentDirectory", "console/paramType-file", "orion/i18nUtil", "console/extensionCommands", "orion/contentTypes"], 
+	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mCurrentDirectory, mFileParamType, i18nUtil, mExtensionCommands, mContentTypes) {
 
 	var currentDirectory, fileClient, output;
 	var hashUpdated = false;
+	var contentTypeService, openWithCommands = [], serviceRegistry;
 
 	var resolveError = function(result, error) {
 		result.resolve(dojo.string.substitute(messages["File service error: ${0}"], ["<em>" + error + "</em>"])); //$NON-NLS-2$ //$NON-NLS-1$
@@ -26,13 +27,50 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 	/* general functions for working with file system nodes */
 
+	function computeEditHref(node) {
+		for (var i = 0; i < openWithCommands.length; i++) {
+			var openWithCommand = openWithCommands[i];
+			if (openWithCommand.visibleWhen(node)) {
+				return openWithCommand.hrefCallback({items: node});  /* use the first one */
+			}
+		}
+
+		/*
+		 * Use the default editor if there is one and the resource is not an image,
+		 * otherwise open the resource's direct URL.
+		 */
+		var contentType = contentTypeService.getFileContentType(node);
+		switch (contentType && contentType.id) {
+			case "image/jpeg": //$NON-NLS-0$
+			case "image/png": //$NON-NLS-0$
+			case "image/gif": //$NON-NLS-0$
+			case "image/ico": //$NON-NLS-0$
+			case "image/tiff": //$NON-NLS-0$
+			case "image/svg": //$NON-NLS-0$
+				return node.Location;
+		}
+
+		var defaultEditor = null;
+		for (i = 0; i < openWithCommands.length; i++) {
+			if (openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
+				defaultEditor = openWithCommands[i];
+				break;
+			}
+		}
+		if (!defaultEditor) {
+			return node.Location;
+		}
+		return defaultEditor.hrefCallback({items: node});
+	}
+
 	function computeLinkString(node) {
 		if (node.Directory) {
 			//TODO html escape sequences in Name?
 			return "<a href=\"#" + node.Location + "\" class=\"consolePageDirectory\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
 		} 
 		//TODO html escape sequences in Name?
-		return "<a href=\"/edit/edit.html#" + node.Location + "\" target=\"_blank\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var href = computeEditHref(node);
+		return "<a href=\"" + href + "\" target=\"_blank\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	}
 
 	function computePathString(node) {
@@ -155,7 +193,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 	}
 
 	function editExec(node) {
-		var href = "/edit/edit.html#" + node.file.Location; //$NON-NLS-0$
+		var href = computeEditHref(node.file);
 		window.open(href);
 	}
 
@@ -262,7 +300,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
-			var serviceRegistry = core.serviceRegistry;
+			serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
 			dojo.parser.parse();
 
@@ -326,6 +364,20 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 				description: messages["Prints the current directory location"],
 				callback: pwdExec,
 				returnType: "string" //$NON-NLS-0$
+			});
+
+			/* initialize the editors cache (used by some of the build-in commands */
+			contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+			serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
+				var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
+				for (var i = 0; i < commands.length; i++) {
+					var commandDeferred = mExtensionCommands._createCommandOptions(commands[i].properties, commands[i].service, serviceRegistry, contentTypes, true);
+					commandDeferred.then(dojo.hitch(this,
+						function(command) {
+							openWithCommands.push(command);
+						}
+					));
+				}
 			});
 
 			// TODO
