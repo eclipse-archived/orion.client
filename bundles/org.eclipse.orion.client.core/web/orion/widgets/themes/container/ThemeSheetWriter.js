@@ -11,7 +11,7 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/settings/ThemeClass'], 
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/ThemeClass'], 
 	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, ThemeClass) {
 		
 		var navbar = '#333';

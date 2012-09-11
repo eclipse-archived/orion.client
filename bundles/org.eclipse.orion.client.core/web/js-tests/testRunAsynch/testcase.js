@@ -52,8 +52,8 @@ tests["test expected asynch failure"] = function() {
 	var newTest = new mTest.Test();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
 	var failures = 0;
-	newTest.addEventListener("testDone", function(name, obj) {
-		if (obj.result === false) {
+	newTest.addEventListener("testDone", function(event) {
+		if (event.result === false) {
 			failures++;
 		}
 	});
@@ -181,8 +181,8 @@ tests["test timeout causes reject"] = function() {
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
 	var d = new dojo.Deferred();
 	var testDone = false;
-	newTest.addEventListener("testDone", function(name, obj) {
-		assert.strictEqual(obj.result, false, "Expected test failure");
+	newTest.addEventListener("testDone", function(event) {
+		assert.strictEqual(event.result, false, "Expected test failure");
 		testDone = true;
 		d.resolve();
 	});

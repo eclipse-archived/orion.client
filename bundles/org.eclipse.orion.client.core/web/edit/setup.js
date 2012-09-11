@@ -425,7 +425,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		: {
 			createContentAssistMode: function(editor) {
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-				contentAssist.addEventListener("Activating", function(event) { //$NON-NLS-0$
+				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 					// Content assist is about to be activated; set its providers.
 					var fileContentType = inputManager.getContentType();
 					var fileName = editor.getTitle();
@@ -472,8 +472,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Establishing dependencies on registered services
-	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(problems) { //$NON-NLS-1$ //$NON-NLS-0$
-		editor.showProblems(problems);
+	serviceRegistry.getService("orion.core.marker").addEventListener("problemsChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+		editor.showProblems(event.problems);
 	});
 	
 	editor.addEventListener("DirtyChanged", function(evt) { //$NON-NLS-0$
@@ -481,7 +481,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-	serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(fileURI) { //$NON-NLS-1$ //$NON-NLS-0$
+	serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+		var fileURI = event.selection;
 		if (inputManager.shouldGoToURI(editor, fileURI)) {
 			inputManager.setInput(fileURI, editor);
 		} 

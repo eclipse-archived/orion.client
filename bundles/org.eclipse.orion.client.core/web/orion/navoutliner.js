@@ -140,16 +140,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 			}));
 
 			favoritesService.addEventListener("favoritesChanged", dojo.hitch(navoutliner, //$NON-NLS-0$
-				function(favs) {
+				function(event) {
 					// TODO temporary code, get rid of old "external favorites"
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=379435
 					var faves = [];
-					for (var i=0; i<favs.navigator.length; i++) {
-						if (!favs.navigator[i].isExternalResource) {
-							faves.push(favs.navigator[i]);
+					for (var i=0; i<event.navigator.length; i++) {
+						if (!event.navigator[i].isExternalResource) {
+							faves.push(event.navigator[i]);
 						}
 					}
-					this.render(faves, favs.registry);
+					this.render(faves, event.registry);
 				}));
 		}
 	}
@@ -213,11 +213,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 				this.commandService.registerCommandContribution(this.favoritesSection.selectionNode.id, "eclipse.deleteFave", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "favoritesContent", "Favorites")); //$NON-NLS-1$ //$NON-NLS-0$
 				commandService.registerSelectionService(this.favoritesSection.selectionNode.id, this.favoritesSelection);
 				var selectionId = this.favoritesSection.selectionNode.id;
-				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(singleSelection, selections) { //$NON-NLS-1$ //$NON-NLS-0$
+				serviceRegistry.getService("orion.favorites.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 					var selectionTools = dojo.byId(selectionId);
 					if (selectionTools) {
 						commandService.destroy(selectionTools);
-						commandService.renderCommands(selectionId, selectionTools, selections, that, "button"); //$NON-NLS-0$
+						commandService.renderCommands(selectionId, selectionTools, event.selections, that, "button"); //$NON-NLS-0$
 					}
 				});
 			}

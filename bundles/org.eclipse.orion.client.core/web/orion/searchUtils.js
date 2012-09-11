@@ -39,14 +39,20 @@ orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
 		queryStr = queryStr.substring(indexOfQMark+1);
 	}
+	var indexOfRegEx = queryStr.indexOf("regEx&");
+	if(indexOfRegEx === 0){
+		queryStr = queryStr.substring(indexOfRegEx + 6);
+	}
 	//var obj = dojo.queryToObject(queryStr);
 	var splitQ = queryStr.split("&"); //$NON-NLS-0$
 	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
+	queryObj.useCrawler = (indexOfRegEx === 0);
 	for(var i=0; i < splitQ.length; i++){
 		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
 		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
 		if(qIndex >= 0){
-			orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
+			indexOfRegEx === 0 ? orion.searchUtils.parseLocationAndSearchStrRegEx(splitQ[i].substring(qIndex+2), queryObj, fromStart):
+			                     orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
 		} else if(rIndex >= 0){
 			queryObj.replace = splitQ[i].substring(rIndex+8);
 		} else {
@@ -82,8 +88,11 @@ orion.searchUtils.generateSearchHref = function(options) {
 };
 
 orion.searchUtils.generateSearchQuery = function(options) {
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "", regEx = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	if(options){
+		if(options.regEx){
+			regEx = "regEx&";
+		}
 		if(options.sort){
 			sort = options.sort;
 		}
@@ -95,7 +104,7 @@ orion.searchUtils.generateSearchQuery = function(options) {
 		}
 		if(options.searchStr){
 			searchStr = options.searchStr;
-			searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
+			//searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
 		}
 		if(options.location){
 			loc = options.location;
@@ -110,7 +119,7 @@ orion.searchUtils.generateSearchQuery = function(options) {
 			replace = "&replace=" + options.replace; //$NON-NLS-0$
 		}
 	}
-	return "?" + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	return "?" + regEx + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 };
 
 orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj, fromStart) {
@@ -125,11 +134,37 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 				loc = loc.substring(0, loc.length-1);
 			}
 			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
+			queryObj.searchStr = splitStr[0];
+			//queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
+	//If the search string contains white space, we should add this special property. 
+	//The property's value is basically the original search string with the double quato at both end.
+	//It is the caller's responsibility to decide wether this property has to be used or not.
+	if(queryObj.searchStr.indexOf(" ") >= 0){
+		queryObj.searchStrWithWhiteSpace = "\"" + queryObj.searchStr + "\"";
+	}
 	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
+};
+
+orion.searchUtils.parseLocationAndSearchStrRegEx = function(locAndSearchStr, queryObj, fromStart) {
+	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
+	queryObj.location = "";
+	queryObj.searchStr = locAndSearchStr;
+	if(hasLocation){
+		var splitStr = locAndSearchStr.split("+Location:"); //$NON-NLS-0$
+		if(splitStr.length === 2){
+			var loc = splitStr[1];
+			if(loc.length > 0 && loc[loc.length - 1] === '*'){ //$NON-NLS-0$
+				loc = loc.substring(0, loc.length-1);
+			}
+			queryObj.location = loc;
+			queryObj.searchStr = splitStr[0];
+		}
+	}
+	queryObj.searchStrTitle = queryObj.searchStr;
+	queryObj.inFileQuery= orion.searchUtils.generateInFileQueryRegEx(queryObj.searchStr, fromStart);
 };
 
 orion.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
@@ -160,6 +195,26 @@ orion.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
 			inFileQuery.regExp = {pattern: pattern, flags: flags};
 			inFileQuery.wildCard = true;
 		}
+	}
+	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
+	return inFileQuery;
+};
+	
+orion.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
+	var inFileQuery = {};
+	inFileQuery.originalSearchStr = searchStr;
+	inFileQuery.searchStr =searchStr;
+	var prefix = "";
+	if(fromStart){
+		prefix = "^";
+	}
+	var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
+	if (regexp) {
+		var pattern = regexp.pattern;
+		var flags = regexp.flags;
+		flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
+		inFileQuery.regExp = {pattern: pattern, flags: flags};
+		inFileQuery.wildCard = true;
 	}
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return inFileQuery;

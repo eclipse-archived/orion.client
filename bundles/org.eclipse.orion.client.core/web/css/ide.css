@@ -407,6 +407,10 @@ h2 {
 	vertical-align: baseline;
 }
 
+.bannerMenuSearchOptions {
+	margin-left: -20px;
+}
+
 .bannerButton {
 	border: 1px solid transparent;
 	text-align: center;

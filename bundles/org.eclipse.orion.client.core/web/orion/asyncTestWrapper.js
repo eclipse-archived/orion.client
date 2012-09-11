@@ -50,9 +50,9 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 				
 				for(var i =0; i < references.length; i++) {
 					var service = loaderServiceRegistry.getService(references[i]);
-					service.addEventListener("testDone", function(testName, testResult) {
-						if (typeof testSuite[testName] !== "undefined") {
-							testSuite[testName].testDone(testResult);
+					service.addEventListener("testDone", function(event) {
+						if (typeof testSuite[event.name] !== "undefined") {
+							testSuite[event.name].testDone(event.result);
 						}
 					});
 					console.log("Launching test suite: " + test);

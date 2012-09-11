@@ -56,6 +56,49 @@
 			}],
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
+		
+		provider.registerService("orion.navigate.content", null, {
+			id: "orion.content.fromURL",
+			name: "Sample HTML5 Site",
+			description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
+			folder: "Hello World",
+			command: "orion.importZipURL"
+		});
+
+		provider.registerService("orion.navigate.content", null, {
+			id: "orion.content.fromSFTP",
+			name: "SFTP Import",
+			description: "Import content from an SFTP location into an Orion folder. You will be prompted for the SFTP location and credentials.",
+			folder: "Imported Content",
+			command: "orion.importSFTP"
+		});
+
+		provider.registerService("orion.navigate.content", null, {
+			id: "orion.content.fromZip",
+			name: "Upload a Zip",
+			description: "Upload content from a local zip file into an Orion folder. You will be prompted for the local zip file.",
+			folder: "Uploaded Content",
+			command: "orion.importZip"
+		});
+
+		provider.registerService("orion.core.setting", null, {
+			settings: [
+				{	pid: "nav.config",
+					name: "Navigation",
+					properties: [
+						{	id: "links.newtab",
+							name: "Links",
+							type: "boolean",
+							defaultValue: true,
+							options: [
+								{value: true, label: "Open in new tab"},
+								{value: false, label: "Open in same tab"}
+							]
+						}
+					]
+				}
+			]
+		});
 
 		provider.connect();
 	};

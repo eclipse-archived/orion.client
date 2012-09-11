@@ -59,8 +59,17 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			if (!_channel) {
 				throw new Error("plugin not connected");
 			}
-			var requestId = _currentMessageId++;
-			var d = new Deferred();
+			var requestId = _currentMessageId++;			
+			var onCancel = function(reason) {
+				if (_state === LOADED) {
+					internalRegistry.postMessage({
+						id: requestId,
+						cancel: typeof reason === "string" ? reason : "canceled"
+					}, _channel);
+				}
+			};
+			
+			var d = new Deferred(onCancel);
 			_deferredResponses[String(requestId)] = d;
 			var message = {
 				id: requestId,
@@ -93,7 +102,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					serviceProxy.dispatchEvent = eventTarget.dispatchEvent.bind(eventTarget);
 					var _addEventListener = serviceProxy.addEventListener;
 					serviceProxy.addEventListener = function(type, listener) {
-						if (!eventTarget._namedlisteners[type]) {
+						if (!eventTarget._namedListeners[type]) {
 							_addEventListener(type);
 						}
 						eventTarget.addEventListener(type, listener);
@@ -101,7 +110,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					var _removeEventListener = serviceProxy.removeEventListener;
 					serviceProxy.removeEventListener = function(type, listener) {
 						eventTarget.removeEventListener(type, listener);
-						if (eventTarget._namedlisteners[type]) {
+						if (eventTarget._namedListeners[type]) {
 							_removeEventListener(type);
 						}
 					};
@@ -114,13 +123,13 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			_state = state;
 			switch (state) {
 				case UNINSTALLED:
-					internalRegistry.dispatchEvent("pluginUninstalled", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginUninstalled", plugin:_self}); //$NON-NLS-0$
 					break;
 				case INSTALLED:
-					internalRegistry.dispatchEvent("pluginInstalled", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginInstalled", plugin:_self}); //$NON-NLS-0$
 					break;
 				case LOADED:
-					internalRegistry.dispatchEvent("pluginLoaded", _self); //$NON-NLS-0$
+					internalRegistry.dispatchEvent({type:"pluginLoaded", plugin:_self}); //$NON-NLS-0$
 					break;
 			}
 		}
@@ -207,7 +216,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 						proxy.dispatchEvent.apply(proxy, message.params);		
 					} else if ("progress" === message.method){ //$NON-NLS-0$
 						deferred = _deferredResponses[String(message.requestId)];
-						deferred.update.apply(deferred, message.params);	
+						deferred.progress.apply(deferred, message.params);	
 					} else if ("timeout"){
 						if (_state === INSTALLED) {
 							_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
@@ -549,14 +558,14 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				},
 				updatePlugin: function(plugin) {
 					_persist(plugin);
-					_pluginEventTarget.dispatchEvent("pluginUpdated", plugin); //$NON-NLS-0$
+					_pluginEventTarget.dispatchEvent({type:"pluginUpdated", plugin: plugin}); //$NON-NLS-0$
 				},
 				postMessage: function(message, channel) {
 					channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
 				},
-				dispatchEvent: function(type, plugin) {
+				dispatchEvent: function(event) {
 					try {
-						_pluginEventTarget.dispatchEvent(type, plugin);
+						_pluginEventTarget.dispatchEvent(event);
 					} catch (e) {
 						if (console) {
 							console.log(e);
@@ -634,7 +643,8 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				if(plugin.getHeaders()) {
 					d.resolve(plugin);
 				} else {
-					var pluginTracker = function(plugin) {
+					var pluginTracker = function(event) {
+						var plugin = event.plugin;
 						if (plugin.getLocation() === url) {
 							d.resolve(plugin);
 							_pluginEventTarget.removeEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$

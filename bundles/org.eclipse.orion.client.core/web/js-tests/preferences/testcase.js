@@ -76,11 +76,7 @@ define(["orion/assert","dojo"], function(assert, dojo) {
 			}
 		}
 	
-		if (window.addEventListener) {
-			window.addEventListener("storage", handleStorage, false);
-		} else if (window.attachEvent){
-			window.attachEvent("onstorage", handleStorage);
-		}
+		window.addEventListener("storage", handleStorage, false);
 
 		top.localStorage.setItem("test", "test-value");
 		top.localStorage.removeItem("test");

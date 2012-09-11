@@ -40,7 +40,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorerRenderer.prototype.getCellHeaderElement = function(col_no){
 		switch(col_no){
 			case 0: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 1: 
 				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -210,6 +210,29 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		);
 	};
 
+	CompareTreeExplorer.prototype._getChildrenLocation =  function(locations, index, onComplete){
+		if(!this._fileClient){
+			console.log("A file client is needed for getting file content"); //$NON-NLS-0$
+			return;
+		}
+		var that = this;
+		that._fileClient.read(locations[index].URL, true).then(function(meta) {
+			locations[index].childrenLocation = meta.ChildrenLocation;
+			if(index < (locations.length - 1)){
+				that._getChildrenLocation(locations, index+1, onComplete);
+			} else {
+				onComplete();
+			}
+		}, function(error, ioArgs) {
+			locations[index].childrenLocation = locations[index].URL;
+			if(index < (locations.length - 1)){
+				that._getChildrenLocation(locations, index+1, onComplete);
+			} else {
+				onComplete();
+			}
+		});
+	};
+
 	CompareTreeExplorer.prototype._getFileContent = function(files, currentIndex, OveralIndex) {
 		if(!this._fileClient){
 			console.log("A file client is needed for getting file content"); //$NON-NLS-0$
@@ -277,6 +300,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 				this._compareResults.push({type: "removed", fileURL: curResItemBase.Location, name: curResItemBase.Name});
 			}
 		}
+		this._totalFiles = this._compareResults.length + this._sameFiles.length;
 		if(this._compareResults.length > 0){
 			this._renderUI();
 		}
@@ -292,24 +316,27 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			this._fileServiceNameBase = this._fileClient.fileServiceName(this._folderBase);
 			
 			var that = this;
-			var crawlerNew = new mSearchCrawler.SearchCrawler(this.registry, this._fileClient, "", {buildSkeletonOnly: true, location: this._folderNew,
-								fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
-								}); 
-			var crawlerBase = new mSearchCrawler.SearchCrawler(this.registry, this._fileClient, "", {buildSkeletonOnly: true, location: this._folderBase,
-								fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
-								}); 
-			crawlerNew.buildSkeleton(
-				function(){
-				}, 
-				function(){
-					crawlerBase.buildSkeleton(
-						function(){
-						}, 
-						function(){
-							that._fileSkeletonNew = crawlerNew.fileSkeleton;
-							that._fileSkeletonBase = crawlerBase.fileSkeleton;
-							that._compareSkeletons(0);
-					});
+			var locations = [{URL:this._folderNew},{URL:this._folderBase}];
+			this._getChildrenLocation(locations, 0, function(){
+				var crawlerNew = new mSearchCrawler.SearchCrawler(that.registry, that._fileClient, "", {buildSkeletonOnly: true, location: that._folderNew, childrenLocation: locations[0].childrenLocation,
+									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
+									}); 
+				var crawlerBase = new mSearchCrawler.SearchCrawler(that.registry, that._fileClient, "", {buildSkeletonOnly: true, location: that._folderBase, childrenLocation: locations[1].childrenLocation,
+									fetchChildrenCallBack: function(folderURL){that.reportStatus("Fetching folder: " + folderURL + "...");}
+									}); 
+				crawlerNew.buildSkeleton(
+					function(){
+					}, 
+					function(){
+						crawlerBase.buildSkeleton(
+							function(){
+							}, 
+							function(){
+								that._fileSkeletonNew = crawlerNew.fileSkeleton;
+								that._fileSkeletonBase = crawlerBase.fileSkeleton;
+								that._compareSkeletons(0);
+						});
+				});
 			});
 		} 
 	};
@@ -347,7 +374,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	};
 
 	CompareTreeExplorer.prototype._renderUI = function() {
-	var that = this;
+		var that = this;
 		this._compareResults.sort( function(item1, item2){
 				var name1 = that._sortByFolder ? (that.getFileServiceName(item1) + item1.fullPathName).toLowerCase(): item1.name.toLowerCase();
 				var name2 = that._sortByFolder ? (that.getFileServiceName(item2) + item2.fullPathName).toLowerCase(): item2.name.toLowerCase();
