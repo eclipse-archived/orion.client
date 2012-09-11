@@ -59,19 +59,19 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 				onStyleReady: function(e) {
 					self.onStyleReady(e);
 				},
-				onServiceAdded: function(serviceRef, service) {
-					self.onServiceAdded(serviceRef, service);
+				onServiceAdded: function(serviceEvent) {
+					self.onServiceAdded(serviceEvent.serviceReference, self.serviceRegistry.getService(serviceEvent.serviceReference));
 				},
-				onServiceRemoved: function(serviceRef, service) {
-					self.onServiceRemoved(serviceRef, service);
+				onServiceRemoved: function(serviceEvent) {
+					self.onServiceRemoved(serviceEvent.serviceReference, self.serviceRegistry.getService(serviceEvent.serviceReference));
 				}
 			};
 			textView.addEventListener("ModelChanging", this.listener.onModelChanging);
 			textView.addEventListener("ModelChanged", this.listener.onModelChanged);
 			textView.addEventListener("Destroy", this.listener.onDestroy);
 			textView.addEventListener("LineStyle", this.listener.onLineStyle);
-			serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded);
-			serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved);
+			serviceRegistry.addEventListener("registered", this.listener.onServiceAdded);
+			serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved);
 
 			var serviceRefs = serviceRegistry.getServiceReferences(SERVICE_NAME);
 			for (var i = 0; i < serviceRefs.length; i++) {
@@ -99,8 +99,8 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 				this.services = null;
 			}
 			if (this.serviceRegistry) {
-				this.serviceRegistry.removeEventListener("serviceAdded", this.listener.onServiceAdded);
-				this.serviceRegistry.removeEventListener("onServiceRemoved", this.listener.onServiceRemoved);
+				this.serviceRegistry.removeEventListener("registered", this.listener.onServiceAdded);
+				this.serviceRegistry.removeEventListener("unregistering", this.listener.onServiceRemoved);
 				this.serviceRegistry = null;
 			}
 			this.listener = null;

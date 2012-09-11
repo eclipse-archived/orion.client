@@ -185,7 +185,8 @@ orion.TextSearcher = (function() {
 				evt.cancelBubble = true;
 				return false;
 			}
-			if((ctrlKeyOnly && evt.keyCode === 75/*"k"*/ ) || evt.keyCode === 13/*enter*/ ){
+			//We can't use ctrlKeyOnly on "k" because ctrl+shift+k means find previous match when the find bar gets focus
+			if(((this.isMac ? evt.metaKey : evt.ctrlKey) && !evt.altKey && evt.keyCode === 75/*"k"*/) || evt.keyCode === 13/*enter*/){
 				if( evt.stopPropagation ) { 
 					evt.stopPropagation(); 
 				}

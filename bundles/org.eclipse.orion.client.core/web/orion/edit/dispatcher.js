@@ -27,14 +27,14 @@ define(['orion/edit/dispatcher'], function() {
 		var self = this;
 		this.listener = {
 			onServiceAdded: function(event) {
-				self._onServiceAdded(event.serviceReference, event.service);
+				self._onServiceAdded(event.serviceReference);
 			},
 			onServiceRemoved: function(event) {
-				self._onServiceRemoved(event.serviceReference, event.service);
+				self._onServiceRemoved(event.serviceReference);
 			}
 		};
-		this.serviceRegistry.addEventListener("serviceAdded", this.listener.onServiceAdded); //$NON-NLS-0$
-		this.serviceRegistry.addEventListener("serviceRemoved", this.listener.onServiceRemoved); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("registered", this.listener.onServiceAdded); //$NON-NLS-0$
+		this.serviceRegistry.addEventListener("unregistering", this.listener.onServiceRemoved); //$NON-NLS-0$
 		this._init();
 	}
 	Dispatcher.prototype = /** @lends orion.edit.Dispatcher.prototype */ {
@@ -90,7 +90,7 @@ define(['orion/edit/dispatcher'], function() {
 			this.serviceReferences[serviceId].push([textView, type, listener]);
 			textView.addEventListener(type, listener);
 		},
-		_onServiceRemoved: function(serviceReference, service) {
+		_onServiceRemoved: function(serviceReference) {
 			var serviceId = serviceReference.getProperty('service.id');
 			var serviceReferences = this.serviceReferences[serviceId];
 			if (serviceReferences) {
@@ -103,8 +103,8 @@ define(['orion/edit/dispatcher'], function() {
 				delete this.serviceReferences[serviceId];
 			}
 		},
-		_onServiceAdded: function(serviceReference, service) {
-			if (serviceReference.getName() === "orion.edit.model") { //$NON-NLS-0$
+		_onServiceAdded: function(serviceReference) {
+			if (serviceReference.getProperty("objectClass").indexOf("orion.edit.model") !== -1) { //$NON-NLS-0$
 				this._wireServiceReference(serviceReference);
 			}
 		},

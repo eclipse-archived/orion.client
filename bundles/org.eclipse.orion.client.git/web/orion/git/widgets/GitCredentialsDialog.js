@@ -85,7 +85,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		}
 		
 		// display prompt checkbox only when it makes sense
-		var gitCredentialsStorage = new mGitCredentialsStorage.GitCredentialsStorage();
+		var gitCredentialsStorage = new GitCredentialsStorage();
 		if(!gitCredentialsStorage.isEnabled()){
 			dojo.style(this.gitSavePrivateKey, "display", "none");
 			dojo.style(this.gitSavePrivateKeyLabel, "display", "none");
@@ -131,18 +131,20 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		var process = function(pKey){
 			if(self._sshService){
 				self._sshService.getKnownHosts().then(function(knownHosts){
-					if(self.options.func)
+					if(self.options.func) {
 						self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : "",
 							gitPrivateKey: self.isPrivateKey.checked ? pKey : "", gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: "", //$NON-NLS-0$
 							knownHosts: knownHosts});
+						}
 					delete self.options.func; //prevent performing this action twice (IE)
 				});
 				
 			}else{
-				if(self.options.func)
+				if(self.options.func) {
 					self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.gitSshPassword.value,
 						gitPrivateKey: pKey, gitPassphrase: self.gitPassphrase.value,
 						knownHosts: self.gitSshKnownHosts.value});
+					}
 				delete self.options.func; //prevent performing this action twice (IE)
 			}
 		};
@@ -164,7 +166,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 					
 					process(loadedPrivateKey);
 				};
-			})(this.privateKeyFile);
+			}(this.privateKeyFile));
 			
 			reader.readAsText(this.privateKeyFile);
 		} else if(loadedPrivateKey){
