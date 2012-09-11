@@ -18,6 +18,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		}
 		
+		function multiply(a,b){
+			var resultString = 'Result:';
+			var result = a*b;
+			return resultString + result;
+		}
+		
+		
 		StyleSet.prototype.name = 'Orion';
 		StyleSet.prototype.navbar = '#333';
 		StyleSet.prototype.button = '#EFEFEF';

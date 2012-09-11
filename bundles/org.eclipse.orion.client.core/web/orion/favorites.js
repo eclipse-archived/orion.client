@@ -37,7 +37,7 @@ define(['require', 'dojo', 'orion/util', 'orion/EventTarget'], function(require,
 		},
 		
 		_notifyListeners: function() {
-			this.dispatchEvent("favoritesChanged", {navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
+			this.dispatchEvent({type:"favoritesChanged", navigator: this._favorites, registry: this._registry}); //$NON-NLS-0$
 		},
 	
 		/**

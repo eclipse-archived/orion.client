@@ -212,6 +212,12 @@ ul,menu,dir {
 	display: inline-block;
 }
 
+.setting-repository-label {
+	min-width: 330px;
+	display: inline-block;
+	padding-top: 10px;
+}
+
 .displaytable>section {
 	display: table-row;
 }

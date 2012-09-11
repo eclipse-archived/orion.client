@@ -10,7 +10,8 @@
  ******************************************************************************/
 /*global define document orion*/
 define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', 'orion/i18nUtil', 'orion/Deferred',
-		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/Select'],
+		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield',
+		'orion/widgets/settings/LabeledSelect'],
 		function(messages, mExplorer, mSection, i18nUtil, Deferred, dojo, dijit) {
 	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
 
@@ -33,8 +34,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 		},
 		changeProperty: function() {},
 		updateField: function(modelValue) {}
-	});
-	var PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
+	}),
+	PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
 		postCreate: function() {
 			this.inherited(arguments);
 			var type = this.property.getType();
@@ -50,16 +51,40 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 		updateField: function(value) {
 			this.myfield.value = value;
 		}
-	});
-	var PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
+	}),
+	PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
 		},
 		updateField: function(value) {
 			this.myfield.checked = value;
 		}
-	});
-	var PropertiesWidget = dojo.declare('orion.widgets.settings.PropertiesWidget', [dijit._Container, dijit._WidgetBase], { //$NON-NLS-0$
+	}),
+	PropertySelect = dojo.declare('orion.widgets.settings.PropertySelect', [orion.widgets.settings.LabeledSelect, PropertyWidget], { //$NON-NLS-0$
+		postCreate: function() {
+			var values = this.property.getOptionValues(), labels = this.property.getOptionLabels();
+			this.options = values.map(function(value, i) {
+				var label = (typeof labels[i] === 'string' ? labels[i] : value); //$NON-NLS-0$
+				return {value: label, label: label};
+			});
+			this.inherited(arguments);
+		},
+		change: function(event) {
+			this.inherited(arguments);
+			var selectedOptionValue = this.property.getOptionValues()[this.getSelectedIndex()];
+			if (typeof selectedOptionValue !== 'undefined') { //$NON-NLS-0$
+				this.changeProperty(selectedOptionValue);
+			}
+		},
+		updateField: function(value) {
+			this.inherited(arguments);
+			var index = this.property.getOptionValues().indexOf(value);
+			if (index !== -1) {
+				this.setSelectedIndex(index);
+			}
+		}
+	}),
+	PropertiesWidget = dojo.declare('orion.widgets.settings.PropertiesWidget', [dijit._Container, dijit._WidgetBase], { //$NON-NLS-0$
 		buildRendering: function() {
 			this.inherited(arguments);
 			var serviceRegistry = this.serviceRegistry;
@@ -94,15 +119,19 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorer', 'orion/section', '
 					changeProperty: self.changeProperty.bind(self, property)
 				};
 				var widget;
-				// TODO if property.getOptionValues(), use a Select
-				switch (property.getType()) {
-					case 'boolean': //$NON-NLS-0$
-						widget = new PropertyCheckbox(options);
-						break;
-					case 'number': //$NON-NLS-0$
-					case 'string': //$NON-NLS-0$
-						widget = new PropertyTextField(options);
-						break;
+				if (property.getOptionValues()) {
+					// Enumeration
+					widget = new PropertySelect(options);
+				} else {
+					switch (property.getType()) {
+						case 'boolean': //$NON-NLS-0$
+							widget = new PropertyCheckbox(options);
+							break;
+						case 'number': //$NON-NLS-0$
+						case 'string': //$NON-NLS-0$
+							widget = new PropertyTextField(options);
+							break;
+					}
 				}
 				self.addChild(widget);
 			});

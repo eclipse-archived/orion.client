@@ -45,10 +45,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				dojo.place(slideout, this.pluginSectionHeader);
 			}
 			this.addRows();
-			this.setTarget();
-			this.storageKey = this.preferences.listenForChangedSettings( dojo.hitch( this, 'onStorage' ) ); //$NON-NLS-0$
+
+			var self = this;
+			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
+				{	updated: function(properties) {
+						var target;
+						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						} else {
+							target = "_blank"; //$NON-NLS-0$
+						}
+						self.setTarget(target);
+					}
+				}, {pid: "nav.config"}); //$NON-NLS-0$
 		},
-		
+
 		updateToolbar: function(id){
 			if(this.pluginCommands) {
 				this.commandService.destroy(this.pluginCommands);
@@ -217,6 +228,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				}
 			}
 		},
+
+		setTarget: function(target) {
+			this.target = target;
+		},
 		
 		/* reloads all of the plugins - sometimes useful for reaffirming plugin initialization */
 
@@ -263,40 +278,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 					break;
 				}
-			}
-		},
-		
-		setTarget: function(){
-	
-			var preferences = this.preferences;	
-			var renderer = this;
-		
-			this.preferences.getPreferences('/settings', 2).then( function(prefs){	 //$NON-NLS-0$
-			
-				var data = prefs.get("General"); //$NON-NLS-0$
-				
-				if( data !== undefined ){
-						
-					var storage = JSON.parse( data );
-					
-					if(storage){
-						var target = preferences.getSetting( storage, "Navigation", messages['Links'] ); //$NON-NLS-0$
-						
-						if( target === messages['Open in new tab'] ){
-							target = "_blank"; //$NON-NLS-0$
-						}else{
-							target = "_self"; //$NON-NLS-0$
-						}
-						
-						renderer.target = target;
-					}
-				}
-			});
-		},
-		
-		onStorage:function (e) {
-			if( e.key === this.storageKey ){
-				this.setTarget();
 			}
 		},
 		

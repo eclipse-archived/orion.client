@@ -2929,7 +2929,7 @@ loop:   for (;;) {
             advance();
             if (option.safe && banned[token.value]) {
                 warning("ADsafe violation: '{a}'.", token, token.value);
-            } else if (token.reserved && !option.es5) {
+            } else if (token.reserved /*&& !option.es5*/) {
                 warning("Expected an identifier and instead saw '{a}' (a reserved word).",
                         token, token.id);
             } 
@@ -5624,6 +5624,10 @@ loop:   for (;;) {
     reserve('public');
     reserve('static');
 
+// For Rhino compatibility, reserve all the ES3 "future reserved words" too.
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=388968
+	'abstract boolean byte char class double extends final float goto implements import int interface long native package private protected public short static super synchronized throws transient volatile'
+	.split(' ').forEach(reserve);
 
 // Parse JSON
 
