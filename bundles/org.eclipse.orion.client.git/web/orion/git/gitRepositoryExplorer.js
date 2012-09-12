@@ -63,10 +63,16 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.changedItem = function(parent, children) {
-		this.redisplay();
+		// An item changed so we do not need to process any URLs
+		this.redisplay(false);
 	};
 	
-	GitRepositoryExplorer.prototype.redisplay = function(){
+	GitRepositoryExplorer.prototype.redisplay = function(processURLs){
+		// make sure to have this flag
+		if(processURLs === undefined){
+			processURLs = true;
+		}
+	
 		var pageParams = PageUtil.matchResourceParameters();
 		if (pageParams.resource) {
 			this.displayRepository(pageParams.resource);
@@ -78,13 +84,21 @@ exports.GitRepositoryExplorer = (function() {
 			var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$
 			gitapiCloneUrl = gitapiCloneUrl.substring(0, gitapiCloneUrl.length-2);
 			
-			this.displayRepositories2(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath); //$NON-NLS-1$ //$NON-NLS-0$
+			this.displayRepositories2(relativePath[0] === "/" ? gitapiCloneUrl + relativePath : gitapiCloneUrl + "/" + relativePath, processURLs); //$NON-NLS-1$ //$NON-NLS-0$
 		};
 	};
 	
-	GitRepositoryExplorer.prototype.displayRepositories2 = function(location){
+	GitRepositoryExplorer.prototype.displayRepositories2 = function(location, processURLs){
 		var that = this;
 		this.loadingDeferred = new dojo.Deferred();
+		console.log(processURLs);
+		
+		if(processURLs){
+			this.loadingDeferred.then(function(){
+				that.commandService.processURL(window.location.href);
+			});
+		}
+		
 		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
 		this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
@@ -99,7 +113,7 @@ exports.GitRepositoryExplorer = (function() {
 					that.displayRepositories(repositories, "full", true); //$NON-NLS-0$
 				}
 				
-				that.commandService.processURL(window.location.href);
+				//that.commandService.processURL(window.location.href);
 			}, function(error){
 				dojo.hitch(that, that.handleError)(error);
 			}
@@ -185,7 +199,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				}
-				that.commandService.processURL(window.location.href);
+				//that.commandService.processURL(window.location.href);
 				progressService.setProgressMessage("");
 			}, function(error){
 				dojo.hitch(that, that.handleError)(error);

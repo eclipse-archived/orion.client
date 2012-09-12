@@ -113,14 +113,28 @@ mBootstrap.startup().then(function(core) {
 		}	
 	);	
 	
+	// previously saved resource value
+	var previousResourceValue = "";
+	
 	//every time the user manually changes the hash, we need to load the workspace with that name
-	dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
-		fileClient.loadWorkspace().then(
-			function(workspace){
-				explorer.setDefaultPath(workspace.Location);
-				explorer.redisplay();
-			}	
-		);	
+	dojo.subscribe("/dojo/hashchange", explorer, function(changedHash) { //$NON-NLS-0$
+		
+		// make sure to close all parameter collectors
+		commandService.closeParameterCollector();
+		
+		var resource = PageUtil.matchResourceParameters().resource;
+		
+		// do not redisplay if not necessary
+		if(previousResourceValue !== resource){
+			previousResourceValue = resource;
+		
+			fileClient.loadWorkspace().then(
+				function(workspace){
+					explorer.setDefaultPath(workspace.Location);
+					explorer.redisplay();
+				}	
+			);	
+		}
 	});
 	
 });
