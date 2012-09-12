@@ -104,5 +104,58 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mysetting'), 'Setting\'s PID no longer designated');
 		assert.ok(!metaTypeRegistry.getObjectClassDefinition(objectClassId), 'ObjectClassDefinition was removed');
 	});
+	tests['test setting categories'] = makeTest(function() {
+		var serviceRegistration1 = serviceRegistry.registerService(SETTING_SERVICE, {},
+			{	settings: [
+					{	pid: 'mypid1',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					},
+					{	pid: 'mypid2',
+						category: 'dog',
+						properties: [
+							{	id: 'prop' }
+						]
+					},
+					{	pid: 'mypid3',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					}
+				]
+			});
+		var serviceRegistration2 = serviceRegistry.registerService(SETTING_SERVICE, {},
+			{	settings: [
+					{	pid: 'mypid4',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					}
+				]
+			});
+
+		var settings = settingsRegistry.getSettings();
+		assert.equal(settings.length, 4);
+		assert.deepEqual(settingsRegistry.getCategories().sort(), ['cat', 'dog'].sort());
+		var catSettings = settingsRegistry.getSettings('cat');
+		var dogSettings = settingsRegistry.getSettings('dog');
+
+		assert.equal(catSettings.length, 3);
+		assert.equal(catSettings[0].getPid(), 'mypid1');
+		assert.equal(catSettings[1].getPid(), 'mypid3');
+		assert.equal(catSettings[2].getPid(), 'mypid4');
+
+		assert.equal(dogSettings.length, 1);
+		assert.equal(dogSettings[0].getPid(), 'mypid2');
+
+		serviceRegistration1.unregister();
+		assert.deepEqual(settingsRegistry.getCategories(), ['cat']);
+		assert.equal(settingsRegistry.getSettings('cat').length, 1);
+		assert.equal(settingsRegistry.getSettings('dog').length, 0);
+	});
 	return tests;
 });
