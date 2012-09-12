@@ -12,7 +12,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], function(messages, dojo, mExplorer, mUtil, mGitCommands, mNavUtils) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], function(messages, dojo, mExplorer, mUtil, mGitCommands, mNavUtils) {
 
 var exports =  {};
 exports.GitCommitNavigator = (function() {

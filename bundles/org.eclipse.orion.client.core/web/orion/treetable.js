@@ -84,7 +84,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 						tree._generate(children, 0);
 					});
 				}
-			});
+			}.bind(this));
 		},
 		
 		_generate: function(children, indentLevel) {

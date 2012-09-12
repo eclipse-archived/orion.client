@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/treetable', 'orion/explorerNavHandler', 'orion/commands'], function(messages, require, dojo, mTreeTable, mNavHandler, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], function(messages, require, dojo, mTreeTable, mNavHandler, mCommands){
 
 var exports = {};
 
@@ -287,9 +287,10 @@ exports.ExplorerModel = (function() {
 	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
 	 * and calculating id based on Location attribute.
 	 */
-	function ExplorerModel(rootPath, /* function returning promise */fetchItems) {
+	function ExplorerModel(rootPath, /* function returning promise */fetchItems, idPrefix) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
+		this.idPrefix = idPrefix || "";
 	}
 	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */{
 		destroy: function(){
@@ -328,7 +329,7 @@ exports.ExplorerModel = (function() {
 			// So we are going to substitute ascii values for invalid characters.
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363062
 			
-			var id = "";
+			var id = this.idPrefix;
 			for (var i=0; i<stripSlashes.length; i++) {
 				if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
 					id += stripSlashes.charCodeAt(i);
@@ -401,7 +402,9 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			dojo.empty(tableNode);
-			dojo.addClass(tableNode, 'treetable'); //$NON-NLS-0$
+			if (this._treeTableClass) {
+				dojo.addClass(tableNode, this._treeTableClass); 
+			}
 			this.renderTableHeader(tableNode);
 
 		},
@@ -644,6 +647,7 @@ exports.ExplorerRenderer = (function() {
 				this.getCheckedFunc = options.getCheckedFunc;
 				this.onCheckedFunc = options.onCheckedFunc;
 				this._highlightSelection = true;
+				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
 				if (options.highlightSelection === false){
 					this._highlightSelection = false;
 				}

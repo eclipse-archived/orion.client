@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorer', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
-		'orion/selection', 'orion/sites/siteUtils', 'orion/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
+		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
 		function(messages, i18nUtil, dojo, mExplorer, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable) {
 	var SiteServicesExplorer2, SitesRenderer2, SiteTreeModel;
 

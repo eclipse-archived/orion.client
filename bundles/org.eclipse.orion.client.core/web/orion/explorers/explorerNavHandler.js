@@ -23,7 +23,7 @@ exports.ExplorerNavHandler = (function() {
 	/**
 	 * Creates a new tree iteration handler
 	 * 
-	 * @name orion.ExplorerNavHandler.ExplorerNavHandler
+	 * @name orion.explorers.ExplorerNavHandler.ExplorerNavHandler
 	 * @class A tree iteration handler based on an explorer.
 	 * @param {Object} explorer The orion.explorer.Explorer instance.
 	 * @param {Object} options The options object which provides iterate patterns and all call back functions when iteration happens.
