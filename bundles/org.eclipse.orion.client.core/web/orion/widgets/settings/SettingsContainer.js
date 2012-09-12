@@ -15,10 +15,10 @@
    category, the right shows the resulting HTML for that category. */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate',
-		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
+		'orion/PageUtil', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate', 'orion/widgets/themes/editor/ThemeData',
+		'orion/widgets/themes/container/ThemeData', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
 		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
-		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate) {
+		function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate, editorThemeData, containerThemeData) {
 
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
@@ -140,12 +140,27 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			var item = {
 				id: "themeBuilder", //$NON-NLS-0$
-				innerHTML: 'Themes', // messages["Themes"],
+				innerHTML: 'UI Theme', // messages["Themes"],
 				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
 				role: "tab", //$NON-NLS-0$
 				tabindex: -1,
 				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
 				onclick: dojo.hitch( this, 'showThemeBuilder', "themeBuilder" ) //$NON-NLS-1$ //$NON-NLS-0$
+			};
+
+			this.addCategory(item, this.initialSettings.length);
+		},
+		
+		addEditorThemeBuilder: function() {
+
+			var item = {
+				id: "editorThemeBuilder", //$NON-NLS-0$
+				innerHTML: 'Editor Theme', // messages["Themes"],
+				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
+				role: "tab", //$NON-NLS-0$
+				tabindex: -1,
+				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
+				onclick: dojo.hitch( this, 'showEditorThemeBuilder', "editorThemeBuilder" ) //$NON-NLS-1$ //$NON-NLS-0$
 			};
 
 			this.addCategory(item, this.initialSettings.length);
@@ -173,14 +188,37 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			if(this.themeWidget) {
 				this.themeWidget.destroy();
 			}
+			
+			var containerTheme = new containerThemeData.ThemeData();
 		
-			this.themeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences });
+			this.themeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: containerTheme });
 			
 			dojo.empty(this.table);
 
 			var themeNode = dojo.create( 'div', null, this.table );
+
+			this.themeWidget.renderData( themeNode, 'INITIALIZE' );
+		},
+		
+		showEditorThemeBuilder: function(id){
+		
+			this.selectCategory(id);
 			
-			this.themeWidget.render(themeNode, 'INITIALIZE');
+			this.updateToolbar(id);
+		
+			if(this.editorThemeWidget) {
+				this.editorThemeWidget.destroy();
+			}
+			
+			var editorTheme = new editorThemeData.ThemeData();
+		
+			this.editorThemeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
+			
+			dojo.empty(this.table);
+
+			var themeNode = dojo.create( 'div', null, this.table );
+
+			this.editorThemeWidget.renderData( themeNode, 'INITIALIZE' );
 		},
 		
 		showUserSettings: function(id){
@@ -328,6 +366,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 						this.showThemeBuilder(id);
 						break;
 						
+					case "editorThemeBuilder":
+						this.showEditorThemeBuilder(id);
+						break;
+						
 					case "pluginSettings":
 						this.showPluginSettings(id);
 						break;
@@ -346,6 +388,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.addUserSettings();
 			this.addThemeBuilder();
+//			this.addEditorThemeBuilder();
 			this.addPlugins();
 			this.addPluginSettings();
 			this.processHash();
