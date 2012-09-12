@@ -1081,11 +1081,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		redraw: function() {
 			if (this._redrawCount > 0) { return; }
 			var lineCount = this._model.getLineCount();
+			this.redrawRulers(0, lineCount);
+			this.redrawLines(0, lineCount); 
+		},
+		redrawRulers: function(startLine, endLine) {
+			if (this._redrawCount > 0) { return; }
 			var rulers = this.getRulers();
 			for (var i = 0; i < rulers.length; i++) {
-				this.redrawLines(0, lineCount, rulers[i]);
+				this.redrawLines(startLine, endLine, rulers[i]);
 			}
-			this.redrawLines(0, lineCount); 
 		},
 		/**
 		 * Redraws the text in the given line range.
@@ -1120,6 +1124,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (ruler) {
 				div.rulerChanged = true;
+			} else {
+				if (this._lineHeight) {
+					this._resetLineHeight(startLine, endLine);
+				}
 			}
 			if (!ruler || ruler.getOverview() === "page") { //$NON-NLS-0$
 				var child = div.firstChild;
@@ -2864,6 +2872,42 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var self = this;
 			this._autoScrollTimerID = setTimeout(function () {self._autoScrollTimer();}, this._AUTO_SCROLL_RATE);
 		},
+		_calculateLineHeightTimer: function(calculate) {
+			if (!this._lineHeight) { return; }
+			if (this._calculateLHTimer) { return; }
+			var lineCount = this._model.getLineCount(), i = 0;
+			if (calculate) {
+				var c = 0;
+				var MAX_TIME = 100;
+				var start = new Date().getTime(), firstLine = 0;
+				while (i < lineCount) {
+					if (!this._lineHeight[i]) {
+						c++;
+						if (!firstLine) { firstLine = i; }
+						this._lineHeight[i] = this._calculateLineHeight(i);
+					}
+					i++;
+					if ((new Date().getTime() - start) > MAX_TIME) {
+						break;
+					}
+				}
+				log("c=" + c + " firstLine=" + firstLine);
+				this.redrawRulers(0, lineCount);
+				this._queueUpdate();
+			}
+			if (i !== lineCount) {
+				var self = this;
+				this._calculateLHTimer = setTimeout(function() {
+					self._calculateLHTimer = null;
+					self._calculateLineHeightTimer(true);
+				}, 0);
+				return;
+			}
+			if (this._calculateLHTimer) {
+				clearTimeout(this._calculateLHTimer);
+				this._calculateLHTimer = undefined;
+			}
+		},
 		_calculateLineHeight: function(lineIndex) {
 			var clientDiv = this._clientDiv;
 			var model = this._model;
@@ -2872,7 +2916,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				child = dummy = this._createLine(clientDiv, null, document, lineIndex, model);
 			}
 			var rect = this._getLineBoundingClientRect(child);
-			var height = this._lineHeight[lineIndex] = rect.bottom - rect.top;
+			var height = rect.bottom - rect.top;
 			if (dummy) { clientDiv.removeChild(dummy); }
 			return height;
 		},
@@ -4039,15 +4083,26 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_getLineBoundingClientRect: function (child, noTrim) {
 			var rect = child.getBoundingClientRect();
-			rect = {left: rect.left, top: rect.top, right: rect.left, bottom: rect.bottom};
-			var lastChild = child.lastChild;
-			//Remove any artificial trailing whitespace in the line
-			while (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
-				lastChild = lastChild.previousSibling;
-			}
-			if (lastChild) {
-				var lastRect = lastChild.getBoundingClientRect();
-				rect.right = lastRect.right + this._getLineTrim(child).right;
+			rect = {left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom};
+			if (this._wrapMode) {
+//				var rects = child.getClientRects();
+//				var minLeft = rects[0].left, maxRight = rects[0].right;
+//				for (var i=1; i<rects.length; i++) {
+//					minLeft = Math.min(rects[i].left, minLeft);
+//					maxRight = Math.max(rects[i].right, maxRight);
+//				}
+//				rect.left = minLeft;
+//				rect.right = maxRight;
+			} else {
+				var lastChild = child.lastChild;
+				//Remove any artificial trailing whitespace in the line
+				while (lastChild && lastChild.ignoreChars === lastChild.firstChild.length) {
+					lastChild = lastChild.previousSibling;
+				}
+				if (lastChild) {
+					var lastRect = lastChild.getBoundingClientRect();
+					rect.right = lastRect.right + this._getLineTrim(child).right;
+				}
 			}
 			if (noTrim) {
 				var padding = this._getLineTrim(child);
@@ -4056,10 +4111,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return rect;
 		},
-		_getLineHeight: function(lineIndex) {
+		_getLineHeight: function(lineIndex, calculate) {
 			if (lineIndex !== undefined && this._lineHeight) {
 				var lineHeight = this._lineHeight[lineIndex];
-				return lineHeight ? lineHeight : this._calculateLineHeight(lineIndex);
+				if (lineHeight) { return lineHeight; }
+				if (calculate || calculate === undefined) {
+					var height = this._lineHeight[lineIndex] = this._calculateLineHeight(lineIndex);
+					return height;
+				}
 			}
 			return this._metrics.lineHeight;
 		},
@@ -4711,9 +4770,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				self._update();
 			}, 0);
 		},
-		_resetLineHeight: function() {
+		_resetLineHeight: function(startLine, endLine) {
 			if (this._wrapMode) {
-				this._lineHeight = [];
+				if (startLine !== undefined && endLine !== undefined) {
+					for (var i = startLine; i < endLine; i++) {
+						this._lineHeight[i] = undefined;
+					}
+				} else {
+					this._lineHeight = new Array(this._model.getLineCount());
+				}
+				this._calculateLineHeightTimer();
+			} else {
+				this._lineHeight = null;
 			}
 		},
 		_resetLineWidth: function() {
@@ -5270,17 +5338,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (wrapMode) {
 				clientDiv.style.whiteSpace = "pre-wrap";
 				clientDiv.style.wordWrap = "break-word";
-				this._lineHeight = new Array(this._model.getLineCount());
 			} else {
 				clientDiv.style.whiteSpace = "pre";
 				clientDiv.style.wordWrap = "normal";
-				this._lineHeight = null;
 			}
 			if (!init) {
 				this.redraw();
 				this._resetLineWidth();
-				//TODO reset lines
 			}
+			this._resetLineHeight();
 		},
 		_showCaret: function (allSelection, pageScroll) {
 			if (!this._clientDiv) { return; }
@@ -5474,21 +5540,26 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (topIndex > 0) {
 					top += this._getLineHeight(topIndex - 1);
 				}
+				while (l < lineCount) {
+					h += this._getLineHeight(l, false);
+					l++;
+				}
+				scrollHeight = h;
 			} else {
 				var firstLine = Math.max(0, scroll.y) / lineHeight;
 				topIndex = Math.floor(firstLine);
 				lineStart = Math.max(0, topIndex - 1);
 				top = Math.round((firstLine - lineStart) * lineHeight);
 				partialY = Math.round((firstLine - topIndex) * lineHeight);
+				scrollHeight = lineCount * lineHeight;
 			}
-			scrollHeight = lineCount * lineHeight;//TODO calculate for VLH
 			this._partialY = partialY;
 			var parent = this._parent;
 			var parentWidth = parent.clientWidth;
 			var parentHeight = parent.clientHeight;
+			clientHeight = this._getClientHeight();
 			if (hScrollOnly) {
 				clientWidth = this._getClientWidth();
-				clientHeight = this._getClientHeight();
 				leftWidth = 0;
 				if (this._leftDiv) {
 					leftRect = this._leftDiv.getBoundingClientRect();
@@ -5501,7 +5572,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			} else {
 
 				var viewDiv = this._viewDiv;
-				clientHeight = this._getClientHeight();
 				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
 				var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
