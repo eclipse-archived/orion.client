@@ -243,30 +243,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		return relative.indexOf('/workspace') === 0; //$NON-NLS-0$
 	}
 	
-	
-	function processNavigatorParent(parent, children) {
-		//link the parent and children together
-		parent.children = children;
-		for (var e in children) {
-			var child = children[e];
-			child.parent=parent;
-		}
-		// not ideal, but for now, sort here so it's done in one place.
-		// this should really be something pluggable that the UI defines
-		parent.children.sort(function(a, b) {
-			var isDir1 = a.Directory;
-			var isDir2 = b.Directory;
-			if (isDir1 !== isDir2) {
-				return isDir1 ? -1 : 1;
-			}
-			var n1 = a.Name && a.Name.toLowerCase();
-			var n2 = b.Name && b.Name.toLowerCase();
-			if (n1 < n2) { return -1; }
-			if (n1 > n2) { return 1; }
-			return 0;
-		}); 
-	}
-	
 	/**
 	 * Returns the text contained by a DOM node.
 	 * @param {DomNode} node
@@ -393,7 +369,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		makeRelative: makeRelative,
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,
-		processNavigatorParent: processNavigatorParent,
 		getText: getText,
 		safeText: safeText,
 		setText: setText,
