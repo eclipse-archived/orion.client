@@ -14,10 +14,10 @@
 
 define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorer-table', 'orion/util', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes',
+        'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/util', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes',
         'dojo/parser'], 
 		function(messages, dojo, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
-				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mUtil, PageUtil, URITemplate, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mNavigatorRenderer, mUtil, PageUtil, URITemplate, mContentTypes) {
 
 dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
@@ -41,12 +41,16 @@ dojo.addOnLoad(function(){
 		var treeRoot = {
 			children:[]
 		};
-					
+				
+	
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, 
-				fileClient: fileClient, commandService: commandService, contentTypeService: contentTypeService,
-				parentId: "explorer-tree", toolbarId: "pageActions", selectionToolsId: "selectionTools", preferences: preferences}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
+		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, 
+				fileClient: fileClient, parentId: "explorer-tree", //$NON-NLS-0$
+				rendererFactory: function(explorer) {
+					return new mNavigatorRenderer.NavigatorRenderer({checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, explorer, commandService, contentTypeService);  //$NON-NLS-0$
+				}}); 
+
 		function refresh() {
 			var pageParams = PageUtil.matchResourceParameters();
 			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
@@ -56,6 +60,7 @@ dojo.addOnLoad(function(){
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, isFavoriteTarget: true,
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService});
+				mFileCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot);
 				var isAtRoot = mUtil.isAtRoot(explorer.treeRoot.Location) ;
 				if (isAtRoot && !dojo.byId("gettingStartedTasks")) { //$NON-NLS-0$
 					// create a command that represents each "orion.navigate.content" extension point
