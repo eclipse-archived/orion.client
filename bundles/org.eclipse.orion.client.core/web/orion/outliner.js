@@ -10,7 +10,132 @@
  ******************************************************************************/
  /*global define document window*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, dojo, mUtil, mSection, mCommands, URITemplate, EventTarget) {
+define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, dojo, mUtil, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
+
+	function OutlineRenderer (options, explorer, title, selectionService) {
+		this.explorer = explorer;
+		this._init(options);
+		this.title = title;
+		this.selectionService = selectionService;
+	}
+	
+	OutlineRenderer.prototype = mExplorer.SelectionRenderer.prototype;
+	OutlineRenderer.prototype.constructor = OutlineRenderer;
+	OutlineRenderer.prototype.getLabelColumnIndex = function() {
+		return 0;
+	};
+	OutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		if (!item) {
+			return;
+		}
+		var elementNode = dojo.create("span", null, tableRow, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		if (item.className) {
+			dojo.addClass(elementNode, item.className);
+		}
+		if (item.children) {
+			this.getExpandImage(tableRow, elementNode);
+		}
+		if (item.href) {
+			this._createLink(item.label, item.href, elementNode);
+		} else if (item.line || item.column || item.start) {
+			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
+			this._createLink(item.label, href, elementNode);
+		} else if (item.label) {
+			dojo.place(document.createTextNode(item.label), elementNode, "last"); //$NON-NLS-0$
+		}
+	};
+	
+	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
+		var link = dojo.create("a", null, parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		// if there is no selection service, we rely on normal link following
+		if (!this.selectionService) {
+			link.href = href;
+		} else {
+			dojo.style(link, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		dojo.addClass(link, "navlinkonpage"); //$NON-NLS-0$
+		dojo.place(document.createTextNode(text), link);
+		// if a selection service has been specified, we will use it for link selection.
+		// Otherwise we assume following the href in the anchor tag is enough.
+		if (this.selectionService) {
+			var selectionService = this.selectionService;
+			var url = href;
+			dojo.connect(link, "onclick", link, function(event) { //$NON-NLS-0$
+				if (mUtil.openInNewWindow(event)) {
+					mUtil.followLink(url, event);
+				} else {
+					selectionService.setSelections(url);
+				}
+			});
+		}
+		return link;
+	};
+	
+
+	function OutlineExplorer(serviceRegistry, selection, title) {
+		/*	we intentionally do not do this:
+				this.selection = selection;
+			Our renderer is going to trigger the selection events using specialized URL's when an outline
+			link is clicked.  We don't want the explorer triggering selection events on the outline model item
+		*/
+		this.registry = serviceRegistry;
+		this.renderer = new OutlineRenderer({checkbox: false, decorateAlternatingLines: false, treeTableClass: "outlineExplorer"}, this, title, selection);  //$NON-NLS-0$ 
+	}
+	OutlineExplorer.prototype = mExplorer.Explorer.prototype;	
+	OutlineExplorer.prototype.constructor = OutlineExplorer;
+	
+	function OutlineModel(items) {
+		this.items = items;
+		this.root = {children: items};
+		this.idItemMap = {};
+		this.specialIds = [];
+	}
+	OutlineModel.prototype.constructor = OutlineModel;
+	
+	OutlineModel.prototype.getRoot = function(onItem){
+		onItem(this.root);
+	};
+	
+	OutlineModel.prototype.destroy = function() {
+	};
+	
+	OutlineModel.prototype.getId = function(/* item */ item){
+		// first see if we have already generated an id because of a special case (duplicates)
+		// We hope this list remains relatively small, or we should consider a different implementation
+		// for mapping items back to their id.
+		for (var i=0; i<this.specialIds.length; i++) {
+			if (this.specialIds[i].item === item) {
+				return this.specialIds[i].id;
+			}
+		}
+		// Generate an id.  This code is assuming that generating an id for an item is faster than if we kept an array
+		// of all id/item combinations.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
+		var id = item.label.replace(/[\\\/\.\:\-\_]/g, "");
+		// We might have duplicate id's if the outline items are duplicated.  Check for this case and use a timestamp in lieu
+		// of the generated id.
+		if (this.idItemMap[id] && this.idItemMap[id]!== item) {
+			id = new Date().getTime().toString();
+			this.idItemMap[id] = item;
+			this.specialIds.push({id: id, item: item});
+		} else {
+			this.idItemMap[id] = item;
+		}
+		return id;
+	};
+		
+	OutlineModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
+		if (parentItem.children) {
+			// The tree model iterator assumes that there are back links to the parent
+			for (var i=0; i<parentItem.children.length; i++) {
+				parentItem.children[i].parent = parentItem;
+			}
+			onComplete(parentItem.children);
+		} else {
+			onComplete([]);
+		}
+	};
+
+
 
 	/**
 	 * Constructs a new Outliner with the given options.
@@ -78,21 +203,22 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			this._renderHeadingAndMenu(this.outlineProviders);
 		},
 		_renderOutline: function(outlineModel, title) {
-			var contentParent = dojo.byId("outlineSectionContent"); //$NON-NLS-0$
+			var contentParent = dojo.byId("outlinerHeading"); //$NON-NLS-0$
 			if (!contentParent) {
 				this._renderHeadingAndMenu();
 			}
+			var contentNode = dojo.byId("outlineSectionContent"); //$NON-NLS-0$
+			dojo.empty(contentNode);
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {
-				if (this.outlineNode) {
-					dojo.empty(this.outlineNode);
-				} else {
-					this.outlineNode = dojo.create("ul", {className: "outline"}); //$NON-NLS-1$ //$NON-NLS-0$
-				}
+				this.explorer = new OutlineExplorer(this._serviceRegistry, this._selectionService, title);
+				this.explorer.createTree("outlineSectionContent", new OutlineModel(outlineModel), {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
+				// expand the first level of the model
 				for (var i=0; i < outlineModel.length; i++) {
-					this._renderElement(this.outlineNode, outlineModel[i], title);
+					if (outlineModel[i].children) {
+						this.explorer.myTree.expand(outlineModel[i]);
+					}
 				}
-				dojo.place(this.outlineNode, "outlineSectionContent", "last"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		},
 		_menuCallback: function() {
@@ -121,61 +247,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			if (outlineProviders.length > 1) {
 				this._commandService.renderCommands(this.outlineSection.selectionNode.id, this.outlineSection.selectionNode.id, {}, this, "button"); //$NON-NLS-0$
 			}
-		},
-		_renderElement: function(/**DOMNode*/ parentNode, /**Object*/ element, title) {
-			if (!element) {
-				return;
-			}
-			var elementNode = dojo.create("li", null, parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			if (element.className) {
-				dojo.addClass(elementNode, element.className);
-			}
-			if (element.href) {
-				this._createLink(element.label, element.href, elementNode);
-			} else if (element.line || element.column || element.start) {
-				var start = element.start || null,
-				    end = element.end || null,
-				    line = element.line || null,
-				    offset = element.column || null,
-				    text = element.text || null,
-				    href = new URITemplate("#{,resource,params*}").expand({resource: title, params: element}); //$NON-NLS-0$
-				this._createLink(element.label, href, elementNode);
-			} else if (element.label) {
-				dojo.place(document.createTextNode(element.label), elementNode, "only"); //$NON-NLS-0$
-			}
-			var children = element.children;
-			if (children) {
-				var newParent = dojo.create("ul", null, elementNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				for (var i = 0; i < children.length; i++) {
-					this._renderElement(newParent, children[i], title);
-				}
-			}
-		},
-		/** @returns {DOMNode} */
-		_createLink: function(text, href, parentNode) {
-			var link = dojo.create("a", null, parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			// if there is no selection service, we rely on normal link following
-			if (!this._selectionService) {
-				link.href = href;
-			} else {
-				dojo.style(link, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			dojo.addClass(link, "navlinkonpage"); //$NON-NLS-0$
-			dojo.place(document.createTextNode(text), link);
-			// if a selection service has been specified, we will use it for link selection.
-			// Otherwise we assume following the href in the anchor tag is enough.
-			if (this._selectionService) {
-				var selectionService = this._selectionService;
-				var url = href;
-				dojo.connect(link, "onclick", link, function(event) { //$NON-NLS-0$
-					if (mUtil.openInNewWindow(event)) {
-						mUtil.followLink(url, event);
-					} else {
-						selectionService.setSelections(url);
-					}
-				});
-			}
-			return link;
 		}
 	};
 	Outliner.prototype.constructor = Outliner;
