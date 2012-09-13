@@ -249,7 +249,32 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}	
 	}
 	
-	function _addSearchOptions(searcher) {
+	function _populateSavedSearchMenu(serviceRegistry, commandService, menu) {
+		// see http://bugs.dojotoolkit.org/ticket/10296
+		menu.focusedChild = null;
+		dojo.forEach(menu.getChildren(), function(child) {
+			menu.removeChild(child);
+			child.destroy();
+		});
+
+		serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+			var i;
+			var searches = prefs.get("search"); //$NON-NLS-0$
+			if (typeof searches === "string") { //$NON-NLS-0$
+				searches = JSON.parse(searches);
+			}
+			if (searches) {
+				for (i in searches) {
+					menu.addChild(new mCommands.CommandMenuItem({
+						 label: "<a href='"+require.toUrl("search/search.html") +  "#" + searches[i].query + "'>" + searches[i].name+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						 hasLink: true
+					}));
+				}
+			}
+		});
+	}
+		
+	function _addSearchOptions(serviceRegistry, commandService, searcher) {
 		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
 		if (optionMenu) {
 			optionMenu.destroy();
@@ -258,14 +283,27 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
 			id : "searchOptionsMenu" //$NON-NLS-0$
 		});
+		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
 		
 		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: "Reg expression",
+			label: messages["Regular expression"],
 			checked: false,
 			onChange : function(checked) {
 				searcher._regEx = checked;
 			}
 		}));
+		newMenu.addChild(new dijit.MenuSeparator());
+		var choicesMenu = new dijit.Menu({
+			style: "display: none;" //$NON-NLS-0$
+		});
+		var popup = new dijit.PopupMenuItem({
+			label: messages["Saved searches"],
+			popup: choicesMenu
+		});
+		newMenu.addChild(popup);
+		dojo.connect(newMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
+			_populateSavedSearchMenu(serviceRegistry, commandService, choicesMenu);
+		});
 		var menuButton = new orion.widgets.UserMenuDropDown({
 			label : "",
 			id : "searchOptionsDropDown", //$NON-NLS-0$
@@ -754,7 +792,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			}
 		});
-		_addSearchOptions(searcher);
+		_addSearchOptions(serviceRegistry, commandService, searcher);
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;
