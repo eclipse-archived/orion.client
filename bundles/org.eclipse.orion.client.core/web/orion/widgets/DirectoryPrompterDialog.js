@@ -73,7 +73,7 @@ function(messages, dojo, dijit, mUtil, mSelection, mNavUtils, mExplorer, mExplor
 					fileClient: this.fileClient, parentId: this.id+"_browseDirectoryExplorerTree", excludeFiles: true, rendererFactory: function(explorer) {  //$NON-NLS-0$
 						return new DirectoryPrompterRenderer({checkbox: false, decorateAlternatingLines: false, treeTableClass: "directoryPrompter" }, explorer);
 					}}); //$NON-NLS-0$
-			this.explorer.loadResourceList(path, true);
+			this.explorer.loadResourceList(path, true, null, true);
 		},
 		
 		execute : function() {

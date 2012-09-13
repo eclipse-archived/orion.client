@@ -229,7 +229,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!this._isRowSelectable(model)){
 				return;
 			}
-			if(!toggling){
+			if(!toggling || this._selectionPolicy === "singleSelection"){//$NON-NLS-0$
 				this._clearSelection(true);
 				this._checkRow(model,false);		
 				this._selections.push(model);
