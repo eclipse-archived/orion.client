@@ -181,9 +181,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 	 * @param [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
 	 * @param postLoad a function to call after loading the resource
-	 * @param {Boolean}singleSelection If true, set the selection policy to "singleSelection".
 	 */
-	FileExplorer.prototype.loadResourceList = function(path, force, postLoad, singleSelection) {
+	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
 		path = mUtil.makeRelative(path);
 		if (!force && path === this._lastPath) {
 			return;
@@ -236,8 +235,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 							}
 						}
 					}
-					var selectionPolicy = singleSelection ? "singleSelection" : "";//$NON-NLS-0$
-					this.createTree(this.parentId, this.model, {setFocus: true, selectionPolicy: selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+					this.createTree(this.parentId, this.model, {setFocus: true, selectionPolicy: this.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
 					if (typeof this.onchange === "function") { //$NON-NLS-0$
 						this.onchange(this.treeRoot);
 					}
