@@ -5,6 +5,7 @@ body {
 	min-height:400px;
 	clear: both;
 	overflow:hidden;
+	cursor:default;
 }
 
 /*Remove button padding in FF*/
@@ -152,7 +153,7 @@ input[type="button"]:active {
 	min-height:400px;
 }
 
-.orion-login, .orion-register, .orion-open, .orion-signup, .orion-reset, .orion-error{
+.orion-login, .orion-register, .orion-open, .orion-signup, .orion-reset, .orion-error, .orion-info {
 	border-radius: 4px;
 	border: solid 1px #CCC;
 }
@@ -274,6 +275,7 @@ input[type="button"]:active {
 	font-size:12px;
 	font-weight:bold;
 	margin-left: 5px;
+	cursor:pointer;
 }
 
 .orion-login-button:hover, .orion-send-button:hover {
@@ -327,7 +329,7 @@ input[type="button"]:active {
 	font-size: 9pt;
 	color:#999;
 	margin-top:15px;
-	cursor: default;
+	cursor: pointer;
 	text-decoration: underline;
 }
 
@@ -368,6 +370,28 @@ input[type="button"]:active {
 	top: 345px;
 	padding:5px;
 	padding-right:0;
+}
+
+.orion-info {
+	color: #333;
+	background-color: white;
+	width: 852px;
+	margin-right:0;
+	position: absolute;
+	top: 390px;
+	padding: 5px;
+	padding-right:0;
+}
+
+.orion-info-link {
+	color: #999;
+	cursor: pointer;
+	text-decoration: underline;
+}
+
+.orion-info-link:hover{
+	color: #333;
+	text-decoration: underline;
 }
 
 a.loginwindow {
