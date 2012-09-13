@@ -42,7 +42,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			if (type === 'number') { //$NON-NLS-0$
 				this.myfield.type = 'number'; //$NON-NLS-0$
 			} else {
-				this.myfield.type = 'string'; //$NON-NLS-0$
+				this.myfield.type = 'text'; //$NON-NLS-0$
 			}
 		},
 		change: function(event) {
@@ -52,7 +52,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			this.myfield.value = value;
 		}
 	}),
-	PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
+	PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyCheckbox', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
 		},
