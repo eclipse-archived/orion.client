@@ -131,6 +131,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				
 				dojo.byId( 'pickercontainer' ).style.display = 'none';
 				dojo.byId( 'savecontainer' ).style.display = '';
+				dojo.byId( 'stringcontainer' ).style.display = '';
 			
 				console.log( 'apply color' );
 			}
@@ -482,8 +483,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 					switch( component.family ){
 					
-						case 'Main':
-						case 'BACKGROUND':
+						case 'background':
 						
 							/* This is a hack to stop lines overlapping - ideally this software needs a layout
 								routine. Not pleased to do this. */
@@ -681,13 +681,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		ThemeBuilder.prototype.drawOutlineData = drawOutlineData;
 		
-		function processSettings( settings ){ /* to be provided by ThemeData */ }
+		function processSettings( settings, preferences ){ /* to be provided by ThemeData */ }
 		
 		ThemeBuilder.prototype.processSettings = processSettings;
 		
 		function apply(data){
 		
-			this.processSettings( this.settings );
+			this.processSettings( this.settings, this.preferences );
 			
 			var themename = this.settings.name;
 			
