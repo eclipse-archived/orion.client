@@ -592,6 +592,12 @@ h2 {
 .treeIterationCursorRow {
 	background-color: #f3f6fe;
 }
+
+.treeIterationCursorRow_Dotted {
+	outline: #AAA 1px dotted !important;
+	background-color: #f3f6fe;
+}
+
 .searchCmdGroupMargin {
 	margin-left: 16px;
 }
