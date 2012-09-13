@@ -11,11 +11,11 @@
 /*global define orion*/
 /*jslint browser:true */
 
-define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/sites/siteMappingsTable',
+define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section', 'orion/sites/siteMappingsTable',
 		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
 		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-		function(messages, require, dojo, dijit, mUtil, mCommands, mSection, mSiteMappingsTable) {
+		function(messages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable) {
 
 var AUTOSAVE_INTERVAL = 8000;
 var ROOT = "/"; //$NON-NLS-0$
@@ -313,11 +313,12 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") { //$NON-NLS-0$
 			dojo.style(this.siteStartedWarning, {display: "block"}); //$NON-NLS-0$
-			this.hostingStatus.innerHTML = mUtil.safeText(messages["Started at "]);
-			dojo.create("a", {href: hostStatus.URL, innerHTML: mUtil.safeText(hostStatus.URL), target: "_new"}, this.hostingStatus, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.hostingStatus.textContent = messages["Started at "];
+			var a = dojo.create("a", {href: hostStatus.URL, target: "_new"}, this.hostingStatus, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			a.textContent = hostStatus.URL;
 		} else if (hostStatus && hostStatus.Status === "stopped") {
 			dojo.style(this.siteStartedWarning, {display: "none"}); //$NON-NLS-0$
-			mUtil.setText(this.hostingStatus, messages["Stopped"]);
+			this.hostingStatus.textContent = messages["Stopped"];
 		}
 
 		setTimeout(dojo.hitch(this, function() {

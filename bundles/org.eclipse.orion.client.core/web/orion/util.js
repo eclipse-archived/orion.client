@@ -244,43 +244,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 	}
 	
 	/**
-	 * Returns the text contained by a DOM node.
-	 * @param {DomNode} node
-	 * @returns {String} The text contained by node. Note that treatment of whitespace 
-	 * and child nodes is not consistent across browsers.
-	 * @name orion.util#getText
-	 * @function
-	 */
-	function getText(node) {
-		return typeof(node.textContent) !== "undefined" ? node.textContent : node.innerText; //$NON-NLS-0$
-	}
-	
-	/**
-	 * Escapes HTML in string. Use this to sanitize user input that is destined for innerHTML.
-	 * @param {String} string
-	 * @returns {String} The string with HTML safely escaped.
-	 * @name orion.util#safeText
-	 * @function
-	 */
-	function safeText(string) {
-		return getText(document.createTextNode(string));
-	}
-	
-	/**
-	 * Removes all children of node and replaces them with a single text node containing text.
-	 * HTML is safely escaped.
-	 * @param {DomNode} node
-	 * @param {String} text
-	 */
-	function setText(node, text) {
-		if (typeof(node.textContent) !== "undefined") { //$NON-NLS-0$
-			node.textContent = text;
-		} else {
-			node.innerText = text;
-		}
-	}
-	
-	/**
 	 * Utility method for saving file contents to a specified location
 	 */
 	function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
@@ -369,9 +332,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		makeRelative: makeRelative,
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,
-		getText: getText,
-		safeText: safeText,
-		setText: setText,
 		saveFileContents: saveFileContents,
 		splitFile: splitFile
 	};
