@@ -388,7 +388,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			this.addUserSettings();
 			this.addThemeBuilder();
-//			this.addEditorThemeBuilder();
+			this.addEditorThemeBuilder();
 			this.addPlugins();
 			this.addPluginSettings();
 			this.processHash();

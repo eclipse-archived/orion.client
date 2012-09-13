@@ -25,7 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		}
 		
 		
-		StyleSet.prototype.name = 'Orion';
+		StyleSet.prototype.name = 'prospecto';
 		StyleSet.prototype.annotationRuler = '#333';
 		StyleSet.prototype.background = '#EFEFEF';
 		StyleSet.prototype.comment = '#333';
@@ -38,39 +38,73 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		StyleSet.prototype.lineNumber = '#bfbfbf';
 
 		function ThemeData(){
-
+		
+		
 			var orion = new StyleSet();
 			
-			orion.name = 'Orion';
+			orion.name = 'orion';
 			orion.annotationRuler = 'white'; 
 			orion.background = 'white';
-			orion.comment = 'darkSeaGreen';
-			orion.keyword = 'darkOrange';
+			orion.comment = 'green';
+			orion.keyword = 'darkRed';
 			orion.text = '#333';
-			orion.string = 'cornFlowerBlue';
+			orion.string = 'blue';
 			orion.overviewRuler = 'white';
-			orion.lineNumberOdd = '#333';
-			orion.lineNumberEven = '#333';
-			orion.lineNumber = '#333';
+			orion.lineNumberOdd = '#444';
+			orion.lineNumberEven = '#444';
+			orion.lineNumber = '#444';
 
-			this.styles.push( orion );			
+			this.styles.push( orion );	
+
+			var prospecto = new StyleSet();
+			
+			prospecto.name = 'prospecto';
+			prospecto.annotationRuler = 'white'; 
+			prospecto.background = 'white';
+			prospecto.comment = 'darkSeaGreen';
+			prospecto.keyword = 'darkOrange';
+			prospecto.text = '#333';
+			prospecto.string = 'cornFlowerBlue';
+			prospecto.overviewRuler = 'white';
+			prospecto.lineNumberOdd = '#333';
+			prospecto.lineNumberEven = '#333';
+			prospecto.lineNumber = '#333';
+
+			this.styles.push( prospecto );			
 			
 			var blue = new StyleSet();
 			
 			blue.name = 'blue';
 			blue.annotationRuler = 'lavender'; 
 			blue.background = 'aliceBlue';
-			blue.comment = 'mediumslateblue';
+			blue.comment = 'indigo';
 			blue.keyword = 'cornFlowerBlue';
 			blue.text = 'navy';
 			blue.string = 'cornFlowerBlue';
-			blue.overviewRuler = 'white';
+			blue.overviewRuler = 'lavender';
 			blue.lineNumberOdd = '#333';
 			blue.lineNumberEven = '#333';
 			blue.lineNumber = '#333';
 			
 			
 			this.styles.push( blue );
+			
+			var ambience = new StyleSet();
+			
+			ambience.name = 'ambience';
+			ambience.annotationRuler = '#3D3D3D'; 
+			ambience.background = '#202020';
+			ambience.comment = 'mediumslateblue';
+			ambience.keyword = 'cornFlowerBlue';
+			ambience.text = 'darkseagreen';
+			ambience.string = 'lightcoral';
+			ambience.overviewRuler = 'white';
+			ambience.lineNumberOdd = 'black';
+			ambience.lineNumberEven = 'black';
+			ambience.lineNumber = 'black';
+			
+			
+			this.styles.push( ambience );
 			
 		}
 		
@@ -99,32 +133,100 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var LEFT = dataset.left;
 			var TOP = dataset.top;
 			
-			dataset.shapes = [	{ type:'RECTANGLE', name:'annotationRuler',	x:LEFT,			y:TOP, width:46,	height:dataset.height, family:'annotationRuler', fill: 'white' },
-								{ type:'RECTANGLE', name:'background',			x:LEFT + 46,	y:TOP, width:290,	height:dataset.height, family:'background',	 fill: 'white' },
+			dataset.shapes = [	{ type:'TEXT', name:'Line Numbers', label:'1', x:LEFT + 20, y:TOP + 20, fill: '#333', family:'lineNumber', font: '9pt sans-serif' },
+								{ type:'TEXT', name:'Comments',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment', font: '9pt sans-serif' },
+								{ type:'RECTANGLE', name:'Background',			x:LEFT + 46,	y:TOP, width:290,	height:dataset.height, family:'background',	 fill: 'white' },
+								{ type:'TEXT', name:'Comments',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment', font: '9pt sans-serif' }, 
 								
-								{ type:'TEXT', name:'comment',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment' }, 
-								{ type:'TEXT', name:'keyword',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword' }, 
-								{ type:'TEXT', name:'text',			label:'multiply(a,b){',		x:LEFT + 100,	y:TOP + 40,		fill: '#333',			family:'text' }, 
-								{ type:'TEXT', name:'keyword',		label:'var',				x:LEFT + 75,	y:TOP + 60,		fill: 'darkorange',		family:'keyword' }, 
-								{ type:'TEXT', name:'text',			label:'output = ',			x:LEFT + 95,	y:TOP + 60,		fill: '#333',			family:'text' }, 
-								{ type:'TEXT', name:'string',		label:'\'Result\'',			x:LEFT + 144,	y:TOP + 60,		fill: 'cornflowerBlue', family:'string' }, 
-								{ type:'TEXT', name:'text',			label:';',					x:LEFT + 185,	y:TOP + 60,		fill: '#333',			family:'text' }, 
-								{ type:'TEXT', name:'keyword',		label:'var',				x:LEFT  +75,	y:TOP + 80,		fill: 'darkorange',		family:'keyword' },
-								{ type:'TEXT', name:'text',			label:'result = a*b;',		x:LEFT + 95,	y:TOP + 80,		fill: '#333',			family:'text' }, 
-								{ type:'TEXT', name:'keyword',		label:'return',				x:LEFT + 75,	y:TOP + 100,	fill: 'darkorange',		family:'keyword' },
-								{ type:'TEXT', name:'text',			label:'output + result;',	x:LEFT + 115,	y:TOP + 100,	fill: '#333',			family:'text' },
-								{ type:'TEXT', name:'text',			label:'}',					x:LEFT + 55,	y:TOP + 120,	fill: '#333',			family:'text' },
-								{ type:'RECTANGLE', name:'overviewRuler',		x:LEFT + 336,	y:TOP, width:14,	height:dataset.height, family:'overviewRuler', fill: 'white' }];
+								
+								{ type:'TEXT', name:'Strings',		label:'\'Result\'',			x:LEFT + 144,	y:TOP + 60,		fill: 'cornflowerBlue', family:'string', font: '9pt sans-serif' }, 
+								{ type:'TEXT', name:'Foreground',			label:'multiply(a,b){',		x:LEFT + 100,	y:TOP + 40,		fill: '#333',			family:'text', font: '9pt sans-serif' },
+								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
+								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
+								 
+								{ type:'TEXT', name:'Keywords',		label:'var',				x:LEFT + 75,	y:TOP + 60,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
+								{ type:'TEXT', name:'Foreground',			label:'output = ',			x:LEFT + 95,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
+								
+								{ type:'TEXT', name:'Foreground',			label:';',					x:LEFT + 185,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
+								{ type:'TEXT', name:'keywords',		label:'var',				x:LEFT  +75,	y:TOP + 80,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
+								{ type:'TEXT', name:'Foreground',			label:'result = a*b;',		x:LEFT + 95,	y:TOP + 80,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
+								{ type:'TEXT', name:'keywords',		label:'return',				x:LEFT + 75,	y:TOP + 100,	fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
+								{ type:'TEXT', name:'Foreground',			label:'output + result;',	x:LEFT + 115,	y:TOP + 100,	fill: '#333',			family:'text', font: '9pt sans-serif' },
+								{ type:'TEXT', name:'Foreground',			label:'}',					x:LEFT + 55,	y:TOP + 120,	fill: '#333',			family:'text', font: '9pt sans-serif' },
+								{ type:'RECTANGLE', name:'Overview Ruler',		x:LEFT + 336,	y:TOP, width:14,	height:dataset.height, family:'overviewRuler', fill: 'white' },
+								{ type:'RECTANGLE', name:'Annotation Ruler',	x:LEFT,			y:TOP, width:46,	height:dataset.height, family:'annotationRuler', fill: 'white' }];
 			
-			for( var line =0; line < 9; line++ ){
-				dataset.shapes.push( { type:'TEXT', name:'lineNumber', label:line+1, x:LEFT + 20, y:TOP + ( 20* line ) + 20, fill: '#333', family:'line' } );
+			for( var line =0; line < 8; line++ ){
+				dataset.shapes.push( { type:'TEXT', name:'Line Numbers', label:line+1, x:LEFT + 20, y:TOP + ( 20* line ) + 20, fill: '#333', family:'lineNumber', font: '9pt sans-serif' } );
 			}	
 			
 			console.log( 'e d i t o r   t h e m e' );
 			
 			return dataset;
 		}
+		
+		
+		function processSettings( settings, preferences ){
+		
+			preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
 
+				var subcategories = JSON.parse ( prefs.get( 'JavaScript Editor' ) );
+				
+				if( subcategories ){
+					console.log( subcategories );
+					
+					for( var s = 0; s < subcategories.length; s++ ){
+						
+						switch( subcategories[s].label ){
+						
+							case 'Font':
+								subcategories[s].data[3].value = settings['background'].value;
+								subcategories[s].data[2].value = settings['text'].value;
+								subcategories[s].data[1].value = '9pt';
+								subcategories[s].data[0].value = 'Sans Serif';
+								break;
+								
+							case 'String Types':
+								subcategories[s].data[0].value = settings['string'].value;
+								break;
+								
+							case 'Annotations Ruler':
+								subcategories[s].data[1].value = settings['annotationRuler'].value;
+								break;
+								
+							case 'Comment Types':
+								subcategories[s].data[0].value = settings['comment'].value;
+								break;
+								
+							case 'Keyword Types':
+								subcategories[s].data[0].value = settings['keyword'].value;
+								break;
+						
+							case 'Overview Ruler':
+								subcategories[s].data[1].value = settings['overviewRuler'].value;
+								break;
+								
+							case 'Folding Ruler':
+								subcategories[s].data[1].value = settings['annotationRuler'].value;
+								break;		
+								
+							case 'Line Number Ruler':
+								subcategories[s].data[1].value = settings['annotationRuler'].value;
+								subcategories[s].data[3].value = settings['annotationRuler'].value;
+								break;		
+						}
+					}
+				}
+				
+				prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
+				
+			});
+		
+		
+			console.log( settings );
+		}
+
+		ThemeData.prototype.processSettings = processSettings;
 
 		ThemeData.prototype.getViewData = getViewData;
 
