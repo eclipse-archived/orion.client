@@ -229,7 +229,7 @@ exports.ExplorerNavHandler = (function() {
 			if(!this._isRowSelectable(model)){
 				return;
 			}
-			if(!toggling){
+			if(!toggling || this._selectionPolicy === "singleSelection"){//$NON-NLS-0$
 				this._clearSelection(true);
 				this._checkRow(model,false);		
 				this._selections.push(model);
@@ -311,12 +311,18 @@ exports.ExplorerNavHandler = (function() {
 		
 		toggleCursor:  function(model, on){
 			var currentRow = this.getRowDiv(model);
-			if(currentRow){
-				dojo.toggleClass(currentRow, "treeIterationCursorRow", on); //$NON-NLS-0$
-			}
 			var currentgrid = this.getCurrentGrid(model);
-			if(currentgrid && currentgrid.domNode) {
-				dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on); //$NON-NLS-0$
+			if(currentgrid) {
+				if(currentRow){
+					dojo.toggleClass(currentRow, "treeIterationCursorRow", on); //$NON-NLS-0$
+				}
+				if(currentgrid.domNode){
+					dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on); //$NON-NLS-0$
+				}
+			} else {
+				if(currentRow){
+					dojo.toggleClass(currentRow, "treeIterationCursorRow_Dotted", on); //$NON-NLS-0$
+				}
 			}
 		},
 		

@@ -395,6 +395,28 @@ exports.ExplorerRenderer = (function() {
 	}
 	ExplorerRenderer.prototype = {
 	
+		_init: function(options) {
+			if (options) {
+				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
+				this.selectionPolicy = options.singleSelection ? "singleSelection" : "";//$NON-NLS-0$
+				this._cachePrefix = options.cachePrefix;
+				this.getCheckedFunc = options.getCheckedFunc;
+				this.onCheckedFunc = options.onCheckedFunc;
+				this._highlightSelection = true;
+				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
+				if (options.highlightSelection === false){
+					this._highlightSelection = false;
+				}
+				this._decorateAlternatingLines = true;
+				if (options.decorateAlternatingLines === false) {
+					this._decorateAlternatingLines = false;
+				}
+				if (!this.actionScopeId) {
+					this.actionScopeId = options.actionScopeId;
+				}
+			}
+		},
+		
 		getLabelColumnIndex: function() {
 			return this.explorer.checkbox ? 1 : 0;  // 0 if no checkboxes
 		}, 
@@ -639,28 +661,6 @@ exports.ExplorerRenderer = (function() {
 			});
 		},
 		
-		_init: function(options) {
-			if (options) {
-				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
-				this._colums = options.colums || [];
-				this._cachePrefix = options.cachePrefix;
-				this.getCheckedFunc = options.getCheckedFunc;
-				this.onCheckedFunc = options.onCheckedFunc;
-				this._highlightSelection = true;
-				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
-				if (options.highlightSelection === false){
-					this._highlightSelection = false;
-				}
-				this._decorateAlternatingLines = true;
-				if (options.decorateAlternatingLines === false) {
-					this._decorateAlternatingLines = false;
-				}
-				if (!this.actionScopeId) {
-					this.actionScopeId = options.actionScopeId;
-				}
-			}
-		},
-		
 		_initializeUIState: function() {
 			this._expanded = [];
 			var prefsPath = this._getUIStatePreferencePath();
@@ -676,11 +676,18 @@ exports.ExplorerRenderer = (function() {
 
 /**
  * @name orion.explorer.SelectionRenderer
- * @class Sample renderer that allows you to render a standard tree table.
+ * @class This  renderer renders a tree table and installs a selection and cursoring model to
+ * allow the user to make selections without using checkboxes.
  * Override {@link orion.explorer.SelectionRenderer#getCellHeaderElement}  and
  * {@link orion.explorer.SelectionRenderer#getCellElement} to generate table content.
  */
 exports.SelectionRenderer = (function(){
+	/**
+	 * Create a selection renderer with the specified options.  Options are defined in
+	 * ExplorerRenderer.  An additional option is added here.
+	 * @param {Boolean}singleSelection If true, set the selection policy to "singleSelection".
+	 *
+	 */
 	function SelectionRenderer(options, explorer) {
 		this._init(options);
 		this.explorer = explorer;

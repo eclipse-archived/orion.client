@@ -235,7 +235,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 							}
 						}
 					}
-					this.createTree(this.parentId, this.model, {setFocus: true, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+					this.createTree(this.parentId, this.model, {setFocus: true, selectionPolicy: this.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
 					if (typeof this.onchange === "function") { //$NON-NLS-0$
 						this.onchange(this.treeRoot);
 					}

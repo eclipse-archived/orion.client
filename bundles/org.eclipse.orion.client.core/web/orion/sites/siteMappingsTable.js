@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define document */
 
-define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'orion/util', 'orion/commands', 'orion/explorers/explorer'],
-		function(messages, require, dojo, mUtil, mCommands, mExplorer) {
+define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/explorers/explorer', 'orion/i18nUtil'],
+		function(messages, require, dojo, mCommands, mExplorer, i18nUtil) {
 
 var ROOT = "/"; //$NON-NLS-0$
 var mSiteMappingsTable = {};
@@ -111,26 +111,29 @@ mSiteMappingsTable.Renderer = (function() {
 		getIsValidCell: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {
 			var target = item.Target;
 			var col = document.createElement("td"); //$NON-NLS-0$
-			var href;
+			var href, a;
 			if (isWorkspacePath(target)) {
 				var self = this;
 				this.options.siteClient.toFileLocation(target).then(function(loc) {
-					href = mUtil.safeText(loc);
+					href = loc;
 					col.innerHTML = "<span class=\"validating\">&#8230;</span>"; //$NON-NLS-0$
 					// use file service directly to avoid retrying in case of failure
 					self.options.fileClient._getService(loc).read(loc, true).then(
 						function(object) {
 							var isDirectory = object && object.Directory;
 							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file"; //$NON-NLS-1$ //$NON-NLS-0$
-							var title = (isDirectory ? messages["Workspace folder"] : messages["Workspace file"]) + " " + href; //$NON-NLS-2$
-							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite ' + spriteClass + '" title="' + title + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							var title = (isDirectory ? messages.WorkspaceFolder : messages.WorkspaceFile);
+							a = dojo.create("a", {href: href, target: "_new"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.create("span", {"class": "imageSprite " + spriteClass, title: i18nUtil.formatMessage(title, href)}, a); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						}, function(error) {
-							col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-error" title="'+messages['Workspace resource not found: '] + href + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+							a = dojo.create("a", {href: href, target: "_new"}, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							dojo.create("span", {"class": "imageSprite core-sprite error", title: i18nUtil.formatMessage(messages.WorkspaceResourceNotFound, href)}, a); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						});
 				});
 			} else {
-				href = mUtil.safeText(target);
-				col.innerHTML = '<a href="' + href + '" target="_new"><span class="imageSprite core-sprite-link" title="'+messages['External link to '] + href + '"/></a>'; //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+				href = target;
+				a = dojo.create("a", {href: href, target: "_new"}, "only"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("span", {"class": "imageSprite core-sprite-link", title: i18nUtil.formatMessage(messages.ExternalLinkTo, href)}, a); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			dojo.addClass(col, "isValidCell"); //$NON-NLS-0$
 			return col;
