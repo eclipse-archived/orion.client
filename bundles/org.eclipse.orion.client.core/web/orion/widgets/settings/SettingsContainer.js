@@ -23,7 +23,36 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
 		constructor: function() {		
-			
+			this.defaultCategories = [
+				{
+					id: "userSettings", //$NON-NLS-0$
+					innerHTML: messages["User Profile"],
+					show: this.showUserSettings
+				},
+				{
+					id: "themeBuilder", //$NON-NLS-0$
+					innerHTML: 'UI Theme', // messages["Themes"],
+					show: this.showThemeBuilder
+				},
+				{
+					id: "editorThemeBuilder", //$NON-NLS-0$
+					innerHTML: 'Editor Theme', // messages["Themes"],
+					show: this.showEditorThemeBuilder
+				},
+				{
+					id: "plugins", //$NON-NLS-0$
+					innerHTML: messages["Plugins"],
+					show: this.showPlugins
+				},
+				{
+					id: "pluginSettings", //$NON-NLS-0$
+					innerHTML: messages.PluginSettings,
+					show: this.showPluginSettings
+				}];
+			this.defaultCategories.forEach(function(item) {
+				item.show = item.show.bind(this, item.id);
+				item.onclick = item.show;
+			}.bind(this));
 		},
 
 		postCreate: function() {
@@ -106,79 +135,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			}
 		},
 
-		addPlugins: function() {
-
-			var item = {
-				id: "plugins", //$NON-NLS-0$
-				innerHTML: messages["Plugins"],
-				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
-				role: "tab", //$NON-NLS-0$
-				tabindex: -1,
-				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-				onclick: dojo.hitch( this, 'showPlugins', "plugins" ) //$NON-NLS-1$ //$NON-NLS-0$
-			};
-
-			this.addCategory(item, this.initialSettings.length);
-		},
-		
-		addUserSettings: function() {
-
-			var item = {
-				id: "userSettings", //$NON-NLS-0$
-				innerHTML: messages["User Profile"],
-				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
-				role: "tab", //$NON-NLS-0$
-				tabindex: -1,
-				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-				onclick: dojo.hitch( this, 'showUserSettings', "userSettings" ) //$NON-NLS-1$ //$NON-NLS-0$
-			};
-
-			this.addCategory(item, this.initialSettings.length);
-		},
-		
-		addThemeBuilder: function() {
-
-			var item = {
-				id: "themeBuilder", //$NON-NLS-0$
-				innerHTML: 'UI Theme', // messages["Themes"],
-				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
-				role: "tab", //$NON-NLS-0$
-				tabindex: -1,
-				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-				onclick: dojo.hitch( this, 'showThemeBuilder', "themeBuilder" ) //$NON-NLS-1$ //$NON-NLS-0$
-			};
-
-			this.addCategory(item, this.initialSettings.length);
-		},
-		
-		addEditorThemeBuilder: function() {
-
-			var item = {
-				id: "editorThemeBuilder", //$NON-NLS-0$
-				innerHTML: 'Editor Theme', // messages["Themes"],
-				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
-				role: "tab", //$NON-NLS-0$
-				tabindex: -1,
-				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-				onclick: dojo.hitch( this, 'showEditorThemeBuilder', "editorThemeBuilder" ) //$NON-NLS-1$ //$NON-NLS-0$
-			};
-
-			this.addCategory(item, this.initialSettings.length);
-		},
-
-		addPluginSettings: function() {
-			var item = {
-				id: "pluginSettings", //$NON-NLS-0$
-				innerHTML: messages.PluginSettings,
-				"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
-				role: "tab", //$NON-NLS-0$
-				tabindex: -1,
-				"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
-				onclick: this.showPluginSettings.bind(this, "pluginSettings") //$NON-NLS-0$
-			};
-			this.addCategory(item, this.initialSettings.length);
-		},
-		
 		showThemeBuilder: function(id){
 		
 			this.selectCategory(id);
@@ -286,7 +242,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				serviceRegistry: this.registry,
 				settingsRegistry: this.settingsRegistry
 			});
-			// starts itself. will also remove previous version of itself
 		},
 
 /*	showPlugins - iterates over the plugin array, reads
@@ -347,50 +302,41 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		},
 
 		showById: function(id) {
-		
-				
 			
 			this.updateToolbar(id);
-				
-				switch(id){
-				
-					case "plugins": //$NON-NLS-0$
-						this.showPlugins(id);
-						break;
-					
-					case "userSettings": //$NON-NLS-0$
-						this.showUserSettings(id);
-						break;
-						
-					case "themeBuilder":
-						this.showThemeBuilder(id);
-						break;
-						
-					case "editorThemeBuilder":
-						this.showEditorThemeBuilder(id);
-						break;
-						
-					case "pluginSettings":
-						this.showPluginSettings(id);
-						break;
-	
-					default:
-						this.selectCategory(id);
-						break;
-				
-				}	
+
+			var isDefaultCategory = this.defaultCategories.some(function(category) {
+				if (category.id === id) {
+					category.show();
+				}
+				return true;
+			});
+
+			if (!isDefaultCategory) {
+				this.selectCategory(id);
+			}
+		},
+
+		addCategory: function(category, index) {
+			category['class'] = 'navbar-item'; //$NON-NLS-1$ //$NON-NLS-0$
+			category.role = "tab";
+			category.tabindex = -1;
+			category["aria-selected"] = "false"; //$NON-NLS-1$ //$NON-NLS-0$
+			this.inherited(arguments);
+		},
+
+		addCategories: function() {
+			this.defaultCategories.forEach(function(category) {
+				this.addCategory(category, this.initialSettings.length);
+			}.bind(this));
 		},
 
 		drawUserInterface: function(settings) {
 
 			this.inherited(arguments);
 
+			this.addCategories();
 
-			this.addUserSettings();
-			this.addThemeBuilder();
-			this.addEditorThemeBuilder();
-			this.addPlugins();
-			this.addPluginSettings();
 			this.processHash();
 
 			/* Adjusting width of mainNode - the css class is shared 
@@ -470,226 +416,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							{ "ui": "Login", "label": "Login", "input": "textfield", "setting": "" },
 							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" }*/
 
-initialSettings: [
-//			{"category": "User",
-//				"subcategory": [{ "ui": "Personal information", "label": "Personal information",
-//				"items": [ { "ui": "Login", "label": "Login", "input": "textfield", "setting": "" },
-//							{ "ui": "Email Address", "label": "Email Address", "input": "textfield", "setting": "" } ]}
-//				]
-//			},
-			{"category": messages['JavaScript Editor'], //$NON-NLS-0$
-			"subcategory": [{
-				"ui": messages["Font"], //$NON-NLS-0$
-				"label": messages['Font'], //$NON-NLS-0$
-				"items": [{ //$NON-NLS-0$
-					"ui": messages["Family"], //$NON-NLS-0$
-					"label": messages['Family'], //$NON-NLS-0$
-					"input": "combo", //$NON-NLS-1$ //$NON-NLS-0$
-					"values": [{ //$NON-NLS-0$
-						"label": messages["Sans Serif"] //$NON-NLS-0$
-					},
-					{
-						"label": messages["Serif"] //$NON-NLS-0$
-					}],
-					"setting": messages['Serif'] //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Size"], //$NON-NLS-0$
-					"label": messages['Size'], //$NON-NLS-0$
-					"input": "combo", //$NON-NLS-1$ //$NON-NLS-0$
-					"values": [{ //$NON-NLS-0$
-						"label": messages["8pt"] //$NON-NLS-0$
-					},
-					{
-						"label": messages["9pt"] //$NON-NLS-0$
-					},
-					{
-						"label": messages["10pt"] //$NON-NLS-0$
-					},
-					{
-						"label": "11pt" //$NON-NLS-1$ //$NON-NLS-0$
-					},
-					{
-						"label": messages["12pt"] //$NON-NLS-0$
-					}],
-					"setting": messages['10pt'] //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Color"], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#000000" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Background"], //$NON-NLS-0$
-					"label": messages['Background'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				}]
-			},
-
-			{
-				"ui": messages["Strings"], //$NON-NLS-0$
-				"label": messages["String Types"], //$NON-NLS-0$
-				"items": [{ //$NON-NLS-0$
-					"ui": messages['Color'], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": messages["blue"] //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Weight"], //$NON-NLS-0$
-					"label": messages['Weight'], //$NON-NLS-0$
-					"input": "combo", //$NON-NLS-1$ //$NON-NLS-0$
-					"values": [{ //$NON-NLS-0$
-						"label": messages["Normal"] //$NON-NLS-0$
-					},
-					{
-						"label": messages["Bold"] //$NON-NLS-0$
-					}],
-					"setting": messages['Normal'] //$NON-NLS-0$
-				}]
-			},
-			{
-				"ui": messages["Comments"], //$NON-NLS-0$
-				"label": messages["Comment Types"], //$NON-NLS-0$
-				"items": [{ //$NON-NLS-0$
-					"ui": messages['Color'], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": messages["green"] //$NON-NLS-0$
-				},
-				{
-					"ui": messages['Weight'], //$NON-NLS-0$
-					"label": messages['Weight'], //$NON-NLS-0$
-					"input": "combo", //$NON-NLS-1$ //$NON-NLS-0$
-					"values": [{ //$NON-NLS-0$
-						"label": messages['Normal'] //$NON-NLS-0$
-					},
-					{
-						"label": messages['Bold'] //$NON-NLS-0$
-					}],
-					"setting": messages['Normal'] //$NON-NLS-0$
-				}]
-			},
-			{
-				"ui": messages["Keywords"], //$NON-NLS-0$
-				"label": messages["Keyword Types"], //$NON-NLS-0$
-				"items": [{ //$NON-NLS-0$
-					"ui": messages['Color'], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": messages["darkred"] //$NON-NLS-0$
-				},
-				{
-					"label": messages['Weight'], //$NON-NLS-0$
-					"input": "combo", //$NON-NLS-1$ //$NON-NLS-0$
-					"values": [{ //$NON-NLS-0$
-						"label": messages['Normal'] //$NON-NLS-0$
-					},
-					{
-						"label": messages['Bold'] //$NON-NLS-0$
-					}],
-					"setting": messages['Bold'] //$NON-NLS-0$
-				}]
-			},
-			{
-				"ui": 'Annotations Ruler',  //$NON-NLS-0$
-				"label":'Annotations Ruler', //$NON-NLS-0$
-				"items": [{
-					"ui": messages["Color"], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "lightgrey" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Background"], //$NON-NLS-0$
-					"label": messages['Background'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				]
-			},
-			{
-				"ui": 'Folding Ruler',  //$NON-NLS-0$
-				"label":'Folding Ruler', //$NON-NLS-0$
-				"items": [{
-					"ui": messages["Color"], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#000000" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Background"], //$NON-NLS-0$
-					"label": messages['Background'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				]
-			},
-			{
-				"ui": 'Overview Ruler',  //$NON-NLS-0$
-				"label":'Overview Ruler', //$NON-NLS-0$
-				"items": [{
-					"ui": messages["Color"], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Background"], //$NON-NLS-0$
-					"label": messages['Background'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				]
-			},
-			{
-				"ui": 'Line Number Ruler',  //$NON-NLS-0$
-				"label":'Line Number Ruler', //$NON-NLS-0$
-				"items": [
-				
-				/* Don't think this is necessary {
-					"ui": messages["Color"], //$NON-NLS-0$
-					"label": messages['Color'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": messages["Background"], //$NON-NLS-0$
-					"label": messages['Background'], //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				},*/
-				{
-					"ui": 'Even Rows Color', //$NON-NLS-0$
-					"label": 'Even Rows Color', //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": 'Even Rows Background', //$NON-NLS-0$
-					"label": 'Even Rows Background', //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": 'Odd Rows Color', //$NON-NLS-0$
-					"label": 'Odd Rows Color', //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#444" //$NON-NLS-1$ //$NON-NLS-0$
-				},
-				{
-					"ui": 'Odd Rows Background', //$NON-NLS-0$
-					"label":'Odd Rows Background', //$NON-NLS-0$
-					"input": "color", //$NON-NLS-1$ //$NON-NLS-0$
-					"setting": "#FFFFFF" //$NON-NLS-1$ //$NON-NLS-0$
-				}
-				]
-			}
-			
-			]
-		}]
-
+		initialSettings: []
 	});
 });
