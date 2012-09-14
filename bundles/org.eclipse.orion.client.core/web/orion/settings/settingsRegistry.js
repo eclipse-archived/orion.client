@@ -17,12 +17,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 
 	/**
 	 * @param {Object} value
-	 * @param {orion.metatype.PropertyType} propertyType
+	 * @param {orion.metatype.AttributeDefinition} attributeDefinition
 	 */
-	function equalsDefaultValue(value, propertyType) {
-		var defaultValue = propertyType.getDefaultValue();
+	function equalsDefaultValue(value, attributeDefinition) {
+		var defaultValue = attributeDefinition.getDefaultValue();
 		var result = value === defaultValue;
-		if (propertyType.getType() === 'string') { //$NON-NLS-0$
+		if (attributeDefinition.getType() === 'string') { //$NON-NLS-0$
 			result = result || (value === '' && defaultValue === null);
 		}
 		return result;
@@ -37,9 +37,9 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @name orion.settings.Setting#isDefaults
 		 * @function
 		 * @description
-		 * @param {Object} properties A map of PropertyType IDs to values.
+		 * @param {Object} properties A map of AttributeDefinition IDs to values.
 		 * @returns {Boolean} <code>true</code> if <code>properties</code> contains a key for each of this setting's
-		 * PropertyTypes, and the corresponding value equals the PropertyType's default value.
+		 * AttributeDefinitions, and the corresponding value equals the AttributeDefinition's default value.
 		 */
 		/**
 		 * @name orion.settings.Setting#getCategory
@@ -66,10 +66,10 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {String}
 		 */
 		/**
-		 * @name orion.settings.Setting#getPropertyTypes
+		 * @name orion.settings.Setting#getAttributeDefinitions
 		 * @function
 		 * @description
-		 * @returns {orion.metatype.PropertyType[]}
+		 * @returns {orion.metatype.AttributeDefinition[]}
 		 */
 		/**
 		 * @name orion.settings.Setting#getTags
@@ -91,12 +91,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		getName: function() { return this.name; },
 		getPid: function() { return this.pid; },
 		getObjectClassDefinitionId: function() { return this.classId; },
-		getPropertyTypes: function() { return this.properties; },
+		getAttributeDefinitions: function() { return this.properties; },
 		getCategory: function() { return this.category || null; },
 		getTags: function() { return this.tags || []; },
 		isDefaults: function(properties) {
-			return this.getPropertyTypes().every(function(propertyType) {
-				return equalsDefaultValue(properties[propertyType.getId()], propertyType);
+			return this.getAttributeDefinitions().every(function(attributeDefinition) {
+				return equalsDefaultValue(properties[attributeDefinition.getId()], attributeDefinition);
 			});
 		}
 	};
@@ -125,7 +125,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			}
 			serviceRegistrations[setting.getPid()] = serviceRegistry.registerService(METATYPE_SERVICE, {}, serviceProperties);
 			var ocd = metaTypeRegistry.getObjectClassDefinition(classId);
-			setting.properties = ocd.getPropertyTypes();
+			setting.properties = ocd.getAttributeDefinitions();
 			settingsMap[setting.getPid()] = setting;
 			var category = setting.getCategory() || DEFAULT_CATEGORY;
 			if (!categoriesMap[category]) {

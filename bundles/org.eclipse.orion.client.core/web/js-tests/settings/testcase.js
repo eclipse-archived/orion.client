@@ -56,14 +56,14 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		var objectClass = metaTypeRegistry.getObjectClassDefinitionForPid('mysetting');
 
 		assert.equal(objectClass.getId(), 'myclass', 'ObjectClassDefinition is designated for setting\'s PID');
-		assert.equal(objectClass.getPropertyTypes().length, 2);
-		assert.equal(objectClass.getPropertyTypes()[0].getId(), 'prop1');
-		assert.equal(objectClass.getPropertyTypes()[1].getId(), 'prop2');
+		assert.equal(objectClass.getAttributeDefinitions().length, 2);
+		assert.equal(objectClass.getAttributeDefinitions()[0].getId(), 'prop1');
+		assert.equal(objectClass.getAttributeDefinitions()[1].getId(), 'prop2');
 
-		// Ensure setting.getPropertyTypes() has the same property types as the OCD.
-		assert.equal(settings[0].getPropertyTypes().length, 2);
-		assert.equal(settings[0].getPropertyTypes()[0].getId(), 'prop1');
-		assert.equal(settings[0].getPropertyTypes()[1].getId(), 'prop2');
+		// Ensure setting.getAttributeDefinitions() has the same attribute definitions as the OCD.
+		assert.equal(settings[0].getAttributeDefinitions().length, 2);
+		assert.equal(settings[0].getAttributeDefinitions()[0].getId(), 'prop1');
+		assert.equal(settings[0].getAttributeDefinitions()[1].getId(), 'prop2');
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
@@ -91,13 +91,13 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.ok(objectClass, 'Setting\'s PID is designated');
 
 		assert.equal(objectClass.getId(), objectClassId);
-		assert.equal(objectClass.getPropertyTypes().length, 2);
-		assert.equal(objectClass.getPropertyTypes()[0].getId(), 'foo');
-		assert.equal(objectClass.getPropertyTypes()[1].getId(), 'bar');
+		assert.equal(objectClass.getAttributeDefinitions().length, 2);
+		assert.equal(objectClass.getAttributeDefinitions()[0].getId(), 'foo');
+		assert.equal(objectClass.getAttributeDefinitions()[1].getId(), 'bar');
 
-		assert.equal(settings[0].getPropertyTypes().length, 2);
-		assert.equal(settings[0].getPropertyTypes()[0].getId(), 'foo');
-		assert.equal(settings[0].getPropertyTypes()[1].getId(), 'bar');
+		assert.equal(settings[0].getAttributeDefinitions().length, 2);
+		assert.equal(settings[0].getAttributeDefinitions()[0].getId(), 'foo');
+		assert.equal(settings[0].getAttributeDefinitions()[1].getId(), 'bar');
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
