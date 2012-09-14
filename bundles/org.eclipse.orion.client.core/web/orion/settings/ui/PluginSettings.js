@@ -218,37 +218,36 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 	 * Requires the 'orion.cm.configadmin' service.
 	 * @param {DomNode|String} options.parent
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry
-	 * @param {orion.settings.SettingsRegistry} options.settingsRegistry
+	 * @param {orion.settings.Settings[]} options.settings
 	 */
 	function SettingsList(options) {
 		var parent = options.parent;
 		var serviceRegistry = options.serviceRegistry;
-		var settingsRegistry = options.settingsRegistry;
-		if (!options.parent || !options.serviceRegistry || !options.settingsRegistry) {
+		var settings = options.settings;
+		if (!options.parent || !options.serviceRegistry || !options.settings || !options.title) {
 			throw 'Missing required option'; //$NON-NLS-0$
 		}
 		this.parent = typeof parent === 'string' ? document.getElementById('parent') : parent; //$NON-NLS-0$ //$NON-NLS-1$
 		// TODO add commands
-		this.render(parent, serviceRegistry, settingsRegistry);
+		this.render(parent, serviceRegistry, settings, options.title);
 	}
 	SettingsList.prototype = {
-		_makeSection: function(parent, sectionId, settings) {
-			var section = new Section(parent, {id: sectionId, title: messages.PluginSettings, useAuxStyle: true,
-				getItemCount: function() { return settings.length; } });
+		_makeSection: function(parent, sectionId, settings, title) {
+			var section = new Section(parent, { id: sectionId, title: title, useAuxStyle: true,
+					getItemCount: function() { return settings.length; } });
 			return section;
 		},
 		destroy: function() {
 			this.explorer.destroy();
 		},
-		render: function(parent, serviceRegistry, settingsRegistry) {
-			var allSettings = settingsRegistry.getSettings();
+		render: function(parent, serviceRegistry, settings, title) {
 			// FIXME Section forces a singleton id, bad
 			var idPrefix = 'pluginsettings-'; //$NON-NLS-0$
 			var sectionId = idPrefix + 'section'; //$NON-NLS-0$
-			var section = this._makeSection(parent, sectionId, allSettings);
+			var section = this._makeSection(parent, sectionId, settings, title);
 
 			this.explorer = new SettingsListExplorer(serviceRegistry);
-			this.explorer.createTree(section.getContentElement().id, new mExplorer.SimpleFlatModel(allSettings, 'setting-', //$NON-NLS-0$
+			this.explorer.createTree(section.getContentElement().id, new mExplorer.SimpleFlatModel(settings, 'setting-', //$NON-NLS-0$
 				function(item) {
 					return item.getPid();
 				}),

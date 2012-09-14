@@ -23,35 +23,40 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
 
 		constructor: function() {		
-			this.defaultCategories = [
+			this.settingsCategories = [
 				{
 					id: "userSettings", //$NON-NLS-0$
-					innerHTML: messages["User Profile"],
+					textContent: messages["User Profile"],
 					show: this.showUserSettings
 				},
 				{
 					id: "themeBuilder", //$NON-NLS-0$
-					innerHTML: 'UI Theme', // messages["Themes"],
+					textContent: 'UI Theme', // messages["Themes"],
 					show: this.showThemeBuilder
 				},
 				{
 					id: "editorThemeBuilder", //$NON-NLS-0$
-					innerHTML: 'Editor Theme', // messages["Themes"],
+					textContent: 'Editor Theme', // messages["Themes"],
 					show: this.showEditorThemeBuilder
 				},
 				{
 					id: "plugins", //$NON-NLS-0$
-					innerHTML: messages["Plugins"],
+					textContent: messages["Plugins"],
 					show: this.showPlugins
-				},
-				{
-					id: "pluginSettings", //$NON-NLS-0$
-					innerHTML: messages.PluginSettings,
-					show: this.showPluginSettings
 				}];
-			this.defaultCategories.forEach(function(item) {
+			this.settingsCategories.forEach(function(item) {
 				item.show = item.show.bind(this, item.id);
-				item.onclick = item.show;
+			}.bind(this));
+		},
+
+		postMixInProperties: function() {
+			// Add extension categories
+			this.settingsRegistry.getCategories().sort().forEach(function(category, i) {
+				this.settingsCategories.push({
+					id: category,
+					textContent: messages[category] || category,
+					show: this.showPluginSettings.bind(this, category)
+				});
 			}.bind(this));
 		},
 
@@ -79,7 +84,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				var selection = prefs.get( 'selection' );
 				
 				var category = pageParams.category || selection; //$NON-NLS-0$
-				container.showById(category);
+				container.showByCategory(category);
 				
 			} );
 			
@@ -230,7 +235,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.pluginWidget.startup();
 		},
 
-		initPluginSettings: function(id) {
+		initPluginSettings: function(category) {
+			function settingsCompare(a, b) {
+				var nameA = a.getName(), nameB = b.getName();
+				if (typeof nameA === 'string' && typeof nameB === 'string') {
+					return nameA.localeCompare(nameB);
+				}
+				return a.getPid().localeCompare(b.getPid());
+			}
+
 			dojo.empty(this.table);
 
 			if (this.pluginSettingsWidget) {
@@ -240,7 +253,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.pluginSettingsWidget = new SettingsList({
 				parent: this.table,
 				serviceRegistry: this.registry,
-				settingsRegistry: this.settingsRegistry
+				settings: this.settingsRegistry.getSettings(category).sort(settingsCompare),
+				title: messages[category] || category
 			});
 		},
 
@@ -262,15 +276,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.initPlugins(id);
 		},
 
-		// Creates the RHS content of plugins settings and stuff
-		showPluginSettings: function(id) {
+		showPluginSettings: function(category) {
+			var id = category;
 			this.selectCategory(id);
 
-			this.initPluginSettings(id);
+			this.initPluginSettings(category);
 		},
 		
 		selectCategory: function(id) {
-
 			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
 				prefs.put( 'selection', id );
 			} );
@@ -301,15 +314,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			}
 		},
 
-		showById: function(id) {
+		showByCategory: function(id) {
 			
 			this.updateToolbar(id);
 
-			var isDefaultCategory = this.defaultCategories.some(function(category) {
+			var isDefaultCategory = this.settingsCategories.some(function(category) {
 				if (category.id === id) {
 					category.show();
+					return true;
 				}
-				return true;
 			});
 
 			if (!isDefaultCategory) {
@@ -317,18 +330,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			}
 		},
 
-		addCategory: function(category, index) {
-			category['class'] = 'navbar-item'; //$NON-NLS-1$ //$NON-NLS-0$
+		addCategory: function(category) {
+			category['class'] = (category['class'] || '') + ' navbar-item'; //$NON-NLS-1$ //$NON-NLS-0$
 			category.role = "tab";
 			category.tabindex = -1;
 			category["aria-selected"] = "false"; //$NON-NLS-1$ //$NON-NLS-0$
+			category.onclick = category.show;
 			this.inherited(arguments);
 		},
 
 		addCategories: function() {
-			this.defaultCategories.forEach(function(category) {
-				this.addCategory(category, this.initialSettings.length);
-			}.bind(this));
+			var self = this;
+			this.settingsCategories.forEach(function(category, i) {
+				self.addCategory(category);
+			});
 		},
 
 		drawUserInterface: function(settings) {
