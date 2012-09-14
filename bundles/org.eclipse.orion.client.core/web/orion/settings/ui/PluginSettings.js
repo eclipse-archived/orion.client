@@ -113,7 +113,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 		},
 		createChildren: function(configuration) {
 			var self = this;
-			this.setting.getPropertyTypes().forEach(function(property) {
+			this.setting.getAttributeDefinitions().forEach(function(property) {
 				var options = {
 					property: property, configuration: configuration, serviceRegistry: self.serviceRegistry,
 					changeProperty: self.changeProperty.bind(self, property)
@@ -136,11 +136,11 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 				self.addChild(widget);
 			});
 		},
-		changeProperty: function(propertyType, value) {
+		changeProperty: function(attributeDefinition, value) {
 			this.initConfiguration().then(function(configuration) {
 				var setting = this.setting;
 				var props = configuration.getProperties() || {};
-				props[propertyType.getId()] = value;
+				props[attributeDefinition.getId()] = value;
 				if (setting.isDefaults(props)) {
 					configuration.remove();
 					this.configuration = null;
