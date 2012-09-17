@@ -106,9 +106,10 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 		}
 		// Generate an id.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
 		var id = item.label.replace(/[\\\/\.\:\-\_]/g, "");
-		// We might have duplicate id's if the outline items are duplicated.  Check for this case and use a timestamp in lieu
-		// of the generated id.
-		if (this.idItemMap[id] && this.idItemMap[id]!== item) {
+		// We might have duplicate id's if the outline items are duplicated, or if we happen to have another dom id using
+		// this name.  Check for this case and use a timestamp in lieu of the generated id.
+		if ((this.idItemMap[id] && this.idItemMap[id]!== item) ||
+			dojo.byId(id)) {// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=389760
 			id = new Date().getTime().toString();
 			this.idItemMap[id] = item;
 			item.outlinerId = id;
