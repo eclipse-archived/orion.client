@@ -251,7 +251,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 					}
 				}
 			});
-			for (var i in toRemove) {
+			for (var i=0; i<toRemove.length; i++) {
 				//table.removeChild(toRemove[i]); // IE barfs on this
 				var child = toRemove[i];
 				child.parentNode.removeChild(child);
