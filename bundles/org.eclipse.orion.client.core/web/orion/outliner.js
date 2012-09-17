@@ -84,11 +84,11 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 	OutlineExplorer.prototype = mExplorer.Explorer.prototype;	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
 	
-	function OutlineModel(items) {
+	function OutlineModel(items, rootId) {
 		this.items = items;
 		this.root = {children: items};
+		this.root.outlinerId = rootId;
 		this.idItemMap = {};
-		this.specialIds = [];
 	}
 	OutlineModel.prototype.constructor = OutlineModel;
 	
@@ -100,23 +100,18 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 	};
 	
 	OutlineModel.prototype.getId = function(/* item */ item){
-		// first see if we have already generated an id because of a special case (duplicates)
-		// We hope this list remains relatively small, or we should consider a different implementation
-		// for mapping items back to their id.
-		for (var i=0; i<this.specialIds.length; i++) {
-			if (this.specialIds[i].item === item) {
-				return this.specialIds[i].id;
-			}
+		// Do we have a cached id?
+		if (item.outlinerId) {
+			return item.outlinerId;
 		}
-		// Generate an id.  This code is assuming that generating an id for an item is faster than if we kept an array
-		// of all id/item combinations.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
+		// Generate an id.  Since these id's are used in the DOM, we strip out characters that shouldn't be in a DOM id.
 		var id = item.label.replace(/[\\\/\.\:\-\_]/g, "");
 		// We might have duplicate id's if the outline items are duplicated.  Check for this case and use a timestamp in lieu
 		// of the generated id.
 		if (this.idItemMap[id] && this.idItemMap[id]!== item) {
 			id = new Date().getTime().toString();
 			this.idItemMap[id] = item;
-			this.specialIds.push({id: id, item: item});
+			item.outlinerId = id;
 		} else {
 			this.idItemMap[id] = item;
 		}
@@ -132,6 +127,16 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			onComplete(parentItem.children);
 		} else {
 			onComplete([]);
+		}
+	};
+	
+	OutlineModel.prototype.doExpansions = function(tree) {
+		// for now, just expand the first level of the model
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=389547
+		for (var i=0; i < this.root.children.length; i++) {
+			if (this.root.children[i].children) {
+				tree.expand(this.root.children[i]);
+			}
 		}
 	};
 
@@ -211,14 +216,10 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			dojo.empty(contentNode);
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {
+				var treeModel = new OutlineModel(outlineModel);
 				this.explorer = new OutlineExplorer(this._serviceRegistry, this._selectionService, title);
-				this.explorer.createTree("outlineSectionContent", new OutlineModel(outlineModel), {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
-				// expand the first level of the model
-				for (var i=0; i < outlineModel.length; i++) {
-					if (outlineModel[i].children) {
-						this.explorer.myTree.expand(outlineModel[i]);
-					}
-				}
+				this.explorer.createTree("outlineSectionContent", treeModel, {selectionPolicy: "cursorOnly", setFocus: false}); //$NON-NLS-1$ //$NON-NLS-0$
+				treeModel.doExpansions(this.explorer.myTree);
 			}
 		},
 		_menuCallback: function() {
