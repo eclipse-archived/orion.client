@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo', 'orion/editor/regex', 'orion/util'], function(require, dojo, mRegex, mUtil) {
+define(['require', 'dojo', 'orion/editor/regex', 'orion/util', 'orion/commands'], function(require, dojo, mRegex, mUtil, mCommands) {
 
 var orion = orion || {};
 
@@ -520,6 +520,76 @@ orion.searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
 	var tail = keepTailSlash ? 0: 1;
 	return filePath.substring(0, filePath.length-fileName.length-tail);
 };
-	
+
+var MAX_RECENT_SEARCH_NUMBER = 20;
+
+orion.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		prefs.put("recentSearch", searches); //$NON-NLS-0$
+	});
+};
+
+orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName){
+	if(typeof searchName !== "string" || !searchName ){
+		return;
+	}
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		var i;
+		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
+		if (typeof searches === "string") { //$NON-NLS-0$
+			searches = JSON.parse(searches);
+		}
+		if (searches) {
+			var i;
+			for (i in searches) {
+				if (searches[i].name === searchName) {
+					return;
+				}
+			}
+			if(searches.length >= MAX_RECENT_SEARCH_NUMBER){
+				var len = searches.length;
+				searches.splice(MAX_RECENT_SEARCH_NUMBER-1, len-MAX_RECENT_SEARCH_NUMBER+1);
+			}
+		} else {
+			searches = [];
+		}
+		searches.splice(0,0,{ "name": searchName});//$NON-NLS-1$
+		orion.searchUtils._storeRecentSearch(serviceRegistry, searches);
+		//prefs.put("recentSearch", searches); //$NON-NLS-0$
+	});
+};
+
+orion.searchUtils.populateSearchMenu = function(serviceRegistry, choicesMenu, type, makeLabelFunc) {
+	// see http://bugs.dojotoolkit.org/ticket/10296
+	choicesMenu.focusedChild = null;
+	dojo.forEach(choicesMenu.getChildren(), function(child) {
+		choicesMenu.removeChild(child);
+		child.destroy();
+	});
+	orion.searchUtils.getSearches(serviceRegistry, type, function(searches){
+		if (searches) {
+			for (i in searches) {
+				choicesMenu.addChild(new mCommands.CommandMenuItem({
+					 label: makeLabelFunc(searches[i]),
+					 hasLink: true
+				}));
+			}
+		}
+	});
+};
+
+orion.searchUtils.getSearches = function(serviceRegistry, type, callback){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		var i;
+		var searches = prefs.get(type); //$NON-NLS-0$
+		if (typeof searches === "string") { //$NON-NLS-0$
+			searches = JSON.parse(searches);
+		}
+		if (searches && callback) {
+			callback(searches);
+		}
+	});
+};
+
 return orion.searchUtils;
 });

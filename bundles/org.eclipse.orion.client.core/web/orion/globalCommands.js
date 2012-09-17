@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils',
 	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -249,28 +249,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}	
 	}
 	
-	function _populateSavedSearchMenu(serviceRegistry, commandService, menu) {
-		// see http://bugs.dojotoolkit.org/ticket/10296
-		menu.focusedChild = null;
-		dojo.forEach(menu.getChildren(), function(child) {
-			menu.removeChild(child);
-			child.destroy();
+	function _addSearchPopUp(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
+		var choicesMenu = new dijit.Menu({
+			style: "display: none;" //$NON-NLS-0$
 		});
-
-		serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
-			var i;
-			var searches = prefs.get("search"); //$NON-NLS-0$
-			if (typeof searches === "string") { //$NON-NLS-0$
-				searches = JSON.parse(searches);
-			}
-			if (searches) {
-				for (i in searches) {
-					menu.addChild(new mCommands.CommandMenuItem({
-						 label: "<a href='"+require.toUrl("search/search.html") +  "#" + searches[i].query + "'>" + searches[i].name+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						 hasLink: true
-					}));
-				}
-			}
+		var popup = new dijit.PopupMenuItem({
+			label: popUpLabel,
+			popup: choicesMenu
+		});
+		mainMenu.addChild(popup);
+		dojo.connect(mainMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
+			mSearchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
+				return makeLabelFunc(theSearch);
+				//)"<a href='"+require.toUrl("search/search.html") +  "#" + theSearch.query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			});
 		});
 	}
 		
@@ -293,17 +285,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		}));
 		newMenu.addChild(new dijit.MenuSeparator());
-		var choicesMenu = new dijit.Menu({
-			style: "display: none;" //$NON-NLS-0$
+		
+		//Add the saved searches as popups
+		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){
+			return "<a href='"+require.toUrl("search/search.html") +  "#" + theSearch.query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
-		var popup = new dijit.PopupMenuItem({
-			label: messages["Saved searches"],
-			popup: choicesMenu
+		//Add the recent searches as popups
+		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
+			var query = searcher.createSearchQuery(theSearch.name);
+			return "<a href='"+require.toUrl("search/search.html") +  "#" + query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
-		newMenu.addChild(popup);
-		dojo.connect(newMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
-			_populateSavedSearchMenu(serviceRegistry, commandService, choicesMenu);
-		});
+		
 		var menuButton = new orion.widgets.UserMenuDropDown({
 			label : "",
 			id : "searchOptionsDropDown", //$NON-NLS-0$
@@ -784,6 +776,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
+						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value);
 						var query = searcher.createSearchQuery(searchField.value);
 						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
 					}
@@ -791,6 +784,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					window.alert(messages["Can't search: no search service is available"]);
 				}
 			}
+		});
+		dojo.connect(searchField, "onfocus", function(e){ //$NON-NLS-0$
+			var searchCompletion =  dojo.byId("searchCompletion");
+			dojo.empty(searchCompletion);
+			mSearchUtils.getSearches(serviceRegistry, "recentSearch", function(searches){//$NON-NLS-0$
+				var i;
+				for (i in searches) {
+					var option = document.createElement('option');
+					option.value = searches[i].name;
+					searchCompletion.appendChild(option);
+				}
+			});
 		});
 		_addSearchOptions(serviceRegistry, commandService, searcher);
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
