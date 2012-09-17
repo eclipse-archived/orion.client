@@ -91,9 +91,8 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 			return this.projects[workspaceId];
 		};
 	}
-	function getSelfHostingMappings(basePath) {
-		// TODO: prompt for port? It is not detectable from client side if proxy is used
-		var hostPrefix = "http://localhost" + ":" + "8080" + makeHostRelative(getContext());
+	function getSelfHostingMappings(basePath, port) {
+		var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext());
 		return [
 			["/", basePath + "/bundles/org.eclipse.orion.client.core/web/index.html"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.core/web"],
@@ -312,9 +311,9 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 				});
 			});
 		},
-		convertToSelfHosting: function(site, selfHostfileLocation) {
+		convertToSelfHosting: function(site, selfHostfileLocation, port) {
 			var internalPath = this.toInternalForm(selfHostfileLocation);
-			var mappings = getSelfHostingMappings(internalPath);
+			var mappings = getSelfHostingMappings(internalPath, port);
 			site.Mappings = mappings;
 			return site;
 		},
