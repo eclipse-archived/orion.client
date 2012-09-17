@@ -75,16 +75,16 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			
 			// Generate the table
 			this._root = this._treeModel.getRoot(function (root) {
-				if (this._showRoot) {
+				if (tree._showRoot) {
 					root._depth = 0;
-					this._generate([root], 0);
+					tree._generate([root], 0);
 				}
 				else {
 					tree._treeModel.getChildren(root, function(children) {
 						tree._generate(children, 0);
 					});
 				}
-			}.bind(this));
+			});
 		},
 		
 		_generate: function(children, indentLevel) {
@@ -104,7 +104,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		},
 		
 		_generateChildren: function(children, indentLevel, referenceNode, position) {
-			for (var i in children) {
+			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				row.id = this._treeModel.getId(children[i]);
 				row._depth = indentLevel;
@@ -221,7 +221,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 					tree._generateChildren(children, row._depth+1, row, "after"); //$NON-NLS-0$
 					tree._rowsChanged();
 					if (postExpandFunc) {
-						postExpandFunc.apply(this, args);
+						postExpandFunc.apply(tree, args);
 					}
 				});
 			}
