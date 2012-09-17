@@ -614,21 +614,28 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				return item.Directory && !mUtil.isAtRoot(item.Location);}});
 	
 		commandService.addCommand(newFolderCommand);
-		
-	
+
+		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', 'Unzip file:', false)]); //$NON-NLS-1$ //$NON-NLS-0$
+
 		var importZipURLCommand = new mCommands.Command({
-			name: "Import a Zip",
-			tooltip: "Import a zip file from a URL and unzip the content",
+			name: "Import from HTTP...",
+			tooltip: "Copy a file from a URL and optionally unzip it",
 			id: "orion.importZipURL", //$NON-NLS-0$
+			parameters: zipURLParameters,
 			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				// this is a temporary hack until we implement import from zip, for now use the old code
-				// that canned content.  Totally fake.
-				var files = ["index.html", "hello.css", "hello.js"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				for (var i=0; i<files.length;  i++) {
-					fileClient.createFile(item.Location, files[i]).then(function(newFileMetadata) {
-						mUtil.saveFileContents(fileClient, newFileMetadata, {sourceLocation: window.location.protocol + "//" + window.location.host+"/examples/contentTemplates/helloWorld/"+newFileMetadata.Name}); //$NON-NLS-0$
-					}, errorHandler);
+				var targetFolder = forceSingleItem(data.items);
+				var sourceURL = data.parameters && data.parameters.valueFor("url"); //$NON-NLS-0$
+				if (targetFolder && sourceURL) {
+					var importURL = targetFolder.ImportLocation+"?source="+sourceURL; //$NON-NLS-0$
+					var expandZip = data.parameters  && data.parameters.valueFor("unzip"); //$NON-NLS-0$
+					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
+					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
+					progress.showWhile(deferred, messages["Importing from "] + sourceURL).then(
+						dojo.hitch(explorer, function() {
+							this.changedItem(this.treeRoot, true);
+						}),
+						errorHandler
+					);//refresh the root
 				}
 			},
 			visibleWhen: function(item) {
