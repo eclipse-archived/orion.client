@@ -39,11 +39,10 @@ function(messages, dojo, dijit, mUtil, mSelection, mNavUtils, mExplorer, mExplor
 		}}
 	 */
 	 
-	dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
+	var DirectoryPrompterDialog = dojo.declare("orion.widgets.DirectoryPrompterDialog", [ dijit.Dialog, orion.widgets._OrionDialogMixin ], { //$NON-NLS-0$
 		widgetsInTemplate : true,
 		templateString : dojo.cache('orion', 'widgets/templates/DirectoryPrompterDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
 		constructor : function() {
-			this.inherited(arguments);
 			this.options = arguments[0] || {};
 		},
 		
@@ -83,4 +82,5 @@ function(messages, dojo, dijit, mUtil, mSelection, mNavUtils, mExplorer, mExplor
 			}.bind(this));
 		}
 	});
+	return DirectoryPrompterDialog;
 });

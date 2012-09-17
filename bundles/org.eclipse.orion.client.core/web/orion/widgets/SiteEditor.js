@@ -9,13 +9,67 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define orion*/
-/*jslint browser:true */
+/*jslint browser:true sub:true*/
 
-define(['i18n!orion/sites/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section', 'orion/sites/siteMappingsTable',
-		'orion/widgets/DirectoryPrompterDialog', 'text!orion/widgets/templates/SiteEditor.html',
-		'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
-		'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-		function(messages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable) {
+define(['i18n!orion/sites/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section',
+	'orion/sites/siteMappingsTable', 'orion/i18nUtil', 'orion/widgets/DirectoryPrompterDialog', 'dijit/Dialog',
+	'orion/widgets/_OrionDialogMixin',
+	'text!orion/widgets/templates/SiteEditor.html',
+	'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
+	'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
+	function(messages, widgetsMessages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable, i18nUtil, DirectoryPrompterDialog,
+		Dialog, _OrionDialogMixin) {
+
+var ConvertToSelfHostingDialog = dojo.declare("orion.widgets.ConvertToSelfHostDialog", [Dialog, _OrionDialogMixin], {
+	DEFAULT_PORT: 8080,
+	widgetsInTemplate: true,
+	templateString: dojo.cache('orion', 'widgets/templates/ConvertToSelfHostingDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
+
+	constructor: function(options) {
+		this.options = options || {};
+	},
+	postMixInProperties: function() {
+		this.options.title = messages['Convert to Self-Hosting']; //$NON-NLS-1$
+		this.message = i18nUtil.formatMessage(messages["SelectRepoSourceFolder"], ["<b>org.eclipse.orion.client</b>"]); //$NON-NLS-1$ //$NON-NLS-0$
+		this.browseMessage = widgetsMessages['Browse...']; //$NON-NLS-1$
+		this.portMessage = i18nUtil.formatMessage(messages["EnterPortNumber"], this.DEFAULT_PORT); //$NON-NLS-1$
+		this.inherited(arguments);
+	},
+	postCreate: function() {
+		this.inherited(arguments);
+		dojo.connect(this.browseButton, 'click', function() { //$NON-NLS-1$
+			var dialog = new DirectoryPrompterDialog({
+				title: messages["Choose Orion Source Folder"], //$NON-NLS-1$
+				serviceRegistry: this.serviceRegistry,
+				fileClient: this.fileClient,
+				func: this.onFolderChosen.bind(this)
+			});
+			dialog.startup();
+			dialog.show();
+		}.bind(this));
+		dojo.connect(this.port, 'onchange', function() { //$NON-NLS-1$
+			this.portNumber = parseInt(this.port.value, 10);
+			this.validate();
+		}.bind(this));
+		this.portNumber = this.port.value = this.DEFAULT_PORT;
+		this.validate();
+	},
+	onFolderChosen: function(folder) {
+		this.folder = folder;
+		this.folderText.textContent = folder ? folder.Name : ''; //$NON-NLS-1$
+		this.validate();
+	},
+	validate: function() {
+		var isValid = (this.folder && !isNaN(this.portNumber) && this.portNumber > 0);
+		this.okButton.set('disabled', !isValid); //$NON-NLS-1$
+	},
+	execute: function() {
+		this.onHide();
+		if (typeof this.options.func === 'function') { //$NON-NLS-1$
+			this.options.func(this.folder, this.portNumber);
+		}
+	}
+});
 
 var AUTOSAVE_INTERVAL = 8000;
 var ROOT = "/"; //$NON-NLS-0$
@@ -25,7 +79,7 @@ var ROOT = "/"; //$NON-NLS-0$
  * @class Editor for an individual site configuration.
  * @param {Object} options Options bag for creating the widget.
  */
-dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templated], { //$NON-NLS-0$
+var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templated], { //$NON-NLS-0$
 	widgetsInTemplate: true,
 	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'), //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -169,7 +223,7 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 			name: messages["Choose folder&#8230;"],
 			imageClass: "core-sprite-folder", //$NON-NLS-0$
 			callback: dojo.hitch(this, function() {
-				var dialog = new orion.widgets.DirectoryPrompterDialog({
+				var dialog = new DirectoryPrompterDialog({
 					serviceRegistry: this.serviceRegistry,
 					fileClient: this.fileClient,
 					func: dojo.hitch(this, function(folder) {
@@ -188,24 +242,22 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	},
 
 	// Special feature for setting up self-hosting
-	// TODO ideally this command would be defined entirely by a plugin. It is here because of the DirectoryPrompter dependency
+	// TODO ideally this logic would be defined entirely by a plugin. It is here because of the dialog (UI) dependency
 	convertToSelfHostedSite: function(items, userData) {
-		var dialog = new orion.widgets.DirectoryPrompterDialog({
+		var self = this;
+		var dialog = new ConvertToSelfHostingDialog({
 			serviceRegistry: this.serviceRegistry,
 			fileClient: this.fileClient,
-			func: dojo.hitch(this, function(folder) {
-				if (folder) {
-					var self = this;
-					this._siteClient.convertToSelfHosting(this.getSiteConfiguration(), folder.Location).then(
-						function(updatedSite) {
-							self.mappings.deleteAllMappings();
-							self.mappings.addMappings(updatedSite.Mappings);
-							self.save();
-						});
-				}
-			}),
-			title: messages["Choose Orion Source Folder"],
-			message: dojo.string.substitute(messages["Select the folder where you checked out the ${0} repository:"], ["<b>org.eclipse.orion.client</b>"])}); //$NON-NLS-1$
+			siteClient: this._siteClient,
+			func: function(folder, port) {
+				self._siteClient.convertToSelfHosting(self.getSiteConfiguration(), folder.Location, port).then(
+					function(updatedSite) {
+						self.mappings.deleteAllMappings();
+						self.mappings.addMappings(updatedSite.Mappings);
+						self.save();
+					});
+			}
+		});
 		dialog.startup();
 		dialog.show();
 	},
@@ -444,4 +496,5 @@ dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templ
 	onError: function(deferred) {
 	}
 });
+	return SiteEditor;
 });
