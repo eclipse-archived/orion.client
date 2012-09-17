@@ -75,6 +75,7 @@ function(mSetup, mTestPerformance) {
 	var sTheme = document.getElementById("themeSelect");
 	var bReadOnly = document.getElementById('readOnly');
 	var bFullSel = document.getElementById('fullSelection');
+	var bWrap = document.getElementById('wrap');
 	var bExpandTab = document.getElementById('expandTab');
 	var sTabSize = document.getElementById('tabSize');
 	
@@ -84,6 +85,7 @@ function(mSetup, mTestPerformance) {
 			fullSelection: bFullSel.checked,
 			expandTab: bExpandTab.checked,
 			tabSize: parseInt(sTabSize.value, 10),
+			wrapMode: bWrap.checked,
 			themeClass: sTheme.value
 		};
 	}
@@ -93,6 +95,7 @@ function(mSetup, mTestPerformance) {
 		var options = view.getOptions();
 		bReadOnly.checked = options.readonly;
 		bFullSel.checked = options.fullSelection;
+		bWrap.checked = options.wrapMode;
 		bExpandTab.checked = options.expandTab;
 		sTabSize.value = options.tabSize;
 		sTheme.value = options.themeClass;
