@@ -113,5 +113,6 @@ define({
 	"Authentication" : "Authentication",
 	"Please be aware that your credentials will be stored persistently in the browser." : "Please be aware that your credentials will be stored persistently in the browser.",
 	"Do you wish to enable the Key Storage?" : "Do you wish to enable the Key Storage?",
-	PluginSettings: 'Plugin Settings'
+	"general": "General",
+	"validation": "Validation"
 });

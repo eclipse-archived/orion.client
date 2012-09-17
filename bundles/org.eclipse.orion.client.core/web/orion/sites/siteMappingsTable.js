@@ -132,7 +132,7 @@ mSiteMappingsTable.Renderer = (function() {
 				});
 			} else {
 				href = target;
-				a = dojo.create("a", {href: href, target: "_new"}, "only"); //$NON-NLS-2$ //$NON-NLS-0$
+				a = dojo.create("a", {href: href, target: "_new"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-0$
 				dojo.create("span", {"class": "imageSprite core-sprite-link", title: i18nUtil.formatMessage(messages.ExternalLinkTo, href)}, a); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			dojo.addClass(col, "isValidCell"); //$NON-NLS-0$
