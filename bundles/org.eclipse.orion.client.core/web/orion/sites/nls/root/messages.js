@@ -57,7 +57,7 @@ define({
 	"WorkspaceFile": "Workspace file: ${0}",
 	"WorkspaceFolder": "Workspace folder: ${0}",
 	"WorkspaceResourceNotFound": "Workspace resource not found: ${0}",
-	"ExternalLinkTo ": "External link to ${0}",
+	"ExternalLinkTo": "External link to ${0}",
 	"Move Up": "Move Up",
 	"Move Down": "Move Down",
 	"HostHint": "HostHint",
