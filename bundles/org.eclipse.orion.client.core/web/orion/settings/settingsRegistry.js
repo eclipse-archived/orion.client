@@ -13,15 +13,16 @@
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var METATYPE_SERVICE = 'orion.cm.metatype', SETTING_SERVICE = 'orion.core.setting'; //$NON-NLS-0$ //$NON-NLS-1$
 	var SETTINGS_PROP = 'settings'; //$NON-NLS-0$
+	var DEFAULT_CATEGORY = 'unsorted'; //$NON-NLS-0$
 
 	/**
 	 * @param {Object} value
-	 * @param {orion.metatype.PropertyType} propertyType
+	 * @param {orion.metatype.AttributeDefinition} attributeDefinition
 	 */
-	function equalsDefaultValue(value, propertyType) {
-		var defaultValue = propertyType.getDefaultValue();
+	function equalsDefaultValue(value, attributeDefinition) {
+		var defaultValue = attributeDefinition.getDefaultValue();
 		var result = value === defaultValue;
-		if (propertyType.getType() === 'string') { //$NON-NLS-0$
+		if (attributeDefinition.getType() === 'string') { //$NON-NLS-0$
 			result = result || (value === '' && defaultValue === null);
 		}
 		return result;
@@ -36,9 +37,15 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @name orion.settings.Setting#isDefaults
 		 * @function
 		 * @description
-		 * @param {Object} properties A map of PropertyType IDs to values.
+		 * @param {Object} properties A map of AttributeDefinition IDs to values.
 		 * @returns {Boolean} <code>true</code> if <code>properties</code> contains a key for each of this setting's
-		 * PropertyTypes, and the corresponding value equals the PropertyType's default value.
+		 * AttributeDefinitions, and the corresponding value equals the AttributeDefinition's default value.
+		 */
+		/**
+		 * @name orion.settings.Setting#getCategory
+		 * @function
+		 * @description
+		 * @returns {String} The category of this setting.
 		 */
 		/**
 		 * @name orion.settings.Setting#getPid
@@ -59,10 +66,10 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {String}
 		 */
 		/**
-		 * @name orion.settings.Setting#getPropertyTypes
+		 * @name orion.settings.Setting#getAttributeDefinitions
 		 * @function
 		 * @description
-		 * @returns {orion.metatype.PropertyType[]}
+		 * @returns {orion.metatype.AttributeDefinition[]}
 		 */
 		/**
 		 * @name orion.settings.Setting#getTags
@@ -76,6 +83,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		this.classId = this.isRef ? json.classId : this.pid + '.type'; //$NON-NLS-0$
 		this.name = typeof json.name === 'string' ? json.name : null; //$NON-NLS-0$
 		this.properties = null;
+		this.category = json.category;
 		this.tags = json.tags;
 		if (!this.pid) { throw new Error('Missing "pid" property'); } //$NON-NLS-0$
 	}
@@ -83,11 +91,12 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		getName: function() { return this.name; },
 		getPid: function() { return this.pid; },
 		getObjectClassDefinitionId: function() { return this.classId; },
-		getPropertyTypes: function() { return this.properties; },
+		getAttributeDefinitions: function() { return this.properties; },
+		getCategory: function() { return this.category || null; },
 		getTags: function() { return this.tags || []; },
 		isDefaults: function(properties) {
-			return this.getPropertyTypes().every(function(propertyType) {
-				return equalsDefaultValue(properties[propertyType.getId()], propertyType);
+			return this.getAttributeDefinitions().every(function(attributeDefinition) {
+				return equalsDefaultValue(properties[attributeDefinition.getId()], attributeDefinition);
 			});
 		}
 	};
@@ -95,7 +104,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	/**
 	 * Tracks dynamic registration/unregistration of settings and registers/unregisters the corresponding MetaType service.
 	 */
-	function SettingTracker(serviceRegistry, metaTypeRegistry, settingsMap) {
+	function SettingTracker(serviceRegistry, metaTypeRegistry, settingsMap, categoriesMap) {
 		var serviceRegistrations = {};
 
 		function _addSetting(settingJson) {
@@ -116,23 +125,28 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			}
 			serviceRegistrations[setting.getPid()] = serviceRegistry.registerService(METATYPE_SERVICE, {}, serviceProperties);
 			var ocd = metaTypeRegistry.getObjectClassDefinition(classId);
-			setting.properties = ocd.getPropertyTypes();
+			setting.properties = ocd.getAttributeDefinitions();
 			settingsMap[setting.getPid()] = setting;
+			var category = setting.getCategory() || DEFAULT_CATEGORY;
+			if (!categoriesMap[category]) {
+				categoriesMap[category] = [];
+			}
+			categoriesMap[category].push(setting.getPid());
 		}
 
-		function _deleteSetting(pid) {
+		function _deleteSetting(pid, category) {
 			var serviceRegistration = serviceRegistrations[pid];
 			serviceRegistration.unregister();
 			delete serviceRegistrations[pid];
 			delete settingsMap[pid];
+			var pids = categoriesMap[category || DEFAULT_CATEGORY];
+			pids.splice(pids.indexOf(pid), 1);
+			if (!pids.length) {
+				delete categoriesMap[category];
+			}
 		}
 
 		ServiceTracker.call(this, serviceRegistry, SETTING_SERVICE);
-		serviceRegistry.getServiceReferences(SETTING_SERVICE).forEach(function(ref) {
-			(ref.getProperty(SETTINGS_PROP) || []).forEach(function(settingJson) {
-				_addSetting(settingJson);
-			});
-		});
 		this.addingService = function(serviceRef) {
 			var settings = serviceRef.getProperty(SETTINGS_PROP);
 			if (!settings || !settings.length) {
@@ -146,7 +160,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		this.removedService = function(serviceRef, service) {
 			var settings = serviceRef.getProperty(SETTINGS_PROP);
 			for (var i=0; i < settings.length; i++) {
-				_deleteSetting(settings[i].pid);
+				_deleteSetting(settings[i].pid, settings[i].category);
 			}
 		};
 	}
@@ -159,20 +173,33 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	 * @param {orion.metatype.MetaTypeRegistry} metaTypeRegistry The metatype registry to look up Object Class Definitions in.
 	 */
 	function SettingsRegistry(serviceRegistry, metaTypeRegistry) {
-		this.settingsMap = {};
-		var tracker = new SettingTracker(serviceRegistry, metaTypeRegistry, this.settingsMap);
+		this.settingsMap = Object.create(null); // PID -> Setting
+		this.categories = Object.create(null);  // Category -> PID[]
+		var tracker = new SettingTracker(serviceRegistry, metaTypeRegistry, this.settingsMap, this.categories);
 		tracker.open();
 	}
 	SettingsRegistry.prototype = /** @lends orion.settings.SettingsRegistry.prototype */ {
 		/**
-		 * Returns all settings.
+		 * Returns settings.
+		 * @param {String} [category] If passed, returns only the settings in the given category. Otherwise, returns all settings.
 		 * @returns {orion.settings.Setting[]}
 		 */
-		getSettings: function() {
+		getSettings: function(category) {
 			var settingsMap = this.settingsMap;
-			return Object.keys(settingsMap).map(function(pid) {
+			var pids = (typeof category === 'string') ? this.categories[category] : Object.keys(settingsMap);
+			if (!pids) {
+				return [];
+			}
+			return pids.map(function(pid) {
 				return settingsMap[pid];
 			});
+		},
+		/**
+		 * Returns all setting categories.
+		 * @returns {String[]}
+		 */
+		getCategories: function() {
+			return Object.keys(this.categories);
 		}
 	};
 

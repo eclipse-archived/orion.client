@@ -79,7 +79,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 
 		addCategory: function(item, index) {
-			dojo.create("li", item, this.navbar); //$NON-NLS-0$
+			index = (typeof index === "undefined") ? 0 : index;
+			var li = dojo.create("li", item, this.navbar); //$NON-NLS-0$
+			li.textContent = item.textContent;
 			this.itemToIndexMap[item.id] = index;
 		},
 

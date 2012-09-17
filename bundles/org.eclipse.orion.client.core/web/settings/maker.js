@@ -13,7 +13,14 @@
 /*global define dojo dijit orion window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteUtils', 'orion/sites/sitesExplorer', 'orion/treetable', 'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/maker/PluginMakerContainer', 'orion/widgets/maker/ScrollingContainerSection', 'orion/widgets/maker/PluginDescriptionSection', 'orion/widgets/maker/PluginCompletionSection', 'dijit/form/Button', 'dijit/ColorPalette'], function(messages, require, dojo, mBootstrap, mStatus, mCommands, mOperationsClient, mFileClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteUtils, mSiteTree, mTreeTable) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/operationsClient',
+		'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient',
+		'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane',
+		'orion/widgets/maker/PluginMakerContainer', 'orion/widgets/maker/ScrollingContainerSection',
+		'orion/widgets/maker/PluginDescriptionSection', 'orion/widgets/maker/PluginCompletionSection', 'dijit/form/Button',
+		'dijit/ColorPalette'],
+		function(messages, require, dojo, mBootstrap, mStatus, mCommands, mOperationsClient, mFileClient, mSearchClient,
+			mDialogs, mGlobalCommands) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
