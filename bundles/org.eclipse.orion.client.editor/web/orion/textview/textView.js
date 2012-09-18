@@ -1523,10 +1523,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		getOffsetAtLocation: function(x, y) {
 			if (!this._clientDiv) { return 0; }
-			var scroll = this._getScroll();
-			var viewRect = this._viewDiv.getBoundingClientRect();
-			var viewPad = this._getViewPadding();
-			var lineIndex = this._getLineAtY(y - scroll.y + viewRect.top + viewPad.top);
+			var lineIndex = this._getLineAtY(y, true);
 			var line = this._getLine(lineIndex);
 			var offset = line.getOffset(x, y - this._getLinePixel(lineIndex));
 			line.destroy();
@@ -3646,14 +3643,30 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var caret = selection.getCaret();
 			var caretLine = model.getLineAtOffset(caret);
 			var lineCount = model.getLineCount();
+			var scroll = this._getScroll();
+			var clientHeight = this._getClientHeight(), x, line;
+			if (this._lineHeight) {
+				x = this._columnX;
+				var caretRect = this._getBoundsAtOffset(caret);
+				if (x === -1 || (args.select && isIE)) {
+					x = caretRect.left;
+				}
+				var lineIndex = this._getLineAtY(caretRect.top + clientHeight, true);
+				line = this._getLine(lineIndex);
+				var y = caretRect.top + clientHeight - this._getLinePixel(lineIndex);
+				selection.extend(line.getOffset(x, y));
+				line.destroy();
+				if (!args.select) { selection.collapse(); }
+				this._setSelection(selection, true, true, clientHeight);
+				this._columnX = x;
+				return true;
+			}
 			if (caretLine < lineCount - 1) {
-				var scroll = this._getScroll();
-				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.min(lineCount - caretLine - 1, lines);
 				scrollLines = Math.max(1, scrollLines);
-				var x = this._columnX, line;
+				x = this._columnX;
 				if (x === -1 || (args.select && isIE)) {
 					line = this._getLine(caretLine);
 					x = line.getBoundingClientRect(caret).left;
@@ -3678,13 +3691,29 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var selection = this._getSelection();
 			var caret = selection.getCaret();
 			var caretLine = model.getLineAtOffset(caret);
+			var scroll = this._getScroll();
+			var clientHeight = this._getClientHeight(), x, line;
+			if (this._lineHeight) {
+				x = this._columnX;
+				var caretRect = this._getBoundsAtOffset(caret);
+				if (x === -1 || (args.select && isIE)) {
+					x = caretRect.left;
+				}
+				var lineIndex = this._getLineAtY(caretRect.bottom - clientHeight, true);
+				line = this._getLine(lineIndex);
+				var y = (caretRect.bottom - clientHeight) - this._getLinePixel(lineIndex);
+				selection.extend(line.getOffset(x, y));
+				line.destroy();
+				if (!args.select) { selection.collapse(); }
+				this._setSelection(selection, true, true, -clientHeight);
+				this._columnX = x;
+				return true;
+			}
 			if (caretLine > 0) {
-				var scroll = this._getScroll();
-				var clientHeight = this._getClientHeight();
 				var lineHeight = this._getLineHeight();
 				var lines = Math.floor(clientHeight / lineHeight);
 				var scrollLines = Math.max(1, Math.min(caretLine, lines));
-				var x = this._columnX, line;
+				x = this._columnX;
 				if (x === -1 || (args.select && isIE)) {
 					line = this._getLine(caretLine);
 					x = line.getBoundingClientRect(caret).left;
@@ -4489,6 +4518,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return child.lineIndex;
 		},
+		_getBoundsAtOffset: function(offset) {
+			var model = this._model;
+			var line = this._getLine(model.getLineAtOffset(offset));
+			var result = line.getBoundingClientRect(offset);
+			var linePixel = this._getLinePixel(line.lineIndex);
+			result.top += linePixel;
+			result.bottom += linePixel;
+			line.destroy();
+			return result;
+		},
 		_getClientHeight: function() {
 			var viewPad = this._getViewPadding();
 			return Math.max(0, this._viewDiv.clientHeight - viewPad.top - viewPad.bottom);
@@ -4695,11 +4734,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
 		},
-		_getLineAtY: function (y) {
-			var viewPad = this._getViewPadding();
-			var viewRect = this._viewDiv.getBoundingClientRect();
-			y -= viewRect.top + viewPad.top;
-			y += this._getScroll().y;
+		_getLineAtY: function (y, document) {
+			if (!document) {
+				var viewPad = this._getViewPadding();
+				var viewRect = this._viewDiv.getBoundingClientRect();
+				y -= viewRect.top + viewPad.top;
+				y += this._getScroll().y;
+			}
 			var lineHeight, lineIndex = 0;
 			if (this._lineHeight) {
 				//TODO [perf] calculate from top index
@@ -5564,23 +5605,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var clientWidth = this._getClientWidth();
 			var clientHeight = this._getClientHeight();
 			var minScroll = clientWidth / 4;
-			var self = this;
-			function _getBoundsAtOffset(o) {
-				var line = self._getLine(model.getLineAtOffset(o));
-				var result = line.getBoundingClientRect(o);
-				var linePixel = self._getLinePixel(line.lineIndex);
-				result.top += linePixel;
-				result.bottom += linePixel;
-				line.destroy();
-				return result;
-			}
-			var bounds = _getBoundsAtOffset(caret === start ? start : endInclusive);
+			var bounds = this._getBoundsAtOffset(caret === start ? start : endInclusive);
 			var left = bounds.left;
 			var right = bounds.right;
 			var top = bounds.top;
 			var bottom = bounds.bottom;
 			if (allSelection && !selection.isEmpty()) {
-				bounds = _getBoundsAtOffset(caret === end ? start : endInclusive);
+				bounds = this._getBoundsAtOffset(caret === end ? start : endInclusive);
 				if (bounds.top === top) {
 					if (caret === start) {
 						right = left + Math.min(bounds.right - left, clientWidth);
