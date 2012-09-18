@@ -46,7 +46,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			orion.annotationRuler = 'white'; 
 			orion.background = 'white';
 			orion.comment = 'green';
-			orion.keyword = 'darkRed';
+			orion.keyword = '#7f0055';
 			orion.text = '#333';
 			orion.string = 'blue';
 			orion.overviewRuler = 'white';
@@ -86,7 +86,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			blue.lineNumberEven = '#333';
 			blue.lineNumber = '#333';
 			
-			
 			this.styles.push( blue );
 			
 			var ambience = new StyleSet();
@@ -103,8 +102,39 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			ambience.lineNumberEven = 'black';
 			ambience.lineNumber = 'black';
 			
-			
 			this.styles.push( ambience );
+			
+			var tierra = new StyleSet();
+			
+			tierra.name = 'tierra';
+			tierra.annotationRuler = 'moccasin'; 
+			tierra.background = 'lemonchiffon';
+			tierra.comment = 'darkseagreen';
+			tierra.keyword = 'darkred';
+			tierra.text = 'darkseagreen';
+			tierra.string = 'orangered';
+			tierra.overviewRuler = 'moccasin';
+			tierra.lineNumberOdd = 'chocolate';
+			tierra.lineNumberEven = 'chocolate';
+			tierra.lineNumber = 'chocolate';
+			
+			this.styles.push( tierra );
+			
+			var nimbus = new StyleSet();
+			
+			nimbus.name = 'nimbus';
+			nimbus.annotationRuler = '#444'; 
+			nimbus.background = 'dimgray';
+			nimbus.comment = 'darkseagreen';
+			nimbus.keyword = 'darkorange';
+			nimbus.text = 'white';
+			nimbus.string = 'cornflowerblue';
+			nimbus.overviewRuler = '#444';
+			nimbus.lineNumberOdd = '#aaa';
+			nimbus.lineNumberEven = '#aaa';
+			nimbus.lineNumber = '#aaa';
+			
+			this.styles.push( nimbus );
 			
 		}
 		
