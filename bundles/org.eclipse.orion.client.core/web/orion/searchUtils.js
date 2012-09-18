@@ -619,5 +619,23 @@ orion.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
 	});
 };
 
+orion.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		var i;
+		var openSearchPref = prefs.get("openSearchPref"); //$NON-NLS-0$
+		if (typeof openSearchPref === "string") { //$NON-NLS-0$
+			openSearchPref = JSON.parse(openSearchPref);
+		}
+		var openInNewTab = openSearchPref ? openSearchPref.openInNewTab : true;
+		callback(openInNewTab);
+	});
+};
+
+orion.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-0$
+	});
+};
+
 return orion.searchUtils;
 });
