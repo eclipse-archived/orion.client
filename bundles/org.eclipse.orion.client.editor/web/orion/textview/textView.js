@@ -291,7 +291,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	TextRect.prototype = /** @lends orion.textview.TextRect.prototype */ {
 		/** @private */
 		toString: function() {
-			return "{" + this.left + ", " + this.top + ", " + this.right + ", " + this.bottom + "}";
+			return "{l=" + this.left + ", t=" + this.top + ", r=" + this.right + ", b=" + this.bottom + "}"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
 	/** 
@@ -668,10 +668,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				lineChild = lineChild.nextSibling;
 			}
-//			log("lineCount=" + result.length);
-//			for (i = 0; i < result.length; i++) {
-//				log("r=" + result[i]);
-//			}
 			if (lineIndex !== undefined) {
 				return result[lineIndex];
 			}
@@ -1530,7 +1526,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var scroll = this._getScroll();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			var viewPad = this._getViewPadding();
-			var lineIndex = this._getYToLine(y - scroll.y + viewRect.top + viewPad.top);
+			var lineIndex = this._getLineAtY(y - scroll.y + viewRect.top + viewPad.top);
 			var line = this._getLine(lineIndex);
 			var offset = line.getOffset(x, y - this._getLinePixel(lineIndex));
 			line.destroy();
@@ -2032,10 +2028,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			if (!ruler) {
-				if (startLine <= this._maxLineIndex && this._maxLineIndex < endLine) {
-					this._checkMaxLineIndex = this._maxLineIndex;
-					this._maxLineIndex = -1;
-					this._maxLineWidth = 0;
+				if (!this._wrapMode) {
+					if (startLine <= this._maxLineIndex && this._maxLineIndex < endLine) {
+						this._checkMaxLineIndex = this._maxLineIndex;
+						this._maxLineIndex = -1;
+						this._maxLineWidth = 0;
+					}
 				}
 			}
 			this._queueUpdate();
@@ -3298,7 +3296,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (start === undefined || end === undefined) {
 			    return;
 			}
-			this._setSelection(new Selection(start, end), false, false, false);
+			this._setSelection(new Selection(start, end), false, false);
 		},
 		_handleTouchStart: function (e) {
 			if (this._touchScrollTimer) {
@@ -3312,7 +3310,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var touch = touches[0];
 				this._touchStartX = touch.clientX;
 				this._touchStartY = touch.clientY;
-				var lineIndex = this._getYToLine(touch.clientY);
+				var lineIndex = this._getLineAtY(touch.clientY);
 				var pt = this.convert({x: touch.clientX, y: touch.clientY}, "page", "document");
 				var line = this._getLine(lineIndex);
 				this._lastTouchOffset = line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex));
@@ -3330,7 +3328,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var interval = 10;
 				if (!this._touchScrollTimer && (e.timeStamp - this._touchStartTime) < (interval*20)) {
 					this._vScrollDiv.style.display = "block"; //$NON-NLS-0$
-					this._hScrollDiv.style.display = "block"; //$NON-NLS-0$
+					if (!this._wrapMode) {
+						this._hScrollDiv.style.display = "block"; //$NON-NLS-0$
+					}
 					var self = this;
 					this._touchScrollTimer = setInterval(function() {
 						var deltaX = 0, deltaY = 0;
@@ -3785,7 +3785,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				lineIndex = caretLine;
 				lineIndex = Math.max(0, Math.min(this._model.getLineCount() - 1, lineIndex + scroll));
 			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
-				lineIndex = this._getYToLine(y);
+				lineIndex = this._getLineAtY(y);
 				line = this._getLine(caretLine); 
 				x += line.getBoundingClientRect(selection.getCaret(), false).left;
 				line.destroy();
@@ -4695,26 +4695,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
 		},
-		_getScroll: function() {
-			var viewDiv = this._viewDiv;
-			return {x: viewDiv.scrollLeft, y: viewDiv.scrollTop};
-		},
-		_getSelection: function () {
-			return this._selection.clone();
-		},
-		_getTopIndex: function (fullyVisible) {
-			var child = this._topChild;
-			if (fullyVisible && this._getClientHeight() > this._getLineHeight()) {
-				var rect = child.getBoundingClientRect();
-				var viewPad = this._getViewPadding();
-				var viewRect = this._viewDiv.getBoundingClientRect();
-				if (rect.top < viewRect.top + viewPad.top) {
-					child = this._getLineNext(child) || child;
-				}
-			}
-			return child.lineIndex;
-		},
-		_getYToLine: function (y) {
+		_getLineAtY: function (y) {
 			var viewPad = this._getViewPadding();
 			var viewRect = this._viewDiv.getBoundingClientRect();
 			y -= viewRect.top + viewPad.top;
@@ -4733,6 +4714,25 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
+		},
+		_getScroll: function() {
+			var viewDiv = this._viewDiv;
+			return {x: viewDiv.scrollLeft, y: viewDiv.scrollTop};
+		},
+		_getSelection: function () {
+			return this._selection.clone();
+		},
+		_getTopIndex: function (fullyVisible) {
+			var child = this._topChild;
+			if (fullyVisible && this._getClientHeight() > this._getLineHeight()) {
+				var rect = child.getBoundingClientRect();
+				var viewPad = this._getViewPadding();
+				var viewRect = this._viewDiv.getBoundingClientRect();
+				if (rect.top < viewRect.top + viewPad.top) {
+					child = this._getLineNext(child) || child;
+				}
+			}
+			return child.lineIndex;
 		},
 		_hookEvents: function() {
 			var self = this;
@@ -4963,10 +4963,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				child = this._getLineNext(child);
 			}
-			if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
-				this._checkMaxLineIndex = this._maxLineIndex;
-				this._maxLineIndex = -1;
-				this._maxLineWidth = 0;
+			if (!this._wrapMode) {
+				if (startLine <= this._maxLineIndex && this._maxLineIndex <= startLine + removedLineCount) {
+					this._checkMaxLineIndex = this._maxLineIndex;
+					this._maxLineIndex = -1;
+					this._maxLineWidth = 0;
+				}
 			}
 			this._update();
 		},
@@ -5346,15 +5348,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._columnX = -1;
 				if (update === undefined) { update = true; }
 				var oldSelection = this._selection; 
-				if (!oldSelection.equals(selection)) {
-					this._selection = selection;
-					var e = {
-						type: "Selection", //$NON-NLS-0$
-						oldValue: {start:oldSelection.start, end:oldSelection.end},
-						newValue: {start:selection.start, end:selection.end}
-					};
-					this.onSelection(e);
-				}
+				this._selection = selection;
+
 				/* 
 				* Always showCaret(), even when the selection is not changing, to ensure the
 				* caret is visible. Note that some views do not scroll to show the caret during
@@ -5370,12 +5365,21 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* when the logical selection is not changed.
 				*/
 				if (update) { this._updateDOMSelection(); }
+				
+				if (!oldSelection.equals(selection)) {
+					var e = {
+						type: "Selection", //$NON-NLS-0$
+						oldValue: {start:oldSelection.start, end:oldSelection.end},
+						newValue: {start:selection.start, end:selection.end}
+					};
+					this.onSelection(e);
+				}
 			}
 		},
 		_setSelectionTo: function (x, y, extent, drag) {
 			var model = this._model, offset;
 			var selection = this._getSelection();
-			var lineIndex = this._getYToLine(y), pt, line;
+			var lineIndex = this._getLineAtY(y), pt, line;
 			if (this._clickCount === 1) {
 				line = this._getLine(lineIndex);
 				pt = this.convert({x: x, y: y}, "page", "document");
@@ -5576,78 +5580,66 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var caret = selection.getCaret();
 			var start = selection.start;
 			var end = selection.end;
-			var startLine = model.getLineAtOffset(start); 
 			var endLine = model.getLineAtOffset(end);
 			var endInclusive = Math.max(Math.max(start, model.getLineStart(endLine)), end - 1);
-			var viewPad = this._getViewPadding();
-			
 			var clientWidth = this._getClientWidth();
-			var leftEdge = viewPad.left;
-			var rightEdge = viewPad.left + clientWidth;
+			var clientHeight = this._getClientHeight();
+			var minScroll = clientWidth / 4;
 			var self = this;
 			function _getBoundsAtOffset(o) {
 				var line = self._getLine(model.getLineAtOffset(o));
-				var result = line.getBoundingClientRect(o, false);
+				var result = line.getBoundingClientRect(o);
+				var linePixel = self._getLinePixel(line.lineIndex);
+				result.top += linePixel;
+				result.bottom += linePixel;
 				line.destroy();
 				return result;
 			}
 			var bounds = _getBoundsAtOffset(caret === start ? start : endInclusive);
 			var left = bounds.left;
 			var right = bounds.right;
-			var minScroll = clientWidth / 4;
-			if (allSelection && !selection.isEmpty() && startLine === endLine) {
+			var top = bounds.top;
+			var bottom = bounds.bottom;
+			if (allSelection && !selection.isEmpty()) {
 				bounds = _getBoundsAtOffset(caret === end ? start : endInclusive);
-				var selectionWidth = caret === start ? bounds.right - left : right - bounds.left;
-				if ((clientWidth - minScroll) > selectionWidth) {
-					if (left > bounds.left) { left = bounds.left; }
-					if (right < bounds.right) { right = bounds.right; }
-				}
-			}
-			var viewRect = this._viewDiv.getBoundingClientRect(); 
-			left -= viewRect.left;
-			right -= viewRect.left;
-			var pixelX = 0;
-			if (left < leftEdge) {
-				pixelX = Math.min(left - leftEdge, -minScroll);
-			}
-			if (right > rightEdge) {
-				var maxScroll = this._scrollDiv.scrollWidth - scroll.x - clientWidth;
-				pixelX = Math.min(maxScroll,  Math.max(right - rightEdge, minScroll));
-			}
-
-			var pixelY = 0;
-			var topIndex = this._getTopIndex(true);
-			var bottomIndex = this._getBottomIndex(true);
-			var caretLine = model.getLineAtOffset(caret);
-			var clientHeight = this._getClientHeight();
-			if (!(topIndex <= caretLine && caretLine <= bottomIndex)) {
-				var lineHeight = this._getLineHeight();
-				var selectionHeight = allSelection ? (endLine - startLine) * lineHeight : 0;
-				pixelY = caretLine * lineHeight;
-				pixelY -= scroll.y;
-				if (pixelY + lineHeight > clientHeight) {
-					pixelY -= clientHeight - lineHeight;
-					if (caret === start && start !== end) {
-						pixelY += Math.min(clientHeight - lineHeight, selectionHeight);
+				if (bounds.top === top) {
+					if (caret === start) {
+						right = left + Math.min(bounds.right - left, clientWidth);
+					} else {
+						left = right - Math.min(right - bounds.left, clientWidth);
 					}
 				} else {
-					if (caret === end) {
-						pixelY -= Math.min (clientHeight - lineHeight, selectionHeight);
-					}
-				}
-				if (pageScroll) {
-					if (pageScroll > 0) {
-						if (pixelY > 0) {
-							pixelY = Math.max(pixelY, pageScroll);
-						}
+					if (caret === start) {
+						bottom = top + Math.min(bounds.bottom - top, clientHeight);
 					} else {
-						if (pixelY < 0) {
-							pixelY = Math.min(pixelY, pageScroll);
-						}
+						top = bottom - Math.min(bottom - bounds.top, clientHeight);
 					}
 				}
 			}
-
+			var pixelX = 0;
+			if (left < scroll.x) {
+				pixelX = Math.min(left - scroll.x, -minScroll);
+			}
+			if (right > scroll.x + clientWidth) {
+				pixelX = Math.max(right - scroll.x - clientWidth, minScroll);
+			}
+			var pixelY = 0;
+			if (top < scroll.y) {
+				pixelY = top - scroll.y;
+			} else if (bottom > scroll.y + clientHeight) {
+				pixelY = bottom - scroll.y - clientHeight;
+			}
+			if (pageScroll) {
+				if (pageScroll > 0) {
+					if (pixelY > 0) {
+						pixelY = Math.max(pixelY, pageScroll);
+					}
+				} else {
+					if (pixelY < 0) {
+						pixelY = Math.min(pixelY, pageScroll);
+					}
+				}
+			}
 			if (pixelX !== 0 || pixelY !== 0) {
 				this._scrollView (pixelX, pixelY);
 				/*
@@ -5759,8 +5751,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var topIndex, lineStart, top, partialY,
 				leftWidth, leftRect,
 				clientHeight, scrollWidth, scrollHeight;
+			var h = 0, lh;
 			if (this._lineHeight) {
-				var h = 0, lh;
 				var l = 0;
 				while (h + (lh = this._getLineHeight(l)) <= scroll.y) {
 					h += lh;
@@ -5856,6 +5848,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	
 				var rect;
 				child = this._getLineNext();
+				h = clientHeight + top;
+				var foundBottomIndex = false;
 				while (child) {
 					lineWidth = child.lineWidth;
 					if (lineWidth === undefined) {
@@ -5865,13 +5859,22 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							this._lineHeight[child.lineIndex] = Math.ceil(rect.bottom - rect.top);
 						}
 					}
-					if (lineWidth >= this._maxLineWidth) {
-						this._maxLineWidth = lineWidth;
-						this._maxLineIndex = child.lineIndex;
+					if (this._lineHeight && !foundBottomIndex) {
+						h -= this._lineHeight[child.lineIndex];
+						if (h < 0) {
+							bottomIndex = child.lineIndex;
+							foundBottomIndex = true;
+						}
+					}
+					if (!this._wrapMode) {
+						if (lineWidth >= this._maxLineWidth) {
+							this._maxLineWidth = lineWidth;
+							this._maxLineIndex = child.lineIndex;
+						}
+						if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
 					}
 					if (child.lineIndex === topIndex) { this._topChild = child; }
 					if (child.lineIndex === bottomIndex) { this._bottomChild = child; }
-					if (this._checkMaxLineIndex === child.lineIndex) { this._checkMaxLineIndex = -1; }
 					child = this._getLineNext(child);
 				}
 				if (this._checkMaxLineIndex !== -1) {
@@ -5942,7 +5945,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._vScrollDiv.style.top = Math.floor(Math.max(0, (scroll.y * trackHeight / scrollHeight))) + "px"; //$NON-NLS-0$
 				this._vScrollDiv.style.height = thumbHeight + "px"; //$NON-NLS-0$
 			}
-			if (this._hScrollDiv) {
+			if (!this._wrapMode && this._hScrollDiv) {
 				var trackWidth = clientWidth - 8;
 				var thumbWidth = Math.max(15, Math.ceil(Math.min(1, trackWidth / (this._maxLineWidth + viewPad.left + viewPad.right)) * trackWidth));
 				this._hScrollDiv.style.left = leftWidth + Math.floor(Math.max(0, Math.floor(scroll.x * trackWidth / this._maxLineWidth))) + "px"; //$NON-NLS-0$
