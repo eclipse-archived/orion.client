@@ -5240,49 +5240,31 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				hd = rootpRect.left;
 				vd = rootpRect.top;
 			}
-			var startLineBounds, l, startLine = new TextLine(this, startNode.lineIndex, startNode);
-			startLineBounds = startLine.getBoundingClientRect();
-			if (startOffset === 0) {
-				l = startLineBounds.left;
-			} else {
-				if (startOffset >= startLineEnd) {
-					l = startLineBounds.right;
-				} else {
-					this._ignoreDOMSelection = true;
-					l = startLine.getBoundingClientRect(model.getLineStart(startNode.lineIndex) + startOffset, false).left;
-					this._ignoreDOMSelection = false;
-				}
-			}
-			var r, endLine = new TextLine(this, endNode.lineIndex, endNode);
-			var endLineBounds = endLine.getBoundingClientRect();
-			if (endOffset === 0) {
-				r = endLineBounds.left;
-			} else {
-				if (endOffset >= endLineEnd) {
-					r = endLineBounds.right;
-				} else {
-					this._ignoreDOMSelection = true;
-					r = endLine.getBoundingClientRect(model.getLineStart(endNode.lineIndex) + endOffset, false).left;
-					this._ignoreDOMSelection = false;
-				}
-			}
+			this._ignoreDOMSelection = true;
+			var startLine = new TextLine(this, startNode.lineIndex, startNode);
+			var startRect = startLine.getBoundingClientRect(model.getLineStart(startNode.lineIndex) + startOffset, false);
+			var l = startRect.left;
+			var endLine = new TextLine(this, endNode.lineIndex, endNode);
+			var endRect = endLine.getBoundingClientRect(model.getLineStart(endNode.lineIndex) + endOffset, false);
+			var r = endRect.left;
+			this._ignoreDOMSelection = false;
 			var sel1Div = this._selDiv1;
 			var sel1Left = Math.min(right, Math.max(left, l));
-			var sel1Top = Math.min(bottom, Math.max(top, startLineBounds.top));
+			var sel1Top = Math.min(bottom, Math.max(top, startRect.top));
 			var sel1Right = right;
-			var sel1Bottom = Math.min(bottom, Math.max(top, startLineBounds.bottom));
+			var sel1Bottom = Math.min(bottom, Math.max(top, startRect.bottom));
 			sel1Div.style.left = (sel1Left - hd) + "px"; //$NON-NLS-0$
 			sel1Div.style.top = (sel1Top - vd) + "px"; //$NON-NLS-0$
 			sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
 			sel1Div.style.height = Math.max(0, sel1Bottom - sel1Top) + "px"; //$NON-NLS-0$
-			if (startNode === endNode) {
+			if (startRect.top === endRect.top) {
 				sel1Right = Math.min(r, right);
 				sel1Div.style.width = Math.max(0, sel1Right - sel1Left) + "px"; //$NON-NLS-0$
 			} else {
 				var sel3Left = left;
-				var sel3Top = Math.min(bottom, Math.max(top, endLineBounds.top));
+				var sel3Top = Math.min(bottom, Math.max(top, endRect.top));
 				var sel3Right = Math.min(right, Math.max(left, r));
-				var sel3Bottom = Math.min(bottom, Math.max(top, endLineBounds.bottom));
+				var sel3Bottom = Math.min(bottom, Math.max(top, endRect.bottom));
 				var sel3Div = this._selDiv3;
 				sel3Div.style.left = (sel3Left - hd) + "px"; //$NON-NLS-0$
 				sel3Div.style.top = (sel3Top - vd) + "px"; //$NON-NLS-0$
@@ -5436,9 +5418,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setFullSelection: function(fullSelection, init) {
 			this._fullSelection = fullSelection;
-			if (this._wrapMode) {
-				this._fullSelection = false;
-			}
 			if (isWebkit) {
 				this._fullSelection = true;
 			}
