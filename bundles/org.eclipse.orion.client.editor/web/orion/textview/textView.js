@@ -4974,6 +4974,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				if (lineIndex > startLine + removedLineCount) {
 					child.lineIndex = lineIndex + addedLineCount - removedLineCount;
+					child._line.lineIndex = child.lineIndex;
 				}
 				child = this._getLineNext(child);
 			}
