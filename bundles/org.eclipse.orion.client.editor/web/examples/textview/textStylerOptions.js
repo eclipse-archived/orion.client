@@ -65,94 +65,67 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 			}
 			return value;
 		}, 
-		_getStyleSheet: function (subcategories, theme, sUtil) {
-			console.log( subcategories );
+		
+		_styleSheet: function( settings, theme ){
+		
+			var elements = [];
+		
+			for( var count = 0; count < settings.length; count++ ){
+				elements[settings[count].element] = settings[count].value;
+			}
+			
 			var result = [];
 			result.push("");
 			
 			//view container
-			var family = this.preferences.getSetting(subcategories, "Font", "Family").toLowerCase();
+			var family = elements['fontFamily'];
 			if(family === "sans serif"){
 				family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
 			}else{
 				family = 'monospace';
 			}	
-			var size = this.preferences.getSetting(subcategories, "Font", "Size");
-			var color = this.preferences.getSetting(subcategories, "Font", "Color");
-			var background = this.preferences.getSetting(subcategories, "Font", "Background");
+			
 			result.push("." + theme + " {");
 			result.push("\tfont-family: " + family + ";");
-			result.push("\tfont-size: " + size + ";");
-			result.push("\tcolor: " + color + ";");
+			result.push("\tfont-size: " + elements['fontSize'] + ";");
+			result.push("\tcolor: " + elements['text'] + ";");
 			result.push("}");
 			
-			//view
 			result.push("." + theme + " .textview {");
-			result.push("\tbackground-color: " + background + ";");
+			result.push("\tbackground-color: " + elements['background'] + ";");
 			result.push("}");
 			
-			// Annotations Ruler
-			
-			var annotationsBackground = this.preferences.getSetting(subcategories, "Annotations Ruler", "Background");
-			console.log( annotationsBackground );
 			result.push("." + theme + ".ruler.annotations{");
 			result.push("\tbackground-color: " + 'red' + ";");
 			result.push("}");
-
-			//ruler
+			
 			result.push("." + theme + " .ruler {");
-			result.push("\tbackground-color: " + annotationsBackground + ";");
+			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
 			result.push("}");
 			
-			//rulerLines
-			var lineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Background");
-			var lineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Color");
 			result.push("." + theme + " .rulerLines {");
-			result.push("\tcolor: " + lineNumberForeground + ";");
-			result.push("\tbackground-color: " + lineNumberBackground + ";");
+			result.push("\tcolor: " + elements['lineNumber'] + ";");
+			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
 			result.push("}");
 			
-			var evenlineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Even Rows Background");
-			var evenlineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Even Rows Color");
 			result.push("." + theme + " .rulerLines.even {");
-			result.push("\tcolor: " + evenlineNumberForeground + ";");
-			result.push("\tbackground-color: " + evenlineNumberBackground + ";");
+			result.push("\tcolor: " + elements['lineNumber'] + ";");
+			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
 			result.push("}");
 
-			var oddlineNumberBackground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Odd Rows Background");
-			var oddlineNumberForeground = this.preferences.getSetting(subcategories, "Line Number Ruler", "Odd Rows Color");
-			result.push("." + theme + " .rulerLines.even {");
-			result.push("\tcolor: " + oddlineNumberForeground + ";");
-			result.push("\tbackground-color: " + oddlineNumberBackground + ";");
+			result.push("." + theme + " .rulerLines.odd {");
+			result.push("\tcolor: " + elements['lineNumber'] + ";");
+			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
 			result.push("}");
-
-			var overviewBackground = this.preferences.getSetting(subcategories, "Overview Ruler", "Background");
-			var overviewForeground = this.preferences.getSetting(subcategories, "Overview Ruler", "Color");
-			result.push("." + theme + " .ruler.overview {");
-			result.push("\tcolor: " + overviewForeground + ";");
-			result.push("\tbackground-color: " + overviewBackground + ";");
-			result.push("}");
-
-			var foldingBackground = this.preferences.getSetting(subcategories, "Folding Ruler", "Background");
-			var foldingForeground = this.preferences.getSetting(subcategories, "Folding Ruler", "Color");
-			result.push("." + theme + " .ruler.folding {");
-			result.push("\tcolor: " + foldingForeground + ";");
-			result.push("\tbackground-color: " + foldingBackground + ";");
-			result.push("}");
-
-
 			
-
-
 			var _this = this;
 			var styler = this._styler;
 			function defineRule(token, settingName) {
 				var className = styler.getClassNameForToken(token);
-				console.log( className );
 				
 				if (className) {
-					var color = preferences.getSetting(subcategories, settingName, "Color");
-					var weight = preferences.getSetting(subcategories, settingName, "Weight").toLowerCase();
+					var color = elements[settingName];
+					var weight = elements['fontWeight'];
 					result.push("." + theme + " ." + className +  " {");
 					result.push("\tcolor: " + color + ";");
 					result.push("\tfont-weight: " + weight + ";");
@@ -160,14 +133,15 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 				}
 			}
 			if (styler.getClassNameForToken) {
-				defineRule("keyword", "Keyword Types");
-				defineRule("string", "String Types");
-				defineRule("singleLineComment", "Comment Types");
-				defineRule("multiLineComment", "Comment Types");
-				defineRule("docComment", "Comment Types");
-				defineRule("docHtmlComment", "Comment Types");
+				defineRule("keyword", "keyword");
+				defineRule("string", "string");
+				defineRule("singleLineComment", "comment");
+				defineRule("multiLineComment", "comment");
+				defineRule("docComment", "comment");
+				defineRule("docHtmlComment", "comment");
 			}							
-			return result.join("\n");//easier for debuggin 
+			
+			return result.join("\n");
 		},
 		_onStorage: function (e) {
 			if( e.key === this.storageKey ){
@@ -191,8 +165,9 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 						stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
 						stylerOptions._stylesheet = null;
 					}
+
 					var stylesheet = stylerOptions._stylesheet = document.createElement("STYLE");
-					stylesheet.appendChild(document.createTextNode(stylerOptions._getStyleSheet( storage, USER_THEME, sUtil)));
+					stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, sUtil)));
 					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
 					head.appendChild(stylesheet);
 					var view = stylerOptions._view;

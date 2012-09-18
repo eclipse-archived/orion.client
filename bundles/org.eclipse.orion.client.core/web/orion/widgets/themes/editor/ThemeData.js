@@ -53,6 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			orion.lineNumberOdd = '#444';
 			orion.lineNumberEven = '#444';
 			orion.lineNumber = '#444';
+			orion.currentLine = '#EAF2FE';
 
 			this.styles.push( orion );	
 
@@ -69,6 +70,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			prospecto.lineNumberOdd = '#333';
 			prospecto.lineNumberEven = '#333';
 			prospecto.lineNumber = '#333';
+			prospecto.currentLine = '#EAF2FE';
 
 			this.styles.push( prospecto );			
 			
@@ -85,6 +87,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			blue.lineNumberOdd = '#333';
 			blue.lineNumberEven = '#333';
 			blue.lineNumber = '#333';
+			blue.currentLine = '#EAF2FE';
 			
 			this.styles.push( blue );
 			
@@ -101,6 +104,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			ambience.lineNumberOdd = 'black';
 			ambience.lineNumberEven = 'black';
 			ambience.lineNumber = 'black';
+			ambience.currentLine = '#EAF2FE';
 			
 			this.styles.push( ambience );
 			
@@ -111,12 +115,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			tierra.background = 'lemonchiffon';
 			tierra.comment = 'darkseagreen';
 			tierra.keyword = 'darkred';
-			tierra.text = 'darkseagreen';
+			tierra.text = '#555555';
 			tierra.string = 'orangered';
 			tierra.overviewRuler = 'moccasin';
 			tierra.lineNumberOdd = 'chocolate';
 			tierra.lineNumberEven = 'chocolate';
 			tierra.lineNumber = 'chocolate';
+			tierra.currentLine = '#EAF2FE';
 			
 			this.styles.push( tierra );
 			
@@ -133,8 +138,26 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			nimbus.lineNumberOdd = '#aaa';
 			nimbus.lineNumberEven = '#aaa';
 			nimbus.lineNumber = '#aaa';
+			nimbus.currentLine = '#EAF2FE';
 			
 			this.styles.push( nimbus );
+			
+			var adelante = new StyleSet();
+			
+			adelante.name = 'adelante';
+			adelante.annotationRuler = '#E2D2B2'; 
+			adelante.background = '#F1E7C8';
+			adelante.comment = '#5D774E';
+			adelante.keyword = '#AF473B';
+			adelante.text = 'dimgray';
+			adelante.string = '#DE5D3B';
+			adelante.overviewRuler = '#E2D2B2';
+			adelante.lineNumberOdd = '#AF473B';
+			adelante.lineNumberEven = '#AF473B';
+			adelante.lineNumber = '#AF473B';
+			adelante.currentLine = '#EAF2FE';
+			
+			this.styles.push( adelante );
 			
 		}
 		
@@ -190,70 +213,40 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				dataset.shapes.push( { type:'TEXT', name:'Line Numbers', label:line+1, x:LEFT + 20, y:TOP + ( 20* line ) + 20, fill: '#333', family:'lineNumber', font: '9pt sans-serif' } );
 			}	
 			
-			console.log( 'e d i t o r   t h e m e' );
-			
 			return dataset;
 		}
 		
 		
 		function processSettings( settings, preferences ){
 		
+			console.log( settings );
+		
 			preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
 
-				var subcategories = JSON.parse ( prefs.get( 'JavaScript Editor' ) );
+				var subcategories = [];
 				
-				if( subcategories ){
-					console.log( subcategories );
-					
-					for( var s = 0; s < subcategories.length; s++ ){
-						
-						switch( subcategories[s].label ){
-						
-							case 'Font':
-								subcategories[s].data[3].value = settings['background'].value;
-								subcategories[s].data[2].value = settings['text'].value;
-								subcategories[s].data[1].value = '9pt';
-								subcategories[s].data[0].value = 'Sans Serif';
-								break;
-								
-							case 'String Types':
-								subcategories[s].data[0].value = settings['string'].value;
-								break;
-								
-							case 'Annotations Ruler':
-								subcategories[s].data[1].value = settings['annotationRuler'].value;
-								break;
-								
-							case 'Comment Types':
-								subcategories[s].data[0].value = settings['comment'].value;
-								break;
-								
-							case 'Keyword Types':
-								subcategories[s].data[0].value = settings['keyword'].value;
-								break;
-						
-							case 'Overview Ruler':
-								subcategories[s].data[1].value = settings['overviewRuler'].value;
-								break;
-								
-							case 'Folding Ruler':
-								subcategories[s].data[1].value = settings['annotationRuler'].value;
-								break;		
-								
-							case 'Line Number Ruler':
-								subcategories[s].data[1].value = settings['annotationRuler'].value;
-								subcategories[s].data[3].value = settings['annotationRuler'].value;
-								break;		
-						}
-					}
-				}
+				var font = {};		
+				font.label = 'Font';
+				font.data = [ { label:'Family', value: 'Sans Serif', ui:'Font' }, { label:'Size', value: '9pt', ui:'Font' }, { label:'Color', value: settings['text'].value }, { label:'Background', value: settings['background'].value } ];
 				
+				var subcategories = [ { element: 'fontFamily', value: 'sans serif' },
+							          { element: 'fontSize', value: '9pt' },
+							          { element: 'fontWeight', value: 'normal' },
+									  { element: 'text', value: settings['text'].value }, 
+									  { element: 'background', value: settings['background'].value },
+									  { element: 'string', value: settings['string'].value },
+									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
+									  { element: 'comment', value: settings['comment'].value },
+									  { element: 'keyword', value: settings['keyword'].value },
+									  { element: 'overviewRuler', value: settings['overviewRuler'].value },
+									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
+									  { element: 'lineNumber', value: settings['lineNumber'].value }
+									/*  { 'currentLine': settings['currentLine'].value } */
+									  ];
+
 				prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
 				
 			});
-		
-		
-			console.log( settings );
 		}
 
 		ThemeData.prototype.processSettings = processSettings;
