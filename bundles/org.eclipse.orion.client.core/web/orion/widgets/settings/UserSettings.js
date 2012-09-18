@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledRepositoryLink', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, GitCredentialsStorage) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledCommand', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, GitCredentialsStorage) {
 
 	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -37,7 +37,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							
 							'<div data-dojo-attach-point="gitTable">' +  //$NON-NLS-0$
 								'<div class="sectionWrapper toolComposite">' +
-									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['Git Credentials']+'</div>' + 
+									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['Git Credentials Storage']+'</div>' + 
 									'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
 								'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 								'<div data-dojo-attach-point="gitSections">' + //$NON-NLS-0$
@@ -140,7 +140,33 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			//--------- git credentials -------------------------------
 			this.gitCredentialsFields = [];
 			
-			this.gitCredentialsFields.push( new orion.widgets.settings.LabeledCheckbox( {fieldlabel:messages["Enable Key Storage"]} ) );
+			this.gitCredentialsFields.push( new orion.widgets.settings.LabeledCheckbox( {fieldlabel:messages["Enable Storage"]} ) );
+			var gitCredentialsSection;
+			var that = this;
+			
+			// erase private key command
+			var erasePrivateKeyCommand = new mCommands.Command({
+				name: messages["Delete"],
+				id: "eclipse.orion.git.erasePrivateKey",
+				callback : function(data){
+					var repository = data.items.gitUrl;
+					var keyIndex = data.items.keyIndex;
+					
+					var messageService = that.registry.getService("orion.page.message");
+					
+					var gitCredentialsStorage = new GitCredentialsStorage();
+		       		if(gitCredentialsStorage.isBrowserEnabled()){
+		       			gitCredentialsStorage.erasePrompt(repository);
+		       			messageService.setProgressResult("Deleted private key for " + repository);
+		       			that.gitCredentialsFields[keyIndex+1].destroy();
+		       		}
+				},
+				visibleWhen : function(item){
+					return true;
+				}
+			});
+			this.commandService.addCommand(erasePrivateKeyCommand);
+			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.erasePrivateKey", 1);
 			
 			var gitCredentialsStorage = new GitCredentialsStorage();
 			if(gitCredentialsStorage.isBrowserEnabled()){
@@ -148,12 +174,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				
 				for(var i=0; i<repositories.length; ++i){
 					if(!gitCredentialsStorage.getPrompt(repositories[i])){
-						this.gitCredentialsFields.push( new orion.widgets.settings.LabeledRepositoryLink( {fieldlabel: repositories[i]} ) );
+						var labeledCommand = new orion.widgets.settings.LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: this.commandService, scopeId: "repositoryItemCommands"} );
+						this.gitCredentialsFields.push(labeledCommand);
 					}
 				}
 			}
 			
-			var gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:messages["Authentication"], container: this.gitSections, sections: this.gitCredentialsFields} );
+			gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:"", container: this.gitSections, sections: this.gitCredentialsFields} );
 			
 			var clearCredentials = new mCommands.Command({
 				name: messages["Reset"],
