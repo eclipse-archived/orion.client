@@ -182,22 +182,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:"", container: this.gitSections, sections: this.gitCredentialsFields} );
 			
-			var clearCredentials = new mCommands.Command({
-				name: messages["Reset"],
-				tooltip: messages["Reset Git Credentials"],
-				id: "orion.clearGitCredentials",
-				callback: dojo.hitch(this, function(data){
-					var gitCredentialsStorage = new GitCredentialsStorage();
-					if(gitCredentialsStorage.isBrowserEnabled()){
-						gitCredentialsStorage.clearCredentials();
-						
-						var messageService = this.registry.getService("orion.page.message");
-						messageService.setProgressResult("Git credentials successfully cleared.");
-						this.refreshGitCredentials();
-					}
-				})
-			});
-			
 			var updateGitCredentialsCommand = new mCommands.Command({
 				name: messages["Update"],
 				tooltip: messages["Update Git Credentials"],
@@ -209,10 +193,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			});
 			
 			this.commandService.addCommand(updateGitCredentialsCommand);
-			this.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 3); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			
-			this.commandService.addCommand(clearCredentials);
-			this.commandService.registerCommandContribution('gitProfileCommands', "orion.clearGitCredentials", 2);
 			this.commandService.renderCommands('gitProfileCommands', dojo.byId( 'gitCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
