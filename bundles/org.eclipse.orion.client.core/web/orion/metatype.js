@@ -12,7 +12,7 @@
 define(['orion/serviceTracker'], function(ServiceTracker) {
 	var PROPERTY_CLASSES = 'classes', PROPERTY_DESIGNATES = 'designates'; //$NON-NLS-0$ //$NON-NLS-1$
 	var METATYPE_SERVICE = 'orion.cm.metatype'; //$NON-NLS-0$
-	var PropertyTypeImpl, ObjectClassDefinitionImpl;
+	var AttributeDefinitionImpl, ObjectClassDefinitionImpl;
 
 	/**
 	 * @name orion.metatype.MetaTypeRegistry
@@ -91,11 +91,11 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		}
 		this.props = [];
 		for (var i=0; i < props.length; i++) {
-			this.props.push(new PropertyTypeImpl(props[i]));
+			this.props.push(new AttributeDefinitionImpl(props[i]));
 		}
 	};
 	ObjectClassDefinitionImpl.prototype = {
-		getPropertyTypes: function() {
+		getAttributeDefinitions: function() {
 			return this.props;
 		},
 		getId: function() {
@@ -107,10 +107,10 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	};
 
 	/**
-	 * @name orion.metatype.impl.PropertyTypeImpl
+	 * @name orion.metatype.impl.AttributeDefinitionImpl
 	 * @private
 	 */
-	PropertyTypeImpl = /** @ignore */ function(attrJson) {
+	AttributeDefinitionImpl = /** @ignore */ function(attrJson) {
 		function isType(t) {
 			switch (t) {
 				case 'boolean': //$NON-NLS-0$
@@ -138,7 +138,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			});
 		}
 	};
-	PropertyTypeImpl.prototype = {
+	AttributeDefinitionImpl.prototype = {
 		getId: function() {
 			return this.id;
 		},
@@ -170,10 +170,10 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 	 * what properties may appear in a {@link orion.cm.ConfigurationProperties} dictionary.</p>
 	 */
 		/**
-		 * @name orion.metatype.ObjectClassDefinition#getPropertyTypes
+		 * @name orion.metatype.ObjectClassDefinition#getAttributeDefinitions
 		 * @function
-		 * @description Returns the property types.
-		 * @returns {orion.metatype.PropertyType[]} The property types of this Object Class Definition.
+		 * @description Returns the attribute definitions.
+		 * @returns {orion.metatype.AttributeDefinition[]} The attribute definitions of this Object Class Definition.
 		 */
 		/**
 		 * @name orion.metatype.ObjectClassDefinition#getId
@@ -188,39 +188,39 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * @returns {String} The name of this Object Class Definition. May be <code>null</code>.
 		 */
 	/**
-	 * @name orion.metatype.PropertyType
-	 * @class Describes the data type of a property.
-	 * @description A <code>PropertyType</code> describes the data type of a property. <p>It typically serves to
+	 * @name orion.metatype.AttributeDefinition
+	 * @class Describes the data type of a property/attribute.
+	 * @description An <code>AttributeDefinition</code> describes the data type of a property/attribute. <p>It typically serves to
 	 * describe the type of an individual property that may appear in a {@link orion.cm.ConfigurationProperties} dictionary.</p>
 	 */
 		/**
-		 * @name orion.metatype.PropertyType#getId
+		 * @name orion.metatype.AttributeDefinition#getId
 		 * @function
 		 * @description Returns the id.
-		 * @returns {String} The id of this PropertyType.
+		 * @returns {String} The id of this AttributeDefinition.
 		 */
 		/**
-		 * @name orion.metatype.PropertyType#getName
+		 * @name orion.metatype.AttributeDefinition#getName
 		 * @function
 		 * @description Returns the description.
 		 * @returns {String} The name, or <code>null</code>.
 		 */
 		/**
-		 * @name orion.metatype.PropertyType#getOptionValues
+		 * @name orion.metatype.AttributeDefinition#getOptionValues
 		 * @function
-		 * @description Returns the option values that this property can take.
+		 * @description Returns the option values that this attribute can take.
 		 * @returns {Object[]|null} The option values. The ordering of the returned array matches the ordering of the labels
 		 * array returned by {@link #getOptionLabels}. If there are no option values available, <code>null</code> is returned.
 		 */
 		/**
-		 * @name orion.metatype.PropertyType#getOptionLabels
+		 * @name orion.metatype.AttributeDefinition#getOptionLabels
 		 * @function
 		 * @description Returns a list of labels for option values.
 		 * @returns {String[]|null} The option labels. The ordering of the returned array matches the ordering of the values
 		 * array returned by {@link #getOptionValues}. If there are no option labels available, <code>null</code> is returned.
 		 */
 		/**
-		 * @name orion.metatype.PropertyType#getType
+		 * @name orion.metatype.AttributeDefinition#getType
 		 * @function
 		 * @description Returns the type.
 		 * @returns {String} The type. It is one of:
@@ -231,7 +231,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		 * </ul>
 		 */
 		/**
-		 * @name orion.metatype.PropertyType#getDefaultValue
+		 * @name orion.metatype.AttributeDefinition#getDefaultValue
 		 * @function
 		 * @description Returns the default value.
 		 * @returns {Object} The default value, or <code>null</code> if no default exists.

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,6 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+ /*jslint browser:true devel:true sub:true */
+ /*global define window orion */
 
 define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/selection',
 	        'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/profile/UsersList', 'orion/profile/usersUtil',
@@ -33,6 +36,37 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 
 			mGlobalCommands.generateBanner("orion-userList", serviceRegistry, commandService, preferences, searcher, usersList); //$NON-NLS-0$	
 			
+			var previousPage = new mCommands.Command({
+				name : messages["< Previous Page"],
+				tooltip: messages["Show previous page of Users names"],
+				id : "orion.userlist.prevPage", //$NON-NLS-0$
+				hrefCallback : function() {
+					var start = usersList.queryObject.start - usersList.queryObject.rows;
+					if (start < 0) {
+						start = 0;
+					}
+					return window.location.pathname + "#?start=" + start + "&rows=" + usersList.queryObject.rows; //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				visibleWhen : function(item) {
+					return usersList.queryObject.start > 0;
+				}
+			});
+			commandService.addCommand(previousPage);
+
+			var nextPage = new mCommands.Command({
+				name : messages["Next Page >"],
+				tooltip: messages["Show next page of User names"],
+				id : "orion.userlist.nextPage", //$NON-NLS-0$
+				hrefCallback : function() {
+					return window.location.pathname + "#?start=" + (usersList.queryObject.start + usersList.queryObject.rows) + "&rows=" + usersList.queryObject.rows; //$NON-NLS-1$ //$NON-NLS-0$
+				},
+				visibleWhen : function(item) {
+					return usersList.queryObject.length === 0 ? true : (usersList.queryObject.start + usersList.queryObject.rows) < usersList.queryObject.length;
+				}
+			});
+			commandService.addCommand(nextPage);
+
+
 			var createUserCommand = new mCommands.Command({
 				name: messages["Create User"],
 				id: "eclipse.createUser", //$NON-NLS-0$
@@ -77,9 +111,10 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 							var usersProcessed = 0;
 							for(var i=0; i<item.length; i++){
 								userService.deleteUser(item[i].Location).then( dojo.hitch(usersList, function(jsonData) {
-									  usersProcessed++;
-									  if(usersProcessed==item.length)
-										  this.reloadUsers();
+									usersProcessed++;
+									if(usersProcessed===item.length) {
+										this.reloadUsers();
+									}
 								  }));	
 							}
 						}
@@ -119,14 +154,22 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orio
 			commandService.addCommandGroup("pageActions", "eclipse.usersGroup", 100); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$
 			
+			commandService.registerCommandContribution("pageActions", "orion.userlist.prevPage", 2, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			commandService.registerCommandContribution("pageActions", "orion.userlist.nextPage", 3, "eclipse.usersGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 			commandService.registerCommandContribution("pageActions", "eclipse.createUser", 1, "eclipse.usersGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			commandService.registerCommandContribution("userCommands", "eclipse.deleteUser", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("userCommands", "eclipse.changePassword", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("selectionTools", "eclipse.deleteUser", 1, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+			//every time the user manually changes the hash, we need to load the user list again
+			dojo.subscribe("/dojo/hashchange", usersList, function() { //$NON-NLS-0$
+				usersList.reloadUsers();
+			});
 			
-			usersList.loadUsers();
-			mUsersUtil.updateNavTools(serviceRegistry, usersList, "pageActions", "selectionTools", {});	 //$NON-NLS-1$ //$NON-NLS-0$
+			usersList.createModel();
+			usersList.loadUsers(true);
 		});
 	});
 });

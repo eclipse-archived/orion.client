@@ -25,7 +25,7 @@ define({
 	"Save the site configuration": "Save the site configuration",
 	"Choose folder&#8230;": "Choose folder&#8230;",
 	"Choose Orion Source Folder": "Choose Orion Source Folder",
-	"Select the folder where you checked out the ${0} repository:": "Select the folder where you checked out the ${0} repository:",
+	"SelectRepoSourceFolder": "Select the folder where you checked out the ${0} repository:",
 	"Loading...": "Loading...",
 	"Add": "Add",
 	"Add a directory mapping to the site configuration": "Add a directory mapping to the site configuration",
@@ -54,10 +54,10 @@ define({
 	"Status": "Status",
 	"URL": "URL",
 	"New Site": "New Site",
-	"Workspace file": "Workspace file",
-	"Workspace folder": "Workspace folder",
-	"Workspace resource not found: ": "Workspace resource not found: ",
-	"External link to ": "External link to ",
+	"WorkspaceFile": "Workspace file: ${0}",
+	"WorkspaceFolder": "Workspace folder: ${0}",
+	"WorkspaceResourceNotFound": "Workspace resource not found: ${0}",
+	"ExternalLinkTo": "External link to ${0}",
 	"Move Up": "Move Up",
 	"Move Down": "Move Down",
 	"HostHint": "HostHint",
@@ -66,5 +66,6 @@ define({
 	"Optional; used to determine the URL where a started site can be accessed." : "Optional; used to determine the URL where a started site can be accessed.",
 	"Changes you make here won't affect the running site." : "Changes you make here won't affect the running site.",
 	"Stopped" : "Stopped",
-	"Started at " : "Started at "
+	"Started at " : "Started at ",
+	"EnterPortNumber": "Enter the HTTP port number that the Orion server is running on (default is ${0}):"
 });

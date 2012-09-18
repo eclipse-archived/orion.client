@@ -234,6 +234,7 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 				{	pid: 'jslint.config',
 					name: 'JSLint Validator',
 					tags: 'validation javascript js jslint'.split(' '),
+					category: 'validation',
 					properties: [
 						{	id: 'options',
 							name: 'Default Options',

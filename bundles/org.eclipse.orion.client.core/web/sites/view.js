@@ -13,9 +13,9 @@
 /*jslint */
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/sitesExplorer', 'orion/PageUtil','dojo/hash', 'dojo/date/locale'], 
+		'orion/sites/viewOnSiteTree', 'orion/PageUtil','dojo/hash', 'dojo/date/locale'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
-			mSiteUtils, mSiteCommands, mSitesExplorer, PageUtil) {
+			mSiteUtils, mSiteCommands, ViewOnSiteTree, PageUtil) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -38,7 +38,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				if (treeWidget) {
 					dojo.empty(parentId);
 				}
-				treeWidget = new mSitesExplorer.ViewOnSiteTree({
+				treeWidget = new ViewOnSiteTree({
 					id: 'view-on-site-table', //$NON-NLS-0$
 					parent: parentId,
 					label: labelId,

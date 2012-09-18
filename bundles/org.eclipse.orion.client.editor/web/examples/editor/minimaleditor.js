@@ -49,13 +49,15 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 						var line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
 						var character = i - editor.getTextView().getModel().getLineStart(line);
 						problems.push({
-							start: character,
+							start: character + 1,
 							end: character + 1,
+							line: line + 1,
 							severity: "error",
 							description: "I don't like the letter 'z'"});
 					}
 				}
 				editor.showProblems(problems);
+				editor.highlightAnnotations();
 				return true;
 		});
 	};
