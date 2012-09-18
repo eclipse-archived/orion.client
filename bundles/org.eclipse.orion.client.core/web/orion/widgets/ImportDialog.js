@@ -30,10 +30,10 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 										'<div class="uploadInstruction">'+messages['Drag a file here']+  //$NON-NLS-0$
 										'</div>' +//$NON-NLS-0$
 										'<div class="uploadOptions">(' +  //$NON-NLS-0$
-										'<input style="height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckbox" id="${id}_unzipCheckbox" dojoType="dijit.form.CheckBox" checked="false" type="checkbox">' + //$NON-NLS-0$
-										'<label style="line-height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckboxLabel" for="${id}_unzipCheckbox">Unzip it</label>' + //$NON-NLS-0$
+										'<input style="height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckbox" id="${id}_unzipCheckbox" dojoType="dijit.form.CheckBox" checked="true" type="checkbox">' + //$NON-NLS-0$
+										'<label style="line-height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckboxLabel" for="${id}_unzipCheckbox">'+messages['unzip zips']+'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
 										')</div>'  + //$NON-NLS-0$
-										'<div class="tipInstruction">'+messages['or if you prefer']+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div class="tipInstruction">'+messages['or if you prefer']+'</div>' +  //$NON-NLS-1$ //$NON-NLS-0$
 										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' + //$NON-NLS-0$
 										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="'+messages['Browse...']+'" >' + //$NON-NLS-2$ //$NON-NLS-0$
 										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' + //$NON-NLS-0$
@@ -95,9 +95,9 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 	handleFiles: function(files){
 
 		this.importloader.form[0].files = files;
-		var checkboxState = this.unzipCheckbox.get('checked');
+		var checkboxState = this.unzipCheckbox.get('checked'); //$NON-NLS-0$)
 		for( var f=0; f< files.length; files++ ){
-			this.uploadDroppedFiles(files[f], checkboxState);
+			this.uploadDroppedFiles(files[f], checkboxState && (files[f].name.indexOf(".zip") === files[f].name.length-4)); //$NON-NLS-0$)
 		}
 	},
 

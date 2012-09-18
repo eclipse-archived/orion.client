@@ -615,7 +615,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	
 		commandService.addCommand(newFolderCommand);
 
-		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', 'Unzip file:', false)]); //$NON-NLS-1$ //$NON-NLS-0$
+		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', 'Unzip *.zip files:', true)]); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var importZipURLCommand = new mCommands.Command({
 			name: "Import from HTTP...",
@@ -627,7 +627,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				var sourceURL = data.parameters && data.parameters.valueFor("url"); //$NON-NLS-0$
 				if (targetFolder && sourceURL) {
 					var importURL = targetFolder.ImportLocation+"?source="+sourceURL; //$NON-NLS-0$
-					var expandZip = data.parameters  && data.parameters.valueFor("unzip"); //$NON-NLS-0$
+					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
 					progress.showWhile(deferred, messages["Importing from "] + sourceURL).then(
