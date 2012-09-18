@@ -35,7 +35,7 @@ define({
 	"Start Transfer": "Start Transfer",
 	"Location:": "Location:",
 	"orion.sftpConnections": "orion.sftpConnections",
-	"Drag a File or Zip here": "Drag a File or Zip here",
+	"Drag a file here": "Drag a file here",
 	"or if you prefer": "or if you prefer",
 	"Browse...": "Browse...",
 	"Import a file or zip": "Import a file or zip",
