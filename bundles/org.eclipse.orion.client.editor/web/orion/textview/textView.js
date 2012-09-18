@@ -650,6 +650,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var rects = this._getClientRects(lineChild, parentRect);
 				for (i = 0; i < rects.length; i++) {
 					var rect = rects[i], j;
+					if (rect.top === rect.bottom) { continue; }
 					var center = rect.top + (rect.bottom - rect.top) / 2;
 					for (j = 0; j < result.length; j++) {
 						r = result[j];
