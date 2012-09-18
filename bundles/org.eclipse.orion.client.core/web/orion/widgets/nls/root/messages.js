@@ -36,6 +36,7 @@ define({
 	"Location:": "Location:",
 	"orion.sftpConnections": "orion.sftpConnections",
 	"Drag a file here": "Drag a file here",
+	"unzip zips": "Unzip *.zip files",
 	"or if you prefer": "or if you prefer",
 	"Browse...": "Browse...",
 	"Import a file or zip": "Import a file or zip",
