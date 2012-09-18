@@ -4911,9 +4911,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._createActions();
 			this._createView();
 		},
-		_isLinkURL: function(string) {
-			return string.toLowerCase().lastIndexOf(".css") === string.length - 4; //$NON-NLS-0$
-		},
 		_modifyContent: function(e, updateCaret) {
 			if (this._readonly && !e._code) {
 				return;
@@ -5033,6 +5030,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._topChild = null;
 			this._bottomChild = null;
 			this._partialY = 0;
+			this._resetLineHeight();
 			this._setSelection(new Selection (0, 0, false), false, false);
 			if (this._viewDiv) {
 				this._viewDiv.scrollLeft = 0;
