@@ -3653,11 +3653,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				var lineIndex = this._getLineAtY(caretRect.top + clientHeight, true);
 				line = this._getLine(lineIndex);
-				var y = caretRect.top + clientHeight - this._getLinePixel(lineIndex);
-				selection.extend(line.getOffset(x, y));
+				var linePixel = this._getLinePixel(lineIndex);
+				var y = caretRect.top + clientHeight - linePixel;
+				caret = line.getOffset(x, y);
+				var rect = line.getBoundingClientRect(caret);
 				line.destroy();
+				selection.extend(caret);
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, true, true, clientHeight);
+				this._setSelection(selection, true, true, rect.top + linePixel - caretRect.top);
 				this._columnX = x;
 				return true;
 			}
@@ -3701,11 +3704,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				var lineIndex = this._getLineAtY(caretRect.bottom - clientHeight, true);
 				line = this._getLine(lineIndex);
-				var y = (caretRect.bottom - clientHeight) - this._getLinePixel(lineIndex);
-				selection.extend(line.getOffset(x, y));
+				var linePixel = this._getLinePixel(lineIndex);
+				var y = (caretRect.bottom - clientHeight) - linePixel;
+				caret = line.getOffset(x, y);
+				var rect = line.getBoundingClientRect(caret);
 				line.destroy();
+				selection.extend(caret);
 				if (!args.select) { selection.collapse(); }
-				this._setSelection(selection, true, true, -clientHeight);
+				this._setSelection(selection, true, true, rect.top + linePixel - caretRect.top);
 				this._columnX = x;
 				return true;
 			}
