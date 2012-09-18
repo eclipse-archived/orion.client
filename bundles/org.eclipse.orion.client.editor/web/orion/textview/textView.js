@@ -2347,20 +2347,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		setTopIndex: function(topIndex) {
 			if (!this._clientDiv) { return; }
-			var model = this._model;
-			if (model.getCharCount() === 0) {
-				return;
-			}
-			var lineCount = model.getLineCount();
-			var lineHeight = this._getLineHeight();
-			var pageSize = Math.max(1, Math.min(lineCount, Math.floor(this._getClientHeight () / lineHeight)));
-			if (topIndex < 0) {
-				topIndex = 0;
-			} else if (topIndex > lineCount - pageSize) {
-				topIndex = lineCount - pageSize;
-			}
-			var pixel = topIndex * lineHeight - this._getScroll().y;
-			this._scrollView(0, pixel);
+			this._scrollView(0, this._getLinePixel(Math.max(0, topIndex)) - this._getScroll().y);
 		},
 		/**
 		 * Sets the top pixel.
@@ -2378,11 +2365,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		setTopPixel: function(pixel) {
 			if (!this._clientDiv) { return; }
-			var lineHeight = this._getLineHeight();
-			var clientHeight = this._getClientHeight();
-			var lineCount = this._model.getLineCount();
-			pixel = Math.min(Math.max(0, pixel), lineHeight * lineCount - clientHeight);
-			this._scrollView(0, pixel - this._getScroll().y);
+			this._scrollView(0, Math.max(0, pixel) - this._getScroll().y);
 		},
 		/**
 		 * Scrolls the selection into view if needed.
