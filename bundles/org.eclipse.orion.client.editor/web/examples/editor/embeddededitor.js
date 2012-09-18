@@ -42,7 +42,8 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var contentAssistFactory = {
 		createContentAssistMode: function(editor) {
 			contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-			var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist");
+			var contentAssistDomNode = document.getElementById("contentassist");
+			var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist, contentAssistDomNode);
 			return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
 		}
 	};

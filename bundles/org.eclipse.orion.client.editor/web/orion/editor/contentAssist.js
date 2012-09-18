@@ -357,6 +357,9 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
 		var self = this;
+		if (!this.parentNode) {
+			throw new Error("parentNode not found");
+		}
 		this.textViewListener = {
 			onMouseDown: function(event) {
 				if (event.event.target.parentElement !== self.parentNode) {

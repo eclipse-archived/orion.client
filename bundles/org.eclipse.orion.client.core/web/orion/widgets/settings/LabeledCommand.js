@@ -16,17 +16,17 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/git/GitCredentialsStorage'], function(messages, require, dojo, dijit, mUtil, mCommands, GitCredentialsStorage) {
 
-	dojo.declare("orion.widgets.settings.LabeledRepositoryLink",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
+	dojo.declare("orion.widgets.settings.LabeledCommand",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
 								'<span class="setting-repository-label" data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
-								'<a href="#" data-dojo-attach-event="onclick:change">'+messages["Erase Key"]+'</a>' + //$NON-NLS-0$
+								'<span data-dojo-attach-point="myCommand"></span>' + //$NON-NLS-0$
 							'</label>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
 						
-		setStorageItem: function(){
-						
+		destroy: function(){
+			dojo.empty(this.domNode);		
 		},
         
         change: function(){
@@ -39,6 +39,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
         postCreate: function(){
             this.inherited( arguments );
             this.mylabel.innerHTML = this.fieldlabel; //$NON-NLS-0$
+            
+            // add erase command
+            this.commandService.renderCommands(this.scopeId, this.myCommand, {gitUrl: this.fieldlabel, keyIndex: this.keyIndex}, this, "button");
         }, 
         
         startup: function(){

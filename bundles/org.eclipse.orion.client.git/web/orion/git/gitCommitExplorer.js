@@ -11,9 +11,9 @@
 
 /*global define console document Image*/
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container', 'orion/git/gitCommands', 'orion/navigationUtils'], 
-		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands, mNavUtils) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
+        'orion/compare/compare-container', 'orion/git/gitCommands'], 
+		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands) {
 	var exports = {};
 
 	exports.GitCommitExplorer = (function() {

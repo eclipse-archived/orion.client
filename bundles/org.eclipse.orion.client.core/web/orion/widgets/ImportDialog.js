@@ -27,15 +27,21 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 							'<div class="uploadContainer" data-dojo-attach-event="drop:drop,dragenter:dragEnter,dragexit:dragExit,dragover:dragOver">' + //$NON-NLS-0$
 								'<div class="dottedOutline">' + //$NON-NLS-0$
 									'<div data-dojo-attach-point="dragArea" class="floatingSection">' + //$NON-NLS-0$
-										'<div class="uploadInstruction">'+messages['Drag a File or Zip here']+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
-										'<div class="tipInstruction">'+messages['or if you prefer']+'</div>' +  //$NON-NLS-2$ //$NON-NLS-0$
+										'<div class="uploadInstruction">'+messages['Drag a file here']+  //$NON-NLS-0$
+										'</div>' +//$NON-NLS-0$
+										'<div class="uploadOptions">(' +  //$NON-NLS-0$
+										'<input style="height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckbox" id="${id}_unzipCheckbox" dojoType="dijit.form.CheckBox" checked="true" type="checkbox">' + //$NON-NLS-0$
+										'<label style="line-height: 20px;" class="uploadOptionsItem" dojoAttachPoint="unzipCheckboxLabel" for="${id}_unzipCheckbox">'+messages['unzip zips']+'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+										')</div>'  + //$NON-NLS-0$
+										'<div class="tipInstruction">'+messages['or if you prefer']+'</div>' +  //$NON-NLS-1$ //$NON-NLS-0$
 										'<form data-dojo-attach-point="importform" method="post" id="importDialog.myForm" enctype="multipart/form-data" >' + //$NON-NLS-0$
-
 										'<input class="uploadBrowser" data-dojo-attach-point="importloader" name="uploadedfile" multiple="false" type="file" id="importLoader" force="iframe" data-dojo-type="dojox.form.Uploader" style="height: 20px" label="'+messages['Browse...']+'" >' + //$NON-NLS-2$ //$NON-NLS-0$
 										'<input type="submit" label="Finish" value="OK" dojoType="dijit.form.Button" style="visibility:hidden;padding: 20 0 10 0; float: right; clear: both;"/>' + //$NON-NLS-0$
 										'</form>' + //$NON-NLS-0$
+										
 									'</div>' + //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
+								'<div>' + //$NON-NLS-0$
 							'</div>' + //$NON-NLS-0$
 						'</div>' +  //$NON-NLS-0$
 					'</div>', //$NON-NLS-0$
@@ -60,14 +66,14 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 
 	/* This upload works for the drag and dropped files */
 
-	uploadDroppedFiles: function(file) {
+	uploadDroppedFiles: function(file, unzip) {
 		// Use native XMLHttpRequest instead of XhrGet since dojo 1.5 does not allow to send binary data as per docs
 		this.req = new XMLHttpRequest();
 
 		this.req.open('post', this.options.importLocation, true); //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
 		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
-		if (file.name.indexOf(".zip") !== file.name.length-4) { //$NON-NLS-0$
+		if (!unzip) {
 			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
@@ -89,9 +95,9 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 	handleFiles: function(files){
 
 		this.importloader.form[0].files = files;
-
+		var checkboxState = this.unzipCheckbox.get('checked'); //$NON-NLS-0$)
 		for( var f=0; f< files.length; files++ ){
-			this.uploadDroppedFiles(files[f]);
+			this.uploadDroppedFiles(files[f], checkboxState && (files[f].name.indexOf(".zip") === files[f].name.length-4)); //$NON-NLS-0$)
 		}
 	},
 

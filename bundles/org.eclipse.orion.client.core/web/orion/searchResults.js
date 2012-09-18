@@ -68,7 +68,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
 			var qObj = mSearchUtils.parseQueryStr(query);
 			this.crawling = qObj.useCrawler;
+			var parent = dojo.byId(this.resultsId);
 			if(this.crawling){
+				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
 				var self = this;
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
 				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
@@ -77,6 +79,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				if(qObj.searchStrWithWhiteSpace){
 					queryToService = query.replace(qObj.searchStr, qObj.searchStrWithWhiteSpace);
 				}
+				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 				try{
 					this.fileService.search(qObj.location, queryToService).then(
 						dojo.hitch(this, function(jsonData) {
@@ -84,6 +87,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 						}));
 				}
 				catch(error){
+					dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
 					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
 						var self = this;
 						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
@@ -103,7 +107,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		loadResults: function(query) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = dojo.byId(this.resultsId);
-			dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 			this._search(parent, query);
 		}
 		

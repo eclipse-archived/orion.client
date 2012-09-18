@@ -13,9 +13,9 @@
 /*jslint browser:true*/
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/selection', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/sitesExplorer2','dojo/hash', 'dojo/date/locale'], 
+		'orion/sites/sitesExplorer','dojo/hash', 'dojo/date/locale'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands,
-			mSiteUtils, mSiteCommands, mSitesExplorer) {
+			mSiteUtils, mSiteCommands, SitesExplorer) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -48,7 +48,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			mGlobalCommands.generateBanner("orion-sites", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: "Sites"});
 			
-			var explorer = new mSitesExplorer.SiteServicesExplorer2(serviceRegistry, selection, "table"); //$NON-NLS-0$
+			var explorer = new SitesExplorer(serviceRegistry, selection, "table"); //$NON-NLS-0$
 			createCommands();
 			explorer.display();
 		});

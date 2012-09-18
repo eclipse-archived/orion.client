@@ -75,5 +75,9 @@ define({
 	"Collapse all": "Collapse all",
 	"Search": "Search",
 	"Submit" : "Submit",
-	"More" : "More"
+	"More" : "More",
+	"Saved searches" : "Saved searches",
+	"Recent searches" : "Recent searches",
+	"Open in new tab" : "Open in new tab", 
+	"Regular expression" : "Regular expression" 
 });

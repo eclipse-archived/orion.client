@@ -243,67 +243,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		return relative.indexOf('/workspace') === 0; //$NON-NLS-0$
 	}
 	
-	
-	function processNavigatorParent(parent, children) {
-		//link the parent and children together
-		parent.children = children;
-		for (var e in children) {
-			var child = children[e];
-			child.parent=parent;
-		}
-		// not ideal, but for now, sort here so it's done in one place.
-		// this should really be something pluggable that the UI defines
-		parent.children.sort(function(a, b) {
-			var isDir1 = a.Directory;
-			var isDir2 = b.Directory;
-			if (isDir1 !== isDir2) {
-				return isDir1 ? -1 : 1;
-			}
-			var n1 = a.Name && a.Name.toLowerCase();
-			var n2 = b.Name && b.Name.toLowerCase();
-			if (n1 < n2) { return -1; }
-			if (n1 > n2) { return 1; }
-			return 0;
-		}); 
-	}
-	
-	/**
-	 * Returns the text contained by a DOM node.
-	 * @param {DomNode} node
-	 * @returns {String} The text contained by node. Note that treatment of whitespace 
-	 * and child nodes is not consistent across browsers.
-	 * @name orion.util#getText
-	 * @function
-	 */
-	function getText(node) {
-		return typeof(node.textContent) !== "undefined" ? node.textContent : node.innerText; //$NON-NLS-0$
-	}
-	
-	/**
-	 * Escapes HTML in string. Use this to sanitize user input that is destined for innerHTML.
-	 * @param {String} string
-	 * @returns {String} The string with HTML safely escaped.
-	 * @name orion.util#safeText
-	 * @function
-	 */
-	function safeText(string) {
-		return getText(document.createTextNode(string));
-	}
-	
-	/**
-	 * Removes all children of node and replaces them with a single text node containing text.
-	 * HTML is safely escaped.
-	 * @param {DomNode} node
-	 * @param {String} text
-	 */
-	function setText(node, text) {
-		if (typeof(node.textContent) !== "undefined") { //$NON-NLS-0$
-			node.textContent = text;
-		} else {
-			node.innerText = text;
-		}
-	}
-	
 	/**
 	 * Utility method for saving file contents to a specified location
 	 */
@@ -393,10 +332,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		makeRelative: makeRelative,
 		makeFullPath: makeFullPath,
 		isAtRoot: isAtRoot,
-		processNavigatorParent: processNavigatorParent,
-		getText: getText,
-		safeText: safeText,
-		setText: setText,
 		saveFileContents: saveFileContents,
 		splitFile: splitFile
 	};

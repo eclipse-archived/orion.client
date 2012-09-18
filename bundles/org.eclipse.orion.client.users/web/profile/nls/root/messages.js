@@ -40,5 +40,9 @@ define({
 	"Are you sure you want to delete user ${0}?": "Are you sure you want to delete user ${0}?",
 	"Change Password": "Change Password",
 	"More": "More",
-	"Passwords do not match!": "Passwords do not match!"
+	"Passwords do not match!": "Passwords do not match!",
+	"< Previous Page": "< Previous Page",
+	"Show previous page of Users names": "Show previous page of Users names",
+	"Next Page >": "Next Page >",
+	"Show next page of User names": "Show next page of User names"
 });

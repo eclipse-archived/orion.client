@@ -682,7 +682,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					var problem = problems[i];
 					if (problem) {
 						// escaping voodoo... we need to construct HTML that contains valid JavaScript.
-						// TODO safeText() from util.js
 						var escapedDescription = problem.description.replace(/'/g, "&#39;").replace(/"/g, '&#34;'); //$NON-NLS-1$ //$NON-NLS-0$
 						var lineIndex = problem.line - 1;
 						var lineStart = model.getLineStart(lineIndex);

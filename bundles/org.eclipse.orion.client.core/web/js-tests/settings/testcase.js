@@ -56,14 +56,14 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		var objectClass = metaTypeRegistry.getObjectClassDefinitionForPid('mysetting');
 
 		assert.equal(objectClass.getId(), 'myclass', 'ObjectClassDefinition is designated for setting\'s PID');
-		assert.equal(objectClass.getPropertyTypes().length, 2);
-		assert.equal(objectClass.getPropertyTypes()[0].getId(), 'prop1');
-		assert.equal(objectClass.getPropertyTypes()[1].getId(), 'prop2');
+		assert.equal(objectClass.getAttributeDefinitions().length, 2);
+		assert.equal(objectClass.getAttributeDefinitions()[0].getId(), 'prop1');
+		assert.equal(objectClass.getAttributeDefinitions()[1].getId(), 'prop2');
 
-		// Ensure setting.getPropertyTypes() has the same property types as the OCD.
-		assert.equal(settings[0].getPropertyTypes().length, 2);
-		assert.equal(settings[0].getPropertyTypes()[0].getId(), 'prop1');
-		assert.equal(settings[0].getPropertyTypes()[1].getId(), 'prop2');
+		// Ensure setting.getAttributeDefinitions() has the same attribute definitions as the OCD.
+		assert.equal(settings[0].getAttributeDefinitions().length, 2);
+		assert.equal(settings[0].getAttributeDefinitions()[0].getId(), 'prop1');
+		assert.equal(settings[0].getAttributeDefinitions()[1].getId(), 'prop2');
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
@@ -91,18 +91,71 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.ok(objectClass, 'Setting\'s PID is designated');
 
 		assert.equal(objectClass.getId(), objectClassId);
-		assert.equal(objectClass.getPropertyTypes().length, 2);
-		assert.equal(objectClass.getPropertyTypes()[0].getId(), 'foo');
-		assert.equal(objectClass.getPropertyTypes()[1].getId(), 'bar');
+		assert.equal(objectClass.getAttributeDefinitions().length, 2);
+		assert.equal(objectClass.getAttributeDefinitions()[0].getId(), 'foo');
+		assert.equal(objectClass.getAttributeDefinitions()[1].getId(), 'bar');
 
-		assert.equal(settings[0].getPropertyTypes().length, 2);
-		assert.equal(settings[0].getPropertyTypes()[0].getId(), 'foo');
-		assert.equal(settings[0].getPropertyTypes()[1].getId(), 'bar');
+		assert.equal(settings[0].getAttributeDefinitions().length, 2);
+		assert.equal(settings[0].getAttributeDefinitions()[0].getId(), 'foo');
+		assert.equal(settings[0].getAttributeDefinitions()[1].getId(), 'bar');
 
 		serviceRegistration.unregister();
 		assert.equal(settingsRegistry.getSettings().length, 0);
 		assert.ok(!metaTypeRegistry.getObjectClassDefinitionForPid('mysetting'), 'Setting\'s PID no longer designated');
 		assert.ok(!metaTypeRegistry.getObjectClassDefinition(objectClassId), 'ObjectClassDefinition was removed');
+	});
+	tests['test setting categories'] = makeTest(function() {
+		var serviceRegistration1 = serviceRegistry.registerService(SETTING_SERVICE, {},
+			{	settings: [
+					{	pid: 'mypid1',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					},
+					{	pid: 'mypid2',
+						category: 'dog',
+						properties: [
+							{	id: 'prop' }
+						]
+					},
+					{	pid: 'mypid3',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					}
+				]
+			});
+		var serviceRegistration2 = serviceRegistry.registerService(SETTING_SERVICE, {},
+			{	settings: [
+					{	pid: 'mypid4',
+						category: 'cat',
+						properties: [
+							{	id: 'prop' }
+						]
+					}
+				]
+			});
+
+		var settings = settingsRegistry.getSettings();
+		assert.equal(settings.length, 4);
+		assert.deepEqual(settingsRegistry.getCategories().sort(), ['cat', 'dog'].sort());
+		var catSettings = settingsRegistry.getSettings('cat');
+		var dogSettings = settingsRegistry.getSettings('dog');
+
+		assert.equal(catSettings.length, 3);
+		assert.equal(catSettings[0].getPid(), 'mypid1');
+		assert.equal(catSettings[1].getPid(), 'mypid3');
+		assert.equal(catSettings[2].getPid(), 'mypid4');
+
+		assert.equal(dogSettings.length, 1);
+		assert.equal(dogSettings[0].getPid(), 'mypid2');
+
+		serviceRegistration1.unregister();
+		assert.deepEqual(settingsRegistry.getCategories(), ['cat']);
+		assert.equal(settingsRegistry.getSettings('cat').length, 1);
+		assert.equal(settingsRegistry.getSettings('dog').length, 0);
 	});
 	return tests;
 });

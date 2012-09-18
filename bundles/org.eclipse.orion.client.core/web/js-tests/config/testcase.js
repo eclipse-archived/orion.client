@@ -12,6 +12,7 @@
 define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
 		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
+	var Plugin = mPluginRegistry.Plugin;
 	var MANAGED_SERVICE = 'orion.cm.managedservice';
 
 	function MockPrefsService() {
@@ -49,15 +50,25 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		};
 	}
 
-	var serviceRegistry, pluginRegistry, pluginStorage, configAdmin;
-	var setUp = function(storage) {
+	var serviceRegistry, preferences, pluginRegistry, pluginStorage, configAdmin;
+	var setUp = function(storage, omitConfigAdmin) {
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
-		configAdmin = new ConfigAdminFactory(serviceRegistry, new MockPrefsService()).getConfigurationAdmin();
+		preferences = new MockPrefsService();
 		pluginStorage = arguments.length ? storage : {};
 		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, pluginStorage);
+		if (typeof omitConfigAdmin === 'undefined' || !omitConfigAdmin) {
+			return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
+				function(createdConfigAdmin) {
+					configAdmin = createdConfigAdmin;
+				});
+		}
+		var d = new Deferred();
+		d.resolve();
+		return d;
 	},
 	tearDown = function() {
 		serviceRegistry = null;
+		preferences = null;
 		pluginRegistry = null;
 		pluginStorage = null;
 		configAdmin = null;
@@ -69,108 +80,98 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 	var tests = {};
 	tests['test ConfigurationAdmin.getConfiguration()'] = makeTest(function() {
 		var pid = 'test.pid';
-		return configAdmin.getConfiguration(pid).then(function(configuration) {
-			assert.strictEqual(configuration.getPid(), pid);
-		});
+		var configuration = configAdmin.getConfiguration(pid);
+		assert.strictEqual(configuration.getPid(), pid);
 	});
 
 	tests['test ConfigurationAdmin.listConfigurations()'] = makeTest(function() {
-		// create some configs
-		var configPromises = [];
+		var createdConfigs = [];
 		for (var i=0; i < 5; i++) {
-			configPromises.push( configAdmin.getConfiguration('orion.test.pid' + (i+1)) );
+			var config = configAdmin.getConfiguration('orion.test.pid' + (i+1));
+			config.update({foo: (i+1)});
+			createdConfigs.push(config);
 		}
-		return Deferred.all(configPromises).then(function(createdConfigs) {
-			createdConfigs.forEach(function(config, i) {
-				config.update({foo: i});
-			});
-			return configAdmin.listConfigurations().then(function(listedConfigs) {
-				assert.equal(createdConfigs.length, 5);
-				assert.equal(listedConfigs.length, 5);
-				assert.ok(createdConfigs.every(function(config) {
-					assert.ok(listedConfigs.some(function(config2) {
-						return config2.getPid() === config.getPid();
-					}), 'Configuration with pid ' + config.getPid() + ' was found');
-					return true;
-				}));
-			});
-		});
+		var listedConfigs = configAdmin.listConfigurations();
+		assert.equal(createdConfigs.length, 5);
+		assert.equal(listedConfigs.length, 5);
+		assert.ok(createdConfigs.every(function(config) {
+			assert.ok(listedConfigs.some(function(config2) {
+				return config2.getPid() === config.getPid();
+			}), 'Configuration with pid ' + config.getPid() + ' was found');
+			return true;
+		}));
 	});
 
 	tests['test Configuration.update(), .getProperties()'] = makeTest(function() {
 		var pid = 'test.pid';
-		return configAdmin.getConfiguration(pid).then(function(configuration) {
-			var properties = configuration.getProperties();
-			assert.strictEqual(configuration.getPid(), pid);
-			assert.strictEqual(properties, null);
-			configuration.update({
-				str: 'blort',
-				num: 42,
-				nil: null
-			});
-			properties = configuration.getProperties();
-			assert.ok(properties);
-			assert.strictEqual(properties.pid, pid);
-			assert.strictEqual(properties.str, 'blort');
-			assert.strictEqual(properties.num, 42);
-			assert.strictEqual(properties.nil, null);
+		var configuration = configAdmin.getConfiguration(pid);
+		var properties = configuration.getProperties();
+		assert.strictEqual(configuration.getPid(), pid);
+		assert.strictEqual(properties, null);
+		configuration.update({
+			str: 'blort',
+			num: 42,
+			nil: null
 		});
+		properties = configuration.getProperties();
+		assert.ok(properties);
+		assert.strictEqual(properties.pid, pid);
+		assert.strictEqual(properties.str, 'blort');
+		assert.strictEqual(properties.num, 42);
+		assert.strictEqual(properties.nil, null);
 	});
 
 	tests['test Configuration.remove()'] = makeTest(function() {
 		var pid = 'test.pid';
-		return configAdmin.getConfiguration(pid).then(function(configuration) {
-			configuration.update({
-				str: 'blort'
-			});
-			var properties = configuration.getProperties();
-			assert.ok(properties);
-			assert.strictEqual(properties.pid, pid);
-			assert.strictEqual(properties.str, 'blort');
-			return configuration.remove()
-				.then(configAdmin.listConfigurations.bind(configAdmin))
-				.then(function(listedConfigs) {
-					assert.ok(listedConfigs.every(function(config) {
-						return config !== null;
-					}), 'No null configuration in list');
-					assert.ok(listedConfigs.every(function(config) {
-						return config && pid !== config.getPid();
-					}), 'Removed configuration is not in list');
-				}).then(function() {
-					return configAdmin.getConfiguration(pid).then(function(configuration) {
-						assert.strictEqual(configuration.getProperties(), null);
-					});
-				});
+		var configuration = configAdmin.getConfiguration(pid);
+		configuration.update({
+			str: 'blort'
 		});
+		var properties = configuration.getProperties();
+		assert.ok(properties);
+		assert.strictEqual(properties.pid, pid);
+		assert.strictEqual(properties.str, 'blort');
+		configuration.remove();
+
+		var listedConfigs = configAdmin.listConfigurations();
+		assert.ok(listedConfigs.every(function(config) {
+				return config !== null;
+			}), 'No null configuration in list');
+		assert.ok(listedConfigs.every(function(config) {
+			return config && pid !== config.getPid();
+		}), 'Removed configuration is not in list');
+
+		configuration = configAdmin.getConfiguration(pid);
+		assert.strictEqual(configuration.getProperties(), null);
 	});
 
 	tests['test ManagedService.updated() called after registering ManagedService'] = makeTest(function() {
 		var pid = 'test.pid';
-		return configAdmin.getConfiguration(pid).then(function(configuration) {
-			var d = new Deferred();
-			configuration.update({
-				str: 'zot',
-				num: 42,
-				nil: null
-			});
-			// this registration should cause a call to updated(props)
-			serviceRegistry.registerService(MANAGED_SERVICE, 
-				{	updated: function(properties) {
-						try {
-							assert.strictEqual(properties.pid, pid);
-							assert.strictEqual(properties.str, 'zot');
-							assert.strictEqual(properties.num, 42);
-							assert.strictEqual(properties.nil, null);
-							d.resolve();
-						} catch (e) {
-							d.reject(e);
-						}
-					}
-				},
-				{	pid: pid
-				});
-			return d;
+		var configuration = configAdmin.getConfiguration(pid);
+		var d = new Deferred();
+		configuration.update({
+			str: 'zot',
+			num: 42,
+			nil: null
 		});
+		// this registration should cause a call to updated(props)
+		serviceRegistry.registerService(MANAGED_SERVICE, 
+			{	updated: function(properties) {
+					try {
+						assert.ok(!!properties);
+						assert.strictEqual(properties.pid, pid);
+						assert.strictEqual(properties.str, 'zot');
+						assert.strictEqual(properties.num, 42);
+						assert.strictEqual(properties.nil, null);
+						d.resolve();
+					} catch (e) {
+						d.reject(e);
+					}
+				}
+			},
+			{	pid: pid
+			});
+		return d;
 	});
 
 	tests['test ManagedService.updated(null) called for nonexistent config'] = makeTest(function() {
@@ -208,11 +209,10 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			},
 			{	pid: pid
 			});
-		configAdmin.getConfiguration(pid).then(function(config) {
-			// 2nd call happens after this:
-			config.update({
-				'test': 'whee'
-			});
+		var config = configAdmin.getConfiguration(pid);
+		// 2nd call happens after this:
+		config.update({
+			'test': 'whee'
 		});
 		return d;
 	});
@@ -236,37 +236,66 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			},
 			{	pid: pid
 			});
-		configAdmin.getConfiguration(pid).then(function(config) {
-			// 2nd call updated(..) happens after this:
-			config.update({
-				'test': 'whee'
-			});
-			// 3rd call happens after this
-			config.remove();
+		var config = configAdmin.getConfiguration(pid);
+		// 2nd call updated(..) happens after this:
+		config.update({
+			'test': 'whee'
 		});
+		// 3rd call happens after this
+		config.remove();
 		return d;
 	});
 
-	tests['test plugin load calls its ManagedServices\' updated() first'] = makeTest(function() {
+	tests['test plugin load updated() call ordering'] = makeTest(function() {
 		return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
 			// Destroy the plugin's iframe
 			pluginRegistry.shutdown();
-			// Create a new PluginRegistry (using the same storage as the old one so it gets our plugin data),
-			// and new ServiceRegistry, ConfigAdmin, etc.
-			setUp(pluginStorage);
-			// This loads the plugin's data from the storage
-			return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
-				// At this point our plugin's data is in the registry, but the plugin is not loaded.
-				// Lazy-load it by invoking a service method
-				var testService = serviceRegistry.getService('test.bogus');
-				return testService.test().then(function() {
-					return testService.getCallOrder().then(function(callOrder) {
-						assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+			// Create a new PluginRegistry (using the same storage as the old one so it gets our plugin data)
+			return setUp(pluginStorage).then(function() {
+				// This loads the plugin's data from the storage
+				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
+					// At this point our plugin's data is in the registry, but the plugin is not loaded.
+					var plugin = pluginRegistry.getPlugin('testManagedServicePlugin.html');
+					assert.ok(plugin);
+					assert.strictEqual(plugin.getState(), Plugin.INSTALLED);
+					// Lazy-load it by invoking a service method
+					var testService = serviceRegistry.getService('test.bogus');
+					return testService.test().then(function() {
+						return testService.getCallOrder().then(function(callOrder) {
+							assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+						});
 					});
 				});
 			});
 		});
 	});
+
+	// Similar to previous test, but ConfigAdmin is registered after PluginRegistry has started up.
+	tests['test plugin load updated() call ordering -- late registration'] = (function() {
+		return testHelpers.makeTest(setUp.bind(null, {} /*no storage*/, true /*no config admin*/), tearDown, function() {
+			return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
+				pluginRegistry.shutdown();
+				setUp(pluginStorage, true /*don't create config admin*/);
+				assert.ok(!configAdmin, 'no config admin yet');
+				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
+					var plugin = pluginRegistry.getPlugin('testManagedServicePlugin.html');
+					assert.ok(plugin);
+					assert.strictEqual(plugin.getState(), Plugin.INSTALLED);
+					// Finally register ConfigAdmin
+					return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
+						function(createdConfigAdmin) {
+							configAdmin = createdConfigAdmin;
+							var testService = serviceRegistry.getService('test.bogus');
+							return testService.test().then(function() {
+								return testService.getCallOrder().then(function(callOrder) {
+									assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
+								});
+							});
+						});
+				});
+			});
+		});
+	}());
 
 return tests;
 });

@@ -25,33 +25,31 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 			test : 1
 		});
 		var reference = registration.getServiceReference();
-		assert.equal("testRegister", reference.getProperty("service.names")[0]);
+		assert.equal("testRegister", reference.getProperty("objectClass")[0]);
 		assert.equal(1, reference.getProperty("test"));
 
-		assert.equal(0, count);
+		assert.equal(count, 0);
 		var service1 = registry.getService("testRegister");
 		service1.test().then(function(newcount) {
 			count = newcount;
 		});
-
-		assert.equal(1, count);
+		assert.equal(count, 1);
 
 		var service2 = registry.getService(reference);
 		service2.test().then(function(newcount) {
 			count = newcount;
 		});
-		assert.equal(2, count);
+		assert.equal(count, 2);
 
 		// contrived
 		assert.equal(service1, service2);
 		registration.unregister();
-		assert.throws(function() {
+		assert["throws"](function() {
 			service2.test().then(function(newcount) {
 				count = newcount;
 			});
 		});
-		count++;
-		assert.equal(3, count);
+		assert.equal(count, 2);
 	};
 	
 	tests.testRegisterUnregisterMultipleServices = function() {
@@ -119,8 +117,8 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 		var srhandler = function() {
 			serviceRemovedCount++;
 		};
-		registry.addEventListener("serviceAdded", sahandler);
-		registry.addEventListener("serviceRemoved", srhandler);
+		registry.addEventListener("registered", sahandler);
+		registry.addEventListener("unregistering", srhandler);
 
 		assert.equal(0, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);

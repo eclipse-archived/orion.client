@@ -306,7 +306,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				var breadcrumbTarget = 	{};
 				breadcrumbTarget.Parents = [];
 				breadcrumbTarget.Name = profile.lastJSON.Name && profile.lastJSON.Name.replace(/^\s+|\s+$/g,"")!=="" ? profile.lastJSON.Name : profile.lastJSON.login; //$NON-NLS-0$
-				mGlobalCommands.setPageTarget({task: "User Profile", breadcrumbTarget: breadcrumbTarget});
+				mGlobalCommands.setPageTarget({task: "User Profile", breadcrumbTarget: breadcrumbTarget}); //$NON-NLS-0$
 			
 				this.commandService.destroy(this.pageActionsPlaceholder);
 				this.commandService.addCommandGroup(this.pageActionsPlaceholder.id, "eclipse.profileActionsGroup", 100); //$NON-NLS-0$

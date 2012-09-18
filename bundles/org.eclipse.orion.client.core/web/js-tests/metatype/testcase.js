@@ -64,7 +64,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		var ocd = metaTypeRegistry.getObjectClassDefinitionForPid('mypid');
 		assert.ok(!!ocd);
 		assert.strictEqual(ocd.getId(), 'myclass');
-		var props = ocd.getPropertyTypes();
+		var props = ocd.getAttributeDefinitions();
 		assert.strictEqual(props.length, 1);
 		assert.ok(!!props[0]);
 		assert.strictEqual(props[0].getId(), 'myprop0');
@@ -102,7 +102,7 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/servicereg
 		assert.ok(!!ocd);
 		assert.strictEqual(ocd.getId(), 'myclass');
 		assert.strictEqual(ocd.getName(), 'My Class');
-		var props = ocd.getPropertyTypes();
+		var props = ocd.getAttributeDefinitions();
 		assert.strictEqual(props.length, 2);
 		assert.ok(!!props[0]);
 		assert.strictEqual(props[0].getId(), 'myprop0');

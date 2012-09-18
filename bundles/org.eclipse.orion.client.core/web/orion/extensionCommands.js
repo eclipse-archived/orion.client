@@ -12,7 +12,7 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/widgets/NewItemDialog", "orion/widgets/DirectoryPrompterDialog", 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
 	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
@@ -304,7 +304,7 @@ define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex",
 				// special properties.  Should already be in metadata.  See bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 				variableExpansions.OrionHome = orionHome;
 				var uriTemplate = new URITemplate(this.info.uriTemplate);
-				return window.decodeURIComponent(uriTemplate.expand(variableExpansions));
+				return uriTemplate.expand(variableExpansions);
 			} 
 			return null;
 		});
