@@ -223,7 +223,6 @@ ConfigStore = /** @ignore */ (function() {
 				// only pid is in the properties here
 				configuration = new ConfigImpl(this.factory, this, pid);
 				this.configs[pid] = configuration;
-				this.pref.put(pid, configuration.getProperties(true) || {}); //$NON-NLS-0$
 			}
 			return configuration;
 		},
@@ -243,8 +242,7 @@ ConfigStore = /** @ignore */ (function() {
 			delete this.configs[pid];
 		},
 		save: function(pid, configuration) {
-			var properties = configuration.getProperties(true);
-			this.pref.put(pid, properties || {});
+			this.pref.put(pid, configuration.getProperties(true) || {});
 		}
 	};
 	return ConfigStore;
