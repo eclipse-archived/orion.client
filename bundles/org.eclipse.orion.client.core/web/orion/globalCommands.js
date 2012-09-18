@@ -281,7 +281,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			label: messages["Regular expression"],
 			checked: false,
 			onChange : function(checked) {
-				searcher._regEx = checked;
+				searcher.useRegEx = checked;
 			}
 		}));
 		newMenu.addChild(new dijit.MenuSeparator());
@@ -292,7 +292,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 		//Add the recent searches as popups
 		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
-			var query = searcher.createSearchQuery(theSearch.name);
+			var query = searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx);
 			return "<a href='"+require.toUrl("search/search.html") +  "#" + query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
 		
@@ -776,7 +776,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
-						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value);
+						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
 						var query = searcher.createSearchQuery(searchField.value);
 						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
 					}
@@ -788,11 +788,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		dojo.connect(searchField, "onfocus", function(e){ //$NON-NLS-0$
 			var searchCompletion =  dojo.byId("searchCompletion");
 			dojo.empty(searchCompletion);
-			mSearchUtils.getSearches(serviceRegistry, "recentSearch", function(searches){//$NON-NLS-0$
+			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
 				var i;
 				for (i in searches) {
 					var option = document.createElement('option');
 					option.value = searches[i].name;
+					if(searches[i].label){
+						option.label = searches[i].label + "(" + messages["Saved searches"] + ")";
+					}
 					searchCompletion.appendChild(option);
 				}
 			});
