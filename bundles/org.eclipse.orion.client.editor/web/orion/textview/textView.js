@@ -643,7 +643,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		getClientRects: function(lineIndex) {
 			if (!this.view._wrapMode) { return [this.getBoundingClientRect()]; }
 			var child = this._ensureCreated();
-			//TODO cache
+			//TODO [perf] cache rects
 			var result = [];
 			var lineChild = child.firstChild, i, r, parentRect = child.getBoundingClientRect();
 			while (lineChild) {
@@ -1523,7 +1523,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 */
 		getOffsetAtLocation: function(x, y) {
 			if (!this._clientDiv) { return 0; }
-			var lineIndex = this._getLineAtY(y, true);
+			var lineIndex = this._getLineAtY(y);
 			var line = this._getLine(lineIndex);
 			var offset = line.getOffset(x, y - this._getLinePixel(lineIndex));
 			line.destroy();
@@ -3017,16 +3017,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return false;
 		},
 		_createMouseEvent: function(type, e) {
-			var scroll = this._getScroll();
-			var viewRect = this._viewDiv.getBoundingClientRect();
-			var viewPad = this._getViewPadding();
-			var x = e.clientX + scroll.x - viewRect.left - viewPad.left;
-			var y = e.clientY + scroll.y - viewRect.top - viewPad.top;
+			var pt = this.convert({x: e.clientX, y: e.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
 			return {
 				type: type,
 				event: e,
-				x: x,
-				y: y
+				x: pt.x,
+				y: pt.y
 			};
 		},
 		_handleMouseUp: function (e) {
@@ -3307,11 +3303,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var touch = touches[0];
 				this._touchStartX = touch.clientX;
 				this._touchStartY = touch.clientY;
-				var lineIndex = this._getLineAtY(touch.clientY);
 				var pt = this.convert({x: touch.clientX, y: touch.clientY}, "page", "document");
-				var line = this._getLine(lineIndex);
-				this._lastTouchOffset = line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex));
-				line.destroy();
+				this._lastTouchOffset = this.getOffsetAtLocation(pt.x, pt.y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
 			}
@@ -3651,7 +3644,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (x === -1 || (args.select && isIE)) {
 					x = caretRect.left;
 				}
-				var lineIndex = this._getLineAtY(caretRect.top + clientHeight, true);
+				var lineIndex = this._getLineAtY(caretRect.top + clientHeight);
 				line = this._getLine(lineIndex);
 				var linePixel = this._getLinePixel(lineIndex);
 				var y = caretRect.top + clientHeight - linePixel;
@@ -3702,7 +3695,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (x === -1 || (args.select && isIE)) {
 					x = caretRect.left;
 				}
-				var lineIndex = this._getLineAtY(caretRect.bottom - clientHeight, true);
+				var lineIndex = this._getLineAtY(caretRect.bottom - clientHeight);
 				line = this._getLine(lineIndex);
 				var linePixel = this._getLinePixel(lineIndex);
 				var y = (caretRect.bottom - clientHeight) - linePixel;
@@ -3812,20 +3805,20 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
 			var selection = this._getSelection();
-			var lineIndex, line, x = this._autoScrollX, y = this._autoScrollY;
-			var caretLine = this._model.getLineAtOffset(selection.getCaret());
+			var pt = this.convert({x: this._autoScrollX, y: this._autoScrollY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+			var caret = selection.getCaret();
+			var caretLine = this._model.getLineAtOffset(caret), lineIndex, line;
 			if (this._autoScrollDir === "up" || this._autoScrollDir === "down") { //$NON-NLS-1$ //$NON-NLS-0$
 				var scroll = this._autoScrollY / this._getLineHeight();
 				scroll = scroll < 0 ? Math.floor(scroll) : Math.ceil(scroll);
 				lineIndex = caretLine;
 				lineIndex = Math.max(0, Math.min(this._model.getLineCount() - 1, lineIndex + scroll));
 			} else if (this._autoScrollDir === "left" || this._autoScrollDir === "right") { //$NON-NLS-1$ //$NON-NLS-0$
-				lineIndex = this._getLineAtY(y);
+				lineIndex = this._getLineAtY(pt.y);
 				line = this._getLine(caretLine); 
-				x += line.getBoundingClientRect(selection.getCaret(), false).left;
+				pt.x += line.getBoundingClientRect(caret, false).left;
 				line.destroy();
 			}
-			var pt = this.convert({x: x, y: y}, "page", "document");
 			line = this._getLine(lineIndex); 
 			selection.extend(line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex)));
 			line.destroy();
@@ -3855,7 +3848,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						break;
 					}
 				}
-//				log("c=" + c + " firstLine=" + firstLine);
 				this.redrawRulers(0, lineCount);
 				this._queueUpdate();
 			}
@@ -4740,13 +4732,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineHeight = this._getLineHeight();
 			return lineHeight * lineIndex;
 		},
-		_getLineAtY: function (y, document) {
-			if (!document) {
-				var viewPad = this._getViewPadding();
-				var viewRect = this._viewDiv.getBoundingClientRect();
-				y -= viewRect.top + viewPad.top;
-				y += this._getScroll().y;
-			}
+		_getLineAtY: function (y) {
 			var lineHeight, lineIndex = 0;
 			if (this._lineHeight) {
 				//TODO [perf] calculate from top index
@@ -5408,10 +5394,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_setSelectionTo: function (x, y, extent, drag) {
 			var model = this._model, offset;
 			var selection = this._getSelection();
-			var lineIndex = this._getLineAtY(y), pt, line;
+			var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+			var lineIndex = this._getLineAtY(pt.y), line;
 			if (this._clickCount === 1) {
 				line = this._getLine(lineIndex);
-				pt = this.convert({x: x, y: y}, "page", "document");
 				offset = line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex));
 				line.destroy();
 				if (drag && !extent) {
@@ -5427,7 +5413,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var start, end;
 				if (word) {
 					line = this._getLine(lineIndex);
-					pt = this.convert({x: x, y: y}, "page", "document");
 					offset = line.getOffset(pt.x, pt.y - this._getLinePixel(lineIndex));
 					if (this._doubleClickSelection) {
 						if (offset >= this._doubleClickSelection.start) {
