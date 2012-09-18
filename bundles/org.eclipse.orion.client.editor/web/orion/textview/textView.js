@@ -3287,7 +3287,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				var touch = touches[0];
 				this._touchStartX = touch.clientX;
 				this._touchStartY = touch.clientY;
-				var pt = this.convert({x: touch.clientX, y: touch.clientY}, "page", "document");
+				var pt = this.convert({x: touch.clientX, y: touch.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
 				this._lastTouchOffset = this.getOffsetAtLocation(pt.x, pt.y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
@@ -4179,7 +4179,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			if (!this._clientDiv) { return; }
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
-			rulerParent.style.display = "block";
+			rulerParent.style.display = "block"; //$NON-NLS-0$
 			var div = document.createElement("DIV"); //$NON-NLS-0$
 			div._ruler = ruler;
 			div.rulerChanged = true;
@@ -4216,7 +4216,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			leftDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
 			leftDiv.style.position = "absolute"; //$NON-NLS-0$
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
-			leftDiv.style.display = "none";
+			leftDiv.style.display = "none"; //$NON-NLS-0$
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
 			var table = document.createElement("TABLE"); //$NON-NLS-0$
 			leftDiv.appendChild(table);
@@ -4243,7 +4243,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.className = "textviewRightRuler"; //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.tabIndex = -1;
-			rightDiv.style.display = "none";
+			rightDiv.style.display = "none"; //$NON-NLS-0$
 			rightDiv.style.overflow = "hidden"; //$NON-NLS-0$
 			rightDiv.style.MozUserSelect = "none"; //$NON-NLS-0$
 			rightDiv.style.WebkitUserSelect = "none"; //$NON-NLS-0$
@@ -4414,7 +4414,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				row.cells[index]._ruler = undefined;
 				row.deleteCell(index);
 				if (cells.length === 0) {
-					rulerParent.style.display = "none";
+					rulerParent.style.display = "none"; //$NON-NLS-0$
 				}
 			}
 		},
@@ -5553,11 +5553,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._wrapMode = wrapMode;
 			var clientDiv = this._clientDiv;
 			if (wrapMode) {
-				clientDiv.style.whiteSpace = "pre-wrap";
-				clientDiv.style.wordWrap = "break-word";
+				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
+				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
 			} else {
-				clientDiv.style.whiteSpace = "pre";
-				clientDiv.style.wordWrap = "normal";
+				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
+				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
 			}
 			if (!init) {
 				this.redraw();
@@ -5722,7 +5722,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineHeight = this._getLineHeight();
 			var clientWidth = this._getClientWidth();
 			if (this._wrapMode) {
-				clientDiv.style.width = clientWidth + "px";
+				clientDiv.style.width = clientWidth + "px"; //$NON-NLS-0$
 			}
 			
 			/*
