@@ -159,6 +159,7 @@ orion.TextSearcher = (function() {
 				});
 				dojo.addClass(menuButton.domNode, "findSlideoutMenu"); //$NON-NLS-0$
 				dojo.place(menuButton.domNode, parentDiv, "last"); //$NON-NLS-0$
+				return searchStringDiv;
 			},
 			function(){that.closeUI();});
 		},
