@@ -11,7 +11,7 @@
 /*jslint sub:true*/
  /*global define window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/explorers/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 

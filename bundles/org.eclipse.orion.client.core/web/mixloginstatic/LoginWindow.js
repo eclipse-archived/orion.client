@@ -12,7 +12,7 @@
 /*jslint browser:true devel:true*/
 /*global define window*/
 
-define(['domReady'], function(domReady) {
+define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 	var userCreationEnabled;
 	var registrationURI;
 
@@ -315,6 +315,10 @@ define(['domReady'], function(domReady) {
 		document.getElementById('orionReset').style.visibility = 'hidden';
 	}
 
+	function openServerInformation() {
+		window.open("/mixloginstatic/ServerStatus.html");
+	}
+
 	domReady(function() {
 
 		var error = getParam("error");
@@ -364,6 +368,24 @@ define(['domReady'], function(domReady) {
 		checkemailrequest.setRequestHeader("Orion-Version", "1");
 		checkemailrequest.send();
 
+		xhr("GET", "/server-status.json", { //$NON-NLS-0$
+			timeout: 15000
+		}).then(function(result) {
+			var results = JSON.parse(result.response);
+			var messages = results.messages;
+			if (messages.length > 0) {
+				var currentDate = new Date();
+				var startDate = new Date(messages[0].startdate);
+				startDate.setHours(0, 0, 0, 0);
+				if (startDate > currentDate) return;
+				var endDate = new Date(messages[0].enddate);
+				endDate.setHours(23, 59, 59);
+				if (endDate <= currentDate)  return;
+				document.getElementById("orionInfoArea").style.visibility = '';
+				document.getElementById("orionInfoMessage").textContent = messages[0].title;
+			}
+		}, function(error) {
+		});
 
 		injectPlaceholderShims();
 
@@ -387,6 +409,8 @@ define(['domReady'], function(domReady) {
 		document.getElementById("loginButton").onclick = function() {
 			confirmLogin();
 		};
+
+		document.getElementById("orionInfoArea").onclick = openServerInformation;
 
 		document.getElementById("resetUserLink").onclick = revealResetUser;
 

@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2009, 2011 IBM Corporation and others.
+ * Copyright (c) 2009, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -8,8 +8,11 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+ 
+ /*jslint browser:true devel:true sub:true*/
+ /*global define window*/
 
-define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorer', 'orion/profile/usersUtil', 'orion/navigationUtils'], function(messages, require, dojo, mExplorer, mUsersUtil, mNavUtils) {
+define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/profile/usersUtil', 'orion/explorers/navigationUtils'], function(messages, require, dojo, mExplorer, mUsersUtil, mNavUtils) {
 
 
 var eclipse = eclipse || {};
@@ -27,11 +30,33 @@ eclipse.UsersList = (function(){
 		this.model = null;
 		this.myTree = null;
 		this.renderer = new eclipse.UsersRenderer({actionScopeId: this.actionScopeId, checkbox: false, cachePrefix: "UsersNavigator"}, this); //$NON-NLS-0$
-	};
+	}
+	
 	UsersList.prototype = new mExplorer.Explorer();
 	
-	UsersList.prototype.loadUsers = function(){
+	UsersList.prototype.queryObject = { start: 0, rows:100, length: 0};
+	
+	UsersList.prototype.calculateQuery = function(locationHash, queryObj) {
+		var startQuery = locationHash.indexOf("?"); //$NON-NLS-0$
+		if (startQuery !== -1) {
+			var queryStr = locationHash.substring(startQuery + 1);
+			var splitQ = queryStr.split("&"); //$NON-NLS-0$
+			for(var i=0; i < splitQ.length; i++){
+				var splitparameters = splitQ[i].split("="); //$NON-NLS-0$
+				if(splitparameters.length === 2){
+					if(splitparameters[0] === "rows"){  //$NON-NLS-0$
+						queryObj.rows = parseInt(splitparameters[1], 10);
+					} else if(splitparameters[0] === "start"){ //$NON-NLS-0$
+						queryObj.start = parseInt(splitparameters[1], 10);
+					}
+				}
+			}
+		}
+	};
+
+	UsersList.prototype.createModel = function() {
 		var parent = dojo.byId(this.parentId);
+		var queryObj = UsersList.prototype.queryObject;
 
 		// Progress indicator
 		var progress = dojo.byId("progress");  //$NON-NLS-0$
@@ -39,20 +64,55 @@ eclipse.UsersList = (function(){
 			progress = dojo.create("div", {id: "progress"}, parent, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		dojo.empty(progress);
-		b = dojo.create("b"); //$NON-NLS-0$
-		dojo.place(document.createTextNode(messages["Loading users..."]), progress, "last"); //$NON-NLS-1$
-
-		mUsersUtil.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
-					
+		dojo.create("b"); //$NON-NLS-0$
+		dojo.place(document.createTextNode(messages["Loading users..."]), progress, "last"); //$NON-NLS-0$
+		
 		var service = this.registry.getService("orion.core.user"); //$NON-NLS-0$
-		this.createTree(this.parentId, new mExplorer.ExplorerFlatModel("/users", service.getUsersList), {setFocus: true}); //$NON-NLS-0$
+		UsersList.prototype.registry = this.registry;
+		
+		var locationHash = window.location.hash;
+		UsersList.prototype.calculateQuery(locationHash, queryObj);
+		var flatModel = new mExplorer.ExplorerFlatModel("../users", UsersList.prototype.getUsersListSubset.bind(this)); //$NON-NLS-0$
+		flatModel.service = service;
+		flatModel.queryObject = queryObj;
+		this.queryObject = queryObj;
+		this.createTree(this.parentId, flatModel, {setFocus: true}); //$NON-NLS-0$
+		mUsersUtil.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, {});
+	};
+	
+	UsersList.prototype.loadUsers = function(refreshTree){
+		var that = this;
+		var queryObj = UsersList.prototype.queryObject;
+		var locationHash = window.location.hash;
+		UsersList.prototype.calculateQuery(locationHash, queryObj);
+		if (refreshTree) {
+			UsersList.prototype.getUsersListSubset().then( function(newChildren) {
+				that.myTree.refresh("userslist", newChildren); //$NON-NLS-0$
+				mUsersUtil.updateNavTools(that.registry, that, that.toolbarId, that.selectionToolsId, {});
+			}.bind(this));
+		}
 	};
 	
 	UsersList.prototype.reloadUsers = function() {
-		dojo.empty(this.parentId);
-		this.loadUsers();
+		this.loadUsers(true);
 	};
-	
+
+	UsersList.prototype.getUsersListSubset = function(root) {
+	    var aService;
+	    if (this.service) {
+	        aService = this.service;
+	    } else {
+	        aService = this.registry.getService("orion.core.user"); //$NON-NLS-0$
+	    }
+		return aService.getUsersListSubset(this.queryObject.start, this.queryObject.rows).then(
+			function(result) {
+				this.queryObject.start = parseInt(result.users_start, 10);
+				this.queryObject.rows = parseInt(result.users_rows, 10);
+				this.queryObject.length = parseInt(result.users_length, 10);
+				return result.users;
+			}.bind(this));
+	};
+
 	return UsersList;
 }());
 
@@ -68,18 +128,14 @@ eclipse.UsersRenderer = (function() {
 		
 		switch(col_no){
 		case 0: 
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Login"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			break;
+			return dojo.create("th", {innerHTML: "<h2>"+messages["Login"]+"</h2>"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		case 1:
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Actions"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			break;
+			return dojo.create("th", {innerHTML: "<h2>"+messages["Actions"]+"</h2>"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		case 2:
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Name"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			break;
+			return dojo.create("th", {innerHTML: "<h2>"+messages["Name"]+"</h2>"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		case 3:
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Last Login"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			break;
-		};
+			return dojo.create("th", {innerHTML: "<h2>"+messages["Last Login"]+"</h2>"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		
 	};
 	
@@ -96,17 +152,13 @@ eclipse.UsersRenderer = (function() {
 			dojo.place(document.createTextNode(item.login), link, "only");			 //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			return col;
-			break;
 		case 1:
 			return this.getActionsColumn(item, tableRow, null, null, true);
-			break;
 		case 2:
 			return dojo.create("td", {innerHTML: item.Name ? item.Name : "&nbsp;"}); //$NON-NLS-1$ //$NON-NLS-0$
-			break;
 		case 3:
-			return dojo.create("td", {innerHTML: item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp)), {formatLength: "short"}) : '&nbsp;'}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			break;
-		};
+			return dojo.create("td", {innerHTML: item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;'}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		
 	};
 	
@@ -136,19 +188,19 @@ eclipse._UsersList = (function() {
 				var titleRow = dojo.create("tr", {"class": "domCommandBackground"}, thead); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				dojo.create("td", { //$NON-NLS-0$
-					innerHTML : "<h2>"+messages['Login']+"</h2>", //$NON-NLS-2$ //$NON-NLS-0$
+					innerHTML : "<h2>"+messages['Login']+"</h2>", //$NON-NLS-1$ //$NON-NLS-0$
 					className : "usersTable" //$NON-NLS-0$
 				}, titleRow);
 				dojo.create("td", { //$NON-NLS-0$
-					innerHTML : "<h2>"+messages['Actions']+"</h2>", //$NON-NLS-2$ //$NON-NLS-0$
+					innerHTML : "<h2>"+messages['Actions']+"</h2>", //$NON-NLS-1$ //$NON-NLS-0$
 					className : "usersTable" //$NON-NLS-0$
 				}, titleRow);
 				dojo.create("td", { //$NON-NLS-0$
-					innerHTML : "<h2>"+messages['Name']+"</h2>", //$NON-NLS-2$ //$NON-NLS-0$
+					innerHTML : "<h2>"+messages['Name']+"</h2>", //$NON-NLS-1$ //$NON-NLS-0$
 					className : "usersTable" //$NON-NLS-0$
 				}, titleRow);
 				dojo.create("td", { //$NON-NLS-0$
-					innerHTML : "<h2>"+messages['Last Login']+"</h2>", //$NON-NLS-2$ //$NON-NLS-0$
+					innerHTML : "<h2>"+messages['Last Login']+"</h2>", //$NON-NLS-1$ //$NON-NLS-0$
 					className : "usersTable" //$NON-NLS-0$
 				}, titleRow);
 
@@ -159,7 +211,7 @@ eclipse._UsersList = (function() {
 				var tbody = dojo.create("tbody", null, table); //$NON-NLS-0$
 
 				for ( var i in jsonData.users) {
-					var userRow = dojo.create("tr", {"class": i%2==0 ? "treeTableRow lightTreeTableRow" : "treeTableRow darkTreeTableRow"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var userRow = dojo.create("tr", {"class": i%2===0 ? "treeTableRow lightTreeTableRow" : "treeTableRow darkTreeTableRow"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.connect(userRow, "onmouseover", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="";}, i)); //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.connect(userRow, "onmouseout", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="hidden";}, i)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.create("td", { //$NON-NLS-0$
@@ -189,7 +241,7 @@ eclipse._UsersList = (function() {
 						className: "usersTable secondaryColumn" //$NON-NLS-0$
 					}, userRow);
 					dojo.create("td", { //$NON-NLS-0$
-						innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp)), {formatLength: "short"}) : '&nbsp;', //$NON-NLS-1$ //$NON-NLS-0$
+						innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;', //$NON-NLS-1$ //$NON-NLS-0$
 						className: "usersTable secondaryColumn" //$NON-NLS-0$
 					}, userRow);
 					dojo.place(userRow, tbody);
@@ -197,7 +249,7 @@ eclipse._UsersList = (function() {
 			}));
 		},
 		getUserTab : function(userName, userLocation) {
-			return tab = "<a class=\"navlinkonpage\" href=\"" + require.toUrl("profile/user-profile.html") + "#" + userLocation //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return "<a class=\"navlinkonpage\" href=\"" + require.toUrl("profile/user-profile.html") + "#" + userLocation //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					+ "\">" + userName + "</a>"; //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		reloadUsers : function() {

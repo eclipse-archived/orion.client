@@ -17,7 +17,7 @@
 
 define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit'], function(messages, dojo, dijit) {
 
-dojo.declare("orion.widgets._OrionDialogMixin", null, { //$NON-NLS-0$
+var _OrionDialogMixin = dojo.declare("orion.widgets._OrionDialogMixin", null, { //$NON-NLS-0$
 	postMixInProperties : function() {
 		this.inherited(arguments);
 		this.title = this.options.title || messages["Information Needed"];
@@ -48,5 +48,5 @@ dojo.declare("orion.widgets._OrionDialogMixin", null, { //$NON-NLS-0$
 		}), this.duration);   
 	}
 });
-
+	return _OrionDialogMixin;
 });
