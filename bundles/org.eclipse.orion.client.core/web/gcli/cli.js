@@ -1,25 +1,35 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
 
 
 var util = require('gcli/util');
+var view = require('gcli/ui/view');
+var l10n = require('gcli/l10n');
 
 var canon = require('gcli/canon');
 var Promise = require('gcli/promise').Promise;
 
-var types = require('gcli/types');
 var Status = require('gcli/types').Status;
 var Conversion = require('gcli/types').Conversion;
-var Type = require('gcli/types').Type;
 var ArrayType = require('gcli/types/basic').ArrayType;
 var StringType = require('gcli/types/basic').StringType;
 var BooleanType = require('gcli/types/basic').BooleanType;
-var SelectionType = require('gcli/types/basic').SelectionType;
+var NumberType = require('gcli/types/basic').NumberType;
 
 var Argument = require('gcli/argument').Argument;
 var ArrayArgument = require('gcli/argument').ArrayArgument;
@@ -34,12 +44,10 @@ var evalCommand;
  * Registration and de-registration.
  */
 exports.startup = function() {
-  types.registerType(CommandType);
   evalCommand = canon.addCommand(evalCommandSpec);
 };
 
 exports.shutdown = function() {
-  types.unregisterType(CommandType);
   canon.removeCommand(evalCommandSpec.name);
   evalCommand = undefined;
 };
@@ -58,48 +66,52 @@ exports.shutdown = function() {
  *
  * <h2>Events<h2>
  * Assignment publishes the following event:<ul>
- * <li>assignmentChange: Either the value or the text has changed. It is likely
- * that any UI component displaying this argument will need to be updated.
+ * <li>onAssignmentChange: Either the value or the text has changed. It is
+ * likely that any UI component displaying this argument will need to be
+ * updated.
  * The event object looks like:
  * <tt>{ assignment: ..., conversion: ..., oldConversion: ... }</tt>
  * @constructor
  */
 function Assignment(param, paramIndex) {
+  // The parameter that we are assigning to
   this.param = param;
-  this.paramIndex = paramIndex;
-  this.assignmentChange = util.createEvent('Assignment.assignmentChange');
 
-  this.setDefault();
+  this.conversion = undefined;
+
+  // The index of this parameter in the parent Requisition. paramIndex === -1
+  // is the command assignment although this should not be relied upon, it is
+  // better to test param instanceof CommandAssignment
+  this.paramIndex = paramIndex;
+
+  this.onAssignmentChange = util.createEvent('Assignment.onAssignmentChange');
+
+  this.setBlank();
 }
 
 /**
- * The parameter that we are assigning to
- * @readonly
+ * Easy accessor for conversion.arg.
+ * This is a read-only property because writes to arg should be done through
+ * the 'conversion' property.
  */
-Assignment.prototype.param = undefined;
-
-Assignment.prototype.conversion = undefined;
-
-/**
- * The index of this parameter in the parent Requisition. paramIndex === -1
- * is the command assignment although this should not be relied upon, it is
- * better to test param instanceof CommandAssignment
- */
-Assignment.prototype.paramIndex = undefined;
+Object.defineProperty(Assignment.prototype, 'arg', {
+  get: function() {
+    return this.conversion.arg;
+  },
+  enumerable: true
+});
 
 /**
- * Easy accessor for conversion.arg
+ * Easy accessor for conversion.value.
+ * This is a read-only property because writes to value should be done through
+ * the 'conversion' property.
  */
-Assignment.prototype.getArg = function() {
-  return this.conversion.arg;
-};
-
-/**
- * Easy accessor for conversion.value
- */
-Assignment.prototype.getValue = function() {
-  return this.conversion.value;
-};
+Object.defineProperty(Assignment.prototype, 'value', {
+  get: function() {
+    return this.conversion.value;
+  },
+  enumerable: true
+});
 
 /**
  * Easy (and safe) accessor for conversion.message
@@ -115,6 +127,47 @@ Assignment.prototype.getMessage = function() {
  */
 Assignment.prototype.getPredictions = function() {
   return this.conversion.getPredictions();
+};
+
+/**
+ * Accessor for a prediction by index.
+ * This is useful above <tt>getPredictions()[index]</tt> because it normalizes
+ * index to be within the bounds of the predictions, which means that the UI
+ * can maintain an index of which prediction to choose without caring how many
+ * predictions there are.
+ * @param index The index of the prediction to choose
+ */
+Assignment.prototype.getPredictionAt = function(index) {
+  if (index == null) {
+    index = 0;
+  }
+
+  if (this.isInName()) {
+    return undefined;
+  }
+
+  var predictions = this.getPredictions();
+  if (predictions.length === 0) {
+    return undefined;
+  }
+
+  index = index % predictions.length;
+  if (index < 0) {
+    index = predictions.length + index;
+  }
+  return predictions[index];
+};
+
+/**
+ * Some places want to take special action if we are in the name part of a
+ * named argument (i.e. the '--foo' bit).
+ * Currently this does not take actual cursor position into account, it just
+ * assumes that the cursor is at the end. In the future we will probably want
+ * to take this into account.
+ */
+Assignment.prototype.isInName = function() {
+  return this.conversion.arg.type === 'NamedArgument' &&
+         this.conversion.arg.prefix.slice(-1) !== ' ';
 };
 
 /**
@@ -136,7 +189,7 @@ Assignment.prototype.setConversion = function(conversion) {
     return;
   }
 
-  this.assignmentChange({
+  this.onAssignmentChange({
     assignment: this,
     conversion: this.conversion,
     oldConversion: oldConversion
@@ -144,22 +197,10 @@ Assignment.prototype.setConversion = function(conversion) {
 };
 
 /**
- * Find a default value for the conversion either from the parameter, or from
- * the type, or failing that by parsing an empty argument.
+ * Setup an empty value for the conversion by parsing an empty argument.
  */
-Assignment.prototype.setDefault = function() {
-  var conversion;
-  if (this.param.getDefault) {
-    conversion = this.param.getDefault();
-  }
-  else if (this.param.type.getDefault) {
-    conversion = this.param.type.getDefault();
-  }
-  else {
-    conversion = this.param.type.parse(new Argument());
-  }
-
-  this.setConversion(conversion);
+Assignment.prototype.setBlank = function() {
+  this.setConversion(this.param.type.getBlank());
 };
 
 /**
@@ -172,11 +213,12 @@ Assignment.prototype.ensureVisibleArgument = function() {
   // case we're going to ignore the event anyway. But on the other hand
   // perhaps this function shouldn't need to know how it is used, and should
   // do the inefficient thing.
-  if (!this.conversion.arg.isBlank()) {
+  if (this.conversion.arg.type !== 'BlankArgument') {
     return false;
   }
 
-  var arg = this.conversion.arg.beget('', {
+  var arg = this.conversion.arg.beget({
+    text: '',
     prefixSpace: this.param instanceof CommandAssignment
   });
   this.conversion = this.param.type.parse(arg);
@@ -193,59 +235,18 @@ Assignment.prototype.ensureVisibleArgument = function() {
  * can narrow the search for status to a single argument.
  */
 Assignment.prototype.getStatus = function(arg) {
-  if (this.param.isDataRequired() && !this.conversion.isDataProvided()) {
-    return Status.ERROR;
+  if (this.param.isDataRequired && !this.conversion.isDataProvided()) {
+    return Status.INCOMPLETE;
   }
 
   // Selection/Boolean types with a defined range of values will say that
   // '' is INCOMPLETE, but the parameter may be optional, so we don't ask
   // if the user doesn't need to enter something and hasn't done so.
-  if (!this.param.isDataRequired() && this.getArg().isBlank()) {
+  if (!this.param.isDataRequired && this.arg.type === 'BlankArgument') {
     return Status.VALID;
   }
 
   return this.conversion.getStatus(arg);
-};
-
-/**
- * Basically <tt>value = conversion.predictions[0])</tt> done in a safe way.
- */
-Assignment.prototype.complete = function() {
-  var predictions = this.conversion.getPredictions();
-  if (predictions.length > 0) {
-    var arg = this.conversion.arg.beget(predictions[0].name);
-    if (!predictions[0].incomplete) {
-      arg.suffix = ' ';
-    }
-    var conversion = this.param.type.parse(arg);
-    this.setConversion(conversion);
-  }
-};
-
-/**
- * Replace the current value with the lower value if such a concept exists.
- */
-Assignment.prototype.decrement = function() {
-  var replacement = this.param.type.decrement(this.conversion.value);
-  if (replacement != null) {
-    var str = this.param.type.stringify(replacement);
-    var arg = this.conversion.arg.beget(str);
-    var conversion = new Conversion(replacement, arg);
-    this.setConversion(conversion);
-  }
-};
-
-/**
- * Replace the current value with the higher value if such a concept exists.
- */
-Assignment.prototype.increment = function() {
-  var replacement = this.param.type.increment(this.conversion.value);
-  if (replacement != null) {
-    var str = this.param.type.stringify(replacement);
-    var arg = this.conversion.arg.beget(str);
-    var conversion = new Conversion(replacement, arg);
-    this.setConversion(conversion);
-  }
 };
 
 /**
@@ -255,83 +256,27 @@ Assignment.prototype.toString = function() {
   return this.conversion.toString();
 };
 
+/**
+ * For test/debug use only. The output from this function is subject to wanton
+ * random change without notice, and should not be relied upon to even exist
+ * at some later date.
+ */
+Object.defineProperty(Assignment.prototype, '_summaryJson', {
+  get: function() {
+    return {
+      param: this.param.name + '/' + this.param.type.name,
+      defaultValue: this.param.defaultValue,
+      arg: this.conversion.arg._summaryJson,
+      value: this.value,
+      message: this.getMessage(),
+      status: this.getStatus().toString(),
+      predictionCount: this.getPredictions().length
+    };
+  },
+  enumerable: true
+});
+
 exports.Assignment = Assignment;
-
-
-/**
- * Select from the available commands.
- * This is very similar to a SelectionType, however the level of hackery in
- * SelectionType to make it handle Commands correctly was to high, so we
- * simplified.
- * If you are making changes to this code, you should check there too.
- */
-function CommandType() {
-}
-
-CommandType.prototype = Object.create(Type.prototype);
-
-CommandType.prototype.name = 'command';
-
-CommandType.prototype.decrement = SelectionType.prototype.decrement;
-CommandType.prototype.increment = SelectionType.prototype.increment;
-CommandType.prototype._findValue = SelectionType.prototype._findValue;
-
-CommandType.prototype.stringify = function(command) {
-  return command.name;
-};
-
-/**
- * Trim a list of commands (as from canon.getCommands()) according to those
- * that match the provided arg.
- */
-CommandType.prototype._findPredictions = function(arg) {
-  var predictions = [];
-  canon.getCommands().forEach(function(command) {
-    if (command.name.indexOf(arg.text) === 0) {
-      // The command type needs to exclude sub-commands when the CLI
-      // is blank, but include them when we're filtering. This hack
-      // excludes matches when the filter text is '' and when the
-      // name includes a space.
-      if (arg.text.length !== 0 || command.name.indexOf(' ') === -1) {
-        predictions.push(command);
-      }
-    }
-  }, this);
-  return predictions;
-};
-
-CommandType.prototype.parse = function(arg) {
-  // Especially at startup, predictions live over the time that things change
-  // so we provide a completion function rather than completion values
-  var predictFunc = function() {
-    return this._findPredictions(arg);
-  }.bind(this);
-
-  var predictions = this._findPredictions(arg);
-
-  if (predictions.length === 0) {
-    return new Conversion(null, arg, Status.ERROR,
-        'Can\'t use \'' + arg.text + '\'.', predictFunc);
-  }
-
-  var command = predictions[0];
-
-  if (predictions.length === 1) {
-    // Is it an exact match of an executable command,
-    // or just the only possibility?
-    if (command.name === arg.text && typeof command.exec === 'function') {
-      return new Conversion(command, arg, Status.VALID, '');
-    }
-    return new Conversion(null, arg, Status.INCOMPLETE, '', predictFunc);
-  }
-
-  // It's valid if the text matches, even if there are several options
-  if (command.name === arg.text) {
-    return new Conversion(command, arg, Status.VALID, '', predictFunc);
-  }
-
-  return new Conversion(null, arg, Status.INCOMPLETE, '', predictFunc);
-};
 
 
 /**
@@ -373,6 +318,7 @@ var evalCommandSpec = {
       description: ''
     }
   ],
+  hidden: true,
   returnType: 'object',
   description: { key: 'cliEvalJavascript' },
   exec: function(args, context) {
@@ -386,15 +332,25 @@ var evalCommandSpec = {
  * This is a special assignment to reflect the command itself.
  */
 function CommandAssignment() {
-  this.param = new canon.Parameter({
-    name: '__command',
-    type: 'command',
-    description: 'The command to execute'
+  var commandParamMetadata = { name: '__command', type: 'command' };
+  // This is a hack so that rather than reply with a generic description of the
+  // command assignment, we reply with the description of the assigned command,
+  // (using a generic term if there is no assigned command)
+  var self = this;
+  Object.defineProperty(commandParamMetadata, 'description', {
+    get: function() {
+      var value = self.value;
+      return value && value.description ?
+          value.description :
+          'The command to execute';
+    },
+    enumerable: true
   });
+  this.param = new canon.Parameter(commandParamMetadata);
   this.paramIndex = -1;
-  this.assignmentChange = util.createEvent('CommandAssignment.assignmentChange');
+  this.onAssignmentChange = util.createEvent('CommandAssignment.onAssignmentChange');
 
-  this.setDefault();
+  this.setBlank();
 }
 
 CommandAssignment.prototype = Object.create(Assignment.prototype);
@@ -402,40 +358,38 @@ CommandAssignment.prototype = Object.create(Assignment.prototype);
 CommandAssignment.prototype.getStatus = function(arg) {
   return Status.combine(
     Assignment.prototype.getStatus.call(this, arg),
-    this.conversion.value && !this.conversion.value.exec ?
-      Status.INCOMPLETE : Status.VALID
+    this.conversion.value && this.conversion.value.exec ?
+            Status.VALID : Status.INCOMPLETE
   );
 };
+
+exports.CommandAssignment = CommandAssignment;
 
 
 /**
  * Special assignment used when ignoring parameters that don't have a home
  */
-function UnassignedAssignment() {
+function UnassignedAssignment(requisition, arg) {
   this.param = new canon.Parameter({
     name: '__unassigned',
-    type: 'string'
+    description: l10n.lookup('cliOptions'),
+    type: {
+      name: 'param',
+      requisition: requisition,
+      isIncompleteName: (arg.text.charAt(0) === '-')
+    },
   });
   this.paramIndex = -1;
-  this.assignmentChange = util.createEvent('UnassignedAssignment.assignmentChange');
+  this.onAssignmentChange = util.createEvent('UnassignedAssignment.onAssignmentChange');
 
-  this.setDefault();
+  this.conversion = this.param.type.parse(arg);
+  this.conversion.assign(this);
 }
 
 UnassignedAssignment.prototype = Object.create(Assignment.prototype);
 
 UnassignedAssignment.prototype.getStatus = function(arg) {
-  return Status.ERROR;
-};
-
-UnassignedAssignment.prototype.setUnassigned = function(args) {
-  if (!args || args.length === 0) {
-    this.setDefault();
-  }
-  else {
-    var conversion = this.param.type.parse(new MergedArgument(args));
-    this.setConversion(conversion);
-  }
+  return this.conversion.getStatus();
 };
 
 
@@ -453,19 +407,15 @@ UnassignedAssignment.prototype.setUnassigned = function(args) {
  * <h2>Events<h2>
  * <p>Requisition publishes the following events:
  * <ul>
- * <li>commandChange: The command has changed. It is likely that a UI
- * structure will need updating to match the parameters of the new command.
- * The event object looks like { command: A }
- * <li>assignmentChange: This is a forward of the Assignment.assignmentChange
- * event. It is fired when any assignment (except the commandAssignment)
+ * <li>onAssignmentChange: This is a forward of the onAssignmentChange event on
+ * Assignment. It is fired when any assignment (except the commandAssignment)
  * changes.
- * <li>inputChange: The text to be mirrored in a command line has changed.
- * The event object looks like { newText: X }.
+ * <li>onTextChange: The text to be mirrored in a command line has changed.
  * </ul>
  *
- * @param environment An optional opaque object passed to commands using
- * ExecutionContext.
- * @param doc A DOM Document passed to commands using ExecutionContext in
+ * @param environment An optional opaque object passed to commands in the
+ * Execution Context.
+ * @param doc A DOM Document passed to commands using the Execution Context in
  * order to allow creation of DOM nodes. If missing Requisition will use the
  * global 'document'.
  * @constructor
@@ -501,34 +451,27 @@ function Requisition(environment, doc) {
   this._args = [];
 
   // Used to store cli arguments that were not assigned to parameters
-  this._unassigned = new UnassignedAssignment();
+  this._unassigned = [];
 
-  // Temporarily set this to true to prevent _onAssignmentChange resetting
+  // Temporarily set this to true to prevent _assignmentChanged resetting
   // argument positions
   this._structuralChangeInProgress = false;
 
-  this.commandAssignment.assignmentChange.add(this._onCommandAssignmentChange, this);
-  this.commandAssignment.assignmentChange.add(this._onAssignmentChange, this);
+  this.commandAssignment.onAssignmentChange.add(this._commandAssignmentChanged, this);
+  this.commandAssignment.onAssignmentChange.add(this._assignmentChanged, this);
 
   this.commandOutputManager = canon.commandOutputManager;
 
-  this.assignmentChange = util.createEvent('Requisition.assignmentChange');
-  this.commandChange = util.createEvent('Requisition.commandChange');
-  this.inputChange = util.createEvent('Requisition.inputChange');
+  this.onAssignmentChange = util.createEvent('Requisition.onAssignmentChange');
+  this.onTextChange = util.createEvent('Requisition.onTextChange');
 }
-
-/**
- * Some number that is higher than the most args we'll ever have. Would use
- * MAX_INTEGER if that made sense
- */
-var MORE_THAN_THE_MOST_ARGS_POSSIBLE = 1000000;
 
 /**
  * Avoid memory leaks
  */
 Requisition.prototype.destroy = function() {
-  this.commandAssignment.assignmentChange.remove(this._onCommandAssignmentChange, this);
-  this.commandAssignment.assignmentChange.remove(this._onAssignmentChange, this);
+  this.commandAssignment.onAssignmentChange.remove(this._commandAssignmentChanged, this);
+  this.commandAssignment.onAssignmentChange.remove(this._assignmentChanged, this);
 
   delete this.document;
   delete this.environment;
@@ -538,7 +481,7 @@ Requisition.prototype.destroy = function() {
  * When any assignment changes, we might need to update the _args array to
  * match and inform people of changes to the typed input text.
  */
-Requisition.prototype._onAssignmentChange = function(ev) {
+Requisition.prototype._assignmentChanged = function(ev) {
   // Don't report an event if the value is unchanged
   if (ev.oldConversion != null &&
       ev.conversion.valueEquals(ev.oldConversion)) {
@@ -549,80 +492,40 @@ Requisition.prototype._onAssignmentChange = function(ev) {
     return;
   }
 
-  this.assignmentChange(ev);
+  this.onAssignmentChange(ev);
 
-  // Both for argument position and the inputChange event, we only care
+  // Both for argument position and the onTextChange event, we only care
   // about changes to the argument.
   if (ev.conversion.argEquals(ev.oldConversion)) {
     return;
   }
 
-  this._structuralChangeInProgress = true;
-
-  // Refactor? See bug 660765
-  // Do preceding arguments need to have dummy values applied so we don't
-  // get a hole in the command line?
-  var i;
-  if (ev.assignment.param.isPositionalAllowed()) {
-    for (i = 0; i < ev.assignment.paramIndex; i++) {
-      var assignment = this.getAssignment(i);
-      if (assignment.param.isPositionalAllowed()) {
-        if (assignment.ensureVisibleArgument()) {
-          this._args.push(assignment.getArg());
-        }
-      }
-    }
-  }
-
-  // Remember where we found the first match
-  var index = MORE_THAN_THE_MOST_ARGS_POSSIBLE;
-  for (i = 0; i < this._args.length; i++) {
-    if (this._args[i].assignment === ev.assignment) {
-      if (i < index) {
-        index = i;
-      }
-      this._args.splice(i, 1);
-      i--;
-    }
-  }
-
-  if (index === MORE_THAN_THE_MOST_ARGS_POSSIBLE) {
-    this._args.push(ev.assignment.getArg());
-  }
-  else {
-    // Is there a way to do this that doesn't involve a loop?
-    var newArgs = ev.conversion.arg.getArgs();
-    for (i = 0; i < newArgs.length; i++) {
-      this._args.splice(index + i, 0, newArgs[i]);
-    }
-  }
-  this._structuralChangeInProgress = false;
-
-  this.inputChange();
+  this.onTextChange();
 };
 
 /**
  * When the command changes, we need to keep a bunch of stuff in sync
  */
-Requisition.prototype._onCommandAssignmentChange = function(ev) {
+Requisition.prototype._commandAssignmentChanged = function(ev) {
+  // Assignments fire AssignmentChange events on any change, including minor
+  // things like whitespace change in arg prefix, so we ignore anything but
+  // an actual value change
+  if (ev.conversion.valueEquals(ev.oldConversion)) {
+    return;
+  }
+
   this._assignments = {};
 
-  var command = this.commandAssignment.getValue();
+  var command = this.commandAssignment.value;
   if (command) {
     for (var i = 0; i < command.params.length; i++) {
       var param = command.params[i];
       var assignment = new Assignment(param, i);
-      assignment.assignmentChange.add(this._onAssignmentChange, this);
+      assignment.onAssignmentChange.add(this._assignmentChanged, this);
       this._assignments[param.name] = assignment;
     }
   }
   this.assignmentCount = Object.keys(this._assignments).length;
-
-  this.commandChange({
-    requisition: this,
-    oldValue: ev.oldValue,
-    newValue: command
-  });
 };
 
 /**
@@ -635,6 +538,28 @@ Requisition.prototype.getAssignment = function(nameOrNumber) {
     nameOrNumber :
     Object.keys(this._assignments)[nameOrNumber];
   return this._assignments[name] || undefined;
+};
+
+/**
+ * There are a few places where we need to know what the 'next thing' is. What
+ * is the user going to be filling out next (assuming they don't enter a named
+ * argument). The next argument is the first in line that is both blank, and
+ * that can be filled in positionally.
+ * @return The next assignment to be used, or null if all the positional
+ * parameters have values.
+ */
+Requisition.prototype._getFirstBlankPositionalAssignment = function() {
+  var reply = null;
+  Object.keys(this._assignments).some(function(name) {
+    var assignment = this.getAssignment(name);
+    if (assignment.arg.type === 'BlankArgument' &&
+            assignment.param.isPositionalAllowed) {
+      reply = assignment;
+      return true; // i.e. break
+    }
+    return false;
+  }, this);
+  return reply;
 };
 
 /**
@@ -664,9 +589,19 @@ Requisition.prototype.cloneAssignments = function() {
  */
 Requisition.prototype.getStatus = function() {
   var status = Status.VALID;
+  if (this._unassigned.length !== 0) {
+    var isAllIncomplete = true;
+    this._unassigned.forEach(function(assignment) {
+      if (!assignment.param.type.isIncompleteName) {
+        isAllIncomplete = false;
+      }
+    });
+    status = isAllIncomplete ? Status.INCOMPLETE : Status.ERROR;
+  }
+
   this.getAssignments(true).forEach(function(assignment) {
     var assignStatus = assignment.getStatus();
-    if (assignment.getStatus() > status) {
+    if (assignStatus > status) {
       status = assignStatus;
     }
   }, this);
@@ -683,7 +618,9 @@ Requisition.prototype.getStatus = function() {
 Requisition.prototype.getArgsObject = function() {
   var args = {};
   this.getAssignments().forEach(function(assignment) {
-    args[assignment.param.name] = assignment.getValue();
+    args[assignment.param.name] = assignment.conversion.isDataProvided() ?
+            assignment.value :
+            assignment.param.defaultValue;
   }, this);
   return args;
 };
@@ -692,7 +629,7 @@ Requisition.prototype.getArgsObject = function() {
  * Access the arguments as an array.
  * @param includeCommand By default only the parameter arguments are
  * returned unless (includeCommand === true), in which case the list is
- * prepended with commandAssignment.getArg()
+ * prepended with commandAssignment.arg
  */
 Requisition.prototype.getAssignments = function(includeCommand) {
   var assignments = [];
@@ -706,12 +643,146 @@ Requisition.prototype.getAssignments = function(includeCommand) {
 };
 
 /**
+ * Alter the given assignment using the given arg. This function is better than
+ * calling assignment.setConversion(assignment.param.type.parse(arg)) because
+ * it adjusts the args in this requisition to keep things up to date
+ */
+Requisition.prototype.setAssignment = function(assignment, arg) {
+  var originalArgs = assignment.arg.getArgs();
+
+  // Update the args array
+  var replacementArgs = arg.getArgs();
+  var maxLen = Math.max(originalArgs.length, replacementArgs.length);
+  for (var i = 0; i < maxLen; i++) {
+    // If there are no more original args, or if the original arg was blank
+    // (i.e. not typed by the user), we'll just need to add at the end
+    if (i >= originalArgs.length || originalArgs[i].type === 'BlankArgument') {
+      this._args.push(replacementArgs[i]);
+      continue;
+    }
+
+    var index = this._args.indexOf(originalArgs[i]);
+    if (index === -1) {
+      console.error('Couldn\'t find ', originalArgs[i], ' in ', this._args);
+      throw new Error('Couldn\'t find ' + originalArgs[i]);
+    }
+
+    // If there are no more replacement args, we just remove the original args
+    // Otherwise swap original args and replacements
+    if (i >= replacementArgs.length) {
+      this._args.splice(index, 1);
+    }
+    else {
+      this._args[index] = replacementArgs[i];
+    }
+  }
+
+  var conversion = assignment.param.type.parse(arg);
+  assignment.setConversion(conversion);
+};
+
+/**
  * Reset all the assignments to their default values
  */
-Requisition.prototype.setDefaultArguments = function() {
+Requisition.prototype.setBlankArguments = function() {
   this.getAssignments().forEach(function(assignment) {
-    assignment.setDefault();
+    assignment.setBlank();
   }, this);
+};
+
+/**
+ * Complete the argument at <tt>cursor</tt>.
+ * Basically the same as:
+ *   assignment = getAssignmentAt(cursor);
+ *   assignment.value = assignment.conversion.predictions[0];
+ * Except it's done safely, and with particular care to where we place the
+ * space, which is complex, and annoying if we get it wrong.
+ * @param cursor The cursor configuration. Should have start and end properties
+ * which should be set to start and end of the selection.
+ * @param predictionChoice The index of the prediction that we should choose.
+ * This number is not bounded by the size of the prediction array, we take the
+ * modulus to get it within bounds
+ */
+Requisition.prototype.complete = function(cursor, predictionChoice) {
+  var assignment = this.getAssignmentAt(cursor.start);
+
+  this.onTextChange.holdFire();
+
+  var prediction = assignment.getPredictionAt(predictionChoice);
+  if (prediction == null) {
+    // No predictions generally means we shouldn't change anything on TAB, but
+    // TAB has the connotation of 'next thing' and when we're at the end of
+    // a thing that implies that we should add a space. i.e.
+    // 'help<TAB>' -> 'help '
+    // But we should only do this if the thing that we're 'completing' is valid
+    // and doesn't already end in a space.
+    if (assignment.arg.suffix.slice(-1) !== ' ' &&
+            assignment.getStatus() === Status.VALID) {
+      this._addSpace(assignment);
+    }
+
+    // Also add a space if we are in the name part of an assignment, however
+    // this time we don't want the 'push the space to the next assignment'
+    // logic, so we don't use addSpace
+    if (assignment.isInName()) {
+      var newArg = assignment.conversion.arg.beget({ prefixPostSpace: true });
+      this.setAssignment(assignment, newArg);
+    }
+  }
+  else {
+    // Mutate this argument to hold the completion
+    var arg = assignment.arg.beget({ text: prediction.name });
+    this.setAssignment(assignment, arg);
+
+    if (!prediction.incomplete) {
+      // The prediction is complete, add a space to let the user move-on
+      this._addSpace(assignment);
+
+      // Bug 779443 - Remove or explain the reparse
+      if (assignment instanceof UnassignedAssignment) {
+        this.update(this.toString());
+      }
+    }
+  }
+
+  this.onTextChange();
+  this.onTextChange.resumeFire();
+};
+
+/**
+ * Pressing TAB sometimes requires that we add a space to denote that we're on
+ * to the 'next thing'.
+ * @param assignment The assignment to which to append the space
+ */
+Requisition.prototype._addSpace = function(assignment) {
+  var arg = assignment.conversion.arg.beget({ suffixSpace: true });
+  if (arg !== assignment.conversion.arg) {
+    this.setAssignment(assignment, arg);
+  }
+};
+
+/**
+ * Replace the current value with the lower value if such a concept exists.
+ */
+Requisition.prototype.decrement = function(assignment) {
+  var replacement = assignment.param.type.decrement(assignment.conversion.value);
+  if (replacement != null) {
+    var str = assignment.param.type.stringify(replacement);
+    var arg = assignment.conversion.arg.beget({ text: str });
+    this.setAssignment(assignment, arg);
+  }
+};
+
+/**
+ * Replace the current value with the higher value if such a concept exists.
+ */
+Requisition.prototype.increment = function(assignment) {
+  var replacement = assignment.param.type.increment(assignment.conversion.value);
+  if (replacement != null) {
+    var str = assignment.param.type.stringify(replacement);
+    var arg = assignment.conversion.arg.beget({ text: str });
+    this.setAssignment(assignment, arg);
+  }
 };
 
 /**
@@ -720,9 +791,9 @@ Requisition.prototype.setDefaultArguments = function() {
 Requisition.prototype.toCanonicalString = function() {
   var line = [];
 
-  var cmd = this.commandAssignment.getValue() ?
-      this.commandAssignment.getValue().name :
-      this.commandAssignment.getArg().text;
+  var cmd = this.commandAssignment.value ?
+      this.commandAssignment.value.name :
+      this.commandAssignment.arg.text;
   line.push(cmd);
 
   Object.keys(this._assignments).forEach(function(name) {
@@ -731,15 +802,15 @@ Requisition.prototype.toCanonicalString = function() {
     // Bug 664377: This will cause problems if there is a non-default value
     // after a default value. Also we need to decide when to use
     // named parameters in place of positional params. Both can wait.
-    if (assignment.getValue() !== assignment.param.defaultValue) {
+    if (assignment.value !== assignment.param.defaultValue) {
       line.push(' ');
-      line.push(type.stringify(assignment.getValue()));
+      line.push(type.stringify(assignment.value));
     }
   }, this);
 
   // Canonically, if we've opened with a { then we should have a } to close
   if (cmd === '{') {
-    if (this.getAssignment(0).getArg().suffix.indexOf('}') === -1) {
+    if (this.getAssignment(0).arg.suffix.indexOf('}') === -1) {
       line.push(' }');
     }
   }
@@ -778,13 +849,13 @@ Requisition.prototype.createInputArgTrace = function() {
   var i;
   this._args.forEach(function(arg) {
     for (i = 0; i < arg.prefix.length; i++) {
-      args.push({ arg: arg, 'char': arg.prefix[i], part: 'prefix' });
+      args.push({ arg: arg, char: arg.prefix[i], part: 'prefix' });
     }
     for (i = 0; i < arg.text.length; i++) {
-      args.push({ arg: arg, 'char': arg.text[i], part: 'text' });
+      args.push({ arg: arg, char: arg.text[i], part: 'text' });
     }
     for (i = 0; i < arg.suffix.length; i++) {
-      args.push({ arg: arg, 'char': arg.suffix[i], part: 'suffix' });
+      args.push({ arg: arg, char: arg.suffix[i], part: 'suffix' });
     }
   });
 
@@ -802,6 +873,31 @@ Requisition.prototype.toString = function() {
   }
 
   return this.toCanonicalString();
+};
+
+/**
+ * If the last character is whitespace then things that we suggest to add to
+ * the end don't need a space prefix.
+ * While this is quite a niche function, it has 2 benefits:
+ * - it's more correct because we can distinguish between final whitespace that
+ *   is part of an unclosed string, and parameter separating whitespace.
+ * - also it's faster than toString() the whole thing and checking the end char
+ * @return true iff the last character is interpreted as parameter separating
+ * whitespace
+ */
+Requisition.prototype.typedEndsWithSeparator = function() {
+  // This is not as easy as doing (this.toString().slice(-1) === ' ')
+  // See the doc comments above; We're checking for separators, not spaces
+  if (this._args) {
+    var lastArg = this._args.slice(-1)[0];
+    if (lastArg.suffix.slice(-1) === ' ') {
+      return true;
+    }
+    return lastArg.text === '' && lastArg.suffix === ''
+        && lastArg.prefix.slice(-1) === ' ';
+  }
+
+  return this.toCanonicalString().slice(-1) === ' ';
 };
 
 /**
@@ -829,8 +925,16 @@ Requisition.prototype.getInputStatusMarkup = function(cursor) {
       status = arg.assignment.getStatus(arg);
       // Promote INCOMPLETE to ERROR  ...
       if (status === Status.INCOMPLETE) {
-        // If the cursor is not in a position to be able to complete it
-        if (arg !== cTrace.arg || cTrace.part !== 'text') {
+        // If the cursor is in the prefix or suffix of an argument then we
+        // don't consider it in the argument for the purposes of preventing
+        // the escalation to ERROR. However if this is a NamedArgument, then we
+        // allow the suffix (as space between 2 parts of the argument) to be in.
+        // We use arg.assignment.arg not arg because we're looking at the arg
+        // that got put into the assignment not as returned by tokenize()
+        var isNamed = (cTrace.arg.assignment.arg.type === 'NamedArgument');
+        var isInside = cTrace.part === 'text' ||
+                        (isNamed && cTrace.part === 'suffix');
+        if (arg.assignment !== cTrace.arg.assignment || !isInside) {
           // And if we're not in the command
           if (!(arg.assignment instanceof CommandAssignment)) {
             status = Status.ERROR;
@@ -839,7 +943,7 @@ Requisition.prototype.getInputStatusMarkup = function(cursor) {
       }
     }
 
-    markup.push({ status: status, string: argTrace['char'] });
+    markup.push({ status: status, string: argTrace.char });
   }
 
   // De-dupe: merge entries where 2 adjacent have same status
@@ -888,15 +992,21 @@ Requisition.prototype.getAssignmentAt = function(cursor) {
       assignForPos.push(assignment);
     }
 
-    // suffix looks forwards
-    if (this._args.length > i + 1) {
+    // suffix is part of the argument only if this is a named parameter,
+    // otherwise it looks forwards
+    if (arg.assignment.arg.type === 'NamedArgument') {
+      // leave the argument as it is
+    }
+    else if (this._args.length > i + 1) {
       // first to the next argument
       assignment = this._args[i + 1].assignment;
     }
-    else if (assignment &&
-        assignment.paramIndex + 1 < this.assignmentCount) {
-      // then to the next assignment
-      assignment = this.getAssignment(assignment.paramIndex + 1);
+    else {
+      // then to the first blank positional parameter, leaving 'as is' if none
+      var nextAssignment = this._getFirstBlankPositionalAssignment();
+      if (nextAssignment != null) {
+        assignment = nextAssignment;
+      }
     }
 
     for (j = 0; j < arg.suffix.length; j++) {
@@ -911,7 +1021,7 @@ Requisition.prototype.getAssignmentAt = function(cursor) {
 
   if (!reply) {
     throw new Error('Missing assignment.' +
-      ' cursor=' + cursor + ' text.length=' + this.toString().length);
+        ' cursor=' + cursor + ' text=' + this.toString());
   }
 
   return reply;
@@ -919,44 +1029,54 @@ Requisition.prototype.getAssignmentAt = function(cursor) {
 
 /**
  * Entry point for keyboard accelerators or anything else that wants to execute
- * a command.
- * @param input Object containing data about how to execute the command.
- * Properties of input include:
- * - args: Arguments for the command
- * - typed: The typed command
- * - visible: Ensure that the output from this command is visible
+ * a command. There are 3 ways to call <tt>exec()</tt>:
+ * 1. Without any parameters. This assumes that the command to be executed has
+ *    already been parsed by the requisition using <tt>update()</tt>.
+ * 2. With a string parameter, or an object with a 'typed' property. This is
+ *    effectively a shortcut for calling <tt>update(typed); exec();</tt>
+ * 3. With input having a 'command' property which is either a command object
+ *    (i.e. from canon.getCommand) or a string which can be passed to
+ *    canon.getCommand() plus and optional 'args' property which contains the
+ *    argument values as passed to command.exec. This method is significantly
+ *    faster, and designed for use from keyboard shortcuts.
+ * In addition to these properties, the input parameter can contain a 'hidden'
+ * property which can be set to true to hide the output from the
+ * CommandOutputManager.
+ * @param input (optional) The command to execute. See above.
  */
 Requisition.prototype.exec = function(input) {
   var command;
   var args;
-  var visible = true;
+  var hidden = false;
+  if (input && input.hidden) {
+    hidden = true;
+  }
 
   if (input) {
-    if (input.args != null) {
+    if (typeof input === 'string') {
+      this.update(input);
+    }
+    else if (typeof input.typed === 'string') {
+      this.update(input.typed);
+    }
+    else if (input.command != null) {
       // Fast track by looking up the command directly since passed args
       // means there is no command line to parse.
-      command = canon.getCommand(input.typed);
+      command = canon.getCommand(input.command);
       if (!command) {
-        console.error('Command not found: ' + command);
+        console.error('Command not found: ' + input.command);
       }
       args = input.args;
-
-      // Default visible to false since this is exec is probably the
-      // result of a keyboard shortcut
-      visible = 'visible' in input ? input.visible : false;
-    }
-    else {
-      this.update(input);
     }
   }
 
   if (!command) {
-    command = this.commandAssignment.getValue();
+    command = this.commandAssignment.value;
     args = this.getArgsObject();
   }
 
   if (!command) {
-    return false;
+    throw new Error('Unknown command');
   }
 
   // Display JavaScript input without the initial { or closing }
@@ -967,90 +1087,84 @@ Requisition.prototype.exec = function(input) {
     typed = typed.replace(/\s*}\s*$/, '');
   }
 
-  var outputObject = {
+  var output = new Output({
     command: command,
     args: args,
     typed: typed,
     canonical: this.toCanonicalString(),
-    completed: false,
-    start: new Date()
-  };
+    hidden: hidden
+  });
 
-  this.commandOutputManager.sendCommandOutput(outputObject);
-
-  var onComplete = function(output, error) {
-    if (visible) {
-      outputObject.end = new Date();
-      outputObject.duration = outputObject.end.getTime() - outputObject.start.getTime();
-      outputObject.error = error;
-      outputObject.output = output;
-      outputObject.completed = true;
-      this.commandOutputManager.sendCommandOutput(outputObject);
-    }
-  }.bind(this);
+  this.commandOutputManager.onOutput({ output: output });
 
   try {
-    var context = new ExecutionContext(this);
+    var context = exports.createExecutionContext(this);
     var reply = command.exec(args, context);
 
-    if (reply != null && reply.isPromise) {
+    if (reply != null && typeof reply.then === 'function') {
       reply.then(
-        function(data) { onComplete(data, false); },
-        function(error) { onComplete(error, true); });
+          function(data) { output.complete(data); },
+          function(error) { output.error = true; output.complete(error); });
 
+      output.promise = reply;
       // Add progress to our promise and add a handler for it here
       // See bug 659300
     }
     else {
-      onComplete(reply, false);
+      output.complete(reply);
     }
   }
   catch (ex) {
     console.error(ex);
-    onComplete(ex, true);
+    output.error = true;
+    output.complete(ex);
   }
 
-  this.clear();
-  return true;
+  this.update('');
+  return output;
 };
 
 /**
  * Called by the UI when ever the user interacts with a command line input
- * @param input A structure that details the state of the input field.
- * It should look something like: { typed:a, cursor: { start:b, end:c } }
- * Where a is the contents of the input field, and b and c are the start
- * and end of the cursor/selection respectively.
- * <p>The general sequence is:
- * <ul>
- * <li>_tokenize(): convert _typed into _parts
- * <li>_split(): convert _parts into _command and _unparsedArgs
- * <li>_assign(): convert _unparsedArgs into requisition
- * </ul>
+ * @param typed The contents of the input field
  */
-Requisition.prototype.update = function(input) {
-  if (input.cursor == null) {
-    input.cursor = { start: input.length, end: input.length };
-  }
-
+Requisition.prototype.update = function(typed) {
   this._structuralChangeInProgress = true;
 
-  this._args = this._tokenize(input.typed);
-
+  this._args = this._tokenize(typed);
   var args = this._args.slice(0); // i.e. clone
   this._split(args);
   this._assign(args);
 
   this._structuralChangeInProgress = false;
-
-  this.inputChange();
+  this.onTextChange();
 };
 
 /**
- * Empty the current buffer, and notify listeners that we're now empty
+ * For test/debug use only. The output from this function is subject to wanton
+ * random change without notice, and should not be relied upon to even exist
+ * at some later date.
  */
-Requisition.prototype.clear = function() {
-  this.update({ typed: '', cursor: { start: 0, end: 0 } });
-};
+Object.defineProperty(Requisition.prototype, '_summaryJson', {
+  get: function() {
+    var summary = {
+      $args: this._args.map(function(arg) {
+        return arg._summaryJson;
+      }),
+      _command: this.commandAssignment._summaryJson,
+      _unassigned: this._unassigned.forEach(function(assignment) {
+        return assignment._summaryJson;
+      })
+    };
+
+    Object.keys(this._assignments).forEach(function(name) {
+      summary[name] = this.getAssignment(name)._summaryJson;
+    }.bind(this));
+
+    return summary;
+  },
+  enumerable: true
+});
 
 /**
  * Requisition._tokenize() is a state machine. These are the states.
@@ -1296,10 +1410,10 @@ Requisition.prototype._split = function(args) {
   // We use the hidden 'eval' command directly rather than shift()ing one of
   // the parameters, and parse()ing it.
   var conversion;
-  if (args[0] instanceof ScriptArgument) {
+  if (args[0].type === 'ScriptArgument') {
     // Special case: if the user enters { console.log('foo'); } then we need to
     // use the hidden 'eval' command
-    conversion = new Conversion(evalCommand, new Argument());
+    conversion = new Conversion(evalCommand, new ScriptArgument());
     this.commandAssignment.setConversion(conversion);
     return;
   }
@@ -1337,24 +1451,34 @@ Requisition.prototype._split = function(args) {
 };
 
 /**
+ * Add all the passed args to the list of unassigned assignments.
+ */
+Requisition.prototype._addUnassignedArgs = function(args) {
+  args.forEach(function(arg) {
+    this._unassigned.push(new UnassignedAssignment(this, arg));
+  }.bind(this));
+};
+
+/**
  * Work out which arguments are applicable to which parameters.
  */
 Requisition.prototype._assign = function(args) {
-  if (!this.commandAssignment.getValue()) {
-    this._unassigned.setUnassigned(args);
+  this._unassigned = [];
+
+  if (!this.commandAssignment.value) {
+    this._addUnassignedArgs(args);
     return;
   }
 
   if (args.length === 0) {
-    this.setDefaultArguments();
-    this._unassigned.setDefault();
+    this.setBlankArguments();
     return;
   }
 
   // Create an error if the command does not take parameters, but we have
   // been given them ...
   if (this.assignmentCount === 0) {
-    this._unassigned.setUnassigned(args);
+    this._addUnassignedArgs(args);
     return;
   }
 
@@ -1368,14 +1492,13 @@ Requisition.prototype._assign = function(args) {
         new MergedArgument(args);
       var conversion = assignment.param.type.parse(arg);
       assignment.setConversion(conversion);
-      this._unassigned.setDefault();
       return;
     }
   }
 
   // Positional arguments can still be specified by name, but if they are
   // then we need to ignore them when working them out positionally
-  var names = this.getParameterNames();
+  var unassignedParams = this.getParameterNames();
 
   // We collect the arguments used in arrays here before assigning
   var arrayArgs = {};
@@ -1388,17 +1511,17 @@ Requisition.prototype._assign = function(args) {
     while (i < args.length) {
       if (assignment.param.isKnownAs(args[i].text)) {
         var arg = args.splice(i, 1)[0];
-        names = names.filter(function(test) {
+        unassignedParams = unassignedParams.filter(function(test) {
           return test !== assignment.param.name;
         });
 
         // boolean parameters don't have values, default to false
         if (assignment.param.type instanceof BooleanType) {
-          arg = new TrueNamedArgument(null, arg);
+          arg = new TrueNamedArgument(arg);
         }
         else {
           var valueArg = null;
-          if (i + 1 >= args.length) {
+          if (i + 1 <= args.length) {
             valueArg = args.splice(i, 1)[0];
           }
           arg = new NamedArgument(arg, valueArg);
@@ -1425,13 +1548,13 @@ Requisition.prototype._assign = function(args) {
   }, this);
 
   // What's left are positional parameters assign in order
-  names.forEach(function(name) {
+  unassignedParams.forEach(function(name) {
     var assignment = this.getAssignment(name);
 
     // If not set positionally, and we can't set it non-positionally,
     // we have to default it to prevent previous values surviving
-    if (!assignment.param.isPositionalAllowed()) {
-      assignment.setDefault();
+    if (!assignment.param.isPositionalAllowed) {
+      assignment.setBlank();
       return;
     }
 
@@ -1447,12 +1570,25 @@ Requisition.prototype._assign = function(args) {
       args = [];
     }
     else {
-      var arg = (args.length > 0) ?
-          args.splice(0, 1)[0] :
-          new Argument();
+      if (args.length === 0) {
+        assignment.setBlank();
+      }
+      else {
+        var arg = args.splice(0, 1)[0];
+        // --foo and -f are named parameters, -4 is a number. So '-' is either
+        // the start of a named parameter or a number depending on the context
+        var isIncompleteName = assignment.param.type instanceof NumberType ?
+            /-[-a-zA-Z_]/.test(arg.text) :
+            arg.text.charAt(0) === '-';
 
-      var conversion = assignment.param.type.parse(arg);
-      assignment.setConversion(conversion);
+        if (isIncompleteName) {
+          this._unassigned.push(new UnassignedAssignment(this, arg));
+        }
+        else {
+          var conversion = assignment.param.type.parse(arg);
+          assignment.setConversion(conversion);
+        }
+      }
     }
   }, this);
 
@@ -1463,28 +1599,138 @@ Requisition.prototype._assign = function(args) {
     assignment.setConversion(conversion);
   }, this);
 
-  if (args.length > 0) {
-    this._unassigned.setUnassigned(args);
-  }
-  else {
-    this._unassigned.setDefault();
-  }
+  // What's left is can't be assigned, but we need to extract
+  this._addUnassignedArgs(args);
 };
 
 exports.Requisition = Requisition;
 
+/**
+ * A simple object to hold information about the output of a command
+ */
+function Output(options) {
+  options = options || {};
+  this.command = options.command || '';
+  this.args = options.args || {};
+  this.typed = options.typed || '';
+  this.canonical = options.canonical || '';
+  this.hidden = options.hidden === true ? true : false;
+
+  this.data = undefined;
+  this.completed = false;
+  this.error = false;
+  this.start = new Date();
+
+  this.onClose = util.createEvent('Output.onClose');
+  this.onChange = util.createEvent('Output.onChange');
+}
+
+/**
+ * Called when there is data to display
+ * @param data
+ */
+Output.prototype.complete = function(data) {
+  this.data = data;
+
+  this.end = new Date();
+  this.duration = this.end.getTime() - this.start.getTime();
+  this.completed = true;
+
+  this.onChange({ output: this });
+};
+
+/**
+ * Convert to a DOM element for display.
+ * @param element The DOM node to which the data should be written. Existing
+ * content of 'element' will be removed before 'outputData' is added.
+ */
+Output.prototype.toDom = function(element) {
+  util.clearElement(element);
+  var document = element.ownerDocument;
+
+  var output = this.data;
+  if (output == null) {
+    return;
+  }
+
+  var node;
+  if (typeof HTMLElement !== 'undefined' && output instanceof HTMLElement) {
+    node = output;
+  }
+  else if (output.isView) {
+    node = output.toDom(document);
+  }
+  else {
+    if (this.command.returnType === 'terminal') {
+      if (Array.isArray(output)) {
+        node = util.createElement(document, 'div');
+        output.forEach(function() {
+          var child = util.createElement(document, 'textarea');
+          child.classList.add('gcli-row-subterminal');
+          child.readOnly = true;
+
+          node.appendChild(child);
+        });
+      }
+      else {
+        node = util.createElement(document, 'textarea');
+        node.classList.add('gcli-row-terminal');
+        node.readOnly = true;
+      }
+    }
+    else {
+      node = util.createElement(document, 'p');
+    }
+
+    util.setContents(node, output.toString());
+  }
+
+  // Make sure that links open in a new window.
+  var links = node.querySelectorAll('*[href]');
+  for (var i = 0; i < links.length; i++) {
+    links[i].setAttribute('target', '_blank');
+  }
+
+  element.appendChild(node);
+};
+
+/**
+ * Convert this object to a string so GCLI can be used in traditional character
+ * based terminals.
+ */
+Output.prototype.toString = function(document) {
+  var output = this.data;
+  if (output == null) {
+    return '';
+  }
+
+  if (typeof HTMLElement !== 'undefined' && output instanceof HTMLElement) {
+    return output.textContent;
+  }
+
+  if (output.isView) {
+    return output.toDom(document).textContent;
+  }
+
+  return output.toString();
+};
+
+exports.Output = Output;
 
 /**
  * Functions and data related to the execution of a command
  */
-function ExecutionContext(requisition) {
-  this.requisition = requisition;
-  this.environment = requisition.environment;
-  this.document = requisition.document;
-}
-
-ExecutionContext.prototype.createPromise = function() {
-  return new Promise();
+exports.createExecutionContext = function(requisition) {
+  return {
+    exec: requisition.exec.bind(requisition),
+    update: requisition.update.bind(requisition),
+    document: requisition.document,
+    environment: requisition.environment,
+    createView: view.createView,
+    createPromise: function() {
+      return new Promise();
+    }
+  };
 };
 
 

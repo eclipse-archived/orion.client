@@ -1,12 +1,32 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
-var argument = exports;
 
+
+/**
+ * Thinking out loud here:
+ * Arguments are an area where we could probably refactor things a bit better.
+ * The split process in Requisition creates a set of Arguments, which are then
+ * assigned. The assign process sometimes converts them into subtypes of
+ * Argument. We might consider that what gets assigned is _always_ one of the
+ * subtypes (or actually a different type hierarchy entirely) and that we
+ * don't manipulate the prefix/text/suffix but just use the 'subtypes' as
+ * filters which present a view of the underlying original Argument.
+ */
 
 /**
  * We record where in the input string an argument comes so we can report
@@ -33,6 +53,8 @@ function Argument(text, prefix, suffix) {
   }
 }
 
+Argument.prototype.type = 'Argument';
+
 /**
  * Return the result of merging these arguments.
  * case and some of the arguments are in quotation marks?
@@ -46,32 +68,52 @@ Argument.prototype.merge = function(following) {
 };
 
 /**
- * Returns a new Argument like this one but with the text set to
- * <tt>replText</tt> and the end adjusted to fit.
- * @param replText Text to replace the old text value
+ * Returns a new Argument like this one but with various items changed.
+ * @param options Values to use in creating a new Argument.
+ * Warning: some implementations of beget make additions to the options
+ * argument. You should be aware of this in the unlikely event that you want to
+ * reuse 'options' arguments.
+ * Properties:
+ * - text: The new text value
+ * - prefixSpace: Should the prefix be altered to begin with a space?
+ * - prefixPostSpace: Should the prefix be altered to end with a space?
+ * - suffixSpace: Should the suffix be altered to end with a space?
+ * - type: Constructor to use in creating new instances. Default: Argument
  */
-Argument.prototype.beget = function(replText, options) {
+Argument.prototype.beget = function(options) {
+  var text = this.text;
   var prefix = this.prefix;
   var suffix = this.suffix;
 
-  var quote = (replText.indexOf(' ') >= 0 || replText.length == 0) ?
-      '\'' : '';
+  if (options.text != null) {
+    text = options.text;
 
-  if (options) {
-    prefix = (options.prefixSpace ? ' ' : '') + quote;
-    suffix = quote;
+    // We need to add quotes when the replacement string has spaces or is empty
+    var needsQuote = text.indexOf(' ') >= 0 || text.length == 0;
+    if (needsQuote && /['"]/.test(prefix)) {
+      prefix = prefix + '\'';
+      suffix = '\'' + suffix;
+    }
   }
 
-  return new Argument(replText, prefix, suffix);
-};
+  if (options.prefixSpace && prefix.charAt(0) !== ' ') {
+    prefix = ' ' + prefix;
+  }
 
-/**
- * Is there any visible content to this argument?
- */
-Argument.prototype.isBlank = function() {
-  return this.text === '' &&
-      this.prefix.trim() === '' &&
-      this.suffix.trim() === '';
+  if (options.prefixPostSpace && prefix.charAt(prefix.length - 1) !== ' ') {
+    prefix = prefix + ' ';
+  }
+
+  if (options.suffixSpace && suffix.charAt(suffix.length - 1) !== ' ') {
+    suffix = suffix + ' ';
+  }
+
+  if (text === this.text && suffix === this.suffix && prefix === this.prefix) {
+    return this;
+  }
+
+  var type = options.type || Argument;
+  return new type(text, prefix, suffix);
 };
 
 /**
@@ -139,53 +181,91 @@ Argument.merge = function(argArray, start, end) {
   return joined;
 };
 
-argument.Argument = Argument;
+/**
+ * For test/debug use only. The output from this function is subject to wanton
+ * random change without notice, and should not be relied upon to even exist
+ * at some later date.
+ */
+Object.defineProperty(Argument.prototype, '_summaryJson', {
+  get: function() {
+    var assignStatus = this.assignment == null ?
+            'null' :
+            this.assignment.param.name;
+    return '<' + this.prefix + ':' + this.text + ':' + this.suffix + '>' +
+        ' (a=' + assignStatus + ',' + ' t=' + this.type + ')';
+  },
+  enumerable: true
+});
+
+exports.Argument = Argument;
+
+
+/**
+ * BlankArgument is a marker that the argument wasn't typed but is there to
+ * fill a slot. Assignments begin with their arg set to a BlankArgument.
+ */
+function BlankArgument() {
+  this.text = '';
+  this.prefix = '';
+  this.suffix = '';
+}
+
+BlankArgument.prototype = Object.create(Argument.prototype);
+
+BlankArgument.prototype.type = 'BlankArgument';
+
+exports.BlankArgument = BlankArgument;
 
 
 /**
  * ScriptArgument is a marker that the argument is designed to be Javascript.
  * It also implements the special rules that spaces after the { or before the
- * } are part of the pre/suffix rather than the content.
+ * } are part of the pre/suffix rather than the content, and that they are
+ * never 'blank' so they can be used by Requisition._split() and not raise an
+ * ERROR status due to being blank.
  */
 function ScriptArgument(text, prefix, suffix) {
-  this.text = text;
+  this.text = text !== undefined ? text : '';
   this.prefix = prefix !== undefined ? prefix : '';
   this.suffix = suffix !== undefined ? suffix : '';
 
-  while (this.text.charAt(0) === ' ') {
-    this.prefix = this.prefix + ' ';
-    this.text = this.text.substring(1);
-  }
-
-  while (this.text.charAt(this.text.length - 1) === ' ') {
-    this.suffix = ' ' + this.suffix;
-    this.text = this.text.slice(0, -1);
-  }
+  ScriptArgument._moveSpaces(this);
 }
 
 ScriptArgument.prototype = Object.create(Argument.prototype);
 
+ScriptArgument.prototype.type = 'ScriptArgument';
+
 /**
- * Returns a new Argument like this one but with the text set to
- * <tt>replText</tt> and the end adjusted to fit.
- * @param replText Text to replace the old text value
+ * Private/Dangerous: Alters a ScriptArgument to move the spaces at the start
+ * or end of the 'text' into the prefix/suffix. With a string, " a " is 3 chars
+ * long, but with a ScriptArgument, { a } is only one char long.
+ * Arguments are generally supposed to be immutable, so this method should only
+ * be called on a ScriptArgument that isn't exposed to the outside world yet.
  */
-ScriptArgument.prototype.beget = function(replText, options) {
-  var prefix = this.prefix;
-  var suffix = this.suffix;
-
-  var quote = (replText.indexOf(' ') >= 0 || replText.length == 0) ?
-      '\'' : '';
-
-  if (options && options.normalize) {
-    prefix = '{ ';
-    suffix = ' }';
+ScriptArgument._moveSpaces = function(arg) {
+  while (arg.text.charAt(0) === ' ') {
+    arg.prefix = arg.prefix + ' ';
+    arg.text = arg.text.substring(1);
   }
 
-  return new ScriptArgument(replText, prefix, suffix);
+  while (arg.text.charAt(arg.text.length - 1) === ' ') {
+    arg.suffix = ' ' + arg.suffix;
+    arg.text = arg.text.slice(0, -1);
+  }
 };
 
-argument.ScriptArgument = ScriptArgument;
+/**
+ * As Argument.beget that implements the space rule documented in the ctor.
+ */
+ScriptArgument.prototype.beget = function(options) {
+  options.type = ScriptArgument;
+  var begotten = Argument.prototype.beget.call(this, options);
+  ScriptArgument._moveSpaces(begotten);
+  return begotten;
+};
+
+exports.ScriptArgument = ScriptArgument;
 
 
 /**
@@ -212,6 +292,8 @@ function MergedArgument(args, start, end) {
 }
 
 MergedArgument.prototype = Object.create(Argument.prototype);
+
+MergedArgument.prototype.type = 'MergedArgument';
 
 /**
  * Keep track of which assignment we've been assigned to, and allow the
@@ -243,21 +325,23 @@ MergedArgument.prototype.equals = function(that) {
        this.prefix === that.prefix && this.suffix === that.suffix;
 };
 
-argument.MergedArgument = MergedArgument;
+exports.MergedArgument = MergedArgument;
 
 
 /**
  * TrueNamedArguments are for when we have an argument like --verbose which
  * has a boolean value, and thus the opposite of '--verbose' is ''.
  */
-function TrueNamedArgument(name, arg) {
+function TrueNamedArgument(arg) {
   this.arg = arg;
-  this.text = arg ? arg.text : '--' + name;
-  this.prefix = arg ? arg.prefix : ' ';
-  this.suffix = arg ? arg.suffix : '';
+  this.text = arg.text;
+  this.prefix = arg.prefix;
+  this.suffix = arg.suffix;
 }
 
 TrueNamedArgument.prototype = Object.create(Argument.prototype);
+
+TrueNamedArgument.prototype.type = 'TrueNamedArgument';
 
 TrueNamedArgument.prototype.assign = function(assignment) {
   if (this.arg) {
@@ -267,12 +351,7 @@ TrueNamedArgument.prototype.assign = function(assignment) {
 };
 
 TrueNamedArgument.prototype.getArgs = function() {
-  // NASTY! getArgs has a fairly specific use: in removing used arguments
-  // from a command line. Unlike other arguments which are EITHER used
-  // in assignments directly OR grouped in things like MergedArguments,
-  // TrueNamedArgument is used raw from the UI, or composed of another arg
-  // from the CLI, so we return both here so they can both be removed.
-  return this.arg ? [ this, this.arg ] : [ this ];
+  return [ this.arg ];
 };
 
 TrueNamedArgument.prototype.equals = function(that) {
@@ -287,7 +366,21 @@ TrueNamedArgument.prototype.equals = function(that) {
        this.prefix === that.prefix && this.suffix === that.suffix;
 };
 
-argument.TrueNamedArgument = TrueNamedArgument;
+/**
+ * As Argument.beget that rebuilds nameArg and valueArg
+ */
+TrueNamedArgument.prototype.beget = function(options) {
+  if (options.text) {
+    console.error('Can\'t change text of a TrueNamedArgument', this, options);
+  }
+
+  options.type = TrueNamedArgument;
+  var begotten = Argument.prototype.beget.call(this, options);
+  begotten.arg = new Argument(begotten.text, begotten.prefix, begotten.suffix);
+  return begotten;
+};
+
+exports.TrueNamedArgument = TrueNamedArgument;
 
 
 /**
@@ -301,6 +394,8 @@ function FalseNamedArgument() {
 }
 
 FalseNamedArgument.prototype = Object.create(Argument.prototype);
+
+FalseNamedArgument.prototype.type = 'FalseNamedArgument';
 
 FalseNamedArgument.prototype.getArgs = function() {
   return [ ];
@@ -318,7 +413,7 @@ FalseNamedArgument.prototype.equals = function(that) {
        this.prefix === that.prefix && this.suffix === that.suffix;
 };
 
-argument.FalseNamedArgument = FalseNamedArgument;
+exports.FalseNamedArgument = FalseNamedArgument;
 
 
 /**
@@ -327,34 +422,54 @@ argument.FalseNamedArgument = FalseNamedArgument;
  * <ul>
  * <li>--param value
  * <li>-p value
- * <li>--pa value
- * <li>-p:value
- * <li>--param=value
- * <li>etc
  * </ul>
- * The general format is:
- * /--?{unique-param-name-prefix}[ :=]{value}/
  * We model this as a normal argument but with a long prefix.
+ *
+ * There are 2 ways to construct a NamedArgument. One using 2 Arguments which
+ * are taken to be the argument for the name (e.g. '--param') and one for the
+ * value to assign to that parameter.
+ * Alternatively, you can pass in the text/prefix/suffix values in the same
+ * way as an Argument is constructed. If you do this then you are expected to
+ * assign to nameArg and valueArg before exposing the new NamedArgument.
  */
-function NamedArgument(nameArg, valueArg) {
-  this.nameArg = nameArg;
-  this.valueArg = valueArg;
-
-  this.text = valueArg.text;
-  this.prefix = nameArg.toString() + valueArg.prefix;
-  this.suffix = valueArg.suffix;
+function NamedArgument() {
+  if (typeof arguments[0] === 'string') {
+    this.nameArg = null;
+    this.valueArg = null;
+    this.text = arguments[0];
+    this.prefix = arguments[1];
+    this.suffix = arguments[2];
+  }
+  else if (arguments[1] == null) {
+    this.nameArg = arguments[0];
+    this.valueArg = null;
+    this.text = '';
+    this.prefix = this.nameArg.toString();
+    this.suffix = '';
+  }
+  else {
+    this.nameArg = arguments[0];
+    this.valueArg = arguments[1];
+    this.text = this.valueArg.text;
+    this.prefix = this.nameArg.toString() + this.valueArg.prefix;
+    this.suffix = this.valueArg.suffix;
+  }
 }
 
 NamedArgument.prototype = Object.create(Argument.prototype);
 
+NamedArgument.prototype.type = 'NamedArgument';
+
 NamedArgument.prototype.assign = function(assignment) {
   this.nameArg.assign(assignment);
-  this.valueArg.assign(assignment);
+  if (this.valueArg != null) {
+    this.valueArg.assign(assignment);
+  }
   this.assignment = assignment;
 };
 
 NamedArgument.prototype.getArgs = function() {
-  return [ this.nameArg, this.valueArg ];
+  return this.valueArg ? [ this.nameArg, this.valueArg ] : [ this.nameArg ];
 };
 
 NamedArgument.prototype.equals = function(that) {
@@ -375,7 +490,30 @@ NamedArgument.prototype.equals = function(that) {
        this.prefix === that.prefix && this.suffix === that.suffix;
 };
 
-argument.NamedArgument = NamedArgument;
+/**
+ * As Argument.beget that rebuilds nameArg and valueArg
+ */
+NamedArgument.prototype.beget = function(options) {
+  options.type = NamedArgument;
+  var begotten = Argument.prototype.beget.call(this, options);
+
+  // Cut the prefix into |whitespace|non-whitespace|whitespace| so we can
+  // rebuild nameArg and valueArg from the parts
+  var matches = /^([\s]*)([^\s]*)([\s]*)$/.exec(begotten.prefix);
+
+  if (this.valueArg == null && begotten.text === '') {
+    begotten.nameArg = new Argument(matches[2], matches[1], matches[3]);
+    begotten.valueArg = null;
+  }
+  else {
+    begotten.nameArg = new Argument(matches[2], matches[1], '');
+    begotten.valueArg = new Argument(begotten.text, matches[3], begotten.suffix);
+  }
+
+  return begotten;
+};
+
+exports.NamedArgument = NamedArgument;
 
 
 /**
@@ -387,6 +525,8 @@ function ArrayArgument() {
 }
 
 ArrayArgument.prototype = Object.create(Argument.prototype);
+
+ArrayArgument.prototype.type = 'ArrayArgument';
 
 ArrayArgument.prototype.addArgument = function(arg) {
   this.args.push(arg);
@@ -420,7 +560,7 @@ ArrayArgument.prototype.equals = function(that) {
     return false;
   }
 
-  if (!(that instanceof ArrayArgument)) {
+  if (!(that.type === 'ArrayArgument')) {
     return false;
   }
 
@@ -446,7 +586,7 @@ ArrayArgument.prototype.toString = function() {
   }, this).join(',') + '}';
 };
 
-argument.ArrayArgument = ArrayArgument;
+exports.ArrayArgument = ArrayArgument;
 
 
 });

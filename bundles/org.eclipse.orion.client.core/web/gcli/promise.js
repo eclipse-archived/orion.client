@@ -1,7 +1,17 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
@@ -135,37 +145,79 @@ Promise.prototype.reject = function(data) {
 
 /**
  * Internal method to be called on resolve() or reject()
- * @private
  */
 Promise.prototype._complete = function(list, status, data, name) {
   // Complain if we've already been completed
   if (this._status != Promise.PENDING) {
-    if (typeof 'console' === 'object') {
-      console.error('Promise complete. Attempted ' + name + '() with ', data);
-      console.error('Prev status = ', this._status, ', value = ', this._value);
-    }
+    Promise._error('Promise complete. Attempted ' + name + '() with ', data);
+    Promise._error('Prev status = ', this._status, ', value = ', this._value);
     throw new Error('Promise already complete');
   }
-
-  this._status = status;
-  this._value = data;
-
-  // Call all the handlers, and then delete them
-  list.forEach(function(handler) {
-    handler.call(null, this._value);
-  }, this);
-  delete this._onSuccessHandlers;
-  delete this._onErrorHandlers;
-
-  // Remove the given {promise} from the _outstanding list, and add it to the
-  // _recent list, pruning more than 20 recent promises from that list
-  delete Promise._outstanding[this._id];
-  Promise._recent.push(this);
-  while (Promise._recent.length > 20) {
-    Promise._recent.shift();
+  else if (list.length == 0 && status == Promise.ERROR) {
+    // Complain if a rejection is ignored
+    // (this is the equivalent of an empty catch-all clause)
+    Promise._error("Promise rejection ignored and silently dropped");
+    Promise._error(data);
+    var frame;
+    if (data.stack) {
+      // This is an exception or an exception-like value
+      Promise._error("Printing original stack");
+      for (frame = data.stack; frame; frame = frame.caller) {
+        Promise._error(frame);
+      }
+    }
+    else if (data.fileName && data.lineNumber) {
+      Promise._error("Error originating at " + data.fileName + ", line "
+           + data.lineNumber);
+    }
+    else if (typeof Components !== "undefined") {
+      try {
+        if (Components.stack) {
+          Promise._error("Original stack not available. Printing current stack");
+          for (frame = Components.stack; frame; frame = frame.caller) {
+            Promise._error(frame);
+          }
+        }
+      }
+      catch (ex) {
+        // Ignore failure to read Components.stack
+      }
+    }
   }
 
+  Promise._setTimeout(function() {
+    this._status = status;
+    this._value = data;
+
+    // Call all the handlers, and then delete them
+    list.forEach(function(handler) {
+      handler.call(null, this._value);
+    }, this);
+    delete this._onSuccessHandlers;
+    delete this._onErrorHandlers;
+
+    // Remove the given {promise} from the _outstanding list, and add it to the
+    // _recent list, pruning more than 20 recent promises from that list
+    delete Promise._outstanding[this._id];
+    // The web version of this code includes this very useful debugging aid,
+    // however there is concern that it will create a memory leak, so we leave it
+    // out when embedded in Mozilla.
+    //*
+    Promise._recent.push(this);
+    while (Promise._recent.length > 20) {
+      Promise._recent.shift();
+    }
+    //*/
+  }.bind(this), 1);
+
   return this;
+};
+
+/**
+ * Minimal debugging.
+ */
+Promise.prototype.toString = function() {
+  return "[Promise " + this._id + "]";
 };
 
 /**
@@ -209,6 +261,25 @@ Promise.group = function(promiseList) {
 
   return groupPromise;
 };
+
+/**
+ * Executes a code snippet or a function after specified delay.
+ * @param callback is the function you want to execute after the delay.
+ * @param delay is the number of milliseconds that the function call should
+ * be delayed by. Note that the actual delay may be longer, see Notes below.
+ * @return the ID of the timeout
+ */
+Promise._setTimeout = function(callback, delay) {
+  return setTimeout(callback, delay);
+};
+
+/**
+ * This implementation of promise also runs in a browser.
+ * Promise._error allows us to redirect error messages to the console with
+ * minimal changes.
+ */
+Promise._error = function() { console.warn(arguments); };
+
 
 exports.Promise = Promise;
 

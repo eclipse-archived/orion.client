@@ -1,7 +1,17 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
@@ -14,17 +24,7 @@ var l10n = require('gcli/l10n');
 var types = require('gcli/types');
 var Status = require('gcli/types').Status;
 var BooleanType = require('gcli/types/basic').BooleanType;
-
-
-/**
- * A lookup hash of our registered commands
- */
-var commands = {};
-
-/**
- * A sorted list of command names, we regularly want them in order, so pre-sort
- */
-var commandNames = [];
+var SelectionType = require('gcli/types/selection').SelectionType;
 
 /**
  * Implement the localization algorithm for any documentation objects (i.e.
@@ -70,6 +70,7 @@ function lookup(data, onUndefined) {
   return l10n.lookup(onUndefined);
 }
 
+
 /**
  * The command object is mostly just setup around a commandSpec (as passed to
  * #addCommand()).
@@ -90,6 +91,7 @@ function Command(commandSpec) {
     throw new Error('command.params must be an array in ' + this.name);
   }
 
+  this.hasNamedParameters = false;
   this.description = 'description' in this ? this.description : undefined;
   this.description = lookup(this.description, 'canonDescNone');
   this.manual = 'manual' in this ? this.manual : undefined;
@@ -118,18 +120,26 @@ function Command(commandSpec) {
   paramSpecs.forEach(function(spec) {
     if (!spec.group) {
       if (usingGroups) {
-        console.error('Parameters can\'t come after param groups.' +
-            ' Ignoring ' + this.name + '/' + spec.name);
+        throw new Error('Parameters can\'t come after param groups.' +
+                        ' Ignoring ' + this.name + '/' + spec.name);
       }
       else {
         var param = new Parameter(spec, this, null);
         this.params.push(param);
+
+        if (!param.isPositionalAllowed) {
+          this.hasNamedParameters = true;
+        }
       }
     }
     else {
       spec.params.forEach(function(ispec) {
         var param = new Parameter(ispec, this, spec.group);
         this.params.push(param);
+
+        if (!param.isPositionalAllowed) {
+          this.hasNamedParameters = true;
+        }
       }, this);
 
       usingGroups = true;
@@ -146,20 +156,15 @@ canon.Command = Command;
  */
 function Parameter(paramSpec, command, groupName) {
   this.command = command || { name: 'unnamed' };
-
-  Object.keys(paramSpec).forEach(function(key) {
-    this[key] = paramSpec[key];
-  }, this);
-
-  this.description = 'description' in this ? this.description : undefined;
-  this.description = lookup(this.description, 'canonDescNone');
-  this.manual = 'manual' in this ? this.manual : undefined;
-  this.manual = lookup(this.manual);
+  this.paramSpec = paramSpec;
+  this.name = this.paramSpec.name;
+  this.type = this.paramSpec.type;
   this.groupName = groupName;
+  this.defaultValue = this.paramSpec.defaultValue;
 
   if (!this.name) {
     throw new Error('In ' + this.command.name +
-      ': all params must have a name');
+                    ': all params must have a name');
   }
 
   var typeSpec = this.type;
@@ -167,16 +172,16 @@ function Parameter(paramSpec, command, groupName) {
   if (this.type == null) {
     console.error('Known types: ' + types.getTypeNames().join(', '));
     throw new Error('In ' + this.command.name + '/' + this.name +
-      ': can\'t find type for: ' + JSON.stringify(typeSpec));
+                    ': can\'t find type for: ' + JSON.stringify(typeSpec));
   }
 
   // boolean parameters have an implicit defaultValue:false, which should
   // not be changed. See the docs.
   if (this.type instanceof BooleanType) {
-    if ('defaultValue' in this) {
-      console.error('In ' + this.command.name + '/' + this.name +
-          ': boolean parameters can not have a defaultValue.' +
-          ' Ignoring');
+    if (this.defaultValue !== undefined) {
+      throw new Error('In ' + this.command.name + '/' + this.name +
+                      ': boolean parameters can not have a defaultValue.' +
+                      ' Ignoring');
     }
     this.defaultValue = false;
   }
@@ -190,15 +195,28 @@ function Parameter(paramSpec, command, groupName) {
       var defaultText = this.type.stringify(this.defaultValue);
       var defaultConversion = this.type.parseString(defaultText);
       if (defaultConversion.getStatus() !== Status.VALID) {
-        console.error('In ' + this.command.name + '/' + this.name +
-            ': Error round tripping defaultValue. status = ' +
-            defaultConversion.getStatus());
+        throw new Error('In ' + this.command.name + '/' + this.name +
+                        ': Error round tripping defaultValue. status = ' +
+                        defaultConversion.getStatus());
       }
     }
     catch (ex) {
-      console.error('In ' + this.command.name + '/' + this.name +
-        ': ' + ex);
+      throw new Error('In ' + this.command.name + '/' + this.name +
+                      ': ' + ex);
     }
+  }
+
+  // Some types (boolean, array) have a non 'undefined' blank value. Give the
+  // type a chance to override the default defaultValue of undefined
+  if (this.defaultValue === undefined) {
+    this.defaultValue = this.type.getBlank().value;
+  }
+
+  // All parameters that can only be set via a named parameter must have a
+  // non-undefined default value
+  if (!this.isPositionalAllowed && this.defaultValue === undefined) {
+    throw new Error('In ' + this.command.name + '/' + this.name +
+                    ': Missing defaultValue for optional parameter.');
   }
 }
 
@@ -215,23 +233,89 @@ Parameter.prototype.isKnownAs = function(name) {
 };
 
 /**
+ * Read the default value for this parameter either from the parameter itself
+ * (if this function has been over-ridden) or from the type, or from calling
+ * parseString on an empty string
+ */
+Parameter.prototype.getBlank = function() {
+  if (this.type.getBlank) {
+    return this.type.getBlank();
+  }
+
+  return this.type.parseString('');
+};
+
+/**
+ * Resolve the manual for this parameter, by looking in the paramSpec
+ * and doing a l10n lookup
+ */
+Object.defineProperty(Parameter.prototype, 'manual', {
+  get: function() {
+    return lookup(this.paramSpec.manual || undefined);
+  },
+  enumerable: true
+});
+
+/**
+ * Resolve the description for this parameter, by looking in the paramSpec
+ * and doing a l10n lookup
+ */
+Object.defineProperty(Parameter.prototype, 'description', {
+  get: function() {
+    return lookup(this.paramSpec.description || undefined, 'canonDescNone');
+  },
+  enumerable: true
+});
+
+/**
  * Is the user required to enter data for this parameter? (i.e. has
  * defaultValue been set to something other than undefined)
  */
-Parameter.prototype.isDataRequired = function() {
-  return this.defaultValue === undefined;
-};
+Object.defineProperty(Parameter.prototype, 'isDataRequired', {
+  get: function() {
+    return this.defaultValue === undefined;
+  },
+  enumerable: true
+});
+
+/**
+ * Reflect the paramSpec 'hidden' property (dynamically so it can change)
+ */
+Object.defineProperty(Parameter.prototype, 'hidden', {
+  get: function() {
+    return this.paramSpec.hidden;
+  },
+  enumerable: true
+});
 
 /**
  * Are we allowed to assign data to this parameter using positional
  * parameters?
  */
-Parameter.prototype.isPositionalAllowed = function() {
-  return this.groupName == null;
-};
+Object.defineProperty(Parameter.prototype, 'isPositionalAllowed', {
+  get: function() {
+    return this.groupName == null;
+  },
+  enumerable: true
+});
 
 canon.Parameter = Parameter;
 
+
+/**
+ * A lookup hash of our registered commands
+ */
+var commands = {};
+
+/**
+ * A sorted list of command names, we regularly want them in order, so pre-sort
+ */
+var commandNames = [];
+
+/**
+ * A lookup of the original commandSpecs by command name
+ */
+var commandSpecs = {};
 
 /**
  * Add a command to the canon of known commands.
@@ -241,29 +325,49 @@ canon.Parameter = Parameter;
  * @return The new command
  */
 canon.addCommand = function addCommand(commandSpec) {
+  if (commands[commandSpec.name] != null) {
+    // Roughly canon.removeCommand() without the event call, which we do later
+    delete commands[commandSpec.name];
+    commandNames = commandNames.filter(function(test) {
+      return test !== commandSpec.name;
+    });
+  }
+
   var command = new Command(commandSpec);
   commands[commandSpec.name] = command;
   commandNames.push(commandSpec.name);
   commandNames.sort();
 
-  canon.canonChange();
+  commandSpecs[commandSpec.name] = commandSpec;
+
+  canon.onCanonChange();
   return command;
 };
 
 /**
  * Remove an individual command. The opposite of #addCommand().
+ * Removing a non-existent command is a no-op.
  * @param commandOrName Either a command name or the command itself.
+ * @return true if a command was removed, false otherwise.
  */
 canon.removeCommand = function removeCommand(commandOrName) {
   var name = typeof commandOrName === 'string' ?
           commandOrName :
           commandOrName.name;
+
+  if (!commands[name]) {
+    return false;
+  }
+
+  // See start of canon.addCommand if changing this code
   delete commands[name];
+  delete commandSpecs[name];
   commandNames = commandNames.filter(function(test) {
     return test !== name;
   });
 
-  canon.canonChange();
+  canon.onCanonChange();
+  return true;
 };
 
 /**
@@ -293,9 +397,17 @@ canon.getCommandNames = function getCommandNames() {
 };
 
 /**
+ * Get access to the stored commandMetaDatas (i.e. before they were made into
+ * instances of Command/Parameters) so we can remote them.
+ */
+canon.getCommandSpecs = function getCommandSpecs() {
+  return commandSpecs;
+};
+
+/**
  * Enable people to be notified of changes to the list of commands
  */
-canon.canonChange = util.createEvent('canon.canonChange');
+canon.onCanonChange = util.createEvent('canon.onCanonChange');
 
 /**
  * CommandOutputManager stores the output objects generated by executed
@@ -308,32 +420,8 @@ canon.canonChange = util.createEvent('canon.canonChange');
  * soon.
  */
 function CommandOutputManager() {
-  this._event = util.createEvent('CommandOutputManager');
+  this.onOutput = util.createEvent('CommandOutputManager.onOutput');
 }
-
-/**
- * Call this method to notify the manager (and therefore all listeners) of a
- * new or updated command output.
- * @param output The command output object that has been created or updated.
- */
-CommandOutputManager.prototype.sendCommandOutput = function(output) {
-  this._event({ output: output });
-};
-
-/**
- * Register a function to be called whenever there is a new command output
- * object.
- */
-CommandOutputManager.prototype.addListener = function(fn, ctx) {
-  this._event.add(fn, ctx);
-};
-
-/**
- * Undo the effects of CommandOutputManager.addListener()
- */
-CommandOutputManager.prototype.removeListener = function(fn, ctx) {
-  this._event.remove(fn, ctx);
-};
 
 canon.CommandOutputManager = CommandOutputManager;
 

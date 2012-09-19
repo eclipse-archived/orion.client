@@ -1,11 +1,8 @@
 
 .gcli-row-in {
-  margin: 5px;
-  color: #333;
-  background-color: #EEE;
-  padding: 3px 8px 1px 1px;
-  border: 1px solid #aaa;
-  border-radius: 4px;
+  padding: 0 4px;
+  box-shadow: 0 -6px 10px -6px #ddd;
+  border-top: 1px solid #bbb;
 }
 
 .gcli-row-in > img {
@@ -26,17 +23,14 @@
   display: none;
 }
 
-.gcli-row-in-typed {
-  color: #000;
-  font-family: consolas, courier, monospace;
+.gcli-row-duration {
+  color: #666;
 }
 
 .gcli-row-prompt {
-  font-family: consolas, courier, monospace;
   color: #00F;
   font-weight: bold;
   font-size: 120%;
-  padding-left: 2px;
 }
 
 .gcli-row-prompt.gcli-row-complete {
@@ -52,10 +46,10 @@
 }
 
 .gcli-row-out {
-  padding-left: 10px;
+  margin: 0 10px 15px;
+  padding: 0 10px;
   line-height: 1.2em;
   font-size: 95%;
-  margin-bottom: 20px;
 }
 
 .gcli-row-out strong,
@@ -67,25 +61,28 @@
   color: #000;
 }
 
+.gcli-row-out p {
+  margin: 5px 0;
+}
+
 .gcli-row-out a {
-  font-weight: bold;
-  color: #666;
+  color: hsl(200,40%,40%);
   text-decoration: none;
 }
 
 .gcli-row-out a:hover {
-  text-decoration: underline;
   cursor: pointer;
+  border-bottom: 1px dotted hsl(200,40%,60%);
 }
 
 .gcli-row-out input[type=password],
 .gcli-row-out input[type=text],
 .gcli-row-out textarea {
-  color: #000;
   font-size: 120%;
   background: transparent;
   padding: 3px;
-  border-radius: 5px;
+  border-radius: 3px;
+  border: 1px solid #bbb;
 }
 
 .gcli-row-out table,
@@ -93,4 +90,41 @@
 .gcli-row-out th {
   border: 0;
   padding: 0 2px;
+}
+
+.gcli-row-terminal,
+.gcli-row-subterminal {
+  border-radius: 3px;
+  border: 1px solid #ddd;
+}
+
+.gcli-row-terminal {
+  height: 200px;
+  width: 620px;
+  font-size: 80%;
+}
+
+.gcli-row-subterminal {
+  height: 150px;
+  width: 300px;
+  font-size: 75%;
+}
+
+.gcli-out-shortcut {
+  font-weight: normal;
+  border: 1px solid #999;
+  border-radius: 3px;
+  color: #666;
+  cursor: pointer;
+  padding: 0 3px 1px;
+  margin: 1px 4px;
+  display: inline-block;
+}
+
+.gcli-out-shortcut:before {
+  content: '\bb';
+  padding-right: 2px;
+  color: hsl(25,78%,50%);
+  font-weight: bold;
+  font-size: 110%;
 }
