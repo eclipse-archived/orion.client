@@ -258,15 +258,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			popup: choicesMenu
 		});
 		mainMenu.addChild(popup);
+		mSearchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
+			return makeLabelFunc(theSearch);
+		});
 		dojo.connect(mainMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
 			mSearchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
 				return makeLabelFunc(theSearch);
-				//)"<a href='"+require.toUrl("search/search.html") +  "#" + theSearch.query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			});
 		});
 	}
 		
-	function _addSearchOptions(serviceRegistry, commandService, searcher) {
+	function _addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab) {
 		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
 		if (optionMenu) {
 			optionMenu.destroy();
@@ -278,22 +280,31 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
 		
 		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Regular expression"],
-			checked: false,
+			label: messages["Open in new tab"],
+			checked: openInNewTab,
 			onChange : function(checked) {
-				searcher._regEx = checked;
+				mSearchUtils.setOpenSearchPref(serviceRegistry, checked);
 			}
 		}));
 		newMenu.addChild(new dijit.MenuSeparator());
 		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: messages["Regular expression"],
+			checked: false,
+			onChange : function(checked) {
+				searcher.useRegEx = checked;
+			}
+		}));
+		newMenu.addChild(new dijit.MenuSeparator());
+		
+		//Add the recent searches as popups
+		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
+			var query = searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx);
+			return "<a href='"+require.toUrl("search/search.html") +  "#" + query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
 		//Add the saved searches as popups
 		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){
 			return "<a href='"+require.toUrl("search/search.html") +  "#" + theSearch.query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		});
-		//Add the recent searches as popups
-		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
-			var query = searcher.createSearchQuery(theSearch.name);
-			return "<a href='"+require.toUrl("search/search.html") +  "#" + query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		});
 		
 		var menuButton = new orion.widgets.UserMenuDropDown({
@@ -776,9 +787,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
-						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value);
+						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
 						var query = searcher.createSearchQuery(searchField.value);
-						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
+						mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+							var href = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
+							if(openInNewTab){
+								window.open(href);
+							} else {
+								window.location = href;
+							}
+						});
 					}
 				} else {
 					window.alert(messages["Can't search: no search service is available"]);
@@ -788,16 +806,21 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		dojo.connect(searchField, "onfocus", function(e){ //$NON-NLS-0$
 			var searchCompletion =  dojo.byId("searchCompletion");
 			dojo.empty(searchCompletion);
-			mSearchUtils.getSearches(serviceRegistry, "recentSearch", function(searches){//$NON-NLS-0$
+			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
 				var i;
 				for (i in searches) {
 					var option = document.createElement('option');
 					option.value = searches[i].name;
+					if(searches[i].label){
+						option.label = searches[i].label + "(" + messages["Saved searches"] + ")";
+					}
 					searchCompletion.appendChild(option);
 				}
 			});
 		});
-		_addSearchOptions(serviceRegistry, commandService, searcher);
+		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
+		});
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;

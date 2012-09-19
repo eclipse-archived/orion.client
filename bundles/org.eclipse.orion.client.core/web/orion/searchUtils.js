@@ -529,7 +529,7 @@ orion.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
 	});
 };
 
-orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName){
+orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
 	if(typeof searchName !== "string" || !searchName ){
 		return;
 	}
@@ -553,7 +553,7 @@ orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName){
 		} else {
 			searches = [];
 		}
-		searches.splice(0,0,{ "name": searchName});//$NON-NLS-1$
+		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$
 		orion.searchUtils._storeRecentSearch(serviceRegistry, searches);
 		//prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
@@ -588,6 +588,52 @@ orion.searchUtils.getSearches = function(serviceRegistry, type, callback){
 		if (searches && callback) {
 			callback(searches);
 		}
+	});
+};
+
+orion.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		var i;
+		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
+		if (typeof searches === "string") { //$NON-NLS-0$
+			searches = JSON.parse(searches);
+		}
+		if(mixed){
+			var savedSearches = prefs.get("search"); //$NON-NLS-0$
+			if (typeof savedSearches === "string") { //$NON-NLS-0$
+				savedSearches = JSON.parse(savedSearches);
+			}
+			for (var i in savedSearches) {
+				var qObj = orion.searchUtils.parseQueryStr(savedSearches[i].query)
+				var duplicated = searches.some(function(search) {
+						return qObj.searchStrTitle === search.name;
+				});
+				if(!duplicated){
+					searches.push({"name": qObj.searchStrTitle, "label": savedSearches[i].name});
+				}
+			}
+		}
+		if (searches && callback) {
+			callback(searches);
+		}
+	});
+};
+
+orion.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		var i;
+		var openSearchPref = prefs.get("openSearchPref"); //$NON-NLS-0$
+		if (typeof openSearchPref === "string") { //$NON-NLS-0$
+			openSearchPref = JSON.parse(openSearchPref);
+		}
+		var openInNewTab = openSearchPref ? openSearchPref.openInNewTab : true;
+		callback(openInNewTab);
+	});
+};
+
+orion.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-0$
 	});
 };
 
