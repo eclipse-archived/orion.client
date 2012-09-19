@@ -268,7 +268,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 	}
 		
-	function _addSearchOptions(serviceRegistry, commandService, searcher) {
+	function _addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab) {
 		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
 		if (optionMenu) {
 			optionMenu.destroy();
@@ -278,6 +278,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			id : "searchOptionsMenu" //$NON-NLS-0$
 		});
 		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: messages["Open in new tab"],
+			checked: openInNewTab,
+			onChange : function(checked) {
+				mSearchUtils.setOpenSearchPref(serviceRegistry, checked);
+			}
+		}));
+		newMenu.addChild(new dijit.MenuSeparator());
 		
 		newMenu.addChild(new dijit.CheckedMenuItem({
 			label: messages["Regular expression"],
@@ -780,7 +789,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					if (searchField.value.length > 0) {
 						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
 						var query = searcher.createSearchQuery(searchField.value);
-						window.location = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
+						mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+							var href = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
+							if(openInNewTab){
+								window.open(href);
+							} else {
+								window.location = href;
+							}
+						});
 					}
 				} else {
 					window.alert(messages["Can't search: no search service is available"]);
@@ -802,7 +818,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			});
 		});
-		_addSearchOptions(serviceRegistry, commandService, searcher);
+		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
+		});
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;

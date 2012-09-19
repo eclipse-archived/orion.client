@@ -105,6 +105,7 @@ define("orion/textview/tooltip", ['i18n!orion/textview/nls/messages', 'orion/tex
 			} else if (contents instanceof mProjectionTextModel.ProjectionTextModel) {
 				var view = this._view;
 				var options = view.getOptions();
+				options.wrapMode = false;
 				options.parent = tooltipContents;
 				var tooltipTheme = "tooltip"; //$NON-NLS-0$
 				var theme = options.themeClass;
