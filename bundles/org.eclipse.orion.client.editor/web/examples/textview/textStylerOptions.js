@@ -18,8 +18,6 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 	var CATEGORY = "JavaScript Editor";
 	var USER_THEME = "userTheme";
 	
-	
-	
 	var preferences;
 
 	/**
@@ -116,6 +114,10 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 			result.push("." + theme + " .rulerLines.odd {");
 			result.push("\tcolor: " + elements['lineNumber'] + ";");
 			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+			result.push("}");
+			
+			result.push("." + theme + " .annotationLine.currentLine {");
+			result.push("\tbackground-color: " + elements['currentLine'] + ";");
 			result.push("}");
 			
 			var _this = this;
