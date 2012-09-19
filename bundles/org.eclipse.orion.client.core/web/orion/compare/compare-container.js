@@ -701,14 +701,14 @@ exports.TwoWayCompareContainer = (function() {
 			}));
 			return view;
 		};
-			
+		/*
 		var contentAssistFactory = {
 			createContentAssistMode: function(editor) {
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 				return new mContentAssist.ContentAssistMode(contentAssist, widget);
 			}
-		};
+		};*/
 			
 		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
 			// Create keybindings for generic editing
@@ -746,7 +746,7 @@ exports.TwoWayCompareContainer = (function() {
 			undoStackFactory: undoStackFactory,
 			annotationFactory: annotationFactory,
 			//lineNumberRulerFactory: new exports.LineNumberRulerFactory(),
-			contentAssistFactory: contentAssistFactory,
+			//contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
 			domNode: editorContainerDomNode

@@ -187,6 +187,10 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 				var lineText = diffArray[mapperItem[2]-1+j];
 				text = text + lineText.substring(diffArraySubstrIndex) + lineDelim;
 			}
+			var lineCount = oldTextModel.getLineCount();
+			if(startLineIndex >= lineCount ){
+				startLineIndex = lineCount -1;
+			}
 			var startOffset = oldTextModel.getLineStart(startLineIndex);
 			oldTextModel.setText(text, startOffset, startOffset);
 		}

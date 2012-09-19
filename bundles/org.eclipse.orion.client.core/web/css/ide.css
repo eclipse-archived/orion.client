@@ -592,6 +592,12 @@ h2 {
 .treeIterationCursorRow {
 	background-color: #f3f6fe;
 }
+
+.treeIterationCursorRow_Dotted {
+	outline: #AAA 1px dotted !important;
+	background-color: #f3f6fe;
+}
+
 .searchCmdGroupMargin {
 	margin-left: 16px;
 }
@@ -653,7 +659,7 @@ h2 {
 .uploadInstruction{
 	font-size: 18pt;
 	color: #CCC;
-	padding: 0 0 100px;
+	padding: 0 0 25px;
 	text-align:center;
 }
 
@@ -662,6 +668,22 @@ h2 {
 	color: #CCC;
 	padding: 0 0 100px;
 	text-align:center;
+}
+
+.uploadOptions {
+	font-size: 14pt;
+	color: #BBB;
+	padding: 0 0 100px;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.uploadOptionsItem {
+	font-size: 12pt;
+	color: #BBB;
+	text-align: center;
+	vertical-align: middle;
+	margin: 0 8px !important;
 }
 
 .uploadBrowser{

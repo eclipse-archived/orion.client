@@ -481,7 +481,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	});
 	
 	// Generically speaking, we respond to changes in selection.  New selections change the editor's input.
-	serviceRegistry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+	selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 		var fileURI = event.selection;
 		if (inputManager.shouldGoToURI(editor, fileURI)) {
 			inputManager.setInput(fileURI, editor);

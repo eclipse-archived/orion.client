@@ -11,8 +11,8 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil'], 
-	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter'], 
+	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil, ThemeSheetWriter) {
 
 		function StyleSet(){
 		
@@ -197,6 +197,101 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
+		
+		
+				function getThemeStorageInfo(){
+			var themeInfo = { storage:'/themes', styleset:'styles', defaultTheme:'orion' }; 
+			return themeInfo;
+		}
+
+		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;
+
+		function getViewData(){
+		
+			var TOP = 10;
+			var LEFT = 10;
+			var UI_SIZE = 350;
+			var BANNER_HEIGHT = 32;
+			var NAV_HEIGHT = 29;
+			var CONTENT_TOP = TOP + BANNER_HEIGHT + NAV_HEIGHT;
+		
+			var dataset = {};
+			dataset.top = TOP;
+			dataset.left = LEFT;
+			dataset.width = UI_SIZE;
+			dataset.height = UI_SIZE;
+			
+			dataset.shapes = [ 	{ type:'IMAGE', 		name:'logo', x: LEFT + 5, y:TOP + 8, source: 'orion-transparent.png', family:'logo' },
+								{ type:'RECTANGLE', 	name:'Navigation Bar',		x:LEFT,		y:TOP,					width:UI_SIZE,	height: BANNER_HEIGHT, family:'navbar', fill: '#333', order:1 },
+								{ type:'TEXT',		name:'Navigation Text',	 label:'UserName',	x:LEFT + UI_SIZE - 70, y:TOP + 20, family:'navtext', fill: '#bfbfbf', font: '8pt sans-serif'},
+								{ type:'ROUNDRECTANGLE', name:'Search Box',	x:LEFT + UI_SIZE - 145,	y:TOP + 10, width: 70,	height: 12, family:'search', fill: '#444', order:3 },
+								{ type:'RECTANGLE', name:'Tool Panel',	x:LEFT + UI_SIZE * 0.4, y:CONTENT_TOP, width:UI_SIZE * 0.6 -1, height:30, family:'toolpanel', fill: 'white', order:4 },
+								{ type:'RECTANGLE', name:'Selection Bar',	x:LEFT + UI_SIZE * 0.4 + 5, y:CONTENT_TOP + 62, width:UI_SIZE * 0.6 -10, height:20, family:'selection', fill: '#FEC', order:7 },
+							   	{ type:'RECTANGLE', 	name:'Location',	x:LEFT,		y:TOP + BANNER_HEIGHT, 	width:UI_SIZE,	height: NAV_HEIGHT, family:'location', fill: '#efefef', order:8 },
+							   	
+							   
+								{ type:'TEXT',		name:'Navigation Text',	 label:'Navigator',	x:LEFT + 50, y: TOP + 20, family:'navtext', fill: '#bfbfbf', font: '8pt sans-serif', order:2 },
+							   	
+							  	{ type:'TEXT',		name:'Content',	 label:'Breadcrumb',	x:LEFT + 5, y:TOP + BANNER_HEIGHT + 18, family:'content', fill: '#3087B3', font: '8pt sans-serif' },
+								{ type:'TEXT',		name:'Content',	 label:'/',	x:LEFT + 68, y:TOP + BANNER_HEIGHT + 18, family:'content', fill: '#3087B3', font: '8pt sans-serif', order:9 },
+								{ type:'TEXT',		name:'Content',	 label:'Location',	x:LEFT + 74, y:TOP + BANNER_HEIGHT + 18, family:'content', fill: '#3087B3', font: '8pt sans-serif' },
+								{ type:'RECTANGLE', name:'Main Panel',	x:LEFT + UI_SIZE * 0.4, y:CONTENT_TOP + 30, width:UI_SIZE * 0.6 -1, height:UI_SIZE - CONTENT_TOP + TOP -31, family:'mainpanel', fill: 'white', order:6 },
+								
+								
+								{ type:'ROUNDRECTANGLE', name:'Button',	x:LEFT + UI_SIZE * 0.4 + 5, y:CONTENT_TOP + 5, width:37, height:20, family:'button', fill: '#EFEFEF', order:11 },
+								{ type:'TEXT',		name:'Button Text',	 label:'Button',	x:LEFT + UI_SIZE * 0.4 + 8, y:CONTENT_TOP + 19, family:'navbar', fill: '#333', font: '8pt sans-serif' },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + UI_SIZE - 7, y1:TOP + 14, x2:LEFT + UI_SIZE - 13, y2:TOP + 14, x3:LEFT + UI_SIZE - 10, y3:TOP + 19, family:'userMenu', fill: '#BFBFBF' },
+								{ type:'TRIANGLE',	name:'userMenu', x1:LEFT + 10, y1:CONTENT_TOP + 17, x2:LEFT + 16, y2:CONTENT_TOP + 17, x3:LEFT + 13, y3:CONTENT_TOP + 22, family:'userMenu', fill: '#BFBFBF' },
+								{ type:'TEXT',		name:'Section Text',	 label:'Section',	x:LEFT + 20, y:CONTENT_TOP + 23, family:'navbar', fill: '#333', font: '8pt sans-serif' },
+								{ type:'LINE', 		name:'Line Color', x1:LEFT + UI_SIZE * 0.4, y1:CONTENT_TOP + 30, x2:LEFT + UI_SIZE, y2:CONTENT_TOP + 30, linewidth:2, fill:'#DEDEDE' },
+								{ type:'LINE', 		name:'Line Color', x1:LEFT + UI_SIZE * 0.4, y1:CONTENT_TOP, x2:LEFT + UI_SIZE * 0.4, y2:TOP + UI_SIZE, linewidth:2, fill:'#DEDEDE'},
+								{ type:'LINE', 		name:'Line Color', x1:LEFT + 10, y1:CONTENT_TOP + 29, x2:LEFT + UI_SIZE * 0.4 - 10, y2:CONTENT_TOP + 29, linewidth:2, fill:'#DEDEDE' },
+								{ type:'RECTANGLE', 	name:'Side Panel',	x:LEFT,		y:CONTENT_TOP, 			width: UI_SIZE * 0.4,	height: UI_SIZE - CONTENT_TOP + TOP, family:'sidepanel', fill: '#FBFBFB', order:12 }
+			];
+			
+			
+			for( var count=0; count < 3; count++ ){
+					
+				/* Section Items */
+					
+				dataset.shapes.push( { type:'TEXT', name:'content', label:'org.eclipse.orion.content', x: LEFT + UI_SIZE * 0.4 + 20, y:CONTENT_TOP + 56 + ( 20 * count ), fill: '#3087B3', family:'content' } );
+			}
+			
+			for( var count=0; count < 3; count++ ){
+					
+				/* Section Items */
+					
+				dataset.shapes.push( { type:'TEXT', name:'content', label:'Item', x:LEFT + 15, y:CONTENT_TOP + 44 + ( 20 * count ), fill: '#3087B3', family:'content' } );
+			}
+			
+			for( var twisty = 0; twisty < 3; twisty++ ){
+			
+				dataset.shapes.push( { type:'TRIANGLE',	name:'twisty', 
+				x1: LEFT + UI_SIZE * 0.4 + 10, y1:CONTENT_TOP + 50 + (twisty*20), 
+				x2:LEFT + UI_SIZE * 0.4 + 15, y2: CONTENT_TOP + 53 + (twisty*20), 
+				x3:LEFT + UI_SIZE * 0.4 + 10, y3: CONTENT_TOP + 56 + (twisty*20), 
+				family:'navbar', fill: '#333' } );
+			}
+			
+			console.log( 'c o n t a i n e r   t h e m e' );
+			
+			return dataset;
+		}
+
+		ThemeData.prototype.getViewData = getViewData;
+		
+		function processSettings( settings ){
+			var sheetMaker = new ThemeSheetWriter.ThemeSheetWriter();
+			var cssdata = sheetMaker.getSheet( settings );
+			
+			var stylesheet = document.createElement("STYLE");
+			stylesheet.appendChild(document.createTextNode(cssdata));
+			
+			var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+			head.appendChild(stylesheet);
+		}
+		
+		ThemeData.prototype.processSettings = processSettings;
 
 		return{
 			ThemeData:ThemeData,

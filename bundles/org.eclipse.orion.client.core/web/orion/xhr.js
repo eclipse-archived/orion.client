@@ -104,7 +104,7 @@ define(['orion/Deferred'], function(Deferred) {
 				if (200 <= code && code < 400) {
 					d.resolve(result);
 				} else {
-					if (log && console) {
+					if (log && typeof console !== 'undefined') {
 						console.log(new Error(xhr.statusText));
 					}
 					d.reject(result);

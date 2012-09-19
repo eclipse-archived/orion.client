@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/treetable', 'orion/explorerNavHandler', 'orion/commands'], function(messages, require, dojo, mTreeTable, mNavHandler, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/treetable', 'orion/explorers/explorerNavHandler', 'orion/commands'], function(messages, require, dojo, mTreeTable, mNavHandler, mCommands){
 
 var exports = {};
 
@@ -287,9 +287,10 @@ exports.ExplorerModel = (function() {
 	 * @class Simple tree model using Children and ChildrenLocation attributes to fetch children
 	 * and calculating id based on Location attribute.
 	 */
-	function ExplorerModel(rootPath, /* function returning promise */fetchItems) {
+	function ExplorerModel(rootPath, /* function returning promise */fetchItems, idPrefix) {
 		this.rootPath = rootPath;
 		this.fetchItems = fetchItems;
+		this.idPrefix = idPrefix || "";
 	}
 	ExplorerModel.prototype = /** @lends orion.explorer.ExplorerModel.prototype */{
 		destroy: function(){
@@ -328,7 +329,7 @@ exports.ExplorerModel = (function() {
 			// So we are going to substitute ascii values for invalid characters.
 			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=363062
 			
-			var id = "";
+			var id = this.idPrefix;
 			for (var i=0; i<stripSlashes.length; i++) {
 				if (stripSlashes[i].match(/[^\.\:\-\_0-9A-Za-z]/g)) {
 					id += stripSlashes.charCodeAt(i);
@@ -394,6 +395,28 @@ exports.ExplorerRenderer = (function() {
 	}
 	ExplorerRenderer.prototype = {
 	
+		_init: function(options) {
+			if (options) {
+				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
+				this.selectionPolicy = options.singleSelection ? "singleSelection" : "";//$NON-NLS-0$
+				this._cachePrefix = options.cachePrefix;
+				this.getCheckedFunc = options.getCheckedFunc;
+				this.onCheckedFunc = options.onCheckedFunc;
+				this._highlightSelection = true;
+				this._treeTableClass = options.treeTableClass || "treetable";  //$NON-NLS-0$
+				if (options.highlightSelection === false){
+					this._highlightSelection = false;
+				}
+				this._decorateAlternatingLines = true;
+				if (options.decorateAlternatingLines === false) {
+					this._decorateAlternatingLines = false;
+				}
+				if (!this.actionScopeId) {
+					this.actionScopeId = options.actionScopeId;
+				}
+			}
+		},
+		
 		getLabelColumnIndex: function() {
 			return this.explorer.checkbox ? 1 : 0;  // 0 if no checkboxes
 		}, 
@@ -401,7 +424,9 @@ exports.ExplorerRenderer = (function() {
 		initTable: function (tableNode, tableTree) {
 			this.tableTree = tableTree;
 			dojo.empty(tableNode);
-			dojo.addClass(tableNode, 'treetable'); //$NON-NLS-0$
+			if (this._treeTableClass) {
+				dojo.addClass(tableNode, this._treeTableClass); 
+			}
 			this.renderTableHeader(tableNode);
 
 		},
@@ -636,27 +661,6 @@ exports.ExplorerRenderer = (function() {
 			});
 		},
 		
-		_init: function(options) {
-			if (options) {
-				this._useCheckboxSelection = options.checkbox === undefined ? false : options.checkbox;
-				this._colums = options.colums || [];
-				this._cachePrefix = options.cachePrefix;
-				this.getCheckedFunc = options.getCheckedFunc;
-				this.onCheckedFunc = options.onCheckedFunc;
-				this._highlightSelection = true;
-				if (options.highlightSelection === false){
-					this._highlightSelection = false;
-				}
-				this._decorateAlternatingLines = true;
-				if (options.decorateAlternatingLines === false) {
-					this._decorateAlternatingLines = false;
-				}
-				if (!this.actionScopeId) {
-					this.actionScopeId = options.actionScopeId;
-				}
-			}
-		},
-		
 		_initializeUIState: function() {
 			this._expanded = [];
 			var prefsPath = this._getUIStatePreferencePath();
@@ -672,11 +676,18 @@ exports.ExplorerRenderer = (function() {
 
 /**
  * @name orion.explorer.SelectionRenderer
- * @class Sample renderer that allows you to render a standard tree table.
+ * @class This  renderer renders a tree table and installs a selection and cursoring model to
+ * allow the user to make selections without using checkboxes.
  * Override {@link orion.explorer.SelectionRenderer#getCellHeaderElement}  and
  * {@link orion.explorer.SelectionRenderer#getCellElement} to generate table content.
  */
 exports.SelectionRenderer = (function(){
+	/**
+	 * Create a selection renderer with the specified options.  Options are defined in
+	 * ExplorerRenderer.  An additional option is added here.
+	 * @param {Boolean}singleSelection If true, set the selection policy to "singleSelection".
+	 *
+	 */
 	function SelectionRenderer(options, explorer) {
 		this._init(options);
 		this.explorer = explorer;

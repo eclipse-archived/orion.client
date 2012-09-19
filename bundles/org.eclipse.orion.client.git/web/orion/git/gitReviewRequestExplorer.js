@@ -14,8 +14,8 @@
 /*jslint regexp:false browser:true forin:true*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container' ,'orion/git/gitCommands', 'orion/navigationUtils','dijit/TooltipDialog', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, dijit , mSection, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands, mNavUtils) {
+        'orion/compare/compare-container' ,'orion/git/gitCommands','dijit/TooltipDialog', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, dijit , mSection, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands) {
 	var exports = {};
 
 	exports.GitReviewRequestExplorer = (function() {
