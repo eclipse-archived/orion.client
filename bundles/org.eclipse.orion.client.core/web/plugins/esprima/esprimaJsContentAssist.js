@@ -1934,7 +1934,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 		
 		function forType(type) {
 			for (var prop in type) {
-				if (type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop]) {
+				if (type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto') {
 					var propType = type[prop].typeName;
 					var first = propType.charAt(0);
 					if (first === "?" || first === "*") {
