@@ -3,10 +3,10 @@
 Template for an Assignment.
 Evaluated each time the commandAssignment changes
 -->
-<div class="gcli-af-template" aria-live="polite">
+<div aria-live="polite">
   <div>
     <div class="gcli-af-cmddesc">
-      ${requisition.commandAssignment.getValue().description}
+      ${requisition.commandAssignment.value.description}
     </div>
     <table class="gcli-af-params">
       <tbody foreach="assignment in ${requisition.getAssignments()}">
@@ -19,7 +19,7 @@ Evaluated each time the commandAssignment changes
           </td>
           <td>${getInputFor(assignment)}</td>
           <td>
-            <span class="gcli-af-required" if="${assignment.param.isDataRequired()}">*</span>
+            <span class="gcli-af-required" if="${assignment.param.isDataRequired}">*</span>
           </td>
         </tr>
         <tr>

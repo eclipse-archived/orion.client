@@ -1,43 +1,56 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
 var argFetch = exports;
 
 
-var dom = require('gcli/util').dom;
+var util = require('gcli/util');
 var Status = require('gcli/types').Status;
 
-var getField = require('gcli/ui/field').getField;
+var getField = require('gcli/ui/fields').getField;
 var domtemplate = require('gcli/ui/domtemplate');
 
-var editorCss = require('text!gcli/ui/arg_fetch.css');
+var argFetchCss = require('text!gcli/ui/arg_fetch.css');
 var argFetchHtml = require('text!gcli/ui/arg_fetch.html');
 
 
 /**
  * A widget to display an inline dialog which allows the user to fill out
  * the arguments to a command.
- * @param options An object containing the customizations, which include:
- * - document: The document to use in creating widgets
- * - requisition: The Requisition to fill out
+ * @param options Object containing user customization properties, including:
  * - argFetcherClass: Custom class name when generating the top level element
  *   which allows different layout systems
+ * @param components Object that links to other UI components. GCLI provided:
+ * - document: The document to use in creating widgets
+ * - requisition: The Requisition to fill out
+ * - element: The root element to populate
  */
-function ArgFetcher(options) {
-  this.document = options.document || document;
-  this.requisition = options.requisition;
+function ArgFetcher(options, components) {
+  this.document = components.document || document;
+  this.requisition = components.requisition;
+  this.inputter = components.inputter;
 
   // FF can be really hard to debug if doc is null, so we check early on
   if (!this.document) {
     throw new Error('No document');
   }
 
-  this.element =  dom.createElement(this.document, 'div');
-  this.element.className = options.argFetcherClass || 'gcli-argfetch';
+  this.element = components.element;
+  this.element.classList.add(options.argFetcherClass || 'gcli-argfetch');
   // We cache the fields we create so we can destroy them later
   this.fields = [];
 
@@ -45,26 +58,22 @@ function ArgFetcher(options) {
   this.okElement = null;
 
   // Pull the HTML into the DOM, but don't add it to the document
-  if (editorCss != null) {
-    this.style = dom.importCss(editorCss, this.document);
+  if (argFetchCss != null) {
+    this.style = util.importCss(argFetchCss, this.document, 'gcli-arg-fetch');
   }
 
-  var templates = dom.createElement(this.document, 'div');
-  dom.setInnerHtml(templates, argFetchHtml);
-  this.reqTempl = templates.querySelector('.gcli-af-template');
+  this.template = util.toDom(this.document, argFetchHtml);
+  this.templateOptions = { allowEval: true, stack: 'arg_fetch.html' };
 
-  this.requisition.commandChange.add(this.onCommandChange, this);
-  this.requisition.inputChange.add(this.onInputChange, this);
-
-  this.onCommandChange();
+  this.inputter.onInputChange.add(this.inputChanged, this);
+  this.inputChanged();
 }
 
 /**
  * Avoid memory leaks
  */
 ArgFetcher.prototype.destroy = function() {
-  this.requisition.inputChange.remove(this.onInputChange, this);
-  this.requisition.commandChange.remove(this.onCommandChange, this);
+  this.inputter.onInputChange.remove(this.inputChanged, this);
 
   if (this.style) {
     this.style.parentNode.removeChild(this.style);
@@ -76,14 +85,22 @@ ArgFetcher.prototype.destroy = function() {
   delete this.document;
   delete this.element;
   delete this.okElement;
-  delete this.reqTempl;
+  delete this.template;
 };
 
 /**
- * Called whenever the command part of the requisition changes
+ * Called whenever the text input of the requisition changes
  */
-ArgFetcher.prototype.onCommandChange = function(ev) {
-  var command = this.requisition.commandAssignment.getValue();
+ArgFetcher.prototype.inputChanged = function() {
+  var command = this.requisition.commandAssignment.value;
+  if (command && command.exec) {
+    var status = this.requisition.getStatus();
+    this.okElement.disabled = (status !== Status.VALID);
+  }
+
+  // This code was called from Requisition.onCommandChange, so ev.oldValue
+  // and ev.newValue are assignments
+  var command = this.requisition.commandAssignment.value;
   if (!command || !command.exec) {
     this.element.style.display = 'none';
   }
@@ -96,10 +113,9 @@ ArgFetcher.prototype.onCommandChange = function(ev) {
     this.fields.forEach(function(field) { field.destroy(); });
     this.fields = [];
 
-    var reqEle = this.reqTempl.cloneNode(true);
-    domtemplate.template(reqEle, this,
-            { allowEval: true, stack: 'arg_fetch.html' });
-    dom.clearElement(this.element);
+    var reqEle = this.template.cloneNode(true);
+    domtemplate.template(reqEle, this, this.templateOptions);
+    util.clearElement(this.element);
     this.element.appendChild(reqEle);
 
     var status = this.requisition.getStatus();
@@ -110,36 +126,24 @@ ArgFetcher.prototype.onCommandChange = function(ev) {
 };
 
 /**
- * Called whenever the text input of the requisition changes
- */
-ArgFetcher.prototype.onInputChange = function(ev) {
-  var command = this.requisition.commandAssignment.getValue();
-  if (command && command.exec) {
-    var status = this.requisition.getStatus();
-    this.okElement.disabled = (status !== Status.VALID);
-  }
-};
-
-/**
- * Called by the template process in #onCommandChange() to get an instance
- * of field for each assignment.
+ * Called by the template process in to get an instance of field for each
+ * assignment.
  */
 ArgFetcher.prototype.getInputFor = function(assignment) {
   try {
     var newField = getField(assignment.param.type, {
       document: this.document,
-      type: assignment.param.type,
       name: assignment.param.name,
       requisition: this.requisition,
-      required: assignment.param.isDataRequired(),
-      named: !assignment.param.isPositionalAllowed()
+      required: assignment.param.isDataRequired,
+      named: !assignment.param.isPositionalAllowed
     });
 
     // BUG 664198 - remove on delete
-    newField.fieldChanged.add(function(ev) {
-      assignment.setConversion(ev.conversion);
+    newField.onFieldChange.add(function(ev) {
+      this.requisition.setAssignment(assignment, ev.conversion.arg);
     }, this);
-    assignment.assignmentChange.add(function(ev) {
+    assignment.onAssignmentChange.add(function(ev) {
       newField.setConversion(ev.conversion);
     }.bind(this));
 
@@ -186,7 +190,7 @@ ArgFetcher.prototype.onFormOk = function(ev) {
  * Event handler added by the template menu.html
  */
 ArgFetcher.prototype.onFormCancel = function(ev) {
-  this.requisition.clear();
+  this.requisition.update('');
 };
 
 /**

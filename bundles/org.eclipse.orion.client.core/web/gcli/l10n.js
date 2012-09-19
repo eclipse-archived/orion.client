@@ -1,7 +1,17 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
@@ -29,6 +39,14 @@ exports.registerStringsSource = function(modulePath) {
     strings[key] = additions[key];
   }, this);
 };
+
+/**
+ * The main GCLI strings source is always required.
+ * We have to load it early on in the process (in the require phase) so that
+ * we can define settingSpecs and commandSpecs at the top level too.
+ */
+require('gcli/nls/strings');
+exports.registerStringsSource('gcli/nls/strings');
 
 /**
  * Undo the effects of registerStringsSource().
@@ -60,7 +78,9 @@ exports.unregisterStringsSource = function(modulePath) {
  * @return The current locale as an RFC 4646 string
  */
 exports.getPreferredLocales = function() {
-  var language = (navigator.language || navigator.userLanguage).toLowerCase();
+  var language = typeof navigator !== 'undefined' ?
+      (navigator.language || navigator.userLanguage).toLowerCase() :
+      'en-us';
   var parts = language.split('-');
   var reply = parts.map(function(part, index) {
     return parts.slice(0, parts.length - index).join('-');
@@ -84,7 +104,7 @@ exports.getPreferredLocales = function() {
  */
 exports.lookup = function(key) {
   var str = strings[key];
-  if (!str) {
+  if (str == null) {
     throw new Error('No i18n key: ' + key);
   }
   return str;
@@ -104,6 +124,9 @@ if (typeof Proxy !== 'undefined') {
       return exports.lookup(name);
     }
   });
+}
+else {
+  exports.propertyLookup = strings;
 }
 
 /**

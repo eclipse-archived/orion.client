@@ -1,18 +1,24 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
 
 
-var host = require('gcli/host');
-var l10n = require('gcli/l10n');
 var types = require('gcli/types');
-var SelectionType = require('gcli/types/basic').SelectionType;
-var Status = require('gcli/types').Status;
-var Conversion = require('gcli/types').Conversion;
+var SelectionType = require('gcli/types/selection').SelectionType;
 
 
 /**
@@ -51,6 +57,7 @@ exports.setDocument = function(document) {
  * Undo the effects of setDocument()
  */
 exports.unsetDocument = function() {
+  ResourceCache.clear();
   doc = undefined;
 };
 
@@ -68,8 +75,7 @@ exports.getDocument = function() {
  * Resource should not be used directly, but instead through a sub-class like
  * CssResource or ScriptResource.
  */
-function Resource(id, name, type, inline, element) {
-  this.id = id;
+function Resource(name, type, inline, element) {
   this.name = name;
   this.type = type;
   this.inline = inline;
@@ -112,6 +118,10 @@ CssResource.prototype.loadContents = function(callback) {
 
 CssResource._getAllStyles = function() {
   var resources = [];
+  if (doc == null) {
+    return resources;
+  }
+
   Array.prototype.forEach.call(doc.styleSheets, function(domSheet) {
     CssResource._getStyle(domSheet, resources);
   });
@@ -184,6 +194,10 @@ ScriptResource.prototype.loadContents = function(callback) {
 };
 
 ScriptResource._getAllScripts = function() {
+  if (doc == null) {
+    return [];
+  }
+
   var scriptNodes = doc.querySelectorAll('script');
   var resources = Array.prototype.map.call(scriptNodes, function(scriptNode) {
     var resource = ResourceCache.get(scriptNode);
@@ -226,7 +240,7 @@ function dedupe(resources, onDupe) {
 }
 
 /**
- * A CSS expression that refers to a single node
+ * Use the Resource implementations to create a type based on SelectionType
  */
 function ResourceType(typeSpec) {
   this.include = typeSpec.include;
@@ -293,7 +307,7 @@ var ResourceCache = {
    * Drop all cache entries. Helpful to prevent memory leaks
    */
   clear: function() {
-    ResourceCache._cached = {};
+    ResourceCache._cached = [];
   }
 };
 
