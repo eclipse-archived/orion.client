@@ -645,6 +645,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if (typeof toolNode === "string") { //$NON-NLS-0$
 			toolNode = dojo.byId(toolNode);
 		}
+		// no reference node has been given, so use the main toolbar.
+		if (!toolNode) {
+			toolNode = dojo.byId("pageActions");
+		}
 		var node = toolNode;
 		// the trickiest part is finding where to start looking (section or main toolbar).
 		// We need to walk up until we find a "toolComposite"

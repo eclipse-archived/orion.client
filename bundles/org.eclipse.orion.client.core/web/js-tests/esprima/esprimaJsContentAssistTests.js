@@ -11,15 +11,13 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define esprima console setTimeout esprimaContentAssistant*/
+/*global define esprima console setTimeout doctrine*/
 define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/esprima", "doctrine/doctrine"], function(mEsprimaPlugin, assert) {
 	
 	//////////////////////////////////////////////////////////
 	// helpers
 	//////////////////////////////////////////////////////////
-	var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider();
-	
-	function computeContentAssist(buffer, prefix, offset) {
+	function computeContentAssist(buffer, prefix, offset, jsLintOptions) {
 		if (!prefix) {
 			prefix = "";
 		}
@@ -28,8 +26,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			if (offset < 0) {
 				offset = buffer.length;
 			}
-		}		
-		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix});
+		}
+		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, jsLintOptions);
+		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true });
 	}
 	
 	function testProposal(proposal, text, description, prefix) {
@@ -134,11 +133,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		assert.equal(stringify(parsedProgram),"{type:ExpressionStatement,expression:{type:MemberExpression,object:{type:Identifier,name:foo},property:null}}");
 	};
 
-	tests["test Content Assist Setup"] = function() {
-		assert.ok(esprimaContentAssistant, "Found Esprima content assistant");
-		assert.ok(esprimaContentAssistant.computeProposals, "Found proposal computer");
-	};
-	
 	tests["test Empty Content Assist"] = function() {
 		var results = computeContentAssist("x", "x");
 		assert.equal(results.length, 0);
@@ -157,15 +151,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -187,16 +187,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["zzz", "zzz : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -218,16 +224,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["zzz", "zzz : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -249,18 +261,24 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["xxx", "xxx : Object"],
 			["yyy", "yyy : Object"],
 			["zzz", "zzz : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -289,16 +307,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -320,17 +344,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -402,7 +432,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
 			["c", "c : {  }"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
@@ -412,17 +442,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -439,7 +475,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
 			["c", "c : {  }"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
@@ -449,17 +485,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -488,7 +530,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na/**/\nvar aaa}", "a");
 		testProposals("a", results, [
 			["abb", "abb : Object"],
-			["a", "------------------"],
+			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
 			["arguments", "arguments : Arguments"]
@@ -502,11 +544,11 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"var abb;\na/**/\nvar aaa\n}\n}", "a");
 		testProposals("a", results, [
 			["abb", "abb : Object"],
-			["a", "------------------"],
+			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
 			["arguments", "arguments : Arguments"],
-			["a", "------------------"],
+			["a", "---------------------------------"],
 			["a", "a : {  }"]
 		]);
 	};
@@ -518,12 +560,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"var abb;\na\nvar aaa\n}\n}");
 		testProposals("", results, [
 			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["a", "a : {  }"],
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
 			["c", "c : {  }"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
@@ -533,16 +575,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -560,12 +608,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"var abb;\na\nvar aaa\n} /**/\n}");
 		testProposals("", results, [
 			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["a", "a : {  }"],
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
 			["c", "c : {  }"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
@@ -575,16 +623,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -608,7 +662,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals("h", results, [
 			["hh2", "hh2 : Number"],
 			["hhh", "hhh : Number"],
-			["h", "------------------"],
+			["h", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"]
 		]);
 	};
@@ -632,7 +686,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["toExponential(digits)", "toExponential(digits) : Number"],
 			["toFixed(digits)", "toFixed(digits) : Number"],
 			["toPrecision(digits)", "toPrecision(digits) : Number"],
-			["to", "------------------"],
+			["to", "---------------------------------"],
 			["toLocaleString()", "toLocaleString() : String"],
 			["toString()", "toString() : String"]
 		]);
@@ -643,7 +697,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals("h", results, [
 			["hh2", "hh2 : Number"],
 			["hhh", "hhh : Number"],
-			["h", "------------------"],
+			["h", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"]
 		]);
 	};
@@ -733,24 +787,30 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test for loop 1"] = function() {
 		var results = computeContentAssist("for (var ii=0;i/**/<8;ii++) { ii }", "i");
 		testProposals("i", results, [
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
-			["i", "------------------"],
+			["i", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
 	};
 	tests["test for loop 2"] = function() {
 		var results = computeContentAssist("for (var ii=0;ii<8;i/**/++) { ii }", "i");
 		testProposals("i", results, [
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
-			["i", "------------------"],
+			["i", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
 	};
 	tests["test for loop 3"] = function() {
 		var results = computeContentAssist("for (var ii=0;ii<8;ii++) { i/**/ }", "i");
 		testProposals("i", results, [
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["ii", "ii : Number"],
-			["i", "------------------"],
+			["i", "---------------------------------"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"]
 		]);
 	};
@@ -776,8 +836,9 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("try { } catch (eee) {e/**/  }", "e");
 		testProposals("e", results, [
 			["eee", "eee : Error"],
-			["e", "------------------"],
+			["e", "---------------------------------"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"]
 		]);
 	};
@@ -955,7 +1016,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"function outer() { function Inner() { }}\n" +
 		"Inn", "Inn");
 		testProposals("Inn", results, [
-			// empty
+			// TODO FIXADE adding all constructors to global scope.  not correct
+			["Inner()", "Inner() : Inner"]
 		]);
 	};
 	
@@ -965,7 +1027,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		"var outer = { Inner : function() { }}\n" +
 		"outer.Inn", "Inn");
 		testProposals("Inn", results, [
-			["Inner()", "Inner() : Inner"]
+			["Inner()", "Inner() : outer.Inner"]
 		]);
 	};
 	
@@ -982,17 +1044,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["ttt", "ttt : Object"],
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1015,17 +1083,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["ttt", "ttt : Object"],
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1048,17 +1122,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Object([val])", "Object([val]) : Object"],
 			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["ttt", "ttt : Object"],
 			["undefined", "undefined : undefined"],
 			["uuu", "uuu : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1263,7 +1343,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("var ttt = { ooo:8};\nttt.", "");
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1278,7 +1358,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("var ttt = { ooo:8};\nif (ttt.) { ttt }", "", "var ttt = { ooo:8};\nif (ttt.".length);
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1293,7 +1373,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals("", results, [
 			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
 			["ooo", "ooo : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1309,7 +1389,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		testProposals("", results, [
 			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
 			["ooo", "ooo : Object"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1324,7 +1404,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("var ttt = { ooo:8};\nfunction ff() { \nttt.}", "", "var ttt = { ooo:8};\nfunction ff() { \nttt.".length);
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1339,7 +1419,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist("var ttt = { ooo:8};\nfunction ff() { \nttt./**/}", "");
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1361,7 +1441,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1384,7 +1464,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 
 		testProposals("", results, [
 			["ooo", "ooo : Number"],
-			["", "------------------"],
+			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
@@ -1892,6 +1972,138 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 
+
+	tests["test dotted constructor1"] = function() {
+		var results = computeContentAssist(
+			"var obj = { Fun : function() { }, fun : function() {}, fun2 : 9 }\nnew obj", "obj");
+		testProposals("obj", results, [
+			["obj.Fun()", "obj.Fun() : obj.Fun"],
+			["obj", "obj : { Fun : obj.Fun, fun : undefined, fun2 : Number }"]
+		]);
+	};
+
+	tests["test dotted constructor2"] = function() {
+		var results = computeContentAssist(
+			"var obj = { Fun : function() { } }\nnew obj.F", "F");
+		testProposals("F", results, [
+			["Fun()", "Fun() : obj.Fun"]
+		]);
+	};
+
+	tests["test dotted constructor3"] = function() {
+		var results = computeContentAssist(
+			"var obj = { };\nobj.Fun = function() { };\nnew obj", "obj");
+		testProposals("obj", results, [
+			["obj.Fun()", "obj.Fun() : obj.Fun"],
+			["obj", "obj : { Fun : obj.Fun }"]
+		]);
+	};
+
+	tests["test dotted constructor4"] = function() {
+		var results = computeContentAssist(
+			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
+		testProposals("obj", results, [
+			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
+			["obj", "obj : { inner : { Fun : {...} } }"]
+		]);
+	};
+	
+	tests["test dotted constructor5"] = function() {
+		var results = computeContentAssist(
+			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
+		testProposals("obj", results, [
+			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
+			["obj", "obj : { inner : { Fun : {...} } }"]
+		]);
+	};
+	
+	tests["test dotted constructor6"] = function() {
+		var results = computeContentAssist(
+			"var obj = { inner : {  } }\nobj.inner.inner2 = { Fun : function() { } }\nnew obj", "obj");
+		testProposals("obj", results, [
+			["obj.inner.inner2.Fun()", "obj.inner.inner2.Fun() : obj.inner.inner2.Fun"],
+			["obj", "obj : { inner : { inner2 : {...} } }"]
+		]);
+	};
+	
+	// assign to another---should only have one proposal since we don't change the type name
+	tests["test dotted constructor7"] = function() {
+		var results = computeContentAssist(
+			"var obj = { inner : { Fun : function() { }  } }\n" +
+			"var other = obj\n" +
+			"new other.inner", "inner");
+		testProposals("inner", results, [
+			["inner", "inner : { Fun : obj.inner.Fun }"]
+		]);
+	};
+	
+	// assign sub-part to another---should only have one proposal since we don't change the type name
+	tests["test dotted constructor8"] = function() {
+		var results = computeContentAssist(
+			"var obj = { inner : { Fun : function() { } } }\n" +
+			"var other = obj.inner\n" +
+			"new other", "other");
+		testProposals("other", results, [
+			["other", "other : { Fun : obj.inner.Fun }"]
+		]);
+	};
+
+	// overloaded constructors
+	tests["test dotted constructor9"] = function() {
+		var results = computeContentAssist(
+			"var obj = { Fun : function() { this.yy1 = 9; } }\n" +
+			"var obj2 = { Fun : function() { this.yy2 = 9; } }\n" +
+			"var xxx = new obj.Fun();\n" +
+			"xxx.yy", "yy");
+		testProposals("yy", results, [
+			["yy1", "yy1 : Number"]
+		]);
+	};
+	tests["test dotted constructor10"] = function() {
+		var results = computeContentAssist(
+			"var obj = { Fun : function() { } }\nobj.Fun.prototype = { yy1 : 9};\n" +
+			"var obj2 = { Fun : function() { } }\nobj2.Fun.prototype = { yy2 : 9};\n" +
+			"var xxx = new obj.Fun();\n" +
+			"xxx.yy", "yy");
+		testProposals("yy", results, [
+			["yy1", "yy1 : Number"]
+		]);
+	};
+
+	// constructor declared inside a function should not be available externally
+	tests["test constructor in function"] = function() {
+		var results = computeContentAssist(
+			"var obj = function() { var Fn = function() { }; };\n" +
+			"new Fn", "Fn");
+		testProposals("Fn", results, [
+		]);
+	};
+	
+	// TODO FIXADE this is wrong, but we're still going to test it
+	// constructor declared as a member available in global scope
+	tests["test constructor in constructor BAD"] = function() {
+		var results = computeContentAssist(
+			"var obj = function() { this.Fn = function() { }; };\n" +
+			"new Fn", "Fn");
+		testProposals("Fn", results, [
+			["Fn()", "Fn() : obj.Fn"]
+		]);
+	};
+	
+	// Not ideal, but a constructor being used from a constructed object is not dotted, but should be
+	tests["test constructor in constructor Not Ideal"] = function() {
+		var results = computeContentAssist(
+			"function Fun() { this.Inner = function() { }}\n" +
+			"var f = new Fun()\n" +
+			"new f.Inner", "Inner");
+		testProposals("Inner", results, [
+			// should be Fun.Inner, but is not
+			["Inner()", "Inner() : Inner"]
+		]);
+	};
+	
+	
+	
 
 	// should not be able to redefine or add to global types
 	tests["test global redefine1"] = function() {
@@ -2456,6 +2668,58 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["flar", "flar : Number"]
 			]);
 		};
+		
+		// RIGEL-138 jsdoc support for functions parameters that are in object literals
+		tests["test object literal fn param jsdoc1"] = function() {
+			var results = computeContentAssist(
+				"var obj = {\n" +
+				"  /** @param {String} foo */\n" +
+				"  fun : function(foo) { foo/**/ }\n" +
+				"}", "foo");
+			testProposals("foo", results, [
+				["foo", "foo : String"]
+			]);
+		};
+		tests["test object literal type jsdoc1"] = function() {
+			var results = computeContentAssist(
+				"var obj = {\n" +
+				"  /** @type {String} foo */\n" +
+				"  foo : undefined\n" +
+				"};\n" +
+				"obj.foo", "foo");
+			testProposals("foo", results, [
+				["foo", "foo : String"]
+			]);
+		};
+		tests["test object literal fn return jsdoc1"] = function() {
+			var results = computeContentAssist(
+				"var foo = {\n" +
+				"  /** @return {String} foo */\n" +
+				"  fun : function(foo) { }\n" +
+				"}\n" +
+				"var res = foo.fun();\n" +
+				"res", "res");
+			testProposals("res", results, [
+				["res", "res : String"]
+			]);
+		};
+		
+		tests["test dotted constructor jsdoc type 1"] = function() {
+			var results = computeContentAssist(
+				"var obj = { Fun : function() {} };\n" +
+				"/** @type obj.Fun */ var xxx;\nxx", "xx");
+			testProposals("xx", results, [
+				["xxx", "xxx : obj.Fun"]
+			]);
+		};
+		tests["test dotted constructor jsdoc type 2"] = function() {
+			var results = computeContentAssist(
+				"var obj = { Fun : function() { this.yyy = 9; } };\n" +
+				"/** @type obj.Fun */ var xxx;\nxxx.yy", "yy");
+			testProposals("yy", results, [
+				["yyy", "yyy : Number"]
+			]);
+		};
 	}
 	
 	/////////////////////////////////////
@@ -2696,6 +2960,100 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"v.a", "a");
 		testProposals("a", results, [
 			["a", "a : String"]
+		]);
+	};
+	
+	///////////////////////////////////////////////////
+	// testing default jslint options
+	///////////////////////////////////////////////////
+	var jsOptionsBrowser = {"options": { "browser": true }};
+	var jsOptionsNoBrowser = {"options": { "browser": false }};
+	var jsOptions1Global = {"global": [ "aaa" ]};
+	var jsOptions2Globals = {"global": [ "aaa", "aab"]};
+	var jsOptionsAndGlobals = {"global": [ "aaa", "aab"], "options": { "browser": true }};
+	
+	tests["test browser:true in options"] = function() {
+		var results = computeContentAssist(
+			"wind", "wind", null, jsOptionsBrowser);
+		testProposals("wind", results, [
+			["window", "window : Window"]
+		]);
+	};
+	
+	tests["test browser:false in options"] = function() {
+		var results = computeContentAssist(
+			"wind", "wind", null, jsOptionsNoBrowser);
+		testProposals("wind", results, [
+		]);
+	};
+	
+	tests["test browser:true in options overriden by browser:false in text"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:false */\nwind", "wind", null, jsOptionsBrowser);
+		testProposals("wind", results, [
+		]);
+	};
+	
+	tests["test browser:false in options overriden by browser:true in text"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true */\nwind", "wind", null, jsOptionsNoBrowser);
+		testProposals("wind", results, [
+			["window", "window : Window"]
+		]);
+	};
+	
+	tests["test 1 global in options"] = function() {
+		var results = computeContentAssist(
+			"aa", "aa", null, jsOptions1Global);
+		testProposals("aa", results, [
+			["aaa", "aaa : {  }"]
+		]);
+	};
+	
+	tests["test 2 globals in options"] = function() {
+		var results = computeContentAssist(
+			"aa", "aa", null, jsOptions2Globals);
+		testProposals("aa", results, [
+			["aaa", "aaa : {  }"],
+			["aab", "aab : {  }"]
+		]);
+	};
+	
+	tests["test 2 globals in options and in text"] = function() {
+		var results = computeContentAssist(
+			"/*global aac */\naa", "aa", null, jsOptions2Globals);
+		testProposals("aa", results, [
+			["aaa", "aaa : {  }"],
+			["aab", "aab : {  }"],
+			["aac", "aac : {  }"]
+		]);
+	};
+	
+	tests["test globals and browser1"] = function() {
+		var results = computeContentAssist(
+			"aa", "aa", null, jsOptionsAndGlobals);
+		testProposals("aa", results, [
+			["aaa", "aaa : {  }"],
+			["aab", "aab : {  }"]
+		]);
+	};
+	
+	tests["test globals and browser2"] = function() {
+		var results = computeContentAssist(
+			"wind", "wind", null, jsOptionsAndGlobals);
+		testProposals("wind", results, [
+			["window", "window : Window"]
+		]);
+	};
+	
+	// RIGEL-100
+	tests["test obj literal with underscore"] = function() {
+		var results = computeContentAssist(
+			"var obj = { _myFun : function() { this._/**/ } }", "_");
+			
+		testProposals("_", results, [
+			// inferred as object type since invocation request is happening inside of object literal.
+			["_myFun", "_myFun : Object"]
 		]);
 	};
 	

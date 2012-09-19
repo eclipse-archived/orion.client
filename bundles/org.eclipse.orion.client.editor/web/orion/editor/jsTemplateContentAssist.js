@@ -40,6 +40,52 @@ define("orion/editor/jsTemplateContentAssist", [], function() {
 		return whitespace;
 	}
 	
+	function findPreviousChar(buffer, offset) {
+		var c = "";
+		while (offset >= 0) {
+			c = buffer[offset];
+			if (c === '\n' || c === '\r') {
+				//we hit the start of the line so we are done
+				break;
+			} else if (/\s/.test(c)) {
+				offset--;
+			} else {
+				// a non-whitespace character, we are done
+				break;
+			}
+		}
+		return c;
+	}
+	
+	var uninterestingChars = { 
+		':': ':',
+		'!': '!',
+		'@': '@',
+		'#': '#',
+		'$': '$',
+		'^': '^',
+		'&': '&',
+		'*': '*',
+		'.': '.',
+		'?': '?',
+		'<': '<',
+		'>': '>'
+	};
+	
+	/** 
+	 * Determines if the invocation location is a valid place to use
+	 * templates.  We are not being too precise here.  As an approximation,
+	 * just look at the previous character.
+	 *
+	 * @return {Boolean} true iff the current invocation location is 
+	 * a valid place for template proposals to appear.
+	 * This means that the invocation location is at the start of anew statement.
+	 */
+	function isValid(prefix, buffer, offset) {
+		var previousChar = findPreviousChar(buffer, offset-prefix.length-1);
+		return !uninterestingChars[previousChar];
+	}
+	
 	/** 
 	 * Removes prefix from string.
 	 * @param {String} prefix
@@ -157,6 +203,10 @@ define("orion/editor/jsTemplateContentAssist", [], function() {
 		computeProposals: function(buffer, offset, context) {
 			var prefix = context.prefix;
 			var proposals = [];
+			if (!isValid(prefix, buffer, offset)) {
+				return proposals;
+			}
+
 			//we are not completing on an object member, so suggest templates and keywords
 			proposals = proposals.concat(getTemplateProposals(prefix, buffer, offset));
 			proposals = proposals.concat(getKeyWordProposals(prefix, buffer, offset));

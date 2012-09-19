@@ -120,16 +120,16 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	};
 
 	tests.testNVP3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?Fun:"},"types":{"Fun":{"$$proto":"?Fun:","ff":"Number"},"?Fun:":{"$$proto":"?Fun:~proto"},"?Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
-			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return Fun(); }});", "a");
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"??Fun::"},"types":{"Fun":{"$$proto":"*Fun:","ff":"Number"},"*Fun:":{"$$proto":"*Fun:~proto"},"*Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return function() { return new Fun(); }}});", "a");
 	};
 
 	tests.testNVP4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"??Fun:a:"},"types":{"Fun":{"$$proto":"?Fun:","ff":"Number"},"?Fun:":{"$$proto":"?Fun:~proto"},"?Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?*Fun:a:"},"types":{"Fun":{"$$proto":"*Fun:","ff":"Number"},"*Fun:":{"$$proto":"*Fun:~proto"},"*Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return Fun; }});", "a");
 	};
 	tests.testNVP5 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?Fun:"},"types":{"Fun":{"$$proto":"?Fun:","ff":"Number"},"?Fun:":{"$$proto":"?Fun:~proto"},"?Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","a":"Number","b":"?Fun:"},"types":{"Fun":{"$$proto":"*Fun:","ff":"Number"},"*Fun:":{"$$proto":"*Fun:~proto"},"*Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define({a : 1, b: function() { function Fun(a) { this.ff = 8; }; return new Fun(); }});", "a");
 	};
 
@@ -165,23 +165,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			"define('afg', [], function() { var a = function() { return ''; };\n return { first: a, second: 8 }; });", "a");
 	};
 	tests.testAMD8 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"?Exported:","second":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"*Exported:","second":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define('afg', [], function() { var Exported = function() { this.a = 9; };\n return { Exported: Exported, second: 8 }; });", "a");
 	};
 	tests.testAMD9 = function() {
-		assertCreateSummary('{"provided":"?Exported:a,b","types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":"*Exported:a,b","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n return Exported; });", "a");
 	};
 	tests.testAMD10 = function() {
-		assertCreateSummary('{"provided":"??Exported:a,b:c,d","types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":"?*Exported:a,b:c,d","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n return function(c,d) { return Exported; }; });", "a");
 	};
 	tests.testAMD11 = function() {
-		assertCreateSummary('{"provided":"?Exported:c,d","types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":"?Exported:c,d","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n return function(c,d) { return new Exported(c,d); }; });", "a");
 	};
 	tests.testAMD12 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n return new Exported(); });", "a");
 	};
 	
@@ -190,23 +190,23 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	// AMD futzing with prototypes of exported constructors
 	//////////////////////////////////////////////////////////
 	tests.testAMDProto1 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","foo":"Number"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","foo":"Number"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.foo = 9;\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto2 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"gen~a~9"},"gen~a~9":{"$$proto":"Object","foo":"Number","bar":"String"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"gen~a~9"},"gen~a~9":{"$$proto":"Object","foo":"Number","bar":"String"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n Exported.prototype = { foo : 9, bar : '' };\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.open = function() { return 9; };\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nreturn new Exported(); });", "a");
 	};
 	tests.testAMDProto5 = function() {
-		assertCreateSummary('{"provided":"?Exported:a,b","types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
+		assertCreateSummary('{"provided":"*Exported:a,b","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"AMD"}',
 			"define([], function() { var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nreturn Exported; });", "a");
 	};
 	
@@ -270,27 +270,27 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	// Common JS futzing with prototypes of exported constructors
 	//////////////////////////////////////////////////////////
 	tests.testCommonjsProto1 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","foo":"Number"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","foo":"Number"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.foo = 9; exports.Exported = new Exported();", "a");
 	};
 	tests.testCommonjsProto2 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"gen~a~6"},"gen~a~6":{"$$proto":"Object","foo":"Number","bar":"String"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"gen~a~6"},"gen~a~6":{"$$proto":"Object","foo":"Number","bar":"String"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n Exported.prototype = { foo : 9, bar : '' };\nexports.Exported = new Exported();", "a");
 	};
 	tests.testCommonjsProto3 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"Exported"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n Exported.prototype.open = function() { return 9; };\nexports.Exported = new Exported();", "a");
 	};
 	tests.testCommonjsProto4 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"?Exported:","a":"Number"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"*Exported:","a":"Number"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports = new Exported(); });", "a");
 	};
 	tests.testCommonjsProto5 = function() {
-		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"?Exported:a,b"},"types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":{"$$proto":"Object","Exported":"*Exported:a,b"},"types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports.Exported = Exported; });", "a");
 	};
 	tests.testCommonjsProto6 = function() {
-		assertCreateSummary('{"provided":"?Exported:a,b","types":{"Exported":{"$$proto":"?Exported:","a":"Number"},"?Exported:":{"$$proto":"?Exported:~proto"},"?Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
+		assertCreateSummary('{"provided":"*Exported:a,b","types":{"Exported":{"$$proto":"*Exported:","a":"Number"},"*Exported:":{"$$proto":"*Exported:~proto"},"*Exported:~proto":{"$$proto":"Object","open":"?Number:"}},"kind":"commonjs"}',
 			"var Exported = function(a,b) { this.a = 9; };\n var func = function() { return 9; };\n Exported.prototype.open = func;\nexports = Exported; });", "a");
 	};
 	
@@ -313,6 +313,50 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		assertCreateSummary('{"provided":{"$$proto":"Object","foo":"gen~a~6"},"types":{"gen~a~6":{"$$proto":"Object","loc":"Location","scr":"Screen"}},"kind":"AMD"}', 
 			"/*jslint browser:true*/\n" +
 			"define([], function () { return { foo : { loc : location, scr : screen } }; });", "a");
+	};
+	
+	//////////////////////////////////////////////////////////
+	// Dotted constructors
+	//////////////////////////////////////////////////////////
+	tests["test dotted constructor1"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","obj":"gen~a~6"},"types":{"gen~a~6":{"$$proto":"Object","Fun":"*obj.Fun:"},"obj.Fun":{"$$proto":"*obj.Fun:"},"*obj.Fun:":{"$$proto":"*obj.Fun:~proto"},"*obj.Fun:~proto":{"$$proto":"Object"}},"kind":"AMD"}', 
+			"define([], function () { return { obj : { Fun: function() { } } }; });", "a");
+	};
+
+	tests["test dotted constructor2"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","obj":"gen~a~4"},"types":{"gen~a~4":{"$$proto":"Object","Fun":"*obj.Fun:"},"obj.Fun":{"$$proto":"*obj.Fun:"},"*obj.Fun:":{"$$proto":"*obj.Fun:~proto"},"*obj.Fun:~proto":{"$$proto":"Object","larf":"Number"}},"kind":"AMD"}',
+			"define([], function () {\n" +
+			"  var obj = { Fun: function() { } };\n" +
+			"  obj.Fun.prototype.larf = 9;\n" +
+			"  return { obj : obj };" +
+			"});", "a");
+	};
+
+	tests["test dotted constructor3"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","Fun":"*obj.Fun:"},"types":{"obj.Fun":{"$$proto":"*obj.Fun:"},"*obj.Fun:":{"$$proto":"*obj.Fun:~proto"},"*obj.Fun:~proto":{"$$proto":"Object","larf":"Number"}},"kind":"AMD"}', 
+			"define([], function () {\n" +
+			"  var obj = { Fun: function() { } };\n" +
+			"  obj.Fun.prototype.larf = 9;\n" +
+			"  return obj;" +
+			"});", "a");
+	};
+
+	tests["test dotted constructor4"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"Object","obj":"*obj.Fun:"},"types":{"obj.Fun":{"$$proto":"*obj.Fun:"},"*obj.Fun:":{"$$proto":"*obj.Fun:~proto"},"*obj.Fun:~proto":{"$$proto":"Object","larf":"Number"}},"kind":"AMD"}', 
+			"define([], function () {\n" +
+			"  var obj = { Fun: function() { } };\n" +
+			"  obj.Fun.prototype.larf = 9;\n" +
+			"  return { obj : obj.Fun };" +
+			"});", "a");
+	};
+
+	tests["test dotted constructor5"] = function() {
+		assertCreateSummary('{"provided":{"$$proto":"*obj.Fun:"},"types":{"obj.Fun":{"$$proto":"*obj.Fun:"},"*obj.Fun:":{"$$proto":"*obj.Fun:~proto"},"*obj.Fun:~proto":{"$$proto":"Object","larf":"Number"}},"kind":"AMD"}', 
+			"define([], function () {\n" +
+			"  var obj = { Fun: function() { } };\n" +
+			"  obj.Fun.prototype.larf = 9;\n" +
+			"  return new obj.Fun();" +
+			"});", "a");
 	};
 
 	return tests;

@@ -63,7 +63,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "fileapi", "servlets/jsdepend-
 		var file = dependency.path;
 		if (file) {
 			jsdepend.getContents(file, function (contents) {
-					var esprimaContentAssistant = new mEsprimaContentAssist.EsprimaJavaScriptContentAssistProvider(indexer);
+					var esprimaContentAssistant = new mEsprimaContentAssist.EsprimaJavaScriptContentAssistProvider(indexer, indexer.jslint);
 					var structure = esprimaContentAssistant.computeSummary(contents, file);
 					var textStructure = JSON.stringify(structure);
 					var ts = generateTimeStamp();

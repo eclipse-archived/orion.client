@@ -71,13 +71,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	
 		/**
 		 * Makes and returns a (shallow) copy of this command invocation.
+		 * @param {orion.commands.ParametersDescription} parameters A description of parameters to be used in the copy.  Optional.
+		 * If not specified, then the existing parameters should be copied.
 		 */
-		makeCopy: function() {
+		makeCopy: function(parameters) {
 			var copy =  new CommandInvocation(this.commandService, this.handler, this.items, this.userData, this.command);
 			copy.domNode = this.domNode;
 			copy.domParent = this.domParent;
-			// we want a copy of our parameters, not the original command parameters.
-			if (this.parameters) {
+			if (parameters) {
+				copy.parameters = parameters.makeCopy();
+			} else if (this.parameters) {
 				copy.parameters = this.parameters.makeCopy();
 			}
 			return copy;
@@ -398,17 +401,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		 * @param {String} commandId the id of the command to run.
 		 * @param {Object} the item on which the command should run.
 		 * @param {Object} the handler for the command.
+		 * @param {orion.commands.ParametersDescription} parameters used on this invocation.  Optional.
 		 *
 		 * Note:  The current implementation will only run the command if a URL binding has been
 		 * specified, or if an item to run the command against has been specified.  
 		 */
-		runCommand: function(commandId, item, handler) {
+		runCommand: function(commandId, item, handler, parameters) {
 			if (item) {
 				var command = this._commandList[commandId];
 				var enabled = command && (command.visibleWhen ? command.visibleWhen(item) : true);
 				if (enabled && command.callback) {
 					window.setTimeout(dojo.hitch(this, function() {
-						this._invoke(new CommandInvocation(this, handler, item, null, command));
+						this._invoke(new CommandInvocation(this, handler, item, null, command), parameters);
 					}), 0);
 				}
 			} else {
@@ -417,7 +421,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				if (binding && binding.command) {
 					if (binding.command.callback) {
 						window.setTimeout(dojo.hitch(this, function() {
-							this._invoke(binding.invocation);
+							this._invoke(binding.invocation, parameters);
 						}), 0);
 					}
 				}
@@ -492,10 +496,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		
 		/*
 		 * Invoke the specified command, collecting parameters if necessary.  This is used inside the framework
-		 * when the user invokes a command.
+		 * when the user invokes a command. If parameters are specified, then these parameters should be used
+		 * in lieu of the invocation's parameters.
+		 *
 		 */
-		_invoke: function(commandInvocation) {
-			return this._collectAndInvoke(commandInvocation.makeCopy(), false);
+		_invoke: function(commandInvocation, parameters) {
+			return this._collectAndInvoke(commandInvocation.makeCopy(parameters), false);
 		},
 		
 	
@@ -518,6 +524,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 							onBlur: function() {dijit.popup.close(tooltipDialog);}
 						});		
 						var parameterArea = dojo.create("div"); //$NON-NLS-0$
+						dojo.addClass(parameterArea, "parameterPopup"); //$NON-NLS-0$
 						var originalFocusNode = window.document.activeElement;
 						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
 							dijit.popup.close(tooltipDialog);
@@ -526,26 +533,27 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 								originalFocusNode.focus();
 							}
 						})(parameterArea);
-						tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
-						var menu = dijit.byId(commandInvocation.domParent.id);
-						var pos;
-						if (menu) {
-							pos = dojo.position(menu.eclipseScopeId, true);
-						} else {
-							pos = dojo.position(commandInvocation.domNode, true);
-						}
-						if (pos.x && pos.y && pos.w) {
-							dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
-							window.setTimeout(function() {
-								focusNode.focus();
-								focusNode.select();
-							}, 0);
-							collecting = true;
+						if (parameterArea.childNodes.length > 0) {
+							tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
+							var menu = dijit.byId(commandInvocation.domParent.id);
+							var pos;
+							if (menu) {
+								pos = dojo.position(menu.eclipseScopeId, true);
+							} else {
+								pos = dojo.position(commandInvocation.domNode, true);
+							}
+							if (pos.x && pos.y && pos.w) {
+								dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
+								window.setTimeout(function() {
+									focusNode.focus();
+									focusNode.select();
+								}, 0);
+								collecting = true;
+							}
 						}
 					}
 					if (!collecting) {
-						// We have failed, so let's get rid of the parameters and just call the callback
-						commandInvocation.parameters = null;
+						// Just call the callback with the information we had.
 						commandInvocation.command.callback.call(commandInvocation.handler || window, commandInvocation);
 					}
 				} else {
@@ -1575,7 +1583,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	 * @param {String} [label] the (optional) label that should be used when showing the parameter
 	 * @param {String} [value] the (optional) default value for the parameter
 	 * @param {Number} [lines] the (optional) number of lines that should be shown when collecting the value.  Valid for type "text" only.
-	 *
 	 * 
 	 * @name orion.commands.CommandParameter
 	 * @class
@@ -1625,10 +1632,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 	function ParametersDescription (parameters, options, getParameters) {
 		this._storeParameters(parameters);
 		this._hasOptionalParameters = options && options.hasOptionalParameters;
-		this._clientCollect = options && options.clientCollect;
 		this._options = options;  // saved for making a copy
 		this.optionsRequested = false;
 		this.getParameters = getParameters;
+		this.clientCollect = options && options.clientCollect;
+
 	}
 	ParametersDescription.prototype = /** @lends orion.commands.ParametersDescription.prototype */ {	
 	
@@ -1668,7 +1676,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 		 * @returns {Boolean} indicating whether the caller should attempt to collect the parameters.
 		 */
 		shouldCollectParameters: function() {
-			return !this._clientCollect && this.hasParameters();
+			return !this.clientCollect && this.hasParameters();
 		},
 				
 		/**
@@ -1735,7 +1743,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 				var newParm = new CommandParameter(parm.name, parm.type, parm.label, parm.value, parm.lines);
 				parameters.push(newParm);
 			});
-			return new ParametersDescription(parameters, this._options, this.getParameters);
+			var copy = new ParametersDescription(parameters, this._options, this.getParameters);
+			// this value may have changed since the options
+			copy.clientCollect = this.clientCollect;
+			return copy;
+			
 		 },
 		 /**
 		  * Return a boolean indicating whether additional optional parameters are available.

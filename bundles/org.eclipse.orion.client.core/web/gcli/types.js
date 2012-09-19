@@ -1,14 +1,24 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
-var types = exports;
 
 
 var Argument = require('gcli/argument').Argument;
+var BlankArgument = require('gcli/argument').BlankArgument;
 
 
 /**
@@ -67,7 +77,9 @@ var Status = {
     return combined;
   }
 };
-types.Status = Status;
+
+exports.Status = Status;
+
 
 /**
  * The type.parse() method converts an Argument into a value, Conversion is
@@ -116,8 +128,6 @@ function Conversion(value, arg, status, message, predictions) {
   this.predictions = predictions;
 }
 
-types.Conversion = Conversion;
-
 /**
  * Ensure that all arguments that are part of this conversion know what they
  * are assigned to.
@@ -132,8 +142,7 @@ Conversion.prototype.assign = function(assignment) {
  * Work out if there is information provided in the contained argument.
  */
 Conversion.prototype.isDataProvided = function() {
-  var argProvided = this.arg.text !== '';
-  return this.value !== undefined || argProvided;
+  return this.arg.type !== 'BlankArgument';
 };
 
 /**
@@ -166,7 +175,7 @@ Conversion.prototype.valueEquals = function(that) {
  * @param that The conversion to compare arguments with
  */
 Conversion.prototype.argEquals = function(that) {
-  return this.arg.equals(that.arg);
+  return that == null ? false : this.arg.equals(that.arg);
 };
 
 /**
@@ -203,6 +212,36 @@ Conversion.prototype.getPredictions = function() {
   }
   return this.predictions || [];
 };
+
+/**
+ * Return an index constrained by the available predictions. Basically
+ * (index % predicitons.length)
+ */
+Conversion.prototype.constrainPredictionIndex = function(index) {
+  if (index == null) {
+    return undefined;
+  }
+
+  var predictions = this.getPredictions();
+  if (predictions.length === 0) {
+    return undefined;
+  }
+
+  index = index % predictions.length;
+  if (index < 0) {
+    index = predictions.length + index;
+  }
+  return index;
+};
+
+/**
+ * Constant to allow everyone to agree on the maximum number of predictions
+ * that should be provided. We actually display 1 less than this number.
+ */
+Conversion.maxPredictions = 11;
+
+exports.Conversion = Conversion;
+
 
 /**
  * ArrayConversion is a special Conversion, needed because arrays are converted
@@ -278,7 +317,7 @@ ArrayConversion.prototype.toString = function() {
   }, this).join(', ') + ' ]';
 };
 
-types.ArrayConversion = ArrayConversion;
+exports.ArrayConversion = ArrayConversion;
 
 
 /**
@@ -344,13 +383,25 @@ Type.prototype.decrement = function(value) {
 };
 
 /**
- * There is interesting information (like predictions) in a conversion of
- * nothing, the output of this can sometimes be customized.
- * @return Conversion
+ * The 'blank value' of most types is 'undefined', but there are exceptions;
+ * This allows types to specify a better conversion from empty string than
+ * 'undefined'.
+ * 2 known examples of this are boolean -> false and array -> []
  */
-Type.prototype.getDefault = undefined;
+Type.prototype.getBlank = function() {
+  return this.parse(new BlankArgument());
+};
 
-types.Type = Type;
+/**
+ * This is something of a hack for the benefit of DeferredType which needs to
+ * be able to lie about it's type for fields to accept it as one of their own.
+ * Sub-types can ignore this unless they're DeferredType.
+ */
+Type.prototype.getType = function() {
+  return this;
+};
+
+exports.Type = Type;
 
 /**
  * Private registry of types
@@ -358,7 +409,7 @@ types.Type = Type;
  */
 var registeredTypes = {};
 
-types.getTypeNames = function() {
+exports.getTypeNames = function() {
   return Object.keys(registeredTypes);
 };
 
@@ -371,7 +422,7 @@ types.getTypeNames = function() {
  * #getType() is called with a 'name' that matches Type.prototype.name we will
  * pass the typeSpec into this constructor.
  */
-types.registerType = function(type) {
+exports.registerType = function(type) {
   if (typeof type === 'object') {
     if (type instanceof Type) {
       if (!type.name) {
@@ -394,7 +445,7 @@ types.registerType = function(type) {
   }
 };
 
-types.registerTypes = function registerTypes(newTypes) {
+exports.registerTypes = function registerTypes(newTypes) {
   Object.keys(newTypes).forEach(function(name) {
     var type = newTypes[name];
     type.name = name;
@@ -405,14 +456,14 @@ types.registerTypes = function registerTypes(newTypes) {
 /**
  * Remove a type from the list available to the system
  */
-types.deregisterType = function(type) {
+exports.deregisterType = function(type) {
   delete registeredTypes[type.name];
 };
 
 /**
  * Find a type, previously registered using #registerType()
  */
-types.getType = function(typeSpec) {
+exports.getType = function(typeSpec) {
   var type;
   if (typeof typeSpec === 'string') {
     type = registeredTypes[typeSpec];
