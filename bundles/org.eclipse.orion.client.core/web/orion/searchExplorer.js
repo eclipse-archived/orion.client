@@ -853,6 +853,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultExplorer.prototype.loadOneFileMetaData =  function(index, onComplete){
+		if(this._crawling){
+			return;
+		}
 		var item = this.model.indexedFileItems[index];
 		var that = this;
 		this.fileClient.read(item.location, true).then(
@@ -869,7 +872,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				} else {
 					//this.renderer.renderLocationElement(item);
 				}
-			    if(index === (this.model.indexedFileItems.length-1)){	
+			    if(index === this.model.indexedFileItems.length){	
 			    	if(onComplete){
 			    		onComplete();
 			    	} else {
@@ -884,7 +887,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				//If we can't load file meta data we have to stale the file.
 				item.stale = true;
 				this.renderer.staleFileElement(item);
-				if(index === (this.model.indexedFileItems.length-1)){
+				if(index === this.model.indexedFileItems.length){
 			    	if(onComplete){
 			    		onComplete();
 			    	} else {
@@ -897,6 +900,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		);
 	};
 
+	SearchResultExplorer.prototype.setCrawling = function(crawling) {
+		this._crawling = crawling;
+	};
+	
 	SearchResultExplorer.prototype.preview = function() {
 		var that = this;
 		this._commandService.openParameterCollector("pageActions", function(parentDiv) { //$NON-NLS-0$
@@ -1450,7 +1457,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else {
 			this.getNavHandler().focus();
 		}
-		this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot);
+		this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
@@ -1516,14 +1523,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 		this.model.indexedFileItems = newIndex;
 		if(this.model.indexedFileItems.length === 0){
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
 			this.getNavHandler().cursorOn(null, true);
 		} else if(!currentFileItem){
 			this.getNavHandler().cursorOn(null, true);
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
 			this.gotoCurrent();
 		} else {
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot, true);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children, true);
 		}
 	};
 	

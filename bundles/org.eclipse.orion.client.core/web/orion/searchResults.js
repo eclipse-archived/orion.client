@@ -31,7 +31,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 
 	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
 
-		_renderSearchResult: function(resultsNode, query, jsonData) {
+		_renderSearchResult: function(crawling, resultsNode, query, jsonData) {
 			var foundValidHit = false;
 			var resultLocation = [];
 			dojo.empty(resultsNode);
@@ -48,6 +48,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 					}
 				}
 			}
+			this.explorer.setCrawling(crawling);
 			this.explorer.setResult(resultsNode, resultLocation, query, jsonData.response.numFound);
 			this.explorer.startUp();
 		},
@@ -73,7 +74,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
 				var self = this;
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
-				crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
+				crawler.search(function(jsonData){self._renderSearchResult(true, resultsNode, query, jsonData);});
 			} else {
 				var queryToService = query;
 				if(qObj.searchStrWithWhiteSpace){
@@ -83,7 +84,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				try{
 					this.fileService.search(qObj.location, queryToService).then(
 						dojo.hitch(this, function(jsonData) {
-							this._renderSearchResult(resultsNode, query, jsonData);
+							this._renderSearchResult(false, resultsNode, query, jsonData);
 						}));
 				}
 				catch(error){
@@ -91,7 +92,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
 						var self = this;
 						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
-						crawler.search(function(jsonData){self._renderSearchResult(resultsNode, query, jsonData);});
+						crawler.search(function(jsonData){self._renderSearchResult(true, resultsNode, query, jsonData);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 					}
