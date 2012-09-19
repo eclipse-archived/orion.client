@@ -5552,13 +5552,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_setWrapMode: function (wrapMode, init) {
 			this._wrapMode = wrapMode;
-			var clientDiv = this._clientDiv;
+			var clientDiv = this._clientDiv, viewDiv = this._viewDiv;
 			if (wrapMode) {
 				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
+				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
 			} else {
 				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
+				viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
 			}
 			if (!init) {
 				this.redraw();
