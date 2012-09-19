@@ -50,7 +50,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		if (offset < 0) {
 			offset = buffer.length;
 		}
-		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix});
+		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true});
 	}
 	
 	function testProposal(proposal, text, description, prefix) {
@@ -179,7 +179,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -407,7 +407,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : String"]
 		]);
 	};
@@ -419,7 +419,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2(a, b)", "ff2(a, b) : String"]
 		]);
 	};
@@ -431,7 +431,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2(a, b)", "ff2(a, b) : String"],
 			["ff3", "ff3 : String"]
 		]);
@@ -444,7 +444,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : String"]
 		]);
 	};
@@ -603,7 +603,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -618,7 +618,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"],
 			["ff3", "ff3 : { a : Number, b : Number }"]
 		]);
@@ -634,7 +634,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"],
 			["ff3", "ff3 : { a : Number, b : Number }"]
 		]);
@@ -650,7 +650,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -665,7 +665,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			}));
 		testProposals("ff", results, [
 			["ff1", "ff1 : Number"],
-			["ff", "------------------"],
+			["ff", "---------------------------------"],
 			["ff2", "ff2 : Number"]
 		]);
 	};
@@ -780,7 +780,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["pathname", "pathname : String"],
 			["port", "port : String"],
 			["protocol", "protocol : String"],
-			["p", "------------------"],
+			["p", "---------------------------------"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
 		]);
@@ -797,7 +797,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			["pathname", "pathname : String"],
 			["port", "port : String"],
 			["protocol", "protocol : String"],
-			["p", "------------------"],
+			["p", "---------------------------------"],
 			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
 			["prototype", "prototype : Object"]
 		]);
