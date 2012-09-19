@@ -1,7 +1,17 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
@@ -20,11 +30,16 @@ define(function(require, exports, module) {
  * @param data Data to use in filling out the template
  * @param options Options to customize the template processing. One of:
  * - allowEval: boolean (default false) Basic template interpolations are
- *   either property paths (e.g. ${a.b.c.d}), however if allowEval=true then we
+ *   either property paths (e.g. ${a.b.c.d}), or if allowEval=true then we
  *   allow arbitrary JavaScript
  * - stack: string or array of strings (default empty array) The template
  *   engine maintains a stack of tasks to help debug where it is. This allows
  *   this stack to be prefixed with a template name
+ * - blankNullUndefined: By default DOMTemplate exports null and undefined
+ *   values using the strings 'null' and 'undefined', which can be helpful for
+ *   debugging, but can introduce unnecessary extra logic in a template to
+ *   convert null/undefined to ''. By setting blankNullUndefined:true, this
+ *   conversion is handled by DOMTemplate
  */
 function template(node, data, options) {
   var template = new Templater(options || {});
@@ -41,7 +56,7 @@ function Templater(options) {
     options = { allowEval: true };
   }
   this.options = options;
-  if (Array.isArray(options.stack)) {
+  if (options.stack && Array.isArray(options.stack)) {
     this.stack = options.stack;
   }
   else if (typeof options.stack === 'string') {
@@ -50,6 +65,7 @@ function Templater(options) {
   else {
     this.stack = [];
   }
+  this.nodes = [];
 }
 
 /**
@@ -71,7 +87,7 @@ Templater.prototype._splitSpecial = /\uF001|\uF002/;
  * Cached regex used to detect if a script is capable of being interpreted
  * using Template._property() or if we need to use Template._envEval()
  */
-Templater.prototype._isPropertyScript = /^[a-zA-Z0-9.]*$/;
+Templater.prototype._isPropertyScript = /^[_a-zA-Z0-9.]*$/;
 
 /**
  * Recursive function to walk the tree processing the attributes as it goes.
@@ -87,6 +103,7 @@ Templater.prototype.processNode = function(node, data) {
     data = {};
   }
   this.stack.push(node.nodeName + (node.id ? '#' + node.id : ''));
+  var pushedNode = false;
   try {
     // Process attributes
     if (node.attributes && node.attributes.length) {
@@ -103,7 +120,9 @@ Templater.prototype.processNode = function(node, data) {
         }
       }
       // Only make the node available once we know it's not going away
+      this.nodes.push(data.__element);
       data.__element = node;
+      pushedNode = true;
       // It's good to clean up the attributes when we've processed them,
       // but if we do it straight away, we mess up the array index
       var attrs = Array.prototype.slice.call(node.attributes);
@@ -134,7 +153,11 @@ Templater.prototype.processNode = function(node, data) {
           } else {
             // Replace references in all other attributes
             var newValue = value.replace(this._templateRegion, function(path) {
-              return this._envEval(path.slice(2, -1), data, value);
+              var insert = this._envEval(path.slice(2, -1), data, value);
+              if (this.options.blankNullUndefined && insert == null) {
+                insert = '';
+              }
+              return insert;
             }.bind(this));
             // Remove '_' prefix of attribute names so the DOM won't try
             // to use them before we've processed the template
@@ -162,7 +185,9 @@ Templater.prototype.processNode = function(node, data) {
       this._processTextNode(node, data);
     }
   } finally {
-    delete data.__element;
+    if (pushedNode) {
+      data.__element = this.nodes.pop();
+    }
     this.stack.pop();
   }
 };
@@ -330,18 +355,21 @@ Templater.prototype._processTextNode = function(node, data) {
       this._handleAsync(part, node, function(reply, siblingNode) {
         var doc = siblingNode.ownerDocument;
         if (reply == null) {
-          reply = '' + reply;
+          reply = this.options.blankNullUndefined ? '' : '' + reply;
         }
         if (typeof reply.cloneNode === 'function') {
           // i.e. if (reply instanceof Element) { ...
           reply = this._maybeImportNode(reply, doc);
           siblingNode.parentNode.insertBefore(reply, siblingNode);
         } else if (typeof reply.item === 'function' && reply.length) {
-          // if thing is a NodeList, then import the children
-          for (var i = 0; i < reply.length; i++) {
-            var child = this._maybeImportNode(reply.item(i), doc);
-            siblingNode.parentNode.insertBefore(child, siblingNode);
-          }
+          // NodeLists can be live, in which case _maybeImportNode can
+          // remove them from the document, and thus the NodeList, which in
+          // turn breaks iteration. So first we clone the list
+          var list = Array.prototype.slice.call(reply, 0);
+          list.forEach(function(child) {
+            var imported = this._maybeImportNode(child, doc);
+            siblingNode.parentNode.insertBefore(imported, siblingNode);
+          }.bind(this));
         }
         else {
           // if thing isn't a DOM element then wrap its string value in one
@@ -421,24 +449,29 @@ Templater.prototype._stripBraces = function(str) {
  * <tt>newValue</tt> is applied.
  */
 Templater.prototype._property = function(path, data, newValue) {
-  if (typeof path === 'string') {
-    path = path.split('.');
-  }
-  var value = data[path[0]];
-  if (path.length === 1) {
-    if (newValue !== undefined) {
-      data[path[0]] = newValue;
+  try {
+    if (typeof path === 'string') {
+      path = path.split('.');
     }
-    if (typeof value === 'function') {
-      return value.bind(data);
+    var value = data[path[0]];
+    if (path.length === 1) {
+      if (newValue !== undefined) {
+        data[path[0]] = newValue;
+      }
+      if (typeof value === 'function') {
+        return value.bind(data);
+      }
+      return value;
     }
-    return value;
+    if (!value) {
+      this._handleError('"' + path[0] + '" is undefined');
+      return null;
+    }
+    return this._property(path.slice(1), value, newValue);
+  } catch (ex) {
+    this._handleError('Path error with \'' + path + '\'', ex);
+    return '${' + path + '}';
   }
-  if (!value) {
-    this._handleError('"' + path[0] + '" is undefined');
-    return null;
-  }
-  return this._property(path.slice(1), value, newValue);
 };
 
 /**
@@ -470,8 +503,7 @@ Templater.prototype._envEval = function(script, data, frame) {
       }
     }
   } catch (ex) {
-    this._handleError('Template error evaluating \'' + script + '\'' +
-        ' environment=' + Object.keys(data).join(', '), ex);
+    this._handleError('Template error evaluating \'' + script + '\'', ex);
     return '${' + script + '}';
   } finally {
     this.stack.pop();

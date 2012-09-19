@@ -97,6 +97,15 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		ACTIVE: 2,
 		FILTERING: 3
 	};
+	
+	var STYLES = {
+		selected : " selected",
+		hr : "proposal-hr",
+		emphasis : "proposal-emphasis",
+		noemphasis : "proposal-noemphasis",
+		dfault : "proposal-default"
+	};
+	
 	function ContentAssist(textView) {
 		this.textView = textView;
 		this.state = State.INACTIVE;
@@ -315,14 +324,24 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			return this.getContentAssist().isActive();
 		},
 		lineUp: function() {
-			this.selectedIndex = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
+			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
+			// TODO we should be adding an 'unselectable' property to the proposal, rather than using the hr style
+			while (this.proposals[newSelected].style === 'hr' && newSelected > 0) {
+				newSelected--;
+			}
+			this.selectedIndex = newSelected;
 			if (this.widget) {
 				this.widget.setSelectedIndex(this.selectedIndex);
 			}
 			return true;
 		},
 		lineDown: function() {
-			this.selectedIndex = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
+			var newSelected = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
+			// TODO we should be adding an 'unselectable' property to the proposal, rather than using the hr style
+			while (this.proposals[newSelected].style === 'hr' && newSelected < this.proposals.length-1) {
+				newSelected++;
+			}
+			this.selectedIndex = newSelected;
 			if (this.widget) {
 				this.widget.setSelectedIndex(this.selectedIndex);
 			}
@@ -398,12 +417,17 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var div = document.createElement("div");
 			div.id = "contentoption" + itemIndex;
 			div.setAttribute("role", "option");
-			if (isSelected) {
-				div.className = "selected";
-				this.parentNode.setAttribute("aria-activedescendant", div.id);
+			var node;
+			if (proposal.style === "hr") {
+				node = document.createElement("hr");
+			} else {
+				div.className = this.calculateClasses(proposal.style, isSelected);
+				node = document.createTextNode(this.getDisplayString(proposal));
+				if (isSelected) {
+					this.parentNode.setAttribute("aria-activedescendant", div.id);
+				}
 			}
-			var textNode = document.createTextNode(proposal);
-			div.appendChild(textNode, div);
+			div.appendChild(node, div);
 			parent.appendChild(div);
 		},
 		/** @private */
@@ -419,6 +443,14 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				});
 			}
 			this._isAccessible = true;
+		},
+		/** @private */
+		calculateClasses : function(style, isSelected) {
+			var cssClass = STYLES[style];
+			if (!cssClass) {
+				cssClass = STYLES.dfault;
+			}
+			return isSelected ? cssClass + STYLES.selected : cssClass;
 		},
 		/** @private */
 		getDisplayString: function(proposal) {
@@ -457,11 +489,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			var nodes = this.parentNode.childNodes;
 			for (var i=0; i < nodes.length; i++) {
 				var child = nodes[i];
-				if (child.className === "selected") {
-					child.className = "";
+				var selIndex = child.className.indexOf(STYLES.selected);
+				if (selIndex >= 0) {
+					child.className = child.className.substring(0, selIndex) + 
+							child.className.substring(selIndex + STYLES.selected.length);
 				}
 				if (child === node) {
-					child.className = "selected";
+					child.className = child.className + STYLES.selected;
 					this.parentNode.setAttribute("aria-activedescendant", child.id);
 					child.focus();
 					if (child.offsetTop < this.parentNode.scrollTop) {
@@ -484,7 +518,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			caretLocation.y += this.textView.getLineHeight();
 			this.parentNode.innerHTML = "";
 			for (var i = 0; i < this.proposals.length; i++) {
-				this.createDiv(this.getDisplayString(this.proposals[i]), i===0, this.parentNode, i);
+				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
 			}
 			this.textView.convert(caretLocation, "document", "page");
 			this.parentNode.style.position = "absolute";

@@ -39,40 +39,41 @@ define("plugins/esprima/types", [], function() {
 	// the global object when not in browser or node
 	var Global = function() {};
 	Global.prototype = {
-		decodeURI : new Definition("?String:uri"),			
-		encodeURI : new Definition("?String:uri"),			
+		$$proto : new Definition("Object"),
+		
+		decodeURI : new Definition("?String:uri"),
+		encodeURI : new Definition("?String:uri"),
 		'eval' : new Definition("?Object:toEval"),
 		parseInt : new Definition("?Number:str,[radix]"),
 		parseFloat : new Definition("?Number:str,[radix]"),
 		"this": new Definition("Global"),  
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("?Object:[val]"),
-		Function: new Definition("?Function:"),
-		Array: new Definition("?Array:[val]"),
-		Boolean: new Definition("?Boolean:[val]"),
-		Number: new Definition("?Number:[val]"),
-		Date: new Definition("?Date:[val]"),
-		RegExp: new Definition("?RegExp:[val]"),
-		Error: new Definition("?Error:[err]"),
-		$$proto : new Definition("Object"),
-		'undefined' : new Definition("undefined")
+		Object: new Definition("*Object:[val]"),
+		Function: new Definition("*Function:"),
+		Array: new Definition("*Array:[val]"),
+		Boolean: new Definition("*Boolean:[val]"),
+		Number: new Definition("*Number:[val]"),
+		Date: new Definition("*Date:[val]"),
+		RegExp: new Definition("*RegExp:[val]"),
+		Error: new Definition("*Error:[err]"),
+		'undefined' : new Definition("undefined"),
+		isNaN : new Definition("?Boolean:num"),
+		isFinite : new Definition("?Boolean:num"),
+		"NaN" : new Definition("Number"),
+		"Infinity" : new Definition("Number"),
+		decodeURIComponent : new Definition("?String:encodedURIString"),
+		encodeURIComponent : new Definition("?String:decodedURIString")
 
 		// not included since not meant to be referenced directly
-		// NaN
-		// Infinity
-		// isNaN
-		// isFinite
 		// EvalError, RangeError, ReferenceError, SyntaxError, TypeError, URIError 
-		
-		// not included since too boring to use...maybe consider for later			
-		// decodeURIComponent
-		// encodeURIComponent
 	};
 	
 	var Window = function() {};
 	Window.prototype = {
 		// copied from Global
+		$$proto : new Definition("Object"),
+		
 		decodeURI : new Definition("?String:uri"),
 		encodeURI : new Definition("?String:uri"),
 		'eval' : new Definition("?Object:toEval"),
@@ -81,15 +82,14 @@ define("plugins/esprima/types", [], function() {
 		"this": new Definition("Window"),  // not Global!
 		Math: new Definition("Math"),
 		JSON: new Definition("JSON"),
-		Object: new Definition("?Object:[val]"),
-		Function: new Definition("?Function:"),
-		Array: new Definition("?Array:[val]"),
-		Boolean: new Definition("?Boolean:[val]"),
-		Number: new Definition("?Number:[val]"),
-		Date: new Definition("?Date:[val]"),
-		RegExp: new Definition("?RegExp:[val]"),
-		Error: new Definition("?Error:[err]"),
-		$$proto : new Definition("Object"),
+		Object: new Definition("*Object:[val]"),
+		Function: new Definition("*Function:"),
+		Array: new Definition("*Array:[val]"),
+		Boolean: new Definition("*Boolean:[val]"),
+		Number: new Definition("*Number:[val]"),
+		Date: new Definition("*Date:[val]"),
+		RegExp: new Definition("*RegExp:[val]"),
+		Error: new Definition("*Error:[err]"),
 		'undefined' : new Definition("undefined"),
 
 		// see https://developer.mozilla.org/en/DOM/window
@@ -222,13 +222,13 @@ define("plugins/esprima/types", [], function() {
 		onpagehide : new Definition("?undefined:event"),
 
 			// Constructors
-		Image : new Definition("?HTMLImageElement:[width],[height]"),
-		Option : new Definition("?HTMLOptionElement:[text].[value],[defaultSelected],[selected]"),
-		Worker : new Definition("?Worker:url"),
-		XMLHttpRequest : new Definition("?XMLHttpRequest:"),
-		WebSocket : new Definition("?WebSocket:url,protocols"),
-		Event : new Definition("?Event:type"),
-		Node : new Definition("?Node:")
+		Image : new Definition("*HTMLImageElement:[width],[height]"),
+		Option : new Definition("*HTMLOptionElement:[text].[value],[defaultSelected],[selected]"),
+		Worker : new Definition("*Worker:url"),
+		XMLHttpRequest : new Definition("*XMLHttpRequest:"),
+		WebSocket : new Definition("*WebSocket:url,protocols"),
+		Event : new Definition("*Event:type"),
+		Node : new Definition("*Node:")
 	};
 	
 	var initialGlobalProperties = [];
@@ -606,10 +606,10 @@ define("plugins/esprima/types", [], function() {
 			// properties
 			appName : new Definition("String"),
 			appVersion : new Definition("String"),
-			connection : new Definition("Object"), // not right, see https://developer.mozilla.org/en/DOM/window.navigator.connection
+			connection : new Definition("Connection"),
 			cookieEnabled : new Definition("Boolean"), 
 			language : new Definition("String"),
-			mimeTypes : new Definition("Object"),  // not right, see https://developer.mozilla.org/en/DOM/window.navigator.mimeTypes
+			mimeTypes : new Definition("MimeTypeArray"),
 			onLine : new Definition("Boolean"), 
 			oscpu : new Definition("String"),
 			platform : new Definition("String"),
@@ -620,6 +620,43 @@ define("plugins/esprima/types", [], function() {
 			javaEnabled : new Definition("?Boolean:"),
 			registerContentHandler : new Definition("?undefined:mimType,url,title"),
 			registerProtocolHandler : new Definition("?undefined:protocol,url,title")
+		},
+		
+		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeTypeArray.html
+		MimeTypeArray : {
+			$$isBuiltin: true,
+			length : new Definition("Number"),
+			item : new Definition("?MimeType:index"),
+			namedItem : new Definition("?MimeType:name")
+		},
+		
+		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/MimeType.html
+		MimeType : {
+			$$isBuiltin: true,
+			description : new Definition("String"),
+			suffixes : new Definition("String"),
+			type : new Definition("String"),
+			enabledPlugin : new Definition("Plugin")
+		},
+		
+		// (not in MDN) http://www.coursevector.com/dommanual/dom/objects/Plugin.html
+		Plugin : {
+			$$isBuiltin: true,
+			description : new Definition("String"),
+			fileName : new Definition("String"),
+			length : new Definition("Number"),
+			name : new Definition("String"),
+			item : new Definition("?MimeType:index"),
+			namedItem : new Definition("?MimeType:name")
+		},
+		
+		// http://dvcs.w3.org/hg/dap/raw-file/tip/network-api/Overview.html#the-connection-interface
+		Connection : {
+			$$isBuiltin: true,
+			bandwidth : new Definition("Number"),
+			metered : new Definition("Boolean"),
+			
+			onchange : new Definition("Function")
 		},
 		
 		// http://dev.w3.org/html5/webstorage/#storage-0
@@ -770,9 +807,8 @@ define("plugins/esprima/types", [], function() {
 			replaceState : new Definition("?undefined:data,title,url")
 		},
 		
-		// see http://www.w3.org/TR/dom/#document
-		// incomplete
-		// also see http://www.w3.org/TR/html5/dom.html#documents-in-the-dom
+		// see http://www.w3.org/TR/dom/#document (complete)
+		// see http://www.w3.org/TR/html5/dom.html#documents-in-the-dom (incomplete)
 		Document : {
 			$$isBuiltin: true,
 			$$proto : new Definition("Node"),
@@ -785,7 +821,7 @@ define("plugins/esprima/types", [], function() {
 			contentType : new Definition("String"),
 
 			doctype : new Definition("DocumentType"),
-			element : new Definition("Element"),
+			documentElement : new Definition("Element"),
 
 			getElementsByTagName : new Definition("?HTMLCollection:localName"),
 			getElementsByTagNameNS : new Definition("?HTMLCollection:namespace,localName"),
@@ -799,7 +835,8 @@ define("plugins/esprima/types", [], function() {
 			createProcessingInstruction : new Definition("?ProcessingInstruction:target,data"),
 			importNode : new Definition("?Node:node,[deep]"),
 			adoptNode : new Definition("?Node:node"),
-			createEvent : new Definition("?Range:"),
+			createEvent : new Definition("?Event:eventInterfaceName"),
+			createRange : new Definition("?Range:"),
 
 			createNodeIterator : new Definition("?NodeIterator:root,[whatToShow],[filter]"),
 			createTreeWalker : new Definition("?TreeWalker:root,[whatToShow],[filter]"),
@@ -1009,11 +1046,17 @@ define("plugins/esprima/types", [], function() {
 			removeAllRanges : new Definition("?undefined:")
 		},
 		
-		// see http://www.w3.org/TR/html5/the-img-element.html#htmlimageelement
+		// see http://www.w3.org/TR/html5/the-html-element.html#the-html-element
 		// incomplete
 		HTMLElement : {
 			$$isBuiltin: true,
-			$$proto : new Definition("Element")
+			$$proto : new Definition("Element"),
+			
+			id : new Definition("String"),
+			title : new Definition("String"),
+			lang : new Definition("String"),
+			dir : new Definition("String"),
+			className : new Definition("String")
 		},
 		 
 		// see http://www.w3.org/TR/html5/the-img-element.html#htmlimageelement
@@ -1029,10 +1072,13 @@ define("plugins/esprima/types", [], function() {
 			$$proto : new Definition("HTMLElement")
 		},
 		 
-		// incomplete
+		// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-75708506
 		HTMLCollection : {
 			$$isBuiltin: true,
-			$$proto : new Definition("Object")
+			$$proto : new Definition("Object"),
+			length : new Definition("Number"),
+			item : new Definition("?Element:index"),
+			namedItem : new Definition("?Element:name")
 		},
 		
 		// incomplete
@@ -1137,7 +1183,225 @@ define("plugins/esprima/types", [], function() {
 			toggle : new Definition("?Boolean:token")
 		}
 		
-		// need to include constructors for lots and lots of html elements
+// HTML constructors
+// http://www.w3.org/TR/DOM-Level-2-HTML/html.html#ID-33759296
+/*		
+HTMLVideoElement
+HTMLAppletElement
+HTMLCollection
+HTMLOutputElement
+HTMLQuoteElement
+HTMLFrameElement
+HTMLTableSectionElement
+HTMLModElement
+HTMLTableCaptionElement
+HTMLCanvasElement
+HTMLOptGroupElement
+HTMLLinkElement
+HTMLImageElement
+HTMLBRElement
+HTMLProgressElement
+HTMLParagraphElement
+HTMLScriptElement
+HTMLOListElement
+HTMLTableCellElement
+HTMLTextAreaElement
+HTMLUListElement
+HTMLMarqueeElement
+HTMLFieldSetElement
+HTMLLIElement
+HTMLTableElement
+HTMLButtonElement
+HTMLAnchorElement
+HTMLAllCollection
+HTMLMetaElement
+HTMLLabelElement
+HTMLMenuElement
+HTMLMapElement
+HTMLParamElement
+HTMLTableColElement
+HTMLTableRowElement
+HTMLDocument
+HTMLSpanElement
+HTMLBaseFontElement
+HTMLEmbedElement
+HTMLDivElement
+HTMLBaseElement
+HTMLHeadElement
+HTMLTitleElement
+HTMLDirectoryElement
+HTMLUnknownElement
+HTMLHtmlElement
+HTMLHRElement
+HTMLInputElement
+HTMLDataListElement
+HTMLStyleElement
+HTMLSourceElement
+HTMLOptionElement
+HTMLFontElement
+HTMLElement
+HTMLBodyElement
+HTMLFormElement
+HTMLHeadingElement
+HTMLSelectElement
+HTMLPreElement
+HTMLIFrameElement
+HTMLMediaElement
+HTMLLegendElement
+HTMLObjectElement
+HTMLDListElement
+HTMLAudioElement
+HTMLAreaElement
+HTMLFrameSetElement
+HTMLMeterElement
+HTMLKeygenElement
+*/
+// SVG constructors
+// http://www.w3.org/TR/SVG11/struct.html#NewDocument
+/*
+SVGScriptElement
+SVGCircleElement
+SVGTitleElement
+SVGFEDistantLightElement
+SVGGElement
+SVGAnimatedString
+SVGFEConvolveMatrixElement
+SVGTransform
+SVGAltGlyphDefElement
+SVGAnimatedLengthList
+SVGCursorElement
+SVGAnimateColorElement
+SVGPathSegCurvetoQuadraticSmoothAbs
+SVGDefsElement
+SVGAnimateElement
+SVGPathSegLinetoVerticalAbs
+SVGAnimatedBoolean
+SVGVKernElement
+SVGElement
+SVGEllipseElement
+SVGForeignObjectElement
+SVGColor
+SVGFEPointLightElement
+SVGMissingGlyphElement
+SVGPathSegCurvetoCubicRel
+SVGPathSegMovetoRel
+SVGFEDisplacementMapElement
+SVGPathSegArcRel
+SVGAElement
+SVGFETurbulenceElement
+SVGMetadataElement
+SVGTextElement
+SVGElementInstanceList
+SVGFEBlendElement
+SVGTSpanElement
+SVGFESpecularLightingElement
+SVGPathSegArcAbs
+SVGZoomEvent
+SVGSVGElement
+SVGPathSegLinetoHorizontalRel
+SVGFEOffsetElement
+SVGAltGlyphItemElement
+SVGPaint
+SVGException
+SVGLengthList
+SVGFontFaceUriElement
+SVGPathSegLinetoAbs
+SVGMarkerElement
+SVGStyleElement
+SVGAnimatedRect
+SVGFilterElement
+SVGFEFuncGElement
+SVGAnimatedNumberList
+SVGPathSegLinetoHorizontalAbs
+SVGZoomAndPan
+SVGFEImageElement
+SVGAnimatedPreserveAspectRatio
+SVGPathSegLinetoVerticalRel
+SVGAltGlyphElement
+SVGSetElement
+SVGPathSegCurvetoCubicAbs
+SVGRect
+SVGPathSegClosePath
+SVGFEGaussianBlurElement
+SVGAngle
+SVGViewElement
+SVGMatrix
+SVGPreserveAspectRatio
+SVGTextPathElement
+SVGRenderingIntent
+SVGFEFloodElement
+SVGAnimateTransformElement
+SVGFEMergeNodeElement
+SVGPoint
+SVGTRefElement
+SVGFESpotLightElement
+SVGLinearGradientElement
+SVGPathSegList
+SVGTextContentElement
+SVGPointList
+SVGSwitchElement
+SVGPathSegCurvetoQuadraticSmoothRel
+SVGFontFaceElement
+SVGLineElement
+SVGLength
+SVGFECompositeElement
+SVGDocument
+SVGGlyphElement
+SVGFontFaceNameElement
+SVGFEMergeElement
+SVGPathSegCurvetoCubicSmoothRel
+SVGAnimatedInteger
+SVGAnimatedNumber
+SVGAnimateMotionElement
+SVGStopElement
+SVGUseElement
+SVGFontElement
+SVGGradientElement
+SVGPathSegLinetoRel
+SVGPathSegCurvetoQuadraticAbs
+SVGAnimatedEnumeration
+SVGNumber
+SVGTextPositioningElement
+SVGComponentTransferFunctionElement
+SVGFEDiffuseLightingElement
+SVGStringList
+SVGRadialGradientElement
+SVGPathElement
+SVGMaskElement
+SVGFEFuncBElement
+SVGPolygonElement
+SVGGlyphRefElement
+SVGFEColorMatrixElement
+SVGElementInstance
+SVGFontFaceSrcElement
+SVGAnimatedAngle
+SVGFontFaceFormatElement
+SVGHKernElement
+SVGPolylineElement
+SVGAnimatedTransformList
+SVGFEFuncRElement
+SVGDescElement
+SVGAnimatedLength
+SVGSymbolElement
+SVGNumberList
+SVGViewSpec
+SVGPathSegCurvetoCubicSmoothAbs
+SVGMPathElement
+SVGPatternElement
+SVGPathSegCurvetoQuadraticRel
+SVGFEComponentTransferElement
+SVGRectElement
+SVGTransformList
+SVGFETileElement
+SVGFEDropShadowElement
+SVGUnitTypes
+SVGPathSegMovetoAbs
+SVGClipPathElement
+SVGFEMorphologyElement
+SVGImageElement
+SVGPathSeg
+SVGFEFuncAElement
+*/
 	};
 	
 	return {

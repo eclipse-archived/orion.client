@@ -56,7 +56,7 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 				// gather children to visit
 				children = [];
 				for (key in node) {
-					if (key !== "range" && key !== "errors" && key !== "target" && key !== "extras") {
+					if (key !== "range" && key !== "errors" && key !== "target" && key !== "extras" && key !== "comments") {
 						child = node[key];
 						if (child instanceof Array) {
 							for (i = 0; i < child.length; i++) {

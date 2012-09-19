@@ -1,1 +1,0 @@
-This directory contains folders that can be used for content templates.  
