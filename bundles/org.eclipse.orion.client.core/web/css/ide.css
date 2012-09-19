@@ -145,6 +145,11 @@ h2 {
 	width: 50em;
 }
 
+.parameterPopup {
+	min-width: 15em;
+	max-width: 100em;
+}
+
 .navTableHeading {
 	color: #404040;
 	border-bottom: 1px solid #404040;
