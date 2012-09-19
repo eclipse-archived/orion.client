@@ -87,7 +87,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			blue.lineNumberOdd = '#333';
 			blue.lineNumberEven = '#333';
 			blue.lineNumber = '#333';
-			blue.currentLine = '#EAF2FE';
+			blue.currentLine = 'white';
 			
 			this.styles.push( blue );
 			
@@ -104,7 +104,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			ambience.lineNumberOdd = 'black';
 			ambience.lineNumberEven = 'black';
 			ambience.lineNumber = 'black';
-			ambience.currentLine = '#EAF2FE';
+			ambience.currentLine = 'lightcyan';
 			
 			this.styles.push( ambience );
 			
@@ -121,7 +121,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			tierra.lineNumberOdd = 'chocolate';
 			tierra.lineNumberEven = 'chocolate';
 			tierra.lineNumber = 'chocolate';
-			tierra.currentLine = '#EAF2FE';
+			tierra.currentLine = '#baa289';
 			
 			this.styles.push( tierra );
 			
@@ -155,7 +155,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			adelante.lineNumberOdd = '#AF473B';
 			adelante.lineNumberEven = '#AF473B';
 			adelante.lineNumber = '#AF473B';
-			adelante.currentLine = '#EAF2FE';
+			adelante.currentLine = '#baa289';
 			
 			this.styles.push( adelante );
 			
@@ -191,9 +191,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 								{ type:'RECTANGLE', name:'Background',			x:LEFT + 46,	y:TOP, width:290,	height:dataset.height, family:'background',	 fill: 'white' },
 								{ type:'TEXT', name:'Comments',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment', font: '9pt sans-serif' }, 
 								
-								
+								{ type:'RECTANGLE', name:'Current Line',		x:LEFT + 46,	y:TOP +67, width:290,	height:18, family:'currentLine', fill: '#eaf2fd' },
 								{ type:'TEXT', name:'Strings',		label:'\'Result\'',			x:LEFT + 144,	y:TOP + 60,		fill: 'cornflowerBlue', family:'string', font: '9pt sans-serif' }, 
 								{ type:'TEXT', name:'Foreground',			label:'multiply(a,b){',		x:LEFT + 100,	y:TOP + 40,		fill: '#333',			family:'text', font: '9pt sans-serif' },
+																{ type:'RECTANGLE', name:'Overview Ruler',		x:LEFT + 336,	y:TOP, width:14,	height:dataset.height, family:'overviewRuler', fill: 'white' },
 								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
 								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
 								 
@@ -201,12 +202,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 								{ type:'TEXT', name:'Foreground',			label:'output = ',			x:LEFT + 95,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
 								
 								{ type:'TEXT', name:'Foreground',			label:';',					x:LEFT + 185,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
+								
 								{ type:'TEXT', name:'keywords',		label:'var',				x:LEFT  +75,	y:TOP + 80,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
 								{ type:'TEXT', name:'Foreground',			label:'result = a*b;',		x:LEFT + 95,	y:TOP + 80,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
 								{ type:'TEXT', name:'keywords',		label:'return',				x:LEFT + 75,	y:TOP + 100,	fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
 								{ type:'TEXT', name:'Foreground',			label:'output + result;',	x:LEFT + 115,	y:TOP + 100,	fill: '#333',			family:'text', font: '9pt sans-serif' },
 								{ type:'TEXT', name:'Foreground',			label:'}',					x:LEFT + 55,	y:TOP + 120,	fill: '#333',			family:'text', font: '9pt sans-serif' },
-								{ type:'RECTANGLE', name:'Overview Ruler',		x:LEFT + 336,	y:TOP, width:14,	height:dataset.height, family:'overviewRuler', fill: 'white' },
+
 								{ type:'RECTANGLE', name:'Annotation Ruler',	x:LEFT,			y:TOP, width:46,	height:dataset.height, family:'annotationRuler', fill: 'white' }];
 			
 			for( var line =0; line < 8; line++ ){
@@ -240,8 +242,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 									  { element: 'keyword', value: settings['keyword'].value },
 									  { element: 'overviewRuler', value: settings['overviewRuler'].value },
 									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
-									  { element: 'lineNumber', value: settings['lineNumber'].value }
-									/*  { 'currentLine': settings['currentLine'].value } */
+									  { element: 'lineNumber', value: settings['lineNumber'].value },
+									  { element: 'currentLine', value: settings['currentLine'].value }
 									  ];
 
 				prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
