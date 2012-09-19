@@ -1031,8 +1031,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view or is used for focus traversal.
 	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
 	 * @property {String} [themeClass] the CSS class for the view theming.
-	 * @property {Number} [tabSize] The number of spaces in a tab.
-	 * @property {Boolean} [wrapMode] whether or not the view wraps lines.
+	 * @property {Number} [tabSize=8] The number of spaces in a tab.
+	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
 	 */
 	/**
 	 * Constructs a new text view.
