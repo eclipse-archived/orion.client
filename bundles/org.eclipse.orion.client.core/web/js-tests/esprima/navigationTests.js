@@ -48,8 +48,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		}
 		assert.equal(actual.typeName, expected.typeName, "Invalid type name in definition");
 		assert.equal(actual.path, expected.path, "Invalid path in definition");
-		assert.equal(actual.range[0], expected.range[0], "Invalid range start in definition");
-		assert.equal(actual.range[1], expected.range[1], "Invalid range end in definition");
+		if (!expected.range) {
+			assert.ok(!actual.range, "Should not have found a range object: " + actual.range);
+		} else {
+			assert.equal(actual.range[0], expected.range[0], "Invalid range start in definition");
+			assert.equal(actual.range[1], expected.range[1], "Invalid range end in definition");
+		}
 		assert.equal(actual.hover, expected.hover, "Invalid hover in definition");
 	}
 	
@@ -58,13 +62,18 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 			hover = toFind + " :: " + typeName;
 		}
 		var expected = {};
-		expected.range = [];
 		
-		expected.range[0] = -1;
-		for (var i = 0; i < findIndex; i++) {
-			expected.range[0] = buffer.indexOf(toFind, expected.range[0]+1);
+		if (findIndex >= 0) {
+			expected.range = [];
+			
+			expected.range[0] = -1;
+			for (var i = 0; i < findIndex; i++) {
+				expected.range[0] = buffer.indexOf(toFind, expected.range[0]+1);
+			}
+			expected.range[1] = expected.range[0] + toFind.length;
+		} else {
+			expected.range = null;
 		}
-		expected.range[1] = expected.range[0] + toFind.length;
 		expected.typeName = typeName;
 		expected.hover = hover;
 		expected.path = path;
@@ -74,13 +83,29 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 	
 	function doSameFileTest(buffer, toFind, typeName, hover, findIndex) {
 		if (!findIndex) { findIndex = 1; }
+		var findText;
+		if (typeof findIndex === "string") {
+			findText = findIndex;
+			findIndex = -1;
+		}
 		var expected = createExpected(buffer, toFind, typeName, hover, null, findIndex);
+		if (findText) {
+			expected.range = [];
+			expected.range[0] = buffer.indexOf(findText);
+			expected.range[1] = expected.range[0] + findText.length;
+		}
 		var actual = computeDefinition(buffer, toFind);
 		assertDefinition(expected, actual);
 	}
-	function doMultiFileTest(otherFile, otherBuffer, buffer, toFind, typeName, hover, findIndex) {
-		if (!findIndex) { findIndex = 1; }
-		var expected = createExpected(otherBuffer, toFind, typeName, hover, otherFile, findIndex);
+	function doMultiFileTest(otherFile, otherBuffer, buffer, toFind, typeName, hover, findIndex, targetInSameFile) {
+		var targetFile = otherFile;
+		if (targetInSameFile) {
+			targetFile = null;
+		}
+		if (!findIndex) { 
+			findIndex = 1; 
+		}
+		var expected = createExpected(targetInSameFile ? buffer : otherBuffer, toFind, typeName, hover, targetFile, findIndex);
 		var buffers = { };
 		buffers[otherFile] = otherBuffer;
 		var actual = computeDefinition(buffer, toFind, new MockIndexer(buffers));
@@ -115,10 +140,85 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		doSameFileTest("var d = 9;var bbb = function(a,b,d) {  }\nd", 
 			'd', "Number", 'd :: Number', 1);
 	};
+	tests.testObjLiteral1 = function() {
+		doSameFileTest("var d = { c: 9, b: ''}\nd.c", 
+			'c', "Number", 'c :: Number', 1);
+	};
+	tests.testObjLiteral2 = function() {
+		doSameFileTest("var d = { a: 9, b: ''}\nd.b", 
+			'b', "String", 'b :: String', 1);
+	};
+	
+	tests.testPrototype1 = function() {
+		doSameFileTest("var Foo = function() {};\nFoo.prototype = { z: 9, b: ''}\nvar d = new Foo();\nd.z", 
+			'z', "Number", 'z :: Number', 1);
+	};
+	
+	tests.testPrototype2 = function() {
+		doSameFileTest("var Foo = function() {};\nFoo.prototype = { a: 9, b: ''}\nvar d = new Foo();\nd.b", 
+			'b', "String", 'b :: String', 1);
+	};
 	
 	
 	//////////////////////////////////////////////////////////
-	// tests in same other file
+	// tests for 'this' expressions
+	//////////////////////////////////////////////////////////
+	tests.testThis1 = function() {
+		doSameFileTest("var Foo = function() { this };", 
+			'this', "Foo", 'this :: Foo', "function() { this }");
+	};
+	
+	tests.testThis2 = function() {
+		doSameFileTest("this", 
+			'this', "Global", 'this :: Global', -1);
+	};
+	
+	tests.testThis3 = function() {
+		doSameFileTest("/*jslint browser:true */this", 
+			'this', "Window", 'this :: Window', -1);
+	};
+	
+	tests.testThis4 = function() {
+		doSameFileTest("var Foo = function() {};\nFoo.prototype = { a : this }", 
+			'this', "Global", 'this :: Global', -1);
+	};
+	
+	//////////////////////////////////////////////////////////
+	// dotted constructor names
+	//////////////////////////////////////////////////////////
+	tests.testDottedConstructor1 = function() {
+		doSameFileTest("function outer() { var Inner = function() { this.xxx=9; }; return Inner; }\n" +
+			"new (outer())().xxx", 
+			'xxx', "Number", 'xxx :: Number', 1);
+	};
+	
+	// not dotted since not part of the outer object
+	tests.testDottedConstructor2 = function() {
+		doSameFileTest("function outer() { var Inner = function() { this.xxx=9; }; return Inner; }\n" +
+			"var xxx = new (outer())();\nxxx", 
+			'xxx', "Inner", 'xxx :: Inner', 1);
+	};
+	
+	// should be dotted, but is not in Chrome Dev Tools, this kind of constructor is Fun.Inner,
+	// but we show it as just Inner
+	tests.testDottedConstructor2 = function() {
+		doSameFileTest("function Fun() { var Inner = function() { this.xxx=9; }; return Inner; }\n" +
+			"var xxx = new (new Fun())();\nxxx", 
+			'xxx', "Inner", 'xxx :: Inner', 1);
+	};
+	
+	// again, should be dotted but is not
+	tests.testDottedConstructor2 = function() {
+		doSameFileTest("function Fun() { this.Inner = function() { }}" +
+			"var f = new Fun()" +
+			"var yyy = new f.Inner()" +
+			"yyy", 
+			'yyy', "Inner", 'yyy :: Inner', 1);
+	};
+	
+	
+	//////////////////////////////////////////////////////////
+	// tests in other file
 	//////////////////////////////////////////////////////////
 	tests.testAMD1 = function() {
 		doMultiFileTest( "file1", "define({ val1 : 9 });",
@@ -129,6 +229,31 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert"], function(mEsp
 		doMultiFileTest( "file1", "define({ val1 : function() { return 9; } });",
 			"define(['file1'], function(f1) { f1.val1; });", 
 			'val1', "?Number:", 'val1 :: () -> Number');
+	};
+	
+	//////////////////////////////////////////////////////////
+	// multi-file dotted constructor names
+	//////////////////////////////////////////////////////////
+	tests.testMultiFileDottedCosntructorAMD1 = function() {
+		doMultiFileTest( "file1", "define({ obj : { Fun : function() { } }});",
+			"define(['file1'], function(f1) { var xxx = new f1.obj.Fun(); xxx});", 
+			'xxx', "obj.Fun", 'xxx :: obj.Fun', 1, true);
+	};
+	tests.testMultiFileDottedCosntructorAMD2 = function() {
+		doMultiFileTest( "file1", "define([], function() {\n" +
+			"var obj = { Fun : function() { } };\n" +
+			"return obj.Fun});",
+			"define(['file1'], function(f1) { var xxx = new f1(); xxx});", 
+			'xxx', "obj.Fun", 'xxx :: obj.Fun', 1, true);
+	};
+	
+	tests.testMultiFileDottedCosntructorAMD3 = function() {
+		doMultiFileTest( "file1", "define([], function() {\n" +
+			"var obj = { Fun : function() { } };\n" +
+			"obj.Fun.prototype.flart = 0;\n" +
+			"return obj.Fun });",
+			"define(['file1'], function(f1) { var xxx = new f1(); xxx.flart});", 
+			'flart', "Number", 'flart :: Number');
 	};
 	
 	
