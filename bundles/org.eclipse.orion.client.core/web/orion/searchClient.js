@@ -178,7 +178,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
 			var useRegularExpresion = forceRegEx ? true : this.useRegEx;
-			return  mSearchUtils.generateSearchQuery({sort: sort, regEx: useRegularExpresion,
+			return  mSearchUtils.generateSearchQuery({sort: sort, useRegEx: useRegularExpresion,
 				rows: 40,
 				start: 0,
 				searchStr: (useRegularExpresion ? query : this._luceneEscape(query, true)),
