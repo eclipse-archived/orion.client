@@ -1047,7 +1047,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			return true;
 		},
 		/** Exits Linked Mode. Places the caret at linkedModeEscapePosition. */
-		cancel: function() {
+		cancel: function(ignoreEscapePosition) {
 			if (!this.linkedModeActive) {
 				return;
 			}
@@ -1056,11 +1056,20 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9), "tab"); //$NON-NLS-0$
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(9, false, true), "shiftTab"); //$NON-NLS-0$
 			
-			this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
+			if (!ignoreEscapePosition) {
+				this.textView.setCaretOffset(this.linkedModeEscapePosition, false);
+			}
 
 			this.editor.reportStatus(messages.linkedModeExited, null, true);
 		},
-		/**
+		lineUp: function() {
+			this.cancel(true);
+			return false;
+		},
+		lineDown: function() {
+			this.cancel(true);
+			return false;
+		},		/**
 		 * Updates the selection in the textView for given Linked Mode position.
 		 */
 		selectTextForLinkedModePosition: function(position) {
