@@ -232,7 +232,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._totalCounter++;
 		var self = this;
 		return _doServiceCall(self.fileClient, "read", [fileObj.Location]).then(function(jsonData) { //$NON-NLS-0$
-			self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
+			//self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 			if(self._hitOnceWithinFile(jsonData)){
 				fileObj.LastModified = fileObj.LocalTimeStamp;
 				self.fileLocations.push(fileObj);
@@ -240,6 +240,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				//console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
 				//console.log(fileObj.Location);
 			}
+			self.registry.getService("orion.page.message").setProgressResult({Message: "Hit " + self._hitCounter + " files out of " + self._totalCounter});
 			},
 			function(error) {
 				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
