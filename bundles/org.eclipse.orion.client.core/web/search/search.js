@@ -29,7 +29,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			return qStr;
 		}
 		
-		function parseHash(){
+		function parseHash(fileClient){
 			var hash = dojo.hash();
 			var hasLocation = (hash.indexOf("+Location:") > -1); //$NON-NLS-0$
 			var searchLocation = null;
@@ -40,6 +40,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 					searchLocation = splitHash[1].split("*")[0]; //$NON-NLS-0$
 					searchStr = splitHash[0];
 				}
+			} else {
+				searchLocation = fileClient.fileServiceRootURL("");//$NON-NLS-0$
 			}
 			return {searchStr: searchStr, searchLocation: searchLocation};
 		}
@@ -50,7 +52,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 		}
 	
 		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, query){
-			var searchLoc = parseHash();
+			var searchLoc = parseHash(fileClient);
 			if(searchLoc.searchLocation){
 				if(searchLoc.searchLocation === fileClient.fileServiceRootURL(searchLoc.searchLocation)){
 					searcher.setRootLocationbyURL(searchLoc.searchLocation);
