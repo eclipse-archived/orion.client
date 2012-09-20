@@ -1275,6 +1275,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 *       <li>"tab" - inserts a tab character at the caret</li>
 		 *       <li>"shiftTab" - noop</li>
 		 *       <li>"toggleTabMode" - toggles tab mode.</li>
+		 *       <li>"toggleWrapMode" - toggles wrap mode.</li>
 		 *       <li>"enter" - inserts a line delimiter at the caret</li>
 		 *     </ul>
 		 *   <li>Clipboard actions.</li>
@@ -3797,6 +3798,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._tabMode = !this._tabMode;
 			return true;
 		},
+		_doWrapMode: function (args) {
+			this.setOptions({wrapMode: !this.getOptions("wrapMode")});
+			return true;
+		},
 		
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
@@ -4184,6 +4189,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				"cut": {defaultHandler: function() {return self._doCut();}}, //$NON-NLS-0$
 				"paste": {defaultHandler: function() {return self._doPaste();}}, //$NON-NLS-0$
 				
+				"toggleWrapMode": {defaultHandler: function() {return self._doWrapMode();}}, //$NON-NLS-0$
 				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}} //$NON-NLS-0$
 			};
 		},
