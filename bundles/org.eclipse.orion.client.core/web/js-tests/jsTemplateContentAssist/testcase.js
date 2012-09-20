@@ -157,5 +157,62 @@ define(["dojo", "orion/assert", "orion/editor/jsTemplateContentAssist"], functio
 		assertNoProposal("do", result);
 	};
 
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace1= function() {
+		var result = getKeywords("x.@@@");
+		assertNoProposal("toString", result);
+		assertNoProposal("for".substr(1), result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace2= function() {
+		var result = getKeywords("x.  @@@");
+		assertNoProposal("toString", result);
+		assertNoProposal("for".substr(1), result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars and there should be no template content assist
+	 */
+	tests.testTemplateAfterNonWhitespace3= function() {
+		var result = getKeywords("$  @@@");
+		assertNoProposal("toString", result);
+		assertNoProposal("for".substr(1), result);
+		assertNoProposal("while", result);
+		assertNoProposal("switch", result);
+		assertNoProposal("try", result);
+		assertNoProposal("if", result);
+		assertNoProposal("do", result);
+	};
+
+	/**
+	 * Test completion after non-whitespace chars.  should be templates because 
+	 * there is a newline
+	 */
+	tests.testTemplateAfterNonWhitespace4= function() {
+		var result = getKeywords("x.\n  @@@");
+		assertNoProposal("toString", result);
+		assertProposal("for", result);
+		assertProposal("while", result);
+		assertProposal("switch", result);
+		assertProposal("try", result);
+		assertProposal("if", result);
+		assertProposal("do", result);
+	};
+
 	return tests;
 });

@@ -40,13 +40,22 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 				delete this.map[key];
 			}
 		};
+		this.prefNodes = Object.create(null);
 		this.getPreferences = function(name, scope) {
 			var d = new Deferred();
+			var self = this;
 			setTimeout(function() {
-				var prefNode = new PrefNode();
+				var prefNode = self.prefNodes[name] = new PrefNode();
 				d.resolve(prefNode);
 			}, 100);
 			return d;
+		};
+		// Search for a string in the preferences JSON.
+		this._contains = function(str) {
+			var prefNodes = this.prefNodes;
+			return Object.keys(prefNodes).some(function(name) {
+				return JSON.stringify(prefNodes[name].map).indexOf(str) !== -1;
+			});
 		};
 	}
 
@@ -296,6 +305,14 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			});
 		});
 	}());
+
+	tests['test lazy Pref storage for Configurations'] = makeTest(function() {
+		var pid = 'GRUNNUR';
+		var configuration = configAdmin.getConfiguration(pid);
+		assert.equal(preferences._contains(pid), false, 'config data exists in Prefs');
+		configuration.update({foo: 'bar'});
+		assert.equal(preferences._contains(pid), true, 'config data exists in Prefs');
+	});
 
 return tests;
 });

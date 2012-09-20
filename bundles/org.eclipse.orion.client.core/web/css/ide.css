@@ -145,6 +145,11 @@ h2 {
 	width: 50em;
 }
 
+.parameterPopup {
+	min-width: 15em;
+	max-width: 100em;
+}
+
 .navTableHeading {
 	color: #404040;
 	border-bottom: 1px solid #404040;
@@ -562,9 +567,26 @@ h2 {
 	border: 2px solid #666;
 }
 
+.contentassist .proposal-emphasis {
+	font-weight: bold
+}
+.contentassist .proposal-noemphasis {
+	background-color: linen;
+	font-weight: lighter;
+	color: grey;
+}
+.contentassist .proposal-hr {
+	/* display as horizontal rule */
+	text-decoration:line-through;
+}
+.contentassist .proposal-default {
+	/* nothing */
+}
+
 .contentassist .selected {
 	background-color: #DDD;
 }
+
 
 .contentassist>div {
 	padding: 1px 3px 0 3px;

@@ -80,6 +80,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 			if (this._activeElements && this._activeElements.parameterArea && this._activeElements.slideContainer) {
 				this._activeElements.onClose = onClose;
 				var focusNode = fillFunction(this._activeElements.parameterArea, this._activeElements.dismissArea);
+				if (!focusNode) {
+					// no parameters were generated.  
+					return false;
+				}
 				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.

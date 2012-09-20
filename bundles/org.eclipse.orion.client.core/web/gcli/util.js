@@ -1,7 +1,17 @@
 /*
- * Copyright 2009-2011 Mozilla Foundation and contributors
- * Licensed under the New BSD license. See LICENSE.txt or:
- * http://opensource.org/licenses/BSD-3-Clause
+ * Copyright 2012, Mozilla Foundation and contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 define(function(require, exports, module) {
@@ -13,12 +23,31 @@ define(function(require, exports, module) {
 
 //------------------------------------------------------------------------------
 
+var eventDebug = false;
+
+/**
+ * Useful way to create a name for a handler, used in createEvent()
+ */
+function nameFunction(handler) {
+  var scope = handler.scope ? handler.scope.constructor.name + '.' : '';
+  var name = handler.func.name;
+  if (name) {
+    return scope + name;
+  }
+  for (var prop in handler.scope) {
+    if (handler.scope[prop] === handler.func) {
+      return scope + prop;
+    }
+  }
+  return scope + handler.func;
+}
+
 /**
  * Create an event.
  * For use as follows:
  *
  *   function Hat() {
- *     this.putOn = createEvent();
+ *     this.putOn = createEvent('Hat.putOn');
  *     ...
  *   }
  *   Hat.prototype.adorn = function(person) {
@@ -35,17 +64,39 @@ define(function(require, exports, module) {
  */
 exports.createEvent = function(name) {
   var handlers = [];
+  var holdFire = false;
+  var heldEvents = [];
+  var eventCombiner = undefined;
 
   /**
    * This is how the event is triggered.
    * @param ev The event object to be passed to the event listeners
    */
   var event = function(ev) {
+    if (holdFire) {
+      heldEvents.push(ev);
+      if (eventDebug) {
+        console.log('Held fire: ' + name, ev);
+      }
+      return;
+    }
+
+    if (eventDebug) {
+      console.group('Fire: ' + name + ' to ' + handlers.length + ' listeners', ev);
+    }
+
     // Use for rather than forEach because it step debugs better, which is
     // important for debugging events
     for (var i = 0; i < handlers.length; i++) {
       var handler = handlers[i];
+      if (eventDebug) {
+        console.log(nameFunction(handler));
+      }
       handler.func.call(handler.scope, ev);
+    }
+
+    if (eventDebug) {
+      console.groupEnd();
     }
   };
 
@@ -65,9 +116,17 @@ exports.createEvent = function(name) {
    * @param scope Optional 'this' object for the function call
    */
   event.remove = function(func, scope) {
+    var found = false;
     handlers = handlers.filter(function(test) {
-      return test.func !== func && test.scope !== scope;
+      var noMatch = (test.func !== func && test.scope !== scope);
+      if (!noMatch) {
+        found = true;
+      }
+      return noMatch;
     });
+    if (!found) {
+      console.warn('Failed to remove handler from ' + name);
+    }
   };
 
   /**
@@ -78,23 +137,92 @@ exports.createEvent = function(name) {
     handlers = [];
   };
 
+  /**
+   * Temporarily prevent this event from firing.
+   * @see resumeFire(ev)
+   */
+  event.holdFire = function() {
+    if (eventDebug) {
+      console.group('Holding fire: ' + name);
+    }
+
+    holdFire = true;
+  };
+
+  /**
+   * Resume firing events.
+   * If there are heldEvents, then we fire one event to cover them all. If an
+   * event combining function has been provided then we use that to combine the
+   * events. Otherwise the last held event is used.
+   * @see holdFire()
+   */
+  event.resumeFire = function() {
+    if (eventDebug) {
+      console.groupEnd('Resume fire: ' + name);
+    }
+
+    if (holdFire !== true) {
+      throw new Error('Event not held: ' + name);
+    }
+
+    holdFire = false;
+    if (heldEvents.length === 0) {
+      return;
+    }
+
+    if (heldEvents.length === 1) {
+      event(heldEvents[0]);
+    }
+    else {
+      var first = heldEvents[0];
+      var last = heldEvents[heldEvents.length - 1];
+      if (eventCombiner) {
+        event(eventCombiner(first, last, heldEvents));
+      }
+      else {
+        event(last);
+      }
+    }
+
+    heldEvents = [];
+  };
+
+  /**
+   * When resumeFire has a number of events to combine, by default it just
+   * picks the last, however you can provide an eventCombiner which returns a
+   * combined event.
+   * eventCombiners will be passed 3 parameters:
+   * - first The first event to be held
+   * - last The last event to be held
+   * - all An array containing all the held events
+   * The return value from an eventCombiner is expected to be an event object
+   */
+  Object.defineProperty(event, 'eventCombiner', {
+    set: function(newEventCombiner) {
+      if (typeof newEventCombiner !== 'function') {
+        throw new Error('eventCombiner is not a function');
+      }
+      eventCombiner = newEventCombiner;
+    },
+
+    enumerable: true
+  });
+
   return event;
 };
 
 
 //------------------------------------------------------------------------------
 
-var dom = {};
-
 /**
  * XHTML namespace
  */
-dom.NS_XHTML = 'http://www.w3.org/1999/xhtml';
+exports.NS_XHTML = 'http://www.w3.org/1999/xhtml';
 
 /**
  * XUL namespace
  */
-dom.NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
+exports.NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
 
 /**
  * Create an HTML or XHTML element depending on whether the document is HTML
@@ -107,9 +235,9 @@ dom.NS_XUL = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul';
  * @param tag The name of the tag to create
  * @returns The created element
  */
-dom.createElement = function(doc, tag) {
-  if (dom.isXmlDocument(doc)) {
-    return doc.createElementNS(dom.NS_XHTML, tag);
+exports.createElement = function(doc, tag) {
+  if (exports.isXmlDocument(doc)) {
+    return doc.createElementNS(exports.NS_XHTML, tag);
   }
   else {
     return doc.createElement(tag);
@@ -120,7 +248,7 @@ dom.createElement = function(doc, tag) {
  * Remove all the child nodes from this node
  * @param elem The element that should have it's children removed
  */
-dom.clearElement = function(elem) {
+exports.clearElement = function(elem) {
   while (elem.hasChildNodes()) {
     elem.removeChild(elem.firstChild);
   }
@@ -137,17 +265,17 @@ var isAllWhitespace = /^\s*$/;
  * @param elem The element which should have blank whitespace trimmed
  * @param deep Should this node removal include child elements
  */
-dom.removeWhitespace = function(elem, deep) {
+exports.removeWhitespace = function(elem, deep) {
   var i = 0;
   while (i < elem.childNodes.length) {
     var child = elem.childNodes.item(i);
-    if (child.nodeType === Node.TEXT_NODE &&
+    if (child.nodeType === 3 /*Node.TEXT_NODE*/ &&
         isAllWhitespace.test(child.textContent)) {
       elem.removeChild(child);
     }
     else {
-      if (deep && child.nodeType === Node.ELEMENT_NODE) {
-        dom.removeWhitespace(child, deep);
+      if (deep && child.nodeType === 1 /*Node.ELEMENT_NODE*/) {
+        exports.removeWhitespace(child, deep);
       }
       i++;
     }
@@ -159,11 +287,31 @@ dom.removeWhitespace = function(elem, deep) {
  * it.
  * @param cssText The CSS declarations to append
  * @param doc The document element to work from
+ * @param id Optional id to assign to the created style tag. If the id already
+ * exists on the document, we do not add the CSS again.
  */
-dom.importCss = function(cssText, doc) {
+exports.importCss = function(cssText, doc, id) {
+  if (!cssText) {
+    return undefined;
+  }
+
   doc = doc || document;
 
-  var style = dom.createElement(doc, 'style');
+  if (!id) {
+    id = 'hash-' + hash(cssText);
+  }
+
+  var found = doc.getElementById(id);
+  if (found) {
+    if (found.tagName.toLowerCase() !== 'style') {
+      console.error('Warning: importCss passed id=' + id +
+              ', but that pre-exists (and isn\'t a style tag)');
+    }
+    return found;
+  }
+
+  var style = exports.createElement(doc, 'style');
+  style.id = id;
   style.appendChild(doc.createTextNode(cssText));
 
   var head = doc.getElementsByTagName('head')[0] || doc.documentElement;
@@ -173,16 +321,45 @@ dom.importCss = function(cssText, doc) {
 };
 
 /**
+ * Simple hash function which happens to match Java's |String.hashCode()|
+ * Done like this because I we don't need crypto-security, but do need speed,
+ * and I don't want to spend a long time working on it.
+ * @see http://werxltd.com/wp/2010/05/13/javascript-implementation-of-javas-string-hashcode-method/
+ */
+function hash(str) {
+  var hash = 0;
+  if (str.length == 0) {
+    return hash;
+  }
+  for (var i = 0; i < str.length; i++) {
+    var char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return hash;
+}
+
+/**
  * There are problems with innerHTML on XML documents, so we need to do a dance
  * using document.createRange().createContextualFragment() when in XML mode
  */
-dom.setInnerHtml = function(elem, html) {
-  if (dom.isXmlDocument(elem.ownerDocument)) {
+exports.setContents = function(elem, contents) {
+  if (typeof HTMLElement !== 'undefined' && contents instanceof HTMLElement) {
+    exports.clearElement(elem);
+    elem.appendChild(contents);
+    return;
+  }
+
+  if (exports.isXmlDocument(elem.ownerDocument)) {
     try {
-      dom.clearElement(elem);
-      html = '<div xmlns="' + dom.NS_XHTML + '">' + html + '</div>';
+      var ns = elem.ownerDocument.documentElement.namespaceURI;
+      if (!ns) {
+        ns = exports.NS_XHTML;
+      }
+      exports.clearElement(elem);
+      contents = '<div xmlns="' + ns + '">' + contents + '</div>';
       var range = elem.ownerDocument.createRange();
-      var child = range.createContextualFragment(html).firstChild;
+      var child = range.createContextualFragment(contents).firstChild;
       while (child.hasChildNodes()) {
         elem.appendChild(child.firstChild);
       }
@@ -194,8 +371,18 @@ dom.setInnerHtml = function(elem, html) {
     }
   }
   else {
-    elem.innerHTML = html;
+    elem.innerHTML = contents;
   }
+};
+
+/**
+ * Load some HTML into the given document and return a DOM element.
+ * This utility assumes that the html has a single root (other than whitespace)
+ */
+exports.toDom = function(document, html) {
+  var div = exports.createElement(document, 'div');
+  exports.setContents(div, html);
+  return div.children[0];
 };
 
 /**
@@ -205,7 +392,7 @@ dom.setInnerHtml = function(elem, html) {
  * @param doc The document element to work from (defaulted to the global
  * 'document' if missing
  */
-dom.isXmlDocument = function(doc) {
+exports.isXmlDocument = function(doc) {
   doc = doc || document;
   // Best test for Firefox
   if (doc.contentType && doc.contentType != 'text/html') {
@@ -217,8 +404,6 @@ dom.isXmlDocument = function(doc) {
   }
   return false;
 };
-
-exports.dom = dom;
 
 /**
  * Find the position of [element] in [nodeList].
@@ -238,7 +423,7 @@ function positionInNodeList(element, nodeList) {
  * @returns a string such that ele.ownerDocument.querySelector(reply) === ele
  * and ele.ownerDocument.querySelectorAll(reply).length === 1
  */
-dom.findCssSelector = function(ele) {
+exports.findCssSelector = function(ele) {
   var document = ele.ownerDocument;
   if (ele.id && document.getElementById(ele.id) === ele) {
     return '#' + ele.id;
@@ -288,18 +473,97 @@ dom.findCssSelector = function(ele) {
 
   // So we can be unique w.r.t. our parent, and use recursion
   index = positionInNodeList(ele, ele.parentNode.children) + 1;
-  selector = dom.findCssSelector(ele.parentNode) + ' > ' +
+  selector = exports.findCssSelector(ele.parentNode) + ' > ' +
           tagName + ':nth-child(' + index + ')';
 
   return selector;
 };
 
-//------------------------------------------------------------------------------
+/**
+ * Work out the path for images.
+ */
+exports.createUrlLookup = function(callingModule) {
+  return function imageUrl(path) {
+    try {
+      return require('text!gcli/ui/' + path);
+    }
+    catch (ex) {
+      // Under node/unamd callingModule is provided by node. This code isn't
+      // the right answer but it's enough to pass all the unit tests and get
+      // test coverage information, which is all we actually care about here.
+      if (callingModule.filename) {
+        return callingModule.filename + path;
+      }
+
+      var filename = callingModule.id.split('/').pop() + '.js';
+
+      if (callingModule.uri.substr(-filename.length) !== filename) {
+        console.error('Can\'t work out path from module.uri/module.id');
+        return path;
+      }
+
+      if (callingModule.uri) {
+        var end = callingModule.uri.length - filename.length - 1;
+        return callingModule.uri.substr(0, end) + '/' + path;
+      }
+
+      return filename + '/' + path;
+    }
+  };
+};
 
 /**
- * Various event utilities
+ * Helper to find the 'data-command' attribute and call some action on it.
+ * @see |updateCommand()| and |executeCommand()|
  */
-var event = {};
+function withCommand(element, action) {
+  var command = element.getAttribute('data-command');
+  if (!command) {
+    command = element.querySelector('*[data-command]')
+            .getAttribute('data-command');
+  }
+
+  if (command) {
+    action(command);
+  }
+  else {
+    console.warn('Missing data-command for ' + util.findCssSelector(element));
+  }
+}
+
+/**
+ * Update the requisition to contain the text of the clicked element
+ * @param element The clicked element, containing either a data-command
+ * attribute directly or in a nested element, from which we get the command
+ * to be executed.
+ * @param context Either a Requisition or an ExecutionContext or another object
+ * that contains an |update()| function that follows a similar contract.
+ */
+exports.updateCommand = function(element, context) {
+  withCommand(element, function(command) {
+    context.update(command);
+  });
+};
+
+/**
+ * Execute the text contained in the element that was clicked
+ * @param element The clicked element, containing either a data-command
+ * attribute directly or in a nested element, from which we get the command
+ * to be executed.
+ * @param context Either a Requisition or an ExecutionContext or another object
+ * that contains an |update()| function that follows a similar contract.
+ */
+exports.executeCommand = function(element, context) {
+  withCommand(element, function(command) {
+    context.exec({
+      visible: true,
+      typed: command
+    });
+  });
+};
+
+
+//------------------------------------------------------------------------------
 
 /**
  * Keyboard handling is a mess. http://unixpapa.com/js/key.html
@@ -313,11 +577,11 @@ var event = {};
  * See BUG 664991: GCLI's keyboard handling should be updated to use DOM-L3
  * https://bugzilla.mozilla.org/show_bug.cgi?id=664991
  */
-if ('KeyEvent' in this) {
-  event.KeyEvent = this.KeyEvent;
+if (typeof 'KeyEvent' === 'undefined') {
+  exports.KeyEvent = this.KeyEvent;
 }
 else {
-  event.KeyEvent = {
+  exports.KeyEvent = {
     DOM_VK_CANCEL: 3,
     DOM_VK_HELP: 6,
     DOM_VK_BACK_SPACE: 8,
@@ -435,8 +699,6 @@ else {
     DOM_VK_META: 224
   };
 }
-
-exports.event = event;
 
 
 });

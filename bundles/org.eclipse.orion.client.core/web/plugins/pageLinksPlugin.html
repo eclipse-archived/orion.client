@@ -56,13 +56,17 @@
 			}],
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
-		
+		var temp = document.createElement('a');
+		temp.href = "./contentTemplates/helloWorld.zip";
+
 		provider.registerService("orion.navigate.content", null, {
 			id: "orion.content.fromURL",
 			name: "Sample HTML5 Site",
 			description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
 			folder: "Hello World",
-			command: "orion.importZipURL"
+			command: "orion.importZipURL",
+			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: temp.href},
+				{name: "unzip", type: "boolean", label: "Unzip:", defaultValue: true, hidden: true}]
 		});
 
 		provider.registerService("orion.navigate.content", null, {
@@ -75,10 +79,10 @@
 
 		provider.registerService("orion.navigate.content", null, {
 			id: "orion.content.fromZip",
-			name: "Upload a Zip",
-			description: "Upload content from a local zip file into an Orion folder. You will be prompted for the local zip file.",
+			name: "Upload a File",
+			description: "Upload content from a local file into an Orion folder. You will be prompted for the local file.",
 			folder: "Uploaded Content",
-			command: "orion.importZip"
+			command: "orion.import"
 		});
 
 		provider.registerService("orion.core.setting", null, {

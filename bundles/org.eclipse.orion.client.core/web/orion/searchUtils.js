@@ -46,7 +46,7 @@ orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 	//var obj = dojo.queryToObject(queryStr);
 	var splitQ = queryStr.split("&"); //$NON-NLS-0$
 	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
-	queryObj.useCrawler = (indexOfRegEx === 0);
+	queryObj.useRegEx = (indexOfRegEx === 0);
 	for(var i=0; i < splitQ.length; i++){
 		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
 		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
@@ -74,6 +74,7 @@ orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 orion.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
 	return {
 		sort: queryObj.sort,
+		useRegEx: queryObj.useRegEx,
 		rows: queryObj.rows,
 		start: queryObj.start,
 		searchStr: queryObj.searchStr,
@@ -90,7 +91,7 @@ orion.searchUtils.generateSearchHref = function(options) {
 orion.searchUtils.generateSearchQuery = function(options) {
 	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "", regEx = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	if(options){
-		if(options.regEx){
+		if(options.useRegEx){
 			regEx = "regEx&";
 		}
 		if(options.sort){
@@ -221,12 +222,16 @@ orion.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
 };
 	
 orion.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
-	var binding = ",find=" + inFileQuery.originalSearchStr;
+	var binding = ",find="; //$NON-NLS-0$
+	if (inFileQuery.wildCard) {
+		binding = binding + "@@useRegEx@@true@@"; //$NON-NLS-0$
+	}
+	binding = binding + encodeURIComponent(inFileQuery.searchStr);
 	if (typeof(replaceStr) === "string") { //$NON-NLS-0$
-		binding = binding + "@@replaceWith@@" + replaceStr;
+		binding = binding + "@@replaceWith@@" + encodeURIComponent(replaceStr); //$NON-NLS-0$
 	}
 	if (typeof(lineNumber) === "number") { //$NON-NLS-0$
-		binding = binding + "@@atLine@@" + lineNumber;
+		binding = binding + "@@atLine@@" + lineNumber; //$NON-NLS-0$
 	}
 	return binding;
 };
@@ -244,13 +249,15 @@ orion.searchUtils.parseFindURLBinding = function(findParam) {
 	var replaceStr = null;
 	var splitQuery = findAndReplaceQuery.split("@@replaceWith@@");
 	var	findQuery = splitQuery[0];
+	var useRegEx = false;
+	if(findQuery.indexOf("@@useRegEx@@true@@") === 0){
+		useRegEx = true;
+		findQuery = findQuery.split("@@useRegEx@@true@@")[1];
+	}
 	if(splitQuery.length > 1){
 		replaceStr = splitQuery[1];
 	}
-	
-	var inFileQ = orion.searchUtils.generateInFileQuery(findQuery);
-	var searchString = inFileQ.searchStr;
-	return {searchStr: searchString, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: inFileQ.wildCard};
+	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx};
 };
 
 orion.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
