@@ -4742,18 +4742,27 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_getLineIndex: function(y) {
 			var lineHeight, lineIndex = 0;
+			var lineCount = this._model.getLineCount();
 			if (this._lineHeight) {
-				//TODO [perf] calculate from top index
-				var h = 0;
-				while (h + (lineHeight = this._getLineHeight(lineIndex)) < y) {
-					h += lineHeight;
-					lineIndex++;
+				lineIndex = this._getTopIndex();
+				var pixel = -this._topIndexY + this._getScroll().y;
+				if (y !== pixel) {
+					if (y < pixel) {
+						while (y < pixel && lineIndex > 0) {
+							y += this._getLineHeight(--lineIndex);
+						}
+					} else {
+						lineHeight = this._getLineHeight(lineIndex);
+						while (y - lineHeight >= pixel && lineIndex < lineCount - 1) {
+							y -= lineHeight;
+							lineHeight = this._getLineHeight(++lineIndex);
+						}
+					}
 				}
 			} else {
 				lineHeight = this._getLineHeight();
 				lineIndex = Math.floor(y / lineHeight);
 			}
-			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
 		_getScroll: function() {
