@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define setTimeout*/
+/*global define setTimeout window*/
 define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', 'orion/serviceregistry', 'orion/pluginregistry'],
 		function(assert, Deferred, testHelpers, config, mServiceRegistry, mPluginRegistry) {
 	var ConfigAdminFactory = config.ConfigurationAdminFactory;
@@ -64,23 +64,24 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 		serviceRegistry = new mServiceRegistry.ServiceRegistry();
 		preferences = new MockPrefsService();
 		pluginStorage = arguments.length ? storage : {};
-		pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, pluginStorage);
-		if (typeof omitConfigAdmin === 'undefined' || !omitConfigAdmin) {
-			return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
-				function(createdConfigAdmin) {
-					configAdmin = createdConfigAdmin;
-				});
-		}
-		var d = new Deferred();
-		d.resolve();
-		return d;
+		pluginRegistry = window.pluginregistry = new mPluginRegistry.PluginRegistry(serviceRegistry, {storage: pluginStorage});
+		return pluginRegistry.start().then(function(){
+			if (typeof omitConfigAdmin === 'undefined' || !omitConfigAdmin) {
+				return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
+					function(createdConfigAdmin) {
+						configAdmin = createdConfigAdmin;
+					});
+			}
+		});
 	},
 	tearDown = function() {
-		serviceRegistry = null;
-		preferences = null;
-		pluginRegistry = null;
-		pluginStorage = null;
-		configAdmin = null;
+		return pluginRegistry.stop().then(function(){
+			serviceRegistry = null;
+			preferences = null;
+			pluginRegistry = null;
+			pluginStorage = null;
+			configAdmin = null;
+		});
 	},
 	makeTest = function(body) {
 		return testHelpers.makeTest(setUp, tearDown, body);
@@ -164,22 +165,22 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 			nil: null
 		});
 		// this registration should cause a call to updated(props)
-		serviceRegistry.registerService(MANAGED_SERVICE, 
-			{	updated: function(properties) {
-					try {
-						assert.ok(!!properties);
-						assert.strictEqual(properties.pid, pid);
-						assert.strictEqual(properties.str, 'zot');
-						assert.strictEqual(properties.num, 42);
-						assert.strictEqual(properties.nil, null);
-						d.resolve();
-					} catch (e) {
-						d.reject(e);
-					}
+		serviceRegistry.registerService(MANAGED_SERVICE, {
+			updated: function(properties) {
+				try {
+					assert.ok( !! properties);
+					assert.strictEqual(properties.pid, pid);
+					assert.strictEqual(properties.str, 'zot');
+					assert.strictEqual(properties.num, 42);
+					assert.strictEqual(properties.nil, null);
+					d.resolve();
+				} catch (e) {
+					d.reject(e);
 				}
-			},
-			{	pid: pid
-			});
+			}
+		}, {
+			pid: pid
+		});
 		return d;
 	});
 
@@ -257,23 +258,12 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 
 	tests['test plugin load updated() call ordering'] = makeTest(function() {
 		return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
-			// Destroy the plugin's iframe
-			pluginRegistry.shutdown();
-			// Create a new PluginRegistry (using the same storage as the old one so it gets our plugin data)
-			return setUp(pluginStorage).then(function() {
-				// This loads the plugin's data from the storage
-				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
-					// At this point our plugin's data is in the registry, but the plugin is not loaded.
-					var plugin = pluginRegistry.getPlugin('testManagedServicePlugin.html');
-					assert.ok(plugin);
-					assert.strictEqual(plugin.getState(), Plugin.INSTALLED);
-					// Lazy-load it by invoking a service method
-					var testService = serviceRegistry.getService('test.bogus');
-					return testService.test().then(function() {
-						return testService.getCallOrder().then(function(callOrder) {
-							assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
-						});
-					});
+			return plugin.start({lazy:true}).then(function() {
+				var testService = serviceRegistry.getService('test.bogus');
+				return testService.test().then(function() {
+					return testService.getCallOrder();
+				}).then(function(callOrder) {
+					assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
 				});
 			});
 		});
@@ -283,24 +273,16 @@ define(['orion/assert', 'orion/Deferred', 'orion/testHelpers', 'orion/config', '
 	tests['test plugin load updated() call ordering -- late registration'] = (function() {
 		return testHelpers.makeTest(setUp.bind(null, {} /*no storage*/, true /*no config admin*/), tearDown, function() {
 			return pluginRegistry.installPlugin('testManagedServicePlugin.html').then(function(plugin) {
-				pluginRegistry.shutdown();
-				setUp(pluginStorage, true /*don't create config admin*/);
-				assert.ok(!configAdmin, 'no config admin yet');
-				return pluginRegistry.startup(['testManagedServicePlugin.html']).then(function() {
-					var plugin = pluginRegistry.getPlugin('testManagedServicePlugin.html');
-					assert.ok(plugin);
-					assert.strictEqual(plugin.getState(), Plugin.INSTALLED);
-					// Finally register ConfigAdmin
-					return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(
-						function(createdConfigAdmin) {
-							configAdmin = createdConfigAdmin;
-							var testService = serviceRegistry.getService('test.bogus');
-							return testService.test().then(function() {
-								return testService.getCallOrder().then(function(callOrder) {
-									assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
-								});
+				return plugin.start({lazy:true}).then(function() {
+					return new ConfigAdminFactory(serviceRegistry, pluginRegistry, preferences).getConfigurationAdmin().then(function(createdConfigAdmin) {
+						configAdmin = createdConfigAdmin;
+						var testService = serviceRegistry.getService('test.bogus');
+						return testService.test().then(function() {
+							return testService.getCallOrder().then(function(callOrder) {
+								assert.deepEqual(callOrder, ['orion.cm.managedservice', 'test.bogus']);
 							});
 						});
+					});
 				});
 			});
 		});
