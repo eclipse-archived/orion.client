@@ -43,8 +43,10 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 			}
 			
 			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
-			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {});
-			loaderPluginRegistry.installPlugin(test).then(function() {
+			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {storage:{}});
+			loaderPluginRegistry.installPlugin(test).then(function(plugin) {
+				return plugin.start();
+			}).then(function() {
 				var references = loaderServiceRegistry.getServiceReferences("orion.test.runner");
 				var testRunDeferreds = [];
 				
@@ -151,10 +153,12 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 	function _loadTests(fileURI) {	 
 		var loader = new TestLoader(fileURI);
 		var testServiceRegistry = new mServiceregistry.ServiceRegistry();
-		var testPluginRegistry = new mPluginregistry.PluginRegistry(testServiceRegistry, {});
+		var testPluginRegistry = new mPluginregistry.PluginRegistry(testServiceRegistry, {storage:{}});
 		
 		/* Install the test plugin and get the list of tests it contains */
-		return testPluginRegistry.installPlugin(fileURI).then(function() {
+		return testPluginRegistry.installPlugin(fileURI).then(function(plugin) {
+			return plugin.start();
+		}).then(function() {
 			var references = testServiceRegistry.getServiceReferences("orion.test.runner");
 			var testRunDeferreds = [];
 
