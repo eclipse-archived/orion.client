@@ -23,7 +23,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 		once = new Deferred();
 	
 		// initialize service registry and EAS services
-		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var serviceRegistry = window.serviceRegistry = new mServiceregistry.ServiceRegistry();
 	
 		// This is code to ensure the first visit to orion works
 		// we read settings and wait for the plugin registry to fully startup before continuing
@@ -34,7 +34,7 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 				var url = require.toUrl(key);
 				configuration.plugins[url] = pluginsPreference[key];
 			});
-			var pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);	
+			var pluginRegistry = window.pluginRegistry = new mPluginRegistry.PluginRegistry(serviceRegistry, configuration);	
 			return pluginRegistry.start().then(function() {
 				if (serviceRegistry.getServiceReferences("orion.core.preference.provider").length > 0) { //$NON-NLS-0$
 					return preferences.getPreferences("/plugins", preferences.USER_SCOPE).then(function(pluginsPreference) { //$NON-NLS-0$
@@ -42,8 +42,10 @@ define(['require', 'orion/Deferred', 'orion/serviceregistry', 'orion/preferences
 						pluginsPreference.keys().forEach(function(key) {
 							var url = require.toUrl(key);
 							if (!pluginRegistry.getPlugin(url)) {
-								installs.push(pluginRegistry.installPlugin(url).then(function(plugin) {
-									plugin.start({lazy:true});
+								installs.push(pluginRegistry.installPlugin(url,{autostart: "lazy"}).then(function(plugin) {
+									return plugin.update().then(function() {
+										return plugin.start({lazy:true});
+									});
 								}));
 							}
 						});	
