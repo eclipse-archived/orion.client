@@ -10,12 +10,48 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout clearTimeout addEventListener document console localStorage Worker*/
+/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker*/
 
-define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/es5shim"], function(Deferred, mServiceregistry, EventTarget){
-	var INSTALLED = 1;
-	var LOADED = 2;
-	var UNINSTALLED = 3;
+define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
+
+	function _equal(obj1, obj2) {
+		var keys1 = Object.keys(obj1);
+		var keys2 = Object.keys(obj2);
+		if (keys1.length !== keys2.length) {
+			return false;
+		}
+		keys1.sort();
+		keys2.sort();
+		for (var i = 0, len = keys1.length; i < len; i++) {
+			var key = keys1[i];
+			if (key !== keys2[i]) {
+				return false;
+			}
+			var value1 = obj1[key], value2 = obj2[key];
+			if (value1 === value2) {
+				continue;
+			}
+			if (JSON.stringify(value1) !== JSON.stringify(value2)) {
+				return false;
+			}
+		}
+		return true;		
+	}
+	
+	function _normalizeURL(location) {
+		if (location.indexOf("://") === -1) { //$NON-NLS-0$
+			var temp = document.createElement('a'); //$NON-NLS-0$
+			temp.href = location;
+	        return temp.href;
+		}
+		return location;
+	}
+
+
+	function PluginEvent(type, plugin) {
+		return {type: type, plugin: plugin};
+	}
+	
 	/**
 	 * Creates a new plugin. This constructor is private and should only be called by the plugin registry.
 	 * @class Represents a single plugin in the plugin registry.
@@ -43,32 +79,38 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 	 * </dd>
 	 * @name orion.pluginregistry.Plugin
 	 */
-	function Plugin(url, data, internalRegistry) {
-		var _self = this;
+	function Plugin(_url, _manifest, _internalRegistry) {
+		var _this = this;
+		_manifest = _manifest || {};
+		var _headers = _manifest.headers || {};
+		var _services = _manifest.services || [];
+		var _autostart = _manifest.autostart;
+		var _lastModified = _manifest.lastModified || 0;
 		
-		var _channel = null;
-		var _deferredLoad = new Deferred();
-		var _deferredUpdate = null;
-		var _state = 0;
+		var _state = "installed";
 		
+		var _deferredStateChange;
+		var _deferredLoad;
+		
+		var _channel;
+		var _registeredServices = {};
 		var _currentMessageId = 0;
 		var _deferredResponses = {};
-		var _services = {};
 		
 		function _callService(serviceId, method, params) {
 			if (!_channel) {
-				throw new Error("plugin not connected");
+				return new Deferred().reject(new Error("plugin not connected"));
 			}
+
 			var requestId = _currentMessageId++;			
 			var onCancel = function(reason) {
-				if (_state === LOADED) {
-					internalRegistry.postMessage({
+				if (_state === "active") {
+					_internalRegistry.postMessage({
 						id: requestId,
 						cancel: typeof reason === "string" ? reason : "canceled"
 					}, _channel);
 				}
 			};
-			
 			var d = new Deferred(onCancel);
 			_deferredResponses[String(requestId)] = d;
 			var message = {
@@ -77,7 +119,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				method: method,
 				params: params
 			};
-			internalRegistry.postMessage(message, _channel);
+			_internalRegistry.postMessage(message, _channel);
 			return d.promise;
 		}
 	
@@ -87,10 +129,10 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 				service.methods.forEach(function(method) {
 					serviceProxy[method] = function() {
 						var params = Array.prototype.slice.call(arguments);
-						if (_state === LOADED) {
+						if (_state === "active") {
 							return _callService(service.serviceId, method, params);
 						} else {
-							return _self._load().then(function() {
+							return _this.start({"transient":true}).then(function() {
 								return _callService(service.serviceId, method, params);
 							});
 						}
@@ -119,112 +161,60 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			return serviceProxy;
 		}
 		
-		function _setState(state) {
-			_state = state;
-			switch (state) {
-				case UNINSTALLED:
-					internalRegistry.dispatchEvent({type:"pluginUninstalled", plugin:_self}); //$NON-NLS-0$
-					break;
-				case INSTALLED:
-					internalRegistry.dispatchEvent({type:"pluginInstalled", plugin:_self}); //$NON-NLS-0$
-					break;
-				case LOADED:
-					internalRegistry.dispatchEvent({type:"pluginLoaded", plugin:_self}); //$NON-NLS-0$
-					break;
+		function _createServiceProperties(service) {
+			var properties = JSON.parse(JSON.stringify(service.properties));
+			properties.__plugin__ = _url; //TODO: eliminate
+			if (!properties.objectClass) {
+				var objectClass = service.names || service.type || [];
+				if (!Array.isArray(objectClass)) {
+					objectClass = [objectClass];
+				}
+				properties.objectClass = objectClass;
 			}
-		}
-	
-		function checkNotUninstalled() {
-			if (_state === UNINSTALLED) {
-				throw new Error("Plugin is uninstalled");
-			}
-		}
-	
-		function _parseData() {
-			var services = data.services;
-			if (services) {
-				services.forEach(function(service) {
-					var serviceProxy = _createServiceProxy(service);
-					var properties = service.properties ? JSON.parse(JSON.stringify(service.properties)) : {};
-					properties.__plugin__ = _self.getLocation();
-					var registration = internalRegistry.registerService(service.names || service.type, serviceProxy, properties);
-					_services[service.serviceId] = {registration: registration, proxy: serviceProxy};
-				});
-			}
-			if (!data._lastModified) {
-				data._lastModified = new Date().getTime();
-			}
+			return properties;
 		}
 		
-		function _checkForUpdate(newData) {
-			if (data.headers && newData.headers) {
-				if (JSON.stringify(data.headers) !== JSON.stringify(newData.headers)) {
-					return true;
-				}
-			} else if (data.headers || newData.headers) {
-				return true;
-			}
-			
-			if (data.services && newData.services) {
-				if (JSON.stringify(data.services) !== JSON.stringify(newData.services)) {
-					return true;
-				}
-			} else if (data.services || newData.services) {
-				return true;
-			}
-			return false;
+		function _registerService(service) {
+			var serviceProxy = _createServiceProxy(service);
+			var properties = _createServiceProperties(service);
+			var registration = _internalRegistry.registerService(service.names || service.type, serviceProxy, properties);
+			_registeredServices[service.serviceId] = {registration: registration, proxy: serviceProxy};
+		}
+	
+		function _persist() {
+			_internalRegistry.persist(_url, {
+				headers:_headers,
+				services: _services,
+				autostart: _autostart,
+				lastModified: _lastModified
+			});
 		}
 		
 		function _responseHandler(message) {
 			var deferred;
 			try {
 				if (message.method) {
-					if ("plugin" === message.method) { //$NON-NLS-0$
-						if (!data) {
-							data = message.params[0];
-							_parseData();
-						} else if (_checkForUpdate(message.params[0])) {
-							// check if the data has been updated
-							for (var serviceId in _services) {
-								if (_services.hasOwnProperty(serviceId)) {
-									_services[serviceId].registration.unregister();
-									delete _services[serviceId];
-								}
-							}
-							data = {};
-							if (message.params[0].headers) {
-								data.headers = message.params[0].headers;
-							}
-							if (message.params[0].services) {
-								data.services = message.params[0].services;
-							}
-							_parseData();
-							internalRegistry.updatePlugin(_self);						
-						}
+					if ("manifest" === message.method || "plugin" === message.method) { //$NON-NLS-0$
+						var manifest = message.params[0];
+						manifest.headers = manifest.headers || {};
+						manifest.services = manifest.services || {};
 						
-						if (_state === INSTALLED) {
-							_setState(LOADED);
-							_deferredLoad.resolve(_self);
-						}
-						
-						if (_deferredUpdate) {
-							_deferredUpdate.resolve(_self);
-							_deferredUpdate = null;
+						if (_equal(manifest.headers, _headers) && _equal(manifest.services, _services)) {
+							_deferredLoad.resolve(_this);
+						} else {
+							_this.update({headers: manifest.headers, services: manifest.services}).then(function() {
+								_deferredLoad.resolve(_this);
+							});
 						}
 					} else if ("dispatchEvent" === message.method){ //$NON-NLS-0$
-						var proxy = _services[message.serviceId].proxy;
+						var proxy = _registeredServices[message.serviceId].proxy;
 						proxy.dispatchEvent.apply(proxy, message.params);		
 					} else if ("progress" === message.method){ //$NON-NLS-0$
 						deferred = _deferredResponses[String(message.requestId)];
 						deferred.progress.apply(deferred, message.params);	
-					} else if ("timeout"){
-						if (_state === INSTALLED) {
-							_deferredLoad.reject(new Error("Load timeout for plugin: " + url));
-						}
-						
-						if (_deferredUpdate) {
-							_deferredUpdate.reject(new Error("Load timeout for plugin: " + url));
-							_deferredUpdate = null;
+					} else if ("timeout" === message.method){
+						if (_deferredLoad) {
+							_deferredLoad.reject(new Error("Load timeout for plugin: " + _url));
 						}
 					} else {
 						throw new Error("Bad response method: " + message.method);
@@ -239,12 +229,19 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					}
 				}
 			} catch (e) {
-				console.log(e);
+				console.log("Plugin._responseHandler " + e);
 			}
 		}
+		this._persist = _persist;
 		
-		this._getData = function() {
-			return data;
+		this._resolve = function() {
+			// check manifest dependencies when we support them
+			_state = "resolved";
+			_internalRegistry.dispatchEvent(new PluginEvent("resolved", _this));
+		};
+		
+		this._getAutostart = function() {
+			return _autostart;
 		};
 	
 		/**
@@ -254,7 +251,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function
 		 */
 		this.getLocation = function() {
-			return url;
+			return _url;
 		};
 		
 		/**
@@ -264,10 +261,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function
 		 */
 		this.getHeaders = function() {
-			if (data) {
-				return data.headers || {};
-			}
-			return null;
+			return JSON.parse(JSON.stringify(_headers));
 		};
 		
 		this.getName = function() {
@@ -287,28 +281,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		};
 		
 		this.getLastModified = function() {
-			return data && data._lastModified ? data._lastModified : 0;
-		};
-		
-		/**
-		 * Uninstalls this plugin
-		 * @name orion.pluginregistry.Plugin#uninstall
-		 * @function
-		 */
-		this.uninstall = function() {
-			checkNotUninstalled();
-			for (var serviceId in _services) {
-				if (_services.hasOwnProperty(serviceId)) {
-					_services[serviceId].registration.unregister();
-					delete _services[serviceId];
-				}
-			}
-			if (_channel) {
-				internalRegistry.disconnect(_channel);
-				_channel = null;
-			}
-			internalRegistry.uninstallPlugin(this);
-			_setState(UNINSTALLED);
+			return _lastModified;
 		};
 		
 		/**
@@ -320,30 +293,12 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 */
 		this.getServiceReferences = function() {
 			var result = [];
-			var serviceId;
-			for (serviceId in _services) {
-				if (_services.hasOwnProperty(serviceId)) {
-					result.push(_services[serviceId].registration.getServiceReference());
-				}
-			}
+			Object.keys(_registeredServices).forEach(function(serviceId){
+				result.push(_registeredServices[serviceId].registration.getReference());
+			});
 			return result;
 		};
 		
-		this.update = function() {
-			checkNotUninstalled();
-			if (_state === INSTALLED) {
-				return this._load();
-			}
-			
-			var updatePromise;
-			if (_deferredUpdate === null) {
-				_deferredUpdate = new Deferred();
-				updatePromise = _deferredUpdate;
-				internalRegistry.disconnect(_channel);
-				_channel = internalRegistry.connect(url, _responseHandler);
-			}
-			return _deferredUpdate.promise;
-		};
 		
 		/**
 		 * Returns this plugin's current state.
@@ -360,54 +315,228 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 			return _state;
 		};
 	
-		this._load = function(isInstall, optTimeout) {
-			checkNotUninstalled();
-			if (!_channel) {
-				_channel = internalRegistry.connect(url, _responseHandler, optTimeout);
-				_deferredLoad.then(null, function() {
-					if (!isInstall) {
-						data = {};
-						internalRegistry.updatePlugin(_self);
+		this.start = function(optOptions) {
+			if (_state === "uninstalled") {
+				return new Deferred().reject(new Error("Plugin is uninstalled"));
+			}
+		
+			if (_deferredStateChange) {
+				return _deferredStateChange.promise.then(this.start.bind(this, optOptions));
+			}
+
+			if (_state === "active") {
+				return new Deferred().resolve();
+			}
+			
+			if (!optOptions || !optOptions["transient"]) {
+				var autostart = optOptions && optOptions.lazy ? "lazy" : "started";
+				if (autostart !== _autostart) {
+					_autostart = autostart;
+					_persist();
+				}
+			}
+			
+			var frameworkState = _internalRegistry.getState();
+			if (frameworkState !== "starting" && frameworkState !== "active") {
+				if (optOptions["transient"]) {
+					return new Deferred().reject(new Error("start transient error"));
+				}
+				return new Deferred().resolve();
+			}
+			
+			if (_state === "installed") {
+				try {
+					this._resolve();
+				} catch (e) {
+					return new Deferred().reject(e);
+				}
+			}
+			
+			if (_state === "resolved") {
+				_services.forEach(function(service) {
+					_registerService(service);
+				});
+			}
+			
+			if (optOptions && optOptions.lazy) {
+				if (_state !== "starting") {
+					_state = "starting";
+					_internalRegistry.dispatchEvent(new PluginEvent("lazy activation", _this));
+				}
+				return new Deferred().resolve();				
+			}
+			var deferredStateChange = new Deferred();
+			_deferredStateChange = deferredStateChange;
+			_state = "starting";
+			_internalRegistry.dispatchEvent(new PluginEvent("starting", _this));
+			_deferredLoad = new Deferred();
+			_channel = _internalRegistry.connect(_url, _responseHandler);
+			_deferredLoad.then(function() {
+				_deferredLoad = null;
+				_state = "active";
+				_internalRegistry.dispatchEvent(new PluginEvent("started", _this));
+				_deferredStateChange = null;
+				deferredStateChange.resolve();
+			}, function() {
+				_deferredLoad = null;
+				_state = "stopping";
+				_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
+				Object.keys(_registeredServices).forEach(function(serviceId) {
+					_registeredServices[serviceId].registration.unregister();
+					delete _registeredServices[serviceId];
+				});
+				_internalRegistry.disconnect(_channel);
+				_channel = null;
+				_state = "resolved";
+				_deferredStateChange = null;
+				_internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
+				deferredStateChange.reject(new Error("plugin activation error"));
+			});
+			return deferredStateChange.promise;
+		};
+		
+		this.stop = function(optOptions) {
+			if (_state === "uninstalled") {
+				return new Deferred().reject(new Error("Plugin is uninstalled"));
+			}
+			
+			if (_deferredStateChange) {
+				return _deferredStateChange.promise.then(this.stop.bind(this, optOptions));
+			}
+
+			if (!optOptions || !optOptions["transient"]) {
+				if ("stopped" !== _autostart) {
+					_autostart = "stopped";
+					_persist();
+				}
+			}
+
+			if (_state !== "active" && _state !== "starting") {
+				return new Deferred().resolve();
+			}
+			
+			var deferredStateChange = new Deferred();
+			_deferredStateChange = deferredStateChange;
+			
+			_state = "stopping";
+			_internalRegistry.dispatchEvent(new PluginEvent("stopping", _this));
+			Object.keys(_registeredServices).forEach(function(serviceId) {
+				_registeredServices[serviceId].registration.unregister();
+				delete _registeredServices[serviceId];
+			});
+			if (_channel) {
+				_internalRegistry.disconnect(_channel);
+				_channel = null;
+			}
+			_state = "resolved";
+			_deferredStateChange = null;
+			_internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
+			deferredStateChange.resolve();
+			
+			return deferredStateChange.promise;
+		};
+		
+		this.update = function(input) {
+			if (_state === "uninstalled") {
+				return new Deferred().reject(new Error("Plugin is uninstalled"));
+			}
+			
+			if (!input) {
+				if (_lastModified === 0) {
+					_lastModified = new Date().getTime();
+					_persist();
+				}
+				return _internalRegistry.loadManifest(_url).then(this.update.bind(this));
+			}
+			
+			_headers = input.headers || {};
+			_services = input.services || {};
+			_autostart = input.autostart || _autostart;
+			
+			if (input.lastModified) {
+				_lastModified = input.lastModified;
+			} else {
+				_lastModified = new Date().getTime();
+				_persist();
+			}
+			
+			if (_state === "active" || _state === "starting") {
+				var serviceIds = [];
+				Object.keys(_services).forEach(function(service) {
+					var serviceId = service.serviceId;
+					serviceIds.push(serviceId);
+					var registeredService = _registeredServices[serviceId];
+					if (registeredService) {
+						if (_equal(service.methods, Object.keys(registeredService.proxy))) {
+							var properties = _createServiceProperties(service);
+							var reference = registeredService.registration.getReference();
+							var currentProperties = {};
+							reference.getPropertyNames().forEach(function(name){
+								currentProperties[name] = reference.getProperty(name);
+							});
+							if (!_equal(properties, currentProperties)) {
+								registeredService.registration.setProperties(properties);
+							}
+							return;
+						}
+						registeredService.registration.unregister();
+						delete _registeredServices[serviceId];
+					}
+					_registerService(service);
+				});
+				Object.keys(_registeredServices).forEach(function(serviceId) {
+					if (serviceIds.indexOf(serviceId) === -1) {
+						_registeredServices[serviceId].registration.unregister();
+						delete _registeredServices[serviceId];
 					}
 				});
 			}
-			return _deferredLoad.promise;
+			
+			if (_state === "active") {
+				_internalRegistry.disconnect(_channel);
+				_deferredLoad = new Deferred();
+				_channel = _internalRegistry.connect(_url, _responseHandler);
+				_deferredLoad.then(function() {
+					_deferredLoad = null;
+				}, function() {
+					_deferredLoad = null;
+					_state = "stopping";
+					_internalRegistry.dispatchEvent(new PluginEvent("stopping"), _this);
+					Object.keys(_registeredServices).forEach(function(serviceId) {
+						_registeredServices[serviceId].registration.unregister();
+						delete _registeredServices[serviceId];
+					});
+					_internalRegistry.disconnect(_channel);
+					_channel = null;
+					_state = "resolved";
+					_internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
+				});
+			}
+
+			_internalRegistry.dispatchEvent(new PluginEvent("updated", _this));
+			return new Deferred().resolve();
 		};
 		
-		if (typeof url !== "string") { //$NON-NLS-0$
-			throw new Error("invalid url:" + url); //$NON-NLS-0$
-		}
-		
-		if (data) {
-			_parseData();
-		}
-		_setState(INSTALLED);
+		/**
+		 * Uninstalls this plugin
+		 * @name orion.pluginregistry.Plugin#uninstall
+		 * @function
+		 */
+		this.uninstall = function() {
+			if (_state === "uninstalled") {
+				return new Deferred().reject(new Error("Plugin is uninstalled"));
+			}
+
+			if (_state === "active" || _state === "starting" || _state === "stopping") {				
+				return this.stop().then(this.uninstall.bind(this), this.uninstall.bind(this));
+			}
+
+			_internalRegistry.removePlugin(this);
+			_state = "uninstalled";
+			_internalRegistry.dispatchEvent(new PluginEvent("uninstalled", _this));
+			return new Deferred().resolve();
+		};
 	}
-	
-	/**
-	 * State constant for the <code>INSTALLED</code> state.
-	 * @name orion.pluginregistry.Plugin.INSTALLED
-	 * @static
-	 * @constant
-	 * @type Number
-	 */
-	Plugin.INSTALLED = INSTALLED;
-	/**
-	 * State constant for the <code>LOADED</code> state.
-	 * @name orion.pluginregistry.Plugin.LOADED
-	 * @static
-	 * @constant
-	 * @type Number
-	 */
-	Plugin.LOADED = LOADED;
-	/**
-	 * State constant for the <code>UNINSTALLED</code> state.
-	 * @name orion.pluginregistry.Plugin.UNINSTALLED
-	 * @static
-	 * @constant
-	 * @type Number
-	 */
-	Plugin.UNINSTALLED = UNINSTALLED;
 	
 	/**
 	 * Dispatched when a plugin has been installed. The type of this event is <code>'pluginInstalled'</code>.
@@ -444,13 +573,152 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 	 * @borrows orion.serviceregistry.EventTarget#addEventListener as #addEventListener
 	 * @borrows orion.serviceregistry.EventTarget#removeEventListener as #removeEventListener
 	 */
-	function PluginRegistry(serviceRegistry, opt_storage, opt_visible) {
-		var _storage = opt_storage || localStorage || {};
+	function PluginRegistry(serviceRegistry, configuration) {
+		configuration = configuration || {};
+		var _storage = configuration.storage || localStorage;
+		var _state = "installed";
 		var _plugins = [];
 		var _channels = [];
 		var _pluginEventTarget = new EventTarget();
+		var _installing = {};
 	
-		addEventListener("message", function(event) { //$NON-NLS-0$
+		var internalRegistry = {
+			registerService: serviceRegistry.registerService.bind(serviceRegistry),
+			connect: function(url, handler, timeout) {
+				var channel = {
+					handler: handler,
+					url: url
+				};
+				
+				function sendTimeout() {
+					handler({method:"timeout"});
+				}
+				
+				var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
+				
+				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") { //$NON-NLS-0$
+					var worker = new Worker(url);
+					worker.onmessage = function(event) {
+						if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
+							channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
+						}
+						channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
+					};
+					channel.target = worker;
+					channel.close = function() {
+						worker.terminate();
+					};
+				} else {
+					var iframe = document.createElement("iframe"); //$NON-NLS-0$
+					iframe.name = url + "_" + new Date().getTime();
+					if (!configuration.visible) {
+						iframe.style.display = "none"; //$NON-NLS-0$
+						iframe.style.visibility = "hidden"; //$NON-NLS-0$
+					}
+					iframe.src = url;
+					iframe.onload = function() {
+						clearTimeout(loadTimeout);
+						setTimeout(sendTimeout, 5000);
+					};
+					iframe.sandbox = "allow-scripts allow-same-origin";
+					document.body.appendChild(iframe);
+					channel.target = iframe.contentWindow;
+					channel.close = function() {
+						if (iframe) {
+							document.body.removeChild(iframe);
+							iframe = null;
+						}
+					};
+				}
+				_channels.push(channel);
+				return channel;
+			},
+			disconnect: function(channel) {
+				for (var i = 0; i < _channels.length; i++) {
+					if (channel === _channels[i]) {
+						_channels.splice(i,1);
+						try {
+							channel.close();
+						} catch(e) {
+							// best effort
+						}
+						break;
+					}
+				}
+			},
+			removePlugin: function(plugin) {
+				for (var i = 0; i < _plugins.length; i++) {
+					if (plugin === _plugins[i]) {
+						_plugins.splice(i,1);
+						break;
+					}
+				}
+				delete _storage["plugin."+plugin.getLocation()];
+			},
+			persist: function(url, manifest) {
+				_storage["plugin."+url] = JSON.stringify(manifest); //$NON-NLS-0$
+			},
+			postMessage: function(message, channel) {
+				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
+			},
+			dispatchEvent: function(event) {
+				try {
+					_pluginEventTarget.dispatchEvent(event);
+				} catch (e) {
+					if (console) {
+						console.log("PluginRegistry.dispatchEvent " +  e);
+					}
+				}
+			},
+			loadManifest: function(url) {
+				var d = new Deferred();
+				var channel = internalRegistry.connect(url, function(message) {
+					if (!channel || !message.method) {
+						return;
+					}
+					if ("manifest" === message.method || "plugin" === message.method) { //$NON-NLS-0$
+						var manifest = message.params[0];
+						internalRegistry.disconnect(channel);
+						channel = null;
+						d.resolve(manifest);
+					} else if ("timeout" === message.method){
+						internalRegistry.disconnect(channel);
+						channel = null;
+						d.reject(new Error("Load timeout for plugin: " + url));
+					}
+				});
+				return d.promise;
+			},
+			getState : function() {
+				return _state;
+			}
+		};
+		
+		this.getLocation = function() {
+			return "System";
+		};
+
+		this.getHeaders = function() {
+			return {};
+		};
+		
+		this.getName = function() {
+			return "System";
+		};
+		
+		this.getVersion = function() {
+			return "0.0.0";
+		};
+		
+		this.getLastModified = function() {
+			return 0;
+		};
+		
+		
+		this.getState = internalRegistry.getState;
+
+
+		function _messageHandler(event) { //$NON-NLS-0$
 			var source = event.source;
 			_channels.some(function(channel){
 				if (source === channel.target) {
@@ -461,155 +729,78 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 					return true; // e.g. break
 				}
 			});
-		}, false);
-		
-		function _normalizeURL(location) {
-			if (location.indexOf("://") === -1) { //$NON-NLS-0$
-				var temp = document.createElement('a'); //$NON-NLS-0$
-				temp.href = location;
-		        return temp.href;
-			}
-			return location;
 		}
-		
-		function _clear(plugin) {
-			delete _storage["plugin."+plugin.getLocation()]; //$NON-NLS-0$
-		}
-		
-		function _persist(plugin) {
-			var expiresSeconds = 60 * 60;
-			plugin._getData()._expires = new Date().getTime() + 1000 * expiresSeconds;
-			_storage["plugin."+plugin.getLocation()] = JSON.stringify(plugin._getData()); //$NON-NLS-0$
-		}
-	
-		var internalRegistry = {
-				registerService: serviceRegistry.registerService.bind(serviceRegistry),
-				connect: function(url, handler, timeout) {
-					var channel = {
-						handler: handler,
-						url: url
-					};
-					
-					function sendTimeout() {
-						handler({method:"timeout"});
-					}
-					
-					var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
-					
-					if (url.match(/\.js$/) && typeof(Worker) !== "undefined") { //$NON-NLS-0$
-						var worker = new Worker(url);
-						worker.onmessage = function(event) {
-								if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
-									channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
-								}
-								channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
-						};
-						channel.target = worker;
-						channel.close = function() {
-							worker.terminate();
-						};
-					} else {
-						var iframe = document.createElement("iframe"); //$NON-NLS-0$
-						iframe.id = url;
-						iframe.name = url;
-						if (!opt_visible) {
-							iframe.style.display = "none"; //$NON-NLS-0$
-							iframe.style.visibility = "hidden"; //$NON-NLS-0$
-						}
-						iframe.src = url;
-						iframe.onload = function() {
-							clearTimeout(loadTimeout);
-							setTimeout(sendTimeout, 5000);
-						};
-						iframe.sandbox = "allow-scripts allow-same-origin";
-						document.body.appendChild(iframe);
-						channel.target = iframe.contentWindow;
-						channel.close = function() {
-							if (iframe) {
-								document.body.removeChild(iframe);
-								iframe = null;
-							}
-						};
-					}
-					_channels.push(channel);
-					return channel;
-				},
-				disconnect: function(channel) {
-					for (var i = 0; i < _channels.length; i++) {
-						if (channel === _channels[i]) {
-							_channels.splice(i,1);
-							try {
-								channel.close();
-							} catch(e) {
-								// best effort
-							}
-							break;
-						}
-					}
-				},
-				uninstallPlugin: function(plugin) {
-					_clear(plugin);
-					for (var i = 0; i < _plugins.length; i++) {
-						if (plugin === _plugins[i]) {
-							_plugins.splice(i,1);
-							break;
-						}
-					}
-				},
-				updatePlugin: function(plugin) {
-					_persist(plugin);
-					_pluginEventTarget.dispatchEvent({type:"pluginUpdated", plugin: plugin}); //$NON-NLS-0$
-				},
-				postMessage: function(message, channel) {
-					channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
-				},
-				dispatchEvent: function(event) {
-					try {
-						_pluginEventTarget.dispatchEvent(event);
-					} catch (e) {
-						if (console) {
-							console.log(e);
-						}
-					}
-				}
-		};
-		
-		function _getPlugin(url) {
-			var result = null;
-			url = _normalizeURL(url);
-			_plugins.some(function(plugin){
-				if (url === plugin.getLocation()) {
-					result = plugin;
-					return true;
-				}
-			});
-			return result;
-		}
-		
+
 		/**
 		 * Starts the plugin registry
 		 * @name orion.pluginregistry.PluginRegistry#startup
 		 * @return A promise that will resolve when the registry has been fully started
 		 * @function 
 		 */
-		this.startup = function(pluginURLs) {	
-			var installList = [];
-			pluginURLs.forEach(function(pluginURL) {
-				pluginURL = _normalizeURL(pluginURL);
-				var key = "plugin." + pluginURL; //$NON-NLS-0$
-				var pluginData = _storage[key] ? JSON.parse(_storage[key]) : null;
-				if (pluginData && pluginData._expires && pluginData._expires > new Date().getTime()) {
-					if (_getPlugin(pluginURL) === null) {
-						_plugins.push(new Plugin(pluginURL, pluginData, internalRegistry));
-					}
-				} else {
-					_storage[key] ="{}"; //$NON-NLS-0$
-					var plugin = new Plugin(pluginURL, {}, internalRegistry); 
-					_plugins.push(plugin);
-					installList.push(plugin._load(false, 5000)); // _load(false) because we want to ensure the plugin is updated
+		this.init = function() {
+			if (_state === "starting" || _state === "active" || _state === "stopping") {
+				return;
+			}
+			addEventListener("message", _messageHandler, false);
+			Object.keys(_storage).forEach(function(key) {
+				if (key.indexOf("plugin.") === 0) {
+					var url = key.substring("plugin.".length);
+					var manifest = JSON.parse(_storage[key]);
+					_plugins.push(new Plugin(url, manifest, internalRegistry));
 				}
 			});
-			return Deferred.all(installList, function(){});
+			if (configuration.plugins) {
+				Object.keys(configuration.plugins).forEach(function(url) {
+					url = _normalizeURL(url);
+					var plugin = this.getPlugin(url);
+					if (!plugin) {
+						var manifest = configuration.plugins[url];
+						manifest = typeof manifest === "object" || {};
+						manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
+						_plugins.push(new Plugin(url, manifest, internalRegistry));
+					}
+				}.bind(this));
+			}
+			_state = "starting";
+		};
+
+		this.start = function() {
+			if (_state !== "starting") {
+				this.init();
+			}
+			if (_state !== "starting") {
+				return new Deferred().reject("Cannot start framework. Framework is already " + _state + ".");
+			}
+
+			var deferreds = [];
+			_plugins.forEach(function(plugin) {
+				var autostart = plugin._getAutostart();
+				if (plugin.getLastModified() === 0) {
+					deferreds.push(plugin.update().then(function() {
+						if ("started" === autostart) {
+							return plugin.start({"transient":true});
+						}
+						if ("lazy" === autostart) {
+							return plugin.start({"lazy":true, "transient":true});
+						}
+						plugin._resolve();
+					}));
+					return;
+				}
+			
+				if ("started" === autostart) {
+					deferreds.push(plugin.start({"transient":true}));
+				} else if ("lazy" === autostart) {
+					deferreds.push(plugin.start({"lazy":true, "transient":true}));
+				} else {
+					plugin._resolve();
+				}
+			});
+			return Deferred.all(deferreds, function(e){
+				console.log("PluginRegistry.stop " + e);
+			}).then(function() {
+				_state = "active";
+			});
 		};
 		
 		/**
@@ -617,57 +808,72 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @name orion.pluginregistry.PluginRegistry#shutdown
 		 * @function 
 		 */
-		this.shutdown = function() {
-			_channels.forEach(function(channel) {
-				try {
-					channel.close();
-				} catch(e) {
-					// best effort
-				}
+		this.stop = function() {
+			if (_state !== "starting" && _state !== "active") {
+				return new Deferred().reject("Cannot stop registry. Registry is already " + _state + ".");
+			}
+			_state = "stopping";
+			var deferreds = [];
+			_plugins.forEach(function(plugin) {
+				deferreds.push(plugin.stop({"transient":true}));
+			});
+			return Deferred.all(deferreds, function(e){
+				console.log("PluginRegistry.stop " +  e);
+			}).then(function() {
+				removeEventListener("message", _messageHandler);
+				_state = "resolved";
 			});
 		};
+		
+		this.update = function() {
+			this.stop().then(this.start.bind(this));
+		};
+		
+		this.uninstall = function() {
+			return new Deferred().reject("Cannot uninstall registry");
+		};
+		
 		
 		/**
 		 * Installs the plugin at the given location into the plugin registry
 		 * @name orion.pluginregistry.PluginRegistry#installPlugin
 		 * @param {String} url The location of the plugin
-		 * @param {Object} [opt_data] The plugin metadata
+		 * @param {Object} [optManifest] The plugin metadata
 		 * @returns A promise that will resolve when the plugin has been installed.
 		 * @function 
 		 */
-		this.installPlugin = function(url, opt_data) {
+		this.installPlugin = function(url, optManifest) {
 			url = _normalizeURL(url);
-			var d = new Deferred();
-			var plugin = _getPlugin(url);
+			var plugin = this.getPlugin(url);
 			if (plugin) {
-				if(plugin.getHeaders()) {
-					d.resolve(plugin);
-				} else {
-					var pluginTracker = function(event) {
-						var plugin = event.plugin;
-						if (plugin.getLocation() === url) {
-							d.resolve(plugin);
-							_pluginEventTarget.removeEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$
-						}
-					};
-					_pluginEventTarget.addEventListener("pluginLoaded", pluginTracker); //$NON-NLS-0$
-				}
-			} else {
-				plugin = new Plugin(url, opt_data, internalRegistry);
-				_plugins.push(plugin);
-				if(plugin.getHeaders()) {
-					_persist(plugin);
-					d.resolve(plugin);
-				} else {				
-					plugin._load(true).then(function() {
-						_persist(plugin);
-						d.resolve(plugin);
-					}, function(e) {
-						d.reject(e);
-					});
-				}
+				return new Deferred().resolve(plugin);
 			}
-			return d.promise;	
+			
+			if (_installing[url]) {
+				return _installing[url];
+			}
+			
+			if (optManifest) {
+				plugin = new Plugin(url, optManifest, internalRegistry);
+				_plugins.push(plugin);
+				plugin._persist();
+				internalRegistry.dispatchEvent(new PluginEvent("installed", plugin));
+				return new Deferred().resolve(plugin);
+			}
+						
+			var promise = internalRegistry.loadManifest(url).then(function(manifest) {
+				plugin = new Plugin(url, manifest, internalRegistry);
+				_plugins.push(plugin);
+				plugin._persist();
+				delete _installing[url];
+				internalRegistry.dispatchEvent(new PluginEvent("installed", plugin));
+				return plugin;
+			}, function(error) {
+				delete _installing[url];
+				throw error;
+			});
+			_installing[url] = promise;
+			return promise;	
 		};
 		
 		/**
@@ -677,13 +883,7 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function 
 		 */
 		this.getPlugins = function() {
-			var result =[];
-			_plugins.forEach(function(plugin) {
-				if (plugin.getHeaders()) {
-					result.push(plugin);
-				}
-			});
-			return result;
+			return _plugins.slice();
 		};
 	
 		/**
@@ -694,19 +894,27 @@ define(["orion/Deferred", "orion/serviceregistry", "orion/EventTarget", "orion/e
 		 * @function 
 		 */
 		this.getPlugin = function(url) {
-			var plugin = _getPlugin(url);
-			if (plugin && plugin.getHeaders()) {
-				return plugin;
-			}
-			return null;
+			var result = null;
+			url = _normalizeURL(url);
+			_plugins.some(function(plugin){
+				if (url === plugin.getLocation()) {
+					result = plugin;
+					return true;
+				}
+			});
+			return result;
 		};
 		
-		this.addEventListener = function(eventName, listener) {
-			_pluginEventTarget.addEventListener(eventName, listener);
-		};
+		this.addEventListener = _pluginEventTarget.addEventListener.bind(_pluginEventTarget);
 		
-		this.removeEventListener = function(eventName, listener) {
-			_pluginEventTarget.removeEventListener(eventName, listener);
+		this.removeEventListener = _pluginEventTarget.removeEventListener.bind(_pluginEventTarget);
+		
+		this.resolvePlugins = function() {
+			var allResolved = true;
+			_plugins.forEach(function(plugin){
+				allResolved = allResolved && plugin._resolve();
+			});
+			return allResolved;
 		};
 	}
 	return {

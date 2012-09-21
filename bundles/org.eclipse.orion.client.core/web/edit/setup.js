@@ -355,6 +355,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
 		
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode");
+		
 		// global search
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
 		editor.getTextView().setAction("searchFiles", function() { //$NON-NLS-0$

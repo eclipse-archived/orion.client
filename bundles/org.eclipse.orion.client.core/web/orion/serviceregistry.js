@@ -84,7 +84,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 		/**
 		 * Returns a reference to this registered service.
 		 */
-		getServiceReference: function() {
+		getReference: function() {
 			if (!this._internalRegistry.isRegistered(this._serviceId)) {
 				throw new Error("already unregistered");
 			}

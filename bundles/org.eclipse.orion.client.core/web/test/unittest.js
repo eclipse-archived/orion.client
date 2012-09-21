@@ -154,9 +154,11 @@ dojo.addOnLoad(function() {
 			
 			// these are isolated from the regular service and plugin registry
 			var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
-			var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {});
+			var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {storage:{}});
 			
-			testPluginRegistry.installPlugin(fileURI).then(function() {
+			testPluginRegistry.installPlugin(fileURI).then(function(plugin) {
+				return plugin.start();
+			}).then(function() {
 				var service = testServiceRegistry.getService("orion.test.runner");
 				//console.log("got service: " + service);
 

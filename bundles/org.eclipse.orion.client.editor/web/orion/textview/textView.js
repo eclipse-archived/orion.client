@@ -1275,6 +1275,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 *       <li>"tab" - inserts a tab character at the caret</li>
 		 *       <li>"shiftTab" - noop</li>
 		 *       <li>"toggleTabMode" - toggles tab mode.</li>
+		 *       <li>"toggleWrapMode" - toggles wrap mode.</li>
 		 *       <li>"enter" - inserts a line delimiter at the caret</li>
 		 *     </ul>
 		 *   <li>Clipboard actions.</li>
@@ -3797,6 +3798,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._tabMode = !this._tabMode;
 			return true;
 		},
+		_doWrapMode: function (args) {
+			this.setOptions({wrapMode: !this.getOptions("wrapMode")});
+			return true;
+		},
 		
 		/************************************ Internals ******************************************/
 		_autoScroll: function () {
@@ -4184,6 +4189,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				"cut": {defaultHandler: function() {return self._doCut();}}, //$NON-NLS-0$
 				"paste": {defaultHandler: function() {return self._doPaste();}}, //$NON-NLS-0$
 				
+				"toggleWrapMode": {defaultHandler: function() {return self._doWrapMode();}}, //$NON-NLS-0$
 				"toggleTabMode": {defaultHandler: function() {return self._doTabMode();}} //$NON-NLS-0$
 			};
 		},
@@ -4718,10 +4724,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_getLinePixel: function(lineIndex) {
 			lineIndex = Math.min(Math.max(0, lineIndex), this._model.getLineCount());
 			if (this._lineHeight) {
-				var pixel = 0;
-				//TODO [perf] calculate line pixel from top pixel
-				for (var i = 0; i < lineIndex; i++) {
-					pixel += this._getLineHeight(i);
+				var topIndex = this._getTopIndex();
+				var pixel = -this._topIndexY + this._getScroll().y, i;
+				if (lineIndex > topIndex) {
+					for (i = topIndex; i < lineIndex; i++) {
+						pixel += this._getLineHeight(i);
+					}
+				} else {
+					for (i = topIndex - 1; i >= lineIndex; i--) {
+						pixel -= this._getLineHeight(i);
+					}
 				}
 				return pixel;
 			}
@@ -4730,18 +4742,27 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_getLineIndex: function(y) {
 			var lineHeight, lineIndex = 0;
+			var lineCount = this._model.getLineCount();
 			if (this._lineHeight) {
-				//TODO [perf] calculate from top index
-				var h = 0;
-				while (h + (lineHeight = this._getLineHeight(lineIndex)) < y) {
-					h += lineHeight;
-					lineIndex++;
+				lineIndex = this._getTopIndex();
+				var pixel = -this._topIndexY + this._getScroll().y;
+				if (y !== pixel) {
+					if (y < pixel) {
+						while (y < pixel && lineIndex > 0) {
+							y += this._getLineHeight(--lineIndex);
+						}
+					} else {
+						lineHeight = this._getLineHeight(lineIndex);
+						while (y - lineHeight >= pixel && lineIndex < lineCount - 1) {
+							y -= lineHeight;
+							lineHeight = this._getLineHeight(++lineIndex);
+						}
+					}
 				}
 			} else {
 				lineHeight = this._getLineHeight();
 				lineIndex = Math.floor(y / lineHeight);
 			}
-			var lineCount = this._model.getLineCount();
 			return Math.max(0, Math.min(lineCount - 1, lineIndex));
 		},
 		_getScroll: function() {
@@ -5042,7 +5063,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._columnX = -1;
 			this._topChild = null;
 			this._bottomChild = null;
-			this._partialY = 0;
+			this._topIndexY = 0;
 			this._resetLineHeight();
 			this._setSelection(new Selection (0, 0, false), false, false);
 			if (this._viewDiv) {
@@ -5743,10 +5764,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			/*
 			* topIndex - top line index of the view (maybe be particialy visible)
 			* lineStart - top line minus one line (if any)
-			* partialY - portion of the top line that is NOT visible.
-			* top - partialY plus height of the line before top line (if any)
+			* topIndexY - portion of the top line that is NOT visible.
+			* top - topIndexY plus height of the line before top line (if any)
 			*/
-			var topIndex, lineStart, top, partialY,
+			var topIndex, lineStart, top, topIndexY,
 				leftWidth, leftRect,
 				clientHeight, scrollWidth, scrollHeight;
 			var h = 0, lh;
@@ -5758,7 +5779,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				topIndex = l;
 				lineStart = Math.max(0, topIndex - 1);
-				partialY = top = scroll.y - h;
+				topIndexY = top = scroll.y - h;
 				if (topIndex > 0) {
 					top += this._getLineHeight(topIndex - 1);
 				}
@@ -5772,10 +5793,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				topIndex = Math.floor(firstLine);
 				lineStart = Math.max(0, topIndex - 1);
 				top = Math.round((firstLine - lineStart) * lineHeight);
-				partialY = Math.round((firstLine - topIndex) * lineHeight);
+				topIndexY = Math.round((firstLine - topIndex) * lineHeight);
 				scrollHeight = lineCount * lineHeight;
 			}
-			this._partialY = partialY;
+			this._topIndexY = topIndexY;
 			var parent = this._parent;
 			var parentWidth = parent.clientWidth;
 			var parentHeight = parent.clientHeight;
@@ -5793,7 +5814,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			} else {
 
 				var viewDiv = this._viewDiv;
-				var linesPerPage = Math.floor((clientHeight + partialY) / lineHeight);
+				var linesPerPage = Math.floor((clientHeight + topIndexY) / lineHeight);
 				var bottomIndex = Math.min(topIndex + linesPerPage, lineCount - 1);
 				var lineEnd = Math.min(bottomIndex + 1, lineCount - 1);
 				
@@ -6037,13 +6058,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_updateRulerSize: function (divRuler, rulerHeight) {
 			if (!divRuler) { return; }
-			var partialY = this._partialY;
+			var topIndexY = this._topIndexY;
 			var lineHeight = this._getLineHeight();
 			var cells = divRuler.firstChild.rows[0].cells;
 			for (var i = 0; i < cells.length; i++) {
 				var div = cells[i].firstChild;
 				var offset = lineHeight;
-				if (div._ruler.getOverview() === "page") { offset += partialY; } //$NON-NLS-0$
+				if (div._ruler.getOverview() === "page") { offset += topIndexY; } //$NON-NLS-0$
 				div.style.top = -offset + "px"; //$NON-NLS-0$
 				div.style.height = (rulerHeight + offset) + "px"; //$NON-NLS-0$
 				div = div.nextSibling;
