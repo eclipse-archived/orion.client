@@ -11,9 +11,9 @@
  *******************************************************************************/
  
 /*global jstestdriver AsyncTestCase fail*/
-/*global eclipse console dojo define*/
+/*global eclipse console define*/
 
-define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/DeferredList' ], function(dojo, mServiceregistry, mPluginregistry){
+define( ['orion/Deferred', 'orion/serviceregistry', 'orion/pluginregistry'], function(Deferred, mServiceregistry, mPluginregistry){
 	
 	function TestLoader(test) {
 		/* This loader is a single test on the main suite, the loader test
@@ -22,7 +22,7 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 		 */
 
 		var noop, errback;
-		var deferred = new dojo.Deferred();
+		var deferred = new Deferred();
 		var testSuite = {};
 		
 				
@@ -60,9 +60,8 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 					console.log("Launching test suite: " + test);
 					testRunDeferreds.push(service.run());
 				}
-				var dl = new dojo.DeferredList(testRunDeferreds, false, false, true);
-				dl.then( function() {
-					loaderPluginRegistry.shutdown();
+				return Deferred.all(testRunDeferreds, function(){}).then( function() {
+					loaderPluginRegistry.stop();
 				});
 			});
 		}
@@ -122,7 +121,7 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 		/* This is a single jstestdriver async test case, it is just a placeholder and 
 		 * testDone() will be called when the real test is finished
 		 */
-		var noop, errback, deferred = new dojo.Deferred();
+		var noop, errback, deferred = new Deferred();
 		
 		function testMethod(queue) {
 			/* jstestdriver calls this method to run the test */
@@ -177,9 +176,8 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 				}));
 			}
 			
-			var dl = new dojo.DeferredList(testRunDeferreds, false, false, true);
-			return dl.then( function() {
-				testPluginRegistry.shutdown();
+			return Deferred.all(testRunDeferreds, function(){}).then( function() {
+				testPluginRegistry.stop();
 				loader.ready(testSuite);
 				return loader;
 			});
@@ -194,8 +192,7 @@ define( ['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/Deferred
 		for (var i = 0; i < testURIs.length; i++) {
 			loaders.push(_loadTests(testURIs[i]));
 		}
-		var dl = new dojo.DeferredList(loaders, false, false, true);
-		return dl.then(function(results) {
+		return Deferred.all(loaders, function(){}).then(function(results) {
 			var OrionTestLoader = new AsyncTestCase(suiteName);
 			for(var i = 0; i < results.length; i++) {
 				var test = results[i][1];		

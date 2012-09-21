@@ -270,17 +270,17 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			var promise = pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
 				return plugin.start({"lazy":true}).then(function() {
 					var cancelPromise = serviceRegistry.getService("test").testCancel();
-					cancelPromise.cancel("test");
+					cancelPromise.cancel();
 					cancelPromise.then(function(result) {
 						assert.ok(false);
 					}, function(error) {
 						assert.ok(cancelPromise.isCanceled());
+					}).then(function() {
+						return serviceRegistry.getService("test").testCancel(true);
+					}).then(function(result) {
+						assert.equal(result, "test");
+						return pluginRegistry.stop();
 					});
-				}).then(function() {
-					return serviceRegistry.getService("test").testCancel(true);
-				}).then(function(result) {
-					assert.equal(result, "test");
-					return pluginRegistry.stop();
 				});
 			});
 			return promise;

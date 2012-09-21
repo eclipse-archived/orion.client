@@ -630,9 +630,6 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				var targetFolder = forceSingleItem(data.items);
 				var sourceURL = data.parameters && data.parameters.valueFor("url"); //$NON-NLS-0$
 				if (targetFolder && sourceURL) {
-					if (sourceURL.indexOf("http://") !== 0) { //$NON-NLS-0$
-						sourceURL = "http://"+sourceURL; //$NON-NLS-0$
-					}
 					var importURL = targetFolder.ImportLocation+"?source="+sourceURL; //$NON-NLS-0$
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$

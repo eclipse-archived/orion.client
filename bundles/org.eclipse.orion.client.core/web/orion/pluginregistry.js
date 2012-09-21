@@ -805,7 +805,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		
 		/**
 		 * Shuts down the plugin registry
-		 * @name orion.pluginregistry.PluginRegistry#shutdown
+		 * @name orion.pluginregistry.PluginRegistry#stop
 		 * @function 
 		 */
 		this.stop = function() {
