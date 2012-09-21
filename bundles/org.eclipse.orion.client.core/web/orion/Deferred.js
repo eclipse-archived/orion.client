@@ -10,10 +10,10 @@
  ******************************************************************************/
 /*global exports module define*/
 (function(root, factory) { // UMD
-	if (typeof exports === 'object') {
-		module.exports = factory();
-	} else if (typeof define === 'function' && define.amd) {
+	if (typeof define === 'function' && define.amd) {
 		define(factory);
+	} else if (typeof exports === 'object') {
+		module.exports = factory();
 	} else {
 		root.orion = root.orion || {};
 		root.orion.Deferred = factory();
@@ -112,7 +112,9 @@
 			if (!checkFulfilled(strict)) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
-				enqueue(notify);
+				if (head) {
+					enqueue(notify);
+				}
 			}
 			return _this.promise;
 		};
@@ -121,7 +123,9 @@
 			if (!checkFulfilled(strict)) {
 				state = "resolved"; //$NON-NLS-0$
 				result = value;
-				enqueue(notify);
+				if (head) {
+					enqueue(notify);
+				}
 			}
 			return _this.promise;
 		};

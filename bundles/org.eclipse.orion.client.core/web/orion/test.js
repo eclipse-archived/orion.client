@@ -11,7 +11,7 @@
 /*jslint regexp: true */
 /*global define window console top self setTimeout*/
 
-define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin', 'orion/es5shim'], function(Deferred, assert, EventTarget, PluginProvider) {
+define(['orion/Deferred', 'orion/assert', 'orion/EventTarget', 'orion/plugin'], function(Deferred, assert, EventTarget, PluginProvider) {
 	// Time to wait before declaring an async test failed. A test function can override this by defining a 'timeout' property.
 	var DEFAULT_TIMEOUT = 30000;
 
