@@ -24,7 +24,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 		}, {
 			test : 1
 		});
-		var reference = registration.getServiceReference();
+		var reference = registration.getReference();
 		assert.equal("testRegister", reference.getProperty("objectClass")[0]);
 		assert.equal(1, reference.getProperty("test"));
 
@@ -136,7 +136,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 		assert.equal(1, serviceAddedCount);
 		assert.equal(0, serviceRemovedCount);
 
-		var service = registry.getService(registration.getServiceReference());
+		var service = registry.getService(registration.getReference());
 		var eventHandler = function(event) {
 			eventResult = event.result;
 		};
