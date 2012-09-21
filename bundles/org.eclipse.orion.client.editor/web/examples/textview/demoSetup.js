@@ -112,6 +112,8 @@ function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, m
 			log("*****************SAVE");
 			return true;
 		});
+		
+		view.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode");
 
 		var annotationModel = view.annotationModel = new mAnnotations.AnnotationModel(baseModel);
 		/* Example: Adding a keyBinding and action*/
