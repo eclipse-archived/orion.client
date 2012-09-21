@@ -20,6 +20,10 @@
 			};
 			var provider = new PluginProvider(headers);
 			var returnReason;
+			var resolveDeferred = new Deferred();
+			var cancelDeferred = new Deferred(function(reason) {
+				resolveDeferred.resolve(reason);
+			});	
 			var impl = {
 				test: function(echo) {
 					return echo;
@@ -39,15 +43,9 @@
 					});
 				},
 				testCancel: function(resolve) {
-				console.log("--" +resolve);
-					var d = new Deferred(function(reason) {
-						returnReason = reason;
-					});				
-					if(resolve) {
-						d.resolve(returnReason);
-					}
-					return d;
+					return resolve ? resolveDeferred : cancelDeferred;
 				}
+				
 			};
 			EventTarget.attach(impl);
 			provider.registerService("test", impl, {name : "echotest", change: "tested"});
