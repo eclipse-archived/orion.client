@@ -14,119 +14,114 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "webdav
 	var tests = {};
 
 	tests["test plugin GET call"] = function() {
-		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
-		
-		assert.equal(pluginRegistry.getPlugins().length, 0);
-		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
-		
-		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			return serviceRegistry.getService("xhr").call("GET", "xhrPlugin.html");
-		}).then(function(result) {
-			assert.ok(result.status >= 200 && result.status < 300);
-			pluginRegistry.shutdown();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {storage:{}});	
+		return pluginRegistry.start().then(function(){
+			return pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
+				plugin.start().then(function() {
+					return serviceRegistry.getService("xhr").call("GET", "xhrPlugin.html");
+				}).then(function(result) {
+					assert.ok(result.status >= 200 && result.status < 300);
+				});
+			});
+		}).then(function() {
+			pluginRegistry.stop();
 		});
-		return promise;
 	};
 	
 	tests["test plugin GET and PROPFIND call"] = function() {
-		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
-				
-		assert.equal(pluginRegistry.getPlugins().length, 0);
-		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
-		
-		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			var service = serviceRegistry.getService("xhr");
-			return service.call("GET", "xhrPlugin.html").then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("PROPFIND", "xhrPlugin.html");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
-				var response = multistatus.response[0];
-				assert.ok(response);
-				assert.ok(response.href[0].match(/xhrPlugin\.html$/));
-				var prop = response.propstat[0].prop; 
-				assert.ok(prop.resourcetype === null || prop.resourcetype.indexOf("collection") === -1);
-				assert.ok(prop.getcontenttype === "text/html");
-				return service.call("PROPFIND", ".", {depth:1});
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
-				var response = multistatus.response[0];
-				assert.ok(response);
-				var prop = response.propstat[0].prop;
-				assert.ok(prop.resourcetype.indexOf("collection") !== -1);
-				pluginRegistry.shutdown();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {storage:{}});	
+		return pluginRegistry.start().then(function(){
+			return pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
+				plugin.start().then(function() {
+					var service = serviceRegistry.getService("xhr");
+					return service.call("GET", "xhrPlugin.html").then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("PROPFIND", "xhrPlugin.html");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
+						var response = multistatus.response[0];
+						assert.ok(response);
+						assert.ok(response.href[0].match(/xhrPlugin\.html$/));
+						var prop = response.propstat[0].prop; 
+						assert.ok(prop.resourcetype === null || prop.resourcetype.indexOf("collection") === -1);
+						assert.ok(prop.getcontenttype === "text/html");
+						return service.call("PROPFIND", ".", {depth:1});
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						var multistatus = mWebdav.parseDAV_multistatus(result.responseText);
+						var response = multistatus.response[0];
+						assert.ok(response);
+						var prop = response.propstat[0].prop;
+						assert.ok(prop.resourcetype.indexOf("collection") !== -1);
+					});
+				});
 			});
+		}).then(function() {
+			pluginRegistry.stop();
 		});
-		return promise;
 	};
 
 	
 	tests["test plugin PUT and DELETE call"] = function() {
-		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
-		
-		assert.equal(pluginRegistry.getPlugins().length, 0);
-		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
-		
-		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			var service = serviceRegistry.getService("xhr");
-			return service.call("GET", "testput.txt", {"Cache-Control": "no-cache"}).then(function(result) {
-				assert.ok(result.status === 404);
-				return service.call("PUT", "testput.txt", null, "test");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("GET", "testput.txt");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("DELETE", "testput.txt");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("GET", "testput.txt");
-			}).then(function(result) {
-				assert.ok(result.status === 404);
-				pluginRegistry.shutdown();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {storage:{}});	
+		return pluginRegistry.start().then(function(){
+			return pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
+				plugin.start().then(function() {
+					var service = serviceRegistry.getService("xhr");
+					return service.call("GET", "testput.txt", {"Cache-Control": "no-cache"}).then(function(result) {
+						assert.ok(result.status === 404);
+						return service.call("PUT", "testput.txt", null, "test");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("GET", "testput.txt");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("DELETE", "testput.txt");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("GET", "testput.txt");
+					}).then(function(result) {
+						assert.ok(result.status === 404);
+					});
+				});
 			});
+		}).then(function() {
+			pluginRegistry.stop();
 		});
-		return promise;
 	};
 	
 	tests["test plugin MKCOL and DELETE call"] = function() {
-		var storage = {};
 		var serviceRegistry = new mServiceregistry.ServiceRegistry();
-		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, storage);
-		
-		assert.equal(pluginRegistry.getPlugins().length, 0);
-		assert.equal(serviceRegistry.getServiceReferences().length, 0);		
-		
-		var promise = pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
-			var service = serviceRegistry.getService("xhr");
-			return service.call("PROPFIND", "test/").then(function(result) {
-				assert.ok(result.status === 404);
-				return service.call("MKCOL", "test/");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("PROPFIND", "test/", {depth:1});
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("DELETE", "test/");
-			}).then(function(result) {
-				assert.ok(result.status >= 200 && result.status < 300);
-				return service.call("PROPFIND", "test/");
-			}).then(function(result) {
-				assert.ok(result.status === 404);			
-				pluginRegistry.shutdown();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {storage:{}});	
+		return pluginRegistry.start().then(function(){
+			return pluginRegistry.installPlugin("http://localhost/dav/plugin/xhrPlugin.html").then(function(plugin) {
+				plugin.start().then(function() {
+					var service = serviceRegistry.getService("xhr");
+					return service.call("PROPFIND", "test/").then(function(result) {
+						assert.ok(result.status === 404);
+						return service.call("MKCOL", "test/");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("PROPFIND", "test/", {depth:1});
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("DELETE", "test/");
+					}).then(function(result) {
+						assert.ok(result.status >= 200 && result.status < 300);
+						return service.call("PROPFIND", "test/");
+					}).then(function(result) {
+						assert.ok(result.status === 404);			
+					});
+				});
 			});
+		}).then(function() {
+			pluginRegistry.stop();
 		});
-		return promise;
 	};
-	
 
 	return tests;
 });
