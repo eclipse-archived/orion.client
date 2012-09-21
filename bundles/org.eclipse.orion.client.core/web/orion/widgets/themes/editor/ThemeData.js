@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global dojo dijit widgets orion  window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil'], 
@@ -218,18 +218,80 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			return dataset;
 		}
 		
+		function parseToXML ( text ) {
+		      try {
+		        var xml = null;
+		        
+		        if ( window.DOMParser ) {
+		
+		          var parser = new DOMParser();
+		          xml = parser.parseFromString( text, "text/xml" );
+		          
+		          var found = xml.getElementsByTagName( "parsererror" );
+		
+		          if ( !found || !found.length || !found[ 0 ].childNodes.length ) {
+		            return xml;
+		          }
+		
+		          return null;
+		        } else {
+		
+		          xml = new ActiveXObject( "Microsoft.XMLDOM" );
+		
+		          xml.async = false;
+		          xml.loadXML( text );
+		
+		          return xml;
+		        }
+		      } catch ( e ) {
+		        // suppress
+		      }
+		 }
+		 
+		ThemeData.prototype.parseToXML = parseToXML;
+		
+		function importTheme(data){
+			console.log( 'import theme' );
+			console.log( data );
+			
+			var body = data.parameters.valueFor("name");
+				
+			var xml = this.parseToXML( body );
+			
+			var newStyle = new StyleSet();
+			
+			newStyle.name = xml.getElementsByTagName("colorTheme")[0].attributes[1].value;;
+			newStyle.annotationRuler = xml.getElementsByTagName("background")[0].attributes[0].value; 
+			newStyle.background = xml.getElementsByTagName("background")[0].attributes[0].value;
+			newStyle.comment = xml.getElementsByTagName("singleLineComment")[0].attributes[0].value;
+			newStyle.keyword = xml.getElementsByTagName("keyword")[0].attributes[0].value;
+			newStyle.text = xml.getElementsByTagName("foreground")[0].attributes[0].value;
+			newStyle.string = xml.getElementsByTagName("string")[0].attributes[0].value;
+			newStyle.overviewRuler = xml.getElementsByTagName("background")[0].attributes[0].value;
+			newStyle.lineNumberOdd = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+			newStyle.lineNumberEven = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+			newStyle.lineNumber = xml.getElementsByTagName("lineNumber")[0].attributes[0].value;
+			newStyle.currentLine = xml.getElementsByTagName("selectionBackground")[0].attributes[0].value;
+			
+			data.items.styles.push( newStyle );
+			data.items.updateThemePicker( newStyle.name );
+			data.items.select( newStyle.name );
+		}
+		
+		ThemeData.prototype.importTheme = importTheme;
 		
 		function processSettings( settings, preferences ){
 		
 			console.log( settings );
 		
 			preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
-
-				var subcategories = [];
 				
 				var font = {};		
 				font.label = 'Font';
-				font.data = [ { label:'Family', value: 'Sans Serif', ui:'Font' }, { label:'Size', value: '9pt', ui:'Font' }, { label:'Color', value: settings['text'].value }, { label:'Background', value: settings['background'].value } ];
+				font.data = [ { label:'Family', value: 'Sans Serif', ui:'Font' }, 
+							{ label:'Size', value: '9pt', ui:'Font' }, 
+							{ label:'Color', value: settings['text'].value }, 
+							{ label:'Background', value: settings['background'].value } ];
 				
 				var subcategories = [ { element: 'fontFamily', value: 'sans serif' },
 							          { element: 'fontSize', value: '9pt' },

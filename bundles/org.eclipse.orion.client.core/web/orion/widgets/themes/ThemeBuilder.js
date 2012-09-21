@@ -169,7 +169,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 														'<span>OR HEX: </span>' + 
 														'<div id="colorstring"></div>' +
 														'<button style="margin-left:5px;height:17px;margin-top:0;" type="button" id="colorButton"}">ok</button>' + 
-													'</div>' +
+												'</div>' +
 											'</div>';
 		
 		var colornames = [["white", "seashell", "cornsilk", "lemonchiffon","lightyellow", "palegreen", "paleturquoise", "aliceblue", "lavender", "plum"],
@@ -210,8 +210,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			} );
 		}
 		
-		
 		ThemeBuilder.prototype.initializeStorage = initializeStorage;
+		
+		function addAdditionalCommand( commandData ){
+		
+			var commitMessageParameters = new mCommands.ParametersDescription(
+			[new mCommands.CommandParameter('name', 'text', messages['Commit message:'], "", 4)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			 {hasOptionalParameters: true});
+		
+			var command = new mCommands.Command({
+				name: commandData.name,
+				tooltip: commandData.tip,
+				parameters: commitMessageParameters,
+				id: commandData.id, //$NON-NLS-0$
+				callback: dojo.hitch(this, function(data){
+					commandData.callback(data);
+				})
+			});
+			
+			this.commandService.addCommand(command);
+			this.commandService.registerCommandContribution('themeCommands', commandData.id, 4); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		
+		ThemeBuilder.prototype.addAdditionalCommand = addAdditionalCommand;
 		
 		function validateHex(hexcode){
 		
