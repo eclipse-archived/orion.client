@@ -5591,10 +5591,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
 				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
 			} else {
 				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
 				viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
+				viewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			}
 			if (!init) {
 				this.redraw();
@@ -5917,7 +5919,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				
 				while (totalLineIndex < lineCount) {
-					tempLineHeight = this._getLineHeight(totalLineIndex, false);
+					tempLineHeight = this._getLineHeight(totalLineIndex, totalLineIndex <= bottomIndex);
 					totalHeight += tempLineHeight;
 					totalLineIndex++;
 				}
