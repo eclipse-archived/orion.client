@@ -9,9 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/serviceTracker', 'orion/pluginregistry'],
-	function(mEventTarget, Deferred, ServiceTracker, mPluginRegistry) {
-var Plugin = mPluginRegistry.Plugin;
+define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/serviceTracker'],
+	function(mEventTarget, Deferred, ServiceTracker) {
 var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
@@ -33,7 +32,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 	var pluginLoadedListener = function(event) {
 		var managedServiceUpdates = [];
 		event.plugin.getServiceReferences().forEach(function(serviceRef) {
-			if (serviceRef.getProperty('service.names').indexOf(MANAGED_SERVICE) !== -1) { //$NON-NLS-0$
+			if (serviceRef.getProperty('objectClass').indexOf(MANAGED_SERVICE) !== -1) { //$NON-NLS-0$
 				var pid = serviceRef.getProperty(PROPERTY_PID);
 				var managedService = serviceRegistry.getService(serviceRef);
 				if (pid && managedService) {
@@ -83,7 +82,7 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 				// pluginLoadedListener will catch the plugin when (if) it loads.
 				var pluginUrl = serviceRefs[i].getProperty('__plugin__'); //$NON-NLS-0$
 				var plugin = pluginUrl && pluginRegistry.getPlugin(pluginUrl);
-				if (!pluginUrl || (plugin && plugin.getState() === Plugin.LOADED)) {
+				if (!pluginUrl || (plugin && plugin.getState() === 'active')) {
 					services[i].updated(properties);
 				}
 			} catch(e) {
@@ -108,10 +107,10 @@ ManagedServiceTracker = /** @ignore */ function(serviceRegistry, pluginRegistry,
 		asyncUpdated([serviceRef], [service], (configuration && configuration.getProperties()));
 	};
 	this.onOpen = function() {
-		pluginRegistry.addEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
+		pluginRegistry.addEventListener('started', pluginLoadedListener); //$NON-NLS-0$
 	};
 	this.onClose = function() {
-		pluginRegistry.removeEventListener('pluginLoaded', pluginLoadedListener); //$NON-NLS-0$
+		pluginRegistry.removeEventListener('started', pluginLoadedListener); //$NON-NLS-0$
 	};
 	this.notifyUpdated = function(configuration) {
 		var pid = configuration.getPid();
