@@ -1498,6 +1498,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 	};
 	
+	SearchResultExplorer.prototype.incrementalRender = function() {
+		var that = this;
+		this.model.buildResultModel();
+		this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
+	};
+	
 	SearchResultExplorer.prototype.restoreLocationStatus = function() {
 		var currentFileLocation = window.sessionStorage[this.model.queryObj.queryStr + "_search_result_currentFileLocation"]; //$NON-NLS-0$
 		var fileModel = this.model.location2Model(currentFileLocation);
