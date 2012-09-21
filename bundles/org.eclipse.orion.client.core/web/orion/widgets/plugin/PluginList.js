@@ -206,7 +206,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
 					this.statusService.setErrorMessage(messages["Already installed"]);
 				} else {
-					this.settings.pluginRegistry.installPlugin(newPluginUrl).then( dojo.hitch( this, 'addPlugin' ), dojo.hitch( this, 'pluginError' ) ); //$NON-NLS-1$ //$NON-NLS-0$
+					this.settings.pluginRegistry.installPlugin(newPluginUrl).then(function(plugin) {
+						return plugin.start({lazy:true});
+					}).then(this.addPlugin.bind(this), this.pluginError.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		},

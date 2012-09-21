@@ -175,6 +175,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			this.editorThemeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
 			
+			var command = { name:'Import', tip:'Import a theme', id:0, callback: dojo.hitch( editorTheme, 'importTheme' ) };
+			
+			this.editorThemeWidget.addAdditionalCommand( command );
+			
 			dojo.empty(this.table);
 
 			var themeNode = dojo.create( 'div', null, this.table );

@@ -147,7 +147,8 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].Url);
 				if(pluginReference===null){
 					var registry = this.registry;
-					dojo.hitch(this, function(div){this.pluginRegistry.installPlugin(pluginsList[i].Url).then(
+					dojo.hitch(this, function(div){this.pluginRegistry.installPlugin(pluginsList[i].Url).then(function(plugin) {
+						return plugin.start({lazy:true}).then(
 							function(ref){
 								var pluginService = registry.getService(ref.getServiceReferences()[0]);
 								if(pluginService.getDivContent) {
@@ -156,6 +157,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 									});
 								}
 							});
+						});
 					})(pluginDiv);
 					continue;
 				}
