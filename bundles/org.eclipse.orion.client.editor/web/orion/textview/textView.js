@@ -1447,6 +1447,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @returns {Number} the pixel position of the line.
 		 *
 		 * @see #setTopPixel
+		 * @see #getLineIndex
 		 * @see #convert
 		 */
 		getLinePixel: function(lineIndex) {
@@ -3869,7 +3870,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var line = this._getLine(lineIndex);
 			var rect = line.getBoundingClientRect();
 			line.destroy();
-			return Math.max(1, rect.bottom - rect.top);
+			return Math.max(1, Math.ceil(rect.bottom - rect.top));
 		},
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
@@ -5387,7 +5388,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
-				if (scroll) { update = !this._showCaret(false, pageScroll); }
+				if (scroll) { /*update = !*/this._showCaret(false, pageScroll); }
 				
 				/* 
 				* Sometimes the browser changes the selection 
@@ -5769,25 +5770,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			var topIndex, lineStart, top, topIndexY,
 				leftWidth, leftRect,
-				clientHeight, scrollWidth, scrollHeight;
-			var h = 0, lh;
+				clientHeight, scrollWidth, scrollHeight,
+				totalHeight = 0, totalLineIndex = 0, tempLineHeight;
 			if (this._lineHeight) {
-				var l = 0;
-				while (h + (lh = this._getLineHeight(l)) <= scroll.y) {
-					h += lh;
-					l++;
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex);
+					if (totalHeight + tempLineHeight > scroll.y) {
+						break;
+					}
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
 				}
-				topIndex = l;
+				topIndex = totalLineIndex;
 				lineStart = Math.max(0, topIndex - 1);
-				topIndexY = top = scroll.y - h;
+				topIndexY = top = scroll.y - totalHeight;
 				if (topIndex > 0) {
 					top += this._getLineHeight(topIndex - 1);
 				}
-				while (l < lineCount) {
-					h += this._getLineHeight(l, false);
-					l++;
-				}
-				scrollHeight = h;
 			} else {
 				var firstLine = Math.max(0, scroll.y) / lineHeight;
 				topIndex = Math.floor(firstLine);
@@ -5811,6 +5810,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (!this._wrapMode) {
 					scrollWidth = Math.max(this._maxLineWidth, scrollWidth);
 				}
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex, false);
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
+				}
+				scrollHeight = totalHeight;
 			} else {
 
 				var viewDiv = this._viewDiv;
@@ -5867,7 +5872,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	
 				var rect;
 				child = this._getLineNext();
-				h = clientHeight + top;
+				var bottomHeight = clientHeight + top;
 				var foundBottomIndex = false;
 				while (child) {
 					lineWidth = child.lineWidth;
@@ -5879,8 +5884,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						}
 					}
 					if (this._lineHeight && !foundBottomIndex) {
-						h -= this._lineHeight[child.lineIndex];
-						if (h < 0) {
+						bottomHeight -= this._lineHeight[child.lineIndex];
+						if (bottomHeight < 0) {
 							bottomIndex = child.lineIndex;
 							foundBottomIndex = true;
 						}
@@ -5910,6 +5915,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						line.destroy();
 					}
 				}
+				
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex, false);
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
+				}
+				scrollHeight = totalHeight;
 	
 				// Update rulers
 				this._updateRuler(this._leftDiv, topIndex, bottomIndex);
