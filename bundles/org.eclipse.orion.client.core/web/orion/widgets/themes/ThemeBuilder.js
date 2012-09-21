@@ -216,7 +216,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 			var commitMessageParameters = new mCommands.ParametersDescription(
 			[new mCommands.CommandParameter('name', 'text', messages['Commit message:'], "", 4)], //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			 {hasOptionalParameters: true});
+			 {hasOptionalParameters: false});
 		
 			var command = new mCommands.Command({
 				name: commandData.name,

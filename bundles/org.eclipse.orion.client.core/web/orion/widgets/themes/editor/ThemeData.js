@@ -138,7 +138,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			nimbus.lineNumberOdd = '#aaa';
 			nimbus.lineNumberEven = '#aaa';
 			nimbus.lineNumber = '#aaa';
-			nimbus.currentLine = '#EAF2FE';
+			nimbus.currentLine = '#aabfbb';
 			
 			this.styles.push( nimbus );
 			
@@ -155,7 +155,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			adelante.lineNumberOdd = '#AF473B';
 			adelante.lineNumberEven = '#AF473B';
 			adelante.lineNumber = '#AF473B';
-			adelante.currentLine = '#baa289';
+			adelante.currentLine = '#9e937b';
 			
 			this.styles.push( adelante );
 			
