@@ -67,29 +67,30 @@ jstestdriver.pluginRegistrar.register({
 		var testCaseName = config.getTestCaseInfo().getTestCaseName();
 		var testURI = config.getTestCaseInfo().getTemplate().prototype.uri;
 
-		require(['dojo', 'orion/serviceregistry', 'orion/pluginregistry', 'dojo/DeferredList'], function (dojo, mServiceregistry, mPluginregistry) {
+		require(['orion/Deferred', 'orion/serviceregistry', 'orion/pluginregistry'], function (Deferred, mServiceregistry, mPluginregistry) {
 			var loaderServiceRegistry = new mServiceregistry.ServiceRegistry();
-			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {}, type === ORION_UI_TYPE);
-			loaderPluginRegistry.installPlugin(testURI).then(function () {
-				var references = loaderServiceRegistry.getServiceReferences("orion.test.runner");
-				var testRunDeferreds = [];
-
-				for (var i = 0; i < references.length; i++) {
-					var service = loaderServiceRegistry.getService(references[i]);
-					service.addEventListener("testDone", function (event) {
-						onTestDone(new jstestdriver.TestResult(testCaseName, event.name, event.result ? "passed" : "failed", event.message || "", "", event.elapsed));
+			var loaderPluginRegistry = new mPluginregistry.PluginRegistry(loaderServiceRegistry, {storage:{}, visible: type === ORION_UI_TYPE});
+			loaderPluginRegistry.start().then(function() {
+				loaderPluginRegistry.installPlugin(testURI).then(function(plugin) {
+					plugin.start();
+				}).then(function() {
+					var references = loaderServiceRegistry.getServiceReferences("orion.test.runner");
+					var testRunDeferreds = [];
+	
+					for (var i = 0; i < references.length; i++) {
+						var service = loaderServiceRegistry.getService(references[i]);
+						service.addEventListener("testDone", function (event) {
+							onTestDone(new jstestdriver.TestResult(testCaseName, event.name, event.result ? "passed" : "failed", event.message || "", "", event.elapsed));
+						});
+						testRunDeferreds.push(service.run());
+					}
+					return Deferred.all(testRunDeferreds, function() {}).then(function () {
+						return loaderPluginRegistry.stop().then(onComplete);
 					});
-					testRunDeferreds.push(service.run());
-				}
-				var dl = new dojo.DeferredList(testRunDeferreds, false, false, true);
-				dl.then(function () {
-					loaderPluginRegistry.shutdown();
-					onComplete();
 				});
-			}, function () {
+			}, function() {
 				onTestDone(new jstestdriver.TestResult(testCaseName, "testSuiteLoader", "error", "failed to load " + testURI, "", 0));
-				loaderPluginRegistry.shutdown();
-				onComplete();
+				return loaderPluginRegistry.stop().then(onComplete);
 			});
 		});
 		return true;
