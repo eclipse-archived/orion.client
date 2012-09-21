@@ -65,7 +65,7 @@ function(messages, require, dojo, dijit, mAuth, mUtil, mSearchUtils, mSearchCraw
 						 * be reused for both.
 						 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
 						 */
-						var token = jsonData.responseHeader.params.q;
+						var token = qObj.searchStr;//jsonData.responseHeader.params.q;
 						token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 						//remove field name if present
 						token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
