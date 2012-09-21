@@ -83,7 +83,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		var _this = this;
 		_manifest = _manifest || {};
 		var _headers = _manifest.headers || {};
-		var _services = _manifest.services || {};
+		var _services = _manifest.services || [];
 		var _autostart = _manifest.autostart;
 		var _lastModified = _manifest.lastModified || 0;
 		
