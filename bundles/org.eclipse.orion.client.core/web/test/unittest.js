@@ -155,8 +155,9 @@ dojo.addOnLoad(function() {
 			// these are isolated from the regular service and plugin registry
 			var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
 			var testPluginRegistry = new mPluginRegistry.PluginRegistry(testServiceRegistry, {storage:{}});
-			
-			testPluginRegistry.installPlugin(fileURI).then(function(plugin) {
+			testPluginRegistry.start().then(function() {
+				return testPluginRegistry.installPlugin(fileURI);
+			}).then(function(plugin) {
 				return plugin.start();
 			}).then(function() {
 				var service = testServiceRegistry.getService("orion.test.runner");
@@ -212,11 +213,11 @@ dojo.addOnLoad(function() {
 				});	
 				if (specificTest) {
 					service.run(specificTest).then(function(result) {
-						testPluginRegistry.shutdown();
+						testPluginRegistry.stop();
 					});
 				} else {
 					service.run().then(function(result) {
-						testPluginRegistry.shutdown();
+						testPluginRegistry.stop();
 					});
 				}
 			}, function(error) {
