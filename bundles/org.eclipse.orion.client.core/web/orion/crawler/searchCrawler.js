@@ -85,6 +85,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	 */
 	SearchCrawler.prototype.search = function(onComplete){
 		var contentTypeService = this.registry.getService("orion.core.contenttypes"); //$NON-NLS-0$
+		this._onSearchComplete = onComplete;
 		var self = this;
 		var dialog = this.registry.getService("orion.page.dialog"); //$NON-NLS-0$
 		dialog.confirm(messages["The search term on this location will not use indexed files."] + "\n" + //$NON-NLS-1$
@@ -99,7 +100,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 						//self._searchFiles().then(function(){
 							self._sort(self.fileLocations);
 							var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
-							onComplete({response: response});
+							self._onSearchComplete({response: response});
 						//});
 					});
 				});
@@ -237,10 +238,13 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 				fileObj.LastModified = fileObj.LocalTimeStamp;
 				self.fileLocations.push(fileObj);
 				self._hitCounter++;
+				self._sort(self.fileLocations);
+				var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
+				self._onSearchComplete({response: response}, true);
 				//console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
 				//console.log(fileObj.Location);
 			}
-			self.registry.getService("orion.page.message").setProgressResult({Message: "Hit " + self._hitCounter + " files out of " + self._totalCounter});
+			self.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [self._hitCounter, self._totalCounter])});
 			},
 			function(error) {
 				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
