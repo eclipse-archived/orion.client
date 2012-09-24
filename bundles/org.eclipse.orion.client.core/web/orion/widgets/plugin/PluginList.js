@@ -15,7 +15,7 @@
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, mUtil, mCommands, mHTMLFragments) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/Deferred', 'orion/util', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, Deferred, mUtil, mCommands, mHTMLFragments) {
 	
 	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -238,24 +238,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		/* reloads all of the plugins - sometimes useful for reaffirming plugin initialization */
 
 		reloadPlugins: function(){
-		
-			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-		
-			var count = 0;
-			
-			var d = new dojo.Deferred();
-		
-			for( var i = 0; i < settingsPluginList.length; i++) {
-			
-				settingsPluginList[i].update().then( function(){
-					count++;
-					if( count === settingsPluginList.length ){
-						d.resolve();
-					}
-				});
-			}
-			
-			d.then( dojo.hitch( this, "reloaded" ) ); //$NON-NLS-0$
+			var plugins = this.settings.pluginRegistry.getPlugins();
+			var updates = [];
+			plugins.forEach(function(plugin){
+				updates.push(plugin.update());
+			});
+			Deferred.all(updates, function(){}).then(this.reloaded.bind(this));
 		},
 		
 		forceRemove: function(url){
