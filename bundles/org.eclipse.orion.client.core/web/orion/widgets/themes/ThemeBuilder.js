@@ -725,7 +725,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 				for( var setting in this.settings ){
 					
 					var element = this.settings[setting].name;
-					;
 					
 					if( element !== 'name' ){
 						newtheme[element] = this.settings[setting].value;
