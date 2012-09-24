@@ -11,11 +11,11 @@
 
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/GitCredentialsStorage', 'orion/git/widgets/CloneGitRepositoryDialog', 
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/util', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 'orion/widgets/NewItemDialog', 
         'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
-        function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils, GitCredentialsStorage) {
+        function(messages, require, dojo, mCommands, mUtil, mGitUtil, mCompareUtils, GitPreferenceStorage) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -116,38 +116,40 @@ var exports = {};
 
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
 		var repository = errorData.Url;
-		var gitCredentialsStorage = new GitCredentialsStorage();
-		var loadedPrivateKey = "", loadedPassphrase = "";
-						
-		if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
-			loadedPrivateKey = gitCredentialsStorage.getPrivateKey(repository);
-			loadedPassphrase = gitCredentialsStorage.getPassphrase(repository);
-		}
 		
-		if(loadedPrivateKey !== ""){
+		var failure = function(){
+			var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+				title: title,
+				serviceRegistry: serviceRegistry,
+				func: func,
+				errordata: options.errordata,
+				failedOperation: options.failedOperation
+			});
+				
+			credentialsDialog.startup();
+			credentialsDialog.show();
 			if(options.failedOperation){
 				var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
 			}
+		};
 		
-			func({ knownHosts: options.knownHosts, gitSshUsername: "", gitSshPassword: "", gitPrivateKey: loadedPrivateKey, gitPassphrase: loadedPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			return;
-		}
-	
-		var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
-			title: title,
-			serviceRegistry: serviceRegistry,
-			func: func,
-			errordata: options.errordata,
-			failedOperation: options.failedOperation
-		});
-		
-		credentialsDialog.startup();
-		credentialsDialog.show();
-		if(options.failedOperation){
-			var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-			dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
-		}
+		var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+		gitPreferenceStorage.get(repository).then(
+			function(credentials){
+				if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
+					if(options.failedOperation){
+						var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+					}
+				
+					func({ knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					return;
+				}
+				
+				failure();
+			}, failure
+		);
 	};
 
 	exports.getDefaultSshOptions = function(serviceRegistry, authParameters){
@@ -232,7 +234,7 @@ var exports = {};
 
 	exports.gatherSshCredentials = function(serviceRegistry, data, title){
 		var def = new dojo.Deferred();
-		var repository = undefined;
+		var repository;
 		
 		//TODO This should be somehow unified
 		if(data.items.RemoteLocation !== undefined){ repository = data.items.RemoteLocation[0].GitUrl; }
@@ -260,56 +262,65 @@ var exports = {};
 				var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then( //$NON-NLS-1$ //$NON-NLS-0$
 					function(){
-						var gitCredentialsStorage = new GitCredentialsStorage();
-						var loadedPrivateKey = "", loadedPassphrase = "";
-						
-						if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
-							loadedPrivateKey = gitCredentialsStorage.getPrivateKey(repository);
-							loadedPassphrase = gitCredentialsStorage.getPassphrase(repository);
-						}
-					
-						triggerCallback({ gitSshUsername: "", gitSshPassword: "", gitPrivateKey: loadedPrivateKey, gitPassphrase: loadedPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.get(repository).then(
+							function(credentials){
+								triggerCallback(credentials);
+							},
+							function(){
+								triggerCallback({
+									gitSshUsername: "",
+									gitSshPassword: "",
+									gitPrivateKey: "",
+									gitPassphrase: ""
+								});
+							}
+						);
 					}
-				);					
+				);
 			}
 			return def;
 		}
 		
-		var gitCredentialsStorage = new GitCredentialsStorage();
-		if(gitCredentialsStorage.isEnabled() && !gitCredentialsStorage.getPrompt(repository)){
-			var loadedPrivateKey = gitCredentialsStorage.getPrivateKey(repository);
-			var loadedPassphrase = gitCredentialsStorage.getPassphrase(repository);
-			
-			if(loadedPrivateKey !== ""){
-				triggerCallback({ gitSshUsername: "", gitSshPassword: "", gitPrivateKey: loadedPrivateKey, gitPassphrase: loadedPassphrase});
-				return def;
+		var failure = function(){
+			if (!data.parameters && !data.optionsRequested){
+				triggerCallback({gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				return;
 			}
-		}
 		
-		if (!data.parameters && !data.optionsRequested){
-			triggerCallback({gitSshUsername: "", gitSshPassword: "", gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			return def;
-		}
+			// try to gather creds from the slideout first
+			if (data.parameters && !data.optionsRequested) {
+				var sshUser =  data.parameters ? data.parameters.valueFor("sshuser") : ""; //$NON-NLS-0$
+				var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	 //$NON-NLS-0$
+				triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
+				return;
+			}
+				
+			// use the old creds dialog
+			var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+				title: title,
+				serviceRegistry: serviceRegistry,
+				func: triggerCallback,
+				errordata: errorData
+			});
+				
+			credentialsDialog.startup();
+			credentialsDialog.show();
+			return;
+		};
 
-		// try to gather creds from the slideout first
-		if (data.parameters && !data.optionsRequested) {
-			var sshUser =  data.parameters ? data.parameters.valueFor("sshuser") : ""; //$NON-NLS-0$
-			var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	 //$NON-NLS-0$
-			triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
-			return def;
-		}
+		var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+		gitPreferenceStorage.get(repository).then(
+			function(credentials){
+				if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
+					triggerCallback(credentials);
+					return;
+				}
+				
+				failure();
+			}, failure
+		);
 		
-		// use the old creds dialog
-		var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
-			title: title,
-			serviceRegistry: serviceRegistry,
-			func: triggerCallback,
-			errordata: errorData
-		});
-		
-		credentialsDialog.startup();
-		credentialsDialog.show();
-
 		return def;
 	};
 	
@@ -325,13 +336,11 @@ var exports = {};
 		}
 		
 		if(jsonData.HttpCode == 500 || jsonData.HttpCode == 400){
-			var repository = jsonData.JsonData.Url;
-			
-			var gitCredentialsStorage = new GitCredentialsStorage();
-			if(gitCredentialsStorage.isEnabled()){
-				gitCredentialsStorage.erasePrivateKey(repository);
-				gitCredentialsStorage.erasePassphrase(repository);
-				gitCredentialsStorage.erasePrompt(repository);
+			if(jsonData.JsonData !== undefined){
+				var repository = jsonData.JsonData.Url;
+				
+				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+				gitPreferenceStorage.remove(repository);
 			}
 		}
 		
