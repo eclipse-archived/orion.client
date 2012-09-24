@@ -302,7 +302,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				var lineEnd = model.getLineEnd(lastLine, true);
 				var lastLineStart = model.getLineStart(lastLine);
 				editor.setText(lines.join(""), lineStart, lineEnd);
-				editor.setSelection(lineStart === selection.start ? selection.start : selection.start - firstRemoveCount, selection.end - removeCount + (selection.end === lastLineStart+1 ? 1 : 0));
+				var start = lineStart === selection.start ? selection.start : selection.start - firstRemoveCount;
+				var end = Math.max(start, selection.end - removeCount + (selection.end === lastLineStart+1 && selection.start !== selection.end ? 1 : 0));
+				editor.setSelection(start, end);
 				return true;
 			}.bind(this), {name: messages.unindentLines});
 			
