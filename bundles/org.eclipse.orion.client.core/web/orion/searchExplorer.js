@@ -932,6 +932,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			dojo.addClass(span, "parameters"); //$NON-NLS-0$
 			span.id = "globalSearchReplaceCommands"; //$NON-NLS-0$
 			parentDiv.appendChild(span);
+			return replaceStringDiv;
 		});
 		
 		var replaceDiv = document.getElementById("globalSearchReplaceWith"); //$NON-NLS-0$
