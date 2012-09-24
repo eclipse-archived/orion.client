@@ -1671,7 +1671,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
 		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property. 
 		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property. 
-		 * @property {Boolean} preventDefault Determines whether the user agent context menu should be shown. It is not shown by default.
+		 * @property {Boolean} defaultPrevented Determines whether the user agent context menu should be shown. It is not shown by default.
 		 */ 
 		/** 
 		 * This event is sent when the user invokes the view context menu. 
@@ -2514,14 +2514,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				// See bug 366312 and 376508.
 				this._updateDOMSelection();
 			}
-			var preventDefault = true;
+			var preventDefault = false;
 			if (this.isListening("ContextMenu")) { //$NON-NLS-0$
 				var evt = this._createMouseEvent("ContextMenu", e); //$NON-NLS-0$
 				evt.screenX = e.screenX;
 				evt.screenY = e.screenY;
-				evt.preventDefault = true;
 				this.onContextMenu(evt);
-				preventDefault = evt.preventDefault;
+				preventDefault = evt.defaultPrevented;
 			}
 			if (preventDefault) {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -2860,9 +2859,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("MouseDown")) { //$NON-NLS-0$
-				this.onMouseDown(this._createMouseEvent("MouseDown", e)); //$NON-NLS-0$
-			}
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
 				if (target.tagName !== "A") { //$NON-NLS-0$
@@ -2899,6 +2895,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				} else {
 					this._clickCount = 1;
 				}
+			}
+			if (this.isListening("MouseDown")) { //$NON-NLS-0$
+				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
+				this.onMouseDown(mouseEvent);
+				if (mouseEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+			}
+			if (button === 1) {
 				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
@@ -3019,8 +3025,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return {
 				type: type,
 				event: e,
+				clickCount: this._clickCount,
 				x: pt.x,
-				y: pt.y
+				y: pt.y,
+				preventDefault: function() {
+					this.defaultPrevented = true;
+				}
 			};
 		},
 		_handleMouseUp: function (e) {
