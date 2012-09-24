@@ -186,10 +186,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			window.open( path, this.target );
 		},
 		
-		addPlugin: function( plugin ){
-			this.statusService.setMessage(messages["Installed "] + plugin.getLocation(), 5000, true);
+		addPlugin: function( pluginUrl ){
+			this.statusService.setMessage(messages["Installed "] + pluginUrl, 5000, true);
 			this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-				plugins.put(plugin.getLocation(), true);
+				plugins.put(pluginUrl, true);
 			}); // this will force a sync
 			
 			this.addRows();
@@ -202,13 +202,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		
 		installHandler: function(newPluginUrl){
 			if (/^\S+$/.test(dojo.trim(newPluginUrl))) {
-				this.statusService.setMessage(messages["Installing "] + newPluginUrl + "...", null, true); //$NON-NLS-1$
+				this.statusService.setMessage(messages["Installing "] + newPluginUrl + "...", null, true); //$NON-NLS-1$ //$NON-NLS-0$
 				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
 					this.statusService.setErrorMessage(messages["Already installed"]);
 				} else {
 					this.settings.pluginRegistry.installPlugin(newPluginUrl).then(function(plugin) {
 						return plugin.start({lazy:true});
-					}).then(this.addPlugin.bind(this), this.pluginError.bind(this)); //$NON-NLS-1$ //$NON-NLS-0$
+					}).then(this.addPlugin.bind(this, newPluginUrl), this.pluginError.bind(this));
 				}
 			}
 		},
