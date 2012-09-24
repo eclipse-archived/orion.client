@@ -468,8 +468,8 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			
 			if (_state === "active" || _state === "starting") {
 				var serviceIds = [];
-				Object.keys(_services).forEach(function(service) {
-					var serviceId = service.serviceId;
+				Object.keys(_services).forEach(function(serviceId) {
+					var service = _services[serviceId];
 					serviceIds.push(serviceId);
 					var registeredService = _registeredServices[serviceId];
 					if (registeredService) {
@@ -477,7 +477,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 							var properties = _createServiceProperties(service);
 							var reference = registeredService.registration.getReference();
 							var currentProperties = {};
-							reference.getPropertyNames().forEach(function(name){
+							reference.getPropertyKeys().forEach(function(name){
 								currentProperties[name] = reference.getProperty(name);
 							});
 							if (!_equal(properties, currentProperties)) {
