@@ -39,10 +39,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 		function ThemeData(){
 		
+			this.styles = [];
 		
 			var orion = new StyleSet();
 			
-			orion.name = 'orion';
+			orion.name = 'Orion';
 			orion.annotationRuler = 'white'; 
 			orion.background = 'white';
 			orion.comment = 'green';
@@ -59,7 +60,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 
 			var prospecto = new StyleSet();
 			
-			prospecto.name = 'prospecto';
+			prospecto.name = 'Prospecto';
 			prospecto.annotationRuler = 'white'; 
 			prospecto.background = 'white';
 			prospecto.comment = 'darkSeaGreen';
@@ -76,7 +77,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var blue = new StyleSet();
 			
-			blue.name = 'blue';
+			blue.name = 'Blue';
 			blue.annotationRuler = 'lavender'; 
 			blue.background = 'aliceBlue';
 			blue.comment = 'indigo';
@@ -93,7 +94,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var ambience = new StyleSet();
 			
-			ambience.name = 'ambience';
+			ambience.name = 'Ambience';
 			ambience.annotationRuler = '#3D3D3D'; 
 			ambience.background = '#202020';
 			ambience.comment = 'mediumslateblue';
@@ -110,7 +111,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var tierra = new StyleSet();
 			
-			tierra.name = 'tierra';
+			tierra.name = 'Tierra';
 			tierra.annotationRuler = 'moccasin'; 
 			tierra.background = 'lemonchiffon';
 			tierra.comment = 'darkseagreen';
@@ -127,7 +128,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var nimbus = new StyleSet();
 			
-			nimbus.name = 'nimbus';
+			nimbus.name = 'Nimbus';
 			nimbus.annotationRuler = '#444'; 
 			nimbus.background = 'dimgray';
 			nimbus.comment = 'darkseagreen';
@@ -144,7 +145,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var adelante = new StyleSet();
 			
-			adelante.name = 'adelante';
+			adelante.name = 'Adelante';
 			adelante.annotationRuler = '#E2D2B2'; 
 			adelante.background = '#F1E7C8';
 			adelante.comment = '#5D774E';
