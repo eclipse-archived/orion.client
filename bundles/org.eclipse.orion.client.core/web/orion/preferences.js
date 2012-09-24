@@ -398,7 +398,6 @@ define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, x
 		 * @param {String} name A slash-delimited path to the preference node to return
 		 */
 		getPreferences: function(name, optScope) {
-			
 			if (!optScope || typeof(optScope) !== "number" || optScope > 7 || optScope < 1) { //$NON-NLS-0$
 				optScope = PreferencesService.DEFAULT_SCOPE | PreferencesService.LOCAL_SCOPE | PreferencesService.USER_SCOPE;
 			}
