@@ -40,6 +40,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		StyleSet.prototype.search = '#444';
 
 		function ThemeData(){
+		
+			this.styles = [];
 
 			var orion = new StyleSet();
 			orion.name = 'Orion';
