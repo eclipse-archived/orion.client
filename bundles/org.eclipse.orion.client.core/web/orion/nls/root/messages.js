@@ -79,5 +79,6 @@ define({
 	"Saved searches" : "Saved searches",
 	"Recent searches" : "Recent searches",
 	"Open in new tab" : "Open in new tab", 
-	"Regular expression" : "Regular expression" 
+	"Regular expression" : "Regular expression",
+	"Search options" : "Search options"
 });
