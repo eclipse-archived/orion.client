@@ -282,7 +282,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 							var data = jsonData;
 							
 							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-								messageService.setProgressResult( messages['User profile data successfully reset.'] );
+								messageService.setProgressResult( messages['User profile data successfully updated.'] );
 								
 								if( userdata.Name ){
 									var userMenu = dijit.byId( 'logins' ); //$NON-NLS-0$
@@ -307,7 +307,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					} else { return; }
 				} else { gitCredentialsStorage.userDisable(); }
 				
-				messageService.setProgressResult( messages['Git Credentials successfully reset.'] );
+				messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
 			}
 		},
 		
