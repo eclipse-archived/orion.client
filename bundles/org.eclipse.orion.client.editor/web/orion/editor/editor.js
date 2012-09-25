@@ -570,7 +570,32 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 				return false;
 			}.bind(this));
-			
+
+			var addRemoveBookmark = function(lineIndex, e) {
+				if (lineIndex === undefined) { return; }
+				if (lineIndex === -1) { return; }
+				var view = this.getView();
+				var viewModel = view.getModel();
+				var annotationModel = this.getAnnotationModel();
+				var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
+				var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
+				var annotations = annotationModel.getAnnotations(lineStart, lineEnd);
+				var bookmark = null;
+				while (annotations.hasNext()) {
+					var annotation = annotations.next();
+					if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) {
+						bookmark = annotation;
+						break;
+					}
+				}
+				if (bookmark) {
+					annotationModel.removeAnnotation(bookmark);
+				} else {
+					bookmark = mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
+					annotationModel.addAnnotation(bookmark);
+				}
+			};
+
 			// Create rulers
 			if (this._annotationFactory) {
 				var textModel = textView.getModel();
@@ -590,7 +615,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.onClick = function(lineIndex, e) {
 						if (lineIndex === undefined) { return; }
 						if (lineIndex === -1) { return; }
-						var viewModel = textView.getModel();
+						var view = this.getView();
+						var viewModel = view.getModel();
 						var annotationModel = this.getAnnotationModel();
 						var lineStart = editor.mapOffset(viewModel.getLineStart(lineIndex));
 						var lineEnd = editor.mapOffset(viewModel.getLineEnd(lineIndex));
@@ -603,10 +629,12 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 							break;
 						}
 					};
+					ruler.onDblClick = addRemoveBookmark;
 					ruler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
 				}
 				this.setAnnotationRulerVisible(true);
 					
@@ -622,6 +650,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_TASK);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
@@ -631,6 +660,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			
 			if (this._lineNumberRulerFactory) {
 				this._lineNumberRuler = this._lineNumberRulerFactory.createLineNumberRuler(this._annotationModel);
+				this._lineNumberRuler.onDblClick = addRemoveBookmark;
 				this.setLineNumberRulerVisible(true);
 			}
 			

@@ -157,6 +157,16 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 			return this._rulerStyle;
 		},
 		/**
+		 * Returns the text view.
+		 *
+		 * @returns {orion.textview.TextView} the text view.
+		 *
+		 * @see #setView
+		 */
+		getView: function() {
+			return this._view;
+		},
+		/**
 		 * Returns the widest annotation which determines the width of the ruler.
 		 * <p>
 		 * If the ruler does not have a fixed width it should provide the widest
