@@ -82,7 +82,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 	function Plugin(_url, _manifest, _internalRegistry) {
 		var _this = this;
 		_manifest = _manifest || {};
-		var _pluginId = _manifest.pluginId;
+		var _created = _manifest.created || new Date().getTime();
 		var _headers = _manifest.headers || {};
 		var _services = _manifest.services || [];
 		var _autostart = _manifest.autostart;
@@ -184,7 +184,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 	
 		function _persist() {
 			_internalRegistry.persist(_url, {
-				pluginId: _pluginId,
+				created: _created,
 				headers: _headers,
 				services: _services,
 				autostart: _autostart,
@@ -246,8 +246,8 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			return _autostart;
 		};
 
-		this.getPluginId = function() {
-			return _pluginId;
+		this._getCreated = function() {
+			return _created;
 		};
 	
 		/**
@@ -587,7 +587,6 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		var _channels = [];
 		var _pluginEventTarget = new EventTarget();
 		var _installing = {};
-		var _nextPluginId = 1;
 	
 		var internalRegistry = {
 			registerService: serviceRegistry.registerService.bind(serviceRegistry),
@@ -720,12 +719,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		this.getLastModified = function() {
 			return 0;
 		};
-		
-		this.getPluginId = function() {
-			return 0;
-		};
-		
-		
+	
 		this.getState = internalRegistry.getState;
 
 
@@ -757,17 +751,13 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 				if (key.indexOf("plugin.") === 0) {
 					var url = key.substring("plugin.".length);
 					var manifest = JSON.parse(_storage[key]);
-					var pluginId = manifest.pluginId;
-					if (pluginId) {
-						if (pluginId >= _nextPluginId) {
-							_nextPluginId = pluginId + 1;
-						}
+					if (manifest.created) {
 						_plugins.push(new Plugin(url, manifest, internalRegistry));
 					}
 				}
 			});
 			_plugins.sort(function (a, b) {
-				return a.getPluginId() < b.getPluginId() ? -1 : 1;
+				return a._getCreated() < b._getCreated() ? -1 : 1;
 			});
 			
 			if (configuration.plugins) {
@@ -778,7 +768,6 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 						var manifest = configuration.plugins[url];
 						manifest = typeof manifest === "object" || {};
 						manifest.autostart = manifest.autostart || configuration.defaultAutostart || "lazy";
-						manifest.pluginId = _nextPluginId++;
 						_plugins.push(new Plugin(url, manifest, internalRegistry));
 					}
 				}.bind(this));
@@ -876,7 +865,6 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			}
 			
 			if (optManifest) {
-				optManifest.pluginId = _nextPluginId++;
 				plugin = new Plugin(url, optManifest, internalRegistry);
 				_plugins.push(plugin);
 				plugin._persist();
@@ -885,7 +873,6 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			}
 						
 			var promise = internalRegistry.loadManifest(url).then(function(manifest) {
-				manifest.pluginId = _nextPluginId++;
 				plugin = new Plugin(url, manifest, internalRegistry);
 				_plugins.push(plugin);
 				plugin._persist();
