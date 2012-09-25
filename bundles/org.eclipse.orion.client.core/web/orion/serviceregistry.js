@@ -89,6 +89,14 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 				throw new Error("already unregistered");
 			}
 			return this._serviceReference;
+		},
+		setProperties: function(properties) {
+			var oldProperties = this._serviceReference._properties;
+			this._serviceReference._properties = properties || {};
+			properties.objectClass = oldProperties.objectClass;
+			properties["service.id"] = this._serviceId;
+			properties["service.names"] = oldProperties["service.names"];
+			this._internalRegistry.modifyService(this._serviceId);
 		}
 	};
 	ServiceRegistration.prototype.constructor = ServiceRegistration;
@@ -168,6 +176,14 @@ define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferr
 						}
 					}
 				});
+			},
+			modifyService: function(serviceId) {
+				var entry = _this._entries[serviceId];
+				if (!entry) {
+					throw new Error("already unregistered");
+				}				
+				var reference = entry.reference;
+				_this._serviceEventTarget.dispatchEvent(new ServiceEvent("modified", reference));
 			}
 		};
 	}
