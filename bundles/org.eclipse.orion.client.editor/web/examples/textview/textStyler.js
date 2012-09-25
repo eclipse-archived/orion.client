@@ -894,7 +894,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
 			for (var i=0; i<brackets.length; i++) {
 				var sign = brackets[i] >= 0 ? 1 : -1;
-				if (brackets[i] * sign === offset) {
+				if (brackets[i] * sign - 1 === offset) {
 					var level = 1;
 					if (bracketIndex & 1) {
 						i--;
@@ -902,7 +902,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex -= 1;
@@ -915,7 +915,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 								sign = brackets[j] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[j] * sign;
+									return brackets[j] * sign - 1;
 								}
 							}
 							lineIndex--;
@@ -926,7 +926,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex += 1;
@@ -940,7 +940,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 								sign = brackets[k] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[k] * sign;
+									return brackets[k] * sign - 1;
 								}
 							}
 							lineIndex++;
@@ -966,9 +966,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 					scanner.setText(text.substring(offset - start, commentStart - start));
 					while ((token = scanner.nextToken())) {
 						if (token === bracketToken) {
-							result.push(scanner.getStartOffset() + offset - start + textOffset);
+							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 						} else if (token === closingBracketToken) {
-							result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 						}
 					}
 				}
@@ -978,9 +978,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 				scanner.setText(text.substring(offset - start, end - start));
 				while ((token = scanner.nextToken())) {
 					if (token === bracketToken) {
-						result.push(scanner.getStartOffset() + offset - start + textOffset);
+						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 					} else if (token === closingBracketToken) {
-						result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 					}
 				}
 			}
