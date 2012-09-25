@@ -2905,7 +2905,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 			}
 			if (button === 1) {
-				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
+				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || isSafari || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
 					}
