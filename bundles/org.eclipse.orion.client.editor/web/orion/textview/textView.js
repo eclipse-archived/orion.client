@@ -1086,12 +1086,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* Feature in WekKit. Webkit limits the width of the lines
 			* computed below to the width of the client div.  This causes
 			* the lines to be wrapped even though "pre" is set.  The fix
-			* is to set the width of the client div to a "auto"
+			* is to set the width of the client div to a "0x7fffffffpx"
 			* before computing the lines width.  Note that this value is
 			* reset to the appropriate value further down.
 			*/
 			if (isWebkit) {
-				clientDiv.style.width = "auto"; //$NON-NLS-0$
+				clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
 			}
 			var lineCount = model.getLineCount();
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
@@ -5874,12 +5874,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Feature in WekKit. Webkit limits the width of the lines
 				* computed below to the width of the client div.  This causes
 				* the lines to be wrapped even though "pre" is set.  The fix
-				* is to set the width of the client div to "auto"
+				* is to set the width of the client div to "0x7fffffffpx"
 				* before computing the lines width.  Note that this value is
 				* reset to the appropriate value further down.
 				*/ 
 				if (isWebkit && !this._wrapMode) {
-					clientDiv.style.width = "auto"; //$NON-NLS-0$
+					clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
 				}
 	
 				var rect;
