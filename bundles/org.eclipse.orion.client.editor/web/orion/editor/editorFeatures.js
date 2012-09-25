@@ -453,7 +453,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					if(annotation.start <= currentOffset) { continue; }
 					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
 					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK) { continue; }
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
 					var tooltip = mTooltip.Tooltip.getTooltip(this.textView);
 					if (!tooltip) { 
 						editor.moveSelection(annotation.start);
@@ -496,7 +497,8 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					if(annotation.start >= currentOffset) { continue; }
 					if(annotation.type !== mAnnotations.AnnotationType.ANNOTATION_ERROR && 
 					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_WARNING && 
-					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK) { continue; }
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_TASK && 
+					   annotation.type !== mAnnotations.AnnotationType.ANNOTATION_BOOKMARK) { continue; }
 					previousAnnotation = annotation;
 				}
 				if(previousAnnotation) {
