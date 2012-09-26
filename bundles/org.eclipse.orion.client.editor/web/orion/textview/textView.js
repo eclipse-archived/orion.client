@@ -583,10 +583,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							}
 						}
 						if (isIE) {
-							var logicalXDPI = window.screen.logicalXDPI;
-							var deviceXDPI = window.screen.deviceXDPI;
-							result.left = result.left * logicalXDPI / deviceXDPI;
-							result.right = result.right * logicalXDPI / deviceXDPI;
+							var xFactor = window.screen.logicalXDPI / window.screen.deviceXDPI;
+							var yFactor = window.screen.logicalYDPI / window.screen.deviceYDPI;
+							result.left = result.left * xFactor;
+							result.right = result.right * xFactor;
+							result.top = result.top * yFactor;
+							result.bottom = result.bottom * yFactor;
 						}
 						break;
 					}
@@ -752,8 +754,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (x < 0) { x = 0; }
 				if (x > (lineRect.right - lineRect.left)) { x = lineRect.right - lineRect.left; }
 			}
-			var logicalXDPI = isIE ? window.screen.logicalXDPI : 1;
-			var deviceXDPI = isIE ? window.screen.deviceXDPI : 1;
+			var xFactor = isIE ? window.screen.logicalXDPI / window.screen.deviceXDPI : 1;
+			var yFactor = isIE ? window.screen.logicalYDPI / window.screen.deviceYDPI : 1;
 			var offset = lineStart;
 			var lineChild = child.firstChild;
 			done:
@@ -789,10 +791,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								var found = false;
 								for (var k = 0; k < rects.length; k++) {
 									rect = rects[k];
-									rangeLeft = rect.left * logicalXDPI / deviceXDPI - lineRect.left;
-									rangeRight = rect.right * logicalXDPI / deviceXDPI - lineRect.left;
-									rangeTop = rect.top * logicalXDPI / deviceXDPI - lineRect.top;
-									rangeBottom = rect.bottom * logicalXDPI / deviceXDPI - lineRect.top;
+									rangeLeft = rect.left * xFactor - lineRect.left;
+									rangeRight = rect.right * xFactor - lineRect.left;
+									rangeTop = rect.top * yFactor - lineRect.top;
+									rangeBottom = rect.bottom * yFactor - lineRect.top;
 									if (rangeLeft <= x && x < rangeRight && (!view._wrapMode || (rangeTop <= y && y < rangeBottom))) {
 										found = true;
 										break;
@@ -816,8 +818,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 								range.moveEnd("character", end - start); //$NON-NLS-0$
 							}
 							rect = range.getClientRects()[0];
-							rangeLeft = rect.left * logicalXDPI / deviceXDPI - lineRect.left;
-							rangeRight = rect.right * logicalXDPI / deviceXDPI - lineRect.left;
+							rangeLeft = rect.left * xFactor - lineRect.left;
+							rangeRight = rect.right * xFactor - lineRect.left;
 							//TODO test for character trailing (wrong for bidi)
 							if (x > (rangeLeft + (rangeRight - rangeLeft) / 2)) {
 								offset++;
