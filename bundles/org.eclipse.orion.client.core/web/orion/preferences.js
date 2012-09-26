@@ -11,7 +11,7 @@
 
 /*global define window localStorage */
 
-define(['require', 'orion/Deferred', 'orion/xhr', 'orion/es5shim'], function(require, Deferred, xhr){
+define(['require', 'orion/Deferred', 'orion/xhr'], function(require, Deferred, xhr){
 	/**
 	 * Constructs a new preferences instance. This constructor is not
 	 * intended to be used by clients. Preferences should instead be
