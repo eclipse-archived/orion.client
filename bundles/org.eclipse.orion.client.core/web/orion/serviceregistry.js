@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define console */
 
-define(["orion/Deferred", "orion/EventTarget", "orion/es5shim"], function(Deferred, EventTarget) {
+define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget) {
 
 	/**
 	 * Creates a new service reference.
