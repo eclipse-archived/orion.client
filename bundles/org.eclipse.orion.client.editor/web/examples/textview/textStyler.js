@@ -104,6 +104,8 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 	var HTML_MARKUP = 12;
 	var DOC_TAG = 13;
 	var TASK_TAG = 14;
+	
+	var BRACKETS = "{}()[]<>";
 
 	// Styles 
 	var singleCommentStyle = {styleClass: "token_singleline_comment"};
@@ -479,6 +481,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			onLineStyle: function(e) {
 				self._onLineStyle(e);
 			},
+			onMouseDown: function(e) {
+				self._onMouseDown(e);
+			},
 			onSelection: function(e) {
 				self._onSelection(e);
 			}
@@ -490,6 +495,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			//TODO still needed to keep the event order correct (styler before view)
 			view.addEventListener("ModelChanged", this._listener.onChanged);
 		}
+		view.addEventListener("MouseDown", this._listener.onMouseDown);
 		view.addEventListener("Selection", this._listener.onSelection);
 		view.addEventListener("Destroy", this._listener.onDestroy);
 		view.addEventListener("LineStyle", this._listener.onLineStyle);
@@ -534,6 +540,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 				} else {
 					view.removeEventListener("ModelChanged", this._listener.onChanged);
 				}
+				view.removeEventListener("MouseDown", this._listener.onMouseDown);
 				view.removeEventListener("Selection", this._listener.onSelection);
 				view.removeEventListener("Destroy", this._listener.onDestroy);
 				view.removeEventListener("LineStyle", this._listener.onLineStyle);
@@ -870,7 +877,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			return result;
 		}, 
 		_findMatchingBracket: function(model, offset) {
-			var brackets = "{}()[]<>";
+			var brackets = BRACKETS;
 			var bracket = model.getText(offset, offset + 1);
 			var bracketIndex = brackets.indexOf(bracket, 0);
 			if (bracketIndex === -1) { return -1; }
@@ -887,7 +894,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			brackets = this._findBrackets(bracket, closingBracket, lineText, lineStart, lineStart, lineEnd);
 			for (var i=0; i<brackets.length; i++) {
 				var sign = brackets[i] >= 0 ? 1 : -1;
-				if (brackets[i] * sign === offset) {
+				if (brackets[i] * sign - 1 === offset) {
 					var level = 1;
 					if (bracketIndex & 1) {
 						i--;
@@ -895,7 +902,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex -= 1;
@@ -908,7 +915,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 								sign = brackets[j] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[j] * sign;
+									return brackets[j] * sign - 1;
 								}
 							}
 							lineIndex--;
@@ -919,7 +926,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 							sign = brackets[i] >= 0 ? 1 : -1;
 							level += sign;
 							if (level === 0) {
-								return brackets[i] * sign;
+								return brackets[i] * sign - 1;
 							}
 						}
 						lineIndex += 1;
@@ -933,7 +940,7 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 								sign = brackets[k] >= 0 ? 1 : -1;
 								level += sign;
 								if (level === 0) {
-									return brackets[k] * sign;
+									return brackets[k] * sign - 1;
 								}
 							}
 							lineIndex++;
@@ -959,9 +966,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 					scanner.setText(text.substring(offset - start, commentStart - start));
 					while ((token = scanner.nextToken())) {
 						if (token === bracketToken) {
-							result.push(scanner.getStartOffset() + offset - start + textOffset);
+							result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 						} else if (token === closingBracketToken) {
-							result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+							result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 						}
 					}
 				}
@@ -971,9 +978,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 				scanner.setText(text.substring(offset - start, end - start));
 				while ((token = scanner.nextToken())) {
 					if (token === bracketToken) {
-						result.push(scanner.getStartOffset() + offset - start + textOffset);
+						result.push(scanner.getStartOffset() + offset - start + textOffset + 1);
 					} else if (token === closingBracketToken) {
-						result.push(-(scanner.getStartOffset() + offset - start + textOffset));
+						result.push(-(scanner.getStartOffset() + offset - start + textOffset + 1));
 					}
 				}
 			}
@@ -1026,6 +1033,33 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			}
 			this._bracketAnnotations = add;
 			this.annotationModel.replaceAnnotations(remove, add);
+		},
+		_onMouseDown: function(e) {
+			if (e.clickCount !== 2) { return; }
+			var view = this.view;
+			var model = view.getModel();
+			var offset = view.getOffsetAtLocation(e.x, e.y);
+			if (offset > 0) {
+				var mapOffset = offset - 1;
+				var baseModel = model;
+				if (model.getBaseModel) {
+					mapOffset = model.mapOffset(mapOffset);
+					baseModel = model.getBaseModel();
+				}
+				var bracket = this._findMatchingBracket(baseModel, mapOffset);
+				if (bracket !== -1) {
+					e.preventDefault();
+					var mapBracket = bracket;
+					if (model.getBaseModel) {
+						mapBracket = model.mapOffset(mapBracket, true);
+					}
+					if (offset > mapBracket) {
+						offset--;
+						mapBracket++;
+					}	
+					view.setSelection(mapBracket, offset);
+				}
+			}
 		},
 		_onModelChanged: function(e) {
 			var start = e.start;

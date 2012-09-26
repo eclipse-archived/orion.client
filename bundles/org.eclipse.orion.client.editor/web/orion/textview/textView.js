@@ -1086,12 +1086,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* Feature in WekKit. Webkit limits the width of the lines
 			* computed below to the width of the client div.  This causes
 			* the lines to be wrapped even though "pre" is set.  The fix
-			* is to set the width of the client div to a "auto"
+			* is to set the width of the client div to a "0x7fffffffpx"
 			* before computing the lines width.  Note that this value is
 			* reset to the appropriate value further down.
 			*/
 			if (isWebkit) {
-				clientDiv.style.width = "auto"; //$NON-NLS-0$
+				clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
 			}
 			var lineCount = model.getLineCount();
 			for (var lineIndex=0; lineIndex<lineCount; lineIndex++) {
@@ -1447,6 +1447,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @returns {Number} the pixel position of the line.
 		 *
 		 * @see #setTopPixel
+		 * @see #getLineIndex
 		 * @see #convert
 		 */
 		getLinePixel: function(lineIndex) {
@@ -1670,7 +1671,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
 		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property. 
 		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property. 
-		 * @property {Boolean} preventDefault Determines whether the user agent context menu should be shown. It is not shown by default.
+		 * @property {Boolean} defaultPrevented Determines whether the user agent context menu should be shown. It is not shown by default.
 		 */ 
 		/** 
 		 * This event is sent when the user invokes the view context menu. 
@@ -2513,14 +2514,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				// See bug 366312 and 376508.
 				this._updateDOMSelection();
 			}
-			var preventDefault = true;
+			var preventDefault = false;
 			if (this.isListening("ContextMenu")) { //$NON-NLS-0$
 				var evt = this._createMouseEvent("ContextMenu", e); //$NON-NLS-0$
 				evt.screenX = e.screenX;
 				evt.screenY = e.screenY;
-				evt.preventDefault = true;
 				this.onContextMenu(evt);
-				preventDefault = evt.preventDefault;
+				preventDefault = evt.defaultPrevented;
 			}
 			if (preventDefault) {
 				if (e.preventDefault) { e.preventDefault(); }
@@ -2859,9 +2859,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleMouseDown: function (e) {
 			if (!e) { e = window.event; }
-			if (this.isListening("MouseDown")) { //$NON-NLS-0$
-				this.onMouseDown(this._createMouseEvent("MouseDown", e)); //$NON-NLS-0$
-			}
 			if (this._linksVisible) {
 				var target = e.target || e.srcElement;
 				if (target.tagName !== "A") { //$NON-NLS-0$
@@ -2898,7 +2895,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				} else {
 					this._clickCount = 1;
 				}
-				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || (isFirefox && !this._overlayDiv))) {
+			}
+			if (this.isListening("MouseDown")) { //$NON-NLS-0$
+				var mouseEvent = this._createMouseEvent("MouseDown", e); //$NON-NLS-0$
+				this.onMouseDown(mouseEvent);
+				if (mouseEvent.defaultPrevented) {
+					e.preventDefault();
+					return;
+				}
+			}
+			if (button === 1) {
+				if (this._handleMouse(e) && (isIE >= 9 || isOpera || isChrome || isSafari || (isFirefox && !this._overlayDiv))) {
 					if (!this._hasFocus) {
 						this.focus();
 					}
@@ -3018,8 +3025,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return {
 				type: type,
 				event: e,
+				clickCount: this._clickCount,
 				x: pt.x,
-				y: pt.y
+				y: pt.y,
+				preventDefault: function() {
+					this.defaultPrevented = true;
+				}
 			};
 		},
 		_handleMouseUp: function (e) {
@@ -3869,7 +3880,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var line = this._getLine(lineIndex);
 			var rect = line.getBoundingClientRect();
 			line.destroy();
-			return Math.max(1, rect.bottom - rect.top);
+			return Math.max(1, Math.ceil(rect.bottom - rect.top));
 		},
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
@@ -5387,7 +5398,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* keyboard navigation when the selection does not chanage. For example, line down
 				* when the caret is already at the last line.
 				*/
-				if (scroll) { update = !this._showCaret(false, pageScroll); }
+				if (scroll) { /*update = !*/this._showCaret(false, pageScroll); }
 				
 				/* 
 				* Sometimes the browser changes the selection 
@@ -5590,10 +5601,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clientDiv.style.whiteSpace = "pre-wrap"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "break-word"; //$NON-NLS-0$
 				viewDiv.style.overflowX = "hidden"; //$NON-NLS-0$
+				viewDiv.style.overflowY = "scroll"; //$NON-NLS-0$
 			} else {
 				clientDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
 				clientDiv.style.wordWrap = "normal"; //$NON-NLS-0$
 				viewDiv.style.overflowX = "auto"; //$NON-NLS-0$
+				viewDiv.style.overflowY = "auto"; //$NON-NLS-0$
 			}
 			if (!init) {
 				this.redraw();
@@ -5769,25 +5782,23 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			var topIndex, lineStart, top, topIndexY,
 				leftWidth, leftRect,
-				clientHeight, scrollWidth, scrollHeight;
-			var h = 0, lh;
+				clientHeight, scrollWidth, scrollHeight,
+				totalHeight = 0, totalLineIndex = 0, tempLineHeight;
 			if (this._lineHeight) {
-				var l = 0;
-				while (h + (lh = this._getLineHeight(l)) <= scroll.y) {
-					h += lh;
-					l++;
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex);
+					if (totalHeight + tempLineHeight > scroll.y) {
+						break;
+					}
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
 				}
-				topIndex = l;
+				topIndex = totalLineIndex;
 				lineStart = Math.max(0, topIndex - 1);
-				topIndexY = top = scroll.y - h;
+				topIndexY = top = scroll.y - totalHeight;
 				if (topIndex > 0) {
 					top += this._getLineHeight(topIndex - 1);
 				}
-				while (l < lineCount) {
-					h += this._getLineHeight(l, false);
-					l++;
-				}
-				scrollHeight = h;
 			} else {
 				var firstLine = Math.max(0, scroll.y) / lineHeight;
 				topIndex = Math.floor(firstLine);
@@ -5811,6 +5822,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				if (!this._wrapMode) {
 					scrollWidth = Math.max(this._maxLineWidth, scrollWidth);
 				}
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex, false);
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
+				}
+				scrollHeight = totalHeight;
 			} else {
 
 				var viewDiv = this._viewDiv;
@@ -5857,17 +5874,17 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* Feature in WekKit. Webkit limits the width of the lines
 				* computed below to the width of the client div.  This causes
 				* the lines to be wrapped even though "pre" is set.  The fix
-				* is to set the width of the client div to "auto"
+				* is to set the width of the client div to "0x7fffffffpx"
 				* before computing the lines width.  Note that this value is
 				* reset to the appropriate value further down.
 				*/ 
 				if (isWebkit && !this._wrapMode) {
-					clientDiv.style.width = "auto"; //$NON-NLS-0$
+					clientDiv.style.width = "0x7fffffffpx"; //$NON-NLS-0$
 				}
 	
 				var rect;
 				child = this._getLineNext();
-				h = clientHeight + top;
+				var bottomHeight = clientHeight + top;
 				var foundBottomIndex = false;
 				while (child) {
 					lineWidth = child.lineWidth;
@@ -5879,8 +5896,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						}
 					}
 					if (this._lineHeight && !foundBottomIndex) {
-						h -= this._lineHeight[child.lineIndex];
-						if (h < 0) {
+						bottomHeight -= this._lineHeight[child.lineIndex];
+						if (bottomHeight < 0) {
 							bottomIndex = child.lineIndex;
 							foundBottomIndex = true;
 						}
@@ -5910,6 +5927,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						line.destroy();
 					}
 				}
+				
+				while (totalLineIndex < lineCount) {
+					tempLineHeight = this._getLineHeight(totalLineIndex, totalLineIndex <= bottomIndex);
+					totalHeight += tempLineHeight;
+					totalLineIndex++;
+				}
+				scrollHeight = totalHeight;
 	
 				// Update rulers
 				this._updateRuler(this._leftDiv, topIndex, bottomIndex);

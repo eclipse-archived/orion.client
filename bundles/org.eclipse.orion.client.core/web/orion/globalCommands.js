@@ -95,7 +95,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				showLabel: true
 			});
 			dojo.place(menuButton.domNode, userMenuPlaceholder, "only"); //$NON-NLS-0$
-			if(menuButton.valueNode) {
+			if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
 		        dojo.destroy(menuButton.valueNode);
 			}
 			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
@@ -187,68 +187,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	}
 
 	
-	// Related links menu management.  The related drop down widget and its associated dropdown menu
-	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
-	// empty, we hide the dropdown.
-	var linksMenu;
-	var pageItem;
-	var exclusions = [];
-	var favoriteTarget = null;
-	var title;
-	
-	function _emptyLinksMenu() {
-		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
-		if(!related){
-			// document not loaded
-			return;
-		}
-		if (linksMenu) {
-			var dropdown = dijit.byId("related"); //$NON-NLS-0$
-			if (dropdown) {
-				dropdown.closeDropDown();
-			}
-			// see http://bugs.dojotoolkit.org/ticket/10296
-			linksMenu.focusedChild = null;
-			dojo.forEach(linksMenu.getChildren(), function(child) {
-				linksMenu.removeChild(child);
-				child.destroy();
-			});
-		}
-	}
-	
-	function _checkForEmptyLinksMenu() {
-		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
-		if (linksMenu && dropdownNode) {
-			if (linksMenu.getChildren().length === 0) {
-				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
-			} else {
-				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
-			}
-		}
-	}
-	
-	function _addRelatedLinkCommand(command, invocation) {
-		if (!linksMenu) {
-			linksMenu = new dijit.Menu({
-				style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
-				id: "relatedLinksMenu" //$NON-NLS-0$
-			});
-		}
-		command._addMenuItem(linksMenu, invocation);
-
-		var menuButton = dijit.byId("related"); //$NON-NLS-0$
-		var domNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
-		if (domNode && !menuButton) {
-			menuButton = new orion.widgets.UserMenuDropDown({
-				id: "related", //$NON-NLS-0$
-				label: messages["Related"],
-				dropDown: linksMenu
-			});
-			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
-		}	
-	}
-	
 	function _addSearchPopUp(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
 		var choicesMenu = new dijit.Menu({
 			style: "display: none;" //$NON-NLS-0$
@@ -308,15 +246,89 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 		
 		var menuButton = new orion.widgets.UserMenuDropDown({
-			label : "",
+			label : messages["Search options"],
+			showLabel: false,
 			id : "searchOptionsDropDown", //$NON-NLS-0$
 			dropDown : newMenu
 		});
+		if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
+			dojo.destroy(menuButton.valueNode);
+		}
+		if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
+			dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
+		}
+
 		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
 		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
 		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
+	// Related links menu management.  The related drop down widget and its associated dropdown menu
+	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
+	// empty, we hide the dropdown.
+	var linksMenu;
+	var pageItem;
+	var exclusions = [];
+	var favoriteTarget = null;
+	var title;
 	
+	function _emptyLinksMenu() {
+		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if(!related){
+			// document not loaded
+			return;
+		}
+		if (linksMenu) {
+			var dropdown = dijit.byId("related"); //$NON-NLS-0$
+			if (dropdown) {
+				dropdown.closeDropDown();
+			}
+			// see http://bugs.dojotoolkit.org/ticket/10296
+			linksMenu.focusedChild = null;
+			dojo.forEach(linksMenu.getChildren(), function(child) {
+				linksMenu.removeChild(child);
+				child.destroy();
+			});
+		}
+	}
+	
+	function _checkForEmptyLinksMenu() {
+		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if (linksMenu && dropdownNode) {
+			if (linksMenu.getChildren().length === 0) {
+				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+			} else {
+				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+			}
+		}
+	}
+	
+	function _addRelatedLinkCommand(command, invocation) {
+		if (!linksMenu) {
+			linksMenu = new dijit.Menu({
+				style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
+				id: "relatedLinksMenu" //$NON-NLS-0$
+			});
+		}
+		command._addMenuItem(linksMenu, invocation);
+
+		var menuButton = dijit.byId("related"); //$NON-NLS-0$
+		var domNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		if (domNode && !menuButton) {
+			menuButton = new orion.widgets.UserMenuDropDown({
+				id: "related", //$NON-NLS-0$
+				label: messages["Related"],
+				dropDown: linksMenu
+			});
+			if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
+				dojo.destroy(menuButton.valueNode);
+			}
+			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
+				dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
+			}
+			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
+		}	
+	}	
 	/**
 	 * Adds the related links to the banner
 	 * @name orion.globalCommands#generateRelatedLinks

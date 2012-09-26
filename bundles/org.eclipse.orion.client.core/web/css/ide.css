@@ -318,6 +318,7 @@ h2 {
 	/* background-image: url(../images/core_sprites.png); 
 	background-position: -96px -328px; */
 	width: 16px; height: 16px; 
+	visibility: hidden;  /* accessibility.  don't tab here when invisible */
 }
 
 /* we don't sprite an animated gif */
@@ -356,6 +357,7 @@ h2 {
 .progressPane_empty {
 	margin-top: 4px;
 	background: inherit;
+	visibility: hidden; /* accessibility.  don't tab here when empty */
 }
 
 .footer {
