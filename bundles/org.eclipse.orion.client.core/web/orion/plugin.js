@@ -27,7 +27,6 @@ define(function() {
 	function PluginProvider(headers) {
 		var _headers = headers;
 		var _services = [];
-		var _conditions = [];
 		var _connected = false;
 		var _activePromises = {};
 		var _target = null;
@@ -51,7 +50,7 @@ define(function() {
 			for (var i = 0; i < _services.length; i++) {
 				services.push({serviceId: i, names: _services[i].names, methods: _services[i].methods, properties: _services[i].properties });
 			}
-			return {headers: _headers || {}, services: services, conditions: _conditions};		
+			return {headers: _headers || {}, services: services};		
 		}
 		
 		function _jsonXMLHttpRequestReplacer(name, value) {
@@ -150,8 +149,10 @@ define(function() {
 				throw new Error("Cannot register service. Plugin Provider is connected");
 			}
 			
-			if (typeof(names) === "string") {
+			if (typeof names === "string") {
 				names = [names];
+			} else if (!Array.isArray(names)) {
+				names =[];
 			}
 			
 			var method = null;
@@ -165,13 +166,6 @@ define(function() {
 			_services[serviceId] = {names: names, methods: methods, implementation: implementation, properties: properties || {}, listeners: {}};
 		};
 		this.registerServiceProvider = this.registerService; // (deprecated) backwards compatibility only
-		
-		this.registerCondition = function(name, properties) {
-			if (_connected) {
-				throw new Error("Cannot register condition. Plugin Provider is connected");
-			}
-			_conditions.push({name: name, properties: properties});
-		};
 		
 		this.connect = function(callback, errback) {
 			if (_connected) {
