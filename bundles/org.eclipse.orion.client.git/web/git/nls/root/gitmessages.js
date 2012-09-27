@@ -367,5 +367,14 @@ define({
 	"Send the link to the reviewer" : "Send the link to the reviewer",
 	"Private key file (optional):" : "Private key file (optional):",
 	"Don't prompt me again:" : "Don't prompt me again:",
-	"Your private key will be saved in the browser for further use" : "Your private key will be saved in the browser for further use"
+	"Your private key will be saved in the browser for further use" : "Your private key will be saved in the browser for further use",
+	"Loading Contribution Review Request..." : "Loading Contribution Review Request...",
+	"The commit can be found in the following repositories" : "The commit can be found in the following repositories",
+	"Try to update your repositories" : "Try to update your repositories",
+	"Create new repository" : "Create new repository",
+	"Attach the remote to one of your existing repositories" : "Attach the remote to one of your existing repositories",
+	"You are reviewing contribution ${0} from ${1}" : "You are reviewing contribution ${0} from ${1}",
+	"Unfortunately the commit can not be found in your workspace. To see it try one of the following: " : "Unfortunately the commit can not be found in your workspace. To see it try one of the following: ",
+	"To review the commit you can also:" : "To review the commit you can also:",
+	"Contribution Review Request for ${0} on ${1}" : "Contribution Review Request for ${0} on ${1}"
 });
