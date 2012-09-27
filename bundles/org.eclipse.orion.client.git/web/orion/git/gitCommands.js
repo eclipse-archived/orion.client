@@ -840,7 +840,7 @@ var exports = {};
 				return mCompareUtils.generateCompareHref(data.items.DiffLocation, {});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Commit" && !explorer.isDirectory; //$NON-NLS-0$
+				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(compareWithWorkingTree);
@@ -992,57 +992,75 @@ var exports = {};
 					commandService.collectParameters(commandInvocation);
 				};
 				
-				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
-					commandInvocation.parameters = null;
-					commandInvocation.optionsRequested = true;
-					commandService.collectParameters(commandInvocation);
-					return;
-				}
-
-				exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
-					function(options) {
-						var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-						var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-						var deferred = gitService.doFetch(path, true,
-								options.gitSshUsername,
-								options.gitSshPassword,
-								options.knownHosts,
-								options.gitPrivateKey,
-								options.gitPassphrase);
-						statusService.createProgressMonitor(deferred, messages['Fetching remote: '] + path);
-						deferred.then(
-							function(jsonData, secondArg) {
-								exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
-									function() {
-										gitService.getGitRemote(path).then(
-											function(jsonData){
-												var remoteJsonData = jsonData;
-												if (explorer.parentId === "explorer-tree") { //$NON-NLS-0$
-													dojo.place(document.createTextNode(messages['Getting git incoming changes...']), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$
-													gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id).then(function(loadScopedCommitsList) {
-														explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
-														explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true); //$NON-NLS-0$
-													});
-												}
-												dojo.hitch(explorer, explorer.changedItem)(item);
-											}, displayErrorOnStatus
-										);
-									}, function (jsonData) {
-										handleResponse(jsonData, commandInvocation);
-									}
-								);
-							}, function(jsonData, secondArg) {
-								exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
-									function() {
-									
-									}, function (jsonData) {
-										handleResponse(jsonData, commandInvocation);
-									}
-								);
-							}
-						);
+				var fetchForceLogic = function(){
+					if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
+						commandInvocation.parameters = null;
+						commandInvocation.optionsRequested = true;
+						commandService.collectParameters(commandInvocation);
+						return;
 					}
-				);
+	
+					exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
+						function(options) {
+							var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
+							var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+							var deferred = gitService.doFetch(path, true,
+									options.gitSshUsername,
+									options.gitSshPassword,
+									options.knownHosts,
+									options.gitPrivateKey,
+									options.gitPassphrase);
+							statusService.createProgressMonitor(deferred, messages['Fetching remote: '] + path);
+							deferred.then(
+								function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+											gitService.getGitRemote(path).then(
+												function(jsonData){
+													var remoteJsonData = jsonData;
+													if (explorer.parentId === "explorer-tree") { //$NON-NLS-0$
+														dojo.place(document.createTextNode(messages['Getting git incoming changes...']), "explorer-tree", "only"); //$NON-NLS-2$ //$NON-NLS-1$
+														gitService.getLog(remoteJsonData.HeadLocation, remoteJsonData.Id).then(function(loadScopedCommitsList) {
+															explorer.renderer.setIncomingCommits(loadScopedCommitsList.Children);
+															explorer.loadCommitsList(remoteJsonData.CommitLocation + "?page=1", remoteJsonData, true); //$NON-NLS-0$
+														});
+													}
+													dojo.hitch(explorer, explorer.changedItem)(item);
+												}, displayErrorOnStatus
+											);
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
+										}
+									);
+								}, function(jsonData, secondArg) {
+									exports.handleProgressServiceResponse2(jsonData, serviceRegistry, 
+										function() {
+										
+										}, function (jsonData) {
+											handleResponse(jsonData, commandInvocation);
+										}
+									);
+								}
+							);
+						}
+					);
+				};
+				
+				//TODO HACK remoteTrackingBranch does not provide git url - we have to collect manually
+				if(!commandInvocation.items.GitUrl){
+					// have to determine manually
+					var gitService = serviceRegistry.getService("orion.git.provider");
+					gitService.getGitRemote(path).then(
+						function(resp){
+							gitService.getGitClone(resp.CloneLocation).then(
+								function(resp){
+									commandInvocation.items.GitUrl = resp.Children[0].GitUrl;
+									fetchForceLogic();
+								}
+							);
+						}
+					);
+				} else { fetchForceLogic(); }
 			},
 			visibleWhen : function(item) {
 				if (item.Type === "RemoteTrackingBranch") //$NON-NLS-0$
@@ -1652,6 +1670,24 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(previousLogPage);
+		
+		//TODO: This is used only in git-log2. Merge with previousLogPage command
+		var previousLog2Page = new mCommands.Command({
+			name : messages["< Previous Page"],
+			tooltip: messages["Show previous page of git log"],
+			id : "eclipse.orion.git.previousLog2Page",
+			hrefCallback : function(data){
+				return require.toUrl("git/git-log2.html") + "#" + data.items.PreviousLocation; //$NON-NLS-1$ //$NON-NLS-0$
+			},
+			visibleWhen : function(item){
+				if(item.Type === "RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
+					return (item.PreviousLocation !== undefined);
+				}
+				
+				return false;
+			}
+		});
+		commandService.addCommand(previousLog2Page);
 
 		var nextLogPage = new mCommands.Command({
 			name : messages["Next Page >"],
@@ -1668,6 +1704,24 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(nextLogPage);
+		
+		//TODO: This is used only in git-log2. Merge with nextLogPage command
+		var nextLog2Page = new mCommands.Command({
+			name : messages["Next Page >"],
+			tooltip: messages["Show next page of git log"],
+			id : "eclipse.orion.git.nextLog2Page", //$NON-NLS-0$
+			hrefCallback : function(data) {
+				return require.toUrl("git/git-log2.html") + "#" + data.items.NextLocation; //$NON-NLS-1$ //$NON-NLS-0$
+			},
+			visibleWhen : function(item) {
+				if(item.Type === "RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
+					return (item.NextLocation !== undefined);
+				}
+				
+				return false;
+			}
+		});
+		commandService.addCommand(nextLog2Page);
 		
 		var previousTagPage = new mCommands.Command({
 			name : messages["< Previous Page"],

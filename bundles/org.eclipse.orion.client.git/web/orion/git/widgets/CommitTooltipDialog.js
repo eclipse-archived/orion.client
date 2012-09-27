@@ -27,27 +27,18 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/util', 'd
 		},
 		
 		displayCommit: function(commit){
-			
-			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:480px"}, this.containerNode); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var tableNode = dojo.create( "div", {"style":"padding:10px; max-width:520px"}, this.containerNode); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 			var link = dojo.create("a", {"class": "gitMainDescription", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.place(document.createTextNode(commitMessage0), link);
 
 			dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: messages[" commit: "] + commit.Name}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			if (commit.Parents && commit.Parents.length > 0){
-				dojo.create( "div", null, tableNode ); //$NON-NLS-0$
-				
-				dojo.place(document.createTextNode(messages["parent: "]), tableNode);
-				link = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
-			}
+			var imageDiv = dojo.create("div", {"style":"display: inline-block; vertical-align:text-top;"}, tableNode);
+			var textDiv = dojo.create("div", {"style":"display: inline-block; vertical-align:text-top;"}, tableNode);
 
-			dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("div", {"class":"git-author-icon-small", "style":"margin-bottom:30px"}, tableNode); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var authorImage = dojo.create("div", {"class":"git-author-icon-small"}, imageDiv); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
@@ -55,13 +46,57 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/util', 'd
 				image.height = 35;
 				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
-			
+
 			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				innerHTML: dojo.string.substitute(messages[" authored by ${0} {${1}) on ${2}"], [commit.AuthorName, commit.AuthorEmail,
-				 dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})])}, tableNode ); //$NON-NLS-0$
-			dojo.create( "div", null, tableNode ); //$NON-NLS-0$
+				 dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})])}, textDiv ); //$NON-NLS-0$
+			dojo.create( "div", null, textDiv ); //$NON-NLS-0$
 			dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				innerHTML: dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail])}, tableNode );
+				innerHTML: dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail])}, textDiv );
+
+			dojo.create( "div", {"style":"padding-top:15px"}, textDiv ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+			dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: messages[" commit: "] + commit.Name}, textDiv ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if (commit.Parents && commit.Parents.length > 0){
+				dojo.create( "div", null, textDiv ); //$NON-NLS-0$
+				
+				link = dojo.create("a", {"class": "gitSecondaryDescription", href: "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1"}, textDiv); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				dojo.place(document.createTextNode(commit.Parents[0].Name), link);
+				
+				var parentNode = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: messages["parent: "]}, textDiv );
+				
+				dojo.place(link, parentNode, "last");
+			}
+			
+			var displayBranches = commit.Branches && commit.Branches.length > 0;
+			var displayTags = commit.Tags && commit.Tags.length > 0;
+						
+			if(displayBranches){
+				dojo.create( "div", {"style":"padding-top:15px"}, textDiv );
+				var branchesSection = dojo.create("section", {"style" : "display: inline-block; vertical-align:text-top;"}, textDiv);
+				var branchesNode = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: messages["branches: "]}, branchesSection );
+				
+				var branchesList = dojo.create( "list", null, branchesSection);
+				
+				for(var i=0; i<commit.Branches.length; ++i){
+					dojo.create("span", {"class":"gitSecondaryDescription", "style" : "padding-left:10px;", innerHTML: commit.Branches[i].FullName}, branchesList);
+				}
+			}
+			
+			if(displayTags){
+				dojo.create( "div", {"style":"padding-top:15px"}, textDiv );
+				var tagsSection = dojo.create("section", {"style" : "display: inline-block; vertical-align:text-top;"}, textDiv);
+				var tagsNode = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				innerHTML: messages["tags: "]}, tagsSection );
+				
+				var tagsList = dojo.create( "list", null, tagsSection);
+				
+				for(var i=0; i<commit.Tags.length; ++i){
+					dojo.create("span", {"class":"gitSecondaryDescription", "style" : "padding-left:10px;", innerHTML: commit.Tags[i].Name}, tagsList);
+				}
+			}
 		},
 		
 		_onBlur: function(){

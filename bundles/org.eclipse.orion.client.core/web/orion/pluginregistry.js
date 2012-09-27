@@ -165,13 +165,11 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		function _createServiceProperties(service) {
 			var properties = JSON.parse(JSON.stringify(service.properties));
 			properties.__plugin__ = _url; //TODO: eliminate
-			if (!properties.objectClass) {
-				var objectClass = service.names || service.type || [];
-				if (!Array.isArray(objectClass)) {
-					objectClass = [objectClass];
-				}
-				properties.objectClass = objectClass;
+			var objectClass = service.names || service.type || [];
+			if (!Array.isArray(objectClass)) {
+				objectClass = [objectClass];
 			}
+			properties.objectClass = objectClass;
 			return properties;
 		}
 		
