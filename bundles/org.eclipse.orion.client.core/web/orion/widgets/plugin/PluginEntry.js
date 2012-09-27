@@ -53,7 +53,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		var serviceDescriptions = [];
 		plugin.getServiceReferences().forEach(function(reference) {
 			var serviceDescription = {
-				service: reference.getProperty("service.names").join(" "),
+				service: reference.getProperty("objectClass").join(" "),
 				items: []
 			};
 	
