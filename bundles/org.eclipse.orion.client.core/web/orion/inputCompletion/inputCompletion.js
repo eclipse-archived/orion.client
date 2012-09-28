@@ -237,9 +237,16 @@ define([], function(){
 	
 	InputCompletion.prototype._show = function(){
 		if(this._proposalList && this._proposalList.length > 0){
+			var curLeft=0, curTop=0;
+			var offsetParent = this._inputField;
+			while (offsetParent) {
+				curLeft += offsetParent.offsetLeft;
+				curTop += offsetParent.offsetTop;
+		        offsetParent = offsetParent.offsetParent;
+			}
 			this._completionUIContainer.style.display = "block"; //$NON-NLS-0$
-			this._completionUIContainer.style.top = this._inputField.offsetTop + this._inputField.offsetHeight + 2 + "px"; //$NON-NLS-0$
-			this._completionUIContainer.style.left = this._inputField.offsetLeft + "px"; //$NON-NLS-0$
+			this._completionUIContainer.style.top = curTop + this._inputField.offsetHeight + 2 + "px"; //$NON-NLS-0$
+			this._completionUIContainer.style.left = curLeft + "px"; //$NON-NLS-0$
 			this._completionUIContainer.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
 			this._mouseDown = false;
 			this.dismissed = false;
