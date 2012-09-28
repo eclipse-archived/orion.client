@@ -58,7 +58,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 
 				NewType.prototype = Object.create(CustomType.prototype);
 				NewType.prototype.name = type.name;
-				NewType.prototype.parse = function (arg) {
+				NewType.prototype.parse = function(arg) {
 					var completion = type.parse(arg.toString().trim());
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
@@ -96,6 +96,9 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				commandOutputManager.onOutput({output: output});
 				output.complete(content);
 			},
+			setFocus: function() {
+				this.inputText.focus();
+			},
 			
 			/** @private */
 
@@ -109,12 +112,12 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				outputDiv.style.width = "100%"; //$NON-NLS-0$
 				output.appendChild(outputDiv);
 
-				var inputText = document.createElement("input"); //$NON-NLS-0$
-				inputText.type = "text"; //$NON-NLS-0$
-				inputText.id = "gcli-input"; //$NON-NLS-0$
-				inputText.style.width = "100%"; //$NON-NLS-0$
-				inputText.style.height = "100%"; //$NON-NLS-0$
-				input.appendChild(inputText);
+				this.inputText = document.createElement("input"); //$NON-NLS-0$
+				this.inputText.type = "text"; //$NON-NLS-0$
+				this.inputText.id = "gcli-input"; //$NON-NLS-0$
+				this.inputText.style.width = "100%"; //$NON-NLS-0$
+				this.inputText.style.height = "100%"; //$NON-NLS-0$
+				input.appendChild(this.inputText);
 
 				mSettings.getSetting("hideIntro").value = true; //$NON-NLS-0$
 				mSettings.getSetting("eagerHelper").value = 2; //$NON-NLS-0$
