@@ -12,7 +12,7 @@
 
 /*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker*/
 
-define(["orion/Deferred", "orion/EventTarget", "orion/Storage"], function(Deferred, EventTarget, Storage){
+define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 
 	function _equal(obj1, obj2) {
 		var keys1 = Object.keys(obj1);
@@ -46,7 +46,36 @@ define(["orion/Deferred", "orion/EventTarget", "orion/Storage"], function(Deferr
 		}
 		return location;
 	}
-
+	
+	function _asStorage(obj) {
+		var _keys = null;
+		function _getKeys() {
+			return (_keys = _keys || Object.keys(obj));
+		}
+		
+		return {
+			key: function(index) {
+				return _getKeys()[index];
+			},
+			getItem: function(key) {
+				return obj[key];
+			},
+			setItem : function(key, value) {
+				obj[key] = value;
+				_keys = null;
+			},
+			removeItem : function(key) {
+				delete obj[key];
+				_keys = null;
+			},
+			clear : function() {
+				_getKeys().forEach(function(key) {
+					delete obj[key];
+				}.bind(this));
+				_keys = null;
+			}
+		};
+	}
 
 	function PluginEvent(type, plugin) {
 		return {type: type, plugin: plugin};
@@ -581,7 +610,7 @@ define(["orion/Deferred", "orion/EventTarget", "orion/Storage"], function(Deferr
 		configuration = configuration || {};
 		var _storage = configuration.storage || localStorage;
 		if (!_storage.getItem) {
-			_storage = new Storage(_storage);
+			_storage = _asStorage(_storage);
 		}
 		var _state = "installed";
 		var _plugins = [];
