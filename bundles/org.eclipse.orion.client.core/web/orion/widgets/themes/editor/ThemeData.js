@@ -160,6 +160,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			this.styles.push( adelante );
 			
+			var raspberry = new StyleSet();
+			
+			raspberry.name = 'Raspberry Pi';
+			raspberry.annotationRuler = 'seashell'; 
+			raspberry.background = 'seashell';
+			raspberry.comment = '#66B32F';
+			raspberry.keyword = '#E73E36';
+			raspberry.text = 'dimgray';
+			raspberry.string = 'darkorange';
+			raspberry.overviewRuler = 'seashell';
+			raspberry.lineNumberOdd = '#E73E36';
+			raspberry.lineNumberEven = '#E73E36';
+			raspberry.lineNumber = '#E73E36';
+			raspberry.currentLine = '#F5B1AE';
+			
+			this.styles.push( raspberry );
+			
 		}
 		
 		function getStyles(){

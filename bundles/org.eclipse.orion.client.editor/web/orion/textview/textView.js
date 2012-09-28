@@ -1673,7 +1673,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
 		 * @property {Number} screenX The pointer location on the x axis, relative to the screen. This is copied from the DOM contextmenu event.screenX property. 
 		 * @property {Number} screenY The pointer location on the y axis, relative to the screen. This is copied from the DOM contextmenu event.screenY property. 
-		 * @property {Boolean} defaultPrevented Determines whether the user agent context menu should be shown. It is not shown by default.
+		 * @property {Boolean} defaultPrevented Determines whether the user agent context menu should be shown. It is shown by default.
+		 * @property {Function} preventDefault If called prevents the user agent context menu from showing.
 		 */ 
 		/** 
 		 * This event is sent when the user invokes the view context menu. 
@@ -5972,7 +5973,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* in the scrollbar. It is possible this a bug since all other paddings are considered.
 				*/
 				scrollWidth = width;
-				if (!isIE || isIE >= 9) { width += viewPad.right; }
+				if ((!isIE || isIE >= 9) && this._maxLineWidth > clientWidth) { width += viewPad.right + viewPad.left; }
 				scrollDiv.style.width = width + "px"; //$NON-NLS-0$
 				if (this._clipScrollDiv) {
 					this._clipScrollDiv.style.width = width + "px"; //$NON-NLS-0$

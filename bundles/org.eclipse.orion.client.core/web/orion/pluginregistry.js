@@ -12,7 +12,7 @@
 
 /*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker*/
 
-define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
+define(["orion/Deferred", "orion/EventTarget", "orion/Storage"], function(Deferred, EventTarget, Storage){
 
 	function _equal(obj1, obj2) {
 		var keys1 = Object.keys(obj1);
@@ -580,6 +580,9 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 	function PluginRegistry(serviceRegistry, configuration) {
 		configuration = configuration || {};
 		var _storage = configuration.storage || localStorage;
+		if (!_storage.getItem) {
+			_storage = new Storage(_storage);
+		}
 		var _state = "installed";
 		var _plugins = [];
 		var _channels = [];
@@ -657,10 +660,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 						break;
 					}
 				}
-				delete _storage["plugin."+plugin.getLocation()];
+				_storage.removeItem("plugin."+plugin.getLocation());
 			},
 			persist: function(url, manifest) {
-				_storage["plugin."+url] = JSON.stringify(manifest); //$NON-NLS-0$
+				_storage.setItem("plugin."+url,JSON.stringify(manifest)); //$NON-NLS-0$
 			},
 			postMessage: function(message, channel) {
 				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
@@ -745,10 +748,14 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 				return;
 			}
 			addEventListener("message", _messageHandler, false);
-			Object.keys(_storage).forEach(function(key) {
+			var storageKeys = [];
+			for (var i = 0, length = _storage.length; i < length;i++) {
+				storageKeys.push(_storage.key(i));
+			}
+			storageKeys.forEach(function(key) {
 				if (key.indexOf("plugin.") === 0) {
 					var url = key.substring("plugin.".length);
-					var manifest = JSON.parse(_storage[key]);
+					var manifest = JSON.parse(_storage.getItem(key));
 					if (manifest.created) {
 						_plugins.push(new Plugin(url, manifest, internalRegistry));
 					}

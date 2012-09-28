@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils',
+	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion',
 	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -795,11 +795,36 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 		
 		// hook up search box behavior
+		dojo.place('<div id="globalSearchCompletionParent" style="display: none" class="inputCompletionContainer" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 		var searchField = dojo.byId("search"); //$NON-NLS-0$
+		var searchCompletion = new mInputCompletion.InputCompletion(function(callBack){
+				mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
+					var i, fullSet = [], hasSavedSearch = false;
+					for (i in searches) {
+						if(searches[i].label){
+							if(!hasSavedSearch){
+								fullSet.push({type: "category", label: "Saved searches"});
+								hasSavedSearch = true;
+							}
+							fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});
+						} else {
+							fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});
+						}
+					}
+					callBack(fullSet);
+				});
+			},
+			"globalSearch", searchField, "globalSearchCompletionParent");
+		var searchCompletionSet = null;
+		var searchCompletionIndex = -1;
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
+		
 		dojo.connect(searchField, "onkeypress", function(e){ //$NON-NLS-0$
+			if(searchCompletion.onKeyPressed(e)){
+				return;
+			}
 			if (e.charOrCode === dojo.keys.ENTER) {
 				if (searcher) {
 					if (searchField.value.length > 0) {
@@ -817,26 +842,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				} else {
 					window.alert(messages["Can't search: no search service is available"]);
 				}
-			}
+			} 
 		});
-		dojo.connect(searchField, "onfocus", function(e){ //$NON-NLS-0$
-			var searchCompletion =  dojo.byId("searchCompletion");
-			dojo.empty(searchCompletion);
-			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
-				var i;
-				for (i in searches) {
-					var option = document.createElement('option');
-					option.value = searches[i].name;
-					if(searches[i].label){
-						option.label = searches[i].label + "(" + messages["Saved searches"] + ")";
-					}
-					searchCompletion.appendChild(option);
-				}
-			});
-		});
+		
 		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
 		});
+		
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;

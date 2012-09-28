@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/GitCredentialsStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledCommand', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, GitCredentialsStorage) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledCommand', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section' ], function(messages, require, dojo, dijit, mUtil, mCommands, mSection, GitPreferenceStorage) {
 
 	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -59,10 +59,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 		},
 		
 		refreshGitCredentials : function(){
-			var gitCredentialsStorage = new GitCredentialsStorage();
-			if(gitCredentialsStorage.isBrowserEnabled()){
-				this.gitCredentialsFields[0].setChecked(gitCredentialsStorage.isUserEnabled());
-			}
+			var that = this;
+			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
+			gitPreferenceStorage.isEnabled().then(
+				function(isEnabled){
+					that.gitCredentialsFields[0].setChecked(isEnabled);
+				}
+			);
 		},
 		
 		postCreate: function(){
@@ -91,29 +94,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			
 			var passwordSection = new orion.widgets.settings.Section( {sectionName:messages['Password'], container: this.sections, sections: this.passwordFields } );
 			
-			/* - linked ------------------------------------------------------ */
-			
-//			this.linkedFields = [];
-//			
-//			var toggleLabels = [ messages['Google'], messages['Yahoo'], messages['AOL'], messages['OpenId'] ];
-//			
-//			var openIds = [ 'https://www.google.com/accounts/o8/id', 'http://me.yahoo.com', 'http://openid.aol.com/', 'http://myopenid.com' ];//$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//			
-//			var toggleData = {toggleOnState:messages["Linked"], toggleOffState:messages["Unlinked"], toggleOnSwitch:messages['Link'], toggleOffSwitch:messages['Unlink']};
-//			
-//			for( var toggle = 0; toggle< 4; toggle++ ){
-//				toggleData.fieldlabel = toggleLabels[toggle];
-//				
-//				var toggleWidget = new orion.widgets.settings.LabeledToggle( toggleData );
-//				
-//				toggleWidget.onAction = dojo.hitch( this, 'confirmOpenId', openIds[toggle] ); //$NON-NLS-0$
-//				
-//				this.linkedFields.push( toggleWidget );
-//				
-//			}
-//			
-//			var linkedSection = new orion.widgets.settings.Section( {sectionName:messages['Linked Accounts'], container: this.sections, sections: this.linkedFields } );
-
 			/* - git --------------------------------------------------------- */
 			
 			this.gitFields = [];
@@ -154,12 +134,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 					
 					var messageService = that.registry.getService("orion.page.message");
 					
-					var gitCredentialsStorage = new GitCredentialsStorage();
-		       		if(gitCredentialsStorage.isBrowserEnabled()){
-		       			gitCredentialsStorage.erasePrompt(repository);
-		       			messageService.setProgressResult("Deleted private key for " + repository);
-		       			that.gitCredentialsFields[keyIndex+1].destroy();
-		       		}
+					var gitPreferenceStorage = new GitPreferenceStorage(that.registry);
+					gitPreferenceStorage.remove(repository).then(
+						function(){
+							messageService.setProgressResult("Deleted private key for " + repository);
+							that.gitCredentialsFields[keyIndex+1].destroy();
+						}
+					);
 				},
 				visibleWhen : function(item){
 					return true;
@@ -168,34 +149,34 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			this.commandService.addCommand(erasePrivateKeyCommand);
 			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.erasePrivateKey", 1);
 			
-			var gitCredentialsStorage = new GitCredentialsStorage();
-			if(gitCredentialsStorage.isBrowserEnabled()){
-				var repositories = gitCredentialsStorage.getRepositories();
-				
-				for(var i=0; i<repositories.length; ++i){
-					if(!gitCredentialsStorage.getPrompt(repositories[i])){
-						var labeledCommand = new orion.widgets.settings.LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: this.commandService, scopeId: "repositoryItemCommands"} );
-						this.gitCredentialsFields.push(labeledCommand);
+			var that = this;
+			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
+			gitPreferenceStorage.getRepositories().then(
+				function(repositories){
+					for(var i=0; i<repositories.length; ++i){
+						var labeledCommand = new orion.widgets.settings.LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
+						that.gitCredentialsFields.push(labeledCommand);
 					}
+					
+					gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:"", container: that.gitSections, sections: that.gitCredentialsFields} );
+			
+					var updateGitCredentialsCommand = new mCommands.Command({
+						name: messages["Update"],
+						tooltip: messages["Update Git Credentials"],
+						id: "orion.updateGitCredentials", //$NON-NLS-0$
+						callback: dojo.hitch(that, function(data){
+							that.updateGitCredentials(data.items);
+						})
+					
+					});
+					
+					that.commandService.addCommand(updateGitCredentialsCommand);
+					that.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 2); //$NON-NLS-1$ //$NON-NLS-0$
+					
+					that.commandService.renderCommands('gitProfileCommands', dojo.byId( 'gitCommands' ), that, that, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+					
 				}
-			}
-			
-			gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:"", container: this.gitSections, sections: this.gitCredentialsFields} );
-			
-			var updateGitCredentialsCommand = new mCommands.Command({
-				name: messages["Update"],
-				tooltip: messages["Update Git Credentials"],
-				id: "orion.updateGitCredentials", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
-					this.updateGitCredentials(data.items);
-				})
-			
-			});
-			
-			this.commandService.addCommand(updateGitCredentialsCommand);
-			this.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 2); //$NON-NLS-1$ //$NON-NLS-0$
-			
-			this.commandService.renderCommands('gitProfileCommands', dojo.byId( 'gitCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+			);
 			
 			this.linkedAccountSection = new mSection.Section(this.linkedSection, {
 							id: "linkedAccountSection", //$NON-NLS-0$
@@ -299,15 +280,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
 			var messageService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 			
 			// git authentication update
-			var gitCredentialsStorage = new GitCredentialsStorage();
-			if(gitCredentialsStorage.isBrowserEnabled()){
-				if( this.gitCredentialsFields[0].isChecked() ){
-					if(window.confirm(messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"])){
-						gitCredentialsStorage.userEnable();
-					} else { return; }
-				} else { gitCredentialsStorage.userDisable(); }
-				
-				messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
+			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
+			if( this.gitCredentialsFields[0].isChecked() ){
+				if(window.confirm(messages["Please be aware that your credentials will be stored persistently in the browser."] + '\n' + messages["Do you wish to enable the Key Storage?"])){
+					gitPreferenceStorage.enable().then(
+						function(){
+							messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
+						}
+					);
+				} else { return; }
+			} else {
+				gitPreferenceStorage.disable().then(
+					function(){
+						messageService.setProgressResult( messages['Git Credentials successfully updated.'] );
+					}
+				);
 			}
 		},
 		

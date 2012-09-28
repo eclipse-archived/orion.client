@@ -11,7 +11,7 @@
 
 /*global dojo dijit widgets FileReader define orion*/
 /*jslint browser:true*/
-define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Tooltip', 'orion/git/GitCredentialsStorage', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GitCredentialsDialog.html'], function(messages, dojo, dijit, Tooltip, GitCredentialsStorage) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dijit/Tooltip', 'orion/git/gitPreferenceStorage', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/GitCredentialsDialog.html'], function(messages, dojo, dijit, Tooltip, GitPreferenceStorage) {
 
 
 /**
@@ -84,13 +84,19 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			 setTimeout(function () { self.gitSshPassword.focus(); }, 400);
 		}
 		
+		var that = this;
+		
 		// display prompt checkbox only when it makes sense
-		var gitCredentialsStorage = new GitCredentialsStorage();
-		if(!gitCredentialsStorage.isEnabled()){
-			dojo.style(this.gitSavePrivateKey, "display", "none");
-			dojo.style(this.gitSavePrivateKeyLabel, "display", "none");
-			dojo.style(this.gitSavePrivateKeyInfo, "display", "none");
-		}
+		var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
+		gitPreferenceStorage.isEnabled().then(
+			function(isEnabled){
+				if(!isEnabled){
+					dojo.style(that.gitSavePrivateKey, "display", "none");
+					dojo.style(that.gitSavePrivateKeyLabel, "display", "none");
+					dojo.style(that.gitSavePrivateKeyInfo, "display", "none");
+				}
+			}
+		);
 		
 		dojo.connect(this.gitSshPassword, "onfocus", null, dojo.hitch(this, function(){
 			this.isSshPassword.checked = true;
@@ -155,30 +161,44 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			reader.onload = (function(f){
 				return function(e){
 					loadedPrivateKey = e.target.result;
-					
-					//save key
-					var gitCredentialsStorage = new GitCredentialsStorage();
-					if(gitCredentialsStorage.isEnabled() && self.gitSavePrivateKey.checked){
-						gitCredentialsStorage.setPrivateKey(repository, loadedPrivateKey);
-						gitCredentialsStorage.setPassphrase(repository, self.gitPassphrase.value);
-						gitCredentialsStorage.setPrompt(repository);
+										
+					var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
+					if(self.gitSavePrivateKey.checked){
+						
+						gitPreferenceStorage.put(repository, {
+							gitPrivateKey : loadedPrivateKey,
+							gitPassphrase : self.gitPassphrase.value
+						}).then(
+							function(){
+								process(loadedPrivateKey);
+							}
+						);
+						
+					} else {
+						process(loadedPrivateKey);
 					}
-					
-					process(loadedPrivateKey);
 				};
 			}(this.privateKeyFile));
 			
 			reader.readAsText(this.privateKeyFile);
 		} else if(loadedPrivateKey){
-				//save key
-				var gitCredentialsStorage = new GitCredentialsStorage();
-				if(gitCredentialsStorage.isEnabled() && self.gitSavePrivateKey.checked){
-					gitCredentialsStorage.setPrivateKey(repository, loadedPrivateKey);
-					gitCredentialsStorage.setPassphrase(repository, self.gitPassphrase.value);
-					gitCredentialsStorage.setPrompt(repository);
-				}
+
+				//save key				
+				var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
+				if(self.gitSavePrivateKey.checked){
 					
-				process(loadedPrivateKey);
+					gitPreferenceStorage.put(repository, {
+						gitPrivateKey : loadedPrivateKey,
+						gitPassphrase : self.gitPassphrase.value
+					}).then(
+						function(){
+							process(loadedPrivateKey);
+						}
+					);
+					
+				} else {
+					process(loadedPrivateKey);
+				}
 		} else { process(loadedPrivateKey); }
 	}
 });
