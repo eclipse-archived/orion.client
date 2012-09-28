@@ -12,16 +12,16 @@
 
 /*global define*/
 
-define(["i18n!orion/console/nls/messages", "dojo", "orion/widgets/Console"],
-	function(messages, dojo, mConsole) {
+define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
+	function(messages, mConsole) {
 
 	var orion = {};
 	orion.consolePage = {};
 
 	orion.consolePage.ParamTypeFile = (function() {
-		function ParamTypeFile(name, currentDirectory, directories, files) {
+		function ParamTypeFile(name, consolePageFileService, directories, files) {
 			this.name = name;
-			this.currentDirectory = currentDirectory;
+			this.consolePageFileService = consolePageFileService;
 			this.directories = directories;
 			this.files = files;
 		}
@@ -45,15 +45,23 @@ define(["i18n!orion/console/nls/messages", "dojo", "orion/widgets/Console"],
 			 * value's string representation.
 			 */
 			stringify: function(value) {
-				return value.Name;
+				return value.typedPath || this.consolePageFileService.computePathString(value);
 			},
 
 			/** @private */
 
 			_createCompletion: function(string, predictions) {
-				var exactMatch = this._find(predictions, function(el) {
-					return el.name === string;
-				});
+				var exactMatch;
+				for (var i = 0; i < predictions.length; i++) {
+					var current = predictions[i];
+					if (current.name === string) {
+						if ((current.value.Directory && this.directories) || (!current.value.Directory && this.files)) {
+							exactMatch = current;
+							break;
+						}
+					}
+				}
+
 				var status, message;
 				var value = string;
 				if (exactMatch) {
@@ -63,7 +71,7 @@ define(["i18n!orion/console/nls/messages", "dojo", "orion/widgets/Console"],
 					status = mConsole.CompletionStatus.PARTIAL;
 				} else {
 					status = mConsole.CompletionStatus.ERROR;
-					message = dojo.string.substitute(messages["'${0}' is not valid"], [string]);
+					message = messages["'${0}' is not valid"].replace("${0}", string); //$NON-NLS-0$
 				}
 				return {value: value, status: status, message: message, predictions: predictions};
 			},
@@ -76,40 +84,51 @@ define(["i18n!orion/console/nls/messages", "dojo", "orion/widgets/Console"],
 				return null;
 			},
 			_getPredictions: function(text) {
-				var childNodes = this.currentDirectory.getCurrentDirectoryChildren();
-				if (!childNodes) {
-					/* child nodes not known yet */
+				var directoryNode = this.consolePageFileService.getDirectory(null, text);
+				if (!directoryNode) {
+					/* either invalid path or not yet retrieved */
 					return null;
 				}
 
-				var predictions = [];
-				if (this.directories) {
-					var add = text.length < 3;
-					if (add) {
-						for (var i = 0; i < text.length; i++) {
-							if (text.charAt(i) !== ".") { //$NON-NLS-0$
-								add = false;
-								break;
-							}
-						}
+				var childNodes = directoryNode.Children || [];
+
+				var index = text.lastIndexOf(this.consolePageFileService.SEPARATOR) + 1;
+				var directoriesSegment = text.substring(0, index);
+				var finalSegment = text.substring(index);
+
+				var directoryPredictions = [];
+				var filePredictions = [];
+				var name;
+				if (finalSegment.length === 0 || finalSegment === "." || finalSegment === "..") { //$NON-NLS-1$ //$NON-NLS-0$
+					var parentNode = this.consolePageFileService.getParent(directoryNode);
+					if (parentNode) {
+						name = directoriesSegment + ".."; //$NON-NLS-0$
+						parentNode.typedPath = name;
+						directoryPredictions.push({name: name, value: parentNode, incomplete: true});
 					}
-					if (add) {
-						// TODO the value for ".." should of course be the node of the
-						// parent directory, but is currently just ".." because this
-						// value often cannot be determined
-						predictions.push({name: "..", value: {Name: ".."}}); //$NON-NLS-1$ //$NON-NLS-0$
-					}
+				}
+				
+				if (finalSegment.trim().length === 0 && directoriesSegment.length > 0) {
+					name = directoriesSegment;
+					directoryNode.typedPath = name;
+					directoryPredictions.push({name: name, value: directoryNode, incomplete: false});
 				}
 				for (var i = 0; i < childNodes.length; i++) {
 					var candidate = childNodes[i];
-					if ((candidate.Directory && this.directories) || (!candidate.Directory && this.files)) {
-						var name = candidate.Name;
-						if (name.indexOf(text) === 0) {
-							predictions.push({name: name, value: candidate});
+					if (candidate.Directory || this.files) {
+						if (candidate.Name.indexOf(finalSegment) === 0) {
+							var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
+							name = directoriesSegment + candidate.Name;
+							candidate.typedPath = name;
+							if (candidate.Directory) {
+								directoryPredictions.push({name: name, value: candidate, incomplete: !complete});
+							} else {
+								filePredictions.push({name: name, value: candidate, incomplete: !complete});
+							}
 						}
 					}
 				}
-				return predictions;
+				return directoryPredictions.concat(filePredictions);
 			}
 		};
 		return ParamTypeFile;
