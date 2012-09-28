@@ -251,7 +251,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 					// adapted from handleKey in http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/bundles/org.eclipse.swt/Eclipse%20SWT%20Custom%20Widgets/common/org/eclipse/swt/custom/StyledText.java
 					if (isMac) {
 						// COMMAND+ALT combinations produce characters on the mac, but COMMAND or COMMAND+SHIFT do not.
-						if (e.metaKey && !e.altKey) {
+						if (e.metaKey && !e.altKey) {  //command without alt
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=390341
+							// special case for select all, cut, copy, paste, and undo.  A slippery slope...
+							if (!e.shiftKey && !e.ctrlKey && (e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88 || e.keyCode === 90)) {
+								return true;
+							}
 							return false;
 						}
 					} else {
@@ -259,6 +264,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 						// are the Alt Gr key on some keyboards.  See Eclipse bug 20953. If together, they might
 						// be a character.
 						if (e.ctrlKey && !e.altKey) {
+							// special case for select all, cut, copy, paste, and undo.  
+							if (!e.shiftKey && (e.keyCode === 65 || e.keyCode === 67 || e.keyCode === 86 || e.keyCode === 88 || e.keyCode === 90)) {
+								return true;
+							}
 							return false;
 						}
 						if (e.altKey && !e.ctrlKey) {
