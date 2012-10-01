@@ -368,7 +368,8 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 * @description Creates a ContentAssistWidget that will display proposals from the given {@link orion.editor.ContentAssist}
 	 * in the given <code>parentNode</code>. Clicking a proposal will cause the ContentAssist to apply that proposal.
 	 * @param {orion.editor.ContentAssist} contentAssist
-	 * @param {String|DomNode} parentNode The ID or DOM node to use as the parent for displaying proposals.
+	 * @param {String|DomNode} [parentNode] The ID or DOM node to use as the parent for displaying proposals. If not provided,
+	 * a new DIV will be created inside &lt;body&gt; and assigned the CSS class <code>contentassist</code>.
 	 */
 	function ContentAssistWidget(contentAssist, parentNode) {
 		this.contentAssist = contentAssist;
@@ -378,7 +379,14 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.isShowing = false;
 		var self = this;
 		if (!this.parentNode) {
-			throw new Error("parentNode not found");
+			this.parentNode = document.createElement("div");
+			this.parentNode.className = "contentassist";
+			var body = document.getElementsByTagName("body")[0];
+			if (body) {
+				body.appendChild(this.parentNode);
+			} else {
+				throw new Error("parentNode is required");
+			}
 		}
 		this.textViewListener = {
 			onMouseDown: function(event) {
