@@ -816,12 +816,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				});
 			},
 			{group: "globalSearch"});
-		//TODO: we should eventually listen the key event in the InputCompletion and bubble the enter key event up to the caller if enter does not mean select a proposal
-		dojo.connect(searchField, "onkeypress", function(e){ //$NON-NLS-0$
-			if(searchCompletion.onKeyPressed(e)){//Some keys in inputCompletion has their meaning
+		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			/*
+			if(!searchCompletion.onKeyDown(e)){//Some keys in inputCompletion has their meaning
+				return;
+			}*/
+			if(e.defaultPrevented){// If the key event is processed by other listerns, e.g. input completion, we do not process it here
+				console.log(" prevented entered :" + e.keyCode);
 				return;
 			}
-			if (e.charOrCode === dojo.keys.ENTER) {
+				console.log(" Not prevented entered :" + e.keyCode);
+			var keyCode= e.charCode || e.keyCode;
+			if (keyCode === 13 ) {// ENTER
 				if (searcher) {
 					if (searchField.value.length > 0) {
 						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
