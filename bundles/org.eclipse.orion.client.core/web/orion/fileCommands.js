@@ -390,7 +390,19 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					}
 					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
 						dojo.hitch(this, function(newText) {
-							fileClient.moveFile(item.Location, item.parent.Location, newText).then(
+							var moveLocation = item.Location;
+							if (item.parent.Projects) {
+								//special case for moving a project. We want to move the 
+								//project rather than move the project's content
+								for (var p=0; p < item.parent.Projects.length; p++) {
+									var project = item.parent.Projects[p];
+									if (project.Id === item.Id) {
+										moveLocation = project.Location;
+										break;
+									}
+								}
+							}
+							fileClient.moveFile(moveLocation, item.parent.Location, newText).then(
 								dojo.hitch(explorer, function(newItem) {
 									var refreshItem;
 									var forceExpand = null;
