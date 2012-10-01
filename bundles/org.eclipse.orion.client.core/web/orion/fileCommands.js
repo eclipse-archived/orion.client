@@ -273,6 +273,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 								var item = selectedItems[i];
 								var newName = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
+								var message = isCopy ? "Copying " : "Moving ";
+								message += item.Location;
 								if (isCopy && item.parent && item.parent.Location === location) {
 									newName = window.prompt(dojo.string.substitute(messages["Enter a new name for '${0}'"], [item.Name]), dojo.string.substitute(messages["Copy of ${0}"], [item.Name]));
 									// user cancelled?  don't copy this one
@@ -281,7 +283,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 									}
 								}
 								if (location) {
-									func.apply(fileClient, [item.Location, targetFolder.Location, newName]).then(
+									var deferred = func.apply(fileClient, [item.Location, targetFolder.Location, newName]);
+									progressService.showWhile(deferred, message).then(
 										dojo.hitch(explorer, refreshFunc), //refresh the root
 										errorHandler
 									);
@@ -411,7 +414,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 									}
 								}
 							}
-							fileClient.moveFile(moveLocation, item.parent.Location, newText).then(
+							var deferred = fileClient.moveFile(moveLocation, item.parent.Location, newText);
+							progressService.showWhile(deferred, "Renaming " + moveLocation).then(
 								dojo.hitch(explorer, function(newItem) {
 									var refreshItem;
 									var forceExpand = null;
@@ -539,7 +543,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 								}
 							}
 							if (deleteLocation) {
-								fileClient.deleteFile(deleteLocation).then(function() {
+								var deferred = fileClient.deleteFile(deleteLocation);
+								progressService.showWhile(deferred, "Deleting " + deleteLocation).then(function() {
 									refresher(refreshItem);
 								}, function(error) {
 									errorHandler(error);
@@ -699,7 +704,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			callback: function(data) {
 				var createFunction = function(name, url) {
 					if (name && url) {
-						fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true).then(
+						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
+						progressService.showWhile(deferred, "Linking to " + url).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
@@ -877,7 +883,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 										}
 									}
 									if (location) {
-										fileClient.copyFile(location, item.Location, name).then(dojo.hitch(explorer, function() {
+										var deferred = fileClient.copyFile(location, item.Location, name);
+										progressService.showWhile(deferred, "Pasting " + location).then(dojo.hitch(explorer, function() {
 											this.changedItem(item, true);
 										}), errorHandler);
 									}
