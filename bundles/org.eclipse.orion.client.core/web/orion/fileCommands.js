@@ -26,6 +26,10 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 
 	var favoritesCache = null;
 	
+	// This variable is used by a shared error handler so it is set up here.  Anyone using the error handler should set this
+	// variable first.
+	var progressService = null;
+	
 	var lastItemLoaded = {Location: null};
 
 	// I'm not sure where this belongs.  This is the first time an outer party consumes
@@ -110,9 +114,12 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		}
 	};
 	
-	function errorHandler(serviceRegistry, error) {
-		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-		progress.setProgressResult(error);
+	function errorHandler(error) {
+		if (progressService) {
+			progressService.setProgressResult(error);
+		} else {
+			window.console.log(error);
+		}
 	}
 
 	
@@ -168,6 +175,8 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	}
 		
 	function createProject(explorer, fileClient, progress, name, populateFunction, progressMessage) {
+		// set progress variable so error handler can use
+		progressService = progress;
 		if (name) {
 			var loadedWorkspace;
 			if (mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
@@ -206,7 +215,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	 * @function
 	 */
 	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
-		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
 		function contains(arr, item) {
 			for (var i=0; i<arr.length; i++) {
@@ -576,7 +585,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFile(item.Location, name);
-							progress.showWhile(deferred, "Creating file '" + name + "'").then(
+							progressService.showWhile(deferred, "Creating file '" + name + "'").then(
 								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 								errorHandler);
 						}
@@ -613,7 +622,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFolder(item.Location, name);
-							progress.showWhile(deferred, "Creating folder '" + name + "'").then(
+							progressService.showWhile(deferred, "Creating folder '" + name + "'").then(
 								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 								errorHandler);
 						}
@@ -646,7 +655,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
-					progress.showWhile(deferred, messages["Importing from "] + sourceURL).then(
+					progressService.showWhile(deferred, messages["Importing from "] + sourceURL).then(
 						dojo.hitch(explorer, function() {
 							this.changedItem(this.treeRoot, true);
 						}),
@@ -669,10 +678,10 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
 				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					createProject(explorer, fileClient, progress, data.parameters.valueFor('name')); //$NON-NLS-0$
+					createProject(explorer, fileClient, progressService, data.parameters.valueFor('name')); //$NON-NLS-0$
 				} else {
 					getNewItemName(data.items, data.domNode.id, messages['New Folder'], function(name) {
-						createProject(explorer, fileClient, progress, name);
+						createProject(explorer, fileClient, progressService, name);
 					});
 				}
 			},
@@ -758,7 +767,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
-						progress.showWhile(deferred, messages["Importing from "] + host).then(
+						progressService.showWhile(deferred, messages["Importing from "] + host).then(
 							dojo.hitch(explorer, function() {
 								this.changedItem(this.treeRoot, true);
 							}),
@@ -786,7 +795,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progress.showWhile(deferred, messages["Exporting from "] + host).then(
+						progressService.showWhile(deferred, messages["Exporting from "] + host).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot, true);}),
 							errorHandler);//refresh the root
 					}
