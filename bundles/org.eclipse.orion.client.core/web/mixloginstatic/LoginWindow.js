@@ -15,6 +15,7 @@
 define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 	var userCreationEnabled;
 	var registrationURI;
+	var forceUserEmail;
 
 	function injectPlaceholderShims() {
 		function textFocus(e) {
@@ -244,6 +245,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		var mypostrequest = new XMLHttpRequest();
 		var login = document.getElementById("create_login").value;
 		var password = document.getElementById("create_password").value;
+		var email =  document.getElementById("create_email").value;
 		mypostrequest.onreadystatechange = function() {
 			if (mypostrequest.readyState === 4) {
 				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
@@ -253,12 +255,15 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 					var responseObject = JSON.parse(mypostrequest.responseText);
 					document.getElementById("errorMessage").innerHTML = responseObject.Message;
 					document.getElementById("errorWin").style.visibility = '';
+					if(mypostrequest.status === 201){
+						hideRegistration();
+					}
 				} else {
 					confirmLogin(login, password);
 				}
 			}
 		};
-		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
+		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password) + "&email=" + encodeURIComponent(email);
 		mypostrequest.open("POST", "../users", true);
 		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		mypostrequest.setRequestHeader("Orion-Version", "1");
@@ -335,6 +340,8 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 				if (checkusersrequest.status === 200) {
 					var responseObject = JSON.parse(checkusersrequest.responseText);
 					userCreationEnabled = responseObject.CanAddUsers;
+					forceUserEmail = responseObject.ForceEmail;
+					document.getElementById("create_email").setAttribute("aria-required", forceUserEmail);
 					registrationURI = responseObject.RegistrationURI;
 					if (!userCreationEnabled && !registrationURI) {
 						formatForNoUserCreation();
