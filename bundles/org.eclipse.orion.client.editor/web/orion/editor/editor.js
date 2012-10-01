@@ -591,7 +591,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				if (bookmark) {
 					annotationModel.removeAnnotation(bookmark);
 				} else {
-					bookmark = mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK, lineStart, lineEnd, editor.getText(lineStart, lineEnd));
+					bookmark = mAnnotations.AnnotationType.createAnnotation(mAnnotations.AnnotationType.ANNOTATION_BOOKMARK, lineStart, lineEnd);
+					bookmark.title = undefined;
 					annotationModel.addAnnotation(bookmark);
 				}
 			};
