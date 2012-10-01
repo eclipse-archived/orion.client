@@ -53,13 +53,13 @@ define([], function(){
 		this._initUI();
 		
 		var that = this;
-		this._completionUIContainer.onmousedown = function(e){
+		this._completionUIContainer.addEventListener("mousedown", function(e) {
 			that._mouseDown = true;
-		};
-		this._completionUIContainer.onmouseup = function(e){
+		});
+		this._completionUIContainer.addEventListener("mouseup", function(e) {
 			that._mouseDown = false;
-		};
-		this._inputField.onblur = function(e){
+		});
+		this._inputField.addEventListener("blur", function(e) {
 			if(that._mouseDown){
 				window.setTimeout(function(){ //wait a few milliseconds for the input field to focus 
 					that._inputField.focus();
@@ -67,11 +67,15 @@ define([], function(){
 			} else {
 				that._dismiss();
 			}
-		};
-		this._inputField.oninput = function(e){
+		});
+		this._inputField.addEventListener("keydown", function(e) {
+			console.log("entered :" + e.keyCode);
+			that.onKeyDown(e);
+		});
+		this._inputField.addEventListener("input", function(e) {
 			that._proposeOn(that._inputField.value);
-		};
-		this._inputField.onfocus = function(e){
+		});
+		this._inputField.addEventListener("focus", function(e) {
 			if(!that._dismissed || !that._binderFunc){
 				return;
 			}
@@ -85,7 +89,7 @@ define([], function(){
 					that._proposeOn(that._inputField.value);
 				});
 			}
-		};
+		});
 	}
 	
 	/**
@@ -93,20 +97,30 @@ define([], function(){
 	 * The user of the input completion has to listen on the key board events and call this function.
 	 * If this function returns true, the caller's listener has to stop handling it.
 	 */
-	InputCompletion.prototype.onKeyPressed = function(e){
-		if (e.charOrCode === 13/* Enter */) {//If there is already a selected/hightlighted item in the proposal list, then put hte proposal back to the input field and dismiss the proposal UI
-			if(this._proposalList && this._proposalList.length > 0 && this._proposalIndex >= 0 && this._proposalIndex < this._proposalList.length){
-				this._dismiss(this._proposalList[this._proposalIndex].item.value);
-				return true;
-			}
-			return false;
-		} else if((e.charOrCode === 40 /* Down arrow */ || e.charOrCode === 38 /* Up arrow */) && this._proposalList && this._proposalList.length > 0){
-			this._walk(e.charOrCode === 40);//In case of down or up arrows, jsut walk forward or backward in the list and highlight it.
+	InputCompletion.prototype.onKeyDown = function(e){
+		if(this._dismissed){
 			return true;
-		} else if(e.charOrCode === 27/* ESC */) {
-			this._dismiss();//Dismiss the proposal UI and do nothing.
 		}
-		return false;
+		var keyCode= e.charCode || e.keyCode;
+		if (keyCode === 13/* Enter */) {//If there is already a selected/hightlighted item in the proposal list, then put hte proposal back to the input field and dismiss the proposal UI
+			if(this._proposalList && this._proposalList.length > 0 && this._proposalIndex >= 0 && this._proposalIndex < this._proposalList.length){
+				e.preventDefault();
+				this._dismiss(this._proposalList[this._proposalIndex].item.value);
+				e.stopPropagation();
+				return false;
+			}
+			return true;
+		} else if((keyCode === 40 /* Down arrow */ || keyCode === 38 /* Up arrow */) && this._proposalList && this._proposalList.length > 0){
+			e.preventDefault();
+			this._walk(keyCode === 40);//In case of down or up arrows, jsut walk forward or backward in the list and highlight it.
+			e.stopPropagation();
+			return false;
+		} else if(keyCode === 27/* ESC */) {
+			e.preventDefault();
+			this._dismiss();//Dismiss the proposal UI and do nothing.
+			return false;
+		}
+		return true;
 	};
 
 	InputCompletion.prototype._bind = function(dataList){
@@ -249,7 +263,7 @@ define([], function(){
 			this._completionUIContainer.style.left = curLeft + "px"; //$NON-NLS-0$
 			this._completionUIContainer.style.width = this._inputField.offsetWidth + "px"; //$NON-NLS-0$
 			this._mouseDown = false;
-			this.dismissed = false;
+			this._dismissed = false;
 		} else {
 			this._dismissed = true;
 			this._proposalList = null;
