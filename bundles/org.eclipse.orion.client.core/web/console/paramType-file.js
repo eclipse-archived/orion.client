@@ -34,10 +34,7 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 			parse: function(arg) {
 				var string = arg || "";
 				var predictions = this._getPredictions(string);
-				if (predictions !== null) {
-					return this._createCompletion(string, predictions);
-				}
-				return {};
+				return this._createCompletion(string, predictions);
 			},
 
 			/**
@@ -52,12 +49,14 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 
 			_createCompletion: function(string, predictions) {
 				var exactMatch;
-				for (var i = 0; i < predictions.length; i++) {
-					var current = predictions[i];
-					if (current.name === string) {
-						if ((current.value.Directory && this.directories) || (!current.value.Directory && this.files)) {
-							exactMatch = current;
-							break;
+				if (predictions) {
+					for (var i = 0; i < predictions.length; i++) {
+						var current = predictions[i];
+						if (current.name === string) {
+							if ((current.value.Directory && this.directories) || (!current.value.Directory && this.files)) {
+								exactMatch = current;
+								break;
+							}
 						}
 					}
 				}
@@ -67,7 +66,7 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 				if (exactMatch) {
 					status = mConsole.CompletionStatus.MATCH;
 					value = exactMatch.value;
-				} else if (predictions !== null && predictions.length > 0) {
+				} else if (predictions && predictions.length > 0) {
 					status = mConsole.CompletionStatus.PARTIAL;
 				} else {
 					status = mConsole.CompletionStatus.ERROR;
