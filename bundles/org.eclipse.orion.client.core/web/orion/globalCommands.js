@@ -804,28 +804,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					for (i in searches) {
 						if(searches[i].label){
 							if(!hasSavedSearch){
-								fullSet.push({type: "category", label: "Saved searches"});
+								fullSet.push({type: "category", label: "Saved searches"});//$NON-NLS-0$ //$NON-NLS-0$
 								hasSavedSearch = true;
 							}
-							fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});
+							fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
 						} else {
-							fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});
+							fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
 						}
 					}
 					callBack(fullSet);
 				});
 			},
-			{group: "globalSearch"});
+			{group: "globalSearch"});//$NON-NLS-0$
 		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			/*
-			if(!searchCompletion.onKeyDown(e)){//Some keys in inputCompletion has their meaning
-				return;
-			}*/
-			if(e.defaultPrevented){// If the key event is processed by other listerns, e.g. input completion, we do not process it here
-				console.log(" prevented entered :" + e.keyCode);
+			if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 				return;
 			}
-				console.log(" Not prevented entered :" + e.keyCode);
 			var keyCode= e.charCode || e.keyCode;
 			if (keyCode === 13 ) {// ENTER
 				if (searcher) {

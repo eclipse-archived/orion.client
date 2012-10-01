@@ -69,7 +69,6 @@ define([], function(){
 			}
 		});
 		this._inputField.addEventListener("keydown", function(e) {
-			console.log("entered :" + e.keyCode);
 			that.onKeyDown(e);
 		});
 		this._inputField.addEventListener("input", function(e) {
