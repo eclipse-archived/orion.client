@@ -747,11 +747,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
-
 		
 		// place an empty div for keyAssist
 		dojo.place('<div id="keyAssist" style="display: none" class="keyAssistFloat" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-
 		
 		// generate primary nav links. 
 		var primaryNav = dojo.byId("primaryNav"); //$NON-NLS-0$
@@ -795,9 +793,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 		
 		// hook up search box behavior
-		dojo.place('<div id="globalSearchCompletionParent" style="display: none" class="inputCompletionContainer" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 		var searchField = dojo.byId("search"); //$NON-NLS-0$
-		var searchCompletion = new mInputCompletion.InputCompletion(function(callBack){
+		if (!searchField) {
+			throw "failed to generate HTML for banner"; //$NON-NLS-0$
+		}
+		var searchCompletion = new mInputCompletion.InputCompletion(searchField,
+			function(callBack){
 				mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
 					var i, fullSet = [], hasSavedSearch = false;
 					for (i in searches) {
@@ -814,15 +815,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					callBack(fullSet);
 				});
 			},
-			"globalSearch", searchField, "globalSearchCompletionParent");
-		var searchCompletionSet = null;
-		var searchCompletionIndex = -1;
-		if (!searchField) {
-			throw "failed to generate HTML for banner"; //$NON-NLS-0$
-		}
-		
+			{group: "globalSearch"});
+		//TODO: we should eventually listen the key event in the InputCompletion and bubble the enter key event up to the caller if enter does not mean select a proposal
 		dojo.connect(searchField, "onkeypress", function(e){ //$NON-NLS-0$
-			if(searchCompletion.onKeyPressed(e)){
+			if(searchCompletion.onKeyPressed(e)){//Some keys in inputCompletion has their meaning
 				return;
 			}
 			if (e.charOrCode === dojo.keys.ENTER) {
@@ -844,7 +840,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			} 
 		});
-		
 		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
 		});
