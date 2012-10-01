@@ -375,6 +375,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
+		this.isShowing = false;
 		var self = this;
 		if (!this.parentNode) {
 			throw new Error("parentNode not found");
@@ -405,6 +406,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			self.textViewListenerAdded = false;
 		});
+		this.scrollListener = function(e) {
+			if (self.isShowing) {
+				self.position();
+			}
+		};
+		document.addEventListener("scroll", this.scrollListener);
 	}
 	ContentAssistWidget.prototype = /** @lends orion.editor.ContentAssistWidget.prototype */ {
 		/** @private */
@@ -514,14 +521,27 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.hide();
 				return;
 			}
-			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
-			caretLocation.y += this.textView.getLineHeight();
 			this.parentNode.innerHTML = "";
 			for (var i = 0; i < this.proposals.length; i++) {
 				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
 			}
+			this.position();
+			this.parentNode.onclick = this.onClick.bind(this);
+			this.isShowing = true;
+		},
+		hide: function() {
+			if(document.activeElement === this.parentNode) {
+				this.textView.focus();
+			}
+			this.parentNode.style.display = "none";
+			this.parentNode.onclick = null;
+			this.isShowing = false;
+		},
+		position: function() {
+			var caretLocation = this.textView.getLocationAtOffset(this.textView.getCaretOffset());
+			caretLocation.y += this.textView.getLineHeight();
 			this.textView.convert(caretLocation, "document", "page");
-			this.parentNode.style.position = "absolute";
+			this.parentNode.style.position = "fixed";
 			this.parentNode.style.left = caretLocation.x + "px";
 			this.parentNode.style.top = caretLocation.y + "px";
 			this.parentNode.style.display = "block";
@@ -536,14 +556,6 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			if (caretLocation.x + this.parentNode.offsetWidth > viewportWidth) {
 				this.parentNode.style.left = (viewportWidth - this.parentNode.offsetWidth) + "px";
 			}
-			this.parentNode.onclick = this.onClick.bind(this);
-		},
-		hide: function() {
-			if(document.activeElement === this.parentNode) {
-				this.textView.focus();
-			}
-			this.parentNode.style.display = "none";
-			this.parentNode.onclick = null;
 		}
 	};
 	return {
