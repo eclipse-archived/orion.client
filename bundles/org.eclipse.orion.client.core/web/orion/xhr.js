@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console define XMLHttpRequest*/
+/*global console define setTimeout XMLHttpRequest*/
 
 /**
  * @name orion.xhr
@@ -104,7 +104,7 @@ define(['orion/Deferred'], function(Deferred) {
 				if (200 <= code && code < 400) {
 					d.resolve(result);
 				} else {
-					if (log && typeof console !== 'undefined') {
+					if (log && typeof console !== 'undefined') { //$NON-NLS-0$
 						console.log(new Error(xhr.statusText));
 					}
 					d.reject(result);
@@ -114,10 +114,20 @@ define(['orion/Deferred'], function(Deferred) {
 		try {
 			xhr.open(method, url, true /* async */);
 			if (typeof options.timeout === 'number') { //$NON-NLS-0$
-				xhr.timeout = options.timeout;
-				xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
-					d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
-				});
+				if (typeof xhr.timeout === 'number') { //$NON-NLS-0$
+					// Browser supports XHR timeout
+					xhr.timeout = options.timeout;
+					xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
+						d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
+					});
+				} else {
+					// Use our own timer
+					setTimeout(function() {
+						if (d.state !== 'resolved' && d.state !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
+							d.reject('Timeout exceeded'); //$NON-NLS-0$
+						}
+					}, options.timeout);
+				}
 			}
 			var headerNames = Object.keys(headers);
 			for (i=0; i < headerNames.length; i++) {
