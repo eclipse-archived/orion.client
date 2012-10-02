@@ -11,7 +11,7 @@
 /*global dojo dijit widgets define*/
 /*jslint browser:true*/
 
-define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/OperationsDialog.html'], function(messages, require, dojo, dijit, mUtil) {
+define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/OperationsDialog.html'], function(messages, require, dojo, dijit) {
 	
 	dojo.declare("orion.widgets.OperationsDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: true,

@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'orion/explorers/explorer'],
-		function(messages, require, dojo, mUtil, mExplorer){
+define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils', 'orion/explorers/explorer'],
+		function(messages, require, dojo, mFileUtils, mExplorer){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -183,7 +183,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/util', 'or
 	 * @param postLoad a function to call after loading the resource
 	 */
 	FileExplorer.prototype.loadResourceList = function(path, force, postLoad) {
-		path = mUtil.makeRelative(path);
+		path = mFileUtils.makeRelative(path);
 		if (!force && path === this._lastPath) {
 			return;
 		}

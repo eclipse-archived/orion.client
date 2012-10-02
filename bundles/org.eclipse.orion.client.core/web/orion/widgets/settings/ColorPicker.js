@@ -11,7 +11,7 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'dijit/form/DropDownButton', 'dijit/ColorPalette'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['require', 'dojo', 'dijit', 'orion/commands', 'dijit/form/DropDownButton', 'dijit/ColorPalette'], function(require, dojo, dijit, mCommands) {
 
 	dojo.declare("orion.widgets.settings.ColorPicker", dijit.form.DropDownButton, { //$NON-NLS-0$
 	

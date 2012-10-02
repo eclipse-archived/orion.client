@@ -15,7 +15,7 @@
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/Deferred', 'orion/util', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, Deferred, mUtil, mCommands, mHTMLFragments) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, Deferred, mCommands, mHTMLFragments) {
 	
 	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	

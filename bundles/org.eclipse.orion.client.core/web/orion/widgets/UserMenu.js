@@ -11,7 +11,7 @@
 
 /*global define window eclipse localStorage*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/Menu'], function(messages, require, dojo, dijit, mCommands, mUtil) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'dijit/Menu'], function(messages, require, dojo, dijit, mCommands) {
 	dojo.declare("orion.widgets.UserMenu", [dijit.Menu], {
 	
 		widgetsInTemplate: false,

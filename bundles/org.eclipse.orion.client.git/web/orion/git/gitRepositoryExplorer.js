@@ -11,8 +11,8 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mFilterSearchBox, mUtil, PageUtil, mGlobalCommands, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/fileUtils', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mFilterSearchBox, mFileUtils, PageUtil, mGlobalCommands, mGitCommands) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -78,7 +78,7 @@ exports.GitRepositoryExplorer = (function() {
 			this.displayRepository(pageParams.resource);
 		} else {
 			var path = this.defaultPath;
-			var relativePath = mUtil.makeRelative(path);
+			var relativePath = mFileUtils.makeRelative(path);
 			
 			//NOTE: require.toURL needs special logic here to handle "gitapi/clone"
 			var gitapiCloneUrl = require.toUrl("gitapi/clone._"); //$NON-NLS-0$

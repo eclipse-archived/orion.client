@@ -12,7 +12,7 @@
 /*global dojo eclipse:true widgets*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/util', 'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], function(messages, dojo, mExplorer, mUtil, mGitCommands, mNavUtils) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/fileUtils', 'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], function(messages, dojo, mExplorer, mFileUtils, mGitCommands, mNavUtils) {
 
 var exports =  {};
 exports.GitCommitNavigator = (function() {
@@ -46,7 +46,7 @@ exports.GitCommitNavigator = (function() {
 
 		this.renderer._useCheckboxSelection = false;
 		
-		path = mUtil.makeRelative(path);
+		path = mFileUtils.makeRelative(path);
 		if (path === this._lastHash && !force) {
 			waitDeferred.callback();
 			return waitDeferred;
