@@ -11,7 +11,7 @@
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog'], function(messages, require, dojo, dijit, mUtil) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog'], function(messages, require, dojo, dijit) {
 	
 	dojo.declare("orion.git.widgets.CommitTooltipDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: false,

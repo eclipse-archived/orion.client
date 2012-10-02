@@ -11,8 +11,8 @@
 
 /*global define */
 
-define(['require', 'orion/util', 'orion/URITemplate', 'orion/sites/siteUtils'],
-		function(require, mUtil, URITemplate) {
+define(['require', 'orion/fileUtils', 'orion/URITemplate', 'orion/sites/siteUtils'],
+		function(require, mFileUtil, URITemplate) {
 	/**
 	 * Returns a relative URL pointing to the editing page for the given site configuration. 
 	 * @param {orion.siteClient.SiteConfiguration} site The site configuration
@@ -23,7 +23,7 @@ define(['require', 'orion/util', 'orion/URITemplate', 'orion/sites/siteUtils'],
 	function generateEditSiteHref(site) {
 		var base = require.toUrl("sites/site.html"); //$NON-NLS-0$
 		return new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
-			resource: mUtil.makeRelative(site.Location)
+			resource: mFileUtil.makeRelative(site.Location)
 		});
 	}
 	return {

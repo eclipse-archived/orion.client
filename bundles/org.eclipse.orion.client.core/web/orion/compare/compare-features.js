@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/compare/nls/messages', 'orion/util', 'orion/compare/compareUtils', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mUtil, mCompareUtils, dojo, dijit) {
+define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mCompareUtils, dojo, dijit) {
 
 
 var orion = orion || {};

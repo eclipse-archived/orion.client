@@ -8,9 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/util', 'orion/fileClient', 'orion/commands', 
+define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
-		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mUtil, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
+		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
 	/**
 	 * Creates a new compare tree explorer.
 	 * @name orion.CompareTreeExplorer

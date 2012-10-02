@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo', 'orion/editor/regex', 'orion/util', 'orion/commands'], function(require, dojo, mRegex, mUtil, mCommands) {
+define(['require', 'dojo', 'orion/editor/regex', 'orion/commands'], function(require, dojo, mRegex, mCommands) {
 
 var orion = orion || {};
 
@@ -436,8 +436,49 @@ orion.searchUtils.generateMatchContext = function(contextAroundLength, fileConte
 	return context;
 };
 
+/**
+ * Split file contents into lines. It also handles the mixed line endings with "\n", "\r" and "\r\n".
+ *
+ * @param {String} text The file contetns.
+ * @returns {Array} Split file lines. 
+ * @name orion.searchUtils#splitFile
+ * @function
+ */
+orion.searchUtils.splitFile = function(text) {
+	var cr = 0, lf = 0, index = 0, start = 0;
+	var splitLines = [];
+	while (true) {
+		if (cr !== -1 && cr <= index) { 
+			cr = text.indexOf("\r", index);  //$NON-NLS-0$
+		}
+		if (lf !== -1 && lf <= index) { 
+			lf = text.indexOf("\n", index);  //$NON-NLS-0$
+		}
+		if (lf === -1 && cr === -1) {
+			splitLines.push(text.substring(start));
+			break; 
+		}
+		var offset = 1;
+		if (cr !== -1 && lf !== -1) {
+			if (cr + 1 === lf) {
+				offset = 2;
+				index = lf + 1;
+			} else {
+				index = (cr < lf ? cr : lf) + 1;
+			}
+		} else if (cr !== -1) {
+			index = cr + 1;
+		} else {
+			index = lf + 1;
+		}
+		splitLines.push(text.substring(start, index - offset));
+		start = index;
+	}
+	return splitLines;
+};
+
 orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
-	var fileContents = mUtil.splitFile(fileContentText);
+	var fileContents = orion.searchUtils.splitFile(fileContentText);
 	if(replacing){
 		fileModelNode.contents = fileContents;
 	}

@@ -11,7 +11,7 @@
 /*jslint sub:true*/
  /*global define window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/PageUtil', 'orion/explorers/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, mUtil, PageUtil, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/explorers/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, mNavUtils){
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 
@@ -607,7 +607,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 						}
 						scopes[binding.keyBinding.scopeName].push(binding);
 					} else {
-						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
 						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}
@@ -617,7 +617,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'or
 					dojo.place("<h2>"+scopedBinding+"</h2>", targetNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ 
 					for (var i=0; i<scopes[scopedBinding].length; i++) {
 						binding = scopes[scopedBinding][i];
-						bindingString = mUtil.getUserKeyString(binding.keyBinding);
+						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
 						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				}	

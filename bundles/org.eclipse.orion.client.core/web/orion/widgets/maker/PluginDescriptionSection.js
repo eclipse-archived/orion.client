@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/PageUtil', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/maker/ScrollingContainerSection'], function(messages, require, dojo, dijit, mUtil, mCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/maker/ScrollingContainerSection'], function(messages, require, dojo, dijit) {
 
 	dojo.declare("orion.widgets.maker.PluginDescriptionSection", [orion.widgets.maker.ScrollingContainerSection], { //$NON-NLS-0$
 						

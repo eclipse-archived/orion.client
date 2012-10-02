@@ -12,9 +12,9 @@
 /*global window define orion */
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "orion/commands", "orion/extensionCommands", 'orion/contentTypes', 'orion/compare/compareUtils', 
+define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/uiUtils", "orion/fileUtils", "orion/commands", "orion/extensionCommands", 'orion/contentTypes', 'orion/compare/compareUtils', 
 	'orion/Deferred', 'dojo/DeferredList', 'orion/widgets/NewItemDialog', 'orion/widgets/DirectoryPrompterDialog', 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(messages, require, dojo, mUtil, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred){
+	function(messages, require, dojo, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred){
 
 	/**
 	 * Utility methods
@@ -137,7 +137,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			}
 		}
 		if (refNode) {
-			mUtil.getUserText(domId+"EditBox", refNode, false, defaultName,  //$NON-NLS-0$
+			mUIUtils.getUserText(domId+"EditBox", refNode, false, defaultName,  //$NON-NLS-0$
 				dojo.hitch(this, function(name) {
 					if (name) {
 						if (tempNode) {
@@ -171,7 +171,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	
 	function canCreateProject(item) {
 		item = forceSingleItem(item);
-		return item.Location && mUtil.isAtRoot(item.Location);
+		return item.Location && mFileUtils.isAtRoot(item.Location);
 	}
 		
 	function createProject(explorer, fileClient, progress, name, populateFunction, progressMessage) {
@@ -179,7 +179,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		progressService = progress;
 		if (name) {
 			var loadedWorkspace;
-			if (mUtil.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
+			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
 				loadedWorkspace = explorer.treeRoot;
 			} else {
 				loadedWorkspace = fileClient.loadWorkspace("");
@@ -227,7 +227,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		}
 		
 		function stripPath(location) {
-			location = mUtil.makeRelative(location);
+			location = mFileUtils.makeRelative(location);
 			// get hash part and strip query off
 			var splits = location.split('#'); //$NON-NLS-0$
 			var path = splits[splits.length-1];
@@ -399,7 +399,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					if (!refNode) {
 						refNode = data.domNode;
 					}
-					mUtil.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
+					mUIUtils.getUserText(refNode.id+"EditBox", refNode, true, item.Name,  //$NON-NLS-0$
 						dojo.hitch(this, function(newText) {
 							var moveLocation = item.Location;
 							if (item.parent.Projects) {
@@ -603,7 +603,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 		commandService.addCommand(newFileCommand);
 		
 		var newFolderNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages['Folder name:'], messages['New Folder'])]); //$NON-NLS-1$ //$NON-NLS-0$
@@ -640,7 +640,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 	
 		commandService.addCommand(newFolderCommand);
 
@@ -669,7 +669,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}
 		});
 		commandService.addCommand(importZipURLCommand);
 		
@@ -757,7 +757,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 		commandService.addCommand(importCommand);
 	
 		var importSFTPCommand = new mCommands.Command({
@@ -785,7 +785,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 		commandService.addCommand(importSFTPCommand);
 	
 		var exportSFTPCommand = new mCommands.Command({
@@ -810,7 +810,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 			},
 			visibleWhen: function(item) {
 				item = forceSingleItem(item);
-				return item.Directory && !mUtil.isAtRoot(item.Location);}});
+				return item.Directory && !mFileUtils.isAtRoot(item.Location);}});
 		commandService.addCommand(exportSFTPCommand);
 		
 		var copyCommand = new mCommands.Command({
@@ -854,7 +854,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				id: "eclipse.pasteSelections", //$NON-NLS-0$
 				visibleWhen: function(item) {
 					item = forceSingleItem(item);
-					return item.Directory && !mUtil.isAtRoot(item.Location);},
+					return item.Directory && !mFileUtils.isAtRoot(item.Location);},
 				callback: function(data) {
 					// Check selection service first.  If a single folder is selected, that is the target.  Otherwise the root is the target.
 					explorer.selection.getSelections(function(selections) {
@@ -866,7 +866,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						}
 						if (bufferedSelection.length > 0) {
 							// Do not allow pasting into the Root of the Workspace
-							if (mUtil.isAtRoot(item.Location)) {
+							if (mFileUtils.isAtRoot(item.Location)) {
 								errorHandler(messages["Cannot paste into the root"]);
 								return;
 							}

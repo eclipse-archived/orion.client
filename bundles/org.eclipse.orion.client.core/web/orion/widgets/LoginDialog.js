@@ -11,7 +11,7 @@
 /*global define eclipse localStorage dojo dijit widgets*/
 /*jslint browser:true*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(messages, require, dojo, dijit, mUtil) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'text!orion/widgets/templates/LoginDialog.html'], function(messages, require, dojo, dijit) {
 
 	dojo.declare("orion.widgets.LoginDialog", [dijit.TooltipDialog], { //$NON-NLS-0$
 		widgetsInTemplate: true,

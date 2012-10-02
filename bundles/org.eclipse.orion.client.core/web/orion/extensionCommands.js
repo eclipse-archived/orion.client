@@ -12,8 +12,8 @@
 /*global window define orion */
 /*browser:true*/
 
-define(["require", "dojo", "orion/util", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
-	function(require, dojo, mUtil, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
+define(["require", "dojo", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
+	function(require, dojo, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
 	 * Utility methods
