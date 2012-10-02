@@ -1110,8 +1110,22 @@ var exports = {};
 
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
-						display.Message = "<span>" + result.jsonData.Result //$NON-NLS-0$
-							+ dojo.string.substitute(messages[". Go to ${0}."], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+						display.Message = "<span>" + result.jsonData.Result; //$NON-NLS-0$
+						if(result.jsonData.FailingPaths){
+							var paths = "";
+							var isFirstPath = true;
+							for(var path in result.jsonData.FailingPaths){
+								if(!isFirstPath){
+									paths+=", ";
+								}
+								isFirstPath = false;
+								paths+=path;
+							}
+							if(!isFirstPath){
+								display.Message+= ". " + dojo.string.substitute(messages['Failing paths: ${0}'], [paths]);
+							}
+						}
+						display.Message += dojo.string.substitute(messages[". Go to ${0}."], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
 							+ statusLocation +"\">"+messages["Git Status page"]+"</a>"])+"</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					} else if(result.error) {
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1990,8 +2004,22 @@ var exports = {};
 					} else if (jsonData.Result == "FAILED") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result  //$NON-NLS-0$
-						+ dojo.string.substitute(messages['. Go to ${0}.'], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+						display.Message = "<span>" + jsonData.Result;  //$NON-NLS-0$
+						if(jsonData.FailingPaths){
+							var paths = "";
+							var isFirstPath = true;
+							for(var path in jsonData.FailingPaths){
+								if(!isFirstPath){
+									paths+=", ";
+								}
+								isFirstPath = false;
+								paths +=path;
+							}
+							if(!isFirstPath){
+								display.Message+= ". " + dojo.string.substitute(messages['Failing paths: ${0}'], [paths]);
+								}
+						}
+						display.Message += dojo.string.substitute(messages['. Go to ${0}.'], ["<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
 						+ statusLocation +"\">"+messages['Git Status page']+"</a>"])+".</span>";					} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 					// handle other cases
 					else {
