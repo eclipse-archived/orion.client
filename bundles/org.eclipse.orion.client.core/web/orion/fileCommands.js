@@ -79,7 +79,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 		if (toolbar) {
 			service.destroy(toolbar);
 		} else {
-			throw messages["could not find toolbar "] + toolbarId;
+			throw "could not find toolbar " + toolbarId; //$NON-NLS-0$
 		}
 		// close any open slideouts because if we are retargeting the command
 		if (item.Location !== lastItemLoaded.Location) {
@@ -273,8 +273,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 								var item = selectedItems[i];
 								var newName = item.Name || null;
 								var func = isCopy ? fileClient.copyFile : fileClient.moveFile;
-								var message = isCopy ? "Copying " : "Moving ";
-								message += item.Location;
+								var message = dojo.string.substitute(isCopy ? messages["Copying ${0}"] : messages["Moving ${0}"], [item.Location]);
 								if (isCopy && item.parent && item.parent.Location === location) {
 									newName = window.prompt(dojo.string.substitute(messages["Enter a new name for '${0}'"], [item.Name]), dojo.string.substitute(messages["Copy of ${0}"], [item.Name]));
 									// user cancelled?  don't copy this one
@@ -415,7 +414,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 								}
 							}
 							var deferred = fileClient.moveFile(moveLocation, item.parent.Location, newText);
-							progressService.showWhile(deferred, "Renaming " + moveLocation).then(
+							progressService.showWhile(deferred, dojo.string.substitute(messages["Renaming ${0}"], [moveLocation])).then(
 								dojo.hitch(explorer, function(newItem) {
 									var refreshItem;
 									var forceExpand = null;
@@ -457,7 +456,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						if(item.length === 2 && !item[0].Directory && !item[1].Directory){
 							var contentType1 = contentTypeService.getFilenameContentType(item[0].Name);
 							var contentType2 = contentTypeService.getFilenameContentType(item[1].Name);
-							if(contentType1 && contentType1['extends'] === "text/plain" && contentType2 && contentType2['extends'] === "text/plain"){
+							if(contentType1 && contentType1['extends'] === "text/plain" && contentType2 && contentType2['extends'] === "text/plain"){ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								return true;
 							}
 						} else if(item.length === 2 && item[0].Directory && item[1].Directory){
@@ -468,9 +467,9 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				},
 				hrefCallback: function(data) {
 					if(data.items[0].Directory && data.items[1].Directory){
-						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location;
+						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location; //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true});
+					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true}); //$NON-NLS-0$
 				}
 			});
 		commandService.addCommand(compareWithEachOtherCommand);
@@ -494,7 +493,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					fileClient: fileClient,				
 					func: function(targetFolder) { 
 						if (targetFolder && targetFolder.Location) {
-							window.open(require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + targetFolder.Location);
+							window.open(require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + targetFolder.Location);  //$NON-NLS-1$ //$NON-NLS-0$
 						}
 					}
 				});
@@ -544,7 +543,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							}
 							if (deleteLocation) {
 								var deferred = fileClient.deleteFile(deleteLocation);
-								progressService.showWhile(deferred, "Deleting " + deleteLocation).then(function() {
+								progressService.showWhile(deferred, dojo.string.substitute(messages["Deleting ${0}"], [deleteLocation])).then(function() {
 									refresher(refreshItem);
 								}, function(error) {
 									errorHandler(error);
@@ -590,7 +589,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFile(item.Location, name);
-							progressService.showWhile(deferred, "Creating file '" + name + "'").then(
+							progressService.showWhile(deferred, dojo.string.substitute(messages["Creating ${0}"], [name])).then(
 								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 								errorHandler);
 						}
@@ -627,7 +626,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var createFunction = function(name) {
 						if (name) {
 							var deferred = fileClient.createFolder(item.Location, name);
-							progressService.showWhile(deferred, "Creating folder '" + name + "'").then(
+							progressService.showWhile(deferred, dojo.string.substitute(messages["Creating ${0}"], [name])).then(
 								dojo.hitch(explorer, function() {this.changedItem(item, true);}),
 								errorHandler);
 						}
@@ -645,11 +644,11 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 	
 		commandService.addCommand(newFolderCommand);
 
-		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', 'Unzip *.zip files:', true)]); //$NON-NLS-1$ //$NON-NLS-0$
+		var zipURLParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['File URL:'], 'URL'), new mCommands.CommandParameter('unzip', 'boolean', messages["Unzip *.zip files:"], true)]);//$NON-NLS-4$  //$NON-NLS-3$  //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 
 		var importZipURLCommand = new mCommands.Command({
-			name: "Import from HTTP...",
-			tooltip: "Copy a file from a URL and optionally unzip it",
+			name: messages["Import from HTTP..."],
+			tooltip: messages["Copy a file from a URL and optionally unzip it"],
 			id: "orion.importZipURL", //$NON-NLS-0$
 			parameters: zipURLParameters,
 			callback: function(data) {
@@ -660,7 +659,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 					var expandZip = data.parameters && data.parameters.valueFor("unzip") && (sourceURL.indexOf(".zip") === sourceURL.length-4); //$NON-NLS-1$ //$NON-NLS-0$
 					var optionHeader = expandZip ? "" : "raw"; //$NON-NLS-1$ //$NON-NLS-0$
 					var deferred = fileClient.remoteImport(importURL, {"OptionHeader":optionHeader}); //$NON-NLS-0$
-					progressService.showWhile(deferred, messages["Importing from "] + sourceURL).then(
+					progressService.showWhile(deferred, dojo.string.substitute(messages["Importing from ${0}"], [sourceURL])).then(
 						dojo.hitch(explorer, function() {
 							this.changedItem(this.treeRoot, true);
 						}),
@@ -705,7 +704,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 				var createFunction = function(name, url) {
 					if (name && url) {
 						var deferred = fileClient.createProject(explorer.treeRoot.ChildrenLocation, name, url, true);
-						progressService.showWhile(deferred, "Linking to " + url).then(
+						progressService.showWhile(deferred, dojo.string.substitute(messages["Linking to ${0}"], [url])).then(
 							dojo.hitch(explorer, function() {this.loadResourceList(this.treeRoot.Path, true);}), // refresh the root
 							errorHandler);
 					}
@@ -773,7 +772,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
-						progressService.showWhile(deferred, messages["Importing from "] + host).then(
+						progressService.showWhile(deferred, dojo.string.substitute(messages["Importing from ${0}"], [host])).then(
 							dojo.hitch(explorer, function() {
 								this.changedItem(this.treeRoot, true);
 							}),
@@ -801,7 +800,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteExport(item.ExportLocation, exportOptions);
-						progressService.showWhile(deferred, messages["Exporting from "] + host).then(
+						progressService.showWhile(deferred, dojo.string.substitute(messages["Exporting from ${0}"], [host])).then(
 							dojo.hitch(explorer, function() {this.changedItem(this.treeRoot, true);}),
 							errorHandler);//refresh the root
 					}
@@ -884,7 +883,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 									}
 									if (location) {
 										var deferred = fileClient.copyFile(location, item.Location, name);
-										progressService.showWhile(deferred, "Pasting " + location).then(dojo.hitch(explorer, function() {
+										progressService.showWhile(deferred, dojo.string.substitute(messages["Pasting ${0}"], [location])).then(dojo.hitch(explorer, function() {
 											this.changedItem(item, true);
 										}), errorHandler);
 									}
@@ -1018,7 +1017,7 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/util", "or
 							}
 							if (!openWithGroupCreated) {
 								openWithGroupCreated = true;
-								commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-0$
+								commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 							if (commandInfo.isEditor) {
 								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
