@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Global Search Proposal</title>
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script>
+	  window.onload = function() {
+	  	  var bindData = [{category: "String operations", datalist:["indexOf", "length", "toUpperCase", "toLowerCase", "bold", "replace", "length", "substring", "slice"]},
+	  	  				  {category: "Orion classes", datalist:["globalCommands", "searchExplorer", "fileExplorer", "navigator", "compare editor", "site editor", "git repo", "git log", "setting page"]},
+	  	  				  {category: "Orion committers", datalist:["Simon Kaegi", "Mark Macdonald", "Libing Wang", "Anton Mcconville", "Ken Walker", "Susan Mccourt", "John Arthorne"]}
+	  	  ];
+	  
+	      var provider = new orion.PluginProvider();
+	      var serviceImpl = {
+	              run: function(keyWords) {
+	                  return bindData;
+	              }
+	          };
+	      var serviceProperties = { 
+	              "filterForMe": true
+	          };
+	      provider.registerService("orion.search.proposal", serviceImpl, serviceProperties);
+	      provider.connect();
+	  };
+	</script>
+</head>
+<body>
+</body>
+</html>

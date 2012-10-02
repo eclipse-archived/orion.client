@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>Global Search Proposal 2</title>
+	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script>
+	  window.onload = function() {
+	  	  var bindData = [{category: "Always there", datalist:["foo", "bar", "cool"]},
+	  	  				  {category: "Always there 2", datalist:["foo 2", "bar 2", "cool 2"]}
+	  	  ];
+	  
+	      var provider = new orion.PluginProvider();
+	      var serviceImpl = {
+	              run: function(keyWords) {
+	                  return bindData;
+	              }
+	          };
+	      var serviceProperties = { 
+	              "filterForMe": false
+	          };
+	      provider.registerService("orion.search.proposal", serviceImpl, serviceProperties);
+	      provider.connect();
+	  };
+	</script>
+</head>
+<body>
+</body>
+</html>

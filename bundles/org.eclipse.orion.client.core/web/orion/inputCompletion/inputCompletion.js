@@ -47,6 +47,7 @@ define([], function(){
 		}
 		this._completionIdPrefix = idFrefix + "__completion__"; //$NON-NLS-0$
 		this._proposeFromStart = options ? options.proposeFromStart : false;
+		this._extendedProvider = options ? options.extendedProvider : null;
 		this._proposalIndex = -1;
 		this._dismissed = true;
 		this._mouseDown = false;
@@ -279,26 +280,20 @@ define([], function(){
 			index = -1;
 		}
 		this._selectProposal(index);
-	}
+	};
 	
-	InputCompletion.prototype._proposeOn = function(inputValue){
-		if(!this._dataList){
-			return;
-		}
-		this._completionUL.innerHTML = "";
-		var searchTerm = inputValue ? inputValue.toLowerCase() : null;
-		this._proposalList = [];
+	InputCompletion.prototype._proposeOnList = function(datalist, searchTerm, filterForMe){
 		var categoryName = "";
 		var categoryList = [];
-		for(var i=0; i < this._dataList.length; i++){
-			if(this._dataList[i].type === "category"){ //$NON-NLS-0$
+		for(var i=0; i < datalist.length; i++){
+			if(datalist[i].type === "category"){ //$NON-NLS-0$
 				this._proposeOnCategory(categoryName, categoryList);
-				categoryName = this._dataList[i].label;
+				categoryName = datalist[i].label;
 				categoryList = [];
 			} else {
 				var proposed = true;
-				if(searchTerm){
-					var searchOn = this._dataList[i].value.toLowerCase();
+				if(searchTerm && filterForMe){
+					var searchOn = datalist[i].value.toLowerCase();
 					var pIndex = searchOn.indexOf(searchTerm);
 					if(pIndex < 0){
 						proposed = false;
@@ -307,14 +302,32 @@ define([], function(){
 					} 
 				}
 				if(proposed){
-					categoryList.push(this._dataList[i]);
+					categoryList.push(datalist[i]);
 				}
 			}
 		}
 		this._proposeOnCategory(categoryName, categoryList);
-		this._show();
 	};
 	
+	InputCompletion.prototype._proposeOn = function(inputValue){
+		this._completionUL.innerHTML = "";
+		var searchTerm = inputValue ? inputValue.toLowerCase() : null;
+		this._proposalList = [];
+		this._proposeOnList(this._dataList, searchTerm, true);
+		if(this._extendedProvider && searchTerm){
+			var that = this;
+			this._extendedProvider(inputValue, function(extendedProposals, filterForMe){
+				if(extendedProposals){
+					for(var i = 0; i < extendedProposals.length; i++){
+						that._proposeOnList(extendedProposals[i].proposals, extendedProposals[i].filterForMe ? searchTerm : inputValue, extendedProposals[i].filterForMe);
+					}
+				}
+				that._show();	
+			}, []);
+		} else {
+			this._show();
+		}
+	};
 	InputCompletion.prototype.constructor = InputCompletion;
 
 	//return module exports
