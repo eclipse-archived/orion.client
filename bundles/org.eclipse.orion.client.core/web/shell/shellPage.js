@@ -74,17 +74,21 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	/* implementations of the build-in commands */
 
 	function cdExec(args, context) {
-		var result = context.createPromise();
 		var node = args.directory;
+		if (!node) {
+			return "";
+		}
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
 		dojo.hash(node.Location);
 		var pathString = shellPageFileService.computePathString(node);
-		result.resolve(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + pathString + "</b>")); //$NON-NLS-1$ //$NON-NLS-0$
-		return result;
+		return i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + pathString + "</b>"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 
 	function editExec(node) {
+		if (!node.file) {
+			return;
+		}
 		var url = computeEditURL(node.file);
 		window.open(url);
 	}
