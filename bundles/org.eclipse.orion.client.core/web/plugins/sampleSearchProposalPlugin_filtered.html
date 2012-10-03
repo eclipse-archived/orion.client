@@ -2,13 +2,12 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>Global Search Proposal</title>
+	<title>Search Proposal Filtered</title>
 	<script type="text/javascript" src="../orion/plugin.js"></script>
 	<script>
 	  window.onload = function() {
-	  	  var bindData = [{category: "String operations", datalist:["indexOf", "length", "toUpperCase", "toLowerCase", "bold", "replace", "length", "substring", "slice"]},
-	  	  				  {category: "Orion classes", datalist:["globalCommands", "searchExplorer", "fileExplorer", "navigator", "compare editor", "site editor", "git repo", "git log", "setting page"]},
-	  	  				  {category: "Orion committers", datalist:["Simon Kaegi", "Mark Macdonald", "Libing Wang", "Anton Mcconville", "Ken Walker", "Susan Mccourt", "John Arthorne"]}
+	  	  var bindData = [{category: "Filtered by me", datalist:["I am always here", "Stay here till uninstalled"]},
+	  	  				  {category: "Filtered by web service", datalist:["I am always here", "Stay here till uninstalled"]}
 	  	  ];
 	  
 	      var provider = new orion.PluginProvider();
@@ -18,7 +17,7 @@
 	              }
 	          };
 	      var serviceProperties = { 
-	              "filterForMe": true
+	              "filterForMe": false
 	          };
 	      provider.registerService("orion.search.proposal", serviceImpl, serviceProperties);
 	      provider.connect();
