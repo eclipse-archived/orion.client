@@ -12,23 +12,23 @@
 
 /*global define*/
 
-define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
-	function(messages, mConsole) {
+define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell"],
+	function(messages, mShell) {
 
 	var orion = {};
-	orion.consolePage = {};
+	orion.shellPage = {};
 
-	orion.consolePage.ParamTypeFile = (function() {
-		function ParamTypeFile(name, consolePageFileService, directories, files) {
+	orion.shellPage.ParamTypeFile = (function() {
+		function ParamTypeFile(name, shellPageFileService, directories, files) {
 			this.name = name;
-			this.consolePageFileService = consolePageFileService;
+			this.shellPageFileService = shellPageFileService;
 			this.directories = directories;
 			this.files = files;
 		}
 
 		ParamTypeFile.prototype = {
 			/**
-			 * This function is invoked by the console to query for the completion
+			 * This function is invoked by the shell to query for the completion
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg) {
@@ -38,11 +38,11 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 			},
 
 			/**
-			 * This function is invoked by the console to query for a completion
+			 * This function is invoked by the shell to query for a completion
 			 * value's string representation.
 			 */
 			stringify: function(value) {
-				return value.typedPath || this.consolePageFileService.computePathString(value);
+				return value.typedPath || this.shellPageFileService.computePathString(value);
 			},
 
 			/** @private */
@@ -64,12 +64,12 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 				var status, message;
 				var value = string;
 				if (exactMatch) {
-					status = mConsole.CompletionStatus.MATCH;
+					status = mShell.CompletionStatus.MATCH;
 					value = exactMatch.value;
 				} else if (predictions && predictions.length > 0) {
-					status = mConsole.CompletionStatus.PARTIAL;
+					status = mShell.CompletionStatus.PARTIAL;
 				} else {
-					status = mConsole.CompletionStatus.ERROR;
+					status = mShell.CompletionStatus.ERROR;
 					message = messages["'${0}' is not valid"].replace("${0}", string); //$NON-NLS-0$
 				}
 				return {value: value, status: status, message: message, predictions: predictions};
@@ -83,7 +83,7 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 				return null;
 			},
 			_getPredictions: function(text) {
-				var directoryNode = this.consolePageFileService.getDirectory(null, text);
+				var directoryNode = this.shellPageFileService.getDirectory(null, text);
 				if (!directoryNode) {
 					/* either invalid path or not yet retrieved */
 					return null;
@@ -91,7 +91,7 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 
 				var childNodes = directoryNode.Children || [];
 
-				var index = text.lastIndexOf(this.consolePageFileService.SEPARATOR) + 1;
+				var index = text.lastIndexOf(this.shellPageFileService.SEPARATOR) + 1;
 				var directoriesSegment = text.substring(0, index);
 				var finalSegment = text.substring(index);
 
@@ -99,7 +99,7 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 				var filePredictions = [];
 				var name;
 				if (finalSegment.length === 0 || finalSegment === "." || finalSegment === "..") { //$NON-NLS-1$ //$NON-NLS-0$
-					var parentNode = this.consolePageFileService.getParent(directoryNode);
+					var parentNode = this.shellPageFileService.getParent(directoryNode);
 					if (parentNode) {
 						name = directoriesSegment + ".."; //$NON-NLS-0$
 						parentNode.typedPath = name;
@@ -133,5 +133,5 @@ define(["i18n!orion/console/nls/messages", "orion/widgets/Console"],
 		return ParamTypeFile;
 	}());
 
-	return orion.consolePage;
+	return orion.shellPage;
 });

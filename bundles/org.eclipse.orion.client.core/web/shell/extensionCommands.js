@@ -14,12 +14,12 @@
 
 /*
  * This file is basically a copy from the orion root directory.  It provides functions
- * that are needed by the Console page, but are marked as private and therefore can
+ * that are needed by the Shell page, but are marked as private and therefore can
  * break unsuspecting clients at any time.  If public equivalents offering the required
  * functionality become available in the future then it should be possible to get rid
  * of this copy.
  *
- * consolePage.js calls _createOpenWithCommands() and _createCommandOptions(), which
+ * shellPage.js calls _createOpenWithCommands() and _createCommandOptions(), which
  * depend on pretty much everything else in the file. 
  */
 

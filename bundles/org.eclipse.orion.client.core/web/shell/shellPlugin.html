@@ -10,16 +10,16 @@
 			var serviceImpl = { /* All data is in properties */ };
 			var provider = new orion.PluginProvider();
 			provider.registerService("orion.page.link", serviceImpl, {
-				nameKey: "Console",
+				nameKey: "Shell",
 				nls: "orion/nls/messages",
-				id: "orion.console",
-				uriTemplate: "{OrionHome}/console/consolePage.html"
+				id: "orion.shell",
+				uriTemplate: "{OrionHome}/shell/shellPage.html"
 			});
 			provider.connect();
 		};
 	</script>
 </head>
 <body>
-<h1>Console Plugin</h1>
+<h1>Shell Plugin</h1>
 </body>
 </html>

@@ -12,12 +12,12 @@
 
 /*global define*/
 
-define(["orion/widgets/Console"], function(mConsole) {
+define(["orion/widgets/Shell"], function(mShell) {
 
 	var orion = {};
-	orion.consolePage = {};
+	orion.shellPage = {};
 
-	orion.consolePage.ParamTypeHidden = (function() {
+	orion.shellPage.ParamTypeHidden = (function() {
 		function ParamTypeHidden() {
 		}
 		ParamTypeHidden.prototype = {
@@ -27,7 +27,7 @@ define(["orion/widgets/Console"], function(mConsole) {
 			parse: function(arg) {
 				return {
 					value: arg,
-					status: mConsole.CompletionStatus.MATCH,
+					status: mShell.CompletionStatus.MATCH,
 					message: undefined,
 					predictions: [{name: this._convertToHidden(arg), value: arg}]};
 			},
@@ -47,5 +47,5 @@ define(["orion/widgets/Console"], function(mConsole) {
 		return ParamTypeHidden;
 	}());
 
-	return orion.consolePage;
+	return orion.shellPage;
 });

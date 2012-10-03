@@ -13,11 +13,11 @@
 /*global define window*/
 /*jslint browser:true*/
 
-define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Console", "console/consolePageFileService", "console/paramType-file", "orion/i18nUtil", "console/extensionCommands", "orion/contentTypes"], 
-	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mConsole, mConsolePageFileService, mFileParamType, i18nUtil, mExtensionCommands, mContentTypes) {
+define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+		"orion/widgets/Shell", "shell/shellPageFileService", "shell/paramType-file", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes"], 
+	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mShellPageFileService, mFileParamType, i18nUtil, mExtensionCommands, mContentTypes) {
 
-	var consolePageFileService, fileClient, output;
+	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 
@@ -64,9 +64,8 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 	}
 
 	function computeLinkString(node) {
-		//TODO html escape sequences in Name?
 		if (node.Directory) {
-			return "<a href=\"#" + node.Location + "\" class=\"consolePageDirectory\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+			return "<a href=\"#" + node.Location + "\" class=\"shellPageDirectory\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
 		} 
 		var href = computeEditURL(node);
 		return "<a href=\"" + href + "\" target=\"_blank\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -77,10 +76,10 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 	function cdExec(args, context) {
 		var result = context.createPromise();
 		var node = args.directory;
-		consolePageFileService.setCurrentDirectory(node);
+		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
 		dojo.hash(node.Location);
-		var pathString = consolePageFileService.computePathString(node);
+		var pathString = shellPageFileService.computePathString(node);
 		result.resolve(messages["Changed to: ${0}"].replace("${0}", "<b>" + pathString + "</b>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		return result;
 	}
@@ -92,11 +91,11 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 	function lsExec(args, context) {
 		var result = context.createPromise();
-		var location = dojo.hash() || consolePageFileService.SEPARATOR;
+		var location = dojo.hash() || shellPageFileService.SEPARATOR;
 		fileClient.loadWorkspace(location).then(
 			function(node) {
-				consolePageFileService.setCurrentDirectory(node); /* flush current node cache */
-				consolePageFileService.withChildren(node,
+				shellPageFileService.setCurrentDirectory(node); /* flush current node cache */
+				shellPageFileService.withChildren(node,
 					function(children) {
 						var buffer = [];
 						for (var i = 0; i < children.length; i++) {
@@ -117,7 +116,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 						 * its initial conversion of targets to _blank.
 						 */
 						setTimeout(function() {
-							var links = output.querySelectorAll(".consolePageDirectory"); //$NON-NLS-0$
+							var links = output.querySelectorAll(".shellPageDirectory"); //$NON-NLS-0$
 							for (var i = 0; i < links.length; i++) {
 								links[i].setAttribute("target", "_self"); //$NON-NLS-1$ //$NON-NLS-0$
 								links[i].className = "";
@@ -138,10 +137,10 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 	function pwdExec(args, context) {
 		var result = context.createPromise();
-		var node = consolePageFileService.getCurrentDirectory();
+		var node = shellPageFileService.getCurrentDirectory();
 		fileClient.loadWorkspace(node.Location).then(
 			function(node) {
-				var buffer = consolePageFileService.computePathString(node);
+				var buffer = shellPageFileService.computePathString(node);
 				result.resolve("<b>" + buffer + "</b>"); //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			function(error) {
@@ -156,7 +155,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 	/*
 	 * Creates a gcli exec function that wraps a 'callback' function contributed by
-	 * an 'orion.console.command' service implementation.
+	 * an 'orion.shell.command' service implementation.
 	 */
 	function contributedExecFunc(service) {
 		if (typeof(service.callback) === "function") { //$NON-NLS-0$
@@ -184,20 +183,20 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			mGlobalCommands.generateBanner("orion-consolePage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-			mGlobalCommands.setPageTarget({task: messages["Console"]});
+			mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+			mGlobalCommands.setPageTarget({task: messages["Shell"]});
 
-			output = document.getElementById("console-output"); //$NON-NLS-0$
-			var input = document.getElementById("console-input"); //$NON-NLS-0$
-			var console = new mConsole.Console(input, output);
-			console.setFocus();
+			output = document.getElementById("shell-output"); //$NON-NLS-0$
+			var input = document.getElementById("shell-input"); //$NON-NLS-0$
+			var shell = new mShell.Shell(input, output);
+			shell.setFocus();
 
-			consolePageFileService = new mConsolePageFileService.ConsolePageFileService();
+			shellPageFileService = new mShellPageFileService.ShellPageFileService();
 			var location = dojo.hash();
 			var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
 			fileClient.loadWorkspace(location || ROOT_ORIONCONTENT).then(
 				function(node) {
-					consolePageFileService.setCurrentDirectory(node);
+					shellPageFileService.setCurrentDirectory(node);
 				});
 			if (location.length === 0) {
 				hashUpdated = true;
@@ -205,13 +204,13 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 			}
 
 			/* add the locally-defined types */
-			var directoryType = new mFileParamType.ParamTypeFile("directory", consolePageFileService, true, false); //$NON-NLS-0$
-			console.addType(directoryType);
-			var fileType = new mFileParamType.ParamTypeFile("file", consolePageFileService, false, true); //$NON-NLS-0$
-			console.addType(fileType);
+			var directoryType = new mFileParamType.ParamTypeFile("directory", shellPageFileService, true, false); //$NON-NLS-0$
+			shell.addType(directoryType);
+			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService, false, true); //$NON-NLS-0$
+			shell.addType(fileType);
 
 			/* add the locally-defined commands */
-			console.addCommand({
+			shell.addCommand({
 				name: "cd", //$NON-NLS-0$
 				description: messages["Changes the current directory"],
 				callback: cdExec,
@@ -222,7 +221,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 					description: messages["The name of the directory"]
 				}]
 			});
-			console.addCommand({
+			shell.addCommand({
 				name: "edit", //$NON-NLS-0$
 				description: messages["Edits a file"],
 				callback: editExec,
@@ -233,13 +232,13 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 					description: messages["The name of the file"]
 				}]
 			});
-			console.addCommand({
+			shell.addCommand({
 				name: "ls", //$NON-NLS-0$
 				description: messages["Lists the files in the current directory"],
 				callback: lsExec,
 				returnType: "string" //$NON-NLS-0$
 			});
-			console.addCommand({
+			shell.addCommand({
 				name: "pwd", //$NON-NLS-0$
 				description: messages["Prints the current directory location"],
 				callback: pwdExec,
@@ -262,7 +261,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 
 			// TODO
 			/* add types contributed through the plug-in API */
-//			var allReferences = serviceRegistry.getServiceReferences("orion.console.type");
+//			var allReferences = serviceRegistry.getServiceReferences("orion.shell.type");
 //			for (var i = 0; i < allReferences.length; ++i) {
 //				var ref = allReferences[i];
 //				var service = serviceRegistry.getService(ref);
@@ -277,12 +276,12 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 //					if (service.decrement) {
 //						type.decrement = service.decrement;
 //					}
-//					console.addType(type);
+//					shell.addType(type);
 //				}
 //			}
 			
 			/* add commands contributed through the plug-in API */
-			var allReferences = serviceRegistry.getServiceReferences("orion.console.command"); //$NON-NLS-0$
+			var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
 			for (var i = 0; i < allReferences.length; ++i) {
 				var ref = allReferences[i];
 				var service = serviceRegistry.getService(ref);
@@ -290,7 +289,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 					if (ref.getProperty("nls") && ref.getProperty("descriptionKey")){  //$NON-NLS-1$ //$NON-NLS-0$
 						i18nUtil.getMessageBundle(ref.getProperty("nls")).then( //$NON-NLS-0$
 							function(ref, commandMessages) {
-								console.addCommand({
+								shell.addCommand({
 									name: ref.getProperty("name"), //$NON-NLS-0$
 									description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
 									callback: contributedExecFunc(service),
@@ -300,7 +299,7 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 								});
 						}, ref);
 					} else {
-						console.addCommand({
+						shell.addCommand({
 							name: ref.getProperty("name"), //$NON-NLS-0$
 							description: ref.getProperty("description"), //$NON-NLS-0$
 							callback: contributedExecFunc(service),
@@ -318,19 +317,19 @@ define(["i18n!orion/console/nls/messages", "require", "dojo", "orion/bootstrap",
 					return;
 				}
 				if (hash.length === 0) {
-					fileClient.loadWorkspace(consolePageFileService.SEPARATOR).then(
+					fileClient.loadWorkspace(shellPageFileService.SEPARATOR).then(
 						function(node) {
-							consolePageFileService.setCurrentDirectory(node);
+							shellPageFileService.setCurrentDirectory(node);
 						}
 					);
-					console.output(messages["Changed to: ${0}"].replace("${0}", "<b>/</b>")); //$NON-NLS-2$ //$NON-NLS-1$
+					shell.output(messages["Changed to: ${0}"].replace("${0}", "<b>/</b>")); //$NON-NLS-2$ //$NON-NLS-1$
 					return;
 				}
 				fileClient.loadWorkspace(hash).then(
 					function(node) {
-						consolePageFileService.setCurrentDirectory(node);
-						var buffer = consolePageFileService.computePathString(node);
-						console.output(messages["Changed to: ${0}"].replace("${0}", "<b>" + buffer + "</b>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						shellPageFileService.setCurrentDirectory(node);
+						var buffer = shellPageFileService.computePathString(node);
+						shell.output(messages["Changed to: ${0}"].replace("${0}", "<b>" + buffer + "</b>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 					}
 				);
 			});
