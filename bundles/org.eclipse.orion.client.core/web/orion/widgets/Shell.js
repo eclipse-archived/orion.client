@@ -13,9 +13,9 @@
 /*global define Range*/
 /*jslint browser:true*/
 
-define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
+define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
 		"gcli/ui/fields/menu", "gcli/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help"],
-	function(messages, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
+	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
@@ -103,9 +103,6 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 			/** @private */
 
 			_init: function(input, output) {
-				if (!input) {throw "no input";} //$NON-NLS-0$
-				if (!output) {throw "no output";} //$NON-NLS-0$
-
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
 				outputDiv.style.height = "100%"; //$NON-NLS-0$
@@ -129,7 +126,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				var self = this;
 				setTimeout(function() {
 					mGCLI.createDisplay();
-					self.output(messages["For a list of available commands type '${0}'."].replace("${0}", ["<b>help</b>"])); //$NON-NLS-1$ //$NON-NLS-0$
+					self.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
 				});
 				mHelp.startup();
 				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -177,7 +174,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 						 */
 						var self = this;
 						conversion.then(function () {
-							if (self.element) { // if there's no UI yet then ignore
+							if (self.element) { /* if there's no UI yet then ignore */
 								self.setConversion(self.getConversion());
 							}
 						});

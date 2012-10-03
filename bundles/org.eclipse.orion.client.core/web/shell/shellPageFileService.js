@@ -35,7 +35,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 		}
 
 		ShellPageFileService.prototype = {
-			SEPARATOR: "/", //$NON-NLS-1$
+			SEPARATOR: "/", //$NON-NLS-0$
 			computePathString: function(node) {
 				if (node.Location === this.SEPARATOR) {
 					return this.SEPARATOR;
@@ -59,7 +59,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				if (name.length === 0) {
 					return null;
 				}
-				if (name === "..") { //$NON-NLS-1$
+				if (name === "..") { //$NON-NLS-0$
 					return this.getParent(node);
 				}
 				if (!node.Children) {
