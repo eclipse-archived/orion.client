@@ -43,7 +43,7 @@ require(["LoginWindow.js"]);
 </script>
 <title>Login Page</title>
 </head>
-<body style="margin: 0; padding: 0; min-height:400px;">
+<body style="margin: 0; padding: 0;">
 	<div class="orion-banner">
 		<div class="orion-nav-bar">
 			<div class="orion-logo"></div>
@@ -51,7 +51,7 @@ require(["LoginWindow.js"]);
 			<a class="orion-twitter-link" href="http://twitter.com/orionhub" target="_blank"></a>
 		</div>
 	</div>
-	<div class="orion-login-container" id="login-window" style="display:none;min-height:400px;">
+	<div class="orion-login-container" id="login-window" style="display:none;">
 		<div class="orion-landing-area">
 			<div id="orionInfoArea"  class="orion-info" style="visibility: hidden;" aria-atomic="true" aria-live="assertive">
 					<div id="orionInfoMessage" class="orion-info-message">&nbsp;</div>
@@ -145,23 +145,31 @@ require(["LoginWindow.js"]);
 			</div>
 
 			<div class="orion-open" id="orionOpen">
-				<div id="openIDLogin" class="orion-open-header">Log in with:</div>
+				<div id="openIDLogin" class="orion-open-header"></div>
 				<div class="orion-open-images">
+				
+					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin orLogin"> 
+						<div class='openIdWrapper openSignIn orion-login-header'>
+							Sign in:
+						</div>
+					</a> 
+				
 					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin"> 
 						<div class='openIdWrapper'>
 							<div id="googleLogin" class="googleIcon" alt="Google" title="Google"></div>
 						</div>
 					</a> 
-					<a id="yahooLoginLink" class="loginWindow" aria-labelledby="openIDLogin yahooLogin"> 
-						<div class='openIdWrapper'>
-							<div id="yahooLogin" class="yahooIcon" alt="Yahoo!" title="Yahoo!"></div> 
-						</div>
-					</a> 
+					
 					<a id="myopenidLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin"> 
 						<div class='openIdWrapper'>
 							<div id="myopenidLogin" class="openIdIcon" alt="myOpenID" title="myOpenID"></div> 
 						</div>
 					</a>
+					<!-- a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin"> 
+						<div class='openIdWrapper'>
+							<div id="personaLogin" class="personaIcon" alt="persona!" title="persona!"></div> 
+						</div>
+					</a --> 
 				</div>
 			</div>
 			

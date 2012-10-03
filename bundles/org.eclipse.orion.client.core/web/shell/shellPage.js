@@ -14,7 +14,7 @@
 /*jslint browser:true*/
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Shell", "shell/shellPageFileService", "shell/paramType-file", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes"], 
+		"orion/widgets/Shell", "shell/shellPageFileService", "shell/paramType-file", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes"],
 	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mShellPageFileService, mFileParamType, i18nUtil, mExtensionCommands, mContentTypes) {
 
 	var shellPageFileService, fileClient, output;
@@ -22,7 +22,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 
 	var resolveError = function(result, error) {
-		result.resolve(messages["File service error: ${0}"].replace("${0}", "<em>" + error + "</em>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		result.resolve(i18nUtil.formatMessage(messages["File service error: ${0}"], "<em>" + error + "</em>")); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 
 	/* general functions for working with file system nodes */
@@ -80,7 +80,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		hashUpdated = true;
 		dojo.hash(node.Location);
 		var pathString = shellPageFileService.computePathString(node);
-		result.resolve(messages["Changed to: ${0}"].replace("${0}", "<b>" + pathString + "</b>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		result.resolve(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + pathString + "</b>")); //$NON-NLS-1$ //$NON-NLS-0$
 		return result;
 	}
 
@@ -322,14 +322,14 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							shellPageFileService.setCurrentDirectory(node);
 						}
 					);
-					shell.output(messages["Changed to: ${0}"].replace("${0}", "<b>/</b>")); //$NON-NLS-2$ //$NON-NLS-1$
+					shell.output(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>/</b>")); //$NON-NLS-0$
 					return;
 				}
 				fileClient.loadWorkspace(hash).then(
 					function(node) {
 						shellPageFileService.setCurrentDirectory(node);
 						var buffer = shellPageFileService.computePathString(node);
-						shell.output(messages["Changed to: ${0}"].replace("${0}", "<b>" + buffer + "</b>")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+						shell.output(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + buffer + "</b>")); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				);
 			});
