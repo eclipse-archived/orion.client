@@ -451,7 +451,6 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		document.getElementById("hideRegisterButton").onclick = hideRegistration;
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
-		document.getElementById("yahooLoginLink").href = createOpenIdLink("http://me.yahoo.com");
 		document.getElementById("myopenidLoginLink").href = createOpenIdLink("http://myopenid.com");
 
 		document.getElementById("cancleResetButton").onclick = hideResetUser;
