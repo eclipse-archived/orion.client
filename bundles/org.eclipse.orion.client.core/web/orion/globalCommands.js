@@ -822,7 +822,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		//If true the inputCompletion class will filter the proposals returned by the plugin.
 		//If false the inputCompletion class assumes that the proposals are already filtered by hte given kerword. 
 		//The false case happens when a plugin wants to use the keyword to ask for a set of filtered proposal from a web service by the keyword and Orion does not need to filter it again.
-		var extendedProposals = [];		
 		var exendedProposalProvider = function(keyWord, uiCallback){
 			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
 			if(!serviceReferences || serviceReferences.length === 0){
@@ -830,22 +829,29 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				return;
 			}
             var promises = [];
-            extendedProposals = [];
 			serviceReferences.forEach(function(serviceRef) {
 				var filterForMe = serviceRef.getProperty("filterForMe");
 				promises.push( serviceRegistry.getService(serviceRef).run(keyWord).then(function(returnValue) {
 					//The return value has to be an array of {category : string, datalist: [string,string,string...]}
-					var thisPromise = {filterForMe: filterForMe, proposals: []};
+					var proposalList = {filterForMe: filterForMe, proposals: []};
 					for (var i = 0; i < returnValue.length; i++) {
-						thisPromise.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
+						proposalList.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
 						for (var j = 0; j < returnValue[i].datalist.length; j++) {
-							thisPromise.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
+							proposalList.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
 						}
 					}
-					extendedProposals.push(thisPromise);
+					return proposalList;
 				}));
 			});
-            Deferred.all( promises ).then( function(){uiCallback(extendedProposals)} );
+            Deferred.all( promises ).then( function(returnValues){
+            	//merge all the promise return values together
+            	var extendedProposals = [];
+            	for(var i = 0; i < returnValues.length; i++){
+            		extendedProposals.push(returnValues[i]);
+            	}
+            	//Render UI
+            	uiCallback(extendedProposals)
+            });
 		};
 		//Create and hook up the inputCompletion instance with the search box dom node.
 		//The defaultProposalProvider provides proposals from the recent and saved searches.
