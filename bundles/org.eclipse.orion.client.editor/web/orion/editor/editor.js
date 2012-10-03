@@ -435,23 +435,25 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			var lineIndex = model.getLineAtOffset(newSelection.start);
 			var newEmpty = newSelection.start === newSelection.end;
 			var oldEmpty = !oldSelection || oldSelection.start === oldSelection.end;
-			if (!(oldLineIndex === lineIndex && oldEmpty && newEmpty)) {
-				var remove = this._currentLineAnnotation ? [this._currentLineAnnotation] : null;
-				this._currentLineAnnotation = null;
-				var add;
-				if (newEmpty) {
-					var start = model.getLineStart(lineIndex);
-					var end = model.getLineEnd(lineIndex);
-					if (model.getBaseModel) {
-						start = model.mapOffset(start);
-						end = model.mapOffset(end);
-					}
-					var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
-					this._currentLineAnnotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
-					add = [this._currentLineAnnotation];
-				}
-				annotationModel.replaceAnnotations(remove, add);
+			var start = model.getLineStart(lineIndex);
+			var end = model.getLineEnd(lineIndex);
+			if (model.getBaseModel) {
+				start = model.mapOffset(start);
+				end = model.mapOffset(end);
 			}
+			var annotation = this._currentLineAnnotation; 
+			if (oldLineIndex === lineIndex && oldEmpty && newEmpty && annotation && annotation.start === start && annotation.end === end) {
+				return;
+			}
+			var remove = annotation ? [annotation] : null;
+			var add;
+			if (newEmpty) {
+				var type = mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE;
+				annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end);
+				add = [annotation];
+			}
+			this._currentLineAnnotation = annotation;
+			annotationModel.replaceAnnotations(remove, add);
 		},
 		
 		highlightAnnotations: function() {
