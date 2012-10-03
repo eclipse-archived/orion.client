@@ -35,7 +35,7 @@ define({
 	"Search ${0}": "Search ${0}",
 	"Type a keyword or wild card to search in ": "Type a keyword or wild card to search in ",
 	"Search failed.": "Search failed.",
-	"No matches found for ": "No matches found for ",
+	"No matches found for ${0}": "No matches found for ${0}",
 	"Searching...": "Searching...",
 	"Resource has been changed by others.": "Resource has been changed by others.",
 	"Failed to write file.": "Failed to write file.",
