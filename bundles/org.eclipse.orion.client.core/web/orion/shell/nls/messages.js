@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
-define(['orion/i18n!orion/console/nls/messages'], function(bundle) {
+define(['orion/i18n!orion/shell/nls/messages'], function(bundle) {
 	var result = {
 			root:true
 	};

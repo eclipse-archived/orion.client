@@ -11,9 +11,9 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/fileClient', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/util', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands',
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/fileClient', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands',
 'orion/selection', 'orion/git/gitClient', 'orion/searchClient', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mFileClient, mSection, mDynamicContent, mFilterSearchBox, mUtil, PageUtil, mGlobalCommands, mGitCommands, mSelection, mGitClient, mSearchClient) {
+		function(messages, require, dojo, mCommands, mFileClient, mSection, mDynamicContent, mFilterSearchBox, PageUtil, mGlobalCommands, mGitCommands, mSelection, mGitClient, mSearchClient) {
 var exports = {};
 
 exports.GitLogExplorer = (function() {

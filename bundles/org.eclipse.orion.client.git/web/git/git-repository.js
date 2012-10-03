@@ -12,10 +12,10 @@
 var eclipse;
 /*global define document dojo dijit serviceRegistry:true */
 /*browser:true*/
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/util', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
         'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'dojo/hash'], 
-		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mUtil, PageUtil, mCommands, mDialogs, mSelection, 
+		function(messages, require, dojo, mBootstrap, mStatus, mProgress, PageUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
 

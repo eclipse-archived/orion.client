@@ -11,8 +11,8 @@
 /*global dojo dijit widgets orion  window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil'], 
-	function(messages, require, dojo, dijit, mUtil, mCommands, mGlobalCommands, PageUtil) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'], 
+	function(messages, require, dojo, dijit) {
 
 		function StyleSet(){
 		

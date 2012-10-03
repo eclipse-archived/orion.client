@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(messages, require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'], function(messages, require, dojo, dijit) {
 
 	dojo.declare("orion.widgets.settings.LabeledCheckbox",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		

@@ -16,10 +16,10 @@
  * Glue code for content.html
  */
 
-define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/util', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 
 	        'dojo/hash'], 
-			function(messages, require, dojo, mBootstrap, mUtil, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
+			function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
 			mGlobalCommands, URITemplate, PageUtil) {
 
 	dojo.addOnLoad(function() {
@@ -36,6 +36,44 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 			
 			var fileMetadata;
 			var hostName;
+			
+			/**
+			 * Utility method for saving file contents to a specified location
+			 */
+			function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
+				var etag = targetMetadata.ETag;
+				var args = { "ETag" : etag }; //$NON-NLS-0$
+				fileClient.write(targetMetadata.Location, contents, args).then(
+					function(result) {
+						if (afterSave) {
+							afterSave();
+						}
+					},
+					/* error handling */
+					function(error) {
+						// expected error - HTTP 412 Precondition Failed 
+						// occurs when file is out of sync with the server
+						if (error.status === 412) {
+							var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
+							if (forceSave) {
+								// repeat save operation, but without ETag 
+								fileClient.write(targetMetadata.Location, contents).then(
+									function(result) {
+											targetMetadata.ETag = result.ETag;
+											if (afterSave) {
+												afterSave();
+											}
+									}
+								);
+							}
+						}
+						// unknown error
+						else {
+							error.log = true;
+						}
+					}
+				);
+			}
 			
 			function loadContent() {
 				var foundContent = false;
@@ -125,7 +163,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'dojo', 'orion/bootstrap',
 					var data = JSON.parse(event.data);
 						if (data.shellService) {
 							if (data.sourceLocation) {
-								mUtil.saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
+								saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
 									if (window.confirm(messages["Content has been saved.  Click OK to go to the navigator, Cancel to keep editing."])) {
 										// go to the navigator
 										window.location.href = hostName + "/navigate/table.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$

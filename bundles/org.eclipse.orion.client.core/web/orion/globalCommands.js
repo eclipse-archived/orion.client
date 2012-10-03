@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion',
+	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', "orion/Deferred",
 	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, Deferred){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -797,25 +797,76 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
-		var searchCompletion = new mInputCompletion.InputCompletion(searchField,
-			function(callBack){
-				mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
-					var i, fullSet = [], hasSavedSearch = false;
-					for (i in searches) {
-						if(searches[i].label){
-							if(!hasSavedSearch){
-								fullSet.push({type: "category", label: "Saved searches"});//$NON-NLS-0$ //$NON-NLS-0$
-								hasSavedSearch = true;
-							}
-							fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
-						} else {
-							fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
+		
+		var defaultProposalProvider = function(uiCallback){
+			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
+				var i, fullSet = [], hasSavedSearch = false;
+				for (i in searches) {
+					if(searches[i].label){
+						if(!hasSavedSearch){
+							fullSet.push({type: "category", label: "Saved searches"});//$NON-NLS-0$ //$NON-NLS-0$
+							hasSavedSearch = true;
+						}
+						fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
+					} else {
+						fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
+					}
+				}
+				uiCallback(fullSet);
+			});
+		};
+		var extendedProposals = [];		
+		var exendedProposalProvider = function(keyWord, uiCallback){
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
+			if(!serviceReferences || serviceReferences.length === 0){
+				uiCallback(null);
+				return;
+			}
+            var promises = [];
+            extendedProposals = [];
+			serviceReferences.forEach(function(serviceRef) {
+				var filterForMe = serviceRef.getProperty("filterForMe");
+				promises.push( serviceRegistry.getService(serviceRef).run(keyWord).then(function(returnValue) {
+					//The return value has to be an array of {category : string, datalist: [string,string,string...]}
+					var thisPromise = {filterForMe: filterForMe, proposals: []};
+					for (var i = 0; i < returnValue.length; i++) {
+						thisPromise.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
+						for (var j = 0; j < returnValue[i].datalist.length; j++) {
+							thisPromise.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
 						}
 					}
-					callBack(fullSet);
-				});
-			},
-			{group: "globalSearch"});//$NON-NLS-0$
+					extendedProposals.push(thisPromise);
+				}));
+			});
+            Deferred.all( promises ).then( uiCallback(extendedProposals) );
+		};
+		
+		var singleProposalProvider = function(keyWord, uiCallback){
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
+			if(!serviceReferences || serviceReferences.length === 0){
+				uiCallback(null);
+				return;
+			}
+			var serviceRef = serviceReferences[0]; //$NON-NLS-0$
+			var filterForMe = serviceRef.getProperty("filterForMe");
+			var promise = serviceRegistry.getService(serviceRef).run(keyWord);
+			promise.then(function(returnValue) {
+				//The return value has to be an array of {category : string, datalist: [string,string,string...]}
+				var extendedProposals = [];
+				var proposal = {filterForMe: filterForMe, proposals: []};
+				for (var i = 0; i < returnValue.length; i++) {
+					proposal.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
+					for (var j = 0; j < returnValue[i].datalist.length; j++) {
+						proposal.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
+					}
+				}
+				extendedProposals.push(proposal);
+				uiCallback(extendedProposals);
+			});
+		};
+		
+		var searchCompletion = new mInputCompletion.InputCompletion(searchField, defaultProposalProvider,
+									{group: "globalSearch", extendedProvider: singleProposalProvider});//$NON-NLS-0$
 		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$
 			if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 				return;
@@ -1080,7 +1131,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
 							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
-								dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								dojo.place("<span role=\"listitem\">"+mUIUtils.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					}

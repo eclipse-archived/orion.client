@@ -14,7 +14,7 @@ define({
 	"Navigator": "Navigator",
 	"Sites": "Sites",
 	"Repositories": "Repositories",
-	"Console": "Console",
+	"Shell": "Shell",
 	"Get Plugins": "Get Plugins",
 	"Global": "Global",
 	"Editor": "Editor",
