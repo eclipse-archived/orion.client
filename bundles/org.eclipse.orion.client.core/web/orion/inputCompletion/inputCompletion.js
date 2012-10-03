@@ -27,6 +27,13 @@ define([], function(){
 	 * </ul>
 	 *
 	 * @param {Object} options The options that may affect how the proposal works.
+	 * @param {Function} options.extendedProvider The extended provider function(keyword, callback(returnedProposals)) that provides additional proposals.
+	 *        It basically provides a list of proposals by a given keyword and a call back. It should call the call back to return the proposals. 
+	 * Each item in the return list must have properties as below:
+	 * <ul>
+	 *   <li>filterForMe: true or false. True means it asks inputCompletion to filter o nteh result. false means it is already filterd.
+	 *   <li>proposals: A list/array of proposals. Each item has the properties {type, label, value} decribed above.</li>
+	 * </ul>
 	 * @param {String} options.group The group name of input completion. If there will be multiple input completion in one page, the group name is nice to provide.
 	 * @param {Boolean} options.proposeFromStart The flag to propose strings that only match from start(index 0). If not provided, the flag is set to false.
 	 * For example if this flag is true, "foo" will only match "fo" but not "oo". If false, "foo" will match both "fo" and "oo".
@@ -316,7 +323,7 @@ define([], function(){
 		this._proposeOnList(this._dataList, searchTerm, true);
 		if(this._extendedProvider && searchTerm){
 			var that = this;
-			this._extendedProvider(inputValue, function(extendedProposals, filterForMe){
+			this._extendedProvider(inputValue, function(extendedProposals){
 				if(extendedProposals){
 					for(var i = 0; i < extendedProposals.length; i++){
 						that._proposeOnList(extendedProposals[i].proposals, extendedProposals[i].filterForMe ? searchTerm : inputValue, extendedProposals[i].filterForMe);

@@ -792,12 +792,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		}
 		
-		// hook up search box behavior
+		// hook up search box: 1.The search box itself 2.Default search proposal provider(recent and saved search) 
+		//                     3.Extended proposal provider from plugins 4.Search options(open result in new tab, reg ex, recent&saved searc hfull list)
 		var searchField = dojo.byId("search"); //$NON-NLS-0$
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
-		
+		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
 			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
 				var i, fullSet = [], hasSavedSearch = false;
@@ -815,6 +816,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				uiCallback(fullSet);
 			});
 		};
+		//Optional. Reading extended search proposals by asking plugins, if any.
+		//If there are multiple plugins then merge all the proposals and call uiCallBack.
+		//Plugins(with service id "orion.search.proposal") should define the property "filterForMe" to true or false. Which means:
+		//If true the inputCompletion class will filter the proposals returned by the plugin.
+		//If false the inputCompletion class assumes that the proposals are already filtered by hte given kerword. 
+		//The false case happens when a plugin wants to use the keyword to ask for a set of filtered proposal from a web service by the keyword and Orion does not need to filter it again.
 		var extendedProposals = [];		
 		var exendedProposalProvider = function(keyWord, uiCallback){
 			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
@@ -838,35 +845,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					extendedProposals.push(thisPromise);
 				}));
 			});
-            Deferred.all( promises ).then( uiCallback(extendedProposals) );
+            Deferred.all( promises ).then( function(){uiCallback(extendedProposals)} );
 		};
-		
-		var singleProposalProvider = function(keyWord, uiCallback){
-			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
-			if(!serviceReferences || serviceReferences.length === 0){
-				uiCallback(null);
-				return;
-			}
-			var serviceRef = serviceReferences[0]; //$NON-NLS-0$
-			var filterForMe = serviceRef.getProperty("filterForMe");
-			var promise = serviceRegistry.getService(serviceRef).run(keyWord);
-			promise.then(function(returnValue) {
-				//The return value has to be an array of {category : string, datalist: [string,string,string...]}
-				var extendedProposals = [];
-				var proposal = {filterForMe: filterForMe, proposals: []};
-				for (var i = 0; i < returnValue.length; i++) {
-					proposal.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
-					for (var j = 0; j < returnValue[i].datalist.length; j++) {
-						proposal.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
-					}
-				}
-				extendedProposals.push(proposal);
-				uiCallback(extendedProposals);
-			});
-		};
-		
+		//Create and hook up the inputCompletion instance with the search box dom node.
+		//The defaultProposalProvider provides proposals from the recent and saved searches.
+		//The exendedProposalProvider provides proposals from plugins.
 		var searchCompletion = new mInputCompletion.InputCompletion(searchField, defaultProposalProvider,
-									{group: "globalSearch", extendedProvider: singleProposalProvider});//$NON-NLS-0$
+									{group: "globalSearch", extendedProvider: exendedProposalProvider});//$NON-NLS-0$
+		//Both inputCompletion and here are listening keydown events on searchField
+		//But here listener should yield to inputCompletion on its "already handled" events.
 		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$
 			if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
 				return;
@@ -891,6 +878,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 			} 
 		});
+		//Finally, hook up search options
 		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
 		});
