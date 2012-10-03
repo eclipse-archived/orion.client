@@ -21,26 +21,26 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
 
 	var orion = {};
-	orion.console = {};
-	orion.console.CompletionStatus = {
+	orion.shell = {};
+	orion.shell.CompletionStatus = {
 		MATCH: 0,
 		PARTIAL: 1,
 		ERROR: 2
 	};
 
 	/**
-	 * Constructs a new console.
+	 * Constructs a new shell.
 	 * 
-	 * @param parent the parent element for the console, it can be either a DOM element or an ID for a DOM element.
+	 * @param parent the parent element for the shell, it can be either a DOM element or an ID for a DOM element.
 	 * 
-	 * @class A Console is a user interface that accepts input command lines and displays output.
-	 * @name orion.console.Console
+	 * @class A Shell is a user interface that accepts input command lines and displays output.
+	 * @name orion.shell.Shell
 	 */
-	orion.console.Console = (function() {
-		function Console(input, output) {
+	orion.shell.Shell = (function() {
+		function Shell(input, output) {
 			this._init(input, output);
 		}
-		Console.prototype = /** @lends orion.console.Console.prototype */ {			
+		Shell.prototype = /** @lends orion.shell.Shell.prototype */ {			
 			addCommand: function(command) {
 				if (!command.exec) {
 					command.exec = command.callback;
@@ -63,10 +63,10 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
 						switch (completion.status) {
-							case orion.console.CompletionStatus.ERROR:
+							case orion.shell.CompletionStatus.ERROR:
 								status = mTypes.Status.ERROR;
 								break;
-							case orion.console.CompletionStatus.PARTIAL:
+							case orion.shell.CompletionStatus.PARTIAL:
 								status = mTypes.Status.INCOMPLETE;
 								break;
 						}
@@ -123,7 +123,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				mSettings.getSetting("eagerHelper").value = 2; //$NON-NLS-0$
 
 				/*
-				 * Create the console asynchronously to ensure that the client finishes its
+				 * Create the shell asynchronously to ensure that the client finishes its
 				 * layout before GCLI computes the locations for its created widgets.
 				 */
 				var self = this;
@@ -195,8 +195,8 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				mFields.addField(CustomField);
 			}
 		};
-		return Console;
+		return Shell;
 	}());
 
-	return orion.console;
+	return orion.shell;
 });

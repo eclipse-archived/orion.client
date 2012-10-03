@@ -19,12 +19,12 @@
 define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstrap, mFileClient) {
 
 	var orion = {};
-	orion.consolePage = {};
+	orion.shellPage = {};
 	
 	var fileClient;
 
-	orion.consolePage.ConsolePageFileService = (function() {
-		function ConsolePageFileService() {
+	orion.shellPage.ShellPageFileService = (function() {
+		function ShellPageFileService() {
 			this.currentDirectory = null;
 			var self = this;
 			this.withNode(
@@ -34,7 +34,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				});
 		}
 
-		ConsolePageFileService.prototype = {
+		ShellPageFileService.prototype = {
 			SEPARATOR: "/", //$NON-NLS-1$
 			computePathString: function(node) {
 				if (node.Location === this.SEPARATOR) {
@@ -259,7 +259,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				});
 			}
 		};
-		return ConsolePageFileService;
+		return ShellPageFileService;
 	}());
 
 	dojo.ready(function() {
@@ -269,5 +269,5 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 		});
 	});
 
-	return orion.consolePage;
+	return orion.shellPage;
 });
