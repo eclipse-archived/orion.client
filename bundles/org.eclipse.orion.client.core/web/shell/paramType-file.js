@@ -62,17 +62,20 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				}
 
 				var status, message;
-				var value = string;
 				if (exactMatch) {
 					status = mShell.CompletionStatus.MATCH;
-					value = exactMatch.value;
 				} else if (predictions && predictions.length > 0) {
 					status = mShell.CompletionStatus.PARTIAL;
 				} else {
 					status = mShell.CompletionStatus.ERROR;
 					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
 				}
-				return {value: value, status: status, message: message, predictions: predictions};
+				return {
+					value: exactMatch ? exactMatch.value : null,
+					status: status,
+					message: message,
+					predictions: predictions
+				};
 			},
 			_find: function(array, func) {
 				for (var i = 0; i < array.length; i++) {

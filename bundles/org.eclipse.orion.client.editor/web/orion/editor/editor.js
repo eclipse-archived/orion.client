@@ -199,7 +199,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Sets whether the editor is dirty.
 		 *
-		 * @param {Boollean} dirty
+		 * @param {Boolean} dirty
 		 */
 		setDirty: function(dirty) {
 			if (this._dirty === dirty) { return; }

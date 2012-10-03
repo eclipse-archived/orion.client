@@ -188,7 +188,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 			output = document.getElementById("shell-output"); //$NON-NLS-0$
 			var input = document.getElementById("shell-input"); //$NON-NLS-0$
-			var shell = new mShell.Shell(input, output);
+			var shell = new mShell.Shell({input: input, output: output});
 			shell.setFocus();
 
 			shellPageFileService = new mShellPageFileService.ShellPageFileService();
@@ -205,44 +205,40 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 			/* add the locally-defined types */
 			var directoryType = new mFileParamType.ParamTypeFile("directory", shellPageFileService, true, false); //$NON-NLS-0$
-			shell.addType(directoryType);
+			shell.registerType(directoryType);
 			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService, false, true); //$NON-NLS-0$
-			shell.addType(fileType);
+			shell.registerType(fileType);
 
 			/* add the locally-defined commands */
-			shell.addCommand({
+			shell.registerCommand({
 				name: "cd", //$NON-NLS-0$
 				description: messages["Changes the current directory"],
 				callback: cdExec,
-				returnType: "string", //$NON-NLS-0$
 				parameters: [{
 					name: "directory", //$NON-NLS-0$
 					type: "directory", //$NON-NLS-0$
 					description: messages["The name of the directory"]
 				}]
 			});
-			shell.addCommand({
+			shell.registerCommand({
 				name: "edit", //$NON-NLS-0$
 				description: messages["Edits a file"],
 				callback: editExec,
-				returnType: "string", //$NON-NLS-0$
 				parameters: [{
 					name: "file", //$NON-NLS-0$
 					type: "file", //$NON-NLS-0$
 					description: messages["The name of the file"]
 				}]
 			});
-			shell.addCommand({
+			shell.registerCommand({
 				name: "ls", //$NON-NLS-0$
 				description: messages["Lists the files in the current directory"],
-				callback: lsExec,
-				returnType: "string" //$NON-NLS-0$
+				callback: lsExec
 			});
-			shell.addCommand({
+			shell.registerCommand({
 				name: "pwd", //$NON-NLS-0$
 				description: messages["Prints the current directory location"],
-				callback: pwdExec,
-				returnType: "string" //$NON-NLS-0$
+				callback: pwdExec
 			});
 
 			/* initialize the editors cache (used by some of the build-in commands */
@@ -276,7 +272,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 //					if (service.decrement) {
 //						type.decrement = service.decrement;
 //					}
-//					shell.addType(type);
+//					shell.registerType(type);
 //				}
 //			}
 			
@@ -289,7 +285,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 					if (ref.getProperty("nls") && ref.getProperty("descriptionKey")){  //$NON-NLS-1$ //$NON-NLS-0$
 						i18nUtil.getMessageBundle(ref.getProperty("nls")).then( //$NON-NLS-0$
 							function(ref, commandMessages) {
-								shell.addCommand({
+								shell.registerCommand({
 									name: ref.getProperty("name"), //$NON-NLS-0$
 									description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
 									callback: contributedExecFunc(service),
@@ -299,7 +295,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 								});
 						}, ref);
 					} else {
-						shell.addCommand({
+						shell.registerCommand({
 							name: ref.getProperty("name"), //$NON-NLS-0$
 							description: ref.getProperty("description"), //$NON-NLS-0$
 							callback: contributedExecFunc(service),
