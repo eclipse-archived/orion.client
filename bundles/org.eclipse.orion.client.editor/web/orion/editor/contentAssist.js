@@ -12,26 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(messages, mKeyBinding, mEventTarget) {
-	var Promise = (function() {
-		function Promise() {
-		}
-		Promise.prototype.then = function(callback) {
-			this.callback = callback;
-			if (this.result) {
-				var promise = this;
-				setTimeout(function() { promise.callback(promise.result); }, 0);
-			}
-		};
-		Promise.prototype.done = function(result) {
-			this.result = result;
-			if (this.callback) {
-				this.callback(this.result);
-			}
-		};
-		return Promise;
-	}());
-
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred'], function(messages, mKeyBinding, mEventTarget, Deferred) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -235,30 +216,20 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			}
 			return index;
 		},
+		handleError: function(error) {
+			if (typeof console !== "undefined") {
+				console.log("Error retrieving content assist proposals");
+				console.log(error);
+			}
+		},
 		/**
 		 * @private
 		 * Retrieves the proposals at the given offset.
 		 * @param {Number} offset The caret offset.
-		 * @returns {Promise} A promise that will provide the proposals.
+		 * @returns {Deferred} A promise that will provide the proposals.
 		 */
 		_computeProposals: function(offset) {
-			var proposals = [],
-			    numComplete = 0,
-			    promise = new Promise(),
-			    providers = this.providers;
-			function collectProposals(result) {
-				if (result) {
-					proposals = proposals.concat(result);
-				}
-				if (++numComplete === providers.length) {
-					promise.done(proposals);
-				}
-			}
-			function errback() {
-				if (++numComplete === providers.length) {
-					promise.done(proposals);
-				}
-			}
+			var providers = this.providers;
 			var textView = this.textView, textModel = textView.getModel();
 			var buffer = textView.getText();
 			var context = {
@@ -266,21 +237,25 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				prefix: textView.getText(this.getPrefixStart(offset), offset),
 				selection: textView.getSelection()
 			};
-			for (var i=0; i < providers.length; i++) {
-				var provider = providers[i];
+			var self = this;
+			var promises = providers.map(function(provider) {
 				//prefer computeProposals but support getProposals for backwards compatibility
-				var proposalsFunc = provider.getProposals;
-				if (typeof provider.computeProposals === "function") {
-					proposalsFunc = provider.computeProposals;
+				var func = provider.computeProposals || provider.getProposals;
+				var proposals;
+				try {
+					if (typeof func === "function") { //$NON-NLS-0$
+						proposals = func.apply(provider, [buffer, offset, context]);
+					}
+				} catch (e) {
+					self.handleError(e);
 				}
-				var proposalsPromise = proposalsFunc.apply(provider, [buffer, offset, context]);
-				if (proposalsPromise && proposalsPromise.then) {
-					proposalsPromise.then(collectProposals, errback);
-				} else {
-					collectProposals(proposalsPromise);
-				}
-			}
-			return promise;
+				return Deferred.when(proposals);
+			});
+			return Deferred.all(promises, this.handleError).then(function(proposalArrays) {
+				return proposalArrays.reduce(function(prev, curr) {
+					return (curr instanceof Array) ? prev.concat(curr) : prev;
+				}, []);
+			});
 		},
 		/**
 		 * Sets the content assist providers that this ContentAssist will consult to obtain proposals.
