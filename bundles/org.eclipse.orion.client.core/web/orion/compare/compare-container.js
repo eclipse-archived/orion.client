@@ -644,7 +644,7 @@ exports.TwoWayCompareContainer = (function() {
 			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				this._commandService.destroy(toolbar);
-				this._commandService.renderCommands(toolbar.id, toolbar, null, this._leftEditor, "button"); //$NON-NLS-0$
+				this._commandService.renderCommands(toolbar.id, toolbar, this._leftEditor, this._leftEditor, "button"); //$NON-NLS-0$
 			}
 		}
 		this._leftTextView = this._leftEditor.getTextView();
