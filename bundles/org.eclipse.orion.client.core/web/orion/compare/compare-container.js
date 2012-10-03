@@ -187,6 +187,7 @@ exports.CompareContainer = (function() {
 			}
 			var that = this;
 			var copyToLeftCommand = new mCommands.Command({
+				name : messages["Copy current change from right to left"],
 				tooltip : messages["Copy current change from right to left"],
 				imageClass : "core-sprite-leftarrow", //$NON-NLS-0$
 				id: "orion.compare.copyToLeft", //$NON-NLS-0$
@@ -197,7 +198,7 @@ exports.CompareContainer = (function() {
 			var toggle2InlineCommand = new mCommands.Command({
 				tooltip : messages["Switch to unified diff"],
 				name: messages["Unified"],
-				imageClass : "core-sprite-link", //$NON-NLS-0$
+				//imageClass : "core-sprite-link", //$NON-NLS-0$
 				id: "orion.compare.toggle2Inline", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -209,7 +210,7 @@ exports.CompareContainer = (function() {
 			var toggle2TwoWayCommand = new mCommands.Command({
 				tooltip : messages["Switch to side by side diff"],
 				name: messages["Side by side"],
-				imageClass : "core-sprite-link", //$NON-NLS-0$
+				//imageClass : "core-sprite-link", //$NON-NLS-0$
 				id: "orion.compare.toggle2TwoWay", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -221,7 +222,7 @@ exports.CompareContainer = (function() {
 			var generateLinkCommand = new mCommands.Command({
 				tooltip : messages["Generate link of the current diff"],
 				name: messages["Generate Link"],
-				imageClass : "core-sprite-link", //$NON-NLS-0$
+				//imageClass : "core-sprite-link", //$NON-NLS-0$
 				id: "orion.compare.generateLink", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -233,7 +234,7 @@ exports.CompareContainer = (function() {
 			var openComparePageCommand = new mCommands.Command({
 				tooltip : messages["Open the compare page"],
 				name: messages["Compare"],
-				imageClass : "core-sprite-link", //$NON-NLS-0$
+				//imageClass : "core-sprite-link", //$NON-NLS-0$
 				id: "orion.compare.openComparePage", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
@@ -243,6 +244,7 @@ exports.CompareContainer = (function() {
 					return data.items.openComparePage();
 			}});
 			var nextDiffCommand = new mCommands.Command({
+				name: messages["Next diff block"],
 				tooltip : messages["Next diff block"],
 				imageClass : "core-sprite-move_down", //$NON-NLS-0$
 				id: "orion.compare.nextDiff", //$NON-NLS-0$
@@ -251,6 +253,7 @@ exports.CompareContainer = (function() {
 					data.items.nextDiff();
 			}});
 			var prevDiffCommand = new mCommands.Command({
+				name : messages["Previous diff block"],
 				tooltip : messages["Previous diff block"],
 				imageClass : "core-sprite-move_up", //$NON-NLS-0$
 				id: "orion.compare.prevDiff", //$NON-NLS-0$
@@ -259,6 +262,7 @@ exports.CompareContainer = (function() {
 					data.items.prevDiff();
 			}});
 			var nextChangeCommand = new mCommands.Command({
+				name : messages["Next diff change"],
 				tooltip : messages["Next diff change"],
 				imageClass : "core-sprite-move_down", //$NON-NLS-0$
 				id: "orion.compare.nextChange", //$NON-NLS-0$
@@ -267,6 +271,7 @@ exports.CompareContainer = (function() {
 					data.items.nextChange();
 			}});
 			var prevChangeCommand = new mCommands.Command({
+				name : messages["Previous diff change"],
 				tooltip : messages["Previous diff change"],
 				imageClass : "core-sprite-move_up", //$NON-NLS-0$
 				id: "orion.compare.prevChange", //$NON-NLS-0$
@@ -281,24 +286,25 @@ exports.CompareContainer = (function() {
 			this._commandService.addCommand(openComparePageCommand);
 			this._commandService.addCommand(nextDiffCommand);
 			this._commandService.addCommand(prevDiffCommand);
-			if(this.options.wordLevelNav){
-				this._commandService.addCommand(nextChangeCommand);
-				this._commandService.addCommand(prevChangeCommand);
-			}
+			this._commandService.addCommand(nextChangeCommand);
+			this._commandService.addCommand(prevChangeCommand);
 				
 			// Register command contributions
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.openComparePage", 107); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.generateLink", 108, null, false, new mCommands.CommandKeyBinding('l', true, true)); //$NON-NLS-0$
 			if (!this.options.readonly) {
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.copyToLeft", 109, null, false, new mCommands.CommandKeyBinding(37/*left arrow key*/, true, false, true)); //$NON-NLS-0$
 			}
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2Inline", 110); //$NON-NLS-0$
 			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.toggle2TwoWay", 111); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112); //$NON-NLS-0$
-			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextDiff", 112, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true)); //$NON-NLS-0$
+			this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevDiff", 113, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true)); //$NON-NLS-0$
 			if(this.options.wordLevelNav){
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114); //$NON-NLS-0$
-				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, false, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, false, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
+			} else {
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.nextChange", 114, null, true, new mCommands.CommandKeyBinding(40/*down arrow key*/, true, true)); //$NON-NLS-0$
+				this._commandService.registerCommandContribution(commandSpanId, "orion.compare.prevChange", 115, null, true, new mCommands.CommandKeyBinding(38/*up arrow key*/, true, true)); //$NON-NLS-0$
 			}
 		},
 		
@@ -321,16 +327,16 @@ exports.CompareContainer = (function() {
 				if(this.options.gridRenderer.additionalCmdRender){
 					if(this.options.gridRenderer.before){
 						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
-						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
 					} else {
-						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+						this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
 						this.options.gridRenderer.additionalCmdRender(this.options.gridRenderer.navGridHolder);
 					}
 				} else {
-					this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
+					this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null, this.options.gridRenderer.navGridHolder); //$NON-NLS-0$
 				}
 			} else {
-				this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "button", null); //$NON-NLS-0$
+				this._commandService.renderCommands(commandSpanId, commandSpanId, this, this, "tool", null); //$NON-NLS-0$
 			}
 		},
 		
