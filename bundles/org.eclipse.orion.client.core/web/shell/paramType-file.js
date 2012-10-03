@@ -12,8 +12,8 @@
 
 /*global define*/
 
-define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell"],
-	function(messages, mShell) {
+define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"],
+	function(messages, mShell, i18nUtil) {
 
 	var orion = {};
 	orion.shellPage = {};
@@ -70,7 +70,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell"],
 					status = mShell.CompletionStatus.PARTIAL;
 				} else {
 					status = mShell.CompletionStatus.ERROR;
-					message = messages["'${0}' is not valid"].replace("${0}", string); //$NON-NLS-0$
+					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
 				}
 				return {value: value, status: status, message: message, predictions: predictions};
 			},
