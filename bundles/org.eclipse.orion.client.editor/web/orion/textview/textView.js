@@ -2226,8 +2226,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		setModel: function(model) {
 			if (!model) { return; }
 			if (model === this._model) { return; }
-			this._model.removeEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.removeEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			var oldLineCount = this._model.getLineCount();
 			var oldCharCount = this._model.getCharCount();
 			var newLineCount = model.getLineCount();
@@ -2253,8 +2253,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				addedLineCount: newLineCount
 			};
 			this.onModelChanged(e); 
-			this._model.addEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.addEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			this._reset();
 			this._update();
 		},
@@ -4810,8 +4810,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					self._onModelChanged(modelChangedEvent);
 				}
 			};
-			this._model.addEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.addEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.addEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.addEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			
 			var handlers = this._handlers = [];
 			var clientDiv = this._clientDiv, viewDiv = this._viewDiv, rootDiv = this._rootDiv;
@@ -5701,8 +5701,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._imeOffset = selection.start;
 		},
 		_unhookEvents: function() {
-			this._model.removeEventListener("Changing", this._modelListener.onChanging); //$NON-NLS-0$
-			this._model.removeEventListener("Changed", this._modelListener.onChanged); //$NON-NLS-0$
+			this._model.removeEventListener("preChanging", this._modelListener.onChanging); //$NON-NLS-0$
+			this._model.removeEventListener("postChanged", this._modelListener.onChanged); //$NON-NLS-0$
 			this._modelListener = null;
 			for (var i=0; i<this._handlers.length; i++) {
 				var h = this._handlers[i];
