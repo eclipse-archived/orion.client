@@ -64,7 +64,6 @@ define({
 	"Profiles": "Profiles",
 	"Information Needed": "Information Needed",
 	"Cancel": "Cancel",
-	"Sorry, the Console is not supported on your browser.": "Sorry, the Console is not supported on your browser.",
 	"If the same file exists in both the source and destination:" : "If the same file exists in both the source and destination:",
 	"Cancel the transfer" : "Cancel the transfer",
 	"Always overwrite destination" : "Always overwrite destination",

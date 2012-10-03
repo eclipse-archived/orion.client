@@ -13,13 +13,13 @@
 /*global define eclipse:true orion:true dojo window*/
 
 define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
-        'orion/commands', 'orion/util', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
+        'orion/commands', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
         'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil",
        'dojo/hash'], 
-		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mUtil, mFavorites,
+		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
 				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil) {

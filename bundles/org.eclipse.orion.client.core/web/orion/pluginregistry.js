@@ -46,7 +46,36 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		}
 		return location;
 	}
-
+	
+	function _asStorage(obj) {
+		var _keys = null;
+		function _getKeys() {
+			return (_keys = _keys || Object.keys(obj));
+		}
+		
+		return {
+			key: function(index) {
+				return _getKeys()[index];
+			},
+			getItem: function(key) {
+				return obj[key];
+			},
+			setItem : function(key, value) {
+				obj[key] = value;
+				_keys = null;
+			},
+			removeItem : function(key) {
+				delete obj[key];
+				_keys = null;
+			},
+			clear : function() {
+				_getKeys().forEach(function(key) {
+					delete obj[key];
+				}.bind(this));
+				_keys = null;
+			}
+		};
+	}
 
 	function PluginEvent(type, plugin) {
 		return {type: type, plugin: plugin};
@@ -580,6 +609,9 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 	function PluginRegistry(serviceRegistry, configuration) {
 		configuration = configuration || {};
 		var _storage = configuration.storage || localStorage;
+		if (!_storage.getItem) {
+			_storage = _asStorage(_storage);
+		}
 		var _state = "installed";
 		var _plugins = [];
 		var _channels = [];
@@ -657,10 +689,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 						break;
 					}
 				}
-				delete _storage["plugin."+plugin.getLocation()];
+				_storage.removeItem("plugin."+plugin.getLocation());
 			},
 			persist: function(url, manifest) {
-				_storage["plugin."+url] = JSON.stringify(manifest); //$NON-NLS-0$
+				_storage.setItem("plugin."+url,JSON.stringify(manifest)); //$NON-NLS-0$
 			},
 			postMessage: function(message, channel) {
 				channel.target.postMessage((channel.useStructuredClone ? message : JSON.stringify(message)), channel.url);
@@ -745,10 +777,14 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 				return;
 			}
 			addEventListener("message", _messageHandler, false);
-			Object.keys(_storage).forEach(function(key) {
+			var storageKeys = [];
+			for (var i = 0, length = _storage.length; i < length;i++) {
+				storageKeys.push(_storage.key(i));
+			}
+			storageKeys.forEach(function(key) {
 				if (key.indexOf("plugin.") === 0) {
 					var url = key.substring("plugin.".length);
-					var manifest = JSON.parse(_storage[key]);
+					var manifest = JSON.parse(_storage.getItem(key));
 					if (manifest.created) {
 						_plugins.push(new Plugin(url, manifest, internalRegistry));
 					}

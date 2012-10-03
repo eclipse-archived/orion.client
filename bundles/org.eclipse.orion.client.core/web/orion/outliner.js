@@ -10,7 +10,7 @@
  ******************************************************************************/
  /*global define document window*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, dojo, mUtil, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
+define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, dojo, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;
@@ -61,8 +61,8 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/util', 'orion/section', 'orion
 			var selectionService = this.selectionService;
 			var url = href;
 			dojo.connect(link, "onclick", link, function(event) { //$NON-NLS-0$
-				if (mUtil.openInNewWindow(event)) {
-					mUtil.followLink(url, event);
+				if (mUIUtils.openInNewWindow(event)) {
+					mUIUtils.followLink(url, event);
 				} else {
 					selectionService.setSelections(url);
 				}

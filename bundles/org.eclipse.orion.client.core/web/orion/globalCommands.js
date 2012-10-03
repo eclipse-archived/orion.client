@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/util', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils',
+	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', "orion/Deferred",
 	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUtil, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, Deferred){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -747,11 +747,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
-
 		
 		// place an empty div for keyAssist
 		dojo.place('<div id="keyAssist" style="display: none" class="keyAssistFloat" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-
 		
 		// generate primary nav links. 
 		var primaryNav = dojo.byId("primaryNav"); //$NON-NLS-0$
@@ -794,13 +792,80 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		}
 		
-		// hook up search box behavior
+		// hook up search box: 1.The search box itself 2.Default search proposal provider(recent and saved search) 
+		//                     3.Extended proposal provider from plugins 4.Search options(open result in new tab, reg ex, recent&saved searc hfull list)
 		var searchField = dojo.byId("search"); //$NON-NLS-0$
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
-		dojo.connect(searchField, "onkeypress", function(e){ //$NON-NLS-0$
-			if (e.charOrCode === dojo.keys.ENTER) {
+		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
+		var defaultProposalProvider = function(uiCallback){
+			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
+				var i, fullSet = [], hasSavedSearch = false;
+				for (i in searches) {
+					if(searches[i].label){
+						if(!hasSavedSearch){
+							fullSet.push({type: "category", label: "Saved searches"});//$NON-NLS-0$ //$NON-NLS-0$
+							hasSavedSearch = true;
+						}
+						fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
+					} else {
+						fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
+					}
+				}
+				uiCallback(fullSet);
+			});
+		};
+		//Optional. Reading extended search proposals by asking plugins, if any.
+		//If there are multiple plugins then merge all the proposals and call uiCallBack.
+		//Plugins(with service id "orion.search.proposal") should define the property "filterForMe" to true or false. Which means:
+		//If true the inputCompletion class will filter the proposals returned by the plugin.
+		//If false the inputCompletion class assumes that the proposals are already filtered by hte given kerword. 
+		//The false case happens when a plugin wants to use the keyword to ask for a set of filtered proposal from a web service by the keyword and Orion does not need to filter it again.
+		var exendedProposalProvider = function(keyWord, uiCallback){
+			var serviceReferences = serviceRegistry.getServiceReferences("orion.search.proposal"); //$NON-NLS-0$
+			if(!serviceReferences || serviceReferences.length === 0){
+				uiCallback(null);
+				return;
+			}
+            var promises = [];
+			serviceReferences.forEach(function(serviceRef) {
+				var filterForMe = serviceRef.getProperty("filterForMe");
+				promises.push( serviceRegistry.getService(serviceRef).run(keyWord).then(function(returnValue) {
+					//The return value has to be an array of {category : string, datalist: [string,string,string...]}
+					var proposalList = {filterForMe: filterForMe, proposals: []};
+					for (var i = 0; i < returnValue.length; i++) {
+						proposalList.proposals.push({type: "category", label: returnValue[i].category});//$NON-NLS-0$
+						for (var j = 0; j < returnValue[i].datalist.length; j++) {
+							proposalList.proposals.push({type: "proposal", label: returnValue[i].datalist[j], value: returnValue[i].datalist[j]});//$NON-NLS-0$
+						}
+					}
+					return proposalList;
+				}));
+			});
+            Deferred.all( promises ).then( function(returnValues){
+            	//merge all the promise return values together
+            	var extendedProposals = [];
+            	for(var i = 0; i < returnValues.length; i++){
+            		extendedProposals.push(returnValues[i]);
+            	}
+            	//Render UI
+            	uiCallback(extendedProposals)
+            });
+		};
+		//Create and hook up the inputCompletion instance with the search box dom node.
+		//The defaultProposalProvider provides proposals from the recent and saved searches.
+		//The exendedProposalProvider provides proposals from plugins.
+		var searchCompletion = new mInputCompletion.InputCompletion(searchField, defaultProposalProvider,
+									{group: "globalSearch", extendedProvider: exendedProposalProvider});//$NON-NLS-0$
+		//Both inputCompletion and here are listening keydown events on searchField
+		//But here listener should yield to inputCompletion on its "already handled" events.
+		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			if(e.defaultPrevented){// If the key event was handled by other listeners and preventDefault was set on(e.g. input completion handled ENTER), we do not handle it here
+				return;
+			}
+			var keyCode= e.charCode || e.keyCode;
+			if (keyCode === 13 ) {// ENTER
 				if (searcher) {
 					if (searchField.value.length > 0) {
 						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
@@ -817,26 +882,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				} else {
 					window.alert(messages["Can't search: no search service is available"]);
 				}
-			}
+			} 
 		});
-		dojo.connect(searchField, "onfocus", function(e){ //$NON-NLS-0$
-			var searchCompletion =  dojo.byId("searchCompletion");
-			dojo.empty(searchCompletion);
-			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
-				var i;
-				for (i in searches) {
-					var option = document.createElement('option');
-					option.value = searches[i].name;
-					if(searches[i].label){
-						option.label = searches[i].label + "(" + messages["Saved searches"] + ")";
-					}
-					searchCompletion.appendChild(option);
-				}
-			});
-		});
+		//Finally, hook up search options
 		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
 		});
+		
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
 		var layoutWidget;
@@ -1073,7 +1125,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
 							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
-								dojo.place("<span role=\"listitem\">"+mUtil.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								dojo.place("<span role=\"listitem\">"+mUIUtils.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					}

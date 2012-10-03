@@ -253,7 +253,7 @@ input[type="button"]:active {
 
 .orion-register-input-holder, .orion-reset-input-holder {
 	padding-bottom: 5px;
-	margin-bottom: 15px;
+	margin-bottom: 4px;
 	border-bottom: dashed 1px #DDD;
 }
 

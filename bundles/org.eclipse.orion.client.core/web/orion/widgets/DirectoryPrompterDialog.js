@@ -11,8 +11,8 @@
 /*global define dojo window orion widgets */
 /*jslint browser:true */
 
-define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'orion/util', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], 
-function(messages, dojo, dijit, mUtil, mSelection, mNavUtils, mExplorer, mExplorerTable) {
+define(['i18n!orion/widgets/nls/messages', 'dojo', 'dijit', 'orion/fileUtils', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/_OrionDialogMixin', 'text!orion/widgets/templates/DirectoryPrompterDialog.html'], 
+function(messages, dojo, dijit, mFileUtils, mSelection, mNavUtils, mExplorer, mExplorerTable) {
 
 	function DirectoryPrompterRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -65,7 +65,7 @@ function(messages, dojo, dijit, mUtil, mSelection, mNavUtils, mExplorer, mExplor
 		},
 		
 		loadFolderList: function(path) {
-			path = mUtil.makeRelative(path);
+			path = mFileUtils.makeRelative(path);
 			this.selection = new mSelection.Selection(this.serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 	
 			this.explorer = new mExplorerTable.FileExplorer({treeRoot: {children:[]}, selection: this.selection, serviceRegistry: this.serviceRegistry,
