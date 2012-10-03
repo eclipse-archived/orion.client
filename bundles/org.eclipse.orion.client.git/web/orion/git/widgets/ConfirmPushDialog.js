@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*jslint browser:true*/
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
-define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojox', 'dijit/Dialog', "orion/util", 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojox', 'dijit/Dialog', 'dojo/data/ItemFileReadStore', 'dojox/form/Uploader', 'dojox/form/uploader/FileList', 
         'dojox/form/uploader/plugins/IFrame', 'dijit/form/Button','dijit/ProgressBar', 'orion/widgets/_OrionDialogMixin', 
         'text!orion/git/widgets/templates/ConfirmPushDialog.html'], function(messages, dojo, dijit,dojox) {
 

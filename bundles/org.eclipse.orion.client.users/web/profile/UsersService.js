@@ -127,8 +127,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 				return error;
 			});
 		},
-		createUser : function(userName, password, onLoad, onError) {
-			var service = this;
+		createUser : function(userName, password, email, onLoad, onError) {
 			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
@@ -137,23 +136,15 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 				timeout: 15000,
 				data: formData({
 					login : userName,
-					password : password
-				})
-			}).then(function(result) {
-				var jsonData = getJSON(result.response);
-				if (onLoad){
-					if(typeof onLoad === "function") //$NON-NLS-0$
-						onLoad(jsonData);
-					else
-						service.dispatchEvent(onLoad, jsonData);
+					password : password,
+					email: email
+				}),
+				load : function(jsonData, xhrArgs) {
+					return jsonData;
+				},
+				error : function(error, ioArgs) {
+					return error;
 				}
-				return jsonData;
-			}, function(result) {
-				var error = getError(result);
-				if (onError) {
-					onError(error);
-				}
-				return error;
 			});
 		},
 		getUserInfo: function(userURI, onLoad){

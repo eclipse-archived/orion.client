@@ -11,7 +11,7 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/widgets/settings/Select'], function(messages, require, dojo, dijit, mUtil, mCommands) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/widgets/settings/Select'], function(messages, require, dojo, dijit) {
 	dojo.declare("orion.widgets.settings.LabeledSelect", [orion.widgets.settings.Select],{ //$NON-NLS-0$
 		templateString: '<div class="setting-property">' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$

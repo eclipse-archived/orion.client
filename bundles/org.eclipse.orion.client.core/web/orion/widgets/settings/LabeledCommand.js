@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/util', 'orion/commands', 'orion/git/gitPreferenceStorage'], function(messages, require, dojo, dijit, mUtil, mCommands, GitPreferenceStorage) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/git/gitPreferenceStorage', 'dijit/_Widget', 'dijit/_Templated'], function(messages, require, dojo, dijit, GitPreferenceStorage) {
 
 	dojo.declare("orion.widgets.settings.LabeledCommand",[dijit._Widget, dijit._Templated],{ //$NON-NLS-0$
 		
@@ -38,7 +38,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/u
         }, 
         
         startup: function(){
-        
+        	this.inherited( arguments );
         }
     });
 });

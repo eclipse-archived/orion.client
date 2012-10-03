@@ -15,7 +15,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains static utility methods.
-	 * @name orion.util
+	 * @name orion.uiUtils
 	 */
 
 	function getUserKeyString(binding) {
@@ -87,36 +87,6 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		return userString+String.fromCharCode(binding.keyCode);
 	}
 
-	/**
-	 * Opens a dialog near the given DOM node
-	 * @name orion.util#openDialog
-	 * @function
-	 */
-	function openDialog(dialog, refNode) {
-		dialog.startup();
-		if (typeof refNode === "string") { //$NON-NLS-0$
-			var node = dojo.byId(refNode);
-			if (!node) {
-				node = dijit.byId(refNode);
-				if (node) {
-					node = node.domNode;
-				}
-			}
-			if (node) {
-				refNode = node;
-			} else {
-				refNode = null;
-			}
-		}
-		if (refNode) {
-			var pos= dojo.position(refNode); 
-			// reaching into internal methods.  It seems there is not a public way.
-			dialog._setStyleAttr("left:" + (pos.x + 16) + "px !important;"); //$NON-NLS-1$ //$NON-NLS-0$
-			dialog._setStyleAttr("top:" + (pos.y + 16) + "px !important;"); //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		dialog.show();
-	}
-	
 	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
 		/** @return function(event) */
 		var handler = function(isKeyEvent) {
@@ -207,132 +177,11 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		}
 	}
 
-	function makeRelative(location) {
-		if (!location) {
-			return location;
-		}
-		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
-		if (location.indexOf(hostName) === 0) {
-			return location.substring(hostName.length);
-		}
-		return location;
-	}
-	
-	function makeFullPath(location) {
-		if (!location) {
-			return location;
-		}
-		
-		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
-		if (location.charAt(0) !== "/") { //$NON-NLS-0$
-			location = "/" + location; //$NON-NLS-0$
-		}
-		return (hostName + location);
-	}
-	
-	/**
-	 * Determines if the path represents the workspace root
-	 * @name orion.util#isAtRoot
-	 * @function
-	 */
-	function isAtRoot(path) {
-		var relative = this.makeRelative(path);
-		// TODO better way?
-		// I thought it should be the line below but is actually the root of all workspaces
-		//  return relative == '/file/';
-		return relative.indexOf('/workspace') === 0; //$NON-NLS-0$
-	}
-	
-	/**
-	 * Utility method for saving file contents to a specified location
-	 */
-	function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
-		var etag = targetMetadata.ETag;
-		var args = { "ETag" : etag }; //$NON-NLS-0$
-		fileClient.write(targetMetadata.Location, contents, args).then(
-			function(result) {
-				if (afterSave) {
-					afterSave();
-				}
-			},
-			/* error handling */
-			function(error) {
-				// expected error - HTTP 412 Precondition Failed 
-				// occurs when file is out of sync with the server
-				if (error.status === 412) {
-					var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
-					if (forceSave) {
-						// repeat save operation, but without ETag 
-						fileClient.write(targetMetadata.Location, contents).then(
-							function(result) {
-									targetMetadata.ETag = result.ETag;
-									if (afterSave) {
-										afterSave();
-									}
-							}
-						);
-					}
-				}
-				// unknown error
-				else {
-					error.log = true;
-				}
-			}
-		);
-	}
-	
-	/**
-	 * Split file contents into lines. It also handles the mixed line endings with "\n", "\r" and "\r\n".
-	 *
-	 * @param {String} text The file contetns.
-	 * @returns {Array} Split file lines. 
-	 * @name orion.util#splitFile
-	 * @function
-	 */
-	function splitFile(text) {
-		var cr = 0, lf = 0, index = 0, start = 0;
-		var splitLines = [];
-		while (true) {
-			if (cr !== -1 && cr <= index) { 
-				cr = text.indexOf("\r", index);  //$NON-NLS-0$
-			}
-			if (lf !== -1 && lf <= index) { 
-				lf = text.indexOf("\n", index);  //$NON-NLS-0$
-			}
-			if (lf === -1 && cr === -1) {
-				splitLines.push(text.substring(start));
-				break; 
-			}
-			var offset = 1;
-			if (cr !== -1 && lf !== -1) {
-				if (cr + 1 === lf) {
-					offset = 2;
-					index = lf + 1;
-				} else {
-					index = (cr < lf ? cr : lf) + 1;
-				}
-			} else if (cr !== -1) {
-				index = cr + 1;
-			} else {
-				index = lf + 1;
-			}
-			splitLines.push(text.substring(start, index - offset));
-			start = index;
-		}
-		return splitLines;
-	}
-	
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
-		openDialog: openDialog,
 		getUserText: getUserText,
 		openInNewWindow: openInNewWindow,
-		followLink: followLink,
-		makeRelative: makeRelative,
-		makeFullPath: makeFullPath,
-		isAtRoot: isAtRoot,
-		saveFileContents: saveFileContents,
-		splitFile: splitFile
+		followLink: followLink
 	};
 });

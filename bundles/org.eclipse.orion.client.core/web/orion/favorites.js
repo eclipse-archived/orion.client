@@ -12,7 +12,7 @@
  
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/util', 'orion/EventTarget'], function(require, dojo, mUtil, EventTarget){
+define(['require', 'dojo', 'orion/fileUtils', 'orion/EventTarget'], function(require, dojo, mFileUtils, EventTarget){
 
 	/**
 	 * Instantiates the favorites service. Clients should obtain the 
@@ -53,7 +53,7 @@ define(['require', 'dojo', 'orion/util', 'orion/EventTarget'], function(require,
 				var location = item.ChildrenLocation ? item.ChildrenLocation : item.Location;
 				// it would be cool if the location were a real document location
 				// for now I'll assume it's from the same host in order to get the pathname
-				location = mUtil.makeRelative(location);
+				location = mFileUtils.makeRelative(location);
 				this.addFavorite(item.Name, location, item.Directory);
 			}
 			this._storeFavorites();

@@ -15,7 +15,8 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 	var EventTarget = mEventTarget.EventTarget;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
 	/**
-	 * Fake version of XMLHttpRequest for testing without actual network accesses.
+	 * Fake version of XMLHttpRequest for testing without actual network accesses. Eemulates the
+	 * supported XHR features of the browser running the test as closely as possible.
 	 */
 	function MockXMLHttpRequest() {
 		this.readyState = 0;
@@ -23,16 +24,19 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		this.responseType = '';
 		this._sendFlag = false;
 		this._timeout = 0;
-		Object.defineProperty(this, 'timeout', {
-			get: function() {
-				return this._timeout;
-			},
-			set: function(value) {
-				if (isIE && (this.readyState !== this.OPENED || this._sendFlag)) {
-					throw new Error('IE: timeout must be set after calling open() but before calling send()');
+		// Does browser understand timeout?
+		if (typeof new XMLHttpRequest().timeout === 'number') {
+			Object.defineProperty(this, 'timeout', {
+				get: function() {
+					return this._timeout;
+				},
+				set: function(value) {
+					if (isIE && (this.readyState !== this.OPENED || this._sendFlag)) {
+						throw new Error('IE: timeout must be set after calling open() but before calling send()');
+					}
 				}
-			}
-		});
+			});
+		}
 	}
 	MockXMLHttpRequest.prototype = {
 		UNSENT: 0,
@@ -91,7 +95,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			this._setReadyState(this.DONE);
 		},
 		_fakeTimeout: function(err) {
-			this.dispatchEvent({type: 'timeout'});
+			if (typeof new XMLHttpRequest().timeout !== "undefined") {
+				this.dispatchEvent({type: 'timeout'});
+			}
 		}
 	};
 	EventTarget.addMixin(MockXMLHttpRequest.prototype);
@@ -153,7 +159,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			}, 50);
 		};
 		return xhr('GET', '/', {
-				timeout: 25 // the value is not important here
+				timeout: 25
 			}, timeoutingXhr).then(fail, succeed);
 	};
 

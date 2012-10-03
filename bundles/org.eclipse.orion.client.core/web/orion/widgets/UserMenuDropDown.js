@@ -11,7 +11,7 @@
 
 /*global define window eclipse localStorage*/
 
-define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/util', 'dijit/form/DropDownButton'], function(require, dojo, dijit, mCommands, mUtil) {
+define(['require', 'dojo', 'dijit', 'dijit/form/DropDownButton'], function(require, dojo, dijit) {
 	dojo.declare("orion.widgets.UserMenuDropDown", [dijit.form.DropDownButton], { //$NON-NLS-0$
 	
 		templateString: '<span class="dijit dijitReset dijitInline" style="padding-top: 3px;">' +  //$NON-NLS-0$

@@ -12,8 +12,8 @@
 /*jslint browser:true*/
 /*global define orion window dojo dijit*/
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', "orion/util", 'dijit/Dialog', 'dijit/form/TextBox', 
-		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/ReviewRequestDialog.html'], function(messages, require, dojo, dijit, mUtil) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'dijit/form/TextBox', 
+		'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/ReviewRequestDialog.html'], function(messages, require, dojo, dijit) {
 
 /**
  * Usage: <code>new orion.git.widgets.ReviewRequestDialog(options).show();</code>

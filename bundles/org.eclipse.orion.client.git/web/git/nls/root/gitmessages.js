@@ -376,5 +376,6 @@ define({
 	"You are reviewing contribution ${0} from ${1}" : "You are reviewing contribution ${0} from ${1}",
 	"Unfortunately the commit can not be found in your workspace. To see it try one of the following: " : "Unfortunately the commit can not be found in your workspace. To see it try one of the following: ",
 	"To review the commit you can also:" : "To review the commit you can also:",
-	"Contribution Review Request for ${0} on ${1}" : "Contribution Review Request for ${0} on ${1}"
+	"Contribution Review Request for ${0} on ${1}" : "Contribution Review Request for ${0} on ${1}",
+	"Failing paths: ${0}": "Failing paths: ${0}"
 });

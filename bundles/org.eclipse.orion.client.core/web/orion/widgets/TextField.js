@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['require', 'dojo', 'dijit', 'orion/util', 'orion/commands'], function(require, dojo, dijit, mUtil, mCommands) {
+define(['require', 'dojo', 'dijit', 'orion/commands'], function(require, dojo, dijit, mCommands) {
 
 	dojo.declare("orion.widgets.settings.TextField", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	

@@ -96,8 +96,8 @@ dojo.declare("orion.widgets.ImportDialog", [ dijit.Dialog, orion.widgets._OrionD
 
 		this.importloader.form[0].files = files;
 		var checkboxState = this.unzipCheckbox.get('checked'); //$NON-NLS-0$)
-		for( var f=0; f< files.length; files++ ){
-			this.uploadDroppedFiles(files[f], checkboxState && (files[f].name.indexOf(".zip") === files[f].name.length-4)); //$NON-NLS-0$)
+		for( var i=0; i< files.length; i++ ){
+			this.uploadDroppedFiles(files[i], checkboxState && (files[i].name.indexOf(".zip") === files[i].name.length-4)); //$NON-NLS-0$)
 		}
 	},
 

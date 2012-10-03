@@ -13,34 +13,34 @@
 /*global define Range*/
 /*jslint browser:true*/
 
-define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
+define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
 		"gcli/ui/fields/menu", "gcli/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help"],
-	function(messages, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
+	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
 
 	var orion = {};
-	orion.console = {};
-	orion.console.CompletionStatus = {
+	orion.shell = {};
+	orion.shell.CompletionStatus = {
 		MATCH: 0,
 		PARTIAL: 1,
 		ERROR: 2
 	};
 
 	/**
-	 * Constructs a new console.
+	 * Constructs a new shell.
 	 * 
-	 * @param parent the parent element for the console, it can be either a DOM element or an ID for a DOM element.
+	 * @param parent the parent element for the shell, it can be either a DOM element or an ID for a DOM element.
 	 * 
-	 * @class A Console is a user interface that accepts input command lines and displays output.
-	 * @name orion.console.Console
+	 * @class A Shell is a user interface that accepts input command lines and displays output.
+	 * @name orion.shell.Shell
 	 */
-	orion.console.Console = (function() {
-		function Console(input, output) {
+	orion.shell.Shell = (function() {
+		function Shell(input, output) {
 			this._init(input, output);
 		}
-		Console.prototype = /** @lends orion.console.Console.prototype */ {			
+		Shell.prototype = /** @lends orion.shell.Shell.prototype */ {			
 			addCommand: function(command) {
 				if (!command.exec) {
 					command.exec = command.callback;
@@ -58,15 +58,15 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 
 				NewType.prototype = Object.create(CustomType.prototype);
 				NewType.prototype.name = type.name;
-				NewType.prototype.parse = function (arg) {
+				NewType.prototype.parse = function(arg) {
 					var completion = type.parse(arg.toString().trim());
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
 						switch (completion.status) {
-							case orion.console.CompletionStatus.ERROR:
+							case orion.shell.CompletionStatus.ERROR:
 								status = mTypes.Status.ERROR;
 								break;
-							case orion.console.CompletionStatus.PARTIAL:
+							case orion.shell.CompletionStatus.PARTIAL:
 								status = mTypes.Status.INCOMPLETE;
 								break;
 						}
@@ -96,37 +96,37 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				commandOutputManager.onOutput({output: output});
 				output.complete(content);
 			},
+			setFocus: function() {
+				this.inputText.focus();
+			},
 			
 			/** @private */
 
 			_init: function(input, output) {
-				if (!input) {throw "no input";} //$NON-NLS-0$
-				if (!output) {throw "no output";} //$NON-NLS-0$
-
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
 				outputDiv.style.height = "100%"; //$NON-NLS-0$
 				outputDiv.style.width = "100%"; //$NON-NLS-0$
 				output.appendChild(outputDiv);
 
-				var inputText = document.createElement("input"); //$NON-NLS-0$
-				inputText.type = "text"; //$NON-NLS-0$
-				inputText.id = "gcli-input"; //$NON-NLS-0$
-				inputText.style.width = "100%"; //$NON-NLS-0$
-				inputText.style.height = "100%"; //$NON-NLS-0$
-				input.appendChild(inputText);
+				this.inputText = document.createElement("input"); //$NON-NLS-0$
+				this.inputText.type = "text"; //$NON-NLS-0$
+				this.inputText.id = "gcli-input"; //$NON-NLS-0$
+				this.inputText.style.width = "100%"; //$NON-NLS-0$
+				this.inputText.style.height = "100%"; //$NON-NLS-0$
+				input.appendChild(this.inputText);
 
 				mSettings.getSetting("hideIntro").value = true; //$NON-NLS-0$
 				mSettings.getSetting("eagerHelper").value = 2; //$NON-NLS-0$
 
 				/*
-				 * Create the console asynchronously to ensure that the client finishes its
+				 * Create the shell asynchronously to ensure that the client finishes its
 				 * layout before GCLI computes the locations for its created widgets.
 				 */
 				var self = this;
 				setTimeout(function() {
 					mGCLI.createDisplay();
-					self.output(messages["For a list of available commands type '${0}'."].replace("${0}", ["<b>help</b>"])); //$NON-NLS-1$ //$NON-NLS-0$
+					self.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
 				});
 				mHelp.startup();
 				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -174,7 +174,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 						 */
 						var self = this;
 						conversion.then(function () {
-							if (self.element) { // if there's no UI yet then ignore
+							if (self.element) { /* if there's no UI yet then ignore */
 								self.setConversion(self.getConversion());
 							}
 						});
@@ -192,8 +192,8 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				mFields.addField(CustomField);
 			}
 		};
-		return Console;
+		return Shell;
 	}());
 
-	return orion.console;
+	return orion.shell;
 });
