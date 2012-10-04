@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define*/
+/*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
 /* This PluginList widget provides a HTML list placeholder for PluginEntries, and
@@ -16,6 +16,27 @@
    to contain PluginEntry widgets */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, Deferred, mCommands, mHTMLFragments) {
+	
+	var defaultPluginURLs = {};
+	
+	function _normalizeURL(location) {
+		if (location.indexOf("://") === -1) { //$NON-NLS-0$
+			var temp = document.createElement('a'); //$NON-NLS-0$
+			temp.href = location;
+	        return temp.href;
+		}
+		return location;
+	}
+	
+	// This is temporary see Bug 368481 - Re-examine localStorage caching and lifecycle
+	var defaultPluginsStorage = localStorage.getItem("/orion/preferences/default/plugins");
+	if (defaultPluginsStorage) {
+		var pluginsPreference = JSON.parse(defaultPluginsStorage);
+		Object.keys(pluginsPreference).forEach(function(pluginURL) {
+			defaultPluginURLs[_normalizeURL(require.toUrl(pluginURL))] = true;
+		});
+	}
+
 	
 	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
@@ -40,13 +61,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		target: "_self", //$NON-NLS-0$
 				
 		postCreate: function(){
+		
+			var _this = this;
 			if (this.pluginSectionHeader) {
 				var slideout = mHTMLFragments.slideoutHTMLFragment("pluginSectionHeader");
 				dojo.place(slideout, this.pluginSectionHeader);
 			}
 			this.addRows();
 
-			var self = this;
 			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
 				{	updated: function(properties) {
 						var target;
@@ -55,8 +77,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 						} else {
 							target = "_blank"; //$NON-NLS-0$
 						}
-						self.setTarget(target);
-					}
+						_this.setTarget(target);
+					}.bind(this)
 				}, {pid: "nav.config"}); //$NON-NLS-0$
 		},
 
@@ -129,9 +151,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 				visibleWhen: function(items) {  // we expect a URL
 					return typeof items === "string"; //$NON-NLS-0$
 				},
-				callback: dojo.hitch(this, function(data) {
+				callback: function(data) {
 					this.reloadPlugin(data.items);
-				})
+				}.bind(this)
 			});			
 			this.commandService.addCommand(reloadPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.reloadPlugin", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -141,15 +163,57 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 				tooltip: messages["Delete this plugin from the configuration"],
 				imageClass: "core-sprite-delete", //$NON-NLS-0$
 				id: "orion.uninstallPlugin", //$NON-NLS-0$
-				visibleWhen: function(items) {  // we expect a URL
-					return typeof items === "string"; //$NON-NLS-0$
+				visibleWhen: function(url) {  // we expect a URL
+					return !defaultPluginURLs[url]; //$NON-NLS-0$
 				},
-				callback: dojo.hitch(this, function(data) {
+				callback: function(data) {
 					this.removePlugin(data.items);
-				})
+				}.bind(this)
 			});			
 			this.commandService.addCommand(uninstallPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
+
+
+			var pluginRegistry = this.settings.pluginRegistry;
+			var disablePluginCommand = new mCommands.Command({
+				name: "Disable",
+				tooltip: "Disable the plugin",
+				id: "orion.disablePlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-stop", //$NON-NLS-0$
+				visibleWhen: function(url) {  // we expect a URL
+					if (defaultPluginURLs[url]) {
+						return false;
+					}
+					var plugin = pluginRegistry.getPlugin(url);
+					return plugin._getAutostart() !== "stopped"; //$NON-NLS-0$
+				},
+				callback: function(data) {
+					this.disablePlugin(data.items);
+				}.bind(this)
+			});			
+			this.commandService.addCommand(disablePluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.disablePlugin", 3); //$NON-NLS-1$ //$NON-NLS-0$
+
+			
+			var enablePluginCommand = new mCommands.Command({
+				name: "Enable",
+				tooltip: "Enable the plugin",
+				id: "orion.enablePlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-start", //$NON-NLS-0$
+				visibleWhen: function(url) {  // we expect a URL
+					if (defaultPluginURLs[url]) {
+						return false;
+					}
+					var plugin = pluginRegistry.getPlugin(url);
+					return plugin._getAutostart() === "stopped"; //$NON-NLS-0$
+				},
+				callback: function(data) {
+					this.enablePlugin(data.items);
+				}.bind(this)
+			});			
+			this.commandService.addCommand(enablePluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.enablePlugin", 4); //$NON-NLS-1$ //$NON-NLS-0$
+
 		
 			var list = this.pluginSettingsList;
 		
@@ -221,13 +285,36 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		
 		/* reloads a single plugin */
 		reloadPlugin: function(url) {
-			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			for( var p = 0; p < settingsPluginList.length; p++ ){
-				if( settingsPluginList[p].getLocation() === url ){
-					settingsPluginList[p].update();
-					this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
-					break;
-				}
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.update().then(this.addRows.bind(this));
+				this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
+			}
+		},
+		
+		disablePlugin: function(url){
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.stop();
+				this.statusService.setMessage("Disabled " + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.put(url, false);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
+			}
+		},
+	
+		enablePlugin: function(url){
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.start({lazy:true});
+				this.statusService.setMessage("Enabled " + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.put(url, false);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
 			}
 		},
 
@@ -247,27 +334,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		},
 		
 		forceRemove: function(url){
-			var settings = this.settings;
-			var statusService = this.statusService;
-			
-			var settingsPluginList = settings.pluginRegistry.getPlugins();
-		
-			var pluginlist = this;
-		
-			for( var p = 0; p < settingsPluginList.length; p++ ){
-				if( settingsPluginList[p].getLocation() === url ){
-					settingsPluginList[p].uninstall();
-					statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
-					settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-						plugins.remove(url);
-						pluginlist.addRows(pluginlist);
-					}); // this will force a sync
-					
-					this.addRows();
-					this.addRows();
-					
-					break;
-				}
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.uninstall();
+				this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.remove(url);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
 			}
 		},
 		

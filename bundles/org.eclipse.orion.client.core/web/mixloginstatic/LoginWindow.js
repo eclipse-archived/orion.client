@@ -233,6 +233,15 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		document.getElementById("errorMessage").innerHTML = "&nbsp;";
 		return true;
 	}
+	
+	function hideRegistration() {
+		document.getElementById('newUserHeaderShown').style.visibility = 'hidden';
+		document.getElementById('orionOpen').style.visibility = '';
+		
+		if (!userCreationEnabled && !registrationURI) {
+			document.getElementById('orionRegister').style.visibility = '';
+		}
+	}
 
 	function confirmCreateUser() {
 		if (!validatePassword()) {
@@ -271,6 +280,10 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 	}
 
 	function revealRegistration() {
+	
+		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+	
 		// If registrationURI is set and userCreation is not, open the URI in a new window
 		if (!userCreationEnabled && registrationURI) {
 			window.open(registrationURI);
@@ -281,17 +294,8 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		document.getElementById('newUserHeaderShown').style.visibility = '';
 	}
 
-	function hideRegistration() {
-		document.getElementById('orionLogin').style.visibility = '';
-		document.getElementById('orionRegister').style.visibility = '';
-		document.getElementById('newUserHeaderShown').style.visibility = 'hidden';
-	}
-
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
-		document.getElementById('orionOpen').style.top = '188px';
-		document.getElementById('orionOpen').style.height = '85px';
-		document.getElementById('orionOpen').style.paddingTop = '45px';
 	}
 
 	function revealResetUser() {
@@ -299,22 +303,16 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		if (!userCreationEnabled && !registrationURI) {
 			document.getElementById('orionRegister').style.visibility = 'hidden';
 			document.getElementById('orionReset').style.height = '212px';
-			document.getElementById('orionOpen').style.top = '251px';
-			document.getElementById('orionOpen').style.height = '50px';
-			document.getElementById('orionOpen').style.paddingTop = '17px';
 		}
 		document.getElementById('newUserHeaderShown').style.display = 'none';
 		document.getElementById('orionReset').style.visibility = '';
+		document.getElementById('reset').focus();
 	}
 
 	function hideResetUser() {
 		document.getElementById('orionLogin').style.visibility = '';
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
-		} else {
-			document.getElementById('orionOpen').style.top = '188px';
-			document.getElementById('orionOpen').style.height = '85px';
-			document.getElementById('orionOpen').style.paddingTop = '45px';
 		}
 		document.getElementById('newUserHeaderShown').style.display = '';
 		document.getElementById('orionReset').style.visibility = 'hidden';
@@ -322,6 +320,26 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 
 	function openServerInformation() {
 		window.open("/mixloginstatic/ServerStatus.html");
+	}
+	
+	function revealLogin(){
+		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+		
+		if (!registrationURI) {
+			document.getElementById('orionLogin').style.visibility = '';
+		}
+		
+		document.getElementById("login").focus();
+	}
+	
+	function cancelLogin(){
+		document.getElementById('orionLogin').style.visibility = 'hidden';
+		document.getElementById('orionOpen').style.visibility = '';
+		
+		if (userCreationEnabled || registrationURI) {
+			document.getElementById('orionRegister').style.visibility = '';
+		}
 	}
 
 	domReady(function() {
@@ -347,7 +365,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 						formatForNoUserCreation();
 					}
 					document.getElementById("login-window").style.display = '';
-					document.getElementById("login").focus();
+					// document.getElementById("login").focus();
 				}
 			}
 		};
@@ -365,7 +383,6 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 					if (responseObject.emailConfigured === false) {
 						document.getElementById("resetUserLink").style.display = 'none';
 					}
-
 				}
 			}
 		};
@@ -454,13 +471,15 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		};
 
 		document.getElementById("createButton").onclick = confirmCreateUser;
+		document.getElementById('cancelLoginButton').onclick = cancelLogin;
 
 		document.getElementById("hideRegisterButton").onclick = hideRegistration;
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
-		document.getElementById("myopenidLoginLink").href = createOpenIdLink("http://myopenid.com");
+		document.getElementById("orionLoginLink").onclick = revealLogin;
 
-		document.getElementById("cancleResetButton").onclick = hideResetUser;
+		document.getElementById("cancelResetButton").onclick = hideResetUser;
+		
 
 		document.getElementById("sendResetButton").onclick = confirmResetUser;
 	});

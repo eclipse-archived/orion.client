@@ -9,10 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout*/
-define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
-		function(dojo, DeferredList, assert, mTextModel, mMockTextView, mContentAssist) {
-	var Deferred = dojo.Deferred,
-	    ContentAssist = mContentAssist.ContentAssist,
+define(['orion/Deferred', 'orion/assert', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
+		function(Deferred, assert, mTextModel, mMockTextView, mContentAssist) {
+	var ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,
 	    MockTextView = mMockTextView.MockTextView;
 
@@ -110,7 +109,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	tests.testFiltering = function() {
 		var first = new Deferred(),
 		    second = new Deferred(),
-		    deferred = new DeferredList([first, second]);
+		    deferred = Deferred.all([first, second]);
 		withData(function(view, contentAssist) {
 			var offset = setText(view, 'foo @@@');
 			var provider = {
@@ -161,7 +160,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	tests.testEvents1 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
-		    deferred = new DeferredList([d1, d2]);
+		    deferred = Deferred.all([d1, d2]);
 		withData(function(view, contentAssist) {
 			setText(view, 'fizz bu');
 			contentAssist.addEventListener('Activating', function(event) {
@@ -183,7 +182,7 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 	tests.testEvents2 = function() {
 		var d1 = new Deferred(),
 		    d2 = new Deferred(),
-		    deferred = new DeferredList([d1, d2]);
+		    deferred = Deferred.all([d1, d2]);
 		withData(function(view, contentAssist) {
 			setText(view, 'foo@@@baz');
 			var proposal = {proposal: ' bar ', description: 'Metasyntactic variable completion'};
@@ -214,6 +213,36 @@ define(['dojo', 'dojo/DeferredList', 'orion/assert', 'orion/textview/textModel',
 			});
 		});
 		return deferred;
+	};
+
+	// Test that some provider throwing or rejecting does not prevent other providers from being invoked.
+	tests.testErrorHandling = function() {
+		var d1 = new Deferred(),
+		    d2 = new Deferred(),
+		    d3 = new Deferred();
+		withData(function(view, contentAssist) {
+			contentAssist.setProviders([
+				{
+					computeProposals: function() {
+						d1.resolve();
+						throw new Error('i threw');
+					}
+				},
+				{
+					computeProposals: function() {
+						d2.resolve();
+						return new Deferred().reject('i rejected');
+					}
+				},
+				{
+					computeProposals: function() {
+						d3.resolve();
+					}
+				}
+			]);
+			contentAssist.activate();
+		});
+		return Deferred.all([d1, d2, d3]);
 	};
 
 	// TODO Test ContentAssistMode

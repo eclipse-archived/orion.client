@@ -38,7 +38,6 @@ require({
 	  domReady: 'requirejs/domReady'
   }
 });
-
 require(["LoginWindow.js"]);
 </script>
 <title>Login Page</title>
@@ -61,18 +60,8 @@ require(["LoginWindow.js"]);
 					<div id="errorMessage">&nbsp;</div>
 			</div>
 
-			<div class="orion-welcome-area">
-				<!-- div class="orion-slogan">
-					<div class="orion-slogan-highlight">Tools for the web</div>
-					<div class="orion-slogan-lowlight">on the web</div>
-				</div -->
-				<!-- div class="orion-welcome-area-text">
-					<h1>Welcome to Orion</h1>
-					<div class="orion-welcome-area-text-content">Orion is a web based developer platform supporting editing, testing and deploying web applictions. Orion has built in Git support. So create an
-						account, clone a repository to OrionHub and start editing</div>
-				</div -->
-			</div>
-			<div class="orion-login" id="orionLogin">
+			<div class="orion-welcome-area"></div>
+			<div class="orion-login" id="orionLogin" style="visibility: hidden;">
 				<div class="orion-login-header">Log in</div>
 				<form>
 					<div class="orion-input-holder">
@@ -84,6 +73,10 @@ require(["LoginWindow.js"]);
 					<div class="orion-login-button-holder">
 						<input type="button" name="password" id="loginButton" class="orion-login-button" value="Sign in" tabindex="0">
 					</div>
+					<div class="orion-login-button-holder">
+						<input type="button" id="cancelLoginButton" class="orion-cancel-button" value="Cancel" tabindex="0">
+					</div>
+					
 					<div class="orion-login-forgot-holder">
 						<a id="resetUserLink" class="orion-forgot-password">Forgot password?</a>
 					</div>
@@ -91,11 +84,9 @@ require(["LoginWindow.js"]);
 			</div>
 
 			<div class="orion-register" id="orionRegister">
-				<div class="orion-register-header">New to Orion?</div>
+				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Need an account?</div>
 				<form>
-					<div class="orion-login-button-holder">
-						<input id="registerButton" type="button" class="orion-register-button" value="Register" tabindex="0">
-					</div>
+					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
 				</form>
 			</div>
 
@@ -139,40 +130,35 @@ require(["LoginWindow.js"]);
 						<input type="button" id="sendResetButton" class="orion-send-button" tabindex="0" value="Send">
 					</div>
 					<div class="orion-login-button-holder">
-						<input type="button" id="cancleResetButton" class="orion-cancel-button" tabindex="0" value="Cancel">
+						<input type="button" id="cancelResetButton" class="orion-cancel-button" tabindex="0" value="Cancel">
 					</div>
 				</form>
 			</div>
 
-			<div class="orion-open" id="orionOpen">
+			<div class="orion-open" id="orionOpen" style="visibility: show;">
+				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Have an account? Sign in: </div>
 				<div id="openIDLogin" class="orion-open-header"></div>
 				<div class="orion-open-images">
-				
-					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin orLogin"> 
-						<div class='openIdWrapper openSignIn orion-login-header'>
-							Sign in:
+			
+					<a id="orionLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin"> 
+						<div class='openIdWrapper'>
+							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" title="sign in with existing Orion account"></div> 
 						</div>
-					</a> 
+					</a>
 				
 					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin"> 
 						<div class='openIdWrapper'>
-							<div id="googleLogin" class="googleIcon" alt="Google" title="Google"></div>
+							<div id="googleLogin" class="googleIcon" alt="Google" title="sign in with associated Google account"></div>
 						</div>
 					</a> 
 					
-					<a id="myopenidLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin"> 
+					<a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin"> 
 						<div class='openIdWrapper'>
-							<div id="myopenidLogin" class="openIdIcon" alt="myOpenID" title="myOpenID"></div> 
+							<div id="personaLogin" class="personaIcon" alt="persona!" title="sign in with associated Persona account"></div> 
 						</div>
-					</a>
-					<!-- a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin"> 
-						<div class='openIdWrapper'>
-							<div id="personaLogin" class="personaIcon" alt="persona!" title="persona!"></div> 
-						</div>
-					</a --> 
+					</a> 
 				</div>
-			</div>
-			
+			</div>		
 		</div>
 	</div>
 </body>

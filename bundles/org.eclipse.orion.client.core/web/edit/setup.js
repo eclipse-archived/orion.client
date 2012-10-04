@@ -152,7 +152,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 								// TODO folding should be a preference.
 								var styler = syntaxHighlighter.getStyler();
 								editor.setFoldingEnabled(styler && styler.foldingEnabled);
-								editor.highlightAnnotations();
 								setOutlineProviders(this._contentType, location);
 								if (!dispatcher) {
 									dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, this._contentType);

@@ -134,22 +134,28 @@ var exports = {};
 			}
 		};
 		
-		var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-		gitPreferenceStorage.get(repository).then(
-			function(credentials){
-				if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
-					if(options.failedOperation){
-						var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+		if((options.gitSshUsername && options.gitSshUsername!=="") ||
+			(options.gitSshPassword && options.gitSshPassword!=="") ||
+			(options.gitPrivateKey && options.gitPrivateKey!=="")){
+			failure();
+		} else {
+			var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+			gitPreferenceStorage.get(repository).then(
+				function(credentials){
+					if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
+						if(options.failedOperation){
+							var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+							dojo.hitch(progressService, progressService.removeOperation)(options.failedOperation.Location, options.failedOperation.Id);
+						}
+					
+						func({ knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						return;
 					}
-				
-					func({ knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					return;
-				}
-				
-				failure();
-			}, failure
-		);
+					
+					failure();
+				}, failure
+			);
+		}
 	};
 
 	exports.getDefaultSshOptions = function(serviceRegistry, authParameters){
@@ -190,6 +196,7 @@ var exports = {};
 			}
 			return;
 		}
+		
 		switch (jsonData.HttpCode) {
 		case 200:
 		case 201:
@@ -244,6 +251,7 @@ var exports = {};
 
 		var triggerCallback = function(sshObject){
 			serviceRegistry.getService("orion.net.ssh").getKnownHosts().then(function(knownHosts){ //$NON-NLS-0$
+				data.sshObject = sshObject;
 				def.callback({
 					knownHosts: knownHosts,
 					gitSshUsername: sshObject.gitSshUsername,
@@ -262,20 +270,29 @@ var exports = {};
 				var sshService = serviceRegistry.getService("orion.net.ssh"); //$NON-NLS-0$
 				sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then( //$NON-NLS-1$ //$NON-NLS-0$
 					function(){
-						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-						gitPreferenceStorage.get(repository).then(
-							function(credentials){
-								triggerCallback(credentials);
-							},
-							function(){
-								triggerCallback({
-									gitSshUsername: "",
-									gitSshPassword: "",
-									gitPrivateKey: "",
-									gitPassphrase: ""
-								});
-							}
-						);
+						if(data.sshObject && (data.sshObject.gitSshUsername!=="" || data.sshObject.gitSshPassword!=="" || data.sshObject.gitPrivateKey!=="")){
+							triggerCallback({
+								gitSshUsername: "",
+								gitSshPassword: "",
+								gitPrivateKey: "",
+								gitPassphrase: ""
+							});
+						} else {
+							var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+							gitPreferenceStorage.get(repository).then(
+								function(credentials){
+									triggerCallback(credentials);
+								},
+								function(){
+									triggerCallback({
+										gitSshUsername: "",
+										gitSshPassword: "",
+										gitPrivateKey: "",
+										gitPassphrase: ""
+									});
+								}
+							);
+						}
 					}
 				);
 			}
@@ -292,8 +309,23 @@ var exports = {};
 			if (data.parameters && !data.optionsRequested) {
 				var sshUser =  data.parameters ? data.parameters.valueFor("sshuser") : ""; //$NON-NLS-0$
 				var sshPassword = data.parameters ? data.parameters.valueFor("sshpassword") : "";	 //$NON-NLS-0$
-				triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
-				return;
+				var saveCredentials = (data.parameters && data.parameters.valueFor("saveCredentials")) ? data.parameters.valueFor("saveCredentials") : false;
+				
+				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+				if(saveCredentials){
+					gitPreferenceStorage.put(repository, {
+						gitSshUsername : sshUser,
+						gitSshPassword : sshPassword
+					}).then(
+						function(){
+							triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
+						}
+					);
+					return;
+				} else {
+					triggerCallback({ gitSshUsername: sshUser, gitSshPassword: sshPassword, gitPrivateKey: "", gitPassphrase: ""}); //$NON-NLS-0$
+					return;
+				}
 			}
 				
 			// use the old creds dialog
@@ -309,17 +341,21 @@ var exports = {};
 			return;
 		};
 
-		var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-		gitPreferenceStorage.get(repository).then(
-			function(credentials){
-				if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
-					triggerCallback(credentials);
-					return;
-				}
-				
-				failure();
-			}, failure
-		);
+		if(data.sshObject && (data.sshObject.gitSshUsername!=="" || data.sshObject.gitSshPassword!=="" || data.sshObject.gitPrivateKey!=="")){
+			failure();
+		} else {
+			var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+			gitPreferenceStorage.get(repository).then(
+				function(credentials){
+					if(credentials.gitPrivateKey !== "" || credentials.gitSshUsername !== "" || credentials.gitSshPassword !== ""){
+						triggerCallback(credentials);
+						return;
+					}
+					
+					failure();
+				}, failure
+			);
+		}
 		
 		return def;
 	};
@@ -333,15 +369,6 @@ var exports = {};
 				callback(jsonData);
 			}
 			return;
-		}
-		
-		if(jsonData.HttpCode == 500 || jsonData.HttpCode == 400){
-			if(jsonData.JsonData !== undefined){
-				var repository = jsonData.JsonData.Url;
-				
-				var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
-				gitPreferenceStorage.remove(repository);
-			}
 		}
 		
 		switch (jsonData.HttpCode) {
@@ -365,7 +392,7 @@ var exports = {};
 					var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					dojo.hitch(progressService, progressService.removeOperation)(jsonData.failedOperation.Location, jsonData.failedOperation.Id);
 				}
-				sshCallback(jsonData);	
+				sshCallback(jsonData);
 				return;
 			}
 		default:
@@ -880,15 +907,32 @@ var exports = {};
 				var handleResponse = function(jsonData, commandInvocation){
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
-						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					}
-					
-					commandInvocation.errorData = jsonData.JsonData;
-					commandService.collectParameters(commandInvocation);
 				};
 				
 				// HACK wrap logic into function
@@ -990,15 +1034,32 @@ var exports = {};
 				var handleResponse = function(jsonData, commandInvocation){
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
-						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages['SSH User Name:']), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					}
-					
-					commandInvocation.errorData = jsonData.JsonData;
-					commandService.collectParameters(commandInvocation);
 				};
 				
 				var fetchForceLogic = function(){
@@ -1342,15 +1403,32 @@ var exports = {};
 				var handleResponse = function(jsonData, commandInvocation){
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
-						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages['SSH User Name:']), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					}
-					
-					commandInvocation.errorData = jsonData.JsonData;
-					commandService.collectParameters(commandInvocation);
 				};
 				
 				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
@@ -1529,15 +1607,32 @@ var exports = {};
 				var handleResponse = function(jsonData, commandInvocation){
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
-						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages['SSH User Name:']), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					}
-					
-					commandInvocation.errorData = jsonData.JsonData;
-					commandService.collectParameters(commandInvocation);
 				};
 				
 				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){
@@ -2253,15 +2348,32 @@ var exports = {};
 				var handleResponse = function(jsonData, commandInvocation){
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
-						if (jsonData.JsonData.User)
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
-						else
-							commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
+						gitPreferenceStorage.isEnabled().then(
+							function(isEnabled){
+								if(isEnabled){
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"]), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:']), new mCommands.CommandParameter("saveCredentials", "boolean", messages["Don't prompt me again:"])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								} else {
+									if (jsonData.JsonData.User)
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshpassword", "password", messages["SSH Password:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
+									else
+										commandInvocation.parameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("sshuser", "text", messages["SSH User Name:"]), new mCommands.CommandParameter("sshpassword", "password", messages['SSH Password:'])], {hasOptionalParameters: true}); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+								}
+								
+								commandInvocation.errorData = jsonData.JsonData;
+								commandService.collectParameters(commandInvocation);
+							}
+						);
+					} else {
+						commandInvocation.errorData = jsonData.JsonData;
+						commandService.collectParameters(commandInvocation);
 					}
-
-					commandInvocation.errorData = jsonData.JsonData;
-					commandService.collectParameters(commandInvocation);
 				};
 
 				if (commandInvocation.parameters && commandInvocation.parameters.optionsRequested){

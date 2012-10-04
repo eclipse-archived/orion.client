@@ -170,7 +170,11 @@ orion.TextSearcher = (function() {
 		
 		_handleKeyUp: function(evt){
 			if(this._incremental && !this._keyUpHandled){
-				this.findNext(true, null, true);
+				if(!this._noSelection){
+					this.findNext(true, null, true);
+				} else {
+					this._noSelection = false;
+				}
 			}
 			this._keyUpHandled = false;
 			return true;
@@ -259,6 +263,8 @@ orion.TextSearcher = (function() {
 			if (this.visible()) {
 				if(defaultSearchStr.length > 0){
 					findDiv.value = defaultSearchStr;
+				} else {
+					this._noSelection = true;
 				}
 				window.setTimeout(function() {
 						findDiv.select();

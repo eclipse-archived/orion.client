@@ -42,7 +42,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		this.gitSshPasswordLabelText = messages["Ssh password:"];
 		this.gitPrivateKeyLabelText = messages["Private key:"];
 		this.gitPrivateKeyFileLabelText = messages["Private key file (optional):"];
-		this.gitSavePrivateKeyLabelText = messages["Don't prompt me again:"];
+		this.gitSaveCredentialsLabelText = messages["Don't prompt me again:"];
 		this.gitPassphraseLabelText = messages["Passphrase (optional):"];
 		if(!this.options.username && !this.options.password && !this.options.privatekey && !this.options.passphrase){
 			this.options.username=true;
@@ -91,41 +91,36 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 		gitPreferenceStorage.isEnabled().then(
 			function(isEnabled){
 				if(!isEnabled){
-					dojo.style(that.gitSavePrivateKey, "display", "none");
-					dojo.style(that.gitSavePrivateKeyLabel, "display", "none");
-					dojo.style(that.gitSavePrivateKeyInfo, "display", "none");
+					dojo.style(that.gitSaveCredentials, "display", "none");
+					dojo.style(that.gitSaveCredentialsLabel, "display", "none");
+					dojo.style(that.gitSaveCredentialsInfo, "display", "none");
 				}
 			}
 		);
 		
 		dojo.connect(this.gitSshPassword, "onfocus", null, dojo.hitch(this, function(){
 			this.isSshPassword.checked = true;
-			this.gitSavePrivateKey.checked = false;
-			this.gitSavePrivateKey.disabled = true;	
 		}) );
 		
 		dojo.connect(this.gitPrivateKey, "onfocus", null, dojo.hitch(this, function(){
 			this.isPrivateKey.checked = true;
-			this.gitSavePrivateKey.disabled = false;
 		}) );
 		
 		dojo.connect(this.gitPrivateKeyFile, "onfocus", null, dojo.hitch(this, function(){
-			this.isPrivateKey.checked = true;
-			this.gitSavePrivateKey.disabled = false;	
+			this.isPrivateKey.checked = true;	
 		}) );
 		
 		dojo.connect(this.gitPassphrase, "onfocus", null, dojo.hitch(this, function(){
-			this.isPrivateKey.checked = true;
-			this.gitSavePrivateKey.disabled = false;	
+			this.isPrivateKey.checked = true;	
 		}) );
-	
+			
 		dojo.connect(dijit.byId(this.gitPrivateKeyFile), "onchange", function(evt){
 			var file = evt.target.files[0];
 			self.privateKeyFile = file;
 		});
 		
 		new Tooltip({
-			connectId: ["gitSavePrivateKeyInfo"],
+			connectId: ["gitSaveCredentialsInfo"],
 			label: messages["Your private key will be saved in the browser for further use"]
 		});
 	},
@@ -163,7 +158,7 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 					loadedPrivateKey = e.target.result;
 										
 					var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
-					if(self.gitSavePrivateKey.checked){
+					if(self.gitSaveCredentials.checked){
 						
 						gitPreferenceStorage.put(repository, {
 							gitPrivateKey : loadedPrivateKey,
@@ -181,11 +176,10 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			}(this.privateKeyFile));
 			
 			reader.readAsText(this.privateKeyFile);
-		} else if(loadedPrivateKey){
-
+		} else if(loadedPrivateKey.length > 0){
 				//save key				
 				var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
-				if(self.gitSavePrivateKey.checked){
+				if(self.gitSaveCredentials.checked){
 					
 					gitPreferenceStorage.put(repository, {
 						gitPrivateKey : loadedPrivateKey,
@@ -199,7 +193,24 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 				} else {
 					process(loadedPrivateKey);
 				}
-		} else { process(loadedPrivateKey); }
+		} else {
+			//save ssh username and password
+			var gitPreferenceStorage = new GitPreferenceStorage(self.options.serviceRegistry);
+			if(self.gitSaveCredentials.checked){
+					
+				gitPreferenceStorage.put(repository, {
+					gitSshUsername : self.gitSshUsername.value,
+					gitSshPassword : self.gitSshPassword.value
+				}).then(
+					function(){
+						process(loadedPrivateKey);
+					}
+				);
+					
+			} else {
+				process(loadedPrivateKey);
+			}
+		}
 	}
 });
 });
