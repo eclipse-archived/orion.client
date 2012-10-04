@@ -130,10 +130,21 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		return utftext;
 	}
 
-	function setResetMessage(isError, message) {
-		document.getElementById("errorMessage").innerHTML = message;
-		//document.getElementById("reset_errorList").className = isError ? "loginError" : "loginInfo";
+	function showErrorMessage(html) {
+		if (typeof html !== "undefined") {
+			document.getElementById("errorMessage").innerHTML = html;
+		}
 		document.getElementById("errorWin").style.visibility = '';
+	}
+
+	function hideErrorMessage() {
+		document.getElementById("errorMessage").innerHTML = "&nbsp;";
+		document.getElementById("errorWin").style.visibility = 'hidden';
+	}
+
+	function setResetMessage(isError, message) {
+		//document.getElementById("reset_errorList").className = isError ? "loginError" : "loginInfo";
+		showErrorMessage(message);
 	}
 
 	function confirmResetUser() {
@@ -144,14 +155,14 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		}
 		var mypostrequest = new XMLHttpRequest();
 		mypostrequest.onreadystatechange = function() {
-			document.getElementById("errorWin").style.visibility = 'hidden';
+			hideErrorMessage();
 			if (mypostrequest.readyState === 4) {
 				if (mypostrequest.status === 200) {
 					responseObject = JSON.parse(mypostrequest.responseText);
 					if (responseObject.Message) {
 						setResetMessage(false, responseObject.Message);
 					} else {
-						document.getElementById("errorWin").style.visibility = '';
+						showErrorMessage();
 					}
 				} else {
 					try {
@@ -222,8 +233,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 					}).then(function() {
 						finishLogin();
 					}, function(error) {
-						document.getElementById("errorMessage").innerHTML = JSON.parse(error.responseText).error;
-						document.getElementById("errorWin").style.visibility = '';
+						showErrorMessage(JSON.parse(error.responseText).error);
 					});
 				}
 			},
@@ -243,8 +253,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 			if (mypostrequest.readyState === 4) {
 				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
 					var responseObject = JSON.parse(mypostrequest.responseText);
-					document.getElementById("errorMessage").innerHTML = responseObject.error;
-					document.getElementById("errorWin").style.visibility = '';
+					showErrorMessage(responseObject.error);
 				} else {
 					finishLogin();
 				}
@@ -260,12 +269,10 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 
 	function validatePassword() {
 		if (document.getElementById("create_password").value !== document.getElementById("create_passwordRetype").value) {
-			document.getElementById("errorWin").style.visibility = '';
-			document.getElementById("errorMessage").innerHTML = "Passwords don't match!";
+			showErrorMessage("Passwords don't match!");
 			return false;
 		}
-		document.getElementById("errorWin").style.visibility = 'hidden';
-		document.getElementById("errorMessage").innerHTML = "&nbsp;";
+		hideErrorMessage();
 		return true;
 	}
 	
@@ -297,8 +304,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 						return;
 					}
 					var responseObject = JSON.parse(mypostrequest.responseText);
-					document.getElementById("errorMessage").innerHTML = responseObject.Message;
-					document.getElementById("errorWin").style.visibility = '';
+					showErrorMessage(responseObject.Message);
 					if(mypostrequest.status === 201){
 						hideRegistration();
 					}
@@ -384,8 +390,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		if (error) {
 			var errorMessage = decodeBase64(error);
 
-			document.getElementById("errorWin").style.visibility = '';
-			document.getElementById("errorMessage").innerHTML = errorMessage;
+			showErrorMessage(errorMessage);
 		}
 
 		var checkusersrequest = new XMLHttpRequest();
