@@ -10,12 +10,13 @@
  ******************************************************************************/
 
 /*jslint browser:true devel:true*/
-/*global define window*/
+/*global define navigator window*/
 
-define(['domReady', 'orion/xhr'], function(domReady, xhr) {
+define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
+	var personaLoginClicked = false;
 
 	function injectPlaceholderShims() {
 		function textFocus(e) {
@@ -181,6 +182,15 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		return results === null ? null : results[1];
 	}
 
+	function finishLogin() {
+		var redirect = getRedirect();
+		if (redirect !== null) {
+			window.location = decodeURIComponent(redirect);
+		} else {
+			window.close();
+		}
+	}
+
 	function createOpenIdLink(openid) {
 		if (openid !== "" && openid !== null) {
 			var redirect = getRedirect();
@@ -190,6 +200,37 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 				return "../login/openid?openid=" + encodeURIComponent(openid);
 			}
 		}
+	}
+
+	function personaLogin() {
+		personaLoginClicked = true;
+		navigator.id.request();
+	}
+
+	function addPersonaHandler(button) {
+		var currentUser = null;
+		navigator.id.watch({
+			loggedInUser: currentUser, 
+			onlogin: function(assertion) {
+				if (personaLoginClicked) {
+					xhr("POST", "../login/persona", {
+						headers: {
+							"Content-type": "application/x-www-form-urlencoded",
+							"Orion-Version": "1"
+						},
+						data: "assertion=" + encodeURIComponent(assertion)
+					}).then(function() {
+						finishLogin();
+					}, function(error) {
+						document.getElementById("errorMessage").innerHTML = JSON.parse(error.responseText).error;
+						document.getElementById("errorWin").style.visibility = '';
+					});
+				}
+			},
+			onlogout: function() {
+				// TODO
+			}
+		});
 	}
 
 	function confirmLogin(login, password) {
@@ -205,13 +246,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 					document.getElementById("errorMessage").innerHTML = responseObject.error;
 					document.getElementById("errorWin").style.visibility = '';
 				} else {
-					var redirect = getRedirect();
-					if (redirect !== null) {
-						window.location = decodeURIComponent(redirect);
-					} else {
-						window.close();
-					}
-
+					finishLogin();
 				}
 			}
 		};
@@ -343,6 +378,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 	}
 
 	domReady(function() {
+		addPersonaHandler(document.getElementById("personaLogin"));
 
 		var error = getParam("error");
 		if (error) {
@@ -477,6 +513,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
 		document.getElementById("orionLoginLink").onclick = revealLogin;
+		document.getElementById("personaLogin").onclick = personaLogin;
 
 		document.getElementById("cancelResetButton").onclick = hideResetUser;
 		
