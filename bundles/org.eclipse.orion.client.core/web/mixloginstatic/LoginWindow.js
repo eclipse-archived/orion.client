@@ -281,17 +281,18 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 
 	function revealRegistration() {
 	
+		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+	
 		// If registrationURI is set and userCreation is not, open the URI in a new window
 		if (!userCreationEnabled && registrationURI) {
 			window.open(registrationURI);
 			return;
 		}
-		
-		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionLogin').style.visibility = 'hidden';
 		document.getElementById('orionRegister').style.visibility = 'hidden';
+		document.getElementById('newUserHeaderShown').style.visibility = '';
 	}
-
-	
 
 	function formatForNoUserCreation() {
 		document.getElementById('orionRegister').style.visibility = 'hidden';
