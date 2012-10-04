@@ -123,7 +123,7 @@ define(['orion/Deferred'], function(Deferred) {
 				} else {
 					// Use our own timer
 					setTimeout(function() {
-						if (d.state !== 'resolved' && d.state !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
+						if (d.state() !== 'resolved' && d.state() !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
 							d.reject('Timeout exceeded'); //$NON-NLS-0$
 						}
 					}, options.timeout);
