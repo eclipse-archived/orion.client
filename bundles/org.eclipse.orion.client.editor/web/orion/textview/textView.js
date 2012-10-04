@@ -26,6 +26,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	var isChrome = userAgent.indexOf("Chrome") !== -1; //$NON-NLS-0$
 	var isSafari = userAgent.indexOf("Safari") !== -1 && !isChrome; //$NON-NLS-0$
 	var isWebkit = userAgent.indexOf("WebKit") !== -1; //$NON-NLS-0$
+	var isAndroid = userAgent.indexOf("Android") !== -1; //$NON-NLS-0$
 	var isPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
 	var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
@@ -3294,6 +3295,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return Math.max(0, lineOffset) + this._model.getLineStart(lineIndex);
 		},
 		_handleSelectionChange: function (e) {
+			if (isAndroid) {
+				return;
+			}
 			var selection = window.getSelection();
 			var start = this._getModelOffset(selection.anchorNode, selection.anchorOffset);
 			var end = this._getModelOffset(selection.focusNode, selection.focusOffset);
@@ -3317,12 +3321,26 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var touches = e.touches;
 			if (touches.length === 1) {
 				var touch = touches[0];
-				this._touchStartX = touch.clientX;
-				this._touchStartY = touch.clientY;
-				var pt = this.convert({x: touch.clientX, y: touch.clientY}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
+				var x = touch.clientX, y = touch.clientY;
+				this._touchStartX = x;
+				this._touchStartY = y;
+				if (isAndroid) {
+					/*
+					* Bug in Android 4.  The clientX/Y coordinates of the touch events
+					* include the page scrolling offsets.
+					*/
+				    if (y < (touch.pageY - window.pageYOffset) || x < (touch.pageX - window.pageXOffset) ) {
+						x = touch.pageX - window.pageXOffset;
+						y = touch.pageY - window.pageYOffset;
+				    }
+				}
+				var pt = this.convert({x: x, y: y}, "page", "document"); //$NON-NLS-1$ //$NON-NLS-0$
 				this._lastTouchOffset = this.getOffsetAtLocation(pt.x, pt.y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
+				if (isAndroid) {
+					this.setSelection(this._lastTouchOffset, this._lastTouchOffset);
+				}
 			}
 		},
 		_handleTouchMove: function (e) {
@@ -4343,12 +4361,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.style.zIndex = "1"; //$NON-NLS-0$
 			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-0$
 			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-0$
-			if (isPad) {
+			if (isPad || isAndroid) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-0$
 			}
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
 			
-			if (isPad) {
+			if (isPad || isAndroid) {
 				var vScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
 				this._vScrollDiv = vScrollDiv;
 				vScrollDiv.style.position = "absolute"; //$NON-NLS-0$
@@ -4836,7 +4854,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e);}}); //$NON-NLS-0$
-			if (isPad) {
+			if (isPad || isAndroid) {
 				handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e); }}); //$NON-NLS-0$
