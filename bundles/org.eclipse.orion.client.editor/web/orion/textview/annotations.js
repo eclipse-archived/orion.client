@@ -147,7 +147,8 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 	 * @param {String} type The annotation type (for example, orion.annotation.error).
 	 * @param {Object|Function} properties The common annotation properties of the registered
 	 *		annotation type. All annotations create with this annotation type will expose these
-	 *		properties.	 */
+	 *		properties.
+	 */
 	AnnotationType.registerType = function(type, properties) {
 		var constructor = properties;
 		if (typeof constructor !== "function") { //$NON-NLS-0$
