@@ -115,7 +115,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 						return this.loadWorkspace(jsonData.Workspaces[0].Location);
 					} else {
 						//no workspace exists, and the user didn't specify one. We'll create one for them
-						return this._createWorkspace("MyWorkspace");
+						return this._createWorkspace("Orion Content");
 					}
 				}
 			}.bind(this));
