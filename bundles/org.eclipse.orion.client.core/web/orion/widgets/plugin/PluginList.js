@@ -221,13 +221,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		
 		/* reloads a single plugin */
 		reloadPlugin: function(url) {
-			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			for( var p = 0; p < settingsPluginList.length; p++ ){
-				if( settingsPluginList[p].getLocation() === url ){
-					settingsPluginList[p].update();
-					this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
-					break;
-				}
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.update().then(this.addRows.bind(this));
+				this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
 			}
 		},
 
@@ -247,27 +244,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		},
 		
 		forceRemove: function(url){
-			var settings = this.settings;
-			var statusService = this.statusService;
-			
-			var settingsPluginList = settings.pluginRegistry.getPlugins();
-		
-			var pluginlist = this;
-		
-			for( var p = 0; p < settingsPluginList.length; p++ ){
-				if( settingsPluginList[p].getLocation() === url ){
-					settingsPluginList[p].uninstall();
-					statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
-					settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-						plugins.remove(url);
-						pluginlist.addRows(pluginlist);
-					}); // this will force a sync
-					
-					this.addRows();
-					this.addRows();
-					
-					break;
-				}
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.uninstall();
+				this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.remove(url);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
 			}
 		},
 		
