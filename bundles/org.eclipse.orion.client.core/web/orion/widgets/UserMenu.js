@@ -64,7 +64,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 									this.addUserItem(key, authService, this.authenticatedServices[key].label);
 									localStorage.removeItem(key);
 									//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
-									for (var i = 0, length = localStorage.length; i < length; i++) {
+									for (var i = localStorage.length - 1; i >= 0; i--) {
 										var name = localStorage.key(i);
 										if (name && name.indexOf("/orion/preferences/user") === 0) {
 											localStorage.removeItem(name);
