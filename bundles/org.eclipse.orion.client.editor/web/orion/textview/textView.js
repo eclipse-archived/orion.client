@@ -3302,6 +3302,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			this._setSelection(new Selection(start, end), false, false);
 		},
+		_handleTextInput: function (e) {
+			if (!e) { e = window.event; }
+			this._doContent(e.data);
+			e.preventDefault();
+		},
 		_handleTouchStart: function (e) {
 			if (this._touchScrollTimer) {
 				this._vScrollDiv.style.display = "none"; //$NON-NLS-0$
@@ -4822,6 +4827,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: clientDiv, type: "focus", handler: function(e) { return self._handleFocus(e);}}); //$NON-NLS-0$
 			handlers.push({target: viewDiv, type: "focus", handler: function(e) { clientDiv.focus(); }}); //$NON-NLS-0$
 			handlers.push({target: viewDiv, type: "scroll", handler: function(e) { return self._handleScroll(e);}}); //$NON-NLS-0$
+			handlers.push({target: clientDiv, type: "textInput", handler: function(e) { return self._handleTextInput(e); }}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e);}}); //$NON-NLS-0$
