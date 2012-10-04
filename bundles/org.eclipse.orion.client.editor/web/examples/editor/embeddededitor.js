@@ -148,7 +148,6 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 	var initialContent = "window.alert('this is some javascript code');  // try pasting in some real code";
 	editor.setInput(contentName, null, initialContent);
 	syntaxHighlighter.highlight(contentName, editor);
-	editor.highlightAnnotations();
 	contentAssist.addEventListener("Activating", function() {
 		if (/\.css$/.test(contentName)) {
 			contentAssist.setProviders([cssContentAssistProvider]);

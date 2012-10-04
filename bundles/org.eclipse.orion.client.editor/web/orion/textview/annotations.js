@@ -672,7 +672,7 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 			}
 		};
 		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
-		view.addEventListener("LineStyle", this._listener.onLineStyle); //$NON-NLS-0$
+		view.addEventListener("postLineStyle", this._listener.onLineStyle); //$NON-NLS-0$
 		annotationModel.addEventListener("Changed", this._listener.onChanged); //$NON-NLS-0$
 	}
 	AnnotationStyler.prototype = /** @lends orion.textview.AnnotationStyler.prototype */ {

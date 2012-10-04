@@ -57,7 +57,6 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 					}
 				}
 				editor.showProblems(problems);
-				editor.highlightAnnotations();
 				return true;
 		});
 	};
