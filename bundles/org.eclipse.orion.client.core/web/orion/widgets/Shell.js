@@ -103,7 +103,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			/**
 			 * Registers a new command in the Shell.
 			 *
-			 * @param {orion.shell.Command} command the command to add to the Shell
+			 * @param {orion.shell.Command} command the command to register in the Shell
 			 */
 			registerCommand: function(command) {
 				if (!command.exec) {
