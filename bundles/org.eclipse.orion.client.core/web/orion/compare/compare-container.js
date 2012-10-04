@@ -109,7 +109,6 @@ exports.CompareStyler = (function() {
 										 fileName,
 										 false /*bug 378193*/).then(function(){
 										 	if(compareWidget && loadingNumber){
-												editorWidget.highlightAnnotations();
 												editorWidget.setAnnotationRulerVisible(false);
 										 		compareWidget._highlighterLoaded++;
 										 		if(compareWidget._highlighterLoaded === loadingNumber){

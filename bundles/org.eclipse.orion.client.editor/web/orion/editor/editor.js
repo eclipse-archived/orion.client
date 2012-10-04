@@ -456,24 +456,6 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 			annotationModel.replaceAnnotations(remove, add);
 		},
 		
-		highlightAnnotations: function() {
-			if (this._annotationStyler) {
-				this._annotationStyler.destroy();
-				this._annotationStyler = null;
-			}
-			if (this._annotationFactory) {
-				this._annotationStyler = this._annotationFactory.createAnnotationStyler(this.getTextView(), this._annotationModel);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
-				this._annotationStyler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
-				this._annotationStyler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
-			}
-		},
-		
 		/**
 		 * Creates the underlying TextView and installs the editor's features.
 		 */
@@ -599,11 +581,24 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				}
 			};
 
-			// Create rulers
+			// Create rulers, annotation model and styler
 			if (this._annotationFactory) {
 				var textModel = textView.getModel();
 				if (textModel.getBaseModel) { textModel = textModel.getBaseModel(); }
 				this._annotationModel = this._annotationFactory.createAnnotationModel(textModel);
+				if (this._annotationModel) {
+					var styler = this._annotationStyler = this._annotationFactory.createAnnotationStyler(textView, this._annotationModel);
+					if (styler) {
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_SEARCH);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_ERROR);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WARNING);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
+					}
+				}
 				
 				/*
 				* TODO - UndoStack relies on this line to ensure that collapsed regions are expanded 
