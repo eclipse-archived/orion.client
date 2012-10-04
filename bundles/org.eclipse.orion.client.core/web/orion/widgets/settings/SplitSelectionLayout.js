@@ -14,7 +14,7 @@
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder'], function(messages, require, dojo, dijit) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList', 'orion/widgets/settings/InputBuilder', 'dijit/_Widget', 'dijit/_Templated'], function(messages, require, dojo, dijit) {
 
 	dojo.declare("orion.widgets.settings.SplitSelectionLayout", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 

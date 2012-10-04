@@ -57,9 +57,13 @@ define("orion/textview/eventTarget", [], function() { //$NON-NLS-0$
 		 * @param {Event} evt The event to dispatch.
 		 */
 		dispatchEvent: function(evt) {
-			if (!this._eventTypes) { return; }
 			var type = evt.type;
-			var state = this._eventTypes[type];
+			this._dispatchEvent("pre" + type, evt); //$NON-NLS-0$
+			this._dispatchEvent(type, evt);
+			this._dispatchEvent("post" + type, evt); //$NON-NLS-0$
+		},
+		_dispatchEvent: function(type, evt) {
+			var state = this._eventTypes ? this._eventTypes[type] : null;
 			if (state) {
 				var listeners = state.listeners;
 				try {

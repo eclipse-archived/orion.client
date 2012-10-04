@@ -490,11 +490,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 		};
 		var model = view.getModel();
 		if (model.getBaseModel) {
-			model.getBaseModel().addEventListener("Changed", this._listener.onChanged);
-		} else {
-			//TODO still needed to keep the event order correct (styler before view)
-			view.addEventListener("ModelChanged", this._listener.onChanged);
+			model = model.getBaseModel();
 		}
+		model.addEventListener("Changed", this._listener.onChanged);
 		view.addEventListener("MouseDown", this._listener.onMouseDown);
 		view.addEventListener("Selection", this._listener.onSelection);
 		view.addEventListener("Destroy", this._listener.onDestroy);

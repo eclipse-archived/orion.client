@@ -13,35 +13,99 @@
 /*global define Range*/
 /*jslint browser:true*/
 
-define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
+define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli/types", "gcli/types/selection", "gcli/argument", "gcli/ui/fields",
 		"gcli/ui/fields/menu", "gcli/util", "gcli/settings", "gcli/canon", "gcli/cli", "gcli/commands/help"],
-	function(messages, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
+	function(messages, i18nUtil, mGCLI, mTypes, mSelectionType, mArgument, mFields, mMenu, mUtil, mSettings, mCanon, mCli, mHelp) {
 
 	function CustomType(typeSpec) {}
 	CustomType.prototype = Object.create(mSelectionType.SelectionType.prototype);
 
 	var orion = {};
 	orion.shell = {};
+
 	orion.shell.CompletionStatus = {
+		/**
+		 * @name orion.shell.CompletionStatus.MATCH
+		 * the current text matches a valid argument value
+		 */
 		MATCH: 0,
+		/**
+		 * @name orion.shell.CompletionStatus.PARTIAL
+		 * the current text matches a subset of the initial characters of a valid
+		 * argument value (ie.- a value in the midst of being typed)
+		 */
 		PARTIAL: 1,
+		/**
+		 * @name orion.shell.CompletionStatus.ERROR
+		 * the current text does not match a subset of the initial characters of any valid values
+		 */
 		ERROR: 2
 	};
 
 	/**
-	 * Constructs a new shell.
-	 * 
-	 * @param parent the parent element for the shell, it can be either a DOM element or an ID for a DOM element.
-	 * 
-	 * @class A Shell is a user interface that accepts input command lines and displays output.
 	 * @name orion.shell.Shell
+	 * @class A Shell is a visual widget that provides a command line interface.
+	 * Commands can be registered in the Shell, and as a user types commands in its input
+	 * field the Shell provides visual hints about the expected arguments.
 	 */
 	orion.shell.Shell = (function() {
-		function Shell(input, output) {
-			this._init(input, output);
+		/**
+		 * Creates a new Shell.
+		 * 
+		 * @param {Object} options the options controlling the features of this Shell
+		 * @param {Object} options.input the HTML element to parent the Shell's created input text on
+		 * @param {Object} options.output the HTML element to parent the Shell's created output text on
+		 */
+		function Shell(options) {
+			this._init(options.input, options.output);
 		}
-		Shell.prototype = /** @lends orion.shell.Shell.prototype */ {			
-			addCommand: function(command) {
+		Shell.prototype = /** @lends orion.shell.Shell.prototype */ {
+			/**
+			 * Renders HTML content in the Shell's output area.
+			 *
+			 * @param {String} content the HTML content to output
+			 */
+			output: function(content) {
+				var output = new mCli.Output();
+				var commandOutputManager = mCanon.commandOutputManager;
+				commandOutputManager.onOutput({output: output});
+				output.complete(content);
+			},
+			/**
+			 * @class Instances represent parameters that commands can accept.
+			 * <p>
+			 * <b>See:</b><br/>
+			 * {@link orion.shell.Command}<br/>
+			 * {@link orion.shell.ParameterType}<br/>
+			 * </p>
+			 * @name orion.shell.Parameter
+			 * 
+			 * @property {String} type the name of the parameter's type (must be the name of
+			 * either a built-in type or a custom type that has been registered with the Shell)
+			 * @property {String} [name] the parameter's name
+			 * @property {String} [description] the parameter's description
+			 * @property {Object} [defaultValue] the parameter's default value (specifying this
+			 * implies that the parameter is optional)
+			 */
+			/**
+			 * @class Instances represent commands that can be registered in Shells.
+			 * <p>
+			 * <b>See:</b><br/>
+			 * {@link orion.shell.Shell}<br/>
+			 * </p>
+			 * @name orion.shell.Command
+			 * 
+			 * @property {String} name the command's name
+			 * @property {Function} callback the function to call when the command is invoked
+			 * @property {orion.shell.Parameter[]} [parameters] the parameters accepted by the command
+			 * @property {String} [description] the command's description
+			 */
+			/**
+			 * Registers a new command in the Shell.
+			 *
+			 * @param {orion.shell.Command} command the command to add to the Shell
+			 */
+			registerCommand: function(command) {
 				if (!command.exec) {
 					command.exec = command.callback;
 				}
@@ -50,10 +114,28 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				}
 				mGCLI.addCommand(command);
 			},
-			addField: function(field) {
-				// TODO
-			},
-			addType: function(type) {
+			/**
+			 * @class Instances represent custom parameter types that can be registered
+			 * in a Shell.  Commands registered in the Shell can then declare parameters
+			 * of the registered type.
+			 * 
+			 * <p>
+			 * <b>See:</b><br/>
+			 * {@link orion.shell.Parameter}<br/>
+			 * </p>
+			 * @name orion.shell.ParameterType
+			 * 
+			 * @property {String} name the name of the parameter type
+			 * @property {Function} parse a function that returns completion suggestions
+			 * @property {Function} stringify a function that returns the string representation
+			 * for a given instance of its type
+			 */
+			/**
+			 * Registers a custom parameter type in the Shell.
+			 *
+			 * @param {orion.shell.ParameterType} type the parameter type to register in the Shell
+			 */
+			registerType: function(type) {
 				function NewType(typeSpec) {}
 
 				NewType.prototype = Object.create(CustomType.prototype);
@@ -90,22 +172,19 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				}
 				mTypes.registerType(NewType);
 			},
-			output: function(content) {
-				var output = new mCli.Output();
-				var commandOutputManager = mCanon.commandOutputManager;
-				commandOutputManager.onOutput({output: output});
-				output.complete(content);
-			},
+			/**
+			 * Sets focus to the Shell's input area.
+			 */
 			setFocus: function() {
 				this.inputText.focus();
 			},
 			
 			/** @private */
 
+			addField: function(field) {
+				// TODO
+			},
 			_init: function(input, output) {
-				if (!input) {throw "no input";} //$NON-NLS-0$
-				if (!output) {throw "no output";} //$NON-NLS-0$
-
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
 				outputDiv.style.height = "100%"; //$NON-NLS-0$
@@ -129,7 +208,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 				var self = this;
 				setTimeout(function() {
 					mGCLI.createDisplay();
-					self.output(messages["For a list of available commands type '${0}'."].replace("${0}", ["<b>help</b>"])); //$NON-NLS-1$ //$NON-NLS-0$
+					self.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
 				});
 				mHelp.startup();
 				mHelp.helpListHtml = mHelp.helpListHtml.replace("\"${includeIntro}\"","${false}"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -177,7 +256,7 @@ define(["i18n!orion/widgets/nls/messages", "gcli/index", "gcli/types", "gcli/typ
 						 */
 						var self = this;
 						conversion.then(function () {
-							if (self.element) { // if there's no UI yet then ignore
+							if (self.element) { /* if there's no UI yet then ignore */
 								self.setConversion(self.getConversion());
 							}
 						});
