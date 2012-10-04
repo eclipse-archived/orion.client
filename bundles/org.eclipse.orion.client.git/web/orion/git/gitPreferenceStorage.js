@@ -42,10 +42,10 @@
 			};
 			
 			if(userCredentials !== undefined){
-				if(userCredentials.sshUsername !== undefined) { credentials.gitSshUsername = userCredentials.gitSshUsername; }
-				if(userCredentials.sshPassword !== undefined) { credentials.gitSshPassword = userCredentials.gitSshPassword; }
-				if(userCredentials.gitPrivateKey !== undefined) { credentials.gitPrivateKey = userCredentials.gitPrivateKey; }
-				if(userCredentials.gitPassphrase !== undefined) { credentials.gitPassphrase = userCredentials.gitPassphrase; }
+				if(userCredentials.gitSshUsername !== undefined && userCredentials.gitSshUsername !== null) { credentials.gitSshUsername = userCredentials.gitSshUsername; }
+				if(userCredentials.gitSshPassword !== undefined && userCredentials.gitSshPassword !== null) { credentials.gitSshPassword = userCredentials.gitSshPassword; }
+				if(userCredentials.gitPrivateKey !== undefined && userCredentials.gitPrivateKey !== null) { credentials.gitPrivateKey = userCredentials.gitPrivateKey; }
+				if(userCredentials.gitPassphrase !== undefined && userCredentials.gitPassphrase !== null) { credentials.gitPassphrase = userCredentials.gitPassphrase; }
 			}
 			
 			var d = new Deferred();

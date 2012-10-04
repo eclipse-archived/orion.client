@@ -110,5 +110,6 @@ define({
 	"Please be aware that your credentials will be stored persistently in the browser." : "Please be aware that your credentials will be stored persistently in the browser.",
 	"Do you wish to enable the Key Storage?" : "Do you wish to enable the Key Storage?",
 	"general": "General",
-	"validation": "Validation"
+	"validation": "Validation",
+	"Deleted git credentials for ${0}" : "Deleted git credentials for ${0}"
 });

@@ -124,10 +124,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			var gitCredentialsSection;
 			var that = this;
 			
-			// erase private key command
+			// erase credentials command
 			var erasePrivateKeyCommand = new mCommands.Command({
 				name: messages["Delete"],
-				id: "eclipse.orion.git.erasePrivateKey",
+				id: "eclipse.orion.git.eraseGitCredentials",
 				callback : function(data){
 					var repository = data.items.gitUrl;
 					var keyIndex = data.items.keyIndex;
@@ -137,7 +137,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 					var gitPreferenceStorage = new GitPreferenceStorage(that.registry);
 					gitPreferenceStorage.remove(repository).then(
 						function(){
-							messageService.setProgressResult("Deleted private key for " + repository);
+							messageService.setProgressResult(dojo.string.substitute(messages["Deleted git credentials for ${0}"], [repository]));
 							that.gitCredentialsFields[keyIndex+1].destroy();
 						}
 					);
@@ -147,7 +147,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				}
 			});
 			this.commandService.addCommand(erasePrivateKeyCommand);
-			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.erasePrivateKey", 1);
+			this.commandService.registerCommandContribution("repositoryItemCommands", "eclipse.orion.git.eraseGitCredentials", 1);
 			
 			var that = this;
 			var gitPreferenceStorage = new GitPreferenceStorage(this.registry);
