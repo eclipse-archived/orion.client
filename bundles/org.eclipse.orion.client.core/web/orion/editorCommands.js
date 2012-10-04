@@ -62,6 +62,14 @@ exports.EditorCommandFactory = (function() {
 				return keyBinding;
 			}
 	
+			function handleError(error) {
+				error = error || "Unknown error";
+				var statusService = serviceRegistry.getService("orion.page.message");
+				if (statusService) {
+					statusService.setErrorMessage(error);
+				}
+			}
+
 			// create commands common to all editors
 			if (!this.isReadOnly) {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -110,12 +118,13 @@ exports.EditorCommandFactory = (function() {
 														if(this.inputManager.afterSave){
 															this.inputManager.afterSave();
 														}
-													}));
+													}, handleError));
 										}
-									}
-									// unknown error
-									else {
-										error.log = true;
+									} else if (error.status === 0) {
+										handleError("No response from server.")
+									} else {
+										// unknown error
+										handleError(error);
 									}
 								})
 						);
