@@ -222,9 +222,7 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			return this._getEntry(location).then(function(entry) {
 				var d = new orion.Deferred();
 				var remove = (entry.removeRecursively) ? "removeRecursively" : "remove";
-				entry[remove](function() {
-					d.resolve();
-				}, d.reject);
+				entry[remove](function() {d.resolve();}, d.reject);
 				return d;
 			});
 		},
@@ -243,9 +241,9 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			
 			return this._getEntry(sourceLocation).then(function(entry) {
 				return that._getEntry(targetLocation).then(function(parent) {
-					var deferred = new orion.Deferred();
-					entry.moveTo(parent, name, deferred.resolve, deferred.reject);
-					return deferred;
+					var d = new orion.Deferred();
+					entry.moveTo(parent, name, function() {d.resolve();}, d.reject);
+					return d;
 				});
 			});
 		},
@@ -264,9 +262,9 @@ eclipse.HTML5LocalFileServiceImpl= (function() {
 			
 			return this._getEntry(sourceLocation).then(function(entry) {
 				return that._getEntry(targetLocation).then(function(parent) {
-					var deferred = new orion.Deferred();
-					entry.copyTo(parent, name, deferred.resolve, deferred.reject);
-					return deferred;
+					var d = new orion.Deferred();
+					entry.copyTo(parent, name, function() {d.resolve();}, d.reject);
+					return d;
 				});
 			});
 		},
