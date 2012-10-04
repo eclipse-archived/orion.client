@@ -150,6 +150,42 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 			});			
 			this.commandService.addCommand(uninstallPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommand", "orion.uninstallPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
+
+
+			var pluginRegistry = this.settings.pluginRegistry;
+			var disablePluginCommand = new mCommands.Command({
+				name: "Disable",
+				tooltip: "Disable the plugin",
+				id: "orion.disablePlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-stop", //$NON-NLS-0$
+				visibleWhen: function(url) {  // we expect a URL
+					var plugin = pluginRegistry.getPlugin(url);
+					return plugin._getAutostart() !== "stopped"; //$NON-NLS-0$
+				},
+				callback: function(data) {
+					this.disablePlugin(data.items);
+				}.bind(this)
+			});			
+			this.commandService.addCommand(disablePluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.disablePlugin", 3); //$NON-NLS-1$ //$NON-NLS-0$
+
+			
+			var enablePluginCommand = new mCommands.Command({
+				name: "Enable",
+				tooltip: "Enable the plugin",
+				id: "orion.enablePlugin", //$NON-NLS-0$
+				imageClass: "core-sprite-start", //$NON-NLS-0$
+				visibleWhen: function(url) {  // we expect a URL
+					var plugin = pluginRegistry.getPlugin(url);
+					return plugin._getAutostart() === "stopped"; //$NON-NLS-0$
+				},
+				callback: function(data) {
+					this.enablePlugin(data.items);
+				}.bind(this)
+			});			
+			this.commandService.addCommand(enablePluginCommand);
+			this.commandService.registerCommandContribution("pluginCommand", "orion.enablePlugin", 4); //$NON-NLS-1$ //$NON-NLS-0$
+
 		
 			var list = this.pluginSettingsList;
 		
@@ -225,6 +261,32 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 			if (plugin) {
 				plugin.update().then(this.addRows.bind(this));
 				this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
+			}
+		},
+		
+		disablePlugin: function(url){
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.stop();
+				this.statusService.setMessage("Disabled " + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.put(url, false);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
+			}
+		},
+	
+		enablePlugin: function(url){
+			var plugin = this.settings.pluginRegistry.getPlugin(url);
+			if (plugin) {
+				plugin.start({lazy:true});
+				this.statusService.setMessage("Enabled " + url, 5000, true);
+				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+					plugins.put(url, false);
+					this.addRows(this);
+				}.bind(this)); // this will force a sync
+				this.addRows();
 			}
 		},
 
