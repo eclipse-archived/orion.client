@@ -75,7 +75,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 						if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
 							target = properties["links.newtab"] ? "_blank" : "_self"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						} else {
-							target = "_blank"; //$NON-NLS-0$
+							target = "_self"; //$NON-NLS-0$
 						}
 						_this.setTarget(target);
 					}.bind(this)

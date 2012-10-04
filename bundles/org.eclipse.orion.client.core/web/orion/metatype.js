@@ -123,7 +123,7 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 		this.name = attrJson.name || null;
 		this.options = attrJson.options || null;
 		this.type = attrJson.type || 'string'; //$NON-NLS-0$
-		this.defaultValue = attrJson.defaultValue || null;
+		this.defaultValue = typeof attrJson.defaultValue !== 'undefined' ? attrJson.defaultValue : null; //$NON-NLS-0$
 		if (!this.id) {
 			throw 'Missing "id" property: ' + JSON.stringify(attrJson); //$NON-NLS-0$
 		}
