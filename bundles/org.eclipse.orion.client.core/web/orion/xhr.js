@@ -18,7 +18,7 @@
 define(['orion/Deferred'], function(Deferred) {
 	/**
 	 * @name orion.xhr.Result
-	 * @class Wraps an XHR response.
+	 * @class Wraps an XHR response or failure.
 	 * @property {Object} args Arguments passed to the {@link orion.xhr.xhr} call.
 	 * @property {Object|ArrayBuffer|Blob|Document|String} response The <code>response</code> object returned by the XMLHttpRequest.
 	 * It is typed according to the <code>responseType</code> passed to the XHR call (by default it is a {@link String}).
@@ -27,12 +27,37 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @property {Number} status The HTTP status code returned by the XMLHttpRequest.
 	 * @property {String} url The URL that the XHR request was made to.
 	 * @property {XMLHttpRequest} xhr The underlying XMLHttpRequest object.
+	 * @property {String|Error} error <i>Optional</i>. If a timeout occurred or an error was thrown while performing the
+	 * XMLHttpRequest, this field contains information about the error.
 	 */
 
 	function encode(value) {
 		return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
 			return '%' + str.charCodeAt(0).toString(16).toUpperCase(); //$NON-NLS-0$
 		});
+	}
+
+	/**
+	 * @param {String} url
+	 * @param {Object} options
+	 * @param {XMLHttpRequest} xhr
+	 * @param {String|Error} [error]
+	 */
+	function makeResult(url, options, xhr, error) {
+		var response = typeof xhr.response !== 'undefined' ? xhr.response : xhr.responseText; //$NON-NLS-0$
+		var responseText = typeof response === 'string' ? response : null; //$NON-NLS-0$
+		var result = {
+			args: options,
+			response: response,
+			responseText: responseText,
+			status: xhr.status,
+			url: url,
+			xhr: xhr
+		};
+		if (typeof error !== 'undefined') { //$NON-NLS-0$
+			result.error = error;
+		}
+		return result;
 	}
 
 	/**
@@ -90,18 +115,9 @@ define(['orion/Deferred'], function(Deferred) {
 		}
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
-				var code = xhr.status;
-				var response = typeof xhr.response !== 'undefined' ? xhr.response : xhr.responseText; //$NON-NLS-0$
-				var responseText = typeof response === 'string' ? response : null; //$NON-NLS-0$
-				var result = {
-					args: options,
-					response: response,
-					responseText: responseText,
-					status: code,
-					url: url,
-					xhr: xhr
-				};
-				if (200 <= code && code < 400) {
+				var result = makeResult(url, options, xhr);
+				var statusCode = xhr.status;
+				if (200 <= statusCode && statusCode < 400) {
 					d.resolve(result);
 				} else {
 					if (log && typeof console !== 'undefined') { //$NON-NLS-0$
@@ -118,13 +134,13 @@ define(['orion/Deferred'], function(Deferred) {
 					// Browser supports XHR timeout
 					xhr.timeout = options.timeout;
 					xhr.addEventListener('timeout', function(e) { //$NON-NLS-0$
-						d.reject('Timeout exceeded: ' + e); //$NON-NLS-0$
+						d.reject(makeResult(url, options, xhr, 'Timeout exceeded')); //$NON-NLS-0$
 					});
 				} else {
 					// Use our own timer
 					setTimeout(function() {
-						if (d.state !== 'resolved' && d.state !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
-							d.reject('Timeout exceeded'); //$NON-NLS-0$
+						if (d.state() !== 'resolved' && d.state() !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
+							d.reject(makeResult(url, options, xhr, 'Timeout exceeded')); //$NON-NLS-0$
 						}
 					}, options.timeout);
 				}
@@ -136,7 +152,7 @@ define(['orion/Deferred'], function(Deferred) {
 			}
 			xhr.send(data);
 		} catch (e) {
-			d.reject(e);
+			d.reject(makeResult(url, options, xhr, e));
 		}
 		return d;
 	}

@@ -19,11 +19,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 	 * supported XHR features of the browser running the test as closely as possible.
 	 */
 	function MockXMLHttpRequest() {
-		this.readyState = 0;
-		this.headers = {};
-		this.responseType = '';
-		this._sendFlag = false;
-		this._timeout = 0;
 		// Does browser understand timeout?
 		if (typeof new XMLHttpRequest().timeout === 'number') {
 			Object.defineProperty(this, 'timeout', {
@@ -37,6 +32,56 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				}
 			});
 		}
+		Object.defineProperty(this, 'readyState', {
+			get: function() {
+				return this._readyState;
+			},
+			set: function(readyState) {
+				this._readyState = readyState;
+				if (typeof this.onreadystatechange === 'function') {
+					this.onreadystatechange();
+				}
+			}
+		});
+		Object.defineProperty(this, 'response', {
+			get: function() {
+				return this._responseText;
+			},
+			set: function(response) {
+				// Bug 381396: if this test is running in IE, emulate IE's non-support for 'response' attribute.
+				if (!isIE) {
+					this._response = response;
+				}
+				if (this.responseType === '' || this.responseType === 'text') {
+					this._responseText = response;
+				}
+			}
+		});
+		Object.defineProperty(this, 'status', {
+			get: function() {
+				if (this.readyState === this.UNSENT || this.readyState === this.OPENED || this._errorFlag) {
+					return 0;
+				}
+				return this._status;
+			},
+			set: function(status) {
+				this._status = status;
+			}
+		});
+		Object.defineProperty(this, 'statusText', {
+			get: function() {
+				return this._statusText;
+			},
+			set: function(statusText) {
+				this._statusText = statusText;
+			}
+		});
+		this.readyState = this.UNSENT;
+		this.headers = {};
+		this.responseType = '';
+		this._sendFlag = false;
+		this._errorFlag = false;
+		this._timeout = 0;
 	}
 	MockXMLHttpRequest.prototype = {
 		UNSENT: 0,
@@ -48,7 +93,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			if (this.readyState !== this.UNSENT) {
 				throw new Error('open called out of order');
 			}
-			this._setReadyState(this.OPENED);
+			this.readyState = this.OPENED;
 		},
 		send: function() {
 			if (this.readyState !== this.OPENED) {
@@ -65,36 +110,16 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		_getRequestHeaders: function() {
 			return this.headers;
 		},
-		_setReadyState: function(value) {
-			this.readyState = value;
-			if (typeof this.onreadystatechange === 'function') {
-				this.onreadystatechange();
-			}
-		},
-		_setResponse: function(response) {
-			// Bug 381396: if this test is running in IE, emulate IE's non-support for 'response' attribute.
-			if (!isIE) {
-				this.response = response;
-			}
-			if (this.responseType === '' || this.responseType === 'text') {
-				this.responseText = response;
-			}
-		},
-		_setStatus: function(status) {
-			this.status = status;
-		},
-		_setStatusText: function(statusText) {
-			this.statusText = statusText;
-		},
 		_fakeComplete: function(status, response, statusText) {
-			this._setStatus(status);
+			this.status = status;
 			if (arguments.length === 3) {
-				this._setStatusText(statusText);
+				this.statusText = statusText;
 			}
-			this._setResponse(response);
-			this._setReadyState(this.DONE);
+			this.response = response;
+			this.readyState = this.DONE;
 		},
 		_fakeTimeout: function(err) {
+			this._errorFlag = true;
 			if (typeof new XMLHttpRequest().timeout !== "undefined") {
 				this.dispatchEvent({type: 'timeout'});
 			}
@@ -208,6 +233,28 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				assert.equal(result.args.timeout, 1500);
 				assert.ok(result.xhr instanceof MockXMLHttpRequest);
 			});
+	};
+
+	tests['test timeout value has expected shape'] = function() {
+		var timeoutingXhr = new OkXhr();
+		timeoutingXhr.send = function() {
+			MockXMLHttpRequest.prototype.send.call(this);
+			var self = this;
+			setTimeout(function() {
+				self._fakeTimeout();
+			}, 50);
+		};
+		return xhr('GET', '/', {
+				timeout: 25
+		}, timeoutingXhr).then(fail, function(result) {
+			assert.ok(!!result.args);
+			assert.ok(!result.response);
+			assert.ok(!result.responseText);
+			assert.equal(result.status, 0);
+			assert.equal(result.url, '/');
+			assert.ok(result.xhr instanceof MockXMLHttpRequest);
+			assert.ok(!!result.error);
+		});
 	};
 
 	tests['test \'X-Requested-With\' is set'] = function() {
