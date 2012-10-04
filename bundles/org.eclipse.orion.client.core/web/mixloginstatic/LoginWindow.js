@@ -326,7 +326,7 @@ define(['domReady', 'orion/xhr'], function(domReady, xhr) {
 		document.getElementById('orionOpen').style.visibility = 'hidden';
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		
-		if (!userCreationEnabled && !registrationURI) {
+		if (!registrationURI) {
 			document.getElementById('orionLogin').style.visibility = '';
 		}
 		
