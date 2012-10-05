@@ -280,7 +280,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		document.getElementById('newUserHeaderShown').style.visibility = 'hidden';
 		document.getElementById('orionOpen').style.visibility = '';
 		
-		if (!userCreationEnabled && !registrationURI) {
+		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
 		}
 	}
@@ -321,18 +321,19 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	}
 
 	function revealRegistration() {
-	
-		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-	
 		// If registrationURI is set and userCreation is not, open the URI in a new window
 		if (!userCreationEnabled && registrationURI) {
 			window.open(registrationURI);
 			return;
 		}
+	
+		document.getElementById('orionOpen').style.visibility = 'hidden';
+		document.getElementById('orionRegister').style.visibility = 'hidden';
+	
 		document.getElementById('orionLogin').style.visibility = 'hidden';
 		document.getElementById('orionRegister').style.visibility = 'hidden';
 		document.getElementById('newUserHeaderShown').style.visibility = '';
+		document.getElementById('create_login').focus();
 	}
 
 	function formatForNoUserCreation() {
@@ -352,9 +353,6 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 
 	function hideResetUser() {
 		document.getElementById('orionLogin').style.visibility = '';
-		if (userCreationEnabled || registrationURI) {
-			document.getElementById('orionRegister').style.visibility = '';
-		}
 		document.getElementById('newUserHeaderShown').style.display = '';
 		document.getElementById('orionReset').style.visibility = 'hidden';
 	}
@@ -365,12 +363,8 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	
 	function revealLogin(){
 		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-		
-		if (!registrationURI) {
-			document.getElementById('orionLogin').style.visibility = '';
-		}
-		
+		document.getElementById('orionRegister').style.visibility = 'hidden';		
+		document.getElementById('orionLogin').style.visibility = '';
 		document.getElementById("login").focus();
 	}
 	
