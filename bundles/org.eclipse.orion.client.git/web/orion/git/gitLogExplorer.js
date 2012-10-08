@@ -92,12 +92,12 @@ exports.GitLogExplorer = (function() {
 				var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
 				if (metadata.Git) {
 					gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation).then(function(defaultRemoteBranchJsonData, secondArg) {
-						seg.href = require.toUrl("git/git-log2.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}
 			} else {
 				if (metadata.Git) {
-					seg.href = require.toUrl("git/git-log2.html") + "#" + metadata.Git.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		}), dojo.hitch(this, function(error) {
