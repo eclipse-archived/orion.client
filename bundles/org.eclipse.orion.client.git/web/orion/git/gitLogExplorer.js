@@ -40,19 +40,12 @@ exports.GitLogExplorer = (function() {
 		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
 		this.actionScopeId = actionScopeId || options.actionScopeId;
-		this.fileClient = new mFileClient.FileClient(serviceRegistry);
 		
 		this.incomingCommits = [];
 		this.outgoingCommits = [];
 		
-		var selection = new mSelection.Selection(serviceRegistry);
-		this.commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-		
-		// Git operations
-		var that = this;
-		var gitClient = new mGitClient.GitService(serviceRegistry);
-		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: that.commandService});
+		this.commandService = this.registry.getService("orion.page.command");
+		this.fileClient = this.registry.getService("orion.core.file");
 	}
 	
 	GitLogExplorer.prototype.getCloneFileUri = function(){
@@ -128,6 +121,8 @@ exports.GitLogExplorer = (function() {
 		
 		if(fileURI){		
 			this.fileClient.read(fileURI, true).then(dojo.hitch(this, function(metadata) {
+				this.isDirectory = metadata.Directory;
+				
 				var title = branchName ? branchName + " on " + metadata.Name + " - Git Log" : metadata.Name + " - " + "Git Log";
 				var breadcrumbRootName;
 				var branchIdentifier = branchName ? " (" + branchName + ") " : "";
@@ -143,7 +138,7 @@ exports.GitLogExplorer = (function() {
 				mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: item, breadcrumbTarget: metadata, breadcrumbRootName: breadcrumbRootName,
 					makeBreadcrumbLink: function(seg, location) {
 						that.makeHref(that.fileClient, seg, location, isRemote);
-					}, serviceRegistry: that.registry, commandService: that.commandService, searchService: that.searcher}); 
+					}, serviceRegistry: that.registry, commandService: that.commandService}); 
 					
 					mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", item); //$NON-NLS-1$ //$NON-NLS-0$
 					deferred.callback();
@@ -452,7 +447,7 @@ exports.GitLogExplorer = (function() {
 				this.parentId = parentId;
 				this.selection = selection;
 				this.actionScopeId = actionScopeId;
-				this.renderer = new LogRenderer({registry: this.registry, actionScopeId: "itemLevelCommands", cachePrefix: "LogNavigator", checkbox: false}, this); //$NON-NLS-0$
+				this.renderer = new LogRenderer({registry: this.registry, actionScopeId: this.actionScopeId, cachePrefix: "LogNavigator", checkbox: false}, this); //$NON-NLS-0$
 				this.createTree(this.parentId, new LogModel());
 			}
 			
@@ -469,7 +464,7 @@ exports.GitLogExplorer = (function() {
 			return LogNavigator;
 		}());
 		
-		var logNavigator = new LogNavigator(this.registry, /*this.logSelection*/ null, "logNode" /*, sectionItemActionScopeId*/); //$NON-NLS-0$
+		var logNavigator = new LogNavigator(this.registry, this.selection, "logNode", this.actionScopeId); //$NON-NLS-0$
 	};
 
 	return GitLogExplorer;
