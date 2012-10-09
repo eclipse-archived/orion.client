@@ -37,7 +37,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
 
 			// Git log explorer
-			var explorer = new mGitLogExplorer.GitLogExplorer(serviceRegistry, selection, null, "table", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions", "itemLevelCommands");
+			var explorer = new mGitLogExplorer.GitLogExplorer(serviceRegistry, fileClient, commandService, selection, 
+					null, "table", "pageTitle", "pageActions", "selectionTools", "pageNavigationActions", "itemLevelCommands");
 			mGlobalCommands.setPageCommandExclusions(["eclipse.git.remote", "eclipse.git.log"]); //$NON-NLS-1$ //$NON-NLS-0$
 			mGlobalCommands.generateBanner("orion-gitlog", serviceRegistry, commandService, preferences, searcher, explorer); //$NON-NLS-0$
 			
