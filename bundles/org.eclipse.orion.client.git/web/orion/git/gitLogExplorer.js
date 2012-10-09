@@ -11,9 +11,9 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/commands', 'orion/fileClient', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands',
-'orion/selection', 'orion/git/gitClient', 'orion/searchClient', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mExplorer, mCommands, mFileClient, mSection, mDynamicContent, mFilterSearchBox, PageUtil, mGlobalCommands, mGitCommands, mSelection, mGitClient, mSearchClient) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/commands', 'orion/section', 'orion/globalCommands', 
+        'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mExplorer, mCommands, mSection, mGlobalCommands, mGitCommands) {
 var exports = {};
 
 exports.GitLogExplorer = (function() {
@@ -29,23 +29,24 @@ exports.GitLogExplorer = (function() {
 	 * @param parentId
 	 * @param actionScopeId
 	 */
-	function GitLogExplorer(serviceRegistry, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId, actionScopeId) {
+	function GitLogExplorer(serviceRegistry, fileClient, commandService, selection, options, parentId, pageTitleId, toolbarId, selectionToolsId, pageNavId, actionScopeId) {
 		this.registry = serviceRegistry;
+		this.fileClient = fileClient;
+		this.commandService = commandService;
 		this.selection = selection;
+		
 		this.checkbox = options !== null ? options.checkbox : true;
 		this.minimal = options !== null ? options.minimal : false;
+		
 		this.parentId = parentId;
 		this.pageTitleId = pageTitleId;
 		this.toolbarId = toolbarId;
-		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
+		this.pageNavId = pageNavId;
 		this.actionScopeId = actionScopeId || options.actionScopeId;
 		
 		this.incomingCommits = [];
 		this.outgoingCommits = [];
-		
-		this.commandService = this.registry.getService("orion.page.command");
-		this.fileClient = this.registry.getService("orion.core.file");
 	}
 	
 	GitLogExplorer.prototype.getCloneFileUri = function(){
