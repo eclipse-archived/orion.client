@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred", "orion/auth"], 
-		function(messages, require, mSearchUtils, mContentTypes, Deferred, mAuth) {
+define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred"], 
+		function(messages, require, mSearchUtils, mContentTypes, Deferred) {
 
 	/**
 	 * This helper method implements invocation of the service call,
@@ -25,33 +25,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		if(!fileService[funcName]){
 			throw funcName + " " + messages['is not supportted in this file system'];
 		}
-		var clientDeferred = new Deferred();
-		fileService[funcName].apply(fileService, funcArgs).then(
-			//on success, just forward the result to the client
-			function(result) {
-				clientDeferred.resolve(result);
-			},
-			//on failure we might need to retry
-			function(error) {
-				if (error.status === 401) {
-					mAuth.handleAuthenticationError(error, function(message) {
-						//try again
-						fileService[funcName].apply(fileService, funcArgs).then(
-							function(result) {
-								clientDeferred.resolve(result);
-							},
-							function(error) {
-								clientDeferred.reject(error);
-							}
-						);
-					});
-				} else {
-					//forward other errors to client
-					clientDeferred.reject(error);
-				}
-			}
-		);
-		return clientDeferred;
+		return fileService[funcName].apply(fileService, funcArgs);
 	}
 	
 	/**
