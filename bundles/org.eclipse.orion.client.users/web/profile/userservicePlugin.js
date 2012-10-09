@@ -37,7 +37,23 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 				"name": "Delete Profile",
 				"tooltip": "Delete Profile",
 				"action": "deleteProfile"
-			}]
+			}],
+			"sections" : [
+                            {"id": "personalInformation", "name" : "Personal Information", "data" :[
+                                                                                                    {"type": "TextBox", "props": {"id": "pi_login", "readOnly" : false, "name" : "login"}, "label": "Login"},
+                                                                                                    {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "type" : "", "name" : "Name"}, "label" : "Name"},
+                                                                                                  	 {"type": "TextBox", "props": {"id": "pi_email", "readOnly" : false,  "type" : "", "name" : "email"}, "label" : "Email"},
+                                                                                                  	 {"type": "CheckBox", "props": {"id": "pi_emailConfirmed", "readOnly" : true,  "type" : "", "name" : "emailConfirmed"}, "label" : "Email confirmed"},
+                                                                                                    {"type": "eclipse.DateLong", "props": {"id": "pi_lastLogin", "readOnly" : true,  "type" : "", "name" : "LastLogInTimestamp"}, "label" : "Last login"}
+                                                                                                    ]
+                            },
+                            {"id": "gitInformation", "name" : "Git (Defaults used to configure clones)", "data" : [
+   				  	                                                                                            {"type": "TextBox", "props": {"id": "git_mail", "readOnly" : false, "name" : "GitMail"}, "label" : "Git Mail"},
+   				  	                                                                                            {"type": "TextBox", "props": {"id": "git_name", "readOnly" : false, "name" : "GitName"}, "label" : "Git Name"}
+   				  	                                                                                            ]
+   				  	        },
+                          {"id": "openids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": "../mixloginstatic/manageOpenids.html", "style" : "border: 0px; width: 500px"}}
+                            ]
 		};
 
 		return content;
@@ -45,10 +61,12 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 
 	usersService.initProfile = function (userURI, pluginsEventName, dataEventName) {
 		return this.getUserInfo(userURI, function (json) {
-			usersService.dispatchEvent(pluginsEventName, {
-				"plugins": json.Plugins
+			usersService.dispatchEvent({
+				type: pluginsEventName,
+				"data": json
 			});
-			usersService.dispatchEvent(dataEventName, json);
+			
+			usersService.dispatchEvent({type: dataEventName, data: json});
 		});
 	};
 
@@ -83,9 +101,7 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 			break;
 		}
 	};
-	usersService.dispatchEvent = function(){
-		// this method will get wrapped and delegated to the plugin
-	};
+
 
 	provider.registerService("orion.core.user", usersService);
 	provider.connect();
