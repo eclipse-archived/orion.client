@@ -11,9 +11,9 @@
 
 /*global define dijit console document Image */
 
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/fileClient', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands',
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/commands', 'orion/fileClient', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands',
 'orion/selection', 'orion/git/gitClient', 'orion/searchClient', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mCommands, mFileClient, mSection, mDynamicContent, mFilterSearchBox, PageUtil, mGlobalCommands, mGitCommands, mSelection, mGitClient, mSearchClient) {
+		function(messages, require, dojo, mExplorer, mCommands, mFileClient, mSection, mDynamicContent, mFilterSearchBox, PageUtil, mGlobalCommands, mGitCommands, mSelection, mGitClient, mSearchClient) {
 var exports = {};
 
 exports.GitLogExplorer = (function() {
@@ -40,19 +40,12 @@ exports.GitLogExplorer = (function() {
 		this.pageNavId = pageNavId;
 		this.selectionToolsId = selectionToolsId;
 		this.actionScopeId = actionScopeId || options.actionScopeId;
-		this.fileClient = new mFileClient.FileClient(serviceRegistry);
 		
 		this.incomingCommits = [];
 		this.outgoingCommits = [];
 		
-		var selection = new mSelection.Selection(serviceRegistry);
-		this.commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-		
-		// Git operations
-		var that = this;
-		var gitClient = new mGitClient.GitService(serviceRegistry);
-		var fileClient = new mFileClient.FileClient(serviceRegistry);
-		this.searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: that.commandService});
+		this.commandService = this.registry.getService("orion.page.command");
+		this.fileClient = this.registry.getService("orion.core.file");
 	}
 	
 	GitLogExplorer.prototype.getCloneFileUri = function(){
@@ -99,12 +92,12 @@ exports.GitLogExplorer = (function() {
 				var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
 				if (metadata.Git) {
 					gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation).then(function(defaultRemoteBranchJsonData, secondArg) {
-						seg.href = require.toUrl("git/git-log2.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}
 			} else {
 				if (metadata.Git) {
-					seg.href = require.toUrl("git/git-log2.html") + "#" + metadata.Git.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					seg.href = require.toUrl("git/git-log.html") + "#" + metadata.Git.CommitLocation + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		}), dojo.hitch(this, function(error) {
@@ -128,6 +121,8 @@ exports.GitLogExplorer = (function() {
 		
 		if(fileURI){		
 			this.fileClient.read(fileURI, true).then(dojo.hitch(this, function(metadata) {
+				this.isDirectory = metadata.Directory;
+				
 				var title = branchName ? branchName + " on " + metadata.Name + " - Git Log" : metadata.Name + " - " + "Git Log";
 				var breadcrumbRootName;
 				var branchIdentifier = branchName ? " (" + branchName + ") " : "";
@@ -143,7 +138,7 @@ exports.GitLogExplorer = (function() {
 				mGlobalCommands.setPageTarget({task: "Git Log", title: title, target: item, breadcrumbTarget: metadata, breadcrumbRootName: breadcrumbRootName,
 					makeBreadcrumbLink: function(seg, location) {
 						that.makeHref(that.fileClient, seg, location, isRemote);
-					}, serviceRegistry: that.registry, commandService: that.commandService, searchService: that.searcher}); 
+					}, serviceRegistry: that.registry, commandService: that.commandService}); 
 					
 					mGitCommands.updateNavTools(that.registry, that, "pageActions", "selectionTools", item); //$NON-NLS-1$ //$NON-NLS-0$
 					deferred.callback();
@@ -160,104 +155,6 @@ exports.GitLogExplorer = (function() {
 	
 	GitLogExplorer.prototype.changedItem = function(parent, children) {
 		this.redisplay();
-	};
-	
-	GitLogExplorer.prototype.renderCommit = function(commit, i){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((i % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("logNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
-		
-		var incomingCommit = false;
-		dojo.forEach(this.incomingCommits, function(comm, i){
-			if (commit.Name === comm.Name){
-				incomingCommit = true;
-			}
-		});
-			
-		var outgoingCommit = false;
-		dojo.forEach(this.outgoingCommits, function(comm, i){
-			if (commit.Name === comm.Name){
-				outgoingCommit = true;
-			}
-		});
-		
-		if(!incomingCommit && !outgoingCommit){
-			dojo.create( "span", null, horizontalBox );
-		} else {
-			var imgSpriteName = (outgoingCommit ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit");
-			dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		
-		if (commit.AuthorImage) {
-			var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
-			var image = new Image();
-			image.src = commit.AuthorImage;
-			image.name = commit.AuthorName;
-			image.width = 30;
-			image.height = 30;
-			dojo.place(image, authorImage, "first"); //$NON-NLS-0$
-		}
-		
-		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		
-		var titleLink = dojo.create("a", {"class": "gitMainDescription navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.place(document.createTextNode(commit.Message), titleLink);		
-		
-		var _timer;
-		
-		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-		    commit: commit,
-		    onMouseLeave: function(){
-		    	if(dijit.popup.hide)
-					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-				dijit.popup.close(tooltipDialog);
-            },
-            onMouseEnter: function(){
-		    	clearTimeout(_timer);
-            }
-		});
-		
-		dojo.connect(titleLink, "onmouseover", titleLink, function() { //$NON-NLS-0$
-			clearTimeout(_timer);
-			
-			_timer = setTimeout(function(){
-				dijit.popup.open({
-					popup: tooltipDialog,
-					around: titleLink,
-					orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				});
-			}, 600);
-		});
-		
-		dojo.connect(titleLink, "onmouseout", titleLink, function() { //$NON-NLS-0$
-			clearTimeout(_timer);
-			
-			_timer = setTimeout(function(){
-				if(dijit.popup.hide)
-					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-				dijit.popup.close(tooltipDialog);
-			}, 200);
-		});
-		
-		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName 
-			+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
-					
-		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.registry.getService("orion.page.command").renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	 //$NON-NLS-0$
-	};
-	
-	GitLogExplorer.prototype.renderLog = function(commits){
-		var tableNode = dojo.byId('table');	 //$NON-NLS-0$
-		dojo.empty(tableNode);
-		
-		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
-		contentParent.innerHTML = '<list id="logNode" class="mainPadding"></list>'; //$NON-NLS-0$
-		
-		for(var i=0; i<commits.length; ++i){
-			this.renderCommit(commits[i], i);
-		}
 	};
 	
 	GitLogExplorer.prototype.getOutgoingIncomingChanges = function(resource){
@@ -384,7 +281,7 @@ exports.GitLogExplorer = (function() {
 								mGitCommands.updateNavTools(that.registry, that, that.toolbarId, that.selectionToolsId, items, that.pageNavId);
 							}
 						
-							that.renderLog(items.Children);
+							that.displayLog(items.Children);
 						});
 					}
 				);
@@ -395,7 +292,181 @@ exports.GitLogExplorer = (function() {
 			}
 		);
 	};
-	
+
+	GitLogExplorer.prototype.displayLog = function(commits){
+		
+		var that = this;
+
+		var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
+		
+		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
+		contentParent.innerHTML = '<div id="logNode" class="mainPadding"></list>'; //$NON-NLS-0$;
+		
+		var LogModel = (function() {
+			function LogModel() {
+			}
+			
+			LogModel.prototype = {					
+				destroy: function(){
+				},
+				getRoot: function(onItem){
+					onItem(commits);
+				},
+				getChildren: function(parentItem, onComplete){	
+					if (parentItem instanceof Array && parentItem.length > 0) {
+						onComplete(parentItem);
+					} else {
+						onComplete([]);
+					}
+				},
+				getId: function(/* item */ item){
+					return item.Name;
+				}
+			};
+			
+			return LogModel;
+		}());
+		
+		var LogRenderer = (function() {
+			function LogRenderer (options, explorer) {
+				this._init(options);
+				this.options = options;
+				this.explorer = explorer;
+				this.registry = options.registry;
+			}
+			
+			LogRenderer.prototype = new mExplorer.SelectionRenderer();
+
+			LogRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+				var commit = item;
+				
+				switch(col_no){
+				case 0:		
+					var td = document.createElement("td"); //$NON-NLS-0$
+					
+					var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, td ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+					
+					var incomingCommit = false;
+					dojo.forEach(that.incomingCommits, function(comm, i){
+						if (commit.Name === comm.Name){
+							incomingCommit = true;
+						}
+					});
+						
+					var outgoingCommit = false;
+					dojo.forEach(that.outgoingCommits, function(comm, i){
+						if (commit.Name === comm.Name){
+							outgoingCommit = true;
+						}
+					});
+					
+					if(!incomingCommit && !outgoingCommit){
+						dojo.create( "span", null, horizontalBox );
+					} else {
+						var imgSpriteName = (outgoingCommit ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit");
+						dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					
+					if (commit.AuthorImage) {
+						var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						
+						var image = new Image();
+						image.src = commit.AuthorImage;
+						image.name = commit.AuthorName;
+						image.width = 30;
+						image.height = 30;
+						dojo.place(image, authorImage, "first"); //$NON-NLS-0$
+					}
+					
+					var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					
+					var titleLink = dojo.create("a", {"class": "gitMainDescription navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.place(document.createTextNode(commit.Message), titleLink);		
+					
+					var _timer;
+					
+					var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
+					    commit: commit,
+					    onMouseLeave: function(){
+					    	if(dijit.popup.hide)
+								dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+							dijit.popup.close(tooltipDialog);
+			            },
+			            onMouseEnter: function(){
+					    	clearTimeout(_timer);
+			            }
+					});
+					
+					dojo.connect(titleLink, "onmouseover", titleLink, function() { //$NON-NLS-0$
+						clearTimeout(_timer);
+						
+						_timer = setTimeout(function(){
+							dijit.popup.open({
+								popup: tooltipDialog,
+								around: titleLink,
+								orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							});
+						}, 600);
+					});
+					
+					dojo.connect(titleLink, "onmouseout", titleLink, function() { //$NON-NLS-0$
+						clearTimeout(_timer);
+						
+						_timer = setTimeout(function(){
+							if(dijit.popup.hide)
+								dijit.popup.hide(tooltipDialog); //close doesn't work on FF
+							dijit.popup.close(tooltipDialog);
+						}, 200);
+					});
+					
+					dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+					var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						innerHTML: messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName 
+						+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
+								
+					return td;
+					
+					break;
+				case 1:
+					var actionsColumn = this.getActionsColumn(item, tableRow, null, null, true);
+					dojo.style(actionsColumn, "padding-left", "5px"); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.style(actionsColumn, "padding-right", "5px"); //$NON-NLS-1$ //$NON-NLS-0$
+					return actionsColumn;
+					break;
+				}
+			};
+			
+			return LogRenderer;
+		}());
+		
+		var LogNavigator = (function() {
+			function LogNavigator(registry, selection, parentId, actionScopeId) {
+				this.registry = registry;
+				this.checkbox = false;
+				this.parentId = parentId;
+				this.selection = selection;
+				this.actionScopeId = actionScopeId;
+				this.renderer = new LogRenderer({registry: this.registry, actionScopeId: this.actionScopeId, cachePrefix: "LogNavigator", checkbox: false}, this); //$NON-NLS-0$
+				this.createTree(this.parentId, new LogModel());
+			}
+			
+			LogNavigator.prototype = new mExplorer.Explorer();
+		
+			//provide to the selection model that if a row is selectable
+			LogNavigator.prototype.isRowSelectable = function(modelItem){
+				return true;
+			};
+			//provide to the expandAll/collapseAll commands
+			LogNavigator.prototype.getItemCount  = function(){
+				return false;
+			};
+			return LogNavigator;
+		}());
+		
+		var logNavigator = new LogNavigator(this.registry, this.selection, "logNode", this.actionScopeId); //$NON-NLS-0$
+	};
+
 	return GitLogExplorer;
 }());
 

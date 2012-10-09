@@ -1788,24 +1788,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(previousLogPage);
-		
-		//TODO: This is used only in git-log2. Merge with previousLogPage command
-		var previousLog2Page = new mCommands.Command({
-			name : messages["< Previous Page"],
-			tooltip: messages["Show previous page of git log"],
-			id : "eclipse.orion.git.previousLog2Page",
-			hrefCallback : function(data){
-				return require.toUrl("git/git-log2.html") + "#" + data.items.PreviousLocation; //$NON-NLS-1$ //$NON-NLS-0$
-			},
-			visibleWhen : function(item){
-				if(item.Type === "RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
-					return (item.PreviousLocation !== undefined);
-				}
-				
-				return false;
-			}
-		});
-		commandService.addCommand(previousLog2Page);
 
 		var nextLogPage = new mCommands.Command({
 			name : messages["Next Page >"],
@@ -1822,24 +1804,6 @@ var exports = {};
 			}
 		});
 		commandService.addCommand(nextLogPage);
-		
-		//TODO: This is used only in git-log2. Merge with nextLogPage command
-		var nextLog2Page = new mCommands.Command({
-			name : messages["Next Page >"],
-			tooltip: messages["Show next page of git log"],
-			id : "eclipse.orion.git.nextLog2Page", //$NON-NLS-0$
-			hrefCallback : function(data) {
-				return require.toUrl("git/git-log2.html") + "#" + data.items.NextLocation; //$NON-NLS-1$ //$NON-NLS-0$
-			},
-			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
-					return (item.NextLocation !== undefined);
-				}
-				
-				return false;
-			}
-		});
-		commandService.addCommand(nextLog2Page);
 		
 		var previousTagPage = new mCommands.Command({
 			name : messages["< Previous Page"],
