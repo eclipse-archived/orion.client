@@ -11,22 +11,29 @@
 /*global dojo dijit window eclipse:true*/
 
 define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient', 'orion/profile/profile',
-	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress'], 
-			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress) {
+	        'orion/operationsClient', 'orion/searchClient', 'orion/fileClient', 'orion/globalCommands', 'orion/status', 'orion/progress',
+	        'orion/dialogs', 'orion/selection', 'orion/ssh/sshTools', 'orion/links'], 
+			function(dojo, mBootstrap, mCommands, mUsersClient, mProfile, mOperationsClient, mSearchClient, mFileClient, mGlobalCommands, mStatus, mProgress,
+					mDialogs, mSelection, mSshTools, mLinks) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
-			var pluginRegistry = core.pluginRegistry;
-
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			var fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
+			
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
+			new mDialogs.DialogService(serviceRegistry);
+			var selection = new mSelection.Selection(serviceRegistry);
+			new mSshTools.SshService(serviceRegistry);
+			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+			var linkService = new mLinks.TextLinkService({serviceRegistry: serviceRegistry});
+			var usersClient = new mUsersClient.UsersClient(serviceRegistry, pluginRegistry);
+		
+			// Git operations
+			var fileClient = new mFileClient.FileClient(serviceRegistry);
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, fileService: fileClient, commandService: commandService});
 			
 			var profile = new mProfile.Profile({
 				registry: serviceRegistry,
@@ -37,7 +44,9 @@ define(['dojo', 'orion/bootstrap', 'orion/commands', 'orion/profile/usersClient'
 				usersClient: usersClient
 			});
 			
+			mGlobalCommands.setPageCommandExclusions([]); //$NON-NLS-1$ //$NON-NLS-0$
 			mGlobalCommands.generateBanner("orion-profile", serviceRegistry, commandService, preferences, searcher, profile); //$NON-NLS-0$
+
 			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				commandService.destroy(toolbar);
