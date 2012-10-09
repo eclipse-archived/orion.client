@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define escape */
-define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
+define(["orion/Deferred", "orion/xhr", 'orion/EventTarget'], function(Deferred, xhr, EventTarget) {
 	function formEncode(value) {
 		return encodeURIComponent(value).replace(/[!'()*]/g, escape).replace('%20', '+'); //$NON-NLS-0$ //$NON-NLS-1$
 	}
@@ -40,6 +40,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 	 * @name eclipse.UsersService
 	 */
 	function UsersService(serviceRegistry) {
+		EventTarget.attach(this);
 		if(serviceRegistry){
 			this._serviceRegistry = serviceRegistry;
 			this._serviceRegistration = serviceRegistry.registerService(
@@ -63,7 +64,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						onLoad(jsonData);
 					else
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				return jsonData;
 			}, function(result) {
@@ -89,7 +90,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						onLoad(jsonData);
 					else
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				return jsonData.users;
 			}, function(result) {
@@ -115,7 +116,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						onLoad(jsonData);
 					else
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 			}, function(result) {
 				var error = getError(result);
@@ -160,7 +161,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						onLoad(jsonData);
 					else
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				return jsonData;
 			}, function(result) {
@@ -197,7 +198,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						return onLoad(jsonData);
 					else{
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 						return jsonData;
 					}
 				} else {
@@ -232,7 +233,7 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 					if(typeof onLoad === "function") //$NON-NLS-0$
 						onLoad(jsonData);
 					else
-						service.dispatchEvent(onLoad, jsonData);
+						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
 				return jsonData;
 			}, function(result) {

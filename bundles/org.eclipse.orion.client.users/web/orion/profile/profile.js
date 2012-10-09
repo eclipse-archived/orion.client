@@ -67,15 +67,17 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			this.usersService = this.registry.getService("orion.core.user"); //$NON-NLS-0$
 			
 			if(this.usersService !== null){
-				this.usersService.addEventListener("requiredPluginsChanged", function(pluginsList){ //$NON-NLS-0$
-					dojo.hitch(userProfile, userProfile.drawPlugins(pluginsList.plugins));
+				this.usersService.addEventListener("requiredPluginsChanged", function(userInfo){ //$NON-NLS-0$
+					var plugins = userInfo.data.Plugins || [];
+					dojo.hitch(userProfile, userProfile.drawPlugins(plugins));
 				});
 				this.usersService.addEventListener("userInfoChanged", function(jsonData){ //$NON-NLS-0$
-					dojo.hitch(userProfile,	userProfile.populateData(jsonData));
+					dojo.hitch(userProfile,	userProfile.populateData(jsonData.data));
 				});
 				this.usersService.addEventListener("userDeleted", function(jsonData){ //$NON-NLS-0$
 					window.location.replace("/"); //$NON-NLS-0$
 				});
+
 				dojo.hitch(userProfile, function(){this.addInputListener();})();
 			}
 	
@@ -179,7 +181,6 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 		setUserToDisplay : function(userURI) {
 			this.currentUserURI = userURI;
 			this.usersClient.initProfile(userURI, "requiredPluginsChanged", "userInfoChanged"); //$NON-NLS-1$ //$NON-NLS-0$
-			
 		},
 		redisplayLastUser : function(){
 			var profile = this;
@@ -288,7 +289,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				
 				if(content.sections[i].type==="iframe"){ //$NON-NLS-0$
 					dojo.hitch(this, this.drawIframe(content.sections[i].data, sectionContents));
-					return;
+					continue;
 				}
 
 				for(var j=0; j<content.sections[i].data.length; j++){
