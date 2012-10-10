@@ -534,10 +534,9 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 			if (view) {
 				var model = view.getModel();
 				if (model.getBaseModel) {
-					model.getBaseModel().removeEventListener("Changed", this._listener.onChanged);
-				} else {
-					view.removeEventListener("ModelChanged", this._listener.onChanged);
+					model = model.getBaseModel();
 				}
+				model.removeEventListener("Changed", this._listener.onChanged);
 				view.removeEventListener("MouseDown", this._listener.onMouseDown);
 				view.removeEventListener("Selection", this._listener.onSelection);
 				view.removeEventListener("Destroy", this._listener.onDestroy);
