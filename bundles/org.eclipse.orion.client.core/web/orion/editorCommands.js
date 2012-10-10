@@ -63,10 +63,18 @@ exports.EditorCommandFactory = (function() {
 			}
 	
 			function handleError(error) {
-				error = error || "Unknown error";
-				var statusService = serviceRegistry.getService("orion.page.message");
+				var errorToDisplay = {};
+				errorToDisplay.Severity = "Error"; //$NON-NLS-0$
+				if (error.status === 0) {
+					errorToDisplay.Message = messages['No response from server.  Check your internet connection and try again.']; //$NON-NLS-1$
+				} else {
+					errorToDisplay = error;
+				}
+				var statusService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 				if (statusService) {
-					statusService.setErrorMessage(error);
+					statusService.setProgressResult(errorToDisplay);
+				} else {
+					window.console.log(errorToDisplay);
 				}
 			}
 
@@ -120,8 +128,6 @@ exports.EditorCommandFactory = (function() {
 														}
 													}, handleError));
 										}
-									} else if (error.status === 0) {
-										handleError("No response from server.")
 									} else {
 										// unknown error
 										handleError(error);

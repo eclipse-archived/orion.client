@@ -196,10 +196,10 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 				dojo.place(msg, this.progressDomId, "last"); //$NON-NLS-0$
 			} else {  // msg is plain text
 				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				if (extraClass && this.progressDomId !== this.domId) {
-					dojo.addClass(this.notificationContainerDomId, extraClass);
-					dojo.removeClass(this.notificationContainerDomId, removedClasses);
-				}
+			}
+			if (extraClass && this.progressDomId !== this.domId) {
+				dojo.addClass(this.notificationContainerDomId, extraClass);
+				dojo.removeClass(this.notificationContainerDomId, removedClasses);
 			}
 			dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
