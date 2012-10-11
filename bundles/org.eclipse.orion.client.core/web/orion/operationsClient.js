@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  /*globals define console setTimeout*/
-define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], function(messages, mAuth, Deferred){
+define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messages, Deferred){
 	
 	function _doServiceCall(operationsService, funcName, funcArgs) {
 		var clientDeferred = new Deferred();
@@ -21,22 +21,8 @@ define(['i18n!orion/operations/nls/messages', "orion/auth", "orion/Deferred"], f
 			},
 			//on failure we might need to retry
 			function(error) {
-				if (error.status === 401) {
-					mAuth.handleAuthenticationError(error, function(message) {
-						//try again
-						operationsService[funcName].apply(operationsService, funcArgs).then(
-							function(result) {
-								clientDeferred.resolve(result);
-							},
-							function(error) {
-								clientDeferred.reject(error);
-							}
-						);
-					});
-				} else {
-					//forward other errors to client
-					clientDeferred.reject(error);
-				}
+				//forward other errors to client
+				clientDeferred.reject(error);
 			}
 		);
 		return clientDeferred;

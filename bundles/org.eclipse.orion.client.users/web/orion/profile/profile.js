@@ -8,11 +8,11 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit window eclipse:true*/
+/*global dojo dijit window eclipse:true define console*/
 
-define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/globalCommands', 'orion/auth',
+define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/globalCommands',
 	        'dojo/parser', 'dojo/hash', 'dojo/date/locale', 'dijit/layout/ContentPane', 'dijit/form/TextBox', 'dijit/form/CheckBox', 'dijit/form/Form'], 
-			function(messages, require, dojo, dijit, mCommands, mGlobalCommands, mAuth) {
+			function(messages, require, dojo, dijit, mCommands, mGlobalCommands) {
 
 	/**
 	 * Used when a value should be displayed as Date but is returned as long.
@@ -108,10 +108,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 						dojo.hash(jsonData.Location);
 					},
 					error : function(response, ioArgs) {
-						var currentXHR = this;
-						mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-							dojo.xhrPost(currentXHR); // retry POST							
-						});
+						//TODO: handle error
 					}
 				});
 			}
@@ -209,54 +206,61 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				iframe.src = iframe.src + "#" + hash; //$NON-NLS-0$
 			}
 		},
-		createFormElem: function(json, node){
-			  if(!json.type){
-			    throw new Error(messages["type is missing!"]);
-			  }
-			  var cls = dojo.getObject(json.type, false, dijit.form);
-			  if(!cls){
-			    cls = dojo.getObject(json.type, false);
-			  }
-			  if(cls){
-				  if(dijit.byId(json.props.id))
-					  dijit.byId(json.props.id).destroy();
-				  
-				  formElem = new cls(json.props);
-				  formElem.placeAt(node);
-				  
-				  function setInnerHTML(myDijit,p){
-					  if(myDijit.declaredClass==="dijit.form.CheckBox"){ //$NON-NLS-0$
-						  p.innerHTML = myDijit.get('checked') ? messages["yes"] : messages["no"]; //$NON-NLS-0$
-						  return;
-					  }
-					  p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
-					  if(p.innerHTML=="")
-						  p.innerHTML="&nbsp"; //$NON-NLS-0$
-					};
-				  
-				  if(formElem.get('readOnly')===true && !formElem.get('ecliplseCustomValue')){ //$NON-NLS-1$ //$NON-NLS-0$
-					  formElem.set('style', 'display: none'); //$NON-NLS-1$ //$NON-NLS-0$
-					  var p = dojo.create("span", {id: formElem.get('id')+"_p", className: "userprofile", innerHTML: formElem.get('value')?formElem.get('value'):"&nbsp;"}, node, "last"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					  
-					  setInnerHTML(formElem, p);
-					  
-					  dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit,p){ //$NON-NLS-0$
-						  if(myDijit.declaredClass==="dijit.form.CheckBox"){ //$NON-NLS-0$
-							  p.innerHTML = myDijit.get('checked') ? messages['yes'] : messages['no']; //$NON-NLS-0$
-							  return;
-						  }
-						  p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
-						  if(p.innerHTML=="")
-							  p.innerHTML="&nbsp"; //$NON-NLS-0$
-						}, formElem, p));
-				  }
-				  
-				  return formElem;
-			  }else{
-				  return new Error(messages["Type not found "] + json.type);
-			  }
-			  
-			},
+		createFormElem: function(json, node) {
+			function setInnerHTML(myDijit, p) {
+				if (myDijit.declaredClass === "dijit.form.CheckBox") { //$NON-NLS-0$
+					p.innerHTML = myDijit.get('checked') ? messages["yes"] : messages["no"]; //$NON-NLS-0$
+					return;
+				}
+				p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
+				if (p.innerHTML === "") {
+					p.innerHTML = "&nbsp"; //$NON-NLS-0$
+				}
+			}
+			
+			if (!json.type) {
+				throw new Error(messages["type is missing!"]);
+			}
+			var Cls = dojo.getObject(json.type, false, dijit.form);
+			if (!Cls) {
+				Cls = dojo.getObject(json.type, false);
+			}
+			if (Cls) {
+				if (dijit.byId(json.props.id)) {
+					dijit.byId(json.props.id).destroy();
+				}
+		
+				var formElem = new Cls(json.props);
+				formElem.placeAt(node);
+		
+		
+				if (formElem.get('readOnly') === true && !formElem.get('ecliplseCustomValue')) { //$NON-NLS-1$ //$NON-NLS-0$
+					formElem.set('style', 'display: none'); //$NON-NLS-1$ //$NON-NLS-0$
+					var p = dojo.create("span", {
+						id: formElem.get('id') + "_p",
+						className: "userprofile",
+						innerHTML: formElem.get('value') ? formElem.get('value') : "&nbsp;"
+					}, node, "last"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					setInnerHTML(formElem, p);
+		
+					dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit, p) { //$NON-NLS-0$
+						if (myDijit.declaredClass === "dijit.form.CheckBox") { //$NON-NLS-0$
+							p.innerHTML = myDijit.get('checked') ? messages['yes'] : messages['no']; //$NON-NLS-0$
+							return;
+						}
+						p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
+						if (p.innerHTML === "") {
+							p.innerHTML = "&nbsp"; //$NON-NLS-0$
+						}
+					}, formElem, p));
+				}
+		
+				return formElem;
+			} else {
+				return new Error(messages["Type not found "] + json.type);
+			}
+		
+		},
 		drawIframe: function(desc, placeholder){
 			var iframe = dojo.create("iframe", desc, placeholder); //$NON-NLS-0$
 			this.iframes.push(iframe);
@@ -268,40 +272,41 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 		draw: function(content, placeholder){
 			var profile = this;
 			placeholder.innerHTML = "";
-			if(content.sections)
-			for(var i=0; i<content.sections.length; i++){
-				
-				if(dijit.byId(content.sections[i].id))
-					dijit.byId(content.sections[i].id).destroy();
-
-				var titleWrapper = dojo.create( "div", {"class":"sectionWrapper toolComposite", "id": content.sections[i].id + "_SectionHeader"}, placeholder ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				
-				dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft", innerHTML: content.sections[i].name }, titleWrapper ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
-				var content2 =	
-					'<div class="sectionTable" role="region" aria-labelledby="' + content.sections[i].id + "_SectionTitle" + '">' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						'<list id="' + content.sections[i].id + '"></list>' + //$NON-NLS-1$ //$NON-NLS-0$
-					'</div>'; //$NON-NLS-0$
-				
-				dojo.place( content2, placeholder );
-
-				var sectionContents = dojo.create("div", null, placeholder); //$NON-NLS-0$
-				
-				if(content.sections[i].type==="iframe"){ //$NON-NLS-0$
-					dojo.hitch(this, this.drawIframe(content.sections[i].data, sectionContents));
-					continue;
-				}
-
-				for(var j=0; j<content.sections[i].data.length; j++){
-					var tableListItem = dojo.create( "div", { "class":"sectionTableItem"}, dojo.byId(content.sections[i].id) ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			if(content.sections) {
+				for(var i=0; i<content.sections.length; i++){
 					
-					var data = content.sections[i].data[j];
-					var label = dojo.create("label", {"for": data.props.id}, tableListItem); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.create( "span", {style: "min-width:150px; display:inline-block", innerHTML: data.label }, label );				 //$NON-NLS-1$ //$NON-NLS-0$
-					var input = this.createFormElem(data, label);
-					dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}})); //$NON-NLS-0$
-					if(this.lastJSON && data.props && this.lastJSON[data.props.name]){
-						input.set('value', this.lastJSON[data.props.name]); //$NON-NLS-0$
+					if(dijit.byId(content.sections[i].id))
+						dijit.byId(content.sections[i].id).destroy();
+	
+					var titleWrapper = dojo.create( "div", {"class":"sectionWrapper toolComposite", "id": content.sections[i].id + "_SectionHeader"}, placeholder ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					
+					dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft", innerHTML: content.sections[i].name }, titleWrapper ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	
+					var content2 =	
+						'<div class="sectionTable" role="region" aria-labelledby="' + content.sections[i].id + "_SectionTitle" + '">' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							'<list id="' + content.sections[i].id + '"></list>' + //$NON-NLS-1$ //$NON-NLS-0$
+						'</div>'; //$NON-NLS-0$
+					
+					dojo.place( content2, placeholder );
+	
+					var sectionContents = dojo.create("div", null, placeholder); //$NON-NLS-0$
+					
+					if(content.sections[i].type==="iframe"){ //$NON-NLS-0$
+						dojo.hitch(this, this.drawIframe(content.sections[i].data, sectionContents));
+						continue;
+					}
+	
+					for(var j=0; j<content.sections[i].data.length; j++){
+						var tableListItem = dojo.create( "div", { "class":"sectionTableItem"}, dojo.byId(content.sections[i].id) ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						
+						var data = content.sections[i].data[j];
+						var label = dojo.create("label", {"for": data.props.id}, tableListItem); //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.create( "span", {style: "min-width:150px; display:inline-block", innerHTML: data.label }, label );				 //$NON-NLS-1$ //$NON-NLS-0$
+						var input = this.createFormElem(data, label);
+						dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}})); //$NON-NLS-0$
+						if(this.lastJSON && data.props && this.lastJSON[data.props.name]){
+							input.set('value', this.lastJSON[data.props.name]); //$NON-NLS-0$
+						}
 					}
 				}
 			}
@@ -331,34 +336,38 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			}
 			
 		},
-		fire: function(action){
+		fire: function(action) {
 			var self = this;
 			var data = new Object();
 			//collect all data that are not reaonly and are not empty passwords
-			dojo.forEach(dijit.byId('profileForm').getDescendants(), function(widget){  //$NON-NLS-0$
-	            var name = widget.name; 
-	            if(!name || widget.disabled || widget.get('readOnly')){ return; } //$NON-NLS-0$
-	            if(widget.get('type') && widget.get('type')=='password' && widget.get('value')==="") {return;} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	            data[name] = widget.get('value'); //$NON-NLS-0$
+			dojo.forEach(dijit.byId('profileForm').getDescendants(), function(widget) { //$NON-NLS-0$
+				var name = widget.name;
+				if (!name || widget.disabled || widget.get('readOnly')) {
+					return;
+				} //$NON-NLS-0$
+				if (widget.get('type') && widget.get('type') === 'password' && widget.get('value') === "") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					return;
+				}
+				data[name] = widget.get('value'); //$NON-NLS-0$
 			});
 			var url = this.currentUserURI;
 			this.usersClient.fire(action, url, data).then(
-					function(info){
-//							if(checkUser) checkUser(); //refresh the user header because user might been changed or user could be deleted
-							dojo.hitch(self, self.displayMessage)(info, "Info"); //$NON-NLS-0$
-						},
-					function(error){
-							if(error.status===401 || error.status===403 )
-								return;
-					dojo.hitch(self, self.displayMessage)(error, "Error"); //$NON-NLS-0$
-
-				});
-	
+		
+			function(info) {
+				//							if(checkUser) checkUser(); //refresh the user header because user might been changed or user could be deleted
+				dojo.hitch(self, self.displayMessage)(info, "Info"); //$NON-NLS-0$
+			}, function(error) {
+				if (error.status === 401 || error.status === 403) {
+					return;
+				}
+				dojo.hitch(self, self.displayMessage)(error, "Error"); //$NON-NLS-0$
+			});
+		
 		},
 		displayMessage: function(message, severity){
-			if(!message)
+			if(!message) {
 				return;
-			
+			}
 			var display = [];
 			
 			display.Severity = severity;

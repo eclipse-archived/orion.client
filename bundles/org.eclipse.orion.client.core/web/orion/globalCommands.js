@@ -14,7 +14,7 @@
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', "orion/Deferred",
-	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/LoginDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
+	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
         function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, Deferred){
 
 	/**
@@ -33,8 +33,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
-	var loginDialog = new orion.widgets.LoginDialog();
-	var userMenu = new orion.widgets.UserMenu({loginDialog: loginDialog});
+	var userMenu = new orion.widgets.UserMenu();
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -47,10 +46,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	}
 	
 	var authenticationIds = [];
-	
-	function getAuthenticationIds(){
-		return authenticationIds;
-	}
 	
 	function startProgressService(serviceRegistry){
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
@@ -118,11 +113,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					authService.getKey().then(function(key){
 						authenticationIds.push(key);
 						authService.getUser().then(function(jsonData){
-							loginDialog.addUserItem(key, authService, label, jsonData);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						}, 
 						function(errorData, jsonData){
-							loginDialog.addUserItem(key, authService, label);
 							userMenu.addUserItem(key, authService, label, jsonData);
 						});
 						window.addEventListener("storage", function(e){ //$NON-NLS-0$
@@ -133,11 +126,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							authRendered[key] = localStorage.getItem(key);
 							
 							authService.getUser().then(function(jsonData){
-								loginDialog.addUserItem(key, authService, label, jsonData);
 								userMenu.addUserItem(key, authService, label, jsonData);
 							}, 
 							function(errorData){
-								loginDialog.addUserItem(key, authService, label);
 								userMenu.addUserItem(key, authService, label);
 							});				
 						}, false);
@@ -147,45 +138,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 		
 	}
-	
-	function setPendingAuthentication(services){
-		loginDialog.setPendingAuthentication(services);
-		var i;
-		for(i in services){
-			if(services.hasOwnProperty(i)){
-				//open prompt if there is at least one pending authentication
-				var userMenu = dojo.byId('userMenu'); //$NON-NLS-0$
-				if(!userMenu.innerHTML){
-					window.setTimeout(function(){ //wait a few milliseconds for the content to generate 
-						try{
-							dijit.popup.open({
-								popup: loginDialog,
-								around: userMenu //$NON-NLS-0$
-							});
-						}catch(e){}
-					}, 500);
-				}else{
-					try{
-						dijit.popup.open({
-							popup: loginDialog,
-							around: userMenu //$NON-NLS-0$
-						});	
-					}catch(e){}
-				}
-				return;
-			}
-		}
-		
-		if (dijit.popup.hide) {
-			dijit.popup.hide(loginDialog); //close doesn't work on FF
-		}
-		dijit.popup.close(loginDialog);
-	}
-	
-	function authenticatedService(SignInKey){
-		loginDialog.authenticatedService(SignInKey);
-	}
-
 	
 	function _addSearchPopUp(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
 		var choicesMenu = new dijit.Menu({
@@ -843,15 +795,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					return proposalList;
 				}));
 			});
-            Deferred.all( promises ).then( function(returnValues){
-            	//merge all the promise return values together
-            	var extendedProposals = [];
-            	for(var i = 0; i < returnValues.length; i++){
-            		extendedProposals.push(returnValues[i]);
-            	}
-            	//Render UI
-            	uiCallback(extendedProposals)
-            });
+			Deferred.all(promises).then(function(returnValues) {
+				//merge all the promise return values together
+				// TODO: WAT? why are we re-creating the array
+				var extendedProposals = [];
+				for (var i = 0; i < returnValues.length; i++) {
+					extendedProposals.push(returnValues[i]);
+				}
+				//Render UI
+				uiCallback(extendedProposals);
+			});
 		};
 		//Create and hook up the inputCompletion instance with the search box dom node.
 		//The defaultProposalProvider provides proposals from the recent and saved searches.
@@ -1191,12 +1144,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		generateBanner: generateBanner,
 		getToolbarElements: getToolbarElements,
 		layoutToolbarElements: layoutToolbarElements,
-		notifyAuthenticationSite: notifyAuthenticationSite,
-		setPendingAuthentication: setPendingAuthentication,
-		getAuthenticationIds: getAuthenticationIds,
 		setPageTarget: setPageTarget,
 		setDirtyIndicator: setDirtyIndicator,
 		setPageCommandExclusions: setPageCommandExclusions,
-		authenticatedService: authenticatedService
+		notifyAuthenticationSite: notifyAuthenticationSite
 	};
 });

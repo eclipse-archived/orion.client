@@ -14,8 +14,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "orion/i18nUtil"], function(messages, Deferred, mAuth, i18nUtil){
-
+define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"], function(messages, Deferred, i18nUtil){
 	/**
 	 * This helper method implements invocation of the service call,
 	 * with retry on authentication error if needed.
@@ -24,35 +23,9 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/auth",  "or
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		//if the function is not implemented in the file service, we throw an exception to the caller
 		if(!fileService[funcName]){
-			throw funcName + messages[" is not supportted in this file system"];
+			throw funcName + messages[" is not supported in this file system"];
 		}
-		var clientDeferred = new Deferred();
-		fileService[funcName].apply(fileService, funcArgs).then(
-			//on success, just forward the result to the client
-			function(result) {
-				clientDeferred.resolve(result);
-			},
-			//on failure we might need to retry
-			function(error) {
-				if (error.status === 401) {
-					mAuth.handleAuthenticationError(error, function(message) {
-						//try again
-						fileService[funcName].apply(fileService, funcArgs).then(
-							function(result) {
-								clientDeferred.resolve(result);
-							},
-							function(error) {
-								clientDeferred.reject(error);
-							}
-						);
-					});
-				} else {
-					//forward other errors to client
-					clientDeferred.reject(error);
-				}
-			}
-		);
-		return clientDeferred;
+		return fileService[funcName].apply(fileService, funcArgs);
 	}
 	
 	function _copy(sourceService, sourceLocation, targetService, targetLocation) {
