@@ -220,9 +220,11 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	
 		var outcome = false;
 		
-		if( event.type === 'click' || event.keyIdentifier === 'Enter' ){
+		if( event.type === 'click' || event.keyCode === 13 ){
 			outcome = true;
 		}
+		
+		event.stopPropagation();
 		
 		return outcome;
 	}
@@ -264,23 +266,27 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 			login = document.getElementById('login').value;
 			password = document.getElementById('password').value;
 		}
-		var mypostrequest = new XMLHttpRequest();
-		mypostrequest.onreadystatechange = function() {
-			if (mypostrequest.readyState === 4) {
-				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
-					var responseObject = JSON.parse(mypostrequest.responseText);
-					showErrorMessage(responseObject.error);
-				} else {
-					finishLogin();
+		
+		if( login.length > 0 && password.length > 0 ){ 
+		
+			var mypostrequest = new XMLHttpRequest();
+			mypostrequest.onreadystatechange = function() {
+				if (mypostrequest.readyState === 4) {
+					if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+						var responseObject = JSON.parse(mypostrequest.responseText);
+						showErrorMessage(responseObject.error);
+					} else {
+						finishLogin();
+					}
 				}
-			}
-		};
-
-		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
-		mypostrequest.open("POST", "../login/form", true);
-		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		mypostrequest.setRequestHeader("Orion-Version", "1");
-		mypostrequest.send(parameters);
+			};
+	
+			var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
+			mypostrequest.open("POST", "../login/form", true);
+			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			mypostrequest.setRequestHeader("Orion-Version", "1");
+			mypostrequest.send(parameters);
+		}
 	}
 
 	function validatePassword() {
@@ -383,6 +389,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	
 	function revealLogin( event ){
 		if( handleSelectionEvent( event ) ){
+			event.stopPropagation();
 			document.getElementById('orionOpen').style.visibility = 'hidden';
 			document.getElementById('orionRegister').style.visibility = 'hidden';		
 			document.getElementById('orionLogin').style.visibility = '';
@@ -397,6 +404,8 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
 		}
+		
+		hideErrorMessage();
 	}
 
 	function googleLogin( event ){
