@@ -28,11 +28,11 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	 * @param {String} char a string of at least one char14acter
 	 * @return {boolean} true iff uppercase ascii character
 	 */
-	function isUpperCaseChar(char) {
-		if (char.length < 1) {
+	function isUpperCaseChar(c) {
+		if (c.length < 1) {
 			return false;
 		}
-		var charCode = char.charCodeAt(0);
+		var charCode = c.charCodeAt(0);
 		if (isNaN(charCode)) {
 			return false;
 		}
@@ -1865,7 +1865,8 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 			proposal: '',
 			description: '---------------------------------',
 			relevance: relevance -1,
-			style: 'hr'
+			style: 'hr',
+			unselectable: true
 		};
 
 		// need to look at prototype for global and window objects
@@ -1925,16 +1926,18 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 	}
 	
 	function createNoninferredProposals(environment, prefix, replaceStart, proposals) {
-		proposals['---dummy'] = {
-			proposal: '',
-			description: 'Non-inferred proposals',
-			relevance: -98,
-			style: 'noemphasis'
-		};
-		
+		var proposalAdded = false;
+		// a property to return is one that is 
+		//  1. defined on the type object 
+		//  2. prefixed by the prefix
+		//  3. doesn't already exist
+		//  4. is not an internal property
+		function isInterestingProperty(type, prop) {
+			return type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto'&& prop !== '$$isBuiltin';
+		}
 		function forType(type) {
 			for (var prop in type) {
-				if (type.hasOwnProperty(prop) && prop.indexOf(prefix) === 0 && !proposals['$' + prop] && prop !== '$$proto') {
+				if (isInterestingProperty(type, prop)) {
 					var propType = type[prop].typeName;
 					var first = propType.charAt(0);
 					if (first === "?" || first === "*") {
@@ -1948,6 +1951,7 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 							relevance: -99,
 							style: 'noemphasis'
 						};
+						proposalAdded = true;
 					} else {
 						proposals[prop] = {
 							proposal: removePrefix(prefix, prop),
@@ -1955,15 +1959,27 @@ define("plugins/esprima/esprimaJsContentAssist", ["plugins/esprima/esprimaVisito
 							relevance: -100,
 							style: 'noemphasis'
 						};
+						proposalAdded = true;
 					}
 				}
 			}
 		}
 		var allTypes = environment.getAllTypes();
 		for (var typeName in allTypes) {
-			if (allTypes.hasOwnProperty(typeName)) {
+			// need to traverse into the prototype
+			if (allTypes[typeName].$$proto) {
 				forType(allTypes[typeName]);
 			}
+		}
+		
+		if (proposalAdded) {
+			proposals['---dummy'] = {
+				proposal: '',
+				description: 'Non-inferred proposals',
+				relevance: -98,
+				style: 'noemphasis',
+				unselectable: true
+			};
 		}
 	}
 	
