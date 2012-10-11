@@ -212,10 +212,26 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 			}
 		}
 	}
+	
+	/* handleSelectionEvent - centralize decision making criteria for the key press,
+	   click, gesture etc that we respect as a user choice */
+	
+	function handleSelectionEvent( event ){
+	
+		var outcome = false;
+		
+		if( event.type === 'click' || event.keyIdentifier === 'Enter' ){
+			outcome = true;
+		}
+		
+		return outcome;
+	}
 
-	function personaLogin() {
-		personaLoginClicked = true;
-		navigator.id.request();
+	function personaLogin( event ) {
+		if( handleSelectionEvent( event ) ){
+			personaLoginClicked = true;
+			navigator.id.request();
+		}
 	}
 
 	function addPersonaHandler(button) {
@@ -320,20 +336,24 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		mypostrequest.send(parameters);
 	}
 
-	function revealRegistration() {
+	function revealRegistration( event ) {
 		// If registrationURI is set and userCreation is not, open the URI in a new window
-		if (!userCreationEnabled && registrationURI) {
-			window.open(registrationURI);
-			return;
+		
+		if( handleSelectionEvent( event ) ){
+		
+			if (!userCreationEnabled && registrationURI) {
+				window.open(registrationURI);
+				return;
+			}
+		
+			document.getElementById('orionOpen').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';
+		
+			document.getElementById('orionLogin').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';
+			document.getElementById('newUserHeaderShown').style.visibility = '';
+			document.getElementById('create_login').focus();
 		}
-	
-		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-	
-		document.getElementById('orionLogin').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-		document.getElementById('newUserHeaderShown').style.visibility = '';
-		document.getElementById('create_login').focus();
 	}
 
 	function formatForNoUserCreation() {
@@ -361,11 +381,13 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		window.open("/mixloginstatic/ServerStatus.html");
 	}
 	
-	function revealLogin(){
-		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';		
-		document.getElementById('orionLogin').style.visibility = '';
-		document.getElementById("login").focus();
+	function revealLogin( event ){
+		if( handleSelectionEvent( event ) ){
+			document.getElementById('orionOpen').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';		
+			document.getElementById('orionLogin').style.visibility = '';
+			document.getElementById("login").focus();
+		}
 	}
 	
 	function cancelLogin(){
@@ -374,6 +396,12 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
+		}
+	}
+
+	function googleLogin( event ){
+		if( handleSelectionEvent( event ) ){
+			event.srcElement.click();
 		}
 	}
 
@@ -488,6 +516,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		};
 
 		document.getElementById("registerButton").onclick = revealRegistration;
+		document.getElementById("registerButton").onkeydown = revealRegistration;
 
 		document.getElementById("create_password").onkeyup = function(event) {
 			if (event.keyCode === 13) {
@@ -511,11 +540,15 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		document.getElementById("hideRegisterButton").onclick = hideRegistration;
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
+		document.getElementById("googleLogin").onkeydown = googleLogin;
+		
 		document.getElementById("orionLoginLink").onclick = revealLogin;
+		document.getElementById("myopenidLogin").onkeydown = revealLogin;
+		
 		document.getElementById("personaLogin").onclick = personaLogin;
+		document.getElementById("personaLogin").onkeydown = personaLogin;
 
 		document.getElementById("cancelResetButton").onclick = hideResetUser;
-		
 
 		document.getElementById("sendResetButton").onclick = confirmResetUser;
 	});

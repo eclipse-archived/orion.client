@@ -83,13 +83,6 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
-			<div class="orion-register" id="orionRegister">
-				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Need an account?</div>
-				<form>
-					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
-				</form>
-			</div>
-
 			<div class="orion-signup" id="newUserHeaderShown" style="visibility: hidden;">
 				<div class="orion-login-header">Create an account</div>
 				<form>
@@ -142,23 +135,31 @@ require(["LoginWindow.js"]);
 			
 					<a id="orionLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin"> 
 						<div class='openIdWrapper'>
-							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" title="sign in with existing Orion account"></div> 
+							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" tabindex="0" title="sign in with existing Orion account"></div> 
 						</div>
 					</a>
 				
 					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin"> 
 						<div class='openIdWrapper'>
-							<div id="googleLogin" class="googleIcon" alt="Google" title="sign in with associated Google account"></div>
+							<div id="googleLogin" class="googleIcon" tabindex="0" alt="Google" title="sign in with associated Google account"></div>
 						</div>
 					</a> 
 					
 					<a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin"> 
 						<div class='openIdWrapper'>
-							<div id="personaLogin" class="personaIcon" alt="Mozilla Persona" title="sign in with associated Mozilla Persona account"></div> 
+							<div id="personaLogin" class="personaIcon" tabindex="0" alt="Mozilla Persona" title="sign in with associated Mozilla Persona account"></div> 
 						</div>
 					</a> 
 				</div>
-			</div>		
+			</div>	
+			
+			<div class="orion-register" id="orionRegister">
+				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Need an account?</div>
+				<form>
+					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
+				</form>
+			</div>
+			
 		</div>
 	</div>
 </body>
