@@ -219,7 +219,7 @@ define(['dojo'], function(dojo){
 					 stringExternalized = true;
 					 var strippedString = unescapeQuotes(change.string);
 					 if(messages && messages[strippedString]){
-						 change.replace = "messages['" + escapeQuotes(messages[strippedString]) + "']";						  //$NON-NLS-1$ //$NON-NLS-0$
+						 change.replace = "messages[\"" + escapeQuotes(messages[strippedString]) + "\"]";						  //$NON-NLS-1$ //$NON-NLS-0$
 					 } else {
 						 change.replace = "messages[" + change.string + "]"; //$NON-NLS-0$
 						 if(!messages) messages = {};
@@ -265,7 +265,6 @@ define(['dojo'], function(dojo){
 	
 	function escapeQuotes(message){
 		message = message.replace(/\"/g, "\\\""); //$NON-NLS-0$
-		message = message.replace(/\'/g, "\\\'"); //$NON-NLS-0$
 		return message;
 	}
 	
