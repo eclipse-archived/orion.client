@@ -300,8 +300,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		lineUp: function() {
 			var newSelected = (this.selectedIndex === 0) ? this.proposals.length - 1 : this.selectedIndex - 1;
-			// TODO we should be adding an 'unselectable' property to the proposal, rather than using the hr style
-			while (this.proposals[newSelected].style === 'hr' && newSelected > 0) {
+			while (this.proposals[newSelected].unselectable && newSelected > 0) {
 				newSelected--;
 			}
 			this.selectedIndex = newSelected;
@@ -312,8 +311,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		lineDown: function() {
 			var newSelected = (this.selectedIndex === this.proposals.length - 1) ? 0 : this.selectedIndex + 1;
-			// TODO we should be adding an 'unselectable' property to the proposal, rather than using the hr style
-			while (this.proposals[newSelected].style === 'hr' && newSelected < this.proposals.length-1) {
+			while (this.proposals[newSelected].unselectable && newSelected < this.proposals.length-1) {
 				newSelected++;
 			}
 			this.selectedIndex = newSelected;
