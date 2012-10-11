@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console */
+/*global define console document*/
 
-define(['i18n!orion/compare/nls/messages', 'dojo', 'orion/auth'], function(messages, dojo, mAuth) {
+define(['i18n!orion/compare/nls/messages', 'dojo'], function(messages, dojo) {
 
 	function _doServiceCall(fileService, funcName, funcArgs) {
 		var clientDeferred = new dojo.Deferred();
@@ -22,22 +22,8 @@ define(['i18n!orion/compare/nls/messages', 'dojo', 'orion/auth'], function(messa
 			},
 			//on failure we might need to retry
 			function(error) {
-				if (error.status === 401 || error.status === 403) {
-					mAuth.handleAuthenticationError(error, function(message) {
-						//try again
-						fileService[funcName].apply(fileService, funcArgs).then(
-							function(result) {
-								clientDeferred.callback(result);
-							},
-							function(error) {
-								clientDeferred.errback(error);
-							}
-						);
-					});
-				} else {
-					//forward other errors to client
-					clientDeferred.errback(error);
-				}
+				//forward other errors to client
+				clientDeferred.errback(error);
 			}
 		);
 		return clientDeferred;

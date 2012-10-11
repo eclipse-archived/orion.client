@@ -13,7 +13,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['require', 'dojo', 'orion/auth'], function(require, dojo, mAuth) {
+define(['require', 'dojo'], function(require, dojo) {
 
 var eclipse = eclipse || {};
 
@@ -918,7 +918,7 @@ eclipse.GitService = (function() {
 				var deferred = new dojo.Deferred();
 				deferred.callback(jsonData);
 				return this._serviceRegistry.getService("orion.page.progress").showWhile(deferred).then(function(progressResp) { //$NON-NLS-0$
-					var returnData = progressResp.Result.Severity == "Ok" ? progressResp.Result.JsonData : progressResp.Result; //$NON-NLS-0$
+					var returnData = progressResp.Result.Severity === "Ok" ? progressResp.Result.JsonData : progressResp.Result; //$NON-NLS-0$
 					clientDeferred.callback(returnData);
 					return;
 				});
@@ -928,29 +928,9 @@ eclipse.GitService = (function() {
 		},
 		
 		_handleGitServiceResponseError: function(deferred, currentXHR, error, ioArgs, retryFunc){
-			if(!deferred)
+			if(!deferred) {
 				deferred = new dojo.Deferred();
-			if (error.status === 401 || error.status === 403) {
-				if(mAuth.handleAuthenticationError(ioArgs.xhr, function(){
-						if(!retryFunc){
-							deferred.errback(error);
-							return;
-						}
-						retryFunc(currentXHR).then(
-								function(result, ioArgs) {
-									deferred.callback(result, ioArgs);
-								},
-								function(error, ioArgs) {
-									deferred.errback(error, ioArgs);
-								});						
-					})==null)
-						return deferred;
-				else{
-					deferred.errback(error);
-					return deferred;
-				}
 			}
-			
 			deferred.errback(error);
 			return deferred;
 		}

@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global define document window*/
-define(['i18n!orion/sites/nls/messages', 'require', 'orion/Deferred', 'orion/auth', 'orion/fileClient'], function(messages, require, Deferred, mAuth, mFileClient) {
+define(['i18n!orion/sites/nls/messages', 'require', 'orion/Deferred', 'orion/fileClient'], function(messages, require, Deferred, mFileClient) {
 	/**
 	 * Performs a service call, handling authentication and retrying after auth.
 	 * @returns {Promise}
@@ -28,22 +28,8 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/Deferred', 'orion/aut
 		
 		// On failure we might need to retry
 		var onError = function(error) {
-			if (error.status === 401 || error.status === 403) {
-				mAuth.handleAuthenticationError(error, function(message) {
-					// Try again
-					serviceMethod.apply(service, args).then(
-						function(result) {
-							clientDeferred.resolve(result);
-						},
-						function(error) {
-							clientDeferred.reject(error);
-						}
-					);
-				});
-			} else {
-				// Forward other errors to client
-				clientDeferred.reject(error);
-			}
+			// Forward other errors to client
+			clientDeferred.reject(error);
 		};
 		serviceMethod.apply(service, args).then(onSuccess, onError);
 		return clientDeferred;

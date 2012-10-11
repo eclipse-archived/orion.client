@@ -12,10 +12,10 @@
 /*global window define document dijit */
 /*browser:true*/
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
-        'orion/auth', 'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
+        'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/gitLogExplorer', 'orion/git/gitCommands',
 	    'orion/links', 'dojo/hash'], 
-		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mAuth, mDialogs, mSelection, mFileClient, mOperationsClient,
+		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, mFileClient, mOperationsClient,
 					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks) {
 
 		mBootstrap.startup().then(function(core) {
