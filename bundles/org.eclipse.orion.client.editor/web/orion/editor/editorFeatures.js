@@ -862,7 +862,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			 *         offset: 10, // Offset of start position of parameter i
 			 *         length: 3  // Length of parameter string for parameter i
 			 *     }], // One object for each parameter; can be null
-			 *     escapePosition: 19 // Optional; offset that caret will be placed at after exiting Linked Mode.
+			 *     escapePosition: 19, // Optional; offset that caret will be placed at after exiting Linked Mode.
+			 *     style: 'emphasis', // Optional: either emphasis, noemphasis, hr to provide custom styling for the proposal
+			 *     unselectable: false // Optional: if set to true, then this proposal cannnot be selected through the keyboard
 			 * }
 			 * Offsets are relative to the text buffer.
 			 */
@@ -1050,7 +1052,11 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			this.cancel();
 			return true;
 		},
-		/** Exits Linked Mode. Places the caret at linkedModeEscapePosition. */
+		/** 
+		 * Exits Linked Mode. Optionally places the caret at linkedModeEscapePosition. 
+		 * @param {boolean} ignoreEscapePosition optional if true, do not place the caret at the 
+		 * escape position.
+		 */
 		cancel: function(ignoreEscapePosition) {
 			if (!this.linkedModeActive) {
 				return;
