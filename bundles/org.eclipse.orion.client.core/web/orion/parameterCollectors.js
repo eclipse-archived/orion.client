@@ -73,6 +73,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 			if (typeof commandNode === "string") { //$NON-NLS-0$
 				commandNode = dojo.byId(commandNode);
 			}
+			if (this._activeElements && this._activeElements.commandNode === commandNode) {
+				// already open.  Just return focus where it needs to be.
+				if (this._activeElements.focusNode) {
+					this._activeElements.focusNode.focus();
+				}
+				return true;
+			}
 			this.close();
 			this._activeElements = null;
 			// determine the closest parameter container to the command.
@@ -84,6 +91,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 					// no parameters were generated.  
 					return false;
 				}
+				this._activeElements.focusNode = focusNode;
 				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.

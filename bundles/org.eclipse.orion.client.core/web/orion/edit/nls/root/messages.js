@@ -28,5 +28,6 @@ define({
 	"Go to line:": "Go to line:",
 	"Undo": "Undo",
 	"Redo": "Redo",
-	"Find": "Find"
+	"Find": "Find",
+	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again."
 });

@@ -12,8 +12,8 @@
 /*global define dijit console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/commands', 'orion/section', 'orion/globalCommands', 
-        'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, dojo, mExplorer, mCommands, mSection, mGlobalCommands, mGitCommands) {
+        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, dojo, mExplorer, mCommands, mSection, mGlobalCommands, mGitCommands, mNavUtils) {
 var exports = {};
 
 exports.GitLogExplorer = (function() {
@@ -383,7 +383,9 @@ exports.GitLogExplorer = (function() {
 					var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
 					var titleLink = dojo.create("a", {"class": "gitMainDescription navlinkonpage", href: "/git/git-commit.html#" + commit.Location + "?page=1&pageSize=1"}, detailsView); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.place(document.createTextNode(commit.Message), titleLink);		
+					dojo.place(document.createTextNode(commit.Message), titleLink);
+					//Add the commit page link as the first grid of the row
+					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, titleLink);
 					
 					var _timer;
 					
