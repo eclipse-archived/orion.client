@@ -67,17 +67,6 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstra
 				displayError(e);
 				dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
 			}
-			window.addEventListener("storage", function(e){ //$NON-NLS-0$
-				try{
-					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
-						dojo.hitch(operationsTable, operationsTable.loadOperations)({Children: []});
-						operationsClient.resetChangeListeners();
-					}
-				}catch (e) {
-					displayError(e);
-					dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
-				}
-			}, false);
 		});
 	});
 	
