@@ -8,11 +8,13 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global confirm console define document window */
+/*global alert confirm console define document window */
 
 define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 	var lastHash;
 	var jsonData;
+
+	var loadAttachedOpenIds, loadUserData;
 
 	function removeOpenId(openid) {
 		if (confirm("Are you sure you want to remove " + openid + " from the list of your external accounts?")) {
@@ -44,7 +46,7 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 		}
 	}
 	
-	function loadAttachedOpenIds(userjsonData) {
+	loadAttachedOpenIds = function(userjsonData) {
 		jsonData = userjsonData;
 		var divId = "openidList";
 		var table = dojo.create("table", null, divId, "only");
@@ -112,9 +114,9 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 	
 			}
 		}
-	}
+	};
 	
-	 function loadUserData(userLocation){
+	loadUserData = function(userLocation){
 			dojo.xhrGet({
 				url : userLocation,
 				headers : {
@@ -129,7 +131,7 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 					console.error(error.message);
 				}
 			});
-	 }
+	 };
 	
 	function onHashChange(hash) {
 		if (lastHash === hash) {
@@ -182,6 +184,20 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 		}
 	}
 
+	function createProviderLink(name, imageUrl, onclick) {
+		var img = document.createElement("img");
+		img.className = "loginWindow";
+		img.id = img.alt = img.title = name;
+		img.src = imageUrl;
+
+		var a = document.createElement("a");
+		a.className = "loginWindow";
+		a.onclick = onclick;
+		a.setAttribute("aria-labelledby", "addExternalAccount " + name);
+		a.appendChild(img);
+		return a;
+	}
+
 	// Page glue code starts here
 	dojo.subscribe("/dojo/hashchange", this, function() {
 		onHashChange(dojo.hash());
@@ -193,20 +209,14 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 		url: "../mixlogin/manageopenids",
 		handleAs: "json"
 	}).then(function(providers) {
-		var openIdContainer = document.getElementById("newOpenId");
-		providers.map(function(provider) {
-			var img = document.createElement("img");
-			img.className = "loginWindow";
-			img.id = img.alt = img.title = provider.Name;
-			img.src = provider.Image;
+		var providerElements = providers.map(function(provider) {
+			return createProviderLink(provider.Name, provider.Image, confirmOpenId.bind(null, provider.Url));
+		});
+		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
+			alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
 
-			var a = document.createElement("a");
-			a.className = "loginWindow";
-			a.onclick = confirmOpenId.bind(null, provider.Url);
-			a.setAttribute("aria-labelledby", "addExternalAccount " + provider.Name);
-			a.appendChild(img);
-			return a;
-		}).forEach(function(provider) {
+		var openIdContainer = document.getElementById("newOpenId");
+		providerElements.forEach(function(provider) {
 			openIdContainer.appendChild(provider);
 			openIdContainer.appendChild(document.createTextNode(" "));
 		});
