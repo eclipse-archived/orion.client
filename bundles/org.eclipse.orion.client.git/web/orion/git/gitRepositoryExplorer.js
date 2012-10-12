@@ -91,8 +91,6 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRepositories2 = function(location, processURLs){
 		var that = this;
 		this.loadingDeferred = new dojo.Deferred();
-		console.log(processURLs);
-		
 		if(processURLs){
 			this.loadingDeferred.then(function(){
 				that.commandService.processURL(window.location.href);
