@@ -11,7 +11,7 @@
 
 /*global define */
 
-define(['dojo', 'orion/auth'], function(dojo, mAuth) {
+define(function() {
 
 	/**
 	 * Creates a new user service. A user service should be obtained by getting
@@ -63,34 +63,8 @@ define(['dojo', 'orion/auth'], function(dojo, mAuth) {
 		 * @private
 		 */
 		_doServiceCall: function(funcName, funcArgs) {
-			var clientDeferred = new dojo.Deferred();
 			var usersService = this.serviceRegistry.getService("orion.core.user"); //$NON-NLS-0$
-			usersService[funcName].apply(usersService, funcArgs).then(
-				//on success, just forward the result to the client
-				function(result) {
-					clientDeferred.callback(result);
-				},
-				//on failure we might need to retry
-				function(error) {
-					if (error.status === 401 || error.status===403) {
-						mAuth.handleAuthenticationError(error, function(message) {
-							//try again
-							usersService[funcName].apply(usersService, funcArgs).then(
-								function(result) {
-									clientDeferred.callback(result);
-								},
-								function(error) {
-									clientDeferred.errback(error);
-								}
-							);
-						});
-					} else {
-						//forward other errors to client
-						clientDeferred.errback(error);
-					}
-				}
-			);
-			return clientDeferred;
+			return usersService[funcName].apply(usersService, funcArgs);
 		}
 	};
 	UsersClient.prototype.constructor = UsersClient;

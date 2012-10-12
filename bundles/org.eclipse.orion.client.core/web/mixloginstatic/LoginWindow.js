@@ -212,10 +212,28 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 			}
 		}
 	}
+	
+	/* handleSelectionEvent - centralize decision making criteria for the key press,
+	   click, gesture etc that we respect as a user choice */
+	
+	function handleSelectionEvent( event ){
+	
+		var outcome = false;
+		
+		if( event.type === 'click' || event.keyCode === 13 ){
+			outcome = true;
+		}
+		
+		event.stopPropagation();
+		
+		return outcome;
+	}
 
-	function personaLogin() {
-		personaLoginClicked = true;
-		navigator.id.request();
+	function personaLogin( event ) {
+		if( handleSelectionEvent( event ) ){
+			personaLoginClicked = true;
+			navigator.id.request();
+		}
 	}
 
 	function addPersonaHandler(button) {
@@ -248,23 +266,27 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 			login = document.getElementById('login').value;
 			password = document.getElementById('password').value;
 		}
-		var mypostrequest = new XMLHttpRequest();
-		mypostrequest.onreadystatechange = function() {
-			if (mypostrequest.readyState === 4) {
-				if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
-					var responseObject = JSON.parse(mypostrequest.responseText);
-					showErrorMessage(responseObject.error);
-				} else {
-					finishLogin();
+		
+		if( login.length > 0 && password.length > 0 ){ 
+		
+			var mypostrequest = new XMLHttpRequest();
+			mypostrequest.onreadystatechange = function() {
+				if (mypostrequest.readyState === 4) {
+					if (mypostrequest.status !== 200 && window.location.href.indexOf("http") !== -1) {
+						var responseObject = JSON.parse(mypostrequest.responseText);
+						showErrorMessage(responseObject.error);
+					} else {
+						finishLogin();
+					}
 				}
-			}
-		};
-
-		var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
-		mypostrequest.open("POST", "../login/form", true);
-		mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		mypostrequest.setRequestHeader("Orion-Version", "1");
-		mypostrequest.send(parameters);
+			};
+	
+			var parameters = "login=" + encodeURIComponent(login) + "&password=" + encodeURIComponent(password);
+			mypostrequest.open("POST", "../login/form", true);
+			mypostrequest.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+			mypostrequest.setRequestHeader("Orion-Version", "1");
+			mypostrequest.send(parameters);
+		}
 	}
 
 	function validatePassword() {
@@ -320,20 +342,24 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		mypostrequest.send(parameters);
 	}
 
-	function revealRegistration() {
+	function revealRegistration( event ) {
 		// If registrationURI is set and userCreation is not, open the URI in a new window
-		if (!userCreationEnabled && registrationURI) {
-			window.open(registrationURI);
-			return;
+		
+		if( handleSelectionEvent( event ) ){
+		
+			if (!userCreationEnabled && registrationURI) {
+				window.open(registrationURI);
+				return;
+			}
+		
+			document.getElementById('orionOpen').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';
+		
+			document.getElementById('orionLogin').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';
+			document.getElementById('newUserHeaderShown').style.visibility = '';
+			document.getElementById('create_login').focus();
 		}
-	
-		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-	
-		document.getElementById('orionLogin').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';
-		document.getElementById('newUserHeaderShown').style.visibility = '';
-		document.getElementById('create_login').focus();
 	}
 
 	function formatForNoUserCreation() {
@@ -361,11 +387,14 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		window.open("/mixloginstatic/ServerStatus.html");
 	}
 	
-	function revealLogin(){
-		document.getElementById('orionOpen').style.visibility = 'hidden';
-		document.getElementById('orionRegister').style.visibility = 'hidden';		
-		document.getElementById('orionLogin').style.visibility = '';
-		document.getElementById("login").focus();
+	function revealLogin( event ){
+		if( handleSelectionEvent( event ) ){
+			event.stopPropagation();
+			document.getElementById('orionOpen').style.visibility = 'hidden';
+			document.getElementById('orionRegister').style.visibility = 'hidden';		
+			document.getElementById('orionLogin').style.visibility = '';
+			document.getElementById("login").focus();
+		}
 	}
 	
 	function cancelLogin(){
@@ -374,6 +403,14 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
+		}
+		
+		hideErrorMessage();
+	}
+
+	function googleLogin( event ){
+		if( handleSelectionEvent( event ) ){
+			event.srcElement.click();
 		}
 	}
 
@@ -488,6 +525,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		};
 
 		document.getElementById("registerButton").onclick = revealRegistration;
+		document.getElementById("registerButton").onkeydown = revealRegistration;
 
 		document.getElementById("create_password").onkeyup = function(event) {
 			if (event.keyCode === 13) {
@@ -511,11 +549,15 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		document.getElementById("hideRegisterButton").onclick = hideRegistration;
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
+		document.getElementById("googleLogin").onkeydown = googleLogin;
+		
 		document.getElementById("orionLoginLink").onclick = revealLogin;
+		document.getElementById("myopenidLogin").onkeydown = revealLogin;
+		
 		document.getElementById("personaLogin").onclick = personaLogin;
+		document.getElementById("personaLogin").onkeydown = personaLogin;
 
 		document.getElementById("cancelResetButton").onclick = hideResetUser;
-		
 
 		document.getElementById("sendResetButton").onclick = confirmResetUser;
 	});

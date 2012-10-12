@@ -46,8 +46,8 @@ require(["LoginWindow.js"]);
 	<div class="orion-banner">
 		<div class="orion-nav-bar">
 			<div class="orion-logo"></div>
-			<a class="orion-rss-link" href="http://planetorion.org/news/" target="_blank"></a>
-			<a class="orion-twitter-link" href="http://twitter.com/orionhub" target="_blank"></a>
+			<a class="orion-rss-link" href="http://planetorion.org/news/" target="_blank" tabindex="-1"></a>
+			<a class="orion-twitter-link" href="http://twitter.com/orionhub" target="_blank" tabindex="-1"></a>
 		</div>
 	</div>
 	<div class="orion-login-container" id="login-window" style="display:none;">
@@ -80,13 +80,6 @@ require(["LoginWindow.js"]);
 					<div class="orion-login-forgot-holder">
 						<a id="resetUserLink" class="orion-forgot-password">Forgot password?</a>
 					</div>
-				</form>
-			</div>
-
-			<div class="orion-register" id="orionRegister">
-				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Need an account?</div>
-				<form>
-					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
 				</form>
 			</div>
 
@@ -135,30 +128,38 @@ require(["LoginWindow.js"]);
 				</form>
 			</div>
 
-			<div class="orion-open" id="orionOpen" style="visibility: visible;">
-				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Have an account? Sign in: </div>
-				<div id="openIDLogin" class="orion-open-header"></div>
-				<div class="orion-open-images">
+			<div class="orion-open" id="orionOpen" style="visibility: visible;" tabindex="-1">
+				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;" tabindex="-1">Have an account? Sign in: </div>
+				<div id="openIDLogin" class="orion-open-header" tabindex="-1"></div>
+				<div class="orion-open-images" tabindex="-1">
 			
-					<a id="orionLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin"> 
-						<div class='openIdWrapper'>
-							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" title="sign in with existing Orion account"></div> 
+					<a id="orionLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin" tabindex="-1"> 
+						<div class='openIdWrapper' tabindex="-1">
+							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" tabindex="0" title="sign in with existing Orion account"></div> 
 						</div>
 					</a>
 				
-					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin"> 
-						<div class='openIdWrapper'>
-							<div id="googleLogin" class="googleIcon" alt="Google" title="sign in with associated Google account"></div>
+					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin" tabindex="-1"> 
+						<div class='openIdWrapper' tabindex="-1">
+							<div id="googleLogin" class="googleIcon" tabindex="0" alt="Google" title="sign in with associated Google account"></div>
 						</div>
 					</a> 
 					
-					<a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin"> 
-						<div class='openIdWrapper'>
-							<div id="personaLogin" class="personaIcon" alt="Mozilla Persona" title="sign in with associated Mozilla Persona account"></div> 
+					<a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin" tabindex="-1"> 
+						<div class='openIdWrapper' tabindex="-1">
+							<div id="personaLogin" class="personaIcon" tabindex="0" alt="Mozilla Persona" title="sign in with associated Mozilla Persona account"></div> 
 						</div>
 					</a> 
 				</div>
-			</div>		
+			</div>	
+			
+			<div class="orion-register" id="orionRegister">
+				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;">Need an account?</div>
+				<form>
+					<input id="registerButton" type="button" class="orion-register-button" value="Create a new account" tabindex="0">
+				</form>
+			</div>
+			
 		</div>
 	</div>
 </body>

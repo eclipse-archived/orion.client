@@ -8,11 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number'],
+define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes', 'dojo/number', 'dojo/date/locale'],
 		function(messages, require, dojo, mExplorer, mNavUtils, mExtensionCommands){
 	/**
 	 * Renders json items into columns in the tree

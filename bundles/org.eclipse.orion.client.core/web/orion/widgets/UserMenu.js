@@ -276,28 +276,6 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 						});
 					
 				}
-			} else if(this.hasServices()) {
-				var a = dojo.create("a", {innerHTML: messages["Profiles"], //$NON-NLS-0$
-					style: "margin-right: 0px" //$NON-NLS-0$
-					}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				
-				dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
-					a.style.cursor = "pointer"; //$NON-NLS-0$
-				});
-				dojo.connect(a, "onmouseout", a, function() { //$NON-NLS-0$
-					a.style.cursor = "default"; //$NON-NLS-0$
-				});
-				
-				dojo.connect(a, "onclick", function(){ //$NON-NLS-0$
-					try{
-						dijit.popup.open({
-				            popup: _self.options.loginDialog,
-				            around: dojo.byId('userInfo') //$NON-NLS-0$
-				        });
-					}catch (e) {/*Known key is null FF error*/}
-						dijit.focus(_self.options.loginDialog.domNode);
-					});
-				
 			} else {
 				dojo.empty(dojo.byId('userInfo')); //$NON-NLS-0$
 			}
