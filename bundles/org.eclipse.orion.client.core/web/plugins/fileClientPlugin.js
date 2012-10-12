@@ -36,20 +36,31 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 		return traced;
 	}
 
+	var tryParentRelative = true;
 	function makeParentRelative(location) {
-		try {
-			if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
-				return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+		if (tryParentRelative) {
+			try {
+				if (window.location.host === parent.location.host && window.location.protocol === parent.location.protocol) {
+					return location.substring(parent.location.href.indexOf(parent.location.host) + parent.location.host.length);
+				} else {
+					tryParentRelative = false;
+				}
+			} catch (e) {
+				tryParentRelative = false;
 			}
-		} catch (e) {
-			//skip
 		}
 		return location;
 	}
 
-	var provider = new PluginProvider();
-
 	var temp = document.createElement('a');
+	temp.href = "../mixloginstatic/LoginWindow.html";
+	var login = temp.href;
+	var headers = {
+		"login": login
+	};
+	
+	var provider = new PluginProvider(headers);
+
 	temp.href = "../file";
 	// note global
 	var fileBase = makeParentRelative(temp.href);
