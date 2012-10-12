@@ -635,10 +635,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (toolbarNode.parentNode) {
 				elements.toolbarTarget = dojo.query(".toolbarTarget", toolbarNode.parentNode)[0]; //$NON-NLS-0$
 				if (elements.toolbarTarget) {
-					var posParent = dojo.position(toolbarNode.parentNode);
-					var pos = dojo.position(elements.toolbarTarget);
-					elements.toolbarTargetY = pos.y - posParent.y;
-					elements.toolbarParentY = posParent.y;
+					var pos = dojo.position(toolbarNode);
+					// assumes that there is never anything besides notifications and slideout between toolbar and its target
+					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=391596
+					elements.toolbarTargetY = pos.h+1;   
 				}
 			}
 		}

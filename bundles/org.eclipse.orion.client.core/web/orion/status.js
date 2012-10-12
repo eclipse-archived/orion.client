@@ -145,7 +145,7 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 			if (message && message.length > 0) {
 				dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			} else if(this._progressMonitors && this._progressMonitors.length > 0){
-				this._renderOngoingMonitors();
+				return this._renderOngoingMonitors();
 			}else{
 				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
 			}
