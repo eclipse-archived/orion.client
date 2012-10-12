@@ -61,15 +61,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				}
 				
 				window.addEventListener("storage", function(e){ //$NON-NLS-0$
-					if(mGlobalCommands.getAuthenticationIds().indexOf(e.key)>=0){
-						//refresh operation list every time when user changes
-						that._operationsClient.getRunningOperations().then(function(operationsList){
-							dojo.hitch(that, that._loadOperationsList)(operationsList);
-						},function(error){console.error(error);});
-					}
-				}, false);
-				
-				window.addEventListener("storage", function(e){ //$NON-NLS-0$
 					if(e.key === "orionOperations"){ //$NON-NLS-0$
 						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'))); //$NON-NLS-1$ //$NON-NLS-0$
 					}
