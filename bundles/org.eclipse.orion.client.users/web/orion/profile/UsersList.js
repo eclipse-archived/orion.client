@@ -12,7 +12,7 @@
  /*jslint browser:true devel:true sub:true*/
  /*global define window*/
 
-define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/profile/usersUtil', 'orion/explorers/navigationUtils'], function(messages, require, dojo, mExplorer, mUsersUtil, mNavUtils) {
+define(['i18n!profile/nls/messages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/profile/usersUtil', 'orion/explorers/navigationUtils', 'dojo/date/locale'], function(messages, require, dojo, mExplorer, mUsersUtil, mNavUtils) {
 
 
 var eclipse = eclipse || {};
