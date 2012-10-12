@@ -529,6 +529,104 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.prevAnnotation});
 			
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, false, true, false), "expand"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.textView.setAction("expand", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var annotationModel = editor.getAnnotationModel();
+				if(!annotationModel) { return true; }
+				var model = editor.getModel();
+				var currentOffset = editor.getCaretOffset();
+				var lineIndex = model.getLineAtOffset(currentOffset);
+				var start = model.getLineStart(lineIndex);
+				var end = model.getLineEnd(lineIndex, true);
+				if (model.getBaseModel) {
+					start = model.mapOffset(start);
+					end = model.mapOffset(end);
+					model = model.getBaseModel();
+				}
+				var annotation, iter = annotationModel.getAnnotations(start, end);
+				while (!annotation && iter.hasNext()) {
+					var a = iter.next();
+					if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+					if (a.expanded) { continue; }
+					annotation = a;
+				}
+				if (annotation && !annotation.expanded) {
+					annotation.expand();
+					annotationModel.modifyAnnotation(annotation);
+				}
+				return true;
+			}.bind(this), {name: messages.expand});
+	
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, false, true, false), "collapse"); //$NON-NLS-1$ //$NON-NLS-0$
+				this.textView.setAction("collapse", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var annotationModel = editor.getAnnotationModel();
+				if(!annotationModel) { return true; }
+				var model = editor.getModel();
+				var currentOffset = editor.getCaretOffset();
+				var lineIndex = model.getLineAtOffset(currentOffset);
+				var start = model.getLineStart(lineIndex);
+				var end = model.getLineEnd(lineIndex, true);
+				if (model.getBaseModel) {
+					start = model.mapOffset(start);
+					end = model.mapOffset(end);
+					model = model.getBaseModel();
+				}
+				var annotation, iter = annotationModel.getAnnotations(start, end);
+				while (!annotation && iter.hasNext()) {
+					var a = iter.next();
+					if (a.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+					annotation = a;
+				}
+				if (annotation && annotation.expanded) {
+					editor.setCaretOffset(annotation.start);
+					annotation.collapse();
+					annotationModel.modifyAnnotation(annotation);
+				}
+				return true;
+			}.bind(this), {name: messages.collapse});
+	
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("e", true, true, true, false), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.textView.setAction("expandAll", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var annotationModel = editor.getAnnotationModel();
+				if(!annotationModel) { return true; }
+				var model = editor.getModel();
+				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+				this.textView.setRedraw(false);
+				while (iter.hasNext()) {
+					annotation = iter.next();
+					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+					if (!annotation.expanded) {
+						annotation.expand();
+						annotationModel.modifyAnnotation(annotation);
+					}
+				}
+				this.textView.setRedraw(true);
+				return true;
+			}.bind(this), {name: messages.expandAll});
+	
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("c", true, true, true, false), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.textView.setAction("collapseAll", function() { //$NON-NLS-0$
+				var editor = this.editor;
+				var annotationModel = editor.getAnnotationModel();
+				if(!annotationModel) { return true; }
+				var model = editor.getModel();
+				var annotation, iter = annotationModel.getAnnotations(0, model.getCharCount());
+				this.textView.setRedraw(false);
+				while (iter.hasNext()) {
+					annotation = iter.next();
+					if (annotation.type !== mAnnotations.AnnotationType.ANNOTATION_FOLDING) { continue; }
+					if (annotation.expanded) {
+						annotation.collapse();
+						annotationModel.modifyAnnotation(annotation);
+					}
+				}
+				this.textView.setRedraw(true);
+				return true;
+			}.bind(this), {name: messages.collapseAll});
+			
 			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !isMac, false, false, isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.textView.setAction("lastEdit", function() { //$NON-NLS-0$
