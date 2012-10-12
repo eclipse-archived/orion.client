@@ -494,7 +494,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 		
 	GitRepositoryExplorer.prototype.renderStatus = function(repository, status){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("workingDirectoryNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("workingDirectoryNode") , "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
@@ -547,7 +547,7 @@ exports.GitRepositoryExplorer = (function() {
 			title: messages['Branches'],
 			iconClass: "gitImageSprite git-sprite-branch", //$NON-NLS-0$
 			slideout: true,
-			content: '<list id="branchNode" class="mainPadding"></list>', //$NON-NLS-0$
+			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 		});
@@ -559,6 +559,8 @@ exports.GitRepositoryExplorer = (function() {
 				var branches = resp.Children;
 				progress.done();
 				
+				that.commandService.destroy(titleWrapper.actionsNode.id);
+				
 				if (mode !== "full" && branches.length !== 0){ //$NON-NLS-0$
 					that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 					that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
@@ -568,10 +570,14 @@ exports.GitRepositoryExplorer = (function() {
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.addBranch", 200); //$NON-NLS-0$
 				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, repository, that, "button"); //$NON-NLS-0$
 				
+				var branchesContainer = dojo.create("list", {className: "mainPadding"});
+				
 				for(var i=0; i<branches.length;i++){
 					branches[i].ParentLocation = branchLocation;
-					that.renderBranch(branches[i], i);
+					that.renderBranch(branches[i], i, branchesContainer);
 				}
+				
+				dojo.place(branchesContainer, dojo.byId("branchNode"), "only");
 			}, function(error){
 				progress.done();
 				dojo.hitch(that, that.handleError)(error);
@@ -579,8 +585,8 @@ exports.GitRepositoryExplorer = (function() {
 		);
 	};
 		
-	GitRepositoryExplorer.prototype.renderBranch = function(branch, index){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, dojo.byId("branchNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	GitRepositoryExplorer.prototype.renderBranch = function(branch, index, container){
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow")  }, container ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -718,13 +724,16 @@ exports.GitRepositoryExplorer = (function() {
 			id: "commitSection", //$NON-NLS-0$
 			title: messages["Commits"],
 			slideout: true,
-			content: '<list id="commitNode" class="mainPadding"></list>', //$NON-NLS-0$
+			content: '<div id="commitNode"></div>', //$NON-NLS-0$
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 		}); 
 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin(messages["Getting current branch"]);
+		
+		var commitsContainer = dojo.create("list", { className: "mainPadding"});
+		
 		this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
 			function(resp){
 				var branches = resp.Children;
@@ -744,6 +753,8 @@ exports.GitRepositoryExplorer = (function() {
 				var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 				
 				titleWrapper.setTitle(dojo.string.substitute(messages["Commits for \"${0}\" branch"], [currentBranch.Name])); //$NON-NLS-1$ //$NON-NLS-0$
+				
+				that.commandService.destroy(titleWrapper.actionsNode.id);
 
 				that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
 				that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, 
@@ -762,7 +773,7 @@ exports.GitRepositoryExplorer = (function() {
 				
 				if (currentBranch.RemoteLocation[0] === null){
 					progress.done();
-					that.renderNoCommit();
+					that.renderNoCommit(commitsContainer);
 					return;
 				}
 				
@@ -775,7 +786,7 @@ exports.GitRepositoryExplorer = (function() {
 							var commitsCount = resp.Children.length;
 							
 							for (var i=0; i<resp.Children.length; i++){
-								that.renderCommit(resp.Children[i], true, i);
+								that.renderCommit(resp.Children[i], true, i, commitsContainer);
 							}
 							
 							progress.worked(messages["Getting outgoing commits"]);
@@ -783,13 +794,13 @@ exports.GitRepositoryExplorer = (function() {
 								function(resp){	
 									progress.worked("Rendering commits"); //$NON-NLS-0$
 									for (var i=0; i<resp.Children.length; i++){
-										that.renderCommit(resp.Children[i], false, i + commitsCount);
+										that.renderCommit(resp.Children[i], false, i + commitsCount, commitsContainer);
 									}
 									
 									commitsCount = commitsCount + resp.Children.length; 
 									
 									if (commitsCount === 0){
-										that.renderNoCommit();
+										that.renderNoCommit(commitsContainer);
 									}
 									
 									progress.done();
@@ -808,11 +819,11 @@ exports.GitRepositoryExplorer = (function() {
 						function(resp){	
 							progress.worked(messages['Rendering commits']);
 							for (var i=0; i<resp.Children.length; i++){
-								that.renderCommit(resp.Children[i], true, i);
+								that.renderCommit(resp.Children[i], true, i, commitsContainer);
 							}
 							
 							if (resp.Children.length === 0){
-								that.renderNoCommit();
+								that.renderNoCommit(commitsContainer);
 							}	
 								
 							progress.done();
@@ -824,10 +835,12 @@ exports.GitRepositoryExplorer = (function() {
 				}
 			}
 		);
+		dojo.place(commitsContainer, dojo.byId("commitNode"), "only");
+		
 	};
 	
-	GitRepositoryExplorer.prototype.renderNoCommit = function(){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, dojo.byId("commitNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	GitRepositoryExplorer.prototype.renderNoCommit = function(container){
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem" }, container); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -838,8 +851,8 @@ exports.GitRepositoryExplorer = (function() {
 			innerHTML: messages["You have no outgoing or incoming commits."]}, detailsView );	
 	};
 		
-	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing, index){
-		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing, index, container){
+		var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, container ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -944,7 +957,7 @@ exports.GitRepositoryExplorer = (function() {
 			id : "tagSection",
 			iconClass : "gitImageSprite git-sprite-tag",
 			title : ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
-			content : '<list id="tagNode" class="mainPadding"></list>',
+			content : '<div id="tagNode"></div>',
 			canHide : true,
 			hidden : true,
 			preferenceService : that.registry.getService("orion.core.preference")
@@ -952,7 +965,7 @@ exports.GitRepositoryExplorer = (function() {
 						
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin(messages["Getting tags"]);
-				
+		var tagsContainer = dojo.create("list", {className: "mainPadding"});
 		this.registry.getService("orion.git.provider").getGitBranch(repository.TagLocation + (mode === "full" ? "?page="+page+"&pageSize="+pageSize : "?page=1&pageSize=5")).then(
 			function(resp){
 				var tags = resp.Children;
@@ -966,6 +979,9 @@ exports.GitRepositoryExplorer = (function() {
 				var tagRenderer = {
 					initialRender : function(){
 						progress.done();
+						dojo.place(tagsContainer, dojo.byId("tagNode"), "only");
+						
+						that.commandService.destroy(titleWrapper.actionsNode.id);
 						
 						if (mode !== "full" && tags.length !== 0){ //$NON-NLS-0$
 							that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.orion.git.repositories.viewAllCommand", 10); //$NON-NLS-0$
@@ -979,19 +995,20 @@ exports.GitRepositoryExplorer = (function() {
 					},
 					
 					renderBeforeItemPopulation : function(i){
-						var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((i % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("tagNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((i % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, tagsContainer ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 						
-						var detailsView = dojo.create( "div", { "id":"tagDetailsView"+i, "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tags[i].Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						
 						this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
 						
-						dojo.create( "div", null, detailsView ); //$NON-NLS-0$
+						dojo.create( "div", {"id":"tagDetailsView"+i}, detailsView ); //$NON-NLS-0$
 						
 						var actionsArea = dojo.create( "div", {"id":"tagActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						that.commandService.renderCommands(that.actionScopeId, actionsArea, tags[i], that, "tool");	 //$NON-NLS-0$
 					},
+					
 					
 					renderAfterItemPopulation : function(i){
 						that.renderTag(tags[i], i);
@@ -1009,7 +1026,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 			
 	GitRepositoryExplorer.prototype.renderTag = function(tag, i){
-		var description = dojo.create( "span", { "class":"tag-description"}, dojo.byId("tagDetailsView"+i) ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var description = dojo.create( "span", { "class":"tag-description"}, dojo.byId("tagDetailsView"+i), "only" ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						
 		var commit = tag.Commit;
 		
