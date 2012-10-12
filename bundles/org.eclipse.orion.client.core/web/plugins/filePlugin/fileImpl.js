@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global window define XMLHttpRequest BlobBuilder*/
-/*jslint forin:true devel:true*/
+/*jslint forin:true devel:true browser:true*/
 
 
 define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr) {
@@ -18,7 +18,25 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
 	 */
-	 
+	var temp = document.createElement('a');
+	function makeAbsolute(location) {
+		temp.href = location;
+		return temp.href;
+	}
+	function _normalizeLocations(data) {
+		if (data && typeof data === "object") {
+			Object.keys(data).forEach(function(key) {
+				var value = data[key];
+				if (key.indexOf("Location") !== -1) {
+					data[key] = makeAbsolute(value);
+				} else {
+					_normalizeLocations(value);
+				}
+			});
+		}
+		return data;
+	}
+	
 	/**
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
@@ -26,6 +44,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 	function FileServiceImpl(fileBase, workspaceBase) {
 		this.fileBase = fileBase;
 		this.workspaceBase = workspaceBase;
+		this.makeAbsolute = workspaceBase && workspaceBase.indexOf("://") !== -1;
 	}
 	
 	FileServiceImpl.prototype = /**@lends eclipse.FileServiceImpl.prototype */
@@ -49,7 +68,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Children || [];
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 
 		/**
@@ -67,7 +91,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
-				return jsonData.Workspaces;
+				return jsonData;
 			});
 		},
 
@@ -84,7 +108,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			}).then(function(result) {
 				var jsonData = result.response ? JSON.parse(result.response) : {};
 				return jsonData.Workspaces;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		
 		/**
@@ -118,6 +147,11 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 						return this._createWorkspace("Orion Content");
 					}
 				}
+			}.bind(this)).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
 			}.bind(this));
 		},
 		/**
@@ -151,7 +185,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				data: JSON.stringify(data)
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Creates a folder.
@@ -175,7 +214,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Create a new file in a specified location. Returns a deferred that will provide
@@ -200,7 +244,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Deletes a file, directory, or project.
@@ -214,7 +263,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		
 		/**
@@ -224,7 +278,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		moveFile: function(sourceLocation, targetLocation, name) {
-			return this._doCopyMove(sourceLocation, targetLocation, true, name);
+			return this._doCopyMove(sourceLocation, targetLocation, true, name).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		 
 		/**
@@ -234,7 +293,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		 * @param {String} [name] The name of the destination file or directory in the case of a rename
 		 */
 		copyFile: function(sourceLocation, targetLocation, name) {
-			return this._doCopyMove(sourceLocation, targetLocation, false, name);
+			return this._doCopyMove(sourceLocation, targetLocation, false, name).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		
 		_doCopyMove: function(sourceLocation, targetLocation, isMove, name) {
@@ -279,7 +343,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				} else {
 					return result.response;
 				}
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Writes the contents or metadata of the file at the given location.
@@ -317,7 +386,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			}
 			return xhr("PUT", location, options).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Imports file and directory contents from another server
@@ -339,7 +413,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		/**
 		 * Exports file and directory contents to another server
@@ -361,7 +440,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : null;
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		},
 		
 		/**
@@ -369,6 +453,17 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		 * @param {String} query The search query
 		 */
 		search: function(location, query) {
+			var locationIndex = query.indexOf("+Location:");
+			if (locationIndex !== -1) {
+				var loc = query.substring(locationIndex + "+Location:".length);	
+				if (loc.indexOf("://") !== -1) {
+					var hostIndex = loc.indexOf("://") + 3;
+					var pathIndex = loc.indexOf("/", hostIndex);
+					loc = (pathIndex === -1 ) ? "" : loc.substring(pathIndex);
+				}
+				query = query.substring(0, locationIndex + "+Location:".length) + loc;
+			}
+		
 			return xhr("GET", "/filesearch" + query, {
 				headers: {
 					"Accept": "application/json",
@@ -377,7 +472,12 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				timeout: 15000
 			}).then(function(result) {
 				return result.response ? JSON.parse(result.response) : {};
-			});
+			}).then(function(result) {
+				if (this.makeAbsolute) {
+					_normalizeLocations(result);
+				}
+				return result;
+			}.bind(this));
 		}
 	};
 	
