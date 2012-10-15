@@ -293,8 +293,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/w
 				family:'navbar', fill: '#333' } );
 			}
 			
-			console.log( 'c o n t a i n e r   t h e m e' );
-			
 			return dataset;
 		}
 
