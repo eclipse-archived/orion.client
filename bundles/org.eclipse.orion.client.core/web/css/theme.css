@@ -21,21 +21,10 @@ a {
 	color: #3087B3;
 }
 
-/* REAL PROBLEMS WITH THESE IN THEMING - AND WE WERE NOT CHANGING THEM IN ANY CASE 
-
-a:visited {
-	color: #3087B3;
-}
-
-a:active {
-	color: #3087B3;
-}
-
 a:hover {
 	cursor: hand;
 	text-decoration: underline;
-	color: #3087B3;
-} */
+}
 
 /* Navigation text */
 
