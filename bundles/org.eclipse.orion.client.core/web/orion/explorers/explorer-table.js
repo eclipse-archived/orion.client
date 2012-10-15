@@ -243,7 +243,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 				dojo.hitch(self, function(error) {
 					clearTimeout(progressTimeout);
 					// Show an error message when a problem happens during getting the workspace
-					if (error.status !== null && error.status !== 401){
+					if (error.status && error.status !== 401){
 						try {
 							error = JSON.parse(error.responseText);
 						} catch(e) {
