@@ -339,9 +339,8 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 					if (!foundValidHit) {
 						// only display no matches found if we have a proper name
 						if (queryName) {
-							var div = dojo.place("<div>"+messages["No matches found for "]+"</div>", resultsNode, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-							var b = dojo.create("b", null, div, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-							dojo.place(document.createTextNode(queryName), b, "only"); //$NON-NLS-0$
+							var errorStr = dojo.string.substitute(messages["No matches found for ${0}"], [queryName]); 
+							dojo.place(document.createTextNode(errorStr), resultsNode, "only"); //$NON-NLS-0$
 							if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 								onResultReady(resultsNode);
 							}
