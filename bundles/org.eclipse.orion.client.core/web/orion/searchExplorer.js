@@ -492,7 +492,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		qParams.location = item.parentLocation;
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
-		var link = dojo.create("a", {className: "navlink", href: href}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = dojo.create("a", {className: "navlinkonpage", href: href}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		link.title = dojo.string.substitute(messages["Search again in this folder with \"${0}\""], [this.explorer.model.queryObj.searchStrTitle]);
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
