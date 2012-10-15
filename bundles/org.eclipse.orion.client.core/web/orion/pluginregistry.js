@@ -735,7 +735,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					var headers = plugin.getHeaders();
 					var message = "Authentication required for: " + location + ".";
 					if (headers.login) {
-						message += " <a href=\"" + headers.login + "\">Login</a>";
+						message += " <a target=\"_blank\" href=\"" + headers.login + "\">Login</a>";
 					}
 					var statusService = serviceRegistry.getService("orion.page.message");
 					if (statusService) {
