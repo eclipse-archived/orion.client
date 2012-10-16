@@ -44,9 +44,19 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 	var temp = document.createElement('a');
 	temp.href = "../prefs/user";
 	var location = temp.href;
+	
+	temp.href = "../mixloginstatic/LoginWindow.html";
+	var login = temp.href;
+	var headers = {
+		name: "Orion Preferences",
+		version: "1.0",
+		description: "This plugin provides access to user preferences.",
+		login: login
+	};
+
+	var provider = new PluginProvider(headers);
 
 	var service = new PreferencesProvider(location);
-	var provider = new PluginProvider();
 	provider.registerService("orion.core.preference.provider", service, {});
 	provider.connect();
 });

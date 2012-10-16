@@ -3,13 +3,22 @@
 <head>
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../../orion/plugin.js"></script>
-	<script type="text/javascript" src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
+	<script src="../../orion/plugin.js"></script>
+	<script src="../../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
 	<script>
+		/*global window orion document dojo*/
 		window.onload = function() {
 			var temp = document.createElement('a');
-			
-			var provider = new eclipse.PluginProvider();
+			temp.href = "../mixloginstatic/LoginWindow.html";
+			var login = temp.href;
+			var headers = {
+				name: "Orion Git Support",
+				version: "1.0",
+				description: "This plugin provides Git Support to the Orion File Service.",
+				login: login
+			};
+		
+			var provider = new orion.PluginProvider(headers);
 			provider.registerService("orion.navigate.command", {}, {
 				nameKey: "Git Status",
 				id: "eclipse.git.status",

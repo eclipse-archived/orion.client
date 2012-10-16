@@ -301,7 +301,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		this.getName = function() {
 			var headers = this.getHeaders();
 			if (headers) {
-				return headers["plugin.name"] || "";
+				return headers.name || "";
 			}
 			return null;
 		};
@@ -309,7 +309,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		this.getVersion = function() {
 			var headers = this.getHeaders();
 			if (headers) {
-				return headers["plugin.version"] || "0.0.0";
+				return headers.version || "0.0.0";
 			}
 			return null;
 		};

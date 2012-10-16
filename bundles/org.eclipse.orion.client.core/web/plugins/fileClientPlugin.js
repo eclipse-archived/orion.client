@@ -56,9 +56,12 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
 	var headers = {
-		"login": login
+		name: "Orion File Service",
+		version: "1.0",
+		description: "This plugin provides file access to a users workspace.",
+		login: login
 	};
-	
+
 	var provider = new PluginProvider(headers);
 
 	temp.href = "../file";

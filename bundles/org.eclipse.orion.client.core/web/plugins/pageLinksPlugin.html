@@ -4,13 +4,19 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<script src="../orion/plugin.js"></script>
 	<script>
-	/*global eclipse window*/
+	/*global orion window*/
 	var VERSION = "1.0";
 	
 	window.onload = function() {
 		var serviceImpl = { /* All data is in properties */ };
 
-		var provider = new orion.PluginProvider();
+		var headers = {
+			name: "Orion Page Links",
+			version: "1.0",
+			description: "This plugin provides the top-level page links for Orion."
+		};
+	
+		var provider = new orion.PluginProvider(headers);
 		
 		// Primary navigation links
 		provider.registerService("orion.page.link", serviceImpl, {

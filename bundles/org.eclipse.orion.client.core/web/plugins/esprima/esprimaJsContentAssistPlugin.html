@@ -6,12 +6,17 @@
 <script src="../../orion/plugin.js"></script>
 <script src="../../requirejs/require.js"></script>
 <script type="text/javascript">
-/*global eclipse require */
+/*global orion require */
 require({
   baseUrl: '../..'
 });
 require(["plugins/esprima/esprimaJsContentAssist"], function(esprimaContentAssistPlugin) {
-	var provider = new eclipse.PluginProvider();
+	var headers = {
+		name: "Orion JavaScript Content Assist",
+		version: "1.0",
+		description: "This plugin provides content assist for JavaScript using the Esprima JavaScript parser."
+	};
+	var provider = new orion.PluginProvider(headers);
 	provider.registerServiceProvider("orion.edit.contentAssist", 
 			new esprimaContentAssistPlugin.EsprimaJavaScriptContentAssistProvider(), {
 		contentType: ["application/javascript"],
