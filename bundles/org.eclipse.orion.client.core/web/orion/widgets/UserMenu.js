@@ -63,6 +63,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 								authService.logout().then(dojo.hitch(_self, function(){
 									this.addUserItem(key, authService, this.authenticatedServices[key].label);
 									localStorage.removeItem(key);
+									localStorage.removeItem("lastLogin");
 									//TODO: Bug 368481 - Re-examine localStorage caching and lifecycle
 									for (var i = localStorage.length - 1; i >= 0; i--) {
 										var name = localStorage.key(i);
