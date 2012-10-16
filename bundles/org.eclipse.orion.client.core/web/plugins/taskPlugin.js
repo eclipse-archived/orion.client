@@ -11,7 +11,17 @@
 /*global define eclipse window parent document*/
 
 define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
-	var provider = new PluginProvider();
+	var temp = document.createElement('a');
+	temp.href = "../mixloginstatic/LoginWindow.html";
+	var login = temp.href;
+	var headers = {
+		name: "Orion Task Management Service",
+		version: "1.0",
+		description: "This plugin provides access to and supports management of the tasks a user is currently running or ran recently.",
+		login: login
+	};
+
+	var provider = new PluginProvider(headers);
 
 	function makeParentRelative(location) {
 		try {
@@ -24,7 +34,6 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 		return location;
 	}
 
-	var temp = document.createElement('a');
 	temp.href = "../task";
 	var base = makeParentRelative(temp.href);
 
