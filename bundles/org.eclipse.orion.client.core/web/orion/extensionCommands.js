@@ -330,7 +330,7 @@ define(["require", "dojo", "orion/commands", "orion/editor/regex", "orion/conten
 					commandOptions.callback = dojo.hitch(info, function(data){
 						var shallowItemsClone;
 						if (this.forceSingleItem) {
-							var item = dojo.isArray() ? data.items[0] : data.items;
+							var item = dojo.isArray(data.items) ? data.items[0] : data.items;
 							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
 						} else {
 							if (dojo.isArray(data.items)) {

@@ -11,7 +11,12 @@
 /*global define eclipse document*/
 
 define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
-	var provider = new PluginProvider();
+	var headers = {
+		name: "Orion User Authentication",
+		version: "1.0",
+		description: "This plugin provides a user authentication service to support user verification and logout support."
+	};
+	var provider = new PluginProvider(headers);
 
 	function qualifyURL(url) {
 		var a = document.createElement('a');

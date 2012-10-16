@@ -39,7 +39,17 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	var workspaceBase = unqualify('../../workspace');
 	//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
 
-	var provider = new PluginProvider();
+	var temp = document.createElement('a');
+	temp.href = "../mixloginstatic/LoginWindow.html";
+	var login = temp.href;
+	var headers = {
+		name: "Orion Site Service",
+		version: "1.0",
+		description: "This plugin provides virtual site support for client web applications in your Orion workspace.",
+		login: login
+	};
+
+	var provider = new PluginProvider(headers);
 
 	provider.registerService('orion.navigate.command', null, {
 		id: 'orion.site.viewon',

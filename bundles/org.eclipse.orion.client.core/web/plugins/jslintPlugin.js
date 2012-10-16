@@ -217,7 +217,14 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 			}
 	};
 	
-	var provider = new PluginProvider();
+
+	var headers = {
+		name: "Orion JSLint Service",
+		version: "1.0",
+		description: "This plugin provides JSLint functionality for outlining and validating JavaScript."
+	};
+
+	var provider = new PluginProvider(headers);
 	provider.registerService(["orion.edit.validator", "orion.cm.managedservice"], validationService, {
 		contentType: ["application/javascript", "text/html"],
 		pid: "jslint.config"

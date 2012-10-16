@@ -12,7 +12,14 @@
 <script>
 /*global window eclipse orion */
 window.onload = function() {
-	var provider = new orion.PluginProvider();
+
+	var headers = {
+		name: "Orion Web Editing Plugin",
+		version: "1.0",
+		description: "This plugin provides editor link support for the navigator and provides default editing capabilities for HMTL, JavaScript, and CSS."
+	};
+
+	var provider = new orion.PluginProvider(headers);
 	
 	provider.registerService("orion.core.contenttype", {}, {
 		contentTypes:
