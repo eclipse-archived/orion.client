@@ -44,7 +44,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
         postCreate: function(){
             this.inherited( arguments );
             
-            this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
+            this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
             
             dojo.style( this.myfield, 'width', '20px' ); //$NON-NLS-1$ //$NON-NLS-0$
         }, 

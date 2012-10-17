@@ -486,9 +486,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
 		if (dirty) {
 			if (isDirty) {
-				dirty.innerHTML = "*"; //$NON-NLS-0$
+				dirty.textContent = "*"; //$NON-NLS-0$
 			} else {
-				dirty.innerHTML = ""; //$NON-NLS-0$
+				dirty.textContent = ""; //$NON-NLS-0$
 			}
 		}
 	}

@@ -223,8 +223,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 
 			dojo.empty( list );
 			var pluginList = this.settings.pluginRegistry.getPlugins();
-			this.pluginTitle.innerHTML = messages['Plugins'];
-			this.pluginCount.innerHTML = pluginList.length;
+			this.pluginTitle.textContent = messages['Plugins'];
+			this.pluginCount.textContent = pluginList.length;
 
 			for( var p = 0; p < pluginList.length; p++ ){
 				var pluginEntry = new orion.widgets.plugin.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );

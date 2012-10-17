@@ -502,7 +502,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				this.hide();
 				return;
 			}
-			this.parentNode.innerHTML = "";
+			this.parentNode.textContent = "";
 			for (var i = 0; i < this.proposals.length; i++) {
 				this.createDiv(this.proposals[i], i===0, this.parentNode, i);
 			}

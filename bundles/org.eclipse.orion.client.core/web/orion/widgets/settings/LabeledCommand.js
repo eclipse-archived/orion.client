@@ -31,7 +31,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
                 
         postCreate: function(){
             this.inherited( arguments );
-            this.mylabel.innerHTML = this.fieldlabel; //$NON-NLS-0$
+            this.mylabel.textContent = this.fieldlabel; //$NON-NLS-0$
             
             // add erase command
             this.commandService.renderCommands(this.scopeId, this.myCommand, {gitUrl: this.fieldlabel, keyIndex: this.keyIndex}, this, "button");

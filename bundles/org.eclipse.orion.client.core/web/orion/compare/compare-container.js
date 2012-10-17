@@ -742,7 +742,7 @@ exports.TwoWayCompareContainer = (function() {
 			} else {
 				status = message;
 			}
-			dojo.byId(statusDivId).innerHTML = dirtyIndicator +  status;
+			dojo.byId(statusDivId).textContent = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(that._registry, that._commandService, "pageActions"); //$NON-NLS-0$
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();

@@ -116,7 +116,8 @@ mSiteMappingsTable.Renderer = (function() {
 				var self = this;
 				this.options.siteClient.toFileLocation(target).then(function(loc) {
 					href = loc;
-					col.innerHTML = "<span class=\"validating\">&#8230;</span>"; //$NON-NLS-0$
+					var span = dojo.create("span", {className: "validating"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					span.textContent = "\u2026"; //$NON-NLS-0$
 					// use file service directly to avoid retrying in case of failure
 					self.options.fileClient._getService(loc).read(loc, true).then(
 						function(object) {

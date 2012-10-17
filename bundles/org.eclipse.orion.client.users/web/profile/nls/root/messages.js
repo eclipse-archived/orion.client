@@ -12,7 +12,6 @@
 
 define({
 	"Loading ${0}...": "Loading ${0}...",
-	"Profile Information for ${0}": "Profile Information for ${0}",
 	"User is not defined": "User is not defined",
 	"type is missing!": "type is missing!",
 	"no": "no",

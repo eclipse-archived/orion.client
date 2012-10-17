@@ -43,8 +43,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 		postCreate: function(){
 			var railsBox = dojo.marginBox( this.domNode.parentNode );
 			this.addData( this.serviceData );
-			this.serviceLabel.innerHTML = messages['Services'];
-			this.serviceCount.innerHTML = this.serviceData.length;
+			this.serviceLabel.textContent = messages['Services'];
+			this.serviceCount.textContent = this.serviceData.length;
 			dojo.style( this.domNode, "width", railsBox.w - 63 + 'px' ); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
@@ -176,7 +176,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 
 			for( itemCount=0;itemCount<data.items.length;itemCount++ ){
 				var row = dojo.create( "tr", null, tablebody); //$NON-NLS-0$
-				dojo.create("td", {'innerHTML':data.items[itemCount].item}, row); //$NON-NLS-1$ //$NON-NLS-0$
+				var td = dojo.create("td", null, row); //$NON-NLS-1$ //$NON-NLS-0$
+				td.textContent = data.items[itemCount].item;
 				
 				var value = data.items[itemCount].value;
 				
@@ -186,13 +187,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 				
 					var debugData = { title:data.service, item:data.items[itemCount].item, value: value };
 
-					dojo.create("span", { 'class':'objectLink', 'title':messages['click here, then check javascript console to drill down'], 'onclick': dojo.hitch( this, 'consoleOutput', debugData ), 'innerHTML':messages['JavaScript Object'] }, cell ); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var span = dojo.create("span", { 'class':'objectLink', 
+						'title':messages['click here, then check javascript console to drill down'], 
+						'onclick': dojo.hitch( this, 'consoleOutput', debugData )
+					}, cell ); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					span.textContent = messages['JavaScript Object'];
 				}else{
-					cell.innerHTML = value;
+					cell.textContent = value;
 				}
 			}
 			
-			dojo.create( "div", { "innerHTML":data.service, "class":"listTitle" }, entry ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var div = dojo.create( "div", {"class":"listTitle" }, entry ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			div.textContent = data.service;
 		},
           
 		addData: function(services){

@@ -298,14 +298,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
+		var title, header;
 		if(col_no === 1){
-			var title = dojo.create("th", {innerHTML: "<h2>"+messages["Results"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			title = dojo.create("th"); //$NON-NLS-0$
+			header = dojo.create("h2", null, title); //$NON-NLS-0$
+			header.textContent = messages["Results"]; //$NON-NLS-0$
 			
 			if( this.explorer.model.queryObj.searchStrTitle){
 				if(this.explorer.numberOnPage > 0){
 					var startNumber = this.explorer.model.queryObj.start + 1;
 					var endNumber = startNumber + this.explorer.numberOnPage - 1;
-					title.innerHTML = "";
+					title.textContent = "";
 					var textBold = dojo.create("h2", null, title, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					var displayStr = "";
 					if(!this.explorer.model.replaceMode()){
@@ -324,9 +327,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			}
 			return title;
 		} else if(col_no === 2){
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Location"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			title = dojo.create("th"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			header = dojo.create("h2", null, title);
+			header.textContent = messages["Location"];
+			return title;
 		} else if(col_no === 0){
-			return dojo.create("th", {innerHTML: ""}); //$NON-NLS-0$
+			return dojo.create("th"); //$NON-NLS-0$
 		}
 	};
 	
@@ -393,7 +399,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				var lineTd = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-0$
 				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd)); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				dojo.create( "td", { noWrap: true, innerHTML: detailModel.context[i].context + "&nbsp"}, lineDiv ); //$NON-NLS-1$ //$NON-NLS-0$
+				var td = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-1$ //$NON-NLS-0$
+				td.textContent = detailModel.context[i].context + " "; //$NON-NLS-0$
 			}
 		}
 		return tableNode;
@@ -566,12 +573,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchReportRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	SearchReportRenderer.prototype.getCellHeaderElement = function(col_no){
+		var th, h2;
 		switch(col_no){
 			case 0: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Files replaced"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				h2 = dojo.create("h2", null, th); //$NON-NLS-0$
+				h2.textContent = messages["Files replaced"];
 				break;
 			case 1: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Status"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				h2 = dojo.create("h2", null, th); //$NON-NLS-0$
+				h2.textContent = messages["Status"];
 				break;
 		}
 	};
@@ -625,7 +637,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 						statusMessage = dojo.string.substitute(messages["${0} out of ${1}  matches replaced."], [item.matchesReplaced, item.model.totalMatches]);
 						break;
 				}
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: statusMessage}); //$NON-NLS-1$ //$NON-NLS-0$
+				var td = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				td.textContent = statusMessage;
+				return td;
 			}
 		}
 	};
@@ -1471,13 +1485,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				var pageTitle = dojo.byId("pageTitle"); //$NON-NLS-0$
 				if(pageTitle){
 					if(!this.model.replaceMode()){
-						pageTitle.innerHTML = messages["Search Results"];
+						pageTitle.textContent = messages["Search Results"];
 					} else {
-						pageTitle.innerHTML = messages["Replace All Matches"];
+						pageTitle.textContent = messages["Replace All Matches"];
 					}
 				}
 			} else {
-				this.parentNode.innerHTML = "";
+				this.parentNode.textContent = "";
 				var textBold = dojo.create("b", null, this.parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				var displayStr = dojo.string.substitute(messages["No matches found for ${0}"], 
 					[this.model.queryObj.searchStrTitle]); 
