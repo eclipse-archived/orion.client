@@ -252,8 +252,8 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					deferred = _deferredResponses[String(message.id)];
 					delete _deferredResponses[String(message.id)];
 					if (message.error) {
-						_internalRegistry.handleServiceError(_this, message.error);
-						deferred.reject(message.error);
+						var error = _internalRegistry.handleServiceError(_this, message.error);
+						deferred.reject(error);
 					} else {
 						deferred.resolve(message.result);
 					}
@@ -731,19 +731,15 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			},
 			handleServiceError: function(plugin, error) {
 				if (error && error.status === 401) {
-					var location = plugin.getLocation();
 					var headers = plugin.getHeaders();
-					var message = "Authentication required for: " + location + ".";
+					var name = plugin.getName() || plugin.getLocation();
+					var message = "Authentication required for: " + name + ".";
 					if (headers.login) {
-						message += " <a target=\"_blank\" href=\"" + headers.login + "\">Login</a>";
+						message += " <a target=\"_blank\" href=\"" + headers.login + "\">Login</a> and re-try the request.";
 					}
-					var statusService = serviceRegistry.getService("orion.page.message");
-					if (statusService) {
-						statusService.setProgressResult({Severity: "Error", HTML: true, Message: "<span>" + message + "</span>"});
-					} else {
-						console.log(message);
-					}
+					return {Severity: "Error", HTML: true, Message: "<span>" + message + "</span>"};
 				}
+				return error;
 			}
 		};
 		

@@ -249,6 +249,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 						} catch(e) {
 						}
 						dojo.place(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message), progress, "only"); //$NON-NLS-1$
+					} else {
+						this.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 					}
 				})
 			);
