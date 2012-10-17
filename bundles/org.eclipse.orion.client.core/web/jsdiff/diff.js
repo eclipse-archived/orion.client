@@ -1,4 +1,4 @@
-/* See license.txt for terms of usage */
+/* See jsdiff-license.txt for terms of usage */
 
 /*
  * Text diff implementation.
