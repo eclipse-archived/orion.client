@@ -126,7 +126,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		},
 		
 		setLink: function(href, name) {
-			this.set("label", "<a class='commandMenuItemAnchor' href='"+href+"'>"+name+"</a>"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			var a = dojo.create("a", {className: "commandMenuItemAnchor", href: href});
+			a.textContent = name;
+			dojo.place(a, this.containerNode, "only");
 			this._anchorLocation = href;
 		},
 		

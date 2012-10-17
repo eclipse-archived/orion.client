@@ -60,10 +60,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (authService !== null) {
 				authService.getUser().then(function(jsonData){
 					if( jsonData.Name ){
-						dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+						//dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+						dropdown.containerNode.textContent = jsonData.Name;
 					}else if( jsonData.login ){
-						dropdown.set( 'label', jsonData.login ); //$NON-NLS-0$
-					}						
+						dropdown.containerNode.textContent = jsonData.login;
+					} 
 				});
 			}
 		}
