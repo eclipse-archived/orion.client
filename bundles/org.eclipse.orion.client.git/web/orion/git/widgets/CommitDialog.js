@@ -78,23 +78,23 @@ dojo.declare("orion.git.widgets.CommitDialog", [dijit.Dialog, orion.widgets._Ori
 		if (!this.commitMessage.value) {
 			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = messages["The commit message is required."];
+			this.commitInfo.textContent = messages["The commit message is required."];
 		} else if (!this.committerName.value) {
 			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = messages['The committer name is required.'];
+			this.commitInfo.textContent = messages['The committer name is required.'];
 		} else if (!this.committerEmail.value) {
 			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = messages['The committer mail is required.'];
+			this.commitInfo.textContent = messages['The committer mail is required.'];
 		} else if (!this.authorName.value) {
 			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = messages['The author name is required.'];
+			this.commitInfo.textContent = messages['The author name is required.'];
 		} else if (!this.authorEmail.value) {
 			dojo.style(this.commitInfoBar, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = true;
-			this.commitInfo.innerHTML = messages['The author mail is required.'];
+			this.commitInfo.textContent = messages['The author mail is required.'];
 		} else {
 			dojo.style(this.commitInfoBar, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.commitChangesButton.disabled = false;

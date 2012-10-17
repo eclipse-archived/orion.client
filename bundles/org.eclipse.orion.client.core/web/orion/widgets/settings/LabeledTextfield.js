@@ -45,7 +45,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
         postCreate: function(){
 			this.inherited(arguments);
 
-            this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
+            this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
             
             if( this.inputType && this.inputType === 'password' ){ //$NON-NLS-0$
 				this.myfield.type = "password"; //$NON-NLS-0$

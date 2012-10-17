@@ -130,15 +130,15 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 		return utftext;
 	}
 
-	function showErrorMessage(html) {
-		if (typeof html !== "undefined") {
-			document.getElementById("errorMessage").innerHTML = html;
+	function showErrorMessage(msg) {
+		if (typeof msg !== "undefined") {
+			document.getElementById("errorMessage").textContent = msg;
 		}
 		document.getElementById("errorWin").style.visibility = '';
 	}
 
 	function hideErrorMessage() {
-		document.getElementById("errorMessage").innerHTML = "&nbsp;";
+		document.getElementById("errorMessage").textContent = "";
 		document.getElementById("errorWin").style.visibility = 'hidden';
 	}
 

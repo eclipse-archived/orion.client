@@ -92,6 +92,12 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		this.isNewProject.checked = true;
 	},
 	openDirectoryPickerDialog: function(){
+		function makePathSegment(folder) {
+			var link = document.createElement("a"); //$NON-NLS-0$
+			link.href = require.toUrl("navigate/table.html") + "#"+folder.ChildrenLocation; //$NON-NLS-1$ //$NON-NLS-0$
+			link.textContent = folder.Name;
+			return link;
+		}
 		this.isExistingProject.checked = true; 
 		var self = this;
 		var dialog = new orion.widgets.DirectoryPrompterDialog({
@@ -101,11 +107,13 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 				func: dojo.hitch(this, function(targetFolder) {
 					if (targetFolder && targetFolder.Location) {
 						this.gitPath.value = targetFolder.Location;
-						this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#" + targetFolder.ChildrenLocation+"'>" + targetFolder.Name + "</a>"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.place(makePathSegment(targetFolder), this.shownGitPath, "only"); //$NON-NLS-0$
 						var currentFolder = targetFolder;
-						
+
 						while(currentFolder.parent && !currentFolder.parent.Projects){
-							this.shownGitPath.innerHTML = "<a href='" + require.toUrl("navigate/table.html") + "#"+currentFolder.parent.ChildrenLocation+"'>" + currentFolder.parent.Name + "</a>/" + this.shownGitPath.innerHTML; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							this.shownGitPath.insertBefore(document.createTextNode("/"), this.shownGitPath.firstChild); //$NON-NLS-0$
+							this.shownGitPath.insertBefore(makePathSegment(currentFolder.parent), this.shownGitPath.firstChild);
+
 							currentFolder = currentFolder.parent;
 						}
 					}

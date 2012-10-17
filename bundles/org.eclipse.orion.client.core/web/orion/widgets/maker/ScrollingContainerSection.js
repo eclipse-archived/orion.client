@@ -37,7 +37,7 @@ define(['require', 'dojo', 'dijit','dijit/TooltipDialog', 'dijit/layout/BorderCo
 			this.selectedNode = this.home;
 			this.anchor.id = this.title;
 			this.anchor.name = this.title;
-			this.sectionTitle.innerHTML = this.title;
+			this.sectionTitle.textContent = this.title;
 		},
 		
 		startup: function(){
@@ -50,7 +50,7 @@ define(['require', 'dojo', 'dijit','dijit/TooltipDialog', 'dijit/layout/BorderCo
 		
 		setOrder: function( order ){
 			this.order = order;
-			this.orderCircle.innerHTML = this.order;
+			this.orderCircle.textContent = this.order;
 		},
 		
 		getData: function(){

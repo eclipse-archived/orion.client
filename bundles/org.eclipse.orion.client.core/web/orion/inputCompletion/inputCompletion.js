@@ -154,14 +154,14 @@ define([], function(){
 			this._completionUIContainer.setAttribute("aria-live", "assertive");
 			document.body.appendChild(this._completionUIContainer);
 		}
-		this._completionUIContainer.innerHTML = "";
+		this._completionUIContainer.textContent = "";
 		this._completionUL = document.getElementById(this._getUIProposalListId())
 		if(!this._completionUL){
 			this._completionUL = document.createElement('ul');//$NON-NLS-0$
 			this._completionUL.id = this._getUIProposalListId();
 			this._completionUL.className = "inputCompletionUL";//$NON-NLS-0$
 		}
-		this._completionUL.innerHTML = "";
+		this._completionUL.textContent = "";
 		this._completionUIContainer.appendChild(this._completionUL);
 	};
 	
@@ -317,7 +317,7 @@ define([], function(){
 	};
 	
 	InputCompletion.prototype._proposeOn = function(inputValue){
-		this._completionUL.innerHTML = "";
+		this._completionUL.textContent = "";
 		var searchTerm = inputValue ? inputValue.toLowerCase() : null;
 		this._proposalList = [];
 		this._proposeOnList(this._dataList, searchTerm, true);

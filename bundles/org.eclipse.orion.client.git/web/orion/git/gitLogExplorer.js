@@ -424,10 +424,10 @@ exports.GitLogExplorer = (function() {
 					});
 					
 					dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-					var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						innerHTML: messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName 
-						+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
-								
+					var description = dojo.create( "span", { "class":"gitSecondaryDescription"  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
+					description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName  + " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"});
+					
 					return td;
 					
 					break;

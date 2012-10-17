@@ -210,8 +210,8 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 				this.tableTree = tableTree;
 				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
 				var thead = dojo.create("thead", null); //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages['Name']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				dojo.create("th", {innerHTML: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {textContent: messages['Name']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.create("th", {textContent: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
 				tableNode.appendChild(thead);
 			},
 			render: function(item, tableRow) {
@@ -289,7 +289,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 
 				options.renderer = new ViewOnSiteRenderer(options);
 				if (options.label) {
-					dojo.byId(options.label).innerHTML = formatMessage(messages.ViewOnSiteCaption, file.Name);
+					dojo.byId(options.label).textContent = formatMessage(messages.ViewOnSiteCaption, file.Name);
 				}
 
 				// Create tree widget

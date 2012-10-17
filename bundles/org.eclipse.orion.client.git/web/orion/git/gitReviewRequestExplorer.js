@@ -122,8 +122,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 					var text = dojo.string.substitute(messages["You are reviewing contribution ${0} from ${1}"], [params[1], params[2]]);
 					var text2 = messages["Unfortunately the commit can not be found in your workspace. To see it try one of the following: "];
 					dojo.byId("moreOptionsDiv").innerHTML = messages["To review the commit you can also:"];
-					dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text, "style" : "padding : 5px, display: block", "id": "welcome"}, dojo.byId("descriptionHeader"));
-					dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text2, "style" : "display: block", "id" : "instruction"}, dojo.byId("descriptionHeader"));
+					var description = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "padding : 5px, display: block", "id": "welcome"}, dojo.byId("descriptionHeader"));
+					description.textContent = text;
+					var description2 = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "display: block", "id" : "instruction"}, dojo.byId("descriptionHeader"));
+					description2.textContent = text2;
 					that.renderCloneSection(params);
 					
 					var repositories = [];
@@ -148,7 +150,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			that.progressService.setProgressMessage("");
 			that.commandService.registerCommandContribution("clone", "eclipse.cloneGitRepositoryReviewReq", 200);
 			that.commandService.renderCommands("clone", dojo.byId("cloneNode"), "clone", that, "button", params[0]);
-			dojo.create("span", { style: "padding: 0px; text-align: left;", "class": "gitMainDescription", innerHTML : " using " + params[0] },  dojo.byId("cloneNode"));
+			var mainDescription = dojo.create("span", { style: "padding: 0px; text-align: left;", "class": "gitMainDescription" },  dojo.byId("cloneNode"));
+			mainDescription.textContent = " using " + params[0];
 		};
 		
 		GitReviewRequestExplorer.prototype.renderSections = function(repositories, url1, url2, sha){
@@ -206,8 +209,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 											dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow"},  dojo.byId("commitNode"));
 											dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch"},  dojo.byId(resp.Children[0].Id + "tableitem"));
 											dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-											var link2 = dojo.create("a", {style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: repositories[0].Name , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
-											dojo.create("span", {"class": "gitSecondaryDescription", innerHTML: messages["location: "] + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
+											var link2 = dojo.create("a", {style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
+											link2.textContent = repositories[0].Name;
+											var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+											span.textContent = messages["location: "] + repositories[0].Content.Path;
 											var link = dojo.create("a", {id : resp.Children[0].Id + "a", style: "padding: 0px; text-align: left; width: 50px", innerHTML: messages["Open Commit"], href: commitPageURL },  dojo.byId(resp.Children[0].Id + "divCommands"));
 											dojo.byId("commitDiv").style.display = " block ";
 											dojo.byId("moreOptionsDiv").style.display = " block ";
@@ -259,8 +264,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 											dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow" , style: "height: 20px"},  dojo.byId("fetchNode"));
 											dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch" },  dojo.byId(resp.Children[0].Id + "tableitem"));
 											dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-											dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: resp.Children[0].Name + "    " , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
-											dojo.create("span", {"class": "gitSecondaryDescription", innerHTML: messages["location: "] + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
+											var link = dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
+											link.textContent = resp.Children[0].Name + "    ";
+											var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+											span.textContent = messages["location: "] + repositories[0].Content.Path;
 											that.commandService.renderCommands("fetch", dojo.byId(resp.Children[0].Id + "divCommands"), remotes.Children[index], that, "tool");
 											dojo.byId("fetchDiv").style.display = " block ";
 											var style = dojo.style("commitDiv", "display");
@@ -271,14 +278,17 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 									dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow"},  dojo.byId("remoteNode"));
 									dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch" },  dojo.byId(resp.Children[0].Id + "tableitem"));
 									dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-									dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", innerHTML: resp.Children[0].Name + "    " , href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
-									dojo.create("span", {"class": "gitSecondaryDescription", innerHTML: messages["location: "] + repositories[0].Content.Path},dojo.byId(resp.Children[0].Id + "div"));
+									var repoLink = dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
+									repoLink.textContent = resp.Children[0].Name + "    ";
+									var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+									span.textContent = messages["location: "] + repositories[0].Content.Path;
 									that.commandService.renderCommands("add", dojo.byId(resp.Children[0].Id + "divCommands"), resp.Children[0], that, "tool",  url1);
 									dojo.byId("remoteDiv").style.display = " block ";
 									 for(var i=0;i<remotes.Children.length;i++){	
 										dojo.create("div", {}, dojo.byId(resp.Children[0].Id + "div"));
 										resp.Children[0].RemoteLocation = "/gitapi/remote" + repositories[0].Location;
-										dojo.create("div", {"class": "gitSecondaryDescription", innerHTML: remotes.Children[i].Name + " : " + remotes.Children[i].GitUrl},dojo.byId(resp.Children[0].Id + "div"));
+										var div = dojo.create("div", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+										div.textContent = remotes.Children[i].Name + " : " + remotes.Children[i].GitUrl;
 									}
 								}
 								that.renderSections(repositories.slice(1), url1, url2, sha);

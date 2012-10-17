@@ -22,7 +22,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/w
 
 		postCreate: function() {
 			this.inherited(arguments);
-			this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
+			this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
 		}
 
 	});

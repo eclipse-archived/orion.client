@@ -35,7 +35,10 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojox', 'dijit/Dialog', 'd
 		var header = dojo.byId("div1");
 		var button = dojo.byId("moreButton");
 		var dialog2 = this.options.dialog;
-		header.innerHTML = "You are going to push to the following remote: " + this.options.location + "<br><br> Click More to push to another remote or OK to push to default" ;
+		header.appendChild(document.createTextNode("You are going to push to the following remote: " + this.options.location));
+		header.appendChild(document.createElement("br"));
+		header.appendChild(document.createElement("br"));
+		header.appendChild(document.createTextNode(" Click More to push to another remote or OK to push to default"));
 		dojo.connect(button,"onclick",function(){
 				dialog2.startup();
 				dialog2.show();

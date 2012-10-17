@@ -140,7 +140,7 @@ eclipse.UsersRenderer = (function() {
 	};
 	
 	UsersRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		
+		var td;
 		switch(col_no){
 		case 0:
 			
@@ -155,9 +155,13 @@ eclipse.UsersRenderer = (function() {
 		case 1:
 			return this.getActionsColumn(item, tableRow, null, null, true);
 		case 2:
-			return dojo.create("td", {innerHTML: item.Name ? item.Name : "&nbsp;"}); //$NON-NLS-1$ //$NON-NLS-0$
+			td = dojo.create("td"); //$NON-NLS-0$
+			td.textContent = item.Name ? item.Name : " "; //$NON-NLS-0$
+			return td;
 		case 3:
-			return dojo.create("td", {innerHTML: item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;'}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			td = dojo.create("td"); //$NON-NLS-0$
+			td.textContent = item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;'; //$NON-NLS-1$ //$NON-NLS-0$
+			return td;
 		}
 		
 	};
@@ -209,16 +213,15 @@ eclipse._UsersList = (function() {
 				dojo.place(table, this.parent);
 				
 				var tbody = dojo.create("tbody", null, table); //$NON-NLS-0$
-
+				var userLoginCell, userNameCell;
 				for ( var i in jsonData.users) {
 					var userRow = dojo.create("tr", {"class": i%2===0 ? "treeTableRow lightTreeTableRow" : "treeTableRow darkTreeTableRow"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.connect(userRow, "onmouseover", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="";}, i)); //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.connect(userRow, "onmouseout", dojo.hitch(this, function(i){document.getElementById("usersActions"+i).style.visibility="hidden";}, i)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.create("td", { //$NON-NLS-0$
-						innerHTML : this
-								.getUserTab(jsonData.users[i].login, jsonData.users[i].Location),
-								className : "usersTable" //$NON-NLS-0$
-					}, userRow);
+					userLoginCell = dojo.create("td", { //$NON-NLS-0$
+						className : "usersTable"
+					}, userRow); //$NON-NLS-1$
+					dojo.place(this.getUserTab(jsonData.users[i].login, jsonData.users[i].Location), userLoginCell);
 					var actionsTd = dojo.create("td", {className: "usersTable secondaryColumn"}); //$NON-NLS-1$ //$NON-NLS-0$
 					var actions = dojo.create("span",{id: "usersActions"+i, style: "visibility: hidden"}, actionsTd); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					var deleteAction = dojo.create("img", { //$NON-NLS-0$
@@ -236,10 +239,10 @@ eclipse._UsersList = (function() {
 								this.deleteUser(login, location);
 							}, jsonData.users[i].login, jsonData.users[i].Location));
 					dojo.place(actionsTd, userRow);
-					dojo.create("td", { //$NON-NLS-0$
-						innerHTML : jsonData.users[i].Name ? jsonData.users[i].Name : '&nbsp;', //$NON-NLS-0$
+					userNameCell = dojo.create("td", { //$NON-NLS-0$
 						className: "usersTable secondaryColumn" //$NON-NLS-0$
 					}, userRow);
+					userNameCell.textContent = jsonData.users[i].Name ? jsonData.users[i].Name : ' '; //$NON-NLS-0$
 					dojo.create("td", { //$NON-NLS-0$
 						innerHTML : jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;', //$NON-NLS-1$ //$NON-NLS-0$
 						className: "usersTable secondaryColumn" //$NON-NLS-0$
@@ -249,8 +252,9 @@ eclipse._UsersList = (function() {
 			}));
 		},
 		getUserTab : function(userName, userLocation) {
-			return "<a class=\"navlinkonpage\" href=\"" + require.toUrl("profile/user-profile.html") + "#" + userLocation //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					+ "\">" + userName + "</a>"; //$NON-NLS-1$ //$NON-NLS-0$
+			var a = dojo.create("a", {className: "navlinkonpage", href: require.toUrl("profile/user-profile.html") + "#" + userLocation}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			a.textContent = userName;
+			return a;
 		},
 		reloadUsers : function() {
 			dojo.html._emptyNode(this.parent);

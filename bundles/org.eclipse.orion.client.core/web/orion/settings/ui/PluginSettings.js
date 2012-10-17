@@ -172,7 +172,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 		var sectionHeader = document.createElement('h3'); //$NON-NLS-0$
 		sectionHeader.id = headerId;
 		sectionHeader.className = 'setting-header'; //$NON-NLS-0$
-		sectionHeader.innerHTML = setting.getName();
+		sectionHeader.textContent = setting.getName();
 
 		var propertiesElement = document.createElement('div'); //$NON-NLS-0$
 		propertiesElement.className = 'setting-content'; //$NON-NLS-0$

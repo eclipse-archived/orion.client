@@ -32,10 +32,10 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			dojo.connect(this.contentText, "onChange", dojo.hitch(this, function(myDijit,p){ //$NON-NLS-0$
 					if(myDijit.get('value')!==""){ //$NON-NLS-0$
 						var value = parseInt(myDijit.get('value')); //$NON-NLS-0$
-						p.innerHTML = dojo.date.locale.format(new Date(value), {formatLength: "short"}); //$NON-NLS-0$
+						p.textContent = dojo.date.locale.format(new Date(value), {formatLength: "short"}); //$NON-NLS-0$
 					}
-					if(p.innerHTML==="") {
-						p.innerHTML="&nbsp"; //$NON-NLS-0$
+					if(p.textContent==="") {
+						p.textContent=" "; //$NON-NLS-0$
 					}
 				}, this.contentText, this.dateP));
 			this.get = dojo.hitch(this.contentText,this.contentText.get);
@@ -142,7 +142,8 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			
 			
 			for(var i=0; i<pluginsList.length; i++){
-				var pluginDiv = dojo.create("div", {style: "clear: both", innerHTML: dojo.string.substitute(messages["Loading ${0}..."],[pluginsList[i].Url])}, userProfile.profileForm.get("domNode")); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+				var pluginDiv = dojo.create("div", {style: "clear: both"}, userProfile.profileForm.get("domNode")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				pluginDiv.textContent = dojo.string.substitute(messages["Loading ${0}..."],[pluginsList[i].Url]); //$NON-NLS-0$
 				var pluginReference= this.pluginRegistry.getPlugin(pluginsList[i].Url);
 				if(pluginReference===null){
 					var registry = this.registry;
@@ -189,8 +190,6 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 				if(this.profileForm){
 					this.profileForm.reset();
 					this.profileForm.set('value', jsonData); //$NON-NLS-0$
-					if(dojo.byId("profileBanner")) //$NON-NLS-0$
-						dojo.byId("profileBanner").innerHTML = dojo.string.substitute(messages["Profile Information for ${0}"], ["<b style='color: #000'>" + jsonData.login + "</b>"]); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 				}
 				for(var i in this.iframes){
 					this.setHash(this.iframes[i], jsonData.Location);
@@ -212,9 +211,9 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 					p.innerHTML = myDijit.get('checked') ? messages["yes"] : messages["no"]; //$NON-NLS-0$
 					return;
 				}
-				p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
-				if (p.innerHTML === "") {
-					p.innerHTML = "&nbsp"; //$NON-NLS-0$
+				p.textContent = myDijit.get('value'); //$NON-NLS-0$
+				if (p.textContent === "") {
+					p.textContent = " "; //$NON-NLS-0$
 				}
 			}
 			
@@ -236,11 +235,11 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 		
 				if (formElem.get('readOnly') === true && !formElem.get('ecliplseCustomValue')) { //$NON-NLS-1$ //$NON-NLS-0$
 					formElem.set('style', 'display: none'); //$NON-NLS-1$ //$NON-NLS-0$
-					var p = dojo.create("span", {
-						id: formElem.get('id') + "_p",
-						className: "userprofile",
-						innerHTML: formElem.get('value') ? formElem.get('value') : "&nbsp;"
-					}, node, "last"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var p = dojo.create("span", { //$NON-NLS-0$
+						id: formElem.get('id') + "_p", //$NON-NLS-1$ //$NON-NLS-0$
+						className: "userprofile" //$NON-NLS-0$
+					}, node, "last"); //$NON-NLS-0$
+					p.textContent = formElem.get('value') ? formElem.get('value') : " "; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					setInnerHTML(formElem, p);
 		
 					dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit, p) { //$NON-NLS-0$
@@ -248,9 +247,9 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 							p.innerHTML = myDijit.get('checked') ? messages['yes'] : messages['no']; //$NON-NLS-0$
 							return;
 						}
-						p.innerHTML = myDijit.get('value'); //$NON-NLS-0$
-						if (p.innerHTML === "") {
-							p.innerHTML = "&nbsp"; //$NON-NLS-0$
+						p.textContent = myDijit.get('value'); //$NON-NLS-0$
+						if (p.textContent === "") {
+							p.textContent = " "; //$NON-NLS-0$
 						}
 					}, formElem, p));
 				}
@@ -280,7 +279,8 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 	
 					var titleWrapper = dojo.create( "div", {"class":"sectionWrapper toolComposite", "id": content.sections[i].id + "_SectionHeader"}, placeholder ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					
-					dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft", innerHTML: content.sections[i].name }, titleWrapper ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var div = dojo.create( "div", { id: content.sections[i].id + "_SectionTitle", "class":"layoutLeft" }, titleWrapper ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					div.textContent = content.sections[i].name;
 	
 					var content2 =	
 						'<div class="sectionTable" role="region" aria-labelledby="' + content.sections[i].id + "_SectionTitle" + '">' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -301,7 +301,8 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 						
 						var data = content.sections[i].data[j];
 						var label = dojo.create("label", {"for": data.props.id}, tableListItem); //$NON-NLS-1$ //$NON-NLS-0$
-						dojo.create( "span", {style: "min-width:150px; display:inline-block", innerHTML: data.label }, label );				 //$NON-NLS-1$ //$NON-NLS-0$
+						var span = dojo.create( "span", {style: "min-width:150px; display:inline-block"}, label );				 //$NON-NLS-1$ //$NON-NLS-0$
+						span.textContent = data.label;
 						var input = this.createFormElem(data, label);
 						dojo.connect(input, "onKeyPress", dojo.hitch(profile, function(event){ if (event.keyCode === 13) { this.fire(); } else {return true;}})); //$NON-NLS-0$
 						if(this.lastJSON && data.props && this.lastJSON[data.props.name]){

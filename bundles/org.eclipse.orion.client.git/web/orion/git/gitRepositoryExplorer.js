@@ -416,7 +416,8 @@ exports.GitRepositoryExplorer = (function() {
 				this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
 				
 				dojo.create("div", null, detailsView);
-				dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : (repositories[i].GitUrl != null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]) }, detailsView);
+				var span = dojo.create("span", {"class" : "gitSecondaryDescription" }, detailsView);
+				span.textContent = (repositories[i].GitUrl != null ? "git url: " + repositories[i].GitUrl : messages["(no remote)"]);
 				dojo.create("div", null, detailsView);
 				dojo.create("span", { "id" : "location"+i, "class":"gitSecondaryDescription" }, detailsView);
 				
@@ -440,7 +441,7 @@ exports.GitRepositoryExplorer = (function() {
 	};
 	
 	GitRepositoryExplorer.prototype.renderRepository = function(repository, index, length, mode, links){
-		dojo.byId("location"+index).innerHTML = messages["location: "] + repository.Content.Path;
+		dojo.byId("location"+index).textContent = messages["location: "] + repository.Content.Path;
 		var status = repository.Status;
 		
 		if (mode === "full"){ //$NON-NLS-0$
@@ -451,10 +452,10 @@ exports.GitRepositoryExplorer = (function() {
 				? dojo.string.substitute(messages["${0} file(s) to stage and ${1} file(s) to commit."], [unstaged, staged])
 				: messages["Nothing to commit."]);
 			
-			dojo.byId("workspaceState"+index).innerHTML = workspaceState;
+			dojo.byId("workspaceState"+index).textContent = workspaceState;
 			
 			var commitsState = repository.CommitsToPush;
-			dojo.byId("commitsState"+index).innerHTML = ((commitsState > 0) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);	
+			dojo.byId("commitsState"+index).textContent = ((commitsState > 0) ? commitsState + messages[" commit(s) to push."] : messages["Nothing to push."]);	
 		}
 	};
 	
@@ -506,9 +507,8 @@ exports.GitRepositoryExplorer = (function() {
 		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: workspaceState}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: dojo.string.substitute(messages['${0} file(s) to stage and ${1} file(s) to commit.'], [unstaged, staged])
-						}, detailsView );
+		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView );   //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		description.textContent = dojo.string.substitute(messages['${0} file(s) to stage and ${1} file(s) to commit.'], [unstaged, staged]);
 	};
 	
 	// Git branches
