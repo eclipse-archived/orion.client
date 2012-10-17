@@ -32,8 +32,9 @@ input[type="button"]:active {
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#555), color-stop(100%,black));
 	background: -webkit-linear-gradient(top, #444 0%,black 100%);
 	background: -o-linear-gradient(top, #444 0%,black 100%);
-	background: -ms-linear-gradient(top, #444 0%,black 100%);
+	background: -ms-linear-gradient(top, #444 0%,black 100%); /* IE10+ */
 	background: linear-gradient(to bottom, #444 0%,black 100%);
+	-ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorStr='#444444', EndColorStr='black')"; /* IE9 */
 	-moz-box-shadow: 0 2px 15px rgba(0,0,0,0.25);
 	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 	-webkit-transition: box-shadow 0.2s linear;
