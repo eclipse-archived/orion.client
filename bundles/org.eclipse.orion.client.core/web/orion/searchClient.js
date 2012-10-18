@@ -292,10 +292,11 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 							var col;
 							if (!foundValidHit) {
 								foundValidHit = true;
+								// Every caller is passing heading === false, consider removing this code.
 								if (heading) {
 									var headingRow = table.insertRow(0);
 									col = headingRow.insertCell(0);
-									col.textContent = heading; //FIXME
+									col.textContent = heading;
 								}
 							}
 							var row = table.insertRow(-1);

@@ -22,7 +22,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<label style="display:table;">' + //$NON-NLS-0$
-								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" >'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" ></span>' +  //$NON-NLS-2$ //$NON-NLS-0$
 								'<span style="display:table-cell; vertical-align:middle;">' + //$NON-NLS-0$
 								'<span class="toggleShell">' + //$NON-NLS-0$
 									'<div data-dojo-attach-point="leftToggle" data-dojo-attach-event="onclick:toggle"></div><div data-dojo-attach-point="rightToggle" data-dojo-attach-event="onclick:toggle"></div>' + //$NON-NLS-0$

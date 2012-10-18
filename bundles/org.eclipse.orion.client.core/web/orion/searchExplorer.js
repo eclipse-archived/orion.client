@@ -308,7 +308,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				if(this.explorer.numberOnPage > 0){
 					var startNumber = this.explorer.model.queryObj.start + 1;
 					var endNumber = startNumber + this.explorer.numberOnPage - 1;
-					title.textContent = "";
+					title.innerHTML = "";
 					var textBold = dojo.create("h2", null, title, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					var displayStr = "";
 					if(!this.explorer.model.replaceMode()){
@@ -400,7 +400,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd)); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				var td = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-1$ //$NON-NLS-0$
-				td.textContent = detailModel.context[i].context + " "; //$NON-NLS-0$
+				td.textContent = detailModel.context[i].context + "&nbsp;"; //$NON-NLS-0$
 			}
 		}
 		return tableNode;
