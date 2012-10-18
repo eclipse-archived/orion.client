@@ -437,7 +437,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 						formatForNoUserCreation();
 					}
 					document.getElementById("login-window").style.display = '';
-					// document.getElementById("login").focus();
+					document.getElementById("myopenidLogin").focus();
 				}
 			}
 		};

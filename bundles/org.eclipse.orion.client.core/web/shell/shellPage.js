@@ -22,6 +22,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 
 	var resolveError = function(result, error) {
+		if (error && error.Message) {
+			error = error.Message;
+		}
 		result.resolve(i18nUtil.formatMessage(messages["File service error: ${0}"], "<em>" + error + "</em>")); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 
