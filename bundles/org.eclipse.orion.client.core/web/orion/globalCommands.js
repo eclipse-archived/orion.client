@@ -731,6 +731,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				require(['i18n!'+info.nls], function(commandMessages){
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					expandedHref = PageUtil.validateURLScheme(expandedHref);
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					text = document.createTextNode(info.nameKey? commandMessages[info.nameKey]: info.name);
 					dojo.place(text, link, "only"); //$NON-NLS-0$
@@ -738,6 +739,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			} else if (info.uriTemplate && info.name) {
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					expandedHref = PageUtil.validateURLScheme(expandedHref);
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					text = document.createTextNode(info.name);
 					dojo.place(text, link, "only"); //$NON-NLS-0$
