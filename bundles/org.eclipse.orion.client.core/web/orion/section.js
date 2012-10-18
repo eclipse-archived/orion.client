@@ -21,7 +21,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 	 * @param [options.preferenceService] used to store the hidden/shown state of the section if specified
 	 * @param [options.iconClass] the class of the icon decorating section, no icon displayed if not provided
 	 * @param [options.getItemCount] {Function} function to return the count of items in the section. If not provided, no count is shown.
-	 * @param [options.content] {String} content of the section in HTML. May be set later using {@link #setContent()}
+	 * @param [options.content] {String|DomNode} HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
 	 * @param [options.slideout] {Boolean} if true section will contain generated slideout
 	 * @param [options.canHide] {Boolean} if true section may be hidden
 	 * @param [options.hidden] {Boolean} if true section will be hidden at first display
@@ -151,10 +151,15 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		
 		/**
 		 * Changes the contents of the section.
-		 * @param content
+		 * @param {String|DomNode} content
 		 */
 		setContent: function(content){
-			this._contentParent.innerHTML = content; // FIXME this API should not require HTML string -- insecure
+			if (typeof content === 'string') {
+				this._contentParent.innerHTML = content;
+			} else {
+				this._contentParent.innerHTML = ""; //NON-NLS-0$
+				this._contentParent.appendChild(content);
+			}
 		},
 
 		/**
