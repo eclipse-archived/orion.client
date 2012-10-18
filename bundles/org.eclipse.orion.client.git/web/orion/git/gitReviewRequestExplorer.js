@@ -125,11 +125,19 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 					dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text, "style" : "padding : 5px, display: block", "id": "welcome"}, dojo.byId("descriptionHeader"));
 					dojo.create("span", {"class" : "gitSecondaryDescription", innerHTML : text2, "style" : "display: block", "id" : "instruction"}, dojo.byId("descriptionHeader"));
 					that.renderCloneSection(params);
-					if(workspace.Children.length === 0){
+					
+					var repositories = [];
+					for(var i=0; i<workspace.Children.length; i++){
+						if(workspace.Children[i].Git){
+							repositories.push(workspace.Children[i]);
+						}
+					}
+					
+					if(repositories.length === 0){
 						dojo.byId("instruction").style.display = " block ";
 						return;
 					}
-					that.renderSections(workspace.Children, params[0], params[2], params[1]);
+					that.renderSections(repositories, params[0], params[2], params[1]);
 				}
 				
 			);
