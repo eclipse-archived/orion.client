@@ -121,7 +121,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 					
 					var text = dojo.string.substitute(messages["You are reviewing contribution ${0} from ${1}"], [params[1], params[2]]);
 					var text2 = messages["Unfortunately the commit can not be found in your workspace. To see it try one of the following: "];
-					dojo.byId("moreOptionsDiv").innerHTML = messages["To review the commit you can also:"];
+					dojo.byId("moreOptionsDiv").textContent = messages["To review the commit you can also:"];
 					var description = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "padding : 5px, display: block", "id": "welcome"}, dojo.byId("descriptionHeader"));
 					description.textContent = text;
 					var description2 = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "display: block", "id" : "instruction"}, dojo.byId("descriptionHeader"));
@@ -213,7 +213,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 											link2.textContent = repositories[0].Name;
 											var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
 											span.textContent = messages["location: "] + repositories[0].Content.Path;
-											var link = dojo.create("a", {id : resp.Children[0].Id + "a", style: "padding: 0px; text-align: left; width: 50px", innerHTML: messages["Open Commit"], href: commitPageURL },  dojo.byId(resp.Children[0].Id + "divCommands"));
+											var link = dojo.create("a", {id : resp.Children[0].Id + "a", style: "padding: 0px; text-align: left; width: 50px", href: commitPageURL },  dojo.byId(resp.Children[0].Id + "divCommands"));
+											link.textContent = messages["Open Commit"];
 											dojo.byId("commitDiv").style.display = " block ";
 											dojo.byId("moreOptionsDiv").style.display = " block ";
 											dojo.byId("instruction").style.display = " none ";

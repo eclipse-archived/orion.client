@@ -210,8 +210,10 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 				this.tableTree = tableTree;
 				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
 				var thead = dojo.create("thead", null); //$NON-NLS-0$
-				dojo.create("th", {textContent: messages['Name']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				dojo.create("th", {textContent: messages['Actions']}, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				var nameCol = dojo.create("th", null, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				var actionsCol = dojo.create("th", null, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				nameCol.textContent = messages['Name'];
+				actionsCol.textContent = messages['Actions'];
 				tableNode.appendChild(thead);
 			},
 			render: function(item, tableRow) {
