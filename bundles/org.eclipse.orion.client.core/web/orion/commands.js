@@ -891,11 +891,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 								style: "display: none;" //$NON-NLS-0$
 							});
 							menuButton = new dijit.form.DropDownButton({
-								label: group.title === "*" ? messages["Actions"] : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
 								showLabel:  group.title !== "*", //$NON-NLS-0$
 								style: "visibility: hidden;", //$NON-NLS-0$
 								dropDown: newMenu
 						        });
+						    menuButton.containerNode.textContent = group.title === "*" ? messages["Actions"] : group.title; //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
 							dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
 							if(domNodeWrapperList){
 								//we need to add the menuButton as the optional widget param

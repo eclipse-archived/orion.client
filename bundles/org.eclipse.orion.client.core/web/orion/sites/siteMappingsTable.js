@@ -66,12 +66,22 @@ mSiteMappingsTable.Renderer = (function() {
 			var col;
 			switch(col_no){
 				case 0:
-					col = dojo.create("th", {innerHTML: " "}); //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("th"); //$NON-NLS-1$ //$NON-NLS-0$
+					col.textContent = " "; //$NON-NLS-0$
 					dojo.addClass(col, "isValidColumn"); //$NON-NLS-0$
 					return col;
-				case 1: return dojo.create("th", {innerHTML: messages["Path"]}); //$NON-NLS-0$
-				case 2: return dojo.create("th", {innerHTML: messages["Mount at (server path)"]}); //$NON-NLS-0$
-				case 3: return dojo.create("th", {innerHTML: messages["Actions"]}); //$NON-NLS-0$
+				case 1:
+					col = dojo.create("th"); //$NON-NLS-0$
+					col.textContent = messages["Path"];
+					return col;
+				case 2:
+					col = dojo.create("th"); //$NON-NLS-0$
+					col.textContent = messages["Mount at (server path)"];
+					return col;
+				case 3:
+					col = dojo.create("th"); //$NON-NLS-0$
+					col.textContent = messages["Actions"];
+					return col;
 			}
 		},
 		getCellElement: function(/**Number*/ col_no, /**Object*/ item, /**HTMLTableRowElement*/ tableRow) {

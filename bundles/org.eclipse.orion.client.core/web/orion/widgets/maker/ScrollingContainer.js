@@ -165,8 +165,9 @@ define(['require', 'dojo', 'dijit', 'orion/fileClient','dijit/TooltipDialog', 'd
 			var content = { 'class':'scrollmenuitem',  //$NON-NLS-1$ //$NON-NLS-0$
 							'href': '#' + name,  //$NON-NLS-1$ //$NON-NLS-0$
 							'data-dojo-attach-point':name,  //$NON-NLS-0$
-							'onclick': dojo.hitch( this, 'scrollTo' ), //$NON-NLS-1$ //$NON-NLS-0$
-							'innerHTML': name }; //$NON-NLS-0$
+							'onclick': dojo.hitch( this, 'scrollTo' ) //$NON-NLS-1$ //$NON-NLS-0$
+			};
+			content.textContent = name;
 			
 			var menuItem = dojo.create( 'a', content ); //$NON-NLS-0$
 			
@@ -179,7 +180,8 @@ define(['require', 'dojo', 'dijit', 'orion/fileClient','dijit/TooltipDialog', 'd
 			
 			listItem.appendChild( menuItem );
 			
-			var counter = dojo.create( 'div', { innerHTML: count, 'class':'itemcount' }, listItem ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var counter = dojo.create( 'div', { 'class':'itemcount' }, listItem ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			counter.textContent = count;
 			
 			var actions = dojo.byId( 'pageActions' ); //$NON-NLS-0$
 		
