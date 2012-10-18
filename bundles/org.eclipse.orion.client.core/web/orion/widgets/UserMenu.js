@@ -21,10 +21,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 						'<tbody class="dijitReset" dojoAttachPoint="containerNode"></tbody>' + //$NON-NLS-0$
 						'</table>', //$NON-NLS-0$
 		
-		label: messages['test'],
-		
 		postCreate : function() {
 			this.inherited(arguments);
+
+			this.label = messages['test'];
 			
 			dojo.style( this.domNode, 'border-radius', '3px' ); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.style( this.domNode, 'border', '1px solid #DDD' ); //$NON-NLS-1$ //$NON-NLS-0$
@@ -92,8 +92,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 				}else{
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 				}
+				var link = document.createElement("a"); //$NON-NLS-0$
+				link.target = "_blank"; //$NON-NLS-0$
+				link.href = loginForm;
+				if (where) {
+					link.textContent = messages["Sign In To "] + where;
+				} else {
+					link.textContent = messages["Sign In"];
+				}
 				this.addChild(new mCommands.Command.MenuItem({
-					label: where ? "<a target='_blank' href="+loginForm+">"+messages["Sign In To "]+ where +"</a>" : "<a target='_blank' href="+loginForm+">"+messages["Sign In"]+"</a>", //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+					label: link,
 					hasLink: true
 				}), startIndex);
 				
@@ -142,8 +150,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 //				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 //			 }));
 			 
+			var helpLink = document.createElement("a"); //$NON-NLS-0$
+			helpLink.href = require.toUrl("help/index.jsp"); //$NON-NLS-0$
+			helpLink.textContent = messages["Help"];
 			this.addChild(new mCommands.CommandMenuItem({
-				 label: "<a href="+require.toUrl("help/index.jsp") + ">"+messages["Help"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: helpLink,
 				 hasLink: true
 			 }));
 			if(this.keyAssistFunction){
@@ -155,9 +166,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 			
 			this.addChild(new dijit.MenuSeparator());
 			
+			var settingsLink = document.createElement("a"); //$NON-NLS-0$
+			settingsLink.href = require.toUrl("settings/settings.html"); //$NON-NLS-0$
+			settingsLink.textContent = messages["Settings"];
 			
 			 this.addChild(new mCommands.CommandMenuItem({
-				 label: "<a href="+require.toUrl("settings/settings.html") + ">"+messages["Settings"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: settingsLink,
 				 hasLink: true
 			 }));
 			 
