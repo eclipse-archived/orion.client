@@ -28,7 +28,8 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			options.readOnly = true;
 			this.contentText = new dijit.form.TextBox(options);
 			this.contentText.set('ecliplseCustomValue',true); //$NON-NLS-0$
-			this.dateP = dojo.create("span", {innerHTML: "&nbsp;", className: "userprofile"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.dateP = dojo.create("span", {className: "userprofile"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.dateP.textContent = "&nbsp;";
 			dojo.connect(this.contentText, "onChange", dojo.hitch(this, function(myDijit,p){ //$NON-NLS-0$
 					if(myDijit.get('value')!==""){ //$NON-NLS-0$
 						var value = parseInt(myDijit.get('value')); //$NON-NLS-0$
@@ -206,9 +207,9 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			}
 		},
 		createFormElem: function(json, node) {
-			function setInnerHTML(myDijit, p) {
+			function setTextContent(myDijit, p) {
 				if (myDijit.declaredClass === "dijit.form.CheckBox") { //$NON-NLS-0$
-					p.innerHTML = myDijit.get('checked') ? messages["yes"] : messages["no"]; //$NON-NLS-0$
+					p.textContent = myDijit.get('checked') ? messages["yes"] : messages["no"]; //$NON-NLS-0$
 					return;
 				}
 				p.textContent = myDijit.get('value'); //$NON-NLS-0$
@@ -240,11 +241,11 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 						className: "userprofile" //$NON-NLS-0$
 					}, node, "last"); //$NON-NLS-0$
 					p.textContent = formElem.get('value') ? formElem.get('value') : " "; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					setInnerHTML(formElem, p);
+					setTextContent(formElem, p);
 		
 					dojo.connect(formElem, "onChange", dojo.hitch(this, function(myDijit, p) { //$NON-NLS-0$
 						if (myDijit.declaredClass === "dijit.form.CheckBox") { //$NON-NLS-0$
-							p.innerHTML = myDijit.get('checked') ? messages['yes'] : messages['no']; //$NON-NLS-0$
+							p.textContent = myDijit.get('checked') ? messages['yes'] : messages['no']; //$NON-NLS-0$
 							return;
 						}
 						p.textContent = myDijit.get('value'); //$NON-NLS-0$
