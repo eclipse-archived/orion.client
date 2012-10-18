@@ -100,11 +100,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 			
 			var sectionWrapper = dojo.create('div', { 'class':'sectionWrapper sectionWrapperAux toolComposite' }, this.table );
 
-			dojo.create('div', { //$NON-NLS-0$
+			var div = dojo.create('div', { //$NON-NLS-0$
 				id: category,
-				innerHTML: category,
 				'class':'sectionAnchor'
 			}, sectionWrapper);
+			div.textContent = category;
 			
 			// <div class="sectionWrapper sectionWrapperAux toolComposite"><div class="sectionAnchor">User Profile</div></div>
 
@@ -119,11 +119,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 					className: 'setting-row'
 				}, this.table);
 
-				dojo.create("h3", { //$NON-NLS-0$
+				var h3 = dojo.create("h3", { //$NON-NLS-0$
 					id: subcategory[sub].label.replace(/ /g,"") + "-header", //$NON-NLS-0$
-					className: 'setting-header',
-					innerHTML: subcategory[sub].ui
+					className: 'setting-header'
 				}, section);
+				h3.textContent = subcategory[sub].ui;
 
 				var outer = dojo.create("div", {className: 'setting-content'}, section); //$NON-NLS-0$
 
@@ -131,10 +131,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 
 					var inner = dojo.create("div", {className: 'setting-property'}, outer); //$NON-NLS-0$
 					var label = dojo.create("label", null, inner); //$NON-NLS-0$
-					dojo.create("span", { //$NON-NLS-0$
-						className: 'setting-label',
-						innerHTML: subcategory[sub].items[item].label + ":" //$NON-NLS-0$
+					var span = dojo.create("span", { //$NON-NLS-0$
+						className: 'setting-label'
 					}, label);
+					span.textContent = subcategory[sub].items[item].label + ":"; //$NON-NLS-0$
 					this.inputBuilder.processInputType(category, subcategory[sub].label, subcategory[sub].items[item], label, subcategory[sub].ui);
 				}
 			}

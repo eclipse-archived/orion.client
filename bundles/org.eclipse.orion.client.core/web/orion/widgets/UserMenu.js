@@ -234,11 +234,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 				var displayName = userName;
 				if(displayName.length > 40)
 					displayName = displayName.substring(0, 30) + "..."; //$NON-NLS-0$
-				var profileLink = dojo.create("a", {innerHTML: displayName, //$NON-NLS-0$
+				var profileLink = dojo.create("a", { //$NON-NLS-0$
 									  href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location, //$NON-NLS-1$ //$NON-NLS-0$
-									  "aria-label": messages["View profile of "] + userName, //$NON-NLS-0$
 									  style: "margin-right: 0px" //$NON-NLS-0$
 								  }, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				profileLink.textContent = displayName;
+				profileLink.setAttribute("aria-label", messages["View profile of "] + userName); //$NON-NLS-0$
 				new mCommands.CommandTooltip({
 					connectId: [profileLink],
 					label: messages['View profile of '] + userName,
@@ -253,17 +254,19 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 							}else{
 								loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 							}
-							dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
+							var link = dojo.create("a", { //$NON-NLS-0$
 								href: loginForm,
 								style: "margin-right: 0px", //$NON-NLS-0$
 								target: "_blank" //$NON-NLS-0$
 							}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+							link.textContent = messages['Sign In'];
 						});
 					})(key);
 				}else if(authService.login){
-					var a = dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
+					var a = dojo.create("a", { //$NON-NLS-0$
 						style: "margin-right: 0px" //$NON-NLS-0$
 					}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+					a.textContent = messages['Sign In'];
 					
 					dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
 						a.style.cursor = "pointer"; //$NON-NLS-0$

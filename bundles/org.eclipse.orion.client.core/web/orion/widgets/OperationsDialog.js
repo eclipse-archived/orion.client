@@ -72,9 +72,11 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'dijit', 'dijit
 			for(var i=0; i<operations.length; i++){
 				var operation = operations[i];
 				var tr = dojo.create("tr"); //$NON-NLS-0$
-				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: operation.Name}, tr); //$NON-NLS-1$ //$NON-NLS-0$
+				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}, tr); //$NON-NLS-1$ //$NON-NLS-0$
+				col.textContent = operation.Name;
 				var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				var link = dojo.create("span", {innerHTML: operation.Name, className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var link = dojo.create("span", {className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				link.textContent = operation.Name;
 
 				dojo.place(document.createTextNode(operation.Name), link, "only"); //$NON-NLS-0$
 				
@@ -117,8 +119,8 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'dijit', 'dijit
 					if(result.DetailedMessage && result.DetailedMessage!=="")
 						message += ": " + result.DetailedMessage; //$NON-NLS-0$
 					dojo.create("br", null, div, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;", innerHTML: message}, div, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					
+					var span = dojo.create("span", {className: "secondaryColumn", style: "margin-left: 18px;"}, div, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					span.textContent = message;
 				}
 				
 				dojo.place(tr, operationsTable, "last"); //$NON-NLS-0$

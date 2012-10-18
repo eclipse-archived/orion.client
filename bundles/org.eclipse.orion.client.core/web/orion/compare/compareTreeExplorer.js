@@ -38,12 +38,17 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorerRenderer.prototype = new mExplorer.SelectionRenderer();
 	
 	CompareTreeExplorerRenderer.prototype.getCellHeaderElement = function(col_no){
+		var col, h2;
 		switch(col_no){
 			case 0: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+ this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				h2 = dojo.create("h2", col); //$NON-NLS-0$
+				h2.textContent = this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				break;
 			case 1: 
-				return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+  messages["Location"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				h2 = dojo.create("h2", col); //$NON-NLS-0$
+				h2.textContent = messages["Location"];
 				break;
 		}
 	};
