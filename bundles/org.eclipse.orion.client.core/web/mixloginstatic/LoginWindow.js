@@ -12,7 +12,7 @@
 /*jslint browser:true devel:true*/
 /*global define navigator window*/
 
-define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'persona/include'], function(domReady, xhr, PageUtil) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
@@ -196,17 +196,21 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	function finishLogin() {
 		var redirect = getRedirect();
 		if (redirect !== null) {
-			window.location = decodeURIComponent(redirect);
-		} else {
-			window.close();
+			redirect = decodeURIComponent(redirect);
+			if(PageUtil.validateURLScheme(redirect)) {
+				window.location = decodeURIComponent(redirect);
+				return;
+			}
 		}
+		window.close();
+		
 	}
 
 	function createOpenIdLink(openid) {
 		if (openid !== "" && openid !== null) {
 			var redirect = getRedirect();
-			if (redirect !== null) {
-				return "../login/openid?openid=" + encodeURIComponent(openid) + "&redirect=" + getRedirect();
+			if (redirect !== null && PageUtil.validateURLScheme(decodeURIComponent(redirect))) {
+				return "../login/openid?openid=" + encodeURIComponent(openid) + "&redirect=" + redirect;
 			} else {
 				return "../login/openid?openid=" + encodeURIComponent(openid);
 			}

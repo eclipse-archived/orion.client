@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker*/
+/*global define setTimeout clearTimeout addEventListener removeEventListener document console localStorage Worker XMLSerializer*/
 
 define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 
@@ -37,6 +37,8 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		}
 		return true;		
 	}
+	
+	var httpOrHttps = new RegExp("^http[s]?","i");
 	
 	function _normalizeURL(location) {
 		if (location.indexOf("://") === -1) { //$NON-NLS-0$
@@ -733,11 +735,23 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 				if (error && error.status === 401) {
 					var headers = plugin.getHeaders();
 					var name = plugin.getName() || plugin.getLocation();
-					var message = "Authentication required for: " + name + ".";
+					var span = document.createElement("span");
+					span.appendChild(document.createTextNode("Authentication required for: " + name + "."));
 					if (headers.login) {
-						message += " <a target=\"_blank\" href=\"" + headers.login + "\">Login</a> and re-try the request.";
+						span.appendChild(document.createTextNode(" "));
+						var anchor = document.createElement("a");
+						anchor.target = "_blank";
+						anchor.textContent = "Login";
+						anchor.href = headers.login;
+						if (!httpOrHttps.test(anchor.href)) {
+							console.log("Illegal Login URL: " + headers.login);
+						} else {
+							span.appendChild(anchor);
+							span.appendChild(document.createTextNode(" and re-try the request."));
+						}
 					}
-					return {Severity: "Error", HTML: true, Message: "<span>" + message + "</span>"};
+					var serializer = new XMLSerializer();
+					return {Severity: "Error", HTML: true, Message: serializer.serializeToString(span)};
 				}
 				return error;
 			}
@@ -810,6 +824,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			if (configuration.plugins) {
 				Object.keys(configuration.plugins).forEach(function(url) {
 					url = _normalizeURL(url);
+					if (!httpOrHttps.test(url)) {
+						console.log("Illegal Plugin URL: " + url);
+						return;
+					}
 					var plugin = this.getPlugin(url);
 					if (!plugin) {
 						var manifest = configuration.plugins[url];
@@ -902,6 +920,9 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		 */
 		this.installPlugin = function(url, optManifest) {
 			url = _normalizeURL(url);
+			if (!httpOrHttps.test(url)) {
+				return new Deferred().reject("Illegal Plugin URL: " + url);
+			}
 			var plugin = this.getPlugin(url);
 			if (plugin) {
 				return new Deferred().resolve(plugin);

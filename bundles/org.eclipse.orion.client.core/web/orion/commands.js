@@ -126,6 +126,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		},
 		
 		setLink: function(href, name) {
+			href = PageUtil.validateURLScheme(href);
 			var a = dojo.create("a", {className: "commandMenuItemAnchor", href: href});
 			a.textContent = name;
 			dojo.place(a, this.containerNode, "only");
