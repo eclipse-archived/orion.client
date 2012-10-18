@@ -25,7 +25,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		if (error && error.Message) {
 			error = error.Message;
 		}
-		result.resolve(i18nUtil.formatMessage(messages["File service error: ${0}"], "<em>" + error + "</em>")); //$NON-NLS-1$ //$NON-NLS-0$
+		var errNode = document.createElement("span"); //$NON-NLS-0$
+		errNode.textContent = i18nUtil.formatMessage(messages["File service error: ${0}"], error);
+		result.resolve(errNode);
 	};
 
 	/* general functions for working with file system nodes */
@@ -66,15 +68,29 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		return defaultEditor.hrefCallback({items: node});
 	}
 
-	function computeLinkString(node) {
+	function createLink(node) {
+		var link = document.createElement("a");
 		if (node.Directory) {
-			return "<a href=\"#" + node.Location + "\" class=\"shellPageDirectory\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
-		} 
-		var href = computeEditURL(node);
-		return "<a href=\"" + href + "\" target=\"_blank\">" + node.Name + "</a>"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			link.href = "#" + node.Location; //$NON-NLS-0$
+			link.className = "shellPageDirectory"; //$NON-NLS-0$
+			link.textContent = node.Name; //$NON-NLS-0$
+			return link;
+		}
+		link.href = computeEditURL(node);
+		link.target = "_blank";  //$NON-NLS-0$
+		link.textContent = node.Name;
+		return link;
 	}
 
 	/* implementations of the build-in commands */
+	function getChangedToElement(dirName) {
+		var span = document.createElement("span"); //NON-NLS-0$
+		span.appendChild(document.createTextNode(messages["Changed to: "]));
+		var bold = document.createElement("b"); //$NON-NLS-0$
+		bold.appendChild(document.createTextNode(dirName));
+		span.appendChild(bold);
+		return span;
+	}
 
 	function cdExec(args, context) {
 		var node = args.directory;
@@ -85,7 +101,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		hashUpdated = true;
 		dojo.hash(node.Location);
 		var pathString = shellPageFileService.computePathString(node);
-		return i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + pathString + "</b>"); //$NON-NLS-1$ //$NON-NLS-0$
+		return getChangedToElement(pathString);
 	}
 
 	function editExec(node) {
@@ -104,12 +120,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				shellPageFileService.setCurrentDirectory(node); /* flush current node cache */
 				shellPageFileService.withChildren(node,
 					function(children) {
-						var buffer = [];
+						var fileList = document.createElement("div"); //$NON-NLS-0$
 						for (var i = 0; i < children.length; i++) {
-							buffer.push(computeLinkString(children[i]));
-							buffer.push("<br>"); //$NON-NLS-0$
+							fileList.appendChild(createLink(children[i]));
+							fileList.appendChild(document.createElement("br")); //$NON-NLS-0$
 						}
-						result.resolve(buffer.join(""));
+						result.resolve(fileList);
 
 						/*
 						 * GCLI changes the target for all <a> tags contained in a result to _blank,
@@ -148,7 +164,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		fileClient.loadWorkspace(node.Location).then(
 			function(node) {
 				var buffer = shellPageFileService.computePathString(node);
-				result.resolve("<b>" + buffer + "</b>"); //$NON-NLS-1$ //$NON-NLS-0$
+				var b = document.createElement("b"); //NON-NLS-0$
+				b.appendChild(document.createTextNode(buffer));
+				result.resolve(b); //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			function(error) {
 				resolveError(result, error);
@@ -156,7 +174,6 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		);
 		return result;
 	}
-
 
 	/* functions for handling contributed commands */
 
@@ -225,7 +242,8 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 					name: "directory", //$NON-NLS-0$
 					type: "directory", //$NON-NLS-0$
 					description: messages["The name of the directory"]
-				}]
+				}],
+				returnType: "html" //$NON-NLS-0$
 			});
 			shell.registerCommand({
 				name: "edit", //$NON-NLS-0$
@@ -240,12 +258,14 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			shell.registerCommand({
 				name: "ls", //$NON-NLS-0$
 				description: messages["Lists the files in the current directory"],
-				callback: lsExec
+				callback: lsExec,
+				returnType: "html" //$NON-NLS-0$
 			});
 			shell.registerCommand({
 				name: "pwd", //$NON-NLS-0$
 				description: messages["Prints the current directory location"],
-				callback: pwdExec
+				callback: pwdExec,
+				returnType: "html" //$NON-NLS-0$
 			});
 
 			/* initialize the editors cache (used by some of the build-in commands */
@@ -325,14 +345,14 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							shellPageFileService.setCurrentDirectory(node);
 						}
 					);
-					shell.output(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>/</b>")); //$NON-NLS-0$
+					shell.output(getChangedToElement("/")); //$NON-NLS-0$
 					return;
 				}
 				fileClient.loadWorkspace(hash).then(
 					function(node) {
 						shellPageFileService.setCurrentDirectory(node);
 						var buffer = shellPageFileService.computePathString(node);
-						shell.output(i18nUtil.formatMessage(messages["Changed to: ${0}"], "<b>" + buffer + "</b>")); //$NON-NLS-1$ //$NON-NLS-0$
+						shell.output(getChangedToElement(buffer)); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				);
 			});
