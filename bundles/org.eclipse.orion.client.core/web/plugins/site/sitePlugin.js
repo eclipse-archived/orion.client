@@ -40,7 +40,7 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	//console.log("sitePlugin siteBase:" + siteBase + ", fileBase:" + fileBase + ", workspaceBase:" + workspaceBase);
 
 	var temp = document.createElement('a');
-	temp.href = "../mixloginstatic/LoginWindow.html";
+	temp.href = "../../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
 	var headers = {
 		name: "Orion Site Service",
