@@ -138,7 +138,7 @@ define(['domReady', 'orion/xhr', 'persona/include'], function(domReady, xhr) {
 	}
 
 	function hideErrorMessage() {
-		document.getElementById("errorMessage").textContent = "";
+		document.getElementById("errorMessage").textContent = "&nbsp;";
 		document.getElementById("errorWin").style.visibility = 'hidden';
 	}
 

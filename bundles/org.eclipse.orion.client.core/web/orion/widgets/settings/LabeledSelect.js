@@ -15,7 +15,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/w
 	dojo.declare("orion.widgets.settings.LabeledSelect", [orion.widgets.settings.Select],{ //$NON-NLS-0$
 		templateString: '<div class="setting-property">' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
-								'<span class="setting-label" data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								'<span class="setting-label" data-dojo-attach-point="mylabel"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								'<select class="setting-control" data-dojo-attach-point="selection" data-dojo-attach-event="onchange:change"></select>' + //$NON-NLS-0$
 							'</label>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
