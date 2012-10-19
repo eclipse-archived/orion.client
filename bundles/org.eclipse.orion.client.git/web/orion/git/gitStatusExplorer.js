@@ -409,7 +409,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.name }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription" }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							itemLabel.textContent = item.name;
 							return td;
 						} else {
 							var td = document.createElement("td"); //$NON-NLS-0$
@@ -606,8 +607,8 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 							
 							dojo.create( "span", { "class":"gitImageSprite " + that._model.getClass(item.type)}, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							
-							var itemLabel = dojo.create( "span", { "class":"gitMainDescription", innerHTML: item.name }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							
+							var itemLabel = dojo.create( "span", { "class":"gitMainDescription" }, div ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							itemLabel.textContent = item.name;
 							return td;
 						} else {
 							var td = document.createElement("td"); //$NON-NLS-0$
@@ -814,11 +815,12 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 			
 			var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: messages['The branch is up to date.']}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var title = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			title.textContent = messages['The branch is up to date.'];
 			dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 			
-			var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				innerHTML: messages['You have no outgoing or incoming commits.']}, detailsView );	
+			var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			description.textContent = messages['You have no outgoing or incoming commits.'];
 		};
 			
 		GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index){
@@ -882,9 +884,9 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 			});
 			
 			dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-			var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				innerHTML: " (SHA " + commit.Name + ") by " + commit.AuthorName  //$NON-NLS-1$ //$NON-NLS-0$
-				+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
+			var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			description.textContent = " (SHA " + commit.Name + ") by " + commit.AuthorName  //$NON-NLS-1$ //$NON-NLS-0$
+				+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}); //$NON-NLS-0$
 			
 			var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	 //$NON-NLS-0$

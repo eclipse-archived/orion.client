@@ -237,12 +237,18 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 	};
 	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
+		var col = dojo.create("th"); //$NON-NLS-0$
+		var h2;
 		if(col_no === 1){
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Files to externalize"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+			h2.textContent = messages["Files to externalize"];
+			return col;
 		} else if(col_no === 2){
-			return dojo.create("th", {innerHTML: "<h2>"+messages["Location"]+"</h2>"}); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+			h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+			h2.textContent = messages["Location"];
+			return col;
 		} else if(col_no === 0){
-			return dojo.create("th", {innerHTML: ""}); //$NON-NLS-0$
+			return col;
 		}
 	};
 	
