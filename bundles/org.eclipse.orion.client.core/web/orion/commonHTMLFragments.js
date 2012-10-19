@@ -15,6 +15,15 @@
 define(['i18n!orion/nls/messages', 'require'], 
         function(messages, require){
 	
+	function asHTMLText(input) {
+		if (!input) {
+			return "";
+		}
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.textContent = input;
+		return span.innerHTML;
+	}
+	
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
 	 * @class This class contains HTML fragments for the common banner, footer, toolbars
@@ -27,13 +36,13 @@ define(['i18n!orion/nls/messages', 'require'],
 	'<header id="banner" role="banner" class="headerLayout">' + //$NON-NLS-0$
 		//Top row:  Logo + discovery links + user
 		'<div id="staticBanner" class="layoutBlock topRowBanner">' + //$NON-NLS-0$
-			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="'+messages['Orion Home']+'"></a>' + //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"></a>' + //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' + //$NON-NLS-0$
 			'<div class="layoutRight">' + //$NON-NLS-0$
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
-				'<input type="text" id="search" autocomplete="off" placeholder="'+messages['Search']+'" title="'+messages['Type a keyword or wild card to search in root']+'" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
-    			'<div id="searchOptions" class="layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
+				'<input type="text" id="search" autocomplete="off" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
+				'<div id="searchOptions" class="layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
 				// '<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' + //$NON-NLS-0$
 				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
@@ -42,7 +51,7 @@ define(['i18n!orion/nls/messages', 'require'],
 		'<div id="titleArea" class="layoutBlock titleArea">' + //$NON-NLS-0$
 			'<div class="clear" style="padding-bottom:5px;display:inline;"><span id="location" class="currentLocation"></span><span id="dirty" class="currentLocation"></span></div>' + //$NON-NLS-0$
 			'<div class="layoutRight pageNav">' + //$NON-NLS-0$
-				'<span id="pageFavorite" tabindex="0" role="button" aria-label="'+messages['Add this page to the favorites list']+'" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' + //$NON-NLS-2$ //$NON-NLS-0$
+				'<span id="pageFavorite" tabindex="0" role="button" aria-label="Add this page to the favorites list" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' + //$NON-NLS-2$ //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
 	'</header>'; //$NON-NLS-0$
@@ -53,14 +62,14 @@ define(['i18n!orion/nls/messages', 'require'],
 	var bottomHTMLFragment = 
 		'<footer id="footerContent" class="layoutBlock footerLayout" role="contentinfo">' + //$NON-NLS-0$
 			'<div class="footerBlock">' + //$NON-NLS-0$
-				messages['Orion is in Beta. Please try it out but BEWARE your data may be lost.'] +
+				asHTMLText(messages['Orion is in Beta. Please try it out but BEWARE your data may be lost.']) +
 			'</div>' + //$NON-NLS-0$
 			'<div class="footerRightBlock">' + //$NON-NLS-0$
-				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">'+messages['FAQ']+'</a> | ' +  //$NON-NLS-0$
-				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=1.0" target="_blank">'+messages['Report a Bug']+'</a> | ' + //$NON-NLS-0$
-				'<a href="http://www.eclipse.org/legal/privacy.php" target="_blank">'+messages['Privacy Policy']+'</a> | ' +  //$NON-NLS-0$
-				'<a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">'+messages['Terms of Use']+'</a> | '+  //$NON-NLS-0$
-				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">'+messages['Copyright Agent']+'</a>'+ //$NON-NLS-0$
+				'<a href="http://wiki.eclipse.org/Orion/FAQ" target="_blank">'+asHTMLText(messages['FAQ'])+'</a> | ' +  //$NON-NLS-0$
+				'<a href="https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&version=1.0" target="_blank">'+asHTMLText(messages['Report a Bug'])+'</a> | ' + //$NON-NLS-0$
+				'<a href="http://www.eclipse.org/legal/privacy.php" target="_blank">'+asHTMLText(messages['Privacy Policy'])+'</a> | ' +  //$NON-NLS-0$
+				'<a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">'+asHTMLText(messages['Terms of Use'])+'</a> | '+  //$NON-NLS-0$
+				'<a href="http://www.eclipse.org/legal/copyright.php" target="_blank">'+asHTMLText(messages['Copyright Agent'])+'</a>'+ //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</footer>'; //$NON-NLS-0$
 	// END BOTTOM BANNER FRAGMENT
@@ -75,7 +84,7 @@ define(['i18n!orion/nls/messages', 'require'],
 	var toolbarHTMLFragment = 
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' + //$NON-NLS-0$
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' + //$NON-NLS-0$
-		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar" aria-label="'+messages['Operations - Press spacebar to show current operations']+'"></img>' + //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar" aria-label="Operations - Press spacebar to show current operations"></img>' + //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		'<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>' + //$NON-NLS-0$
 		'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>' + //$NON-NLS-0$
 		'<div id="notificationArea" class="layoutLeft layoutBlock slideContainer">' + //$NON-NLS-0$
