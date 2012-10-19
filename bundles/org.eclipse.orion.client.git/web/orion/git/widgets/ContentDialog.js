@@ -40,7 +40,8 @@ dojo.declare("orion.git.widgets.ContentDialog", [ dijit.Dialog, orion.widgets._O
 		for (var i=0;i<sections.length;i++){
 			var currentSection = sections[i];
 			dojo.create("li", {id : currentSection.id + "Span" }, sectionsDiv); //$NON-NLS-1$ //$NON-NLS-0$
-			var ahref = dojo.create("a", { href: window.location.href, title: dojo.string.substitute(messages["Go to ${0} section"], [currentSection.id]), innerHTML: currentSection.id + "\n"}, currentSection.id + "Span"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+			var ahref = dojo.create("a", { href: window.location.href, title: dojo.string.substitute(messages["Go to ${0} section"], [currentSection.id])}, currentSection.id + "Span"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+			ahref.textContent = currentSection.id + "\n";
 			dojo.connect(ahref, 'onclick', dojo.hitch(currentSection, function() { //$NON-NLS-0$
 				this.scrollIntoView(true);
 				that.hide();

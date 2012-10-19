@@ -504,7 +504,8 @@ exports.GitRepositoryExplorer = (function() {
 			workspaceState = messages["You have changes to commit in your workspace!"]
 		
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: workspaceState}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var title = dojo.create( "span", { "class":"gitMainDescription"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		title.textContent = workspaceState;
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		
 		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView );   //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -592,7 +593,8 @@ exports.GitRepositoryExplorer = (function() {
 		if (branch.Current)
 			dojo.create( "span", { "class":"sectionIcon gitImageSprite git-sprite-branch_active" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : ""), innerHTML: branch.Name }, detailsView ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var title = dojo.create( "span", { "class":"gitMainDescription " + (branch.Current ? "activeBranch" : "") }, detailsView ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		title.textContent = branch.Name;
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		
 		var commit = branch.Commit.Children[0];
@@ -600,10 +602,9 @@ exports.GitRepositoryExplorer = (function() {
 		var tracksMessage = ((branch.RemoteLocation.length == 1 && branch.RemoteLocation[0].Children.length == 1) ? 
 				dojo.string.substitute(messages["tracks ${0}, "], [branch.RemoteLocation[0].Children[0].Name]) : messages["tracks no branch, "]);
 		
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: tracksMessage 
-			+ dojo.string.substitute(messages["last modified ${0} by ${1}"], [dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}), //$NON-NLS-1$
-			commit.AuthorName])}, detailsView );
+		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		description.textContent = tracksMessage + dojo.string.substitute(messages["last modified ${0} by ${1}"], [dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"}), //$NON-NLS-0$
+			commit.AuthorName]);
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, branch, this, "tool");	 //$NON-NLS-0$
@@ -703,7 +704,8 @@ exports.GitRepositoryExplorer = (function() {
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var detailsView = dojo.create( "div", { "class":"vbox stretch details-view"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: remoteBranch.Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var title = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		title.textContent = remoteBranch.Name;
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -842,11 +844,12 @@ exports.GitRepositoryExplorer = (function() {
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: messages["The branch is up to date."]}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var title = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		title.textContent = messages["The branch is up to date."];
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
 		
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: messages["You have no outgoing or incoming commits."]}, detailsView );	
+		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		description.textContent = messages["You have no outgoing or incoming commits."];
 	};
 		
 	GitRepositoryExplorer.prototype.renderCommit = function(commit, outgoing, index, container){
@@ -910,9 +913,9 @@ exports.GitRepositoryExplorer = (function() {
 		});
 		
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName 
-			+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})}, detailsView ); //$NON-NLS-1$ //$NON-NLS-0$
+		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		description.textContent = messages[" (SHA "] + commit.Name + messages[") by "] + commit.AuthorName 
+			+ " on " + dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"});
 		
 		var actionsArea = dojo.create( "div", {"id":"branchActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, commit, this, "tool");	 //$NON-NLS-0$
@@ -997,7 +1000,8 @@ exports.GitRepositoryExplorer = (function() {
 						var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 						
 						var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: tags[i].Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var title = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						title.textContent = tags[i].Name;
 						
 						this.explorer.progressIndicators[i] = new this.explorer.progressIndicator(i, title);
 						
@@ -1123,10 +1127,12 @@ exports.GitRepositoryExplorer = (function() {
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		var title = dojo.create( "span", { "class":"gitMainDescription", innerHTML: remote.Name }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var title = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		title.textContent = remote.Name;
 		
 		dojo.create( "div", null, detailsView ); //$NON-NLS-0$
-		var description = dojo.create( "span", { "class":"gitSecondaryDescription", innerHTML: remote.GitUrl}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var description = dojo.create( "span", { "class":"gitSecondaryDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		description.textContent = remote.GitUrl;
 
 		var actionsArea = dojo.create( "div", {"id":"remoteActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, remote, this, "tool");	 //$NON-NLS-0$
@@ -1196,8 +1202,10 @@ exports.GitRepositoryExplorer = (function() {
 		var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
 		
 		var detailsView = dojo.create( "div", { "class":"stretch"}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.create( "span", { "class":"gitMainDescription", innerHTML: configEntry.Key }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.create( "span", { "class":"gitSecondaryDescription", "style":"margin-left:20px", innerHTML: configEntry.Value}, detailsView ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var keySpan = dojo.create( "span", { "class":"gitMainDescription" }, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		keySpan.textContent = configEntry.Key;
+		var valueSpan = dojo.create( "span", { "class":"gitSecondaryDescription", "style":"margin-left:20px" }, detailsView ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		valueSpan.textContent = configEntry.Value;
 
 		var actionsArea = dojo.create( "div", {"id":"configActionsArea", "class":"sectionTableItemActions" }, horizontalBox ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.commandService.renderCommands(this.actionScopeId, actionsArea, configEntry, this, "tool"); //$NON-NLS-0$

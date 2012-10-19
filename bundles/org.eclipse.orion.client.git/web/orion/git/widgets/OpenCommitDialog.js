@@ -154,7 +154,8 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 		}));
 
 		dojo.create( "div", {"style":"padding-top:15px"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.create( "span", {"class": "gitSecondaryDescription", innerHTML: messages[' commit: '] + commit.Name}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var commitSpan = dojo.create( "span", {"class": "gitSecondaryDescription"}, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commitSpan.textContent = messages[' commit: '] + commit.Name;
 		if (commit.Parents && commit.Parents.length > 0){
 			dojo.create( "div", null, tableNode ); //$NON-NLS-0$
 			
@@ -179,12 +180,12 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 		}
 		
-		dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: dojo.string.substitute(messages[" authored by ${0} (${1})) on ${2}"], [commit.AuthorName , commit.AuthorEmail,
-			dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})])}, tableNode ); //$NON-NLS-0$
+		var authoredBySpan = dojo.create( "span", { "class":"gitSecondaryDescription" }, tableNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		authoredBySpan.textContent = dojo.string.substitute(messages[" authored by ${0} (${1})) on ${2}"], [commit.AuthorName , commit.AuthorEmail,
+			dojo.date.locale.format(new Date(commit.Time), {formatLength: "short"})]); //$NON-NLS-0$
 		dojo.create( "div", null, tableNode ); //$NON-NLS-0$
-		dojo.create( "span", { "class":"gitSecondaryDescription",  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			innerHTML: dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail])}, tableNode );
+		var committedBySpan = dojo.create( "span", { "class":"gitSecondaryDescription" }, tableNode );  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		committedBySpan.textContent = dojo.string.substitute(messages['committed by 0 (1)'], [commit.CommitterName, commit.CommitterEmail]);
 	},
 	
 	/**
