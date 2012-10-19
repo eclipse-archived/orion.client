@@ -158,6 +158,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			});
 		});
 	}
+
+	function createSearchLink(query, name) {
+		var link = document.createElement("a"); //$NON-NLS-0$
+		link.href = require.toUrl("search/search.html") + "#" + query; //$NON-NLS-1$ //$NON-NLS-0$
+		link.textContent = name;
+		return link;
+	}
 		
 	function _addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab) {
 		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
@@ -190,12 +197,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		//Add the recent searches as popups
 		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
-			var query = searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx);
-			return "<a href='"+require.toUrl("search/search.html") +  "#" + query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return createSearchLink(searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx), theSearch.name);
 		});
 		//Add the saved searches as popups
 		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){
-			return "<a href='"+require.toUrl("search/search.html") +  "#" + theSearch.query + "'>" + theSearch.name+"</a>"; //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			return createSearchLink(theSearch.query, theSearch.name);
 		});
 		
 		var menuButton = new orion.widgets.UserMenuDropDown({
