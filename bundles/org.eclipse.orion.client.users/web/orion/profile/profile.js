@@ -29,7 +29,7 @@ define(['i18n!profile/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands
 			this.contentText = new dijit.form.TextBox(options);
 			this.contentText.set('ecliplseCustomValue',true); //$NON-NLS-0$
 			this.dateP = dojo.create("span", {className: "userprofile"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.dateP.textContent = "&nbsp;";
+			this.dateP.textContent = "\u00a0";
 			dojo.connect(this.contentText, "onChange", dojo.hitch(this, function(myDijit,p){ //$NON-NLS-0$
 					if(myDijit.get('value')!==""){ //$NON-NLS-0$
 						var value = parseInt(myDijit.get('value')); //$NON-NLS-0$
