@@ -400,7 +400,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd)); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
 				var td = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-1$ //$NON-NLS-0$
-				td.textContent = detailModel.context[i].context + "&nbsp;"; //$NON-NLS-0$
+				td.textContent = detailModel.context[i].context + "\u00a0"; //$NON-NLS-0$
 			}
 		}
 		return tableNode;

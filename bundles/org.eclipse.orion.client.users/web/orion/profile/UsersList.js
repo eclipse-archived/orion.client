@@ -164,7 +164,7 @@ eclipse.UsersRenderer = (function() {
 			return td;
 		case 3:
 			td = dojo.create("td"); //$NON-NLS-0$
-			td.textContent = item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;'; //$NON-NLS-1$ //$NON-NLS-0$
+			td.textContent = item.LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(item.LastLogInTimestamp, 10)), {formatLength: "short"}) : '\u00a0'; //$NON-NLS-1$ //$NON-NLS-0$
 			return td;
 		}
 		
@@ -256,7 +256,7 @@ eclipse._UsersList = (function() {
 					var lastLoginCell = dojo.create("td", { //$NON-NLS-0$
 						className: "usersTable secondaryColumn" //$NON-NLS-0$
 					}, userRow);
-					lastLoginCell.textContent = jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp, 10)), {formatLength: "short"}) : '&nbsp;'; //$NON-NLS-1$ //$NON-NLS-0$
+					lastLoginCell.textContent = jsonData.users[i].LastLogInTimestamp ? dojo.date.locale.format(new Date(parseInt(jsonData.users[i].LastLogInTimestamp, 10)), {formatLength: "short"}) : '\u00a0'; //$NON-NLS-1$ //$NON-NLS-0$
 					dojo.place(userRow, tbody);
 				}
 			}));
