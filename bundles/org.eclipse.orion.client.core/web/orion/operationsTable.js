@@ -93,19 +93,32 @@ define(['i18n!orion/operations/nls/messages',  'require', 'dojo', 'orion/explore
 			
 			if (this.options['minimal']) //$NON-NLS-0$
 				return;
-			
+
+			var col, h2;
 			switch(col_no){
 				case 0: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Name"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+					h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+					h2.textContent = messages["Name"];
+					return col;
 					break;
 				case 1:
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Actions"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+					h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+					h2.textContent = messages["Actions"];
+					return col;
 					break;
 				case 2: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Status"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+					h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+					h2.textContent = messages["Status"];
+					return col;
 					break;
 				case 3: 
-					return dojo.create("th", {style: "padding-left: 5px; padding-right: 5px", innerHTML: "<h2>"+messages["Scheduled"]+"</h2>"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+					h2 = dojo.create("h2", null, col); //$NON-NLS-0$
+					h2.textContent = messages["Scheduled"];
+					return col;
 					break;
 
 			}
@@ -132,12 +145,13 @@ define(['i18n!orion/operations/nls/messages',  'require', 'dojo', 'orion/explore
 		};
 		
 		OperationsRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+			var col;
 			switch(col_no){
 			case 0:
-				var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: item.Name}); //$NON-NLS-1$ //$NON-NLS-0$
+				col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				col.textContent = item.Name;
 				var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				var span = dojo.create("span", {innerHTML: item.Name, className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-
+				var span = dojo.create("span", {className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(item.Name), span, "only"); //$NON-NLS-0$
 				
 				var operationIcon = dojo.create("span", null, div, "first"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -175,13 +189,17 @@ define(['i18n!orion/operations/nls/messages',  'require', 'dojo', 'orion/explore
 				var message = result.Message || item.Message;
 				if(result.DetailedMessage && result.DetailedMessage!=="")
 					message += ": " + result.DetailedMessage; //$NON-NLS-0$
-				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML: message}); //$NON-NLS-1$ //$NON-NLS-0$
+				col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				col.textContent = message;
+				return col;
 				break;
 			case 3:
 				if(item.Created && parseInt(item.Created)>0){
-					return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px", innerHTML:  dojo.date.locale.format( //$NON-NLS-1$ //$NON-NLS-0$
+					col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+					col.textContent = dojo.date.locale.format( 
 							new Date(parseInt(item.Created)),
-							{selector: "datetime", formatLength: "medium"})}); //$NON-NLS-1$ //$NON-NLS-0$
+							{selector: "datetime", formatLength: "medium"}); //$NON-NLS-1$ //$NON-NLS-0$
+					return col;
 				}
 				return dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
 			}
