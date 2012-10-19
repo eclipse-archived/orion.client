@@ -169,7 +169,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 	var CommandPopupMenuItem = dojo.declare(dijit.PopupMenuItem, {
 		// Override setter for 'label' attribute to prevent the use of innerHTML
 		_setLabelAttr: function(content) {
-			this.containerNode.textContent = content;
+			if (typeof content === "string") {
+				this.containerNode.textContent = content;
+			} else {
+				dojo.empty(this.containerNode);
+				this.containerNode.appendChild(content);
+			}
 		}
 	});
 
