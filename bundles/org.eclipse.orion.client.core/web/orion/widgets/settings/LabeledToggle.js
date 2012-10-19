@@ -22,7 +22,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<label style="display:table;">' + //$NON-NLS-0$
-								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" >'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<span data-dojo-attach-point="mylabel" style="display:table-cell; vertical-align:middle;" ></span>' +  //$NON-NLS-2$ //$NON-NLS-0$
 								'<span style="display:table-cell; vertical-align:middle;">' + //$NON-NLS-0$
 								'<span class="toggleShell">' + //$NON-NLS-0$
 									'<div data-dojo-attach-point="leftToggle" data-dojo-attach-event="onclick:toggle"></div><div data-dojo-attach-point="rightToggle" data-dojo-attach-event="onclick:toggle"></div>' + //$NON-NLS-0$
@@ -39,15 +39,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
 		
 		styleSwitch: function(){
 			if( this.state === true ){
-				this.leftToggle.innerHTML = this.toggleOnState;
-				this.rightToggle.innerHTML = this.toggleOffSwitch;
+				this.leftToggle.textContent = this.toggleOnState;
+				this.rightToggle.textContent = this.toggleOffSwitch;
           
 				dojo.addClass( this.leftToggle, 'toggleOn' ); //$NON-NLS-0$
 				dojo.addClass( this.rightToggle, 'toggleOff' ); //$NON-NLS-0$
 		
             }else{
-				this.leftToggle.innerHTML = this.toggleOnSwitch;
-				this.rightToggle.innerHTML = this.toggleOffState;
+				this.leftToggle.textContent = this.toggleOnSwitch;
+				this.rightToggle.textContent = this.toggleOffState;
 	
 				dojo.addClass( this.leftToggle, 'toggleOff' ); //$NON-NLS-0$
 				dojo.addClass( this.rightToggle, 'toggleOn' );	 //$NON-NLS-0$
@@ -75,7 +75,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
         
             this.inherited( arguments );
         
-			this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
+			this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
         
 			this.styleSwitch();
 //            dojo.style( this.myfield, 'width', '20px' );

@@ -932,7 +932,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			var data = this.themeData.getViewData();
 		
 			if( state && state === 'INITIALIZE' ){ INITIALIZE = true; }
-			anchor.innerHTML = this.template;	
+			anchor.innerHTML = this.template; // ok--this is a fixed value
 	
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			var themeData = this.themeData; 

@@ -26,7 +26,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
 								
 		postCreate: function(){
 			
-			this.titleNode.innerHTML = this.sectionName;
+			this.titleNode.textContent = this.sectionName;
 			
 			if( this.container ){
 				this.container.appendChild( this.domNode );

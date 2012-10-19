@@ -119,7 +119,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		} else {
 			status = message;
 		}
-		document.getElementById("status").innerHTML = dirtyIndicator + status;
+		document.getElementById("status").textContent = dirtyIndicator + status;
 	};
 	
 	var editor = new mEditor.Editor({
@@ -139,7 +139,7 @@ function(require, mTextView, mKeyBinding, mTextStyler, mTextMateStyler, mHtmlGra
 		} else {
 			dirtyIndicator = "";
 		}
-		document.getElementById("status").innerHTML = dirtyIndicator + status;
+		document.getElementById("status").textContent = dirtyIndicator + status;
 	});
 	
 	editor.installTextView();

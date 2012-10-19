@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*jslint sub:true*/
- /*global define window Image */
+ /*global define document window Image */
  
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/explorers/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, mNavUtils){
 
@@ -124,9 +124,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				this._anchorLocation = anchor.href;
 			}
 		},
+
+		// Override setter for 'label' attribute to prevent the use of innerHTML and allow a DOM node instead.
+		_setLabelAttr: function(value) {
+			if (typeof value === "string") {
+				this.containerNode.textContent = value;
+			} else if (value) {
+				dojo.empty(this.containerNode);
+				this.containerNode.appendChild(value);
+			}
+		},
 		
 		setLink: function(href, name) {
-			this.set("label", "<a class='commandMenuItemAnchor' href='"+href+"'>"+name+"</a>"); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			href = PageUtil.validateURLScheme(href);
+			var a = dojo.create("a", {className: "commandMenuItemAnchor", href: href});
+			a.textContent = name;
+			dojo.place(a, this.containerNode, "only");
 			this._anchorLocation = href;
 		},
 		
@@ -136,7 +149,35 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			}
 		}
 	});
-	
+
+	var CommandDropDownButton = dojo.declare(dijit.form.DropDownButton, {
+		// Override setter for 'label' attribute to prevent the use of innerHTML
+		_setLabelAttr: function(/*String*/ content) {
+			if (typeof content === "string") {
+				this._set("label", content);
+				this.containerNode.textContent = content;
+				if(this.showLabel === false && !this.params.title){
+					this.titleNode.title = dojo.trim(this.containerNode.innerText || this.containerNode.textContent || '');
+				}
+			} else if (content) {
+				dojo.empty(this.containerNode);
+				this.containerNode.appendChild(content);
+			}
+		}
+	});
+
+	var CommandPopupMenuItem = dojo.declare(dijit.PopupMenuItem, {
+		// Override setter for 'label' attribute to prevent the use of innerHTML
+		_setLabelAttr: function(content) {
+			if (typeof content === "string") {
+				this.containerNode.textContent = content;
+			} else {
+				dojo.empty(this.containerNode);
+				this.containerNode.appendChild(content);
+			}
+		}
+	});
+
 	/**
 	 * Override the dijit Tooltip to handle cases where the tooltip is not dismissing
 	 * when expected.
@@ -222,6 +263,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					// this is a menu
 					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();})); //$NON-NLS-0$
 				}				
+			}
+		},
+
+		_setLabelAttr: function(content) {
+			this.label = null;
+			if (typeof content === "string") {
+				this.domNode.textContent = content;
+			} else {
+				dojo.empty(this.domNode);
+				this.domNode.appendChild(content);
 			}
 		}
 	});
@@ -887,7 +938,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							var newMenu= new dijit.Menu({
 								style: "display: none;" //$NON-NLS-0$
 							});
-							menuButton = new dijit.form.DropDownButton({
+							menuButton = new CommandDropDownButton({
 								label: group.title === "*" ? messages["Actions"] : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
 								showLabel:  group.title !== "*", //$NON-NLS-0$
 								style: "visibility: hidden;", //$NON-NLS-0$
@@ -934,8 +985,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 									if (this.emptyGroupMessage) {
 										dojo.connect(menuButton.focusNode, "onclick", this, function() { //$NON-NLS-0$
 											//Show the empty group message.
+											var emptyGroupMessage = document.createElement("p"); //$NON-NLS-0$
+											emptyGroupMessage.textContent = this.emptyGroupMessage;
 											var tooltipDialog = new dijit.TooltipDialog({
-												content: "<p>"+this.emptyGroupMessage+"</p>",
+												content: emptyGroupMessage,
 												onMouseLeave: function() {
 													dijit.popup.close(tooltipDialog);
 													tooltipDialog.destroyRecursive();
@@ -983,7 +1036,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							var subMenu = new dijit.Menu();
 							// popup menu placeholder must be added synchronously to respect order.
 							// We will remove it if it ends up empty
-							var groupPopup = new dijit.PopupMenuItem({
+							var groupPopup = new CommandPopupMenuItem({
 								label: group.title,
 								popup: subMenu
 							});
@@ -1057,7 +1110,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 								style: "display: none;" //$NON-NLS-0$
 							});
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
-								menuButton = new dijit.form.DropDownButton({
+								menuButton = new CommandDropDownButton({
 										label: command.name,
 										dropDown: choicesMenu,
 										postCreate: function() {
@@ -1065,7 +1118,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 											dojo.connect(this._buttonNode, "mousedown", this, function(e) { //$NON-NLS-0$
 												this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
 											});
-											dijit.form.DropDownButton.prototype.postCreate.apply(this, Array.prototype.slice.call(arguments));
+											CommandDropDownButton.prototype.postCreate.apply(this, Array.prototype.slice.call(arguments));
 										}});
 								dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
 								dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
@@ -1079,7 +1132,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 								menuButton.eclipseChoices = choicesMenu;
 							} else if (renderType === "menu") { //$NON-NLS-0$
 								// parent is already a menu
-								var popup = new dijit.PopupMenuItem({
+								var popup = new CommandPopupMenuItem({
 									label: command.name,
 									popup: choicesMenu
 								});
@@ -1186,7 +1239,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name;
-			this.tooltip = options.tooltip || options.name;
+			if (options.tooltip || options.name) {
+				this.tooltip = document.createElement("span"); //$NON-NLS-0$
+				this.tooltip.textContent = options.tooltip || options.name;
+			} else {
+				this.tooltip = null;
+			}
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  

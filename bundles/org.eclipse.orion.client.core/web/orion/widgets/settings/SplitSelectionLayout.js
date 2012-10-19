@@ -69,10 +69,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 
 			var category = this.initialSettings[settingsIndex].category;
 
-			dojo.create("h1", { //$NON-NLS-0$
-				id: category,
-				innerHTML: category
+			var h1 = dojo.create("h1", { //$NON-NLS-0$
+				id: category
 			}, this.table);
+			h1.textContent = category;
 
 			// Extend here for adding section pages of your choice
 		},
@@ -117,7 +117,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 			for (var count = 0; count < settings.length; count++) {
 				var itemId = settings[count].category.replace(/\s/g, "").toLowerCase();
 				var item = {
-					innerHTML: settings[count].category,
 					id: itemId,
 					"class": 'navbar-item', //$NON-NLS-1$ //$NON-NLS-0$
 					role: "tab", //$NON-NLS-0$
@@ -125,6 +124,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 					"aria-selected": "false", //$NON-NLS-1$ //$NON-NLS-0$
 					onclick: dojo.hitch( this, "showSettings", itemId ) //$NON-NLS-0$
 				};
+				item.textContent = settings[count].category;
 
 				this.addCategory(item, count);
 			}

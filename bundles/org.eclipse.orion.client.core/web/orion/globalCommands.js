@@ -60,10 +60,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (authService !== null) {
 				authService.getUser().then(function(jsonData){
 					if( jsonData.Name ){
-						dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+						//dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
+						dropdown.containerNode.textContent = jsonData.Name;
 					}else if( jsonData.login ){
-						dropdown.set( 'label', jsonData.login ); //$NON-NLS-0$
-					}						
+						dropdown.containerNode.textContent = jsonData.login;
+					} 
 				});
 			}
 		}
@@ -485,9 +486,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
 		if (dirty) {
 			if (isDirty) {
-				dirty.innerHTML = "*"; //$NON-NLS-0$
+				dirty.textContent = "*"; //$NON-NLS-0$
 			} else {
-				dirty.innerHTML = ""; //$NON-NLS-0$
+				dirty.textContent = ""; //$NON-NLS-0$
 			}
 		}
 	}
@@ -730,6 +731,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				require(['i18n!'+info.nls], function(commandMessages){
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					expandedHref = PageUtil.validateURLScheme(expandedHref);
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					text = document.createTextNode(info.nameKey? commandMessages[info.nameKey]: info.name);
 					dojo.place(text, link, "only"); //$NON-NLS-0$
@@ -737,6 +739,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			} else if (info.uriTemplate && info.name) {
 					var uriTemplate = new URITemplate(info.uriTemplate);
 					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
+					expandedHref = PageUtil.validateURLScheme(expandedHref);
 					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					text = document.createTextNode(info.name);
 					dojo.place(text, link, "only"); //$NON-NLS-0$

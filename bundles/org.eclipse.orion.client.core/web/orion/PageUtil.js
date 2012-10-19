@@ -9,10 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define console window*/
+/*global define console window document*/
 
 define(function(){
-
 	function matchResourceParameters(optURIText) {
 		optURIText = optURIText || window.location.toString();
 		var result = {resource:""};
@@ -34,8 +33,33 @@ define(function(){
 		}
 		return result;
 	}
+	
+	var httpOrHttps = new RegExp("^http[s]?","i");
 
+	function validateURLScheme(url, optAllowedSchemes) {
+		var absoluteURL = url;
+		if (url.indexOf("://") === -1) { //$NON-NLS-0$
+			var temp = document.createElement('a'); //$NON-NLS-0$
+			temp.href = url;
+	        absoluteURL = temp.href;
+		}
+		var match = false;
+		if (optAllowedSchemes) {
+			match = optAllowedSchemes.some(function(scheme){
+				return new RegExp("^" + scheme + ":", "i").test(absoluteURL);
+			});
+		} else {
+			match = httpOrHttps.test(absoluteURL);
+		}
+		if (match) {
+			return url;
+		} else {
+			console.log("Illegal URL Scheme: '" + url + "'");
+			return "";
+		}
+	}
 	return {
-		matchResourceParameters: matchResourceParameters
+		matchResourceParameters: matchResourceParameters,
+		validateURLScheme: validateURLScheme	
 	};
 });

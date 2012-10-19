@@ -21,7 +21,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 	 * @param [options.preferenceService] used to store the hidden/shown state of the section if specified
 	 * @param [options.iconClass] the class of the icon decorating section, no icon displayed if not provided
 	 * @param [options.getItemCount] {Function} function to return the count of items in the section. If not provided, no count is shown.
-	 * @param [options.content] {String} content of the section in HTML. May be set later using {@link #setContent()}
+	 * @param [options.content] {String|DomNode} HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
 	 * @param [options.slideout] {Boolean} if true section will contain generated slideout
 	 * @param [options.canHide] {Boolean} if true section may be hidden
 	 * @param [options.hidden] {Boolean} if true section will be hidden at first display
@@ -74,15 +74,18 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			dojo.addClass(icon, options.iconClass);
 		}
 		
-		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft", innerHTML: options.title }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft" }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.titleNode.textContent = options.title;
 
 		// Add item count
 		if (typeof options.getItemCount === "function") { //$NON-NLS-0$
-			var count = dojo.create("div", {"class": "layoutLeft sectionItemCount", innerHTML: options.getItemCount(this)}, this.domNode); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			var count = dojo.create("div", {"class": "layoutLeft sectionItemCount"}, this.domNode); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			count.textContent = options.getItemCount(this);
 		}
 
-		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft", innerHTML: "..."}, this.domNode ); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
+		this._progressNode.textContent = "..."; //$NON-NLS-0$ 
 		
 		// add filter search box
 		dojo.create("div", {"id" : options.id + "FilterSearchBox"}, this.domNode);
@@ -143,15 +146,20 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		 * @param title
 		 */
 		setTitle: function(title){
-			this.titleNode.innerHTML = title;
+			this.titleNode.textContent = title;
 		},
 		
 		/**
 		 * Changes the contents of the section.
-		 * @param content
+		 * @param {String|DomNode} content
 		 */
 		setContent: function(content){
-			this._contentParent.innerHTML = content;
+			if (typeof content === 'string') {
+				this._contentParent.innerHTML = content;
+			} else {
+				this._contentParent.innerHTML = ""; //NON-NLS-0$
+				this._contentParent.appendChild(content);
+			}
 		},
 
 		/**

@@ -16,7 +16,7 @@
    PluginList widget, but each plugin entry element should fit into any HTML list
    or table */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/TooltipDialog', 'orion/widgets/plugin/ServiceCarousel'], function(messages, require, dojo, dijit) {
+define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/PageUtil', 'dijit/TooltipDialog', 'orion/widgets/plugin/ServiceCarousel'], function(messages, require, dojo, dijit, PageUtil) {
 
 		/*	formatLocationAsPluginName - temporary function - 
 		the current plugins don't provide useful enough, or 
@@ -91,7 +91,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 						'</list>', //$NON-NLS-0$
 		serviceDescriptions: null,
 		addPluginLink: function(name, url)  {
-			var link = dojo.create("a",{'class': "plugin-link", style: "margin-right: 5px;", href: url, title: name, innerHTML: name}, this.pluginLinks);
+			if (!PageUtil.validateURLScheme(url)) {
+				console.log("Illegal "+ name +" URL: " + url);
+				return;
+			}
+			var link = dojo.create("a",{'class': "plugin-link", style: "margin-right: 5px;", href: url, title: name}, this.pluginLinks);
+			link.textContent = name;
 		},
 		postCreate: function(){	
 			var headers = this.plugin.getHeaders();

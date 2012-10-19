@@ -12,7 +12,7 @@
 
 define({
 	"Shell": "Shell",
-	"Changed to: ${0}": "Changed to: ${0}",
+	"Changed to: ": "Changed to: ",
 	"${0} is not a directory": "${0} is not a directory",
 	"${0} was not found": "${0} was not found",
 	"Changes the current directory": "Changes the current directory",

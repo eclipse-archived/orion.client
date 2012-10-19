@@ -21,10 +21,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 						'<tbody class="dijitReset" dojoAttachPoint="containerNode"></tbody>' + //$NON-NLS-0$
 						'</table>', //$NON-NLS-0$
 		
-		label: messages['test'],
-		
 		postCreate : function() {
 			this.inherited(arguments);
+
+			this.label = messages['test'];
 			
 			dojo.style( this.domNode, 'border-radius', '3px' ); //$NON-NLS-1$ //$NON-NLS-0$
 			dojo.style( this.domNode, 'border', '1px solid #DDD' ); //$NON-NLS-1$ //$NON-NLS-0$
@@ -92,8 +92,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 				}else{
 					loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 				}
+				var link = document.createElement("a"); //$NON-NLS-0$
+				link.target = "_blank"; //$NON-NLS-0$
+				link.href = loginForm;
+				if (where) {
+					link.textContent = messages["Sign In To "] + where;
+				} else {
+					link.textContent = messages["Sign In"];
+				}
 				this.addChild(new mCommands.Command.MenuItem({
-					label: where ? "<a target='_blank' href="+loginForm+">"+messages["Sign In To "]+ where +"</a>" : "<a target='_blank' href="+loginForm+">"+messages["Sign In"]+"</a>", //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
+					label: link,
 					hasLink: true
 				}), startIndex);
 				
@@ -142,8 +150,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 //				 _onClick: function(evt) { this.getParent().onItemClick(this, evt); }
 //			 }));
 			 
+			var helpLink = document.createElement("a"); //$NON-NLS-0$
+			helpLink.href = require.toUrl("help/index.jsp"); //$NON-NLS-0$
+			helpLink.textContent = messages["Help"];
 			this.addChild(new mCommands.CommandMenuItem({
-				 label: "<a href="+require.toUrl("help/index.jsp") + ">"+messages["Help"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: helpLink,
 				 hasLink: true
 			 }));
 			if(this.keyAssistFunction){
@@ -155,9 +166,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 			
 			this.addChild(new dijit.MenuSeparator());
 			
+			var settingsLink = document.createElement("a"); //$NON-NLS-0$
+			settingsLink.href = require.toUrl("settings/settings.html"); //$NON-NLS-0$
+			settingsLink.textContent = messages["Settings"];
 			
 			 this.addChild(new mCommands.CommandMenuItem({
-				 label: "<a href="+require.toUrl("settings/settings.html") + ">"+messages["Settings"]+"</a>", //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				 label: settingsLink,
 				 hasLink: true
 			 }));
 			 
@@ -234,11 +248,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 				var displayName = userName;
 				if(displayName.length > 40)
 					displayName = displayName.substring(0, 30) + "..."; //$NON-NLS-0$
-				var profileLink = dojo.create("a", {innerHTML: displayName, //$NON-NLS-0$
+				var profileLink = dojo.create("a", { //$NON-NLS-0$
 									  href: require.toUrl("profile/user-profile.html") + "#" + jsonData.Location, //$NON-NLS-1$ //$NON-NLS-0$
-									  "aria-label": messages["View profile of "] + userName, //$NON-NLS-0$
 									  style: "margin-right: 0px" //$NON-NLS-0$
 								  }, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				profileLink.textContent = displayName;
+				profileLink.setAttribute("aria-label", messages["View profile of "] + userName); //$NON-NLS-0$
 				new mCommands.CommandTooltip({
 					connectId: [profileLink],
 					label: messages['View profile of '] + userName,
@@ -253,17 +268,19 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/co
 							}else{
 								loginForm+= "&redirect=" + eclipse.globalCommandUtils.notifyAuthenticationSite + "?key=" + key; //$NON-NLS-1$ //$NON-NLS-0$
 							}
-							dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
+							var link = dojo.create("a", { //$NON-NLS-0$
 								href: loginForm,
 								style: "margin-right: 0px", //$NON-NLS-0$
 								target: "_blank" //$NON-NLS-0$
 							}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+							link.textContent = messages['Sign In'];
 						});
 					})(key);
 				}else if(authService.login){
-					var a = dojo.create("a", {innerHTML: messages['Sign In'], //$NON-NLS-0$
+					var a = dojo.create("a", { //$NON-NLS-0$
 						style: "margin-right: 0px" //$NON-NLS-0$
 					}, dojo.byId('userInfo'), "only"); //$NON-NLS-1$ //$NON-NLS-0$
+					a.textContent = messages['Sign In'];
 					
 					dojo.connect(a, "onmouseover", a, function() { //$NON-NLS-0$
 						a.style.cursor = "pointer"; //$NON-NLS-0$

@@ -20,7 +20,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
-								'<span class="setting-label" data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<span class="setting-label" data-dojo-attach-point="mylabel"></span>' +  //$NON-NLS-2$ //$NON-NLS-0$
 								'<input class="setting-control settingsCheckbox" type="checkbox" name="myname" data-dojo-attach-point="myfield" data-dojo-attach-event="onchange:change"/>' + //$NON-NLS-0$
 							'</label>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
@@ -44,7 +44,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/_
         postCreate: function(){
             this.inherited( arguments );
             
-            this.mylabel.innerHTML = this.fieldlabel + ':'; //$NON-NLS-0$
+            this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
             
             dojo.style( this.myfield, 'width', '20px' ); //$NON-NLS-1$ //$NON-NLS-0$
         }, 

@@ -212,7 +212,7 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 			 * Create a renderer to display search results.
 			 * @public
 		     * @param {DOMNode} resultsNode Node under which results will be added.
-			 * @param {String} [heading] the heading text (HTML), or null if none required
+			 * @param {String} [heading] the heading text, or null if none required
 			 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
 			 * @param {Function(DOMNode)} [decorator] A function to be called that knows how to decorate each row in the result table
 			 *   This function is passed a <td> element.
@@ -292,10 +292,11 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 							var col;
 							if (!foundValidHit) {
 								foundValidHit = true;
+								// Every caller is passing heading === false, consider removing this code.
 								if (heading) {
 									var headingRow = table.insertRow(0);
 									col = headingRow.insertCell(0);
-									col.innerHTML = heading;
+									col.textContent = heading;
 								}
 							}
 							var row = table.insertRow(-1);

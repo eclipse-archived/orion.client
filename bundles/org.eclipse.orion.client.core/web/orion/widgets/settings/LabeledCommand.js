@@ -20,7 +20,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 		
 		templateString: '<div>' +  //$NON-NLS-0$
 							'<label>' + //$NON-NLS-0$
-								'<span class="setting-repository-label" data-dojo-attach-point="mylabel">'+messages['Label:']+'</span>' +  //$NON-NLS-2$ //$NON-NLS-0$
+								'<span class="setting-repository-label" data-dojo-attach-point="mylabel"></span>' +  //$NON-NLS-2$ //$NON-NLS-0$
 								'<span data-dojo-attach-point="myCommand"></span>' + //$NON-NLS-0$
 							'</label>' +  //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
@@ -31,7 +31,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
                 
         postCreate: function(){
             this.inherited( arguments );
-            this.mylabel.innerHTML = this.fieldlabel; //$NON-NLS-0$
+            this.mylabel.textContent = this.fieldlabel; //$NON-NLS-0$
             
             // add erase command
             this.commandService.renderCommands(this.scopeId, this.myCommand, {gitUrl: this.fieldlabel, keyIndex: this.keyIndex}, this, "button");

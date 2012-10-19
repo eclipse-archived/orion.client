@@ -62,10 +62,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 			// first time setup
 			if (!this._taskSection) {
 				var contentId = "taskListContent"+this._title; //$NON-NLS-0$
+				var contentDiv = dojo.create("div", {id: contentId}); //$NON-NLS-0$
 				this.fileSystemsSection = new mSection.Section(this._parent, {
 					id: "taskListSection"+this._title, //$NON-NLS-0$
 					title: this._title,
-					content: '<div id="'+contentId+'"></div>', //$NON-NLS-1$ //$NON-NLS-0$
+					content: contentDiv,
 					preferenceService: this._registry.getService("orion.core.preference"), //$NON-NLS-0$
 					canHide: true,
 					hidden: this._collapsed,

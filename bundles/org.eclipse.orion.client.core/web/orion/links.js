@@ -54,7 +54,7 @@ define([], function(){
 					href = href.replace('%'+(i+1), segments[i]); //$NON-NLS-0$
 				}
 				link.setAttribute('href', href); //$NON-NLS-0$
-				link.innerHTML = match;
+				link.textContent = match;
 				result.appendChild(link);
 				text = remainder;
 			}
