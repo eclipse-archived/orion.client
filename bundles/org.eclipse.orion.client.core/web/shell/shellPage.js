@@ -69,11 +69,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function createLink(node) {
-		var link = document.createElement("a");
+		var link = document.createElement("a"); //$NON-NLS-0$
 		if (node.Directory) {
 			link.href = "#" + node.Location; //$NON-NLS-0$
 			link.className = "shellPageDirectory"; //$NON-NLS-0$
-			link.textContent = node.Name; //$NON-NLS-0$
+			link.textContent = node.Name;
 			return link;
 		}
 		link.href = computeEditURL(node);
@@ -82,9 +82,10 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		return link;
 	}
 
-	/* implementations of the build-in commands */
+	/* implementations of the built-in commands */
+
 	function getChangedToElement(dirName) {
-		var span = document.createElement("span"); //NON-NLS-0$
+		var span = document.createElement("span"); //$NON-NLS-0$
 		span.appendChild(document.createTextNode(messages["Changed to: "]));
 		var bold = document.createElement("b"); //$NON-NLS-0$
 		bold.appendChild(document.createTextNode(dirName));
@@ -115,7 +116,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	function lsExec(args, context) {
 		var result = context.createPromise();
 		var location = dojo.hash() || shellPageFileService.SEPARATOR;
-		fileClient.loadWorkspace(location).then(
+		shellPageFileService.loadWorkspace(location).then(
 			function(node) {
 				shellPageFileService.setCurrentDirectory(node); /* flush current node cache */
 				shellPageFileService.withChildren(node,
@@ -129,11 +130,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 						/*
 						 * GCLI changes the target for all <a> tags contained in a result to _blank,
-						 * to force clicked links to open in a new window or tab.  However for links
-						 * that are created by this command to represent directories, selection should
-						 * happen within the same page since it just changes the page hash.
+						 * to force clicked links to open in a new window or tab.  However links that
+						 * are created by this command to represent directories should open in the
+						 * same window/tab since the only change is the page hash.
 						 *
-						 * To work around this GCLI behavior do a pass of all links created by this
+						 * To work around this GCLI behavior, do a pass of all links created by this
 						 * command to represent directories and change their targets back to _self.
 						 * This must be done asynchronously to ensure that it runs after GCLI has done
 						 * its initial conversion of targets to _blank.
@@ -161,12 +162,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	function pwdExec(args, context) {
 		var result = context.createPromise();
 		var node = shellPageFileService.getCurrentDirectory();
-		fileClient.loadWorkspace(node.Location).then(
+		shellPageFileService.loadWorkspace(node.Location).then(
 			function(node) {
 				var buffer = shellPageFileService.computePathString(node);
-				var b = document.createElement("b"); //NON-NLS-0$
+				var b = document.createElement("b"); //$NON-NLS-0$
 				b.appendChild(document.createTextNode(buffer));
-				result.resolve(b); //$NON-NLS-1$ //$NON-NLS-0$
+				result.resolve(b);
 			},
 			function(error) {
 				resolveError(result, error);
@@ -218,7 +219,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			shellPageFileService = new mShellPageFileService.ShellPageFileService();
 			var location = dojo.hash();
 			var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
-			fileClient.loadWorkspace(location || ROOT_ORIONCONTENT).then(
+			shellPageFileService.loadWorkspace(location || ROOT_ORIONCONTENT).then(
 				function(node) {
 					shellPageFileService.setCurrentDirectory(node);
 				});
@@ -340,19 +341,19 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 					return;
 				}
 				if (hash.length === 0) {
-					fileClient.loadWorkspace(shellPageFileService.SEPARATOR).then(
+					shellPageFileService.loadWorkspace(shellPageFileService.SEPARATOR).then(
 						function(node) {
 							shellPageFileService.setCurrentDirectory(node);
 						}
 					);
-					shell.output(getChangedToElement("/")); //$NON-NLS-0$
+					shell.output(getChangedToElement(shellPageFileService.SEPARATOR));
 					return;
 				}
-				fileClient.loadWorkspace(hash).then(
+				shellPageFileService.loadWorkspace(hash).then(
 					function(node) {
 						shellPageFileService.setCurrentDirectory(node);
 						var buffer = shellPageFileService.computePathString(node);
-						shell.output(getChangedToElement(buffer)); //$NON-NLS-1$ //$NON-NLS-0$
+						shell.output(getChangedToElement(buffer));
 					}
 				);
 			});
