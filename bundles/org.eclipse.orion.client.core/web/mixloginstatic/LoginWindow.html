@@ -61,7 +61,7 @@ require(["LoginWindow.js"]);
 			</div>
 
 			<div class="orion-welcome-area"></div>
-			<div class="orion-login" id="orionLogin" style="visibility: hidden;">
+			<div class="orion-login" id="orionLoginForm" style="visibility: hidden;">
 				<div class="orion-login-header">Log in</div>
 				<form>
 					<div class="orion-input-holder">
@@ -129,25 +129,24 @@ require(["LoginWindow.js"]);
 			</div>
 
 			<div class="orion-open" id="orionOpen" style="visibility: visible;" tabindex="-1">
-				<div style="padding-bottom:10px;font-weight: bold;font-size: 15px;" tabindex="-1">Have an account? Sign in: </div>
-				<div id="openIDLogin" class="orion-open-header" tabindex="-1"></div>
+				<div id="existingAccountLogin" style="padding-bottom:10px;font-weight: bold;font-size: 15px;" tabindex="-1">Have an account? Sign in:</div>
 				<div class="orion-open-images" tabindex="-1">
 			
-					<a id="orionLoginLink" class="loginWindow" aria-labelledby="openIDLogin myopenidLogin" tabindex="-1"> 
+					<a id="orionLoginLink" class="loginWindow" aria-labelledby="existingAccountLogin orionLogin" tabindex="-1"> 
 						<div class='openIdWrapper' tabindex="-1">
-							<div id="myopenidLogin" class="orionLoginIcon" alt="myOpenID" tabindex="0" title="sign in with existing Orion account"></div> 
+							<div id="orionLogin" class="orionLoginIcon" tabindex="0" alt="Orion" title="Sign in with existing Orion account"></div> 
 						</div>
 					</a>
 				
-					<a id="googleLoginLink" class="loginWindow" aria-labelledby="openIDLogin googleLogin" tabindex="-1"> 
+					<a id="googleLoginLink" class="loginWindow" aria-labelledby="existingAccountLogin googleLogin" tabindex="-1"> 
 						<div class='openIdWrapper' tabindex="-1">
-							<div id="googleLogin" class="googleIcon" tabindex="0" alt="Google" title="sign in with associated Google account"></div>
+							<div id="googleLogin" class="googleIcon" tabindex="0" alt="Google" title="Sign in with associated Google account"></div>
 						</div>
 					</a> 
 					
-					<a id="personaLoginLink" class="loginWindow" aria-labelledby="openIDLogin personaLogin" tabindex="-1"> 
+					<a id="personaLoginLink" class="loginWindow" aria-labelledby="existingAccountLogin personaLogin" tabindex="-1"> 
 						<div class='openIdWrapper' tabindex="-1">
-							<div id="personaLogin" class="personaIcon" tabindex="0" alt="Mozilla Persona" title="sign in with associated Mozilla Persona account"></div> 
+							<div id="personaLogin" class="personaIcon" tabindex="0" alt="Mozilla Persona" title="Sign in with associated Mozilla Persona account"></div> 
 						</div>
 					</a> 
 				</div>
