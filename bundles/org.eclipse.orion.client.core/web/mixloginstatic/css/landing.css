@@ -200,16 +200,10 @@ input[type="button"]:active {
 	color:#666;
 }
 
-.orion-open-header	{
+.orion-account-header {
+	padding-bottom:10px;
 	font-weight: bold;
-	font-size:15px;
-	padding-bottom: 10px;
-	margin-bottom:5px;
-	color:#666;
-	vertical-align: 8px;
-	/* padding-right: 20px; */
-	float:left;
-	line-height: 48px;
+	font-size: 15px;
 }
 
 .orion-register-header{
