@@ -768,9 +768,9 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/uiUtils", 
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var dialog = new orion.widgets.SFTPConnectionDialog({
-					func:  function(host,path,user,password, overwriteOptions){
+					func:  function(host,port,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
-						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						progressService.showWhile(deferred, dojo.string.substitute(messages["Importing from ${0}"], [host])).then(
 							dojo.hitch(explorer, function() {
