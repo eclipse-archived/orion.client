@@ -126,6 +126,9 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				}
 				return node.parent;
 			},
+			loadWorkspace: function(path) {
+				return fileClient.loadWorkspace(path);
+			},
 			/**
 			 * Sets the current directory node and initiates retrieval of its
 			 * child nodes.

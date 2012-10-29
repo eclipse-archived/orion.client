@@ -585,41 +585,57 @@ h2 {
 }
 
 .contentassist {
+	font-size:11px;
 	display: none;
 	background-color: white;
 	position: fixed;
 	top: 100px;
 	left: 100px;
-	border: 2px inset #DDD;
+	border: 1px solid #DDD;
 	z-index:100;
 	cursor: default;
 	overflow: auto;
 	height: 150px;
-	width: 300px;
+	width: 350px;
 }
 
 .contentassist:focus {
-	border: 2px solid #666;
+	border: 1px solid #666;
 }
 
 .contentassist .proposal-emphasis {
-	font-weight: bold
+	font-weight: normal;
 }
+
+.contentassist hr{
+	border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 .contentassist .proposal-noemphasis {
-	background-color: linen;
+	background-color: aliceblue;
 	font-weight: lighter;
 	color: grey;
 }
 .contentassist .proposal-hr {
 	/* display as horizontal rule */
-	text-decoration:line-through;
+	border: 0;
+    height: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 .contentassist .proposal-default {
 	/* nothing */
 }
 
 .contentassist .selected {
-	background-color: #DDD;
+	/* background-color: #a6bfe1; */
+	font-weight:bold;
+	padding-bottom: 3px;
+	background-color: #FEC;
+	font-weight: bold;
 }
 
 
