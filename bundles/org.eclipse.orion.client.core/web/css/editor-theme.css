@@ -1,0 +1,254 @@
+/* This file applies style to the Orion editor */
+
+/* ************************************************************************************************
+ * textview.css
+ * Basic styles for the TextView.
+ *
+ *************************************************************************************************/
+.textview {
+	background-color: white;
+	padding: 1px 2px;
+}
+
+.textviewContainer {
+	background-color: #eaeaea;
+	font-family: monospace;
+	font-size: 10pt;
+	min-width: 50px;
+	min-height: 50px;
+}
+
+.textviewContent {
+  cursor: auto;
+}
+
+.textviewLeftRuler {
+  border-right: 1px solid #eaeaea;
+}
+
+.textviewRightRuler {
+  border-left: 1px solid #eaeaea;
+}
+
+/* ************************************************************************************************
+ * textstyler.css
+ * Styles for JS, CSS, and Java.
+ *
+ *************************************************************************************************/
+.token_singleline_comment {
+	color: green;
+}
+
+.token_multiline_comment {
+	color: green;
+}
+
+.token_doc_comment {
+	color: #00008F;
+}
+
+a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
+	text-decoration: underline;
+}
+
+.token_doc_html_markup {
+	color: #7F7F9F;
+}
+
+.token_doc_tag {
+	color: #7F9FBF;
+}
+
+.token_task_tag {
+	color: #7F9FBF;
+}
+
+.token_string {
+	color: blue;
+}
+
+.token_number {
+	color: blue;
+}
+
+.token_keyword {
+	color: darkred;
+	font-weight: bold;
+}
+
+.token_space {
+	/* images/white_space.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAJCAIAAABv85FHAAAABnRSTlMA/wAAAACkwsAdAAAAIUlEQVR4nGP4z8CAC+GUIEXuABhgkTuABEiRw2cmae4EAH05X7xDolNRAAAAAElFTkSuQmCC");
+	background-repeat: no-repeat;
+ 	background-position: center center;
+}
+
+.token_tab {
+	/* images/white_tab.png */
+	background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAJCAIAAACJ2loDAAAABnRSTlMA/wD/AP83WBt9AAAAMklEQVR4nGP4TwRgoK6i52c3bz5w6zMSA6tJn28d2Lx589nnCAYu63AaSLxJRLoJPwAAeNk0aG4opfMAAAAASUVORK5CYII=");
+	background-repeat: no-repeat;
+ 	background-position: left center;
+}
+
+.line_caret {
+	background-color: #EAF2FE;
+}
+
+/* ************************************************************************************************
+ * default-theme.css
+ * Syles for TextMate (in particular HTML files) and for the CodeMirror plugin.
+ *
+ *************************************************************************************************/
+.comment {
+	color: green;
+}
+
+.comment-block-documentation {
+	color: #00008F;
+}
+
+.constant {
+	font-style: italic;
+	color: blue;
+}
+
+.constant-character-entity {
+	font-style: normal;
+}
+
+.entity {
+	color: #3f7f7f;
+}
+
+.entity-name-function, .entity-name-type {
+	font-weight: bold;
+}
+
+.invalid-illegal {
+	color: white;
+	background-color: red;
+}
+
+.invalid-deprecated {
+	text-decoration: line-through;
+}
+
+.keyword-control {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+.keyword-operator {
+	color: #ddd;
+}
+
+.markup-heading {
+	font-weight: bold;
+}
+
+.markup-quote {
+	font-style: italic;
+}
+
+.meta-tag {
+	color: #3f7f7f;
+}
+
+.storage {
+	color: #7F0055;
+}
+
+.string {
+	color: blue;
+}
+
+.support {
+	color: #21439c;
+}
+
+.variable {
+	color: #0000c0;
+}
+
+.variable-parameter {
+	color: black;
+}
+
+.variable-language {
+	color: #7F0055;
+	font-weight: bold;
+}
+
+/* Hardcoded HTML styles */
+.entity-name-tag /*tag name*/ {
+	color: #3f7f7f;
+}
+
+.entity-other-attribute-name {
+	color: #7f007f;
+}
+
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+
+.punctuation-definition-string {
+	color: blue;
+}
+
+.string-quoted {
+	color: #2a00ff;
+}
+
+/* CodeMirror */
+.cm-meta { color: #00008F; }
+.cm-keyword { font-weight: bold; color: #7F0055; }
+.cm-atom { color: #21439c; }
+.cm-number { color: black; }
+.cm-def { color: green; }
+.cm-variable { color: black; }
+.cm-variable-2 { color: #004080; }
+.cm-variable-3 { color: #004080; }
+.cm-property { color: black; }
+.cm-operator { color: #222; }
+.cm-comment { color: green; }
+.cm-string { color: blue; }
+/*.cm-string-2 { color: blue; }*/
+.cm-error { color: #ff0000; }
+.cm-qualifier { color: gray; }
+.cm-builtin { color: #7F0055; }
+.cm-bracket { color: white; background-color: gray; }
+.cm-tag { color: #3f7f7f; }
+.cm-attribute { color: #7f007f; }
+
+
+/* ************************************************************************************************
+ * htmlStyles.css
+ * Styling for html syntax highlighting
+ *
+ *************************************************************************************************/
+.entity-name-tag {
+	color: #3f7f7f;
+}
+
+.entity-other-attribute-name {
+	color: #7f007f;
+}
+
+.punctuation-definition-comment {
+	color: #3f5fbf;
+}
+
+.comment {
+	color: #3f5fbf
+}
+
+.string-quoted {
+	color: #2a00ff;
+	font-style: italic;
+}
+
+.invalid {
+	color: red;
+	font-weight: bold;
+}
