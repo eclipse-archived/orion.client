@@ -62,8 +62,11 @@
 			}],
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
 		});
-		var temp = document.createElement('a');
-		temp.href = "./contentTemplates/helloWorld.zip";
+
+		var htmlHelloWorld = document.createElement('a');
+		htmlHelloWorld.href = "./contentTemplates/helloWorld.zip";
+		var pluginHelloWorld = document.createElement('a');
+		pluginHelloWorld.href = "./contentTemplates/pluginHelloWorld.zip";
 
 		provider.registerService("orion.navigate.content", null, {
 			id: "orion.content.fromURL",
@@ -71,7 +74,17 @@
 			description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
 			folder: "Hello World",
 			command: "orion.importZipURL",
-			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: temp.href},
+			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: htmlHelloWorld.href},
+				{name: "unzip", type: "boolean", label: "Unzip:", defaultValue: true}]
+		});
+
+		provider.registerService("orion.navigate.content", null, {
+			id: "orion.content.plugin",
+			name: "Sample Orion Plugin",
+			description: "Generate a sample plugin for integrating with Orion.",
+			folder: "Hello World Plugin",
+			command: "orion.importZipURL",
+			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: pluginHelloWorld.href},
 				{name: "unzip", type: "boolean", label: "Unzip:", defaultValue: true}]
 		});
 
