@@ -15,7 +15,8 @@
  * @name orion.xhr
  * @namespace Provides a promise-based API to {@link XMLHttpRequest}.
  */
-define(['orion/Deferred'], function(Deferred) {
+define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
+
 	/**
 	 * @name orion.xhr.Result
 	 * @class Wraps an XHR response or failure.
@@ -30,12 +31,6 @@ define(['orion/Deferred'], function(Deferred) {
 	 * @property {String|Error} error <i>Optional</i>. If a timeout occurred or an error was thrown while performing the
 	 * XMLHttpRequest, this field contains information about the error.
 	 */
-
-	function encode(value) {
-		return encodeURIComponent(value).replace(/[!'()*]/g, function(str) {
-			return '%' + str.charCodeAt(0).toString(16).toUpperCase(); //$NON-NLS-0$
-		});
-	}
 
 	/**
 	 * @param {String} url
@@ -95,17 +90,8 @@ define(['orion/Deferred'], function(Deferred) {
 			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if (options.query && typeof options.query === 'object') { //$NON-NLS-0$
-			var queryObj = options.query, paramNames = Object.keys(queryObj);
-			var queryBuf = [];
-			for (i=0; i < paramNames.length; i++) {
-				var param = paramNames[i], value = queryObj[param];
-				queryBuf.push(encode(param) + '=' + encode(value)); //$NON-NLS-0$
-			}
-			if (queryBuf.length) {
-				var urlComponents = url.split('#'); //$NON-NLS-0$
-				urlComponents[0] += (urlComponents[0].indexOf('?') === -1 ? '?' : '&') + queryBuf.join('&'); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				url = urlComponents.join('#'); //$NON-NLS-0$
-			}
+			var queryString = urlencode.encodeQuery(options.query);
+			url = urlencode.appendQuery(url, queryString);
 		}
 		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			data = options.data;
