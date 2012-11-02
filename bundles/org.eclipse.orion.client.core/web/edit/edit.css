@@ -14,10 +14,10 @@
 
 @import "../css/sections.css"; /* for outliner */
 
-@import "../../orion/textview/textview.css";
-@import "../../orion/textview/rulers.css";
-@import "../../orion/textview/annotations.css";
-@import "../../orion/textview/tooltip.css";
+@import "../orion/textview/textview.css";
+@import "../orion/textview/rulers.css";
+@import "../orion/textview/annotations.css";
+@import "../orion/textview/tooltip.css";
 @import "../css/editor-theme.css";
 
 .outlineExplorer {
