@@ -9,23 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define escape */
-define(["orion/Deferred", "orion/xhr", 'orion/EventTarget'], function(Deferred, xhr, EventTarget) {
-	function formEncode(value) {
-		return encodeURIComponent(value).replace(/[!'()*]/g, escape).replace('%20', '+'); //$NON-NLS-0$ //$NON-NLS-1$
-	}
-
-	/**
-	 * @returns The map as application/x-www-form-urlencoded data.
-	 */
-	function formData(map) {
-		var keys = Object.keys(map);
-		var buf = [];
-		for (var i=0; i < keys.length; i++) {
-			var key = keys[i], value = map[key];
-			buf.push(formEncode(key) + "=" + formEncode(value)); //$NON-NLS-0$
-		}
-		return buf.join("&"); //$NON-NLS-0$
-	}
+define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], function(Deferred, xhr, EventTarget, urlencode) {
 
 	function getJSON(data) {
 		return data === "" ? null : JSON.parse(data);
@@ -135,7 +119,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget'], function(Deferred, 
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
-				data: formData({
+				data: urlencode.encodeFormData({
 					login : userName,
 					password : password,
 					email: email
@@ -222,7 +206,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget'], function(Deferred, 
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout : 15000,
-				data : formData({
+				data : urlencode.encodeFormData({
 					reset: true,
 					login : login,
 					password : password
