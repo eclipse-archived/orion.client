@@ -22,6 +22,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/explorers/
 		this.contentTypeService = contentTypeService;
 		this.openWithCommands = null;
 		this.actionScopeId = options.actionScopeId;
+		
 		this._init(options);
 		this.target = "_self"; //$NON-NLS-0$
 	}
@@ -87,9 +88,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/explorers/
 			var link;
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
-				this.getExpandImage(tableRow, span);
+				var image = this.getExpandImage(tableRow, span);
 				link = dojo.create("a", {className: "navlinkonpage", id: tableRow.id+"NameLink", href: "#" + item.ChildrenLocation}, span, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(item.Name), link, "last"); //$NON-NLS-0$
+				this.explorer._makeDropTarget(item, tableRow);
+				this.explorer._makeDropTarget(item, link);
 			} else {
 				var i;			
 				// Images: always generate link to file. Non-images: use the "open with" href if one matches,
