@@ -104,7 +104,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 	 * @param {Boolean} options.excludeFolders specifies that folders should not be shown.  Optional.
 	 * @param {orion.serviceRegistry.ServiceRegistry} options.serviceRegistry  the service registry to use for retrieving other
 	 *	Orion services.  Optional.  If not specified, then some features of the explorer will not be enabled, such as status reporting,
-	 * 	honoring preference settings, etc.
+	 *  honoring preference settings, etc.
 	 */
 	function FileExplorer(options) {
 		this.registry = options.serviceRegistry;
@@ -115,9 +115,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 		this.excludeFolders = options.excludeFolders;
 		this.parentId = options.parentId;
 		this.renderer = options.rendererFactory(this);
+		this.dragAndDrop = options.dragAndDrop;
 		this.model = null;
 		this.myTree = null;
 		this.checkbox = false;
+		this._hookedDrag = false;
 
 		var renderer = this.renderer;
 		if (this.registry) {
@@ -136,6 +138,121 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 	}
 	
 	FileExplorer.prototype = new mExplorer.Explorer();
+	
+	FileExplorer.prototype._makeDropTarget = function(item, node, persistAndReplace) {
+		function dropFileEntry(entry, path, target, explorer, performDrop, fileClient) {
+			path = path || "";
+			if (entry.isFile) {
+				// can't drop files directly into workspace.
+				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+					explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+						Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+				} else {
+					entry.file(function(file) {
+						performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(dojo.string.substitute(messages["Unzip ${0}?"], [file.name]))); //$NON-NLS-1$ //$NON-NLS-0$ 
+					});
+				}
+			} else if (entry.isDirectory) {
+				var dirReader = entry.createReader();
+				fileClient.createFolder(target.Location, entry.name).then(function(subFolder) {
+					explorer.changedItem(target, true);
+					dirReader.readEntries(function(entries) {
+						for (var i=0; i<entries.length; i++) {
+							dropFileEntry(entries[i], path + entry.name + "/", subFolder, explorer, performDrop, fileClient); //$NON-NLS-0$
+						}
+					});
+				});
+			}
+		}
+		
+		if (this.dragAndDrop) {
+			var explorer = this;
+			var performDrop = this.dragAndDrop;
+			
+			var dragLeave = dojo.hitch(this, function(evt) { //$NON-NLS-0$
+				dojo.removeClass(node, "dragOver"); //$NON-NLS-0$
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+			// if we are rehooking listeners on a node, unhook old before hooking and remembering new
+			if (persistAndReplace) {
+				if (this._oldDragLeave) {
+					node.removeEventListener("dragleave", this._oldDragLeave, false); //$NON-NLS-0$
+				}
+				this._oldDragLeave = dragLeave;
+			}
+			node.addEventListener("dragleave", dragLeave, false); //$NON-NLS-0$
+
+			var dragEnter = dojo.hitch(this, function (evt) { //$NON-NLS-0$
+				dojo.addClass(node, "dragOver"); //$NON-NLS-0$
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+			if (persistAndReplace) {
+				if (this._oldDragEnter) {
+					node.removeEventListener("dragenter", this._oldDragEnter, false); //$NON-NLS-0$
+				}
+				this._oldDragEnter = dragEnter;
+			}
+			node.addEventListener("dragenter", dragEnter, false); //$NON-NLS-0$
+
+			// this listener is the same for any time, so we don't need to remove/rehook.
+			var dragOver = function (evt) { //$NON-NLS-0$
+				// default behavior is to not trigger a drop, so we override the default
+				// behavior in order to enable drop.  
+				evt.preventDefault();
+				evt.stopPropagation();
+			};
+			if (persistAndReplace && !this._oldDragOver) {
+				node.addEventListener("dragover", dragOver, false); //$NON-NLS-0$
+				this._oldDragOver = dragOver;
+			}
+
+			var drop = dojo.hitch(this, function(evt) { //$NON-NLS-0$
+				dojo.removeClass(node, "dragOver"); //$NON-NLS-0$
+				// webkit supports testing for and traversing directories
+				// http://wiki.whatwg.org/wiki/DragAndDropEntries
+				if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
+					for (var i=0; i<evt.dataTransfer.items.length; i++) {
+						var entry = null;
+						if (typeof evt.dataTransfer.items[i].getAsEntry === "function") { //$NON-NLS-0$
+							entry = evt.dataTransfer.items[i].getAsEntry();
+						} else if (typeof evt.dataTransfer.items[i].webkitGetAsEntry === "function") { //$NON-NLS-0$
+							entry = evt.dataTransfer.items[i].webkitGetAsEntry();
+						}
+						if (entry) {
+							dropFileEntry(entry, null, item, explorer, performDrop, this.fileClient);
+						}
+					}
+				} else if (evt.dataTransfer.files && evt.dataTransfer.files.length > 0) {
+					for (var i=0; i<evt.dataTransfer.files.length; i++) {
+						var file = evt.dataTransfer.files[i];
+						// this test is reverse engineered as a way to figure out when a file entry is a directory.
+						// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
+						// see http://www.w3.org/TR/FileAPI/#file
+						if (!file.length && (!file.type || file.type === "")) {
+							this.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
+								{Severity: "Error", Message: dojo.string.substitute(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], [file.name])}); //$NON-NLS-1$ //$NON-NLS-0$ 
+						} else if (item.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+							this.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
+						} else {
+							performDrop(item, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(dojo.string.substitute(messages["Unzip ${0}?"], [file.name]))); //$NON-NLS-1$ //$NON-NLS-0$ 
+						}
+					}
+				}
+				evt.preventDefault();
+				evt.stopPropagation();
+			});
+			if (persistAndReplace) {
+				if (this._oldDrop) {
+					node.removeEventListener("drop", this._oldDrop, false); //$NON-NLS-0$
+				}
+				this._oldDrop = drop;
+			}
+			node.addEventListener("drop", drop, false); //$NON-NLS-0$
+		}
+	};
 	
 	// we have changed an item on the server at the specified parent node
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
@@ -207,7 +324,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			var progressTimeout = setTimeout(function() {
 				dojo.empty(progress);
 				var b = dojo.create("b"); //$NON-NLS-0$
-				dojo.place(document.createTextNode(messages["Loading "]), progress, "last"); //$NON-NLS-1$
+				dojo.place(document.createTextNode(messages["Loading "]), progress, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode(path), b, "last"); //$NON-NLS-0$
 				dojo.place(b, progress, "last"); //$NON-NLS-0$
 				dojo.place(document.createTextNode("..."), progress, "last"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -235,7 +352,29 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 							}
 						}
 					}
+					if (this.dragAndDrop) {
+						if (this._hookedDrag) {
+							// rehook on the parent to indicate the new root location
+							this._makeDropTarget(this.treeRoot, parent, true);
+						} else {
+							// uses two different techniques from Modernizr
+							// first ascertain that drag and drop in general is supported
+							var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
+							// then check that file transfer is actually supported, since this is what we will be doing.
+							// For example IE9 has drag and drop but not file transfer
+							supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
+							this._hookedDrag = true;
+							if (supportsDragAndDrop) {
+								this._makeDropTarget(this.treeRoot, parent, true);
+							} else {
+								this.dragAndDrop = null;
+								window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
+							}
+						}
+					}
+
 					this.createTree(this.parentId, this.model, {setFocus: true, selectionPolicy: this.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+					// We only need to hook drag and drop up once
 					if (typeof this.onchange === "function") { //$NON-NLS-0$
 						this.onchange(this.treeRoot);
 					}
