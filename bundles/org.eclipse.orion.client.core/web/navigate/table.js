@@ -45,10 +45,18 @@ dojo.addOnLoad(function(){
 	
 		var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 		
-		var explorer = new mExplorerTable.FileExplorer({serviceRegistry: serviceRegistry, treeRoot: treeRoot, selection: selection, 
-				fileClient: fileClient, parentId: "explorer-tree", //$NON-NLS-0$
+		var explorer = new mExplorerTable.FileExplorer({
+				serviceRegistry: serviceRegistry, 
+				treeRoot: treeRoot, 
+				selection: selection, 
+				fileClient: fileClient, 
+				parentId: "explorer-tree", //$NON-NLS-0$
+				dragAndDrop: mFileCommands.uploadFile,
 				rendererFactory: function(explorer) {
-					return new mNavigatorRenderer.NavigatorRenderer({checkbox: false, decorateAlternatingLines: false, cachePrefix: "Navigator"}, explorer, commandService, contentTypeService);  //$NON-NLS-0$
+					return new mNavigatorRenderer.NavigatorRenderer({
+						checkbox: false, 
+						decorateAlternatingLines: false, 
+						cachePrefix: "Navigator"}, explorer, commandService, contentTypeService);  //$NON-NLS-0$
 				}}); 
 
 		function refresh() {

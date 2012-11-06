@@ -67,6 +67,29 @@ define(['i18n!orion/navigate/nls/messages', "require", "dojo", "orion/uiUtils", 
 		}
 	};
 	FavoriteFoldersCache.prototype.constructor = FavoriteFoldersCache;
+	
+	/**
+	 * Uploads a file
+	 * @name orion.fileCommands#uploadFile
+	 * @function
+	 */
+	fileCommandUtils.uploadFile = function(targetFolder, file, explorer, unzip) { 
+		this.req = new XMLHttpRequest();
+		this.req.open('post', targetFolder.ImportLocation, true); //$NON-NLS-0$
+		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
+		this.req.setRequestHeader("Slug", file.name); //$NON-NLS-0$
+		// TODO if we want to unzip zip files, don't use this...
+		if (!unzip) {
+			this.req.setRequestHeader("X-Xfer-Options", "raw"); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		this.req.setRequestHeader("Content-Type", file.type); //$NON-NLS-0$
+		this.req.onreadystatechange = function() {
+			if (explorer) {
+				explorer.changedItem(targetFolder, true);
+			}
+		};
+		this.req.send(file);
+	};
 
 	/**
 	 * Updates the explorer tool bar
