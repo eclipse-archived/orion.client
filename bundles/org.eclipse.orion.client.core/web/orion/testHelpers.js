@@ -13,6 +13,8 @@ define(['orion/Deferred'], function(Deferred) {
 	/**
 	 * Helper for generating a setup-invoke-teardown test case.
 	 * @name orion.test.makeTest
+	 * @function
+	 * @static
 	 * @param {Function} setUp Invoked before the testBody is attempted. This function can return a promise.
 	 * @param {Function} tearDown Invoked after the testBody has been attempted.
 	 * @param {Function} testBody The test body. This can return a promise or an immediate result.

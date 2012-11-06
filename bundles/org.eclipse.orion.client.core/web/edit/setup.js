@@ -17,12 +17,12 @@ define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'o
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil",
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil", 'orion/edit/syntaxmodel',
        'dojo/hash'], 
 		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer) {
 	
 var exports = exports || {};
 	
@@ -56,6 +56,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		searchFloat = dojo.byId("searchFloat"); //$NON-NLS-0$
 
 	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
+	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
 	var fileClient = new mFileClient.FileClient(serviceRegistry);
 	var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 	
