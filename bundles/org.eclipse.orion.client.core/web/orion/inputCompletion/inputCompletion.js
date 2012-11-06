@@ -165,6 +165,13 @@ define([], function(){
 		this._completionUIContainer.appendChild(this._completionUL);
 	};
 	
+	InputCompletion.prototype._createProposalLink = function(name, href) {
+		var link = document.createElement("a"); //$NON-NLS-0$
+		link.href = require.toUrl(href);
+		link.textContent = name;
+		return link;
+	}
+	
 	InputCompletion.prototype._proposeOnCategory = function(categoryName, categoryList){
 		if(categoryList.length === 0){
 			return;
@@ -187,8 +194,12 @@ define([], function(){
 			};
 			listEle.className = "inputCompletionLINormal"; //$NON-NLS-0$
 			listEle.completionItem = categoryList[i];
- 			var liText = document.createTextNode(categoryList[i].value);
-			listEle.appendChild(liText);
+			if(typeof categoryList[i].value === "string"){
+				var liText = document.createTextNode(categoryList[i].value);
+				listEle.appendChild(liText);
+			} else if(categoryList[i].value.name && categoryList[i].value.type === "link"){
+				listEle.appendChild(this._createProposalLink(categoryList[i].value.name, categoryList[i].value.value));
+			}
  			this._completionUL.appendChild(listEle);
  			this._proposalList.push({item: categoryList[i], domNode: listEle});
 		}
@@ -245,10 +256,13 @@ define([], function(){
 		this._dismissed = true;
 		this._proposalList = null;
 		this._proposalIndex = -1;
-		if(valueToInputField){
+		
+		if(typeof valueToInputField === "string"){
 			this._inputField.value = valueToInputField;
 			this._dismissing = true;
 			this._inputField.focus();
+		} else if(valueToInputField && valueToInputField.name && valueToInputField.type === "link"){
+			window.location.href = valueToInputField.value;
 		}
 		var that = this;
 		window.setTimeout(function(){ //wait a few milliseconds for the proposal pane to hide 
@@ -300,7 +314,12 @@ define([], function(){
 			} else {
 				var proposed = true;
 				if(searchTerm && filterForMe){
-					var searchOn = datalist[i].value.toLowerCase();
+					var searchOn;
+					if(typeof datalist[i].value === "string"){
+						searchOn = datalist[i].value.toLowerCase();
+					} else if(datalist[i].value.name){
+						searchOn = datalist[i].value.name.toLowerCase();
+					}
 					var pIndex = searchOn.indexOf(searchTerm);
 					if(pIndex < 0){
 						proposed = false;
@@ -320,6 +339,11 @@ define([], function(){
 		this._completionUL.textContent = "";
 		var searchTerm = inputValue ? inputValue.toLowerCase() : null;
 		this._proposalList = [];
+		/*
+		var topList = [{type: "proposal", value: {name: "Advanced Search", value: "/settings/settings.html", type: "link"}},
+					   {type: "proposal", value: {name: "Files...", value: "/settings/settings.html", type: "link"}}]
+		this._proposeOnList(topList, searchTerm, false);
+		*/
 		this._proposeOnList(this._dataList, searchTerm, true);
 		if(this._extendedProvider && searchTerm){
 			var that = this;
