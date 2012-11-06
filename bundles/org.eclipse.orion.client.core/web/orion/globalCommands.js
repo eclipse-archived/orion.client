@@ -196,11 +196,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		newMenu.addChild(new dijit.MenuSeparator());
 		
 		//Add the recent searches as popups
-		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){
+		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){ //$NON-NLS-0$
 			return createSearchLink(searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx), theSearch.name);
 		});
 		//Add the saved searches as popups
-		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){
+		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){ //$NON-NLS-0$
 			return createSearchLink(theSearch.query, theSearch.name);
 		});
 		
@@ -762,15 +762,19 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
 			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
-				var i, fullSet = [], hasSavedSearch = false;
+				var i, fullSet = [], hasSavedSearch = false, hasRecentSearch = false;
 				for (i in searches) {
 					if(searches[i].label){
 						if(!hasSavedSearch){
-							fullSet.push({type: "category", label: "Saved searches"});//$NON-NLS-0$ //$NON-NLS-0$
+							fullSet.push({type: "category", label: messages["Saved searches"]});//$NON-NLS-0$
 							hasSavedSearch = true;
 						}
 						fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
 					} else {
+						if(!hasRecentSearch){
+							fullSet.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
+							hasRecentSearch = true;
+						}
 						fullSet.push({type: "proposal", label: searches[i].name, value: searches[i].name});//$NON-NLS-0$
 					}
 				}
@@ -805,14 +809,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}));
 			});
 			Deferred.all(promises).then(function(returnValues) {
-				//merge all the promise return values together
-				// TODO: WAT? why are we re-creating the array
-				var extendedProposals = [];
-				for (var i = 0; i < returnValues.length; i++) {
-					extendedProposals.push(returnValues[i]);
-				}
 				//Render UI
-				uiCallback(extendedProposals);
+				uiCallback(returnValues);
 			});
 		};
 		//Create and hook up the inputCompletion instance with the search box dom node.
@@ -975,6 +973,41 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		commandService.addCommand(openResourceCommand);
 		commandService.registerCommandContribution("globalActions", "eclipse.openResource", 100,  null, true, new mCommands.CommandKeyBinding('f', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+		var globalSearchCommand = new mCommands.Command({
+			name: messages["Global search"],
+			tooltip: messages["Global search"],
+			id: "eclipse.globalSearch", //$NON-NLS-0$
+			callback: function(data) {
+				var searchField = dojo.byId("search"); //$NON-NLS-0$
+				if(searchField){
+					searchField.focus();
+				}
+			}});
+			
+		// set binding in editor and a general one for other pages
+		if (editor) {
+			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true, false, true), globalSearchCommand.id);   //$NON-NLS-0$
+			editor.getTextView().setAction(globalSearchCommand.id, function() {
+					var selection = editor.getSelection();
+					var searchString = null;
+					if (selection.end > selection.start) {//If there is selection from editor, we want to use it as the default keyword
+						var model = editor.getModel();
+						searchString = model.getText(selection.start, selection.end);
+					}
+					var searchField = dojo.byId("search"); //$NON-NLS-0$
+					if(searchField){
+						if(searchString){
+							searchField.value = searchString;
+						}
+						searchField.focus();
+					}
+					return true;
+				}, globalSearchCommand);
+		}
+		
+		commandService.addCommand(globalSearchCommand);
+		commandService.registerCommandContribution("globalActions", "eclipse.globalSearch", 101,  null, true, new mCommands.CommandKeyBinding('h', true, false, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		// Toggle trim command
 		var toggleBanner = new mCommands.Command({
