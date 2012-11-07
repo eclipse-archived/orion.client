@@ -16,6 +16,7 @@ define(['i18n!profile/nls/messages', 'dojo'], function(messages, dojo) {
 
 
 function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item) {
+	var eclipse = eclipse || {};
 		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 		var toolbar = dojo.byId(toolbarId);
 		if (toolbar) {

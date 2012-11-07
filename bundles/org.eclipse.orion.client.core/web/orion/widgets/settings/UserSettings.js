@@ -270,6 +270,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 									//userMenu.set( 'label', userdata.Name  ); //$NON-NLS-0$
 									userMenu.containerNode.textContent = userdata.Name;
 								}	
+							}, function(error){
+								messageService.setProgressResult(error);
 							});
 						});
 					});
