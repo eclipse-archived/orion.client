@@ -35,9 +35,10 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 	UsersService.prototype = /** @lends eclipse.FileService.prototype */
 	{
 		getUsersListSubset : function(start, rows, onLoad) {
+			var ret = new Deferred();
 			var service = this;
 			var uri = "../users?start=" + start + "&rows=" + rows;
-			return xhr("GET", uri, { //$NON-NLS-1$ 
+			xhr("GET", uri, { //$NON-NLS-1$ 
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -50,20 +51,21 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				return jsonData;
-			}, function(result) {
-				var error = getError(result);
+				ret.resolve(jsonData);
+			}, function(error) {
 				if(!service.info) {
-					handleAuthenticationError(error, function(){
-						service.getUsersListSubset(start, rows, onLoad); // retry GET
+					handleAuthenticationError(getError(error), function(){
+						service.getUsersListSubset(start, rows); // retry GET
 					});
 				}
-				return error;
+				ret.reject(error.response || error);
 			});
+			return ret;
 		},
 		getUsersList : function(onLoad) {
+			var ret = new Deferred();
 			var service = this;
-			return xhr("GET", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			xhr("GET", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -76,20 +78,21 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				return jsonData.users;
-			}, function(result) {
-				var error = getError(result);
+				ret.resolve(jsonData.users);
+			}, function(error) {
 				if(!service.info) {
-					handleAuthenticationError(error, function(){
+					handleAuthenticationError(getError(error), function(){
 						service.getUsersList(onLoad); // retry GET
 					});
 				}
-				return error;
+				ret.reject(error.response || error);
 			});
+			return ret;
 		},
 		deleteUser : function(userURI, onLoad) {
+			var ret = new Deferred();
 			var service = this;
-			return xhr("DELETE", userURI, { //$NON-NLS-0$
+			xhr("DELETE", userURI, { //$NON-NLS-0$
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -102,18 +105,20 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-			}, function(result) {
-				var error = getError(result);
+				ret.resolve(jsonData);
+			}, function(error) {
 				if(!service.info) {
-					handleAuthenticationError(error, function(){
+					handleAuthenticationError(getError(error), function(){
 						service.deleteUser(userURI, onLoad); // retry DELETE
 					});
 				}
-				return error;
+				ret.reject(error.response || error);
 			});
+			return ret;
 		},
 		createUser : function(userName, password, email, onLoad, onError) {
-			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			var ret = new Deferred();
+			xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -125,16 +130,18 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					email: email
 				}),
 				load : function(jsonData, xhrArgs) {
-					return jsonData;
+					ret.resolve(jsonData);
 				},
 				error : function(error, ioArgs) {
-					return error;
+					ret.reject(error.response || error);
 				}
 			});
+			return ret;
 		},
 		getUserInfo: function(userURI, onLoad){
+			var ret = new Deferred();
 			var service = this;
-			return xhr("GET", userURI, { //$NON-NLS-0$
+			xhr("GET", userURI, { //$NON-NLS-0$
 				headers : {
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
@@ -147,29 +154,29 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				return jsonData;
-			}, function(result) {
-				var error = getError(result);
+				ret.resolve(jsonData);
+			}, function(error) {
 				if(!service.info) {
-					handleAuthenticationError(error, function(){
+					handleAuthenticationError(getError(error), function(){
 						service.getUserInfo(userURI, onLoad); // retry GET
 					});
 				}
-				return error;
+				ret.reject(error.response || error);
 			});
+			return ret;
 		},
 		updateUserInfo: function(userUri, data, onLoad){
+			var ret = new Deferred();
 			var service = this;
 			var uri = userUri;
 			
 
 			if(data.password!==data.passwordRetype){
-				var ret = new Deferred();
 				ret.reject({message: messages["Passwords do not match!"]});
 				return ret;
 			}
 
-			return xhr("PUT", uri, { //$NON-NLS-0$
+			xhr("PUT", uri, { //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/json", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -180,27 +187,26 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 				var jsonData = getJSON(result.response);
 				if (onLoad){
 					if(typeof onLoad === "function") //$NON-NLS-0$
-						return onLoad(jsonData);
-					else{
+						onLoad(jsonData);
+					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
-						return jsonData;
-					}
-				} else {
-					return jsonData;
 				}
-			}, function(result) {
-				var error = getError(result);
+				ret.resolve(jsonData);
+			}, function(error) {
 				if(!service.info) {
-					handleAuthenticationError(error, function(){
+					handleAuthenticationError(getError(error), function(){
 						service.updateUserInfo(userUri, data, onLoad); // retry GET
 					});
 				}
-				return error;
+				ret.reject(error.response || error);
 			});
+			
+			return ret;
 		},
 		resetUserPassword: function(login, password, onLoad){
+			var ret = new Deferred();
 			var service = this;
-			return xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
+			xhr("POST", "../users", { //$NON-NLS-1$ //$NON-NLS-0$
 				headers : {
 					"Content-Type": "application/x-www-form-urlencoded", //$NON-NLS-1$ //$NON-NLS-0$
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
@@ -219,10 +225,11 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					else
 						service.dispatchEvent({type: onLoad, data: jsonData});
 				}
-				return jsonData;
+				ret.resolve(jsonData);
 			}, function(result) {
-				return result.response;
+				ret.reject(error.response || error);
 			});
+			return ret;
 		}
 	};
 	return UsersService;
