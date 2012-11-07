@@ -76,6 +76,7 @@ define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel"
 	}
 	MockTextView.prototype = /** @lends orion.test.editor.MockTextView.prototype */ {
 		_init: function(options) {
+			options = options || {};
 			this._model = options.model || new mTextModel.TextModel();
 			this.lineStyles = [];
 			this._timer = null;

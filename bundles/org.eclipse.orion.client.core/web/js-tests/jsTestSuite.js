@@ -117,6 +117,7 @@ OrionTestCase("config", "/js-tests/config/test.html");
 OrionTestCase("metatype", "/js-tests/metatype/test.html");
 OrionTestCase("setting", "/js-tests/settings/test.html");
 OrionTestCase("esprima-content-assist", "/js-tests/esprima/esprimaJsContentAssistTests.html");
+OrionTestCase("esprima-content-assist", "/js-tests/asyncStyler/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");
