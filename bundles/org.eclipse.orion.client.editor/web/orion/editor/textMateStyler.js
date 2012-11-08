@@ -337,6 +337,34 @@ var RegexUtil = {
 };
 
 	/**
+	 * @private
+	 * @param obj {Object} A JSON-ish object.
+	 * @returns {Object} Deep copy of <code>obj</code>. Does not work on properties that are functions or RegExp instances.
+	 */
+	function clone(obj) {
+		var c;
+		if (obj instanceof Array) {
+			c = new Array(obj.length);
+			for (var i=0; i < obj.length; i++) {
+				c[i] = clone(obj[i]);
+			}
+		} else {
+			c = {};
+			for (var prop in obj) {
+				if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+					var value = obj[prop];
+					if (typeof value === "object" && value !== null) {
+						c[prop] = clone(value);
+					} else {
+						c[prop] = value;
+					}
+				}
+			}
+		}
+		return c;
+	}
+
+	/**
 	 * @name orion.editor.TextMateStyler
 	 * @class A styler that knows how to apply a subset of the TextMate grammar format to style a line.
 	 *
@@ -404,8 +432,8 @@ var RegexUtil = {
 	function TextMateStyler(textView, grammar, externalGrammars) {
 		this.initialize(textView);
 		// Copy grammar object(s) since we will mutate them
-		this.grammar = this.clone(grammar);
-		this.externalGrammars = externalGrammars ? this.clone(externalGrammars) : [];
+		this.grammar = clone(grammar);
+		this.externalGrammars = externalGrammars ? clone(externalGrammars) : [];
 		
 		this._styles = {}; /* key: {String} scopeName, value: {String[]} cssClassNames */
 		this._tree = null;
@@ -446,33 +474,6 @@ var RegexUtil = {
 			this._styles = null;
 			this._tree = null;
 			this._listener = null;
-		},
-		/**
-		 * @private
-		 * @param obj {Object} A JSON-ish object.
-		 * @returns {Object} Deep copy of <code>obj</code>. Does not work on properties that are functions or RegExp instances.
-		 */
-		clone: function clone(obj) {
-			var c;
-			if (obj instanceof Array) {
-				c = new Array(obj.length);
-				for (var i=0; i < obj.length; i++) {
-					c[i] = clone(obj[i]);
-				}
-			} else {
-				c = {};
-				for (var prop in obj) {
-					if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-						var value = obj[prop];
-						if (typeof value === "object" && value !== null) {
-							c[prop] = clone(value);
-						} else {
-							c[prop] = value;
-						}
-					}
-				}
-			}
-			return c;
 		},
 		/** @private */
 		preprocess: function(grammar) {
