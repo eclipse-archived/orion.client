@@ -57,8 +57,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			node.className = "";
 			var attrs = node.attributes;
 			for (var i= attrs.length; i-->0;) {
-				if (attrs[i].specified) {
-					node.removeAttributeNode(attrs[i]); 
+				if (!isIE || isIE >= 9 || (isIE < 9 && attrs[i].specified)) {
+					node.removeAttribute(attrs[i].name); 
 				}
 			}
 		}
