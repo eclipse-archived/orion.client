@@ -239,6 +239,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}.bind(this));
 			
 			this.textView.setAction("tab", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				if(!this.textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -271,6 +272,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			}.bind(this));
 	
 			this.textView.setAction("shiftTab", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				if(!this.textView.getOptions("tabMode")) { return; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
@@ -310,6 +312,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, false, false, true), "moveLinesUp"); //$NON-NLS-0$
 			this.textView.setAction("moveLinesUp", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -342,6 +345,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, false, false, true), "moveLinesDown"); //$NON-NLS-0$
 			this.textView.setAction("moveLinesDown", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -373,6 +377,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(38, true, false, true), "copyLinesUp"); //$NON-NLS-0$
 			this.textView.setAction("copyLinesUp", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -394,6 +399,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(40, true, false, true), "copyLinesDown"); //$NON-NLS-0$
 			this.textView.setAction("copyLinesDown", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -415,6 +421,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding('d', true, false, false), "deleteLines"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.textView.setAction("deleteLines", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var selection = editor.getSelection();
 				var model = editor.getModel();
@@ -799,6 +806,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			// Block comment operations
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true), "toggleLineComment"); //$NON-NLS-0$
 			this.textView.setAction("toggleLineComment", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -883,6 +891,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !isMac, false, isMac), "addBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("addBlockComment", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -907,6 +916,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 			
 			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !isMac, false, isMac), "removeBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
+				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
 				var model = editor.getModel();
 				var selection = editor.getSelection();
@@ -1009,6 +1019,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		},
 		enter: function() {
 			// Auto indent
+			if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 			var editor = this.editor;
 			var selection = editor.getSelection();
 			if (selection.start === selection.end) {
