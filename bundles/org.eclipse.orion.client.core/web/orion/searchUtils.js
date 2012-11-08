@@ -10,16 +10,16 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['require', 'dojo', 'orion/editor/regex', 'orion/commands'], function(require, dojo, mRegex, mCommands) {
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/editor/regex', 'orion/commands', 'orion/widgets/UserMenuDropDown'], function(messages, require, dojo, dijit, mRegex, mCommands) {
 
-var orion = orion || {};
+var exports = exports || {};
 
 /**
  * Utility methods
- * @namespace orion.searchUtils 
+ * @namespace exports.searchUtils 
  */
  
-orion.searchUtils = orion.searchUtils || {};
+exports.searchUtils = exports.searchUtils || {};
 
 /**
  * Parse the search query string from the hash value of a search page.
@@ -30,29 +30,25 @@ orion.searchUtils = orion.searchUtils || {};
  * <li>{@link String} <code>sort</code> The sort parameters."Path asc" or "Name asc".</li>
  * <li>{@link Object} <code>inFileQuery</code> The query object for in file search.</li>
  * </ul>
- * @name orion.searchUtils#parseQueryStr
+ * @name exports.searchUtils#parseQueryStr
  * @function
  */
-orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
+exports.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 	var indexOfQMark = queryStr.indexOf("?"); //$NON-NLS-0$
 	var indexOfQWqual = queryStr.indexOf("q="); //$NON-NLS-0$
 	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
 		queryStr = queryStr.substring(indexOfQMark+1);
 	}
-	var indexOfRegEx = queryStr.indexOf("regEx&");
-	if(indexOfRegEx === 0){
-		queryStr = queryStr.substring(indexOfRegEx + 6);
-	}
-	//var obj = dojo.queryToObject(queryStr);
-	var splitQ = queryStr.split("&"); //$NON-NLS-0$
-	var queryObj = {queryStr: queryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
-	queryObj.useRegEx = (indexOfRegEx === 0);
+	var advOptions = exports.searchUtils.parseAdvQueryStr(queryStr);
+	var splitQ = advOptions.nonAdvQueryStr.split("&"); //$NON-NLS-0$
+	var queryObj = {advOptions: advOptions.advOptions, nonAdvQueryStr: advOptions.nonAdvQueryStr, queryStr: advOptions.nonAdvQueryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
 	for(var i=0; i < splitQ.length; i++){
 		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
 		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
 		if(qIndex >= 0){
-			indexOfRegEx === 0 ? orion.searchUtils.parseLocationAndSearchStrRegEx(splitQ[i].substring(qIndex+2), queryObj, fromStart):
-			                     orion.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
+			(queryObj.advOptions && queryObj.advOptions.regEx) ? 
+				exports.searchUtils.parseLocationAndSearchStrRegEx(splitQ[i].substring(qIndex+2), queryObj, fromStart):
+				exports.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
 		} else if(rIndex >= 0){
 			queryObj.replace = splitQ[i].substring(rIndex+8);
 		} else {
@@ -71,10 +67,38 @@ orion.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 	return queryObj;
 };
 
-orion.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
+exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
+
+exports.searchUtils.parseAdvQueryStr = function(queryStr) {
+	var advOptions = null;
+	var indexAdv = queryStr.indexOf("advOptions={");
+	var indexAdvEnd = queryStr.indexOf("}&");
+	if(indexAdv === 0 && indexAdvEnd > 0){
+		advOptions = {};
+		var advString = queryStr.substring(12, indexAdvEnd);
+		var splitAdv = advString.split("&"); //$NON-NLS-0$
+		for(var i=0; i < splitAdv.length; i++){
+			var splitparameters = splitAdv[i].split("="); //$NON-NLS-0$
+			if(splitparameters.length === 2){
+				if(splitparameters[0] === "regEx"){ //$NON-NLS-0$
+					advOptions.regEx = (splitparameters[1] === "true" ? true: false);
+				} else if(splitparameters[0] === "type"){ //$NON-NLS-0$
+					advOptions.type = splitparameters[1];
+				} 
+			}
+		}
+	}
+	var nonAdvQueryStr = queryStr;
+	if(advOptions){
+		nonAdvQueryStr = queryStr.substring(indexAdvEnd + 2);
+	}
+	return {advOptions: advOptions, nonAdvQueryStr: "?" + nonAdvQueryStr};
+};
+
+exports.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
 	return {
 		sort: queryObj.sort,
-		useRegEx: queryObj.useRegEx,
+		advOptions: queryObj.advOptions,
 		rows: queryObj.rows,
 		start: queryObj.start,
 		searchStr: queryObj.searchStr,
@@ -83,16 +107,25 @@ orion.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
 	};
 };
 
-orion.searchUtils.generateSearchHref = function(options) {
+exports.searchUtils.generateSearchHref = function(options) {
 	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
-	return base + "#" + orion.searchUtils.generateSearchQuery(options); //$NON-NLS-0$
+	return base + "#" + exports.searchUtils.generateSearchQuery(options); //$NON-NLS-0$
 };
 
-orion.searchUtils.generateSearchQuery = function(options) {
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "", regEx = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+exports.searchUtils.generateSearchQuery = function(options) {
+	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "", advOptions = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	if(options){
-		if(options.useRegEx){
-			regEx = "regEx&";
+		if(options.advOptions){
+			advOptions = "advOptions={";
+			var andOpt = "";
+			if(options.advOptions.regEx){
+				advOptions = advOptions + "regEx=true";
+				andOpt = "&";
+			}
+			if(options.advOptions.type){
+				advOptions = advOptions + andOpt + "type=" + options.advOptions.type;
+			}
+			advOptions = advOptions + "}&";
 		}
 		if(options.sort){
 			sort = options.sort;
@@ -120,10 +153,10 @@ orion.searchUtils.generateSearchQuery = function(options) {
 			replace = "&replace=" + options.replace; //$NON-NLS-0$
 		}
 	}
-	return "?" + regEx + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	return "?" + advOptions + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 };
 
-orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj, fromStart) {
+exports.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj, fromStart) {
 	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
 	queryObj.location = "";
 	queryObj.searchStr = locAndSearchStr;
@@ -140,16 +173,22 @@ orion.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
+	if(queryObj.advOptions && queryObj.advOptions.type && queryObj.advOptions.type !== exports.searchUtils.ALL_FILE_TYPE){
+		var newStr = queryObj.nonAdvQueryStr.replace(queryObj.searchStr, queryObj.searchStr + "+NameLower:*." + queryObj.advOptions.type);
+		queryObj.nonAdvQueryStr = newStr;
+	}
 	//If the search string contains white space, we should add this special property. 
 	//The property's value is basically the original search string with the double quato at both end.
 	//It is the caller's responsibility to decide wether this property has to be used or not.
 	if(queryObj.searchStr.indexOf(" ") >= 0){
 		queryObj.searchStrWithWhiteSpace = "\"" + queryObj.searchStr + "\"";
+		var newStr = queryObj.nonAdvQueryStr.replace(queryObj.searchStr, queryObj.searchStrWithWhiteSpace);
+		queryObj.nonAdvQueryStr = newStr;
 	}
-	queryObj.inFileQuery= orion.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
+	queryObj.inFileQuery= exports.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
 };
 
-orion.searchUtils.parseLocationAndSearchStrRegEx = function(locAndSearchStr, queryObj, fromStart) {
+exports.searchUtils.parseLocationAndSearchStrRegEx = function(locAndSearchStr, queryObj, fromStart) {
 	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
 	queryObj.location = "";
 	queryObj.searchStr = locAndSearchStr;
@@ -165,10 +204,10 @@ orion.searchUtils.parseLocationAndSearchStrRegEx = function(locAndSearchStr, que
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr;
-	queryObj.inFileQuery= orion.searchUtils.generateInFileQueryRegEx(queryObj.searchStr, fromStart);
+	queryObj.inFileQuery= exports.searchUtils.generateInFileQueryRegEx(queryObj.searchStr, fromStart);
 };
 
-orion.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
+exports.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
 	var inFileQuery = {};
 	inFileQuery.originalSearchStr = searchStr;
 	var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
@@ -201,7 +240,7 @@ orion.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
 	return inFileQuery;
 };
 	
-orion.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
+exports.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
 	var inFileQuery = {};
 	inFileQuery.originalSearchStr = searchStr;
 	inFileQuery.searchStr =searchStr;
@@ -221,7 +260,7 @@ orion.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
 	return inFileQuery;
 };
 	
-orion.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
+exports.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
 	var binding = ",find="; //$NON-NLS-0$
 	if (inFileQuery.wildCard) {
 		binding = binding + "@@useRegEx@@true@@"; //$NON-NLS-0$
@@ -236,7 +275,7 @@ orion.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, rep
 	return binding;
 };
 
-orion.searchUtils.parseFindURLBinding = function(findParam) {
+exports.searchUtils.parseFindURLBinding = function(findParam) {
 	var lineNumber = null;
 	var splitParam = findParam.split("@@atLine@@");
 	if(splitParam.length > 1){
@@ -260,18 +299,18 @@ orion.searchUtils.parseFindURLBinding = function(findParam) {
 	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx};
 };
 
-orion.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
+exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
 	return text.replace(regexp, replacingStr); 
 	
 };
 
-orion.searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
+exports.searchUtils.replaceStringLiteral = function(text, keyword, replacingStr){
 	var regexp = mRegex.parse("/" + keyword + "/gim"); //$NON-NLS-1$ //$NON-NLS-0$
-	return orion.searchUtils.replaceRegEx(text,regexp, replacingStr);
+	return exports.searchUtils.replaceRegEx(text,regexp, replacingStr);
 };
 
-orion.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
+exports.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, onlyOnce){
 	var i,startIndex = 0;
 	var found = false;
 	var result = [];
@@ -310,7 +349,7 @@ orion.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, only
  *         {Number} index<br />
  *         {Number} length
  */
-orion.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
+exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	if (!pattern) {
 		return null;
 	}
@@ -328,12 +367,12 @@ orion.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	};
 };
 
-orion.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
+exports.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOnce){
 	var i,startIndex = 0;
 	var found = false;
 	var result = [];
 	while(true){
-		var regExResult = orion.searchUtils.findRegExp(lineString, inFileQuery.regExp.pattern, inFileQuery.regExp.flags, startIndex);
+		var regExResult = exports.searchUtils.findRegExp(lineString, inFileQuery.regExp.pattern, inFileQuery.regExp.flags, startIndex);
 		if(regExResult){
 			result.push(regExResult);
 			found = true;
@@ -351,7 +390,7 @@ orion.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, onlyOn
 	return null;
 };
 
-orion.searchUtils.generateNewContents = function( oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
+exports.searchUtils.generateNewContents = function( oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
 	if(fileModelNode && oldContents){
 		var updating;
 		if(newContents.length > 0){
@@ -391,7 +430,7 @@ orion.searchUtils.generateNewContents = function( oldContents, newContents, file
 						fileModelNode.children[startNumber+k].newMatches = fileModelNode.children[startNumber+k].matches;
 					}
 				} else{
-					var result =  orion.searchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, searchStrLength);
+					var result =  exports.searchUtils.replaceCheckedMatches(lineStringOrigin, replaceStr, originalMatches, checkedMatches, searchStrLength);
 					newStr = result.replacedStr;
 					for(var k = 0; k < fileModelNode.children[startNumber].matches.length; k++ ){
 						fileModelNode.children[startNumber+k].newMatches = result.newMatches;
@@ -409,7 +448,7 @@ orion.searchUtils.generateNewContents = function( oldContents, newContents, file
 	}
 };
 
-orion.searchUtils.generateMatchContext = function(contextAroundLength, fileContents, lineNumber/*zero based*/){
+exports.searchUtils.generateMatchContext = function(contextAroundLength, fileContents, lineNumber/*zero based*/){
 	var context = [];
 	var totalContextLength = contextAroundLength*2 + 1;
 	var startFrom, endTo;
@@ -441,10 +480,10 @@ orion.searchUtils.generateMatchContext = function(contextAroundLength, fileConte
  *
  * @param {String} text The file contetns.
  * @returns {Array} Split file lines. 
- * @name orion.searchUtils#splitFile
+ * @name exports.searchUtils#splitFile
  * @function
  */
-orion.searchUtils.splitFile = function(text) {
+exports.searchUtils.splitFile = function(text) {
 	var cr = 0, lf = 0, index = 0, start = 0;
 	var splitLines = [];
 	while (true) {
@@ -477,8 +516,8 @@ orion.searchUtils.splitFile = function(text) {
 	return splitLines;
 };
 
-orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
-	var fileContents = orion.searchUtils.splitFile(fileContentText);
+exports.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileContentText, lineDelim, replacing, caseSensitive){
+	var fileContents = exports.searchUtils.splitFile(fileContentText);
 	if(replacing){
 		fileModelNode.contents = fileContents;
 	}
@@ -491,14 +530,14 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 				var lineString = caseSensitive ? lineStringOrigin : lineStringOrigin.toLowerCase();
 				var result;
 				if(inFileQuery.wildCard){
-					result = orion.searchUtils.searchOnelineRegEx(inFileQuery, lineString);
+					result = exports.searchUtils.searchOnelineRegEx(inFileQuery, lineString);
 				} else {
-					result = orion.searchUtils.searchOnelineLiteral(inFileQuery, lineString);
+					result = exports.searchUtils.searchOnelineLiteral(inFileQuery, lineString);
 				}
 				if(result){
 					var lineNumber = i+1;
 					if(!replacing){
-						var detailNode = {parent: fileModelNode, context: orion.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
+						var detailNode = {parent: fileModelNode, context: exports.searchUtils.generateMatchContext(2, fileContents, i), checked: fileModelNode.checked, 
 										  type: "detail", matches: result, lineNumber: lineNumber, name: lineStringOrigin, 
 										  location: fileModelNode.location + "-" + lineNumber}; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						fileModelNode.children.push(detailNode);
@@ -517,7 +556,7 @@ orion.searchUtils.searchWithinFile = function( inFileQuery, fileModelNode, fileC
 	}
 };
 
-orion.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
+exports.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalMatches, checkedMatches, defaultMatchLength){
 	var gap = defaultMatchLength;
 	var startIndex = 0;
 	var replacedStr = "";
@@ -551,7 +590,7 @@ orion.searchUtils.replaceCheckedMatches = function(text, replacingStr, originalM
 	return {replacedStr: replacedStr, newMatches: newMatches};
 };
 
-orion.searchUtils.fullPathNameByMeta = function(parents){
+exports.searchUtils.fullPathNameByMeta = function(parents){
 	var parentIndex = parents.length;
 	var fullPath = "";
 	//add parents chain top down if needed
@@ -564,20 +603,20 @@ orion.searchUtils.fullPathNameByMeta = function(parents){
 	return fullPath;
 };
 
-orion.searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
+exports.searchUtils.path2FolderName = function(filePath, fileName, keepTailSlash){
 	var tail = keepTailSlash ? 0: 1;
 	return filePath.substring(0, filePath.length-fileName.length-tail);
 };
 
 var MAX_RECENT_SEARCH_NUMBER = 20;
 
-orion.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
+exports.searchUtils._storeRecentSearch = function(serviceRegistry, searches){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
 };
 
-orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
+exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useRegEx){
 	if(typeof searchName !== "string" || !searchName ){
 		return;
 	}
@@ -602,19 +641,19 @@ orion.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useReg
 			searches = [];
 		}
 		searches.splice(0,0,{ "name": searchName, "regEx": useRegEx});//$NON-NLS-1$
-		orion.searchUtils._storeRecentSearch(serviceRegistry, searches);
+		exports.searchUtils._storeRecentSearch(serviceRegistry, searches);
 		//prefs.put("recentSearch", searches); //$NON-NLS-0$
 	});
 };
 
-orion.searchUtils.populateSearchMenu = function(serviceRegistry, choicesMenu, type, makeLabelFunc) {
+exports.searchUtils.populateSearchMenu = function(serviceRegistry, choicesMenu, type, makeLabelFunc) {
 	// see http://bugs.dojotoolkit.org/ticket/10296
 	choicesMenu.focusedChild = null;
 	dojo.forEach(choicesMenu.getChildren(), function(child) {
 		choicesMenu.removeChild(child);
 		child.destroy();
 	});
-	orion.searchUtils.getSearches(serviceRegistry, type, function(searches){
+	exports.searchUtils.getSearches(serviceRegistry, type, function(searches){
 		if (searches) {
 			for (i in searches) {
 				choicesMenu.addChild(new mCommands.CommandMenuItem({
@@ -626,7 +665,7 @@ orion.searchUtils.populateSearchMenu = function(serviceRegistry, choicesMenu, ty
 	});
 };
 
-orion.searchUtils.getSearches = function(serviceRegistry, type, callback){
+exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var i;
 		var searches = prefs.get(type); //$NON-NLS-0$
@@ -639,7 +678,7 @@ orion.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	});
 };
 
-orion.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
+exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var i;
 		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
@@ -652,7 +691,7 @@ orion.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
 				savedSearches = JSON.parse(savedSearches);
 			}
 			for (var i in savedSearches) {
-				var qObj = orion.searchUtils.parseQueryStr(savedSearches[i].query)
+				var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query)
 				var duplicated = searches.some(function(search) {
 						return qObj.searchStrTitle === search.name;
 				});
@@ -667,23 +706,121 @@ orion.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
 	});
 };
 
-orion.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
-	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
+exports.searchUtils.getOpenSearchPref = function(serviceRegistry, callback){
+	serviceRegistry.getService("orion.core.preference").getPreferences("/cm/configurations").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var i;
-		var openSearchPref = prefs.get("openSearchPref"); //$NON-NLS-0$
-		if (typeof openSearchPref === "string") { //$NON-NLS-0$
-			openSearchPref = JSON.parse(openSearchPref);
+		var properties = prefs.get("nav.config"); //$NON-NLS-0$
+		var openInNewTab;
+		if (properties && properties["links.newtab"] !== "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
+			openInNewTab = properties["links.newtab"] ? true : false; //$NON-NLS-2$ 
+		} else {
+			openInNewTab = false;
 		}
-		var openInNewTab = openSearchPref ? openSearchPref.openInNewTab : true;
 		callback(openInNewTab);
 	});
 };
 
-orion.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
+exports.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-0$
 	});
 };
 
-return orion.searchUtils;
+exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
+	if (searcher) {
+		if (searchStr.length > 0) {
+			exports.searchUtils.addRecentSearch(serviceRegistry, searchStr, advOptions ? advOptions.regEx: false);
+			var query = searcher.createSearchQuery(searchStr, null, null, false, null, advOptions);
+			exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+				var href = require.toUrl("search/search.html") + "#" +query; //$NON-NLS-1$ //$NON-NLS-0$
+				if(openInNewTab){
+					window.open(href);
+				} else {
+					window.location = href;
+				}
+			});
+		}
+	} else {
+		window.alert(messages["Can't search: no search service is available"]);
+	}
+};
+
+exports.searchUtils._addSearchOptions = function(serviceRegistry, commandService, searcher) {
+	exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
+		if (optionMenu) {
+			optionMenu.destroy();
+		}
+		var newMenu = new dijit.Menu({
+			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
+			id : "searchOptionsMenu" //$NON-NLS-0$
+		});
+		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: messages["Open in new tab"],
+			checked: openInNewTab,
+			onChange : function(checked) {
+				exports.searchUtils.setOpenSearchPref(serviceRegistry, checked);
+			}
+		}));
+		newMenu.addChild(new dijit.MenuSeparator());
+		
+		newMenu.addChild(new dijit.CheckedMenuItem({
+			label: messages["Regular expression"],
+			checked: false,
+			onChange : function(checked) {
+				searcher.useRegEx = checked;
+			}
+		}));
+		newMenu.addChild(new dijit.MenuSeparator());
+		
+		//Add the recent searches as popups
+		exports.searchUtils._addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){ //$NON-NLS-0$
+			return createSearchLink(searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx), theSearch.name);
+		});
+		//Add the saved searches as popups
+		exports.searchUtils._addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){ //$NON-NLS-0$
+			return createSearchLink(theSearch.query, theSearch.name);
+		});
+		
+		var menuButton = new orion.widgets.UserMenuDropDown({
+			label : messages["Search options"],
+			showLabel: false,
+			id : "searchOptionsDropDown", //$NON-NLS-0$
+			dropDown : newMenu
+		});
+		if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
+			dojo.destroy(menuButton.valueNode);
+		}
+		if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
+			dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
+		}
+	
+		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
+		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
+		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+	});
+};
+
+exports.searchUtils._addSearchPopUp = function(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
+	var choicesMenu = new dijit.Menu({
+		style: "display: none;" //$NON-NLS-0$
+	});
+	var popup = new dijit.PopupMenuItem({
+		label: popUpLabel,
+		popup: choicesMenu
+	});
+	mainMenu.addChild(popup);
+	exports.searchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
+		return makeLabelFunc(theSearch);
+	});
+	dojo.connect(mainMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
+		exports.searchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
+			return makeLabelFunc(theSearch);
+		});
+	});
+};
+
+return exports.searchUtils;
 });

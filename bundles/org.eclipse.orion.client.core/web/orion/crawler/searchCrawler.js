@@ -151,6 +151,16 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		}); 
 	};
 		
+	SearchCrawler.prototype._onFileType = function(contentType){
+		if(this.queryObj.advOptions && this.queryObj.advOptions.type){
+			if(this.queryObj.advOptions.type === mSearchUtils.ALL_FILE_TYPE){
+				return true;
+			}
+			return contentType.extension.indexOf(this.queryObj.advOptions.type) >= 0;
+		}
+		return true;
+	};
+
 	SearchCrawler.prototype._visitRecursively = function(directoryLocation){
 		var results = [];
 		var _this = this;
@@ -167,7 +177,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 						results.push(_this._buildSingleSkeleton(children[i]));
 					}else {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, _this.contentTypesCache);
-						if(contentType && contentType['extends'] === "text/plain" /*&& contentType.extension.indexOf(_this.queryObj.extension*/){ //$NON-NLS-0$ //$NON-NLS-0$
+						if(contentType && contentType['extends'] === "text/plain" && _this._onFileType(contentType)){ //$NON-NLS-0$ //$NON-NLS-0$
 							results.push(_this._sniffSearch(children[i]));
 						}
 					}

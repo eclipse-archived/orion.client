@@ -13,9 +13,9 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', "orion/Deferred",
+	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', "orion/Deferred",
 	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, Deferred){
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, mAdvSearchOptContainer, Deferred){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -140,25 +140,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 	}
 	
-	function _addSearchPopUp(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
-		var choicesMenu = new dijit.Menu({
-			style: "display: none;" //$NON-NLS-0$
-		});
-		var popup = new dijit.PopupMenuItem({
-			label: popUpLabel,
-			popup: choicesMenu
-		});
-		mainMenu.addChild(popup);
-		mSearchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
-			return makeLabelFunc(theSearch);
-		});
-		dojo.connect(mainMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
-			mSearchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
-				return makeLabelFunc(theSearch);
-			});
-		});
-	}
-
 	function createSearchLink(query, name) {
 		var link = document.createElement("a"); //$NON-NLS-0$
 		link.href = require.toUrl("search/search.html") + "#" + query; //$NON-NLS-1$ //$NON-NLS-0$
@@ -166,61 +147,24 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		return link;
 	}
 		
-	function _addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab) {
-		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
-		if (optionMenu) {
-			optionMenu.destroy();
-		}
-		var newMenu = new dijit.Menu({
-			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
-			id : "searchOptionsMenu" //$NON-NLS-0$
+	function _addAdvancedSearchButton(container) {
+		var dropDownImage = dojo.create("span", {id: "advancedSearchDropDown"}, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		dropDownImage.tabIndex = 0;
+		dojo.addClass(dropDownImage, "advancedSearchDecorationSprite");
+		dojo.addClass(dropDownImage, "core-sprite-openarrow");
+		dropDownImage.title = "advanced search";
+		dropDownImage.onclick = function(evt) {
+			container.toggle();
+		};
+		dropDownImage.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			var keyCode= e.charCode || e.keyCode;
+			if (keyCode === 13 ) {// ENTER
+				container.toggle();
+			} 
 		});
-		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
-		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Open in new tab"],
-			checked: openInNewTab,
-			onChange : function(checked) {
-				mSearchUtils.setOpenSearchPref(serviceRegistry, checked);
-			}
-		}));
-		newMenu.addChild(new dijit.MenuSeparator());
-		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Regular expression"],
-			checked: false,
-			onChange : function(checked) {
-				searcher.useRegEx = checked;
-			}
-		}));
-		newMenu.addChild(new dijit.MenuSeparator());
-		
-		//Add the recent searches as popups
-		_addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){ //$NON-NLS-0$
-			return createSearchLink(searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx), theSearch.name);
-		});
-		//Add the saved searches as popups
-		_addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){ //$NON-NLS-0$
-			return createSearchLink(theSearch.query, theSearch.name);
-		});
-		
-		var menuButton = new orion.widgets.UserMenuDropDown({
-			label : messages["Search options"],
-			showLabel: false,
-			id : "searchOptionsDropDown", //$NON-NLS-0$
-			dropDown : newMenu
-		});
-		if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
-			dojo.destroy(menuButton.valueNode);
-		}
-		if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
-			dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
-		}
-
-		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
-		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		dojo.addClass(dropDownImage, "bannerMenuSearchOptions"); //$NON-NLS-0$
 	}
+	
 	// Related links menu management.  The related drop down widget and its associated dropdown menu
 	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
 	// empty, we hide the dropdown.
@@ -759,6 +703,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
+		var advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(searchField, searcher, serviceRegistry,
+									{group: "advancedSearch"});//$NON-NLS-0$
 		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
 			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
@@ -826,28 +772,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 			var keyCode= e.charCode || e.keyCode;
 			if (keyCode === 13 ) {// ENTER
-				if (searcher) {
-					if (searchField.value.length > 0) {
-						mSearchUtils.addRecentSearch(serviceRegistry, searchField.value, searcher.useRegEx);
-						var query = searcher.createSearchQuery(searchField.value);
-						mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
-							var href = require.toUrl("search/search.html") + "#"+query; //$NON-NLS-1$ //$NON-NLS-0$
-							if(openInNewTab){
-								window.open(href);
-							} else {
-								window.location = href;
-							}
-						});
-					}
-				} else {
-					window.alert(messages["Can't search: no search service is available"]);
-				}
+				mSearchUtils.doSearch(searcher, serviceRegistry, searchField.value);
 			} 
 		});
 		//Finally, hook up search options
-		mSearchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
-			_addSearchOptions(serviceRegistry, commandService, searcher, openInNewTab);
-		});
+		_addAdvancedSearchButton(advSearchOptContainer);
 		
 		// layout behavior.  Special handling for pages that use dijit for interior layout.
 		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
@@ -1054,6 +983,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			if (clickNode && clickNode.id !== "keyAssist") { //$NON-NLS-0$
 				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			}
+			if(clickNode && !advSearchOptContainer.clicked(clickNode) && clickNode.id !== "advancedSearchDropDown"){
+				advSearchOptContainer.dismiss();
+			}
+			
 		}));
 		if (editor) {
 			editor.getTextView().addEventListener("MouseDown", function() { //$NON-NLS-0$
