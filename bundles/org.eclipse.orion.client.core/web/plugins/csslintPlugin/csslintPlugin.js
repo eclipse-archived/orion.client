@@ -67,7 +67,7 @@ window.onload = function() {
 		var headers = {
 			name: "Orion CSSLint Support",
 			version: "1.0",
-			description: "This plugin provides a CSSLint service to support outline and validation of CSS"
+			description: "This plugin provides a CSSLint service to support outline and validation of CSS files."
 		};
 
 		var provider = new orion.PluginProvider(headers);

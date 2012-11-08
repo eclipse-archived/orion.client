@@ -17,7 +17,7 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 	var headers = {
 		name: "Orion User Profile",
 		version: "1.0",
-		description: "This plugin support access and modification of a users profile.",
+		description: "This plugin supports access and modification of a user's profile information.",
 		login: login
 	};
 
