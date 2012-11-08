@@ -17,7 +17,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 	var headers = {
 		name: "Orion Task Management Service",
 		version: "1.0",
-		description: "This plugin provides access to and supports management of the tasks a user is currently running or ran recently.",
+		description: "This plugin provides access to the tasks a user is currently running or ran recently, and provides management of those tasks.",
 		login: login
 	};
 

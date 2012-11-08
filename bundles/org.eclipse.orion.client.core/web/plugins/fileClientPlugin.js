@@ -58,7 +58,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	var headers = {
 		name: "Orion File Service",
 		version: "1.0",
-		description: "This plugin provides file access to a users workspace.",
+		description: "This plugin provides file access to a user's workspace.",
 		login: login
 	};
 

@@ -14,7 +14,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 	var headers = {
 		name: "Orion User Authentication",
 		version: "1.0",
-		description: "This plugin provides a user authentication service to support user verification and logout support."
+		description: "This plugin provides a user authentication service to support user verification and logout."
 	};
 	var provider = new PluginProvider(headers);
 
