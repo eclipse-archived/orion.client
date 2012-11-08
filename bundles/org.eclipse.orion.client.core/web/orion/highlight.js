@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*global define*/
-define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/asyncStyler',
+define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
 			'examples/textview/textStylerOptions'], 
-		function(dojo, mTextStyler, mTextMateStyler, mAsyncStyler, mTextStylerOptions) {
+		function(dojo, mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -101,7 +101,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 			if (provider) {
 				var type = provider.getProperty("type"); //$NON-NLS-0$
 				if (type === "highlighter") { //$NON-NLS-0$
-					styler = new mAsyncStyler.AsyncStyler(textView, serviceRegistry, annotationModel);
+					styler = new AsyncStyler(textView, serviceRegistry, annotationModel);
 					styler.setContentType(contentType);
 				} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
 					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
