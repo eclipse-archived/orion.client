@@ -339,11 +339,8 @@ define([], function(){
 		this._completionUL.textContent = "";
 		var searchTerm = inputValue ? inputValue.toLowerCase() : null;
 		this._proposalList = [];
-		/*
-		var topList = [{type: "proposal", value: {name: "Advanced Search", value: "/settings/settings.html", type: "link"}},
-					   {type: "proposal", value: {name: "Files...", value: "/settings/settings.html", type: "link"}}]
-		this._proposeOnList(topList, searchTerm, false);
-		*/
+		//var topList = [{type: "proposal", value: {name: "Advanced Search", value: "/settings/settings.html", type: "link"}}]
+		//this._proposeOnList(topList, searchTerm, false);
 		this._proposeOnList(this._dataList, searchTerm, true);
 		if(this._extendedProvider && searchTerm){
 			var that = this;
