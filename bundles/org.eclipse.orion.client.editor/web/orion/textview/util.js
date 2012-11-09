@@ -13,7 +13,7 @@
 define(function() {
 
 	var userAgent = navigator.userAgent;
-	var isIE = parseFloat(userAgent.split("MSIE")[1]); //$NON-NLS-0$
+	var isIE = parseFloat(userAgent.split("MSIE")[1]) || undefined; //$NON-NLS-0$
 	var isFirefox = parseFloat(userAgent.split("Firefox/")[1] || userAgent.split("Minefield/")[1]) || undefined; //$NON-NLS-1$ //$NON-NLS-0$
 	var isOpera = userAgent.indexOf("Opera") !== -1; //$NON-NLS-0$
 	var isChrome = userAgent.indexOf("Chrome") !== -1; //$NON-NLS-0$
