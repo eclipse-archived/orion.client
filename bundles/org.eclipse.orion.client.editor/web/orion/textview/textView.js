@@ -16,8 +16,6 @@
 
 define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/util'], function(mTextModel, mKeyBinding, mEventTarget, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-	var isRangeRects, isW3CEvents;
-
 	/** @private */
 	function getWindow(document) {
 		return document.defaultView || document.parentWindow;
@@ -540,7 +538,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					if (lineOffset + nodeLength > offset) {
 						var index = offset - lineOffset;
 						var range;
-						if (isRangeRects) {
+						if (view._isRangeRects) {
 							range = document.createRange();
 							range.setStart(textNode, index);
 							range.setEnd(textNode, index + 1);
@@ -767,15 +765,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					rect = rects[j];
 					if (rect.left <= x && x < rect.right && (!view._wrapMode || (rect.top <= y && y < rect.bottom))) {
 						var range, start, end;
-						if (util.isIE || isRangeRects) {
-							range = isRangeRects ? document.createRange() : document.body.createTextRange();
+						if (util.isIE || view._isRangeRects) {
+							range = view._isRangeRects ? document.createRange() : document.body.createTextRange();
 							var high = nodeLength;
 							var low = -1;
 							while ((high - low) > 1) {
 								var mid = Math.floor((high + low) / 2);
 								start = low + 1;
 								end = mid === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : mid + 1;
-								if (isRangeRects) {
+								if (view._isRangeRects) {
 									range.setStart(textNode, start);
 									range.setEnd(textNode, end);
 								} else {
@@ -805,7 +803,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							offset += high;
 							start = high;
 							end = high === nodeLength - 1 && lineChild.ignoreChars ? textNode.length : Math.min(high + 1, textNode.length);
-							if (isRangeRects) {
+							if (view._isRangeRects) {
 								range.setStart(textNode, start);
 								range.setEnd(textNode, end);
 							} else {
@@ -2425,7 +2423,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			if (e.preventDefault) { e.preventDefault(); }
 			if (e.stopPropagation){ e.stopPropagation(); }
-			if (!isW3CEvents) {
+			if (!this._isW3CEvents) {
 				/*
 				* In IE 8 is not possible to prevent the default handler from running
 				* during mouse down event using usual API. The workaround is to give
@@ -2835,7 +2833,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* grab on mouse down and ungrab on mouse up.  The fix is to grab on the first
 				* mouse down and ungrab on mouse move when the button 1 is not set.
 				*/
-				if (isW3CEvents) { this._setGrab(target); }
+				if (this._isW3CEvents) { this._setGrab(target); }
 				
 				this._doubleClickSelection = null;
 				this._setSelectionTo(e.clientX, e.clientY, e.shiftKey);
@@ -2953,7 +2951,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			* a mouse down event from mouse move when the button is still down and isMouseDown
 			* flag is not set.
 			*/
-			if (!isW3CEvents) {
+			if (!this._isW3CEvents) {
 				if (e.button === 0) {
 					this._setGrab(null);
 					return true;
@@ -3049,7 +3047,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* grab on mouse down and ungrab on mouse up.  The fix is to grab on the first
 				* mouse down and ungrab on mouse move when the button 1 is not set.
 				*/
-				if (isW3CEvents) { this._setGrab(null); }
+				if (this._isW3CEvents) { this._setGrab(null); }
 
 				/*
 				* Note that there cases when Firefox sets the DOM selection in mouse up.
@@ -4877,7 +4875,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					handlers.push({target: this._overlayDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e ? e : window.event);}}); //$NON-NLS-0$
 					handlers.push({target: this._overlayDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e ? e : window.event); }}); //$NON-NLS-0$
 				}
-				if (!isW3CEvents) {
+				if (!this._isW3CEvents) {
 					handlers.push({target: this._clientDiv, type: "dblclick", handler: function(e) { return self._handleDblclick(e ? e : window.event); }}); //$NON-NLS-0$
 				}
 			}
@@ -4916,9 +4914,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				parent = (options.document || document).getElementById(parent);
 			}
 			if (!parent) { throw "no parent"; } //$NON-NLS-0$
-			var document = parent.ownerDocument;
-			isRangeRects = (!util.isIE || util.isIE >= 9) && typeof document.createRange().getBoundingClientRect === "function"; //$NON-NLS-0$
-			isW3CEvents = parent.addEventListener;
 			options.parent = parent;
 			options.model = options.model || new mTextModel.TextModel();
 			var defaultOptions = this._defaultOptions();
@@ -4944,6 +4939,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._hasFocus = false;
 			this._columnX = -1;
 			this._dragOffset = -1;
+			this._isRangeRects = (!util.isIE || util.isIE >= 9) && typeof parent.ownerDocument.createRange().getBoundingClientRect === "function"; //$NON-NLS-0$
+			this._isW3CEvents = parent.addEventListener;
 
 			/* Auto scroll */
 			this._autoScrollX = null;
