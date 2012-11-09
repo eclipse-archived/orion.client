@@ -678,7 +678,7 @@ exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	});
 };
 
-exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback){
+exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDuplication, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var i;
 		var searches = prefs.get("recentSearch"); //$NON-NLS-0$
@@ -691,12 +691,16 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, callback
 				savedSearches = JSON.parse(savedSearches);
 			}
 			for (var i in savedSearches) {
-				var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query)
-				var duplicated = searches.some(function(search) {
-						return qObj.searchStrTitle === search.name;
-				});
-				if(!duplicated){
-					searches.push({"name": qObj.searchStrTitle, "label": savedSearches[i].name});
+				if(checkDuplication){
+					var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query)
+					var duplicated = searches.some(function(search) {
+							return qObj.searchStrTitle === search.name;
+					});
+					if(!duplicated){
+						searches.push({"name": qObj.searchStrTitle, "label": savedSearches[i].name});
+					}
+				} else {
+					searches.push({"name": null, "label": savedSearches[i].name, value: savedSearches[i].query});
 				}
 			}
 		}
