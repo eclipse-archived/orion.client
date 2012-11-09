@@ -207,8 +207,8 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	
 	advSearchOptRenderer.prototype._initHTMLLabels = function(){
 		document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
-		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["On file type:"])); //$NON-NLS-0$ //$NON-NLS-0$
-		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expresion:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression:"])); //$NON-NLS-0$ //$NON-NLS-0$
 	};
 	
 	advSearchOptRenderer.prototype._renderHTML = function(htmlTemplate){
@@ -246,15 +246,15 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		//Create file type combo box
 		this._fileTypes = document.createElement('select'); //$NON-NLS-0$
 		label = document.createElement('label'); //$NON-NLS-0$
-		label.appendChild(document.createTextNode(messages["On file type:"]));
+		label.appendChild(document.createTextNode(messages["File type:"]));
 		this._createListEle(ul, "advSearchOptLIControl", [label, this._fileTypes]); //$NON-NLS-0$
 		
-	    //Create regular expresion check box
+	    //Create regular expression check box
 	    this._regExCB = document.createElement('input'); //$NON-NLS-0$
 	    this._regExCB.type = 'checkbox'; //$NON-NLS-0$
 	    this._regExCB.checked = false;
 		label = document.createElement('label'); //$NON-NLS-0$
-		label.appendChild(document.createTextNode(messages["Regular expresion:"]));
+		label.appendChild(document.createTextNode(messages["Regular expression:"]));
 		this._createListEle(ul, "advSearchOptLIControl", [label, this._regExCB]); //$NON-NLS-0$
 		
 		//Create search button
