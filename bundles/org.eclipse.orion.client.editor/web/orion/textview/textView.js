@@ -14,7 +14,7 @@
 
 /*global window document navigator setTimeout clearTimeout setInterval clearInterval define */
 
-define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget'], function(mTextModel, mKeyBinding, mEventTarget) { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/util'], function(mTextModel, mKeyBinding, mEventTarget, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	var userAgent = navigator.userAgent;
 	var isIE;
@@ -335,7 +335,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
 			view.onLineStyle(e);
-			var lineDiv = div || document.createElement("DIV"); //$NON-NLS-0$
+			var lineDiv = div || util.createElement("div"); //$NON-NLS-0$
 			if (!div || !compare(div.viewStyle, e.style)) {
 				applyStyle(e.style, lineDiv, div);
 				if (div) { div._trim = null; }
@@ -508,8 +508,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_createSpan: function(parent, document, text, style, ignoreChars) {
 			var isLink = style && style.tagName === "A"; //$NON-NLS-0$
 			if (isLink) { parent.hasLink = true; }
-			var tagName = isLink && this.view._linksVisible ? "A" : "SPAN"; //$NON-NLS-1$ //$NON-NLS-0$
-			var child = document.createElement(tagName);
+			var tagName = isLink && this.view._linksVisible ? "a" : "span"; //$NON-NLS-1$ //$NON-NLS-0$
+			var child = util.createElement(tagName);
 			child.appendChild(document.createTextNode(text));
 			applyStyle(style, child);
 			if (tagName === "A") { //$NON-NLS-0$
@@ -564,7 +564,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 							var text = textNode.data;
 							lineChild.removeChild(textNode);
 							lineChild.appendChild(document.createTextNode(text.substring(0, index)));
-							var span = document.createElement("SPAN"); //$NON-NLS-0$
+							var span = util.createElement("span"); //$NON-NLS-0$
 							span.appendChild(document.createTextNode(text.substring(index, index + 1)));
 							lineChild.appendChild(span);
 							lineChild.appendChild(document.createTextNode(text.substring(index + 1)));
@@ -2470,7 +2470,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			*/
 			if (isIE < 9) {
 				if (!this._getSelection().isEmpty()) {
-					var child = document.createElement("DIV"); //$NON-NLS-0$
+					var child = util.createElement("div"); //$NON-NLS-0$
 					var rootDiv = this._rootDiv;
 					rootDiv.appendChild(child);
 					rootDiv.removeChild(child);
@@ -3911,7 +3911,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		_calculateMetrics: function() {
 			var parent = this._clientDiv;
 			var c = " "; //$NON-NLS-0$
-			var line = document.createElement("DIV"); //$NON-NLS-0$
+			var line = util.createElement("div"); //$NON-NLS-0$
 			line.style.lineHeight = "normal"; //$NON-NLS-0$
 			var model = this._model;
 			var lineText = model.getLine(0);
@@ -3920,18 +3920,18 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			applyStyle(e.style, line);
 			line.style.position = "fixed"; //$NON-NLS-0$
 			line.style.left = "-1000px"; //$NON-NLS-0$
-			var span1 = document.createElement("SPAN"); //$NON-NLS-0$
+			var span1 = util.createElement("span"); //$NON-NLS-0$
 			span1.appendChild(document.createTextNode(c));
 			line.appendChild(span1);
-			var span2 = document.createElement("SPAN"); //$NON-NLS-0$
+			var span2 = util.createElement("span"); //$NON-NLS-0$
 			span2.style.fontStyle = "italic"; //$NON-NLS-0$
 			span2.appendChild(document.createTextNode(c));
 			line.appendChild(span2);
-			var span3 = document.createElement("SPAN"); //$NON-NLS-0$
+			var span3 = util.createElement("span"); //$NON-NLS-0$
 			span3.style.fontWeight = "bold"; //$NON-NLS-0$
 			span3.appendChild(document.createTextNode(c));
 			line.appendChild(span3);
-			var span4 = document.createElement("SPAN"); //$NON-NLS-0$
+			var span4 = util.createElement("span"); //$NON-NLS-0$
 			span4.style.fontWeight = "bold"; //$NON-NLS-0$
 			span4.style.fontStyle = "italic"; //$NON-NLS-0$
 			span4.appendChild(document.createTextNode(c));
@@ -3973,7 +3973,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			// calculate pad and scroll width
 			var pad = getPadding(this._viewDiv);
-			var div1 = document.createElement("DIV"); //$NON-NLS-0$
+			var div1 = util.createElement("div"); //$NON-NLS-0$
 			div1.style.position = "fixed"; //$NON-NLS-0$
 			div1.style.left = "-1000px"; //$NON-NLS-0$
 			div1.style.paddingLeft = pad.left + "px"; //$NON-NLS-0$
@@ -3982,7 +3982,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			div1.style.paddingBottom = pad.bottom + "px"; //$NON-NLS-0$
 			div1.style.width = "100px"; //$NON-NLS-0$
 			div1.style.height = "100px"; //$NON-NLS-0$
-			var div2 = document.createElement("DIV"); //$NON-NLS-0$
+			var div2 = util.createElement("div"); //$NON-NLS-0$
 			div2.style.width = "100%"; //$NON-NLS-0$
 			div2.style.height = "100%"; //$NON-NLS-0$
 			div1.appendChild(div2);
@@ -4235,7 +4235,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var side = ruler.getLocation();
 			var rulerParent = side === "left" ? this._leftDiv : this._rightDiv; //$NON-NLS-0$
 			rulerParent.style.display = "block"; //$NON-NLS-0$
-			var div = document.createElement("DIV"); //$NON-NLS-0$
+			var div = util.createElement("div"); //$NON-NLS-0$
 			div._ruler = ruler;
 			div.rulerChanged = true;
 			div.style.position = "relative"; //$NON-NLS-0$
@@ -4251,7 +4251,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var parent = this._parent;
 			while (parent.hasChildNodes()) { parent.removeChild(parent.lastChild); }
 
-			var rootDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var rootDiv = util.createElement("div"); //$NON-NLS-0$
 			this._rootDiv = rootDiv;
 			rootDiv.tabIndex = -1;
 			rootDiv.style.position = "relative"; //$NON-NLS-0$
@@ -4262,7 +4262,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rootDiv.setAttribute("role", "application"); //$NON-NLS-1$ //$NON-NLS-0$
 			parent.appendChild(rootDiv);
 			
-			var leftDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var leftDiv = util.createElement("div"); //$NON-NLS-0$
 			leftDiv.className = "textviewLeftRuler"; //$NON-NLS-0$
 			this._leftDiv = leftDiv;
 			leftDiv.tabIndex = -1;
@@ -4273,7 +4273,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			leftDiv.style.cursor = "default"; //$NON-NLS-0$
 			leftDiv.style.display = "none"; //$NON-NLS-0$
 			leftDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			var table = document.createElement("TABLE"); //$NON-NLS-0$
+			var table = util.createElement("table"); //$NON-NLS-0$
 			leftDiv.appendChild(table);
 			table.cellPadding = "0px"; //$NON-NLS-0$
 			table.cellSpacing = "0px"; //$NON-NLS-0$
@@ -4281,7 +4281,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			table.insertRow(0);
 			rootDiv.appendChild(leftDiv);
 
-			var viewDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var viewDiv = util.createElement("div"); //$NON-NLS-0$
 			viewDiv.className = "textview"; //$NON-NLS-0$
 			this._viewDiv = viewDiv;
 			viewDiv.tabIndex = -1;
@@ -4294,7 +4294,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.style.outline = "none"; //$NON-NLS-0$
 			rootDiv.appendChild(viewDiv);
 			
-			var rightDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var rightDiv = util.createElement("div"); //$NON-NLS-0$
 			rightDiv.className = "textviewRightRuler"; //$NON-NLS-0$
 			this._rightDiv = rightDiv;
 			rightDiv.tabIndex = -1;
@@ -4306,7 +4306,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			rightDiv.style.cursor = "default"; //$NON-NLS-0$
 			rightDiv.style.right = "0px"; //$NON-NLS-0$
 			rightDiv.setAttribute("aria-hidden", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			table = document.createElement("TABLE"); //$NON-NLS-0$
+			table = util.createElement("table"); //$NON-NLS-0$
 			rightDiv.appendChild(table);
 			table.cellPadding = "0px"; //$NON-NLS-0$
 			table.cellSpacing = "0px"; //$NON-NLS-0$
@@ -4314,7 +4314,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			table.insertRow(0);
 			rootDiv.appendChild(rightDiv);
 				
-			var scrollDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var scrollDiv = util.createElement("div"); //$NON-NLS-0$
 			this._scrollDiv = scrollDiv;
 			scrollDiv.style.margin = "0px"; //$NON-NLS-0$
 			scrollDiv.style.borderWidth = "0px"; //$NON-NLS-0$
@@ -4322,7 +4322,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			viewDiv.appendChild(scrollDiv);
 			
 			if (isFirefox) {
-				var clipboardDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var clipboardDiv = util.createElement("div"); //$NON-NLS-0$
 				this._clipboardDiv = clipboardDiv;
 				clipboardDiv.style.position = "fixed"; //$NON-NLS-0$
 				clipboardDiv.style.whiteSpace = "pre"; //$NON-NLS-0$
@@ -4331,7 +4331,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 
 			if (!isIE && !isPad) {
-				var clipDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var clipDiv = util.createElement("div"); //$NON-NLS-0$
 				this._clipDiv = clipDiv;
 				clipDiv.style.position = "absolute"; //$NON-NLS-0$
 				clipDiv.style.overflow = "hidden"; //$NON-NLS-0$
@@ -4340,7 +4340,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				clipDiv.style.padding = "0px"; //$NON-NLS-0$
 				rootDiv.appendChild(clipDiv);
 				
-				var clipScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var clipScrollDiv = util.createElement("div"); //$NON-NLS-0$
 				this._clipScrollDiv = clipScrollDiv;
 				clipScrollDiv.style.position = "absolute"; //$NON-NLS-0$
 				clipScrollDiv.style.height = "1px"; //$NON-NLS-0$
@@ -4350,7 +4350,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			this._setFullSelection(this._fullSelection, true);
 
-			var clientDiv = document.createElement("DIV"); //$NON-NLS-0$
+			var clientDiv = util.createElement("div"); //$NON-NLS-0$
 			clientDiv.className = "textviewContent"; //$NON-NLS-0$
 			this._clientDiv = clientDiv;
 			clientDiv.style.position = "absolute"; //$NON-NLS-0$
@@ -4367,7 +4367,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
 			
 			if (isPad || isAndroid) {
-				var vScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var vScrollDiv = util.createElement("div"); //$NON-NLS-0$
 				this._vScrollDiv = vScrollDiv;
 				vScrollDiv.style.position = "absolute"; //$NON-NLS-0$
 				vScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
@@ -4383,7 +4383,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				vScrollDiv.style.width = "8px"; //$NON-NLS-0$
 				vScrollDiv.style.display = "none"; //$NON-NLS-0$
 				rootDiv.appendChild(vScrollDiv);
-				var hScrollDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var hScrollDiv = util.createElement("div"); //$NON-NLS-0$
 				this._hScrollDiv = hScrollDiv;
 				hScrollDiv.style.position = "absolute"; //$NON-NLS-0$
 				hScrollDiv.style.borderWidth = "1px"; //$NON-NLS-0$
@@ -4402,7 +4402,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 
 			if (isFirefox && !clientDiv.setCapture) {
-				var overlayDiv = document.createElement("DIV"); //$NON-NLS-0$
+				var overlayDiv = util.createElement("div"); //$NON-NLS-0$
 				this._overlayDiv = overlayDiv;
 				overlayDiv.style.position = clientDiv.style.position;
 				overlayDiv.style.borderWidth = clientDiv.style.borderWidth;
@@ -4428,9 +4428,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					styleText += "\n.textviewContainer ::-moz-selection {background: " + this._highlightRGB + ";}"; //$NON-NLS-1$ //$NON-NLS-0$
 				}
 				if (styleText) {
-					var stylesheet = document.createElement("STYLE"); //$NON-NLS-0$
+					var stylesheet = util.createElement("style"); //$NON-NLS-0$
 					stylesheet.id = "_textviewStyle"; //$NON-NLS-0$
-					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement; //$NON-NLS-0$
+					var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
 					stylesheet.appendChild(document.createTextNode(styleText));
 					head.insertBefore(stylesheet, head.firstChild);
 				}
@@ -5167,7 +5167,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					return true;
 				}
 			}
-			var child = document.createElement("PRE"); //$NON-NLS-0$
+			var child = util.createElement("pre"); //$NON-NLS-0$
 			child.style.position = "fixed"; //$NON-NLS-0$
 			child.style.left = "-1000px"; //$NON-NLS-0$
 			convertDelimiter(text, 
@@ -5175,7 +5175,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					child.appendChild(document.createTextNode(t));
 				}, 
 				function() {
-					child.appendChild(document.createElement("BR")); //$NON-NLS-0$
+					child.appendChild(util.createElement("br")); //$NON-NLS-0$
 				}
 			);
 			child.appendChild(document.createTextNode(" ")); //$NON-NLS-0$
@@ -5281,7 +5281,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				* selection at the end of some lines does not get redrawn.  The
 				* fix is to create a DOM element in the body to force a redraw.
 				*/
-				var child = document.createElement("DIV"); //$NON-NLS-0$
+				var child = util.createElement("div"); //$NON-NLS-0$
 				body.appendChild(child);
 				body.removeChild(child);
 				
@@ -5529,7 +5529,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			
 			if (!this._selDiv1 && (this._fullSelection && !isPad)) {
 				this._highlightRGB = isWebkit ? "transparent" : "Highlight"; //$NON-NLS-1$ //$NON-NLS-0$
-				var selDiv1 = document.createElement("DIV"); //$NON-NLS-0$
+				var selDiv1 = util.createElement("div"); //$NON-NLS-0$
 				this._selDiv1 = selDiv1;
 				selDiv1.style.position = "absolute"; //$NON-NLS-0$
 				selDiv1.style.borderWidth = "0px"; //$NON-NLS-0$
@@ -5541,7 +5541,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv1.style.height = "0px"; //$NON-NLS-0$
 				selDiv1.style.zIndex = "0"; //$NON-NLS-0$
 				parent.appendChild(selDiv1);
-				var selDiv2 = document.createElement("DIV"); //$NON-NLS-0$
+				var selDiv2 = util.createElement("div"); //$NON-NLS-0$
 				this._selDiv2 = selDiv2;
 				selDiv2.style.position = "absolute"; //$NON-NLS-0$
 				selDiv2.style.borderWidth = "0px"; //$NON-NLS-0$
@@ -5553,7 +5553,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				selDiv2.style.height = "0px"; //$NON-NLS-0$
 				selDiv2.style.zIndex = "0"; //$NON-NLS-0$
 				parent.appendChild(selDiv2);
-				var selDiv3 = document.createElement("DIV"); //$NON-NLS-0$
+				var selDiv3 = util.createElement("div"); //$NON-NLS-0$
 				this._selDiv3 = selDiv3;
 				selDiv3.style.position = "absolute"; //$NON-NLS-0$
 				selDiv3.style.borderWidth = "0px"; //$NON-NLS-0$
@@ -6140,7 +6140,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					widthDiv = child;
 					child = child.nextSibling;
 				} else {
-					widthDiv = document.createElement("DIV"); //$NON-NLS-0$
+					widthDiv = util.createElement("div"); //$NON-NLS-0$
 					widthDiv.style.visibility = "hidden"; //$NON-NLS-0$
 					div.appendChild(widthDiv);
 				}
@@ -6175,7 +6175,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					frag = document.createDocumentFragment();
 					for (lineIndex=topIndex; lineIndex<=bottomIndex; lineIndex++) {
 						if (!child || child.lineIndex > lineIndex) {
-							lineDiv = document.createElement("DIV"); //$NON-NLS-0$
+							lineDiv = util.createElement("div"); //$NON-NLS-0$
 							annotation = annotations[lineIndex];
 							if (annotation) {
 								applyStyle(annotation.style, lineDiv);
@@ -6220,7 +6220,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 						for (var prop in annotations) {
 							lineIndex = prop >>> 0;
 							if (lineIndex < 0) { continue; }
-							lineDiv = document.createElement("DIV"); //$NON-NLS-0$
+							lineDiv = util.createElement("div"); //$NON-NLS-0$
 							annotation = annotations[prop];
 							applyStyle(annotation.style, lineDiv);
 							lineDiv.style.position = "absolute"; //$NON-NLS-0$

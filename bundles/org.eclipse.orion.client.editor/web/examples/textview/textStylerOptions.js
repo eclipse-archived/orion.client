@@ -13,7 +13,7 @@
 
 /*global window document define localStorage*/
 
-define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBootstrap) {
+define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textview/util'], function(mBootstrap, util) {
 
 	var CATEGORY = "JavaScript Editor";
 	var USER_THEME = "userTheme";
@@ -168,9 +168,9 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap'], function(mBoo
 						stylerOptions._stylesheet = null;
 					}
 
-					var stylesheet = stylerOptions._stylesheet = document.createElement("STYLE");
+					var stylesheet = stylerOptions._stylesheet = util.createElement("style");
 					stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, sUtil)));
-					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					var head = document.getElementsByTagName("head")[0] || document.documentElement;
 					head.appendChild(stylesheet);
 					var view = stylerOptions._view;
 					var options = {themeClass:null};
