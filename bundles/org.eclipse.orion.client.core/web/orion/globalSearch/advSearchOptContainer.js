@@ -48,7 +48,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 			this._optUIContainer.style.display = "none"; //$NON-NLS-0$
 			this._optUIContainer.className = "advSearchOptContainer"; //$NON-NLS-0$
 			document.body.appendChild(this._optUIContainer);
-			this._optRenderer.render(this._optUIContainer, 'orion/globalSearch/advSearchOpt.html');			
+			this._optRenderer.render(this._optUIContainer/*, 'orion/globalSearch/advSearchOpt.html'*/);			
 		}
 	};
 	
