@@ -33,7 +33,6 @@ define(["require",
 	var styler = null;
 	var annotationStyler = null;
 	var loadedThemes = [];
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
 	var AnnotationType = mAnnotations.AnnotationType;
 		
@@ -63,7 +62,7 @@ define(["require",
 					stylesheet = document.createStyleSheet();
 					stylesheet.cssText = cssText;
 				} else {
-					stylesheet = util.createElement("style");
+					stylesheet = util.createElement(document, "style");
 					var head = document.getElementsByTagName("head")[0] || document.documentElement;
 					stylesheet.appendChild(document.createTextNode(cssText));
 					head.appendChild(stylesheet);
@@ -101,7 +100,7 @@ define(["require",
 			undoStack.undo();
 			return true;
 		});
-		view.setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo");
+		view.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo");
 		view.setAction("redo", function() {
 			undoStack.redo();
 			return true;
@@ -169,7 +168,7 @@ define(["require",
 				end = model.mapOffset(end);
 			}
 			var type;
-			if (isMac ? e.metaKey : e.ctrlKey) {
+			if (util.isMac ? e.metaKey : e.ctrlKey) {
 				if (e.shiftKey && e.altKey) {
 					type = AnnotationType.ANNOTATION_WARNING;
 				} else if (e.altKey) {

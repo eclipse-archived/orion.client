@@ -28,8 +28,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}, {name: messages.undo});
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("redo", function() { //$NON-NLS-0$
 				undoStack.redo();
 				return true;
@@ -634,8 +633,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.collapseAll});
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !isMac, false, false, isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.textView.setAction("lastEdit", function() { //$NON-NLS-0$
 				if (typeof this._lastEditLocation === "number")  { //$NON-NLS-0$
 					this.editor.showSelection(this._lastEditLocation);
@@ -888,8 +886,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !isMac, false, isMac), "addBlockComment"); //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !util.isMac, false, util.isMac), "addBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("addBlockComment", function() { //$NON-NLS-0$
 				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
@@ -914,7 +911,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.addBlockComment});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !isMac, false, isMac), "removeBlockComment"); //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !util.isMac, false, util.isMac), "removeBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
 				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
