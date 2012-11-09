@@ -53,7 +53,7 @@ function(mSetup, mTestPerformance, util) {
 			text += arguments[n];
 		}
 		console.appendChild(document.createTextNode(text));
-		console.appendChild(util.createElement("br"));
+		console.appendChild(util.createElement(document, "br"));
 		console.scrollTop = console.scrollHeight;
 	}
 	window.log = log;
@@ -170,7 +170,7 @@ function(mSetup, mTestPerformance, util) {
 	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
-			var option = util.createElement("option");
+			var option = util.createElement(document, "option");
 			option.setAttribute("value", property);
 			option.appendChild(document.createTextNode(property.substring(prefix.length	)));
 			sPerform.appendChild(option);

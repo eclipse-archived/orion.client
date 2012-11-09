@@ -11,7 +11,7 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation 
  ******************************************************************************/
 
-/*global window document define localStorage*/
+/*global define*/
 
 define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textview/util'], function(mBootstrap, util) {
 
@@ -168,11 +168,13 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 						stylerOptions._stylesheet = null;
 					}
 
-					var stylesheet = stylerOptions._stylesheet = util.createElement("style");
+					var view = stylerOptions._view;
+					var parent = view.getOptions("parent");
+					var document = parent.ownerDocument;
+					var stylesheet = stylerOptions._stylesheet = util.createElement(document, "style");
 					stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, sUtil)));
 					var head = document.getElementsByTagName("head")[0] || document.documentElement;
 					head.appendChild(stylesheet);
-					var view = stylerOptions._view;
 					var options = {themeClass:null};
 					view.getOptions(options);
 					var theme = options.themeClass;

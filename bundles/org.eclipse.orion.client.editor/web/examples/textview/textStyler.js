@@ -10,7 +10,7 @@
  *               Alex Lakatos - fix for bug#369781
  ******************************************************************************/
 
-/*global document window navigator define */
+/*global define */
 
 define("examples/textview/textStyler", ['orion/textview/annotations'], function(mAnnotations) {
 

@@ -11,10 +11,9 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
 
-/*global window define */
+/*global define */
 
-define("orion/textview/keyBinding", [], function() { //$NON-NLS-0$
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
+define("orion/textview/keyBinding", ['orion/textview/util'], function(util) { //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * Constructs a new key binding with the given key code and modifiers.
@@ -56,11 +55,11 @@ define("orion/textview/keyBinding", [], function() { //$NON-NLS-0$
 		 */
 		match: function (e) {
 			if (this.keyCode === e.keyCode) {
-				var mod1 = isMac ? e.metaKey : e.ctrlKey;
+				var mod1 = util.isMac ? e.metaKey : e.ctrlKey;
 				if (this.mod1 !== mod1) { return false; }
 				if (this.mod2 !== e.shiftKey) { return false; }
 				if (this.mod3 !== e.altKey) { return false; }
-				if (isMac && this.mod4 !== e.ctrlKey) { return false; }
+				if (util.isMac && this.mod4 !== e.ctrlKey) { return false; }
 				return true;
 			}
 			return false;

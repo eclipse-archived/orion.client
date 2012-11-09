@@ -113,8 +113,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				}
 			}
 		};
-		var isMac = navigator.platform.indexOf("Mac") !== -1;
-		textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
+		textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding(' ', false, false, false, true) : new mKeyBinding.KeyBinding(' ', true), "contentAssist");
 		textView.setAction("contentAssist", function() {
 			self.activate();
 			return true;
@@ -346,13 +345,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 */
 	function ContentAssistWidget(contentAssist, parentNode) {
 		this.contentAssist = contentAssist;
-		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		this.textView = this.contentAssist.getTextView();
 		this.textViewListenerAdded = false;
 		this.isShowing = false;
-		var self = this;
+		var document = this.textView.getOptions("parent").ownerDocument;
+		this.parentNode = typeof parentNode === "string" ? document.getElementById(parentNode) : parentNode;
 		if (!this.parentNode) {
-			this.parentNode = util.createElement("div");
+			this.parentNode = util.createElement(document, "div");
 			this.parentNode.className = "contentassist";
 			var body = document.getElementsByTagName("body")[0];
 			if (body) {
@@ -361,6 +360,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 				throw new Error("parentNode is required");
 			}
 		}
+		var self = this;
 		this.textViewListener = {
 			onMouseDown: function(event) {
 				if (event.event.target.parentElement !== self.parentNode) {
@@ -402,12 +402,13 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		/** @private */
 		createDiv: function(proposal, isSelected, parent, itemIndex) {
-			var div = util.createElement("div");
+			var document = parent.ownerDocument;
+			var div = util.createElement(document, "div");
 			div.id = "contentoption" + itemIndex;
 			div.setAttribute("role", "option");
 			var node;
 			if (proposal.style === "hr") {
-				node = util.createElement("hr");
+				node = util.createElement(document, "hr");
 			} else {
 				div.className = this.calculateClasses(proposal.style, isSelected);
 				node = document.createTextNode(this.getDisplayString(proposal));
@@ -511,7 +512,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.isShowing = true;
 		},
 		hide: function() {
-			if(document.activeElement === this.parentNode) {
+			if(this.parentNode.ownerDocument.activeElement === this.parentNode) {
 				this.textView.focus();
 			}
 			this.parentNode.style.display = "none";
@@ -529,6 +530,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			this.parentNode.scrollTop = 0;
 
 			// Make sure that the panel is never outside the viewport
+			var document = this.parentNode.ownerDocument;
 			var viewportWidth = document.documentElement.clientWidth,
 			    viewportHeight =  document.documentElement.clientHeight;
 			if (caretLocation.y + this.parentNode.offsetHeight > viewportHeight) {
