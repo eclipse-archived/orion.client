@@ -9,14 +9,23 @@
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global define*/
+/*global define document*/
 define(function() {
 	function formatMessage(msg) {
 		var args = arguments;
 		return msg.replace(/\$\{([^\}]+)\}/g, function(str, index) { return args[(index << 0) + 1]; });
 	}
+	
+	var XHTML = "http://www.w3.org/1999/xhtml"; //$NON-NLS-0$
+	function createElement(tagName) {
+		if (document.createElementNS) {
+			return document.createElementNS(XHTML, tagName);
+		}
+		return document.createElement(tagName);
+	}
 
 	return {
-		formatMessage: formatMessage
+		formatMessage: formatMessage,
+		createElement: createElement
 	};
 });

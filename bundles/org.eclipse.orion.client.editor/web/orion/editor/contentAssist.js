@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred'], function(messages, mKeyBinding, mEventTarget, Deferred) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -352,7 +352,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		this.isShowing = false;
 		var self = this;
 		if (!this.parentNode) {
-			this.parentNode = document.createElement("div");
+			this.parentNode = util.createElement("div");
 			this.parentNode.className = "contentassist";
 			var body = document.getElementsByTagName("body")[0];
 			if (body) {
@@ -402,12 +402,12 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		},
 		/** @private */
 		createDiv: function(proposal, isSelected, parent, itemIndex) {
-			var div = document.createElement("div");
+			var div = util.createElement("div");
 			div.id = "contentoption" + itemIndex;
 			div.setAttribute("role", "option");
 			var node;
 			if (proposal.style === "hr") {
-				node = document.createElement("hr");
+				node = util.createElement("hr");
 			} else {
 				div.className = this.calculateClasses(proposal.style, isSelected);
 				node = document.createTextNode(this.getDisplayString(proposal));

@@ -14,9 +14,9 @@
 /*globals define window document setTimeout */
 
 
-define(['examples/textview/demoSetup', 'tests/textview/test-performance'],   
+define(['examples/textview/demoSetup', 'tests/textview/test-performance', 'orion/textview/util'],   
  
-function(mSetup, mTestPerformance) {
+function(mSetup, mTestPerformance, util) {
 
 	function clearConsole () {
 		var console = window.document.getElementById('console');
@@ -53,7 +53,7 @@ function(mSetup, mTestPerformance) {
 			text += arguments[n];
 		}
 		console.appendChild(document.createTextNode(text));
-		console.appendChild(document.createElement("br"));
+		console.appendChild(util.createElement("br"));
 		console.scrollTop = console.scrollHeight;
 	}
 	window.log = log;
@@ -170,7 +170,7 @@ function(mSetup, mTestPerformance) {
 	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
-			var option = document.createElement("OPTION");
+			var option = util.createElement("option");
 			option.setAttribute("value", property);
 			option.appendChild(document.createTextNode(property.substring(prefix.length	)));
 			sPerform.appendChild(option);

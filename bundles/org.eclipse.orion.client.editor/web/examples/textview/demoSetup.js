@@ -24,9 +24,9 @@ define(["require",
 		"orion/textview/eventTarget",
 		"orion/editor/textMateStyler",
 		"orion/editor/htmlGrammar",
-		"examples/textview/textStyler"],   
- 
-function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		"examples/textview/textStyler",
+		"orion/textview/util"
+], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};
 	var view = null;
@@ -63,8 +63,8 @@ function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, m
 					stylesheet = document.createStyleSheet();
 					stylesheet.cssText = cssText;
 				} else {
-					stylesheet = document.createElement("STYLE");
-					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					stylesheet = util.createElement("style");
+					var head = document.getElementsByTagName("head")[0] || document.documentElement;
 					stylesheet.appendChild(document.createTextNode(cssText));
 					head.appendChild(stylesheet);
 				}
