@@ -72,7 +72,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
 			var qObj = mSearchUtils.parseQueryStr(query);
-			this.crawling = qObj.useRegEx;
+			this.crawling = (qObj.advOptions ? (qObj.advOptions.regEx/* || qObj.advOptions.type !== mSearchUtils.ALL_FILE_TYPE*/) : false);
 			var parent = dojo.byId(this.resultsId);
 			if(this.crawling){
 				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
@@ -80,10 +80,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
 				crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, query, jsonData, incremental);});
 			} else {
-				var queryToService = query;
-				if(qObj.searchStrWithWhiteSpace){
-					queryToService = query.replace(qObj.searchStr, qObj.searchStrWithWhiteSpace);
-				}
+				var queryToService = qObj.nonAdvQueryStr;
 				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 				try{
 					this.fileService.search(qObj.location, queryToService).then(

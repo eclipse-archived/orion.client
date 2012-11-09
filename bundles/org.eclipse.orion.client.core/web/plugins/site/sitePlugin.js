@@ -45,7 +45,7 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	var headers = {
 		name: "Orion Site Service",
 		version: "1.0",
-		description: "This plugin provides virtual site support for client web applications in your Orion workspace.",
+		description: "This plugin provides virtual site support for hosting client web applications from your Orion workspace.",
 		login: login
 	};
 

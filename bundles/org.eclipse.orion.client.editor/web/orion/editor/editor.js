@@ -70,7 +70,16 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		this._keyModes = [];
 	}
 	Editor.prototype = /** @lends orion.editor.Editor.prototype */ {
-		
+		/**
+		 * Destroys the editor.
+		 */
+		destroy: function() {
+			this.uninstallTextView();
+			this._textViewFactory = this._undoStackFactory = this._textDNDFactory = 
+			this._annotationFactory = this._foldingRulerFactory = this._lineNumberRulerFactory = 
+			this._contentAssistFactory = this._keyBindingFactory = this._statusReporter =
+			this._domNode = null;
+		},
 		/**
 		 * Returns the annotation model of the editor. 
 		 *
@@ -673,6 +682,29 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 				textView: textView
 			};
 			this.dispatchEvent(textViewInstalledEvent);
+		},
+		
+		/**
+		 * Destroys the underlying TextView.
+		 */
+		uninstallTextView: function() {
+			var textView = this._textView;
+			if (!textView) { return; }
+			
+			textView.destroy();
+			
+			this._textView = this._undoStack = this._textDND = this._contentAssist = 
+				this._listener = this._annotationModel = this._annotationStyler =
+				this._annotationRuler = this._overviewRuler = this._lineNumberRuler =
+				this._foldingRuler = this._currentLineAnnotation = this._title = null;
+			this._dirty = false;
+			this._keyModes = [];
+			
+			var textViewUninstalledEvent = {
+				type: "TextViewUninstalled", //$NON-NLS-0$
+				textView: textView
+			};
+			this.dispatchEvent(textViewUninstalledEvent);
 		},
 		
 		_updateCursorStatus: function() {

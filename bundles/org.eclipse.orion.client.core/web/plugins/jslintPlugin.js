@@ -221,7 +221,7 @@ define(["orion/plugin", "orion/jslintworker", "domReady!"], function(PluginProvi
 	var headers = {
 		name: "Orion JSLint Service",
 		version: "1.0",
-		description: "This plugin provides JSLint functionality for outlining and validating JavaScript."
+		description: "This plugin provides JSLint functionality for outlining and validating JavaScript code."
 	};
 
 	var provider = new PluginProvider(headers);

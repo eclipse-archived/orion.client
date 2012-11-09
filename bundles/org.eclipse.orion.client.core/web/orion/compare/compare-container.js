@@ -811,8 +811,8 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype.destroy = function(){
 		if(this._leftTextView){
 			this._diffNavigator.destroy();
-			this._leftTextView.destroy();
-			this._rightTextView.destroy();
+			this._leftEditor.destroy();
+			this._rightEditor.destroy();
 			this._uiFactory.destroy();
 		}
 	};

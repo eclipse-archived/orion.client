@@ -163,7 +163,7 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
-		createSearchQuery: function(query, nameQuery, sort, useRoot, searchPrefix, forceRegEx)  {
+		createSearchQuery: function(query, nameQuery, sort, useRoot, searchPrefix, advancedOptions)  {
 			if (!sort) {
 				sort = "Path"; //$NON-NLS-0$
 			}
@@ -177,8 +177,8 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 					location: useRoot ? this._searchRootLocation: this._searchLocation,
 					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
 			}
-			var useRegularExpresion = forceRegEx ? true : this.useRegEx;
-			return  mSearchUtils.generateSearchQuery({sort: sort, useRegEx: useRegularExpresion,
+			var useRegularExpresion = advancedOptions ? advancedOptions.regEx : true;
+			return  mSearchUtils.generateSearchQuery({sort: sort, advOptions: advancedOptions,
 				rows: 40,
 				start: 0,
 				searchStr: (useRegularExpresion ? query : this._luceneEscape(query, true)),

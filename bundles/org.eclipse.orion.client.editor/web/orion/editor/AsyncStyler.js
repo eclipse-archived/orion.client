@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
 /*global console define*/
-define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
+define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
 	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 	var badServiceError = SERVICE_NAME + " service must be an event emitter";
@@ -45,7 +45,7 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 	 * @param {orion.textview.TextView} textView The TextView to style.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The ServiceRegistry to monitor for highlighter services.
 	 * @param {orion.textview.AnnotationModel} [annotationModel] The Annotation Model to use for creating error and warning annotations.
-	 * @see {orion.editor.StyleReadyEvent}
+	 * @see orion.editor.StyleReadyEvent
 	 */
 	function AsyncStyler(textView, serviceRegistry, annotationModel) {
 		this.initialize(textView, serviceRegistry, annotationModel);
@@ -215,7 +215,7 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 		 * <p>In this way, a single provider service can be registered for several content types, and select different logic for 
 		 * each type.</p>
 		 * @param {String} contentTypeId The Content Type ID describing the kind of file currently being edited in the TextView.
-		 * @see {@link orion.file.ContentType}
+		 * @see orion.core.ContentType
 		 */
 		setContentType: function(contentTypeId) {
 			this.contentType = contentTypeId;
@@ -288,5 +288,5 @@ define("orion/editor/asyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 	 * presented as annotations in the UI.
 	 */
 
-	return { AsyncStyler: AsyncStyler };
+	return AsyncStyler;
 });
