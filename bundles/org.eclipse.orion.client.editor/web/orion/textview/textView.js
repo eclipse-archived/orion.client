@@ -3148,7 +3148,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					var window = this._getWindow();
 					window.setTimeout(function() {
 						self._updateDOMSelection();
-						this._ignoreFocus = false;
+						self._ignoreFocus = false;
 					}, 0);
 				}
 				if (e.preventDefault) { e.preventDefault(); }
