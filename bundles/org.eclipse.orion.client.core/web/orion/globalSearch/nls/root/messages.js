@@ -12,6 +12,7 @@
 
 define({
 	"Files that contain:": "Files that contain:",
+	"Search": "Search",
 	"All types": "All types",
 	"On file type:": "On file type:",
 	"Regular expresion:" : "Regular expresion:"
