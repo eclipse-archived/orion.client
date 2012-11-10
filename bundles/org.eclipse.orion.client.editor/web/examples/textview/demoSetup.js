@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define window document setTimeout XMLHttpRequest log */
+/*globals define XMLHttpRequest log */
  
 define(["require", 
 		"orion/textview/keyBinding",
@@ -58,6 +58,7 @@ define(["require",
 			loadedThemes.push(theme);
 			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
 				var stylesheet;
+				var document = view.getOptions("parent").ownerDocument;
 				if (document.createStyleSheet) {
 					stylesheet = document.createStyleSheet();
 					stylesheet.cssText = cssText;
