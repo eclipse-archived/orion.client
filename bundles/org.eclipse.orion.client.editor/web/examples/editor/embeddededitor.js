@@ -11,7 +11,7 @@
  *     IBM Corporation - initial API and implementation
  *     Andrew Eisenberg - rename jsContentAssist to jsTemplateContentAssist
  *******************************************************************************/
-/*global examples orion:true window define*/
+/*global window define*/
 /*jslint browser:true devel:true*/
 
 define([
