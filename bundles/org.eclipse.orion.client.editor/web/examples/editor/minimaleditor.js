@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global orion:true window define*/
+/*global window define*/
 /*jslint browser:true devel:true*/
 
 

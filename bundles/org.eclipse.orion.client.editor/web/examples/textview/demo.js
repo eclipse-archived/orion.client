@@ -11,74 +11,71 @@
  *     Mihai Sucan (Mozilla Foundation) - fix for bug 350636
  *******************************************************************************/
  
-/*globals define window document setTimeout */
-
+/*globals define window */
 
 define(['examples/textview/demoSetup', 'tests/textview/test-performance', 'orion/textview/util'],   
  
 function(mSetup, mTestPerformance, util) {
 
+	/** Console */
+	var document = window.document;
+	var console = document.getElementById('console'); //$NON-NLS-0$
+	var consoleCol = document.getElementById('consoleCol'); //$NON-NLS-0$
+	var consoleHeader = document.getElementById('consoleHeader'); //$NON-NLS-0$
+	var consoleActions = document.getElementById('consoleActions'); //$NON-NLS-0$
+	
+	/** Actions */
+	var bCreateJava = document.getElementById("createJavaSample"); //$NON-NLS-0$
+	var bCreateJS = document.getElementById("createJavaScriptSample"); //$NON-NLS-0$
+	var bCreateHTML = document.getElementById("createHtmlSample"); //$NON-NLS-0$
+	var bCreatePlain = document.getElementById("createPlainTextSample"); //$NON-NLS-0$
+	var bCreateBidi = document.getElementById("createBidiTextSample"); //$NON-NLS-0$
+	var bCreateLoad = document.getElementById("createLoad"); //$NON-NLS-0$
+	var sLangSelect = document.getElementById("langSelect"); //$NON-NLS-0$
+	var tURLContent = document.getElementById("urlContent"); //$NON-NLS-0$
+	var bSetOptions = document.getElementById("setOptions"); //$NON-NLS-0$
+	var bClearLog = document.getElementById("clearLog"); //$NON-NLS-0$
+	var bHideLog = document.getElementById("hideLog"); //$NON-NLS-0$
+	var bTest = document.getElementById("test"); //$NON-NLS-0$
+	var bPerform = document.getElementById("performanceTest"); //$NON-NLS-0$
+	var sPerform = document.getElementById("performanceTestSelect"); //$NON-NLS-0$
+	var sTheme = document.getElementById("themeSelect"); //$NON-NLS-0$
+	var bReadOnly = document.getElementById('readOnly'); //$NON-NLS-0$
+	var bFullSel = document.getElementById('fullSelection'); //$NON-NLS-0$
+	var bWrap = document.getElementById('wrap'); //$NON-NLS-0$
+	var bExpandTab = document.getElementById('expandTab'); //$NON-NLS-0$
+	var sTabSize = document.getElementById('tabSize'); //$NON-NLS-0$
+
 	function clearConsole () {
-		var console = window.document.getElementById('console');
 		if (!console) { return; }
 		while (console.hasChildNodes()) { console.removeChild(console.lastChild); }
 	}
 	
 	function showConsole () {
-		var console = window.document.getElementById('console');
 		if (!console) { return; }
-		var consoleCol = window.document.getElementById('consoleCol');
-		var consoleHeader = window.document.getElementById('consoleHeader');
-		var consoleActions = window.document.getElementById('consoleActions');
-		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "block";
+		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "block"; //$NON-NLS-0$
 		if (mSetup.view) { mSetup.view.resize(); }
 	}
 	
 	function hideConsole () {
-		var console = window.document.getElementById('console');
 		if (!console) { return; }
-		var consoleCol = window.document.getElementById('consoleCol');
-		var consoleHeader = window.document.getElementById('consoleHeader');
-		var consoleActions = window.document.getElementById('consoleActions');
-		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "none";
+		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "none"; //$NON-NLS-0$
 		if (mSetup.view) { mSetup.view.resize(); }
 	}
 	
 	function log (text) {
-		var console = window.document.getElementById('console');
 		if (!console) { return; }
 		showConsole();
 		for (var n = 1; n < arguments.length; n++) {
-			text += " ";
+			text += " "; //$NON-NLS-0$
 			text += arguments[n];
 		}
 		console.appendChild(document.createTextNode(text));
-		console.appendChild(util.createElement(document, "br"));
+		console.appendChild(util.createElement(document, "br")); //$NON-NLS-0$
 		console.scrollTop = console.scrollHeight;
 	}
 	window.log = log;
 
-	var bCreateJava = document.getElementById("createJavaSample");
-	var bCreateJS = document.getElementById("createJavaScriptSample");
-	var bCreateHTML = document.getElementById("createHtmlSample");
-	var bCreatePlain = document.getElementById("createPlainTextSample");
-	var bCreateBidi = document.getElementById("createBidiTextSample");
-	var bCreateLoad = document.getElementById("createLoad");
-	var sLangSelect = document.getElementById("langSelect");
-	var tURLContent = document.getElementById("urlContent");
-	var bSetOptions = document.getElementById("setOptions");
-	var bClearLog = document.getElementById("clearLog");
-	var bHideLog = document.getElementById("hideLog");
-	var bTest = document.getElementById("test");
-	var bPerform = document.getElementById("performanceTest");
-	var sPerform = document.getElementById("performanceTestSelect");
-	var sTheme = document.getElementById("themeSelect");
-	var bReadOnly = document.getElementById('readOnly');
-	var bFullSel = document.getElementById('fullSelection');
-	var bWrap = document.getElementById('wrap');
-	var bExpandTab = document.getElementById('expandTab');
-	var sTabSize = document.getElementById('tabSize');
-	
 	function getOptions() {
 		return {
 			readonly: bReadOnly.checked,
@@ -115,30 +112,30 @@ function(mSetup, mTestPerformance, util) {
 	}
 	
 	function createJavaSample() {
-		return setupView(mSetup.getFile("text.txt"), "java");
+		return setupView(mSetup.getFile("text.txt"), "java"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	function createJavaScriptSample() {
-		return setupView(mSetup.getFile("/orion/textview/textView.js"), "js");
+		return setupView(mSetup.getFile("/orion/textview/textView.js"), "js"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 
 	function createHtmlSample() {
-		return setupView(mSetup.getFile("/examples/textview/demo.html"), "html");
+		return setupView(mSetup.getFile("/examples/textview/demo.html"), "html"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	function createPlainTextSample() {
 		var lineCount = 50000;
 		var lines = [];
 		for(var i = 0; i < lineCount; i++) {
-			lines.push("This is the line of text number "+i);
+			lines.push("This is the line of text number "+i); //$NON-NLS-0$
 		}
-		return setupView(lines.join("\r\n"), null);
+		return setupView(lines.join("\r\n"), null); //$NON-NLS-0$
 	}
 	
 	function createBidiTextSample() {
 		var lines = [];
-		lines.push("Hello \u0644\u0645\u0646\u0647");
-		return setupView(lines.join("\r\n"), null);
+		lines.push("Hello \u0644\u0645\u0646\u0647"); //$NON-NLS-0$
+		return setupView(lines.join(util.platformDelimiter), null);
 	}
 	
 	function createLoad() {
@@ -147,7 +144,7 @@ function(mSetup, mTestPerformance, util) {
 	}
 
 	function test() {
-		log("test");
+		log("test"); //$NON-NLS-0$
 	}
 	
 	function performanceTest() {
@@ -166,12 +163,12 @@ function(mSetup, mTestPerformance, util) {
 	bHideLog.onclick = hideConsole;
 	bTest.onclick = test;
 	bPerform.onclick = performanceTest;
-	var prefix = "test";
+	var prefix = "test"; //$NON-NLS-0$
 	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
-			var option = util.createElement(document, "option");
-			option.setAttribute("value", property);
+			var option = util.createElement(document, "option"); //$NON-NLS-0$
+			option.setAttribute("value", property); //$NON-NLS-0$
 			option.appendChild(document.createTextNode(property.substring(prefix.length	)));
 			sPerform.appendChild(option);
 		}
