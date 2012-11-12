@@ -21,7 +21,7 @@ define({
 	"The name of the file": "The name of the file",
 	"Lists the files in the current directory": "Lists the files in the current directory",
 	"Prints the current directory location": "Prints the current directory location",
-	"Clear the shell screen": "Clear the shell screen",
+	"Clears the shell screen": "Clears the shell screen",
 	"'${0}' is not valid": "'${0}' is not valid",
 	"File service error: ${0}": "File service error: ${0}"
 });
