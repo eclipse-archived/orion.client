@@ -184,6 +184,13 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			addField: function(field) {
 				// TODO
 			},
+			_clear: function() {
+				var outputDiv = document.getElementsByClassName("gcli-output")[0];
+				while (outputDiv.hasChildNodes()) {
+					outputDiv.removeChild(outputDiv.lastChild);
+				}				
+				this.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
+			},
 			_init: function(input, output) {
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$
 				outputDiv.id = "gcli-display"; //$NON-NLS-0$
