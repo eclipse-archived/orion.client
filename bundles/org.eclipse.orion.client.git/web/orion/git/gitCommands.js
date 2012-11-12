@@ -2101,6 +2101,9 @@ var exports = {};
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
 		function displayErrorOnStatus(error) {
+		
+		if(error){
+		}
 			
 			if (error.status === 401 || error.status === 403)
 				return;
