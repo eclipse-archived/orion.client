@@ -61,6 +61,16 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 		}
 		Shell.prototype = /** @lends orion.shell.Shell.prototype */ {
 			/**
+			 * Clears the Shell's output area.
+			 */
+			clear: function() {
+				var outputDiv = document.getElementsByClassName("gcli-output")[0];
+				while (outputDiv.hasChildNodes()) {
+					outputDiv.removeChild(outputDiv.lastChild);
+				}				
+				this.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
+			},
+			/**
 			 * Renders HTML content in the Shell's output area.
 			 *
 			 * @param {String} content the HTML content to output
@@ -183,13 +193,6 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 
 			addField: function(field) {
 				// TODO
-			},
-			_clear: function() {
-				var outputDiv = document.getElementsByClassName("gcli-output")[0];
-				while (outputDiv.hasChildNodes()) {
-					outputDiv.removeChild(outputDiv.lastChild);
-				}				
-				this.output(i18nUtil.formatMessage(messages["For a list of available commands type '${0}'."], "<b>help</b>")); //$NON-NLS-0$
 			},
 			_init: function(input, output) {
 				var outputDiv = document.createElement("div"); //$NON-NLS-0$

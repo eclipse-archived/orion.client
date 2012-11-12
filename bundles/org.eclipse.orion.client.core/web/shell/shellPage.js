@@ -270,8 +270,8 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			});
 			shell.registerCommand({
 				name: "clear", //$NON-NLS-0$
-				description: messages["Clear the shell screen"],
-				callback: function (args, context) {shell._clear();}
+				description: messages["Clears the shell screen"],
+				callback: function (args, context) {shell.clear();}
 			});
 
 			/* initialize the editors cache (used by some of the build-in commands */
