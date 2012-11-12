@@ -21,7 +21,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 
-	var resolveError = function(result, error) {
+	var resolveError = function(result, xhrResult) {
+		var error = xhrResult;
+		try {
+			error = JSON.parse(xhrResult.responseText);
+		} catch (e) {}
 		if (error && error.Message) {
 			error = error.Message;
 		}
