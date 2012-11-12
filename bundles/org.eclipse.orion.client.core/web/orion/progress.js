@@ -26,7 +26,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 		this._operationsClient = operationsClient;
 		this._initDone = false;
 		this._topicListeners = {};
-		this._myOperations = {};
+		this._operations = {Children: []};
 		this._lastOperation = null;
 		this._lastIconClass = null;
 	}
@@ -54,7 +54,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 						}, 5000);
 					}, function(error){console.error(error);});
 				}else{
-					dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'))); //$NON-NLS-1$ //$NON-NLS-0$
+					dojo.hitch(that, that._generateOperationsInfo(that._operations));
 					window.setTimeout(function() {
 						dojo.hitch(that, that._checkOperationsChanges());
 					}, 5000);
@@ -62,14 +62,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				
 				window.addEventListener("storage", function(e){ //$NON-NLS-0$
 					if(e.key === "orionOperations"){ //$NON-NLS-0$
-						dojo.hitch(that, that._generateOperationsInfo(JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'))); //$NON-NLS-1$ //$NON-NLS-0$
+						dojo.hitch(that, that._generateOperationsInfo(that._operations)); //$NON-NLS-1$ //$NON-NLS-0$
 					}
 				});
 			},
 			_loadOperationsList: function(operationsList){
 				operationsList.lastClientDate = new Date();
 				if(operationsList.lastClientDate-this.getLastListUpdate()>300000){
-					localStorage.setItem("orionOperations", JSON.stringify(operationsList)); //$NON-NLS-0$
+					this._operations = operationsList; //$NON-NLS-0$
 					this._generateOperationsInfo(operationsList);
 				}
 			},
@@ -78,7 +78,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 			 * @returns {Date}
 			 */
 			getLastListUpdate: function(){
-				var list = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
+				var list = this._operations; //$NON-NLS-1$ //$NON-NLS-0$
 				return list.lastClientDate ? new Date(list.lastClientDate) : new Date(0);
 			},
 			_markOperationAsFailed: function(operation, error, ioArgs){
@@ -90,7 +90,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 			},
 			_checkOperationsChanges: function(){
 				var that = this;
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
+				var operations = this._operations; //$NON-NLS-1$ //$NON-NLS-0$
 				var operationsToDelete = [];
 				var allRequests = [];
 				for(var i=0; i<operations.Children.length; i++){
@@ -124,7 +124,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 						for(var i=operationsToDelete.length-1; i>=0; i--){
 							operations.Children.splice(operationsToDelete[i], 1);
 						}
-						localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
+						that._operations = operations; //$NON-NLS-0$
 						dojo.hitch(that, that._generateOperationsInfo)(operations);
 					}
 					window.setTimeout(function() {
@@ -151,7 +151,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 			}, 
 			
 			_generateOperationsInfo: function(operations){
-				this._operationsDialog.setOperations(operations, this._myOperations);
+				this._operationsDialog.setOperations(operations);
 				
 				if(!operations.Children || operations.Children.length==0){
 					this._switchIconTo("progressPane_empty"); //$NON-NLS-0$
@@ -165,9 +165,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				var status = "";
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
-					if(!this._myOperations[operation.Id]) {
-						continue; //only operations run by this page change status
-					}
 					if(operation.Running==true){
 						status = "running"; //$NON-NLS-0$
 						break;
@@ -222,10 +219,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 			 * @returns {dojo.Deferred} notified when operation finishes
 			 */
 			followOperation: function(operationJson, deferred, operationLocation){
-				if(operationJson.Id){
-					this._myOperations[operationJson.Id] = true;
-				}
 				var result = deferred ? deferred : new dojo.Deferred();
+				operationLocation = operationLocation || operationJson.Location;
 				this.writeOperation(operationJson);
 				var that = this;
 				if (operationJson && operationJson.Location && operationJson.Running==true) {
@@ -245,7 +240,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 						operationJson.Result.failedOperation = {Location: operationLocation, Id: operationJson.Id, Name: operationJson.Name};
 						result.callback(operationJson);
 						setTimeout(function(){
-							if(that._myOperations[operationJson.Id]) // give 10 miliseconds for the operation handler to remove the operation
 								dojo.hitch(that, that._openOperationsPopup)();							
 						}, 10);
 					}else{
@@ -262,12 +256,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				return result;
 			},
 			removeOperation: function(operationLocation, operationId){
-				that = this;
+				var that = this;
 				if(operationId){
 					if(this._lastOperation!=null && this._lastOperation.Id === operationId){
 						this._lastOperation = null;
 					}
-					delete this._myOperations[operationId];
 				}
 				dojo.hitch(that._operationsClient, that._operationsClient.removeOperation)(operationLocation).then(function(){
 					dojo.hitch(that, that.removeOperationFromTheList)(operationId);
@@ -277,9 +270,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 				if(this._lastOperation!=null && this._lastOperation.Id === operationId){
 					this._lastOperation = null;
 				}
-				delete this._myOperations[operationId];
 				
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
+				var operations = this._operations; //$NON-NLS-1$ //$NON-NLS-0$
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
 					if(operation.Id && operation.Id===operationId){
@@ -287,18 +279,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 						break;
 					}
 				}
-				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
+				this._operations = operations; //$NON-NLS-0$
 				this._generateOperationsInfo(operations); 
 			},
 			removeCompletedOperations: function(){
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
+				var operations = this._operations; //$NON-NLS-1$ //$NON-NLS-0$
 				for(var i=operations.Children.length-1; i>=0; i--){
 					var operation = operations.Children[i];
 					if(!operation.Running){
 						operations.Children.splice(i, 1);
 					}
 				}
-				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
+				this._operations = operations; //$NON-NLS-0$
 				this._generateOperationsInfo(operations);
 			},
 			setProgressResult: function(result){
@@ -344,23 +336,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/globalCommands', 'o
 			writeOperation: function(operationj){
 				var operationJson = JSON.parse(JSON.stringify(operationj));
 				this._lastOperation = operationJson;
-				var operations = JSON.parse(localStorage.getItem("orionOperations") || '{"Children": []}'); //$NON-NLS-1$ //$NON-NLS-0$
+				var operations = this._operations;
 				for(var i=0; i<operations.Children.length; i++){
 					var operation = operations.Children[i];
-					if(operation.Id && operation.Id===operationJson.Id){
+					if((typeof operation.Id !== 'undefined') && operation.Id===operationJson.Id){//$NON-NLS-0$
 						operations.Children.splice(i, 1);
 						break;
 					}
 				}
-				//do not store results, they may be too big for localStorage
-				if(!operationJson.Running && !operationJson.Failed){
-					delete operationJson.Result;
-				}
+				
 				operationJson.lastClientDate = new Date();
 				operations.Children.push(operationJson);
 				//update also the last list update
 				operations.lastClientDate = new Date();
-				localStorage.setItem("orionOperations", JSON.stringify(operations)); //$NON-NLS-0$
+				this._operations = operations;
 				this._generateOperationsInfo(operations); 
 			}
 	};
