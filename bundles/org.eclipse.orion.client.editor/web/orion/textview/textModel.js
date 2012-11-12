@@ -11,10 +11,9 @@
  *		Silenio Quarti (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
-/*global define window*/
+/*global define*/
 
-define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEventTarget) { //$NON-NLS-1$ //$NON-NLS-0$
-	var isWindows = window.navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
+define("orion/textview/textModel", ['orion/textview/eventTarget', 'orion/textview/util'], function(mEventTarget, util) { //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * Constructs a new TextModel with the given text and default line delimiter.
@@ -438,7 +437,7 @@ define("orion/textview/textModel", ['orion/textview/eventTarget'], function(mEve
 					lineDelimiter = this.getText(this.getLineEnd(0), this.getLineEnd(0, true));
 				}
 			}
-			this._lineDelimiter = lineDelimiter ? lineDelimiter : (isWindows ? "\r\n" : "\n"); //$NON-NLS-1$ //$NON-NLS-0$
+			this._lineDelimiter = lineDelimiter ? lineDelimiter : util.platformDelimiter;
 			if (all) {
 				var lineCount = this.getLineCount();
 				if (lineCount > 1) {

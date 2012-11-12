@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define window document setTimeout XMLHttpRequest log */
+/*globals define XMLHttpRequest log */
  
 define(["require", 
 		"orion/textview/keyBinding",
@@ -24,16 +24,15 @@ define(["require",
 		"orion/textview/eventTarget",
 		"orion/editor/textMateStyler",
 		"orion/editor/htmlGrammar",
-		"examples/textview/textStyler"],   
- 
-function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+		"examples/textview/textStyler",
+		"orion/textview/util"
+], function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, mTextView, mTextDND, mRulers, mUndoStack, mEventTarget, mTextMateStyler, mHtmlGrammar, mTextStyler, util) {
 
 	var exports = {};
 	var view = null;
 	var styler = null;
 	var annotationStyler = null;
 	var loadedThemes = [];
-	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 	
 	var AnnotationType = mAnnotations.AnnotationType;
 		
@@ -59,12 +58,13 @@ function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, m
 			loadedThemes.push(theme);
 			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
 				var stylesheet;
+				var document = view.getOptions("parent").ownerDocument;
 				if (document.createStyleSheet) {
 					stylesheet = document.createStyleSheet();
 					stylesheet.cssText = cssText;
 				} else {
-					stylesheet = document.createElement("STYLE");
-					var head = document.getElementsByTagName("HEAD")[0] || document.documentElement;
+					stylesheet = util.createElement(document, "style");
+					var head = document.getElementsByTagName("head")[0] || document.documentElement;
 					stylesheet.appendChild(document.createTextNode(cssText));
 					head.appendChild(stylesheet);
 				}
@@ -101,7 +101,7 @@ function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, m
 			undoStack.undo();
 			return true;
 		});
-		view.setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo");
+		view.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo");
 		view.setAction("redo", function() {
 			undoStack.redo();
 			return true;
@@ -169,7 +169,7 @@ function(require, mKeyBinding, mTextModel, mAnnotations, mProjectionTextModel, m
 				end = model.mapOffset(end);
 			}
 			var type;
-			if (isMac ? e.metaKey : e.ctrlKey) {
+			if (util.isMac ? e.metaKey : e.ctrlKey) {
 				if (e.shiftKey && e.altKey) {
 					type = AnnotationType.ANNOTATION_WARNING;
 				} else if (e.altKey) {

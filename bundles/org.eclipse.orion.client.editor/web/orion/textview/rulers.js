@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define setTimeout clearTimeout setInterval clearInterval Node */
+/*global define*/
 
-define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/textview/i18nUtil'], function(messages, mAnnotations, mTooltip, i18nUtil) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/textview/util'], function(messages, mAnnotations, mTooltip, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/**
 	 * Constructs a new ruler. 
@@ -562,7 +562,7 @@ define("orion/textview/rulers", ['i18n!orion/textview/nls/messages', 'orion/text
 				var lineStart = model.getLineStart(mapLine);
 				mapLine = model.getBaseModel().getLineAtOffset(model.mapOffset(lineStart));
 			}
-			return i18nUtil.formatMessage(messages.line, mapLine + 1);
+			return util.formatMessage(messages.line, mapLine + 1);
 		}
 		return Ruler.prototype._getTooltipContents.call(this, lineIndex, annotations);
 	};

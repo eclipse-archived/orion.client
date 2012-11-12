@@ -112,7 +112,7 @@ define([], function(){
 		if (keyCode === 13/* Enter */) {//If there is already a selected/hightlighted item in the proposal list, then put hte proposal back to the input field and dismiss the proposal UI
 			if(this._proposalList && this._proposalList.length > 0 && this._proposalIndex >= 0 && this._proposalIndex < this._proposalList.length){
 				e.preventDefault();
-				this._dismiss(this._proposalList[this._proposalIndex].item.value);
+				this._dismiss(this._proposalList[this._proposalIndex].item.value, e.ctrlKey);
 				e.stopPropagation();
 				return false;
 			}
@@ -249,7 +249,7 @@ define([], function(){
 		}
 	};
 	
-	InputCompletion.prototype._dismiss = function(valueToInputField){
+	InputCompletion.prototype._dismiss = function(valueToInputField, ctrlKey){
 		if(this._mouseDown){
 			return;
 		}
@@ -262,7 +262,11 @@ define([], function(){
 			this._dismissing = true;
 			this._inputField.focus();
 		} else if(valueToInputField && valueToInputField.name && valueToInputField.type === "link"){
-			window.location.href = valueToInputField.value;
+			if(ctrlKey){
+				window.open(valueToInputField.value);
+			} else {
+				window.location.href = valueToInputField.value;
+			}
 		}
 		var that = this;
 		window.setTimeout(function(){ //wait a few milliseconds for the proposal pane to hide 

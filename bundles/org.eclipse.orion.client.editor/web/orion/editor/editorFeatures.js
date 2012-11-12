@@ -13,8 +13,8 @@
 /*jslint maxerr:150 browser:true devel:true */
 
 define("orion/editor/editorFeatures", ['i18n!orion/editor/nls/messages', 'orion/textview/undoStack', 'orion/textview/keyBinding', //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/textview/textDND', 'orion/editor/regex', 'orion/textview/i18nUtil'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, i18nUtil) {
+	'orion/textview/rulers', 'orion/textview/annotations', 'orion/textview/tooltip', 'orion/textview/textDND', 'orion/editor/regex', 'orion/textview/util'], //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTextDND, mRegex, util) {
 
 	function UndoFactory() {
 	}
@@ -28,8 +28,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}, {name: messages.undo});
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			textView.setKeyBinding(isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("redo", function() { //$NON-NLS-0$
 				undoStack.redo();
 				return true;
@@ -108,7 +107,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					var match = prefix.match(new RegExp("^" + mRegex.escape(txt), "i")); //$NON-NLS-1$ //$NON-NLS-0$
 					if (match && match.length > 0) {
 						prefix = self._incrementalFindPrefix += e.text;
-						self.editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, prefix));
+						self.editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 						var searchStart = editor.getSelection().start;
 						var result = editor.getModel().find({
 							string: prefix,
@@ -120,7 +119,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 							editor.moveSelection(result.start, result.end);
 							self._incrementalFindIgnoreSelection = false;
 						} else {
-							editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
+							editor.reportStatus(util.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
 							self._incrementalFindSuccess = false;
 						}
 						e.text = null;
@@ -197,9 +196,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 							this._incrementalFindIgnoreSelection = true;
 							editor.moveSelection(result.start, result.end);
 							this._incrementalFindIgnoreSelection = false;
-							editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, prefix));
+							editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 						} else {
-							editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
+							editor.reportStatus(util.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
 							this._incrementalFindSuccess = false;
 						}
 					}
@@ -219,7 +218,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						this.toggleIncrementalFind();
 						return true;
 					}
-					editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 					var result = editor.getModel().find({
 						string: prefix,
 						start: editor.getCaretOffset() - prefix.length - 1,
@@ -231,7 +230,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 						editor.moveSelection(result.start,result.end);
 						this._incrementalFindIgnoreSelection = false;
 					} else {
-						editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
+						editor.reportStatus(util.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
 					}
 					return true;
 				}
@@ -634,8 +633,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.collapseAll});
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !isMac, false, false, isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding("q", !util.isMac, false, false, util.isMac), "lastEdit"); //$NON-NLS-1$ //$NON-NLS-0$
 			this.textView.setAction("lastEdit", function() { //$NON-NLS-0$
 				if (typeof this._lastEditLocation === "number")  { //$NON-NLS-0$
 					this.editor.showSelection(this._lastEditLocation);
@@ -647,7 +645,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		toggleIncrementalFind: function() {
 			this._incrementalFindActive = !this._incrementalFindActive;
 			if (this._incrementalFindActive) {
-				this.editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, this._incrementalFindPrefix));
+				this.editor.reportStatus(util.formatMessage(messages.incrementalFind, this._incrementalFindPrefix));
 				this.textView.addEventListener("Verify", this._incrementalFindListener.onVerify); //$NON-NLS-0$
 				this.textView.addEventListener("Selection", this._incrementalFindListener.onSelection); //$NON-NLS-0$
 			} else {
@@ -707,9 +705,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					this._incrementalFindIgnoreSelection = true;
 					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
-					editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 				} else {
-					editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
+					editor.reportStatus(util.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -736,9 +734,9 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 					this._incrementalFindIgnoreSelection = true;
 					editor.moveSelection(result.start, result.end);
 					this._incrementalFindIgnoreSelection = false;
-					editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFind, prefix));
+					editor.reportStatus(util.formatMessage(messages.incrementalFind, prefix));
 				} else {
-					editor.reportStatus(i18nUtil.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
+					editor.reportStatus(util.formatMessage(messages.incrementalFindNotFound, prefix), "error"); //$NON-NLS-0$
 					this._incrementalFindSuccess = false;
 				}
 				return true;
@@ -888,8 +886,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return {commentStart: commentStart, commentEnd: commentEnd};
 			}
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !isMac, false, isMac), "addBlockComment"); //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(191, true, !util.isMac, false, util.isMac), "addBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("addBlockComment", function() { //$NON-NLS-0$
 				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;
@@ -914,7 +911,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 				return true;
 			}.bind(this), {name: messages.addBlockComment});
 			
-			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !isMac, false, isMac), "removeBlockComment"); //$NON-NLS-0$
+			this.textView.setKeyBinding(new mKeyBinding.KeyBinding(220, true, !util.isMac, false, util.isMac), "removeBlockComment"); //$NON-NLS-0$
 			this.textView.setAction("removeBlockComment", function() { //$NON-NLS-0$
 				if (this.textView.getOptions("readonly")) { return false; } //$NON-NLS-0$
 				var editor = this.editor;

@@ -707,15 +707,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 									{group: "advancedSearch"});//$NON-NLS-0$
 		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
-			mSearchUtils.getMixedSearches(serviceRegistry, true, function(searches){
+			mSearchUtils.getMixedSearches(serviceRegistry, true, false, function(searches){
 				var i, fullSet = [], hasSavedSearch = false, hasRecentSearch = false;
 				for (i in searches) {
-					if(searches[i].label){
+					if(searches[i].label && searches[i].value){
 						if(!hasSavedSearch){
 							fullSet.push({type: "category", label: messages["Saved searches"]});//$NON-NLS-0$
 							hasSavedSearch = true;
 						}
-						fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
+						fullSet.push({type: "proposal", value: {name: searches[i].label, value: require.toUrl("search/search.html") + "#" + searches[i].value, type: "link"}});
+						//fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
 					} else {
 						if(!hasRecentSearch){
 							fullSet.push({type: "category", label: messages["Recent searches"]});//$NON-NLS-0$
