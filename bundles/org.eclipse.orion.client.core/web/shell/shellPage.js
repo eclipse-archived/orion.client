@@ -92,7 +92,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		span.appendChild(bold);
 		return span;
 	}
-
+	
 	function cdExec(args, context) {
 		var node = args.directory;
 		if (!node) {
@@ -267,6 +267,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				description: messages["Prints the current directory location"],
 				callback: pwdExec,
 				returnType: "html" //$NON-NLS-0$
+			});
+			shell.registerCommand({
+				name: "clear", //$NON-NLS-0$
+				description: messages["Clear the shell screen"],
+				callback: function (args, context) {shell._clear();}
 			});
 
 			/* initialize the editors cache (used by some of the build-in commands */
