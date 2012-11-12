@@ -22,13 +22,11 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 		createUndoStack: function(editor) {
 			var textView = editor.getTextView();
 			var undoStack =  new mUndoStack.UndoStack(textView, 200);
-			textView.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo"); //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("undo", function() { //$NON-NLS-0$
 				undoStack.undo();
 				return true;
 			}, {name: messages.undo});
 			
-			textView.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			textView.setAction("redo", function() { //$NON-NLS-0$
 				undoStack.redo();
 				return true;

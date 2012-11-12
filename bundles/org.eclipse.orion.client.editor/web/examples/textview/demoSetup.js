@@ -96,12 +96,10 @@ define(["require",
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
 		exports.textDND = new mTextDND.TextDND(view, undoStack);
-		view.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo"); //$NON-NLS-1$ //$NON-NLS-0$
 		view.setAction("undo", function() { //$NON-NLS-0$
 			undoStack.undo();
 			return true;
 		});
-		view.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo"); //$NON-NLS-2$ //$NON-NLS-1$//$NON-NLS-0$
 		view.setAction("redo", function() { //$NON-NLS-0$
 			undoStack.redo();
 			return true;
