@@ -25,14 +25,44 @@ define(['require'], function(require) {
 		}
 		return node.querySelectorAll(selector);
 	}
-		
-	function byId(id) {
-		return document.getElementById(id);
+	
+	function $$array(selector, node) {
+		return Array.prototype.slice.call($$(selector,node));
 	}
+		
+	function node(either) {
+		var theNode = either;
+		if (typeof(either) === "string") { //$NON-NLS-0$
+			theNode = document.getElementById(either);
+		}	
+		return theNode;
+	}
+	
+	function stop(event) {
+		if (window.document.all) { 
+			event.keyCode = 0;
+		} else { 
+			event.preventDefault();
+			event.stopPropagation();
+		}
+	}
+	
+	var KEY = {
+		ESCAPE: 27,
+		UP: 38,
+		DOWN: 40
+	};
+	
+	var NULLHREF = "javascript:;"; //$NON-NLS-0$
+	
 	//return module exports
 	return {
 		$: $,
 		$$: $$,
-		byId: byId
+		$$array: $$array,
+		node: node,
+		stop: stop,
+		KEY: KEY,
+		NULLHREF: NULLHREF
 	};
 });

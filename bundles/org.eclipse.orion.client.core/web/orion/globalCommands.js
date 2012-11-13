@@ -13,9 +13,13 @@
 /*browser:true*/
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
-	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/webui/splitter', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', "orion/Deferred",
-	'dojo/DeferredList', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton', 'orion/widgets/OpenResourceDialog', 'orion/widgets/UserMenu', 'orion/widgets/UserMenuDropDown'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, mSplitter, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, mAdvSearchOptContainer, Deferred){
+	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
+	'orion/webui/dropdown', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
+	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
+	'orion/widgets/UserMenu', 'dojo/DeferredList', 'orion/widgets/OpenResourceDialog'], 
+        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
+        mDropdown, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
+        mAdvSearchOptContainer, Deferred, mUserMenu){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -33,7 +37,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 
 	var notifyAuthenticationSite = qualifyURL(require.toUrl('auth/NotifyAuthentication.html')); //$NON-NLS-0$
 	var authRendered = {};
-	var userMenu = new orion.widgets.UserMenu();
 	
 	function getLabel(authService, serviceReference){
 		if(authService.getLabel){
@@ -54,17 +57,29 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 	}
 	
-	function setUserName(registry, dropdown){
+	function setUserName(registry, node){
 			
 			var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (authService !== null) {
 				authService.getUser().then(function(jsonData){
+					var text;
 					if( jsonData.Name ){
-						//dropdown.set( 'label', jsonData.Name ); //$NON-NLS-0$
-						dropdown.containerNode.textContent = jsonData.Name;
+						text = document.createTextNode(jsonData.Name); 
 					}else if( jsonData.login ){
-						dropdown.containerNode.textContent = jsonData.login;
+						var text = document.createTextNode(jsonData.login);
 					} 
+					if (text) {
+						if (node.childNodes.length > 0) {
+							if (node.childNodes[0].nodeType === 3) {
+								// replace original text
+								node.replaceChild(text, node.childNodes[0]);
+							} else {
+								node.insertBefore(text, node.childNodes[0]);
+							}
+						} else {
+							node.appendChild(text);
+						}
+					}
 				});
 			}
 		}
@@ -74,7 +89,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	 * @name orion.globalCommands#generateUserInfo
 	 * @function
 	 */
-	function generateUserInfo(serviceRegistry) {
+	function generateUserInfo(serviceRegistry, keyAssistFunction) {
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
 		authenticationIds = [];
@@ -82,30 +97,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if(!userMenuPlaceholder){
 			return;
 		}
+		var dropdownNode = lib.node("userDropdown"); //$NON-NLS-0$
+		var userDropdown = new mDropdown.Dropdown({
+			dropdown: dropdownNode
+		});
+		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown});
+		var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 		
-		if(!dijit.byId('logins')){ //$NON-NLS-0$
-			var menuButton = new orion.widgets.UserMenuDropDown({
-				id: "logins", //$NON-NLS-0$
-				dropDown: userMenu,
-				label: messages["Options"], 
-				showLabel: true
-			});
-			dojo.place(menuButton.domNode, userMenuPlaceholder, "only"); //$NON-NLS-0$
-			if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
-		        dojo.destroy(menuButton.valueNode);
-			}
-			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
-				dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
-			}
-			new mCommands.CommandTooltip({
-				connectId: [menuButton.focusNode],
-				label: messages['Options'],
-				position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			});
+		new mCommands.CommandTooltip({
+			connectId: [dropdownTrigger],
+			label: messages['Options'],
+			position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		});
 			
-			setUserName( serviceRegistry, menuButton );
-		}
-		
+		setUserName(serviceRegistry, dropdownTrigger);
+		menuGenerator.setKeyAssist(keyAssistFunction);
+
 		for(var i=0; i<authServices.length; i++){
 			var servicePtr = authServices[i];
 			var authService = serviceRegistry.getService(servicePtr);		
@@ -114,10 +121,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					authService.getKey().then(function(key){
 						authenticationIds.push(key);
 						authService.getUser().then(function(jsonData){
-							userMenu.addUserItem(key, authService, label, jsonData);
+							menuGenerator.addUserItem(key, authService, label, jsonData);
 						}, 
 						function(errorData, jsonData){
-							userMenu.addUserItem(key, authService, label, jsonData);
+							menuGenerator.addUserItem(key, authService, label, jsonData);
 						});
 						window.addEventListener("storage", function(e){ //$NON-NLS-0$
 							if(authRendered[key] === localStorage.getItem(key)){
@@ -127,10 +134,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							authRendered[key] = localStorage.getItem(key);
 							
 							authService.getUser().then(function(jsonData){
-								userMenu.addUserItem(key, authService, label, jsonData);
+								menuGenerator.addUserItem(key, authService, label, jsonData);
 							}, 
 							function(errorData){
-								userMenu.addUserItem(key, authService, label);
+								menuGenerator.addUserItem(key, authService, label);
 							});				
 						}, false);
 					});							
@@ -165,10 +172,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		dojo.addClass(dropDownImage, "bannerMenuSearchOptions"); //$NON-NLS-0$
 	}
 	
-	// Related links menu management.  The related drop down widget and its associated dropdown menu
-	// are created when needed.  The links menu is reused as content changes.  If the links menu becomes
+	// Related links menu management.  The related menu is reused as content changes.  If the menu becomes
 	// empty, we hide the dropdown.
-	var linksMenu;
+	var linksDropdown;
 	var pageItem;
 	var exclusions = [];
 	var favoriteTarget = null;
@@ -180,57 +186,31 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			// document not loaded
 			return;
 		}
-		if (linksMenu) {
-			var dropdown = dijit.byId("related"); //$NON-NLS-0$
-			if (dropdown) {
-				dropdown.closeDropDown();
-			}
-			// see http://bugs.dojotoolkit.org/ticket/10296
-			linksMenu.focusedChild = null;
-			dojo.forEach(linksMenu.getChildren(), function(child) {
-				linksMenu.removeChild(child);
-				child.destroy();
-			});
+		if (linksDropdown) {
+			linksDropdown.close();
+			linksDropdown.empty();
 		}
 	}
 	
 	function _checkForEmptyLinksMenu() {
-		var dropdownNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
-		if (linksMenu && dropdownNode) {
-			if (linksMenu.getChildren().length === 0) {
-				dojo.style(dropdownNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+		var triggerNode = lib.node("relatedTrigger"); //$NON-NLS-0$
+		if (linksDropdown && triggerNode) {
+			if (linksDropdown.getItems().length === 0) {
+				dojo.style(triggerNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
 			} else {
-				dojo.style(dropdownNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+				dojo.style(triggerNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
 			}
 		}
 	}
 	
 	function _addRelatedLinkCommand(command, invocation) {
-		if (!linksMenu) {
-			linksMenu = new dijit.Menu({
-				style: "display: none;padding:3px;border-radius:3px;", //$NON-NLS-0$
-				id: "relatedLinksMenu" //$NON-NLS-0$
+		var dropdownNode = lib.node("relatedDropdown"); //$NON-NLS-0$
+		if (!linksDropdown) {
+			linksDropdown = new mDropdown.Dropdown({
+				dropdown: dropdownNode
 			});
 		}
-		command._addMenuItem(linksMenu, invocation);
-
-		var menuButton = dijit.byId("related"); //$NON-NLS-0$
-		var domNode = dojo.byId("relatedLinks"); //$NON-NLS-0$
-		if (domNode && !menuButton) {
-			menuButton = new orion.widgets.UserMenuDropDown({
-				id: "related", //$NON-NLS-0$
-				label: messages["Related"],
-				dropDown: linksMenu
-			});
-			if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
-				dojo.destroy(menuButton.valueNode);
-			}
-			if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
-				dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
-			}
-			dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-			dojo.place(menuButton.domNode, domNode, "only"); //$NON-NLS-0$
-		}	
+		command._addMenuItem(dropdownNode, invocation);
 	}	
 	/**
 	 * Adds the related links to the banner
@@ -1074,12 +1054,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		}
 		
-		userMenu.setKeyAssist(keyAssistCommand.callback);
 		checkFavoritesButton(serviceRegistry, commandService);
 
 		renderGlobalCommands(commandService);
 		
-		generateUserInfo(serviceRegistry);
+		generateUserInfo(serviceRegistry, keyAssistCommand.callback);
 		
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
@@ -1115,8 +1094,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	
 	//return the module exports
 	return {
-		generateUserInfo: generateUserInfo,
-		generateRelatedLinks: generateRelatedLinks,
 		generateBanner: generateBanner,
 		getToolbarElements: getToolbarElements,
 		layoutToolbarElements: layoutToolbarElements,
