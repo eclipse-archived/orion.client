@@ -28,65 +28,67 @@
 <tr>
 <td style="width:15%;height:100%;vertical-align:top;">
 	<div style="overflow:auto;height:100%;">
-	<h3>Orion</h3>
-	<div class='group'>
-		<b>Options</b>
-		<div>
-			<select id="contentsSelect">
-				<option value="createJavaScriptSample">JavaScript</option>
-				<option value="createHtmlSample">HTML</option>
-				<option value="createJavaSample">Java</option>
-				<option value="createPlainTextSample">Plain</option>
-				<option value="createBidiTextSample">BIDI</option>
-			</select>
-			<label for="contentsSelect">Contents</label>
+		<div class="logo">
+			<img src="logo.png"/>
 		</div>
-		<div>
-			<select id="themeSelect">
-				<option value="">Default</option>
-				<option value="dark">Dark</option>
-				<option value="">Eclipse</option>
-				<option value="orion">Orion</option>
-			</select>
-			<label for="themeSelect">Theme</label>
+		<div class='group'>
+			<b>Options</b>
+			<div>
+				<select id="contentsSelect">
+					<option value="createJavaScriptSample">JavaScript</option>
+					<option value="createHtmlSample">HTML</option>
+					<option value="createJavaSample">Java</option>
+					<option value="createPlainTextSample">Plain</option>
+					<option value="createBidiTextSample">BIDI</option>
+				</select>
+				<label for="contentsSelect">Contents</label>
+			</div>
+			<div>
+				<select id="themeSelect">
+					<option value="">Default</option>
+					<option value="dark">Dark</option>
+					<option value="">Eclipse</option>
+					<option value="orion">Orion</option>
+				</select>
+				<label for="themeSelect">Theme</label>
+			</div>
+			<div>
+				<input type="text" value="4" size="2" id="tabSize">
+				<label for="tabSize">Tab Size</label>
+			</div>
+			<div>
+				<input type="checkbox" id="readOnly">
+				<label for="readOnly">Read Only</label>
+			</div>
+			<div>
+				<input type="checkbox" checked="checked" id="fullSelection">
+				<label for="fullSelection">Full Selection</label>
+			</div>
+			<div>
+				<input type="checkbox" id="wrap">
+				<label for="wrap">Word Wrap</label>
+			</div>
+			<div>
+				<input type="checkbox" id="expandTab">
+				<label for="expandTab">Expand Tabs</label>
+			</div>
+			<div>
+				<input type="checkbox" checked="checked" id="autoSetOptions">
+				<label for="autoSetOptions">Auto Set Options</label>
+			</div>
+			<button id='setOptions'>Set Options</button>
 		</div>
-		<div>
-			<input type="text" value="4" size="2" id="tabSize">
-			<label for="tabSize">Tab Size</label>
+		<div class='group'>
+			<b>Testing</b>
+			<select id="testSelect"></select>
+			<button id='test'>Test</button>
 		</div>
-		<div>
-			<input type="checkbox" id="readOnly">
-			<label for="readOnly">Read Only</label>
+		<div id='consoleParent' class='group' style='display:none;'>
+			<b>Console</b>
+			<div id='console' class="console"></div>
+			<button id='clearLog'>Clear</button>
+			<button id='hideLog'>Hide</button>
 		</div>
-		<div>
-			<input type="checkbox" checked="checked" id="fullSelection">
-			<label for="fullSelection">Full Selection</label>
-		</div>
-		<div>
-			<input type="checkbox" id="wrap">
-			<label for="wrap">Word Wrap</label>
-		</div>
-		<div>
-			<input type="checkbox" id="expandTab">
-			<label for="expandTab">Expand Tabs</label>
-		</div>
-		<div>
-			<input type="checkbox" checked="checked" id="autoSetOptions">
-			<label for="autoSetOptions">Auto Set Options</label>
-		</div>
-		<button id='setOptions'>Set Options</button>
-	</div>
-	<div class='group'>
-		<b>Testing</b>
-		<select id="testSelect"></select>
-		<button id='test'>Test</button>
-	</div>
-	<div id='consoleParent' class='group' style='display:none;'>
-		<b>Console</b>
-		<div id='console' style="overflow:scroll;white-space:pre;height:200px;background-color:white;"></div>
-		<button id='clearLog'>Clear</button>
-		<button id='hideLog'>Hide</button>
-	</div>
 	</div>
 </td>
 <td style="height:100%;">

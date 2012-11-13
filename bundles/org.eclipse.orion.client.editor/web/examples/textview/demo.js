@@ -42,7 +42,7 @@ function(mSetup, mTestPerformance, util) {
 
 	function resize() {
 		var height = document.documentElement.clientHeight;
-		table.style.height = (height - 8) + "px"; //$NON-NLS-0$
+		table.style.height = (height - (util.isIE ? 8 : 0)) + "px"; //$NON-NLS-0$
 		if (mSetup.view) { mSetup.view.resize(); }
 	}
 	resize();
