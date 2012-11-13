@@ -12,15 +12,6 @@
 
 define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
-	function stop(event) {
-		if (window.document.all) { 
-			event.keyCode = 0;
-		} else { 
-			event.preventDefault();
-			event.stopPropagation();
-		}
-	}
-
 	/**
 	 * Constructs a new Splitter with the given options.  A splitter manages the layout
 	 * of two panels, a side panel and a main panel.  A toggle button will open or close the side panel.
@@ -40,18 +31,11 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._resizeListeners = [];
 			this._animationDelay = 501;  // longer than CSS transitions in layout.css
 			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
-			function nodeFromOption(value) {
-				var node = value;
-				if (typeof(value) === "string") { //$NON-NLS-0$
-					node = lib.byId(value);
-				}	
-				return node;
-			}
-			this._node = nodeFromOption(options.node);
+			this._node = lib.node(options.node);
 			if (!this._node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
-			this._sideNode = nodeFromOption(options.sidePanel);
+			this._sideNode = lib.node(options.sidePanel);
 			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
-			this._mainNode = nodeFromOption(options.mainPanel);
+			this._mainNode = lib.node(options.mainPanel);
 			if (!this._mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
 			this._thumb = document.createElement("div"); //$NON-NLS-0$
 			this._node.appendChild(this._thumb);
@@ -196,7 +180,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._splitLeft = event.clientX;
 				this._node.style.left = event.clientX + "px"; //$NON-NLS-0$ 
 				this._adjustToSplitPosition(true);
-				stop(event);
+				lib.stop(event);
 			}
 		},
 		

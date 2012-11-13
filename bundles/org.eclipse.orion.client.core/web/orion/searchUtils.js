@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/editor/regex', 'orion/commands', 'orion/widgets/UserMenuDropDown'], function(messages, require, dojo, dijit, mRegex, mCommands) {
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/editor/regex', 'orion/commands'], function(messages, require, dojo, dijit, mRegex, mCommands) {
 
 var exports = exports || {};
 

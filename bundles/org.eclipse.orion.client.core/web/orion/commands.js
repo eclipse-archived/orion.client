@@ -11,29 +11,9 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/explorers/navigationUtils', 'dijit/Menu', 'dijit/form/DropDownButton', 'dijit/MenuItem', 'dijit/PopupMenuItem', 'dijit/MenuSeparator', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/explorers/navigationUtils', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, lib, mDropdown, mNavUtils){
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-
-	/*
-	 * stateless helper function
-	 */
-	function _setupActivateVisuals(domNode, focusNode, overClass) {
-		var makeActive = function() {
-			if (overClass) {
-				dojo.addClass(this, overClass);
-			}
-		};
-		var makeInactive = function() {
-			if (overClass) {
-				dojo.removeClass(this, overClass);
-			}
-		};
-		dojo.connect(domNode, "onmouseover", domNode, makeActive); //$NON-NLS-0$
-		dojo.connect(focusNode, "onfocus", domNode, makeActive); //$NON-NLS-0$
-		dojo.connect(domNode, "onmouseout", domNode, makeInactive); //$NON-NLS-0$
-		dojo.connect(focusNode, "onblur", domNode, makeInactive); //$NON-NLS-0$
-	}
 
 	/**
 	 * CommandInvocation is a data structure that carries all relevant information about a command invocation.
@@ -88,95 +68,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 
 	};
 	CommandInvocation.prototype.constructor = CommandInvocation;
-
-	/**
-	 * Override the dijit MenuItem so that the inherited click behavior is not used.
-	 * This is done when the command is defined with a link, so that the normal browser
-	 * link behavior (and interpretations of various mouse clicks) is used.  We also style
-	 * link specially (padding, etc.) to help reduce the difference in perceived
-	 * responsive area (the menu item) with the actual area (the link)
-	 * 
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=350584
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=371265
-	 */
-	var CommandMenuItem = dojo.declare(dijit.MenuItem, {
-		constructor: function() {
-			var options = arguments[0] || {};
-			options.onKeyDown = dojo.hitch(this, function(evt) {
-				if (evt.keyCode === dojo.keys.ENTER || evt.keyCode === dojo.keys.SPACE) {
-					if(this._anchorLocation) { 
-						if(evt.ctrlKey) {
-							window.open(this._anchorLocation);
-						} else {
-							window.location=this._anchorLocation;
-						}
-					}
-				}
-			});
-			this.inherited(arguments || [options]);
-		},
-	
-		// if it has a link and the anchor is already in the dom, style it with some padding.
-		postCreate: function() {
-			var anchor = dojo.query("a", this.domNode)[0]; //$NON-NLS-0$
-			if (anchor) {
-				dojo.addClass(anchor, "commandMenuItemAnchor"); //$NON-NLS-0$
-				this._anchorLocation = anchor.href;
-			}
-		},
-
-		// Override setter for 'label' attribute to prevent the use of innerHTML and allow a DOM node instead.
-		_setLabelAttr: function(value) {
-			if (typeof value === "string") {
-				this.containerNode.textContent = value;
-			} else if (value) {
-				dojo.empty(this.containerNode);
-				this.containerNode.appendChild(value.cloneNode(true));
-			}
-		},
-		
-		setLink: function(href, name) {
-			href = PageUtil.validateURLScheme(href);
-			var a = dojo.create("a", {className: "commandMenuItemAnchor", href: href});
-			a.textContent = name;
-			dojo.place(a, this.containerNode, "only");
-			this._anchorLocation = href;
-		},
-		
-		_onClick: function(evt) {
-			if (!this.hasLink) {
-				this.inherited(arguments);
-			}
-		}
-	});
-
-	var CommandDropDownButton = dojo.declare(dijit.form.DropDownButton, {
-		// Override setter for 'label' attribute to prevent the use of innerHTML
-		_setLabelAttr: function(/*String*/ content) {
-			if (typeof content === "string") {
-				this._set("label", content);
-				this.containerNode.textContent = content;
-				if(this.showLabel === false && !this.params.title){
-					this.titleNode.title = dojo.trim(this.containerNode.innerText || this.containerNode.textContent || '');
-				}
-			} else if (content) {
-				dojo.empty(this.containerNode);
-				this.containerNode.appendChild(content.cloneNode(true));
-			}
-		}
-	});
-
-	var CommandPopupMenuItem = dojo.declare(dijit.PopupMenuItem, {
-		// Override setter for 'label' attribute to prevent the use of innerHTML
-		_setLabelAttr: function(content) {
-			if (typeof content === "string") {
-				this.containerNode.textContent = content;
-			} else {
-				dojo.empty(this.containerNode);
-				this.containerNode.appendChild(content.cloneNode(true));
-			}
-		}
-	});
 
 	/**
 	 * Override the dijit Tooltip to handle cases where the tooltip is not dismissing
@@ -596,12 +487,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						if (parameterArea.childNodes.length > 0) {
 							tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
 							var menu = dijit.byId(commandInvocation.domParent.id);
-							var pos;
-							if (menu) {
-								pos = dojo.position(menu.eclipseScopeId, true);
-							} else {
-								pos = dojo.position(commandInvocation.domNode, true);
-							}
+							var pos = dojo.position(commandInvocation.domNode, true);
 							if (pos.x && pos.y && pos.w) {
 								dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
 								window.setTimeout(function() {
@@ -799,13 +685,30 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			parentTable.sortedContributions = null;
 		},
 		
-		_isLastChildSeparator: function(parent, style) {
+		_checkForTrailingSeparator: function(parent, style, autoRemove) {
+			var last;
 			if (style === "tool" || style === "button") { //$NON-NLS-1$ //$NON-NLS-0$
-				return parent.childNodes.length > 0 && dojo.hasClass(parent.childNodes[parent.childNodes.length - 1], "commandSeparator"); //$NON-NLS-0$
+				last = parent.childNodes.length > 0 ? parent.childNodes[parent.childNodes.length-1] : null;
+				if (last && last.classList.contains("commandSeparator")) {
+					if (autoRemove) {
+						parent.removeChild(last);
+						return false;
+					} 
+					return true;
+				}
 			}
 			if (style === "menu") { //$NON-NLS-0$
-				var menuChildren = parent.getChildren();
-				return menuChildren.length > 0 && (menuChildren[menuChildren.length-1] instanceof dijit.MenuSeparator);
+				var items = lib.$$array("li a", parent); //$NON-NLS-0$
+				if (items.length > 0 && items[items.length - 1].classList.contains("dropdownSeparator")) { //$NON-NLS-0$
+					last = items[items.length - 1];
+					if (autoRemove) {
+						// reachy reachy.  Remove the anchor's li parent
+						last.parentNode.parentNode.removeChild(last.parentNode);
+						return false;
+					} else {
+						return true;
+					}
+				}
 			}
 			return false;
 		},
@@ -821,8 +724,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		 *  service will be used to determine which items are involved. 
 		 * @param {Object} handler The object that should perform the command
 		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
-		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  The caller
-		 *  must supply the parent menu.
+		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  
 		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
 		 * @param {Array} domNodeWrapperList Optional an array used to record any DOM nodes that are rendered during this call.
 		 *  If an array is provided, then as commands are rendered, an object will be created to represent the command's node.  
@@ -856,17 +758,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			if (contributions) {
 				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData, domNodeWrapperList);
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
-				if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
-					if (this._isLastChildSeparator(parent, renderType)) {
-						parent.removeChild(parent.childNodes[parent.childNodes.length-1]);
-					}
-				} else if (renderType=== "menu") { //$NON-NLS-0$
-					if (this._isLastChildSeparator(parent, renderType)) {
-						var child = parent.getChildren()[parent.getChildren().length-1];
-						parent.removeChild(child);
-						child.destroy();
-					}
-				}
+				this._checkForTrailingSeparator(parent, renderType, true);
 			}
 		},
 		
@@ -919,71 +811,33 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				var id, menuButton, invocation;
 				if (sortedByPosition[i].children && Object.getOwnPropertyNames(sortedByPosition[i].children).length > 0) {
 					var group = sortedByPosition[i];
-					var children;
 					var childContributions = sortedByPosition[i].children;
 					var commandService = this;
 					if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 						if (group.title) {
 							// We need a named menu button.  We used to first render into the menu and only 
-							// add a menu button in the dom when we knew it was needed.  For performance, though, we need
-							// to be asynchronous in traversing children, so we will add the menu and only remove it
-							// if it turns out we didn't need it.  
-							// If we wait until the end of asynch processing to add the menu button, the order will
-							// not be right, and we could have css ripple.  The down side to this approach is that a dropdown
-							// could appear and then not be needed.  It would be dangerous to assume that null items or an empty
-							// item array always mean "don't render" since some commands ignore the items.  It seems the best we
-							// can do is add it as not visible (thus reserving space) and make it visible when needed.   This could
-							// still cause ripple but helps with cases like the "More" menu which is always last.
+							// add a menu button in the dom when we knew items were actually rendered.
+							// For performance, though, we need to be asynchronous in traversing children, so we will 
+							// add the menu button always and then remove it if we don't need it.  
+							// If we wait until the end of asynch processing to add the menu button, the layout will have 
+							// to be redone. The down side to always adding the menu button is that we may find out we didn't
+							// need it after all, which could cause layout to change.
 							
-							var newMenu= new dijit.Menu({
-								style: "display: none;" //$NON-NLS-0$
-							});
-							menuButton = new CommandDropDownButton({
-								label: group.title === "*" ? messages["Actions"] : group.title, //TODO undocumented hack, even mode dangerous when we have globalization //$NON-NLS-0$
-								showLabel:  group.title !== "*", //$NON-NLS-0$
-								style: "visibility: hidden;", //$NON-NLS-0$
-								dropDown: newMenu
-						        });
-							dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
+							var created = this._createDropdownMenu(parent, group.title, "commandButton");
 							if(domNodeWrapperList){
-								//we need to add the menuButton as the optional widget param
-								mNavUtils.generateNavGrid(domNodeWrapperList, menuButton.domNode, menuButton);
+								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
-							var menuParent = parent;
-							if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-								menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
-							} else {
-								dojo.addClass(menuButton.domNode, "commandMargins"); //$NON-NLS-0$
-							}
-							dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
-							dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-							_setupActivateVisuals(menuButton.domNode, menuButton.focusNode);
-							dojo.place(menuButton.domNode, menuParent, "last"); //$NON-NLS-0$
-							// we'll need to identify a menu with the dom id of its original parent
-							newMenu.eclipseScopeId = parent.eclipseScopeId || parent.id;
+
 							// render the children asynchronously
 							window.setTimeout(dojo.hitch({contributions: childContributions, emptyGroupMessage: group.emptyGroupMessage}, function() {
-								// it is possible that commands were destroyed by the time we get here.  Bail out if
-								// the parent menu has been destroyed.  We are reaching into the widget to make this
-								// determination.
-								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=382394
-								if (newMenu._destroyed) {
-									return;
-								}
-								commandService._render(this.contributions, newMenu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+								commandService._render(this.contributions, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
-								children = newMenu.getChildren();
-								if (commandService._isLastChildSeparator(newMenu, "menu")) { //$NON-NLS-0$
-									var trailingSep = children[children.length-1];
-									newMenu.removeChild(trailingSep);
-									trailingSep.destroy();
-									children = newMenu.getChildren();
-								}
+								commandService._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
 								// now determine if we actually needed the menu or not
-								if (children.length === 0) {
+								if (created.menu.childNodes.length === 0) {
 									if (this.emptyGroupMessage) {
-										dojo.connect(menuButton.focusNode, "onclick", this, function() { //$NON-NLS-0$
+										dojo.connect(created.menuButton, "onclick", this, function() { //$NON-NLS-0$
 											//Show the empty group message.
 											var emptyGroupMessage = document.createElement("p"); //$NON-NLS-0$
 											emptyGroupMessage.textContent = this.emptyGroupMessage;
@@ -994,22 +848,23 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 													tooltipDialog.destroyRecursive();
 												}
 											});		
-											dijit.popup.open({popup: tooltipDialog, around: menuButton.domNode});
+											dijit.popup.open({popup: tooltipDialog, around: created.menuButton});
 											// in case the user's mouse never entered this popup and thus couldn't leave
 											window.setTimeout(function() {
 												dijit.popup.close(tooltipDialog);
 												tooltipDialog.destroyRecursive();
 											}, 15000);
 										});
-										dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+										dojo.style(created.menuButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 									} else {
 										if(domNodeWrapperList){
-											mNavUtils.removeNavGrid(domNodeWrapperList, menuButton.domNode);
+											mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 										}
-										menuButton.destroyRecursive();
+										created.menu.parentNode.removeChild(created.menu);
+										parent.removeChild(created.destroyButton);
 									}
 								} else {
-									dojo.style(menuButton.domNode, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+									dojo.style(created.menuButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 								}
 							}), 0);
 						} else {  
@@ -1017,7 +872,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							// non grouped items.
 							var sep;
 							// Only draw a separator if there is a non-separator preceding it.
-							if (parent.childNodes.length > 0 && !this._isLastChildSeparator(parent, renderType)) {
+							if (parent.childNodes.length > 0 && !this._checkForTrailingSeparator(parent, renderType)) {
 								sep = this.generateSeparatorImage(parent);
 							}
 							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
@@ -1033,36 +888,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					} else {
 						// group within a menu
 						if (group.title) {
-							var subMenu = new dijit.Menu();
-							// popup menu placeholder must be added synchronously to respect order.
-							// We will remove it if it ends up empty
-							var groupPopup = new CommandPopupMenuItem({
-								label: group.title,
-								popup: subMenu
-							});
-							parent.addChild(groupPopup);
-							commandService._render(childContributions, subMenu, items, handler, renderType, userData, domNodeWrapperList); 
-							if (subMenu.getChildren().length === 0) {
-								groupPopup.set("label", "removeme"); //$NON-NLS-1$ //$NON-NLS-0$
-								parent.removeChild(groupPopup);
-								groupPopup.destroyRecursive();
+							var trigger = dojo.create("li", {}, parent); //$NON-NLS-0$
+							var created = this._createDropdownMenu(trigger, group.title);
+							commandService._render(childContributions, created.menu, items, handler, renderType, userData, domNodeWrapperList); 
+							if (created.menu.childNodes.length === 0) {
+								parent.removeChild(trigger);
 							}
 						} else {  
 							// menu items with leading and trailing separators
-							// don't render a separator if there is nothing preceding, or if the last thing was a separator
-							var menuSep;
-							if (parent.getChildren().length > 0 && !this._isLastChildSeparator(parent, renderType)) {
-								menuSep = new dijit.MenuSeparator();
-								parent.addChild(menuSep);
+							// don't render a separator if there is nothing preceding
+							if (parent.childNodes.length > 0) {
+								this._generateMenuSeparator(parent);
 							}
 							// synchronously render the children since order matters
 							commandService._render(childContributions, parent, items, handler, renderType, userData, domNodeWrapperList); 
 							// Add a trailing separator if children rendered.
-							var menuChildren = parent.getChildren();
-							if (menuChildren[menuChildren.length - 1] !== menuSep) {
-								menuSep = new dijit.MenuSeparator();
-								parent.addChild(menuSep);
-							}
+							this._generateMenuSeparator(parent);
 						}
 					}
 				} else {
@@ -1106,44 +947,24 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					if (render) {
 						// special case.  The item wants to provide a set of choices
 						if (command.choiceCallback) {
-							var choicesMenu = new dijit.Menu({
-								style: "display: none;" //$NON-NLS-0$
-							});
+							var menuParent;
+							var nodeClass;
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
-								menuButton = new CommandDropDownButton({
-										label: command.name,
-										dropDown: choicesMenu,
-										postCreate: function() {
-											// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=383035#c1
-											dojo.connect(this._buttonNode, "mousedown", this, function(e) { //$NON-NLS-0$
-												this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
-											});
-											CommandDropDownButton.prototype.postCreate.apply(this, Array.prototype.slice.call(arguments));
-										}});
-								dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
-								dojo.removeAttr(menuButton.titleNode, "title"); // there is no need for a native browser tooltip //$NON-NLS-0$
-								dojo.destroy(menuButton.valueNode); // the valueNode gets picked up by screen readers; since it's not used, we can get rid of it
-								if (command.image) {
-									dojo.addClass(menuButton.iconNode, "commandImage"); //$NON-NLS-0$
-									menuButton.iconNode.src = command.image;
+								menuParent = parent;
+								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+									menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
+								} else {
+									nodeClass = "commandMargins"; //$NON-NLS-0$
 								}
-								dojo.place(menuButton.domNode, parent, "last"); //$NON-NLS-0$
-								menuButton.eclipseCommand = command;
-								menuButton.eclipseChoices = choicesMenu;
-							} else if (renderType === "menu") { //$NON-NLS-0$
-								// parent is already a menu
-								var popup = new CommandPopupMenuItem({
-									label: command.name,
-									popup: choicesMenu
-								});
-								parent.addChild(popup);
-								popup.eclipseCommand = command;
-								popup.eclipseChoices = choicesMenu;
-								// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=338887
-								dojo.connect(parent, "_openPopup", popup, function(event) { //$NON-NLS-0$
-									this.eclipseCommand.populateChoicesMenu(this.eclipseChoices, items, handler, userData);
-								});
+							} else {
+								menuParent = parent;
 							}
+							// dropdown button
+							var self = this;
+							var populateFunction = dojo.hitch(command, function(menu) {
+								this.populateChoicesMenu(menu, items, handler, userData, self);
+							});
+							var created = this._createDropdownMenu(menuParent, command.name, null, populateFunction);
 						} else {
 							if (renderType === "tool") { //$NON-NLS-0$
 								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item //$NON-NLS-0$
@@ -1157,6 +978,45 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						}
 					} 
 				}
+			}
+		},
+		
+		_createDropdownMenu: function(parent, name, triggerClass, populateFunction) {
+			var destroyButton;
+			var menuButton = dojo.create("a"); //$NON-NLS-0$
+			menuButton.classList.add("dropdownTrigger"); //$NON-NLS-0$
+			if (triggerClass) {
+				menuButton.classList.add(triggerClass);
+			}
+			menuButton.href = lib.NULLHREF;
+			var title = document.createTextNode(name);
+			menuButton.appendChild(title);
+			var arrow = document.createElement("span"); //$NON-NLS-0$
+			arrow.classList.add("dropdownArrow"); //$NON-NLS-0$
+			menuButton.appendChild(arrow);
+			var menuParent = parent;
+			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+				menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
+				destroyButton = menuParent;
+			} else {
+				dojo.addClass(menuButton, "commandMargins"); //$NON-NLS-0$
+				destroyButton = menuButton;
+			}
+			dojo.place(menuButton, menuParent, "last"); //$NON-NLS-0$
+			var newMenu = dojo.create("ul", {}, menuParent); //$NON-NLS-0$
+			dojo.addClass(newMenu, "dropdownMenu"); //$NON-NLS-0$
+			menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
+			return {menuButton: menuButton, menu: newMenu, destroyButton: destroyButton};
+		},
+		
+		_generateMenuSeparator: function(dropdown) {
+			if (!this._checkForTrailingSeparator(dropdown, "menu")) { //$NON-NLS-0$
+				var item = document.createElement("li"); //$NON-NLS-0$
+				var anchor = document.createElement("a"); //$NON-NLS-0$
+				anchor.href = lib.NULLHREF;
+				anchor.classList.add("dropdownSeparator"); //$NON-NLS-0$
+				item.appendChild(anchor);
+				dropdown.appendChild(item);
 			}
 		},
 		
@@ -1264,7 +1124,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
-				element = this._makeLink(context);
+				element = this._makeLink(context, "commandLink");
 				if (!element) {
 					return;
 				}
@@ -1280,8 +1140,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					this._addAccessibleLabel(element);
 				}
 				this._hookCallback(element, context);
-				_setupActivateVisuals(element, element, image ? "commandImageOver" : "commandButtonOver");			 //$NON-NLS-1$ //$NON-NLS-0$
-
 			}
 			context.domNode = element;
 			context.domParent = parent;
@@ -1312,26 +1170,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			context.handler = context.handler || this;
 			var element;
 			if (this.hrefCallback) {
-				element = this._makeLink(context);
+				element = this._makeLink(context, "commandLink");
 				if (!element) {
 					return;
 				}
 			} else {
 				element = dojo.create("span", {tabindex: "0", role: "button"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				this._hookCallback(element, context);
-				var overClass;
 				if (this.name) {
 					dojo.place(window.document.createTextNode(this.name), element, "last"); //$NON-NLS-0$
 					dojo.addClass(element, "commandButton"); //$NON-NLS-0$
-					overClass = "commandButtonOver"; //$NON-NLS-0$
 				} else {
 					// TODO we need a way to force a button contribution to look like a tool.  This is a very rare case.
 					addImageToElement(this, element, name);
-					overClass = "commandImageOver"; //$NON-NLS-0$
 					// ensure there is accessible text describing this image
 					this._addAccessibleLabel(element);
 				}
-				_setupActivateVisuals(element, element, overClass);			
 			}
 			element.id = name;
 			if (this.tooltip) {
@@ -1355,72 +1209,54 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		},
 		_addMenuItem: function(parent, context, domNodeWrapperList) {
 			var showIcon = context.commandService.showMenuIcons;
-			context.domParent = parent.domNode;
-			var menuitem = new CommandMenuItem({
-				labelType: this.hrefCallback ? "html" : "text", //$NON-NLS-1$ //$NON-NLS-0$
-				label: this.name,
-				iconClass: showIcon ? this.imageClass : null,
-				hasLink: !!this.hrefCallback
-			});
+			context.domParent = parent;
+			var element = this._makeLink(context);
+			element.role = "menu"; //$NON-NLS-0$
+
 			if (this.tooltip) {
 				new CommandTooltip({
-					connectId: [menuitem.domNode],
+					connectId: [element],
 					label: this.tooltip,
 					commandParent: parent,
 					commandService: context.commandService
 				});
 			}
-			if (this.hrefCallback) {
-				var loc = this.hrefCallback.call(context.handler, context);
-				if (loc) {
-					if (loc.then) {
-						loc.then(dojo.hitch(this, function(l) { 
-							menuitem.setLink(l, this.name); 
-						}));
-					} else if (loc) {
-						menuitem.setLink(loc, this.name);
-					} else {
-						return;
-					}
-				}
-			} else if (this.callback) {
-				menuitem.onClick = dojo.hitch(this, function() {
-					context.commandService._invoke(context);
-				});
+			if (!this.hrefCallback && this.callback) {
+				this._hookCallback(element, context);
+				dojo.addClass(element, "commandLink"); //$NON-NLS-0$
 			}
 			
-			// we may need to refer back to the command.  
-			menuitem.eclipseCommand = this;
-			parent.addChild(menuitem);
-			if (showIcon) {
-				if (this.imageClass) {
-					dojo.addClass(menuitem.iconNode, this.spriteClass);
-				} else if (this.image) {
-					dojo.addClass(menuitem.iconNode, "commandMenuItem"); //$NON-NLS-0$
-					// reaching...
-					menuitem.iconNode.src = this.image;
-				}
-			}
-			context.domNode = menuitem.domNode;
+			context.domNode = element;
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
+			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
+				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
+			} else {
+				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
+			}
+			dojo.place(element, parent, "last"); //$NON-NLS-0$
+
 		},
 		
 		/*
 		 * stateless helper
 		 */
-		 _makeLink: function(context) {
+		 _makeLink: function(context, aClass) {
 			var element = dojo.create("a", {tabindex: "0"}); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(element, "commandLink"); //$NON-NLS-0$
+			if (aClass) {
+				dojo.addClass(element, aClass); //$NON-NLS-0$
+			}
 			dojo.place(window.document.createTextNode(this.name), element, "last"); //$NON-NLS-0$
-			var href = this.hrefCallback.call(context.handler, context);
-			if (href.then){
-				href.then(function(l){
-					element.href = l;
-				});
-			} else if (href) {
-				element.href = href; 
-			} else {  // no href, we don't want the link
-				return null;
+			if (this.hrefCallback) {
+				var href = this.hrefCallback.call(context.handler, context);
+				if (href.then){
+					href.then(function(l){
+						element.href = l;
+					});
+				} else if (href) {
+					element.href = href; 
+				} else {  // no href
+					element.href = lib.NULLHREF;
+				}
 			}
 			return element;
 		 },
@@ -1455,38 +1291,19 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		 * Used internally by the command service.  Not intended to be overridden or called
 		 * externally.
 		 */
-		 populateChoicesMenu: function(menu, items, handler, userData) {
-			// see http://bugs.dojotoolkit.org/ticket/10296
-			menu.focusedChild = null;
-			dojo.forEach(menu.getChildren(), function(child) {
-				menu.removeChild(child);
-				child.destroy();
-			});
-
+		 populateChoicesMenu: function(parent, items, handler, userData, commandService) {
 			var choices = this.getChoices(items, handler, userData);
-			var showIcon = this.showMenuIcons;
-
 			for (var j=0; j<choices.length; j++) {
 				var choice = choices[j];
-				var menuitem;
 				if (choice.name) {
-					menuitem = new dijit.MenuItem({
-						label: choice.name,
-						iconClass: showIcon ? choice.imageClass : null,
-						onClick: this.makeChoiceCallback(choice, items)
-					});
-					if (showIcon) {
-						if (choice.imageClass) {
-							dojo.addClass(menuitem.iconNode, choice.spriteClass || "commandSprite"); //$NON-NLS-0$
-						} else if (choice.image) {
-							dojo.addClass(menuitem.iconNode, "commandImage"); //$NON-NLS-0$
-							menuitem.iconNode.src = choice.image;
-						}
-					}
+					var itemNode = dojo.create("li", {}, parent); //$NON-NLS-0$
+					var node = document.createElement("a"); //$NON-NLS-0$
+					var text = document.createTextNode(choice.name); //$NON-NLS-0$
+					node.appendChild(text);
+					itemNode.appendChild(node);
 				} else {  // anything not named is a separator
-					menuitem = new dijit.MenuSeparator();
+					commandService._generateMenuSeparator(parent);
 				}
-				menu.addChild(menuitem);
 			}
 		},
 		
@@ -1831,7 +1648,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		CommandKeyBinding: CommandKeyBinding,
 		Command: Command,
 		CommandInvocation: CommandInvocation,
-		CommandMenuItem: CommandMenuItem,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
 		CommandParameter: CommandParameter,

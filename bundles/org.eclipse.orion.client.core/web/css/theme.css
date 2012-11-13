@@ -29,27 +29,24 @@ a:hover {
 /* Navigation text */
 
 .primaryNav {
-	font-size: 8pt; /* 7pt */
+	font-size: 8pt; 
 	font-weight:normal;
 	color: #BFBFBF;
 	padding-top: 6px;
 	vertical-align: baseline;
 }
 
-.primaryNav a {
-	font-size: 8pt; /* 7pt */
-	color: #BFBFBF;
+.primaryNav  a {
 	margin-right: 6px;
 	margin-left: 6px; 
+	color: #BFBFBF;
 	vertical-align: baseline;
 	text-decoration: none;
 }
 
 .primaryNav a:hover {
-	color: #bfbfbf;
 	cursor: hand;
 	color: white;
-	font-weight:normal;
 }
 
 /* Title area - the place for location/breadcrumbs */
@@ -62,19 +59,6 @@ a:hover {
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
     border-bottom: 1px solid #DEDEDE;
     min-height:20px;
-}
-
-/* splitter - typically the color of the title area */
-.split {
-	background: #efefef;
-}
-
-.splitTracking {
-	background: #dedede;
-}
-
-.splitThumb {
-	background: #cdcdcd;
 }
 
 /* Row selection */
@@ -202,7 +186,7 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
-.commandButtonOver {
+.commandButton:hover, .commandButton:focus {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
 }
@@ -242,7 +226,7 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
-.commandImageOver {
+.commandImage:hover, .commandImage:focus {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
 }
@@ -286,78 +270,87 @@ a.currentLocation:hover {
 .commandInactiveItem {
 }
 
-/* dijit overrides related to theming */
-/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
-/* buttons */
-
-.claro .dijitButton .dijitButtonNode,
-.claro .dijitDropDownButton .dijitButtonNode,
-.claro .dijitComboButton .dijitButtonNode,
-.claro .dijitToggleButton .dijitButtonNode {
-  background-color: transparent;
-  background-image: none;
-  border: 1px solid transparent;
-  box-shadow: none;
-  border-radius: 3px;
-  padding: 0;
-  padding-bottom: 3px;
-  color: #222;
-  margin: 0;
+/* widget theming */
+/* splitter - typically the color of the title area */
+.split {
+	background: #efefef;
 }
 
-.claro .commandMenu .dijitButtonNode {
-  color: #222;
+.splitTracking {
+	background: #dedede;
 }
 
-/* button hover */
-.claro .dijitButtonHover .dijitButtonNode,
-.claro .dijitDropDownButtonHover .dijitButtonNode,
-.claro .dijitComboButton .dijitButtonNodeHover,
-.claro .dijitComboButton .dijitDownArrowButtonHover,
-.claro .dijitToggleButtonHover .dijitButtonNode {
-    background-color: #e3e3e3;
-    color: black;
-	border: 1px solid #808080;
- }
+.splitThumb {
+	background: #cdcdcd;
+}
 
-/* arrow buttons*/
-.claro .dijitArrowButtonInner {
+/* dropdowns */
+.dropdown {
+} 
+
+.dropdownArrow {
 	background-position: 0 -422px;	
 	width: 5px; height: 3px;
 	background-image: url(../images/core_sprites.png); 
 	display: inline-block; 
-	margin: 1px;
+	margin: 2px;
 	vertical-align: middle; 
 }
 
-/* menus and menu items */
-
-.claro .dijitMenu {
-   background-color: #FFFFFF;
-   border: 1px solid #9a9a9a;
+.dropdownTrigger {
 }
 
-.claro .dijitMenuItem {
-   outline: none;
-   padding-top:4px;
+.dropdownTriggerOpen {
+	color: white;
 }
 
-.claro .dijitMenuSeparatorTop {
-	height: auto;
-	margin-top: 1px;
-	border-bottom: 1px solid #DDD;
+.dropdownMenu {
+	color: #222;
+	background-color: #fbfbfb;
+	display: none;
+	z-index: 150;
+	min-width: 180px;
+	position: absolute;
+	list-style-type: none;
+	border-radius: 3px;
+	border: 1px solid #DDD;
+	padding: 0;
 }
 
-.claro .dijitMenuItemLabel {
-	position: relative;
-	padding: 5px;
+.dropdownMenu li {
+	min-width: 180px;
+	display: block;
 }
 
-.claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
-   background-color: #e3e3e3;
-   color: black;
-   background-image: none;
+.dropdownMenu li a {
+	padding: 2px 10px;
+	margin: 0;
 }
+
+.dropdownMenu li a:hover {
+	text-decoration: none;
+	background: #ffeecc;
+}
+
+.dropdownMenu li a:focus {
+	text-decoration: none;
+	background: #ffeecc;
+}
+
+.dropdownMenuOpen {
+	display: block;
+}
+
+.dropdownSeparator {
+	height: 2px;
+	background-color: #222;
+	padding: 0;
+}
+
+/* dijit overrides related to theming */
+/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
+/* buttons */
+
 
 /* tooltips */
 .claro .dijitTooltip {
