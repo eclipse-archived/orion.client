@@ -158,6 +158,7 @@ function(mSetup, mTestPerformance, util) {
 	function updateSetOptionsButton() {
 		if (bAutoSet.checked) {
 			bSetOptions.style.display = "none";
+			setOptions();
 		} else {
 			bSetOptions.style.display = "block";
 		}
