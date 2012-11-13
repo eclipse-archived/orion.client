@@ -1,17 +1,18 @@
 @import "./themes/default.css";
 
-.button {
-	color: teal;
-	cursor: pointer;
-	text-decoration: underline;
-	padding: 0px 2px 0px 2px;
+.group {
+	border: 1px solid teal;
+	padding:5px;
+	margin-top:5px;
 }
 
-.parentElement {
+.editor_group {
 	border: 1px solid teal;
 }
 
-.option {
-	border: 1px solid teal;
-	padding: 2px 2px 3px 2px;
+body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #ffd400;
 }
