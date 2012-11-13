@@ -419,24 +419,20 @@ exports.UndoCommandFactory = (function() {
 				name: messages['Undo'],
 				id: "orion.undo", //$NON-NLS-0$
 				callback: function(data) {
-					data.items.getTextView().invokeAction("undo");
+					data.items.getTextView().invokeAction("undo"); //$NON-NLS-0$
 				}});
-			editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo"); //$NON-NLS-1$ //$NON-NLS-0$
 			editor.getTextView().setAction("undo", function() { //$NON-NLS-0$
 				undoStack.undo();
 				return true;
 			}, undoCommand);
 			this.commandService.addCommand(undoCommand);
 			
-			var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
-			var binding = isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true); //$NON-NLS-1$ //$NON-NLS-0$
 			var redoCommand = new mCommands.Command({
 				name: messages['Redo'],
 				id: "orion.redo", //$NON-NLS-0$
 				callback: function(data) {
 					data.items.getTextView().invokeAction("redo"); //$NON-NLS-0$
 				}});
-			editor.getTextView().setKeyBinding(binding, "redo"); //$NON-NLS-0$
 			editor.getTextView().setAction("redo", function() { //$NON-NLS-0$
 				undoStack.redo();
 				return true;
@@ -444,8 +440,8 @@ exports.UndoCommandFactory = (function() {
 	
 			this.commandService.addCommand(redoCommand);
 	
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, new mCommands.CommandKeyBinding('z', true)); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, binding); //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.undo", 400, null, true, editor.getTextView().getKeyBindings("undo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(this.toolbarId, "orion.redo", 401, null, true, editor.getTextView().getKeyBindings("redo")[0]); //$NON-NLS-1$ //$NON-NLS-0$
 
 			return undoStack;
 		}

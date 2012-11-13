@@ -39,7 +39,7 @@ define(["require",
 	function getFile(file) {
 		try {
 			var objXml = new XMLHttpRequest();
-			objXml.open("GET",file,false);
+			objXml.open("GET",file,false); //$NON-NLS-0$
 			objXml.send(null);
 			return objXml.responseText;
 		} catch (e) {
@@ -56,15 +56,15 @@ define(["require",
 				}
 			}
 			loadedThemes.push(theme);
-			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) {
+			require(["text!examples/textview/themes/" + theme + ".css"], function(cssText) { //$NON-NLS-1$ //$NON-NLS-0$
 				var stylesheet;
-				var document = view.getOptions("parent").ownerDocument;
+				var document = view.getOptions("parent").ownerDocument; //$NON-NLS-0$
 				if (document.createStyleSheet) {
 					stylesheet = document.createStyleSheet();
 					stylesheet.cssText = cssText;
 				} else {
-					stylesheet = util.createElement(document, "style");
-					var head = document.getElementsByTagName("head")[0] || document.documentElement;
+					stylesheet = util.createElement(document, "style"); //$NON-NLS-0$
+					var head = document.getElementsByTagName("head")[0] || document.documentElement; //$NON-NLS-0$
 					stylesheet.appendChild(document.createTextNode(cssText));
 					head.appendChild(stylesheet);
 				}
@@ -89,37 +89,35 @@ define(["require",
 		}
 		options = options || {};
 		loadTheme(options.themeClass);
-		options.parent = options.parent || "divParent";
+		options.parent = options.parent || "divParent"; //$NON-NLS-0$
 		options.model = viewModel;
 		exports.view = view = new mTextView.TextView(options);
 		
 		/* Undo stack */
 		var undoStack = exports.undoStack = new mUndoStack.UndoStack(view, 200);
 		exports.textDND = new mTextDND.TextDND(view, undoStack);
-		view.setKeyBinding(new mKeyBinding.KeyBinding('z', true), "undo");
-		view.setAction("undo", function() {
+		view.setAction("undo", function() { //$NON-NLS-0$
 			undoStack.undo();
 			return true;
 		});
-		view.setKeyBinding(util.isMac ? new mKeyBinding.KeyBinding('z', true, true) : new mKeyBinding.KeyBinding('y', true), "redo");
-		view.setAction("redo", function() {
+		view.setAction("redo", function() { //$NON-NLS-0$
 			undoStack.redo();
 			return true;
 		});
 
-		view.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save");
-		view.setAction("save", function() {
-			log("*****************SAVE");
+		view.setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
+		view.setAction("save", function() { //$NON-NLS-0$
+			log("*****************SAVE"); //$NON-NLS-0$
 			return true;
 		});
 		
-		view.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode");
+		view.setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-1$ //$NON-NLS-0$
 
 		var annotationModel = view.annotationModel = new mAnnotations.AnnotationModel(baseModel);
 		/* Example: Adding a keyBinding and action*/
-		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll");
-		view.setAction("collapseAll", function() {
-			log("*****************COLLAPSE");
+		view.setKeyBinding(new mKeyBinding.KeyBinding('h', true), "collapseAll"); //$NON-NLS-1$ //$NON-NLS-0$
+		view.setAction("collapseAll", function() { //$NON-NLS-0$
+			log("*****************COLLAPSE"); //$NON-NLS-0$
 			var iter = annotationModel.getAnnotations(0, baseModel.getCharCount());
 			view.setRedraw(false);
 			while (iter.hasNext()) {
@@ -133,9 +131,9 @@ define(["require",
 			return true;
 		});
 		/* Example: Adding a keyBinding and action*/
-		view.setKeyBinding(new mKeyBinding.KeyBinding('j', true), "expandAll");
-		view.setAction("expandAll", function() {
-			log("*****************EXPAND");
+		view.setKeyBinding(new mKeyBinding.KeyBinding('j', true), "expandAll"); //$NON-NLS-1$ //$NON-NLS-0$
+		view.setAction("expandAll", function() { //$NON-NLS-0$
+			log("*****************EXPAND"); //$NON-NLS-0$
 			var iter = annotationModel.getAnnotations(0, baseModel.getCharCount());
 			view.setRedraw(false);
 			while (iter.hasNext()) {
@@ -151,14 +149,14 @@ define(["require",
 		
 
 		/* Adding the Rulers */
-		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"});
+		var annotationRuler = view.annotationRuler = new mRulers.AnnotationRuler(annotationModel, "left", {styleClass: "ruler annotations"}); //$NON-NLS-1$ //$NON-NLS-0$
 		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_BREAKPOINT);
 		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_BOOKMARK);
 		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_ERROR);
 		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_WARNING);
 		annotationRuler.addAnnotationType(AnnotationType.ANNOTATION_TASK);
-		annotationRuler.setMultiAnnotation({html: "<div class='annotationHTML multiple'></div>"});
-		annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"});
+		annotationRuler.setMultiAnnotation({html: "<div class='annotationHTML multiple'></div>"}); //$NON-NLS-0$
+		annotationRuler.setMultiAnnotationOverlay({html: "<div class='annotationHTML overlay'></div>"}); //$NON-NLS-0$
 		annotationRuler.onDblClick =  function(lineIndex, e) {
 			if (lineIndex === undefined) { return; }
 			var model = this._view.getModel();
@@ -194,13 +192,13 @@ define(["require",
 				annotationModel.removeAnnotation(annotation);
 			} else {
 				annotation = AnnotationType.createAnnotation(type, start, end);
-				annotation.title += ": " + model.getLine(lineIndex);
+				annotation.title += ": " + model.getLine(lineIndex); //$NON-NLS-0$
 				annotationModel.addAnnotation(annotation);
 			}
 		};
-		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"});
+		var linesRuler = view.lines = new mRulers.LineNumberRuler(annotationModel, "left", {styleClass: "ruler lines"}, {styleClass: "rulerLines odd"}, {styleClass: "rulerLines even"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		linesRuler.onDblClick = annotationRuler.onDblClick;
-		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"});
+		var overviewRuler = new mRulers.OverviewRuler(annotationModel, "right", {styleClass: "ruler overview"}); //$NON-NLS-1$ //$NON-NLS-0$
 		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_BREAKPOINT);
 		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_BOOKMARK);
 		overviewRuler.addAnnotationType(AnnotationType.ANNOTATION_ERROR);
@@ -212,7 +210,7 @@ define(["require",
 		view.addRuler(annotationRuler);
 		view.addRuler(linesRuler);
 		if (foldingEnabled) {
-			var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"});
+			var foldingRuler = view.folding = new mRulers.FoldingRuler(annotationModel, "left", {styleClass: "ruler folding"}); //$NON-NLS-1$ //$NON-NLS-0$
 			foldingRuler.addAnnotationType(AnnotationType.ANNOTATION_FOLDING);
 			view.addRuler(foldingRuler);
 		}
@@ -230,13 +228,13 @@ define(["require",
 			annotationStyler = null;
 		}
 		switch (lang) {
-			case "js":
-			case "java":
-			case "css":
+			case "js": //$NON-NLS-0$
+			case "java": //$NON-NLS-0$
+			case "css": //$NON-NLS-0$
 				styler = new mTextStyler.TextStyler(view, lang, view.annotationModel);
 				styler.setHighlightCaretLine(true);
 				break;
-			case "html":
+			case "html": //$NON-NLS-0$
 				styler = new mTextMateStyler.TextMateStyler(view, new mHtmlGrammar.HtmlGrammar());
 				break;
 		}
