@@ -98,6 +98,10 @@ hard-coded numbers elsewhere.
 	clear: both;
 }
 
+.hidden {
+	visibility: hidden;
+}
+
 .sidePanelLayout {
 	display: block;
 	position: absolute;
@@ -209,7 +213,7 @@ hard-coded numbers elsewhere.
 	vertical-align: baseline;
 }
 
-.commandList li {
+.commandList > li {
 	float: left;
 	margin-left: 4px;
 	margin-right: 4px;

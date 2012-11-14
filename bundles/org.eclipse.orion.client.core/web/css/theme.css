@@ -32,11 +32,18 @@ a:hover {
 	font-size: 8pt; 
 	font-weight:normal;
 	color: #BFBFBF;
-	padding-top: 6px;
 	vertical-align: baseline;
 }
 
-.primaryNav  a {
+.primaryNav > div {
+	padding-top: 6px;
+}
+
+.primaryNav > nav {
+	padding-top: 6px;
+}
+
+.primaryNav a {
 	margin-right: 6px;
 	margin-left: 6px; 
 	color: #BFBFBF;
@@ -156,7 +163,6 @@ a.currentLocation:hover {
 	padding-left:20px;
 	padding-right:16px;
 	margin-left:5px;
-	margin-top:6px !important;
 	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;
 }
 
@@ -191,25 +197,6 @@ a.currentLocation:hover {
 	border: 1px solid #808080;
 }
 
-.commandMenu {
-    color: #222;
-	display: inline-block;
-	vertical-align: baseline;
-	margin: 0;
-	font-size:8pt;
-	font-weight:normal;
-	border: 1px solid #dedede;
-	background-color: #efefef;
-    cursor: pointer;
-    border-radius:1px;
-}
-
-.commandMenuItem {
-	border: 0;
-	padding: 0;
-	margin: 0;
-}
-
 .commandImage {
 	border: 1px solid transparent;
     border-radius: 2px;
@@ -236,8 +223,16 @@ a.currentLocation:hover {
 	font-weight:bold;
 }
 
-.commandMenuItemAnchor {
-	padding-right: 40px;
+.commandMenuLink {
+	display: inline-block;
+	vertical-align: baseline;
+	padding: 2px 0;  
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
 }
 
 .commandLink {
@@ -288,7 +283,7 @@ a.currentLocation:hover {
 .dropdown {
 } 
 
-.dropdownArrow {
+.dropdownArrowDown {
 	background-position: 0 -422px;	
 	width: 5px; height: 3px;
 	background-image: url(../images/core_sprites.png); 
@@ -297,11 +292,20 @@ a.currentLocation:hover {
 	vertical-align: middle; 
 }
 
+.dropdownArrowRight {
+	background-position: 0 -654px; 
+	width: 6px; height: 11px;
+	background-image: url(../images/core_sprites.png); 
+	margin: 2px;
+	vertical-align: middle; 
+	float: right;
+}
+
 .dropdownTrigger {
 }
 
 .dropdownTriggerOpen {
-	color: white;
+	border: 1px solid #ddd;
 }
 
 .dropdownMenu {
@@ -317,22 +321,31 @@ a.currentLocation:hover {
 	padding: 0;
 }
 
-.dropdownMenu li {
+.dropdownSubMenu {
+	position: relative
+}
+
+.dropdownSubMenu > ul {
+	top: 0;
+	left: 100%;
+}
+
+.dropdownMenu > li {
 	min-width: 180px;
 	display: block;
 }
 
-.dropdownMenu li a {
-	padding: 2px 10px;
+.dropdownMenu > li > a {
+	width: 100%;
 	margin: 0;
 }
 
-.dropdownMenu li a:hover {
+.dropdownMenu > li > a:hover {
 	text-decoration: none;
 	background: #ffeecc;
 }
 
-.dropdownMenu li a:focus {
+.dropdownMenu > li > a:focus {
 	text-decoration: none;
 	background: #ffeecc;
 }
@@ -342,9 +355,9 @@ a.currentLocation:hover {
 }
 
 .dropdownSeparator {
-	height: 2px;
-	background-color: #222;
-	padding: 0;
+	height: 1px;
+	background-color: #ddd;
+	color: #ddd;
 }
 
 /* dijit overrides related to theming */

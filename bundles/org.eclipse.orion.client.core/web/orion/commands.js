@@ -822,8 +822,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							// If we wait until the end of asynch processing to add the menu button, the layout will have 
 							// to be redone. The down side to always adding the menu button is that we may find out we didn't
 							// need it after all, which could cause layout to change.
-							
-							var created = this._createDropdownMenu(parent, group.title, "commandButton");
+							var created = this._createDropdownMenu(parent, group.title); 
 							if(domNodeWrapperList){
 								mNavUtils.generateNavGrid(domNodeWrapperList, created.menuButton);
 							}
@@ -889,7 +888,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						// group within a menu
 						if (group.title) {
 							var trigger = dojo.create("li", {}, parent); //$NON-NLS-0$
-							var created = this._createDropdownMenu(trigger, group.title);
+							var created = this._createDropdownMenu(trigger, group.title, true);
 							commandService._render(childContributions, created.menu, items, handler, renderType, userData, domNodeWrapperList); 
 							if (created.menu.childNodes.length === 0) {
 								parent.removeChild(trigger);
@@ -964,13 +963,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							var populateFunction = dojo.hitch(command, function(menu) {
 								this.populateChoicesMenu(menu, items, handler, userData, self);
 							});
-							var created = this._createDropdownMenu(menuParent, command.name, null, populateFunction);
+							var created = this._createDropdownMenu(menuParent, command.name, true, populateFunction);
 						} else {
 							if (renderType === "tool") { //$NON-NLS-0$
-								id = "tool" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item //$NON-NLS-0$
+								id = "tool" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
 								command._addTool(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "button") { //$NON-NLS-0$
-								id = "button" + command.id + i;  // using the index ensures unique ids within the DOM when a command repeats for each item //$NON-NLS-0$
+								id = "button" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item 
 								command._addButton(parent, id, invocation, domNodeWrapperList);	
 							} else if (renderType === "menu") { //$NON-NLS-0$
 								command._addMenuItem(parent, invocation, domNodeWrapperList);
@@ -981,28 +980,36 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			}
 		},
 		
-		_createDropdownMenu: function(parent, name, triggerClass, populateFunction) {
-			var destroyButton;
+		_createDropdownMenu: function(parent, name, nested, populateFunction) {
+			var destroyButton, arrowClass, extraClass;
 			var menuButton = dojo.create("a"); //$NON-NLS-0$
 			menuButton.classList.add("dropdownTrigger"); //$NON-NLS-0$
-			if (triggerClass) {
-				menuButton.classList.add(triggerClass);
+			if (nested) {
+				menuButton.classList.add("commandMenuLink"); //$NON-NLS-0$
+				extraClass = "dropdownSubMenu"; //$NON-NLS-0$
+				arrowClass = "dropdownArrowRight"; //$NON-NLS-0$
+			} else {
+				menuButton.classList.add("commandButton"); //$NON-NLS-0$
+				arrowClass = "dropdownArrowDown"; //$NON-NLS-0$
 			}
 			menuButton.href = lib.NULLHREF;
 			var title = document.createTextNode(name);
 			menuButton.appendChild(title);
 			var arrow = document.createElement("span"); //$NON-NLS-0$
-			arrow.classList.add("dropdownArrow"); //$NON-NLS-0$
+			arrow.classList.add(arrowClass); //$NON-NLS-0$
 			menuButton.appendChild(arrow);
 			var menuParent = parent;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 				menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
 				destroyButton = menuParent;
 			} else {
-				dojo.addClass(menuButton, "commandMargins"); //$NON-NLS-0$
+				menuButton.classList.add("commandMargins"); //$NON-NLS-0$
 				destroyButton = menuButton;
 			}
-			dojo.place(menuButton, menuParent, "last"); //$NON-NLS-0$
+			menuParent.appendChild(menuButton);
+			if (extraClass) {
+				menuParent.classList.add(extraClass);
+			}
 			var newMenu = dojo.create("ul", {}, menuParent); //$NON-NLS-0$
 			dojo.addClass(newMenu, "dropdownMenu"); //$NON-NLS-0$
 			menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
@@ -1012,6 +1019,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_generateMenuSeparator: function(dropdown) {
 			if (!this._checkForTrailingSeparator(dropdown, "menu")) { //$NON-NLS-0$
 				var item = document.createElement("li"); //$NON-NLS-0$
+				item.classList.add("dropdownSeparator"); //$NON-NLS-0$
 				var anchor = document.createElement("a"); //$NON-NLS-0$
 				anchor.href = lib.NULLHREF;
 				anchor.classList.add("dropdownSeparator"); //$NON-NLS-0$
@@ -1210,7 +1218,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_addMenuItem: function(parent, context, domNodeWrapperList) {
 			var showIcon = context.commandService.showMenuIcons;
 			context.domParent = parent;
-			var element = this._makeLink(context);
+			var element = this._makeLink(context, "commandMenuLink");
 			element.role = "menu"; //$NON-NLS-0$
 
 			if (this.tooltip) {
@@ -1223,7 +1231,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			}
 			if (!this.hrefCallback && this.callback) {
 				this._hookCallback(element, context);
-				dojo.addClass(element, "commandLink"); //$NON-NLS-0$
 			}
 			
 			context.domNode = element;
@@ -1298,6 +1305,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				if (choice.name) {
 					var itemNode = dojo.create("li", {}, parent); //$NON-NLS-0$
 					var node = document.createElement("a"); //$NON-NLS-0$
+					node.classList.add("commandMenuLink");
 					var text = document.createTextNode(choice.name); //$NON-NLS-0$
 					node.appendChild(text);
 					itemNode.appendChild(node);

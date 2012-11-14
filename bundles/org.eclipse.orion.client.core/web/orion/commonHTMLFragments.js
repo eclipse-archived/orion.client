@@ -41,13 +41,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 			'<div class="layoutRight">' + //$NON-NLS-0$
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
 				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;">' + //$NON-NLS-0$
-					'<a id="relatedTrigger" class="dropdownTrigger" href="'+ lib.NULLHREF + '">' + messages["Related"] + '<span class="dropdownArrow"></span></a>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					'<a id="relatedTrigger" class="dropdownTrigger hidden" href="'+ lib.NULLHREF + '">' + messages["Related"] + '<span class="dropdownArrowDown"></span></a>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					'<ul id="relatedDropdown" class="dropdownMenu" role="menu"></ul>' + //$NON-NLS-0$
 				'</div>' + //$NON-NLS-0$
 				'<input type="text" id="search" autocomplete="off" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
 				'<div id="searchOptions" class="layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
 				'<div id="userMenu" class="spacingLeft layoutLeft">' + //$NON-NLS-0$
-					'<a id="userTrigger" class="dropdownTrigger" href="' + lib.NULLHREF + '">' + messages["Options"] + '<span class="dropdownArrow"></span></a>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					'<a id="userTrigger" class="dropdownTrigger" href="' + lib.NULLHREF + '">' + messages["Options"] + '<span class="dropdownArrowDown"></span></a>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					'<ul id="userDropdown" class="dropdownMenu" role="menu"></ul>' + //$NON-NLS-0$
 				'</div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
