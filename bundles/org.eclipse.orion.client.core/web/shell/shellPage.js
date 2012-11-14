@@ -281,7 +281,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 	function pluginsUninstallExec(args, context) {
 		var result = context.createPromise();
-		if (args.plugin.isAllPlugin()) {
+		if (args.plugin.isAllPlugin) {
 			var msg = messages["Are you sure you want to uninstall all contributed plug-ins?"];
 			if (!window.confirm(msg)) {
 				return messages["Aborted"];
