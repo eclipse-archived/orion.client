@@ -1,17 +1,33 @@
 @import "./themes/default.css";
 
-.button {
-	color: teal;
-	cursor: pointer;
-	text-decoration: underline;
-	padding: 0px 2px 0px 2px;
+.logo {
+	background-color: black;
+	border-radius: 5px;
+	padding-left: 10px;
 }
 
-.parentElement {
-	border: 1px solid teal;
+.group {
+	border: 1px solid black;
+	padding:5px;
+	margin-top:5px;
+	background-color: #ffd400;
+	border-radius: 5px;
 }
 
-.option {
-	border: 1px solid teal;
-	padding: 2px 2px 3px 2px;
+.editor_group {
+	border: 1px solid black;
+}
+
+.console {
+	overflow:scroll;
+	white-space:pre;
+	height:200px;
+	background-color:white;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	overflow: hidden;
+	background-color: #ededed;
 }

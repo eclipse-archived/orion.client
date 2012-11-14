@@ -16,35 +16,37 @@
 define(['examples/textview/demoSetup', 'tests/textview/test-performance', 'orion/textview/util'],   
  
 function(mSetup, mTestPerformance, util) {
-
+	
 	/** Console */
 	var document = window.document;
 	var console = document.getElementById('console'); //$NON-NLS-0$
-	var consoleCol = document.getElementById('consoleCol'); //$NON-NLS-0$
-	var consoleHeader = document.getElementById('consoleHeader'); //$NON-NLS-0$
-	var consoleActions = document.getElementById('consoleActions'); //$NON-NLS-0$
+	var consoleCol = document.getElementById('consoleParent'); //$NON-NLS-0$
 	
-	/** Actions */
-	var bCreateJava = document.getElementById("createJavaSample"); //$NON-NLS-0$
-	var bCreateJS = document.getElementById("createJavaScriptSample"); //$NON-NLS-0$
-	var bCreateHTML = document.getElementById("createHtmlSample"); //$NON-NLS-0$
-	var bCreatePlain = document.getElementById("createPlainTextSample"); //$NON-NLS-0$
-	var bCreateBidi = document.getElementById("createBidiTextSample"); //$NON-NLS-0$
-	var bCreateLoad = document.getElementById("createLoad"); //$NON-NLS-0$
-	var sLangSelect = document.getElementById("langSelect"); //$NON-NLS-0$
-	var tURLContent = document.getElementById("urlContent"); //$NON-NLS-0$
-	var bSetOptions = document.getElementById("setOptions"); //$NON-NLS-0$
+	/** Testing */
 	var bClearLog = document.getElementById("clearLog"); //$NON-NLS-0$
 	var bHideLog = document.getElementById("hideLog"); //$NON-NLS-0$
 	var bTest = document.getElementById("test"); //$NON-NLS-0$
-	var bPerform = document.getElementById("performanceTest"); //$NON-NLS-0$
-	var sPerform = document.getElementById("performanceTestSelect"); //$NON-NLS-0$
+	var sTest = document.getElementById("testSelect"); //$NON-NLS-0$
+
+	/** Options */	
+	var bSetOptions = document.getElementById("setOptions"); //$NON-NLS-0$
+	var sContents = document.getElementById("contentsSelect"); //$NON-NLS-0$
 	var sTheme = document.getElementById("themeSelect"); //$NON-NLS-0$
+	var sTabSize = document.getElementById('tabSize'); //$NON-NLS-0$
 	var bReadOnly = document.getElementById('readOnly'); //$NON-NLS-0$
 	var bFullSel = document.getElementById('fullSelection'); //$NON-NLS-0$
 	var bWrap = document.getElementById('wrap'); //$NON-NLS-0$
 	var bExpandTab = document.getElementById('expandTab'); //$NON-NLS-0$
-	var sTabSize = document.getElementById('tabSize'); //$NON-NLS-0$
+	var bAutoSet = document.getElementById('autoSetOptions'); //$NON-NLS-0$
+	var table = document.getElementById('table'); //$NON-NLS-0$
+
+	function resize() {
+		var height = document.documentElement.clientHeight;
+		table.style.height = (height - (util.isIE ? 8 : 0)) + "px"; //$NON-NLS-0$
+		if (mSetup.view) { mSetup.view.resize(); }
+	}
+	resize();
+	window.onresize = resize;
 
 	function clearConsole () {
 		if (!console) { return; }
@@ -53,13 +55,13 @@ function(mSetup, mTestPerformance, util) {
 	
 	function showConsole () {
 		if (!console) { return; }
-		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "block"; //$NON-NLS-0$
+		consoleCol.style.display = "block"; //$NON-NLS-0$
 		if (mSetup.view) { mSetup.view.resize(); }
 	}
 	
 	function hideConsole () {
 		if (!console) { return; }
-		consoleCol.style.display = consoleHeader.style.display = consoleActions.style.display = "none"; //$NON-NLS-0$
+		consoleCol.style.display = "none"; //$NON-NLS-0$
 		if (mSetup.view) { mSetup.view.resize(); }
 	}
 	
@@ -98,10 +100,17 @@ function(mSetup, mTestPerformance, util) {
 		sTheme.value = options.themeClass;
 	}
 
+	var contents, currentContents;
 	function setOptions() {
 		var view = mSetup.checkView(getOptions());
 		view.focus();
 		updateOptions();
+		window.setTimeout(function() {
+			if (currentContents !== sContents.value) {
+				contents[sContents.value]();
+				currentContents = sContents.value;
+			}
+		}, 0);
 	}
 
 	function setupView(text, lang) {
@@ -138,39 +147,71 @@ function(mSetup, mTestPerformance, util) {
 		return setupView(lines.join(util.platformDelimiter), null);
 	}
 	
-	function createLoad() {
-		var text = tURLContent.value ? mSetup.getFile(tURLContent.value) : "";
-		return setupView(text, sLangSelect.value);
+	contents = {
+		createJavaSample: createJavaSample,
+		createJavaScriptSample: createJavaScriptSample,
+		createHtmlSample: createHtmlSample,
+		createPlainTextSample: createPlainTextSample,
+		createBidiTextSample: createBidiTextSample
+	};
+	
+	function updateSetOptionsButton() {
+		if (bAutoSet.checked) {
+			bSetOptions.style.display = "none";
+			setOptions();
+		} else {
+			bSetOptions.style.display = "block";
+		}
 	}
+	function checkSetOptions() {
+		if (bAutoSet.checked) {
+			setOptions();
+		}
+	}
+	updateSetOptionsButton();
+	
+	/* Adding events */
+	bSetOptions.onclick = setOptions;
+	sContents.onchange = checkSetOptions;
+	sTheme.onchange = checkSetOptions;
+	bReadOnly.onchange = checkSetOptions;
+	sTabSize.onchange = checkSetOptions;
+	bFullSel.onchange = checkSetOptions;
+	bWrap.onchange = checkSetOptions;
+	bExpandTab.onchange = checkSetOptions;
+	bAutoSet.onchange = updateSetOptionsButton;
+	
+	/* Adding console actions */
+	bClearLog.onclick = clearConsole;
+	bHideLog.onclick = hideConsole;
 
+	/* Adding testing actions */
+	var tests = {};
 	function test() {
 		log("test"); //$NON-NLS-0$
 	}
+	tests.test = test;
 	
-	function performanceTest() {
-		mTestPerformance[sPerform.value]();
+	function runTest() {
+		tests[sTest.value]();
 	}
-	
-	/* Adding events */
-	bCreateJava.onclick = createJavaSample;
-	bCreateJS.onclick = createJavaScriptSample;
-	bCreateHTML.onclick = createHtmlSample;
-	bCreatePlain.onclick = createPlainTextSample;
-	bCreateBidi.onclick = createBidiTextSample;
-	bCreateLoad.onclick = createLoad;
-	bSetOptions.onclick = setOptions;
-	bClearLog.onclick = clearConsole;
-	bHideLog.onclick = hideConsole;
-	bTest.onclick = test;
-	bPerform.onclick = performanceTest;
+	bTest.onclick = runTest;
+	var option = util.createElement(document, "option"); //$NON-NLS-0$
+	option.setAttribute("value", "test"); //$NON-NLS-0$
+	option.appendChild(document.createTextNode("Test"));
+	sTest.appendChild(option);
 	var prefix = "test"; //$NON-NLS-0$
 	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
-			var option = util.createElement(document, "option"); //$NON-NLS-0$
+			option = util.createElement(document, "option"); //$NON-NLS-0$
 			option.setAttribute("value", property); //$NON-NLS-0$
 			option.appendChild(document.createTextNode(property.substring(prefix.length	)));
-			sPerform.appendChild(option);
+			sTest.appendChild(option);
+			tests[property] = mTestPerformance[property];
 		}
 	}
+	
+	document.body.style.display = "block"; //$NON-NLS-0$
+	setOptions();
  });
