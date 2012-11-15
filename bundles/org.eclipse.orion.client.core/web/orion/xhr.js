@@ -99,6 +99,10 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 		if (typeof options.responseType === 'string') { //$NON-NLS-0$
 			xhr.responseType = options.responseType;
 		}
+		xhr.onprogress = function(progressEvent) {
+			progressEvent.xhr = xhr;
+			d.progress(progressEvent);
+		};
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState === 4) {
 				var result = makeResult(url, options, xhr);
