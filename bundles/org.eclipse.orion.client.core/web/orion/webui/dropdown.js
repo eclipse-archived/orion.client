@@ -78,35 +78,41 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 *
 		 */
 		getItems: function() {
-			return lib.$$array(".dropdownMenu li:not(.dropdownSeparator) a", this._dropdownNode); //$NON-NLS-0$
+			var items = lib.$$array("li:not(.dropdownSeparator) > .dropdownMenuItem", this._dropdownNode, true); //$NON-NLS-0$
+			// We only want the direct li children, not any descendants.  But we can't preface a query with ">"
+			// So we do some reachy filtering here.
+			var filtered = [];
+			for (var i=0; i<items.length; i++) {
+				if (items[i].parentNode.parentNode === this._dropdownNode) {
+					filtered.push(items[i]);
+				}
+			}
+			return filtered;
 		},
 		
 		/**
 		 *
 		 */
 		empty: function() {
-			var items = lib.$$array(".dropdownMenu li", this._dropdownNode); //$NON-NLS-0$
+			var items = lib.$$array("li", this._dropdownNode); //$NON-NLS-0$
 			for (var i=0; i<items.length; i++) {
 				this._dropdownNode.removeChild(items[i]);
 			}
 		},
 		
-		/**
-		 *
-		 */
-		_getFocusItem: function() {
-			return lib.$(".dropdownMenu li:not(.dropdownSeparator) a:focus", this._dropdownNode.parentNode); //$NON-NLS-0$
-		},
 		 
 		/**
 		 * A key is down in the dropdown node
 		 */
 		 _dropdownKeyDown: function(event) {
 			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN) {
-				var items = this.getItems();
-				var focusItem = this._getFocusItem();
+				var items = this.getItems();	
+				var focusItem = document.activeElement;
 				if (items.length && items.length > 0 && focusItem) {
 					var index = items.indexOf(focusItem);
+					if (index < 0) {
+						return;
+					}
 					if (event.keyCode === lib.KEY.UP && index > 0) {
 						index--;
 					} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {

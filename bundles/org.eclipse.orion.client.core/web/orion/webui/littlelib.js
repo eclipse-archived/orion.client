@@ -48,13 +48,15 @@ define(['require'], function(require) {
 	}
 	
 	var KEY = {
+		ENTER: 13,
 		ESCAPE: 27,
+		SPACE: 32,
+		LEFT: 37,
 		UP: 38,
+		RIGHT: 39,
 		DOWN: 40
 	};
-	
-	var NULLHREF = "javascript:;"; //$NON-NLS-0$
-	
+		
 	//return module exports
 	return {
 		$: $,
@@ -62,7 +64,6 @@ define(['require'], function(require) {
 		$$array: $$array,
 		node: node,
 		stop: stop,
-		KEY: KEY,
-		NULLHREF: NULLHREF
+		KEY: KEY
 	};
 });

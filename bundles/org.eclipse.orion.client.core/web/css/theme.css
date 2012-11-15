@@ -22,7 +22,7 @@ a {
 }
 
 a:hover {
-	cursor: hand;
+	cursor: pointer;
 	text-decoration: underline;
 }
 
@@ -43,16 +43,15 @@ a:hover {
 	padding-top: 6px;
 }
 
-.primaryNav a {
+.primaryNav > nav > a {
+	color: #BFBFBF;
 	margin-right: 6px;
 	margin-left: 6px; 
-	color: #BFBFBF;
-	vertical-align: baseline;
 	text-decoration: none;
 }
 
-.primaryNav a:hover {
-	cursor: hand;
+.primaryNav > nav > a:hover, .primaryNav span.dropdownTrigger:hover {
+	cursor: pointer;
 	color: white;
 }
 
@@ -223,18 +222,6 @@ a.currentLocation:hover {
 	font-weight:bold;
 }
 
-.commandMenuLink {
-	display: inline-block;
-	vertical-align: baseline;
-	padding: 2px 0;  
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
-
 .commandLink {
 	display: inline-block;
 	vertical-align: baseline;
@@ -288,24 +275,29 @@ a.currentLocation:hover {
 	width: 5px; height: 3px;
 	background-image: url(../images/core_sprites.png); 
 	display: inline-block; 
-	margin: 2px;
-	vertical-align: middle; 
+	margin: 4px 4px 0;
+	vertical-align: top; 
 }
 
 .dropdownArrowRight {
 	background-position: 0 -654px; 
 	width: 6px; height: 11px;
 	background-image: url(../images/core_sprites.png); 
-	margin: 2px;
+	margin-right: 4px;
 	vertical-align: middle; 
 	float: right;
 }
 
 .dropdownTrigger {
+	font-weight: normal;
+}
+
+.dropdownTrigger a {
+	text-decoration: none;
 }
 
 .dropdownTriggerOpen {
-	border: 1px solid #ddd;
+	
 }
 
 .dropdownMenu {
@@ -332,21 +324,23 @@ a.currentLocation:hover {
 
 .dropdownMenu > li {
 	min-width: 180px;
+	padding: 0 2px;
 	display: block;
 }
 
-.dropdownMenu > li > a {
+.dropdownMenu > li > a, .dropdownMenu > li > span {
 	width: 100%;
 	margin: 0;
+	padding: 4px 0;
 }
 
-.dropdownMenu > li > a:hover {
+.dropdownMenu > li:hover {
 	text-decoration: none;
 	background: #ffeecc;
 }
 
-.dropdownMenu > li > a:focus {
-	text-decoration: none;
+.dropdownMenu > li > a:focus, .dropdownMenu > li > span:focus {
+	outline: 1px dotted #aaa;
 	background: #ffeecc;
 }
 
@@ -358,8 +352,21 @@ a.currentLocation:hover {
 	height: 1px;
 	background-color: #ddd;
 	color: #ddd;
+	padding: 0 !important;
+	margin: 0;
 }
 
+.dropdownMenuItem, .dropdownMenuItem a {
+	display: inline-block;
+	vertical-align: baseline;
+	color: #222;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
 /* dijit overrides related to theming */
 /* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
 /* buttons */

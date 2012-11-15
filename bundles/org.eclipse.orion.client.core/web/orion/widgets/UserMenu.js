@@ -42,18 +42,29 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 			return length;
 		},
 		
+		_makeMenuItem: function(name, click) {
+			var element = document.createElement("span"); //$NON-NLS-0$
+			element.role = "menuitem";  //$NON-NLS-0$
+			element.tabIndex = 0; //$NON-NLS-0$
+			var text = document.createTextNode(name);
+			element.appendChild(text);
+			element.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+			element.addEventListener("click", click, false); //$NON-NLS-0$
+			// onClick events do not register for spans when using the keyboard
+			element.addEventListener("keydown", this, function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.key.ENTER || e.charCode === lib.key.SPACE) {	
+					click();
+				}
+			}, false);
+			return element;
+		},
+		
 		_renderAuthenticatedService: function(key, startIndex){
 			var _self = this;
 			var authService = this.authenticatedServices[key].authService;
-			if(authService && authService.logout){
+			if (authService && authService.logout){
 				var item = document.createElement("li");//$NON-NLS-0$
-				var link = document.createElement("a"); //$NON-NLS-0$
-				link.href = lib.NULLHREF; //$NON-NLS-0$
-				var text = document.createTextNode(messages["Sign Out"]);
-				link.appendChild(text);
-				item.appendChild(link);
-				this._dropdownNode.appendChild(item);
-				link.addEventListener("click", function() { //$NON-NLS-0$
+				var element = this._makeMenuItem(messages["Sign Out"], function() {
 					authService.logout().then(function(){
 						_self.addUserItem(key, authService, _self.authenticatedServices[key].label);
 						localStorage.removeItem(key);
@@ -69,7 +80,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 							window.location = formURL;
 						});
 					});
-				}, false);//$NON-NLS-0$
+				});
+				item.appendChild(element);
+				this._dropdownNode.appendChild(item);
 			}
 		},
 		
@@ -79,33 +92,34 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 						 
 			var item = document.createElement("li");//$NON-NLS-0$
 			var link = document.createElement("a"); //$NON-NLS-0$
+			link.role = "menuitem"; //$NON-NLS-0$
+			link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			link.href = require.toUrl("help/index.jsp"); //$NON-NLS-0$
 			var text = document.createTextNode(messages["Help"]);//$NON-NLS-0$
 			link.appendChild(text);
 			item.appendChild(link);
 			this._dropdownNode.appendChild(item);
-
+			
+			var element;
 			if(this.keyAssistFunction){
 				item = document.createElement("li");//$NON-NLS-0$
-				link = document.createElement("a"); //$NON-NLS-0$
-				link.href = lib.NULLHREF;
-				text = document.createTextNode(messages["Keyboard Shortcuts"]);//$NON-NLS-0$
-				link.appendChild(text);
-				item.appendChild(link);
+				element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
+				item.appendChild(element);
 				this._dropdownNode.appendChild(item);
-				link.addEventListener("click", this.keyAssistFunction, false);//$NON-NLS-0$
 			}
 			
 			// separator
 			item = document.createElement("li"); //$NON-NLS-0$
-			link = document.createElement("a"); //$NON-NLS-0$
-			link.href = lib.NULLHREF;
-			link.classList.add("dropdownSeparator"); //$NON-NLS-0$
-			item.appendChild(link);
+			item.classList.add("dropdownSeparator"); //$NON-NLS-0$
+			element = document.createElement("span"); //$NON-NLS-0$
+			element.classList.add("dropdownSeparator"); //$NON-NLS-0$
+			item.appendChild(element);
 			this._dropdownNode.appendChild(item);
 	
 			item = document.createElement("li");//$NON-NLS-0$
 			link = document.createElement("a"); //$NON-NLS-0$
+			link.role = "menuitem";  //$NON-NLS-0$
+			link.classList.add("dropdownMenuItem");  //$NON-NLS-0$
 			link.href = require.toUrl("settings/settings.html"); //$NON-NLS-0$
 			text = document.createTextNode(messages["Settings"]);//$NON-NLS-0$
 			link.appendChild(text);
