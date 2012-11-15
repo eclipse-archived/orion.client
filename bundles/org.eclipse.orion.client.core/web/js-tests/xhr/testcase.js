@@ -123,6 +123,11 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 			if (typeof new XMLHttpRequest().timeout !== "undefined") {
 				this.dispatchEvent({type: 'timeout'});
 			}
+		},
+		_fakeProgressEvent: function(event) {
+			if (typeof this.onprogress === 'function') {
+				this.onprogress(event);
+			}
 		}
 	};
 	EventTarget.addMixin(MockXMLHttpRequest.prototype);
@@ -348,6 +353,23 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		alreadyOpenXhr.open('GET', '/foo');
 		// Since request is already OPEN the next call to open() will throw, and xhr should catch & reject
 		return xhr('GET', '/bar', null, alreadyOpenXhr).then(fail, succeed);
+	};
+
+	tests['test progress event'] = function() {
+		//assert the Deferred's progress notification is invoked.
+		var progressXhr = new OkXhr();
+		var deferred = new Deferred();
+		xhr('GET', '/foobar', {}, progressXhr).then(null, null, function(progressEvent) {
+			try {
+				assert.ok(progressEvent);
+				assert.equal(progressEvent.loaded, 31337);
+				deferred.resolve();
+			} catch (e) {
+				deferred.reject(e);
+			}
+		});
+		progressXhr._fakeProgressEvent({loaded: 31337});
+		return deferred;
 	};
 
 return tests;
