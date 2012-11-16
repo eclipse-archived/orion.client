@@ -31,8 +31,8 @@
 		<div class="logo">
 			<img src="logo.png"/>
 		</div>
-		<div class='group'>
-			<b>Options</b>
+		<div id="options" role="group" class="group">
+			<label for="options"><b>Options</b></label>
 			<div>
 				<select id="contentsSelect">
 					<option value="createJavaScriptSample">JavaScript</option>
@@ -99,17 +99,17 @@
 			</div>
 			<button id='setOptions'>Set Options</button>
 		</div>
-		<div class='group'>
-			<b>Testing</b>
+		<div id="testing" role="group" class='group'>
+			<label for="testing"><b>Testing</b></label>
 			<div>
 				<select id="testSelect"></select>
 				<label for="testSelect">Test</label>
 			</div>
 			<button id='test'>Run Test</button>
 		</div>
-		<div id='consoleParent' class='group' style='display:none;'>
-			<label for="console"><b>Console</b></label>
-			<div id='console' class="console" tabindex="0" role="textbox" aria-multiline="true" aria-readonly="true"></div>
+		<div id='consoleParent' role="group" class='group' style='display:none;'>
+			<label for="consoleParent"><b>Console</b></label>
+			<div id='console' class="console" tabindex="0" role="textbox" aria-label="Console" aria-multiline="true" aria-readonly="true"></div>
 			<button id='clearLog'>Clear</button>
 			<button id='hideLog'>Hide</button>
 		</div>
