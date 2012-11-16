@@ -38,6 +38,11 @@ define(['require'], function(require) {
 		return theNode;
 	}
 	
+	function contains(parent, child) {
+		return parent === child || Boolean(parent.compareDocumentPosition(child) & 16);
+	}
+	
+	// TODO check IE10 to see if necessary
 	function stop(event) {
 		if (window.document.all) { 
 			event.keyCode = 0;
@@ -63,6 +68,7 @@ define(['require'], function(require) {
 		$$: $$,
 		$$array: $$array,
 		node: node,
+		contains: contains,
 		stop: stop,
 		KEY: KEY
 	};
