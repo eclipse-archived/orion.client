@@ -1146,7 +1146,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				} else {
 					image = addImageToElement(this, element, name);
 					// ensure there is accessible text describing this image
-					element.setAttribute("aria-label", this.name); //$NON-NLS-0$
+					if (this.name) {
+						element.setAttribute("aria-label", this.name); //$NON-NLS-0$
+					}
 				}
 				this._hookCallback(element, context);
 			}
@@ -1228,7 +1230,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			var element = document.createElement("span"); //$NON-NLS-0$
 			element.tabIndex = 0; 
 			element.id = this.name;
-			this._hookCallback(element, context);
 			var text = document.createTextNode(this.name);
 			element.appendChild(text);
 			if (aClass) {
@@ -1317,10 +1318,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					var text = document.createTextNode(choice.name); //$NON-NLS-0$
 					node.appendChild(text);
 					itemNode.appendChild(node);
-					node.addEventListener("click", choice.callback.bind(choice), false); //$NON-NLS-0$
+					node.choice = choice;
+					node.addEventListener("click", function(event) { //$NON-NLS-0$
+						if (event.target.choice) {
+							event.target.choice.callback.call(event.target.choice, items);
+						}
+					}, false); 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
 						if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
-							choice.callback.bind(choice);
+							if (event.target.choice) {
+								event.target.callback.call(event.target.choice, items);
+							}
 						}
 					}, false);
 				} else {  // anything not named is a separator

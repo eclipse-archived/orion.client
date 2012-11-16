@@ -34,14 +34,31 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._triggerNode = lib.$(".dropdownTrigger", this._dropdownNode.parentNode); //$NON-NLS-0$
 			if (!this._triggerNode) { throw "no dom node for dropdown trigger found"; } //$NON-NLS-0$
 			this._populate = options.populate;
-			this._triggerNode.addEventListener("click", this.toggle.bind(this), false); //$NON-NLS-0$
+			var self = this;
+			
+			// click on trigger opens.
+			this._triggerNode.addEventListener("click", function(event) { //$NON-NLS-0$
+				self.toggle();
+				lib.stop(event);
+			}, false);
+			
+			// auto dismissal.  Click anywhere else means close.
+			document.addEventListener("click", function(event) { //$NON-NLS-0$
+				if (event.target !== self._triggerNode && !lib.contains(self._dropdownNode, event.target)) {
+					self.close(); 
+				}
+				// don't stop event
+			}, true); //$NON-NLS-0$
+			
+			// keys
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
+			
 		},
 		
 		/**
 		 * Toggle the open/closed state of the dropdown.
 		 */			
-		toggle: function() {
+		toggle: function(event) {
 			if (this._triggerNode.classList.contains("dropdownTriggerOpen")) { //$NON-NLS-0$
 				this.close();
 			} else {
@@ -105,24 +122,32 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 * A key is down in the dropdown node
 		 */
 		 _dropdownKeyDown: function(event) {
-			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN) {
+			if (event.keyCode === lib.KEY.UP || event.keyCode === lib.KEY.DOWN || event.keyCode === lib.KEY.RIGHT || event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.LEFT) {
 				var items = this.getItems();	
 				var focusItem = document.activeElement;
 				if (items.length && items.length > 0 && focusItem) {
 					var index = items.indexOf(focusItem);
-					if (index < 0) {
-						return;
+					if (index >= 0) {
+						if (event.keyCode === lib.KEY.UP && index > 0) {
+							index--;
+							items[index].focus();
+						} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
+							index++;
+							items[index].focus();
+						} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.RIGHT) {
+							if (focusItem.classList.contains("dropdownTrigger") && focusItem.dropdown) { //$NON-NLS-0$
+								focusItem.dropdown.open();
+								lib.stop(event);
+							}
+						} else if (event.keyCode === lib.KEY.LEFT && focusItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
+							this.close();
+						}
 					}
-					if (event.keyCode === lib.KEY.UP && index > 0) {
-						index--;
-					} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
-						index++;
-					}
-					items[index].focus();
 				}
 				lib.stop(event);
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
 				this.close();
+				lib.stop(event);
 			}
 		 }
 	};
