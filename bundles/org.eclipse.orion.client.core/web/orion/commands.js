@@ -768,9 +768,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		 * @param {String|DOMElement} parent The id or DOM node that should be emptied.
 		 */
 		destroy: function(parent) {
-			if (typeof(parent) === "string") { //$NON-NLS-0$
-				parent = dojo.byId(parent);
-			}
+			parent = lib.node(parent);
 			if (!parent) { 
 				throw "no parent";  //$NON-NLS-0$
 			}
@@ -887,9 +885,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						// group within a menu
 						if (group.title) {
 							var trigger = dojo.create("li", {}, parent); //$NON-NLS-0$
-							var choiceMenu = this._createDropdownMenu(trigger, group.title, true);
-							commandService._render(childContributions, choiceMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
-							if (choiceMenu.menu.childNodes.length === 0) {
+							var subMenu = this._createDropdownMenu(trigger, group.title, true);
+							commandService._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+							if (subMenu.menu.childNodes.length === 0) {
 								parent.removeChild(trigger);
 							}
 						} else {  
