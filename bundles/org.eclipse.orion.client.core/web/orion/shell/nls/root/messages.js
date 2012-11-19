@@ -24,6 +24,8 @@ define({
 	"Clears the shell screen": "Clears the shell screen",
 	"'${0}' is not valid": "'${0}' is not valid",
 	"Error: ${0}": "Error: ${0}",
+	"NoResponseFromServer": "No response from server for ${0}. Check your internet connection and try again.",
+	"ServerError": "Server error: ${0} returned ${1} ${2}",
 	"Succeeded": "Succeeded",
 	"Aborted": "Aborted",
 	"The name of the plug-in": "The name of the plug-in",
