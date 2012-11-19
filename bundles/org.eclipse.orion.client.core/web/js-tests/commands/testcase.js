@@ -8,19 +8,26 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define dojo dijit orion window document */
+/*global define orion window document */
 
-define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/selection', 'dijit/Menu'], 
-			function(require, dojo, dijit, assert, mServiceregistry, mCommands, mSelection) {
+define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/selection', 'orion/Deferred', 'orion/webui/littlelib', 'orion/webui/dropdown'], 
+			function(require, assert, mServiceregistry, mCommands, mSelection, Deferred, lib, mDropdown) {
 			
 	/**
 	 * dom elements we need
 	 */
-	var parentDiv = dojo.create("div");
-	var parentUl = dojo.create("ul");
-	var parentMenu = new dijit.Menu({
-		style: "display: none;"
-	});
+	var parentDiv = document.createElement("div");
+	var parentUl = document.createElement("ul");
+	var menuDiv = document.createElement("div");
+	document.body.appendChild(menuDiv);
+	var dropdownTrigger = document.createElement("span");
+	menuDiv.appendChild(dropdownTrigger);
+	dropdownTrigger.classList.add("dropdownTrigger");
+	dropdownTrigger.classList.add("commandButton");
+	var dropdownMenu = document.createElement("ul");
+	menuDiv.appendChild(dropdownMenu);
+	dropdownMenu.classList.add("dropdownMenu");
+	var parentMenu = new mDropdown.Dropdown({dropdown: dropdownMenu});
 		
 	/**
 	 * mock services
@@ -65,7 +72,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1;
 
 	var visibleWhenAllValid = function(items) {
-		if (dojo.isArray(items)) {
+		if (Array.isArray(items)) {
 			for (var i=0; i<items.length; i++) {
 				if (!items[0].IsValid) {
 					return false;
@@ -78,7 +85,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	};
 	
 	var visibleWhenOnlyOne = function(items) {
-		if (dojo.isArray(items)) {
+		if (Array.isArray(items)) {
 			return items.length === 1 && items[0].IsValid;
 		} else {
 			return items.IsValid;
@@ -196,13 +203,9 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	function init(testId) {
 		window.console.log("Initializing data for test " + testId);
 		contributionId = testId;
+		parentMenu.empty();
 		commandService.destroy(parentDiv);
 		commandService.destroy(parentUl);
-		parentMenu.focusedChild = null;
-		dojo.forEach(parentMenu.getChildren(), function(child) {
-			parentMenu.removeChild(child);
-			child.destroy();
-		});
 		initializeItems();
 	}
 	
@@ -238,7 +241,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.link", 3);
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 3);
-		assert.equal(dojo.query("a", parentDiv).length, 1);
+		assert.equal(lib.$$("a", parentDiv).length, 1);
 	};
 	
 	/**
@@ -251,7 +254,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.link", 3);
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "tool");
 		assert.equal(parentDiv.childNodes.length, 3);
-		assert.equal(dojo.query("a", parentDiv).length, 1);
+		assert.equal(lib.$$("a", parentDiv).length, 1);
 	};
 	
 	/**
@@ -263,8 +266,8 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 3);
 		commandService.renderCommands(contributionId, parentDiv, allItems, window, "tool");
 		assert.equal(parentDiv.childNodes.length, 2);
-		assert.equal(dojo.query(".commandSprite", parentDiv).length, 1);
-		assert.equal(dojo.query("..commandMissingImageButton", parentDiv).length, 1);
+		assert.equal(lib.$$(".commandSprite", parentDiv).length, 1);
+		assert.equal(lib.$$(".commandMissingImageButton", parentDiv).length, 1);
 	};
 	
 	/**
@@ -275,8 +278,8 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.delete", 1);
 		commandService.registerCommandContribution(contributionId, "test.new", 2);
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 3);
-		commandService.renderCommands(contributionId, parentMenu, item1, window, "menu");
-		assert.equal(parentMenu.getChildren().length, 3);
+		commandService.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
+		assert.equal(parentMenu.getItems().length, 3);
 	};
 	
 	/**
@@ -290,7 +293,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 1, "testGroup2");
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
-		assert.equal(dojo.query(".commandSeparator", parentDiv).length, 1);
+		assert.equal(lib.$$(".commandSeparator", parentDiv).length, 1);
 	};
 	
 	/**
@@ -303,7 +306,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
-		assert.equal(dojo.query(".commandMenu", parentDiv).length, 1);
+		assert.equal(lib.$$(".commandButton.dropdownTrigger", parentDiv).length, 1);
 	};
 	
 	/**
@@ -315,8 +318,8 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
 		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup");
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup");
-		commandService.renderCommands(contributionId, parentMenu, item1, window, "menu");
-		assert.equal(parentMenu.getChildren().length, 1);  // everything is in a submenu
+		commandService.renderCommands(contributionId, dropdownMenu, item1, window, "menu");
+		assert.equal(parentMenu.getItems().length, 1);  // everything is in a submenu
 	};
 	
 	/**
@@ -330,11 +333,10 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.delete", 1, "testGroup");
 		commandService.registerCommandContribution(contributionId, "test.new", 2, "testGroup/testGroup2");
 		commandService.registerCommandContribution(contributionId, "test.noIcon", 3, "testGroup/testGroup2/testGroup3");
-		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
-		assert.equal(dojo.query(".commandMenu", parentDiv).length, 1);  // just one menu since the others should be grouped
-		var topMenuNode = dojo.query(".commandMenu", parentDiv).at(0);
-		// we could traverse further down in this menu if we had an id set to retrieve the dijit but currently the 
-		// command framework does not set an id on auto generated menus.
+		commandService.renderCommands(contributionId, menuDiv, item1, window, "menu");
+		assert.equal(lib.$$(".dropdownTrigger", menuDiv).length, 4);  // four menus
+		assert.equal(lib.$$(".dropdownTrigger.dropdownMenuItem", menuDiv).length, 3);  // three sub menus
+		assert.equal(lib.$$(".dropdownTrigger.commandButton", menuDiv).length, 1);  // one top menu
 	};
 	
 	/**
@@ -373,10 +375,10 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.registerCommandContribution(contributionId, "test.new", 2);
 		commandService.registerCommandContribution(contributionId, "test.link", 3);
 		commandService.renderCommands(contributionId, parentUl, item1, window, "button");
-		assert.equal(dojo.query("a", parentUl).length, 1);
-		assert.equal(dojo.query("li > a", parentUl).length, 1);
+		assert.equal(lib.$$("a", parentUl).length, 1);
+		assert.equal(lib.$$("li > a", parentUl).length, 1);
 		assert.equal(parentUl.childNodes.length, 3);
-		assert.equal(dojo.query("li", parentUl).length, 3);
+		assert.equal(lib.$$("li", parentUl).length, 3);
 	};	
 	
 	/**
@@ -390,7 +392,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		hitCounters = {};
 		commandService.runCommand("test.parameters");
 		commandService.runCommand("test.parameters");
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
 				assert.equal(hitCounters["test.parameters"], 2);
@@ -415,7 +417,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		assert.equal(parentDiv.childNodes.length, 1);
 		hitCounters["test.delete"] = 0;
 		fakeKeystroke('z');
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
 				assert.equal(hitCounters["test.delete"], 1);
@@ -437,7 +439,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		assert.equal(parentDiv.childNodes.length, 0);
 		hitCounters["test.noIcon"] = 0;
 		fakeKeystroke('z', true, true);
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
 				assert.equal(hitCounters["test.noIcon"], 1);
@@ -458,7 +460,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 1);
 		commandService.processURL("#,foo=fred");
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
 				assert.equal(parameters.lastValueForName, "fred");
@@ -479,7 +481,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 		commandService.renderCommands(contributionId, parentDiv, item1, window, "button");
 		assert.equal(parentDiv.childNodes.length, 0);
 		commandService.processURL("#,foo=wilma");
-		var d = new dojo.Deferred();
+		var d = new Deferred();
 		window.setTimeout(function(){
 			try {
 				assert.equal(parameters.lastValueForName, "wilma");

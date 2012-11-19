@@ -112,8 +112,11 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 */
 		empty: function() {
 			var items = lib.$$array("li", this._dropdownNode); //$NON-NLS-0$
+			// We only want the direct li children, not any descendants. 
 			for (var i=0; i<items.length; i++) {
-				this._dropdownNode.removeChild(items[i]);
+				if (items[i].parentNode === this._dropdownNode) {
+					items[i].parentNode.removeChild(items[i]);
+				}
 			}
 		},
 		
