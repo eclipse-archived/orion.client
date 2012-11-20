@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'dijit', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton' ], 
-	function(messages, require, mAnnotations, dojo, dijit, mCommands, mRegex, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils' ], 
+	function(messages, require, mAnnotations, dojo, mCommands, mRegex, mSearchUtils){
 	
 var orion = orion || {};
 
@@ -81,19 +81,14 @@ orion.TextSearcher = (function() {
 				that.createButton(messages["Replace"], parentDiv, function() {that.replace();});				
 				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	
 
-				var optionMenu = dijit.byId("searchOptMenu"); //$NON-NLS-0$
-				if (optionMenu) {
-					optionMenu.destroy();
-				}
-				var newMenu = new dijit.Menu({
-					style : "display: none;", //$NON-NLS-0$
-					id : "searchOptMenu" //$NON-NLS-0$
-				});
-				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Show all"],
-					checked: that._showAllOccurrence,
-					onChange : function(checked) {
+				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
+				parentDiv.appendChild(optionsDiv);
+				optionsDiv.classList.add("findOptionsDiv"); //$NON-NLS-0$
+				var optionMenu = that._commandService._createDropdownMenu(optionsDiv, messages['Options']);
+				optionMenu.menuButton.classList.add("findSlideoutMenu"); //$NON-NLS-0$
+				that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Show all"], that._showAllOccurrence,
+					function(event) {
+						var checked = event.target.checked;
 						that.setOptions({showAllOccurrence: checked});
 						if(checked){
 							that.markAllOccurrences(true);
@@ -103,62 +98,45 @@ orion.TextSearcher = (function() {
 								annotationModel.removeAnnotations(mAnnotations.AnnotationType.ANNOTATION_MATCHING_SEARCH);
 							}
 						}
-					}
-				}));
+						optionMenu.dropdown.close(true);
+					});
 				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Case sensitive"],
-					checked: !that._ignoreCase,
-					onChange : function(checked) {
-						that.setOptions({ignoreCase: !checked});
-					}
-				}));
+				that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Case sensitive"], !that._ignoreCase,
+					function(event) {
+						that.setOptions({ignoreCase: !event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
 				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Wrap search"],
-					checked: that._wrapSearch,
-					onChange : function(checked) {
-						that.setOptions({wrapSearch: checked});
-					}
-				}));
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Incremental search"],
-					checked: that._incremental,
-					onChange : function(checked) {
-						that.setOptions({incremental: checked});
-					}
-				}));
+				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Wrap search"], that._wrapSearch,
+					function(event) {
+						that.setOptions({wrapSearch: event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
+					
+				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Incremental search"], that._incremental,
+					function(event) {
+						that.setOptions({incremental: event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
+					
+				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Whole Word"], that._wholeWord,
+					function(event) {
+						that.setOptions({wholeWord: event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
+					
+				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Regular expression"], that._useRegExp,
+					function(event) {
+						that.setOptions({useRegExp: event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
 				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Whole Word"],
-					checked: that._wholeWord,
-					onChange : function(checked) {
-						that.setOptions({wholeWord: checked});
-					}
-				}));
-				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Regular expression"],
-					checked: that._useRegExp,
-					onChange : function(checked) {
-						that.setOptions({useRegExp: checked});
-					}
-				}));
-				
-				newMenu.addChild(new dijit.CheckedMenuItem({
-					label: messages["Find after replace"],
-					checked: that._findAfterReplace,
-					onChange : function(checked) {
-						that.setOptions({findAfterReplace: checked});
-					}
-				}));
-				
-				var menuButton = new dijit.form.DropDownButton({
-					label : messages["Options"],
-					dropDown : newMenu
-				});
-				dojo.addClass(menuButton.domNode, "findSlideoutMenu"); //$NON-NLS-0$
-				dojo.place(menuButton.domNode, parentDiv, "last"); //$NON-NLS-0$
+				that._commandService._generateCheckedMenuItem(optionMenu.menu,  messages["Find after replace"], that._findAfterReplace,
+					function(event) {
+						that.setOptions({findAfterReplace: event.target.checked});
+						optionMenu.dropdown.close(true);
+					});
+					
 				return searchStringDiv;
 			},
 			function(){that.closeUI();});

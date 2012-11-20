@@ -978,6 +978,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		},
 		
 		_createDropdownMenu: function(parent, name, nested, populateFunction) {
+			parent = lib.node(parent);
 			var destroyButton, arrowClass, extraClass;
 			var menuButton = dojo.create("span"); //$NON-NLS-0$
 			menuButton.classList.add("dropdownTrigger"); //$NON-NLS-0$
@@ -1013,7 +1014,24 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			var newMenu = dojo.create("ul", {}, menuParent); //$NON-NLS-0$
 			dojo.addClass(newMenu, "dropdownMenu"); //$NON-NLS-0$
 			menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
-			return {menuButton: menuButton, menu: newMenu, destroyButton: destroyButton};
+			newMenu.dropdown = menuButton.dropdown;
+			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
+		},
+		
+		_generateCheckedMenuItem: function(dropdown, name, checked, onChange) {
+			var itemNode = dojo.create("li", {}, dropdown); //$NON-NLS-0$
+			var node = document.createElement("input"); //$NON-NLS-0$
+			node.type = "checkbox";//$NON-NLS-0$
+			node.role = "menuitem"; //$NON-NLS-0$
+			node.value = checked.toString();
+			node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+			node.classList.add("checkedMenuItem"); //$NON-NLS-0$
+			var span = document.createElement("span"); //$NON-NLS-0$
+			var text = document.createTextNode(name); //$NON-NLS-0$
+			span.appendChild(text);
+			itemNode.appendChild(node);
+			itemNode.appendChild(span);
+			node.addEventListener("change", onChange, false); //$NON-NLS-0$
 		},
 		
 		_generateMenuSeparator: function(dropdown) {
@@ -1190,6 +1208,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				}
 			} else {
 				element = this._makeButton(parent, context, "commandButton"); //$NON-NLS-0$
+				this._hookCallback(element, context);
 			}
 			context.domParent = parent;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
@@ -1204,10 +1223,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_addMenuItem: function(parent, context, domNodeWrapperList) {
 			context.domParent = parent;
 			var element;
+			var dropdown = parent.dropdown;
 			if (this.hrefCallback) {
 				element = this._makeLink(parent, context, "dropdownMenuItem"); //$NON-NLS-0$
 			} else {
 				element = this._makeButton(parent, context, "dropdownMenuItem"); //$NON-NLS-0$
+				if (this.callback) {
+					this._hookCallback(element, context, function() {dropdown.close(true);});
+				}
 			}
 			element.role = "menuitem";  //$NON-NLS-0$
 			
@@ -1240,9 +1263,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					commandParent: parent,
 					commandService: context.commandService
 				});
-			}
-			if (!this.hrefCallback && this.callback) {
-				this._hookCallback(element, context);
 			}
 			context.domNode = element;
 			return element;
@@ -1286,16 +1306,21 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		/*
 		 * stateless helper
 		 */
-		_hookCallback: function(domNode, context) {
-			dojo.connect(domNode, "onclick", this, function() { //$NON-NLS-0$
+		_hookCallback: function(domNode, context, before, after) {
+			domNode.addEventListener("click", function(e) { //$NON-NLS-0$
+				if (before) { before(); }
 				context.commandService._invoke(context);
-			});
-			// onClick events do not register for spans when using the keyboard
-			dojo.connect(domNode, "onkeypress", this, function(e) { //$NON-NLS-0$
-				if (e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {						
+				if (after) { after(); }
+				lib.stop(e);
+			}, false);
+			domNode.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+					if (before) { before(); }
 					context.commandService._invoke(context);					
+					if (after) { after(); }
+					lib.stop(e);
 				}				
-			});
+			}, false);
 		},
 		
 		/**
@@ -1325,7 +1350,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
 						if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
 							if (event.target.choice) {
-								event.target.callback.call(event.target.choice, items);
+								event.target.choice.callback.call(event.target.choice, items);
 							}
 						}
 					}, false);

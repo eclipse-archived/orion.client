@@ -23,3 +23,44 @@
 .outlineExplorer {
 	overflow-y: none;
 }
+
+.findOptionsDiv {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+
+.findSlideoutButton {
+	color: #222;
+	border: 1px solid transparent;
+	text-align: center;
+	vertical-align: top;
+    cursor: pointer;
+    display: inline-block;
+    padding: 2px;
+    margin-left: 8px;
+    border-radius:1px;
+    font-weight: normal;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.findSlideoutMenu {
+	color: #222;
+	background-color: transparent;
+	border: 1px solid transparent;
+	padding: 2px;
+    font-weight: normal;
+    margin: 0;
+    margin-left: 8px;
+	text-align: center;
+}
+
+.findSlideoutButton:hover {
+	background-color: #efefef;
+	border: 1px solid #222;
+}

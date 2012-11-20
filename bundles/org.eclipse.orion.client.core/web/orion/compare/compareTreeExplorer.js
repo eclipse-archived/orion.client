@@ -353,29 +353,13 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 
 	CompareTreeExplorer.prototype._addOptions = function() {
 		var that = this;
-		var optionMenu = dijit.byId("compareTreeOptMenu"); //$NON-NLS-0$
-		if (optionMenu) {
-			optionMenu.destroy();
-		}
-		var newMenu = new dijit.Menu({
-			style : "display: none;", //$NON-NLS-0$
-			id : "compareTreeOptMenu" //$NON-NLS-0$
-		});
-		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Sort by folders"],
-			checked: false,
-			onChange : function(checked) {
-				that._sortByFolder = checked;
+		var optionMenu = that._commandService._createDropdownMenu("pageNavigationActions", messages['Options']);
+		that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Sort by folders"], false,
+			function(event) {
+				that._sortByFolder = event.target.checked;
 				that._renderUI();
-			}
-		}));
-		var menuButton = new dijit.form.DropDownButton({
-			label : messages["Options"],
-			dropDown : newMenu
-		});
-		dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
-		dojo.place(menuButton.domNode, "pageNavigationActions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				optionMenu.dropdown.close(true);
+			});
 	};
 
 	CompareTreeExplorer.prototype._renderUI = function() {

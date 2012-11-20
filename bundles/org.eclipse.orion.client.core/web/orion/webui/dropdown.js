@@ -42,6 +42,16 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				lib.stop(event);
 			}, false);
 			
+			// if trigger node is not key enabled...
+			if (this._triggerNode.tagName.toLowerCase() === "span") { //$NON-NLS-0$
+				this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
+					if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
+						self.toggle();
+						lib.stop(event);
+					}
+				}, false);
+			}
+			
 			// auto dismissal.  Click anywhere else means close.
 			document.addEventListener("click", function(event) { //$NON-NLS-0$
 				if (event.target !== self._triggerNode && !lib.contains(self._dropdownNode, event.target)) {
@@ -85,10 +95,12 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		/**
 		 * Close the dropdown.
 		 */			
-		close: function() {
+		close: function(restoreFocus) {
 			this._triggerNode.classList.remove("dropdownTriggerOpen"); //$NON-NLS-0$
 			this._dropdownNode.classList.remove("dropdownMenuOpen"); //$NON-NLS-0$
-			this._triggerNode.focus();
+			if (restoreFocus) {
+				this._triggerNode.focus();
+			}
 		},
 		
 		/**
@@ -143,13 +155,13 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 								lib.stop(event);
 							}
 						} else if (event.keyCode === lib.KEY.LEFT && focusItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
-							this.close();
+							this.close(true);
 						}
 					}
 				}
 				lib.stop(event);
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
-				this.close();
+				this.close(true);
 				lib.stop(event);
 			}
 		 }
