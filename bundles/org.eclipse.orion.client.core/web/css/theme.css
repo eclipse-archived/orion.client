@@ -305,7 +305,7 @@ a.currentLocation:hover {
 	background-color: #fbfbfb;
 	display: none;
 	z-index: 150;
-	min-width: 180px;
+	min-width: 120px;
 	position: absolute;
 	list-style-type: none;
 	border-radius: 3px;
@@ -323,7 +323,7 @@ a.currentLocation:hover {
 }
 
 .dropdownMenu > li {
-	min-width: 180px;
+	min-width: 120px;
 	padding: 0 2px;
 	display: block;
 }
@@ -339,7 +339,7 @@ a.currentLocation:hover {
 	background: #ffeecc;
 }
 
-.dropdownMenu > li > a:focus, .dropdownMenu > li > span:focus {
+.dropdownMenu > li > *:focus {
 	outline: 1px dotted #aaa;
 	background: #ffeecc;
 }
@@ -367,6 +367,12 @@ a.currentLocation:hover {
 	-ms-user-select: none;
 	user-select: none;
 }
+
+.checkedMenuItem {
+	margin: 4px 6px 2px 0;
+	vertical-align: bottom;
+}
+
 /* dijit overrides related to theming */
 /* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
 /* buttons */

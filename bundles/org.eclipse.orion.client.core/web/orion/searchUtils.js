@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/editor/regex', 'orion/commands'], function(messages, require, dojo, dijit, mRegex, mCommands) {
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/editor/regex', 'orion/commands'], function(messages, require, dojo, mRegex, mCommands) {
 
 var exports = exports || {};
 
@@ -747,83 +747,6 @@ exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, ad
 	} else {
 		window.alert(messages["Can't search: no search service is available"]);
 	}
-};
-
-exports.searchUtils._addSearchOptions = function(serviceRegistry, commandService, searcher) {
-	exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
-		var optionMenu = dijit.byId("searchOptionsDropDown"); //$NON-NLS-0$
-		if (optionMenu) {
-			optionMenu.destroy();
-		}
-		var newMenu = new dijit.Menu({
-			style: "display: none;padding:0px;border-radius:3px;", //$NON-NLS-0$
-			id : "searchOptionsMenu" //$NON-NLS-0$
-		});
-		dojo.addClass(newMenu.domNode, "commandMenu"); //$NON-NLS-0$
-		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Open in new tab"],
-			checked: openInNewTab,
-			onChange : function(checked) {
-				exports.searchUtils.setOpenSearchPref(serviceRegistry, checked);
-			}
-		}));
-		newMenu.addChild(new dijit.MenuSeparator());
-		
-		newMenu.addChild(new dijit.CheckedMenuItem({
-			label: messages["Regular expression"],
-			checked: false,
-			onChange : function(checked) {
-				searcher.useRegEx = checked;
-			}
-		}));
-		newMenu.addChild(new dijit.MenuSeparator());
-		
-		//Add the recent searches as popups
-		exports.searchUtils._addSearchPopUp(newMenu,  messages["Recent searches"], serviceRegistry, "recentSearch", function(theSearch){ //$NON-NLS-0$
-			return createSearchLink(searcher.createSearchQuery(theSearch.name, false, null, false, null, theSearch.regEx), theSearch.name);
-		});
-		//Add the saved searches as popups
-		exports.searchUtils._addSearchPopUp(newMenu,  messages["Saved searches"], serviceRegistry, "search", function(theSearch){ //$NON-NLS-0$
-			return createSearchLink(theSearch.query, theSearch.name);
-		});
-		
-		var menuButton = new orion.widgets.UserMenuDropDown({
-			label : messages["Search options"],
-			showLabel: false,
-			id : "searchOptionsDropDown", //$NON-NLS-0$
-			dropDown : newMenu
-		});
-		if(menuButton.valueNode) {  // accessibility, remove value node so screen reader does not stop there.
-			dojo.destroy(menuButton.valueNode);
-		}
-		if(menuButton.titleNode && dojo.attr(menuButton.titleNode, "title")) { //$NON-NLS-0$
-			dojo.removeAttr(menuButton.titleNode, "title"); //$NON-NLS-0$
-		}
-	
-		dojo.addClass(menuButton.domNode, "bannerMenu"); //$NON-NLS-0$
-		dojo.addClass(menuButton.domNode, "bannerMenuSearchOptions"); //$NON-NLS-0$
-		dojo.place(menuButton.domNode, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
-	});
-};
-
-exports.searchUtils._addSearchPopUp = function(mainMenu, popUpLabel, serviceRegistry, type, makeLabelFunc){
-	var choicesMenu = new dijit.Menu({
-		style: "display: none;" //$NON-NLS-0$
-	});
-	var popup = new dijit.PopupMenuItem({
-		label: popUpLabel,
-		popup: choicesMenu
-	});
-	mainMenu.addChild(popup);
-	exports.searchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
-		return makeLabelFunc(theSearch);
-	});
-	dojo.connect(mainMenu, "_openPopup", popup, function(event) { //$NON-NLS-0$
-		exports.searchUtils.populateSearchMenu(serviceRegistry, choicesMenu, type, function(theSearch){
-			return makeLabelFunc(theSearch);
-		});
-	});
 };
 
 return exports.searchUtils;

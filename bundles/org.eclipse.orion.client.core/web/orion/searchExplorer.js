@@ -1263,38 +1263,22 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		var optionMenu = dijit.byId("globalSearchOptMenu"); //$NON-NLS-0$
-		if (optionMenu) {
-			optionMenu.destroy();
-		}
-		var newMenu = new dijit.Menu({
-			style : "display: none;", //$NON-NLS-0$
-			id : "globalSearchOptMenu" //$NON-NLS-0$
-		});
+		var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
+			if(!that.model.replaceMode()){
+				that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
+					function(event) {
+						that.sortWithName(event.target.checked);
+						window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);  // so user can see the check take effect briefly before it closes
+					});
+			} else {
+				that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
+					function(event) {
+						that.toggleCompare(event.target.checked);
+						window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);
+					});
+			}		
+		}); 
 		
-		if(!this.model.replaceMode()){
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: messages["Sort by Name"],
-				checked: that.model.sortByName,
-				onChange : function(checked) {
-					that.sortWithName(checked);
-				}
-			}));
-		} else {
-			newMenu.addChild(new dijit.CheckedMenuItem({
-				label: messages["Compare changes"],
-				checked: true,
-				onChange : function(checked) {
-					that.toggleCompare(checked);
-				}
-			}));
-		}
-		var menuButton = new dijit.form.DropDownButton({
-			label : messages['Options'],
-			dropDown : newMenu
-		});
-		dojo.addClass(menuButton.domNode, "commandMenu"); //$NON-NLS-0$
-		dojo.place(menuButton.domNode, "pageNavigationActions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
 	SearchResultExplorer.prototype.reportStatus = function(message) {
