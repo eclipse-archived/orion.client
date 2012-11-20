@@ -11,7 +11,7 @@
  *******************************************************************************/
 
 /*global define window*/
-/*jslint browser:true*/
+/*jslint browser:true sub:true*/
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
@@ -22,17 +22,23 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences;
 
-	var resolveError = function(result, xhrResult) {
+	var resolveError = function(promise, xhrResult) {
 		var error = xhrResult;
 		try {
 			error = JSON.parse(xhrResult.responseText);
 		} catch (e) {}
 		if (error && error.Message) {
-			error = error.Message;
+			error = i18nUtil.formatMessage(messages["Error: ${0}"], error.Message);
+		} else if (typeof xhrResult.url === "string") {
+			if (xhrResult.status === 0) {
+				error = i18nUtil.formatMessage(messages["NoResponseFromServer"], xhrResult.url);
+			} else {
+				error = i18nUtil.formatMessage(messages["ServerError"], xhrResult.url, xhrResult.status, xhrResult.statusText);
+			}
 		}
 		var errNode = document.createElement("span"); //$NON-NLS-0$
-		errNode.textContent = i18nUtil.formatMessage(messages["Error: ${0}"], error);
-		result.resolve(errNode);
+		errNode.textContent = error;
+		promise.resolve(errNode);
 	};
 
 	/* general functions for working with file system nodes */
