@@ -10,16 +10,7 @@
  ******************************************************************************/
 /*global window define document localStorage */
 
-define(['require', 'dojo'], function(require, dojo) {
-
-	function stop(event) {
-		if (window.document.all) { 
-			event.keyCode = 0;
-		} else { 
-			event.preventDefault();
-			event.stopPropagation();
-		}
-	}
+define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
 	/**
 	 * Constructs a new Splitter with the given options.  A splitter manages the layout
@@ -40,23 +31,17 @@ define(['require', 'dojo'], function(require, dojo) {
 			this._resizeListeners = [];
 			this._animationDelay = 501;  // longer than CSS transitions in layout.css
 			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
-			function nodeFromOption(value) {
-				var node = value;
-				if (typeof(value) === "string") { //$NON-NLS-0$
-					node = dojo.byId(value);
-				}	
-				return node;
-			}
-			this._node = nodeFromOption(options.node);
+			this._node = lib.node(options.node);
 			if (!this._node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
-			this._sideNode = nodeFromOption(options.sidePanel);
+			this._sideNode = lib.node(options.sidePanel);
 			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
-			this._mainNode = nodeFromOption(options.mainPanel);
+			this._mainNode = lib.node(options.mainPanel);
 			if (!this._mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
-		
-			dojo.place("<div id='splitThumb' class='splitThumb splitThumbLayout'></div>", this._node, "only"); //$NON-NLS-0$ //$NON-NLS-1$
+			this._thumb = document.createElement("div"); //$NON-NLS-0$
+			this._node.appendChild(this._thumb);
+			this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
+			this._thumb.classList.add("splitThumbLayout"); //$NON-NLS-0$
 			this._initializeFromStoredSettings();
-			this._thumb = dojo.query("#splitThumb", this._node)[0]; //$NON-NLS-0$
 			
 			if (this._closed) {
 				this._closed = false;  // _thumbDown will toggle it, so turn it off and then call _thumbDown.
@@ -64,12 +49,12 @@ define(['require', 'dojo'], function(require, dojo) {
 			} else {
 				this._adjustToSplitPosition();
 			}
-			dojo.style(this._node, {visibility: "visible"}); //$NON-NLS-0$ 
-			dojo.style(this._mainNode, {display: "block"}); //$NON-NLS-0$ 
-			dojo.style(this._sideNode, {display: "block"}); //$NON-NLS-0$ 
-			dojo.connect(this._node, "onmousedown", this, this._mouseDown); //$NON-NLS-0$
-			dojo.connect(window, "onmouseup", this, this._mouseUp); //$NON-NLS-0$
-			dojo.connect(window, "onresize", this, this._resize);  //$NON-NLS-0$
+			this._node.style.visibility = "visible"; //$NON-NLS-0$ 
+			this._mainNode.style.display = "block"; //$NON-NLS-0$ 
+			this._sideNode.style.display = "block"; //$NON-NLS-0$ 
+			this._node.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
+			window.addEventListener("mouseup", this._mouseUp.bind(this), false); //$NON-NLS-0$
+			window.addEventListener("resize", this._resize.bind(this), false);  //$NON-NLS-0$
 		},
 		/**
 		 * Toggle the open/closed state of the side panel.
@@ -108,25 +93,28 @@ define(['require', 'dojo'], function(require, dojo) {
 		 },
 		 
 		_adjustToSplitPosition: function(updateStorage) {
-			var pos = dojo.position(this._node);
-			this._splitWidth = pos.w;
+			var rect = this._node.getBoundingClientRect();
+			this._splitWidth = rect.right - rect.left;
 			if (updateStorage || !this._splitLeft){
-				this._splitLeft = pos.x;
+				this._splitLeft = rect.left;
 				localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			dojo.style(this._sideNode, {width: this._splitLeft + "px", right: this._splitLeft - 1 +"px", display: "block"}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$ 
-			dojo.style(this._node, {left: this._splitLeft + "px"}); //$NON-NLS-0$ 
+			this._sideNode.style.width = this._splitLeft + "px"; //$NON-NLS-0$
+			this._sideNode.style.right = this._splitLeft - 1 +"px"; //$NON-NLS-0$
+			this._sideNode.style.display = "block"; //$NON-NLS-0$ 
+			this._node.style.left = this._splitLeft + "px"; //$NON-NLS-0$ 
 			this._resize();
 		},
 		
 		_resize: function(animationDelay) {
 			animationDelay = animationDelay || 0;
-			var pos = dojo.position(this._node.parentNode);
-			this._totalWidth = pos.w;
-			pos = dojo.position(this._node);
-			dojo.style(this._mainNode, {width: (this._totalWidth - pos.x - pos.w) +"px"}); //$NON-NLS-0$ 
-			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._mainNode); }), animationDelay);
-			window.setTimeout(dojo.hitch(this, function() { this._notifyResizeListeners(this._sideNode); }), animationDelay);
+			var rect = this._node.parentNode.getBoundingClientRect();
+			this._totalWidth = rect.right - rect.left;
+			rect = this._node.getBoundingClientRect();
+			this._mainNode.style.width = (this._totalWidth - rect.right) +"px"; //$NON-NLS-0$ 
+			var self = this;
+			window.setTimeout(function() { self._notifyResizeListeners(self._mainNode); }, animationDelay);
+			window.setTimeout(function() { self._notifyResizeListeners(self._sideNode); }, animationDelay);
 		},
 		
 		_notifyResizeListeners: function(node) {
@@ -139,15 +127,15 @@ define(['require', 'dojo'], function(require, dojo) {
 			if (this._closed) {
 				this._closed = false;
 				this._addAnimation();
-				dojo.style(this._sideNode, {width: this._splitLeft+"px"}); //$NON-NLS-0$ 
-				dojo.style(this._node, {left: this._splitLeft+"px"}); //$NON-NLS-0$
+				this._sideNode.style.width = this._splitLeft+"px"; //$NON-NLS-0$ 
+				this._node.style.left = this._splitLeft+"px"; //$NON-NLS-0$
 				this._resize(this._animationDelay);
 				this._removeAnimation();
 			} else {
 				this._closed = true;
 				this._addAnimation();
-				dojo.style(this._sideNode, {width: 0}); 
-				dojo.style(this._node, {left: "1px"}); //$NON-NLS-0$ 
+				this._sideNode.style.width = 0;
+				this._node.style.left = "1px"; //$NON-NLS-0$ 
 				this._resize(this._animationDelay);
 				this._removeAnimation();
 			}
@@ -157,19 +145,20 @@ define(['require', 'dojo'], function(require, dojo) {
 		
 		_removeAnimation: function() {
 			// in a timeout to ensure the animations are complete.
-			window.setTimeout(dojo.hitch(this, function() {
-				dojo.removeClass(this._sideNode, "sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-				dojo.removeClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
-				dojo.removeClass(this._node, "splitLayoutAnimation"); //$NON-NLS-0$ 
-				dojo.removeClass(this._thumb, "splitLayoutAnimation"); //$NON-NLS-0$ 
-			}), this._animationDelay);
+			var self = this;
+			window.setTimeout(function() {
+				self._sideNode.classList.remove("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
+				self._mainNode.classList.remove("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+				self._node.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
+				self._thumb.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
+			}, this._animationDelay);
 		},
 		
 		_addAnimation: function() {
-			dojo.addClass(this._sideNode, "sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-			dojo.addClass(this._mainNode, "mainPanelLayoutAnimation"); //$NON-NLS-0$ 
-			dojo.addClass(this._node, "splitLayoutAnimation"); //$NON-NLS-0$ 
-			dojo.addClass(this._thumb, "splitLayoutAnimation"); //$NON-NLS-0$ 
+			this._sideNode.classList.add("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
+			this._mainNode.classList.add("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+			this._node.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
+			this._thumb.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
 		},
 		
 		_mouseDown: function(event) {
@@ -179,28 +168,29 @@ define(['require', 'dojo'], function(require, dojo) {
 			if (this._tracking) {
 				return;
 			}
-			dojo.addClass(this._node, "splitTracking"); //$NON-NLS-0$
-			dojo.addClass(this._mainNode, "panelTracking"); //$NON-NLS-0$
-			dojo.addClass(this._sideNode, "panelTracking"); //$NON-NLS-0$
-			this._tracking = dojo.connect(window, "onmousemove", this, this._mouseMove); //$NON-NLS-0$
+			this._node.classList.add("splitTracking"); //$NON-NLS-0$
+			this._mainNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this._sideNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this._tracking = this._mouseMove.bind(this);
+			window.addEventListener("mousemove", this._tracking); //$NON-NLS-0$
 		},
 		
 		_mouseMove: function(event) {
 			if (this._tracking) {
 				this._splitLeft = event.clientX;
-				dojo.style(this._node, {left: event.clientX + "px"}); //$NON-NLS-0$ 
+				this._node.style.left = event.clientX + "px"; //$NON-NLS-0$ 
 				this._adjustToSplitPosition(true);
-				stop(event);
+				lib.stop(event);
 			}
 		},
 		
 		_mouseUp: function(event) {
 			if (this._tracking) {
-				dojo.disconnect(this._tracking);
+				window.removeEventListener("mousemove", this._tracking); //$NON-NLS-0$
 				this._tracking = null;
-				dojo.removeClass(this._node, "splitTracking"); //$NON-NLS-0$
-				dojo.removeClass(this._mainNode, "panelTracking"); //$NON-NLS-0$
-				dojo.removeClass(this._sideNode, "panelTracking"); //$NON-NLS-0$
+				this._node.classList.remove("splitTracking"); //$NON-NLS-0$
+				this._mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
+				this._sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
 			}
 		}
 	};

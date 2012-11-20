@@ -12,8 +12,8 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require'], 
-        function(messages, require){
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'], 
+        function(messages, require, lib){
 	
 	function asHTMLText(input) {
 		if (!input) {
@@ -35,16 +35,21 @@ define(['i18n!orion/nls/messages', 'require'],
 	
 	'<header id="banner" role="banner" class="headerLayout">' + //$NON-NLS-0$
 		//Top row:  Logo + discovery links + user
-		'<div id="staticBanner" class="layoutBlock topRowBanner">' + //$NON-NLS-0$
+		'<div id="staticBanner" class="primaryNav layoutBlock topRowBanner">' + //$NON-NLS-0$
 			'<a id="home" class="layoutLeft logo" href="' + require.toUrl("navigate/table.html") + '" aria-label="Orion Home"></a>' + //$NON-NLS-8$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			'<nav id="primaryNav" class="layoutLeft primaryNav" role="navigation"></nav>' + //$NON-NLS-0$
+			'<nav id="primaryNav" class="layoutLeft" role="navigation"></nav>' + //$NON-NLS-0$
 			'<div class="layoutRight">' + //$NON-NLS-0$
 				'<div id="globalActions" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
-				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
+				'<div id="relatedLinks" class="spacingLeft layoutLeft" style="padding-top:1px;">' + //$NON-NLS-0$
+					'<span tabindex="0" role="button" id="relatedTrigger" class="dropdownTrigger hidden">' + messages["Related"] + '<span class="dropdownArrowDown"></span></span>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					'<ul id="relatedDropdown" class="dropdownMenu" role="menu"></ul>' + //$NON-NLS-0$
+				'</div>' + //$NON-NLS-0$
 				'<input type="text" id="search" autocomplete="off" placeholder="Search" title="Type a keyword or wild card to search in root" class="layoutLeft spacingLeft searchbox" role="search">' + //$NON-NLS-2$ //$NON-NLS-0$
 				'<div id="searchOptions" class="layoutLeft" style="padding-top:1px;"></div>' + //$NON-NLS-0$
-				// '<div id="userInfo" style= "display:none;" class="layoutLeft primaryNav"></div>' + //$NON-NLS-0$
-				'<div id="userMenu" class="spacingLeft layoutLeft"></div>' + //$NON-NLS-0$
+				'<div id="userMenu" class="spacingLeft layoutLeft">' + //$NON-NLS-0$
+					'<span id="userTrigger" tabindex="0" role="button" class="dropdownTrigger">' + messages["Options"] + '<span class="dropdownArrowDown"></span></span>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					'<ul id="userDropdown" class="dropdownMenu" role="menu"></ul>' + //$NON-NLS-0$
+				'</div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
 		//Title area

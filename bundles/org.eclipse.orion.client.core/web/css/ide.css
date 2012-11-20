@@ -215,7 +215,6 @@ h2 {
 	background-image: url(../images/core_sprites.png);
 	margin-left: 0px;
 	padding-right: 0px;
-	margin-top: 6px;
 }
 
 .thumbnail {
@@ -396,7 +395,6 @@ h2 {
 	display: none;
 	vertical-align:middle;
 	font-size:11px;
-	font-weight:bold;
 	z-index: 50;
 }
 
@@ -824,40 +822,6 @@ input {
 
 .uploadBrowser{
 	left:50px;
-}
-
-.findSlideoutButton {
-	color: #222;
-	border: 1px solid transparent;
-	text-align: center;
-	vertical-align: top;
-    cursor: pointer;
-    display: inline-block;
-    padding: 2px;
-    margin-left: 8px;
-    border-radius:1px;
-    font-weight: normal;
-	-webkit-touch-callout: none;
-	-webkit-user-select: none;
-	-khtml-user-select: none;
-	-moz-user-select: none;
-	-ms-user-select: none;
-	user-select: none;
-}
-
-.findSlideoutMenu {
-	color: #222;
-	padding: 0;
-    font-weight: normal;
-    margin: 0;
-    margin-left: 8px;
-	text-align: center;
-	vertical-align: top;
-}
-
-.findSlideoutButton:hover {
-	background-color: #efefef;
-	border: 1px solid #222;
 }
 
 .targetSelector{

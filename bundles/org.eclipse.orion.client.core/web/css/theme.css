@@ -22,34 +22,37 @@ a {
 }
 
 a:hover {
-	cursor: hand;
+	cursor: pointer;
 	text-decoration: underline;
 }
 
 /* Navigation text */
 
 .primaryNav {
-	font-size: 8pt; /* 7pt */
+	font-size: 8pt; 
 	font-weight:normal;
 	color: #BFBFBF;
-	padding-top: 6px;
 	vertical-align: baseline;
 }
 
-.primaryNav a {
-	font-size: 8pt; /* 7pt */
+.primaryNav > div {
+	padding-top: 6px;
+}
+
+.primaryNav > nav {
+	padding-top: 6px;
+}
+
+.primaryNav > nav > a {
 	color: #BFBFBF;
 	margin-right: 6px;
 	margin-left: 6px; 
-	vertical-align: baseline;
 	text-decoration: none;
 }
 
-.primaryNav a:hover {
-	color: #bfbfbf;
-	cursor: hand;
+.primaryNav > nav > a:hover, .primaryNav span.dropdownTrigger:hover {
+	cursor: pointer;
 	color: white;
-	font-weight:normal;
 }
 
 /* Title area - the place for location/breadcrumbs */
@@ -62,19 +65,6 @@ a:hover {
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
     border-bottom: 1px solid #DEDEDE;
     min-height:20px;
-}
-
-/* splitter - typically the color of the title area */
-.split {
-	background: #efefef;
-}
-
-.splitTracking {
-	background: #dedede;
-}
-
-.splitThumb {
-	background: #cdcdcd;
 }
 
 /* Row selection */
@@ -172,7 +162,6 @@ a.currentLocation:hover {
 	padding-left:20px;
 	padding-right:16px;
 	margin-left:5px;
-	margin-top:6px !important;
 	font: 7pt Lucida Sans Unicode,Lucida Grande,Verdana,Arial,Helvetica,Myriad,Tahoma,clean,sans-serif !important;
 }
 
@@ -202,28 +191,9 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
-.commandButtonOver {
+.commandButton:hover, .commandButton:focus {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
-}
-
-.commandMenu {
-    color: #222;
-	display: inline-block;
-	vertical-align: baseline;
-	margin: 0;
-	font-size:8pt;
-	font-weight:normal;
-	border: 1px solid #dedede;
-	background-color: #efefef;
-    cursor: pointer;
-    border-radius:1px;
-}
-
-.commandMenuItem {
-	border: 0;
-	padding: 0;
-	margin: 0;
 }
 
 .commandImage {
@@ -242,7 +212,7 @@ a.currentLocation:hover {
 	user-select: none;
 }
 
-.commandImageOver {
+.commandImage:hover, .commandImage:focus {
 	background-color: #e6e6e6;
 	border: 1px solid #808080;
 }
@@ -250,10 +220,6 @@ a.currentLocation:hover {
 /* should be used in conjunction with .commandButton when a tool has no icon. */
 .commandMissingImageButton {
 	font-weight:bold;
-}
-
-.commandMenuItemAnchor {
-	padding-right: 40px;
 }
 
 .commandLink {
@@ -286,78 +252,131 @@ a.currentLocation:hover {
 .commandInactiveItem {
 }
 
-/* dijit overrides related to theming */
-/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
-/* buttons */
-
-.claro .dijitButton .dijitButtonNode,
-.claro .dijitDropDownButton .dijitButtonNode,
-.claro .dijitComboButton .dijitButtonNode,
-.claro .dijitToggleButton .dijitButtonNode {
-  background-color: transparent;
-  background-image: none;
-  border: 1px solid transparent;
-  box-shadow: none;
-  border-radius: 3px;
-  padding: 0;
-  padding-bottom: 3px;
-  color: #222;
-  margin: 0;
+/* widget theming */
+/* splitter - typically the color of the title area */
+.split {
+	background: #efefef;
 }
 
-.claro .commandMenu .dijitButtonNode {
-  color: #222;
+.splitTracking {
+	background: #dedede;
 }
 
-/* button hover */
-.claro .dijitButtonHover .dijitButtonNode,
-.claro .dijitDropDownButtonHover .dijitButtonNode,
-.claro .dijitComboButton .dijitButtonNodeHover,
-.claro .dijitComboButton .dijitDownArrowButtonHover,
-.claro .dijitToggleButtonHover .dijitButtonNode {
-    background-color: #e3e3e3;
-    color: black;
-	border: 1px solid #808080;
- }
+.splitThumb {
+	background: #cdcdcd;
+}
 
-/* arrow buttons*/
-.claro .dijitArrowButtonInner {
+/* dropdowns */
+.dropdown {
+} 
+
+.dropdownArrowDown {
 	background-position: 0 -422px;	
 	width: 5px; height: 3px;
 	background-image: url(../images/core_sprites.png); 
 	display: inline-block; 
-	margin: 1px;
+	margin: 4px 4px 0;
+	vertical-align: top; 
+}
+
+.dropdownArrowRight {
+	background-position: 0 -654px; 
+	width: 6px; height: 11px;
+	background-image: url(../images/core_sprites.png); 
+	margin-right: 4px;
 	vertical-align: middle; 
+	float: right;
 }
 
-/* menus and menu items */
-
-.claro .dijitMenu {
-   background-color: #FFFFFF;
-   border: 1px solid #9a9a9a;
+.dropdownTrigger {
+	font-weight: normal;
 }
 
-.claro .dijitMenuItem {
-   outline: none;
-   padding-top:4px;
+.dropdownTrigger a {
+	text-decoration: none;
 }
 
-.claro .dijitMenuSeparatorTop {
-	height: auto;
-	margin-top: 1px;
-	border-bottom: 1px solid #DDD;
+.dropdownTriggerOpen {
+	
 }
 
-.claro .dijitMenuItemLabel {
-	position: relative;
-	padding: 5px;
+.dropdownMenu {
+	color: #222;
+	background-color: #fbfbfb;
+	display: none;
+	z-index: 150;
+	min-width: 120px;
+	position: absolute;
+	list-style-type: none;
+	border-radius: 3px;
+	border: 1px solid #DDD;
+	padding: 0;
 }
 
-.claro .dijitMenuActive .dijitMenuItemHover, .claro .dijitMenuActive .dijitMenuItemSelected, .claro .dijitMenuActive .dijitMenuItemActive {
-   background-color: #e3e3e3;
-   color: black;
-   background-image: none;
+.dropdownSubMenu {
+	position: relative
 }
+
+.dropdownSubMenu > ul {
+	top: 0;
+	left: 100%;
+}
+
+.dropdownMenu > li {
+	min-width: 120px;
+	padding: 0 2px;
+	display: block;
+}
+
+.dropdownMenu > li > a, .dropdownMenu > li > span {
+	width: 100%;
+	margin: 0;
+	padding: 4px 0;
+}
+
+.dropdownMenu > li:hover {
+	text-decoration: none;
+	background: #ffeecc;
+}
+
+.dropdownMenu > li > *:focus {
+	outline: 1px dotted #aaa;
+	background: #ffeecc;
+}
+
+.dropdownMenuOpen {
+	display: block;
+}
+
+.dropdownSeparator {
+	height: 1px;
+	background-color: #ddd;
+	color: #ddd;
+	padding: 0 !important;
+	margin: 0;
+}
+
+.dropdownMenuItem, .dropdownMenuItem a {
+	display: inline-block;
+	vertical-align: baseline;
+	color: #222;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+}
+
+.checkedMenuItem {
+	margin: 4px 6px 2px 0;
+	vertical-align: bottom;
+}
+
+/* dijit overrides related to theming */
+/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
+/* buttons */
+
 
 /* tooltips */
 .claro .dijitTooltip {
