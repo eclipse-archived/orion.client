@@ -1149,7 +1149,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			context.handler = context.handler || this;
 			var element, image;
 			if (this.hrefCallback) {
-				element = this._makeLink(context, "commandLink"); //$NON-NLS-0$
+				element = this._makeLink(parent, context, "commandLink"); //$NON-NLS-0$
 				if (!element) {
 					return;
 				}
