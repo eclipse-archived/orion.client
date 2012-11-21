@@ -16,3 +16,11 @@ html,body {
   position: absolute; top: 0; bottom: 30px; left: 0; right: 0;
   font-size: 10pt;
 }
+
+.modelDecorationSprite { 
+	display: inline-block; 
+	vertical-align: middle; 
+	background-image: url(../images/core_sprites.png);
+}
+.core-sprite-closedarrow{ background-position: 0 -54px; width: 16px; height: 16px; } 
+.core-sprite-openarrow{ background-position: 0 -499px; width: 16px; height: 16px; } 

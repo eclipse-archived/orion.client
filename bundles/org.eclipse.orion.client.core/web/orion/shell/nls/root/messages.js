@@ -40,5 +40,6 @@ define({
 	"Installs a plug-in from a URL": "Installs a plug-in from a URL",
 	"The plug-in URL": "The plug-in URL",
 	"Commands for working with plug-ins": "Commands for working with plug-ins",
-	"Are you sure you want to uninstall all contributed plug-ins?": "Are you sure you want to uninstall all contributed plug-ins?"
+	"Are you sure you want to uninstall all contributed plug-ins?": "Are you sure you want to uninstall all contributed plug-ins?",
+	"Displays a plug-in's services": "Displays a plug-in's services"
 });
