@@ -189,44 +189,6 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 	/* implementations of built-in plug-in management commands */
 
-	function pluginsListExec(args, context) {
-		var plugins = pluginsType.getPlugins();
-		var result = document.createElement("table"); //$NON-NLS-0$
-		for (var i = 0; i < plugins.length; i++) {
-			var row = document.createElement("tr"); //$NON-NLS-0$
-			result.appendChild(row);
-			var stateCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(stateCell);
-			var state = plugins[i].getState();
-			if (state === "active" || state === "starting") { //$NON-NLS-1$ //$NON-NLS-0$
-				state = "enabled"; //$NON-NLS-0$
-			} else {
-				state = "disabled"; //$NON-NLS-0$
-			}
-			stateCell.textContent = state;
-			var nameCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(nameCell);
-			var b = document.createElement("b"); //$NON-NLS-0$
-			nameCell.appendChild(b);
-			b.appendChild(document.createTextNode(plugins[i].name));
-		}
-		return result;
-	}
-
-	function pluginsDisableExec(args, context) {
-		var result = context.createPromise();
-		var plugin = args.plugin;
-		plugin.stop().then(
-			function() {
-				result.resolve(messages.Succeeded);
-			},
-			function(error) {
-				result.resolve(error);
-			}
-		);
-		return result;
-	}
-
 	function pluginServicesExec(args, context) {
 		var ServicesModel = (function() {
 			function ServicesModel(root) {
@@ -323,13 +285,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			var keys = service.getPropertyKeys();
 			keys.forEach(function(key) {
 				if (key === "service.names") { //$NON-NLS-0$
-					current.name = service.getProperty(key)[0];
-				} else {
-					if (key === "id") {
-						current.id = service.getProperty(key);
-					}
-					current.values.push({name: key, value: service.getProperty(key)});
+					current.name = service.getProperty(key).join();
 				}
+				if (key === "id") {
+					current.id = service.getProperty(key);
+				}
+				current.values.push({name: key, value: service.getProperty(key)});
 			});
 			if (current.name) {
 				current.elementId = "serviceElement" + serviceElementCounter++; //$NON-NLS-0$
@@ -348,6 +309,44 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				renderer.tableTree = tableTree;
 			}
 		});
+		return result;
+	}
+
+	function pluginsListExec(args, context) {
+		var plugins = pluginsType.getPlugins();
+		var result = document.createElement("table"); //$NON-NLS-0$
+		for (var i = 0; i < plugins.length; i++) {
+			var row = document.createElement("tr"); //$NON-NLS-0$
+			result.appendChild(row);
+			var stateCell = document.createElement("td"); //$NON-NLS-0$
+			row.appendChild(stateCell);
+			var state = plugins[i].getState();
+			if (state === "active" || state === "starting") { //$NON-NLS-1$ //$NON-NLS-0$
+				state = "enabled"; //$NON-NLS-0$
+			} else {
+				state = "disabled"; //$NON-NLS-0$
+			}
+			stateCell.textContent = state;
+			var nameCell = document.createElement("td"); //$NON-NLS-0$
+			row.appendChild(nameCell);
+			var b = document.createElement("b"); //$NON-NLS-0$
+			nameCell.appendChild(b);
+			b.appendChild(document.createTextNode(plugins[i].name));
+		}
+		return result;
+	}
+
+	function pluginsDisableExec(args, context) {
+		var result = context.createPromise();
+		var plugin = args.plugin;
+		plugin.stop().then(
+			function() {
+				result.resolve(messages.Succeeded);
+			},
+			function(error) {
+				result.resolve(error);
+			}
+		);
 		return result;
 	}
 
