@@ -14,13 +14,108 @@
 /*jslint browser:true sub:true*/
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Shell", "orion/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
-	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType, mPluginParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry) {
+		"orion/widgets/Shell", "orion/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
+		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
+	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry) {
 
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginsType, preferences, serviceElementCounter = 0;
+
+	/* model and renderer for displaying services */
+
+	var ServicesModel = (function() {
+		function ServicesModel(root) {
+			this.root = root;
+		}
+		ServicesModel.prototype = {
+			getRoot: function(onItem) {
+				onItem(this.root);
+			},
+			getChildren: function(parentItem, onComplete) {
+				onComplete(parentItem.values);
+			},
+			getId: function(item) {
+				return item.elementId;
+			}
+		};
+		return ServicesModel;
+	}());
+
+	var ServicesRenderer = (function() {
+		function ServicesRenderer() {
+		}
+		ServicesRenderer.prototype = {			
+			getTwistieElementId: function(rowId) {
+				return rowId + "__expand"; //$NON-NLS-0$
+			},
+			initTable: function(tableNode) {
+			},
+			labelColumnIndex: function() {
+				return 0;
+			},
+			render: function(item, tr) {
+				tr.className += " treeTableRow"; //$NON-NLS-0$
+				var td = document.createElement("td"); //$NON-NLS-0$
+				tr.appendChild(td);
+
+				if (!item.value) {
+					/* top-level row displaying service name */
+					var span = document.createElement("span"); //$NON-NLS-0$
+					td.appendChild(span);
+
+					var twistieElement = document.createElement("span"); //$NON-NLS-0$
+					twistieElement.id = this.getTwistieElementId(tr.id);
+					span.appendChild(twistieElement);
+					twistieElement.className = "modelDecorationSprite core-sprite-closedarrow"; //$NON-NLS-0$
+					var self = this;
+					twistieElement.onclick = function(event) {
+						self.tableTree.toggle(tr.id);
+					};
+
+					td = document.createElement("td"); //$NON-NLS-0$
+					tr.appendChild(td);
+					var b = document.createElement("b"); //$NON-NLS-0$
+					td.appendChild(b);
+					b.textContent = item.name;
+					if (item.id) {
+						span = document.createElement("span"); //$NON-NLS-0$
+						td.appendChild(span);
+						span.textContent = " (" + item.id + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					td.colSpan = "2"; //$NON-NLS-0$
+					return;
+				}
+
+				/* child row displaying a property of a service */
+				td = document.createElement("td"); //$NON-NLS-0$
+				tr.appendChild(td);
+				td.textContent = item.name;
+				td = document.createElement("td"); //$NON-NLS-0$
+				tr.appendChild(td);
+				td.textContent = item.value;
+			},
+			updateExpandVisuals: function(row, isExpanded) {
+				var twistieElement = document.getElementById(this.getTwistieElementId(row.id));
+				if (twistieElement) {
+					var className = twistieElement.className;
+					if (isExpanded) {
+						className += " core-sprite-openarrow"; //$NON-NLS-0$
+						className = className.replace(/\s?core-sprite-closedarrow/g, "");
+					} else {
+						className += " core-sprite-closedarrow"; //$NON-NLS-0$
+						className = className.replace(/\s?core-sprite-openarrow/g, "");
+					}
+					twistieElement.className = className;
+				}
+			}
+		};
+		return ServicesRenderer;
+	}());
+
+	/* general functions for working with file system nodes */
 
 	var resolveError = function(promise, xhrResult) {
 		var error = xhrResult;
@@ -40,8 +135,6 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		errNode.textContent = error;
 		promise.resolve(errNode);
 	};
-
-	/* general functions for working with file system nodes */
 
 	function computeEditURL(node) {
 		for (var i = 0; i < openWithCommands.length; i++) {
@@ -190,93 +283,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	/* implementations of built-in plug-in management commands */
 
 	function pluginServicesExec(args, context) {
-		var ServicesModel = (function() {
-			function ServicesModel(root) {
-				this.root = root;
-			}
-			ServicesModel.prototype = {
-				getRoot: function(onItem) {
-					onItem(this.root);
-				},
-				getChildren: function(parentItem, onComplete) {
-					onComplete(parentItem.values);
-				},
-				getId: function(item) {
-					return item.elementId;
-				}
-			};
-			return ServicesModel;
-		}());
-		var ServicesRenderer = (function() {
-			function ServicesRenderer() {
-			}
-			ServicesRenderer.prototype = {			
-				getTwistieElementId: function(rowId) {
-					return rowId + "__expand"; //$NON-NLS-0$
-				},
-				initTable: function(tableNode) {
-				},
-				labelColumnIndex: function() {
-					return 0;
-				},
-				render: function(item, tr) {
-					tr.className += " treeTableRow"; //$NON-NLS-0$
-					var td = document.createElement("td"); //$NON-NLS-0$
-					tr.appendChild(td);
-
-					if (!item.value) {
-						/* top-level row displaying service name */
-						var span = document.createElement("span"); //$NON-NLS-0$
-						td.appendChild(span);
-
-						var twistieElement = document.createElement("span"); //$NON-NLS-0$
-						twistieElement.id = this.getTwistieElementId(tr.id);
-						span.appendChild(twistieElement);
-						twistieElement.className = "modelDecorationSprite core-sprite-closedarrow"; //$NON-NLS-0$
-						var self = this;
-						twistieElement.onclick = function(event) {
-							self.tableTree.toggle(tr.id);
-						};
-
-						td = document.createElement("td"); //$NON-NLS-0$
-						tr.appendChild(td);
-						var b = document.createElement("b"); //$NON-NLS-0$
-						td.appendChild(b);
-						b.textContent = item.name;
-						if (item.id) {
-							span = document.createElement("span"); //$NON-NLS-0$
-							td.appendChild(span);
-							span.textContent = " (" + item.id + ")"; //$NON-NLS-1$ //$NON-NLS-0$
-						}
-						td.colSpan = "2"; //$NON-NLS-0$
-						return;
-					}
-
-					/* child row displaying a property of a service */
-					td = document.createElement("td"); //$NON-NLS-0$
-					tr.appendChild(td);
-					td.textContent = item.name;
-					td = document.createElement("td"); //$NON-NLS-0$
-					tr.appendChild(td);
-					td.textContent = item.value;
-				},
-				updateExpandVisuals: function(row, isExpanded) {
-					var twistieElement = document.getElementById(this.getTwistieElementId(row.id));
-					if (twistieElement) {
-						var className = twistieElement.className;
-						if (isExpanded) {
-							className += " core-sprite-openarrow"; //$NON-NLS-0$
-							className = className.replace(/\s?core-sprite-closedarrow/g, "");
-						} else {
-							className += " core-sprite-closedarrow"; //$NON-NLS-0$
-							className = className.replace(/\s?core-sprite-openarrow/g, "");
-						}
-						twistieElement.className = className;
-					}
-				}
-			};
-			return ServicesRenderer;
-		}());
+		if (!args.plugin) {
+			return "";
+		}
 
 		var result = document.createElement("div"); //$NON-NLS-0$
 		var services = args.plugin.getServiceReferences();
@@ -318,27 +327,28 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		for (var i = 0; i < plugins.length; i++) {
 			var row = document.createElement("tr"); //$NON-NLS-0$
 			result.appendChild(row);
-			var stateCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(stateCell);
-			var state = plugins[i].getState();
-			if (state === "active" || state === "starting") { //$NON-NLS-1$ //$NON-NLS-0$
-				state = "enabled"; //$NON-NLS-0$
-			} else {
-				state = "disabled"; //$NON-NLS-0$
-			}
-			stateCell.textContent = state;
-			var nameCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(nameCell);
+			var td = document.createElement("td"); //$NON-NLS-0$
+			row.appendChild(td);
 			var b = document.createElement("b"); //$NON-NLS-0$
-			nameCell.appendChild(b);
-			b.appendChild(document.createTextNode(plugins[i].name));
+			td.appendChild(b);
+			b.textContent = plugins[i].name;
+			var state = plugins[i].getState();
+			if (state !== "active" && state !== "starting") { //$NON-NLS-1$ //$NON-NLS-0$
+				var span = document.createElement("span"); //$NON-NLS-0$
+				td.appendChild(span);
+				span.textContent = " (" + messages.disabled + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		return result;
 	}
 
 	function pluginsDisableExec(args, context) {
-		var result = context.createPromise();
 		var plugin = args.plugin;
+		if (!plugin) {
+			return "";
+		}
+
+		var result = context.createPromise();
 		plugin.stop().then(
 			function() {
 				result.resolve(messages.Succeeded);
@@ -351,8 +361,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function pluginsEnableExec(args, context) {
-		var result = context.createPromise();
 		var plugin = args.plugin;
+		if (!plugin) {
+			return "";
+		}
+
+		var result = context.createPromise();
 		plugin.start({lazy:true}).then(
 			function() {
 				result.resolve(messages.Succeeded);
@@ -395,8 +409,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function pluginsReloadExec(args, context) {
-		var result = context.createPromise();
 		var plugin = args.plugin;
+		if (!plugin) {
+			return "";
+		}
+
+		var result = context.createPromise();
 		plugin.update().then(
 			function() {
 				result.resolve(messages.Succeeded);
@@ -409,6 +427,10 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function pluginsUninstallExec(args, context) {
+		if (!args.plugin) {
+			return "";
+		}
+
 		var result = context.createPromise();
 		if (args.plugin.isAllPlugin) {
 			var msg = messages["Are you sure you want to uninstall all contributed plug-ins?"];
@@ -448,6 +470,50 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				}
 			);
 		}
+		return result;
+	}
+	
+	/* implementations of built-in service management commands */
+
+	function serviceContributorsExec(args, context) {
+		if (!args.id) {
+			return "";
+		}
+
+		var serviceId = args.id.trim();
+		var result = document.createElement("div"); //$NON-NLS-0$
+		var plugins = pluginsType.getPlugins();
+		plugins.forEach(function(plugin) {
+			var services = plugin.getServiceReferences();
+			services.forEach(function(service) {
+				var names = service.getProperty("service.names"); //$NON-NLS-0$
+				if (names.indexOf(serviceId) !== -1) {
+					var current = {name: plugin.name, values: []};
+					var keys = service.getPropertyKeys();
+					keys.forEach(function(key) {
+						if (key === "id") { //$NON-NLS-0$
+							current.id = service.getProperty(key);
+						}
+						current.values.push({name: key, value: service.getProperty(key)});
+					});
+					current.elementId = "serviceElement" + serviceElementCounter++; //$NON-NLS-0$
+					current.values.forEach(function(value) {
+						value.elementId = "serviceElement" + serviceElementCounter++; //$NON-NLS-0$
+					});
+					var parent = document.createElement("div"); //$NON-NLS-0$
+					result.appendChild(parent);
+					var renderer = new ServicesRenderer();
+					var tableTree = new mTreeTable.TableTree({
+						model: new ServicesModel(current),
+						showRoot: true,
+						parent: parent,
+						renderer: renderer
+					});
+					renderer.tableTree = tableTree;
+				}
+			});
+		});
+
 		return result;
 	}
 
@@ -524,6 +590,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			var contributedPluginsType = new mPluginParamType.ParamTypePlugin("contributedPlugins", pluginRegistry, true); //$NON-NLS-0$
 			shell.registerType(contributedPluginsType);
 
+			var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
+			shell.registerType(serviceType);
+
 			/* add the locally-defined commands */
 			shell.registerCommand({
 				name: "cd", //$NON-NLS-0$
@@ -561,7 +630,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			shell.registerCommand({
 				name: "clear", //$NON-NLS-0$
 				description: messages["Clears the shell screen"],
-				callback: function (args, context) {shell.clear();}
+				callback: function(args, context) {
+					shell.clear();
+				}
 			});
 
 			/* plug-in management commands */
@@ -639,7 +710,25 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 					type: "plugin", //$NON-NLS-0$
 					description: messages["The name of the plug-in"]
 				}],
-				returnType: "string" //$NON-NLS-0$
+				returnType: "html" //$NON-NLS-0$
+			});
+
+			/* service management commands */
+			shell.registerCommand({
+				name: "service", //$NON-NLS-0$
+				description: messages["Commands for working with a service"]
+			});
+
+			shell.registerCommand({
+				name: "service contributors", //$NON-NLS-0$
+				description: messages["Displays all plug-in contributions for a service"],
+				callback: serviceContributorsExec,
+				parameters: [{
+					name: "id", //$NON-NLS-0$
+					type: "service", //$NON-NLS-0$
+					description: messages["The service identifier"]
+				}],
+				returnType: "html" //$NON-NLS-0$
 			});
 
 			/* initialize the editors cache (used by some of the build-in commands */

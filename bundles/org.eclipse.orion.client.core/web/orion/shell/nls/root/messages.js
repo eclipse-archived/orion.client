@@ -41,5 +41,9 @@ define({
 	"The plug-in URL": "The plug-in URL",
 	"Commands for working with plug-ins": "Commands for working with plug-ins",
 	"Are you sure you want to uninstall all contributed plug-ins?": "Are you sure you want to uninstall all contributed plug-ins?",
-	"Displays a plug-in's services": "Displays a plug-in's services"
+	"Displays a plug-in's services": "Displays a plug-in's services",
+	"Commands for working with a service": "Commands for working with a service",
+	"Displays all plug-in contributions for a service": "Displays all plug-in contributions for a service",
+	"The service identifier": "The service identifier",
+	"disabled": "disabled"
 });
