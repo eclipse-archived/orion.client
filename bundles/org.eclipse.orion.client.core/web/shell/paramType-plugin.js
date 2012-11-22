@@ -75,10 +75,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			this.pluginRegistry = pluginRegistry;
 			this.excludeDefaultPlugins = excludeDefaultPlugins;
 			this.isSingleSelect = isSingleSelect;
-			if (excludeDefaultPlugins) {
-				this._computeDefaultPlugins();
-			}
-			this._initPluginsList();
+
 			var self = this;
 			pluginRegistry.addEventListener(
 				"installed", //$NON-NLS-0$
@@ -92,6 +89,14 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 					self._initPluginsList();
 				}
 			);
+
+			/* don't let initialization delay page rendering */
+			setTimeout(function() {
+				if (self.excludeDefaultPlugins) {
+					self._computeDefaultPlugins();
+				}
+				self._initPluginsList();
+			}, 1);
 		}
 
 		ParamTypePlugin.prototype = {
@@ -196,13 +201,15 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			},
 			_getPredictions: function(text) {
 				var predictions = [];
-				this.plugins.forEach(function(current) {
-					if (current.name.indexOf(text) === 0) {
-						predictions.push({name: current.name, value: current});
+				if (this.plugins) {
+					this.plugins.forEach(function(current) {
+						if (current.name.indexOf(text) === 0) {
+							predictions.push({name: current.name, value: current});
+						}
+					});
+					if (!this.isSingleSelect && NAME_ALL.indexOf(text) === 0) {
+						predictions.push({name: NAME_ALL, value: new AllPlugin(this.plugins)});
 					}
-				});
-				if (!this.isSingleSelect && NAME_ALL.indexOf(text) === 0) {
-					predictions.push({name: NAME_ALL, value: new AllPlugin(this.plugins)});
 				}
 				return predictions;
 			},
@@ -217,6 +224,20 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 						current.name = headers.name || self._formatLocationAsPluginName(location);
 						self.plugins.push(current);
 					}
+				});
+				this._sort(this.plugins);
+			},
+			_sort: function(children) {
+				children.sort(function(a,b) {
+					var name1 = a.name && a.name.toLowerCase();
+					var name2 = b.name && b.name.toLowerCase();
+					if (name1 < name2) {
+						return -1;
+					}
+					if (name1 > name2) {
+						return 1;
+					}
+					return 0;
 				});
 			}
 		};
