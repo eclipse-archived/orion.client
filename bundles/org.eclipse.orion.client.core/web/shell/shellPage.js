@@ -327,20 +327,17 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		for (var i = 0; i < plugins.length; i++) {
 			var row = document.createElement("tr"); //$NON-NLS-0$
 			result.appendChild(row);
-			var stateCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(stateCell);
-			var state = plugins[i].getState();
-			if (state === "active" || state === "starting") { //$NON-NLS-1$ //$NON-NLS-0$
-				state = "enabled"; //$NON-NLS-0$
-			} else {
-				state = "disabled"; //$NON-NLS-0$
-			}
-			stateCell.textContent = state;
-			var nameCell = document.createElement("td"); //$NON-NLS-0$
-			row.appendChild(nameCell);
+			var td = document.createElement("td"); //$NON-NLS-0$
+			row.appendChild(td);
 			var b = document.createElement("b"); //$NON-NLS-0$
-			nameCell.appendChild(b);
-			b.appendChild(document.createTextNode(plugins[i].name));
+			td.appendChild(b);
+			b.textContent = plugins[i].name;
+			var state = plugins[i].getState();
+			if (state !== "active" && state !== "starting") { //$NON-NLS-1$ //$NON-NLS-0$
+				var span = document.createElement("span"); //$NON-NLS-0$
+				td.appendChild(span);
+				span.textContent = " (" + messages.disabled + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+			}
 		}
 		return result;
 	}
