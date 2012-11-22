@@ -89,6 +89,18 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 					self._initPluginsList();
 				}
 			);
+			pluginRegistry.addEventListener(
+				"stopping", //$NON-NLS-0$
+				function() {
+					self._sort(self.plugins);
+				}
+			);
+			pluginRegistry.addEventListener(
+				"lazy activation", //$NON-NLS-0$
+				function() {
+					self._sort(self.plugins);
+				}
+			);
 
 			/* don't let initialization delay page rendering */
 			setTimeout(function() {
@@ -229,6 +241,13 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			},
 			_sort: function(children) {
 				children.sort(function(a,b) {
+					var isEnabled1 = a.getState();
+					isEnabled1 = isEnabled1 === "active" || isEnabled1 === "starting"; //$NON-NLS-1$ //$NON-NLS-0$
+					var isEnabled2 = b.getState();
+					isEnabled2 = isEnabled2 === "active" || isEnabled2 === "starting"; //$NON-NLS-1$ //$NON-NLS-0$
+					if (isEnabled1 !== isEnabled2) {
+						return isEnabled1 ? -1 : 1;
+					}
 					var name1 = a.name && a.name.toLowerCase();
 					var name2 = b.name && b.name.toLowerCase();
 					if (name1 < name2) {

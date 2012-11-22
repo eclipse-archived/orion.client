@@ -44,5 +44,6 @@ define({
 	"Displays a plug-in's services": "Displays a plug-in's services",
 	"Commands for working with a service": "Commands for working with a service",
 	"Displays all plug-in contributions for a service": "Displays all plug-in contributions for a service",
-	"The service identifier": "The service identifier"
+	"The service identifier": "The service identifier",
+	"disabled": "disabled"
 });
