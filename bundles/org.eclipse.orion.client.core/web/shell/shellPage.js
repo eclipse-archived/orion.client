@@ -14,13 +14,13 @@
 /*jslint browser:true sub:true*/
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
-		"orion/widgets/Shell", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
-	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mShellPageFileService, mFileParamType, mPluginParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry) {
+		"orion/widgets/Shell", "orion/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
+	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType, mPluginParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry) {
 
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
-	var pluginRegistry, pluginType, preferences;
+	var pluginRegistry, pluginsType, preferences, serviceElementCounter = 0;
 
 	var resolveError = function(promise, xhrResult) {
 		var error = xhrResult;
@@ -189,8 +189,131 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 	/* implementations of built-in plug-in management commands */
 
+	function pluginServicesExec(args, context) {
+		var ServicesModel = (function() {
+			function ServicesModel(root) {
+				this.root = root;
+			}
+			ServicesModel.prototype = {
+				getRoot: function(onItem) {
+					onItem(this.root);
+				},
+				getChildren: function(parentItem, onComplete) {
+					onComplete(parentItem.values);
+				},
+				getId: function(item) {
+					return item.elementId;
+				}
+			};
+			return ServicesModel;
+		}());
+		var ServicesRenderer = (function() {
+			function ServicesRenderer() {
+			}
+			ServicesRenderer.prototype = {			
+				getTwistieElementId: function(rowId) {
+					return rowId + "__expand"; //$NON-NLS-0$
+				},
+				initTable: function(tableNode) {
+				},
+				labelColumnIndex: function() {
+					return 0;
+				},
+				render: function(item, tr) {
+					tr.className += " treeTableRow"; //$NON-NLS-0$
+					var td = document.createElement("td"); //$NON-NLS-0$
+					tr.appendChild(td);
+
+					if (!item.value) {
+						/* top-level row displaying service name */
+						var span = document.createElement("span"); //$NON-NLS-0$
+						td.appendChild(span);
+
+						var twistieElement = document.createElement("span"); //$NON-NLS-0$
+						twistieElement.id = this.getTwistieElementId(tr.id);
+						span.appendChild(twistieElement);
+						twistieElement.className = "modelDecorationSprite core-sprite-closedarrow"; //$NON-NLS-0$
+						var self = this;
+						twistieElement.onclick = function(event) {
+							self.tableTree.toggle(tr.id);
+						};
+
+						td = document.createElement("td"); //$NON-NLS-0$
+						tr.appendChild(td);
+						var b = document.createElement("b"); //$NON-NLS-0$
+						td.appendChild(b);
+						b.textContent = item.name;
+						if (item.id) {
+							span = document.createElement("span"); //$NON-NLS-0$
+							td.appendChild(span);
+							span.textContent = " (" + item.id + ")"; //$NON-NLS-1$ //$NON-NLS-0$
+						}
+						td.colSpan = "2"; //$NON-NLS-0$
+						return;
+					}
+
+					/* child row displaying a property of a service */
+					td = document.createElement("td"); //$NON-NLS-0$
+					tr.appendChild(td);
+					td.textContent = item.name;
+					td = document.createElement("td"); //$NON-NLS-0$
+					tr.appendChild(td);
+					td.textContent = item.value;
+				},
+				updateExpandVisuals: function(row, isExpanded) {
+					var twistieElement = document.getElementById(this.getTwistieElementId(row.id));
+					if (twistieElement) {
+						var className = twistieElement.className;
+						if (isExpanded) {
+							className += " core-sprite-openarrow"; //$NON-NLS-0$
+							className = className.replace(/\s?core-sprite-closedarrow/g, "");
+						} else {
+							className += " core-sprite-closedarrow"; //$NON-NLS-0$
+							className = className.replace(/\s?core-sprite-openarrow/g, "");
+						}
+						twistieElement.className = className;
+					}
+				}
+			};
+			return ServicesRenderer;
+		}());
+
+		var result = document.createElement("div"); //$NON-NLS-0$
+		var services = args.plugin.getServiceReferences();
+		services.forEach(function(service) {
+			var current = {values: []};
+			var keys = service.getPropertyKeys();
+			keys.forEach(function(key) {
+				if (key === "service.names") { //$NON-NLS-0$
+					current.name = service.getProperty(key).join();
+				}
+				if (key === "id") {
+					current.id = service.getProperty(key);
+				}
+				current.values.push({name: key, value: service.getProperty(key)});
+			});
+			if (current.name) {
+				current.elementId = "serviceElement" + serviceElementCounter++; //$NON-NLS-0$
+				current.values.forEach(function(value) {
+					value.elementId = "serviceElement" + serviceElementCounter++; //$NON-NLS-0$
+				});
+				var parent = document.createElement("div"); //$NON-NLS-0$
+				result.appendChild(parent);
+				var renderer = new ServicesRenderer();
+				var tableTree = new mTreeTable.TableTree({
+					model: new ServicesModel(current),
+					showRoot: true,
+					parent: parent,
+					renderer: renderer
+				});
+				renderer.tableTree = tableTree;
+			}
+		});
+		return result;
+	}
+
 	function pluginsListExec(args, context) {
-		var plugins = pluginType.getPlugins();
+		var plugins = pluginsType.getPlugins();
 		var result = document.createElement("table"); //$NON-NLS-0$
 		for (var i = 0; i < plugins.length; i++) {
 			var row = document.createElement("tr"); //$NON-NLS-0$
@@ -218,7 +341,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		var plugin = args.plugin;
 		plugin.stop().then(
 			function() {
-				result.resolve(messages["Succeeded"]);
+				result.resolve(messages.Succeeded);
 			},
 			function(error) {
 				result.resolve(error);
@@ -232,7 +355,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		var plugin = args.plugin;
 		plugin.start({lazy:true}).then(
 			function() {
-				result.resolve(messages["Succeeded"]);
+				result.resolve(messages.Succeeded);
 			},
 			function(error) {
 				result.resolve(error);
@@ -255,7 +378,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 								plugins.put(url, true);
 							});
-							result.resolve(messages["Succeeded"]);
+							result.resolve(messages.Succeeded);
 						},
 						function(error) {
 							result.resolve(error);
@@ -276,7 +399,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		var plugin = args.plugin;
 		plugin.update().then(
 			function() {
-				result.resolve(messages["Succeeded"]);
+				result.resolve(messages.Succeeded);
 			},
 			function(error) {
 				result.resolve(error);
@@ -290,7 +413,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		if (args.plugin.isAllPlugin) {
 			var msg = messages["Are you sure you want to uninstall all contributed plug-ins?"];
 			if (!window.confirm(msg)) {
-				return messages["Aborted"];
+				return messages.Aborted;
 			}
 			args.plugin.uninstall().then(
 				function() {
@@ -302,7 +425,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							}
 						}.bind(this) /* force a sync */
 					);
-					result.resolve(messages["Succeeded"]);
+					result.resolve(messages.Succeeded);
 				},
 				function(error) {
 					result.resolve(error);
@@ -318,7 +441,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							plugins.remove(location);
 						}.bind(this) /* force a sync */
 					);
-					result.resolve(messages["Succeeded"]);
+					result.resolve(messages.Succeeded);
 				},
 				function(error) {
 					result.resolve(error);
@@ -362,7 +485,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-			mGlobalCommands.setPageTarget({task: messages["Shell"]});
+			mGlobalCommands.setPageTarget({task: messages.Shell});
 
 			output = document.getElementById("shell-output"); //$NON-NLS-0$
 			var input = document.getElementById("shell-input"); //$NON-NLS-0$
@@ -387,10 +510,19 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			shell.registerType(directoryType);
 			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService, false, true); //$NON-NLS-0$
 			shell.registerType(fileType);
-			pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
+
+			/* for single-selection commands for use on any plug-in */
+			var pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry, false, true); //$NON-NLS-0$
 			shell.registerType(pluginType);
-			var contributedPluginType = new mPluginParamType.ParamTypePlugin("contributedPlugin", pluginRegistry, true); //$NON-NLS-0$
+			/* for multiple-selection commands for use on any plug-in */
+			pluginsType = new mPluginParamType.ParamTypePlugin("plugins", pluginRegistry); //$NON-NLS-0$
+			shell.registerType(pluginsType);
+			/* for single-selection commands for use on contributed plug-ins only */
+			var contributedPluginType = new mPluginParamType.ParamTypePlugin("contributedPlugin", pluginRegistry, true, true); //$NON-NLS-0$
 			shell.registerType(contributedPluginType);
+			/* for multiple-selection commands for use on contributed plug-ins only */
+			var contributedPluginsType = new mPluginParamType.ParamTypePlugin("contributedPlugins", pluginRegistry, true); //$NON-NLS-0$
+			shell.registerType(contributedPluginsType);
 
 			/* add the locally-defined commands */
 			shell.registerCommand({
@@ -460,7 +592,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsUninstallExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugin", //$NON-NLS-0$
+					type: "contributedPlugins", //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -471,7 +603,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsReloadExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "plugin", //$NON-NLS-0$
+					type: "plugins", //$NON-NLS-0$
 					description: messages["The name of the plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -482,7 +614,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsEnableExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugin", //$NON-NLS-0$
+					type: "contributedPlugins", //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -493,8 +625,19 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsDisableExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugin", //$NON-NLS-0$
+					type: "contributedPlugins", //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
+				}],
+				returnType: "string" //$NON-NLS-0$
+			});
+			shell.registerCommand({
+				name: "plugins services", //$NON-NLS-0$
+				description: messages["Displays a plug-in's services"],
+				callback: pluginServicesExec,
+				parameters: [{
+					name: "plugin", //$NON-NLS-0$
+					type: "plugin", //$NON-NLS-0$
+					description: messages["The name of the plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
 			});

@@ -70,10 +70,11 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 	}());
 
 	orion.shellPage.ParamTypePlugin = (function() {
-		function ParamTypePlugin(name, pluginRegistry, excludeDefaultPlugins) {
+		function ParamTypePlugin(name, pluginRegistry, excludeDefaultPlugins, isSingleSelect) {
 			this.name = name;
 			this.pluginRegistry = pluginRegistry;
 			this.excludeDefaultPlugins = excludeDefaultPlugins;
+			this.isSingleSelect = isSingleSelect;
 			if (excludeDefaultPlugins) {
 				this._computeDefaultPlugins();
 			}
@@ -195,14 +196,14 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			},
 			_getPredictions: function(text) {
 				var predictions = [];
-				if (NAME_ALL.indexOf(text) === 0) {
-					predictions.push({name: NAME_ALL, value: new AllPlugin(this.plugins)});
-				}
 				this.plugins.forEach(function(current) {
 					if (current.name.indexOf(text) === 0) {
 						predictions.push({name: current.name, value: current});
 					}
 				});
+				if (!this.isSingleSelect && NAME_ALL.indexOf(text) === 0) {
+					predictions.push({name: NAME_ALL, value: new AllPlugin(this.plugins)});
+				}
 				return predictions;
 			},
 			_initPluginsList: function() {
