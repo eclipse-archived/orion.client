@@ -32,12 +32,14 @@ define([], function() {
 		return buf.join('&'); //$NON-NLS-0$
 	}
 
-	return {
+	/**
+	 * @name orion.urlencode
+	 * @class Utilities for dealing with URL and form encoding.
+	 */
+	return /** @lends orion.urlencode */ {
 		/**
 		 * Encodes an object of key-value pairs as a string suitable for the query component of a URI.
-		 * @function
 		 * @static
-		 * @name orion.urlencode.encodeQuery
 		 * @param {Object} data The parameters to encode.
 		 * @returns {String} The URL-encoded string.
 		 */
@@ -45,8 +47,7 @@ define([], function() {
 			return encodeObject(params, urlencode);
 		},
 		/**
-		 * Encodes an object of form fields and values as a <code>application/x-www-form-urlencoded</code> string.
-		 * @function
+		 * Encodes an object of form fields and values as an <code>application/x-www-form-urlencoded</code> string.
 		 * @static
 		 * @param {Object} data The form data to encode.
 		 * @returns {String} The <code>x-www-form-urlencoded</code> string.
@@ -56,11 +57,9 @@ define([], function() {
 		},
 		/**
 		 * Returns a URL with the given queryString in its query component.
-		 * @name orion.urlencode.appendQuery
 		 * @param {String} url The URL.
 		 * @param {String} queryString The query string to incorporate into <code>url</code>.
 		 * @returns {String} The URL with <code>queryString</code> appended to its query component.
-		 * @function
 		 * @static
 		 */
 		appendQuery: function(url, queryString) {
