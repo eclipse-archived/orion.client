@@ -3992,7 +3992,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return true;
 		},
 		_commitIME: function () {
-			if (this._imeOffset === -1) { return; }
+			if (this._imeOffset === -1 || util.isWebkit) { return; }
 			// make the state of the IME match the state the view expects it be in
 			// when the view commits the text and IME also need to be committed
 			// this can be accomplished by changing the focus around
@@ -5722,7 +5722,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return false;
 		},
 		_startIME: function () {
-			if (this._imeOffset !== -1) { return; }
+			if (this._imeOffset !== -1 || util.isWebkit) { return; }
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
 				this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
