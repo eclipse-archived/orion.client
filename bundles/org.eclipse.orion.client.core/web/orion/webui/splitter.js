@@ -93,7 +93,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 },
 		 
 		_adjustToSplitPosition: function(updateStorage) {
-			var rect = this._node.getBoundingClientRect();
+			var rect = lib.bounds(this._node);
 			this._splitWidth = rect.right - rect.left;
 			if (updateStorage || !this._splitLeft){
 				this._splitLeft = rect.left;
@@ -108,10 +108,10 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		
 		_resize: function(animationDelay) {
 			animationDelay = animationDelay || 0;
-			var rect = this._node.parentNode.getBoundingClientRect();
-			this._totalWidth = rect.right - rect.left;
-			rect = this._node.getBoundingClientRect();
-			this._mainNode.style.width = (this._totalWidth - rect.right) +"px"; //$NON-NLS-0$ 
+			var rect = lib.bounds(this._node.parentNode);
+			this._totalWidth = rect.width;
+			rect = lib.bounds(this._node);
+			this._mainNode.style.width = (this._totalWidth - (rect.left + rect.width)) +"px"; //$NON-NLS-0$ 
 			var self = this;
 			window.setTimeout(function() { self._notifyResizeListeners(self._mainNode); }, animationDelay);
 			window.setTimeout(function() { self._notifyResizeListeners(self._sideNode); }, animationDelay);

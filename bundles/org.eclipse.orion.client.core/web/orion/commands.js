@@ -11,7 +11,7 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/explorers/navigationUtils', 'dijit/Tooltip', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, lib, mDropdown, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/explorers/navigationUtils', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, lib, mDropdown, mTooltip, mNavUtils){
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 
@@ -68,105 +68,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 
 	};
 	CommandInvocation.prototype.constructor = CommandInvocation;
-
-	/**
-	 * Override the dijit Tooltip to handle cases where the tooltip is not dismissing
-	 * when expected.
-	 * Case 1:  the tooltip should close when the command dom node that generated it is hidden.
-	 * Case 2:  the tooltip should always disappear when unhovered, regardless of who has the 
-	 * focus.  This allows the tooltip to properly disappear when we hit Esc to close the menu.  
-	 * We may have to revisit this when we do an accessibility pass.
-	 * 
-	 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=360687
-	 */
-	var CommandTooltip = dojo.declare(dijit.Tooltip, {
-		constructor : function() {
-			this.inherited(arguments);
-			this.options = arguments[0] || {};
-			this.showDelay = 1000;
-		},
-		
-		_onUnHover: function(evt){
-			// comment out line below from dijit implementation
-			// if(this._focus){ return; }
-			// this is the rest of it
-			if(this._showTimer){
-				window.clearTimeout(this._showTimer);
-				delete this._showTimer;
-			}
-			// added this flag
-			this.polling = false;
-			this.close();
-			
-		}, 
-		
-		_onHover: function(/*DomNode*/ target){
-			// Override to register for notification when parent node disappears
-			// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
-			this.inherited(arguments);
-			this.polling = true;
-			this.pollForMissingTarget();
-			
-			// Override the dijit default ARIA role of alert, which causes undesirable behaviour.
-			window.setTimeout(function() {
-				if(dijit._masterTT) {
-					dojo.removeAttr(dijit._masterTT.containerNode, "role"); //$NON-NLS-0$
-				}
-			}, this.showDelay + 1);
-		},
-		
-		pollForMissingTarget: function() {
-			if (!this.polling) {
-				return;
-			}
-			window.setTimeout(dojo.hitch(this, function() {
-				// see if our target node is still in the document
-				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
-				if (this._stillInDocument(this._connectNode)) {
-					this.pollForMissingTarget();
-				} else {
-					this.polling = false;
-					this.close();
-				}
-			}), this.showDelay + 500);
-		},
-		
-		_stillInDocument: function(node) {
-			// we can't check dojo.byId(node.id) because we could have another node by the same id, common when
-			// emptying a command parent and rerendering commands.  You'll end up with the same id.  This is precisely
-			// the case we are trying to correct in	https://bugs.eclipse.org/bugs/show_bug.cgi?id=369923
-			// parent nodes are also still hooked up.  So we have to walk up all the way the parent chain to see if
-			// indeed our parent node is the document.
-			while (node) {
-		        if (node === window.document) {
-		            return true;
-		        }
-		        node = node.parentNode;
-			}
-			// parent chain stopped before getting to document.
-			return false;
-		},
-				
-		postMixInProperties: function() {
-			this.inherited(arguments);
-			if (this.options.commandParent) {
-				if (dijit.byId(this.options.commandParent.id)) {
-					// this is a menu
-					dojo.connect(this.options.commandParent, "onClose", dojo.hitch(this, function() {this.close();})); //$NON-NLS-0$
-				}				
-			}
-		},
-
-		_setLabelAttr: function(content) {
-			this.label = null;
-			if (typeof content === "string") {  //$NON-NLS-0$
-				this.domNode.textContent = content;
-			} else {
-				dojo.empty(this.domNode);
-				this.domNode.appendChild(content.cloneNode(true));
-			}
-		}
-	});
 
 	/**
 	 * Constructs a new command service with the given options.
@@ -1124,12 +1025,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_init: function(options) {
 			this.id = options.id;  // unique id
 			this.name = options.name;
-			if (options.tooltip || options.name) {
-				this.tooltip = document.createElement("span"); //$NON-NLS-0$
-				this.tooltip.textContent = options.tooltip || options.name;
-			} else {
-				this.tooltip = null;
-			}
+			this.tooltip = options.tooltip || options.name;
 			this.callback = options.callback; // optional callback that should be called when command is activated (clicked)
 			this.hrefCallback = options.hrefCallback; // optional callback that returns an href for a command link
 			this.choiceCallback = options.choiceCallback; // optional callback indicating that the command will supply secondary choices.  
@@ -1171,12 +1067,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			context.domNode = element;
 			context.domParent = parent;
 			if (this.tooltip) {
-				new CommandTooltip({
-					connectId: [element],
-					label: this.tooltip,
-					position: ["above", "left", "right", "below"], // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandParent: parent,
-					commandService: context.commandService
+				new mTooltip.Tooltip({
+					node: element,
+					text: this.tooltip,
+					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
 				});
 			}
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
@@ -1257,11 +1151,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				element.classList.add(aClass); //$NON-NLS-0$
 			}
 			if (this.tooltip) {
-				new CommandTooltip({
-					connectId: [element],
-					label: this.tooltip,
-					commandParent: parent,
-					commandService: context.commandService
+				new mTooltip.Tooltip({
+					node: element,
+					text: this.tooltip,
+					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
 				});
 			}
 			context.domNode = element;
@@ -1291,14 +1184,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				}
 			}
 			if (this.tooltip) {
-				new CommandTooltip({
-					connectId: [element],
-					label: this.tooltip,
-					commandParent: parent,
-					commandService: context.commandService
+				new mTooltip.Tooltip({
+					node: element,
+					text: this.tooltip,
+					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
 				});
 			}
-
 			context.domNode = element;
 			return element;
 		 },
@@ -1703,7 +1594,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		CommandInvocation: CommandInvocation,
 		URLBinding: URLBinding,
 		ParametersDescription: ParametersDescription,
-		CommandParameter: CommandParameter,
-		CommandTooltip: CommandTooltip
+		CommandParameter: CommandParameter
 	};
 });
