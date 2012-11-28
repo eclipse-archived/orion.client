@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- define(['dojo', 'dijit'], function(dojo, dijit){
+ define(['dojo', 'orion/webui/tooltip'], function(dojo, mTooltip){
  
 	/**
 	* Progress indicator in form of a simple spinner.
@@ -53,9 +53,9 @@
 			indicator.src = "/images/problem.gif";
 			dojo.removeAttr(indicator, "class");
 			
-			new dijit.Tooltip({
-				connectId: [this._prefix+this._id],
-				label: err
+			new mTooltip.Tooltip({
+				node: indicator,
+				text: err
 			});
 		}
 	};
@@ -107,9 +107,9 @@
 			
 			dojo.create("img", {"src":"/images/problem.gif"}, this._anchor);
 			
-			new dijit.Tooltip({
-				connectId: [this._prefix+this._id],
-				label: err
+			new mTooltip.Tooltip({
+				node: indicator,
+				text:err
 			});
 		}
 	};

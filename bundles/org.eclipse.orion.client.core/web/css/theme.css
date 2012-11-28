@@ -373,18 +373,59 @@ a.currentLocation:hover {
 	vertical-align: bottom;
 }
 
-/* dijit overrides related to theming */
-/* dijit theme overrides per graphic designer.  Mostly affecting drop down and menu appearance and hovers */
-/* buttons */
-
-
 /* tooltips */
-.claro .dijitTooltip {
-	max-width: 300px;
+
+.tooltip {
+	color: #fffcd7;
+	background-color: #939393;
+	border-radius: 2px;
+	visibility: hidden;
+	z-index: 200;
+	min-width: 80px;
+	position: absolute;
+	padding: 8px;
 }
 
-.claro .dijitTooltipContainer {
-  /* the part with the text */
-  background-color: #ffffff;
-  background-image: none;
- }
+.left:after {
+	position: absolute;
+	display: inline-block;
+	border: 8px solid;
+	border-color: transparent transparent transparent #939393;
+	top: 4px;
+	right: -16px;
+	content: '';
+}
+
+.right:before {
+	position: absolute;
+	display: inline-block;
+	border: 8px solid;
+	border-color: transparent #939393 transparent transparent;
+	left: -16px;
+	top: 4px;
+	content: '';
+}
+
+.below:before {
+	position: absolute;
+	display: block;
+	border: 8px solid;
+	border-color: transparent transparent #939393 transparent;
+	left: 16px;
+	top: -16px;
+	content: '';
+}
+
+.above:after {
+	position: absolute;
+	display: block;
+	border: 8px solid;
+	border-color: #939393 transparent transparent;
+	left: 16px;
+	bottom: -16px;
+	content: '';
+}
+
+.tooltipShowing {
+	visibility: visible;
+}
