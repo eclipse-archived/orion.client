@@ -21,6 +21,8 @@ define(function() {
 	var isWebkit = userAgent.indexOf("WebKit") !== -1; //$NON-NLS-0$
 	var isAndroid = userAgent.indexOf("Android") !== -1; //$NON-NLS-0$
 	var isIPad = userAgent.indexOf("iPad") !== -1; //$NON-NLS-0$
+	var isIPhone = userAgent.indexOf("iPhone") !== -1; //$NON-NLS-0$
+	var isIOS = isIPad || isIPhone;
 	var isMac = navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 	var isWindows = navigator.platform.indexOf("Win") !== -1; //$NON-NLS-0$
 	var isLinux = navigator.platform.indexOf("Linux") !== -1; //$NON-NLS-0$
@@ -53,6 +55,8 @@ define(function() {
 		isWebkit: isWebkit,
 		isAndroid: isAndroid,
 		isIPad: isIPad,
+		isIPhone: isIPhone,
+		isIOS: isIOS,
 		
 		/** OSs */
 		isMac: isMac,

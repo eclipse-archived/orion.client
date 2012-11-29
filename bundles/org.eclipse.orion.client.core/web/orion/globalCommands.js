@@ -14,11 +14,11 @@
 
 define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
-	'orion/webui/dropdown', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
+	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
 	'orion/widgets/UserMenu', 'dojo/DeferredList', 'orion/widgets/OpenResourceDialog'], 
         function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
-        mDropdown, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
+        mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
         mAdvSearchOptContainer, Deferred, mUserMenu){
 
 	/**
@@ -104,10 +104,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown});
 		var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 		
-		new mCommands.CommandTooltip({
-			connectId: [dropdownTrigger],
-			label: messages['Options'],
-			position: ["above", "left", "right", "below"] // otherwise defaults to right and obscures adjacent commands //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		new mTooltip.Tooltip({
+			node: dropdownTrigger,
+			text: messages['Options'],
+			position: "below" //$NON-NLS-0$
 		});
 			
 		setUserName(serviceRegistry, dropdownTrigger);
@@ -384,11 +384,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 						makeFavorite(serviceRegistry);
 					}
 				});
-				new mCommands.CommandTooltip({
-					connectId: [faveButton],
-					label: messages["Add to the favorites list"],
-					position: ["below", "left", "right", "above"], // below since this is at top of page. //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService: commandService
+				new mTooltip.Tooltip({
+					node: faveButton,
+					text: messages["Add to the favorites list"],
+					position: "left" //$NON-NLS-1$
 				});
 				dojo.style(faveButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {

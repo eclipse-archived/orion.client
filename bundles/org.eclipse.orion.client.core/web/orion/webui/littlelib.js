@@ -42,6 +42,16 @@ define(['require'], function(require) {
 		return parent === child || Boolean(parent.compareDocumentPosition(child) & 16);
 	}
 	
+	function bounds(node) {
+		var clientRect = node.getBoundingClientRect();
+		return { 
+			left: clientRect.left + document.body.scrollLeft,
+			top: clientRect.top + document.body.scrollTop,
+			width: clientRect.width,
+			height: clientRect.height
+		};
+	}
+	
 	// TODO check IE10 to see if necessary
 	function stop(event) {
 		if (window.document.all) { 
@@ -69,6 +79,7 @@ define(['require'], function(require) {
 		$$array: $$array,
 		node: node,
 		contains: contains,
+		bounds: bounds,
 		stop: stop,
 		KEY: KEY
 	};
