@@ -35,7 +35,7 @@ define({
 	"Are you sure you want to delete '${0}'?": "Are you sure you want to delete '${0}'?",
 	"Are you sure you want to delete '${0}' from the favorites?": "Are you sure you want to delete '${0}' from the favorites?",
 	"Are you sure you want to delete these ${0} favorites?": "Are you sure you want to delete these ${0} favorites?",
-	"You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.": "You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu.",
+	"You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu.": "You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu.",
 	"Export as zip": "Export as zip",
 	"Create a zip file of the folder contents and download it": "Create a zip file of the folder contents and download it",
 	"New File": "New File",
