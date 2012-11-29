@@ -3279,7 +3279,53 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._setSelection(new Selection(start, end), false, false);
 		},
 		_handleTextInput: function (e) {
-			this._doContent(e.data);
+			if (util.isAndroid) {
+				var selection = this._getWindow().getSelection();
+				var temp = selection.anchorNode;
+				while (temp) {
+					if (temp.lineIndex !== undefined) {
+						break;
+					}
+					temp = temp.parentNode;
+				}
+				if (temp) {
+					var model = this._model;
+					var lineIndex = temp.lineIndex;
+					var oldText = model.getLine(lineIndex), text = oldText;
+					var offset = 0;
+					var lineStart = model.getLineStart(lineIndex);
+					if (selection.rangeCount > 0) {
+						selection.getRangeAt(0).deleteContents();
+						var node = temp.ownerDocument.createTextNode(e.data);
+						selection.getRangeAt(0).insertNode(node);
+						var nodeText = this._getDOMText(temp, node);
+						text = nodeText.text;
+						offset = nodeText.offset;
+						node.parentNode.removeChild(node);
+					}
+					temp.lineRemoved = true;
+					
+					var start = 0;
+					while (oldText.charCodeAt(start) === text.charCodeAt(start) && start < offset) {
+						start++;
+					}
+		
+					var end = oldText.length - 1, delta = text.length - oldText.length;
+					while (oldText.charCodeAt(end) === text.charCodeAt(end + delta) && end + delta >= offset + e.data.length) {
+						end--;
+					}
+					end++;
+					
+					var deltaText = text.substring(start, end + delta);
+					start += lineStart;
+					end += lineStart;
+					
+//					log("<" + text + "> <" + deltaText + "> <" + oldText + "> " + start + " " + end);
+					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true}, true);
+				}
+			} else {
+				this._doContent(e.data);
+			}
 			e.preventDefault();
 		},
 		_handleTouchStart: function (e) {
@@ -4002,7 +4048,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var model = this._model;
 			var lineIndex = model.getLineAtOffset(this._imeOffset);
 			var lineStart = model.getLineStart(lineIndex);
-			var newText = this._getDOMText(lineIndex);
+			var newText = this._getDOMText(this._getLineNode(lineIndex)).text;
 			var oldText = model.getLine(lineIndex);
 			var start = this._imeOffset - lineStart;
 			var end = start + newText.length - oldText.length;
@@ -4650,18 +4696,20 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return "";
 		},
-		_getDOMText: function(lineIndex) {
-			var child = this._getLineNode(lineIndex);
+		_getDOMText: function(child, offsetNode) {
 			var lineChild = child.firstChild;
-			var text = "";
+			var text = "", offset = 0;
 			while (lineChild) {
 				var textNode = lineChild.firstChild;
 				while (textNode) {
+					if (offsetNode === textNode) {
+						offset = text.length;
+					}
 					if (lineChild.ignoreChars) {
 						for (var i = 0; i < textNode.length; i++) {
 							var ch = textNode.data.substring(i, i + 1);
-							if (ch !== " ") { //$NON-NLS-0$
-								text += ch;
+							if (ch !== " " && ch !== "\u200C") { //$NON-NLS-1$ //$NON-NLS-0$
+								text += ch === "\u00A0" ? "\t" : ch; //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
 					} else {
@@ -4671,7 +4719,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				}
 				lineChild = lineChild.nextSibling;
 			}
-			return text;
+			return {text: text, offset: offset};
 		},
 		_getTextFromElement: function(element) {
 			var document = element.ownerDocument;
