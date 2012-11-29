@@ -229,7 +229,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/commands',
 				// TODO temporary hack from Libing 
 				this.explorer.getNavHandler()._clearSelection(false);
 			} else {
-				dojo.place("<p>"+dojo.string.substitute(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the More menu."], ["<b>"+messages["Make Favorite"]+"</b>"])+"</p>", "favoritesContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-0$
+				dojo.place("<p>"+dojo.string.substitute(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu."], ["<b>"+messages["Make Favorite"]+"</b>", "<b>"+messages["Actions"]+"</b>"])+"</p>", "favoritesContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-0$
 			}
 		}
 	};//end navigation outliner prototype
