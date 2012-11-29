@@ -2647,7 +2647,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		},
 		_handleFocus: function (e) {
 			this._hasFocus = true;
-			if (util.isIPad && this._lastTouchOffset !== undefined) {
+			if (util.isIOS && this._lastTouchOffset !== undefined) {
 				this.setCaretOffset(this._lastTouchOffset, true);
 				this._lastTouchOffset = undefined;
 			} else {
@@ -4361,7 +4361,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				rootDiv.appendChild(clipboardDiv);
 			}
 
-			if (!util.isIE && !util.isIPad) {
+			if (!util.isIE && !util.isIOS) {
 				var clipDiv = util.createElement(document, "div"); //$NON-NLS-0$
 				this._clipDiv = clipDiv;
 				clipDiv.style.position = "absolute"; //$NON-NLS-0$
@@ -4392,12 +4392,12 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			clientDiv.style.zIndex = "1"; //$NON-NLS-0$
 			clientDiv.style.WebkitUserSelect = "text"; //$NON-NLS-0$
 			clientDiv.setAttribute("spellcheck", "false"); //$NON-NLS-1$ //$NON-NLS-0$
-			if (util.isIPad || util.isAndroid) {
+			if (util.isIOS || util.isAndroid) {
 				clientDiv.style.WebkitTapHighlightColor = "transparent"; //$NON-NLS-0$
 			}
 			(this._clipDiv || rootDiv).appendChild(clientDiv);
 			
-			if (util.isIPad || util.isAndroid) {
+			if (util.isIOS || util.isAndroid) {
 				var vScrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
 				this._vScrollDiv = vScrollDiv;
 				vScrollDiv.style.position = "absolute"; //$NON-NLS-0$
@@ -4895,7 +4895,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "paste", handler: function(e) { return self._handlePaste(e ? e : window.event);}}); //$NON-NLS-0$
-			if (util.isIPad || util.isAndroid) {
+			if (util.isIOS || util.isAndroid) {
 				handlers.push({target: document, type: "selectionchange", handler: function(e) { return self._handleSelectionChange(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchstart", handler: function(e) { return self._handleTouchStart(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e ? e : window.event); }}); //$NON-NLS-0$
@@ -5578,7 +5578,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				return;
 			}
 			
-			if (!this._selDiv1 && (this._fullSelection && !util.isIPad)) {
+			if (!this._selDiv1 && (this._fullSelection && !util.isIOS)) {
 				var document = parent.ownerDocument;
 				this._highlightRGB = util.isWebkit ? "transparent" : "Highlight"; //$NON-NLS-1$ //$NON-NLS-0$
 				var selDiv1 = util.createElement(document, "div"); //$NON-NLS-0$
