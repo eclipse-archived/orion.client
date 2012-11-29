@@ -80,11 +80,11 @@ define("orion/editor/htmlGrammar", [], function() {
 				},
 				"qqString": { // double quoted string
 					"match": "(\")[^\"]+(\")",
-					"name": "string.quoted.double.html"
+					"name": "token.string"
 				},
 				"qString": { // single quoted string
 					"match": "(')[^']+(\')",
-					"name": "string.quoted.single.html"
+					"name": "token.string"
 				},
 				"entity": {
 					"match": "&[A-Za-z0-9]+;",

@@ -18,7 +18,9 @@ define(['require', 'dojo', 'dijit', 'dijit/_Widget', 'dijit/_Templated'], functi
 
 	dojo.declare("orion.widgets.settings.TextField", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
 	
-		 templateString: '<input type="text" style:"width:190px;" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
+	
+	
+		 templateString: '<input type="text" class="setting-control" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
 		
 //		templateString: '<div><div>THIS IS A PLACEHOLDER</div></div>',
 		
@@ -31,7 +33,6 @@ define(['require', 'dojo', 'dijit', 'dijit/_Widget', 'dijit/_Templated'], functi
 		
 		constructor: function(){
 			this.inherited( arguments );
-//			console.log( 'c o n s t r u c t o r: ' + this.ui ); //$NON-NLS-0$
 		},
 		
 		setStorageItem: function(){

@@ -166,49 +166,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/w
 			red.breadcrumb = 'darkred';
 			red.separator = '#CD2127';
 			
-			this.styles.push( red );
-			
-			var blue = new StyleSet();
-			
-			blue.name = 'Blue';
-			blue.navbar = '#425069';
-			
-			blue.search = '#768DB8';
-			
-			blue.breadcrumb = '#7F99C0';
-			blue.separator = '#CD2127';
-			blue.location = '#7F99C0';
-			
-			blue.button = 'lavender';
-			
-			blue.selection = '#9AAABF';
-			blue.sidepanel = '#9AAABF';
-			blue.mainpanel = 'white';
-			blue.toolpanel = '#FEFEFE';
-			blue.navtext = '#FBFBFB';
-			blue.content = '#3B5998';
-			
-			
-			this.styles.push( blue );
-			
-			var raspberry = new StyleSet();
-			
-			raspberry.name = 'Raspberry Pi';
-			raspberry.navbar = '#679636';
-			raspberry.button = '#777777';
-			raspberry.location = '#F39E9A';
-			raspberry.selection = 'lightcoral';
-			raspberry.sidepanel = 'seashell';
-			raspberry.mainpanel = '#FDFADD';
-			raspberry.toolpanel = 'seashell';
-			raspberry.navtext = '#FBFBFB';
-			raspberry.content = 'E73E36';
-			raspberry.search = '#4c8623';
-			raspberry.breadcrumb = 'darkred';
-			raspberry.separator = '#CD2127';
-			
-			this.styles.push( raspberry );
-			
+			this.styles.push( red );		
 		}
 		
 		function getStyles(){
