@@ -12,10 +12,11 @@
 
 .textviewContainer {
 	background-color: #eaeaea;
-	font-family: monospace;
+	font-family: Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
+	color: darkSlateGrey;
 }
 
 .textviewContent {
@@ -35,16 +36,16 @@
  * Styles for JS, CSS, and Java.
  *
  *************************************************************************************************/
-.token_singleline_comment {
-	color: green;
+.comment {
+	color: darkSeaGreen;
 }
 
 .token_multiline_comment {
-	color: green;
+	color: darkSeaGreen;
 }
 
 .token_doc_comment {
-	color: #00008F;
+	color: #AAA;
 }
 
 a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
@@ -63,8 +64,8 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	color: #7F9FBF;
 }
 
-.token_string {
-	color: blue;
+.token-string {
+	color: cornflowerBlue; /* was blue; */
 }
 
 .token_number {
@@ -72,7 +73,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .token_keyword {
-	color: darkred;
+	color: darkOrange; /* originally darkred; */
 	font-weight: bold;
 }
 
@@ -99,9 +100,6 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
  * Syles for TextMate (in particular HTML files) and for the CodeMirror plugin.
  *
  *************************************************************************************************/
-.comment {
-	color: green;
-}
 
 .comment-block-documentation {
 	color: #00008F;
@@ -158,9 +156,9 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	color: #7F0055;
 }
 
-.string {
+/* .string {
 	color: blue;
-}
+} */
 
 .support {
 	color: #21439c;
@@ -181,7 +179,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 
 /* Hardcoded HTML styles */
 .entity-name-tag /*tag name*/ {
-	color: #3f7f7f;
+	color: darkOrange;
 }
 
 .entity-other-attribute-name {
@@ -196,9 +194,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	color: blue;
 }
 
-.string-quoted {
-	color: #2a00ff;
-}
+
 
 /* CodeMirror */
 .cm-meta { color: #00008F; }
@@ -227,25 +223,13 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
  * Styling for html syntax highlighting
  *
  *************************************************************************************************/
-.entity-name-tag {
-	color: #3f7f7f;
-}
 
 .entity-other-attribute-name {
-	color: #7f007f;
+	color: darkSeaGreen;
 }
 
 .punctuation-definition-comment {
 	color: #3f5fbf;
-}
-
-.comment {
-	color: #3f5fbf
-}
-
-.string-quoted {
-	color: #2a00ff;
-	font-style: italic;
 }
 
 .invalid {

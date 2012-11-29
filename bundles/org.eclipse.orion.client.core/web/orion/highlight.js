@@ -11,8 +11,8 @@
 
 /*global define*/
 define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
-			'examples/textview/textStylerOptions'], 
-		function(dojo, mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions) {
+			'examples/textview/textStylerOptions', 'orion/bootstrap', 'orion/textview/util'], 
+		function(dojo, mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions, mBootstrap, util) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -105,7 +105,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 					styler.setContentType(contentType);
 				} else if (type === "grammar" || typeof type === "undefined") { //$NON-NLS-1$ //$NON-NLS-0$
 					var grammar = provider.getProperty("grammar"); //$NON-NLS-0$
-					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars);
+					styler = new mTextMateStyler.TextMateStyler(textView, grammar, grammars, mBootstrap, util);
 				}
 			}
 			return styler;
