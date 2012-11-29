@@ -5657,6 +5657,8 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var clientDiv = this._clientDiv;
 			if (util.isOpera) {
 				if (clientDiv) { clientDiv.style.OTabSize = this._tabSize+""; }
+			} else if (util.isWebkit >= 537.1) {
+				if (clientDiv) { clientDiv.style.tabSize = this._tabSize+""; }
 			} else if (util.isFirefox >= 4) {
 				if (clientDiv) {  clientDiv.style.MozTabSize = this._tabSize+""; }
 			} else if (this._tabSize !== 8) {
