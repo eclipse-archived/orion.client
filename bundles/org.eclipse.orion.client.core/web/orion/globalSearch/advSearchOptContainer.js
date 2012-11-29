@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes'], function(messages, require, mSearchUtils, mContentTypes){
+define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/i18nUtil"], function(messages, require, mSearchUtils, mContentTypes, i18nUtil){
 
 	/**
 	 * advSearchOptContainer is the drop down container for all advanced search options.
@@ -155,10 +155,8 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	};
 	
 	advSearchOptRenderer.prototype._submitSearch = function(){
-		if(this._searchBox.value.length > 0){
-			var options = this.getOptions();
-			mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.searchStr, options);
-		} 
+		var options = this.getOptions();
+		mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.searchStr, options);
 	};
 	
 	advSearchOptRenderer.prototype._loadFileTypes = function(){
@@ -231,7 +229,8 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		//Create html collection for all the controls as rows of LI
 		var ul = document.createElement('ul');//$NON-NLS-0$
 		ul.className = "advSearchOptUL";//$NON-NLS-0$
-		this._parentDiv.appendChild(ul);		
+		this._parentDiv.appendChild(ul);	
+		var that = this;
 		
 		//Create search Label
 		var label = document.createElement('label'); //$NON-NLS-0$
@@ -241,10 +240,20 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		//Create search input box
 		this._searchBox = document.createElement('input'); //$NON-NLS-0$
 		this._searchBox.type = "text"; //$NON-NLS-0$
+		this._searchBox.placeholder = messages["Type a search term"];
 		this._createListEle(ul, "advSearchOptLIControl", this._searchBox); //$NON-NLS-0$
 
 		//Create file type combo box
 		this._fileTypes = document.createElement('select'); //$NON-NLS-0$
+		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
+			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value
+			if(type === mSearchUtils.ALL_FILE_TYPE){
+				that._searchBox.placeholder = messages["Type a search term"];
+			} else {
+				that._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
+			}
+		});
+		
 		label = document.createElement('label'); //$NON-NLS-0$
 		label.appendChild(document.createTextNode(messages["File type:"]));
 		this._createListEle(ul, "advSearchOptLIControl", [label, this._fileTypes]); //$NON-NLS-0$

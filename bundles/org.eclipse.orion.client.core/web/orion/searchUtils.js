@@ -173,17 +173,30 @@ exports.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryO
 		}
 	}
 	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
+	//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
 	if(queryObj.advOptions && queryObj.advOptions.type && queryObj.advOptions.type !== exports.searchUtils.ALL_FILE_TYPE){
-		var newStr = queryObj.nonAdvQueryStr.replace(queryObj.searchStr, queryObj.searchStr + "+NameLower:*." + queryObj.advOptions.type);
-		queryObj.nonAdvQueryStr = newStr;
-	}
-	//If the search string contains white space, we should add this special property. 
-	//The property's value is basically the original search string with the double quato at both end.
-	//It is the caller's responsibility to decide wether this property has to be used or not.
-	if(queryObj.searchStr.indexOf(" ") >= 0){
-		queryObj.searchStrWithWhiteSpace = "\"" + queryObj.searchStr + "\"";
-		var newStr = queryObj.nonAdvQueryStr.replace(queryObj.searchStr, queryObj.searchStrWithWhiteSpace);
-		queryObj.nonAdvQueryStr = newStr;
+		var newQParam = exports.searchUtils.copyQueryParams(queryObj);
+		newQParam.advOptions = null;
+		//If the search string is not empty, we just combine the file type.
+		if(queryObj.searchStr !== ""){
+			var newSearchStr = queryObj.searchStr;
+			//If the search string contains white space, we should add double quato at both end. 
+			if(queryObj.searchStr.indexOf(" ") >= 0){
+				newSearchStr = "\"" + newSearchStr + "\"";
+			}
+			newQParam.searchStr = newSearchStr + "+NameLower:*." + queryObj.advOptions.type;
+		} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
+			newQParam.searchStr = "NameLower:*." + queryObj.advOptions.type;
+			var newSortStr = newQParam.sort.replace("Path", "NameLower");
+			newQParam.sort = newSortStr;
+			queryObj.searchStrTitle = "*." + queryObj.advOptions.type;
+		}
+		queryObj.nonAdvQueryStr = exports.searchUtils.generateSearchQuery(newQParam);
+	} else if(queryObj.searchStr.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
+		var newQParam = exports.searchUtils.copyQueryParams(queryObj);
+		newQParam.advOptions = null;
+		newQParam.searchStr = "\"" + queryObj.searchStr + "\"";
+		queryObj.nonAdvQueryStr = exports.searchUtils.generateSearchQuery(newQParam);
 	}
 	queryObj.inFileQuery= exports.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
 };
@@ -732,9 +745,18 @@ exports.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
 
 exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
 	if (searcher) {
-		if (searchStr.length > 0) {
-			exports.searchUtils.addRecentSearch(serviceRegistry, searchStr, advOptions ? advOptions.regEx: false);
-			var query = searcher.createSearchQuery(searchStr, null, null, false, null, advOptions);
+		var newSearchStr = searchStr, commitSearch = true;
+		if(newSearchStr === "*"){
+			newSearchStr = "";
+		}
+		if(newSearchStr === ""){
+			commitSearch = advOptions && advOptions.type !== exports.searchUtils.ALL_FILE_TYPE;
+		}
+		if (commitSearch) {
+			if(newSearchStr !== ""){
+				exports.searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
+			}
+			var query = searcher.createSearchQuery(newSearchStr, null, null, false, null, advOptions);
 			exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
 				var href = require.toUrl("search/search.html") + "#" +query; //$NON-NLS-1$ //$NON-NLS-0$
 				if(openInNewTab){
