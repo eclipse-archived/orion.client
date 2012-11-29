@@ -9,10 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document */
+/*global document */
 // HTML Templates Shim -- see http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/templates/index.html
 
-define(function(){
+(function() {
 	document.body.insertAdjacentHTML("beforeend", "<template id='__testTemplate__'><div></div></template>");
 	var testTemplate = document.getElementById("__testTemplate__");
 	var supportsTemplate = !!testTemplate.content;
@@ -59,4 +59,4 @@ define(function(){
 			template.content.appendChild(template.firstChild);
 		}
 	});
-});
+}());
