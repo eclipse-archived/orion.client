@@ -13,6 +13,20 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'], 
 	function(messages, require, dojo, dijit) {
+	
+		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
+	
+			Using Prospecto as an example:
+			
+			-----------------------------------------------
+							CSS			HTML		JS
+			-----------------------------------------------
+			ORANGE			Class		Tag			Keyword
+			darkSlateGray	Text		Text		Text
+			darkSeaGreen	Comments	Comments	Comments
+			cornFlowerblue	String		String		String
+			----------------------------------------------- */
+	
 
 		function StyleSet(){
 		
@@ -26,157 +40,185 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		
 		
 		StyleSet.prototype.name = 'prospecto';
-		StyleSet.prototype.annotationRuler = '#333';
+		StyleSet.prototype.annotationRuler = 'darkSlateGray';
 		StyleSet.prototype.background = '#EFEFEF';
-		StyleSet.prototype.comment = '#333';
+		StyleSet.prototype.comment = 'darkSlateGray';
 		StyleSet.prototype.keyword = '#3087B3';
-		StyleSet.prototype.text = '#333';
+		StyleSet.prototype.text = 'darkSlateGray';
 		StyleSet.prototype.string = 'FEC';
 		StyleSet.prototype.overviewRuler = '#FBFBFB';
 		StyleSet.prototype.lineNumberOdd = 'white';
 		StyleSet.prototype.lineNumberEven = 'white';
 		StyleSet.prototype.lineNumber = '#bfbfbf';
+		StyleSet.prototype.tag = 'darkorange';
+		StyleSet.prototype.attribute = 'cadetBlue';
+		StyleSet.prototypefontSize = '10pt';
 
-		function ThemeData(){
-		
-			this.styles = [];
-		
-			var orion = new StyleSet();
-			
-			orion.name = 'Orion';
-			orion.annotationRuler = 'white'; 
-			orion.background = 'white';
-			orion.comment = 'green';
-			orion.keyword = '#7f0055';
-			orion.text = '#333';
-			orion.string = 'blue';
-			orion.overviewRuler = 'white';
-			orion.lineNumberOdd = '#444';
-			orion.lineNumberEven = '#444';
-			orion.lineNumber = '#444';
-			orion.currentLine = '#EAF2FE';
+			function ThemeData() {
 
-			this.styles.push( orion );	
+		this.styles = [];
 
-			var prospecto = new StyleSet();
-			
-			prospecto.name = 'Prospecto';
-			prospecto.annotationRuler = 'white'; 
-			prospecto.background = 'white';
-			prospecto.comment = 'darkSeaGreen';
-			prospecto.keyword = 'darkOrange';
-			prospecto.text = '#333';
-			prospecto.string = 'cornFlowerBlue';
-			prospecto.overviewRuler = 'white';
-			prospecto.lineNumberOdd = '#333';
-			prospecto.lineNumberEven = '#333';
-			prospecto.lineNumber = '#333';
-			prospecto.currentLine = '#EAF2FE';
+		var orion = new StyleSet();
 
-			this.styles.push( prospecto );			
-			
-			var blue = new StyleSet();
-			
-			blue.name = 'Blue';
-			blue.annotationRuler = 'lavender'; 
-			blue.background = 'aliceBlue';
-			blue.comment = 'indigo';
-			blue.keyword = 'cornFlowerBlue';
-			blue.text = 'navy';
-			blue.string = 'cornFlowerBlue';
-			blue.overviewRuler = 'lavender';
-			blue.lineNumberOdd = '#333';
-			blue.lineNumberEven = '#333';
-			blue.lineNumber = '#333';
-			blue.currentLine = 'white';
-			
-			this.styles.push( blue );
-			
-			var ambience = new StyleSet();
-			
-			ambience.name = 'Ambience';
-			ambience.annotationRuler = '#3D3D3D'; 
-			ambience.background = '#202020';
-			ambience.comment = 'mediumslateblue';
-			ambience.keyword = 'cornFlowerBlue';
-			ambience.text = 'darkseagreen';
-			ambience.string = 'lightcoral';
-			ambience.overviewRuler = 'white';
-			ambience.lineNumberOdd = 'black';
-			ambience.lineNumberEven = 'black';
-			ambience.lineNumber = 'black';
-			ambience.currentLine = 'lightcyan';
-			
-			this.styles.push( ambience );
-			
-			var tierra = new StyleSet();
-			
-			tierra.name = 'Tierra';
-			tierra.annotationRuler = 'moccasin'; 
-			tierra.background = 'lemonchiffon';
-			tierra.comment = 'darkseagreen';
-			tierra.keyword = 'darkred';
-			tierra.text = '#555555';
-			tierra.string = 'orangered';
-			tierra.overviewRuler = 'moccasin';
-			tierra.lineNumberOdd = 'chocolate';
-			tierra.lineNumberEven = 'chocolate';
-			tierra.lineNumber = 'chocolate';
-			tierra.currentLine = '#baa289';
-			
-			this.styles.push( tierra );
-			
-			var nimbus = new StyleSet();
-			
-			nimbus.name = 'Nimbus';
-			nimbus.annotationRuler = '#444'; 
-			nimbus.background = 'dimgray';
-			nimbus.comment = 'darkseagreen';
-			nimbus.keyword = 'darkorange';
-			nimbus.text = 'white';
-			nimbus.string = 'cornflowerblue';
-			nimbus.overviewRuler = '#444';
-			nimbus.lineNumberOdd = '#aaa';
-			nimbus.lineNumberEven = '#aaa';
-			nimbus.lineNumber = '#aaa';
-			nimbus.currentLine = '#aabfbb';
-			
-			this.styles.push( nimbus );
-			
-			var adelante = new StyleSet();
-			
-			adelante.name = 'Adelante';
-			adelante.annotationRuler = '#E2D2B2'; 
-			adelante.background = '#F1E7C8';
-			adelante.comment = '#5D774E';
-			adelante.keyword = '#AF473B';
-			adelante.text = 'dimgray';
-			adelante.string = '#DE5D3B';
-			adelante.overviewRuler = '#E2D2B2';
-			adelante.lineNumberOdd = '#AF473B';
-			adelante.lineNumberEven = '#AF473B';
-			adelante.lineNumber = '#AF473B';
-			adelante.currentLine = '#9e937b';
-			
-			this.styles.push( adelante );
-			
-			var raspberry = new StyleSet();
-			
-			raspberry.name = 'Raspberry Pi';
-			raspberry.annotationRuler = 'seashell'; 
-			raspberry.background = 'seashell';
-			raspberry.comment = '#66B32F';
-			raspberry.keyword = '#E73E36';
-			raspberry.text = 'dimgray';
-			raspberry.string = 'darkorange';
-			raspberry.overviewRuler = 'seashell';
-			raspberry.lineNumberOdd = '#E73E36';
-			raspberry.lineNumberEven = '#E73E36';
-			raspberry.lineNumber = '#E73E36';
-			raspberry.currentLine = '#F5B1AE';
-			
-			this.styles.push( raspberry );
-			
+		orion.name = 'Orion';
+		orion.annotationRuler = 'white';
+		orion.background = 'white';
+		orion.comment = 'green';
+		orion.keyword = '#7f0055';
+		orion.text = 'darkSlateGray';
+		orion.string = 'blue';
+		orion.overviewRuler = 'white';
+		orion.lineNumberOdd = '#444';
+		orion.lineNumberEven = '#444';
+		orion.lineNumber = '#444';
+		orion.currentLine = '#EAF2FE';
+		orion.tag = 'darkorange';
+		orion.attribute = 'cadetBlue';
+		orion.fontSize = '10pt';
+
+		this.styles.push(orion);
+
+		var prospecto = new StyleSet();
+
+		prospecto.name = 'Prospecto';
+		prospecto.annotationRuler = 'white';
+		prospecto.background = 'white';
+		prospecto.comment = 'darkSeaGreen';
+		prospecto.keyword = 'darkOrange';
+		prospecto.text = 'darkSlateGray';
+		prospecto.string = 'cornFlowerBlue';
+		prospecto.overviewRuler = 'white';
+		prospecto.lineNumberOdd = 'darkSlateGray';
+		prospecto.lineNumberEven = 'darkSlateGray';
+		prospecto.lineNumber = 'darkSlateGray';
+		prospecto.currentLine = '#EAF2FE';
+		prospecto.tag = 'darkorange';
+		prospecto.attribute = 'cadetBlue';
+		prospecto.fontSize = '10pt';
+
+
+		this.styles.push(prospecto);
+
+		var blue = new StyleSet();
+
+		blue.name = 'Blue';
+		blue.annotationRuler = 'lavender';
+		blue.background = 'aliceBlue';
+		blue.comment = 'indigo';
+		blue.keyword = 'cornFlowerBlue';
+		blue.text = 'navy';
+		blue.string = 'cornFlowerBlue';
+		blue.overviewRuler = 'lavender';
+		blue.lineNumberOdd = 'darkSlateGray';
+		blue.lineNumberEven = 'darkSlateGray';
+		blue.lineNumber = 'darkSlateGray';
+		blue.currentLine = 'white';
+		blue.tag = 'cornFlowerBlue';
+		blue.attribute = 'cadetBlue';
+		blue.fontSize = '10pt';
+
+		this.styles.push(blue);
+
+		var ambience = new StyleSet();
+
+		ambience.name = 'Ambience';
+		ambience.annotationRuler = '#3D3D3D';
+		ambience.background = '#202020';
+		ambience.comment = 'mediumslateblue';
+		ambience.keyword = 'cornFlowerBlue';
+		ambience.text = 'darkseagreen';
+		ambience.string = 'lightcoral';
+		ambience.overviewRuler = 'white';
+		ambience.lineNumberOdd = 'black';
+		ambience.lineNumberEven = 'black';
+		ambience.lineNumber = 'black';
+		ambience.currentLine = 'lightcyan';
+		ambience.tag = 'cornFlowerBlue';
+		ambience.attribute = 'cadetBlue';
+		ambience.fontSize = '10pt';
+
+		this.styles.push(ambience);
+
+		var tierra = new StyleSet();
+
+		tierra.name = 'Tierra';
+		tierra.annotationRuler = 'moccasin';
+		tierra.background = 'lemonchiffon';
+		tierra.comment = 'darkseagreen';
+		tierra.keyword = 'darkred';
+		tierra.text = '#555555';
+		tierra.string = 'orangered';
+		tierra.overviewRuler = 'moccasin';
+		tierra.lineNumberOdd = 'chocolate';
+		tierra.lineNumberEven = 'chocolate';
+		tierra.lineNumber = 'chocolate';
+		tierra.currentLine = '#baa289';
+		tierra.tag = 'darkred';
+		tierra.attribute = 'cadetBlue';
+		tierra.fontSize = '10pt';
+
+		this.styles.push(tierra);
+
+		var nimbus = new StyleSet();
+
+		nimbus.name = 'Nimbus';
+		nimbus.annotationRuler = '#444';
+		nimbus.background = 'dimgray';
+		nimbus.comment = 'darkseagreen';
+		nimbus.keyword = 'darkorange';
+		nimbus.text = 'white';
+		nimbus.string = 'cornflowerblue';
+		nimbus.overviewRuler = '#444';
+		nimbus.lineNumberOdd = '#aaa';
+		nimbus.lineNumberEven = '#aaa';
+		nimbus.lineNumber = '#aaa';
+		nimbus.currentLine = '#aabfbb';
+		nimbus.tag = 'darkorange';
+		nimbus.attribute = 'cadetBlue';
+		nimbus.fontSize = '10pt';
+
+		this.styles.push(nimbus);
+
+		var adelante = new StyleSet();
+
+		adelante.name = 'Adelante';
+		adelante.annotationRuler = '#E2D2B2';
+		adelante.background = '#F1E7C8';
+		adelante.comment = '#5D774E';
+		adelante.keyword = '#AF473B';
+		adelante.text = 'dimgray';
+		adelante.string = '#DE5D3B';
+		adelante.overviewRuler = '#E2D2B2';
+		adelante.lineNumberOdd = '#AF473B';
+		adelante.lineNumberEven = '#AF473B';
+		adelante.lineNumber = '#AF473B';
+		adelante.currentLine = '#9e937b';
+		adelante.tag = '#AF473B';
+		adelante.attribute = 'cadetBlue';
+		adelante.fontSize = '10pt';
+
+		this.styles.push(adelante);
+
+		var raspberry = new StyleSet();
+
+		raspberry.name = 'Raspberry Pi';
+		raspberry.annotationRuler = 'seashell';
+		raspberry.background = 'seashell';
+		raspberry.comment = '#66B32F';
+		raspberry.keyword = '#E73E36';
+		raspberry.text = 'dimgray';
+		raspberry.string = 'darkorange';
+		raspberry.overviewRuler = 'seashell';
+		raspberry.lineNumberOdd = '#E73E36';
+		raspberry.lineNumberEven = '#E73E36';
+		raspberry.lineNumber = '#E73E36';
+		raspberry.currentLine = '#F5B1AE';
+		raspberry.tag = '#E73E36';
+		raspberry.attribute = 'cadetBlue';
+		raspberry.fontSize = '10pt';
+
+		this.styles.push(raspberry);
+
 		}
 		
 		function getStyles(){
@@ -186,55 +228,411 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		ThemeData.prototype.styles = [];
 		ThemeData.prototype.getStyles = getStyles;
 		
+		var fontSettable = true;
+		
+		ThemeData.prototype.fontSettable = fontSettable;
+		
 		function getThemeStorageInfo(){
-			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'orion' }; 
+			var themeInfo = { storage:'/themes', styleset:'editorstyles', defaultTheme:'Prospecto' }; 
 			return themeInfo;
 		}
 
 		ThemeData.prototype.getThemeStorageInfo = getThemeStorageInfo;
 
-		function getViewData(){
-		
-			var dataset = {};
-			dataset.top = 10;
-			dataset.left = 10;
-			dataset.width = 400;
-			dataset.height = 350;
-			
-			var LEFT = dataset.left;
-			var TOP = dataset.top;
-			
-			dataset.shapes = [	{ type:'TEXT', name:'Line Numbers', label:'1', x:LEFT + 20, y:TOP + 20, fill: '#333', family:'lineNumber', font: '9pt sans-serif' },
-								{ type:'TEXT', name:'Comments',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment', font: '9pt sans-serif' },
-								{ type:'RECTANGLE', name:'Background',			x:LEFT + 46,	y:TOP, width:290,	height:dataset.height, family:'background',	 fill: 'white' },
-								{ type:'TEXT', name:'Comments',		label:'/* comment */',		x:LEFT + 55,	y:TOP + 20,		fill: 'darkSeaGreen',	family:'comment', font: '9pt sans-serif' }, 
-								
-								{ type:'RECTANGLE', name:'Current Line',		x:LEFT + 46,	y:TOP +67, width:290,	height:18, family:'currentLine', fill: '#eaf2fd' },
-								{ type:'TEXT', name:'Strings',		label:'\'Result\'',			x:LEFT + 144,	y:TOP + 60,		fill: 'cornflowerBlue', family:'string', font: '9pt sans-serif' }, 
-								{ type:'TEXT', name:'Foreground',			label:'multiply(a,b){',		x:LEFT + 100,	y:TOP + 40,		fill: '#333',			family:'text', font: '9pt sans-serif' },
-																{ type:'RECTANGLE', name:'Overview Ruler',		x:LEFT + 336,	y:TOP, width:14,	height:dataset.height, family:'overviewRuler', fill: 'white' },
-								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
-								{ type:'TEXT', name:'keywords',		label:'function',			x:LEFT + 55,	y:TOP + 40,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
-								 
-								{ type:'TEXT', name:'Keywords',		label:'var',				x:LEFT + 75,	y:TOP + 60,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' }, 
-								{ type:'TEXT', name:'Foreground',			label:'output = ',			x:LEFT + 95,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
-								
-								{ type:'TEXT', name:'Foreground',			label:';',					x:LEFT + 185,	y:TOP + 60,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
-								
-								{ type:'TEXT', name:'keywords',		label:'var',				x:LEFT  +75,	y:TOP + 80,		fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
-								{ type:'TEXT', name:'Foreground',			label:'result = a*b;',		x:LEFT + 95,	y:TOP + 80,		fill: '#333',			family:'text', font: '9pt sans-serif' }, 
-								{ type:'TEXT', name:'keywords',		label:'return',				x:LEFT + 75,	y:TOP + 100,	fill: 'darkorange',		family:'keyword', font: '9pt sans-serif' },
-								{ type:'TEXT', name:'Foreground',			label:'output + result;',	x:LEFT + 115,	y:TOP + 100,	fill: '#333',			family:'text', font: '9pt sans-serif' },
-								{ type:'TEXT', name:'Foreground',			label:'}',					x:LEFT + 55,	y:TOP + 120,	fill: '#333',			family:'text', font: '9pt sans-serif' },
+		function getViewData() {
 
-								{ type:'RECTANGLE', name:'Annotation Ruler',	x:LEFT,			y:TOP, width:46,	height:dataset.height, family:'annotationRuler', fill: 'white' }];
-			
-			for( var line =0; line < 8; line++ ){
-				dataset.shapes.push( { type:'TEXT', name:'Line Numbers', label:line+1, x:LEFT + 20, y:TOP + ( 20* line ) + 20, fill: '#333', family:'lineNumber', font: '9pt sans-serif' } );
-			}	
-			
-			return dataset;
+		var dataset = {};
+		dataset.top = 10;
+		dataset.left = 10;
+		dataset.width = 400;
+		dataset.height = 350;
+
+		var LEFT = dataset.left;
+		var TOP = dataset.top;
+
+		dataset.shapes = [{
+			type: 'TEXT',
+			name: 'Line Numbers',
+			label: '1',
+			x: LEFT + 20,
+			y: TOP + 20,
+			fill: 'darkSlateGray',
+			family: 'lineNumber',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'RECTANGLE',
+			name: 'Background',
+			x: LEFT + 46,
+			y: TOP,
+			width: 290,
+			height: dataset.height,
+			family: 'background',
+			fill: 'white'
+		},
+		{
+			type: 'TEXT',
+			name: 'Strings',
+			label: "'text/javascript'",
+			x: LEFT + 134,
+			y: TOP + 20,
+			fill: 'darkorange',
+			family: 'string',
+			font: '9pt sans-serif'
+		},
+		
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: '=',
+			x: LEFT + 124,
+			y: TOP + 20,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+
+		
+		{
+			type: 'RECTANGLE',
+			name: 'Current Line',
+			x: LEFT + 46,
+			y: TOP + 87,
+			width: 290,
+			height: 18,
+			family: 'currentLine',
+			fill: '#eaf2fd'
+		},
+		
+		{
+			type: 'TEXT',
+			name: 'HTML Attribute',
+			label: 'type',
+			x: LEFT + 98,
+			y: TOP + 20,
+			fill: 'darkGray',
+			family: 'attribute',
+			font: '9pt sans-serif'
+		},
+		
+		{
+			type: 'RECTANGLE',
+			name: 'Overview Ruler',
+			x: LEFT + 336,
+			y: TOP,
+			width: 14,
+			height: dataset.height,
+			family: 'overviewRuler',
+			fill: 'white'
+		},	
+		{
+			type: 'TEXT',
+			name: 'Comments',
+			label: '/* comment */',
+			x: LEFT + 75,
+			y: TOP + 40,
+			fill: 'darkSeaGreen',
+			family: 'comment',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '<script',
+			x: LEFT + 55,
+			y: TOP + 20,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '>',
+			x: LEFT + 213,
+			y: TOP + 20,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'RECTANGLE',
+			name: 'Current Line',
+			x: LEFT + 46,
+			y: TOP + 87,
+			width: 290,
+			height: 18,
+			family: 'currentLine',
+			fill: '#eaf2fd'
+		},
+		{
+			type: 'TEXT',
+			name: 'Strings',
+			label: '\'Result\'',
+			x: LEFT + 164,
+			y: TOP + 80,
+			fill: 'cornflowerBlue',
+			family: 'string',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: 'multiply(a,b){',
+			x: LEFT + 120,
+			y: TOP + 60,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		
+		{
+			type: 'TEXT',
+			name: 'keywords',
+			label: 'function',
+			x: LEFT + 75,
+			y: TOP + 60,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Keywords',
+			label: 'var',
+			x: LEFT + 95,
+			y: TOP + 80,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: 'output = ',
+			x: LEFT + 115,
+			y: TOP + 80,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: ';',
+			x: LEFT + 205,
+			y: TOP + 80,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'keywords',
+			label: 'var',
+			x: LEFT + 95,
+			y: TOP + 100,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: 'result = a*b;',
+			x: LEFT + 115,
+			y: TOP + 100,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'keywords',
+			label: 'return',
+			x: LEFT + 95,
+			y: TOP + 120,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: 'output + result;',
+			x: LEFT + 135,
+			y: TOP + 120,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: '}',
+			x: LEFT + 75,
+			y: TOP + 140,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '</script>',
+			x: LEFT + 55,
+			y: TOP + 160,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '<style',
+			x: LEFT + 55,
+			y: TOP + 200,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Attribute',
+			label: 'type',
+			x: LEFT + 95,
+			y: TOP + 200,
+			fill: 'darkGray',
+			family: 'attribute',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Foreground',
+			label: '=',
+			x: LEFT + 121,
+			y: TOP + 200,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'Strings',
+			label: "'text/css'",
+			x: LEFT + 131,
+			y: TOP + 200,
+			fill: 'darkorange',
+			family: 'string',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '>',
+			x: LEFT + 180,
+			y: TOP + 200,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Class Name',
+			label: '.some-class',
+			x: LEFT + 75,
+			y: TOP + 220,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Class Name',
+			label: '{',
+			x: LEFT + 145,
+			y: TOP + 220,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Attribute',
+			label: 'color:',
+			x: LEFT + 95,
+			y: TOP + 240,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Value',
+			label: '#123456',
+			x: LEFT + 130,
+			y: TOP + 240,
+			fill: 'darkSlateGray',
+			family: 'string',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Text',
+			label: ';',
+			x: LEFT + 180,
+			y: TOP + 240,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'CSS Class Name',
+			label: '}',
+			x: LEFT + 75,
+			y: TOP + 260,
+			fill: 'darkSlateGray',
+			family: 'text',
+			font: '9pt sans-serif'
+		},
+		{
+			type: 'TEXT',
+			name: 'HTML Tag',
+			label: '</style>',
+			x: LEFT + 55,
+			y: TOP + 280,
+			fill: 'darkorange',
+			family: 'keyword',
+			font: '9pt sans-serif'
+		},
+		/* <style type='text/css'></style> */
+		{
+			type: 'RECTANGLE',
+			name: 'Annotation Ruler',
+			x: LEFT,
+			y: TOP,
+			width: 46,
+			height: dataset.height,
+			family: 'annotationRuler',
+			fill: 'white'
+		}];
+
+		for (var line = 0; line < 16; line++) {
+			dataset.shapes.push({
+				type: 'TEXT',
+				name: 'Line Numbers',
+				label: line + 1,
+				x: LEFT + 20,
+				y: TOP + (20 * line) + 20,
+				fill: 'darkSlateGray',
+				family: 'lineNumber',
+				font: '9pt sans-serif'
+			});
 		}
+
+		return dataset;
+	}
 		
 		function parseToXML ( text ) {
 		      try {
@@ -267,6 +665,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		 }
 		 
 		ThemeData.prototype.parseToXML = parseToXML;
+		
+		function selectFontSize( size ){
+			console.log( 'fontsize: ' + size );
+		}
+		
+		ThemeData.prototype.selectFontSize = selectFontSize;
 		
 		function importTheme(data){
 			console.log( 'import theme' );
@@ -301,18 +705,22 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		function processSettings( settings, preferences ){
 		
 			console.log( settings );
+			
+			if( !settings['fontSize'] ){
+				settings['fontSize'] = { value:'10pt' };
+			}
 		
 			preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
 				
 				var font = {};		
 				font.label = 'Font';
-				font.data = [ { label:'Family', value: 'Sans Serif', ui:'Font' }, 
-							{ label:'Size', value: '9pt', ui:'Font' }, 
-							{ label:'Color', value: settings['text'].value }, 
-							{ label:'Background', value: settings['background'].value } ];
-				
+				font.data = [ 	{ label:'Family', value: 'Sans Serif', ui:'Font' }, 
+								{ label:'Size', value: settings['fontSize'].value, ui:'Font' }, 
+								{ label:'Color', value: settings['text'].value }, 
+								{ label:'Background', value: settings['background'].value } ];
+					
 				var subcategories = [ { element: 'fontFamily', value: 'sans serif' },
-							          { element: 'fontSize', value: '9pt' },
+							          { element: 'fontSize', value:  settings['fontSize'].value },
 							          { element: 'fontWeight', value: 'normal' },
 									  { element: 'text', value: settings['text'].value }, 
 									  { element: 'background', value: settings['background'].value },
@@ -323,7 +731,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 									  { element: 'overviewRuler', value: settings['overviewRuler'].value },
 									  { element: 'annotationRuler', value: settings['annotationRuler'].value },
 									  { element: 'lineNumber', value: settings['lineNumber'].value },
-									  { element: 'currentLine', value: settings['currentLine'].value }
+									  { element: 'currentLine', value: settings['currentLine'].value },
+									  { element: 'attribute', value: settings['attribute'].value }
 									  ];
 
 				prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );

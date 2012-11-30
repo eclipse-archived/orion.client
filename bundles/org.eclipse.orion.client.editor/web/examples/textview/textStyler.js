@@ -108,13 +108,13 @@ define("examples/textview/textStyler", ['orion/textview/annotations'], function(
 	var BRACKETS = "{}()[]<>";
 
 	// Styles 
-	var singleCommentStyle = {styleClass: "token_singleline_comment"};
+	var singleCommentStyle = {styleClass: "comment"};
 	var multiCommentStyle = {styleClass: "token_multiline_comment"};
 	var docCommentStyle = {styleClass: "token_doc_comment"};
 	var htmlMarkupStyle = {styleClass: "token_doc_html_markup"};
 	var tasktagStyle = {styleClass: "token_task_tag"};
 	var doctagStyle = {styleClass: "token_doc_tag"};
-	var stringStyle = {styleClass: "token_string"};
+	var stringStyle = {styleClass: "token-string"};
 	var numberStyle = {styleClass: "token_number"};
 	var keywordStyle = {styleClass: "token_keyword"};
 	var spaceStyle = {styleClass: "token_space"};

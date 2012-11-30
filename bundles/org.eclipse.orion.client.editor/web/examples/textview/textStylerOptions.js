@@ -86,6 +86,10 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 			result.push("." + theme + " {");
 			result.push("\tfont-family: " + family + ";");
 			result.push("\tfont-size: " + elements['fontSize'] + ";");
+			
+//			result.push("\tfont-family: " + 'source-code-pro' + ";");
+//			result.push("\tfont-size: " + '9pt' + ";");
+			
 			result.push("\tcolor: " + elements['text'] + ";");
 			result.push("}");
 			
@@ -146,6 +150,9 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 			return result.join("\n");
 		},
 		_onStorage: function (e) {
+		
+			console.log( ' _ONSTORAGE ' );
+		
 			if( e.key === this.storageKey ){
 				this._updateStylesheet( this.preferences );
 			}
