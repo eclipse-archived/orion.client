@@ -106,20 +106,6 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		this._cancelCallBack = cancelCallBack;
 	}
 	
-	advSearchOptRenderer.prototype._createListEle = function(ul, className, control){
-		var listEle = document.createElement('li'); //$NON-NLS-0$
-		listEle.className = className;
-		if(control instanceof Array){
-			for(var i = 0; i < control.length; i++){
-				listEle.appendChild(control[i]);
-			}
-		} else if(control){
-			listEle.appendChild(control);
-		}
-		ul.appendChild(listEle);
-		return listEle;
-	};
-	
 	advSearchOptRenderer.prototype.getOptions = function(){
 		return {searchStr: this._searchBox.value,
 		        regEx: this._regExCB.checked,
@@ -159,7 +145,12 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		mSearchUtils.doSearch(this._searcher, this._serviceRegistry, options.searchStr, options);
 	};
 	
-	advSearchOptRenderer.prototype._loadFileTypes = function(){
+	advSearchOptRenderer.prototype._initControls = function(){
+		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
+		this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
+		this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
+		this._submitButton = document.getElementById("advSearchSubmit"); //$NON-NLS-0$
+		//Load file types content type provider
 		var fTypes = [ {label: messages["All types"], value: mSearchUtils.ALL_FILE_TYPE} ];
 		for(var i = 0; i < this.contentTypesCache.length; i++){
 			if(this.contentTypesCache[i]['extends'] === "text/plain"){ //$NON-NLS-0$  //$NON-NLS-0$
@@ -175,9 +166,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		 	this._fileTypes.appendChild(option); 
 			option.value = fTypes[x].value; 
 		} 
-	};
-	
-	advSearchOptRenderer.prototype._addListeners = function(){
+		//Add listeners
 		var that = this;
 		this._searchBox.addEventListener("keydown", function(e) { //$NON-NLS-0$
 			var keyCode= e.charCode || e.keyCode;
@@ -190,23 +179,27 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 				}
 			} 
 		});
+		
+		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
+			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value
+			if(type === mSearchUtils.ALL_FILE_TYPE){
+				that._searchBox.placeholder = messages["Type a search term"];
+			} else {
+				that._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
+			}
+		});
+		
 		this._submitButton.onclick = function(e){
 			that._submitSearch();
 		}
 	};
-
-	advSearchOptRenderer.prototype._initHTMLControls = function(){
-		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
-		this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
-		this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
-		this._submitButton = document.getElementById("advSearchSubmit"); //$NON-NLS-0$
-		this._submitButton.value = messages["Search"]; //$NON-NLS-0$
-	};
 	
 	advSearchOptRenderer.prototype._initHTMLLabels = function(){
 		document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchSubmit").value = messages["Search"]; //$NON-NLS-0$ //$NON-NLS-0$
 	};
 	
 	advSearchOptRenderer.prototype._renderHTML = function(htmlTemplate){
@@ -218,63 +211,35 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	    	if (this.status!==200) return; 
 	    	that._parentDiv.innerHTML= this.responseText;
 	    	that._initHTMLLabels();
-	    	that._initHTMLControls()
-	    	that._loadFileTypes();
-	    	that._addListeners();
+	    	that._initControls()
 		};
 		xhr.send();
 	};
 	
+	advSearchOptRenderer.prototype._htmlTemplate =
+							'<ul class="advSearchOptUL">' + 
+								'<li class="advSearchOptLILabel">' +
+									'<label>' + messages["Files that contain:"] + '</label>' +
+								'</li>' +
+								'<li class="advSearchOptLIControl">' +
+									'<input type="text" id="advSearchInput" placeholder="' + messages["Type a search term"] + '"></input>' +
+								'</li>' +
+								'<li class="advSearchOptLIControl">' +
+									'<label>' + messages["File type:"] + '</label>' +
+									'<select id="advSearchTypes"></select>' +
+								'</li>' +
+								'<li class="advSearchOptLIControl">' +
+									'<label>' + messages["Regular expression:"] + '</label>' +
+									'<input type="checkbox" id="advSearchRegEx"></input>' +
+								'</li>' +
+								'<li class="advSearchOptLIControl">' +
+									'<input type="button" class="advSearchOptButton" id="advSearchSubmit" value="' + messages["Search"] + '"></input>' +
+								'</li>' +
+							'</ul>';
+	
 	advSearchOptRenderer.prototype._renderRaw = function(){
-		//Create html collection for all the controls as rows of LI
-		var ul = document.createElement('ul');//$NON-NLS-0$
-		ul.className = "advSearchOptUL";//$NON-NLS-0$
-		this._parentDiv.appendChild(ul);	
-		var that = this;
-		
-		//Create search Label
-		var label = document.createElement('label'); //$NON-NLS-0$
-		label.appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$
-		this._createListEle(ul, "advSearchOptLILabel", label); //$NON-NLS-0$
-		
-		//Create search input box
-		this._searchBox = document.createElement('input'); //$NON-NLS-0$
-		this._searchBox.type = "text"; //$NON-NLS-0$
-		this._searchBox.placeholder = messages["Type a search term"];
-		this._createListEle(ul, "advSearchOptLIControl", this._searchBox); //$NON-NLS-0$
-
-		//Create file type combo box
-		this._fileTypes = document.createElement('select'); //$NON-NLS-0$
-		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
-			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value
-			if(type === mSearchUtils.ALL_FILE_TYPE){
-				that._searchBox.placeholder = messages["Type a search term"];
-			} else {
-				that._searchBox.placeholder =i18nUtil.formatMessage(messages["All ${0} files"], type);
-			}
-		});
-		
-		label = document.createElement('label'); //$NON-NLS-0$
-		label.appendChild(document.createTextNode(messages["File type:"]));
-		this._createListEle(ul, "advSearchOptLIControl", [label, this._fileTypes]); //$NON-NLS-0$
-		
-	    //Create regular expression check box
-	    this._regExCB = document.createElement('input'); //$NON-NLS-0$
-	    this._regExCB.type = 'checkbox'; //$NON-NLS-0$
-	    this._regExCB.checked = false;
-		label = document.createElement('label'); //$NON-NLS-0$
-		label.appendChild(document.createTextNode(messages["Regular expression:"]));
-		this._createListEle(ul, "advSearchOptLIControl", [label, this._regExCB]); //$NON-NLS-0$
-		
-		//Create search button
-		this._submitButton = document.createElement('input'); //$NON-NLS-0$
-		this._submitButton.type = "button"; //$NON-NLS-0$
-		this._submitButton.value = messages["Search"]; //$NON-NLS-0$
-		this._submitButton.className = "advSearchOptButton"; //$NON-NLS-0$
-		this._createListEle(ul, "advSearchOptLIControl", this._submitButton); //$NON-NLS-0$
-		
-    	this._loadFileTypes();
-    	this._addListeners();
+		this._parentDiv.innerHTML = this._htmlTemplate;
+	    this._initControls()
 	};
 	
 	advSearchOptRenderer.prototype.constructor = advSearchOptRenderer;
