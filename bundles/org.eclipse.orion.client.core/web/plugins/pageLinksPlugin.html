@@ -2,12 +2,32 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script src="../orion/plugin.js"></script>
+	<script src="../requirejs/require.js"></script>
 	<script>
-	/*global orion window*/
+	/*global require*/
+	require({
+	  baseUrl: '..',
+
+	  // set the paths to our library packages
+	  packages: [
+	    {
+	      name: 'dojo',
+	      location: 'org.dojotoolkit/dojo',
+	      main: 'lib/main-browser',
+	      lib: '.'
+	    }		    
+	  ],
+	  paths: {
+		  text: 'requirejs/text',
+		  i18n: 'requirejs/i18n',
+		  domReady: 'requirejs/domReady'
+	  }
+	});	
+
+	/*global define orion window*/
 	var VERSION = "1.0";
-	
-	window.onload = function() {
+
+	require(['require', 'orion/plugin'], function(require, PluginProvider) {
 		var serviceImpl = { /* All data is in properties */ };
 
 		var headers = {
@@ -16,7 +36,7 @@
 			description: "This plugin provides the top-level page links for Orion."
 		};
 	
-		var provider = new orion.PluginProvider(headers);
+		var provider = new PluginProvider(headers);
 		
 		// Primary navigation links
 		provider.registerService("orion.page.link", serviceImpl, {
@@ -61,6 +81,21 @@
 				replacements: [{pattern: "\\?depth=1$", replacement: ""}]  /* strip off depth=1 if it is there because we always add it back */
 			}],
 				uriTemplate: "{OrionHome}/navigate/table.html#{NavigatorLocation}?depth=1"
+		});
+
+		provider.registerService("orion.page.link.user", null, {
+			id: "orion.help",
+			nameKey: "Help",
+			nls: "orion/widgets/nls/messages",
+			uriTemplate: require.toUrl("help/index.jsp"),
+			category: 0
+		});
+		provider.registerService("orion.page.link.user", null, {
+			id: "orion.settings",
+			nameKey: "Settings",
+			nls: "orion/widgets/nls/messages",
+			uriTemplate: "{OrionHome}/settings/settings.html",
+			category: 1
 		});
 
 		var htmlHelloWorld = document.createElement('a');
@@ -125,7 +160,7 @@
 		});
 
 		provider.connect();
-	};
+	});
 	</script>
 </head>
 <body>

@@ -101,7 +101,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var userDropdown = new mDropdown.Dropdown({
 			dropdown: dropdownNode
 		});
-		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown});
+		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown, serviceRegistry: serviceRegistry});
 		var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 		
 		new mTooltip.Tooltip({
