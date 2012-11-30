@@ -587,9 +587,7 @@ var RegexUtil = {
 			this.textView = textView;
 			var self = this;
 			
-			var self = this;
-		
-			if (this.textView) {
+			if (this.textView && mBootStrap) {
 				mBootStrap.startup().then(function(core) {
 					preferences = core.preferences;
 					self.preferences = preferences;
@@ -597,7 +595,7 @@ var RegexUtil = {
 					self.storageKey = preferences.listenForChangedSettings( self._listener.onStorage );
 				});
 			}		
-			
+
 			this._listener = {
 				onModelChanged: function(e) {
 					self.onModelChanged(e);
