@@ -3266,7 +3266,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return Math.max(0, lineOffset) + this._model.getLineStart(lineIndex);
 		},
 		_handleSelectionChange: function (e) {
-			if (util.isAndroid) {
+			if (this._imeOffset !== -1) {
 				return;
 			}
 			var window = this._getWindow();
@@ -3279,6 +3279,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			this._setSelection(new Selection(start, end), false, false);
 		},
 		_handleTextInput: function (e) {
+			this._imeOffset = -1;
 			if (util.isAndroid) {
 				var selection = this._getWindow().getSelection();
 				var temp = selection.anchorNode;
@@ -3320,7 +3321,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					start += lineStart;
 					end += lineStart;
 					
-//					log("<" + text + "> <" + deltaText + "> <" + oldText + "> " + start + " " + end);
 					this._modifyContent({text: deltaText, start: start, end: end, _ignoreDOMSelection: true}, true);
 				}
 			} else {
@@ -3329,6 +3329,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			e.preventDefault();
 		},
 		_handleTouchStart: function (e) {
+			this._commitIME();
 			var window = this._getWindow();
 			if (this._touchScrollTimer) {
 				this._vScrollDiv.style.display = "none"; //$NON-NLS-0$
@@ -3356,9 +3357,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				this._lastTouchOffset = this.getOffsetAtLocation(pt.x, pt.y);
 				this._touchStartTime = e.timeStamp;
 				this._touching = true;
-				if (util.isAndroid) {
-					this.setSelection(this._lastTouchOffset, this._lastTouchOffset);
-				}
 			}
 		},
 		_handleTouchMove: function (e) {
@@ -4038,7 +4036,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return true;
 		},
 		_commitIME: function () {
-			if (this._imeOffset === -1 || util.isWebkit) { return; }
+			if (this._imeOffset === -1) { return; }
 			// make the state of the IME match the state the view expects it be in
 			// when the view commits the text and IME also need to be committed
 			// this can be accomplished by changing the focus around
@@ -4890,7 +4888,6 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			handlers.push({target: clientDiv, type: "keydown", handler: function(e) { return self._handleKeyDown(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keypress", handler: function(e) { return self._handleKeyPress(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "keyup", handler: function(e) { return self._handleKeyUp(e ? e : window.event);}}); //$NON-NLS-0$
-			handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "contextmenu", handler: function(e) { return self._handleContextMenu(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "copy", handler: function(e) { return self._handleCopy(e ? e : window.event);}}); //$NON-NLS-0$
 			handlers.push({target: clientDiv, type: "cut", handler: function(e) { return self._handleCut(e ? e : window.event);}}); //$NON-NLS-0$
@@ -4901,6 +4898,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 				handlers.push({target: clientDiv, type: "touchmove", handler: function(e) { return self._handleTouchMove(e ? e : window.event); }}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "touchend", handler: function(e) { return self._handleTouchEnd(e ? e : window.event); }}); //$NON-NLS-0$
 			} else {
+				handlers.push({target: clientDiv, type: "selectstart", handler: function(e) { return self._handleSelectStart(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "mousedown", handler: function(e) { return self._handleMouseDown(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "mouseover", handler: function(e) { return self._handleMouseOver(e ? e : window.event);}}); //$NON-NLS-0$
 				handlers.push({target: clientDiv, type: "mouseout", handler: function(e) { return self._handleMouseOut(e ? e : window.event);}}); //$NON-NLS-0$
@@ -5315,10 +5313,15 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var document = this._parent.ownerDocument;
 			if (window.getSelection) {
 				//W3C
+				var sel = window.getSelection();
+				if ((sel.anchorNode === startLineNode && sel.anchorOffset === startLineOffset &&
+					sel.focusNode === endLineNode && sel.focusOffset === endLineOffset) ||
+					(sel.anchorNode === endLineNode && sel.anchorOffset === endLineOffset &&
+					sel.focusNode === startLineNode && sel.focusOffset === startLineOffset)) { return; }
+				
 				range = document.createRange();
 				range.setStart(startLineNode, startLineOffset);
 				range.setEnd(endLineNode, endLineOffset);
-				var sel = window.getSelection();
 				this._ignoreSelect = false;
 				if (sel.rangeCount > 0) { sel.removeAllRanges(); }
 				sel.addRange(range);
@@ -5772,7 +5775,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			return false;
 		},
 		_startIME: function () {
-			if (this._imeOffset !== -1 || util.isWebkit) { return; }
+			if (this._imeOffset !== -1) { return; }
 			var selection = this._getSelection();
 			if (!selection.isEmpty()) {
 				this._modifyContent({text: "", start: selection.start, end: selection.end}, true);
