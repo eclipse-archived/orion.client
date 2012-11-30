@@ -16,10 +16,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
-	'orion/widgets/UserMenu', 'dojo/DeferredList', 'orion/widgets/OpenResourceDialog'], 
+	'orion/widgets/UserMenu', 'orion/PageLinks', 'dojo/DeferredList', 'orion/widgets/OpenResourceDialog'], 
         function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
-        mAdvSearchOptContainer, Deferred, mUserMenu){
+        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -101,7 +101,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var userDropdown = new mDropdown.Dropdown({
 			dropdown: dropdownNode
 		});
-		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown});
+		var menuGenerator = new mUserMenu.UserMenu({dropdownNode: dropdownNode, dropdown: userDropdown, serviceRegistry: serviceRegistry});
 		var dropdownTrigger = lib.node("userTrigger"); //$NON-NLS-0$
 		
 		new mTooltip.Tooltip({
@@ -636,44 +636,11 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		// generate primary nav links. 
 		var primaryNav = dojo.byId("primaryNav"); //$NON-NLS-0$
 		if (primaryNav) {
-			// Note that the shape of the "orion.page.link" extension is not in any shape or form that could be considered final.
-			// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
-			
-			// The shape of a contributed navigation link is (for now):
-			// info - information about the navigation link (object).
-			//     required attribute: name - the name of the navigation link
-			//     required attribute: id - the id of the navigation link
-			//     required attribute: uriTemplate - the URL for the navigation link
-			//     optional attribute: image - a URL to an icon representing the link (currently not used, may use in future)
-			var navLinks= serviceRegistry.getServiceReferences("orion.page.link"); //$NON-NLS-0$
-			var params = PageUtil.matchResourceParameters(window.location.href);
-			// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
-			var locationObject = {OrionHome: hostName, Location: params.resource};
-			for (var i=0; i<navLinks.length; i++) {
-				var info = {};
-				var propertyNames = navLinks[i].getPropertyKeys();
-				for (var j = 0; j < propertyNames.length; j++) {
-					info[propertyNames[j]] = navLinks[i].getProperty(propertyNames[j]);
-				}
-			if(info.uriTemplate && info.nls && (info.name || info.nameKey)){
-				require(['i18n!'+info.nls], function(commandMessages){
-					var uriTemplate = new URITemplate(info.uriTemplate);
-					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
-					expandedHref = PageUtil.validateURLScheme(expandedHref);
-					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					text = document.createTextNode(info.nameKey? commandMessages[info.nameKey]: info.name);
-					dojo.place(text, link, "only"); //$NON-NLS-0$
+			PageLinks.createPageLinks(serviceRegistry, "orion.page.link").then(function(links) {
+				links.forEach(function(link) {
+					primaryNav.appendChild(link);
 				});
-			} else if (info.uriTemplate && info.name) {
-					var uriTemplate = new URITemplate(info.uriTemplate);
-					var expandedHref = window.decodeURIComponent(uriTemplate.expand(locationObject));
-					expandedHref = PageUtil.validateURLScheme(expandedHref);
-					var link = dojo.create("a", {href: expandedHref, target: target, 'class':'targetSelector'}, primaryNav, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					text = document.createTextNode(info.name);
-					dojo.place(text, link, "only"); //$NON-NLS-0$
-				}
-			}
+			});
 		}
 		
 		// hook up search box: 1.The search box itself 2.Default search proposal provider(recent and saved search) 
@@ -959,8 +926,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		}));
 		dojo.connect(document, "onclick", dojo.hitch(this, function(e) { //$NON-NLS-0$
-			var clickNode =  e.target || e.originalTarget || e.srcElement; 
-			if (clickNode && clickNode.id !== "keyAssist") { //$NON-NLS-0$
+			var clickNode =  e.target || e.originalTarget || e.srcElement;
+			if (clickNode && (!clickNode.classList || !clickNode.classList.contains("key-assist-menuitem"))) { //$NON-NLS-0$
 				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			}
 			if(clickNode && !advSearchOptContainer.clicked(clickNode) && clickNode.id !== "advancedSearchDropDown"){

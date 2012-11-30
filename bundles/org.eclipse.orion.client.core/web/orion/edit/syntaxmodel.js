@@ -73,7 +73,9 @@ define(['orion/serviceTracker'], function(ServiceTracker) {
 			}
 		};
 		providerTracker.removedService = function(ref, service) {
-			service.removeEventListener('orion.edit.syntaxmodel.modelReady', notifySyntaxModelListeners); //$NON-NLS-0$
+			if (service && typeof service.removeEventListener === 'function') {
+				service.removeEventListener('orion.edit.syntaxmodel.modelReady', notifySyntaxModelListeners); //$NON-NLS-0$
+			}
 		};
 		listenerTracker.open();
 		providerTracker.open();

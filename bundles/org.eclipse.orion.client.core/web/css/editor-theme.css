@@ -12,7 +12,7 @@
 
 .textviewContainer {
 	background-color: #eaeaea;
-	font-family: Myriad,Helvetica,Tahoma,Arial,clean,sans-serif;
+	font-family: "Menlo", "Consolas", "Vera Mono", "monospace";
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
@@ -20,15 +20,15 @@
 }
 
 .textviewContent {
-  cursor: auto;
+	cursor: auto;
 }
 
 .textviewLeftRuler {
-  border-right: 1px solid #eaeaea;
+	border-right: 1px solid #eaeaea;
 }
 
 .textviewRightRuler {
-  border-left: 1px solid #eaeaea;
+	border-left: 1px solid #eaeaea;
 }
 
 /* ************************************************************************************************

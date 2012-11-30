@@ -11,7 +11,7 @@
 
 /*global define window document localStorage*/
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], function(messages, require, lib) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/PageLinks'], function(messages, require, lib, PageLinks) {
 	
 	function UserMenu(options) {
 		this._init(options);		
@@ -22,6 +22,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 			this._dropdownNode = lib.node(options.dropdownNode);
 			if (!this._dropdownNode) { throw "no dom node for dropdown found"; } //$NON-NLS-0$
 			this._dropdown = options.dropdown;
+			this._serviceRegistry = options.serviceRegistry;
 			this.authenticatedServices = {};
 			this.unauthenticatedServices = {};
 		},
@@ -86,55 +87,75 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 			}
 		},
 		
-
+		/*
+		Category 0
+			[Contributed extension links]
+			Keyboard Shortcuts
+		Separator
+		Category 1
+			[Contributed extension links]
+			[Service sign-out links]
+		*/
 		renderServices: function(){
-			this._dropdown.empty();
-						 
-			var item = document.createElement("li");//$NON-NLS-0$
-			var link = document.createElement("a"); //$NON-NLS-0$
-			link.role = "menuitem"; //$NON-NLS-0$
-			link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-			link.href = require.toUrl("help/index.jsp"); //$NON-NLS-0$
-			var text = document.createTextNode(messages["Help"]);//$NON-NLS-0$
-			link.appendChild(text);
-			item.appendChild(link);
-			this._dropdownNode.appendChild(item);
-			
-			var element;
-			if(this.keyAssistFunction){
-				item = document.createElement("li");//$NON-NLS-0$
-				element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
-				item.appendChild(element);
-				this._dropdownNode.appendChild(item);
+			var doc = document;
+			var categories = [];
+			function getCategory(number) {
+				if (!categories[number]) {
+					categories[number] = doc.createDocumentFragment();
+				}
+				return categories[number];
 			}
-			
-			// separator
-			item = document.createElement("li"); //$NON-NLS-0$
-			item.classList.add("dropdownSeparator"); //$NON-NLS-0$
-			element = document.createElement("span"); //$NON-NLS-0$
-			element.classList.add("dropdownSeparator"); //$NON-NLS-0$
-			item.appendChild(element);
-			this._dropdownNode.appendChild(item);
-	
-			item = document.createElement("li");//$NON-NLS-0$
-			link = document.createElement("a"); //$NON-NLS-0$
-			link.role = "menuitem";  //$NON-NLS-0$
-			link.classList.add("dropdownMenuItem");  //$NON-NLS-0$
-			link.href = require.toUrl("settings/settings.html"); //$NON-NLS-0$
-			text = document.createTextNode(messages["Settings"]);//$NON-NLS-0$
-			link.appendChild(text);
-			item.appendChild(link);
-			this._dropdownNode.appendChild(item);
+			PageLinks.getPageLinksInfo(this._serviceRegistry, "orion.page.link.user").then(function(linkInfos) { //$NON-NLS-0$
+				this._dropdown.empty();
 
-			if(this.isSingleService()){
-				//add sign out only for single service.
-				for(var i in this.authenticatedServices){
-					if (this.authenticatedServices.hasOwnProperty(i)) {
-						this._renderAuthenticatedService(i, 0);
+				// Read extension-contributed links
+				linkInfos.forEach(function(item) {
+					var categoryNumber = typeof item.category === "number" ? item.category : 1; //$NON-NLS-0$
+					var category = getCategory(categoryNumber);
+
+					var li = doc.createElement("li");//$NON-NLS-0$
+					var link = doc.createElement("a"); //$NON-NLS-0$
+					link.role = "menuitem"; //$NON-NLS-0$
+					link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
+
+					link.href = item.href;
+					link.textContent = item.textContent;
+					li.appendChild(link);
+					category.appendChild(li);
+				});
+
+				if(this.keyAssistFunction){
+					var keyAssist = document.createElement("li");//$NON-NLS-0$
+					var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
+					element.classList.add("key-assist-menuitem");
+					keyAssist.appendChild(element);
+					getCategory(0).appendChild(keyAssist);
+				}
+
+				// Add categories to _dropdownNode
+				var _self = this;
+				categories.sort(function(a, b) { return a - b; }).forEach(function(category, i) {
+					if (i < categories.length - 1) {
+						// Add a separator
+						var li = document.createElement("li"); //$NON-NLS-0$
+						li.classList.add("dropdownSeparator"); //$NON-NLS-0$
+						var element = document.createElement("span"); //$NON-NLS-0$
+						element.classList.add("dropdownSeparator"); //$NON-NLS-0$
+						li.appendChild(element);
+						category.appendChild(li);
+					}
+					_self._dropdownNode.appendChild(category);
+				});
+
+				if(this.isSingleService()){
+					//add sign out only for single service.
+					for(var i in this.authenticatedServices){
+						if (this.authenticatedServices.hasOwnProperty(i)) {
+							this._renderAuthenticatedService(i, 0);
+						}
 					}
 				}
-			}
-			
+			}.bind(this));
 		},
 		
 		setKeyAssist: function(keyAssistFunction){
