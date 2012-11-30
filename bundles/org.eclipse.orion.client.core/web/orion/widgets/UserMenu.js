@@ -126,7 +126,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 
 				if(this.keyAssistFunction){
 					var keyAssist = document.createElement("li");//$NON-NLS-0$
-					keyAssist.appendChild(this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction));
+					var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
+					element.classList.add("key-assist-menuitem");
+					keyAssist.appendChild(element);
 					getCategory(0).appendChild(keyAssist);
 				}
 

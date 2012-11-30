@@ -926,8 +926,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		}));
 		dojo.connect(document, "onclick", dojo.hitch(this, function(e) { //$NON-NLS-0$
-			var clickNode =  e.target || e.originalTarget || e.srcElement; 
-			if (clickNode && clickNode.id !== "keyAssist") { //$NON-NLS-0$
+			var clickNode =  e.target || e.originalTarget || e.srcElement;
+			if (clickNode && (!clickNode.classList || !clickNode.classList.contains("key-assist-menuitem"))) { //$NON-NLS-0$
 				keyAssistNode.style.display = "none"; //$NON-NLS-0$
 			}
 			if(clickNode && !advSearchOptContainer.clicked(clickNode) && clickNode.id !== "advancedSearchDropDown"){
