@@ -200,27 +200,34 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		return result;
 	};
 
+	SearchCrawler.prototype._reportSingleHit = function(fileObj){
+		fileObj.LastModified = fileObj.LocalTimeStamp;
+		this.fileLocations.push(fileObj);
+		this._hitCounter++;
+		this._sort(this.fileLocations);
+		var response = {numFound: this.fileLocations.length, docs: this.fileLocations };
+		this._onSearchComplete({response: response}, true);
+	};
+	
 	SearchCrawler.prototype._sniffSearch = function(fileObj){
 		this._totalCounter++;
 		var self = this;
-		return self.fileClient.read(fileObj.Location).then(function(jsonData) { //$NON-NLS-0$
-			//self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
-			if(self._hitOnceWithinFile(jsonData)){
-				fileObj.LastModified = fileObj.LocalTimeStamp;
-				self.fileLocations.push(fileObj);
-				self._hitCounter++;
-				self._sort(self.fileLocations);
-				var response = {numFound: self.fileLocations.length, docs: self.fileLocations };
-				self._onSearchComplete({response: response}, true);
-				//console.log("hit on file : "+ self._hitCounter + " out of " + self._totalCounter);
-				//console.log(fileObj.Location);
-			}
-			self.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [self._hitCounter, self._totalCounter])});
-			},
-			function(error) {
-				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
-			}
-		);
+		if(this.queryObj.searchStr === ""){
+			this._reportSingleHit(fileObj);
+			this.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [this._hitCounter, this._totalCounter])});
+		} else {
+			return self.fileClient.read(fileObj.Location).then(function(jsonData) { //$NON-NLS-0$
+				//self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
+				if(self._hitOnceWithinFile(jsonData)){
+					self._reportSingleHit(fileObj);
+				}
+				self.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [self._hitCounter, self._totalCounter])});
+				},
+				function(error) {
+					console.error("Error loading file content: " + error.message); //$NON-NLS-0$
+				}
+			);
+		}
 	};
 	
 	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){

@@ -251,6 +251,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else if (parentItem.type === "detail") { //$NON-NLS-0$
 			onComplete([]);
 		} else if (parentItem.type === "file" && parentItem.location) { //$NON-NLS-0$
+			if(this.queryObj.searchStr === ""){
+				return;
+			}
 			this.fileClient.read(parentItem.location).then(
 					dojo.hitch(this, function(jsonData) {
 						  mSearchUtils.searchWithinFile(this.queryObj.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode());
@@ -525,7 +528,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				col.noWrap = true;
 				span = dojo.create("span", {id: this.getFileIconId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
+				if(this.explorer.model.queryObj.searchStr !== ""){
+					this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
+				} else {
+					var decorateImage = dojo.create("span", null, span, "last"); //$NON-NLS-0$ //$NON-NLS-0$
+					dojo.addClass(decorateImage, "imageSprite"); //$NON-NLS-0$
+					dojo.addClass(decorateImage, "core-sprite-file");//$NON-NLS-0$
+				}
 			} else {
 				span = dojo.create("span", {}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 				col.noWrap = true;
@@ -736,7 +745,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.preview();
 			},
 			visibleWhen : function(item) {
-				return !that.model.replaceMode();
+				return !that.model.replaceMode() && that.model.queryObj.searchStr !== "";
 			}
 		});
 		
@@ -748,7 +757,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems;
+				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.queryObj.searchStr !== "";
 			}
 		});
 	
@@ -859,7 +868,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this._commandService.addCommand(nextResultCommand);
 		this._commandService.addCommand(prevResultCommand);
 		mExplorer.createExplorerCommands(this._commandService, function(item){
-			return !item._reporting;
+			return !item._reporting && that.model.queryObj.searchStr !== "";
 		});
 		// Register command contributions
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1263,22 +1272,23 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
-			if(!that.model.replaceMode()){
-				that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
-					function(event) {
-						that.sortWithName(event.target.checked);
-						window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);  // so user can see the check take effect briefly before it closes
-					});
-			} else {
-				that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
-					function(event) {
-						that.toggleCompare(event.target.checked);
-						window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);
-					});
-			}		
-		}); 
-		
+		if(this.model.queryObj.searchStr !== ""){
+			var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
+				if(!that.model.replaceMode()){
+					that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
+						function(event) {
+							that.sortWithName(event.target.checked);
+							window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);  // so user can see the check take effect briefly before it closes
+						});
+				} else {
+					that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Compare changes"], true,
+						function(event) {
+							that.toggleCompare(event.target.checked);
+							window.setTimeout(function() {newMenu.dropdown.close(true);}, 100);
+						});
+				}		
+			}); 
+		}
 	};
 	
 	SearchResultExplorer.prototype.reportStatus = function(message) {
