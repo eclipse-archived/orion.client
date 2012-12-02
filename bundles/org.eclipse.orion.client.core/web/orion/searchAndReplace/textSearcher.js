@@ -371,8 +371,16 @@ orion.TextSearcher = (function() {
 					end = result.end;
 				}
 			}
-			editor.setText(newStr, start, end);
-			editor.setSelection(start , start + newStr.length, true);
+			if (this._useRegExp) {
+				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
+				if (newStrWithSubstitutions) {
+					editor.setText(newStrWithSubstitutions, start, end)
+					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
+				}
+			} else {
+				editor.setText(newStr, start, end);
+				editor.setSelection(start, start + newStr.length, true);
+			}
 			this.endUndo();
 			if (this._findAfterReplace && searchStr){
 				this._doFind(searchStr, this.getSearchStartIndex(false), false, this._wrapSearch);
