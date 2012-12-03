@@ -25,6 +25,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var pluginRegistry, pluginsType, preferences, serviceElementCounter = 0;
 
 	var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
+	var PAGE_TEMPLATE = "{OrionHome}/shell/shellPage.html#{,resource}"; //$NON-NLS-0$
 
 	/* model and renderer for displaying services */
 
@@ -125,7 +126,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function setCWD(value) {
-		var template = new URITemplate("{OrionHome}/shell/shellPage.html#{,resource}"); //$NON-NLS-0$
+		var template = new URITemplate(PAGE_TEMPLATE);
 		var url = template.expand({
 			resource: value
 		});
@@ -574,6 +575,16 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			output = document.getElementById("shell-output"); //$NON-NLS-0$
 			var input = document.getElementById("shell-input"); //$NON-NLS-0$
 			var shell = new mShell.Shell({input: input, output: output});
+
+			var parameters = PageUtil.matchResourceParameters(window.location.href);
+			if (parameters.command) {
+				shell.setInputText(parameters.command);
+				delete parameters.command;
+				var template = new URITemplate(PAGE_TEMPLATE);
+				var url = template.expand(parameters);
+				window.location.href = url;
+			}
+
 			shell.setFocus();
 
 			shellPageFileService = new mShellPageFileService.ShellPageFileService();
