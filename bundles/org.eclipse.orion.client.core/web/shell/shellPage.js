@@ -15,14 +15,16 @@
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry"],
+		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate"],
 	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry) {
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate) {
 
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginsType, preferences, serviceElementCounter = 0;
+
+	var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
 
 	/* model and renderer for displaying services */
 
@@ -115,6 +117,21 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		return ServicesRenderer;
 	}());
 
+	/* url token utilities */
+
+	function getCWD() {
+		var result = PageUtil.matchResourceParameters(window.location.href).resource;
+		return result.length > 0 ? result : null;
+	}
+
+	function setCWD(value) {
+		var template = new URITemplate("{OrionHome}/shell/shellPage.html#{,resource}"); //$NON-NLS-0$
+		var url = template.expand({
+			resource: value
+		});
+		window.location.href = url;
+	}
+
 	/* general functions for working with file system nodes */
 
 	var resolveError = function(promise, xhrResult) {
@@ -204,7 +221,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		}
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
-		dojo.hash(node.Location);
+		setCWD(node.Location);
 		var pathString = shellPageFileService.computePathString(node);
 		return getChangedToElement(pathString);
 	}
@@ -219,7 +236,8 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 	function lsExec(args, context) {
 		var result = context.createPromise();
-		var location = dojo.hash() || shellPageFileService.SEPARATOR;
+		var node = shellPageFileService.getCurrentDirectory();
+		var location = node ? node.Location : (getCWD() || ROOT_ORIONCONTENT);
 		shellPageFileService.loadWorkspace(location).then(
 			function(node) {
 				shellPageFileService.setCurrentDirectory(node); /* flush current node cache */
@@ -559,16 +577,15 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			shell.setFocus();
 
 			shellPageFileService = new mShellPageFileService.ShellPageFileService();
-			var location = dojo.hash();
-			var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
+			var location = getCWD();
 			shellPageFileService.loadWorkspace(location || ROOT_ORIONCONTENT).then(
 				function(node) {
 					shellPageFileService.setCurrentDirectory(node);
 				}
 			);
-			if (location.length === 0) {
+			if (!location) {
 				hashUpdated = true;
-				dojo.hash(ROOT_ORIONCONTENT);
+				setCWD(ROOT_ORIONCONTENT);
 			}
 
 			/* add the locally-defined types */
@@ -797,28 +814,27 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				}
 			}
 
-			dojo.subscribe("/dojo/hashchange", function(hash) { //$NON-NLS-0$
+			window.onhashchange = function() {
 				if (hashUpdated) {
 					hashUpdated = false;
 					return;
 				}
+
+				var hash = window.location.hash.substring(1);
 				if (hash.length === 0) {
-					shellPageFileService.loadWorkspace(shellPageFileService.SEPARATOR).then(
-						function(node) {
-							shellPageFileService.setCurrentDirectory(node);
-						}
-					);
-					shell.output(getChangedToElement(shellPageFileService.SEPARATOR));
-					return;
+					hash = ROOT_ORIONCONTENT;
 				}
 				shellPageFileService.loadWorkspace(hash).then(
 					function(node) {
-						shellPageFileService.setCurrentDirectory(node);
-						var buffer = shellPageFileService.computePathString(node);
-						shell.output(getChangedToElement(buffer));
+						if (shellPageFileService.getCurrentDirectory().Location !== node.Location) {
+							shellPageFileService.setCurrentDirectory(node);
+							var buffer = shellPageFileService.computePathString(node);
+							shell.output(getChangedToElement(buffer));
+							setCWD(node.Location);
+						}
 					}
 				);
-			});
+			};
 		});
 	});
 });
