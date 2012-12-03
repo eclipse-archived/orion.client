@@ -165,12 +165,35 @@ define([], function(){
 		this._completionUIContainer.appendChild(this._completionUL);
 	};
 	
-	InputCompletion.prototype._createProposalLink = function(name, href) {
+	InputCompletion.prototype._createProposalLink = function(name, href, boldIndex, boldLength) {
 		var link = document.createElement("a"); //$NON-NLS-0$
 		link.href = require.toUrl(href);
-		link.textContent = name;
+		link.appendChild(this._createBoldText(name, boldIndex, boldLength));
 		return link;
-	}
+	};
+	
+	InputCompletion.prototype._createBoldText = function(text, boldIndex, boldLength){
+		if(boldIndex < 0){
+			return document.createTextNode(text);
+		}
+		var parentSpan = document.createElement('span'); //$NON-NLS-0$
+		var startIndex = 0;
+		var textNode;
+		if(startIndex !== boldIndex){
+			textNode = document.createTextNode(text.substring(startIndex, boldIndex));
+			parentSpan.appendChild(textNode);
+		} 
+		var matchSegBold = document.createElement('b'); //$NON-NLS-0$
+		parentSpan.appendChild(matchSegBold);
+		textNode = document.createTextNode(text.substring(boldIndex, boldIndex+boldLength));
+		matchSegBold.appendChild(textNode);
+		
+		if((boldIndex + boldLength) < (text.length - 1)){
+			textNode = document.createTextNode(text.substring(boldIndex + boldLength));
+			parentSpan.appendChild(textNode);
+		}
+		return parentSpan;
+	};
 	
 	InputCompletion.prototype._proposeOnCategory = function(categoryName, categoryList){
 		if(categoryList.length === 0){
@@ -193,15 +216,15 @@ define([], function(){
 				that._dismiss(e.currentTarget.completionItem.value);
 			};
 			listEle.className = "inputCompletionLINormal"; //$NON-NLS-0$
-			listEle.completionItem = categoryList[i];
-			if(typeof categoryList[i].value === "string"){
-				var liText = document.createTextNode(categoryList[i].value);
-				listEle.appendChild(liText);
-			} else if(categoryList[i].value.name && categoryList[i].value.type === "link"){
-				listEle.appendChild(this._createProposalLink(categoryList[i].value.name, categoryList[i].value.value));
+			listEle.completionItem = categoryList[i].item;
+			if(typeof categoryList[i].item.value === "string"){
+				var liTextEle = this._createBoldText(categoryList[i].item.value, categoryList[i].boldIndex, categoryList[i].boldLength);
+				listEle.appendChild(liTextEle);
+			} else if(categoryList[i].item.value.name && categoryList[i].item.value.type === "link"){
+				listEle.appendChild(this._createProposalLink(categoryList[i].item.value.name, categoryList[i].item.value.value, categoryList[i].boldIndex, categoryList[i].boldLength));
 			}
  			this._completionUL.appendChild(listEle);
- 			this._proposalList.push({item: categoryList[i], domNode: listEle});
+ 			this._proposalList.push({item: categoryList[i].item, domNode: listEle});
 		}
 	};
 
@@ -310,6 +333,7 @@ define([], function(){
 	InputCompletion.prototype._proposeOnList = function(datalist, searchTerm, filterForMe){
 		var categoryName = "";
 		var categoryList = [];
+		var searchTermLen = searchTerm ? searchTerm.length : 0;
 		for(var i=0; i < datalist.length; i++){
 			if(datalist[i].type === "category"){ //$NON-NLS-0$
 				this._proposeOnCategory(categoryName, categoryList);
@@ -317,6 +341,7 @@ define([], function(){
 				categoryList = [];
 			} else {
 				var proposed = true;
+				var pIndex = -1;
 				if(searchTerm && filterForMe){
 					var searchOn;
 					if(typeof datalist[i].value === "string"){
@@ -324,7 +349,7 @@ define([], function(){
 					} else if(datalist[i].value.name){
 						searchOn = datalist[i].value.name.toLowerCase();
 					}
-					var pIndex = searchOn.indexOf(searchTerm);
+					pIndex = searchOn.indexOf(searchTerm);
 					if(pIndex < 0){
 						proposed = false;
 					} else if(this._proposeFromStart){
@@ -332,7 +357,7 @@ define([], function(){
 					} 
 				}
 				if(proposed){
-					categoryList.push(datalist[i]);
+					categoryList.push({item: datalist[i], boldIndex: pIndex, boldLength: searchTermLen});
 				}
 			}
 		}
