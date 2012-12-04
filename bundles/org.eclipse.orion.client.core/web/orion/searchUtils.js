@@ -40,7 +40,7 @@ exports.searchUtils.parseQueryStr = function(queryStr, fromStart) {
 		queryStr = queryStr.substring(indexOfQMark+1);
 	}
 	var advOptions = exports.searchUtils.parseAdvQueryStr(queryStr);
-	var splitQ = advOptions.nonAdvQueryStr.split("&"); //$NON-NLS-0$
+	var splitQ = advOptions.nonAdvParams;
 	var queryObj = {advOptions: advOptions.advOptions, nonAdvQueryStr: advOptions.nonAdvQueryStr, queryStr: advOptions.nonAdvQueryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
 	for(var i=0; i < splitQ.length; i++){
 		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
@@ -92,7 +92,7 @@ exports.searchUtils.parseAdvQueryStr = function(queryStr) {
 	if(advOptions){
 		nonAdvQueryStr = queryStr.substring(indexAdvEnd + 2);
 	}
-	return {advOptions: advOptions, nonAdvQueryStr: "?" + nonAdvQueryStr};
+	return {advOptions: advOptions, nonAdvQueryStr: "?" + nonAdvQueryStr, nonAdvParams: nonAdvQueryStr.split("&")};
 };
 
 exports.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
