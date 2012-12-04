@@ -375,54 +375,109 @@ a.currentLocation:hover {
 
 /* tooltips */
 
-.tooltip {
-	color: #fffcd7;
-	background-color: #939393;
-	border-radius: 2px;
+.tooltipContainer {
 	visibility: hidden;
 	z-index: 200;
-	min-width: 80px;
+	background: transparent;
+	position: absolute;
+	min-width: 15em;
+	max-width: 110em;
+}
+.tooltip {
+	color: #222;
+	background-color: #fbfbfb;
+	border-radius: 3px;
+	border: 1px solid #DDD;
 	position: absolute;
 	padding: 8px;
+	z-index: 200;
 }
 
-.left:after {
+.tooltip.left {
+	min-width: 15em;
+}
+
+.tooltipTailFromleft {
 	position: absolute;
 	display: inline-block;
 	border: 8px solid;
-	border-color: transparent transparent transparent #939393;
+	border-color: transparent transparent transparent #fbfbfb;
 	top: 4px;
-	right: -16px;
+	right: -15px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailBorderFromleft {
+	position: absolute;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent transparent transparent #888;
+	top: 2px;
+	right: -17px;
 	content: '';
 }
 
-.right:before {
+.tooltipTailFromright {
 	position: absolute;
 	display: inline-block;
 	border: 8px solid;
-	border-color: transparent #939393 transparent transparent;
-	left: -16px;
+	border-color: transparent #fbfbfb transparent transparent;
+	left: -15px;
 	top: 4px;
 	content: '';
+	z-index: 201;
 }
 
-.below:before {
+.tooltipTailBorderFromright {
 	position: absolute;
-	display: block;
-	border: 8px solid;
-	border-color: transparent transparent #939393 transparent;
-	left: 16px;
-	top: -16px;
+	display: inline-block;
+	border: 10px solid;
+	border-color: transparent #888 transparent transparent;
+	left: -17px;
+	top: 2px;
 	content: '';
 }
 
-.above:after {
+.tooltipTailFrombelow {
 	position: absolute;
 	display: block;
 	border: 8px solid;
-	border-color: #939393 transparent transparent;
+	border-color: transparent transparent #fbfbfb transparent;
 	left: 16px;
-	bottom: -16px;
+	top: -15px;
+	content: '';
+	z-index: 201;
+}
+
+.tooltipTailBorderFrombelow {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: transparent transparent #888 transparent;
+	left: 14px;
+	top: -17px;
+	content: '';
+}
+
+.tooltipTailFromabove {
+	position: absolute;
+	display: block;
+	border: 8px solid;
+	border-color: #fbfbfb transparent transparent;
+	left: 16px;
+	content: '';
+	bottom: -15px;
+	z-index: 201;
+}
+
+.tooltipTailBorderFromabove {
+	position: absolute;
+	display: block;
+	border: 10px solid;
+	border-color: #888 transparent transparent;
+	left: 14px;
+	bottom: -17px;
 	content: '';
 }
 
