@@ -11,6 +11,7 @@
 		"plugins/taskPlugin.html": true,
 		"plugins/csslintPlugin.html": true,
 		"plugins/site/sitePlugin.html": true,
-		"plugins/esprima/esprimaJsContentAssistPlugin.html":true
+		"plugins/esprima/esprimaJsContentAssistPlugin.html":true,
+		"shell/plugins/shellPagePlugin.html":true
 	}
 }

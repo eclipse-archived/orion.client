@@ -45,5 +45,7 @@ define({
 	"Commands for working with a service": "Commands for working with a service",
 	"Displays all plug-in contributions for a service": "Displays all plug-in contributions for a service",
 	"The service identifier": "The service identifier",
-	"disabled": "disabled"
+	"disabled": "disabled",
+	"Open in Shell": "Open in Shell",
+	"Open in Shell page": "Open in Shell page"
 });
