@@ -266,7 +266,9 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 			var serviceRegistry = options.serviceRegistry;
 			var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
 			var siteService = this.siteService = mSiteClient.forFileLocation(serviceRegistry, options.fileLocation);
-			serviceRegistry.getService("orion.core.file").read(options.fileLocation, true).then(function(file) { //$NON-NLS-0$
+			var fileClient = options.fileClient;
+			
+			fileClient.read(options.fileLocation, true).then(function(file) { //$NON-NLS-0$
 				options.siteService = siteService;
 				options.model = new ViewOnSiteTreeModel(siteService, options.id, file);
 				options.file = this.file = file;
