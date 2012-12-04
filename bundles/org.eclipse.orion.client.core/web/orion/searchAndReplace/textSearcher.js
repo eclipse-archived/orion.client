@@ -10,8 +10,8 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/textview/annotations', 'dojo', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils' ], 
-	function(messages, require, mAnnotations, dojo, mCommands, mRegex, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils' ], 
+	function(messages, require, lib, mAnnotations, mCommands, mRegex, mSearchUtils){
 	
 var orion = orion || {};
 
@@ -72,7 +72,7 @@ orion.TextSearcher = (function() {
 				replaceStringDiv.name = messages["ReplaceWith:"];
 				replaceStringDiv.id = "localSearchReplaceWith"; //$NON-NLS-0$
 				replaceStringDiv.placeholder=messages["Replace With"];
-				dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin'); //$NON-NLS-0$
+				replaceStringDiv.classList.add('searchCmdGroupMargin'); //$NON-NLS-0$
 				replaceStringDiv.onkeydown = function(evt){
 					return that._handleKeyDown(evt, false);
 				};
@@ -218,19 +218,22 @@ orion.TextSearcher = (function() {
 		},
 		
 		createButton: function(text, parent, callback) {
-			var button  = dojo.create("span", {tabindex: "0", role: "button"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(button, "onclick", this, callback); //$NON-NLS-0$
-			dojo.connect(button, "onkeypress", this, function(e) { //$NON-NLS-0$
-				if (e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {						
-					callback();			
-				} else if (e.keyCode === dojo.keys.ESCAPE) {
-					this.closeUI();
+			var button  = document.createElement("span"); //$NON-NLS-0$
+			button.tabIndex = 0;
+			button.role = "button"; //$NON-NLS-0$
+			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
+			var self = this;
+			button.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+					callback.bind(self)();			
+				} else if (e.keyCode === lib.KEY.ESCAPE) {
+					self.closeUI();
 				}
 			});
-			dojo.place(window.document.createTextNode(text), button, "last"); //$NON-NLS-0$
-			dojo.addClass(button, "findSlideoutButton"); //$NON-NLS-0$
+			button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
+			button.classList.add("findSlideoutButton"); //$NON-NLS-0$
 			
-			dojo.place(button, parent, "last"); //$NON-NLS-0$
+			parent.appendChild(button);
 		},
 		
 		buildToolBar : function(defaultSearchStr, defaultReplaceStr) {
@@ -437,26 +440,27 @@ orion.TextSearcher = (function() {
 				editor.reportStatus("");
 				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-1$
 				var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
-				window.setTimeout(dojo.hitch(this, function() {
+				var self = this;
+				window.setTimeout(function() {
 					var startPos = 0;
 					var number = 0, lastResult;
 					while(true){
-						var result = this._doFind(searchStr, startPos);
+						var result = self._doFind(searchStr, startPos);
 						if(!result) {
 							break;
 						}
 						lastResult = result;
 						number++;
 						if(number === 1) {
-							this.startUndo();
+							self.startUndo();
 						}
 						var selection = editor.getSelection();
 						editor.setText(newStr, selection.start, selection.end);
 						editor.setSelection(selection.start , selection.start + newStr.length, true);
-						startPos = this.getSearchStartIndex(true, true);
+						startPos = self.getSearchStartIndex(true, true);
 					}
 					if(number > 0) {
-						this.endUndo();
+						self.endUndo();
 					}
 					editor.reportStatus("", "progress"); //$NON-NLS-0$
 					if(startPos > 0) {
@@ -464,8 +468,8 @@ orion.TextSearcher = (function() {
 					} else {
 						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-1$
 					}
-					this._replacingAll = false;
-				}), 100);				
+					self._replacingAll = false;
+				}, 100);				
 				
 			}
 		},

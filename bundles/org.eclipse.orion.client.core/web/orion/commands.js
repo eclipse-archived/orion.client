@@ -1062,7 +1062,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				}
 			} else {
 				element = document.createElement("span"); //$NON-NLS-0$
-				element.tabindex = domNodeWrapperList ? -1 : 0;
+				element.tabIndex = domNodeWrapperList ? -1 : 0;
 				element.role = "button";  //$NON-NLS-0$ 
 				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
@@ -1111,7 +1111,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			} else if (!this.name && this.hasImage()) {
 				// rare case but can happen for some icons we force with text
 				element = document.createElement("span"); //$NON-NLS-0$
-				element.tabindex = 0;
+				element.tabIndex = 0;
 				element.role = "button"; //$NON-NLS-0$ 
 				addImageToElement(this, element, name);
 				// ensure there is accessible text describing this image if we have any
@@ -1196,7 +1196,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 */
 		 _makeLink: function(parent, context, aClass, position) {
 			var element = document.createElement("a"); //$NON-NLS-0$
-			element.tabindex = 0;
+			element.tabIndex = 0;
 			element.id = this.name;
 			if (aClass) {
 				element.classList.add(aClass); //$NON-NLS-0$
