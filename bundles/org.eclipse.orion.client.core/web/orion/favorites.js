@@ -12,7 +12,7 @@
  
 /*jslint forin:true*/
 
-define(['require', 'dojo', 'orion/fileUtils', 'orion/EventTarget'], function(require, dojo, mFileUtils, EventTarget){
+define(['require', 'orion/fileUtils', 'orion/EventTarget'], function(require, mFileUtils, EventTarget){
 
 	/**
 	 * Instantiates the favorites service. Clients should obtain the 
@@ -45,7 +45,7 @@ define(['require', 'dojo', 'orion/fileUtils', 'orion/EventTarget'], function(req
 		 * @param items One or more file or directory objects
 		 */
 		makeFavorites: function(items) {
-			items = dojo.isArray(items) ? items : [items];
+			items = Array.isArray(items) ? items : [items];
 			for (var i=0; i < items.length; i++) {
 				var item = items[i];
 				

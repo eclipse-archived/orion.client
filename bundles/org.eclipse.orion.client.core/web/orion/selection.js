@@ -10,7 +10,7 @@
  *******************************************************************************/
  /*global define */
  
-define(["dojo","orion/EventTarget"], function(dojo, EventTarget){
+define(["orion/EventTarget"], function(EventTarget){
 
 	/**
 	 * Constructs a new selection service. Clients should obtain a selection service
@@ -63,7 +63,7 @@ define(["dojo","orion/EventTarget"], function(dojo, EventTarget){
 		 * @param itemOrArray A single selected item or an array of selected items
 		 */
 		setSelections: function(itemOrArray) {
-			if (dojo.isArray(itemOrArray)) {	
+			if (Array.isArray(itemOrArray)) {	
 				this._selections = itemOrArray;
 			} else if (itemOrArray) {
 				this._selections = [itemOrArray];
