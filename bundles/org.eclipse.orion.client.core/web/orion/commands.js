@@ -925,6 +925,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			node.type = "checkbox";//$NON-NLS-0$
 			node.role = "menuitem"; //$NON-NLS-0$
 			node.value = checked.toString();
+			node.checked = checked;
 			node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			node.classList.add("checkedMenuItem"); //$NON-NLS-0$
 			var span = document.createElement("span"); //$NON-NLS-0$
