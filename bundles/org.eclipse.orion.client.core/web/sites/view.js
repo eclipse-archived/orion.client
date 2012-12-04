@@ -43,6 +43,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					parent: parentId,
 					label: labelId,
 					serviceRegistry: serviceRegistry,
+					fileClient: fileClient,
 					fileLocation: file
 				});
 			}
