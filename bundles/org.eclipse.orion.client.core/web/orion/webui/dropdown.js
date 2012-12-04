@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window define document localStorage */
+/*global window define document */
 
 define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
@@ -38,8 +38,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			
 			// click on trigger opens.
 			this._triggerNode.addEventListener("click", function(event) { //$NON-NLS-0$
-				self.toggle();
-				lib.stop(event);
+				if (self.toggle())  {
+					lib.stop(event);
+				}
 			}, false);
 			
 			// if trigger node is not key enabled...
@@ -51,28 +52,20 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					}
 				}, false);
 			}
-			
-			// auto dismissal.  Click anywhere else means close.
-			document.addEventListener("click", function(event) { //$NON-NLS-0$
-				if (event.target !== self._triggerNode && !lib.contains(self._dropdownNode, event.target)) {
-					self.close(); 
-				}
-				// don't stop event
-			}, true); //$NON-NLS-0$
-			
+						
 			// keys
 			this._dropdownNode.addEventListener("keydown", this._dropdownKeyDown.bind(this), false); //$NON-NLS-0$
 			
 		},
 		
 		/**
-		 * Toggle the open/closed state of the dropdown.
+		 * Toggle the open/closed state of the dropdown.  Return a boolean that indicates whether action was taken.
 		 */			
 		toggle: function(event) {
 			if (this._triggerNode.classList.contains("dropdownTriggerOpen")) { //$NON-NLS-0$
-				this.close();
+				return this.close();
 			} else {
-				this.open();
+				return this.open();
 			}
 		},
 		
@@ -86,10 +79,17 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			}
 			var items = this.getItems();
 			if (items.length > 0) {
+				if (!this._hookedAutoDismiss) {
+					// add auto dismiss.  Clicking anywhere but trigger and dropdown means close.
+					lib.addAutoDismiss([this._triggerNode, this._dropdownNode], this.close.bind(this));
+					this._hookedAutoDismiss = true;
+				}
 				this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 				this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 				items[0].focus();
+				return true;
 			}
+			return false;
 		},
 		
 		/**
@@ -101,6 +101,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (restoreFocus) {
 				this._triggerNode.focus();
 			}
+			return true;
 		},
 		
 		/**

@@ -107,7 +107,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		new mTooltip.Tooltip({
 			node: dropdownTrigger,
 			text: messages['Options'],
-			position: "below" //$NON-NLS-0$
+			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
 		});
 			
 		setUserName(serviceRegistry, dropdownTrigger);
@@ -387,7 +387,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				new mTooltip.Tooltip({
 					node: faveButton,
 					text: messages["Add to the favorites list"],
-					position: "left" //$NON-NLS-1$
+					position: ["left", "below", "above"] //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
 				dojo.style(faveButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {

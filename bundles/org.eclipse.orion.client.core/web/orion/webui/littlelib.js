@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global window document */
+/*global window define document */
 
 define(['require'], function(require) {
 
@@ -39,7 +39,8 @@ define(['require'], function(require) {
 	}
 	
 	function contains(parent, child) {
-		return parent === child || Boolean(parent.compareDocumentPosition(child) & 16);
+		var compare = parent.compareDocumentPosition(child);  // useful to break out for debugging
+		return parent === child || Boolean(compare & 16);
 	}
 	
 	function bounds(node) {
@@ -50,6 +51,40 @@ define(['require'], function(require) {
 			width: clientRect.width,
 			height: clientRect.height
 		};
+	}
+	
+	var autoDismissNodes = [];
+	
+	function addAutoDismiss(excludeNodes, dismissFunction) {
+		// auto dismissal.  Click anywhere else means close.
+		// Hook listener only once
+		if (autoDismissNodes.length === 0) {
+			document.addEventListener("click", function(event) { //$NON-NLS-0$
+				var stillInDocument = [];  // while we are going through the list, keep a list of the ones still connected to the document
+				for (var i=0; i<autoDismissNodes.length; i++) {
+					var exclusions = autoDismissNodes[i].excludeNodes;
+					var dismiss = autoDismissNodes[i].dismiss;
+					var inDocument = false;
+					var isExclusion = false;
+					for (var j=0; j<exclusions.length; j++) {
+						if (contains(exclusions[j], event.target)) {
+							inDocument = true;
+							isExclusion = true;
+						} else {						
+							inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+						}
+					}
+					if (inDocument && !isExclusion) {
+						dismiss();
+					}
+					if (inDocument) {
+						stillInDocument.push(autoDismissNodes[i]);
+					}
+				}
+				autoDismissNodes = stillInDocument;
+			}, true); //$NON-NLS-0$
+		}
+		autoDismissNodes.push({excludeNodes: excludeNodes, dismiss: dismissFunction});
 	}
 	
 	// TODO check IE10 to see if necessary
@@ -81,6 +116,7 @@ define(['require'], function(require) {
 		contains: contains,
 		bounds: bounds,
 		stop: stop,
+		addAutoDismiss: addAutoDismiss,
 		KEY: KEY
 	};
 });
