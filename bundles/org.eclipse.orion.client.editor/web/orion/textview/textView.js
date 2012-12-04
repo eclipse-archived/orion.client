@@ -3265,10 +3265,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			}
 			return Math.max(0, lineOffset) + this._model.getLineStart(lineIndex);
 		},
-		_handleSelectionChange: function (e) {
-			if (this._imeOffset !== -1) {
-				return;
-			}
+		_updateSelectionFromDOM: function() {
 			var window = this._getWindow();
 			var selection = window.getSelection();
 			var start = this._getModelOffset(selection.anchorNode, selection.anchorOffset);
@@ -3277,6 +3274,31 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			    return;
 			}
 			this._setSelection(new Selection(start, end), false, false);
+		},
+		_handleSelectionChange: function (e) {
+			if (this._imeOffset !== -1) {
+				return;
+			}
+			/*
+			 * Feature in Android. The selection handles are hidden when the DOM changes. Sending
+			 * selection events to the application while the user is moving the selection handles
+			 * may hide the handles unexpectedly.  The fix is to delay updating the selection and
+			 * sending the event to the application.
+			 */
+			if (util.isAndroid) {
+				var window = this._getWindow();
+				if (this._selTimer) {
+					window.clearTimeout(this._selTimer);
+				}
+				var that = this;
+				this._selTimer = window.setTimeout(function() {
+					if (!that._clientDiv) { return; }
+					that._selTimer = null; 
+					that._updateSelectionFromDOM();
+				}, 250);
+			} else {
+				this._updateSelectionFromDOM();
+			}
 		},
 		_handleTextInput: function (e) {
 			this._imeOffset = -1;
