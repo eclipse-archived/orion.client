@@ -50,9 +50,12 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	};
 
 	var provider = new PluginProvider(headers);
+	
+	var host = document.createElement('a');
+	host.href = '/';
 
 	provider.registerService('orion.navigate.command', null, {
-		id: 'orion.site.viewon',
+		id: 'orion.site.' + host.hostname + '.viewon',
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
@@ -62,7 +65,7 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 	});
 
 	provider.registerService('orion.page.link.related', null, {
-		id: 'orion.site.viewon',
+		id: 'orion.site.' + host.hostname + '.viewon',
 		nameKey: 'View on Site',
 		tooltipKey: 'View this file or folder on a web site hosted by Orion',
 		nls: 'orion/nls/messages',
@@ -70,12 +73,10 @@ define(['orion/plugin', 'plugins/site/siteServiceImpl'], function(PluginProvider
 		uriTemplate: '{OrionHome}/sites/view.html#,file={Location}'
 	});
 
-	var host = document.createElement('a');
-	host.href = '/';
 	provider.registerService('orion.site',
 		new siteImpl.SiteImpl(fileBase, workspaceBase),
-		{	id: 'orion.site.default',
-			name: '' + host.hostname + ' Orion file system',
+		{	id: 'orion.site.' + host.hostname,
+			name: 'Orion Sites at ' + host.hostname,
 			canSelfHost: true,
 			pattern: siteBase,
 			filePattern: fileBase
