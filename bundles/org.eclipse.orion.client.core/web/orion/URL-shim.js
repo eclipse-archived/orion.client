@@ -16,6 +16,8 @@
 	if (typeof window.URL === "function" && new window.URL("http://www.w3.org").protocol === "http:") {
 		return;
 	}
+	
+	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
 
 	function _createMapIterator(entries, kind) {
 		var index = 0;
@@ -72,6 +74,7 @@
 				this.clear();
 				this._dirty = false;
 				if (search) {
+					_checkString(search);
 					var pairs = search.slice(1).split("&");
 					for (var i = 0; i < pairs.length; i++) {
 						var pair = pairs[i];
@@ -149,8 +152,8 @@
 			},
 			enumerable: true
 		},
-			'delete': {
-			value: function(key, value) {
+		'delete': {
+			value: function(key, value) { // Note: value support has been removed in current spec
 				_checkString(key);
 				var found;
 				var checkValue = arguments.length > 1;
@@ -266,7 +269,8 @@
 			value: urlAnchor
 		});
 		Object.defineProperty(this, "query", {
-			value: new URLQuery(urlAnchor.search)
+			value: new URLQuery(urlAnchor.search),
+			enumerable: true
 		});
 	}
 
@@ -319,13 +323,13 @@
 		},
 		username: {
 			get: function() {
-				var parsed = /([^:]*):?(.*)/.exec(this._userinfo);
+				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var username = decodeURIComponent(parsed[1] || "");
 				return username;
 			},
 			set: function(value) {
 				_checkString(value);
-				var parsed = /([^:]*):?(.*)/.exec(this._userinfo);
+				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var userpass = [encodeURIComponent(value || "")];
 				if (parsed[2] !== null) {
 					userpass.push(parsed[2]);
@@ -336,13 +340,13 @@
 		},
 		password: {
 			get: function() {
-				var parsed = /([^:]*):?(.*)/.exec(this._userinfo);
+				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var password = decodeURIComponent(parsed[2] || "");
 				return password;
 			},
 			set: function(value) {
 				_checkString(value);
-				var parsed = /([^:]*):?(.*)/.exec(this._userinfo);
+				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var userpass = [parsed[1] || ""];
 				if (value) {
 					userpass.push(encodeURIComponent(value));
