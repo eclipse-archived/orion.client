@@ -11,7 +11,7 @@
 /*jslint sub:true*/
  /*global define document window Image */
  
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/explorers/navigationUtils', 'dijit/TooltipDialog' ], function(messages, require, dojo, dijit, UIUtil, PageUtil, lib, mDropdown, mTooltip, mNavUtils){
+define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/explorers/navigationUtils'], function(messages, require, UIUtil, PageUtil, lib, mDropdown, mTooltip, mNavUtils) {
 
 	var isMac = window.navigator.platform.indexOf("Mac") !== -1; //$NON-NLS-0$
 
@@ -88,7 +88,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			this._registry = options.serviceRegistry;
 			this._serviceRegistration = this._registry.registerService("orion.page.command", this); //$NON-NLS-0$
 			this._defaultSelectionService = options.selection;
-			dojo.connect(window.document, "onkeydown", dojo.hitch(this, function (evt){ //$NON-NLS-0$
+			var self = this;
+			window.document.addEventListener("keydown", function (evt){ //$NON-NLS-0$
 				function isContentKey(e) {
 					// adapted from handleKey in http://git.eclipse.org/c/platform/eclipse.platform.swt.git/plain/bundles/org.eclipse.swt/Eclipse%20SWT%20Custom%20Widgets/common/org/eclipse/swt/custom/StyledText.java
 					if (isMac) {
@@ -169,8 +170,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						return;
 					}
 				}
-				this._processKey(evt);
-			}));
+				self._processKey(evt);
+			}, false);
 		},
 		
 		_processKey: function(event) {
@@ -204,9 +205,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 								return;
 							} else if (command.callback) {
 								stop(event);
-								window.setTimeout(dojo.hitch(this, function() {	
-									this._invoke(invocation);
-								}), 0);
+								var self = this;
+								window.setTimeout(function() {	
+									self._invoke(invocation);
+								}, 0);
 								return;
 							}
 						}
@@ -232,9 +234,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						// If the command has not rendered (visibleWhen=false, etc.) we don't have an invocation.
 						if (invocation && invocation.parameters && command.callback) {
 							invocation.parameters.setValue(match.parameterName, match.parameterValue);
-							window.setTimeout(dojo.hitch(this, function() {
-								this._invoke(invocation);
-							}), 0);
+							var self = this;
+							window.setTimeout(function() {
+								self._invoke(invocation);
+							}, 0);
 							return;
 						}
 					}
@@ -258,22 +261,23 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		 * specified, or if an item to run the command against has been specified.  
 		 */
 		runCommand: function(commandId, item, handler, parameters) {
+			var self = this;
 			if (item) {
 				var command = this._commandList[commandId];
 				var enabled = command && (command.visibleWhen ? command.visibleWhen(item) : true);
 				if (enabled && command.callback) {
-					window.setTimeout(dojo.hitch(this, function() {
-						this._invoke(new CommandInvocation(this, handler, item, null, command), parameters);
-					}), 0);
+					window.setTimeout(function() {
+						self._invoke(new CommandInvocation(self, handler, item, null, command), parameters);
+					}, 0);
 				}
 			} else {
 				//TODO should we be keeping invocation context for commands without bindings? 
 				var binding = this._urlBindings[commandId];
 				if (binding && binding.command) {
 					if (binding.command.callback) {
-						window.setTimeout(dojo.hitch(this, function() {
-							this._invoke(binding.invocation, parameters);
-						}), 0);
+						window.setTimeout(function() {
+							self._invoke(binding.invocation, parameters);
+						}, 0);
 					}
 				}
 			}
@@ -369,33 +373,28 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					commandInvocation.parameters.updateParameters(commandInvocation);
 					collecting = this._parameterCollector.collectParameters(commandInvocation);
 				
-					// The parameter collector cannot collect.  We will do a default implementation using a tooltip dialog.
+					// The parameter collector cannot collect.  We will do a default implementation using a popup.
 					if (!collecting) {
-						var tooltipDialog = new dijit.TooltipDialog({
-							onBlur: function() {dijit.popup.close(tooltipDialog);}
-						});		
-						var parameterArea = dojo.create("div"); //$NON-NLS-0$
-						dojo.addClass(parameterArea, "parameterPopup"); //$NON-NLS-0$
+						var tooltip = new mTooltip.Tooltip({
+							node: commandInvocation.domNode,
+							trigger: "click", //$NON-NLS-0$
+							position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						});
+						var parameterArea = tooltip.contentContainer();
+						parameterArea.classList.add("parameterPopup"); //$NON-NLS-0$
 						var originalFocusNode = window.document.activeElement;
 						var focusNode = this._parameterCollector.getFillFunction(commandInvocation, function() {
-							dijit.popup.close(tooltipDialog);
-							tooltipDialog.destroyRecursive();
 							if (originalFocusNode) {
 								originalFocusNode.focus();
 							}
+							tooltip.destroy();
 						})(parameterArea);
-						if (parameterArea.childNodes.length > 0) {
-							tooltipDialog.set("content", parameterArea); //$NON-NLS-0$
-							var pos = dojo.position(commandInvocation.domNode, true);
-							if (pos.x && pos.y && pos.w) {
-								dijit.popup.open({popup: tooltipDialog, x: pos.x + pos.w - 8, y: pos.y + 8});
-								window.setTimeout(function() {
-									focusNode.focus();
-									focusNode.select();
-								}, 0);
-								collecting = true;
-							}
-						}
+						tooltip.show();
+						window.setTimeout(function() {
+							focusNode.focus();
+							focusNode.select();
+						}, 0);
+						collecting = true;
 					}
 					if (!collecting) {
 						// Just call the callback with the information we had.
@@ -432,7 +431,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		 */
 		showKeyBindings: function(targetNode) {
 			var scopes = {};
-			var bindingString, binding;
+			var bindingString, binding, span;
 			for (var aBinding in this._activeBindings) {
 				binding = this._activeBindings[aBinding];
 				if (binding && binding.keyBinding && binding.command) {
@@ -444,17 +443,26 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 						scopes[binding.keyBinding.scopeName].push(binding);
 					} else {
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						span = document.createElement("span"); //$NON-NLS-0$
+						span.role = "listitem"; //$NON-NLS-0$
+						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
+						span.appendChild(document.createElement("br")); //$NON-NLS-0$
+						targetNode.appendChild(span);
 					}
 				}
 			}
 			for (var scopedBinding in scopes) {
 				if (scopes[scopedBinding].length && scopes[scopedBinding].length > 0) {
-					dojo.place("<h2>"+scopedBinding+"</h2>", targetNode, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$ 
+					var heading = document.createElement("h2"); //$NON-NLS-0$
+					targetNode.appendChild(heading);
+					heading.appendChild(document.createTextNode(scopedBinding));
 					for (var i=0; i<scopes[scopedBinding].length; i++) {
 						binding = scopes[scopedBinding][i];
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
-						dojo.place("<span role='listitem'>"+bindingString+" = "+binding.command.name+"<br></span>", targetNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						span.role = "listitem"; //$NON-NLS-0$
+						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
+						span.appendChild(document.createElement("br")); //$NON-NLS-0$
+						targetNode.appendChild(span);
 					}
 				}	
 			}
@@ -635,9 +643,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			if (typeof(scopeId) !== "string") { //$NON-NLS-0$
 				throw "a scope id for rendering must be specified"; //$NON-NLS-0$
 			}
-			if (typeof(parent) === "string") { //$NON-NLS-0$
-				parent = dojo.byId(parent);
-			}
+			parent = lib.node(parent);
 			if (!parent) { 
 				throw "no parent";  //$NON-NLS-0$
 			}
@@ -673,11 +679,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			if (!parent) { 
 				throw "no parent";  //$NON-NLS-0$
 			}
-			var widgets = dijit.findWidgets(parent);
-			dojo.forEach(widgets, function(w) {
-				w.destroyRecursive();
-			});
-			dojo.empty(parent);
+			while (parent.hasChildNodes()) {
+				var node = parent.firstChild;
+				if (node.commandTooltip) {
+					node.commandTooltip.destroy();
+				}
+				if (node.emptyGroupTooltip) {
+					node.emptyGroupTooltip.destroy();
+				}
+				this.destroy(node);
+				parent.removeChild(node);
+			}
 		},
 		
 		_render: function(contributions, parent, items, handler, renderType, userData, domNodeWrapperList) {
@@ -726,33 +738,23 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							}
 
 							// render the children asynchronously
-							window.setTimeout(dojo.hitch({contributions: childContributions, emptyGroupMessage: group.emptyGroupMessage}, function() {
-								commandService._render(this.contributions, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
+							var context = {contributions: childContributions, group: group};
+							window.setTimeout(function() {
+								commandService._render(context.contributions, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
 								// of a trailing separator in the menu first, and then decide if our menu is necessary
 								commandService._checkForTrailingSeparator(created.menu, "menu", true);  //$NON-NLS-0$
 								// now determine if we actually needed the menu or not
 								if (created.menu.childNodes.length === 0) {
-									if (this.emptyGroupMessage) {
-										dojo.connect(created.menuButton, "onclick", this, function() { //$NON-NLS-0$
-											//Show the empty group message.
-											var emptyGroupMessage = document.createElement("p"); //$NON-NLS-0$
-											emptyGroupMessage.textContent = this.emptyGroupMessage;
-											var tooltipDialog = new dijit.TooltipDialog({
-												content: emptyGroupMessage,
-												onMouseLeave: function() {
-													dijit.popup.close(tooltipDialog);
-													tooltipDialog.destroyRecursive();
-												}
-											});		
-											dijit.popup.open({popup: tooltipDialog, around: created.menuButton});
-											// in case the user's mouse never entered this popup and thus couldn't leave
-											window.setTimeout(function() {
-												dijit.popup.close(tooltipDialog);
-												tooltipDialog.destroyRecursive();
-											}, 15000);
-										});
-										dojo.style(created.menuButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+									if (context.group.emptyGroupMessage) {
+										if (!created.menuButton.emptyGroupTooltip) {
+											created.menuButton.emptyGroupTooltip = new mTooltip.Tooltip({
+												node: created.menuButton,
+												text: context.group.emptyGroupMessage,
+												trigger: "click", //$NON-NLS-0$
+												position: ["below", "right", "above", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+											});
+										}
 									} else {
 										if(domNodeWrapperList){
 											mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
@@ -761,9 +763,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 										parent.removeChild(created.destroyButton);
 									}
 								} else {
-									dojo.style(created.menuButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+									created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
 								}
-							}), 0);
+							}, 0);
 						} else {  
 							// rendering a group using a separator on each end. We do it synchronously because order matters with
 							// non grouped items.
@@ -785,7 +787,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					} else {
 						// group within a menu
 						if (group.title) {
-							var trigger = dojo.create("li", {}, parent); //$NON-NLS-0$
+							var trigger = document.createElement("li"); //$NON-NLS-0$
+							parent.appendChild(trigger);
 							var subMenu = this._createDropdownMenu(trigger, group.title, true);
 							commandService._render(childContributions, subMenu.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 							if (subMenu.menu.childNodes.length === 0) {
@@ -849,7 +852,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 								menuParent = parent;
 								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-									menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
+									menuParent = document.createElement("li"); //$NON-NLS-0$
+									parent.appendChild(menuParent);
 								} else {
 									nodeClass = "commandMargins"; //$NON-NLS-0$
 								}
@@ -858,10 +862,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 							}
 							// dropdown button
 							var self = this;
-							var populateFunction = dojo.hitch(command, function(menu) {
+							var populateFunction = function(menu) {
 								this.populateChoicesMenu(menu, items, handler, userData, self);
-							});
-							this._createDropdownMenu(menuParent, command.name, true, populateFunction);
+							};
+							this._createDropdownMenu(menuParent, command.name, true, populateFunction.bind(command));
 						} else {
 							if (renderType === "tool") { //$NON-NLS-0$
 								id = "tool" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
@@ -881,7 +885,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		_createDropdownMenu: function(parent, name, nested, populateFunction) {
 			parent = lib.node(parent);
 			var destroyButton, arrowClass, extraClass;
-			var menuButton = dojo.create("span"); //$NON-NLS-0$
+			var menuButton = document.createElement("span"); //$NON-NLS-0$
 			menuButton.classList.add("dropdownTrigger"); //$NON-NLS-0$
 			if (nested) {
 				menuButton.classList.add("dropdownMenuItem"); //$NON-NLS-0$
@@ -902,7 +906,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			menuButton.appendChild(arrow);
 			var menuParent = parent;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				menuParent = dojo.create("li", {}, parent); //$NON-NLS-0$
+				menuParent = document.createElement("li"); //$NON-NLS-0$
+				parent.appendChild(menuParent);
 				destroyButton = menuParent;
 			} else {
 				menuButton.classList.add("commandMargins"); //$NON-NLS-0$
@@ -912,15 +917,17 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			if (extraClass) {
 				menuParent.classList.add(extraClass);
 			}
-			var newMenu = dojo.create("ul", {}, menuParent); //$NON-NLS-0$
-			dojo.addClass(newMenu, "dropdownMenu"); //$NON-NLS-0$
+			var newMenu = document.createElement("ul"); //$NON-NLS-0$
+			menuParent.appendChild(newMenu);
+			newMenu.classList.add("dropdownMenu"); //$NON-NLS-0$
 			menuButton.dropdown = new mDropdown.Dropdown({dropdown: newMenu, populate: populateFunction});
 			newMenu.dropdown = menuButton.dropdown;
 			return {menuButton: menuButton, menu: newMenu, dropdown: menuButton.dropdown, destroyButton: destroyButton};
 		},
 		
 		_generateCheckedMenuItem: function(dropdown, name, checked, onChange) {
-			var itemNode = dojo.create("li", {}, dropdown); //$NON-NLS-0$
+			var itemNode = document.createElement("li"); //$NON-NLS-0$
+			dropdown.appendChild(itemNode);
 			var node = document.createElement("input"); //$NON-NLS-0$
 			node.type = "checkbox";//$NON-NLS-0$
 			node.role = "menuitem"; //$NON-NLS-0$
@@ -957,13 +964,15 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		generateSeparatorImage: function(parent) {
 			var sep;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				sep = dojo.create("li", null, parent, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				sep = document.createElement("li"); //$NON-NLS-0$
+				parent.appendChild(sep);
 			} else {
-				sep = dojo.create("span", null, parent, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				sep = document.createElement("span"); //$NON-NLS-0$
+				parent.appendChild(sep);
 			}
-			dojo.addClass(sep, "core-sprite-sep");  // location in sprite //$NON-NLS-0$
-			dojo.addClass(sep, "imageSprite");  // sets sprite background //$NON-NLS-0$
-			dojo.addClass(sep, "commandSeparator"); //$NON-NLS-0$
+			sep.classList.add("core-sprite-sep");  // location in sprite //$NON-NLS-0$
+			sep.classList.add("imageSprite");  // sets sprite background //$NON-NLS-0$
+			sep.classList.add("commandSeparator"); //$NON-NLS-0$
 			return sep;
 		}
 
@@ -971,19 +980,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 	CommandService.prototype.constructor = CommandService;
 	
 	function addImageToElement(command, element, name) {
-		dojo.addClass(element, "commandImage"); //$NON-NLS-0$
+		element.classList.add("commandImage"); //$NON-NLS-0$
 		var node;
 		if (command.imageClass) {
-			node = dojo.create("span", {}, element, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(node, command.spriteClass);
-			dojo.addClass(node, command.imageClass);
+			node = document.createElement("span"); //$NON-NLS-0$
+			element.appendChild(node);
+			node.classList.add(command.spriteClass);
+			node.classList.add(command.imageClass);
 		} else {
 			node = new Image();
 			node.alt = command.name;
 			node.name = name;
 			node.id = name;
 			node.src = command.image;	
-			dojo.place(node, element, "last"); //$NON-NLS-0$
+			element.appendChild(node);
 		}
 		return node;
 	}
@@ -1051,11 +1061,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 					return;
 				}
 			} else {
-				element = dojo.create("span", {tabindex: domNodeWrapperList ? "-1" : "0", role: "button"}); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				element = document.createElement("span"); //$NON-NLS-0$
+				element.tabIndex = domNodeWrapperList ? -1 : 0;
+				element.role = "button";  //$NON-NLS-0$ 
 				if (!this.hasImage()) {
 					var text = window.document.createTextNode(this.name);
-					dojo.place(text, element, "last"); //$NON-NLS-0$
-					dojo.addClass(element, "commandMissingImageButton commandButton"); //$NON-NLS-0$
+					element.appendChild(text);
+					element.classList.add("commandMissingImageButton"); //$NON-NLS-0$
+					element.classList.add("commandButton"); //$NON-NLS-0$
 				} else {
 					image = addImageToElement(this, element, name);
 					// ensure there is accessible text describing this image
@@ -1068,18 +1081,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			context.domNode = element;
 			context.domParent = parent;
 			if (this.tooltip) {
-				new mTooltip.Tooltip({
+				element.commandTooltip = new mTooltip.Tooltip({
 					node: element,
 					text: this.tooltip,
-					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
+					position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
+				var li = document.createElement("li"); //$NON-NLS-0$
+				parent.appendChild(li);
+				parent = li;
 			} else {
-				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
+				element.classList.add("commandMargins"); //$NON-NLS-0$
 			}
-			dojo.place(element, parent, "last"); //$NON-NLS-0$
+			parent.appendChild(element);
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 	
@@ -1095,24 +1110,35 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				element = this._makeLink(parent, context, "commandLink"); //$NON-NLS-0$
 			} else if (!this.name && this.hasImage()) {
 				// rare case but can happen for some icons we force with text
-				element = dojo.create("span", {tabindex: "0", role: "button"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				element = document.createElement("span"); //$NON-NLS-0$
+				element.tabIndex = 0;
+				element.role = "button"; //$NON-NLS-0$ 
 				addImageToElement(this, element, name);
 				// ensure there is accessible text describing this image if we have any
 				if (this.tooltip) {
 					element.setAttribute("aria-label", this.tooltip); //$NON-NLS-0$
 				}
 				this._hookCallback(element, context);
+				if (this.tooltip) {
+					element.commandTooltip = new mTooltip.Tooltip({
+						node: element,
+						text: this.tooltip,
+						position: ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					});
+				}
 			} else {
 				element = this._makeButton(parent, context, "commandButton"); //$NON-NLS-0$
 				this._hookCallback(element, context);
 			}
 			context.domParent = parent;
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
+				var li = document.createElement("li"); //$NON-NLS-0$
+				parent.appendChild(li);
+				parent = li;
 			} else {
-				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
+				element.classList.add("commandMargins"); //$NON-NLS-0$
 			}
-			dojo.place(element, parent, "last"); //$NON-NLS-0$
+			parent.appendChild(element);
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 		},
 		
@@ -1121,9 +1147,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			var element;
 			var dropdown = parent.dropdown;
 			if (this.hrefCallback) {
-				element = this._makeLink(parent, context, "dropdownMenuItem"); //$NON-NLS-0$
+				element = this._makeLink(parent, context, "dropdownMenuItem", ["right", "left", "above", "below"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				element = this._makeButton(parent, context, "dropdownMenuItem"); //$NON-NLS-0$
+				element = this._makeButton(parent, context, "dropdownMenuItem", ["right", "left", "above", "below"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				if (this.callback) {
 					this._hookCallback(element, context, function() {dropdown.close(true);});
 				}
@@ -1132,18 +1158,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			
 			mNavUtils.generateNavGrid(domNodeWrapperList, context.domNode);
 			if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
-				parent = dojo.create("li", {}, parent); //$NON-NLS-0$
+				var li = document.createElement("li"); //$NON-NLS-0$
+				parent.appendChild(li);
+				parent = li;
 			} else {
-				dojo.addClass(element, "commandMargins"); //$NON-NLS-0$
+				element.classList.add("commandMargins"); //$NON-NLS-0$
 			}
-			dojo.place(element, parent, "last"); //$NON-NLS-0$
+			parent.appendChild(element); //$NON-NLS-0$
 
 		},
 		
 		/*
 		 * stateless helper
 		 */
-		_makeButton: function(parent, context, aClass) {
+		_makeButton: function(parent, context, aClass, position) {
 			var element = document.createElement("span"); //$NON-NLS-0$
 			element.tabIndex = 0; 
 			element.id = this.name;
@@ -1153,10 +1181,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				element.classList.add(aClass); //$NON-NLS-0$
 			}
 			if (this.tooltip) {
-				new mTooltip.Tooltip({
+				element.commandTooltip = new mTooltip.Tooltip({
 					node: element,
 					text: this.tooltip,
-					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
+					position: position || ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
 			context.domNode = element;
@@ -1166,13 +1194,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		/*
 		 * stateless helper
 		 */
-		 _makeLink: function(parent, context, aClass) {
-			var element = dojo.create("a", {tabindex: "0"}); //$NON-NLS-1$ //$NON-NLS-0$
+		 _makeLink: function(parent, context, aClass, position) {
+			var element = document.createElement("a"); //$NON-NLS-0$
+			element.tabIndex = 0;
 			element.id = this.name;
 			if (aClass) {
-				dojo.addClass(element, aClass); //$NON-NLS-0$
+				element.classList.add(aClass); //$NON-NLS-0$
 			}
-			dojo.place(window.document.createTextNode(this.name), element, "last"); //$NON-NLS-0$
+			element.appendChild(document.createTextNode(this.name));
 			if (this.hrefCallback) {
 				var href = this.hrefCallback.call(context.handler, context);
 				if (href.then){
@@ -1186,10 +1215,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 				}
 			}
 			if (this.tooltip) {
-				new mTooltip.Tooltip({
+				element.commandTooltip = new mTooltip.Tooltip({
 					node: element,
 					text: this.tooltip,
-					position: "above" // otherwise defaults to right and obscures adjacent commands //$NON-NLS-0$
+					position: position || ["above", "below", "right", "left"] //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
 			}
 			context.domNode = element;
@@ -1226,7 +1255,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 			for (var j=0; j<choices.length; j++) {
 				var choice = choices[j];
 				if (choice.name) {
-					var itemNode = dojo.create("li", {}, parent); //$NON-NLS-0$
+					var itemNode = document.createElement("li"); //$NON-NLS-0$
+					parent.appendChild(itemNode);
 					var node = document.createElement("span"); //$NON-NLS-0$
 					node.tabIndex = 0; 
 					node.role = "menuitem"; //$NON-NLS-0$
@@ -1314,13 +1344,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/uiUtils', 
 		this.mod2 = mod2 !== undefined && mod2 !== null ? mod2 : false;
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
-		if (typeof(domScope) === "string") { //$NON-NLS-0$
-			this.domScope = dojo.byId(domScope);
-			this.scopeName = scopeName || domScope;
-		} else {
-			this.domScope = domScope;
-			this.scopeName = scopeName || domScope ? domScope.id : null;
-		}
+		this.domScope = lib.node(domScope);
+		this.scopeName = scopeName || domScope ? domScope.id : null;
 	}
 	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
 		/**
