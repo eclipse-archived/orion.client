@@ -131,10 +131,8 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 				
 				if (className) {
 					var color = elements[settingName];
-					var weight = elements['fontWeight'];
 					result.push("." + theme + " ." + className +  " {");
 					result.push("\tcolor: " + color + ";");
-					result.push("\tfont-weight: " + weight + ";");
 					result.push("}");
 				}
 			}
