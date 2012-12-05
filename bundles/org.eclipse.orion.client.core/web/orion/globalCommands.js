@@ -594,6 +594,93 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		}
 	}
 	
+	function isDescendant(parent, child) {
+	     var node = child.parentNode;
+	     while (node !== null) {
+	         if (node === parent) {
+	             return true;
+	         }
+	         node = node.parentNode;
+	     }
+	     return false;
+	}
+	
+	
+		/* This function adds a settings dialog to a page. It adds it so that	
+		a settings gear will appear at the right hand side */
+	
+	function addSettings( settings ){
+		var settingsNode = document.getElementById("settingsTab");
+		var settingsButton = document.getElementById("settingsAction");
+		settingsNode.style.visibility = '';
+		settingsButton.style.visibility = '';
+		settingsButton.onclick = function(){
+		
+			var TAB_HEIGHT = 24;
+			var TAB_WIDTH = 25;
+			var PANEL_HEIGHT = 150;
+			var PANEL_WIDTH = 220;
+			var BORDER_RADIUS = '3px';
+			var COLOR = '#555';
+		
+			settingsNode.style.backgroundColor = COLOR;
+			settingsNode.style.zIndex = '99';
+			settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
+			settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
+			
+			settingsButton.className = "core-sprite-settings-white";
+			
+			settingsNode.id = 'settingsNode';
+			settingsButton.id = 'settingsButton';
+			
+			var rightPane = document.getElementById( 'innerPanels' );	
+			var rpBox = rightPane.getBoundingClientRect();
+			var box = settingsNode.getBoundingClientRect();
+			var leftPane = document.getElementById( 'outlineContainer' );
+			var lpBox = leftPane.getBoundingClientRect();
+			
+			var panel = document.createElement( 'div' );
+			panel.className = 'settingsPanel';
+			panel.style.width = PANEL_WIDTH + 'px';
+			panel.style.height = PANEL_HEIGHT + 'px';
+			panel.style.backgroundColor = COLOR;
+			panel.style.zIndex = '99';
+			panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
+			panel.id = 'settingsPanel';
+			
+			panel.style.borderTopLeftRadius = BORDER_RADIUS;
+			panel.style.borderBottomRightRadius = BORDER_RADIUS;
+			panel.style.borderBottomLeftRadius = BORDER_RADIUS;
+			rightPane.appendChild( panel );
+			
+			settings.appendTo( panel );
+			
+			var listener = window.addEventListener("click", function(event) { 
+			
+				switch( event.target.id ){
+					
+					case 'settingsPanel':
+					case 'settingsButton':
+					case 'settingsNode':
+						break;
+						
+					default:
+					
+						if( !isDescendant( panel, event.target ) ){
+							settingsButton.className = "core-sprite-settings";
+							settingsNode.style.backgroundColor = 'white';
+	
+								rightPane.removeChild( panel );
+							
+							settings.destroy();
+							window.removeEventListener( listener );
+						}
+						
+						break;
+				}			
+			}, false);
+		};
+	}
 	
 	/**
 	 * Generates the banner at the top of a page.
@@ -1060,6 +1147,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	
 	//return the module exports
 	return {
+		addSettings: addSettings,
 		generateBanner: generateBanner,
 		getToolbarElements: getToolbarElements,
 		layoutToolbarElements: layoutToolbarElements,

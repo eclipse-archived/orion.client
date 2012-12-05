@@ -149,52 +149,6 @@ exports.EditorCommandFactory = (function() {
 					
 				this.commandService.addCommand(saveCommand);
 				this.commandService.registerCommandContribution(this.toolbarId, "orion.save", 1, null, false, new mCommands.CommandKeyBinding('s', true)); //$NON-NLS-1$ //$NON-NLS-0$
-				
-				
-				if( document.webkitCancelFullScreen || document.mozCancelFullScreen ){
-				
-					editor.getTextView().setAction("fullscreen", dojo.hitch(this, function (){ 
-						var element = document.getElementById('innerPanels'); 
-						
-						if( element.webkitRequestFullScreen ){
-							element.webkitRequestFullScreen(); 
-						}else if( element.mozRequestFullScreen ){
-							element.mozRequestFullScreen(); 
-						}
-					}));
-						
-				    editor.getTextView().setAction("normalscreen", dojo.hitch(this, function (){ 
-						var element = document.getElementById('innerPanels');
-						if( document.webkitCancelFullScreen ){
-							document.webkitCancelFullScreen(); 
-						}else if( document.mozCancelFullScreen ){
-							document.mozCancelFullScreen();
-						}
-					}));
-	
-					
-					var fullScreenCommand = new mCommands.Command({
-					
-						name: 'Fullscreen',
-						tooltip: 'Edit in full screen mode',
-						id: "orion.fullscreen",
-						callback: function(data){
-						
-							if( data.domNode.innerHTML === 'Fullscreen' ){
-								data.domNode.innerHTML = 'Exit Fullscreen';
-								data.items.getTextView().invokeAction("fullscreen");
-							}else{
-								data.domNode.innerHTML = 'Fullscreen';
-								
-								data.items.getTextView().invokeAction("normalscreen");
-							}
-						}
-					});
-					
-					this.commandService.addCommand(fullScreenCommand);
-					this.commandService.registerCommandContribution(this.toolbarId, "orion.fullscreen", 1, null, false, new mCommands.CommandKeyBinding('u', true)); //$NON-NLS-1$ //$NON-NLS-0$
-	
-				}
 		
 				// page navigation commands (go to line)
 				var lineParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('line', 'number', 'Line:')], {hasOptionalParameters: false}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

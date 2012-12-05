@@ -77,3 +77,23 @@
 .core-sprite-stop{ background-position: 0 -685px; width: 16px; height: 16px; } 
 .core-sprite-stylesheet{ background-position: 0 -703px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: 0 -721px; width: 16px; height: 16px; } 
+ 
+   
+.core-sprite-settings {
+   background: url(../images/gear.png) no-repeat top left;
+   vertical-align: middle;
+   display: inline-block;
+   margin-top: 4px;
+   height: 16px;
+   width: 16px;
+}
+
+.core-sprite-settings-white {
+   background: url(../images/gear-white.png) no-repeat top left;
+   vertical-align: middle;
+   display: inline-block;
+   margin-top: 4px;
+   height: 16px;
+   width: 16px;
+}
+
