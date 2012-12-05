@@ -11,6 +11,9 @@
 /*global define document window*/
 /*jslint regexp:false*/
 define(['require', 'orion/xhr'], function(require, xhr) {
+	
+	var temp = document.createElement('a');
+	
 	function qualifyURL(url) {
 		var link = document.createElement("a");
 		link.href = url;
@@ -33,6 +36,26 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 	function isInternalPath(path) {
 		return new RegExp("^/").test(path);
 	}
+	
+	function makeAbsolute(location) {
+		temp.href = location;
+		return temp.href;
+	}
+	
+	function _normalizeLocations(data) {
+		if (data && typeof data === "object") {
+			Object.keys(data).forEach(function(key) {
+				var value = data[key];
+				if (key.indexOf("Location") !== -1) {
+					data[key] = makeAbsolute(value);
+				} else {
+					_normalizeLocations(value);
+				}
+			});
+		}
+		return data;
+	}
+	
 	/**
 	 * @returns {String} A display string constructed by replacing the first segment (project id)
 	 * of internalPath with the project's Name.
@@ -130,7 +153,9 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 	function SiteImpl(filePrefix, workspacePrefix) {
 		this.filePrefix = filePrefix;
 		this.cache = new Cache(workspacePrefix);
+		this.makeAbsolute = workspacePrefix && workspacePrefix.indexOf("://") !== -1;
 	}
+	
 	SiteImpl.prototype = {
 		getSiteConfigurations: function() {
 			//NOTE: require.toURL needs special logic here to handle "site"
@@ -143,7 +168,14 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 				timeout: 15000
 			}).then(function(response) {
 				return response.SiteConfigurations;
-			});
+			}).then(
+				function(result) {
+					if (this.makeAbsolute) {
+						_normalizeLocations(result);
+					}
+					return result;
+				}.bind(this)
+			);
 		},
 		loadSiteConfiguration: function(locationUrl) {
 			return xhrJson('GET', locationUrl, {
@@ -151,7 +183,14 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 					"Orion-Version": "1"
 				},
 				timeout: 15000
-			});
+			}).then(
+				function(result) {
+					if (this.makeAbsolute) {
+						_normalizeLocations(result);
+					}
+					return result;
+				}.bind(this)
+			);
 		},
 		/**
 		 * @param {String} name
@@ -183,7 +222,14 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 					"Orion-Version": "1"
 				},
 				timeout: 15000
-			});
+			}).then(
+				function(result) {
+					if (this.makeAbsolute) {
+						_normalizeLocations(result);
+					}
+					return result;
+				}.bind(this)
+			);
 		},
 		updateSiteConfiguration: function(locationUrl, updatedSiteConfig) {
 			return xhrJson('PUT', locationUrl, {
@@ -193,7 +239,14 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 					"Orion-Version": "1"
 				},
 				timeout: 15000
-			});
+			}).then(
+				function(result) {
+					if (this.makeAbsolute) {
+						_normalizeLocations(result);
+					}
+					return result;
+				}.bind(this)
+			);
 		},
 		deleteSiteConfiguration: function(locationUrl) {
 			return xhrJson('DELETE', locationUrl, {
@@ -201,7 +254,14 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 					"Orion-Version": "1"
 				},
 				timeout: 15000
-			});
+			}).then(
+				function(result) {
+					if (this.makeAbsolute) {
+						_normalizeLocations(result);
+					}
+					return result;
+				}.bind(this)
+			);
 		},
 		/**
 		 * @param {String} fileLocation
