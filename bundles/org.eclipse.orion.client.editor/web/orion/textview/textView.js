@@ -473,7 +473,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 					}
 					var spacesCount = tabSize - (data.tabOffset % tabSize);
 					if (spacesCount > 0) {
-						//TODO hack to preserve text length in getDOMText()
+						//TODO hack to preserve tabs in getDOMText()
 						var spaces = "\u00A0"; //$NON-NLS-0$
 						for (var i = 1; i < spacesCount; i++) {
 							spaces += " "; //$NON-NLS-0$
@@ -4720,22 +4720,39 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineChild = child.firstChild;
 			var text = "", offset = 0;
 			while (lineChild) {
-				var textNode = lineChild.firstChild;
-				while (textNode) {
-					if (offsetNode === textNode) {
-						offset = text.length;
-					}
-					if (lineChild.ignoreChars) {
-						for (var i = 0; i < textNode.length; i++) {
-							var ch = textNode.data.substring(i, i + 1);
-							if (ch !== " " && ch !== "\u200C") { //$NON-NLS-1$ //$NON-NLS-0$
-								text += ch === "\u00A0" ? "\t" : ch; //$NON-NLS-1$ //$NON-NLS-0$
+				var textNode;
+				if (lineChild.ignoreChars) {
+					textNode = lineChild.lastChild;
+					var ignored = 0, childText = [], childOffset = -1;
+					while (textNode) {
+						var data = textNode.data;
+						for (var i = data.length - 1; i >= 0; i--) {
+							var ch = data.substring(i, i + 1);
+							if (ignored < lineChild.ignoreChars && (ch === " " || ch === "\u200C" || ch === "\uFEFF")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								ignored++;
+							} else {
+								childText.push(ch === "\u00A0" ? "\t" : ch); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 						}
-					} else {
-						text += textNode.data;
+						if (offsetNode === textNode) {
+							childOffset = childText.length;
+						}
+						textNode = textNode.previousSibling;
 					}
-					textNode = textNode.nextSibling;
+					childText = childText.reverse().join("");
+					if (childOffset !== -1) {
+						offset = text.length + childText.length - childOffset;
+					}
+					text += childText;
+				} else {
+					textNode = lineChild.firstChild;
+					while (textNode) {
+						if (offsetNode === textNode) {
+							offset = text.length;
+						}
+						text += textNode.data;
+						textNode = textNode.nextSibling;
+					}
 				}
 				lineChild = lineChild.nextSibling;
 			}
