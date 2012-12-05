@@ -58,6 +58,7 @@
 		return value;
 	}
 
+	// See http://url.spec.whatwg.org/#interface-urlquery
 	function URLQuery() {
 		Object.defineProperty(this, "_entries", {
 			value: [] // array of [key,value]
@@ -153,21 +154,16 @@
 			enumerable: true
 		},
 		'delete': {
-			value: function(key, value) { // Note: value support has been removed in current spec
+			value: function(key) {
 				_checkString(key);
 				var found;
-				var checkValue = arguments.length > 1;
-				if (checkValue) {
-					value = _checkValue(value);
-				}
-				this._entries.forEach(function(entry, i, entries) {
+				for (var i = this._entries.length - 1; i > -1; i--) {
+					var entry = this._entries[i];
 					if (entry[0] === key) {
-						if (!checkValue || entry[1] === value) {
-							found = true;
-							entries.splice(i, 1);
-						}
+						found = true;
+						this._entries.splice(i, 1);
 					}
-				});
+				}
 				if (found) {
 					this._dirty = true;
 				}
@@ -238,7 +234,8 @@
 			enumerable: true
 		}
 	});
-
+	
+	// See http://url.spec.whatwg.org/#api
 	function URL(url, base) {
 		url = url || "";
 		if (typeof url !== "string") {
