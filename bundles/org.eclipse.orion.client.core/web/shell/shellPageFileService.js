@@ -182,7 +182,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 			/** @private */
 			
 			_retrieveNode: function(node, func, errorFunc) {
-				if (node.Parents && node.Children) {
+				if (node.parent && node.Children) {
 					if (func) {
 						func(node);
 					}
@@ -215,13 +215,13 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 						node.parent = self.rootNode;
 					} else if (node.Parents.length === 0) {
 						/* node's parent is the root of a file service */
-						var index = node.Location.indexOf(self.SEPARATOR, 1);
-						var location = node.Location.substring(0, index);
+						var location = fileClient.fileServiceRootURL(node.Location);
 						fileClient.loadWorkspace(location).then(
 							function(parent) {
 								parent.parent = self.rootNode;
 								node.parent = parent;
-							});
+							}
+						);
 					} else {
 						node.parent = node.Parents[0];
 						for (var i = 0; i < node.Parents.length - 1; i++) {
