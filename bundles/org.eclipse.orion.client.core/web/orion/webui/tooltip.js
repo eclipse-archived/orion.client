@@ -153,7 +153,20 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					return false;
 				}
 			}
-			
+			if (left < 0) {
+				if (force) {
+					left = 4;
+				} else {
+					return false;
+				}
+			}
+			if (top < 0) {
+				if (force) {
+					top = 4;
+				} else {
+					return false;
+				}
+			}
 			this._tailBorder = document.createElement("span"); //$NON-NLS-0$
 			this._tailBorder.classList.add("tooltipTailBorderFrom"+position); //$NON-NLS-0$
 			this._tail = document.createElement("span"); //$NON-NLS-0$
