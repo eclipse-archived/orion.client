@@ -15,9 +15,9 @@
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate"],
+		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred"],
 	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate) {
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred) {
 
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
@@ -545,13 +545,20 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	function contributedExecFunc(service) {
 		if (typeof(service.callback) === "function") { //$NON-NLS-0$
 			return function(args, context) {
-				var promise = context.createPromise();
+				// Use orion/Deferred since it supports progress; gcli/promise does not.
+				//var promise = context.createPromise();
+				var promise = new Deferred();
 				service.callback(args).then(
 					function(result) {
 						promise.resolve(result);
 					},
 					function(error) {
 						resolveError(promise, error);
+					},
+					function(data) {
+						if (typeof promise.progress === "function") {
+							promise.progress(data);
+						}
 					}
 				);
 				return promise;
