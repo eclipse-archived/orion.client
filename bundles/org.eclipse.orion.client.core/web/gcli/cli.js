@@ -1107,11 +1107,10 @@ Requisition.prototype.exec = function(input) {
     if (reply != null && typeof reply.then === 'function') {
       reply.then(
           function(data) { output.complete(data); },
-          function(error) { output.error = true; output.complete(error); });
+          function(error) { output.error = true; output.complete(error); },
+          function(data) { output.progress(data); });
 
       output.promise = reply;
-      // Add progress to our promise and add a handler for it here
-      // See bug 659300
     }
     else {
       output.complete(reply);
@@ -1629,7 +1628,7 @@ function Output(options) {
 }
 
 /**
- * Called when there is data to display
+ * Called when there is data to display and the data completes execution of the command.
  * @param data
  */
 Output.prototype.complete = function(data) {
@@ -1640,6 +1639,16 @@ Output.prototype.complete = function(data) {
   this.completed = true;
 
   this.onChange({ output: this });
+};
+
+/**
+ * Called when there is data to display.
+ * @param data The data up to this point.
+ */
+Output.prototype.progress = function(data) {
+	this.data = data;
+
+	this.onChange({ output: this });
 };
 
 /**
