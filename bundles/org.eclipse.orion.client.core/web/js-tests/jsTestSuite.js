@@ -118,9 +118,7 @@ OrionTestCase("setting", "/js-tests/settings/test.html");
 OrionTestCase("esprima-content-assist", "/js-tests/esprima/esprimaJsContentAssistTests.html");
 OrionTestCase("asyncStyler", "/js-tests/asyncStyler/test.html");
 OrionTestCase("syntaxmodel", "/js-tests/syntaxmodel/test.html");
-
-//Test below is hanging on Internet Explorer - see bug 391920
-//OrionTestCase("commands", "/js-tests/commands/test.html");
+OrionTestCase("commands", "/js-tests/commands/test.html");
 
 //OrionTestCase("searchRendering", "/js-tests/searchRendering/test.html");
 //OrionUITestCase("textviewPerformance", "/js-tests/textview/test-performance.html");
