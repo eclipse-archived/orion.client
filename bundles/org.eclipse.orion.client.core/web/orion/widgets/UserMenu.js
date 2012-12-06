@@ -52,8 +52,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			element.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			element.addEventListener("click", click, false); //$NON-NLS-0$
 			// onClick events do not register for spans when using the keyboard
-			element.addEventListener("keydown", this, function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.key.ENTER || e.charCode === lib.key.SPACE) {	
+			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
+				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {	
 					click();
 				}
 			}, false);
@@ -117,7 +117,6 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 					var link = doc.createElement("a"); //$NON-NLS-0$
 					link.role = "menuitem"; //$NON-NLS-0$
 					link.classList.add("dropdownMenuItem"); //$NON-NLS-0$
-
 					link.href = item.href;
 					link.textContent = item.textContent;
 					li.appendChild(link);
@@ -125,9 +124,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				});
 
 				if(this.keyAssistFunction){
-					var keyAssist = document.createElement("li");//$NON-NLS-0$
+					var keyAssist = document.createElement("li"); //$NON-NLS-0$
 					var element = this._makeMenuItem(messages["Keyboard Shortcuts"], this.keyAssistFunction);
-					element.classList.add("key-assist-menuitem");
+					element.classList.add("key-assist-menuitem"); //$NON-NLS-0$
 					keyAssist.appendChild(element);
 					getCategory(0).appendChild(keyAssist);
 				}

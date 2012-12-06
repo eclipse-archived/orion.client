@@ -147,9 +147,11 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 						if (event.keyCode === lib.KEY.UP && index > 0) {
 							index--;
 							items[index].focus();
+							lib.stop(event);
 						} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
 							index++;
 							items[index].focus();
+							lib.stop(event);
 						} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.RIGHT) {
 							if (focusItem.classList.contains("dropdownTrigger") && focusItem.dropdown) { //$NON-NLS-0$
 								focusItem.dropdown.open();
@@ -157,10 +159,10 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 							}
 						} else if (event.keyCode === lib.KEY.LEFT && focusItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
 							this.close(true);
+							lib.stop(event);
 						}
 					}
 				}
-				lib.stop(event);
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
 				this.close(true);
 				lib.stop(event);
