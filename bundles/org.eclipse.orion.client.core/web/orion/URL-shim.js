@@ -124,7 +124,7 @@
 			value: function(key, value) {
 				_checkString(key);
 				value = _checkValue(value);
-				var found;
+				var found = false;
 				this._dirty = true;
 				this._entries.some(function(entry) {
 					if (entry[0] === key) {
@@ -156,17 +156,16 @@
 		'delete': {
 			value: function(key) {
 				_checkString(key);
-				var found;
+				var found = false;
 				for (var i = this._entries.length - 1; i > -1; i--) {
 					var entry = this._entries[i];
 					if (entry[0] === key) {
+						this._dirty = true;
 						found = true;
 						this._entries.splice(i, 1);
 					}
 				}
-				if (found) {
-					this._dirty = true;
-				}
+				return found;
 			},
 			enumerable: true
 		},
