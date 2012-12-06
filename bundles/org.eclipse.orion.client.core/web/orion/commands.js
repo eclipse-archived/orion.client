@@ -849,8 +849,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 						if (command.choiceCallback) {
 							var menuParent;
 							var nodeClass;
+							var nested;
 							if (renderType === "tool" || renderType === "button") { //$NON-NLS-1$ //$NON-NLS-0$
 								menuParent = parent;
+								nested = false;
 								if (parent.nodeName.toLowerCase() === "ul") { //$NON-NLS-0$
 									menuParent = document.createElement("li"); //$NON-NLS-0$
 									parent.appendChild(menuParent);
@@ -859,13 +861,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 								}
 							} else {
 								menuParent = parent;
+								nested = true;
 							}
 							// dropdown button
 							var self = this;
 							var populateFunction = function(menu) {
 								this.populateChoicesMenu(menu, items, handler, userData, self);
 							};
-							this._createDropdownMenu(menuParent, command.name, true, populateFunction.bind(command));
+							this._createDropdownMenu(menuParent, command.name, nested, populateFunction.bind(command));
 						} else {
 							if (renderType === "tool") { //$NON-NLS-0$
 								id = "tool" + command.id + i;  //$NON-NLS-0$ // using the index ensures unique ids within the DOM when a command repeats for each item
