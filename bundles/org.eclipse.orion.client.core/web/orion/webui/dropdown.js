@@ -84,12 +84,23 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					lib.addAutoDismiss([this._triggerNode, this._dropdownNode], this.close.bind(this));
 					this._hookedAutoDismiss = true;
 				}
+				this._positionDropdown();
 				this._triggerNode.classList.add("dropdownTriggerOpen"); //$NON-NLS-0$
 				this._dropdownNode.classList.add("dropdownMenuOpen"); //$NON-NLS-0$
 				items[0].focus();
 				return true;
 			}
 			return false;
+		},
+		
+		_positionDropdown: function() {
+			this._dropdownNode.style.left = "";
+			var bounds = lib.bounds(this._dropdownNode);
+			var totalBounds = lib.bounds(document.documentElement);
+			if (bounds.left + bounds.width > totalBounds.left + totalBounds.width) {
+				var left = totalBounds.width - bounds.width - 4;
+				this._dropdownNode.style.left = left + "px"; //$NON-NLS-0$
+			}
 		},
 		
 		/**

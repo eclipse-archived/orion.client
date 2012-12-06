@@ -303,7 +303,7 @@ a.currentLocation:hover {
 .dropdownMenu {
 	color: #222;
 	background-color: #fbfbfb;
-	display: none;
+	visibility: hidden;
 	z-index: 150;
 	min-width: 120px;
 	position: absolute;
@@ -345,7 +345,7 @@ a.currentLocation:hover {
 }
 
 .dropdownMenuOpen {
-	display: block;
+	visibility: visible;
 }
 
 .dropdownSeparator {
