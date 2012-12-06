@@ -114,6 +114,7 @@ h2 {
 	color: #404040;
 	vertical-align: middle;
 	font-weight: normal;
+	color:silver;
 }
 
 .dismiss {
@@ -136,6 +137,7 @@ h2 {
 	margin-bottom: 8px;
 	font-weight: normal;
 	vertical-align: baseline;
+	color:silver;
 }
 
 .parameterInputurl {
@@ -149,6 +151,7 @@ h2 {
 .parameterInputtextarea {
 	vertical-align: top;
 	width: 50em;
+	color:#333;
 }
 
 .parameterPopup {
@@ -391,7 +394,7 @@ h2 {
 	width: 97%;
 	clear: both;
 	float: left;
-	border-radius: 3px;
+	border-radius: 2px;
 	margin: 8px;
 	display: none;
 	vertical-align: middle;
@@ -723,7 +726,7 @@ input {
 	text-indent: 0px;
 	text-shadow: none;
 	border: none;
-	border-radius: 5px;
+	border-radius: 2px;
 	color: silver;
 	font-size: 9pt;
 	padding: 2px;
