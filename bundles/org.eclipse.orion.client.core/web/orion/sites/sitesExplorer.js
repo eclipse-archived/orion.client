@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/section', 'orion/globalCommands',
 		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
-		function(messages, i18nUtil, dojo, mExplorer, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable) {
+		function(messages, i18nUtil, dojo, mExplorer, Deferred, mCommands, mSection, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable) {
 	var SiteServicesExplorer, SitesRenderer, SiteTreeModel;
 
 	/** 
@@ -61,7 +61,11 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 			if (siteServices.length > 0) {
 				siteServices[0].getSiteConfigurations().then(
 					function(/**Array*/ siteConfigurations) {
-						result.push.apply(result, siteConfigurations);
+						var item = {};
+						item.siteService = siteServices[0];
+						item.siteConfigurations = siteConfigurations;
+						
+						result.push(item);
 						that._getSiteConfigurations(siteServices.slice(1), result, deferred);
 					}
 				);					
@@ -103,7 +107,22 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$
 					
-					that.createTree(that.parentId, new SiteTreeModel(siteConfigurations), {setFocus: true});
+					for (var i=0; i<siteConfigurations.length; i++){
+						
+						if	(siteConfigurations.length > 1){
+							var titleWrapper = new mSection.Section(dojo.byId(that.parentId), {
+								id: siteConfigurations[i].siteService._id + "_Section", //$NON-NLS-0$
+								title: siteConfigurations[i].siteService._name,
+								content: '<div id="' + siteConfigurations[i].siteService._id + '_Node" class="mainPadding"></list>', //$NON-NLS-1$ //$NON-NLS-0$
+								canHide: true
+							});
+						} else {
+							var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, dojo.byId(that.parentId), "last");
+							contentParent.innerHTML = '<div id="' + siteConfigurations[i].siteService._id + '_Node" class="mainPadding"></div>'; //$NON-NLS-1$ //$NON-NLS-0$
+						}
+					
+						that.createTree(siteConfigurations[i].siteService._id + "_Node", new SiteTreeModel(siteConfigurations[i].siteConfigurations), {setFocus: true});
+					}
 					
 					// TODO should show Create per each site service
 					that._updatePageActions(that.registry, siteServiceRefs[0]); //$NON-NLS-1$ //$NON-NLS-0$
@@ -137,10 +156,13 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explor
 		
 		SiteServicesExplorer.prototype.refresh = function(){
 			var that = this;
-			
+
 			this._getSiteConfigurations(this.siteClients).then(
 				function(siteConfigurations){
-					that.createTree(that.parentId, new SiteTreeModel(siteConfigurations), {setFocus: true});
+					for (var i=0; i<siteConfigurations.length; i++){
+						dojo.empty(siteConfigurations[i].siteService._id + "_Node");
+						that.createTree(siteConfigurations[i].siteService._id + "_Node", new SiteTreeModel(siteConfigurations[i].siteConfigurations), {setFocus: true});
+					}
 				}
 			);
 		};

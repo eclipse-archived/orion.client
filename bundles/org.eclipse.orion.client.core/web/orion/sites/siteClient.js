@@ -57,6 +57,8 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/Deferred', 'orion/fil
 		this._selfHost = siteServiceRef.getProperty('canSelfHost'); //$NON-NLS-0$
 		this._sitePattern = siteServiceRef.getProperty('sitePattern'); //$NON-NLS-0$
 		this._filePattern = siteServiceRef.getProperty('filePattern'); //$NON-NLS-0$
+		this._name = siteServiceRef.getProperty('name'); //$NON-NLS-0$
+		this._id = siteServiceRef.getProperty('id'); //$NON-NLS-0$
 
 		this._getService = function() {
 			return this._siteService;
