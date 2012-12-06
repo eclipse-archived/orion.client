@@ -17,12 +17,12 @@ define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'o
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil", 'orion/edit/syntaxmodel',
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil", 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser',
        'dojo/hash'], 
 		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
-				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer) {
+				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemeChooser) {
 	
 var exports = exports || {};
 	
@@ -139,6 +139,11 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
 							name = this.getTitle();
 						}
+						
+						var chooser = new mThemeChooser.MiniThemeChooser( preferences, editor.getTextView() );
+	
+						mGlobalCommands.addSettings( chooser );
+						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,
 							isFavoriteTarget: true, makeAlternate: function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {

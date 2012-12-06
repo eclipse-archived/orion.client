@@ -49,7 +49,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		StyleSet.prototype.overviewRuler = '#FBFBFB';
 		StyleSet.prototype.lineNumberOdd = 'white';
 		StyleSet.prototype.lineNumberEven = 'white';
-		StyleSet.prototype.lineNumber = '#bfbfbf';
+		StyleSet.prototype.lineNumber = 'silver';
 		StyleSet.prototype.tag = 'darkorange';
 		StyleSet.prototype.attribute = 'cadetBlue';
 		StyleSet.prototypefontSize = '10pt';
@@ -88,9 +88,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		prospecto.text = 'darkSlateGray';
 		prospecto.string = 'cornFlowerBlue';
 		prospecto.overviewRuler = 'white';
-		prospecto.lineNumberOdd = 'darkSlateGray';
-		prospecto.lineNumberEven = 'darkSlateGray';
-		prospecto.lineNumber = 'darkSlateGray';
+		prospecto.lineNumberOdd = 'silver';
+		prospecto.lineNumberEven = 'silver';
+		prospecto.lineNumber = 'silver';
 		prospecto.currentLine = '#EAF2FE';
 		prospecto.tag = 'darkorange';
 		prospecto.attribute = 'cadetBlue';
@@ -703,8 +703,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		ThemeData.prototype.importTheme = importTheme;
 		
 		function processSettings( settings, preferences ){
-		
-			console.log( settings );
 			
 			if( !settings['fontSize'] ){
 				settings['fontSize'] = { value:'10pt' };
