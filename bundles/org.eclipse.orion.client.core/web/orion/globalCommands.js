@@ -606,79 +606,87 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	}
 	
 	
-		/* This function adds a settings dialog to a page. It adds it so that	
+	/* This function adds a settings dialog to a page. It adds it so that	
 		a settings gear will appear at the right hand side */
 	
 	function addSettings( settings ){
 		var settingsNode = document.getElementById("settingsTab");
 		var settingsButton = document.getElementById("settingsAction");
+		var CLICKED = false;
+		
 		settingsNode.style.visibility = '';
 		settingsButton.style.visibility = '';
 		settingsButton.onclick = function(){
 		
-			var TAB_HEIGHT = 24;
-			var TAB_WIDTH = 25;
-			var PANEL_HEIGHT = 150;
-			var PANEL_WIDTH = 220;
-			var BORDER_RADIUS = '3px';
-			var COLOR = '#555';
+			if( !CLICKED ){
+			
+				CLICKED = true;
 		
-			settingsNode.style.backgroundColor = COLOR;
-			settingsNode.style.zIndex = '99';
-			settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
-			settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
+				var TAB_HEIGHT = 24;
+				var TAB_WIDTH = 25;
+				var PANEL_HEIGHT = 150;
+				var PANEL_WIDTH = 220;
+				var BORDER_RADIUS = '3px';
+				var COLOR = '#555';
 			
-			settingsButton.className = "core-sprite-settings-white";
-			
-			settingsNode.id = 'settingsNode';
-			settingsButton.id = 'settingsButton';
-			
-			var rightPane = document.getElementById( 'innerPanels' );	
-			var rpBox = rightPane.getBoundingClientRect();
-			var box = settingsNode.getBoundingClientRect();
-			var leftPane = document.getElementById( 'outlineContainer' );
-			var lpBox = leftPane.getBoundingClientRect();
-			
-			var panel = document.createElement( 'div' );
-			panel.className = 'settingsPanel';
-			panel.style.width = PANEL_WIDTH + 'px';
-			panel.style.height = PANEL_HEIGHT + 'px';
-			panel.style.backgroundColor = COLOR;
-			panel.style.zIndex = '99';
-			panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
-			panel.id = 'settingsPanel';
-			
-			panel.style.borderTopLeftRadius = BORDER_RADIUS;
-			panel.style.borderBottomRightRadius = BORDER_RADIUS;
-			panel.style.borderBottomLeftRadius = BORDER_RADIUS;
-			rightPane.appendChild( panel );
-			
-			settings.appendTo( panel );
-			
-			var listener = window.addEventListener("click", function(event) { 
-			
-				switch( event.target.id ){
-					
-					case 'settingsPanel':
-					case 'settingsButton':
-					case 'settingsNode':
-						break;
+				settingsNode.style.backgroundColor = COLOR;
+				settingsNode.style.zIndex = '99';
+				settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
+				settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
+				
+				settingsButton.className = "core-sprite-settings-white";
+				
+				settingsNode.id = 'settingsNode';
+				settingsButton.id = 'settingsButton';
+				
+				var rightPane = document.getElementById( 'innerPanels' );	
+				var rpBox = rightPane.getBoundingClientRect();
+				var box = settingsNode.getBoundingClientRect();
+				var leftPane = document.getElementById( 'outlineContainer' );
+				var lpBox = leftPane.getBoundingClientRect();
+				
+				var panel = document.createElement( 'div' );
+				panel.className = 'settingsPanel';
+				panel.style.width = PANEL_WIDTH + 'px';
+				panel.style.height = PANEL_HEIGHT + 'px';
+				panel.style.backgroundColor = COLOR;
+				panel.style.zIndex = '99';
+				panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
+				panel.id = 'settingsPanel';		
+				panel.style.borderTopLeftRadius = BORDER_RADIUS;
+				panel.style.borderBottomRightRadius = BORDER_RADIUS;
+				panel.style.borderBottomLeftRadius = BORDER_RADIUS;
+				
+				rightPane.appendChild( panel );
+				
+				settings.appendTo( panel );
+				
+				var listener = window.addEventListener("click", function(event) { 
+				
+					switch( event.target.id ){
 						
-					default:
-					
-						if( !isDescendant( panel, event.target ) ){
-							settingsButton.className = "core-sprite-settings";
-							settingsNode.style.backgroundColor = 'white';
-	
-								rightPane.removeChild( panel );
+						case 'settingsPanel':
+						case 'settingsButton':
+						case 'settingsNode':
+							break;
 							
-							settings.destroy();
-							window.removeEventListener( listener );
-						}
+						default:
 						
-						break;
-				}			
-			}, false);
+							if( !isDescendant( panel, event.target ) ){
+								settingsButton.className = "core-sprite-settings";
+								settingsNode.style.backgroundColor = 'white';
+		
+								rightPane.removeChild( panel );
+								CLICKED = false;
+								
+								settings.destroy();
+								window.removeEventListener( listener );
+							}
+							
+							break;
+					}			
+				}, false);
+			}
 		};
 	}
 	

@@ -5,7 +5,6 @@
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
- * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global dojo dijit widgets orion  window console define localStorage*/
@@ -75,11 +74,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 			this.commandService = args.commandService;
 			this.preferences = args.preferences;
-			
-			if( args.setFont ){
-				
-			
-			}
 					
 			this.initializeStorage();
 			
@@ -683,16 +677,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				
 				var orderedShapes = [];
 			
-//				Array.prototype.sortByElement = function(e){
-//				 return this.sort(function(a,b){
-//				  if( a[e] && b[e] ){
-//				  return (a[e] > b[e]) ? 1 : (a[e] < b[e]) ? -1 : 0;
-//				  }else return 1;
-//				 });
-//				}
-//				
-//				this.dataset.shapes.sortByElement( 'order' );
-			
 				for( var item in this.dataset.shapes ){
 				
 					if( this.settings && this.settings[ this.dataset.shapes[item].family ] ){
@@ -765,6 +749,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				if( !existingTheme ){
 					this.styles.push( newtheme );
 				}
+				
 				themename = newtheme.name;
 				
 				if( dojo.byId( 'themesaver' ).value ){
@@ -804,8 +789,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			OVERVIEW = true;
 			var data = this.themeData.getViewData();
 			this.drawOutlineData(data);
-//			dojo.byId( 'pickercontainer' ).style.display = '';
-//			dojo.byId( 'savecontainer' ).style.display = 'none';
 			dojo.byId( 'stringcontainer' ).style.display = 'none';
 		}
 		
@@ -927,8 +910,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
-				   
-				   
+				   		   
 				selection = prefs.get( 'selected' );
 				
 				if(selection){ selection = JSON.parse( selection ); }
@@ -1064,8 +1046,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			var fontsizepicker = dijit.byId( 'fontsizepicker' );
 			if (fontsizepicker) {
 				fontsizepicker.destroyRecursive();
-			}
-			
+			}		
 		}
 		
 		ThemeBuilder.prototype.destroy = destroy;
