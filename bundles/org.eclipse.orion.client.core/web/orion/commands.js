@@ -1199,7 +1199,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 */
 		 _makeLink: function(parent, context, aClass, position) {
 			var element = document.createElement("a"); //$NON-NLS-0$
-			element.tabIndex = 0;
 			element.id = this.name;
 			if (aClass) {
 				element.classList.add(aClass); //$NON-NLS-0$
