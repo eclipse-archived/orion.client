@@ -334,13 +334,13 @@ a.currentLocation:hover {
 	padding: 4px 0;
 }
 
-.dropdownMenu > li:hover {
-	text-decoration: none;
-	background: #ffeecc;
-}
-
 .dropdownMenu > li > *:focus {
 	outline: 1px dotted #aaa;
+	background: #f3f6fe;
+}
+
+.dropdownMenu > li:hover {
+	text-decoration: none;
 	background: #ffeecc;
 }
 
