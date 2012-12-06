@@ -72,7 +72,8 @@ hard-coded numbers elsewhere.
 .layoutBlock {
 	clear: both;
 	margin: 0;
-	padding: 2px 8px;
+	/* padding: 2px 8px; */
+	padding: 4px 4px 2px 4px;
 	vertical-align: baseline;
 }
 
