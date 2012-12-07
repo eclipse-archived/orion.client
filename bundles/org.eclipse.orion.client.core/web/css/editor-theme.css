@@ -16,7 +16,7 @@
 	font-size: 10pt;
 	min-width: 50px;
 	min-height: 50px;
-	color: darkSlateGrey;
+	color: #333;
 }
 
 .textviewContent {
@@ -37,15 +37,15 @@
  *
  *************************************************************************************************/
 .comment {
-	color: darkSeaGreen;
+	color: #3C802C;
 }
 
 .token_multiline_comment {
-	color: darkSeaGreen;
+	color: #3C802C;
 }
 
 .token_doc_comment {
-	color: #AAA;
+	color: #3C802C;
 }
 
 a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
@@ -65,7 +65,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .token-string {
-	color: cornflowerBlue; /* was blue; */
+	color: #446fbd; /* was blue; */
 }
 
 .token_number {
@@ -73,7 +73,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .token_keyword {
-	color: darkOrange; /* originally darkred; */
+	color: #CC4C07; /* originally darkred; */
 	font-weight: bold;
 }
 
@@ -179,7 +179,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 
 /* Hardcoded HTML styles */
 .entity-name-tag /*tag name*/ {
-	color: darkOrange;
+	color: #CC4C07;
 }
 
 .entity-other-attribute-name {
@@ -225,7 +225,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
  *************************************************************************************************/
 
 .entity-other-attribute-name {
-	color: darkSeaGreen;
+	color: #3C802C;
 }
 
 .punctuation-definition-comment {

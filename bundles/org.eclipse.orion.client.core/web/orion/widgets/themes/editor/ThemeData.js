@@ -42,15 +42,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		StyleSet.prototype.name = 'prospecto';
 		StyleSet.prototype.annotationRuler = 'darkSlateGray';
 		StyleSet.prototype.background = '#EFEFEF';
-		StyleSet.prototype.comment = 'darkSlateGray';
-		StyleSet.prototype.keyword = '#3087B3';
-		StyleSet.prototype.text = 'darkSlateGray';
-		StyleSet.prototype.string = 'FEC';
+		StyleSet.prototype.comment = '#3C802C';
+		StyleSet.prototype.keyword = '#CC4C07';
+		StyleSet.prototype.text = '#333';
+		StyleSet.prototype.string = '#446FBD';
 		StyleSet.prototype.overviewRuler = '#FBFBFB';
 		StyleSet.prototype.lineNumberOdd = 'white';
 		StyleSet.prototype.lineNumberEven = 'white';
 		StyleSet.prototype.lineNumber = 'silver';
-		StyleSet.prototype.tag = 'darkorange';
+		StyleSet.prototype.tag = '#CC4C07';
 		StyleSet.prototype.attribute = 'cadetBlue';
 		StyleSet.prototypefontSize = '10pt';
 
@@ -83,16 +83,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		prospecto.name = 'Prospecto';
 		prospecto.annotationRuler = 'white';
 		prospecto.background = 'white';
-		prospecto.comment = 'darkSeaGreen';
-		prospecto.keyword = 'darkOrange';
-		prospecto.text = 'darkSlateGray';
-		prospecto.string = 'cornFlowerBlue';
+		prospecto.comment = '#3C802C';
+		prospecto.keyword = '#CC4C07';
+		prospecto.text = '#333';
+		prospecto.string = '#446FBD';
 		prospecto.overviewRuler = 'white';
 		prospecto.lineNumberOdd = 'silver';
 		prospecto.lineNumberEven = 'silver';
 		prospecto.lineNumber = 'silver';
 		prospecto.currentLine = '#EAF2FE';
-		prospecto.tag = 'darkorange';
+		prospecto.tag = '#CC4C07';
 		prospecto.attribute = 'cadetBlue';
 		prospecto.fontSize = '10pt';
 
