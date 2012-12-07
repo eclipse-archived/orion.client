@@ -91,7 +91,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' + //$NON-NLS-0$
 		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar" aria-label="Operations - Press spacebar to show current operations"></img>' + //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		'<div class="layoutRight" style="padding-left:7px;padding-right:7px;margin-top:3px;" id="settingsTab" style="visibility:hidden;">' +
-		'<div class="layoutRight settings core-sprite-settings" id="settingsAction" role="settings" aria-live="off" style="visibility:hidden;"></div>' + //$NON-NLS-0$
+		'<div class="layoutRight core-sprite-settings" id="settingsAction" role="settings" aria-live="off" style="visibility:hidden;"></div>' + //$NON-NLS-0$
 		'</div>' + 
 		'<div class="layoutRight status" id="statusPane" role="status" aria-live="off"></div>' + //$NON-NLS-0$
 		'<ul class="layoutRight commandList pageActions" id="pageNavigationActions"></ul>' + //$NON-NLS-0$
