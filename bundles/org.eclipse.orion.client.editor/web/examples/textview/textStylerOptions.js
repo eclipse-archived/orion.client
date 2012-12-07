@@ -87,9 +87,6 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 			result.push("\tfont-family: " + family + ";");
 			result.push("\tfont-size: " + elements['fontSize'] + ";");
 			
-//			result.push("\tfont-family: " + 'source-code-pro' + ";");
-//			result.push("\tfont-size: " + '9pt' + ";");
-			
 			result.push("\tcolor: " + elements['text'] + ";");
 			result.push("}");
 			
