@@ -42,15 +42,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 		StyleSet.prototype.name = 'prospecto';
 		StyleSet.prototype.annotationRuler = 'darkSlateGray';
 		StyleSet.prototype.background = '#EFEFEF';
-		StyleSet.prototype.comment = 'darkSlateGray';
-		StyleSet.prototype.keyword = '#3087B3';
-		StyleSet.prototype.text = 'darkSlateGray';
-		StyleSet.prototype.string = 'FEC';
+		StyleSet.prototype.comment = '#3C802C';
+		StyleSet.prototype.keyword = '#CC4C07';
+		StyleSet.prototype.text = '#333';
+		StyleSet.prototype.string = '#446FBD';
 		StyleSet.prototype.overviewRuler = '#FBFBFB';
 		StyleSet.prototype.lineNumberOdd = 'white';
 		StyleSet.prototype.lineNumberEven = 'white';
 		StyleSet.prototype.lineNumber = 'silver';
-		StyleSet.prototype.tag = 'darkorange';
+		StyleSet.prototype.tag = '#CC4C07';
 		StyleSet.prototype.attribute = 'cadetBlue';
 		StyleSet.prototypefontSize = '10pt';
 
@@ -58,41 +58,41 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 
 		this.styles = [];
 
-		var orion = new StyleSet();
+		var eclipse = new StyleSet();
 
-		orion.name = 'Orion';
-		orion.annotationRuler = 'white';
-		orion.background = 'white';
-		orion.comment = 'green';
-		orion.keyword = '#7f0055';
-		orion.text = 'darkSlateGray';
-		orion.string = 'blue';
-		orion.overviewRuler = 'white';
-		orion.lineNumberOdd = '#444';
-		orion.lineNumberEven = '#444';
-		orion.lineNumber = '#444';
-		orion.currentLine = '#EAF2FE';
-		orion.tag = 'darkorange';
-		orion.attribute = 'cadetBlue';
-		orion.fontSize = '10pt';
+		eclipse.name = 'Eclipse';
+		eclipse.annotationRuler = 'white';
+		eclipse.background = 'white';
+		eclipse.comment = 'green';
+		eclipse.keyword = '#7f0055';
+		eclipse.text = 'darkSlateGray';
+		eclipse.string = 'blue';
+		eclipse.overviewRuler = 'white';
+		eclipse.lineNumberOdd = '#444';
+		eclipse.lineNumberEven = '#444';
+		eclipse.lineNumber = '#444';
+		eclipse.currentLine = '#EAF2FE';
+		eclipse.tag = 'darkorange';
+		eclipse.attribute = 'cadetBlue';
+		eclipse.fontSize = '10pt';
 
-		this.styles.push(orion);
+		this.styles.push(eclipse);
 
 		var prospecto = new StyleSet();
 
 		prospecto.name = 'Prospecto';
 		prospecto.annotationRuler = 'white';
 		prospecto.background = 'white';
-		prospecto.comment = 'darkSeaGreen';
-		prospecto.keyword = 'darkOrange';
-		prospecto.text = 'darkSlateGray';
-		prospecto.string = 'cornFlowerBlue';
+		prospecto.comment = '#3C802C';
+		prospecto.keyword = '#CC4C07';
+		prospecto.text = '#333';
+		prospecto.string = '#446FBD';
 		prospecto.overviewRuler = 'white';
 		prospecto.lineNumberOdd = 'silver';
 		prospecto.lineNumberEven = 'silver';
 		prospecto.lineNumber = 'silver';
 		prospecto.currentLine = '#EAF2FE';
-		prospecto.tag = 'darkorange';
+		prospecto.tag = '#CC4C07';
 		prospecto.attribute = 'cadetBlue';
 		prospecto.fontSize = '10pt';
 
