@@ -45,11 +45,9 @@ function _updateStylesheet(preferences, util){
 		var head = document.getElementsByTagName("head")[0] || document.documentElement;
 		
 		head.appendChild(stylesheet);
-		
+
+		self.textView.update(true);		
 	});
-	
-	
-//	stylesheet.appendChild(document.createTextNode(this.self._styleSheet( storage, USER_THEME, util)));
 }
 
 
@@ -84,9 +82,6 @@ function _styleSheet( settings, theme ){
 			result.push(  theme + " {");
 			result.push("\tfont-family: " + family + ";");
 			result.push("\tfont-size: " + elements['fontSize'] + ";");
-			
-//			result.push("\tfont-family: " + 'source-code-pro' + ";");
-//			result.push("\tfont-size: " + '9pt' + ";");
 			
 			result.push("\tcolor: " + elements['text'] + ";");
 			result.push("}");
@@ -124,31 +119,7 @@ function _styleSheet( settings, theme ){
 
 			result.push(  theme + " .entity-name-tag {");
 			result.push("\color: " + elements['keyword'] + ";");
-			result.push("}");
-			
-			
-//			var _this = this;
-//			var styler = this._styler;
-//			function defineRule(token, settingName) {
-//				var className = styler.getClassNameForToken(token);
-//				
-//				if (className) {
-//					var color = elements[settingName];
-//					var weight = elements['fontWeight'];
-//					result.push(  theme + " ." + className +  " {");
-//					result.push("\tcolor: " + color + ";");
-//					result.push("\tfont-weight: " + weight + ";");
-//					result.push("}");
-//				}
-//			}
-//			if (styler.getClassNameForToken) {
-//				defineRule("keyword", "keyword");
-//				defineRule("string", "string");
-//				defineRule("singleLineComment", "comment");
-//				defineRule("multiLineComment", "comment");
-//				defineRule("docComment", "comment");
-//				defineRule("docHtmlComment", "comment");
-//			}							
+			result.push("}");				
 			
 			return result.join("\n");
 		}
@@ -613,20 +584,15 @@ var RegexUtil = {
 			textView.addEventListener("ModelChanged", this._listener.onModelChanged);
 			textView.addEventListener("Destroy", this._listener.onDestroy);
 			textView.addEventListener("LineStyle", this._listener.onLineStyle);
-//			textView.addEventListener("Storage", this._listener.onStorage);
 			textView.redrawLines();
 		},
 		onDestroy: function(/**eclipse.DestroyEvent*/ e) {
 			this.destroy();
 		},
 		onStorage: function (e) {
-		
-			console.log( ' on storage - textmate styler ' );
-			
 			if( e.key === this.storageKey ){
 				this._updateStylesheet( this.preferences );
 			}
-			
 		},
 		destroy: function() {
 			if (this.textView) {
