@@ -58,25 +58,25 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'],
 
 		this.styles = [];
 
-		var orion = new StyleSet();
+		var eclipse = new StyleSet();
 
-		orion.name = 'Orion';
-		orion.annotationRuler = 'white';
-		orion.background = 'white';
-		orion.comment = 'green';
-		orion.keyword = '#7f0055';
-		orion.text = 'darkSlateGray';
-		orion.string = 'blue';
-		orion.overviewRuler = 'white';
-		orion.lineNumberOdd = '#444';
-		orion.lineNumberEven = '#444';
-		orion.lineNumber = '#444';
-		orion.currentLine = '#EAF2FE';
-		orion.tag = 'darkorange';
-		orion.attribute = 'cadetBlue';
-		orion.fontSize = '10pt';
+		eclipse.name = 'Eclipse';
+		eclipse.annotationRuler = 'white';
+		eclipse.background = 'white';
+		eclipse.comment = 'green';
+		eclipse.keyword = '#7f0055';
+		eclipse.text = 'darkSlateGray';
+		eclipse.string = 'blue';
+		eclipse.overviewRuler = 'white';
+		eclipse.lineNumberOdd = '#444';
+		eclipse.lineNumberEven = '#444';
+		eclipse.lineNumber = '#444';
+		eclipse.currentLine = '#EAF2FE';
+		eclipse.tag = 'darkorange';
+		eclipse.attribute = 'cadetBlue';
+		eclipse.fontSize = '10pt';
 
-		this.styles.push(orion);
+		this.styles.push(eclipse);
 
 		var prospecto = new StyleSet();
 
