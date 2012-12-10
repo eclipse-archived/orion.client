@@ -158,7 +158,17 @@ h2 {
 .parameterPopup {
 	min-width: 15em;
 	max-width: 100em;
+	color: #333;
 }
+
+.parameterPopup > label{
+	color: #333;
+}
+
+.parameterPopup > input{
+	color: #333;
+}
+
 
 .navTableHeading {
 	color: #404040;
@@ -726,7 +736,7 @@ input {
 	text-indent: none;
 	text-indent: 0px;
 	text-shadow: none;
-	border: none;
+	border: solid 1px #555;
 	border-radius: 2px;
 	color: #333;
 	font-size: 9pt;
@@ -843,6 +853,15 @@ input {
 .targetSelector{
 
 }
+
+#folderNameparameterCollector{
+	color:#333;
+}
+
+#urlparameterCollector{
+	color:#333;
+}
+
 
 .setting-control {
 	display: inline-block;
