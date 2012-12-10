@@ -154,14 +154,26 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 				}
 			} else if (entry.isDirectory) {
 				var dirReader = entry.createReader();
-				fileClient.createFolder(target.Location, entry.name).then(function(subFolder) {
-					explorer.changedItem(target, true);
+				var traverseChildren = function(folder) {
 					dirReader.readEntries(function(entries) {
 						for (var i=0; i<entries.length; i++) {
-							dropFileEntry(entries[i], path + entry.name + "/", subFolder, explorer, performDrop, fileClient); //$NON-NLS-0$
+							dropFileEntry(entries[i], path + entry.name + "/", folder, explorer, performDrop, fileClient); //$NON-NLS-0$
 						}
 					});
-				});
+				};
+				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
+					fileClient.createProject(target.ChildrenLocation, entry.name).then(function(project) {
+					explorer.loadResourceList(explorer.treeRoot.Path, true);					
+					fileClient.read(project.ContentLocation, true).then(function(folder) {
+							traverseChildren(folder);
+						});
+					});
+				} else {
+					fileClient.createFolder(target.Location, entry.name).then(function(subFolder) {
+						explorer.changedItem(target, true);
+						traverseChildren(subFolder);
+					});
+				}
 			}
 		}
 		
