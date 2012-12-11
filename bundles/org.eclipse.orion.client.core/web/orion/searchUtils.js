@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/editor/regex', 'orion/commands'], function(messages, require, dojo, mRegex, mCommands) {
+define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/editor/regex', 'orion/commands', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, dojo, mRegex, mCommands, PageUtil, URITemplate) {
 
 var exports = exports || {};
 
@@ -21,258 +21,134 @@ var exports = exports || {};
  
 exports.searchUtils = exports.searchUtils || {};
 
-/**
- * Parse the search query string from the hash value of a search page.
- * @param {String} queryStr The hash string.
- * @returns {Object} An object having the properties:<ul>
- * <li>{@link Integer} <code>start</code> The start number of search result of current page.</li>
- * <li>{@link Integer} <code>rows</code> The max rows per page.</li>
- * <li>{@link String} <code>sort</code> The sort parameters."Path asc" or "Name asc".</li>
- * <li>{@link Object} <code>inFileQuery</code> The query object for in file search.</li>
- * </ul>
- * @name exports.searchUtils#parseQueryStr
- * @function
- */
-exports.searchUtils.parseQueryStr = function(queryStr, fromStart) {
-	var indexOfQMark = queryStr.indexOf("?"); //$NON-NLS-0$
-	var indexOfQWqual = queryStr.indexOf("q="); //$NON-NLS-0$
-	if(indexOfQMark < indexOfQWqual && indexOfQWqual > 0){
-		queryStr = queryStr.substring(indexOfQMark+1);
-	}
-	var advOptions = exports.searchUtils.parseAdvQueryStr(queryStr);
-	var splitQ = advOptions.nonAdvParams;
-	var queryObj = {advOptions: advOptions.advOptions, nonAdvQueryStr: advOptions.nonAdvQueryStr, queryStr: advOptions.nonAdvQueryStr, start:0, rows:10, sort:"Path asc", replace: null}; //$NON-NLS-0$
-	for(var i=0; i < splitQ.length; i++){
-		var qIndex = splitQ[i].indexOf("q="); //$NON-NLS-0$
-		var rIndex = splitQ[i].indexOf("replace="); //$NON-NLS-0$
-		if(qIndex >= 0){
-			(queryObj.advOptions && queryObj.advOptions.regEx) ? 
-				exports.searchUtils.parseLocationAndSearchStrRegEx(splitQ[i].substring(qIndex+2), queryObj, fromStart):
-				exports.searchUtils.parseLocationAndSearchStr(splitQ[i].substring(qIndex+2), queryObj, fromStart);
-		} else if(rIndex >= 0){
-			queryObj.replace = splitQ[i].substring(rIndex+8);
-		} else {
-			var splitparameters = splitQ[i].split("="); //$NON-NLS-0$
-			if(splitparameters.length === 2){
-				if(splitparameters[0] === "rows"){ //$NON-NLS-0$
-					queryObj.rows = parseInt(splitparameters[1]);
-				} else if(splitparameters[0] === "start"){ //$NON-NLS-0$
-					queryObj.start = parseInt(splitparameters[1]);
-				} else if(splitparameters[0] === "sort"){ //$NON-NLS-0$
-					queryObj.sort = splitparameters[1];
-				} 
-			}
-		}
-	}
-	return queryObj;
-};
-
 exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
 
-exports.searchUtils.parseAdvQueryStr = function(queryStr) {
-	var advOptions = null;
-	var indexAdv = queryStr.indexOf("advOptions={");
-	var indexAdvEnd = queryStr.indexOf("}&");
-	if(indexAdv === 0 && indexAdvEnd > 0){
-		advOptions = {};
-		var advString = queryStr.substring(12, indexAdvEnd);
-		var splitAdv = advString.split("&"); //$NON-NLS-0$
-		for(var i=0; i < splitAdv.length; i++){
-			var splitparameters = splitAdv[i].split("="); //$NON-NLS-0$
-			if(splitparameters.length === 2){
-				if(splitparameters[0] === "regEx"){ //$NON-NLS-0$
-					advOptions.regEx = (splitparameters[1] === "true" ? true: false);
-				} else if(splitparameters[0] === "type"){ //$NON-NLS-0$
-					advOptions.type = splitparameters[1];
-				} 
-			}
-		}
-	}
-	var nonAdvQueryStr = queryStr;
-	if(advOptions){
-		nonAdvQueryStr = queryStr.substring(indexAdvEnd + 2);
-	}
-	return {advOptions: advOptions, nonAdvQueryStr: "?" + nonAdvQueryStr, nonAdvParams: nonAdvQueryStr.split("&")};
-};
-
-exports.searchUtils.copyQueryParams = function(queryObj, copyReplace) {
-	return {
-		sort: queryObj.sort,
-		advOptions: queryObj.advOptions,
-		rows: queryObj.rows,
-		start: queryObj.start,
-		searchStr: queryObj.searchStr,
-		location: queryObj.location,
-		replace: copyReplace ? queryObj.replace: null
-	};
-};
-
-exports.searchUtils.generateSearchHref = function(options) {
-	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
-	return base + "#" + exports.searchUtils.generateSearchQuery(options); //$NON-NLS-0$
-};
-
-exports.searchUtils.generateSearchQuery = function(options) {
-	var sort = "Path asc", rows = 40, start = 0 , searchStr = "", loc = "", replace = "", advOptions = ""; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	if(options){
-		if(options.advOptions){
-			advOptions = "advOptions={";
-			var andOpt = "";
-			if(options.advOptions.regEx){
-				advOptions = advOptions + "regEx=true";
-				andOpt = "&";
-			}
-			if(options.advOptions.type){
-				advOptions = advOptions + andOpt + "type=" + options.advOptions.type;
-			}
-			advOptions = advOptions + "}&";
-		}
-		if(options.sort){
-			sort = options.sort;
-		}
-		if(options.rows){
-			rows = options.rows;
-		}
-		if(options.start){
-			start = options.start;
-		}
-		if(options.searchStr){
-			searchStr = options.searchStr;
-			//searchStr = searchStr.split(" ").join(""); //$NON-NLS-0$
-		}
-		if(options.location){
-			loc = options.location;
-			if(loc.length > 0 && loc[loc.length -1] !== '*'){ //$NON-NLS-0$
-				loc = loc + "*"; //$NON-NLS-0$
-			}
-			if(loc !== ""){
-				loc = "+Location:" + loc; //$NON-NLS-0$
-			}
-		}
-		if(options.replace !== null && options.replace !== undefined){
-			replace = "&replace=" + options.replace; //$NON-NLS-0$
-		}
-	}
-	return "?" + advOptions + "sort=" + sort + "&rows=" + rows + "&start=" + start + "&q=" + searchStr + loc + replace; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-};
-
-exports.searchUtils.parseLocationAndSearchStr = function(locAndSearchStr, queryObj, fromStart) {
-	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
-	queryObj.location = "";
-	queryObj.searchStr = locAndSearchStr;
-	if(hasLocation){
-		var splitStr = locAndSearchStr.split("+Location:"); //$NON-NLS-0$
-		if(splitStr.length === 2){
-			var loc = splitStr[1];
-			if(loc.length > 0 && loc[loc.length - 1] === '*'){ //$NON-NLS-0$
-				loc = loc.substring(0, loc.length-1);
-			}
-			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0];
-			//queryObj.searchStr = splitStr[0].split(" ").join(""); //$NON-NLS-0$
-		}
-	}
-	queryObj.searchStrTitle = queryObj.searchStr.split("\\").join(""); //$NON-NLS-0$
-	//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
-	if(queryObj.advOptions && queryObj.advOptions.type && queryObj.advOptions.type !== exports.searchUtils.ALL_FILE_TYPE){
-		var newQParam = exports.searchUtils.copyQueryParams(queryObj);
-		newQParam.advOptions = null;
-		//If the search string is not empty, we just combine the file type.
-		if(queryObj.searchStr !== ""){
-			var newSearchStr = queryObj.searchStr;
-			//If the search string contains white space, we should add double quato at both end. 
-			if(queryObj.searchStr.indexOf(" ") >= 0){
-				newSearchStr = "\"" + newSearchStr + "\"";
-			}
-			newQParam.searchStr = newSearchStr + "+NameLower:*." + queryObj.advOptions.type;
-		} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
-			newQParam.searchStr = "NameLower:*." + queryObj.advOptions.type;
-			var newSortStr = newQParam.sort.replace("Path", "NameLower");
-			newQParam.sort = newSortStr;
-			queryObj.searchStrTitle = "*." + queryObj.advOptions.type;
-		}
-		queryObj.nonAdvQueryStr = exports.searchUtils.generateSearchQuery(newQParam);
-	} else if(queryObj.searchStr.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
-		var newQParam = exports.searchUtils.copyQueryParams(queryObj);
-		newQParam.advOptions = null;
-		newQParam.searchStr = "\"" + queryObj.searchStr + "\"";
-		queryObj.nonAdvQueryStr = exports.searchUtils.generateSearchQuery(newQParam);
-	}
-	queryObj.inFileQuery= exports.searchUtils.generateInFileQuery(queryObj.searchStr, fromStart);
-};
-
-exports.searchUtils.parseLocationAndSearchStrRegEx = function(locAndSearchStr, queryObj, fromStart) {
-	var hasLocation = (locAndSearchStr.indexOf("+Location:") > -1); //$NON-NLS-0$
-	queryObj.location = "";
-	queryObj.searchStr = locAndSearchStr;
-	if(hasLocation){
-		var splitStr = locAndSearchStr.split("+Location:"); //$NON-NLS-0$
-		if(splitStr.length === 2){
-			var loc = splitStr[1];
-			if(loc.length > 0 && loc[loc.length - 1] === '*'){ //$NON-NLS-0$
-				loc = loc.substring(0, loc.length-1);
-			}
-			queryObj.location = loc;
-			queryObj.searchStr = splitStr[0];
-		}
-	}
-	queryObj.searchStrTitle = queryObj.searchStr;
-	queryObj.inFileQuery= exports.searchUtils.generateInFileQueryRegEx(queryObj.searchStr, fromStart);
-};
-
-exports.searchUtils.generateInFileQuery = function(searchStr, fromStart) {
-	var inFileQuery = {};
-	inFileQuery.originalSearchStr = searchStr;
-	var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
-	var hasQMark = (searchStr.indexOf("?") > -1); //$NON-NLS-0$
-	if(hasStar){
-		searchStr = searchStr.split("*").join(".*"); //$NON-NLS-1$ //$NON-NLS-0$
-	}
-	if(hasQMark){
-		searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
-	}
-	if(!hasStar && !hasQMark){
-		inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
-		inFileQuery.wildCard = false;
-	} else {
-		inFileQuery.searchStr =searchStr.toLowerCase();
-		var prefix = "";
-		if(fromStart){
-			prefix = "^";
-		}
-		var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
-		if (regexp) {
-			var pattern = regexp.pattern;
-			var flags = regexp.flags;
-			flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
-			inFileQuery.regExp = {pattern: pattern, flags: flags};
-			inFileQuery.wildCard = true;
-		}
-	}
-	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
-	return inFileQuery;
-};
-	
-exports.searchUtils.generateInFileQueryRegEx = function(searchStr, fromStart) {
-	var inFileQuery = {};
-	inFileQuery.originalSearchStr = searchStr;
-	inFileQuery.searchStr =searchStr;
-	var prefix = "";
+function _generateSearchHelperRegEx(inFileQuery, fromStart){
+	var prefix = ""; //$NON-NLS-1$
 	if(fromStart){
-		prefix = "^";
+		prefix = "^"; //$NON-NLS-1$
 	}
 	var regexp = mRegex.parse("/" + prefix + inFileQuery.searchStr + "/"); //$NON-NLS-1$ //$NON-NLS-0$
 	if (regexp) {
 		var pattern = regexp.pattern;
 		var flags = regexp.flags;
-		flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$
+		flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
 		inFileQuery.regExp = {pattern: pattern, flags: flags};
 		inFileQuery.wildCard = true;
 	}
-	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
-	return inFileQuery;
+}
+
+exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
+	if (searcher) {
+		var newSearchStr = searchStr, commitSearch = true;
+		if(newSearchStr === "*"){
+			newSearchStr = "";
+		}
+		if(newSearchStr === ""){
+			commitSearch = advOptions && advOptions.type !== exports.searchUtils.ALL_FILE_TYPE;
+		}
+		if (commitSearch) {
+			if(newSearchStr !== ""){
+				exports.searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
+			}
+			var searchParams = searcher.createSearchParams(newSearchStr, false, false, advOptions);
+			var href = exports.searchUtils.generateSearchHref(searchParams);
+			exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
+				if(openInNewTab){
+					window.open(href);
+				} else {
+					window.location = href;
+				}
+			});
+		}
+	} else {
+		window.alert(messages["Can't search: no search service is available"]);
+	}
 };
-	
+
+/**
+ * Generate a helper query object used for search result renderer.
+ * @param {Object} searchParams The search parameters.
+ * @param {Boolean} fromStart True if doing file name search, otherwise false.
+ * @returns {Object} An object having the properties:<ul>
+ * <li>{@link Object} <code>searchParams</code> The search parameters.</li>
+ * <li>{@link Object} <code>inFileQuery</code> The query object for in file search.</li>
+ * </ul>
+ * @name exports.searchUtils#generateSearchHelper
+ * @function
+ */
+exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
+	var searchStr = searchParams.keyword;
+	var displayedSearchTerm = searchStr;
+	var inFileQuery = {};
+	if(searchParams.fileType && searchParams.fileType !== exports.searchUtils.ALL_FILE_TYPE && searchStr === ""){
+		displayedSearchTerm = "*." + searchParams.fileType;
+	}
+	if(!searchParams.regEx){
+		var hasStar = (searchStr.indexOf("*") > -1); //$NON-NLS-0$
+		var hasQMark = (searchStr.indexOf("?") > -1); //$NON-NLS-0$
+		if(hasStar){
+			searchStr = searchStr.split("*").join(".*"); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		if(hasQMark){
+			searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
+		}
+		if(!hasStar && !hasQMark && !searchParams.nameSearch){
+			inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
+			inFileQuery.wildCard = false;
+		} else {
+			inFileQuery.searchStr =searchStr.toLowerCase();
+			_generateSearchHelperRegEx(inFileQuery, fromStart);
+			inFileQuery.wildCard = true;
+		}
+	} else {
+		inFileQuery.searchStr =searchStr;
+		_generateSearchHelperRegEx(inFileQuery, fromStart);
+	}
+	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
+	return {params: searchParams, inFileQuery: inFileQuery, displayedSearchTerm: displayedSearchTerm};
+};
+
+exports.searchUtils.convertSearchParams = function(searchParams) {
+	if(searchParams.rows !== undefined){
+		searchParams.rows = parseInt(searchParams.rows);
+	}
+	if(searchParams.start !== undefined){
+		searchParams.start = parseInt(searchParams.start);
+	}
+	if(typeof searchParams.regEx === "string"){
+		searchParams.regEx = (searchParams.regEx.toLowerCase() === "true");
+	}
+	if(typeof searchParams.nameSearch === "string"){
+		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true");
+	}
+}
+
+exports.searchUtils.copySearchParams = function(searchParams, copyReplace) {
+	var result = {};
+	for (var prop in searchParams) {
+		if(searchParams[prop] !== undefined && searchParams[prop] !== null){
+			if(!copyReplace && prop === "replace") { //$NON-NLS-2$
+				continue;
+			}
+			result[prop] = searchParams[prop];
+		}
+	}
+	return result;	
+};
+
+exports.searchUtils.generateSearchHref = function(options) {
+	var base =  require.toUrl("search/search.html"); //$NON-NLS-0$
+	var sParams = exports.searchUtils.copySearchParams(options, true);
+	var searchLocation = sParams.resource;
+	sParams.resource = undefined;
+	var href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
+		resource: searchLocation,
+		params: sParams
+	});
+	return href;
+};
+
 exports.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
 	var binding = ",find="; //$NON-NLS-0$
 	if (inFileQuery.wildCard) {
@@ -741,34 +617,6 @@ exports.searchUtils.setOpenSearchPref = function(serviceRegistry, openInNewTab){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		prefs.put("openSearchPref", {"openInNewTab": openInNewTab}); //$NON-NLS-0$
 	});
-};
-
-exports.searchUtils.doSearch = function(searcher, serviceRegistry, searchStr, advOptions){
-	if (searcher) {
-		var newSearchStr = searchStr, commitSearch = true;
-		if(newSearchStr === "*"){
-			newSearchStr = "";
-		}
-		if(newSearchStr === ""){
-			commitSearch = advOptions && advOptions.type !== exports.searchUtils.ALL_FILE_TYPE;
-		}
-		if (commitSearch) {
-			if(newSearchStr !== ""){
-				exports.searchUtils.addRecentSearch(serviceRegistry, newSearchStr, advOptions ? advOptions.regEx: false);
-			}
-			var query = searcher.createSearchQuery(newSearchStr, null, null, false, null, advOptions);
-			exports.searchUtils.getOpenSearchPref(serviceRegistry, function(openInNewTab){
-				var href = require.toUrl("search/search.html") + "#" +query; //$NON-NLS-1$ //$NON-NLS-0$
-				if(openInNewTab){
-					window.open(href);
-				} else {
-					window.location = href;
-				}
-			});
-		}
-	} else {
-		window.alert(messages["Can't search: no search service is available"]);
-	}
 };
 
 return exports.searchUtils;

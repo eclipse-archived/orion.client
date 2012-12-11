@@ -13,62 +13,37 @@
 /*browser:true*/
 
 define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',
-        'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 'orion/contentTypes',
+        'orion/commands', 'orion/favorites', 'orion/searchOutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/searchResults', 'orion/globalCommands', 'orion/contentTypes', 'orion/searchUtils', 'orion/PageUtil',
         'dojo/hash', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'], 
 		function(require, dojo, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mSearchOutliner, 
-				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
+				mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes, mSearchUtils, PageUtil) {
 
 	dojo.addOnLoad(function() {
-		function extractQueryString(){
-			//In fire fox, dojo.hash() transforms white space as "%20", where we can use it if the hash contains "replace=xx xx"
-			var qStr = window.location.hash;
-			var index = qStr.indexOf("#"); //$NON-NLS-0$
-			if(index >= 0){
-				qStr = qStr.substring(index+1);
-			}
-			return qStr;
-		}
-		
-		function parseHash(fileClient){
-			var hash = dojo.hash();
-			var hasLocation = (hash.indexOf("+Location:") > -1); //$NON-NLS-0$
-			var searchLocation = null;
-			var searchStr = hash;
-			if(hasLocation){
-				var splitHash = hash.split("+Location:"); //$NON-NLS-0$
-				if(splitHash.length === 2){
-					searchLocation = splitHash[1].split("*")[0]; //$NON-NLS-0$
-					searchStr = splitHash[0];
-				}
-			} else {
-				searchLocation = fileClient.fileServiceRootURL("");//$NON-NLS-0$
-			}
-			return {searchStr: searchStr, searchLocation: searchLocation};
-		}
-		
-		function makeHref(fileClient, seg, location, searchStr, searcher){
+		function makeHref(fileClient, seg, location, searchParams, searcher){
 			var searchLocation = (!location || location === "" || location === "root") ? searcher.getSearchRootLocation() : location;
-			seg.href = require.toUrl("search/search.html") + "#" + searchStr + "+Location:" + searchLocation + "*"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var newParams = mSearchUtils.copySearchParams(searchParams);
+			newParams.resource = searchLocation;
+			seg.href = mSearchUtils.generateSearchHref(newParams);
 		}
 	
-		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, query){
-			var searchLoc = parseHash(fileClient);
-			if(searchLoc.searchLocation){
-				if(searchLoc.searchLocation === fileClient.fileServiceRootURL(searchLoc.searchLocation)){
-					searcher.setRootLocationbyURL(searchLoc.searchLocation);
-					searcher.setLocationbyURL(searchLoc.searchLocation);
+		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams){
+			var searchLoc = searchParams.resource;
+			if(searchLoc){
+				if(searchLoc === fileClient.fileServiceRootURL(searchLoc)){
+					searcher.setRootLocationbyURL(searchLoc);
+					searcher.setLocationbyURL(searchLoc);
 					mGlobalCommands.setPageTarget({task: "Search", serviceRegistry: serviceRegistry, 
-						commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc.searchLocation),
-						makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
-						searcher.setChildrenLocationbyURL(searchLoc.searchLocation);
-						searchResultsGenerator.loadResults(query);
+						commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: fileClient.fileServiceName(searchLoc),
+						makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
+						searcher.setChildrenLocationbyURL(searchLoc);
+						searchResultsGenerator.loadResults(searchParams);
 				} else {
-					fileClient.read(searchLoc.searchLocation, true).then(
+					fileClient.read(searchLoc, true).then(
 						dojo.hitch(this, function(metadata) {
 							mGlobalCommands.setPageTarget({task: "Search", target: metadata, serviceRegistry: serviceRegistry, 
 								fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search",
-								makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
-								searchResultsGenerator.loadResults(query);
+								makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
+								searchResultsGenerator.loadResults(searchParams);
 						}),
 						dojo.hitch(this, function(error) {
 							window.console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
@@ -78,7 +53,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			} else {
 				mGlobalCommands.setPageTarget({task: "Search", serviceRegistry: serviceRegistry, 
 					commandService: commandService, searchService: searcher, fileService: fileClient, breadcrumbRootName: "Search",
-					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchLoc.searchStr, searcher);}});
+					makeBreadcrumbLink: function(seg,location){makeHref(fileClient, seg, location, searchParams, searcher);}});
 			}
 		}
 		mBootstrap.startup().then(function(core) {
@@ -104,24 +79,26 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var searchOutliner = new mSearchOutliner.SearchOutliner({parent: "searchProgress", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
 			mGlobalCommands.generateBanner("orion-searchResults", serviceRegistry, commandService, preferences, searcher, searcher, null, null); //$NON-NLS-0$
 			
-			var queryString =extractQueryString();
+			var searchParams = PageUtil.matchResourceParameters();
+			mSearchUtils.convertSearchParams(searchParams);
 			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				commandService.destroy(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, queryString, searcher, "button"); //$NON-NLS-0$
+				commandService.renderCommands(toolbar.id, toolbar, searcher, searcher, "button"); //$NON-NLS-0$
 			}
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
-			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, queryString);
+			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams);
 			//searchResultsGenerator.loadResults(queryString);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
-				var query = extractQueryString();
-				setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, query);
+				searchParams = PageUtil.matchResourceParameters();
+				mSearchUtils.convertSearchParams(searchParams);
+				setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams);
 				//searchResultsGenerator.loadResults(query);
 				var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 				if (toolbar) {	
 					commandService.destroy(toolbar);
-					commandService.renderCommands(toolbar.id, toolbar, query, searcher, "button"); //$NON-NLS-0$
+					commandService.renderCommands(toolbar.id, toolbar, searcher, searcher, "button"); //$NON-NLS-0$
 				}
 			});
 		});
