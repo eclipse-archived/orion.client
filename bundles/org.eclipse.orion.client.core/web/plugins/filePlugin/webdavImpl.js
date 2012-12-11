@@ -71,6 +71,7 @@ function parseDAV_response(responseElement) {
 	propstatElements,
 	i,
 	result = {href: []};
+	/* Comment for demo */
 	
 	if (responsedescriptionElement !==null) {
 		result.responsedescription = serializeChildren(responsedescriptionElement);
