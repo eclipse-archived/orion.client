@@ -24,10 +24,16 @@ define(["dojo", "orion/assert", "orion/searchUtils"], function(dojo, assert, mSe
 	 * Search in a file with key word and return the file model node.
 	 */
 	function searchInFile(fileContentText, keyword, replacing) {
-		var inFileQuery = mSearchUtils.generateInFileQuery(keyword);
+		var searchHelper = mSearchUtils.generateSearchHelper({
+			resource: "Temp",
+			sort: "Path asc",
+			rows: 40,
+			start: 0,
+			keyword: keyword
+		});
 		var fileModel = makeFileModel();
-		mSearchUtils.searchWithinFile(inFileQuery, fileModel, fileContentText, "\n", replacing);
-		return {m: fileModel, q:inFileQuery};
+		mSearchUtils.searchWithinFile(searchHelper.inFileQuery, fileModel, fileContentText, "\n", replacing);
+		return {m: fileModel, q:searchHelper.inFileQuery};
 	}
 	
 	/**

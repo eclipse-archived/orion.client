@@ -21,11 +21,11 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	 * It basically visits all the children recursively under a given directory location and search on a given keyword, either literal or wild card.
 	 * @param {serviceRegistry} serviceRegistry The service registry.
 	 * @param {fileClient} fileClient The file client that provides fetchChildren and read APIs.
-	 * @param {String} queryStr The query string. This is temporary for now. The format is "?sort=Path asc&rows=40&start=0&q=keyword+Location:/file/e/bundles/\*"
+	 * @param {Object} searchParams The search parameters. 
 	 * @param {Object} options Not used yet. For future use.
 	 * @name orion.search.SearchCrawler
 	 */
-	function SearchCrawler(	serviceRegistry, fileClient, queryStr, options) {
+	function SearchCrawler(	serviceRegistry, fileClient, searchParams, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this.fileLocations = [];
@@ -35,13 +35,13 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		this._searchOnName = options && options.searchOnName;
 		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
-		this.queryObj = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.parseQueryStr(queryStr);
+		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.generateSearchHelper(searchParams);
 		this._location = options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
 	}
 	
 	/**
-	 * Do search based on this.queryObj.
+	 * Do search based on this.searchHelper.
 	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
 	 */
 	SearchCrawler.prototype.search = function(onComplete){
@@ -74,9 +74,9 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	 * @param {String} queryStr The query string. This is temporary for now. The format is "?sort=Path asc&rows=40&start=0&q=keyword+Location:/file/e/bundles/\*"
 	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
 	 */
-	SearchCrawler.prototype.searchName = function(queryStr, onComplete){
-		if(queryStr){
-			this.queryObj = mSearchUtils.parseQueryStr(queryStr, true);
+	SearchCrawler.prototype.searchName = function(searchParams, onComplete){
+		if(searchParams){
+			this.searchHelper = mSearchUtils.generateSearchHelper(searchParams, true);
 		}
 		if(onComplete){
 			this.onSearchNameComplete = onComplete;
@@ -87,14 +87,14 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 			for (var i = 0; i < this.fileSkeleton.length ; i++){
 				var lineString = this.fileSkeleton[i].Name.toLowerCase();
 				var result;
-				if(this.queryObj.inFileQuery.wildCard){
-					result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);
+				if(this.searchHelper.inFileQuery.wildCard){
+					result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);
 				} else {
-					result = mSearchUtils.searchOnelineLiteral(this.queryObj.inFileQuery, lineString, true);
+					result = mSearchUtils.searchOnelineLiteral(this.searchHelper.inFileQuery, lineString, true);
 				}
 				if(result){
 					results.push(this.fileSkeleton[i]);
-					if(results.length >= this.queryObj.rows){
+					if(results.length >= this.searchHelper.params.rows){
 						break;
 					}
 				}
@@ -105,7 +105,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	};
 	
 	/**
-	 * Do search based on this.queryObj.
+	 * Do search based on this.searchHelper.
 	 * @param {Function} onComplete The callback function on search complete. The array of hit file locations are passed to the callback.
 	 */
 	SearchCrawler.prototype.buildSkeleton = function(onBegin, onComplete){
@@ -118,7 +118,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 			var result = that._visitRecursively(that._childrenLocation).then(function(){ //$NON-NLS-0$
 					that._buildingSkeleton = false;
 					onComplete();
-					if(that.queryObj && !that._buildSkeletonOnly){
+					if(that.searchHelper && !that._buildSkeletonOnly){
 						that.searchName();
 					}
 			});
@@ -152,11 +152,11 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	};
 		
 	SearchCrawler.prototype._onFileType = function(contentType){
-		if(this.queryObj.advOptions && this.queryObj.advOptions.type){
-			if(this.queryObj.advOptions.type === mSearchUtils.ALL_FILE_TYPE){
+		if(this.searchHelper.params.fileType){
+			if(this.searchHelper.params.fileType === mSearchUtils.ALL_FILE_TYPE){
 				return true;
 			}
-			return contentType.extension.indexOf(this.queryObj.advOptions.type) >= 0;
+			return contentType.extension.indexOf(this.searchHelper.params.fileType) >= 0;
 		}
 		return true;
 	};
@@ -192,10 +192,10 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype._hitOnceWithinFile = function( fileContentText){
 		var lineString = fileContentText.toLowerCase();
 		var result;
-		if(this.queryObj.inFileQuery.wildCard){
-			result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);
+		if(this.searchHelper.inFileQuery.wildCard){
+			result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);
 		} else {
-			result = mSearchUtils.searchOnelineLiteral(this.queryObj.inFileQuery, lineString, true);
+			result = mSearchUtils.searchOnelineLiteral(this.searchHelper.inFileQuery, lineString, true);
 		}
 		return result;
 	};
@@ -212,7 +212,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype._sniffSearch = function(fileObj){
 		this._totalCounter++;
 		var self = this;
-		if(this.queryObj.searchStr === ""){
+		if(this.searchHelper.params.keyword === ""){
 			this._reportSingleHit(fileObj);
 			this.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [this._hitCounter, this._totalCounter])});
 		} else {
@@ -233,7 +233,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 	SearchCrawler.prototype._buildSingleSkeleton = function(fileObj){
 		this._totalCounter++;
 		this.fileSkeleton.push(fileObj);
-		if(this.queryObj && !this._buildSkeletonOnly && this._totalCounter%100 === 0){
+		if(this.searchHelper && !this._buildSkeletonOnly && this._totalCounter%100 === 0){
 			this.searchName();
 		}
 		//console.log("skeltoned files : "+ this._totalCounter);

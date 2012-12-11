@@ -35,13 +35,11 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 		/**
 		 * Runs a search and displays the results under the given DOM node.
 		 * @public
-		 * @param {String} query URI of the query to run.
+		 * @param {Object} searchParams The search parameters.
 		 * @param {String} [excludeFile] URI of a file to exclude from the result listing.
 		 * @param {Function(JSONObject)} Callback function that receives the results of the query.
-		 * @param {Boolean} [keyWordSearch] If true, do keyword search. Otherwise do name search.
 		 */
-		search: function(query, excludeFile, renderer, keyWordSearch) {
-			var qObj = mSearchUtils.parseQueryStr(query);
+		search: function(searchParams, excludeFile, renderer) {
 			var transform = function(jsonData) {
 				var transformed = [];
 				for (var i=0; i < jsonData.response.docs.length; i++) {
@@ -54,18 +52,18 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 				}
 				return transformed;
 			};
-			if(this._crawler && !keyWordSearch){ //$NON-NLS-0$
-				this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
+			if(this._crawler && searchParams.nameSearch){
+				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null);});
 			} else {
 				try {
-					this._fileService.search(qObj.location, query).then(function(jsonData) {
+					this._fileService.search(searchParams).then(function(jsonData) {
 						/**
 						 * transforms the jsonData so that the result conforms to the same
 						 * format as the favourites list. This way renderer implementation can
 						 * be reused for both.
 						 * jsonData.response.docs{ Name, Location, Directory, LineNumber }
 						 */
-						var token = qObj.searchStr;//jsonData.responseHeader.params.q;
+						var token = searchParams.keyword;//jsonData.responseHeader.params.q;
 						token= token.substring(token.indexOf("}")+1); //$NON-NLS-0$
 						//remove field name if present
 						token= token.substring(token.indexOf(":")+1); //$NON-NLS-0$
@@ -76,9 +74,9 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 				}
 				catch(error){
 					if(typeof(error) === "string" && error.indexOf("search") > -1 && this._crawler){ //$NON-NLS-0$
-						this._crawler.searchName(query, function(jsonData){renderer(transform(jsonData), null);});
-					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && keyWordSearch){ //$NON-NLS-0${
-						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, query, {childrenLocation: this.getChildrenLocation()});
+						this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null);});
+					} else if(typeof(error) === "string" && error.indexOf("search") > -1 && !searchParams.nameSearch){ //$NON-NLS-0${
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this._fileService, searchParams, {childrenLocation: this.getChildrenLocation()});
 						crawler.search(function(jsonData){renderer(transform(jsonData), null);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
@@ -157,52 +155,33 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 			return this._childrenLocation;
 		},
 		/**
-		 * Returns a query URL for a search.
-		 * @param {String} query The text to search for, or null when searching purely on file name
-		 * @param {String} [nameQuery] The name of a file to search for
-		 * @param {String} [sort] The field to sort search results on. By default results will sort by path
+		 * Returns a query object for search. The return value has the propertyies of resource and parameters.
+		 * @param {String} keyword The text to search for, or null when searching purely on file name
+		 * @param {Boolean} [nameSearch] The name of a file to search for
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
-		createSearchQuery: function(query, nameQuery, sort, useRoot, searchPrefix, advancedOptions)  {
-			if (!sort) {
-				sort = "Path"; //$NON-NLS-0$
-			}
-			sort += " asc";//ascending sort order //$NON-NLS-0$
-			if (nameQuery) {
+		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions)  {
+			if (nameSearch) {
 				//assume implicit trailing wildcard if there isn't one already
-				var wildcard= (/\*$/.test(nameQuery) ? "" : "*"); //$NON-NLS-0$
-				return  mSearchUtils.generateSearchQuery({sort: sort,
+				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
+				return {
+					resource: useRoot ? this._searchRootLocation: this._searchLocation,
+					sort: "NameLower asc",
 					rows: 100,
 					start: 0,
-					location: useRoot ? this._searchRootLocation: this._searchLocation,
-					searchStr: searchPrefix + this._luceneEscape(nameQuery, true) + wildcard}); //$NON-NLS-0$
+					nameSearch: true,
+					keyword: keyword
+				};
 			}
-			var useRegularExpresion = advancedOptions ? advancedOptions.regEx : true;
-			return  mSearchUtils.generateSearchQuery({sort: sort, advOptions: advancedOptions,
+			return {
+				resource: useRoot ? this._searchRootLocation: this._searchLocation,
+				sort: "Path asc",
 				rows: 40,
 				start: 0,
-				searchStr: (useRegularExpresion ? query : this._luceneEscape(query, true)),
-				location: useRoot ? this._searchRootLocation: this._searchLocation});
-		},
-		/**
-		 * Escapes all characters in the string that require escaping in Lucene queries.
-		 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
-		 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
-		 * @param {String} input The string to perform escaping on
-		 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
-		 * @private
-		 */
-		_luceneEscape: function(input, omitWildcards) {
-			var output = "",
-			    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
-			for (var i = 0; i < input.length; i++) {
-				var c = input.charAt(i);
-				if (specialChars.indexOf(c) >= 0) {
-					output += '\\'; //$NON-NLS-0$
-				}
-				output += c;
-			}
-			return output;
+				regEx: advancedOptions ? advancedOptions.regEx : undefined,
+				fileType: advancedOptions ? advancedOptions.type : undefined,
+				keyword: keyword
+			};
 		},
 
 		//default search renderer until we factor this out completely

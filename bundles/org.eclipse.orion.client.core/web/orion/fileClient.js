@@ -434,8 +434,8 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		 * Performs a search with the given query.
 		 * @param {String} query The search query
 		 */
-		search: function(location, query) {
-			return _doServiceCall(this._getService(location), "search", arguments); //$NON-NLS-0$
+		search: function(searchParams) {
+			return _doServiceCall(this._getService(searchParams.resource), "search", arguments); //$NON-NLS-0$
 		}
 	};//end FileClient prototype
 	FileClient.prototype.constructor = FileClient;

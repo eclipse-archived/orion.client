@@ -147,13 +147,6 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 	}
 	
-	function createSearchLink(query, name) {
-		var link = document.createElement("a"); //$NON-NLS-0$
-		link.href = require.toUrl("search/search.html") + "#" + query; //$NON-NLS-1$ //$NON-NLS-0$
-		link.textContent = name;
-		return link;
-	}
-		
 	function _addAdvancedSearchButton(container) {
 		var dropDownImage = dojo.create("span", {id: "advancedSearchDropDown"}, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
 		dropDownImage.tabIndex = 0;
