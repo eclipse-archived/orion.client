@@ -507,17 +507,14 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 					if(newKeyword.indexOf(" ") >= 0){
 						newKeyword = "\"" + newKeyword + "\"";
 					}
-					newKeyword = newKeyword + "+NameLower:*." + searchParams.fileType;
+					newKeyword = encodeURIComponent(newKeyword) + "+NameLower:*." + searchParams.fileType;
 				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
 					newKeyword = "NameLower:*." + searchParams.fileType;
 					newSort = newSort.replace("Path", "NameLower");
 				}
 			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
-				newKeyword = "\"" + newKeyword + "\"";
+				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
 			}
-		}
-		if(!searchParams.nameSearch){
-			newKeyword = encodeURIComponent(newKeyword);
 		}
 		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchParams.resource + "*";
 	}
