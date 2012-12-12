@@ -11,7 +11,7 @@
 /*global define console setTimeout*/
 
 
-define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(assert, mServiceRegistry, EventTarget) {
+define(["orion/assert", "orion/serviceregistry", "orion/EventTarget", "orion/Deferred"], function(assert, mServiceRegistry, EventTarget, Deferred) {
 	var tests = {};
 	tests.testRegisterAndGetService = function() {
 		var count = 0;
@@ -30,26 +30,24 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget"], function(
 
 		assert.equal(count, 0);
 		var service1 = registry.getService("testRegister");
-		service1.test().then(function(newcount) {
+		var service2;
+		
+		return service1.test().then(function(newcount) {
 			count = newcount;
-		});
-		assert.equal(count, 1);
-
-		var service2 = registry.getService(reference);
-		service2.test().then(function(newcount) {
+		}).then(function() {
+			assert.equal(count, 1);
+		}).then(function() {
+			service2 = registry.getService(reference);
+			return service2.test();
+		}).then(function(newcount) {
 			count = newcount;
+		}).then(function() {
+			assert.equal(count, 2);
+		}).then(function() {
+			assert.equal(service1, service2);
+			registration.unregister();
+			assert["throws"](service2.test);	
 		});
-		assert.equal(count, 2);
-
-		// contrived
-		assert.equal(service1, service2);
-		registration.unregister();
-		assert["throws"](function() {
-			service2.test().then(function(newcount) {
-				count = newcount;
-			});
-		});
-		assert.equal(count, 2);
 	};
 	
 	tests.testRegisterUnregisterMultipleServices = function() {
