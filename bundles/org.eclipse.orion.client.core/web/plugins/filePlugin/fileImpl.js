@@ -522,6 +522,8 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 				}
 			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
 				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
+			} else {
+				newKeyword = encodeURIComponent(newKeyword)
 			}
 		}
 		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchParams.resource + "*";
