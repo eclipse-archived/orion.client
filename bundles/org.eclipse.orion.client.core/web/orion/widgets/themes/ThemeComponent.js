@@ -40,7 +40,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 		
 		function render( context ){
 				
-				if( context != null ){
+				if( context !== null ){
 					this.context = context;
 				}
 				
