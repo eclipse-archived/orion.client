@@ -22,9 +22,16 @@ define(function(){
 				var params = text.split(","); //$NON-NLS-0$
 				result.resource = decodeURIComponent(params[0]);
 				for (var i = 1; i < params.length; i++) {
-					var nameValue = params[i].split("="); //$NON-NLS-0$
-					var name = decodeURIComponent(nameValue[0]);
-					var value = (nameValue.length === 2) ? decodeURIComponent(nameValue[1]) : null;
+					//We can not use params[i].split("=") here because a param's value may contain "=", which is not encoded.
+					var equalIndex = params[i].indexOf("="); //$NON-NLS-0$
+					var name, value;
+					if(equalIndex !== -1){
+						name = decodeURIComponent(params[i].substring(0, equalIndex));
+						value = decodeURIComponent(params[i].substring(equalIndex + 1));
+					} else {//If there is no "=" defined, we assume that the param only has a name but value is null.
+						name = decodeURIComponent(params[i]);
+						value = null;
+					}
 					if (value !== null && name !== "resource") { //$NON-NLS-0$
 						result[name] = value;
 					}
