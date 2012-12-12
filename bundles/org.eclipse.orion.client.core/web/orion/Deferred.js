@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global exports module define*/
+/*global exports module define setTimeout*/
 (function(root, factory) { // UMD
 	if (typeof define === 'function' && define.amd) {
 		define(factory);
@@ -39,7 +39,7 @@
 			return;
 		}
 		running = true;
-		do {
+		setTimeout(function() {
 			while (fn) {
 				fn();
 				if (remainingHead) {
@@ -60,7 +60,7 @@
 				}
 			}
 			running = false;
-		} while (running);
+		}, 0);
 	}
 
 	function noReturn(fn) {

@@ -15,7 +15,7 @@
 define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'dijit/TooltipDialog'], 
 		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils) {
 
-	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, queryStr, options) {
+	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchParams, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
@@ -27,12 +27,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.location2ModelMap = [];
 		this._lineDelimiter = "\n";  //$NON-NLS-0$
 		this.onMatchNumberChanged = options.onMatchNumberChanged;
-		this.queryObj = mSearchUtils.parseQueryStr(queryStr);
+		this.searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
 	SearchResultModel.prototype.replaceMode = function(){
-		return (typeof this.queryObj.replace === "string"); //$NON-NLS-0$
+		return (typeof this.searchHelper.params.replace === "string"); //$NON-NLS-0$
 	};
 	
 	SearchResultModel.prototype.sameFile = function(prevSelection, curSelection){
@@ -77,25 +77,25 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultModel.prototype.storeStatus = function(currentModel) {
 		if(currentModel){
 			var fileItem = this.fileModel(currentModel);
-			window.sessionStorage[this.queryObj.queryStr + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
+			window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
 			if(currentModel.type === "file"){ //$NON-NLS-0$
-				window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
+				window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				window.sessionStorage[this.queryObj.queryStr + "_search_result_currentDetailIndex"] = JSON.stringify(this.model2Index(currentModel)); //$NON-NLS-0$
+				window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentDetailIndex"] = JSON.stringify(this.model2Index(currentModel)); //$NON-NLS-0$
 			}
 			
 		}
 	};
 	
 	SearchResultModel.prototype.restoreGlobalStatus = function() {
-		this.defaultReplaceStr = this.queryObj.searchStrTitle;
+		this.defaultReplaceStr = this.searchHelper.displayedSearchTerm;
 		var defaultReplaceStr = window.sessionStorage["global_search_default_replace_string"]; //$NON-NLS-0$
 		if (typeof defaultReplaceStr === "string") { //$NON-NLS-0$
 			if (defaultReplaceStr.length > 0) {
 				this.defaultReplaceStr= defaultReplaceStr;
 			} 
 		}
-		this.sortByName = (this.queryObj.sort.indexOf("Name") > -1); //$NON-NLS-0$
+		this.sortByName = (this.searchHelper.params.sort.indexOf("Name") > -1); //$NON-NLS-0$
 	};
 	
 	SearchResultModel.prototype.getRoot = function(onItem){
@@ -166,7 +166,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			this.getFileContent(model, dojo.hitch(this, function(fileItem){
 				matchesReplaced = this.matchesReplaced(fileItem);
 				var newContents = [];
-				mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, replaceStr, this.queryObj.inFileQuery.searchStrLength); 
+				mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, replaceStr, this.searchHelper.inFileQuery.searchStrLength); 
 				var contents = newContents.join(this._lineDelimiter);
 				
 				var etag = fileItem.ETag;
@@ -214,10 +214,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultModel.prototype.hitOnceWithinFile = function( fileContentText){
 		var lineString = fileContentText.toLowerCase();
 		var result;
-		if(this.queryObj.inFileQuery.wildCard){
-			result = mSearchUtils.searchOnelineRegEx(this.queryObj.inFileQuery, lineString, true);
+		if(this.searchHelper.inFileQuery.wildCard){
+			result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);
 		} else {
-			result = mSearchUtils.searchOnelineLiteral(this.queryObj.inFileQuery, lineString, true);
+			result = mSearchUtils.searchOnelineLiteral(this.searchHelper.inFileQuery, lineString, true);
 		}
 		return result;
 	};
@@ -228,7 +228,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else {
 			this.fileClient.read(fileItem.location).then(
 				dojo.hitch(this, function(jsonData) {
-					mSearchUtils.searchWithinFile(this.queryObj.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode());
+					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode());
 					if(this.onMatchNumberChanged && !writing){
 						this.onMatchNumberChanged(fileItem);
 					}
@@ -251,12 +251,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else if (parentItem.type === "detail") { //$NON-NLS-0$
 			onComplete([]);
 		} else if (parentItem.type === "file" && parentItem.location) { //$NON-NLS-0$
-			if(this.queryObj.searchStr === ""){
+			if(this.searchHelper.params.keyword === ""){
 				return;
 			}
 			this.fileClient.read(parentItem.location).then(
 					dojo.hitch(this, function(jsonData) {
-						  mSearchUtils.searchWithinFile(this.queryObj.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode());
+						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode());
 						  if(this.onMatchNumberChanged){
 							  this.onMatchNumberChanged(parentItem);
 						  }
@@ -307,19 +307,19 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			header = dojo.create("h2", null, title); //$NON-NLS-0$
 			header.textContent = messages["Results"]; //$NON-NLS-0$
 			
-			if( this.explorer.model.queryObj.searchStrTitle){
+			if( this.explorer.model.searchHelper.displayedSearchTerm){
 				if(this.explorer.numberOnPage > 0){
-					var startNumber = this.explorer.model.queryObj.start + 1;
+					var startNumber = this.explorer.model.searchHelper.params.start + 1;
 					var endNumber = startNumber + this.explorer.numberOnPage - 1;
 					title.innerHTML = "";
 					var textBold = dojo.create("h2", null, title, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 					var displayStr = "";
 					if(!this.explorer.model.replaceMode()){
 						displayStr = dojo.string.substitute(messages["Files ${0} of ${1} matching ${2}"], 
-						[startNumber +"-"+ endNumber, this.explorer.totalNumber, this.explorer.model.queryObj.searchStrTitle]); 
+						[startNumber +"-"+ endNumber, this.explorer.totalNumber, this.explorer.model.searchHelper.displayedSearchTerm]); 
 					} else {
 						displayStr = dojo.string.substitute(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
-						[this.explorer.model.queryObj.searchStrTitle,
+						[this.explorer.model.searchHelper.displayedSearchTerm,
 						this.explorer._replaceStr, 
 						startNumber +"-"+ endNumber, //$NON-NLS-2$
 						this.explorer.totalNumber
@@ -389,7 +389,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.queryObj.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
@@ -411,7 +411,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	
 	SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan){
 		var startIndex = 0;
-		var gap = this.explorer.model.queryObj.inFileQuery.searchStrLength;
+		var gap = this.explorer.model.searchHelper.inFileQuery.searchStrLength;
 		for(var i = 0; i < detailModel.matches.length; i++){
 			if(startIndex >= detailModel.name.length)
 				break;
@@ -425,7 +425,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				dojo.place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
 			}
 			var matchSegBold = dojo.create("b", null, parentSpan, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			if(this.explorer.model.queryObj.inFileQuery.wildCard){
+			if(this.explorer.model.searchHelper.inFileQuery.wildCard){
 				gap = detailModel.matches[i].length;
 			}
 			dojo.place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
@@ -457,7 +457,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
-		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.queryObj.inFileQuery, item.lineNumber, this.explorer._replaceStr);
+		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
 		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
@@ -498,12 +498,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan){
 		var spanHolder = onSpan ? onSpan: dojo.byId(this.getLocationSpanId(item));
 		dojo.empty(spanHolder);
-		var qParams = mSearchUtils.copyQueryParams(this.explorer.model.queryObj, true);
-		qParams.location = item.parentLocation;
+		var qParams = mSearchUtils.copySearchParams(this.explorer.model.searchHelper.params, true);
+		qParams.resource = item.parentLocation;
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		var link = dojo.create("a", {className: "navlinkonpage", href: href}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		link.title = dojo.string.substitute(messages["Search again in this folder with \"${0}\""], [this.explorer.model.queryObj.searchStrTitle]);
+		link.title = dojo.string.substitute(messages["Search again in this folder with \"${0}\""], [this.explorer.model.searchHelper.displayedSearchTerm]);
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
 		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
@@ -528,7 +528,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				col.noWrap = true;
 				span = dojo.create("span", {id: this.getFileIconId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				if(this.explorer.model.queryObj.searchStr !== ""){
+				if(this.explorer.model.searchHelper.params.keyword !== ""){
 					this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
 				} else {
 					var decorateImage = dojo.create("span", null, span, "last"); //$NON-NLS-0$ //$NON-NLS-0$
@@ -690,15 +690,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultExplorer.prototype.onchange = function(item) {
 	};
 	
-	SearchResultExplorer.prototype.setResult = function(parentNode, resultLocation, queryStr, totalNumber) {
+	SearchResultExplorer.prototype.setResult = function(parentNode, resultLocation, searchParams, totalNumber) {
 		var that = this;
 		this.parentNode = parentNode;
-		this.queryStr = queryStr;
+		this.searchParams = searchParams;
 		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
-		this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, queryStr, 
+		this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, searchParams, 
 						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
-		this._replaceStr = this.model.queryObj.replace;
+		this._replaceStr = this.model.searchHelper.params.replace;
 		if(this.model.replaceMode()){
 			this._hasCheckedItems = true;
 			this.checkbox = true;
@@ -730,7 +730,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			tooltip: messages["Save search query"],
 			id: "orion.saveSearchResults", //$NON-NLS-0$
 			callback: function(data) {
-				that.saveSearch(that.queryStr);
+				that.saveSearch(that.searchParams);
 			},
 			visibleWhen : function(item) {
 				return !that.model.replaceMode();
@@ -745,7 +745,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.preview();
 			},
 			visibleWhen : function(item) {
-				return !that.model.replaceMode() && that.model.queryObj.searchStr !== "";
+				return !that.model.replaceMode() && that.model.searchHelper.params.keyword !== "";
 			}
 		});
 		
@@ -757,7 +757,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.queryObj.searchStr !== "";
+				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.searchHelper.params.keyword !== "";
 			}
 		});
 	
@@ -816,14 +816,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			tooltip: messages["Show previous page of search result"],
 			id : "orion.search.prevPage", //$NON-NLS-0$
 			hrefCallback : function() {
-				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
-				var qParams = mSearchUtils.copyQueryParams(that.model.queryObj, true);
+				var prevPage = that.caculatePrevPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
+				var qParams = mSearchUtils.copySearchParams(that.model.searchHelper.params, true);
 				qParams.start = prevPage.start;
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var prevPage = that.caculatePrevPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
-				return (prevPage.start !== that.model.queryObj.start);
+				var prevPage = that.caculatePrevPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
+				return (prevPage.start !== that.model.searchHelper.params.start);
 			}
 		});
 		var nextPage = new mCommands.Command({
@@ -831,14 +831,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			tooltip: messages["Show next page of search result"],
 			id : "orion.search.nextPage", //$NON-NLS-0$
 			hrefCallback : function() {
-				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
-				var qParams = mSearchUtils.copyQueryParams(that.model.queryObj, true);
+				var nextPage = that.caculateNextPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
+				var qParams = mSearchUtils.copySearchParams(that.model.searchHelper.params, true);
 				qParams.start = nextPage.start;
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var nextPage = that.caculateNextPage(that.model.queryObj.start, that.model.queryObj.rows, that.totalNumber);
-				return (nextPage.start !== that.model.queryObj.start);
+				var nextPage = that.caculateNextPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
+				return (nextPage.start !== that.model.searchHelper.params.start);
 			}
 		});
 		var nextResultCommand = new mCommands.Command({
@@ -868,7 +868,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this._commandService.addCommand(nextResultCommand);
 		this._commandService.addCommand(prevResultCommand);
 		mExplorer.createExplorerCommands(this._commandService, function(item){
-			return !item._reporting && that.model.queryObj.searchStr !== "";
+			return !item._reporting && that.model.searchHelper.params.keyword !== "";
 		});
 		// Register command contributions
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -1007,7 +1007,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	
 	SearchResultExplorer.prototype.doPreview = function(replacingStr, all) {
 		window.sessionStorage["global_search_default_replace_string"] = replacingStr; //$NON-NLS-0$
-		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj, true);
+		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params, true);
 		qParams.replace = replacingStr;
 		if(all){
 			qParams.start = 0;
@@ -1018,7 +1018,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 
 	SearchResultExplorer.prototype.searchAgain = function() {
-		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj, true);
+		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params, true);
 		qParams.replace = null;
 		if(qParams.rows > this.defaulRows ){
 			qParams.rows = this.defaulRows;
@@ -1174,7 +1174,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 		var that = this;
 		this.model.getFileContent(fileItem, function(fileItem){
-			mSearchUtils.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model.queryObj.inFileQuery.searchStrLength); 
+			mSearchUtils.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model.searchHelper.inFileQuery.searchStrLength); 
 			// Diff operations
 			var fType = that._getContentType(fileItem);
 			dojo.when(fType, function(fType) {
@@ -1224,13 +1224,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.registry.getService("orion.core.savedSearches").addSearch(searchName, query); //$NON-NLS-0$
 	};
 	
-	SearchResultExplorer.prototype.saveSearch = function(query) {
-		var queryObj = mSearchUtils.parseQueryStr(query);
+	SearchResultExplorer.prototype.saveSearch = function(searchParams) {
+		var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1];
 		var qName = query;
-		if(queryObj && typeof(queryObj.searchStrTitle) === "string" && typeof(queryObj.location) === "string" ){ //$NON-NLS-1$ //$NON-NLS-0$
-			qName = "\'" + queryObj.searchStrTitle + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
-			if(queryObj.location.length > 0){
-				this.fileClient.read(queryObj.location, true).then(
+		
+		if(typeof(this.model.searchHelper.displayedSearchTerm) === "string" && typeof(searchParams.resource) === "string" ){ //$NON-NLS-1$ //$NON-NLS-0$
+			qName = "\'" + this.model.searchHelper.displayedSearchTerm + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
+			if(searchParams.resource.length > 0){
+				this.fileClient.read(searchParams.resource, true).then(
 					dojo.hitch(this, function(meta) {
 						var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 						var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name; //$NON-NLS-0$
@@ -1272,7 +1273,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		if(this.model.queryObj.searchStr !== ""){
+		if(this.model.searchHelper.params.keyword !== ""){
 			var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
 				if(!that.model.replaceMode()){
 					that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
@@ -1421,7 +1422,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				return;
 			}
 			this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber-1, currentModel.matches[currentModel.matchNumber-1], 
-					currentModel.newMatches[currentModel.matchNumber-1], this.model.queryObj.inFileQuery.searchStrLength,
+					currentModel.newMatches[currentModel.matchNumber-1], this.model.searchHelper.inFileQuery.searchStrLength,
 					function(){window.setTimeout(function(){that.renderer.focus();}, 200);});
 			window.setTimeout(function(){that.renderer.focus();}, 0);
 		}
@@ -1474,7 +1475,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
-		if(this.model.queryObj.searchStrTitle){
+		if(this.model.searchHelper.displayedSearchTerm){
 			if (this.numberOnPage > 0) {
 				var pageTitle = dojo.byId("pageTitle"); //$NON-NLS-0$
 				if(pageTitle){
@@ -1488,7 +1489,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				this.parentNode.textContent = "";
 				var textBold = dojo.create("b", null, this.parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				var displayStr = dojo.string.substitute(messages["No matches found for ${0}"], 
-					[this.model.queryObj.searchStrTitle]); 
+					[this.model.searchHelper.displayedSearchTerm]); 
 				dojo.place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
 				return;
 			} 
@@ -1521,10 +1522,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultExplorer.prototype.restoreLocationStatus = function() {
-		var currentFileLocation = window.sessionStorage[this.model.queryObj.queryStr + "_search_result_currentFileLocation"]; //$NON-NLS-0$
+		var currentFileLocation = window.sessionStorage[this.model.searchHelper.params.keyword + "_search_result_currentFileLocation"]; //$NON-NLS-0$
 		var fileModel = this.model.location2Model(currentFileLocation);
 		var currentDetailIndex = "none"; //$NON-NLS-0$
-		var detailIndexCached = window.sessionStorage[this.model.queryObj.queryStr + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
+		var detailIndexCached = window.sessionStorage[this.model.searchHelper.params.keyword + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
 		if (typeof detailIndexCached === "string") { //$NON-NLS-0$
 			if (detailIndexCached.length > 0) {
 				currentDetailIndex = detailIndexCached;
@@ -1565,7 +1566,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(this.model.sortByName === byName){
 			return;
 		}
-		var qParams = mSearchUtils.copyQueryParams(this.model.queryObj);
+		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params);
 		qParams.sort = byName ? "NameLower asc" : "Path asc"; //$NON-NLS-1$ //$NON-NLS-0$
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);

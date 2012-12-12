@@ -419,9 +419,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				var b = dojo.create("b", null, searchFloat, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				searchFloat.style.display = "block"; //$NON-NLS-0$
-				var query = searcher.createSearchQuery(searchPattern, null, "Name", true); //$NON-NLS-0$
+				var searchParams = searcher.createSearchParams(searchPattern, false, true);
+				searchParams.sort = "Name asc"; //$NON-NLS-0$
 				var renderer = searcher.defaultRenderer.makeRenderFunction(null, searchFloat, false);
-				searcher.search(query, inputManager.getInput(), renderer, true);
+				searcher.search(searchParams, inputManager.getInput(), renderer);
 			}, 0);
 			return true;
 		}, {name: messages["Search Files"]}); //$NON-NLS-0$

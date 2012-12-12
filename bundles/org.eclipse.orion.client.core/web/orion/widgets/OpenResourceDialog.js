@@ -242,9 +242,10 @@ var OpenResourceDialog = dojo.declare("orion.widgets.OpenResourceDialog", [dijit
 			// Gives Webkit a chance to show the "Searching" message
 			var that = this;
 			setTimeout(function() {
-				var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", that._searchOnRoot, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				var searchParams = that.searcher.createSearchParams(text, true, that._searchOnRoot);
+				//var query = that.searcher.createSearchQuery(null, text, that.searcher._crawler ? false : "NameLower", that._searchOnRoot, that.searcher._crawler ? "" : "NameLower:"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 				var renderFunction = that.searchRenderer.makeRenderFunction(that.contentTypeService, that.results, false, dojo.hitch(that, that.decorateResult));
-				that.searcher.search(query, false, renderFunction);
+				that.searcher.search(searchParams, false, renderFunction);
 			}, 0);
 		}
 	},

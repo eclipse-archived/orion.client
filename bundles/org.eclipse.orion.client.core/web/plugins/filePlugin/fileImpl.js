@@ -449,21 +449,11 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		},
 		
 		/**
-		 * Performs a search with the given query.
-		 * @param {String} query The search query
+		 * Performs a search with the given search parameters.
+		 * @param {Object} searchParams The search parameters
 		 */
-		search: function(location, query) {
-			var locationIndex = query.indexOf("+Location:");
-			if (locationIndex !== -1) {
-				var loc = query.substring(locationIndex + "+Location:".length);	
-				if (loc.indexOf("://") !== -1) {
-					var hostIndex = loc.indexOf("://") + 3;
-					var pathIndex = loc.indexOf("/", hostIndex);
-					loc = (pathIndex === -1 ) ? "" : loc.substring(pathIndex);
-				}
-				query = query.substring(0, locationIndex + "+Location:".length) + loc;
-			}
-		
+		search: function(searchParams) {
+			var query = _generateLuceneQuery(searchParams);
 			return xhr("GET", "/filesearch" + query, {
 				headers: {
 					"Accept": "application/json",
@@ -480,6 +470,54 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			}.bind(this));
 		}
 	};
+	
+	/**
+	 * Escapes all characters in the string that require escaping in Lucene queries.
+	 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
+	 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+	 * @param {String} input The string to perform escaping on
+	 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
+	 * @private
+	 */
+	function _luceneEscape(input, omitWildcards) {
+		var output = "",
+		    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
+		for (var i = 0; i < input.length; i++) {
+			var c = input.charAt(i);
+			if (specialChars.indexOf(c) >= 0) {
+				output += '\\'; //$NON-NLS-0$
+			}
+			output += c;
+		}
+		return output;
+	}
+	
+	function _generateLuceneQuery(searchParams){
+		var newKeyword = _luceneEscape(searchParams.keyword, true);
+		var newSort = searchParams.sort;
+		if(searchParams.nameSearch){ //Search file name only
+			var wildcard= (/\*$/.test(searchParams.keyword) ? "" : "*"); //$NON-NLS-0$
+			newKeyword = "NameLower:" + newKeyword + wildcard;
+		} else {
+			//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
+			if(searchParams.fileType && searchParams.fileType !== "*.*"){
+				//If the search string is not empty, we just combine the file type.
+				if(newKeyword !== ""){
+					//If the search string contains white space, we should add double quato at both end. 
+					if(newKeyword.indexOf(" ") >= 0){
+						newKeyword = "\"" + newKeyword + "\"";
+					}
+					newKeyword = encodeURIComponent(newKeyword) + "+NameLower:*." + searchParams.fileType;
+				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
+					newKeyword = "NameLower:*." + searchParams.fileType;
+					newSort = newSort.replace("Path", "NameLower");
+				}
+			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
+				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
+			}
+		}
+		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchParams.resource + "*";
+	}
 	
 	function _call2(method, url, headers, body) {
 		var d = new Deferred(); // create a promise

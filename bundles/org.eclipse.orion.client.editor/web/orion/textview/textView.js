@@ -321,7 +321,9 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 			var lineText = model.getLine(lineIndex);
 			var lineStart = model.getLineStart(lineIndex);
 			var e = {type:"LineStyle", textView: view, lineIndex: lineIndex, lineText: lineText, lineStart: lineStart}; //$NON-NLS-0$
-			view.onLineStyle(e);
+			if (lineText.length < 2000) {
+				view.onLineStyle(e);
+			}
 			var lineDiv = div || util.createElement(parent.ownerDocument, "div"); //$NON-NLS-0$
 			if (!div || !compare(div.viewStyle, e.style)) {
 				applyStyle(e.style, lineDiv, div);

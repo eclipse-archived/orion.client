@@ -31,7 +31,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 
 	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
 
-		_renderSearchResult: function(crawling, resultsNode, query, jsonData, incremental) {
+		_renderSearchResult: function(crawling, resultsNode, searchParams, jsonData, incremental) {
 			var foundValidHit = false;
 			var resultLocation = [];
 			dojo.empty(resultsNode);
@@ -49,7 +49,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				}
 			}
 			this.explorer.setCrawling(crawling);
-			this.explorer.setResult(resultsNode, resultLocation, query, jsonData.response.numFound);
+			this.explorer.setResult(resultsNode, resultLocation, searchParams, jsonData.response.numFound);
 			if(incremental){
 				this.explorer.incrementalRender();
 			} else {
@@ -68,32 +68,31 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
 		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
-		_search: function(resultsNode, query) {
+		_search: function(resultsNode, searchParams) {
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
-			var qObj = mSearchUtils.parseQueryStr(query);
-			this.crawling = (qObj.advOptions ? (qObj.advOptions.regEx/* || qObj.advOptions.type !== mSearchUtils.ALL_FILE_TYPE*/) : false);
+			this.crawling = searchParams.regEx;
 			var parent = dojo.byId(this.resultsId);
 			if(this.crawling){
 				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
 				var self = this;
-				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
-				crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, query, jsonData, incremental);});
+				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
+				crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 			} else {
-				var queryToService = qObj.nonAdvQueryStr;
+				//var queryToService = qObj.nonAdvQueryStr;
 				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 				try{
-					this.fileService.search(qObj.location, queryToService).then(
+					this.fileService.search(searchParams).then(
 						dojo.hitch(this, function(jsonData) {
-							this._renderSearchResult(false, resultsNode, query, jsonData);
+							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}));
 				}
 				catch(error){
 					dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
 					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
 						var self = this;
-						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, query, {childrenLocation: this.searcher.getChildrenLocation()});
-						crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, query, jsonData, incremental);});
+						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
+						crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 					} else {
 						this.registry.getService("orion.page.message").setErrorMessage(error);	 //$NON-NLS-0$
 					}
