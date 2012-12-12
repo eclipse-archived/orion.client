@@ -11,8 +11,8 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/editor/ThemeData'], 
-	function(messages, require, dojo, dijit, mCommands, mGlobalCommands, PageUtil, Component, ThemeData ) {
+define(['i18n!orion/settings/nls/messages', 'require','dijit', 'orion/PageUtil', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/settings/Select'], 
+	function(messages, require, dijit, PageUtil, ThemeData, Select ) {
 
 		function MiniThemeChooser(preferences, textview){			
 			this.preferences = preferences;
@@ -222,7 +222,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 		
 		function addFontSizePicker(){
 		
-			var MiniThemeChooser = this;
+			var chooser = this;
 			
 			var currentSize = '10pt';
 			
@@ -262,31 +262,22 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				}	
 				
 				this.sizeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-				this.sizeSelect.setStorageItem = dojo.hitch( MiniThemeChooser, 'selectFontSize' );	
-			
+				this.sizeSelect.setStorageItem = chooser.selectFontSize.bind(chooser);
 			});
 		}
 		
 		MiniThemeChooser.prototype.addFontSizePicker = addFontSizePicker;
-				
-		function addThemePicker(){
 		
+		
+		function setUpPicker(prefs){ //$NON-NLS-0$
+		
+			var themeInfo = this.themeData.getThemeStorageInfo();
+				
 			var options = [];
 			
-			var MiniThemeChooser = this;
-			
-			var selection;
-			
-			var builder = this;
-			
-			var themeInfo = this.themeData.getThemeStorageInfo();
-			
-			/* Check to see if the Orion theme is in the themes preferences ... if it is, 
-				   then we don't need to populate again, otherwise we do need to populate. */
-			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
+			var chooser = this;
    		   
-				selection = prefs.get( 'selected' );
+				var selection = prefs.get( 'selected' );
 				
 				if(selection){ selection = JSON.parse( selection ); }
 				
@@ -299,7 +290,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 					/* If we're in this condition, then the themes are not in local storage yet.
 					   Going to make sure */
 				
-					styles = builder.styleset; 
+					styles = chooser.styleset; 
 				}
 				
 				if(!selection) {
@@ -323,16 +314,28 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 						
 						options.push(set);
 						
-						MiniThemeChooser.styles = styles;
+						chooser.styles = styles;
 					}	
 				}
 			
 				var picker = document.getElementById( 'themepicker' );
 				
 				this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-				this.themeSelect.setStorageItem = dojo.hitch( MiniThemeChooser, 'selectTheme' );
+				this.themeSelect.setStorageItem = chooser.selectTheme.bind(chooser); 
+			}
+		
+		MiniThemeChooser.prototype.setUpPicker = setUpPicker;
+				
+		function addThemePicker(){
 			
-			} ));	
+			var themeInfo = this.themeData.getThemeStorageInfo();
+			
+			/* Check to see if the Orion theme is in the themes preferences ... if it is, 
+				   then we don't need to populate again, otherwise we do need to populate. */
+				   
+			var chooser = this;
+			
+			this.preferences.getPreferences(themeInfo.storage, 2).then( chooser.setUpPicker.bind(chooser) );	
 		}
 		
 		MiniThemeChooser.prototype.addThemePicker = addThemePicker;
