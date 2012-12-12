@@ -450,7 +450,15 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		
 		/**
 		 * Performs a search with the given search parameters.
-		 * @param {Object} searchParams The search parameters
+		 * @param {Object} searchParams The JSON object that describes all the search parameters.
+		 * @param {String} searchParams.resource Required. The location where search is performed. Required. Normally a sub folder of the file system. Empty string means the root of the file system.
+		 * @param {String} searchParams.keyword The search keyword. Required but can be empty string.  If fileType is a specific type and the keyword is empty, then list up all the files of that type. If searchParams.regEx is true then the keyword has to be a valid regular expression. 
+		 * @param {String} searchParams.sort Required. Defines the order of the return results. Should be either "Path asc" or "Name asc". Extensions are possible but not currently supported.  
+		 * @param {boolean} searchParams.nameSearch Optional. If true, the search performs only file name search. 
+		 * @param {String} searchParams.fileType Optional. The file type. If specified, search will be performed under this file type. E.g. "*.*" means all file types. "html" means html files.
+		 * @param {Boolean} searchParams.regEx Optional. The option of regular expression search.
+		 * @param {integer} searchParams.start Optional. The zero based strat number for the range of the returned hits. E.g if there are 1000 hits in total, then 5 means the 6th hit.
+		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
 		 */
 		search: function(searchParams) {
 			var query = _generateLuceneQuery(searchParams);
