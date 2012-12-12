@@ -29,6 +29,7 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 	
 		this._styler = styler;
 		this._view = this._styler.view;
+		this._view.stylerOptions = this;
 		var self = this;
 		this._listener = {
 			onStorage: function(e) {
@@ -145,11 +146,38 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 			return result.join("\n");
 		},
 		_onStorage: function (e) {
-		
-			console.log( ' _ONSTORAGE ' );
-		
 			if( e.key === this.storageKey ){
 				this._updateStylesheet( this.preferences );
+			}
+		},
+		_update:function(storage, stylerOptions, sUtil ){
+				
+			if (storage){
+				if (stylerOptions._stylesheet) {
+					stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
+					stylerOptions._stylesheet = null;
+				}
+
+				var view = stylerOptions._view;
+				var parent = view.getOptions("parent");
+				var document = parent.ownerDocument;
+				var stylesheet = stylerOptions._stylesheet = util.createElement(document, "style");
+				stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, sUtil)));
+				var head = document.getElementsByTagName("head")[0] || document.documentElement;
+				head.appendChild(stylesheet);
+				var options = {themeClass:null};
+				view.getOptions(options);
+				var theme = options.themeClass;
+				if (theme) {
+					theme = theme.replace(USER_THEME, "");
+					if (theme) { theme += " "; }
+					theme += USER_THEME;
+				} else {
+					theme = USER_THEME;
+				}
+				options.themeClass = theme;
+				view.setOptions(options);
+				view.update(true);
 			}
 		},
 		_updateStylesheet: function (preferences, sUtil) {
@@ -162,34 +190,8 @@ define("examples/textview/textStylerOptions", ['orion/bootstrap', 'orion/textvie
 				var data = prefs.get(CATEGORY);
 				
 				if( data !== undefined ){
-			
 					storage = JSON.parse( prefs.get(CATEGORY) );	
-					if (!storage) { return; }
-					if (stylerOptions._stylesheet) {
-						stylerOptions._stylesheet.parentNode.removeChild(stylerOptions._stylesheet);
-						stylerOptions._stylesheet = null;
-					}
-
-					var view = stylerOptions._view;
-					var parent = view.getOptions("parent");
-					var document = parent.ownerDocument;
-					var stylesheet = stylerOptions._stylesheet = util.createElement(document, "style");
-					stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, sUtil)));
-					var head = document.getElementsByTagName("head")[0] || document.documentElement;
-					head.appendChild(stylesheet);
-					var options = {themeClass:null};
-					view.getOptions(options);
-					var theme = options.themeClass;
-					if (theme) {
-						theme = theme.replace(USER_THEME, "");
-						if (theme) { theme += " "; }
-						theme += USER_THEME;
-					} else {
-						theme = USER_THEME;
-					}
-					options.themeClass = theme;
-					view.setOptions(options);
-					view.update(true);
+					stylerOptions._update(storage, stylerOptions, sUtil );
 				}
 			} );
 		}

@@ -31,29 +31,62 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 														'<div id="fontsizepicker"></div>' +
 													'</div>' +
 												'</div>';
-		
-		function appendTo( node ){
-			node.innerHTML = this.template;		
-			this.addFontSizePicker();
-			this.addThemePicker();
+												
+		function isDescendant(parent, child) {
+		     var node = child.parentNode;
+		     while (node !== null) {
+		         if (node === parent) {
+		             return true;
+		         }
+		         node = node.parentNode;
+		     }
+		     return false;
 		}
 		
-		MiniThemeChooser.prototype.appendTo = appendTo;
+		MiniThemeChooser.prototype.isDescendant = isDescendant;
+												
+		function removeSettings( event ){
+		
+			if( !isDescendant( this.container, event.target ) ){
+
+				this.destroy();
+				
+				window.removeEventListener( this.listener );
+
+				if( this.container ){
+					this.container.parentNode.removeChild( this.container );
+					this.container = null;
+				}
+			}
+		}
+		
+		MiniThemeChooser.prototype.removeSettings = removeSettings;
+		
+		function onRemove( callback ){
+			this.removeCall = callback;
+		}
+		
+		MiniThemeChooser.prototype.onRemove = onRemove;
+		
+		function appendTo( node ){
+		
+			this.container = node;
+			node.innerHTML = this.template;		
+			this.addFontSizePicker();
+			this.addThemePicker();		
+		}
+		
+		MiniThemeChooser.prototype.appendTo = appendTo;	
 		
 		function selectTheme( name ){
-		
+			
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			var themeData = this.themeData;
 			var selectedTheme;
-			var reload = false;	
 			var settings;
 			
-			if( name ){ reload = true; }
-			
-			var builder = this;
-			
-			/* Find the selected style details */
-				
+			var miniChooser = this;
+		
 			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
 			
 				var currentTheme = prefs.get( 'selected' );
@@ -84,48 +117,55 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 					}
 		
 					prefs.put( 'selected', JSON.stringify(selectedTheme) );
-				}
-				
+					
+					miniChooser.setThemeData( settings );
+				}		
 			} );
-			
-			/* Write the selected style details into storage */
-				
+		}
+		
+		MiniThemeChooser.prototype.selectTheme = selectTheme;
+		
+		function setThemeData( settings ){
+		
+			var subcategories;			
+			var tv = this.textview;
+
 			this.preferences.getPreferences('/settings', 2).then(function(prefs){
 			
 				if( settings ){	
 					var font = {};		
 					font.label = 'Font';
-					font.data = [ 	{ label:'Family', value: 'Sans Serif', ui:'Font' }, 
-									{ label:'Size', value: settings['fontSize'].value, ui:'Font' }, 
-									{ label:'Color', value: settings['text'].value }, 
-									{ label:'Background', value: settings['background'].value } ];
+					font.data = [	{ label:'Family', value: 'Sans Serif', ui:'Font' }, 
+									{ label:'Size', value: settings.fontSize.value, ui:'Font' }, 
+									{ label:'Color', value: settings.text.value }, 
+									{ label:'Background', value: settings.background.value } ];
 						
-					var subcategories = [ { element: 'fontFamily', value: 'sans serif' },
-										  { element: 'fontSize', value:  settings['fontSize'] },
-								          { element: 'fontWeight', value: 'normal' },
-										  { element: 'text', value: settings['text'] }, 
-										  { element: 'background', value: settings['background'] },
-										  { element: 'string', value: settings['string'] },
-										  { element: 'annotationRuler', value: settings['annotationRuler'] },
-										  { element: 'comment', value: settings['comment'] },
-										  { element: 'keyword', value: settings['keyword'] },
-										  { element: 'overviewRuler', value: settings['overviewRuler'] },
-										  { element: 'annotationRuler', value: settings['annotationRuler'] },
-										  { element: 'lineNumber', value: settings['lineNumber'] },
-										  { element: 'currentLine', value: settings['currentLine'] },
-										  { element: 'attribute', value: settings['attribute'] }
-										  ];
+					subcategories = [ { element: 'fontFamily', value: 'sans serif' },
+									  { element: 'fontSize', value:  settings.fontSize },
+							          { element: 'fontWeight', value: 'normal' },
+									  { element: 'text', value: settings.text }, 
+									  { element: 'background', value: settings.background },
+									  { element: 'string', value: settings.string },
+									  { element: 'annotationRuler', value: settings.annotationRuler },
+									  { element: 'comment', value: settings.comment },
+									  { element: 'keyword', value: settings.keyword },
+									  { element: 'overviewRuler', value: settings.overviewRuler },
+									  { element: 'annotationRuler', value: settings.annotationRuler },
+									  { element: 'lineNumber', value: settings.lineNumber },
+									  { element: 'currentLine', value: settings.currentLine },
+									  { element: 'attribute', value: settings.attribute }
+									];
 	
 					prefs.put( 'JavaScript Editor', JSON.stringify(subcategories) );
 					
-					if( reload ){
-						window.location.reload();
-					}			
+					if( tv.stylerOptions ){
+						tv.stylerOptions._update( subcategories, tv.stylerOptions );
+					}	
 				}
 			} );
 		}
 		
-		MiniThemeChooser.prototype.selectTheme = selectTheme;
+		MiniThemeChooser.prototype.setThemeData = setThemeData;
 		
 		function initializeStorage(){
 			var builder = this;
@@ -159,22 +199,22 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 				prefs.put( 'JavaScript Editor', JSON.stringify(styles) );
 				
-				/* First cut - going to reload the page, will work on making this
-				   happen dynamically. First of all I want to makes sure the
-				   infrastructure is working to add settings and operate
-				   the settings panel */
-				
-				window.location.reload();
-				
-				/* Just setting the style is not enough - having trouble
-				   closing in on the right hooks within the editor
-				   to update the view 
-				
 				var nodes = document.querySelectorAll( '.userTheme' ); 
 				for( var item in nodes ){
-					nodes[item].style.fontSize = size;
-				} */
+					if( nodes[item].style ){
+						nodes[item].style.fontSize = size;
+					}
+				}
 				
+				nodes = document.querySelectorAll( '.textviewContainer' ); 
+				
+				for( var item in nodes ){
+					if( nodes[item].style ){
+						nodes[item].style.fontSize = size;
+					}
+				}
+				
+				tv.update( true );
 			});
 		}
 		
@@ -241,11 +281,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
-
-				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
+			/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
-				   		   
+			
+			this.preferences.getPreferences(themeInfo.storage, 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
+   		   
 				selection = prefs.get( 'selected' );
 				
 				if(selection){ selection = JSON.parse( selection ); }
