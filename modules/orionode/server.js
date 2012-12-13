@@ -27,6 +27,7 @@ var orionStatic = require('./lib/orion_static');
 
 var LIBS = path.normalize(path.join(__dirname, 'lib/'));
 var NODE_MODULES = path.normalize(path.join(__dirname, 'node_modules/'));
+var ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
 
 // vroom vroom
 http.globalAgent.maxSockets = 25;
@@ -70,7 +71,7 @@ function startServer(options) {
 			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/')), {
 				socketIORoot: path.resolve(NODE_MODULES, 'socket.io-client/')
 			}))
-			.use(orionStatic(path.normalize(path.join(LIBS, 'orion.client/')), {
+			.use(orionStatic(path.normalize(ORION_CLIENT), {
 				dojoRoot: path.resolve(LIBS, 'dojo/'),
 				dev: options.dev
 			}))
