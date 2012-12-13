@@ -1,0 +1,29 @@
+{
+  "name": "orion",
+  "version": "0.0.7",
+  "description": "An Eclipse Orion server based on Node.js and connect.",
+  "homepage": "http://eclipse.org/orion/",
+  "dependencies": {
+    "connect": "~2.4.6",
+    "node-inspector": "~0.2.0beta3",
+    "sax": "~0.4.2",
+    "promised-io": "~0.3.0",
+    "socket.io": "~0.9.11",
+    "socket.io-client": "~0.9.11"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mamacdon/orionode"
+  },
+  "keywords": [
+    "orion",
+    "eclipse",
+    "ide"
+  ],
+  "author": "Orion contributors",
+  "license": "EPL+EDL"
+}
