@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/mamacdon/orionode"
+    "url": "git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git"
   },
   "keywords": [
     "orion",
