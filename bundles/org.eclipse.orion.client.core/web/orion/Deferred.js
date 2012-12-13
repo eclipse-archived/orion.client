@@ -21,7 +21,30 @@
 }(this, function() {
 	var head, tail, remainingHead, remainingTail, running = false;
 
-	function enqueue(fn) {
+	function run(fn) {
+		while (fn) {
+			fn();
+			if (remainingHead) {
+				if (!head) {
+					head = remainingHead;
+				} else {
+					tail.next = remainingHead;
+				}
+				tail = remainingTail;
+			}
+			if (head) {
+				remainingHead = head.next;
+				remainingTail = tail;
+				fn = head.fn;
+				head = tail = null;
+			} else {
+				fn = null;
+			}
+		}
+		running = false;
+	}
+
+	function enqueue(fn, runAsync) {
 		if (running) {
 			if (!head) {
 				head = {
@@ -39,28 +62,11 @@
 			return;
 		}
 		running = true;
-		setTimeout(function() {
-			while (fn) {
-				fn();
-				if (remainingHead) {
-					if (!head) {
-						head = remainingHead;
-					} else {
-						tail.next = remainingHead;
-					}
-					tail = remainingTail;
-				}
-				if (head) {
-					remainingHead = head.next;
-					remainingTail = tail;
-					fn = head.fn;
-					head = tail = null;
-				} else {
-					fn = null;
-				}
-			}
-			running = false;
-		}, 0);
+		if (runAsync) {
+			setTimeout(run.bind(null, fn), 0);
+		} else {
+			run(fn);
+		}
 	}
 
 	function noReturn(fn) {
@@ -228,6 +234,7 @@
 			}
 		};
 
+		// Note: "then" ALWAYS returns before having onResolve or onReject called as per http://promises-aplus.github.com/promises-spec/
 		this.then = function(onResolve, onReject, onProgress) {
 			var listener = {
 				resolve: onResolve,
@@ -246,7 +253,7 @@
 			}
 			tail = listener;
 			if (state) {
-				enqueue(notify);
+				enqueue(notify, true); //runAsync
 			}
 			return listener.deferred.promise;
 		};
