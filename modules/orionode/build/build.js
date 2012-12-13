@@ -29,7 +29,7 @@ var IS_WINDOWS = process.platform === 'win32';
 var pathToNode = process.execPath;
 var pathToRjs = path.resolve(__dirname, 'r.js');
 var pathToBuildFile = path.resolve(__dirname, process.argv[2] || './orion.build.js');
-var pathToOrionClientBundlesFolder = path.resolve(path.dirname(pathToBuildFile), '../lib/orion.client/bundles/');
+var pathToOrionClientBundlesFolder = path.resolve(path.dirname(pathToBuildFile), '../../../bundles/');
 var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
 var pathToDojo = path.resolve(path.dirname(pathToBuildFile), '../lib/dojo/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
