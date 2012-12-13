@@ -47,21 +47,11 @@
 		}
 	}
 
-	function _checkValue(value) {
-		if (typeof value !== "string" && value !== null) {
-			if (typeof value === "undefined") {
-				value = null;
-			} else {
-				throw new TypeError();
-			}
-		}
-		return value;
-	}
-
 	// See http://url.spec.whatwg.org/#interface-urlquery
 	function URLQuery() {
 		Object.defineProperty(this, "_entries", {
-			value: [] // array of [key,value]
+			value: [], // array of [key,value]
+			writable: true
 		});
 		Object.defineProperty(this, "_dirty", {
 			value: false,
@@ -77,14 +67,12 @@
 				if (search) {
 					_checkString(search);
 					var pairs = search.slice(1).split("&");
-					for (var i = 0; i < pairs.length; i++) {
-						var pair = pairs[i];
-						var parsed = /([^=]*)(=?)(.*)/.exec(pair);
-						var name = decodeURIComponent(parsed[1] || "");
-						var hasEquals = !!parsed[2];
-						var value = hasEquals ? decodeURIComponent(parsed[3] || "") : null;
+					pairs.forEach(function(pair) {
+						var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
+						var name = parsed[1] ? decodeURIComponent(parsed[1]) : "";
+						var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
 						this.append(name, value);
-					}
+					}, this);
 				}
 			}
 		},
@@ -97,7 +85,7 @@
 					} else {
 						anchor.search = "?" + this._entries.map(function(entry) {
 							var pair = encodeURIComponent(entry[0]);
-							if (entry[1] !== null) {
+							if (entry[1]) {
 								pair += "=" + encodeURIComponent(entry[1]);
 							}
 							return pair;
@@ -123,12 +111,10 @@
 		set: {
 			value: function(key, value) {
 				_checkString(key);
-				value = _checkValue(value);
-				var found = false;
+				_checkString(value);
 				this._dirty = true;
-				this._entries.some(function(entry) {
+				var found = this._entries.some(function(entry) {
 					if (entry[0] === key) {
-						found = true;
 						entry[1] = value;
 						return true;
 					}
@@ -142,30 +128,26 @@
 		has: {
 			value: function(key) {
 				_checkString(key);
-				var found = false;
-				this._entries.some(function(entry) {
+				return this._entries.some(function(entry) {
 					if (entry[0] === key) {
-						found = true;
 						return true;
 					}
 				});
-				return found;
 			},
 			enumerable: true
 		},
 		'delete': {
 			value: function(key) {
 				_checkString(key);
-				var found = false;
-				for (var i = this._entries.length - 1; i > -1; i--) {
-					var entry = this._entries[i];
-					if (entry[0] === key) {
-						this._dirty = true;
-						found = true;
-						this._entries.splice(i, 1);
-					}
+				var filtered = this._entries.filter(function(entry) {
+					return entry[0] !== key;
+				});
+				if (filtered.length !== this._entries.length) {
+					this._entries = filtered;
+					this._dirty = true;
+					return true;
 				}
-				return found;
+				return false;
 			},
 			enumerable: true
 		},
@@ -226,7 +208,7 @@
 		append: {
 			value: function(key, value) {
 				_checkString(key);
-				value = _checkValue(value);
+				_checkString(value);
 				this._entries.push([key, value]);
 				this._dirty = true;
 			},
