@@ -16,12 +16,26 @@ define("orion/editor/textMateStyler", ['orion/editor/regex' ], function(mRegex) 
 
 var preferences;
 
+function _update( storage, stylerOptions, sUtil ){
+
+	var USER_THEME = "";
+
+	var parent = stylerOptions.textView._parent;
+	var document = parent.ownerDocument;
+	var stylesheet = stylerOptions._stylesheet = stylerOptions.util.createElement(document, "style");
+	stylesheet.appendChild(document.createTextNode(stylerOptions._styleSheet( storage, USER_THEME, stylerOptions.util)));
+	var head = document.getElementsByTagName("head")[0] || document.documentElement;
+	
+	head.appendChild(stylesheet);
+
+	stylerOptions.textView.update(true);		
+}
+
 function _updateStylesheet(preferences, util){
 
 	var storage;
 	var CATEGORY = "JavaScript Editor";
-	var USER_THEME = "";
-	
+		
 	var self = this;
 	
 	preferences.getPreferences('/settings', 2).then( function(prefs){	
@@ -36,93 +50,85 @@ function _updateStylesheet(preferences, util){
 				self._stylesheet.parentNode.removeChild(self._stylesheet);
 				self._stylesheet = null;
 			}
+			
+			self._update( storage, self, util );
 		}
-		
-		var parent = self.textView._parent;
-		var document = parent.ownerDocument;
-		var stylesheet = self._stylesheet = self.util.createElement(document, "style");
-		stylesheet.appendChild(document.createTextNode(self._styleSheet( storage, USER_THEME, self.util)));
-		var head = document.getElementsByTagName("head")[0] || document.documentElement;
-		
-		head.appendChild(stylesheet);
-
-		self.textView.update(true);		
 	});
 }
 
 
 function _styleSheet( settings, theme ){
 		
-			var elements = [];
-		
-			for( var count = 0; count < settings.length; count++ ){
-				elements[settings[count].element] = settings[count].value;
-			}
-			
-			var result = [];
-			result.push("");
-			
-			//view container
-			var family = elements['fontFamily'];
-			if(family === "sans serif"){
-				family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
-			}else{
-				family = 'monospace';
-			}	
-			
-			result.push( theme + " .textviewContainer {" );
-			result.push( "\background-color:" + elements['background'] + ";" );
-			result.push( "\tfont-family: " + family + ";" );
-			result.push( "\tfont-size: " + elements['fontSize'] + ";" );
-			result.push( "\tmin-width: 50px;" );
-			result.push( "\tmin-height: 50px;" );
-			result.push("\tcolor: " + elements['text'] + ";");
-			result.push("}");
-			
-			result.push(  theme + " {");
-			result.push("\tfont-family: " + family + ";");
-			result.push("\tfont-size: " + elements['fontSize'] + ";");
-			
-			result.push("\tcolor: " + elements['text'] + ";");
-			result.push("}");
-			
-			result.push(  theme + " .textview {");
-			result.push("\tbackground-color: " + elements['background'] + ";");
-			result.push("}");
-			
-			result.push(  theme + ".ruler.annotations{");
-			result.push("\tbackground-color: " + 'white' + ";");
-			result.push("}");
-			
-			result.push(  theme + " .ruler {");
-			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
-			result.push("}");
-			
-			result.push(  theme + " .rulerLines {");
-			result.push("\tcolor: " + elements['lineNumber'] + ";");
-			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
-			result.push("}");
-			
-			result.push(  theme + " .rulerLines.even {");
-			result.push("\tcolor: " + elements['lineNumber'] + ";");
-			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
-			result.push("}");
+	var elements = [];
 
-			result.push(  theme + " .rulerLines.odd {");
-			result.push("\tcolor: " + elements['lineNumber'] + ";");
-			result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
-			result.push("}");
-			
-			result.push(  theme + " .annotationLine.currentLine {");
-			result.push("\tbackground-color: " + elements['currentLine'] + ";");
-			result.push("}");
+	for( var count = 0; count < settings.length; count++ ){
+		elements[settings[count].element] = settings[count].value;
+	}
+	
+	var result = [];
+	result.push("");
+	
+	//view container
+	var family = elements['fontFamily'];
+	if(family === "sans serif"){
+		family = '"Menlo", "Consolas", "Vera Mono", "monospace"';
+	}else{
+		family = 'monospace';
+	}	
+	
+	result.push( theme + " .textviewContainer {" );
+	result.push( "\background-color:" + elements['background'] + ";" );
+	result.push( "\tfont-family: " + family + ";" );
+	result.push( "\tfont-size: " + elements['fontSize'] + ";" );
+	result.push( "\tmin-width: 50px;" );
+	result.push( "\tmin-height: 50px;" );
+	result.push("\tcolor: " + elements['text'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " {");
+	result.push("\tfont-family: " + family + ";");
+	result.push("\tfont-size: " + elements['fontSize'] + ";");
+	
+	result.push("\tcolor: " + elements['text'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .textview {");
+	result.push("\tbackground-color: " + elements['background'] + ";");
+	result.push("}");
+	
+	result.push(  theme + ".ruler.annotations{");
+	result.push("\tbackground-color: " + 'white' + ";");
+	result.push("}");
+	
+	result.push(  theme + " .ruler {");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .rulerLines {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .rulerLines.even {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
 
-			result.push(  theme + " .entity-name-tag {");
-			result.push("\color: " + elements['keyword'] + ";");
-			result.push("}");				
-			
-			return result.join("\n");
-		}
+	result.push(  theme + " .rulerLines.odd {");
+	result.push("\tcolor: " + elements['lineNumber'] + ";");
+	result.push("\tbackground-color: " + elements['annotationRuler'] + ";");
+	result.push("}");
+	
+	result.push(  theme + " .annotationLine.currentLine {");
+	result.push("\tbackground-color: " + elements['currentLine'] + ";");
+	result.push("}");
+
+	result.push(  theme + " .entity-name-tag {");
+	result.push("\color: " + elements['keyword'] + ";");
+	result.push("}");				
+	
+	return result.join("\n");
+}
 
 var RegexUtil = {
 	// Rules to detect some unsupported Oniguruma features
@@ -550,12 +556,14 @@ var RegexUtil = {
 		this._allGrammars = {}; /* key: {String} scopeName of grammar, value: {Object} grammar */
 		this.preprocess(this.grammar);
 		this._updateStylesheet = _updateStylesheet;
+		this._update = _update;
 		this._styleSheet = _styleSheet;
 		this.util = util;
 	}
 	TextMateStyler.prototype = /** @lends orion.editor.TextMateStyler.prototype */ {
 		initialize: function(textView, mBootStrap, util) {
 			this.textView = textView;
+			this.textView.stylerOptions = this;
 			var self = this;
 			
 			if (this.textView && mBootStrap) {

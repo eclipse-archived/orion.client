@@ -415,7 +415,7 @@
 		}
 	});
 
-	if (window.URL.createObjectURL) {
+	if (window.URL && window.URL.createObjectURL) {
 		Object.defineProperty(URL, "createObjectURL", {
 			value: window.URL.createObjectURL.bind(window.URL),
 			enumerable: false

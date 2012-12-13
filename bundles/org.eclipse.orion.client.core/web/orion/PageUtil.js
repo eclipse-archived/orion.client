@@ -22,10 +22,12 @@ define(function(){
 				var params = text.split(","); //$NON-NLS-0$
 				result.resource = decodeURIComponent(params[0]);
 				for (var i = 1; i < params.length; i++) {
-					var nameValue = params[i].split("="); //$NON-NLS-0$
-					var name = decodeURIComponent(nameValue[0]);
-					var value = (nameValue.length === 2) ? decodeURIComponent(nameValue[1]) : null;
-					if (value !== null && name !== "resource") { //$NON-NLS-0$
+					//We can not use params[i].split("=") here because a param's value may contain "=", which is not encoded.
+					var pair = params[i];
+					var parsed = /([^=]*)(=?)(.*)/.exec(pair);
+					var name = decodeURIComponent(parsed[1] || ""); //$NON-NLS-0$
+					var value = decodeURIComponent(parsed[3] || ""); //$NON-NLS-0$
+					if(name !== "" && name !== "resource"){ //$NON-NLS-0$ //$NON-NLS-0$
 						result[name] = value;
 					}
 				}

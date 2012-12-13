@@ -618,7 +618,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				var TAB_HEIGHT = 24;
 				var TAB_WIDTH = 25;
 				var PANEL_HEIGHT = 150;
-				var PANEL_WIDTH = 220;
+				var PANEL_WIDTH = 150;
 				var BORDER_RADIUS = '3px';
 				var COLOR = '#555';
 			
