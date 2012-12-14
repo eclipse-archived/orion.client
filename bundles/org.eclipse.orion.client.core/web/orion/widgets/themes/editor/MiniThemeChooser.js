@@ -11,8 +11,8 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require','dijit', 'orion/PageUtil', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/settings/Select'], 
-	function(messages, require, dijit, PageUtil, ThemeData, Select ) {
+define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/editor/ThemeData','orion/widgets/input/Select'], 
+	function(messages, require, ThemeData, Select ) {
 
 		function MiniThemeChooser(preferences, textview){			
 			this.preferences = preferences;
@@ -254,14 +254,14 @@ define(['i18n!orion/settings/nls/messages', 'require','dijit', 'orion/PageUtil',
 						label: size + 'pt'
 					};	
 					
-					if( set.label === currentSize ){ set.selected = 'true'; }
+					if( set.label === currentSize ){ set.selected = true; }
 					
 					this.fontSize = currentSize;
 					
 					options.push(set);
 				}	
 				
-				this.sizeSelect = new orion.widgets.settings.Select( {options:options}, picker );
+				this.sizeSelect = new Select.Select( options, picker );
 				this.sizeSelect.setStorageItem = chooser.selectFontSize.bind(chooser);
 			});
 		}
@@ -320,7 +320,7 @@ define(['i18n!orion/settings/nls/messages', 'require','dijit', 'orion/PageUtil',
 			
 				var picker = document.getElementById( 'themepicker' );
 				
-				this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
+				this.themeSelect = new Select.Select( options, picker );
 				this.themeSelect.setStorageItem = chooser.selectTheme.bind(chooser); 
 			}
 		
@@ -340,17 +340,7 @@ define(['i18n!orion/settings/nls/messages', 'require','dijit', 'orion/PageUtil',
 		
 		MiniThemeChooser.prototype.addThemePicker = addThemePicker;
 		
-		function destroy(){
-			var picker = dijit.byId( 'themepicker' );
-			if (picker) {
-				picker.destroyRecursive();
-			}
-
-			var fontsizepicker = dijit.byId( 'fontsizepicker' );
-			if (fontsizepicker) {
-				fontsizepicker.destroyRecursive();
-			}
-		}
+		function destroy(){}
 		
 		MiniThemeChooser.prototype.destroy = destroy;
 
