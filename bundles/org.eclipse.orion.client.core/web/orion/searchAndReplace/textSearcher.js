@@ -63,8 +63,8 @@ orion.TextSearcher = (function() {
 				};
 				parentDiv.appendChild(searchStringDiv);
 				
-				that.createButton("Next", parentDiv, function() {that.findNext(true);});				
-				that.createButton("Previous", parentDiv, function() {that.findNext(false);});	
+				that.createButton("Next", parentDiv, function() {that.findNext(true);}); //$NON-NLS-0$			
+				that.createButton("Previous", parentDiv, function() {that.findNext(false);}); //$NON-NLS-0$
 				
 				// create replace text
 				var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
@@ -78,8 +78,8 @@ orion.TextSearcher = (function() {
 				};
 				parentDiv.appendChild(replaceStringDiv);
 				
-				that.createButton(messages["Replace"], parentDiv, function() {that.replace();});				
-				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	
+				that.createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
+				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
 
 				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
 				parentDiv.appendChild(optionsDiv);
@@ -238,7 +238,6 @@ orion.TextSearcher = (function() {
 		
 		buildToolBar : function(defaultSearchStr, defaultReplaceStr) {
 			this._keyUpHandled = true;
-			var that = this;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (this.visible()) {
@@ -416,7 +415,7 @@ orion.TextSearcher = (function() {
 				if (result) {
 					this._editor.reportStatus("");
 				} else {
-					this._editor.reportStatus(messages["Not found"], "error"); //$NON-NLS-1$
+					this._editor.reportStatus(messages["Not found"], "error"); //$NON-NLS-0$ //$NON-NLS-1$
 				}
 				var visible = this.visible();
 				if (visible) {
@@ -451,7 +450,7 @@ orion.TextSearcher = (function() {
 				this._replacingAll = true;
 				var editor = this._editor;
 				editor.reportStatus("");
-				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-1$
+				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-0$ //$NON-NLS-1$
 				var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
 				var self = this;
 				window.setTimeout(function() {
@@ -478,7 +477,7 @@ orion.TextSearcher = (function() {
 					if(startPos > 0) {
 						editor.reportStatus(messages["Replaced "]+number+messages[" matches"]);
 					} else {
-						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-1$
+						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-0$ //$NON-NLS-1$
 					}
 					self._replacingAll = false;
 				}, 100);				
