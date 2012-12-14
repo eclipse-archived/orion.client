@@ -9,15 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window widgets eclipse:true orion:true serviceRegistry dojo dijit define */
+/*global window widgets eclipse:true orion:true serviceRegistry define */
 /*jslint maxerr:150 browser:true devel:true regexp:false*/
 
 
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'dojo', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils'], 
-	function(messages, dojo, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils) {
+define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils'], 
+	function(messages, lib, Deferred, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils) {
 
 var exports = {};
 
@@ -83,59 +83,60 @@ exports.EditorCommandFactory = (function() {
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('s', true), "save"); //$NON-NLS-1$ //$NON-NLS-0$
 				//If we are introducing other file system to provide save action, we need to define an onSave function in the input manager
 				//That way the file system knows how to implement their save mechanism
-				if(this.inputManager.onSave){
-					editor.getTextView().setAction("save", dojo.hitch(this, function () { //$NON-NLS-0$
+				var self = this;
+				if (this.inputManager.onSave) {
+					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
 						var contents = editor.getText();
-						this.inputManager.onSave(this.inputManager.getInput(), contents,
-												dojo.hitch(this, function(result) {
-													editor.setInput(this.inputManager.getInput(), null, contents, true);
-													if(this.inputManager.afterSave){
-														this.inputManager.afterSave();
-													}
-												}),
-												dojo.hitch(this, function(error) {
-													error.log = true;
-												})
+						self.inputManager.onSave(self.inputManager.getInput(), contents,
+							function(result) {
+								editor.setInput(self.inputManager.getInput(), null, contents, true);
+								if(self.inputManager.afterSave){
+									self.inputManager.afterSave();
+								}
+							},
+							function(error) {
+								error.log = true;
+							}
 						);
 						return true;
-					}), {name: messages['Save']});
+					}, {name: messages['Save']});
 				} else {
-					editor.getTextView().setAction("save", dojo.hitch(this, function () { //$NON-NLS-0$
+					editor.getTextView().setAction("save", function () { //$NON-NLS-0$
 						var contents = editor.getText();
-						var etag = this.inputManager.getFileMetadata().ETag;
+						var etag = self.inputManager.getFileMetadata().ETag;
 						var args = { "ETag" : etag }; //$NON-NLS-0$
-						this.fileClient.write(this.inputManager.getInput(), contents, args).then(
-								dojo.hitch(this, function(result) {
-									this.inputManager.getFileMetadata().ETag = result.ETag;
-									editor.setInput(this.inputManager.getInput(), null, contents, true);
-									if(this.inputManager.afterSave){
-										this.inputManager.afterSave();
+						self.fileClient.write(self.inputManager.getInput(), contents, args).then(
+							function(result) {
+								self.inputManager.getFileMetadata().ETag = result.ETag;
+								editor.setInput(self.inputManager.getInput(), null, contents, true);
+								if(self.inputManager.afterSave){
+									self.inputManager.afterSave();
+								}
+							},
+							function(error) {
+								// expected error - HTTP 412 Precondition Failed 
+								// occurs when file is out of sync with the server
+								if (error.status === 412) {
+									var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
+									if (forceSave) {
+										// repeat save operation, but without ETag 
+										self.fileClient.write(self.inputManager.getInput(), contents).then(
+											function(result) {
+												self.inputManager.getFileMetadata().ETag = result.ETag;
+												editor.setInput(self.inputManager.getInput(), null, contents, true);
+												if(self.inputManager.afterSave){
+													self.inputManager.afterSave();
+												}
+											}, handleError);
 									}
-								}),
-								dojo.hitch(this, function(error) {
-									// expected error - HTTP 412 Precondition Failed 
-									// occurs when file is out of sync with the server
-									if (error.status === 412) {
-										var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
-										if (forceSave) {
-											// repeat save operation, but without ETag 
-											this.fileClient.write(this.inputManager.getInput(), contents).then(
-													dojo.hitch(this, function(result) {
-														this.inputManager.getFileMetadata().ETag = result.ETag;
-														editor.setInput(this.inputManager.getInput(), null, contents, true);
-														if(this.inputManager.afterSave){
-															this.inputManager.afterSave();
-														}
-													}, handleError));
-										}
-									} else {
-										// unknown error
-										handleError(error);
-									}
-								})
+								} else {
+									// unknown error
+									handleError(error);
+								}
+							}
 						);
 						return true;
-					}), {name: messages['Save']});
+					}, {name: messages['Save']});
 				}
 				var saveCommand = new mCommands.Command({
 					name: messages['Save'],
@@ -182,10 +183,10 @@ exports.EditorCommandFactory = (function() {
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.gotoLine", 1, null, true, new mCommands.CommandKeyBinding('l', true), new mCommands.URLBinding("gotoLine", "line")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				// override the editor binding 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('l', true), "gotoLine"); //$NON-NLS-1$ //$NON-NLS-0$
-				editor.getTextView().setAction("gotoLine", dojo.hitch(this, function () { //$NON-NLS-0$
-					this.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
+				editor.getTextView().setAction("gotoLine", function () { //$NON-NLS-0$
+					self.commandService.runCommand("orion.gotoLine"); //$NON-NLS-0$
 					return true;
-				}), gotoLineCommand);
+				}, gotoLineCommand);
 
 				// find&&replace commands (find)
 				var findParameter = new mCommands.ParametersDescription([new mCommands.CommandParameter('find', 'text', 'Find:')], {clientCollect: true}, //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -244,10 +245,10 @@ exports.EditorCommandFactory = (function() {
 				this.commandService.registerCommandContribution(this.pageNavId, "orion.editor.find", 2, null, true, new mCommands.CommandKeyBinding('f', true), new mCommands.URLBinding("find", "find")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				// override the editor binding 
 				editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('f', true), "find"); //$NON-NLS-1$ //$NON-NLS-0$
-				editor.getTextView().setAction("find", dojo.hitch(this, function () { //$NON-NLS-0$
-					this.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
+				editor.getTextView().setAction("find", function () { //$NON-NLS-0$
+					self.commandService.runCommand("orion.editor.find"); //$NON-NLS-0$
 					return true;
-				}), findCommand);
+				}, findCommand);
 
 				// add the commands generated by plug-ins who implement the "orion.edit.command" extension.
 		
@@ -284,36 +285,37 @@ exports.EditorCommandFactory = (function() {
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
 				var input = this.inputManager;
 				var makeCommand = function(info, service, options) {
-					options.callback = dojo.hitch(editor, function(data) {
-							// command service will provide editor parameter but editor widget callback will not
-							editor = data ? data.items || this : this;
-							var selection = editor.getSelection();
-							var model = editor.getModel();
-							var text = model.getText();
-							service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()).then(function(result){
-								if (result && result.text) {
-									editor.setText(result.text);
-									if (result.selection) {
-										editor.setSelection(result.selection.start, result.selection.end);
-										editor.getTextView().focus();
-									}
-								} else {
-									if (typeof result === 'string') { //$NON-NLS-0$
-										editor.setText(result, selection.start, selection.end);
-										editor.setSelection(selection.start, selection.start + result.length);
-										editor.getTextView().focus();
-									}
+					options.callback = function(data) {
+						// command service will provide editor parameter but editor widget callback will not
+						editor = data ? data.items || this : this;
+						var selection = editor.getSelection();
+						var model = editor.getModel();
+						var text = model.getText();
+						service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()).then(function(result){
+							if (result && result.text) {
+								editor.setText(result.text);
+								if (result.selection) {
+									editor.setSelection(result.selection.start, result.selection.end);
+									editor.getTextView().focus();
 								}
-							});
-							return true;
+							} else {
+								if (typeof result === 'string') { //$NON-NLS-0$
+									editor.setText(result, selection.start, selection.end);
+									editor.setSelection(selection.start, selection.start + result.length);
+									editor.getTextView().focus();
+								}
+							}
 						});
+						return true;
+					};
+					options.callback = options.callback.bind(editor);
 					return new mCommands.Command(options);
 				};
-				dojo.when(getContentTypes(this.serviceRegistry), dojo.hitch(this, function() {
+				Deferred.when(getContentTypes(this.serviceRegistry), function() {
 					var deferreds = [];
 					for (var i=0; i<actionReferences.length; i++) {
 						var serviceReference = actionReferences[i];
-						var service = this.serviceRegistry.getService(actionReferences[i]);
+						var service = self.serviceRegistry.getService(actionReferences[i]);
 						var info = {};
 						var propertyNames = actionReferences[i].getPropertyKeys();
 						for (var j = 0; j < propertyNames.length; j++) {
@@ -321,39 +323,40 @@ exports.EditorCommandFactory = (function() {
 						}
 						info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
 						
-						var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, this.serviceRegistry, contentTypesCache, false, function(items) {
+						var deferred = mExtensionCommands._createCommandOptions(info, serviceReference, self.serviceRegistry, contentTypesCache, false, function(items) {
 							// items is the editor and we care about the file metadata for validation
 							return input.getFileMetadata();
 						});
 						deferreds.push(deferred);	
-						deferred.then(dojo.hitch(this, function(commandOptions){
+						deferred.then(function(commandOptions){
 							var command = makeCommand(info, service, commandOptions);
-							this.commandService.addCommand(command);
-							this.commandService.registerCommandContribution(this.toolbarId, command.id, 100+i);
+							self.commandService.addCommand(command);
+							self.commandService.registerCommandContribution(self.toolbarId, command.id, 100+i);
 							if (info.key) {
 								// add it to the editor as a keybinding
 								var textView = editor.getTextView();
 								textView.setKeyBinding(createKeyBinding(info.key), command.id);
 								textView.setAction(command.id, command.callback, command);
 							}				
-						}));
+						});
 					}
-					new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+					Deferred.all(deferreds, function(error) {return {_error: error}; }).then(function(promises) {
 						// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
 						// metadata, because we'll generate again once we know.
 						if (input.getFileMetadata()) {
-							var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
-								this.commandService.destroy(toolbar);
-								this.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
+								self.commandService.destroy(toolbar);
+								self.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
 							}
-							toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
+							toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 							if (toolbar) {	
-								this.commandService.destroy(toolbar);
-								this.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
-							}						}
-					}));
-				}));
+								self.commandService.destroy(toolbar);
+								self.commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");   //$NON-NLS-0$
+							}
+						}
+					});
+				});
 			}
 		}
 	};

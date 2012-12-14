@@ -8,7 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'], function(dojo, mSelection, mCommands, mHTMLFragments){
+ /*global define window document*/
+define(['orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'], function(lib, mSelection, mCommands, mHTMLFragments){
 	
 	/**
 	 * Generates a section
@@ -19,7 +20,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 	 * @param options.id {String} id of the section header
 	 * @param options.title {String} title (in HTML) of the section
 	 * @param [options.preferenceService] used to store the hidden/shown state of the section if specified
-	 * @param [options.iconClass] the class of the icon decorating section, no icon displayed if not provided
+	 * @param [options.iconClass] {String|Array} a class or array of classes to use in the icon decorating section, no icon displayed if not provided
 	 * @param [options.getItemCount] {Function} function to return the count of items in the section. If not provided, no count is shown.
 	 * @param [options.content] {String|DomNode} HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
 	 * @param [options.slideout] {Boolean} if true section will contain generated slideout
@@ -49,57 +50,105 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		}
 
 		// setting up the section
-		var wrapperClass = options.useAuxStyle ? "sectionWrapper sectionWrapperAux" : "sectionWrapper"; //$NON-NLS-1$ //$NON-NLS-0$
-		this.domNode = dojo.create( "div", {"class": wrapperClass+" toolComposite", "id": options.id}, parent ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var wrapperClasses = options.useAuxStyle ? ["sectionWrapper", "sectionWrapperAux", "toolComposite"] : ["sectionWrapper", "toolComposite"]; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.domNode = document.createElement("div"); //$NON-NLS-0$
+		parent.appendChild(this.domNode);
+		for(var i=0; i<wrapperClasses.length; i++) {
+			this.domNode.classList.add(wrapperClasses[i]);
+		}
+		this.domNode.id = options.id;
 
 		// if canHide, add twistie and stuff...
 		if(options.canHide){
-			this.twistie = dojo.create( "span", { "class":"modelDecorationSprite layoutLeft sectionTitle" }, this.domNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.style(this.domNode, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.attr(this.domNode, "tabIndex", "0"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(this.domNode, "onclick", function(evt) { //$NON-NLS-0$
+			this.twistie = document.createElement("span"); //$NON-NLS-0$
+			this.twistie.classList.add("modelDecorationSprite"); //$NON-NLS-0$
+			this.twistie.classList.add("layoutLeft"); //$NON-NLS-0$
+			this.twistie.classList.add("sectionTitle"); //$NON-NLS-0$
+			this.domNode.style.cursor = "pointer"; //$NON-NLS-0$
+			this.domNode.appendChild(this.twistie);
+			this.domNode.tabIndex = 0; //$NON-NLS-0$
+			this.domNode.addEventListener("click", function(evt) { //$NON-NLS-0$
 				if (evt.target === that.titleNode || evt.target === that.twistie) {
 					that._changeExpandedState();
 				}
-			});
-			dojo.connect(this.domNode, "onkeydown", function(evt) { //$NON-NLS-0$
-				if(evt.keyCode === dojo.keys.ENTER && (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie)) {
+			}, false);
+			this.domNode.addEventListener("keydown", function(evt) { //$NON-NLS-0$
+				if(evt.keyCode === lib.KEY.ENTER && (evt.target === that.domNode || evt.target === that.titleNode || evt.target === that.twistie)) {
 					that._changeExpandedState();
 				}
-			});
+			}, false);
 		}
 
 		if(options.iconClass){
-			var icon = dojo.create( "span", { "class":"sectionIcon" }, this.domNode ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(icon, options.iconClass);
+			var icon = document.createElement("span"); //$NON-NLS-0$
+			icon.classList.add("sectionIcon"); //$NON-NLS-0$
+			this.domNode.appendChild(icon);
+			var classes = Array.isArray(options.iconClass) ? options.iconClass : [options.iconClass];
+			classes.forEach(function(aClass) {
+				icon.classList.add(aClass);
+			});
 		}
 		
-		this.titleNode = dojo.create( "div", { id: options.id + "Title", "class":"sectionAnchor sectionTitle layoutLeft" }, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.titleNode = document.createElement("div"); //$NON-NLS-0$
+		this.titleNode.id = options.id + "Title"; //$NON-NLS-0$
+		this.titleNode.classList.add("sectionAnchor"); //$NON-NLS-0$
+		this.titleNode.classList.add("sectionTitle"); //$NON-NLS-0$
+		this.titleNode.classList.add("layoutLeft"); //$NON-NLS-0$
+		this.domNode.appendChild(this.titleNode);
 		this.titleNode.textContent = options.title;
 
 		// Add item count
 		if (typeof options.getItemCount === "function") { //$NON-NLS-0$
-			var count = dojo.create("div", {"class": "layoutLeft sectionItemCount"}, this.domNode); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			var count = document.createElement("div"); //$NON-NLS-0$
+			count.classList.add("layoutLeft"); //$NON-NLS-0$
+			count.classList.add("sectionItemCount"); //$NON-NLS-0$
+			this.domNode.appendChild(count);
 			count.textContent = options.getItemCount(this);
 		}
 
-		this._progressNode = dojo.create( "div", { id: options.id + "Progress", "class": "sectionProgress sectionTitle layoutLeft"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._progressNode = document.createElement("div"); //$NON-NLS-0$
+		this._progressNode.id = options.id + "Progress"; //$NON-NLS-0$
+		this._progressNode.classList.add("sectionProgress"); //$NON-NLS-0$
+		this._progressNode.classList.add("sectionTitle"); //$NON-NLS-0$
+		this._progressNode.classList.add("layoutLeft"); //$NON-NLS-0$
 		this._progressNode.style.visibility = "hidden"; //$NON-NLS-0$
 		this._progressNode.textContent = "..."; //$NON-NLS-0$ 
-		
+		this.domNode.appendChild(this._progressNode);
 		// add filter search box
-		dojo.create("div", {"id" : options.id + "FilterSearchBox"}, this.domNode);
+		var searchbox = document.createElement("div"); //$NON-NLS-0$
+		searchbox.id = options.id + "FilterSearchBox"; //$NON-NLS-0$
+		this.domNode.appendChild(searchbox);
 		
-		this._toolActionsNode = dojo.create( "div", { id: options.id + "ToolActionsArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.actionsNode = dojo.create( "div", { id: options.id + "ActionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		this.selectionNode = dojo.create( "div", { id: options.id + "SelectionArea", "class":"layoutRight sectionActions"}, this.domNode ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._toolActionsNode = document.createElement("div"); //$NON-NLS-0$
+		this._toolActionsNode.id = options.id + "ToolActionsArea"; //$NON-NLS-0$
+		this._toolActionsNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this._toolActionsNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this.domNode.appendChild(this._toolActionsNode);
+		this.actionsNode = document.createElement("div"); //$NON-NLS-0$
+		this.actionsNode.id = options.id + "ActionArea"; //$NON-NLS-0$
+		this.actionsNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.actionsNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this.domNode.appendChild(this.actionsNode);
+		this.selectionNode = document.createElement("div"); //$NON-NLS-0$
+		this.selectionNode.id = options.id + "SelectionArea"; //$NON-NLS-0$
+		this.selectionNode.classList.add("layoutRight"); //$NON-NLS-0$
+		this.selectionNode.classList.add("sectionActions"); //$NON-NLS-0$
+		this.domNode.appendChild(this.selectionNode);
 		
 		if(options.slideout){
-			this.slideout = mHTMLFragments.slideoutHTMLFragment(options.id);
-			dojo.place(this.slideout, this.domNode);
+			var slideoutFragment = mHTMLFragments.slideoutHTMLFragment(options.id);
+			var range = document.createRange();
+			range.selectNode(this.domNode);
+			slideoutFragment = range.createContextualFragment(slideoutFragment);
+			this.domNode.appendChild(slideoutFragment);
 		}
 
-		this._contentParent = dojo.create("div", { "id": this.id + "Content", "role": "region", "class":"sectionTable", "aria-labelledby": this.titleNode.id}, parent, "last"); //$NON-NLS-8$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this._contentParent = document.createElement("div"); //$NON-NLS-0$
+		this._contentParent.id = this.id + "Content"; //$NON-NLS-0$
+		this._contentParent.role = "region"; //$NON-NLS-0$
+		this._contentParent.classList.add("sectionTable"); //$NON-NLS-0$
+		this._contentParent.setAttribute("aria-labelledby", this.titleNode.id); //$NON-NLS-0$
+		parent.appendChild(this._contentParent);
 
 		if(options.content){
 			this.setContent(options.content);
@@ -111,26 +160,27 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		}
 		this._preferenceService = options.preferenceService;
 		// initially style as hidden until we determine what needs to happen
-		dojo.style(this._contentParent, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+		this._contentParent.style.display = "none"; //$NON-NLS-0$
 		// should we consult a preference?
 		if (this._preferenceService) {
-			this._preferenceService.getPreferences("/window/views").then(dojo.hitch(this, function(prefs) {  //$NON-NLS-0$
-				var isExpanded = prefs.get(this.id);
+			var self = this;
+			this._preferenceService.getPreferences("/window/views").then(function(prefs) {  //$NON-NLS-0$
+				var isExpanded = prefs.get(self.id);
 				
 				if (isExpanded === undefined){
 				} else {
-					this.hidden = !isExpanded;
+					self.hidden = !isExpanded;
 				}
 
-				if (!this.hidden) {
-					dojo.style(this._contentParent, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
+				if (!self.hidden) {
+					self._contentParent.style.display = "block"; //$NON-NLS-0$
 				}
 				
-				this._updateExpandedState(!this.hidden, false);
-			}));
+				self._updateExpandedState(!self.hidden, false);
+			});
 		} else {
 			if (!this.hidden) {
-				dojo.style(this._contentParent, "display", "block"); //$NON-NLS-1$ //$NON-NLS-0$
+				this._contentParent.style.display = "block"; //$NON-NLS-0$
 			}
 			this._updateExpandedState(!this.hidden, false);
 		}
@@ -154,7 +204,7 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		 * @param {String|DomNode} content
 		 */
 		setContent: function(content){
-			if (typeof content === 'string') {
+			if (typeof content === 'string') {  //$NON-NLS-0$
 				this._contentParent.innerHTML = content;
 			} else {
 				this._contentParent.innerHTML = ""; //NON-NLS-0$
@@ -202,19 +252,12 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 		},
 		
 		_changeExpandedState: function() {
-			var t = new dojo.fx.Toggler({
-				node: this._contentParent.id,
-				showDuration: 500,
-				hideDuration: 500,
-				showFunc: dojo.fx.wipeIn,
-				hideFunc: dojo.fx.wipeOut
-			});
-				
+			// TODO we could use classes with CSS transitions to animate				
 			if (!this.hidden){
-				t.hide();
+				this._contentParent.style.display = "none"; //$NON-NLS-0$
 				this.hidden = true;
 			} else {
-				t.show();
+				this._contentParent.style.display = "block"; //$NON-NLS-0$
 				this.hidden = false;
 			}
 			
@@ -225,8 +268,8 @@ define(['dojo', 'orion/selection', 'orion/commands', 'orion/commonHTMLFragments'
 			var expandImage = this.twistie;
 			var id = this.id;
 			if (expandImage) {
-				dojo.addClass(expandImage, isExpanded ? this._expandImageClass : this._collapseImageClass);
-				dojo.removeClass(expandImage, isExpanded ? this._collapseImageClass : this._expandImageClass);
+				expandImage.classList.add(isExpanded ? this._expandImageClass : this._collapseImageClass);
+				expandImage.classList.remove(isExpanded ? this._collapseImageClass : this._expandImageClass);
 			}
 			// if a preference service was specified, we remember the state.
 			if (this._preferenceService && storeValue) {

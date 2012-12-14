@@ -8,9 +8,9 @@
  *
  * Contributors: IBM Corporation - _initial API and implementation
  *******************************************************************************/
-/*global define window Image */
+/*global define window document Image */
  
-define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlobalCommands) {
+define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(require, lib, mGlobalCommands) {
 	
 	/**
 	 * Service for reporting status
@@ -35,17 +35,18 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 	
 		_init: function() {
 			// this is a cheat, all dom ids should be passed in
-			var closeButton = dojo.byId("closeNotifications"); //$NON-NLS-0$
+			var closeButton = lib.node("closeNotifications"); //$NON-NLS-0$
+			var self = this;
 			if (closeButton && !this._hookedClose) {
-				dojo.connect(closeButton, "onclick", this, function() { //$NON-NLS-0$
-					this.setProgressMessage("");
-				});	
+				closeButton.addEventListener("click", function() { //$NON-NLS-0$
+					self.setProgressMessage("");
+				}, false);	
 				// onClick events do not register for spans when using the keyboard
-				dojo.connect(closeButton, "onkeypress", this, function(e) { //$NON-NLS-0$
-					if (e.keyCode === dojo.keys.ENTER || e.keyCode === dojo.keys.SPACE) {						
-						this.setProgressMessage("");
+				closeButton.addEventListener("keydown", function(e) { //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+						self.setProgressMessage("");
 					}				
-				});
+				}, false);
 			}
 		},
 		
@@ -65,28 +66,31 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 		setMessage : function(msg, timeout, isAccessible) {
 			this._init();
 			this.currentMessage = msg;
+			var node = lib.node(this.domId);
 			if(typeof(isAccessible) === "boolean") { //$NON-NLS-0$
 				var that = this;
-				var node = dojo.byId(this.domId);
 				// this is kind of a hack; when there is good screen reader support for aria-busy,
 				// this should be done by toggling that instead
-				var readSetting = dojo.attr(node, "aria-live"); //$NON-NLS-0$
-				dojo.attr(node, "aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var readSetting = node.getAttribute("aria-live"); //$NON-NLS-0$
+				node.setAttribute("aria-live", isAccessible ? "polite" : "off"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				window.setTimeout(function() {
 					if (msg === that.currentMessage) {
-						dojo.place(window.document.createTextNode(msg), that.domId, "only"); //$NON-NLS-0$
-						window.setTimeout(function() { dojo.attr(node, "aria-live", readSetting); }, 100); //$NON-NLS-0$
+						lib.empty(node);
+						node.appendChild(document.createTextNode(msg));
+						window.setTimeout(function() { node.setAttribute("aria-live", readSetting); }, 100); //$NON-NLS-0$
 					}
 				}, 100);
 			}
 			else { 
-				dojo.place(window.document.createTextNode(msg), this.domId, "only");  //$NON-NLS-0$
+				lib.empty(node);
+				node.appendChild(document.createTextNode(msg));
 			}
 			if (typeof(timeout) === "number") { //$NON-NLS-0$
 				var that = this;
 				window.setTimeout(function() {
 					if (msg === that.currentMessage) {
-						dojo.place(window.document.createTextNode(""), that.domId, "only"); //$NON-NLS-0$
+						lib.empty(node);
+						node.appendChild(document.createTextNode("")); //$NON-NLS-0$
 					}
 				}, timeout);
 			}
@@ -126,9 +130,12 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 					break;
 				}
 			}
-			var span = dojo.create("span", {style: {color: color}});  //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(message), span);
-			dojo.place(span, this.domId, "only"); //$NON-NLS-0$
+			var span = document.createElement("span");  //$NON-NLS-0$
+			span.style.color = color;
+			span.appendChild(document.createTextNode(message));
+			var node = lib.node(this.domId);
+			lib.empty(node);
+			node.appendChild(span);
 		},
 		
 		/**
@@ -138,16 +145,21 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 		setProgressMessage : function(message) {
 			this._init();
 			this.currentMessage = message;
-			var image = dojo.create("span", {"class": "imageSprite core-sprite-progress"}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(image, this.progressDomId, "only"); //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(message), this.progressDomId, "last"); //$NON-NLS-0$
-			dojo.addClass(this.notificationContainerDomId, "progressNormal"); //$NON-NLS-0$
+			var image = document.createElement("span"); //$NON-NLS-0$
+			image.classList.add("imageSprite"); //$NON-NLS-0$
+			image.classList.add("core-sprite-progress");  //$NON-NLS-0$
+			var node = lib.node(this.progressDomId);
+			lib.empty(node);
+			node.appendChild(image);
+			node.appendChild(document.createTextNode(message));
+			var container = lib.node(this.notificationContainerDomId);
+			container.classList.add("progressNormal"); //$NON-NLS-0$
 			if (message && message.length > 0) {
-				dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
+				container.classList.add("slideContainerActive"); //$NON-NLS-0$
 			} else if(this._progressMonitors && this._progressMonitors.length > 0){
 				return this._renderOngoingMonitors();
 			}else{
-				dojo.removeClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
+				container.classList.remove("slideContainerActive"); //$NON-NLS-0$
 			}
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
@@ -190,18 +202,26 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 					break;
 				}
 			}
-			var image = dojo.create("span", {"class": imageClass}); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(image, this.progressDomId, "only"); //$NON-NLS-0$
+			var image = document.createElement("span"); //$NON-NLS-0$
+			image.classList.add(imageClass); //$NON-NLS-0$
+			var node = lib.node(this.progressDomId);
+			var container = lib.node(this.notificationContainerDomId);
+			lib.empty(node);
+			node.appendChild(image);
 			if (status.HTML) { // msg is HTML to be inserted directly
-				dojo.place(msg, this.progressDomId, "last"); //$NON-NLS-0$
+				var span = document.createElement("span"); //$NON-NLS-0$
+				span.innerHTML = msg;
+				node.appendChild(span);
 			} else {  // msg is plain text
-				dojo.place(window.document.createTextNode("   " + msg), this.progressDomId, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				node.appendChild(document.createTextNode("   " + msg)); //$NON-NLS-0$
 			}
 			if (extraClass && this.progressDomId !== this.domId) {
-				dojo.addClass(this.notificationContainerDomId, extraClass);
-				dojo.removeClass(this.notificationContainerDomId, removedClasses);
+				container.classList.add(extraClass);
+				for (var i=0; i<removedClasses.length; i++) {
+					container.classList.remove(removedClasses[i]);
+				}
 			}
-			dojo.addClass(this.notificationContainerDomId, "slideContainerActive"); //$NON-NLS-0$
+			container.classList.add("slideContainerActive"); //$NON-NLS-0$
 			mGlobalCommands.layoutToolbarElements(this._getNotifierElements());
 		},
 		
@@ -285,10 +305,10 @@ define(['require', 'dojo', 'orion/globalCommands'], function(require, dojo, mGlo
 			var that = this;
 			deferred.then(
 					function(response, secondArg){
-						dojo.hitch(that, that.done)();
+						that.done.bind(that)();
 					},
 					function(error, secondArg){
-						dojo.hitch(that, that.done)();
+						that.done.bind(that)();
 					});
 		}
 	}

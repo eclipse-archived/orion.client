@@ -9,9 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define window dojo*/
+/*global define window */
 
-define(['dojo'], function(dojo) {
+define(['orion/Deferred'], function(Deferred) {
 
 var SyntaxChecker = (function () {
 	function SyntaxChecker(serviceRegistry, editor) {
@@ -37,18 +37,18 @@ var SyntaxChecker = (function () {
 					if (serviceReference.getProperty("contentType")) { //$NON-NLS-0$
 						filteredValidators.push(getFilteredValidator(registry, serviceReference, contentType));
 					} else if (pattern && new RegExp(pattern).test(title)) {
-						var d = new dojo.Deferred();
-						d.callback(serviceReference);
+						var d = new Deferred();
+						d.resolve(serviceReference);
 						filteredValidators.push(d);
 					}
 				}
 				// Return a promise that gives the validators that aren't null
-				return new dojo.DeferredList(filteredValidators).then(
+				return Deferred.all(filteredValidators, function(error) {return {_error: error}; }).then(
 					function(validators) {
 						var capableValidators = [];
 						for (var i=0; i < validators.length; i++) {
-							var validator = validators[i][1];
-							if (validator !== null) {
+							var validator = validators[i];
+							if (validator && !validator._error) {
 								capableValidators.push(validator);
 							}
 						}
@@ -71,12 +71,12 @@ var SyntaxChecker = (function () {
 						problemPromises.push(self.registry.getService(validator).checkSyntax(title, contents).then(extractProblems));
 					}
 					
-					new dojo.DeferredList(problemPromises)
-						.then(function(result) {
+					Deferred.all(problemPromises, function(error) {return {_error: error}; })
+						.then(function(results) {
 							var problems = [];
-							for (i=0; i < result.length; i++) {
-								var probs = result[i] && result[i][1];
-								if (probs) {
+							for (i=0; i < results.length; i++) {
+								var probs = results[i];
+								if (!probs._error) {
 									self._fixup(probs);
 									problems = problems.concat(probs);
 								}

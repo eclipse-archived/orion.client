@@ -8,11 +8,11 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/widgets/themes/ThemeClass'], 
-	function(messages, require, dojo, dijit, ThemeClass) {
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/widgets/themes/ThemeClass'], 
+	function(messages, require, ThemeClass) {
 		
 		var navbar = '#333';
 		var button = '#777777';

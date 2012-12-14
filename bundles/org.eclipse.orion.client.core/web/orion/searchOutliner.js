@@ -152,7 +152,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 	function SearchExplorer(serviceRegistry, selection) {
 		this.selection = selection;
 		this.registry = serviceRegistry;
-		this.renderer = new SearchRenderer({checkbox: false, decorateAlternatingLines: false}, this);
+		this.renderer = new SearchRenderer({checkbox: false}, this);
 	}
 	SearchExplorer.prototype = mExplorer.Explorer.prototype;	
 	SearchExplorer.prototype.constructor = SearchExplorer;

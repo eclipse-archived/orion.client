@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define document*/
 define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/explorers/explorer', 'orion/Deferred', 'orion/commands', 'orion/section', 'orion/globalCommands',
-		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/treetable'],
+		'orion/selection', 'orion/sites/siteUtils', 'orion/explorers/navigationUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable'],
 		function(messages, i18nUtil, dojo, mExplorer, Deferred, mCommands, mSection, mGlobalCommands, mSelection, mSiteUtils, mNavUtils, mSiteClient, mSiteCommands, treetable) {
 	var SiteServicesExplorer, SitesRenderer, SiteTreeModel;
 

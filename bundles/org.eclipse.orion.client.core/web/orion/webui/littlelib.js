@@ -53,6 +53,13 @@ define(['require'], function(require) {
 		};
 	}
 	
+	function empty(node) {
+		while (node.hasChildNodes()) {
+			var child = node.firstChild;
+			node.removeChild(child);
+		}
+	}
+	
 	var autoDismissNodes = [];
 	
 	function addAutoDismiss(excludeNodes, dismissFunction) {
@@ -65,17 +72,18 @@ define(['require'], function(require) {
 					var exclusions = autoDismissNodes[i].excludeNodes;
 					var dismiss = autoDismissNodes[i].dismiss;
 					var inDocument = false;
-					var isExclusion = false;
+					var shouldDismiss = true;
 					for (var j=0; j<exclusions.length; j++) {
-						if (contains(exclusions[j], event.target)) {
-							inDocument = true;
-							isExclusion = true;
-						} else {						
-							inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
-						}
+						inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
+						if (inDocument && contains(exclusions[j], event.target)) {
+							shouldDismiss = false;
+							break;
+						} 
 					}
-					if (inDocument && !isExclusion) {
+					if (shouldDismiss) {
 						dismiss();
+						// might have been removed as part of the dismiss processing
+						inDocument = document.compareDocumentPosition(document, exclusions[j]) !== 1; // DOCUMENT_POSITION_DISCONNECTED = 0x01;
 					}
 					if (inDocument) {
 						stillInDocument.push(autoDismissNodes[i]);
@@ -115,6 +123,7 @@ define(['require'], function(require) {
 		node: node,
 		contains: contains,
 		bounds: bounds,
+		empty: empty,
 		stop: stop,
 		addAutoDismiss: addAutoDismiss,
 		KEY: KEY

@@ -15,7 +15,7 @@
 define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes',
-        'dojo/parser'], 
+        'dojo/parser', 'dojo/hash'], 
 		function(messages, dojo, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes) {
 
@@ -55,7 +55,6 @@ dojo.addOnLoad(function(){
 				rendererFactory: function(explorer) {
 					return new mNavigatorRenderer.NavigatorRenderer({
 						checkbox: false, 
-						decorateAlternatingLines: false, 
 						cachePrefix: "Navigator"}, explorer, commandService, contentTypeService);  //$NON-NLS-0$
 				}}); 
 

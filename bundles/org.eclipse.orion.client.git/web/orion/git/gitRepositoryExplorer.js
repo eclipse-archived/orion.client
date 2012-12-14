@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define dijit console document Image */
+/*global define window dijit console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/section', 'orion/dynamicContent', 'orion/git/widgets/FilterSearchBox', 'orion/fileUtils', 'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog', 'dojo/date/locale'], 
 		function(messages, require, dojo, mCommands, mSection, mDynamicContent, mFilterSearchBox, mFileUtils, PageUtil, mGlobalCommands, mGitCommands) {
@@ -383,7 +383,7 @@ exports.GitRepositoryExplorer = (function() {
 					var titleWrapper = new mSection.Section(tableNode, {
 						id: "repositorySection", //$NON-NLS-0$
 						title: "Repository",
-						iconClass: "gitImageSprite git-sprite-repository" //$NON-NLS-0$
+						iconClass: ["gitImageSprite", "git-sprite-repository"] //$NON-NLS-1$ //$NON-NLS-0$
 					});
 					titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
 					that.loadingDeferred.callback();
@@ -544,7 +544,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "branchSection", //$NON-NLS-0$
 			title: messages['Branches'],
-			iconClass: "gitImageSprite git-sprite-branch", //$NON-NLS-0$
+			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<div id="branchNode"></div>', //$NON-NLS-0$
 			canHide: true,
@@ -623,7 +623,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "remoteBranchSection", //$NON-NLS-0$
 			title: "Remote Branches", //$NON-NLS-0$
-			iconClass: "gitImageSprite git-sprite-branch", //$NON-NLS-0$
+			iconClass: ["gitImageSprite", "git-sprite-branch"], //$NON-NLS-1$ //$NON-NLS-0$
 			content: '<list id="remoteBranchNode" class="mainPadding"></list>', //$NON-NLS-0$
 			canHide: true,
 			preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
@@ -956,7 +956,7 @@ exports.GitRepositoryExplorer = (function() {
 		var tableNode = dojo.byId("table");
 		var titleWrapper = new mSection.Section(tableNode, {
 			id : "tagSection",
-			iconClass : "gitImageSprite git-sprite-tag",
+			iconClass : ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
 			title : ("Tags" + (mode === "full" ? "" : " (5 most recent)")),
 			content : '<div id="tagNode"></div>',
 			canHide : true,
@@ -1086,7 +1086,7 @@ exports.GitRepositoryExplorer = (function() {
 		var titleWrapper = new mSection.Section(tableNode, {
 			id: "remoteSection", //$NON-NLS-0$
 			title: messages["Remotes"],
-			iconClass: "gitImageSprite git-sprite-remote", //$NON-NLS-0$
+			iconClass: ["gitImageSprite", "git-sprite-remote"], //$NON-NLS-1$ //$NON-NLS-0$
 			slideout: true,
 			content: '<list id="remoteNode" class="mainPadding"></list>', //$NON-NLS-0$
 			canHide: true,

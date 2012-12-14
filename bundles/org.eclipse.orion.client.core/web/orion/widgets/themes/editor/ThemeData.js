@@ -8,11 +8,11 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage ActiveXObject DOMParser*/
+/*global widgets orion window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit'], 
-	function(messages, require, dojo, dijit) {
+define(['i18n!orion/settings/nls/messages', 'require'], 
+	function(messages, require) {
 	
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	

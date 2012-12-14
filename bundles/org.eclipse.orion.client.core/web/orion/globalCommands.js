@@ -12,14 +12,14 @@
 /*global window document define login logout localStorage orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
+define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orion/commands', 'orion/parameterCollectors', 
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/textview/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
-	'orion/widgets/UserMenu', 'orion/PageLinks', 'dojo/DeferredList', 'orion/widgets/OpenResourceDialog'], 
-        function(messages, require, dojo, dijit, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
+	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog'], 
+        function(messages, require, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
-        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks){
+        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -42,8 +42,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if(authService.getLabel){
 			return authService.getLabel();
 		} else {
-			var d = new dojo.Deferred();
-			d.callback(serviceReference.properties.name);
+			var d = new Deferred();
+			d.resolve(serviceReference.properties.name);
 			return d;
 		}
 	}
@@ -53,7 +53,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	function startProgressService(serviceRegistry){
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if(progressService) {
-			dojo.hitch(progressService, progressService.init)("progressPane"); //$NON-NLS-0$
+			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$
 		}
 	}
 	
@@ -93,7 +93,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		var authServices = serviceRegistry.getServiceReferences("orion.core.auth"); //$NON-NLS-0$
 		authenticationIds = [];
-		var userMenuPlaceholder = dojo.byId("userMenu"); //$NON-NLS-0$
+		var userMenuPlaceholder = lib.node("userMenu"); //$NON-NLS-0$
 		if(!userMenuPlaceholder){
 			return;
 		}
@@ -115,43 +115,43 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 
 		for(var i=0; i<authServices.length; i++){
 			var servicePtr = authServices[i];
-			var authService = serviceRegistry.getService(servicePtr);		
-			dojo.hitch(this, function(authService, servicePtr){
-					getLabel(authService, servicePtr).then(function(label){			
-					authService.getKey().then(function(key){
-						authenticationIds.push(key);
+			var authService = serviceRegistry.getService(servicePtr);	
+			getLabel(authService, servicePtr).then(function(label){			
+				authService.getKey().then(function(key){
+					authenticationIds.push(key);
+					authService.getUser().then(function(jsonData){
+						menuGenerator.addUserItem(key, authService, label, jsonData);
+					}, 
+					function(errorData, jsonData){
+						menuGenerator.addUserItem(key, authService, label, jsonData);
+					});
+					window.addEventListener("storage", function(e){ //$NON-NLS-0$
+						if(authRendered[key] === localStorage.getItem(key)){
+							return;
+						}
+						
+						authRendered[key] = localStorage.getItem(key);
+						
 						authService.getUser().then(function(jsonData){
 							menuGenerator.addUserItem(key, authService, label, jsonData);
 						}, 
-						function(errorData, jsonData){
-							menuGenerator.addUserItem(key, authService, label, jsonData);
-						});
-						window.addEventListener("storage", function(e){ //$NON-NLS-0$
-							if(authRendered[key] === localStorage.getItem(key)){
-								return;
-							}
-							
-							authRendered[key] = localStorage.getItem(key);
-							
-							authService.getUser().then(function(jsonData){
-								menuGenerator.addUserItem(key, authService, label, jsonData);
-							}, 
-							function(errorData){
-								menuGenerator.addUserItem(key, authService, label);
-							});				
-						}, false);
-					});							
-				});
-			})(authService, servicePtr);
+						function(errorData){
+							menuGenerator.addUserItem(key, authService, label);
+						});				
+					}, false);
+				});							
+			});
 		}
 		
 	}
 	
 	function _addAdvancedSearchButton(container) {
-		var dropDownImage = dojo.create("span", {id: "advancedSearchDropDown"}, "searchOptions", "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		var dropDownImage = document.createElement("span"); //$NON-NLS-0$
+		dropDownImage.id = "advancedSearchDropDown"; //$NON-NLS-0$
+		lib.node("searchOptions").appendChild(dropDownImage); //$NON-NLS-0$
 		dropDownImage.tabIndex = 0;
-		dojo.addClass(dropDownImage, "advancedSearchDecorationSprite");
-		dojo.addClass(dropDownImage, "core-sprite-openarrow");
+		dropDownImage.classList.add("advancedSearchDecorationSprite");//$NON-NLS-0$
+		dropDownImage.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
 		dropDownImage.title = "advanced search";
 		dropDownImage.onclick = function(evt) {
 			container.toggle();
@@ -162,7 +162,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				container.toggle();
 			} 
 		});
-		dojo.addClass(dropDownImage, "bannerMenuSearchOptions"); //$NON-NLS-0$
+		dropDownImage.classList.add("bannerMenuSearchOptions"); //$NON-NLS-0$
 	}
 	
 	// Related links menu management.  The related menu is reused as content changes.  If the menu becomes
@@ -174,7 +174,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	var title;
 	
 	function _emptyLinksMenu() {
-		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		var related = lib.node("relatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
@@ -189,9 +189,9 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var triggerNode = lib.node("relatedTrigger"); //$NON-NLS-0$
 		if (linksDropdown && triggerNode) {
 			if (linksDropdown.getItems().length === 0) {
-				dojo.style(triggerNode, "visibility", "hidden"); //$NON-NLS-0$ //$NON-NLS-1$
+				triggerNode.style.visibility = "hidden"; //$NON-NLS-0$
 			} else {
-				dojo.style(triggerNode, "visibility", "visible");//$NON-NLS-0$ //$NON-NLS-1$
+				triggerNode.style.visibility = "visible"; //$NON-NLS-0$ 
 			}
 		}
 	}
@@ -232,13 +232,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		if (contributedLinks.length <= 0) {
 			return;
 		}
-		var related = dojo.byId("relatedLinks"); //$NON-NLS-0$
+		var related = lib.node("relatedLinks"); //$NON-NLS-0$
 		if(!related){
 			// document not loaded
 			return;
 		}
 		
-		dojo.when(getContentTypes(), dojo.hitch(this, function() {
+		Deferred.when(getContentTypes(), function() {
 			var alternateItemDeferred;
 			_emptyLinksMenu();
 			var deferreds = [];
@@ -261,30 +261,31 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 								if (!alternateItemDeferred) {
 									alternateItemDeferred = alternateItem();
 								}
-								dojo.when(alternateItemDeferred, dojo.hitch(command, function (newItem) {
+								
+								Deferred.when(alternateItemDeferred, function (newItem) {
 									if (newItem && (item === pageItem)) { // there is an alternate, and it still applies to the current page target
-										if (!this.visibleWhen || this.visibleWhen(newItem)) {
-											_addRelatedLinkCommand(this, new mCommands.CommandInvocation(commandService, newItem, newItem, null, this));
+										if (!command.visibleWhen || command.visibleWhen(newItem)) {
+											_addRelatedLinkCommand(command, new mCommands.CommandInvocation(commandService, newItem, newItem, null, command));
 										}
 									}
-								}));
+								});
 							}
 						} 
 					}
 					
 					var command = null;
+					var deferred = null;
 					// exclude anything in the list of exclusions
-					var position = dojo.indexOf(exclusions, info.id);
+					var position = exclusions.indexOf(info.id);
 					if (position < 0) {
 						// First see if we have a uriTemplate and name, which is enough to build a command internally.
 						if (((info.nls && info.nameKey) || info.name) && info.uriTemplate) {
-							var deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
+							deferred = mExtensionCommands._createCommandOptions(info, contributedLinks[i], serviceRegistry, contentTypesCache, true);
 							deferreds.push(deferred);
-							deferred.then(
-									dojo.hitch(this, function(commandOptions){
-										var command = new mCommands.Command(commandOptions);
-										enhanceCommand(command);
-									}));
+							deferred.then(function(commandOptions){
+								var command = new mCommands.Command(commandOptions);
+								enhanceCommand(command);
+							});
 							continue;
 						}
 						// If we couldn't compose one, see if one is already registered.
@@ -308,11 +309,10 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 									}
 									deferred = mExtensionCommands._createCommandOptions(navInfo, commandsReferences[j], serviceRegistry, contentTypesCache, true);
 									deferreds.push(deferred);
-									deferred.then(
-											dojo.hitch(this, function(commandOptions){
-												command = new mCommands.Command(commandOptions);
-												enhanceCommand(command);
-											}));
+									deferred.then(function(commandOptions){
+										command = new mCommands.Command(commandOptions);
+										enhanceCommand(command);
+									});
 									break;
 								}
 							}
@@ -321,14 +321,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 					}
 				} 
 			}
-			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+			Deferred.all(deferreds, function(error) { return error; }).then(function(){
 				_checkForEmptyLinksMenu();
-			}));
-		}));
+			});
+		});
 	}
 	
 	function renderGlobalCommands(commandService) {
-		var globalTools = dojo.byId("globalActions"); //$NON-NLS-0$
+		var globalTools = lib.node("globalActions"); //$NON-NLS-0$
 		if (globalTools) {	
 			commandService.destroy(globalTools);
 			commandService.renderCommands(globalTools.id, globalTools, {}, {}, "tool"); //$NON-NLS-0$
@@ -364,27 +364,27 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	
 	// Hook up favorites button
 	function checkFavoritesButton(serviceRegistry, commandService) {
-		var faveButton = dojo.byId("pageFavorite"); //$NON-NLS-0$
+		var faveButton = lib.node("pageFavorite"); //$NON-NLS-0$
 		if (faveButton) {
 			if (favoriteTarget && favoriteTarget.Location) {
-				dojo.addClass(faveButton, "bannerButton"); //$NON-NLS-0$
-				dojo.connect(faveButton, "onclick", this, function() { //$NON-NLS-0$
+				faveButton.classList.add("bannerButton"); //$NON-NLS-0$
+				faveButton.addEventListener("click", function() { //$NON-NLS-0$
 					makeFavorite(serviceRegistry);
-				});
+				}, false);
 				// onClick events do not register for spans when using the keyboard
-				dojo.connect(faveButton, "onkeypress", this, function(e) { //$NON-NLS-0$
-					if (e.keyCode === dojo.keys.ENTER) {						
+				faveButton.addEventListener("keydown", function(e) { //$NON-NLS-0$
+					if (e.keyCode === lib.KEY.ENTER) {						
 						makeFavorite(serviceRegistry);
 					}
-				});
+				}, false);
 				new mTooltip.Tooltip({
 					node: faveButton,
 					text: messages["Add to the favorites list"],
 					position: ["left", "below", "above"] //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				});
-				dojo.style(faveButton, "visibility", "visible"); //$NON-NLS-1$ //$NON-NLS-0$
+				faveButton.style.visibility = "visible";  //$NON-NLS-0$
 			} else {
-				dojo.style(faveButton, "visibility", "hidden"); //$NON-NLS-1$ //$NON-NLS-0$
+				faveButton.style.visibility = "hidden";  //$NON-NLS-0$
 			}
 		}
 	}
@@ -405,7 +405,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			window.document.title = title;
 		}
 
-		var dirty = dojo.byId("dirty"); //$NON-NLS-0$f
+		var dirty = lib.node("dirty"); //$NON-NLS-0$f
 		if (dirty) {
 			if (isDirty) {
 				dirty.textContent = "*"; //$NON-NLS-0$
@@ -477,7 +477,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			}
 		} 
 		window.document.title = title;
-		dojo.empty("location"); //$NON-NLS-0$
+		lib.empty(lib.node("location")); //$NON-NLS-0$
 		new mBreadcrumbs.BreadCrumbs({
 			container: "location",  //$NON-NLS-0$
 			resource: options.breadcrumbTarget || options.target,
@@ -530,38 +530,38 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var elements = {};
 		var toolbarNode = null;
 		if (typeof toolNode === "string") { //$NON-NLS-0$
-			toolNode = dojo.byId(toolNode);
+			toolNode = lib.node(toolNode);
 		}
 		// no reference node has been given, so use the main toolbar.
 		if (!toolNode) {
-			toolNode = dojo.byId("pageActions");
+			toolNode = lib.node("pageActions");
 		}
 		var node = toolNode;
 		// the trickiest part is finding where to start looking (section or main toolbar).
 		// We need to walk up until we find a "toolComposite"
 
 		while (node) {
-			if (dojo.hasClass(node, "toolComposite")) { //$NON-NLS-0$
+			if (node.classList.contains("toolComposite")) { //$NON-NLS-0$
 				toolbarNode = node;
 				break;
 			}
 			node = node.parentNode;
 		}
-		if (dojo.hasClass(toolNode, "commandMarker")) { //$NON-NLS-0$
+		if (toolNode.classList.contains("commandMarker")) { //$NON-NLS-0$
 			elements.commandNode = toolNode;
 		}
 		if (toolbarNode) {
-			elements.slideContainer = dojo.query(".slideParameters", toolbarNode)[0]; //$NON-NLS-0$
-			elements.parameterArea = dojo.query(".parameters", toolbarNode)[0]; //$NON-NLS-0$
-			elements.dismissArea = dojo.query(".parametersDismiss", toolbarNode)[0]; //$NON-NLS-0$
-			elements.notifications = dojo.query("#notificationArea", toolbarNode)[0]; //$NON-NLS-0$
+			elements.slideContainer = lib.$(".slideParameters", toolbarNode); //$NON-NLS-0$
+			elements.parameterArea = lib.$(".parameters", toolbarNode); //$NON-NLS-0$
+			elements.dismissArea = lib.$(".parametersDismiss", toolbarNode); //$NON-NLS-0$
+			elements.notifications = lib.$("#notificationArea", toolbarNode); //$NON-NLS-0$
 			if (toolbarNode.parentNode) {
-				elements.toolbarTarget = dojo.query(".toolbarTarget", toolbarNode.parentNode)[0]; //$NON-NLS-0$
+				elements.toolbarTarget = lib.$(".toolbarTarget", toolbarNode.parentNode); //$NON-NLS-0$
 				if (elements.toolbarTarget) {
-					var pos = dojo.position(toolbarNode);
+					var bounds = lib.bounds(toolbarNode);
 					// assumes that there is never anything besides notifications and slideout between toolbar and its target
 					// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=391596
-					elements.toolbarTargetY = pos.h+1;   
+					elements.toolbarTargetY = bounds.height+1;   
 				}
 			}
 		}
@@ -571,33 +571,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 	function layoutToolbarElements(elements) {
 		if (elements.toolbarTarget && elements.toolbarTargetY) {
 			var heightExtras = 0;
-			var pos;
-			if (elements.notifications && dojo.hasClass(elements.notifications, "slideContainerActive")) { //$NON-NLS-0$
-				pos = dojo.position(elements.notifications);
-				heightExtras += pos.h;
+			var bounds;
+			if (elements.notifications && elements.notifications.classList.contains("slideContainerActive")) { //$NON-NLS-0$
+				bounds = lib.bounds(elements.notifications);
+				heightExtras += bounds.height;
 			}
-			if (elements.slideContainer && dojo.hasClass(elements.slideContainer, "slideContainerActive")) { //$NON-NLS-0$
-				pos = dojo.position(elements.slideContainer);
-				heightExtras += pos.h;
+			if (elements.slideContainer && elements.slideContainer.classList.contains("slideContainerActive")) { //$NON-NLS-0$
+				bounds = lib.bounds(elements.slideContainer);
+				heightExtras += bounds.height;
 			}
 			if (heightExtras > 0) {
 				heightExtras += 8;  // padding
 			}
-			dojo.style(elements.toolbarTarget, {"top": elements.toolbarTargetY + heightExtras + "px", "bottom": 0}); //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+			elements.toolbarTarget.style.top = elements.toolbarTargetY + heightExtras + "px"; //$NON-NLS-0$
+			elements.toolbarTarget.style.bottom = 0;
 		}
 	}
-	
-	function isDescendant(parent, child) {
-	     var node = child.parentNode;
-	     while (node !== null) {
-	         if (node === parent) {
-	             return true;
-	         }
-	         node = node.parentNode;
-	     }
-	     return false;
-	}
-	
 	
 	/* This function adds a settings dialog to a page. It adds it so that	
 		a settings gear will appear at the right hand side */
@@ -606,6 +595,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		var settingsNode = document.getElementById("settingsTab");
 		var settingsButton = document.getElementById("settingsAction");
 		var CLICKED = false;
+		var panel;
 		
 		settingsNode.style.visibility = '';
 		settingsButton.style.visibility = '';
@@ -638,47 +628,31 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				var leftPane = document.getElementById( 'outlineContainer' );
 				var lpBox = leftPane.getBoundingClientRect();
 				
-				var panel = document.createElement( 'div' );
-				panel.className = 'settingsPanel';
-				panel.style.width = PANEL_WIDTH + 'px';
-				panel.style.height = PANEL_HEIGHT + 'px';
-				panel.style.backgroundColor = COLOR;
-				panel.style.zIndex = '99';
-				panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
-				panel.id = 'settingsPanel';		
-				panel.style.borderTopLeftRadius = BORDER_RADIUS;
-				panel.style.borderBottomRightRadius = BORDER_RADIUS;
-				panel.style.borderBottomLeftRadius = BORDER_RADIUS;
-				
-				rightPane.appendChild( panel );
-				
+				if (!panel) {
+					panel = document.createElement( 'div' );
+					panel.className = 'settingsPanel';
+					panel.style.width = PANEL_WIDTH + 'px';
+					panel.style.height = PANEL_HEIGHT + 'px';
+					panel.style.backgroundColor = COLOR;
+					panel.style.zIndex = '99';
+					panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
+					panel.id = 'settingsPanel';		
+					panel.style.borderTopLeftRadius = BORDER_RADIUS;
+					panel.style.borderBottomRightRadius = BORDER_RADIUS;
+					panel.style.borderBottomLeftRadius = BORDER_RADIUS;
+					
+					rightPane.appendChild( panel );
+					lib.addAutoDismiss([settingsButton, settingsNode, panel], function() {
+						settingsButton.className = "core-sprite-settings";
+						settingsNode.style.backgroundColor = 'white';
+						panel.style.visibility = 'hidden';
+						CLICKED = false;
+					});	
+				} else {
+					panel.style.visibility = 'visible';
+				}
+				lib.empty(panel);	
 				settings.appendTo( panel );
-				
-				var listener = window.addEventListener("click", function(event) { 
-				
-					switch( event.target.id ){
-						
-						case 'settingsPanel':
-						case 'settingsButton':
-						case 'settingsNode':
-							break;
-							
-						default:
-						
-							if( !isDescendant( panel, event.target ) ){
-								settingsButton.className = "core-sprite-settings";
-								settingsNode.style.backgroundColor = 'white';
-		
-								rightPane.removeChild( panel );
-								CLICKED = false;
-								
-								settings.destroy();
-								window.removeEventListener( listener );
-							}
-							
-							break;
-					}			
-				}, false);
 			}
 		};
 	}
@@ -694,37 +668,58 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		applyTheme( prefsService );
 		
 		var target = "_self"; //$NON-NLS-0$
-		var parent = dojo.byId(parentId);
+		var parent = lib.node(parentId);
 		
-		if (!dojo.byId("staticBanner")) { //$NON-NLS-0$
-			if (!parent) {
-				throw messages["could not find banner parent, id was "] + parentId;
-			}
-			// place the HTML fragment for the header.
-			dojo.place(commonHTML.topHTMLFragment, parent, "first"); //$NON-NLS-0$
+		if (!parent) {
+			throw messages["could not find banner parent, id was "] + parentId;
+		}
+		// place the HTML fragment for the header.
+		var range = document.createRange();
+		range.selectNode(parent);
+		var headerFragment = range.createContextualFragment(commonHTML.topHTMLFragment);
+		if (parent.firstChild) {
+			parent.insertBefore(headerFragment, parent.firstChild);
+		} else {
+			parent.appendChild(headerFragment);
 		}
 		
-		var toolbar = dojo.byId("pageToolbar"); //$NON-NLS-0$
+		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
-			dojo.addClass(toolbar, "toolbarLayout"); //$NON-NLS-0$
-			dojo.place(commonHTML.toolbarHTMLFragment, toolbar, "only"); //$NON-NLS-0$
+			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
+			toolbar.innerHTML = commonHTML.toolbarHTMLFragment;
 		}
 		
-		var footer = dojo.byId("footer"); //$NON-NLS-0$
+		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer) {
-			dojo.place(commonHTML.bottomHTMLFragment, footer, "only"); //$NON-NLS-0$
+			footer.innerHTML = commonHTML.bottomHTMLFragment;
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
 		commandService.setParameterCollector(new mParameterCollectors.CommandParameterCollector(getToolbarElements, layoutToolbarElements));
 		
 		// place an empty div for keyAssist
-		dojo.place('<div id="keyAssist" style="display: none" class="keyAssistFloat" role="list" aria-atomic="true" aria-live="assertive"></div>', document.body, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		var keyAssistDiv = document.createElement("div");//$NON-NLS-0$
+		keyAssistDiv.id = "keyAssist";//$NON-NLS-0$
+		keyAssistDiv.style.display = "none";//$NON-NLS-0$
+		keyAssistDiv.classList.add("keyAssistFloat");//$NON-NLS-0$
+		keyAssistDiv.role="list";//$NON-NLS-0$
+		keyAssistDiv.setAttribute("aria-atomic", "true");//$NON-NLS-1$ //$NON-NLS-0$
+		keyAssistDiv.setAttribute("aria-live", "assertive");//$NON-NLS-1$ //$NON-NLS-0$
+		document.body.appendChild(keyAssistDiv);
+		
+		document.addEventListener("keydown", function (e){  //$NON-NLS-0$
+			if (e.charOrCode === lib.KEY.ESCAPE) {
+				keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+			}
+		}, false);
+		lib.addAutoDismiss([keyAssistDiv], function() {
+			keyAssistDiv.style.display = "none"; //$NON-NLS-0$
+		});
 		
 		// generate primary nav links. 
-		var primaryNav = dojo.byId("primaryNav"); //$NON-NLS-0$
+		var primaryNav = lib.node("primaryNav"); //$NON-NLS-0$
 		if (primaryNav) {
-			PageLinks.createPageLinks(serviceRegistry, "orion.page.link").then(function(links) {
+			PageLinks.createPageLinks(serviceRegistry, "orion.page.link").then(function(links) { //$NON-NLS-0$
 				links.forEach(function(link) {
 					primaryNav.appendChild(link);
 				});
@@ -733,12 +728,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		
 		// hook up search box: 1.The search box itself 2.Default search proposal provider(recent and saved search) 
 		//                     3.Extended proposal provider from plugins 4.Search options(open result in new tab, reg ex, recent&saved searc hfull list)
-		var searchField = dojo.byId("search"); //$NON-NLS-0$
+		var searchField = lib.node("search"); //$NON-NLS-0$
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
 		var advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(searchField, searcher, serviceRegistry,
 									{group: "advancedSearch"});//$NON-NLS-0$
+
 		//Required. Reading recent&saved search from user preference. Once done call the uiCallback
 		var defaultProposalProvider = function(uiCallback){
 			mSearchUtils.getMixedSearches(serviceRegistry, true, false, function(searches){
@@ -812,19 +808,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		});
 		//Finally, hook up search options
 		_addAdvancedSearchButton(advSearchOptContainer);
-		
-		// layout behavior.  Special handling for pages that use dijit for interior layout.
-		var dijitLayout = dojo.query(".dijitManagesLayout")[0]; //$NON-NLS-0$
-		var layoutWidget;
-		if (dijitLayout && dijitLayout.id) {
-			layoutWidget = dijit.byId(dijitLayout.id);
-		}
+		lib.addAutoDismiss([lib.node(advSearchOptContainer.containerId), lib.node("advancedSearchDropDown")], function() { //$NON-NLS-0$
+			advSearchOptContainer.dismiss();
+		});
+
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
 		var splitter;
-		var splitNode = dojo.query(".split")[0]; //$NON-NLS-0$
+		var splitNode = lib.$(".split"); //$NON-NLS-0$
 		if (splitNode) {
-			var side = dojo.query(".sidePanelLayout")[0]; //$NON-NLS-0$
-			var main = dojo.query(".mainPanelLayout")[0]; //$NON-NLS-0$
+			var side = lib.$(".sidePanelLayout"); //$NON-NLS-0$
+			var main = lib.$(".mainPanelLayout"); //$NON-NLS-0$
 			if (side && main) {
 				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main});
 				var toggleSidePanelCommand = new mCommands.Command({
@@ -837,32 +830,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				commandService.addCommand(toggleSidePanelCommand);
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-				// editor and layout specific behavior if needed
-				if (editor || layoutWidget) {
+				// editor behavior if needed
+				if (editor) {
 					splitter.addResizeListener(function(node) {
 						if (editor && node === main) {
 							editor.getTextView().resize();
 						}
-						if (layoutWidget) {
-							layoutWidget.resize();
-						}
 					});
-					if (editor) {
-						editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
-						editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
-							splitter.toggleSidePanel();
-							return true;
-						}, {name:"Toggle Outliner"});
-					}
+					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
+					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
+						splitter.toggleSidePanel();
+						return true;
+					}, {name:"Toggle Outliner"});
 				}
 			}
 		}
-		
-		// trigger a layout for pages that still manage inner content with dijit layouts.
-		if (layoutWidget) {
-			window.setTimeout(function() {layoutWidget.layout();}, 10);
-		}
-			
+
 		// Assemble global commands, those that could be available from any page due to header content or common key bindings.
 		// make favorite
 		var favoriteCommand = new mCommands.Command({
@@ -871,7 +854,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			imageClass: "core-sprite-makeFavorite", //$NON-NLS-0$
 			id: "orion.makeFavorite", //$NON-NLS-0$
 			visibleWhen: function(item) {
-				var items = dojo.isArray(item) ? item : [item];
+				var items = Array.isArray(item) ? item : [item];
 				if (items.length === 0) {
 					return false;
 				}
@@ -882,7 +865,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				}
 				return true;},
 			callback: function(data) {
-				var items = dojo.isArray(data.items) ? data.items : [data.items];
+				var items = Array.isArray(data.items) ? data.items : [data.items];
 				var favService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 				var doAdd = function(item) {
 					return function(result) {
@@ -909,12 +892,12 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 				//service must be accessed via the registry so we get async behaviour
 				favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
 			}
-			var dialog = new orion.widgets.OpenResourceDialog({searcher: searcher, searchRenderer:searcher.defaultRenderer, favoriteService:favoriteService});
-			if (editor) {
-				dojo.connect(dialog, "onHide", function() { //$NON-NLS-0$
-					editor.getTextView().focus(); // Focus editor after dialog close, Dojo's doesn't work
-				});
-			}
+			var dialog = new openResource.OpenResourceDialog({
+				searcher: searcher, 
+				searchRenderer:searcher.defaultRenderer, 
+				favoriteService:favoriteService,
+				onHide:  function() { editor.getTextView().focus(); }
+			});
 			window.setTimeout(function() {dialog.show();}, 0);
 		};
 			
@@ -943,7 +926,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			tooltip: messages["Global search"],
 			id: "eclipse.globalSearch", //$NON-NLS-0$
 			callback: function(data) {
-				var searchField = dojo.byId("search"); //$NON-NLS-0$
+				var searchField = lib.node("search"); //$NON-NLS-0$
 				if(searchField){
 					searchField.focus();
 				}
@@ -959,7 +942,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 						var model = editor.getModel();
 						searchString = model.getText(selection.start, selection.end);
 					}
-					var searchField = dojo.byId("search"); //$NON-NLS-0$
+					var searchField = lib.node("search"); //$NON-NLS-0$
 					if(searchField){
 						if(searchString){
 							searchField.value = searchString;
@@ -979,23 +962,20 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			tooltip: messages["Hide or show the page banner and footer"],
 			id: "orion.toggleTrim", //$NON-NLS-0$
 			callback: function() {
-				var header = dojo.byId("banner"); //$NON-NLS-0$
-				var footer = dojo.byId("footer"); //$NON-NLS-0$
-				var content = dojo.query(".content-fixedHeight")[0]; //$NON-NLS-0$
+				var header = lib.node("banner"); //$NON-NLS-0$
+				var footer = lib.node("footer"); //$NON-NLS-0$
+				var content = lib.$(".content-fixedHeight"); //$NON-NLS-0$
 				if (header.style.display === "none") { //$NON-NLS-0$
 					header.style.display = "block"; //$NON-NLS-0$
 					footer.style.display = "block"; //$NON-NLS-0$
-					dojo.removeClass(content, "content-fixedHeight-maximized"); //$NON-NLS-0$
+					content.classList.remove("content-fixedHeight-maximized"); //$NON-NLS-0$
 				} else {
 					header.style.display = "none"; //$NON-NLS-0$
 					footer.style.display = "none"; //$NON-NLS-0$
-					dojo.addClass(content, "content-fixedHeight-maximized"); //$NON-NLS-0$
+					content.classList.add("content-fixedHeight-maximized"); //$NON-NLS-0$
 				}	
 				if (editor) {
 					editor.getTextView().resize();
-				}
-				if (layoutWidget) {
-					window.setTimeout(function() {layoutWidget.resize();}, 10);
 				}
 				return true;
 			}});
@@ -1006,38 +986,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			editor.getTextView().setKeyBinding(new mCommands.CommandKeyBinding('m', true, true), toggleBanner.id); //$NON-NLS-0$
 			editor.getTextView().setAction(toggleBanner.id, toggleBanner.callback, toggleBanner);
 		}
-				
-		var keyAssistNode = dojo.byId("keyAssist"); //$NON-NLS-0$
-		dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){  //$NON-NLS-0$
-			if (e.charOrCode === dojo.keys.ESCAPE) {
-				keyAssistNode.style.display = "none"; //$NON-NLS-0$
-			}
-		}));
-		dojo.connect(document, "onclick", dojo.hitch(this, function(e) { //$NON-NLS-0$
-			var clickNode =  e.target || e.originalTarget || e.srcElement;
-			if (clickNode && (!clickNode.classList || !clickNode.classList.contains("key-assist-menuitem"))) { //$NON-NLS-0$
-				keyAssistNode.style.display = "none"; //$NON-NLS-0$
-			}
-			if(clickNode && !advSearchOptContainer.clicked(clickNode) && clickNode.id !== "advancedSearchDropDown"){
-				advSearchOptContainer.dismiss();
-			}
-			
-		}));
-		if (editor) {
-			editor.getTextView().addEventListener("MouseDown", function() { //$NON-NLS-0$
-				keyAssistNode.style.display = "none"; //$NON-NLS-0$
-			});
-		}
-		
+						
 		if (escapeProvider) {
 			var keyAssistEscHandler = {
 				isActive: function() {
-					return keyAssistNode.style.display === "block"; //$NON-NLS-0$
+					return keyAssistDiv.style.display === "block"; //$NON-NLS-0$
 				},
 				
 				cancel: function() {
 					if (this.isActive()) {
-						keyAssistNode.style.display = "none"; //$NON-NLS-0$
+						keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 						return true;
 					}
 					return false;   // not handled
@@ -1076,10 +1034,13 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 			tooltip: messages["Show a list of all the keybindings on this page"],
 			id: "eclipse.keyAssist", //$NON-NLS-0$
 			callback: function() {
-				if (keyAssistNode.style.display === "none") { //$NON-NLS-0$
-					dojo.empty(keyAssistNode);
+				if (keyAssistDiv.style.display === "none") { //$NON-NLS-0$
+					var heading;
+					lib.empty(keyAssistDiv);
 					if (editor) {
-						dojo.place("<h2>"+messages["Editor"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-3$ //$NON-NLS-2$
+						heading = document.createElement("h2"); //$NON-NLS-0$
+						heading.appendChild(document.createTextNode(messages["Editor"]));
+						keyAssistDiv.appendChild(heading);
 						var editorActions = editor.getTextView().getActions(false);
 						for(var i=0; i<editorActions.length; i++) {
 							var actionID = editorActions[i], actionName = actionID;
@@ -1088,15 +1049,22 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 							if (actionDescription && actionDescription.name) { actionName = actionDescription.name; }
 							var bindings = textView.getKeyBindings(actionID);
 							for (var j=0; j<bindings.length; j++) {
-								dojo.place("<span role=\"listitem\">"+mUIUtils.getUserKeyString(bindings[j])+" = " + actionName + "<br></span>", keyAssistNode, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								var bindingString = mUIUtils.getUserKeyString(bindings[j]);
+								var span = document.createElement("span"); //$NON-NLS-0$
+								span.role = "listitem"; //$NON-NLS-0$
+								span.appendChild(document.createTextNode(bindingString + " = " + actionName)); 
+								span.appendChild(document.createElement("br")); //$NON-NLS-0$
+								keyAssistDiv.appendChild(span);
 							}
 						}
 					}
-					dojo.place("<h2>"+messages["Global"]+"</h2>", keyAssistNode, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					commandService.showKeyBindings(keyAssistNode);
-					keyAssistNode.style.display = "block"; //$NON-NLS-0$
+					heading = document.createElement("h2"); //$NON-NLS-0$
+					heading.appendChild(document.createTextNode(messages["Global"]));
+					keyAssistDiv.appendChild(heading);
+					commandService.showKeyBindings(keyAssistDiv);
+					keyAssistDiv.style.display = "block"; //$NON-NLS-0$
 				} else {
-					keyAssistNode.style.display = "none"; //$NON-NLS-0$
+					keyAssistDiv.style.display = "none"; //$NON-NLS-0$
 				}
 				return true;
 			}});
@@ -1117,17 +1085,18 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'orion/commonHTML
 		// now that footer containing progress pane is added
 		startProgressService(serviceRegistry);
 
-		//every time the user manually changes the hash, we need to load the workspace with that name
-		dojo.subscribe("/dojo/hashchange", commandService, function() { //$NON-NLS-0$
+		// check for commands in the hash
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			commandService.processURL(window.location.href);
-		});
+		}, false);
 		
 		function setTarget(target){
 			target = target;
 			
-			dojo.query(".targetSelector").forEach(function(node, index, arr){ //$NON-NLS-0$
-				node.target = target;
-			});	
+			var nodes = lib.$$array(".targetSelector"); //$NON-NLS-0$
+			for (var i=0; i<nodes.length; i++) {
+				nodes[i].target = target;
+			}
 		}
 		
 		function readTargetPreference(serviceRegistry){

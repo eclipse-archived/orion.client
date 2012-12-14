@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -41,9 +41,9 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		if (binding.alphaKey) {
 			return userString+binding.alphaKey;
 		}
-		for (var keyName in dojo.keys) {
-			if (typeof(dojo.keys[keyName] === "number")) { //$NON-NLS-0$
-				if (dojo.keys[keyName] === binding.keyCode) {
+		for (var keyName in lib.KEY) {
+			if (typeof(lib.KEY[keyName] === "number")) { //$NON-NLS-0$
+				if (lib.KEY[keyName] === binding.keyCode) {
 					return userString+keyName;
 				}
 			}
@@ -91,31 +91,28 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		/** @return function(event) */
 		var handler = function(isKeyEvent) {
 			return function(event) {
-				var editBox = dijit.byId(id),
-					newValue = editBox.get("value"); //$NON-NLS-0$
-				if (isKeyEvent && event.keyCode === dojo.keys.ESCAPE) {
+				var editBox = lib.node(id),
+					newValue = editBox.value;
+				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
 					if (shouldHideRefNode) {
-						dojo.style(refNode, "display", "inline"); //$NON-NLS-1$ //$NON-NLS-0$
+						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
-					// editBox.getPromptMessage(false);  // to get rid of prompting tooltip
-					editBox.destroyRecursive();
+					editBox.parentNode.removeChild(editBox);
 					if (onEditDestroy) {
 						onEditDestroy();
 					}
 					return;
 				}
-				if (isKeyEvent && event.keyCode !== dojo.keys.ENTER) {
+				if (isKeyEvent && event.keyCode !== lib.KEY.ENTER) {
 					return;
-				} else if (!editBox.isValid() || (!isInitialValid && newValue === initialText)) {
-					// No change; restore the old refnode
+				} else if (newValue.length === 0 || (!isInitialValid && newValue === initialText)) {
 					if (shouldHideRefNode) {
-						dojo.style(refNode, "display", "inline"); //$NON-NLS-1$ //$NON-NLS-0$
+						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 				} else {
 					onComplete(newValue);
 				}
-				// editBox.getPromptMessage(false); // to get rid of prompting tooltip
-				editBox.destroyRecursive();
+				editBox.parentNode.removeChild(editBox);
 				if (onEditDestroy) {
 					onEditDestroy();
 				}
@@ -123,26 +120,34 @@ define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/Val
 		};
 	
 		// Swap in an editable text field
-		var editBox = new dijit.form.ValidationTextBox({
-			id: id,
-			required: true, // disallows empty string
-			value: initialText || ""
-			// promptMessage: promptMessage  // ignore until we can reliably dismiss this on destroy
-		});
-		dojo.place(editBox.domNode, refNode, "after"); //$NON-NLS-0$
-		dojo.addClass(editBox.domNode, "userEditBoxPrompt"); //$NON-NLS-0$
+		var editBox = document.createElement("input"); //$NON-NLS-0$
+		editBox.id = id;
+		editBox.value = initialText || "";
+		refNode.parentNode.insertBefore(editBox, refNode.nextSibling);
+		editBox.classList.add("userEditBoxPrompt"); //$NON-NLS-0$
 		if (shouldHideRefNode) {
-			dojo.style(refNode, "display", "none"); //$NON-NLS-1$ //$NON-NLS-0$
+			refNode.style.display = "none"; //$NON-NLS-0$
 		}				
-		dojo.connect(editBox, "onKeyDown", handler(true)); //$NON-NLS-0$
-		dojo.connect(editBox, "onBlur", handler(false)); //$NON-NLS-0$
+		editBox.addEventListener("keydown", handler(true), false); //$NON-NLS-0$
+		editBox.addEventListener("blur", handler(false), false); //$NON-NLS-0$
 		window.setTimeout(function() { 
 			editBox.focus(); 
 			if (initialText) {
-				var box = dojo.byId(id);
+				var box = lib.node(id);
 				var end = selectTo ? initialText.indexOf(selectTo) : -1;
 				if (end > 0) {
-					dijit.selectInputText(box, 0, end);
+					if(box.createTextRange) {
+						var range = box.createTextRange();
+						range.collapse(true);
+						range.moveStart("character", 0); //$NON-NLS-0$
+						range.moveEnd("character", end); //$NON-NLS-0$
+						range.select();
+					} else if(box.setSelectionRange) {
+						box.setSelectionRange(0, end);
+					} else if(box.selectionStart !== undefined) {
+						box.selectionStart = 0;
+						box.selectionEnd = end;
+					}
 				} else {
 					box.select();
 				}
