@@ -2,6 +2,7 @@
 !.gitignore
 .project
 
+lib/dojo/
 node_modules/
 npm-debug.log
 
