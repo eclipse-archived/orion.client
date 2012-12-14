@@ -13,7 +13,7 @@
 
 
 define(['require', 'dojo', 'dijit', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
-		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/treetable', "orion/URITemplate", 
+		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/webui/treetable', "orion/URITemplate", 
 		'orion/PageUtil', 'dojo/hash', 'dijit/form/Button'],
         function(require, dojo, dijit, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
             mTreetable, URITemplate, mPageUtil) {

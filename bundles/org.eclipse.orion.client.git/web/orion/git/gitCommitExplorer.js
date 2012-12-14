@@ -242,7 +242,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 			var titleWrapper = new mSection.Section(tableNode, {
 				id: "tagSection", //$NON-NLS-0$
 				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
-				iconClass: "gitImageSprite git-sprite-tag", //$NON-NLS-0$
+				iconClass: ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
 				slideout: true,
 				content: '<list id="tagNode"></list>', //$NON-NLS-0$
 				canHide: true,

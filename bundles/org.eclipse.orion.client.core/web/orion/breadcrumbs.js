@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global window define document */
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
@@ -32,13 +32,10 @@ define(['require', 'dojo'], function(require, dojo) {
 	}
 	BreadCrumbs.prototype = /** @lends orion.breadcrumbs.BreadCrumbs.prototype */ {
 		_init: function(options) {
-			var container = options.container;
-			if (typeof(container) === "string") { //$NON-NLS-0$
-				container = dojo.byId(container);
-			}
+			var container = lib.node(options.container);
 			if (!container) { throw "no parent container"; } //$NON-NLS-0$
 			this._container = container;
-			dojo.removeClass(container, "currentLocation"); //$NON-NLS-0$
+			container.classList.remove("currentLocation"); //$NON-NLS-0$
 			this._id = options.id || "eclipse.breadcrumbs"; //$NON-NLS-0$
 			this._resource = options.resource|| null;
 			this._rootSegmentName = options.rootSegmentName;
@@ -60,7 +57,8 @@ define(['require', 'dojo'], function(require, dojo) {
 				} else {
 					seg = document.createElement('span'); //$NON-NLS-0$
 				}
-				dojo.place(document.createTextNode(this._workspaceRootSegmentName), seg, "only"); //$NON-NLS-0$
+				lib.empty(seg);
+				seg.appendChild(document.createTextNode(this._workspaceRootSegmentName)); 
 				return seg;
 			}
 			return null;
@@ -68,9 +66,9 @@ define(['require', 'dojo'], function(require, dojo) {
 
 		render: function() {
 			var container = this._container;
-			var crumbs = dojo.byId(this._id);
+			var crumbs = lib.node(this._id);
 			if (crumbs) {
-				dojo.empty(crumbs);
+				lib.empty(crumbs);
 			} else {
 				crumbs = document.createElement('span'); //$NON-NLS-0$
 				crumbs.id = this._id;
@@ -79,20 +77,20 @@ define(['require', 'dojo'], function(require, dojo) {
 			var seg, slash;
 			seg = this.getNavigatorWorkspaceRootSegment();
 			if (seg) {
-				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
+				seg.classList.add("breadcrumb"); //$NON-NLS-0$
 				crumbs.appendChild(seg);
 				if (this._resource && this._resource.Parents) {
 					slash = document.createElement('span'); //$NON-NLS-0$
-					dojo.place(document.createTextNode(' / '), slash, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+					slash.appendChild(document.createTextNode(' / '));  //$NON-NLS-0$
 					this.path+="/"; //$NON-NLS-0$
-					dojo.addClass(slash, "breadcrumbSeparator"); //$NON-NLS-0$
+					slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$
 					crumbs.appendChild(slash);
 				} else {
 					// we are at the root.  Get rid of any href since we are already here
 					seg.href = "";
 					// don't need the breadcrumb style because we are here.
-					dojo.removeClass(seg, "breadcrumb"); //$NON-NLS-0$
-					dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
+					seg.classList.remove("breadcrumb"); //$NON-NLS-0$
+					seg.classList.add("currentLocation"); //$NON-NLS-0$
 					return;
 				}
 			}
@@ -103,12 +101,12 @@ define(['require', 'dojo'], function(require, dojo) {
 					var parents = this._resource.Parents;
 					for (var i = parents.length; --i >= 0 ;){
 						seg = document.createElement('a'); //$NON-NLS-0$
-						dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
+						seg.classList.add("breadcrumb"); //$NON-NLS-0$
 						if (firstSegmentName) {
-							dojo.place(document.createTextNode(firstSegmentName), seg, "only"); //$NON-NLS-0$
+							seg.appendChild(document.createTextNode(firstSegmentName)); 
 							firstSegmentName = null;
 						} else {
-							dojo.place(document.createTextNode(parents[i].Name), seg, "only"); //$NON-NLS-0$
+							seg.appendChild(document.createTextNode(parents[i].Name)); 
 						}
 						this.path += parents[i].Name; 
 						if(this._makeHref) {
@@ -119,30 +117,30 @@ define(['require', 'dojo'], function(require, dojo) {
 						}
 						crumbs.appendChild(seg);
 						slash = document.createElement('span'); //$NON-NLS-0$
-						dojo.place(document.createTextNode(' / '), slash, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+						slash.appendChild(document.createTextNode(' / ')); //$NON-NLS-0$
 						this.path += '/'; //$NON-NLS-0$
-						dojo.addClass(slash, "breadcrumbSeparator"); //$NON-NLS-0$
+						slash.classList.add("breadcrumbSeparator"); //$NON-NLS-0$
 						crumbs.appendChild(slash);
 					}
 				}
 				//add a final entry for the current location
 				seg = document.createElement('span'); //$NON-NLS-0$
 				if (firstSegmentName) {
-					dojo.place(document.createTextNode(firstSegmentName), seg, "only"); //$NON-NLS-0$
+					seg.appendChild(document.createTextNode(firstSegmentName)); 
 					firstSegmentName = null;
 				} else {
-					dojo.place(document.createTextNode(this._resource.Name), seg, "only"); //$NON-NLS-0$
+					seg.appendChild(document.createTextNode(this._resource.Name)); 
 				}				
-				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
+				seg.classList.add("currentLocation"); //$NON-NLS-0$
 				this.path+=this._resource.Name;
 				crumbs.appendChild(seg);
 			} 
 			// if we had no resource, or had no parents, we need some kind of current location in the breadcrumb
 			if (crumbs.childNodes.length === 0) {
 				seg = document.createElement('span'); //$NON-NLS-0$
-				dojo.place(document.createTextNode(firstSegmentName || document.title), seg, "only"); //$NON-NLS-0$
-				dojo.addClass(seg, "breadcrumb"); //$NON-NLS-0$
-				dojo.addClass(seg, "currentLocation"); //$NON-NLS-0$
+				seg.appendChild(document.createTextNode(firstSegmentName || document.title)); 
+				seg.classList.add("breadcrumb"); //$NON-NLS-0$
+				seg.classList.add("currentLocation"); //$NON-NLS-0$
 				crumbs.appendChild(seg);
 			}
 		}

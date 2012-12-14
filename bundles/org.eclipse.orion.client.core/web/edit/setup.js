@@ -10,16 +10,15 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*jslint browser:true devel:true*/
-/*global define eclipse:true orion:true dojo window*/
+/*global define eclipse:true orion:true window*/
 
-define(['i18n!orion/edit/nls/messages', 'require', 'dojo', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['i18n!orion/edit/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/commands', 'orion/favorites', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/outliner',
         'orion/problems', 'orion/editor/contentAssist', 'orion/editorCommands', 'orion/editor/editorFeatures', 'orion/editor/editor', 'orion/syntaxchecker',
         'orion/textview/textView', 'orion/textview/textModel', 
         'orion/textview/projectionTextModel', 'orion/textview/keyBinding','orion/searchAndReplace/textSearcher',
-        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', "orion/i18nUtil", 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser',
-       'dojo/hash'], 
-		function(messages, require, dojo, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
+        'orion/edit/dispatcher', 'orion/contentTypes', 'orion/PageUtil', 'orion/highlight', 'orion/i18nUtil', 'orion/edit/syntaxmodel', 'orion/widgets/themes/editor/MiniThemeChooser'],
+		function(messages, require, Deferred, lib, mSelection, mStatus, mProgress, mDialogs, mCommands, mFavorites,
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, mOutliner, mProblems, mContentAssist, mEditorCommands, mEditorFeatures, mEditor,
 				mSyntaxchecker, mTextView, mTextModel, mProjectionTextModel, mKeyBinding, mSearcher,
 				mDispatcher, mContentTypes, PageUtil, Highlight, i18nUtil, SyntaxModelWirer, mThemeChooser) {
@@ -44,16 +43,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		new mDialogs.DialogService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
-		// Editor needs additional services besides EAS.
+		// Editor needs additional services
 		problemService = new mProblems.ProblemService(serviceRegistry);
 		outlineService = new mOutliner.OutlineService({serviceRegistry: serviceRegistry, preferences: preferences});
 		new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
 		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 	}());
 	
-	var outlineDomNode = dojo.byId("outline"), //$NON-NLS-0$
-		editorDomNode = dojo.byId("editor"), //$NON-NLS-0$
-		searchFloat = dojo.byId("searchFloat"); //$NON-NLS-0$
+	var outlineDomNode = lib.node("outline"), //$NON-NLS-0$
+		editorDomNode = lib.node("editor"), //$NON-NLS-0$
+		searchFloat = lib.node("searchFloat"); //$NON-NLS-0$
 
 	var syntaxHighlighter = new Highlight.SyntaxHighlighter(serviceRegistry);
 	var syntaxModelWirer = new SyntaxModelWirer(serviceRegistry);
@@ -96,7 +95,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 			var input = PageUtil.matchResourceParameters(location);
 			var fileURI = input.resource;
-			parseNumericParams(input, ["start", "end", "line", "offset", "length"]);
+			parseNumericParams(input, ["start", "end", "line", "offset", "length"]); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			// populate editor
 			if (fileURI) {
 				if (fileURI === this.lastFilePath) {
@@ -109,22 +108,23 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					var progressTimeout = setTimeout(function() {
 						editor.setInput(fullPathName, messages["Fetching "] + fullPathName, null);
 					}, 800); // wait 800ms before displaying
-					var setInput = dojo.hitch(this, function(contents, metadata) {
+					var self = this;
+					var setInput = function(contents, metadata) {
 						var altPageTarget, name;
 						if (metadata) {
-							this._fileMetadata = metadata;
-							var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+							self._fileMetadata = metadata;
+							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
 								commandService.destroy(toolbar);
 								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
 							}
-							toolbar = dojo.byId("pageNavigationActions"); //$NON-NLS-0$
+							toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 							if (toolbar) {	
 								commandService.destroy(toolbar);
 								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button");  // use true when we want to force toolbar items to text //$NON-NLS-0$
 							}
-							this.setTitle(metadata.Location);
-							this._contentType = contentTypeService.getFileContentType(metadata);
+							self.setTitle(metadata.Location);
+							self._contentType = contentTypeService.getFileContentType(metadata);
 							// page target is the file, but if any interesting links fail, try the parent folder metadata.
 							altPageTarget = function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
@@ -134,17 +134,16 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							name = metadata.Name;
 						} else {
 							// No metadata
-							this._fileMetadata = null;
-							this.setTitle(fileURI);
-							this._contentType = contentTypeService.getFilenameContentType(this.getTitle());
-							name = this.getTitle();
+							self._fileMetadata = null;
+							self.setTitle(fileURI);
+							self._contentType = contentTypeService.getFilenameContentType(self.getTitle());
+							name = self.getTitle();
 						}
-						
+		
 						var chooser = new mThemeChooser.MiniThemeChooser( preferences, editor.getTextView() );
-	
 						mGlobalCommands.addSettings( chooser );
 						
-						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,
+						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
 							isFavoriteTarget: true, makeAlternate: function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
 									return fileClient.read(metadata.Parents[0].Location, true);
@@ -153,39 +152,36 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							serviceRegistry: serviceRegistry, commandService: commandService,
 							searchService: searcher, fileService: fileClient});
 						mGlobalCommands.setDirtyIndicator(false);
-						syntaxHighlighter.setup(this._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
-							.then(dojo.hitch(this, function() {
+						syntaxHighlighter.setup(self._contentType, editor.getTextView(), editor.getAnnotationModel(), fileURI, true)
+							.then(function() {
 								// TODO folding should be a preference.
 								var styler = syntaxHighlighter.getStyler();
 								editor.setFoldingEnabled(styler && styler.foldingEnabled);
-								setOutlineProviders(this._contentType, location);
+								setOutlineProviders(self._contentType, location);
 								if (!dispatcher) {
-									dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, this._contentType);
+									dispatcher = new mDispatcher.Dispatcher(serviceRegistry, editor, self._contentType);
 								}
 								// Contents
 								editor.setInput(fileURI, null, contents);
 								editor.showSelection(input.start, input.end, input.line, input.offset, input.length);
 								commandService.processURL(window.location.href);
-							}));
+							});
 						clearTimeout(progressTimeout);
-					});
-					var load = dojo.hitch(this, function(results) {
-						var contentsOk = results[0][0], contents = contentsOk ? results[0][1] : null;
-						var metadataOk = results[1][0], metadata = metadataOk ? results[1][1] : null;
-						var error;
+					};
+					var load = function(results) {
+						var contentOrError = results[0];
+						var metadataOrError = results[1];
 						clearTimeout(progressTimeout);
-						if (!contentsOk) {
-							error = results[0][1];
-							console.error("HTTP status code: ", error.status); //$NON-NLS-0$
-							contents = messages["An error occurred: "] + errorMessage(error);
+						if (contentOrError._error) {
+							console.error("HTTP status code: ", contentOrError._error.status); //$NON-NLS-0$
+							contentOrError = messages["An error occurred: "] + errorMessage(contentOrError._error);
 						}
-						if (!metadataOk) {
-							error = results[1][1];
-							console.error("Error loading file metadata: " + errorMessage(error)); //$NON-NLS-0$
+						if (metadataOrError._error) {
+							console.error("Error loading file metadata: " + errorMessage(metadataOrError._error)); //$NON-NLS-0$
 						}
-						setInput(contents, metadata);
-					});
-					new dojo.DeferredList([fileClient.read(fileURI), fileClient.read(fileURI, true)]).then(load, load);
+						setInput(contentOrError, metadataOrError);
+					};
+					new Deferred.all([fileClient.read(fileURI), fileClient.read(fileURI, true)], function(error) { return {_error: error}; }).then(load);
 				}
 				this.lastFilePath = fileURI;
 			} else {
@@ -223,17 +219,17 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		},
 		
 		hashChanged: function(editor) {
-			var oldHash = this._lastHash || this.getInput();
 			var oldInput = this.getInput();
-			selection.setSelections("#" + dojo.hash()); // may prompt, change input, or both //$NON-NLS-0$
-			var newHash = dojo.hash();
+			selection.setSelections(window.location.hash); // may prompt, change input, or both //$NON-NLS-0$
+			var newHash = window.location.hash;
 			var newInput = this.getInput();
-			var inputChanged = PageUtil.matchResourceParameters("#" + oldInput).resource !== PageUtil.matchResourceParameters("#" + newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
-			var hashMatchesInput = PageUtil.matchResourceParameters("#" + newInput).resource === PageUtil.matchResourceParameters("#" + newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
+			var inputChanged = PageUtil.matchResourceParameters(oldInput).resource !== PageUtil.matchResourceParameters(newInput).resource; //$NON-NLS-1$ //$NON-NLS-0$
+			var hashMatchesInput = PageUtil.matchResourceParameters(newInput).resource === PageUtil.matchResourceParameters(newHash).resource; //$NON-NLS-1$ //$NON-NLS-0$
 			if (!inputChanged && !hashMatchesInput) {
-				dojo.hash(this._lastHash);
+				this._lastHash = newHash;
+				window.location.hash = this._lastHash[0] === "#" ? this._lastHash.substring(1): this._lastHash; //$NON-NLS-0$
 			} else if (inputChanged) {
-				dojo.hash(newHash);
+				this.setInput(newHash, editor);
 				this._lastHash = newHash;
 			} else {
 				// Input didn't change and input matches hash, just remember the current hash
@@ -283,7 +279,6 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			return false;
 		},
 		tab: function() {
-			var handled = false;
 			for (var i=0; i<this.handlers.length; i++) {
 				if (this.handlers[i].isActive()) {
 					return this.handlers[i].tab();
@@ -360,7 +355,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		// give our external escape handler a shot at handling escape
 		keyModeStack.push(escHandler);
 		
-		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode");
+		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding('w', true, false, true), "toggleWrapMode"); //$NON-NLS-0$
 		
 		// global search
 		editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("h", true), "searchFiles"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -376,14 +371,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				} if (!searchPattern) {
 					return;
 				}
-				dojo.connect(document, "onkeypress", dojo.hitch(this, function (e){  //$NON-NLS-0$
-					if (e.charOrCode === dojo.keys.ESCAPE) {
+				document.addEventListener("keydown", function (e){  //$NON-NLS-0$
+					if (e.charOrCode === lib.KEY.ESCAPE) {
 						searchFloat.style.display = "none"; //$NON-NLS-0$
-						if(dojo.query("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
+						if(lib.$$array("a", searchFloat).indexOf(document.activeElement) !== -1) { //$NON-NLS-0$
 							editor.getTextView().focus();
 						}
 					}
-				}));
+				}, false);
 				
 				var searchFloatTabHandler = {
 					isActive: function() {
@@ -392,7 +387,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 					
 					tab: function() {
 						if (this.isActive()) {
-							dojo.query("a",searchFloat)[0].focus(); //$NON-NLS-0$
+							lib.$("a",searchFloat).focus(); //$NON-NLS-0$
 							return true;
 						}
 						return false;
@@ -415,9 +410,10 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				};
 				escHandler.addHandler(searchFloatEscHandler);
 									
-				dojo.place(document.createTextNode(messages["Searching for occurrences of "]), searchFloat, "last"); //$NON-NLS-1$
-				var b = dojo.create("b", null, searchFloat, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(document.createTextNode("\"" + searchPattern + "\"..."), b, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				searchFloat.appendChild(document.createTextNode(messages["Searching for occurrences of "])); 
+				var b = document.createElement("b"); //$NON-NLS-0$
+				searchFloat.appendChild(b);
+				b.appendChild(document.createTextNode("\"" + searchPattern + "\"...")); //$NON-NLS-1$ //$NON-NLS-0$
 				searchFloat.style.display = "block"; //$NON-NLS-0$
 				var searchParams = searcher.createSearchParams(searchPattern, false, true);
 				searchParams.sort = "Name asc"; //$NON-NLS-0$
@@ -496,9 +492,8 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		} 
 	});
 	
-	// In this page, the hash change drives selection.  In other scenarios, a file picker might drive selection
-	dojo.subscribe("/dojo/hashchange", inputManager, function() {inputManager.hashChanged(editor);}); //$NON-NLS-0$
-	inputManager.setInput(dojo.hash(), editor);
+	window.addEventListener("hashchange", function() {inputManager.hashChanged(editor);}, false); //$NON-NLS-0$
+	inputManager.setInput(window.location.hash, editor);
 	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
 		
@@ -514,15 +509,21 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 		serviceRegistry: serviceRegistry,
 		outlineService: serviceRegistry.getService("orion.edit.outline"), //$NON-NLS-0$
 		commandService: commandService,
-		selectionService: selection});
+		selectionService: selection,
+		onSelectedProvider: function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
+			outlineService.setProvider(outlineProvider);
+			outlineService.emitOutline(editor.getText(), editor.getTitle());
+		}
+	});
 	if (filteredProviders) {
 		outliner.setOutlineProviders(filteredProviders);
 	}
 		
 	function setOutlineProviders(fileContentType, title) {
-		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner");
+		var outlineProviders = serviceRegistry.getServiceReferences("orion.edit.outliner"); //$NON-NLS-0$
 		filteredProviders = [];
-		for (var i=0; i < outlineProviders.length; i++) {
+		var i;
+		for (i=0; i < outlineProviders.length; i++) {
 			var serviceReference = outlineProviders[i],
 			    contentTypeIds = serviceReference.getProperty("contentType"), //$NON-NLS-0$
 			    pattern = serviceReference.getProperty("pattern"); // for backwards compatibility //$NON-NLS-0$
@@ -539,18 +540,18 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 			}
 		}
 		var deferreds = []; 
-		for(var i=0; i<filteredProviders.length; i++){
-			if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){
-				var deferred = new dojo.Deferred();
+		for(i=0; i<filteredProviders.length; i++){
+			if(filteredProviders[i].getProperty("nameKey") && filteredProviders[i].getProperty("nls")){ //$NON-NLS-1$ //$NON-NLS-0$
+				var deferred = new Deferred();
 				deferreds.push(deferred);
-				i18nUtil.getMessageBundle(filteredProviders[i].getProperty("nls")).then(dojo.hitch(this, function(i, deferred, commandMessages){
-					filteredProviders[i].displayName = commandMessages[filteredProviders[i].getProperty("nameKey")];
-					deferred.resolve();
-				}, i, deferred), dojo.hitch(this, function(i, deferred, error){
-					deferred.reject(error);
-				}, i, deferred));
+				var provider = filteredProviders[i];
+				var getDisplayName = function(commandMessages) { //$NON-NLS-0$
+					this.provider.displayName = commandMessages[provider.getProperty("nameKey")]; //$NON-NLS-0$
+					this.deferred.resolve();
+				};
+				i18nUtil.getMessageBundle(provider.getProperty("nls")).then(getDisplayName.bind({provider: provider, deferred: deferred}), deferred.reject); //$NON-NLS-0$
 			} else {
-				filteredProviders[i].displayName = filteredProviders[i].getProperty("name");
+				filteredProviders[i].displayName = filteredProviders[i].getProperty("name"); //$NON-NLS-0$
 			}
 		}
 		if(deferreds.length===0){
@@ -559,22 +560,17 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 				outliner.setOutlineProviders(filteredProviders);
 			}
 		}else{
-			new dojo.DeferredList(deferreds).addBoth(dojo.hitch(this, function(){
+			Deferred.all(deferreds, function(error) { return error; }).then(function(){
 				outlineService.setOutlineProviders(filteredProviders);
 				if (outliner) {
 					outliner.setOutlineProviders(filteredProviders);
 				}
-			}));
+			});
 		}
 	}
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$
 		outlineService.emitOutline(editor.getText(), editor.getTitle());
 	});
-	dojo.connect(outliner, "setSelectedProvider", function(/**ServiceReference*/ outlineProvider) { //$NON-NLS-0$
-		outlineService.setProvider(outlineProvider);
-		outlineService.emitOutline(editor.getText(), editor.getTitle());
-	});
-	
 	window.onbeforeunload = function() {
 		if (editor.isDirty()) {
 			 return messages["There are unsaved changes."];

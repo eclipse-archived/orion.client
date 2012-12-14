@@ -12,8 +12,8 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/Deferred", "dojo"], 
-		function(messages, require, mSearchUtils, mContentTypes, Deferred, dojo) {
+define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/searchUtils', 'orion/contentTypes', 'orion/Deferred'], 
+		function(messages, require, i18nUtil, mSearchUtils, mContentTypes, Deferred) {
 	
 	/**
 	 * SearchCrawler is an alternative when a file service does not provide the search API.
@@ -214,14 +214,14 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/searchUtils', 'orio
 		var self = this;
 		if(this.searchHelper.params.keyword === ""){
 			this._reportSingleHit(fileObj);
-			this.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [this._hitCounter, this._totalCounter])});
+			this.registry.getService("orion.page.message").setProgressResult({Message: i18nUtil.formatMessage(messages["${0} files found out of ${1}"], this._hitCounter, this._totalCounter)});
 		} else {
 			return self.fileClient.read(fileObj.Location).then(function(jsonData) { //$NON-NLS-0$
 				//self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 				if(self._hitOnceWithinFile(jsonData)){
 					self._reportSingleHit(fileObj);
 				}
-				self.registry.getService("orion.page.message").setProgressResult({Message: dojo.string.substitute(messages["${0} files found out of ${1}"], [self._hitCounter, self._totalCounter])});
+				self.registry.getService("orion.page.message").setProgressResult({Message: i18nUtil.formatMessage(messages["${0} files found out of ${1}"], self._hitCounter, self._totalCounter)});
 				},
 				function(error) {
 					console.error("Error loading file content: " + error.message); //$NON-NLS-0$

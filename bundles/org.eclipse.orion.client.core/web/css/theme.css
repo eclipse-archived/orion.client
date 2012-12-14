@@ -484,3 +484,40 @@ a.currentLocation:hover {
 .tooltipShowing {
 	visibility: visible;
 }
+
+/* dialogs */
+.dialog {
+	visibility: hidden;
+	z-index: 175;  /* less than tooltips, more than the rest */
+	position: absolute;
+	background-color: #fbfbfb;
+	border-radius: 3px;
+	border: 1px solid #DDD;
+}
+
+.dialogShowing {
+	visibility: visible;
+}
+
+.dialogTitle {
+	padding: 2px;
+	display: block;
+}
+
+.dialogTitleText {
+	margin: 2px 2px 0;
+	color: #222;
+	font-size: 1.1em;
+}
+
+.dialogDismiss {
+	display: block;
+	cursor: pointer;
+}
+
+.dialogContent {
+	padding: 8px;
+}
+
+.dialogButtons {
+}

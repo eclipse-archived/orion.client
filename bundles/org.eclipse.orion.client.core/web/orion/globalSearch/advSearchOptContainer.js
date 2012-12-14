@@ -8,6 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define window document XMLHttpRequest*/
 
 define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 'orion/contentTypes', "orion/i18nUtil"], function(messages, require, mSearchUtils, mContentTypes, i18nUtil){
 
@@ -30,41 +31,25 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 			}
 		}
 		this._idPrefix = idFrefix + "__dropDown__"; //$NON-NLS-0$
+		this.containerId = this._idPrefix + "UIContainer"; //$NON-NLS-0$
 		this._dismissed = true;
 		var that = this;
 		this._optRenderer = new advSearchOptRenderer(searcher, serviceRegistry, function(){that.dismiss();that._inputField.focus();});
 		this._initUI();
 	}
 	
-	advSearchOptContainer.prototype._getUIContainerID = function(){
-		return this._idPrefix + "UIContainer"; //$NON-NLS-0$
-	};
-
 	advSearchOptContainer.prototype._initUI = function(){
-		this._optUIContainer = document.getElementById(this._getUIContainerID());
+		this._optUIContainer = document.getElementById(this.containerId);
 		if(!this._optUIContainer){
 			this._optUIContainer = document.createElement('div'); //$NON-NLS-0$
-			this._optUIContainer.id = this._getUIContainerID();
+			this._optUIContainer.id = this.containerId;
 			this._optUIContainer.style.display = "none"; //$NON-NLS-0$
 			this._optUIContainer.className = "advSearchOptContainer"; //$NON-NLS-0$
 			document.body.appendChild(this._optUIContainer);
 			this._optRenderer.render(this._optUIContainer/*, 'orion/globalSearch/advSearchOpt.html'*/);			
 		}
 	};
-	
-	advSearchOptContainer.prototype.clicked = function(target){
-		if(this._dismissed){
-			return true;
-		}
-		var parent = target;
-		while (parent) {
-			if(parent === this._optUIContainer){
-				return true;
-			}
-	        parent = parent.parentNode;
-		}
-		return false;
-	};
+
 	
 	advSearchOptContainer.prototype.dismiss = function(valueToInputField){
 		this._dismissed = true;
@@ -110,7 +95,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		return {searchStr: this._searchBox.value,
 		        regEx: this._regExCB.checked,
 		        type: this._fileTypes.options[this._fileTypes.selectedIndex].value
-		}
+		};
 	};
 
 	advSearchOptRenderer.prototype.render = function(parentDiv, htmlTemplate){
@@ -181,7 +166,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		});
 		
 		this._fileTypes.addEventListener("change", function(e) { //$NON-NLS-0$
-			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value
+			var type = that._fileTypes.options[that._fileTypes.selectedIndex].value;
 			if(type === mSearchUtils.ALL_FILE_TYPE){
 				that._searchBox.placeholder = messages["Type a search term"];
 			} else {
@@ -191,7 +176,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		
 		this._submitButton.onclick = function(e){
 			that._submitSearch();
-		}
+		};
 	};
 	
 	advSearchOptRenderer.prototype._initHTMLLabels = function(){
@@ -211,7 +196,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	    	if (this.status!==200) return; 
 	    	that._parentDiv.innerHTML= this.responseText;
 	    	that._initHTMLLabels();
-	    	that._initControls()
+	    	that._initControls();
 		};
 		xhr.send();
 	};
@@ -239,7 +224,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	
 	advSearchOptRenderer.prototype._renderRaw = function(){
 		this._parentDiv.innerHTML = this._htmlTemplate;
-	    this._initControls()
+	    this._initControls();
 	};
 	
 	advSearchOptRenderer.prototype.constructor = advSearchOptRenderer;
