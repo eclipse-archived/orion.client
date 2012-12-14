@@ -17,6 +17,10 @@ html,body {
   font-size: 10pt;
 }
 
+.gcli-row-out > p {
+	white-space: pre;
+}
+
 .modelDecorationSprite { 
 	display: inline-block; 
 	vertical-align: middle; 

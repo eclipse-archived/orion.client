@@ -76,7 +76,7 @@ define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
 		url.query.append("b","4");
 		url.query.append("c","5");
 		url.query.append("a param","a value");
-		url.query.set("empty");
+		url.query.set("empty", "");
 		url.query.append("b","6");
 		assert.equal(url.search, "?a=1&b=3&b=4&c=5&a%20param=a%20value&empty&b=6");
 		url.query['delete']("b");
