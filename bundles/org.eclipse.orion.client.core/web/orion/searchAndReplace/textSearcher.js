@@ -6,12 +6,14 @@
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  * 
- * Contributors: IBM Corporation - initial API and implementation
+ * Contributors: 
+ *	IBM Corporation - initial API and implementation
+ *	Adrian Aichner - regular expression capture group support in replace
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils' ], 
-	function(messages, require, lib, mAnnotations, mCommands, mRegex, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/searchUtils' ], 
+	function(messages, require, lib, mAnnotations, mCommands, mSearchUtils){
 	
 var orion = orion || {};
 
@@ -63,8 +65,8 @@ orion.TextSearcher = (function() {
 				};
 				parentDiv.appendChild(searchStringDiv);
 				
-				that.createButton("Next", parentDiv, function() {that.findNext(true);});				
-				that.createButton("Previous", parentDiv, function() {that.findNext(false);});	
+				that.createButton("Next", parentDiv, function() {that.findNext(true);}); //$NON-NLS-0$			
+				that.createButton("Previous", parentDiv, function() {that.findNext(false);}); //$NON-NLS-0$
 				
 				// create replace text
 				var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
@@ -78,8 +80,8 @@ orion.TextSearcher = (function() {
 				};
 				parentDiv.appendChild(replaceStringDiv);
 				
-				that.createButton(messages["Replace"], parentDiv, function() {that.replace();});				
-				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	
+				that.createButton(messages["Replace"], parentDiv, function() {that.replace();}); //$NON-NLS-0$		
+				that.createButton(messages["Replace All"], parentDiv, function() {that.replaceAll();});	//$NON-NLS-0$
 
 				var optionsDiv = document.createElement("div"); //$NON-NLS-0$
 				parentDiv.appendChild(optionsDiv);
@@ -238,7 +240,6 @@ orion.TextSearcher = (function() {
 		
 		buildToolBar : function(defaultSearchStr, defaultReplaceStr) {
 			this._keyUpHandled = true;
-			var that = this;
 			this._editor.getTextView().addEventListener("Focus", this._listeners.onEditorFocus); //$NON-NLS-0$
 			var findDiv = document.getElementById("localSearchFindWith"); //$NON-NLS-0$
 			if (this.visible()) {
@@ -348,6 +349,20 @@ orion.TextSearcher = (function() {
 			}
 		}, 
 	
+		_doReplace: function(start, end, searchStr, newStr) {
+			var editor = this._editor;
+			if (this._useRegExp) {
+				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
+				if (newStrWithSubstitutions) {
+					editor.setText(newStrWithSubstitutions, start, end);
+					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
+				}
+			} else {
+				editor.setText(newStr, start, end);
+				editor.setSelection(start, start + newStr.length, true);
+			}
+		},
+		
 		replace: function() {
 			this.startUndo();
 			var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
@@ -355,8 +370,7 @@ orion.TextSearcher = (function() {
 			var selection = editor.getSelection();
 			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
 			var start = selection ? selection.start : 0;
-			var end = selection ? selection.end : 0;
-			if(searchStr){
+			if (searchStr) {
 				var result = editor.getModel().find({
 					string: searchStr,
 					start: start,
@@ -366,20 +380,9 @@ orion.TextSearcher = (function() {
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._ignoreCase
 				}).next();
-				if(result){
-					start = result.start;
-					end = result.end;
+				if (result) {
+					this._doReplace(result.start, result.end, searchStr, newStr);
 				}
-			}
-			if (this._useRegExp) {
-				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
-				if (newStrWithSubstitutions) {
-					editor.setText(newStrWithSubstitutions, start, end)
-					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
-				}
-			} else {
-				editor.setText(newStr, start, end);
-				editor.setSelection(start, start + newStr.length, true);
 			}
 			this.endUndo();
 			if (this._findAfterReplace && searchStr){
@@ -411,7 +414,7 @@ orion.TextSearcher = (function() {
 				if (result) {
 					this._editor.reportStatus("");
 				} else {
-					this._editor.reportStatus(messages["Not found"], "error"); //$NON-NLS-1$
+					this._editor.reportStatus(messages["Not found"], "error"); //$NON-NLS-0$ //$NON-NLS-1$
 				}
 				var visible = this.visible();
 				if (visible) {
@@ -446,7 +449,7 @@ orion.TextSearcher = (function() {
 				this._replacingAll = true;
 				var editor = this._editor;
 				editor.reportStatus("");
-				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-1$
+				editor.reportStatus(messages["Replacing all..."], "progress"); //$NON-NLS-0$ //$NON-NLS-1$
 				var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
 				var self = this;
 				window.setTimeout(function() {
@@ -463,8 +466,7 @@ orion.TextSearcher = (function() {
 							self.startUndo();
 						}
 						var selection = editor.getSelection();
-						editor.setText(newStr, selection.start, selection.end);
-						editor.setSelection(selection.start , selection.start + newStr.length, true);
+						self._doReplace(selection.start, selection.end, searchStr, newStr);
 						startPos = self.getSearchStartIndex(true, true);
 					}
 					if(number > 0) {
@@ -474,7 +476,7 @@ orion.TextSearcher = (function() {
 					if(startPos > 0) {
 						editor.reportStatus(messages["Replaced "]+number+messages[" matches"]);
 					} else {
-						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-1$
+						editor.reportStatus(messages["Nothing replaced"], "error"); //$NON-NLS-0$ //$NON-NLS-1$
 					}
 					self._replacingAll = false;
 				}, 100);				

@@ -1,0 +1,11 @@
+# Want to track this .gitignore file in Git, so override the top-level ignore
+!.gitignore
+.project
+
+lib/dojo/
+node_modules/
+npm-debug.log
+
+# Per-user Orionode data
+.workspace/
+.temp/
