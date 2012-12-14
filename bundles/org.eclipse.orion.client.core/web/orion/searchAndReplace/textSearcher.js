@@ -12,8 +12,8 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/editor/regex', 'orion/searchUtils' ], 
-	function(messages, require, lib, mAnnotations, mCommands, mRegex, mSearchUtils){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/searchUtils' ], 
+	function(messages, require, lib, mAnnotations, mCommands, mSearchUtils){
 	
 var orion = orion || {};
 
