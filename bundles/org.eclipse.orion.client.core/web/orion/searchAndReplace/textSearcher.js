@@ -368,8 +368,7 @@ orion.TextSearcher = (function() {
 			var selection = editor.getSelection();
 			var searchStr = document.getElementById("localSearchFindWith").value; //$NON-NLS-0$
 			var start = selection ? selection.start : 0;
-			var end = selection ? selection.end : 0;
-			if(searchStr){
+			if (searchStr) {
 				var result = editor.getModel().find({
 					string: searchStr,
 					start: start,
@@ -379,11 +378,9 @@ orion.TextSearcher = (function() {
 					wholeWord: this._wholeWord,
 					caseInsensitive: this._ignoreCase
 				}).next();
-				if(result){
-					start = result.start;
-					end = result.end;
+				if (result) {
+					this._doReplace(result.start, result.end, searchStr, newStr);
 				}
-				this._doReplace(start, end, searchStr, newStr);
 			}
 			this.endUndo();
 			if (this._findAfterReplace && searchStr){
