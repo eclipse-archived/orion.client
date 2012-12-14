@@ -348,6 +348,20 @@ orion.TextSearcher = (function() {
 			}
 		}, 
 	
+		_doReplace: function(start, end, searchStr, newStr) {
+			var editor = this._editor;
+			if (this._useRegExp) {
+				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
+				if (newStrWithSubstitutions) {
+					editor.setText(newStrWithSubstitutions, start, end);
+					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
+				}
+			} else {
+				editor.setText(newStr, start, end);
+				editor.setSelection(start, start + newStr.length, true);
+			}
+		},
+		
 		replace: function() {
 			this.startUndo();
 			var newStr = document.getElementById("localSearchReplaceWith").value; //$NON-NLS-0$
@@ -370,16 +384,7 @@ orion.TextSearcher = (function() {
 					start = result.start;
 					end = result.end;
 				}
-			}
-			if (this._useRegExp) {
-				var newStrWithSubstitutions = editor.getText().substring(start, end).replace(new RegExp(searchStr), newStr);
-				if (newStrWithSubstitutions) {
-					editor.setText(newStrWithSubstitutions, start, end)
-					editor.setSelection(start, start + newStrWithSubstitutions.length, true);
-				}
-			} else {
-				editor.setText(newStr, start, end);
-				editor.setSelection(start, start + newStr.length, true);
+				this._doReplace(start, end, searchStr, newStr);
 			}
 			this.endUndo();
 			if (this._findAfterReplace && searchStr){
@@ -463,8 +468,7 @@ orion.TextSearcher = (function() {
 							self.startUndo();
 						}
 						var selection = editor.getSelection();
-						editor.setText(newStr, selection.start, selection.end);
-						editor.setSelection(selection.start , selection.start + newStr.length, true);
+						self._doReplace(selection.start, selection.end, searchStr, newStr);
 						startPos = self.getSearchStartIndex(true, true);
 					}
 					if(number > 0) {
