@@ -55,7 +55,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/commands',
 	function NavOutlineExplorer(serviceRegistry, selection) {
 		this.selection = selection;
 		this.registry = serviceRegistry;
-		this.renderer = new NavOutlineRenderer({checkbox: false, decorateAlternatingLines: false}, this);
+		this.renderer = new NavOutlineRenderer({checkbox: false}, this);
 	}
 	NavOutlineExplorer.prototype = mExplorer.Explorer.prototype;	
 	NavOutlineExplorer.prototype.constructor = NavOutlineExplorer;

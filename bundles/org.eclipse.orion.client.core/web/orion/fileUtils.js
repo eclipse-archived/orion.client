@@ -10,7 +10,7 @@
  *******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
+define(['i18n!orion/nls/messages'], function(messages) {
                 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.

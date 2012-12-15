@@ -13,7 +13,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['require', 'dojo'], function(require, dojo) {
+define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo) {
 
 var eclipse = eclipse || {};
 

@@ -10,7 +10,7 @@
  ******************************************************************************/
  /*global define document window*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, dojo, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
+define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'orion/uiUtils', 'orion/section', 'orion/explorers/explorer', 'orion/commands', 'orion/URITemplate', 'orion/EventTarget'], function(messages, Deferred, lib, mUIUtils, mSection, mExplorer, mCommands, URITemplate, EventTarget) {
 
 	function OutlineRenderer (options, explorer, title, selectionService) {
 		this.explorer = explorer;
@@ -28,9 +28,10 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 		if (!item) {
 			return;
 		}
-		var elementNode = dojo.create("span", null, tableRow, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		var elementNode = document.createElement("span"); //$NON-NLS-0$
+		tableRow.appendChild(elementNode);
 		if (item.className) {
-			dojo.addClass(elementNode, item.className);
+			elementNode.classList.add(item.className);
 		}
 		if (item.children) {
 			this.getExpandImage(tableRow, elementNode);
@@ -41,32 +42,33 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 			var href = new URITemplate("#{,resource,params*}").expand({resource: this.title, params: item}); //$NON-NLS-0$
 			this._createLink(item.label, href, elementNode);
 		} else if (item.label) {
-			dojo.place(document.createTextNode(item.label), elementNode, "last"); //$NON-NLS-0$
+			elementNode.appendChild(document.createTextNode(item.label)); //$NON-NLS-0$
 		}
 	};
 	
 	OutlineRenderer.prototype._createLink = function(text, href, parentNode) {
-		var link = dojo.create("a", null, parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+		var link = document.createElement("a"); //$NON-NLS-0$
+		parentNode.appendChild(link);
 		// if there is no selection service, we rely on normal link following
 		if (!this.selectionService) {
 			link.href = href;
 		} else {
-			dojo.style(link, "cursor", "pointer"); //$NON-NLS-1$ //$NON-NLS-0$
+			link.style.cursor = "pointer"; //$NON-NLS-0$
 		}
-		dojo.addClass(link, "navlinkonpage"); //$NON-NLS-0$
-		dojo.place(document.createTextNode(text), link);
+		link.classList.add("navlinkonpage"); //$NON-NLS-0$
+		link.appendChild(document.createTextNode(text));
 		// if a selection service has been specified, we will use it for link selection.
 		// Otherwise we assume following the href in the anchor tag is enough.
 		if (this.selectionService) {
 			var selectionService = this.selectionService;
 			var url = href;
-			dojo.connect(link, "onclick", link, function(event) { //$NON-NLS-0$
+			link.addEventListener("click", function(event) { //$NON-NLS-0$
 				if (mUIUtils.openInNewWindow(event)) {
 					mUIUtils.followLink(url, event);
 				} else {
 					selectionService.setSelections(url);
 				}
-			});
+			}, false);
 		}
 		return link;
 	};
@@ -79,7 +81,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 			link is clicked.  We don't want the explorer triggering selection events on the outline model item
 		*/
 		this.registry = serviceRegistry;
-		this.renderer = new OutlineRenderer({checkbox: false, decorateAlternatingLines: false, treeTableClass: "outlineExplorer"}, this, title, selection);  //$NON-NLS-0$ 
+		this.renderer = new OutlineRenderer({checkbox: false, treeTableClass: "outlineExplorer"}, this, title, selection);  //$NON-NLS-0$ 
 	}
 	OutlineExplorer.prototype = mExplorer.Explorer.prototype;	
 	OutlineExplorer.prototype.constructor = OutlineExplorer;
@@ -109,7 +111,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 		// We might have duplicate id's if the outline items are duplicated, or if we happen to have another dom id using
 		// this name.  Check for this case and use a timestamp in lieu of the generated id.
 		if ((this.idItemMap[id] && this.idItemMap[id]!== item) ||
-			dojo.byId(id)) {// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=389760
+			lib.node(id)) {// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=389760
 			id = new Date().getTime().toString();
 			this.idItemMap[id] = item;
 			item.outlinerId = id;
@@ -162,9 +164,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 	Outliner.prototype = /** @lends orion.outliner.Outliner.prototype */ {
 		_init: function(options) {
 			var parent = options.parent;
-			if (typeof(parent) === "string") { //$NON-NLS-0$
-				parent = dojo.byId(parent);
-			}
+			parent = lib.node(parent);
 			if (!parent) { throw "no parent"; } //$NON-NLS-0$
 			if (!options.outlineService) {throw "no outline service"; } //$NON-NLS-0$
 			this._parent = parent;
@@ -172,8 +172,9 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 			this._outlineService = options.outlineService;
 			this._commandService = options.commandService;
 			this._selectionService = options.selectionService;
+			this._onSelectedProvider = options.onSelectedProvider;
 			var self = this;
-			dojo.when(this._outlineService, function(service) {
+			Deferred.when(self._outlineService, function(service) {
 				service.addEventListener("outline", function(event) { //$NON-NLS-0$
 					self.providerId = event.providerId;
 					self._renderHeadingAndMenu(self.outlineProviders);
@@ -188,7 +189,8 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 				visibleWhen: function(item) {
 					return true;
 				},
-				choiceCallback: dojo.hitch(this, this._menuCallback)});
+				choiceCallback: this._menuCallback.bind(this)
+			});
 			this._commandService.addCommand(switchOutlineCommand);
 		},
 		outlineChanged: function(outlinerService, title, contents) {
@@ -197,24 +199,24 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 				self._renderOutline(outlineModel, title);
 			});
 		},
-		/**
-		 * Clients can connect to this function to be notified of user choice of outline provider.
-		 */
 		setSelectedProvider: function(/**ServiceReference*/ provider) {
 			this.providerId = provider.getProperty("id"); //$NON-NLS-0$
 			this.providerName = provider.getProperty("name"); //$NON-NLS-0$
+			if (this._onSelectedProvider) {
+				this._onSelectedProvider(provider);
+			}
 		},
 		setOutlineProviders: function(providers) {
 			this.outlineProviders = providers;
 			this._renderHeadingAndMenu(this.outlineProviders);
 		},
 		_renderOutline: function(outlineModel, title) {
-			var contentParent = dojo.byId("outlinerHeading"); //$NON-NLS-0$
+			var contentParent = lib.node("outlinerHeading"); //$NON-NLS-0$
 			if (!contentParent) {
 				this._renderHeadingAndMenu();
 			}
-			var contentNode = dojo.byId("outlineSectionContent"); //$NON-NLS-0$
-			dojo.empty(contentNode);
+			var contentNode = lib.node("outlineSectionContent"); //$NON-NLS-0$
+			lib.empty(contentNode);
 			outlineModel = outlineModel instanceof Array ? outlineModel : [outlineModel];
 			if (outlineModel) {
 				var treeModel = new OutlineModel(outlineModel);
@@ -231,7 +233,7 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 				    prefix = (provider.getProperty("id") === this.providerId) ? "* " : ""; //$NON-NLS-1$ //$NON-NLS-0$
 				choices.push({
 					name: prefix + name,
-					callback: dojo.hitch(this, this.setSelectedProvider, provider)});
+					callback: this.setSelectedProvider.bind(this, provider)});
 			}
 			return choices;
 		},
@@ -270,14 +272,14 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 		EventTarget.attach(this);
 		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this); //$NON-NLS-0$
 		this._outlinePref = this._preferences.getPreferences("/edit/outline"); //$NON-NLS-0$
-		this._provider = new dojo.Deferred();
+		this._provider = new Deferred();
 	}
 	OutlineService.prototype = /** @lends orion.outliner.OutlineService.prototype */ {
 		setOutlineProviders: function(/**ServiceReference[]*/ providers) {
 			this.providers = providers;
 			// Check pref to see if user has chosen a preferred outline provider
 			var self = this;
-			dojo.when(this._outlinePref, function(pref) {
+			Deferred.when(this._outlinePref, function(pref) {
 				var provider;
 				for (var i=0; i < providers.length; i++) {
 					provider = providers[i];
@@ -291,10 +293,10 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 			});
 		},
 		setProvider: function(/**ServiceReference*/ provider) {
-			if (this._provider.fired !== -1) {
-				this._provider = new dojo.Deferred();
+			if (this._provider.isFulfilled()) {
+				this._provider = new Deferred();
 			}
-			this._provider.callback(provider);
+			this._provider.resolve(provider);
 			var id = provider.getProperty("id"); //$NON-NLS-0$
 			if (id) {
 				this._outlinePref.then(function(pref) {
@@ -302,15 +304,18 @@ define(['i18n!orion/nls/messages', 'dojo', 'orion/uiUtils', 'orion/section', 'or
 				});
 			}
 		},
-		/** @returns {dojo.Deferred} */
+
 		getProvider: function() {
 			return this._provider;
 		},
 		emitOutline: function(contents, title, providerId) {
 			var self = this;
-			dojo.when(this.getProvider(), function(provider) {
+			
+			Deferred.when(this.getProvider(), function(provider) {
 				self._serviceRegistry.getService(provider).getOutline(contents, title).then(function(outline) {
-					self.dispatchEvent({type:"outline", outline: outline, title: title, providerId: provider.getProperty("id")}); //$NON-NLS-1$ //$NON-NLS-0$
+					if (outline) {
+						self.dispatchEvent({type:"outline", outline: outline, title: title, providerId: provider.getProperty("id")}); //$NON-NLS-1$ //$NON-NLS-0$
+					}
 				});
 			});
 		}

@@ -13,8 +13,8 @@
 /*global define window document */
 /*jslint devel:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit', 'orion/searchUtils', 'orion/crawler/searchCrawler', 'dijit/form/Button', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane' ], 
-function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/searchUtils', 'orion/crawler/searchCrawler'], 
+function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search client.
@@ -92,8 +92,8 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 		},
 		handleError: function(response, resultsNode) {
 			console.error(response);
-			var errorText = document.createTextNode(response);
-			dojo.place(errorText, resultsNode, "only"); //$NON-NLS-0$
+			lib.empty(resultsNode);
+			resultsNode.appendChild(document.createTextNode(response));
 			return response;
 		},
 		setLocationByMetaData: function(meta, useParentLocation){
@@ -118,18 +118,18 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 				locationName = this._fileService.fileServiceName(meta.Location);
 				this._childrenLocation = meta.ChildrenLocation;
 			}
-			var searchInputDom = dojo.byId("search"); //$NON-NLS-0$
+			var searchInputDom = lib.node("search"); //$NON-NLS-0$
 			if(!locationName){
 				locationName = "";
 			}
 			if(searchInputDom && searchInputDom.placeholder){
 				searchInputDom.value = "";
-				var placeHolder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
+				var placeHolder = i18nUtil.formatMessage(messages["Search ${0}"], locationName);
 				
 				if(placeHolder.length > 30){
 					searchInputDom.placeholder = placeHolder.substring(0, 27) + "..."; //$NON-NLS-1$
 				} else {
-					searchInputDom.placeholder = dojo.string.substitute(messages["Search ${0}"], [locationName]);
+					searchInputDom.placeholder = i18nUtil.formatMessage(messages["Search ${0}"], locationName);
 				}
 			}
 			if(searchInputDom && searchInputDom.title){
@@ -219,7 +219,10 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 				 */
 				function render(resources, queryName, error) {
 					if (error) {
-						dojo.place("<div>"+messages["Search failed."]+"</div>", resultsNode, "only"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						lib.empty(resultsNode);
+						var message = document.createElement("div"); //$NON-NLS-0$
+						message.appendChild(document.createTextNode(messages["Search failed."]));
+						resultsNode.appendChild(message);
 						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 							onResultReady(resultsNode);
 						}
@@ -262,7 +265,7 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 					}()); //End of appendPath function
 		
 					var foundValidHit = false;
-					dojo.empty(resultsNode);
+					lib.empty(resultsNode);
 					if (resources && resources.length > 0) {
 						var table = document.createElement('table'); //$NON-NLS-0$
 						table.setAttribute('role', 'presentation'); //$NON-NLS-1$ //$NON-NLS-0$
@@ -285,9 +288,9 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 								decorator(col);
 							}
 							var resourceLink = document.createElement('a'); //$NON-NLS-0$
-							dojo.place(document.createTextNode(resource.name), resourceLink);
+							resourceLink.appendChild(document.createTextNode(resource.name));
 							if (resource.LineNumber) { // FIXME LineNumber === 0 
-								dojo.place(document.createTextNode(' (Line ' + resource.LineNumber + ')'), resourceLink); //$NON-NLS-1$ //$NON-NLS-0$
+								resourceLink.appendChild(document.createTextNode(' (Line ' + resource.LineNumber + ')')); //$NON-NLS-1$ //$NON-NLS-0$
 							}
 							var loc = resource.location;
 							if (resource.isExternalResource) {
@@ -307,11 +310,11 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 							}
 							resourceLink.setAttribute('href', loc); //$NON-NLS-0$
 							resourceLink.setAttribute('aria-describedby', (resource.folderName ? resource.folderName : resource.path).replace(/[^a-zA-Z0-9_\.:\-]/g,'')); //$NON-NLS-0$
-							dojo.style(resourceLink, "verticalAlign", "middle"); //$NON-NLS-1$ //$NON-NLS-0$
+							resourceLink.style.verticalAlign = "middle"; //$NON-NLS-0$
 							col.appendChild(resourceLink);
 							appendPath(col, resource);
 						}
-						dojo.place(table, resultsNode, "last"); //$NON-NLS-0$
+						resultsNode.appendChild(table);
 						if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 							onResultReady(resultsNode);
 						}
@@ -319,8 +322,9 @@ function(messages, require, dojo, dijit, mSearchUtils, mSearchCrawler){
 					if (!foundValidHit) {
 						// only display no matches found if we have a proper name
 						if (queryName) {
-							var errorStr = dojo.string.substitute(messages["No matches found for ${0}"], [queryName]); 
-							dojo.place(document.createTextNode(errorStr), resultsNode, "only"); //$NON-NLS-0$
+							var errorStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], queryName); 
+							lib.empty(resultsNode);
+							resultsNode.appendChild(document.createTextNode(errorStr)); 
 							if (typeof(onResultReady) === "function") { //$NON-NLS-0$
 								onResultReady(resultsNode);
 							}

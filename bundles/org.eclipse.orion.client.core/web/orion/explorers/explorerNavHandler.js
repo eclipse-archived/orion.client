@@ -12,7 +12,7 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/nls/messages', 'dojo', 'orion/treeModelIterator'], function(messages, dojo, mTreeModelIterator){
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib', 'orion/treeModelIterator'], function(messages, lib, mTreeModelIterator){
 
 var exports = {};
 var userAgent = navigator.userAgent;
@@ -38,74 +38,67 @@ exports.ExplorerNavHandler = (function() {
 	    
 	    this._currentColumn = 0;
 	    var parentDiv = this._getEventListeningDiv();
-	    dojo.attr(parentDiv, "tabIndex", 0); //$NON-NLS-0$
-		dojo.addClass(parentDiv, "selectionModelContainer"); //$NON-NLS-0$
-		
-		this._modelIterator = new mTreeModelIterator.TreeModelIterator([],
-		   		   {isExpanded: dojo.hitch(this, function(model) {
-		   						 	return this.isExpanded(model);
-		   						 }),
-		   						 
-		   			isExpandable: this.explorer.renderer.isExpandable ? dojo.hitch(this, function(model) {
-					 				return this.explorer.renderer.isExpandable(model);
-								 }) : dojo.hitch(this, function(model) {
-					 				return this.isExpandable(model);
-								 }),				   						 
-		   			
-					forceExpandFunc: this.explorer.forceExpandFunc? dojo.hitch(this, function(modelToExpand, childPosition, callback) {
-			 						return this.explorer.forceExpandFunc(modelToExpand, childPosition, callback);
-						 		 }) : undefined
-		   		   });
+	    parentDiv.tabIndex = 0;
+		parentDiv.classList.add("selectionModelContainer"); //$NON-NLS-0$
+		var self = this;
+		this._modelIterator = new mTreeModelIterator.TreeModelIterator([], {
+			isExpanded: this.isExpanded.bind(this),					 
+			isExpandable: this.explorer.renderer.isExpandable ? 
+				function(model) { return self.explorer.renderer.isExpandable(model); } : 
+				function(model) { return self.isExpandable(model); },
+			forceExpandFunc: this.explorer.forceExpandFunc ? 
+				function(modelToExpand, childPosition, callback) {
+					return self.explorer.forceExpandFunc(modelToExpand, childPosition, callback);
+				} : undefined
+		});
 		this._init(options);
 		
 	    if(!options || options.setFocus !== false){
-	    	parentDiv.focus();
+			parentDiv.focus();
 	    }
-		var keyListener = dojo.connect(parentDiv, "onkeydown", dojo.hitch(this, function (e) { //$NON-NLS-0$
-            if (e.target) {// Firefox,  Chrome and Safari
-                if(e.target !== parentDiv){
-    				return true;
-    			}
-            } else if (e.srcElement){// Internet Explorer
-                if(e.srcElement !== parentDiv){
-    				return true;
-    			}
-            }
-			if(this.explorer.preventDefaultFunc && this.explorer.preventDefaultFunc(e, this._modelIterator.cursor())){
+	    var keyListener = function (e) { 
+			if(e.target !== parentDiv){
+				return;
+			}
+			if(self.explorer.preventDefaultFunc && self.explorer.preventDefaultFunc(e, self._modelIterator.cursor())){
 				return true;
 			}
-			if(e.keyCode === dojo.keys.DOWN_ARROW){
-				return this.onDownArrow(e);
-			} else if(e.keyCode === dojo.keys.UP_ARROW){
-				return this.onUpArrow(e);
-			} else if(e.keyCode === dojo.keys.RIGHT_ARROW){
-				return this.onRightArrow(e);
-			} else if(e.keyCode === dojo.keys.LEFT_ARROW){
-				return this.onLeftArrow(e);
-			} else if(e.keyCode === dojo.keys.SPACE){
-				return this.onSpace(e);
-			} else if(e.keyCode === dojo.keys.ENTER) {
-				return this.onEnter(e);
+			if(e.keyCode === lib.KEY.DOWN) {
+				return self.onDownArrow(e);
+			} else if(e.keyCode === lib.KEY.UP) {
+				return self.onUpArrow(e);
+			} else if(e.keyCode === lib.KEY.RIGHT) {
+				return self.onRightArrow(e);
+			} else if(e.keyCode === lib.KEY.LEFT) {
+				return self.onLeftArrow(e);
+			} else if(e.keyCode === lib.KEY.SPACE) {
+				return self.onSpace(e);
+			} else if(e.keyCode === lib.KEY.ENTER) {
+				return self.onEnter(e);
 			}
-		}));
-		this._listeners.push(keyListener);
-		var l1 = dojo.connect(parentDiv, "onblur", dojo.hitch(this, function (e) { //$NON-NLS-0$
-			if(this.explorer.onFocus){
-				this.explorer.onFocus(false);
+		};
+		parentDiv.addEventListener("keydown", keyListener, false); //$NON-NLS-0$
+		this._listeners.push({type: "keydown", listener: keyListener}); //$NON-NLS-0$
+		var l1 = function (e) { 
+			if(self.explorer.onFocus){
+				self.explorer.onFocus(false);
 			} else {
-				this.toggleCursor(null, false);
+				self.toggleCursor(null, false);
 			}
-		}));
-		var l2 = dojo.connect(parentDiv, "onfocus", dojo.hitch(this, function (e) { //$NON-NLS-0$
-			if(this.explorer.onFocus){
-				this.explorer.onFocus(true);
+		};
+		parentDiv.addEventListener("blur", l1, false); //$NON-NLS-0$
+		this._listeners.push({type: "blur", listener: l1}); //$NON-NLS-0$
+		var l2 = function (e) { 
+			if(self.explorer.onFocus){
+				self.explorer.onFocus(true);
 			} else {
-				this.toggleCursor(null, true);
+				self.toggleCursor(null, true);
 			}
-		}));
-		this._listeners.push(l1);
-		this._listeners.push(l2);
-	};
+		};
+		parentDiv.addEventListener("focus", l2, false); //$NON-NLS-0$
+		this._listeners.push({type: "focus", listener: l2}); //$NON-NLS-0$
+		this._parentDiv = parentDiv;
+	}
 	
 	ExplorerNavHandler.prototype = /** @lends orion.ExplorerNavHandler.ExplorerNavHandler.prototype */ {
 		
@@ -123,13 +116,13 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_ctrlKeyOn: function(e){
-			return 	isMac ? e.metaKey : e.ctrlKey;
+			return isMac ? e.metaKey : e.ctrlKey;
 		},
 		
 		removeListeners: function(){
 			if(this._listeners){
 				for (var i=0; i < this._listeners.length; i++) {
-					dojo.disconnect(this._listeners[i]);
+					this._parentDiv.removeEventListener(this._listeners[i].type, this._listeners[i].listener, false);
 				}
 			}
 		},
@@ -145,14 +138,14 @@ exports.ExplorerNavHandler = (function() {
 			if(this.explorer.keyEventListeningDiv && typeof this.explorer.keyEventListeningDiv === "function"){ //$NON-NLS-0$
 				return this.explorer.keyEventListeningDiv(secondLevel);
 			}
-			return dojo.byId(this.explorer._parentId);
+			return lib.node(this.explorer._parentId);
 		},
 		
 		isExpandable: function(model){
 			if(!model){
 				return false;
 			}
-			var expandImage = dojo.byId(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
+			var expandImage = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
 			return expandImage ? true: false;
 		},
 		
@@ -314,14 +307,26 @@ exports.ExplorerNavHandler = (function() {
 			var currentgrid = this.getCurrentGrid(model);
 			if(currentgrid) {
 				if(currentRow){
-					dojo.toggleClass(currentRow, "treeIterationCursorRow", on); //$NON-NLS-0$
+					if (on) {
+						currentRow.classList.add("treeIterationCursorRow"); //$NON-NLS-0$
+					} else {
+						currentRow.classList.remove("treeIterationCursorRow"); //$NON-NLS-0$
+					}
 				}
 				if(currentgrid.domNode){
-					dojo.toggleClass(currentgrid.domNode, "treeIterationCursor", on); //$NON-NLS-0$
+					if (on) {
+						currentgrid.domNode.classList.add("treeIterationCursor"); //$NON-NLS-0$
+					} else {
+						currentgrid.domNode.classList.remove("treeIterationCursor"); //$NON-NLS-0$
+					}
 				}
 			} else {
 				if(currentRow){
-					dojo.toggleClass(currentRow, "treeIterationCursorRow_Dotted", on); //$NON-NLS-0$
+					if (on) {
+						currentRow.classList.add("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
+					} else {
+						currentRow.classList.remove("treeIterationCursorRow_Dotted"); //$NON-NLS-0$
+					}
 				}
 			}
 		},
@@ -381,7 +386,7 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var modelId = this.model.getId(rowModel);
 			var value = this._navDict.getValue(modelId);
-			return value && value.rowDomNode ? value.rowDomNode :  dojo.byId(modelId);
+			return value && value.rowDomNode ? value.rowDomNode :  lib.node(modelId);
 		},
 		
 		iterate: function(forward, forceExpand, selecting)	{
@@ -402,7 +407,7 @@ exports.ExplorerNavHandler = (function() {
 				if(!tableRow){
 					return;
 				}
-				var checkBox  = dojo.byId(this.explorer.renderer.getCheckBoxId(tableRow.id));
+				var checkBox  = lib.node(this.explorer.renderer.getCheckBoxId(tableRow.id));
 				var checked = toggle ? !checkBox.checked : true;
 				if(checked !== checkBox.checked){
 					this.explorer.renderer.onCheck(tableRow, checkBox, checked, true);
@@ -421,11 +426,10 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		_getToolBarHeight: function(toolBarId){
-			if(dojo.byId(toolBarId)){
-				mBox = dojo.marginBox(toolBarId);
-				if(mBox){
-					return mBox.h;
-				}
+			var toolbar = lib.node(toolBarId);
+			if(toolbar){
+				var bounds = lib.bounds(toolbar);
+				return bounds.height;
 			}
 			return 0;
 		},
@@ -436,9 +440,10 @@ exports.ExplorerNavHandler = (function() {
 			}
 			
 			var headerHeight = 0;
-			headerHeight += this._getToolBarHeight("staticBanner");
-			headerHeight += this._getToolBarHeight("titleArea");
-			headerHeight += this._getToolBarHeight("pageToolbar");
+			//TODO not so great to know about these ids here
+			headerHeight += this._getToolBarHeight("staticBanner"); //$NON-NLS-0$
+			headerHeight += this._getToolBarHeight("titleArea"); //$NON-NLS-0$
+			headerHeight += this._getToolBarHeight("pageToolbar"); //$NON-NLS-0$
 			
 		    var parentNode = this._getEventListeningDiv(true);
 			var parentRect = parentNode.getClientRects()[0];
@@ -464,7 +469,11 @@ exports.ExplorerNavHandler = (function() {
 			}
 			var rowDiv = this.getRowDiv(model);
 			if(rowDiv){
-				dojo.toggleClass(rowDiv, "checkedRow", this._inSelection(model) < 0); //$NON-NLS-0$
+				if (this._inSelection(model) < 0) {
+					rowDiv.classList.add("checkedRow"); //$NON-NLS-0$
+				} else {
+					rowDiv.classList.remove("checkedRow"); //$NON-NLS-0$
+				}
 			}
 		},
 		
@@ -481,7 +490,7 @@ exports.ExplorerNavHandler = (function() {
 		},
 		
 		onClick: function(model, mouseEvt)	{
-			var twistieSpan = dojo.byId(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
+			var twistieSpan = lib.node(this.explorer.renderer.expandCollapseImageId(this.model.getId(model)));
 			if(mouseEvt.target === twistieSpan){
 				return;
 			}
@@ -669,7 +678,7 @@ exports.ExplorerNavDict = (function() {
 		},
 			
 		/**
-		 * Get the value of a key by model id. 		 
+		 * Get the value of a key by model id.
 		 *  @param {String} id The model id.
 		 * @returns {Object} The value of the id from the dictionary.
 		 */
@@ -678,7 +687,7 @@ exports.ExplorerNavDict = (function() {
 		},
 		
 		/**
-		 * Get the grid navigation holder from a row navigation model. 		 
+		 * Get the grid navigation holder from a row navigation model.
 		 *  @param {Object} modelItem The model item object that represent a row.
 		 * @returns {Array} The .gridChildren property of the value keyed by the model id.
 		 */
@@ -697,7 +706,7 @@ exports.ExplorerNavDict = (function() {
 		},
 		
 		/**
-		 * Initialize the grid navigation holder to null. 		 
+		 * Initialize the grid navigation holder to null.
 		 *  @param {Object} modelItem The model item object that represent a row.
 		 */
 		initGridNavHolder: function(modelItem) {

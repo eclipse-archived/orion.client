@@ -9,11 +9,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window document define login logout localStorage orion */
+/*global window document define orion */
 /*browser:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'dijit/MenuItem', 'dijit/form/DropDownButton'], 
-        function(messages, require, dojo, dijit) {
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'], 
+        function(messages, require, lib) {
 
 	
 	/**
@@ -37,16 +37,16 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 		close: function () {
 			if (this._activeElements) {
 				if (this._activeElements.parameterArea) {
-					dojo.empty(this._activeElements.parameterArea);
+					lib.empty(this._activeElements.parameterArea);
 				}
 				if (this._activeElements.slideContainer) {
-					dojo.removeClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
+					this._activeElements.slideContainer.classList.remove("slideContainerActive"); //$NON-NLS-0$
 				}
 				if (this._activeElements.dismissArea) {
-					 dojo.empty(this._activeElements.dismissArea);
+					 lib.empty(this._activeElements.dismissArea);
 				}
 				if (this._activeElements.commandNode) {
-					dojo.removeClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
+					this._activeElements.commandNode.classList.remove("activeCommand"); //$NON-NLS-0$
 				}
 				this._toolbarLayoutFunction(this._activeElements);
 				if (this._activeElements.onClose) {
@@ -71,7 +71,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 		 */
 		open: function(commandNode, fillFunction, onClose) {
 			if (typeof commandNode === "string") { //$NON-NLS-0$
-				commandNode = dojo.byId(commandNode);
+				commandNode = lib.node(commandNode);
 			}
 			if (this._activeElements && this._activeElements.commandNode === commandNode) {
 				// already open.  Just return focus where it needs to be.
@@ -92,27 +92,32 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 					return false;
 				}
 				this._activeElements.focusNode = focusNode;
-				var close = dojo.query("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
+				var close = lib.$$array("#closebox", this._activeElements.dismissArea || this._activeElements.parameterArea); //$NON-NLS-0$
 				if (close.length === 0) {
 					// add the close button if the fill function did not.
 					var dismiss = this._activeElements.dismissArea || this._activeElements.parameterArea;
-					close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, dismiss, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
-					dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
-					dojo.addClass(close, "dismiss"); //$NON-NLS-0$
+					close = document.createElement("span"); //$NON-NLS-0$
+					close.id = "closebox"; //$NON-NLS-0$
+					close.role = "button"; //$NON-NLS-0$
+					close.tabIndex = 0; //$NON-NLS-0$
+					close.classList.add("imageSprite"); //$NON-NLS-0$
+					close.classList.add("core-sprite-close"); //$NON-NLS-0$
+					close.classList.add("dismiss"); //$NON-NLS-0$
 					close.title = messages['Close'];
-					dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
-						this.close();
-					}));
+					dismiss.appendChild(close);
+					var self = this;
+					close.addEventListener("click", function(event) { //$NON-NLS-0$
+						self.close();
+					}, false);
 					// onClick events do not register for spans when using the keyboard without a screen reader
-					dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
-						if(e.keyCode === dojo.keys.ENTER || e.charCode === dojo.keys.SPACE) {
-							this.close();
+					close.addEventListener("keydown", function (e) { //$NON-NLS-0$
+						if(e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {
+							self.close();
 						}
-					}));
+					}, false);
 				}
 				// all parameters have been generated.  Activate the area.
-				dojo.addClass(this._activeElements.slideContainer, "slideContainerActive"); //$NON-NLS-0$
+				this._activeElements.slideContainer.classList.add("slideContainerActive"); //$NON-NLS-0$
 				this._toolbarLayoutFunction(this._activeElements);
 
 				if (focusNode) {
@@ -123,7 +128,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 					}, 0);
 				}
 				if (this._activeElements.commandNode) {
-					dojo.addClass(this._activeElements.commandNode, "activeCommand"); //$NON-NLS-0$
+					this._activeElements.commandNode.classList.add("activeCommand"); //$NON-NLS-0$
 				}
 				return true;
 			}
@@ -131,14 +136,14 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 		},
 		
 		_collectAndCall: function(commandInvocation, parent) {
-			dojo.query("input", parent).forEach(function(field) { //$NON-NLS-0$
+			lib.$$array("input", parent).forEach(function(field) { //$NON-NLS-0$
 				if (field.type === "checkbox") { //$NON-NLS-0$
 					commandInvocation.parameters.setValue(field.parameterName, field.checked);
 				} else if (field.type !== "button") { //$NON-NLS-0$
 					commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 				}
 			});
-			dojo.query("textArea", parent).forEach(function(field) { //$NON-NLS-0$
+			lib.$$array("textArea", parent).forEach(function(field) { //$NON-NLS-0$
 				commandInvocation.parameters.setValue(field.parameterName, field.value.trim());
 			});
 			if (commandInvocation.command.callback) {
@@ -156,7 +161,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 		collectParameters: function(commandInvocation) {
 			if (commandInvocation.parameters) {
 				if (commandInvocation.domNode) {
-					dojo.addClass(commandInvocation.domNode, "commandMarker"); //$NON-NLS-0$
+					commandInvocation.domNode.classList.add("commandMarker"); //$NON-NLS-0$
 				}
 				return this.open(commandInvocation.domNode || commandInvocation.domParent, this.getFillFunction(commandInvocation));
 			}
@@ -171,56 +176,68 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 		 * @returns {Function} a function that can fill the specified dom node with parameter collection behavior
 		 */
 		 getFillFunction: function(commandInvocation, closeFunction) {
-			return dojo.hitch(this, function(parameterArea, dismissArea) {
+			var self = this;
+			return function(parameterArea, dismissArea) {
 				var first = null;
-				var localClose = dojo.hitch(this, function() {
+				var localClose = function() {
 					if (closeFunction) {
 						closeFunction();
 					} 
-					this.close();
-				});
-				var keyHandler = dojo.hitch(this, function(event) {
-					if (event.keyCode === dojo.keys.ENTER) {
-						this._collectAndCall(commandInvocation, parameterArea);
+					self.close();
+				};
+				var keyHandler = function(event) {
+					if (event.keyCode === lib.KEY.ENTER) {
+						self._collectAndCall(commandInvocation, parameterArea);
 					}
-					if (event.keyCode === dojo.keys.ESCAPE || event.keyCode === dojo.keys.ENTER) {
+					if (event.keyCode === lib.KEY.ESCAPE || event.keyCode === lib.KEY.ENTER) {
 						localClose();
-						dojo.stopEvent(event);
+						lib.stop(event);
 					}
-				});
+				};
 				commandInvocation.parameters.forEach(function(parm) {
 					if (parm.label) {
-						var label = dojo.create("label", {"class": "parameterInput", "for": parm.name + "parameterCollector"}, parameterArea, "last"); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var label = document.createElement("label"); //$NON-NLS-0$
+						label.classList.add("parameterInput"); //$NON-NLS-0$
+						label.setAttribute("for", parm.name + "parameterCollector"); //$NON-NLS-1$ //$NON-NLS-0$
 						label.textContent = parm.label;
+						parameterArea.appendChild(label);
 					} 
-					var options = {type: parm.type, id: parm.name + "parameterCollector"}; //$NON-NLS-0$
+					var type = parm.type;
+					var id = parm.name + "parameterCollector"; //$NON-NLS-0$
 					var field;
-					if (parm.type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) { //$NON-NLS-1$ //$NON-NLS-0$
-						options.rows = parm.lines;
-						options.type = "textarea"; //$NON-NLS-0$
-						field = dojo.create("textarea", options, parameterArea, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					if (type === "text" && typeof(parm.lines) === "number" && parm.lines > 1) { //$NON-NLS-1$ //$NON-NLS-0$
+						field = document.createElement("textarea"); //$NON-NLS-0$
+						field.rows = parm.lines;
+						field.type = "textarea"; //$NON-NLS-0$
+						field.id = id;
+						parameterArea.appendChild(field);
 						// esc only
-						keyHandler = dojo.hitch(this, function(event) {
-							if (event.keyCode === dojo.keys.ESCAPE) {
+						keyHandler = function(event) {
+							if (event.keyCode === lib.KEY.ESCAPE) {
 								localClose();
-								dojo.stopEvent(event);
+								lib.stop(event);
 							}
-						});
+						};
 					} else if (parm.type === "boolean") { //$NON-NLS-0$
-						options.type = "checkbox"; //$NON-NLS-0$
+						field = document.createElement("input"); //$NON-NLS-0$
+						field.type = "checkbox"; //$NON-NLS-0$
+						field.id = id;
+						parameterArea.appendChild(field);
 						if (parm.value) {
-							options.checked = true;
+							field.checked = true;
 						}
 					} else {
+						field = document.createElement("input"); //$NON-NLS-0$
+						field.type = "text"; //$NON-NLS-0$
+						field.id = id;
+						parameterArea.appendChild(field);
 						if (parm.value) {
-							options.value = parm.value;
+							field.value = parm.value;
 						}
 					}
-					if (!field) {
-						field = dojo.create("input", options, parameterArea, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					}
+					field.classList.add("parameterInput"); //$NON-NLS-0$
 					// we define special classes for some parameter types
-					dojo.addClass(field, "parameterInput parameterInput"+options.type); //$NON-NLS-0$
+					field.classList.add("parameterInput"+field.type); //$NON-NLS-0$
 					// for fun
 					field.setAttribute("speech", "speech"); //$NON-NLS-1$ //$NON-NLS-0$
 					field.setAttribute("x-webkit-speech", "x-webkit-speech"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -228,7 +245,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 					if (!first) {
 						first = field;
 					}
-					dojo.connect(field, "onkeypress", keyHandler); //$NON-NLS-0$
+					field.addEventListener("keydown", keyHandler, false); //$NON-NLS-0$
 				});
 				var parentDismiss = dismissArea || parameterArea;
 				var finish = function (collector) {
@@ -236,54 +253,62 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'dijit', 'dijit/Menu', 'di
 					localClose();
 				};
 
+				var makeButton = function(text, parent) {
+					var button = document.createElement("span"); //$NON-NLS-0$
+					button.role = "button"; //$NON-NLS-0$
+					button.tabIndex = 0;
+					parent.appendChild(button);
+					if (text) {
+						button.appendChild(document.createTextNode(text)); //$NON-NLS-0$
+					}
+					button.classList.add("dismiss"); //$NON-NLS-0$
+					return button;
+				};
+				
 				if (commandInvocation.parameters.hasOptionalParameters()) {
 					commandInvocation.parameters.optionsRequested = false;
 					
-					var options = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.place(window.document.createTextNode(messages["More"]), options, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.addClass(options, "dismiss"); //$NON-NLS-0$
-					dojo.connect(options, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
+					var options = makeButton(messages["More"], parentDismiss); //$NON-NLS-0$
+					options.addEventListener("click", function() { //$NON-NLS-0$
 						commandInvocation.parameters.optionsRequested = true;
-						finish(this);
-					}));
+						finish(self);
+					}, false);
 					// onClick events do not register for spans when using the keyboard without a screen reader
-					dojo.connect(options, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
-						if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {			
+					options.addEventListener("keydown", function (e) { //$NON-NLS-0$
+						if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {			
 							commandInvocation.parameters.optionsRequested = true;
-							finish(this);
+							finish(self);
 						}
-					}));
+					}, false);
 				}
 				// OK and cancel buttons
-				var ok = dojo.create("span", {role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(window.document.createTextNode(messages["Submit"]), ok, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.addClass(ok, "dismiss"); //$NON-NLS-0$
-				dojo.connect(ok, "onclick", dojo.hitch(this, function() { //$NON-NLS-0$
-					finish(this);
-				}));
+				var ok = makeButton(messages["Submit"], parentDismiss);
+					ok.addEventListener("click", function() { //$NON-NLS-0$
+					finish(self);
+				}, false);
 				// onClick events do not register for spans when using the keyboard without a screen reader
-				dojo.connect(ok, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
-					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
-						finish(this);
+					ok.addEventListener("keydown", function (e) { //$NON-NLS-0$
+					if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {
+						finish(self);
 					}
-				}));
+				}, false);
 				
-				var close = dojo.create("span", {id: "closebox", role: "button", tabindex: "0"}, parentDismiss, "last"); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.addClass(close, "imageSprite"); //$NON-NLS-0$
-				dojo.addClass(close, "core-sprite-close"); //$NON-NLS-0$
-				dojo.addClass(close, "dismiss"); //$NON-NLS-0$
+				var close = makeButton(null, parentDismiss);
+				close.id = "closebox"; //$NON-NLS-0$
+				close.classList.add("imageSprite"); //$NON-NLS-0$
+				close.classList.add("core-sprite-close"); //$NON-NLS-0$
 				close.title = messages['Close'];
-				dojo.connect(close, "onclick", dojo.hitch(this, function(event) { //$NON-NLS-0$
+				close.addEventListener("click", function(event) { //$NON-NLS-0$
 					localClose();
-				}));
+				}, false);
 				// onClick events do not register for spans when using the keyboard without a screen reader
-				dojo.connect(close, "onkeypress", dojo.hitch(this, function (e) { //$NON-NLS-0$
-					if(e.keyCode === dojo.keys.ENTER  || e.charCode === dojo.keys.SPACE) {
+				close.addEventListener("keydown", function (e) { //$NON-NLS-0$
+					if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {
 						localClose();
 					}
-				}));
+				}, false);
 				return first;
-			});
+			};
 		 }
 	};
 	CommandParameterCollector.prototype.constructor = CommandParameterCollector;

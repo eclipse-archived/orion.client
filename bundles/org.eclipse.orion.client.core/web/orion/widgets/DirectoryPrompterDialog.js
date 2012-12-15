@@ -70,7 +70,7 @@ function(messages, dojo, dijit, mFileUtils, mSelection, mNavUtils, mExplorer, mE
 	
 			this.explorer = new mExplorerTable.FileExplorer({treeRoot: {children:[]}, selection: this.selection, serviceRegistry: this.serviceRegistry,
 					fileClient: this.fileClient, parentId: this.id+"_browseDirectoryExplorerTree", excludeFiles: true, rendererFactory: function(explorer) {  //$NON-NLS-0$
-						return new DirectoryPrompterRenderer({checkbox: false, singleSelection: true, decorateAlternatingLines: false, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
+						return new DirectoryPrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
 					}}); //$NON-NLS-0$
 			this.explorer.loadResourceList(path, true, null);
 		},

@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*jslint forin:true devel:true*/
-/*global define dojo document*/
+/*global define document*/
 
-define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
+define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
 
 	/**
 	 * Constructs a new TableTree with the given options.
@@ -54,9 +54,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		_init: function(options) {
 			var parent = options.parent;
 			var tree = this;
-			if (typeof(parent) === "string") { //$NON-NLS-0$
-				parent = dojo.byId(parent);
-			}
+			parent = lib.node(parent);
 			if (!parent) { throw messages["no parent"]; }
 			if (!options.model) { throw messages["no tree model"]; }
 			if (!options.renderer) { throw messages["no renderer"]; }
@@ -69,9 +67,9 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			this._labelColumnIndex = options.labelColumnIndex === undefined ? 0 : options.labelColumnIndex;
 			this._id = options.id === undefined ? "treetable" : options.id; //$NON-NLS-0$
 			this._tableStyle = options.tableStyle;
-			this._tableElement = options.tableElement || "table";
-			this._tableBodyElement = options.tableBodyElement || "tbody";
-			this._tableRowElement = options.tableRowElement || "tr";
+			this._tableElement = options.tableElement || "table"; //$NON-NLS-0$
+			this._tableBodyElement = options.tableBodyElement || "tbody"; //$NON-NLS-0$
+			this._tableRowElement = options.tableRowElement || "tr"; //$NON-NLS-0$
 			
 			// Generate the table
 			this._root = this._treeModel.getRoot(function (root) {
@@ -88,22 +86,22 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		},
 		
 		_generate: function(children, indentLevel) {
-			dojo.empty(this._parent);
+			lib.empty(this._parent);
 			var table = document.createElement(this._tableElement); //$NON-NLS-0$
 			table.id = this._id;
 			if (this._tableStyle) {
-				dojo.addClass(table, this._tableStyle);
+				table.classList.add(this._tableStyle);
 			}
 			this._renderer.initTable(table, this);
-			var tbody = document.createElement(this._tableBodyElement); //$NON-NLS-0$
-			tbody.id = this._id+"tbody"; //$NON-NLS-0$
-			this._generateChildren(children, indentLevel, tbody, "last"); //$NON-NLS-0$
-			table.appendChild(tbody);
+			this._bodyElement = document.createElement(this._tableBodyElement); //$NON-NLS-0$
+			this._bodyElement.id = this._id+"tbody"; //$NON-NLS-0$
+			this._generateChildren(children, indentLevel); //$NON-NLS-0$
+			table.appendChild(this._bodyElement);
 			this._parent.appendChild(table);
 			this._rowsChanged();
 		},
 		
-		_generateChildren: function(children, indentLevel, referenceNode, position) {
+		_generateChildren: function(children, indentLevel, referenceNode) {
 			for (var i=0; i<children.length; i++) {
 				var row = document.createElement(this._tableRowElement); //$NON-NLS-0$
 				row.id = this._treeModel.getId(children[i]);
@@ -115,10 +113,14 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 				this._renderer.render(children[i], row);
 				// generate an indent
 				var indent = this._indent * indentLevel;
-				dojo.style(row.childNodes[this._labelColumnIndex], "paddingLeft", indent +"px"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(row, referenceNode, position);
-				if (position === "after") { //$NON-NLS-0$
-					referenceNode = row;
+				row.childNodes[this._labelColumnIndex].style.paddingLeft = indent +"px";  //$NON-NLS-0$
+				if (referenceNode) {
+					this._bodyElement.insertBefore(row, referenceNode.nextSibling);
+					if (referenceNode) { //$NON-NLS-0$
+						referenceNode = row;
+					}
+				} else {
+					this._bodyElement.appendChild(row);
 				}
 			}
 		},
@@ -139,10 +141,10 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			var tree;
 			if (parentId === this._id) {  // root of tree
 				this._removeChildRows(parentId);
-				this._generateChildren(children, 0, dojo.byId(parentId+"tbody"), "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				this._generateChildren(children, 0);
 				this._rowsChanged();
 			} else {  // node in the tree
-				var row = dojo.byId(parentId);
+				var row = lib.node(parentId);
 				if (row) {
 					// if it is showing children, refresh what is showing
 					row._item = item;
@@ -152,12 +154,12 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 						this._removeChildRows(parentId);
 						this._renderer.updateExpandVisuals(row, true);
 						if(children){
-							this._generateChildren(children, row._depth+1, row, "after"); //$NON-NLS-0$
+							this._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 							this._rowsChanged();
 						} else {
 							tree = this;
 							children = this._treeModel.getChildren(row._item, function(children) {
-								tree._generateChildren(children, row._depth+1, row, "after"); //$NON-NLS-0$
+								tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 								tree._rowsChanged();
 							});
 						}
@@ -173,20 +175,15 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		},
 		
 		getItem: function(itemOrId) {  // a dom node, a dom id, or the item
-			if (typeof(itemOrId) === "string") {  //dom id //$NON-NLS-0$
-				var node = dojo.byId(itemOrId);
-				if (node) {
-					return node._item;
-				}
-			}
-			if (itemOrId._item) {  // is it a dom node that knows its item?
-				return itemOrId._item;
+			var node = lib.node(itemOrId);
+			if (node && node._item) {
+				return node._item;
 			}
 			return itemOrId;  // return what we were given
 		},
 		
 		toggle: function(id) {
-			var row = dojo.byId(id);
+			var row = lib.node(id);
 			if (row) {
 				if (row._expanded) {
 					this.collapse(id);
@@ -200,7 +197,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		},
 		
 		isExpanded: function(id) {
-			var row = dojo.byId(id);
+			var row =lib.node(id);
 			if (row) {
 				return row._expanded;
 			}
@@ -209,7 +206,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 		
 		expand: function(itemOrId , postExpandFunc , args) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
-			var row = dojo.byId(id);
+			var row = lib.node(id);
 			if (row) {
 				if (row._expanded) {
 					return;
@@ -218,7 +215,7 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 				var tree = this;
 				this._renderer.updateExpandVisuals(row, true);
 				this._treeModel.getChildren(row._item, function(children) {
-					tree._generateChildren(children, row._depth+1, row, "after"); //$NON-NLS-0$
+					tree._generateChildren(children, row._depth+1, row); //$NON-NLS-0$
 					tree._rowsChanged();
 					if (postExpandFunc) {
 						postExpandFunc.apply(tree, args);
@@ -233,9 +230,11 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 			var stop = false;
 			var parentDepth = -1;
 			var toRemove = [];
-			dojo.query(".treeTableRow", this._parent).forEach(function(row, i) { //$NON-NLS-0$
+			var rows = lib.$$array(".treeTableRow", this._parent); //$NON-NLS-0$
+			for (var i=0; i < rows.length; i++) {
+				var row = rows[i];
 				if (stop) {
-					return;
+					break;
 				}
 				if (foundParent) {
 					if (row._depth > parentDepth) {
@@ -250,17 +249,16 @@ define(['i18n!orion/nls/messages', 'dojo'], function(messages, dojo) {
 						parentDepth = row._depth;
 					}
 				}
-			});
-			for (var i=0; i<toRemove.length; i++) {
-				//table.removeChild(toRemove[i]); // IE barfs on this
-				var child = toRemove[i];
+			}
+			for (var j=0; j<toRemove.length; j++) {
+				var child = toRemove[j];
 				child.parentNode.removeChild(child);
 			}
 		},
 		
 		collapse: function(itemOrId) {
 			var id = typeof(itemOrId) === "string" ? itemOrId : this._treeModel.getId(itemOrId); //$NON-NLS-0$
-			var row = dojo.byId(id);
+			var row = lib.node(id);
 			if (row) {
 				if (!row._expanded) {
 					return;

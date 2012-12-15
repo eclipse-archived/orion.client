@@ -738,7 +738,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 							}
 
 							// render the children asynchronously
-							var context = {contributions: childContributions, group: group};
+							var context = {contributions: childContributions, group: group, parent: parent};
 							window.setTimeout(function() {
 								commandService._render(context.contributions, created.menu, items, handler, "menu", userData, domNodeWrapperList);  //$NON-NLS-0$
 								// special post-processing when we've created a menu in an image bar.  We want to get rid 
@@ -759,8 +759,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 										if(domNodeWrapperList){
 											mNavUtils.removeNavGrid(domNodeWrapperList, created.menuButton);
 										}
-										created.menu.parentNode.removeChild(created.menu);
-										parent.removeChild(created.destroyButton);
+										if (created.menu.parentNode) {
+											created.menu.parentNode.removeChild(created.menu);
+										}
+										if (created.destroyButton && created.destroyButton.parentNode) {
+											created.destroyButton.parentNode.removeChild(created.destroyButton);
+										}
 									}
 								} else {
 									created.menuButton.style.visibility = "visible";  //$NON-NLS-0$
@@ -934,7 +938,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 			var node = document.createElement("input"); //$NON-NLS-0$
 			node.type = "checkbox";//$NON-NLS-0$
 			node.role = "menuitem"; //$NON-NLS-0$
-			node.value = checked.toString();
 			node.checked = checked;
 			node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			node.classList.add("checkedMenuItem"); //$NON-NLS-0$

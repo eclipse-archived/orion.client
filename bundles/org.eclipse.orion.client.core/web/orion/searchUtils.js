@@ -9,8 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define window */
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/editor/regex', 'orion/commands', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, dojo, mRegex, mCommands, PageUtil, URITemplate) {
+define(['i18n!orion/nls/messages', 'require', 'orion/editor/regex', 'orion/commands', 'orion/PageUtil', 'orion/URITemplate'], function(messages, require, mRegex, mCommands, PageUtil, URITemplate) {
 
 var exports = exports || {};
 
@@ -122,7 +123,7 @@ exports.searchUtils.convertSearchParams = function(searchParams) {
 	if(typeof searchParams.nameSearch === "string"){
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true");
 	}
-}
+};
 
 exports.searchUtils.copySearchParams = function(searchParams, copyReplace) {
 	var result = {};
@@ -535,25 +536,6 @@ exports.searchUtils.addRecentSearch = function(serviceRegistry, searchName, useR
 	});
 };
 
-exports.searchUtils.populateSearchMenu = function(serviceRegistry, choicesMenu, type, makeLabelFunc) {
-	// see http://bugs.dojotoolkit.org/ticket/10296
-	choicesMenu.focusedChild = null;
-	dojo.forEach(choicesMenu.getChildren(), function(child) {
-		choicesMenu.removeChild(child);
-		child.destroy();
-	});
-	exports.searchUtils.getSearches(serviceRegistry, type, function(searches){
-		if (searches) {
-			for (i in searches) {
-				choicesMenu.addChild(new mCommands.CommandMenuItem({
-					 label: makeLabelFunc(searches[i]),
-					 hasLink: true
-				}));
-			}
-		}
-	});
-};
-
 exports.searchUtils.getSearches = function(serviceRegistry, type, callback){
 	serviceRegistry.getService("orion.core.preference").getPreferences("/window/favorites").then(function(prefs) {  //$NON-NLS-1$ //$NON-NLS-0$
 		var i;
@@ -581,7 +563,7 @@ exports.searchUtils.getMixedSearches = function(serviceRegistry, mixed, checkDup
 			}
 			for (var i in savedSearches) {
 				if(checkDuplication){
-					var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query)
+					var qObj = exports.searchUtils.parseQueryStr(savedSearches[i].query);
 					var duplicated = searches.some(function(search) {
 							return qObj.searchStrTitle === search.name;
 					});

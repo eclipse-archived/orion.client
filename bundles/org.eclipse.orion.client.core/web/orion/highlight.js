@@ -10,9 +10,9 @@
  ******************************************************************************/
 
 /*global define*/
-define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
-			'examples/textview/textStylerOptions', 'orion/bootstrap', 'orion/textview/util'], 
-		function(dojo, mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions, mBootstrap, util) {
+define(['examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
+			'examples/textview/textStylerOptions', 'orion/bootstrap', 'orion/textview/util', 'orion/Deferred'], 
+		function(mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions, mBootstrap, util, Deferred) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
 	 * @static
@@ -23,7 +23,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 	 * @param {orion.textview.AnnotationModel} annotationModel
 	 * @param {String} [fileName] Deprecated.
 	 * @param {Boolean} [allowAsync=true]
-	 * @returns {Dojo.Deferred}
+	 * @returns {orion.Deferred}
 	 */
 	function createStyler(serviceRegistry, contentTypeService, contentType, textView, annotationModel, fileName, allowAsync) {
 		// Returns a promise (if provider matches) or null (if it doesn't match).
@@ -36,8 +36,8 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 						return isMatch ? provider : null;
 					});
 			} else if (extension && fileTypes && fileTypes.indexOf(extension) !== -1) {
-				var d = new dojo.Deferred();
-				d.callback(provider);
+				var d = new Deferred();
+				d.resolve(provider);
 				return d;
 			}
 			return null;
@@ -68,8 +68,8 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		// Check default styler
 		var styler = createDefaultStyler(contentType);
 		if (styler) {
-			var result = new dojo.Deferred();
-			result.callback(styler);
+			var result = new Deferred();
+			result.resolve(styler);
 			return result;
 		}
 
@@ -87,12 +87,12 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 				promises.push(promise);
 			}
 		}
-		return new dojo.DeferredList(promises).then(function(promises) {
+		return Deferred.all(promises, function(error) {return {_error: error};}).then(function(promises) {
 			// Take the last matching provider. Could consider ranking them here.
 			var provider;
 			for (var i = promises.length - 1; i >= 0; i--) {
-				var promise = promises[i][1];
-				if (promise && isAllowed(promise)) {
+				var promise = promises[i];
+				if (promise && !promise._error && isAllowed(promise)) {
 					provider = promise;
 					break;
 				}
@@ -131,7 +131,7 @@ define(['dojo', 'examples/textview/textStyler', 'orion/editor/textMateStyler', '
 		 * will be checked against the file extension instead of contentType.
 		 * @param {Boolean} [allowAsync=true] If true, plugin-contributed asynchronous highlighters (i.e. <code>type == "highlighter"</code>
 		 * will be consulted. If false, only rule-based highlighters will be consulted.
-		 * @returns {dojo.Deferred} A promise that is resolved when this highlighter has been set up.
+		 * @returns {orion.Deferred} A promise that is resolved when this highlighter has been set up.
 		 */
 		setup: function(fileContentType, textView, annotationModel, fileName, allowAsync) {
 			allowAsync = typeof allowAsync === "undefined" ? true : allowAsync; //$NON-NLS-0$

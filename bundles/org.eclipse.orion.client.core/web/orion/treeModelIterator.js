@@ -88,7 +88,7 @@ exports.TreeModelIterator = (function() {
 			if(!next){
 				if(forceExpand && this._expandable(this._cursor) && this.forceExpandFunc){
 					var that = this;
-					return this.forceExpandFunc(this._cursor, "first", function(model){if(mdoel){that.setCursor(model);};}); //$NON-NLS-0$
+					return this.forceExpandFunc(this._cursor, "first", function(model){if(model){that.setCursor(model);}}); //$NON-NLS-0$
 				}
 				next = this._findSibling(this._cursor, true);
 				if(next){
@@ -104,7 +104,8 @@ exports.TreeModelIterator = (function() {
 				previous = this._drillToLast(previous);
 			}
 			if(forceExpand && previous && this._expandable(previous) && this.forceExpandFunc && previous !== this._cursor.parent){
-				return this.forceExpandFunc(previous, "last", function(model){if(mdoel){that.setCursor(model);};}); //$NON-NLS-0$
+				var that = this;
+				return this.forceExpandFunc(previous, "last", function(model){if(model){that.setCursor(model);}}); //$NON-NLS-0$
 			}
 			if(previous){
 				this.setCursor(previous);

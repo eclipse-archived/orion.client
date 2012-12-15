@@ -10,12 +10,10 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global define */
-define(['dojo', 'orion/bootstrap', 'edit/setup'], function(dojo, mBootstrap, mSetup) {
-	dojo.addOnLoad(function(){
-		mBootstrap.startup().then(function(core) {
-			var serviceRegistry = core.serviceRegistry;
-			var preferences = core.preferences;
-			mSetup.setUpEditor(serviceRegistry, preferences, true);  // read only
-		});
+define(['orion/bootstrap', 'edit/setup'], function(mBootstrap, mSetup) {
+	mBootstrap.startup().then(function(core) {
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
+		mSetup.setUpEditor(serviceRegistry, preferences, true);  // read only
 	});
 });
