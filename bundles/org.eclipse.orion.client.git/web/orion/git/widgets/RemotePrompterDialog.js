@@ -11,7 +11,7 @@
 /*global dojo dijit eclipse widgets */
 /*jslint browser:true */
 
-define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'orion/explorers/explorer', 'dijit/Dialog', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(messages, dojo, dijit, mExplorer) {
+define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'orion/explorers/explorer', 'dijit/Dialog', 'dijit/layout/BorderContainer', 'dijit/form/Button', 'orion/widgets/ExplorerTree',  'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/RemotePrompterDialog.html'], function(messages, dojo, dijit, mExplorer) {
 
 /**
 * @param options {{
