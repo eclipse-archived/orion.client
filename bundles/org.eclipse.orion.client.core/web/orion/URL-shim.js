@@ -16,7 +16,7 @@
 	if (typeof window.URL === "function" && new window.URL("http://www.w3.org").protocol === "http:") {
 		return;
 	}
-	
+
 	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
 
 	function _createMapIterator(entries, kind) {
@@ -41,6 +41,33 @@
 		};
 	}
 
+	function _parseSearch(search) {
+		var entries = [];
+		if (search) {
+			var pairs = search.slice(1).split("&");
+			pairs.forEach(function(pair) {
+				var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
+				var key = parsed[1] ? decodeURIComponent(parsed[1]) : "";
+				var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
+				entries.push([key, value]);
+			}, this);
+		}
+		return entries;
+	}
+
+	function _stringifySearch(entries) {
+		if (entries.length === 0) {
+			return "";
+		}
+		return "?" + entries.map(function(entry) {
+			var pair = encodeURIComponent(entry[0]);
+			if (entry[1]) {
+				pair += "=" + encodeURIComponent(entry[1]);
+			}
+			return pair;
+		}).join("&");
+	}
+
 	function _checkString(txt) {
 		if (typeof txt !== "string") {
 			throw new TypeError();
@@ -48,57 +75,19 @@
 	}
 
 	// See http://url.spec.whatwg.org/#interface-urlquery
-	function URLQuery() {
-		Object.defineProperty(this, "_entries", {
-			value: [], // array of [key,value]
-			writable: true
-		});
-		Object.defineProperty(this, "_dirty", {
-			value: false,
-			writable: true
+	function URLQuery(anchor) {
+		Object.defineProperty(this, "_anchor", {
+			value: anchor
 		});
 	}
 
 	Object.defineProperties(URLQuery.prototype, {
-		_parseSearch: {
-			value: function(search) {
-				this.clear();
-				this._dirty = false;
-				if (search) {
-					_checkString(search);
-					var pairs = search.slice(1).split("&");
-					pairs.forEach(function(pair) {
-						var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
-						var name = parsed[1] ? decodeURIComponent(parsed[1]) : "";
-						var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
-						this.append(name, value);
-					}, this);
-				}
-			}
-		},
-		_updateSearch: {
-			value: function(anchor) {
-				if (this._dirty) {
-					this._dirty = false;
-					if (this.size === 0) {
-						anchor.search = "";
-					} else {
-						anchor.search = "?" + this._entries.map(function(entry) {
-							var pair = encodeURIComponent(entry[0]);
-							if (entry[1]) {
-								pair += "=" + encodeURIComponent(entry[1]);
-							}
-							return pair;
-						}).join("&");
-					}
-				}
-			}
-		},
 		get: {
 			value: function(key) {
 				_checkString(key);
 				var result;
-				this._entries.some(function(entry) {
+				var entries = _parseSearch(this._anchor.search);
+				entries.some(function(entry) {
 					if (entry[0] === key) {
 						result = entry[1];
 						return true;
@@ -112,23 +101,25 @@
 			value: function(key, value) {
 				_checkString(key);
 				_checkString(value);
-				this._dirty = true;
-				var found = this._entries.some(function(entry) {
+				var entries = _parseSearch(this._anchor.search);
+				var found = entries.some(function(entry) {
 					if (entry[0] === key) {
 						entry[1] = value;
 						return true;
 					}
 				});
 				if (!found) {
-					this._entries.push([key, value]);
+					entries.push([key, value]);
 				}
+				this._anchor.search = _stringifySearch(entries);
 			},
 			enumerable: true
 		},
 		has: {
 			value: function(key) {
 				_checkString(key);
-				return this._entries.some(function(entry) {
+				var entries = _parseSearch(this._anchor.search);
+				return entries.some(function(entry) {
 					if (entry[0] === key) {
 						return true;
 					}
@@ -136,15 +127,15 @@
 			},
 			enumerable: true
 		},
-		'delete': {
+		"delete": {
 			value: function(key) {
 				_checkString(key);
-				var filtered = this._entries.filter(function(entry) {
+				var entries = _parseSearch(this._anchor.search);
+				var filtered = entries.filter(function(entry) {
 					return entry[0] !== key;
 				});
-				if (filtered.length !== this._entries.length) {
-					this._entries = filtered;
-					this._dirty = true;
+				if (filtered.length !== entries.length) {
+					this._anchor.search = _stringifySearch(filtered);
 					return true;
 				}
 				return false;
@@ -153,17 +144,14 @@
 		},
 		clear: {
 			value: function() {
-				if (this._entries.length !== 0) {
-					this._entries.length = 0;
-					this._dirty = true;
-				}
+				this._anchor.search = "";
 			},
 			enumerable: true
 		},
 		forEach: {
 			value: function(callback, thisArg) {
 				var thisMap = this;
-				this._entries.forEach(function(entry) {
+				_parseSearch(this._anchor.search).forEach(function(entry) {
 					callback.call(thisArg, entry[1], entry[0], thisMap);
 				});
 			},
@@ -171,37 +159,34 @@
 		},
 		keys: {
 			value: function() {
-				return _createMapIterator(this._entries, "keys");
+				return _createMapIterator(_parseSearch(this._anchor.search), "keys");
 			},
 			enumerable: true
 		},
 		values: {
 			value: function() {
-				return _createMapIterator(this._entries, "values");
+				return _createMapIterator(_parseSearch(this._anchor.search), "values");
 			},
 			enumerable: true
 		},
 		items: {
 			value: function() {
-				return _createMapIterator(this._entries, "keys+values");
+				return _createMapIterator(_parseSearch(this._anchor.search), "keys+values");
 			}
 		},
 		size: {
 			get: function() {
-				return this._entries.length;
+				return _parseSearch(this._anchor.search).length;
 			},
 			enumerable: true
 		},
 		getAll: {
 			value: function(key) {
 				_checkString(key);
-				var result = [];
-				this._entries.forEach(function(entry) {
-					if (entry[0] === key) {
-						result.push(entry[1]);
-					}
+				var entries = _parseSearch(this._anchor.search);
+				return entries.filter(function(entry) {
+					return entry[0] === key;
 				});
-				return result;
 			},
 			enumerable: true
 		},
@@ -209,13 +194,14 @@
 			value: function(key, value) {
 				_checkString(key);
 				_checkString(value);
-				this._entries.push([key, value]);
-				this._dirty = true;
+				var entries = _parseSearch(this._anchor.search);
+				entries.push([key, value]);
+				this._anchor.search = _stringifySearch(entries);
 			},
 			enumerable: true
 		}
 	});
-	
+
 	// See http://url.spec.whatwg.org/#api
 	function URL(url, base) {
 		url = url || "";
@@ -247,7 +233,7 @@
 			value: urlAnchor
 		});
 		Object.defineProperty(this, "query", {
-			value: new URLQuery(urlAnchor.search),
+			value: new URLQuery(urlAnchor),
 			enumerable: true
 		});
 	}
@@ -255,13 +241,11 @@
 	Object.defineProperties(URL.prototype, {
 		href: {
 			get: function() {
-				this.query._updateSearch(this._urlAnchor);
 				return this._urlAnchor.href;
 			},
 			set: function(value) {
 				_checkString(value);
 				this._urlAnchor.href = value;
-				this.query._parseSearch(this._urlAnchor.search);
 			},
 			enumerable: true
 		},
@@ -293,7 +277,6 @@
 			},
 			set: function(value) {
 				_checkString(value);
-				this.query._updateSearch(this._urlAnchor);
 				var re = new RegExp("^" + this._urlAnchor.protocol + "(\\/\\/)(?:([^@]*)?@)?" + this._urlAnchor.host);
 				var replacement = this._urlAnchor.protocol + "//" + (value ? value + "@" : "") + this._urlAnchor.host;
 				this._urlAnchor.href = this._urlAnchor.href.replace(re, replacement);
@@ -375,13 +358,11 @@
 		},
 		search: {
 			get: function() {
-				this.query._updateSearch(this._urlAnchor);
 				return this._urlAnchor.search;
 			},
 			set: function(value) {
 				_checkString(value);
 				this._urlAnchor.search = value;
-				this.query._parseSearch(this._urlAnchor.search);
 			},
 			enumerable: true
 		},
