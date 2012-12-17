@@ -9,8 +9,8 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global console define setTimeout*/
-define(['orion/textview/eventTarget', 'orion/Deferred', 'orion/serviceTracker'],
-	function(mEventTarget, Deferred, ServiceTracker) {
+define(['orion/Deferred', 'orion/serviceTracker'],
+	function(Deferred, ServiceTracker) {
 var ManagedServiceTracker, ConfigAdminFactory, ConfigStore, ConfigAdminImpl, ConfigImpl;
 
 var PROPERTY_PID = 'pid'; //$NON-NLS-0$
