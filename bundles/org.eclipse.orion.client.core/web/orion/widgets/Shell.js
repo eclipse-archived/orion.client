@@ -146,12 +146,14 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * @param {orion.shell.ParameterType} type the parameter type to register in the Shell
 			 */
 			registerType: function(type) {
-				function NewType(typeSpec) {}
+				function NewType(typeSpec) {
+					this.typeSpec = typeSpec;
+				}
 
 				NewType.prototype = Object.create(CustomType.prototype);
 				NewType.prototype.name = type.name;
 				NewType.prototype.parse = function(arg) {
-					var completion = type.parse(arg.toString().trim());
+					var completion = type.parse(arg.toString().trim(), this.typeSpec);
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
 						switch (completion.status) {
@@ -167,17 +169,17 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				};
 				if (type.stringify) {
 					NewType.prototype.stringify = function (arg) {
-						return type.stringify(arg);
+						return type.stringify(arg, this.typeSpec);
 					};
 				}
 				if (type.increment) {
 					NewType.prototype.increment = function (arg) {
-						return type.increment(arg);
+						return type.increment(arg, this.typeSpec);
 					};
 				}
 				if (type.decrement) {
 					NewType.prototype.decrement = function (arg) {
-						return type.decrement(arg);
+						return type.decrement(arg, this.typeSpec);
 					};
 				}
 				mTypes.registerType(NewType);
