@@ -22,7 +22,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
-	var pluginRegistry, pluginsType, preferences, serviceElementCounter = 0;
+	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
 	var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
 	var PAGE_TEMPLATE = "{OrionHome}/shell/shellPage.html#{,resource}"; //$NON-NLS-0$
@@ -341,7 +341,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 
 	function pluginsListExec(args, context) {
-		var plugins = pluginsType.getPlugins();
+		var plugins = pluginType.getPlugins();
 		var result = document.createElement("table"); //$NON-NLS-0$
 		for (var i = 0; i < plugins.length; i++) {
 			var row = document.createElement("tr"); //$NON-NLS-0$
@@ -545,7 +545,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	function contributedExecFunc(service) {
 		if (typeof(service.callback) === "function") { //$NON-NLS-0$
 			return function(args, context) {
-				// Use orion/Deferred since it supports progress; gcli/promise does not.
+				/* Use orion/Deferred since it supports progress, gcli/promise does not */
 				//var promise = context.createPromise();
 				var promise = new Deferred();
 				service.callback(args).then(
@@ -607,24 +607,10 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			}
 
 			/* add the locally-defined types */
-			var directoryType = new mFileParamType.ParamTypeFile("directory", shellPageFileService, true, false); //$NON-NLS-0$
-			shell.registerType(directoryType);
-			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService, false, true); //$NON-NLS-0$
+			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService); //$NON-NLS-0$
 			shell.registerType(fileType);
-
-			/* for single-selection commands for use on any plug-in */
-			var pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry, false, true); //$NON-NLS-0$
+			pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
 			shell.registerType(pluginType);
-			/* for multiple-selection commands for use on any plug-in */
-			pluginsType = new mPluginParamType.ParamTypePlugin("plugins", pluginRegistry); //$NON-NLS-0$
-			shell.registerType(pluginsType);
-			/* for single-selection commands for use on contributed plug-ins only */
-			var contributedPluginType = new mPluginParamType.ParamTypePlugin("contributedPlugin", pluginRegistry, true, true); //$NON-NLS-0$
-			shell.registerType(contributedPluginType);
-			/* for multiple-selection commands for use on contributed plug-ins only */
-			var contributedPluginsType = new mPluginParamType.ParamTypePlugin("contributedPlugins", pluginRegistry, true); //$NON-NLS-0$
-			shell.registerType(contributedPluginsType);
-
 			var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
 			shell.registerType(serviceType);
 
@@ -635,7 +621,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: cdExec,
 				parameters: [{
 					name: "directory", //$NON-NLS-0$
-					type: "directory", //$NON-NLS-0$
+					type: {name: "file", directory: true}, //$NON-NLS-0$
 					description: messages["The name of the directory"]
 				}],
 				returnType: "html" //$NON-NLS-0$
@@ -646,7 +632,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: editExec,
 				parameters: [{
 					name: "file", //$NON-NLS-0$
-					type: "file", //$NON-NLS-0$
+					type: {name: "file", file: true}, //$NON-NLS-0$
 					description: messages["The name of the file"]
 				}]
 			});
@@ -698,7 +684,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsUninstallExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugins", //$NON-NLS-0$
+					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -709,7 +695,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsReloadExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "plugins", //$NON-NLS-0$
+					type: {name: "plugin", multiple: true, excludeDefaultPlugins: false}, //$NON-NLS-0$
 					description: messages["The name of the plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -720,7 +706,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsEnableExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugins", //$NON-NLS-0$
+					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -731,7 +717,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginsDisableExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "contributedPlugins", //$NON-NLS-0$
+					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
 					description: messages["The name of the contributed plug-in"]
 				}],
 				returnType: "string" //$NON-NLS-0$
@@ -742,7 +728,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: pluginServicesExec,
 				parameters: [{
 					name: "plugin", //$NON-NLS-0$
-					type: "plugin", //$NON-NLS-0$
+					type: {name: "plugin", multiple: false, excludeDefaultPlugins: false}, //$NON-NLS-0$
 					description: messages["The name of the plug-in"]
 				}],
 				returnType: "html" //$NON-NLS-0$
@@ -770,13 +756,12 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 			serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
 				var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
+				var fn = function(command) {
+					openWithCommands.push(command);
+				};
 				for (var i = 0; i < commands.length; i++) {
 					var commandDeferred = mExtensionCommands._createCommandOptions(commands[i].properties, commands[i].service, serviceRegistry, contentTypes, true);
-					commandDeferred.then(
-						function(command) {
-							openWithCommands.push(command);
-						}
-					);
+					commandDeferred.then(fn);
 				}
 			});
 
@@ -818,7 +803,8 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 									parameters: ref.getProperty("parameters"), //$NON-NLS-0$
 									manual: ref.getProperty("manual") //$NON-NLS-0$
 								});
-						}, ref);
+							},
+							ref);
 					} else {
 						shell.registerCommand({
 							name: ref.getProperty("name"), //$NON-NLS-0$
