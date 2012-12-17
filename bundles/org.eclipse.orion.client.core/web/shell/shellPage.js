@@ -501,7 +501,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 		var serviceId = args.id.trim();
 		var result = document.createElement("div"); //$NON-NLS-0$
-		var plugins = pluginsType.getPlugins();
+		var plugins = pluginType.getPlugins();
 		plugins.forEach(function(plugin) {
 			var services = plugin.getServiceReferences();
 			services.forEach(function(service) {
