@@ -73,7 +73,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 			if (typeof commandNode === "string") { //$NON-NLS-0$
 				commandNode = lib.node(commandNode);
 			}
-			if (this._activeElements && this._activeElements.commandNode === commandNode) {
+			if (this._activeElements && this._activeElements.slideContainer && this._activeElements.commandNode === commandNode) {
 				// already open.  Just return focus where it needs to be.
 				if (this._activeElements.focusNode) {
 					this._activeElements.focusNode.focus();
