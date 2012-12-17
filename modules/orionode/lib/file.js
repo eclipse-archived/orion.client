@@ -66,7 +66,7 @@ module.exports = function(options) {
 			var seg = segs[i];
 			loc = api.join(loc, seg);
 			parents.push({
-				Name: seg,
+				Name: decodeURIComponent(seg),
 				ChildrenLocation: loc + '?depth=1', 
 				Location: loc
 			});
@@ -97,7 +97,7 @@ module.exports = function(options) {
 								ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
 								LocalTimeStamp: stats.mtime.getTime(),
 								Location: api.join(fileRoot, rest),
-								Name: name,
+								Name: decodeURIComponent(name),
 								Parents: getParents(filepath, rest)
 								
 							});
@@ -125,12 +125,12 @@ module.exports = function(options) {
 
 	function writeFileMetadata(res, rest, filepath, stats, etag) {
 		var metaObj = {
-			Name: path.basename(filepath),
+			Name: decodeURIComponent(path.basename(filepath)),
 			Location: api.join(fileRoot, rest),
 			Directory: stats.isDirectory(),
 			LocalTimeStamp: stats.mtime.getTime(),
 			Parents: getParents(filepath, rest),
-			ChildrenLocation: api.join(fileRoot, rest, '?depth=1'),
+			ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
 			//Charset: "UTF-8",
 			Attributes: {
 				// TODO fix this
