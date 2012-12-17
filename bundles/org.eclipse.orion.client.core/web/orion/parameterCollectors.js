@@ -228,7 +228,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 						}
 					} else {
 						field = document.createElement("input"); //$NON-NLS-0$
-						field.type = "text"; //$NON-NLS-0$
+						field.type = parm.type;
 						field.id = id;
 						parameterArea.appendChild(field);
 						if (parm.value) {
