@@ -50,7 +50,7 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 					Id: childname,
 					Directory: isDirectory,
 					Location: api.join(parentLocation, childname + (isDirectory ? '/' : '')),
-					ChildrenLocation: api.join(parentLocation, childname, '?depth=1')
+					ChildrenLocation: api.join(parentLocation, childname) + '?depth=1'
 /*
     {
       "ChildrenLocation": "http://orion.eclipse.org/file/D/myworkspace/?depth=1",

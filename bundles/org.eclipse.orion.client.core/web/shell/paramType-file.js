@@ -19,11 +19,9 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 	orion.shellPage = {};
 
 	orion.shellPage.ParamTypeFile = (function() {
-		function ParamTypeFile(name, shellPageFileService, directories, files) {
+		function ParamTypeFile(name, shellPageFileService) {
 			this.name = name;
 			this.shellPageFileService = shellPageFileService;
-			this.directories = directories;
-			this.files = files;
 		}
 
 		ParamTypeFile.prototype = {
@@ -31,7 +29,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * This function is invoked by the shell to query for the completion
 			 * status and predictions for an argument with this parameter type.
 			 */
-			parse: function(arg) {
+			parse: function(arg, typeSpec) {
 				var string = arg || "";
 				if (string.indexOf("'") === 0) {
 					string = string.substring(1);
@@ -39,8 +37,8 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				if (string.lastIndexOf("'") === string.length - 1) {
 					string = string.substring(0, string.length - 1);
 				}
-				var predictions = this._getPredictions(string);
-				return this._createCompletion(string, predictions);
+				var predictions = this._getPredictions(string, typeSpec.directory, typeSpec.file);
+				return this._createCompletion(string, predictions, typeSpec.directory, typeSpec.file);
 			},
 
 			/**
@@ -53,13 +51,13 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 
 			/** @private */
 
-			_createCompletion: function(string, predictions) {
+			_createCompletion: function(string, predictions, directory, file) {
 				var exactMatch;
 				if (predictions) {
 					for (var i = 0; i < predictions.length; i++) {
 						var current = predictions[i];
 						if (current.name === string) {
-							if ((current.value.Directory && this.directories) || (!current.value.Directory && this.files)) {
+							if ((current.value.Directory && directory) || (!current.value.Directory && file)) {
 								exactMatch = current;
 								break;
 							}
@@ -91,7 +89,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				}
 				return null;
 			},
-			_getPredictions: function(text) {
+			_getPredictions: function(text, directory, file) {
 				var directoryNode = this.shellPageFileService.getDirectory(null, text);
 				if (!directoryNode) {
 					/* either invalid path or not yet retrieved */
@@ -123,7 +121,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				}
 				for (var i = 0; i < childNodes.length; i++) {
 					var candidate = childNodes[i];
-					if (candidate.Directory || this.files) {
+					if (candidate.Directory || file) {
 						if (candidate.Name.indexOf(finalSegment) === 0) {
 							var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
 							name = directoriesSegment + candidate.Name;

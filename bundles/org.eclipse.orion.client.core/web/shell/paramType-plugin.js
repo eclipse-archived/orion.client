@@ -18,15 +18,19 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 	orion.shellPage = {};
 
 	var AllPlugin = (function() {
-		function AllPlugin(plugins) {
+		function AllPlugin(plugins, urlsToExclude) {
 			this.plugins = plugins;
+			this.urlsToExclude = urlsToExclude;
 		}
 		AllPlugin.prototype = {
 			name: NAME_ALL,
 			getPluginLocations: function() {
 				var result = [];
 				this.plugins.forEach(function(current) {
-					result.push(current.getLocation());
+					var location = current.getLocation();
+					if (!urlsToExclude || !urlsToExclude[location]) {
+						result.push(location);
+					}
 				});
 				return result;
 			},
@@ -49,19 +53,30 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			/** @private */
 
 			_invokeOnAllPlugins: function(funcName, arg) {
+				var targetList = this.urlsToExclude ? [] : this.plugins;
+				if (this.urlsToExclude) {
+					var self = this;
+					this.plugins.forEach(function(current) {
+						if (!self.urlsToExclude[current.getLocation()]) {
+							targetList.push(current);
+						}
+					});
+				}
+
 				var result = new Deferred();
-				var targetCount = this.plugins.length;
+				var targetCount = targetList.length;
 				var succeedCount = 0;
-				var succeedFn = function() {
-					if (++succeedCount === targetCount) {
-						result.resolve();
-					}
-				};
-				var errorFn = function(error) {
-					result.reject(error);
-				};
-				this.plugins.forEach(function(current) {
-					current[funcName](arg).then(succeedFn, errorFn);
+				targetList.forEach(function(current) {
+					current[funcName](arg).then(
+						function() {
+							if (++succeedCount === targetCount) {
+								result.resolve();
+							}
+						},
+						function(error) {
+							result.reject(error);
+						}
+					);
 				});
 				return result;
 			}
@@ -70,43 +85,27 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 	}());
 
 	orion.shellPage.ParamTypePlugin = (function() {
-		function ParamTypePlugin(name, pluginRegistry, excludeDefaultPlugins, isSingleSelect) {
+		function ParamTypePlugin(name, pluginRegistry) {
 			this.name = name;
 			this.pluginRegistry = pluginRegistry;
-			this.excludeDefaultPlugins = excludeDefaultPlugins;
-			this.isSingleSelect = isSingleSelect;
 
 			var self = this;
-			pluginRegistry.addEventListener(
-				"installed", //$NON-NLS-0$
-				function() {
-					self._initPluginsList();
-				}
-			);
-			pluginRegistry.addEventListener(
-				"uninstalled", //$NON-NLS-0$
-				function() {
-					self._initPluginsList();
-				}
-			);
-			pluginRegistry.addEventListener(
-				"stopping", //$NON-NLS-0$
-				function() {
-					self._sort(self.plugins);
-				}
-			);
-			pluginRegistry.addEventListener(
-				"lazy activation", //$NON-NLS-0$
-				function() {
-					self._sort(self.plugins);
-				}
-			);
+			pluginRegistry.addEventListener("installed", function() { //$NON-NLS-0$
+				self._initPluginsList();
+			});
+			pluginRegistry.addEventListener("uninstalled", function() { //$NON-NLS-0$
+				self._initPluginsList();
+			});
+			pluginRegistry.addEventListener("stopping", function() { //$NON-NLS-0$
+				self._sort(self.plugins);
+			});
+			pluginRegistry.addEventListener("lazy activation", function() { //$NON-NLS-0$
+				self._sort(self.plugins);
+			});
 
-			/* don't let initialization delay page rendering */
+			/* don't let initialization delay rendering of the page */
 			setTimeout(function() {
-				if (self.excludeDefaultPlugins) {
-					self._computeDefaultPlugins();
-				}
+				self._computeDefaultPlugins();
 				self._initPluginsList();
 			}, 1);
 		}
@@ -122,7 +121,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			 * This function is invoked by the shell to query for the completion
 			 * status and predictions for an argument with this parameter type.
 			 */
-			parse: function(arg) {
+			parse: function(arg, typeSpec) {
 				var string = arg || "";
 				if (string.indexOf("'") === 0) { //$NON-NLS-0$
 					string = string.substring(1);
@@ -130,7 +129,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				if (string.lastIndexOf("'") === string.length - 1) { //$NON-NLS-0$
 					string = string.substring(0, string.length - 1);
 				}
-				var predictions = this._getPredictions(string);
+				var predictions = this._getPredictions(string, typeSpec.multiple, typeSpec.excludeDefaultPlugins);
 				return this._createCompletion(string, predictions);
 			},
 
@@ -144,10 +143,10 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 
 			/** @private */
 
-			_defaultPluginURLs: {},
+			_defaultPluginUrls: {},
 			_computeDefaultPlugins: function() {
 				/* temporary, see Bug 368481 - Re-examine localStorage caching and lifecycle */
-				var normalizeURL = function(location) {
+				var normalizeUrl = function(location) {
 					if (location.indexOf("://") === -1) { //$NON-NLS-0$
 						var temp = document.createElement("a"); //$NON-NLS-0$
 						temp.href = location;
@@ -160,8 +159,8 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				if (defaultPluginsStorage) {
 					var pluginsPreference = JSON.parse(defaultPluginsStorage);
 					var self = this;
-					Object.keys(pluginsPreference).forEach(function(pluginURL) {
-						self._defaultPluginURLs[normalizeURL(require.toUrl(pluginURL))] = true;
+					Object.keys(pluginsPreference).forEach(function(pluginUrl) {
+						self._defaultPluginUrls[normalizeUrl(require.toUrl(pluginUrl))] = true;
 					});
 				}
 			},
@@ -211,16 +210,22 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				}
 				return last.trim();
 			},
-			_getPredictions: function(text) {
+			_getPredictions: function(text, multiple, excludeDefaultPlugins) {
 				var predictions = [];
 				if (this.plugins) {
+					var self = this;
 					this.plugins.forEach(function(current) {
-						if (current.name.indexOf(text) === 0) {
-							predictions.push({name: current.name, value: current});
+						if (!excludeDefaultPlugins || !self._defaultPluginUrls[current.getLocation()]) {
+							if (current.name.indexOf(text) === 0) {
+								predictions.push({name: current.name, value: current});
+							}
 						}
 					});
-					if (!this.isSingleSelect && NAME_ALL.indexOf(text) === 0) {
-						predictions.push({name: NAME_ALL, value: new AllPlugin(this.plugins)});
+					if (multiple && NAME_ALL.indexOf(text) === 0) {
+						predictions.push({
+							name: NAME_ALL,
+							value: new AllPlugin(this.plugins, excludeDefaultPlugins ? this._defaultPluginUrls : null)
+						});
 					}
 				}
 				return predictions;
@@ -231,11 +236,9 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 				var self = this;
 				list.forEach(function(current) {
 					var location = current.getLocation();
-					if (!self.excludeDefaultPlugins || !self._defaultPluginURLs[location]) {
-						var headers = current.getHeaders();
-						current.name = headers.name || self._formatLocationAsPluginName(location);
-						self.plugins.push(current);
-					}
+					var headers = current.getHeaders();
+					current.name = headers.name || self._formatLocationAsPluginName(location);
+					self.plugins.push(current);
 				});
 				this._sort(this.plugins);
 			},

@@ -540,7 +540,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		// the trickiest part is finding where to start looking (section or main toolbar).
 		// We need to walk up until we find a "toolComposite"
 
-		while (node) {
+		while (node && node.classList) {
 			if (node.classList.contains("toolComposite")) { //$NON-NLS-0$
 				toolbarNode = node;
 				break;
