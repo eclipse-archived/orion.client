@@ -11,7 +11,7 @@
  *     Andrew Eisenberg (VMware) - initial API and implementation
  ******************************************************************************/
 
-/*global define esprima*/
+/*global define esprima scriptedLogger*/
 define("plugins/esprima/esprimaVisitor", [], function() {
 
 
@@ -34,16 +34,25 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 			if (!extraOptions.comment) {
 				extraOptions.comment = true;
 			}
-			var parsedProgram = esprima.parse(contents, extraOptions);
-			return parsedProgram;
+			try {
+				var parsedProgram = esprima.parse(contents, extraOptions);
+				return parsedProgram;
+			} catch (e) {
+				if (typeof scriptedLogger !== "undefined") {
+					scriptedLogger.warn("Problem parsing file", "CONTENT_ASSIST");
+					scriptedLogger.warn(e.message, "CONTENT_ASSIST");
+					scriptedLogger.warn(e.stack, "CONTENT_ASSIST");
+				}
+				return null;
+			}
 		},
 
 		/**
-		 * Generic AST visitor.  Visits all children in source order, if they have a range property.  Children with
-		 * no range property are visited first.
-		 * 
+		 * Generic AST visitor.  Visits all children in source order, if they have a range property.
+		 *
 		 * @param node The AST node to visit
-		 * @param context any extra data required to pass between operations
+		 * @param {rhsVisit:Boolean,...} context any extra data required to pass between operations.  Set rhsVisit to true if the rhs of
+		 * assignments and variable declarators should be visited before the lhs
 		 * @param operation function(node, context, [isInitialOp]) an operation on the AST node and the data.  Return falsy if
 		 * the visit should no longer continue. Return truthy to continue.
 		 * @param [postoperation] (optional) function(node, context, [isInitialOp]) an operation that is exectuted after visiting the current node's children.
@@ -64,10 +73,9 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 									children.push(child[i]);
 								} else if (key === "properties") {
 									// might be key-value pair of an object expression
-									// don't visit the key since it doesn't have an sloc
-									// and it is handle later by inferencing
-									// FIXADE - I don't know if this is still necessary since it looks like esprima has changed the
-									// way it handles properties in object expressions and they may now be proper AST nodes
+									// in old versions of the parser, the 'properties' property did not have a 'type' or a 'range'
+									// so we must explicitly visit the children here.
+									// in new versions of the parser, this is fixed, and this branch will never be taken.
 									if (child[i].hasOwnProperty("key") && child[i].hasOwnProperty("value")) {
 										children.push(child[i].key);
 										children.push(child[i].value);
@@ -84,6 +92,7 @@ define("plugins/esprima/esprimaVisitor", [], function() {
 
 				if (children.length > 0) {
 					// sort children by source location
+					// children with no source location are visited first
 					children.sort(function(left, right) {
 						if (left.range && right.range) {
 							return left.range[0] - right.range[0];
