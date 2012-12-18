@@ -621,7 +621,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: cdExec,
 				parameters: [{
 					name: "directory", //$NON-NLS-0$
-					type: {name: "file", directory: true}, //$NON-NLS-0$
+					type: {name: "file", directory: true, exist: true}, //$NON-NLS-0$
 					description: messages["The name of the directory"]
 				}],
 				returnType: "html" //$NON-NLS-0$
@@ -632,7 +632,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				callback: editExec,
 				parameters: [{
 					name: "file", //$NON-NLS-0$
-					type: {name: "file", file: true}, //$NON-NLS-0$
+					type: {name: "file", file: true, exist: true}, //$NON-NLS-0$
 					description: messages["The name of the file"]
 				}]
 			});

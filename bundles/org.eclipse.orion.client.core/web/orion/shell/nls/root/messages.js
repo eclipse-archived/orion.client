@@ -47,5 +47,6 @@ define({
 	"The service identifier": "The service identifier",
 	"disabled": "disabled",
 	"Open in Shell": "Open in Shell",
-	"Open in Shell page": "Open in Shell page"
+	"Open in Shell page": "Open in Shell page",
+	"'${0}' already exists": "'${0}' already exists"
 });
