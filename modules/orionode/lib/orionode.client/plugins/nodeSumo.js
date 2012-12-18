@@ -93,7 +93,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		description: 'Runs a Node.js application.',
 		parameters: [{
 			name: 'module',
-			type: 'file',
+			type: {name: "file", file: true, exist: true}, //$NON-NLS-0$
 			description: 'The module to run.'
 		}, {
 			name: 'args',
@@ -162,7 +162,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		description: 'Runs a Node.js application with a given debug port number. Use different port numbers if you debug more than one apps. Use the debug URL from the command response, in a webkit browser to start debug.',
 		parameters: [{
 			name: 'module',
-			type: 'file',
+			type: {name: "file", file: true, exist: true}, //$NON-NLS-0$
 			description: 'The module to run in the child.'
 		}, {
 			name: 'port',
