@@ -12,7 +12,7 @@
 /*global window document define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands'], function(messages, require, dojo, mSection, mCommands){
+define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/section', 'orion/commands'], function(messages, require, lib, mSection, mCommands){
 
 	/**
 	 * Creates a new user interface element showing a list of tasks
@@ -33,10 +33,7 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 	 * 	The command tooltip will be used as the description if no descriptionProperty is provided.
 	 */
 	function TaskList(options) {
-		var parent = options.parent;
-		if (typeof(parent) === "string") { //$NON-NLS-0$
-			parent = dojo.byId(parent);
-		}
+		var parent = lib.node(options.parent);
 		if (!parent) { throw messages['no parent']; }
 		if (!options.serviceRegistry) {throw messages["no service registry"]; }
 		this._parent = parent;
@@ -62,7 +59,8 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 			// first time setup
 			if (!this._taskSection) {
 				var contentId = "taskListContent"+this._title; //$NON-NLS-0$
-				var contentDiv = dojo.create("div", {id: contentId}); //$NON-NLS-0$
+				var contentDiv = document.createElement("div"); //$NON-NLS-0$
+				contentDiv.id = contentId;
 				this.fileSystemsSection = new mSection.Section(this._parent, {
 					id: "taskListSection"+this._title, //$NON-NLS-0$
 					title: this._title,
@@ -73,24 +71,31 @@ define(['i18n!orion/nls/messages', 'require', 'dojo', 'orion/section', 'orion/co
 					useAuxStyle: true
 				});
 				if (this._description) {
-					dojo.place("<p>"+this._description+"</p>", contentId, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					var p = document.createElement("p"); //$NON-NLS-0$
+					p.appendChild(document.createTextNode(this._description));
+					contentDiv.appendChild(p);
 				}
-				var taskTable = dojo.create("table", { role: "presentation" }, contentId, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var taskTable = document.createElement("table"); //$NON-NLS-0$
+				taskTable.role = "presentation"; //$NON-NLS-0$
+				contentDiv.appendChild(taskTable);
 				for (var i=0; i<this._tasks.length; i++) {
-					var row = dojo.create("tr", null, taskTable, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					var col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					var row = document.createElement("tr"); //$NON-NLS-0$
+					taskTable.appendChild(row);
+					var col = document.createElement("td"); //$NON-NLS-0$
+					row.appendChild(col);
 					this._commandService.registerCommandContribution("task"+i, this._tasks[i].commandId, 1); //$NON-NLS-0$
 					this._commandService.renderCommands("task"+i, col, this._item, this._handler, "button"); //$NON-NLS-1$ //$NON-NLS-0$
 					if (col.childNodes.length > 0) {
 						// I know I have only one command if I have any at all
-						dojo.addClass(col.childNodes[0], "taskTitle"); //$NON-NLS-0$
+						col.childNodes[0].classList.add("taskTitle"); //$NON-NLS-0$
 					}					
-					col = dojo.create("td", null, row, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.addClass(col, "taskDescription"); //$NON-NLS-0$
+					col = document.createElement("td"); //$NON-NLS-0$
+					row.appendChild(col);
+					col.classList.add("taskDescription"); //$NON-NLS-0$
 					var command = this._commandService.findCommand(this._tasks[i].commandId);
 					if (command) {
 						var description = this._descriptionProperty ? command[this._descriptionProperty] : command.tooltip;
-						dojo.place(document.createTextNode(description), col, "last"); //$NON-NLS-0$
+						col.appendChild(document.createTextNode(description));
 					}
 				}
 			}

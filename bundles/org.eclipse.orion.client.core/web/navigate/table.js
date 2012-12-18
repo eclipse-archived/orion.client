@@ -9,17 +9,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document dojo window eclipse orion serviceRegistry:true widgets alert*/
+/*global define document window eclipse orion serviceRegistry:true widgets alert*/
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'dojo', 'orion/bootstrap', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes',
-        'dojo/parser', 'dojo/hash'], 
-		function(messages, dojo, mBootstrap, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
+        'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes'], 
+		function(messages, mBootstrap, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes) {
 
-dojo.addOnLoad(function(){
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -68,8 +66,9 @@ dojo.addOnLoad(function(){
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, isFavoriteTarget: true,
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService});
 				mFileCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot);
-				var isAtRoot = mFileUtils.isAtRoot(explorer.treeRoot.Location) ;
-				if (isAtRoot && !dojo.byId("gettingStartedTasks")) { //$NON-NLS-0$
+				var isAtRoot = mFileUtils.isAtRoot(explorer.treeRoot.Location);
+				var gettingStartedNode = lib.node("gettingStartedTasks"); //$NON-NLS-0$
+				if (isAtRoot && !gettingStartedNode) { 
 					// create a command that represents each "orion.navigate.content" extension point
 					var newContentContributions = serviceRegistry.getServiceReferences("orion.navigate.content"); //$NON-NLS-0$
 					var tasks = [];
@@ -94,8 +93,8 @@ dojo.addOnLoad(function(){
 						description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
 						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false,
 						descriptionProperty: "contentDescription"}); //$NON-NLS-0$
-				} else {
-					dojo.empty("gettingStarted"); //$NON-NLS-0$
+				} else if (gettingStartedNode) {
+					lib.empty(gettingStartedNode); 
 				}
 			});
 		}
@@ -142,11 +141,6 @@ dojo.addOnLoad(function(){
 			
 		mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, commandService, explorer, "pageActions", "selectionTools", "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
-		//every time the user manually changes the hash, we need to load the workspace with that name
-		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
-			refresh();
-		});
+		window.addEventListener("hashchange", function() {refresh();}, false); //$NON-NLS-0$
 	});
-});
-
 });
