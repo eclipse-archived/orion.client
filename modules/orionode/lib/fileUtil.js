@@ -45,9 +45,13 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 			var children = childStats.map(function(cs) {
 				var childname = path.basename(cs[0]);
 				var isDirectory = cs[1].isDirectory();
+				var timeStamp = cs[1].mtime.getTime();
+				var size = cs[1].size;
 				return {
 					Name: childname,
 					Id: childname,
+					Length: size,
+					LocalTimeStamp: timeStamp,
 					Directory: isDirectory,
 					Location: api.join(parentLocation, childname + (isDirectory ? '/' : '')),
 					ChildrenLocation: api.join(parentLocation, childname) + '?depth=1'
