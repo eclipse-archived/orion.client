@@ -142,6 +142,25 @@ orion.TwoWayCompareUIFactory = (function() {
 			return bc;
 		},
 		
+		/**
+		 * Force a layout in the parent tree of the specified node, if there are layout managers assigned.
+		 *
+		 * @param {DomNode} node the node triggering new layout.
+		 */
+		_forceLayout: function(node) {
+			if (typeof node === "string") { //$NON-NLS-0$
+				node = dojo.byId(node);
+			}
+			while (node) {
+				var widget = dijit.byId(node.id);
+				if (widget && typeof widget.layout === "function") { //$NON-NLS-0$
+					widget.layout();
+					return;
+				}
+				node = node.parentNode;
+			}
+		},
+	
 		buildUI:function(){
 			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
 			this.destroy();
@@ -154,7 +173,8 @@ orion.TwoWayCompareUIFactory = (function() {
 			topWidget.addChild(leftB);
 			topWidget.addChild(rightB);
 			topWidget.startup();
-			topWidget.layout();
+			this._forceLayout(this._parentDivID);
+			//topWidget.layout();
 		},
 		
 		destroy: function(){

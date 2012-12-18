@@ -13,7 +13,7 @@
 /*jslint browser:true devel:true */
 define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient', 'dojo/DeferredList'], 
 		function(messages, require, dojo, dijit, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
 				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher, mFileClient) {
 
