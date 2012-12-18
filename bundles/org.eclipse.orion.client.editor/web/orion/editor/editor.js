@@ -603,6 +603,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 					}
 				}
@@ -659,6 +661,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 				}
 				this.setOverviewRulerVisible(true);
 			}
@@ -748,6 +752,38 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						var start = lineStart + problem.start - 1;
 						var end = lineStart + problem.end;
 						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
+						add.push(annotation);
+					}
+				}
+			}
+			annotationModel.replaceAnnotations(remove, add);
+		},
+		
+		showOccurrences: function(occurrences) {
+			var annotationModel = this._annotationModel;
+			if (!annotationModel) {
+				return;
+			}
+			var remove = [], add = [];
+			var model = annotationModel.getTextModel();
+			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			while (annotations.hasNext()) {
+				annotation = annotations.next();
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE || annotation.type === mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE) {
+					remove.push(annotation);
+				}
+			}
+			if (occurrences) { 
+				for (var i = 0; i < occurrences.length; i++) {
+					var occurrence = occurrences[i];
+					if (occurrence) {
+						var lineIndex = occurrence.line - 1;
+						var lineStart = model.getLineStart(lineIndex);
+						var start = lineStart + occurrence.start - 1;
+						var end = lineStart + occurrence.end;
+						var type = occurrence.readAccess === true ? mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE : mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE;
+						var description = occurrence.description;
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, description);
 						add.push(annotation);
 					}
 				}

@@ -137,6 +137,14 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 	 * Matching search annotation type.
 	 */
 	AnnotationType.ANNOTATION_MATCHING_SEARCH = "orion.annotation.matchingSearch"; //$NON-NLS-0$
+	/**
+	 * Read Occurrence annotation type.
+	 */
+	AnnotationType.ANNOTATION_READ_OCCURRENCE = "orion.annotation.readOccurrence"; //$NON-NLS-0$
+	/**
+	 * Write Occurrence annotation type.
+	 */
+	AnnotationType.ANNOTATION_WRITE_OCCURRENCE = "orion.annotation.writeOccurrence"; //$NON-NLS-0$
 	
 	/** @private */
 	var annotationTypes = {};
@@ -216,6 +224,8 @@ define("orion/textview/annotations", ['i18n!orion/textview/nls/messages', 'orion
 	registerType(AnnotationType.ANNOTATION_MATCHING_BRACKET);
 	registerType(AnnotationType.ANNOTATION_CURRENT_SEARCH);
 	registerType(AnnotationType.ANNOTATION_MATCHING_SEARCH);
+	registerType(AnnotationType.ANNOTATION_READ_OCCURRENCE);
+	registerType(AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 	registerType(AnnotationType.ANNOTATION_CURRENT_LINE, true);
 	AnnotationType.registerType(AnnotationType.ANNOTATION_FOLDING, FoldingAnnotation);
 	
