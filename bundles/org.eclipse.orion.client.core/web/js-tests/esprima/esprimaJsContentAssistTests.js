@@ -17,7 +17,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	//////////////////////////////////////////////////////////
 	// helpers
 	//////////////////////////////////////////////////////////
-	function computeContentAssist(buffer, prefix, offset, jsLintOptions) {
+	function computeContentAssist(buffer, prefix, offset, lintOptions) {
 		if (!prefix) {
 			prefix = "";
 		}
@@ -27,7 +27,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				offset = buffer.length;
 			}
 		}
-		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, jsLintOptions);
+		var esprimaContentAssistant = new mEsprimaPlugin.EsprimaJavaScriptContentAssistProvider(null, lintOptions);
 		return esprimaContentAssistant.computeProposals(buffer, offset, {prefix : prefix, inferredOnly : true });
 	}
 	
@@ -55,7 +55,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	}
 	
 	function testProposals(prefix, actualProposals, expectedProposals) {
-		assert.equal(actualProposals.length, expectedProposals.length, 
+		assert.equal(actualProposals.length, expectedProposals.length,
 			"Wrong number of proposals.  Expected:\n" + stringifyExpected(expectedProposals) +"\nActual:\n" + stringifyActual(actualProposals, prefix));
 			
 		for (var i = 0; i < actualProposals.length; i++) {
@@ -119,8 +119,6 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 
 	var tests = {};
 
-	tests.testEmpty = function() {};
-
 	tests["test recovery basic parse"] = function() {
 		var parsedProgram = parse("foo.bar");
 		assertNoErrors(parsedProgram);
@@ -145,20 +143,20 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -181,20 +179,20 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -218,27 +216,27 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["zzz", "zzz : Object"],
+			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -255,29 +253,29 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
-			["xxx", "xxx : Object"],
-			["yyy", "yyy : Object"],
-			["zzz", "zzz : Object"],
+			["xxx", "xxx : {  }"],
+			["yyy", "yyy : {  }"],
+			["zzz", "zzz : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -291,8 +289,8 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test multi var content assist 2"] = function() {
 		var results = computeContentAssist("var zzz;\nvar zxxx, xxx, yyy;\nz","z");
 		testProposals("z", results, [
-			["zxxx", "zxxx : Object"],
-			["zzz", "zzz : Object"]
+			["zxxx", "zxxx : {  }"],
+			["zzz", "zzz : {  }"]
 		]);
 	};
 	tests["test single function content assist"] = function() {
@@ -301,21 +299,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -338,22 +336,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -408,7 +406,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		var results = computeContentAssist(
 				"var foo;\nfunction other(a, b, c) {\nfunction inner() { var foo2; }\nf/**/}", "f");
 		testProposals("f", results, [
-			["foo", "foo : Object"]
+			["foo", "foo : {  }"]
 		]);
 	};
 	tests["test scopes 2"] = function() {
@@ -436,22 +434,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -479,26 +477,27 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["other(a, b, c)", "other(a, b, c) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
+			["nuthin", "nuthin : {  }"],
 			["this", "this : Global"],
 			["undefined", "undefined : undefined"],
 			["", "---------------------------------"],
@@ -526,10 +525,10 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 5"] = function() {
-		// should not see 'aaa' since that is declared later
 		var results = computeContentAssist("function fun(a, b, c) {}\nfunction other(aa, ab, c) {var abb;\na/**/\nvar aaa}", "a");
 		testProposals("a", results, [
-			["abb", "abb : Object"],
+			["aaa", "aaa : {  }"],
+			["abb", "abb : {  }"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
@@ -537,13 +536,13 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 6"] = function() {
-		// should not see 'aaa' since that is declared later
 		var results = computeContentAssist(
 		"function fun(a, b, c) {\n" +
 		"function other(aa, ab, c) {\n"+
 		"var abb;\na/**/\nvar aaa\n}\n}", "a");
 		testProposals("a", results, [
-			["abb", "abb : Object"],
+			["aaa", "aaa : {  }"],
+			["abb", "abb : {  }"],
 			["a", "---------------------------------"],
 			["aa", "aa : {  }"],
 			["ab", "ab : {  }"],
@@ -553,14 +552,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	tests["test in function 7"] = function() {
-		// should not see 'aaa' since that is declared later
+		// should not see 'aaa' or 'abb' since declared in another function
 		var results = computeContentAssist(
 		"function fun(a, b, c) {/**/\n" +
 		"function other(aa, ab, ac) {\n"+
 		"var abb;\na\nvar aaa\n}\n}");
 		testProposals("", results, [
-			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
-			["", "---------------------------------"],
 			["a", "a : {  }"],
 			["arguments", "arguments : Arguments"],
 			["b", "b : {  }"],
@@ -569,21 +566,22 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
+			["other(aa, ab, ac)", "other(aa, ab, ac) : undefined"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -617,21 +615,21 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
 			["fun(a, b, c)", "fun(a, b, c) : undefined"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
@@ -736,9 +734,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test Object Literal inside"] = function() {
 		var results = computeContentAssist("var x = { the : 1, far : this.th/**/ };", "th");
 		testProposals("th", results, [
-			// type is 'Object' here, not number, since inside the object literal, we don't 
-			// know the types of literal fields
-			["the", "the : Object"]
+			["the", "the : Number"]
 		]);
 	};
 	tests["test Object Literal outside"] = function() {
@@ -773,7 +769,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test this reference 1"] = function() {
 		var results = computeContentAssist("var xxxx;\nthis.x", "x");
 		testProposals("x", results, [
-			["xxxx", "xxxx : Object"]
+			["xxxx", "xxxx : {  }"]
 		]);
 	};
 	tests["test binary expression 1"] = function() {
@@ -817,19 +813,19 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test while loop 1"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(ii/**/ === null) {\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test while loop 2"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(this.ii/**/ === null) {\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test while loop 3"] = function() {
 		var results = computeContentAssist("var iii;\nwhile(iii === null) {this.ii/**/\n}", "ii");
 		testProposals("ii", results, [
-			["iii", "iii : Object"]
+			["iii", "iii : {  }"]
 		]);
 	};
 	tests["test catch clause 1"] = function() {
@@ -934,7 +930,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test constructor 2"] = function() {
 		var results = computeContentAssist(
 		"function Fun() {	this.xxx = 9;	this.uuu = this.xxx; }\n" +
-		"var y = new Fun();\n" +	
+		"var y = new Fun();\n" +
 		"y.x", "x");
 		testProposals("x", results, [
 			["xxx", "xxx : Number"]
@@ -1038,28 +1034,28 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1077,28 +1073,28 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1116,28 +1112,28 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["Array([val])", "Array([val]) : Array"],
 			["Boolean([val])", "Boolean([val]) : Boolean"],
 			["Date([val])", "Date([val]) : Date"],
-			["Error([err])", "Error([err]) : Error"],
-			["Function()", "Function() : Function"],
-			["Number([val])", "Number([val]) : Number"],
-			["Object([val])", "Object([val]) : Object"],
-			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["decodeURI(uri)", "decodeURI(uri) : String"],
 			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
 			["encodeURI(uri)", "encodeURI(uri) : String"],
 			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
 			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
 			["isFinite(num)", "isFinite(num) : Boolean"],
 			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
 			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
 			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
 			["Infinity", "Infinity : Number"],
 			["JSON", "JSON : JSON"],
 			["Math", "Math : Math"],
 			["NaN", "NaN : Number"],
 			["this", "this : Global"],
-			["ttt", "ttt : Object"],
+			["ttt", "ttt : {  }"],
 			["undefined", "undefined : undefined"],
-			["uuu", "uuu : Object"],
+			["uuu", "uuu : {  }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1371,8 +1367,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test broken after dot 3"] = function() {
 		var results = computeContentAssist("var ttt = { ooo:this.};", "", "var ttt = { ooo:this.".length);
 		testProposals("", results, [
-			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
-			["ooo", "ooo : Object"],
+			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1387,8 +1382,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 	tests["test broken after dot 3a"] = function() {
 		var results = computeContentAssist("var ttt = { ooo:this./**/};", "");
 		testProposals("", results, [
-			// inferred type of ooo is object since we don't put real types on object literal properties until after the post-op
-			["ooo", "ooo : Object"],
+			["ooo", "ooo : { ooo : { ooo : {...} } }"],
 			["", "---------------------------------"],
 			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
 			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
@@ -1675,7 +1669,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
-	// not sure I like this.  returning an object literal wrapped in a funtion looks no different from 
+	// not sure I like this.  returning an object literal wrapped in a funtion looks no different from
 	// returning an object literal
 	tests["test function return type obj literal 2"] = function() {
 		var results = computeContentAssist(
@@ -1769,11 +1763,12 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
-	// should not see an implicit if it comes after the invocation location
+	// should see an implicit even if it comes after the invocation location
 	tests["test implicit7"] = function() {
 		var results = computeContentAssist(
 			"xx/**/\nxxx", "xx");
 		testProposals("xx", results, [
+			["xxx", "xxx : {  }"]
 		]);
 	};
 
@@ -2004,7 +1999,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : { Fun : function() { } } }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2013,7 +2008,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			"var obj = { inner : {  } }\nobj.inner.Fun = function() { }\nnew obj", "obj");
 		testProposals("obj", results, [
 			["obj.inner.Fun()", "obj.inner.Fun() : obj.inner.Fun"],
-			["obj", "obj : { inner : { Fun : {...} } }"]
+			["obj", "obj : { inner : { Fun : obj.inner.Fun } }"]
 		]);
 	};
 	
@@ -2220,6 +2215,182 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			["xx", "xx : Number"]
 		]);
 	};
+	
+	tests["test browser10"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	// browser takes higher precedence than node
+	tests["test browser11"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	// browser takes higher precedence than node
+	tests["test browser12"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true browser:true */\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	// configuration from lint options
+	tests["test browser13"] = function() {
+		var results = computeContentAssist(
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+	
+	
+	// configuration from lint options overridden by options
+	tests["test browser13"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:false */\n" +
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+	
+	
+	
+	// Node awareness
+	tests["test node1"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	tests["test node2"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"process", "process"
+		);
+		testProposals("process", results, [
+			["process", "process : Process"]
+		]);
+	};
+
+	tests["test node3"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:false node:true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+	
+	tests["test node4"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	
+	tests["test node5"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"var stream = require('stream');\n" +
+			"var s = new stream.Stream();\n" +
+			"s.foo = 9;\n" +
+			"s.foo", "foo"
+		);
+		testProposals("foo", results, [
+		]);
+	};
+
+	// just checking that our regex works
+	tests["test node6"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node: xxx true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	// just checking that our regex works
+	tests["test node7"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node  xxxx : true*/\n" +
+			"thi", "thi"
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	// configuration from .scripted
+	tests["test node8"] = function() {
+		var results = computeContentAssist(
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node9"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:false*/\n" +
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Global"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node10"] = function() {
+		var results = computeContentAssist(
+			"/*jslint node:true*/\n" +
+			"thi", "thi", null, {options:{browser:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Module"]
+		]);
+	};
+
+	// configuration from .scripted is overridden by in file comments
+	tests["test node11"] = function() {
+		var results = computeContentAssist(
+			"/*jslint browser:true*/\n" +
+			"thi", "thi", null, {options:{node:true}}
+		);
+		testProposals("thi", results, [
+			["this", "this : Window"]
+		]);
+	};
+
 
 	////////////////////////////////////////
 	// jsdoc tests
@@ -2428,7 +2599,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			);
 			// currently, we just ignore parameterization
 			testProposals("x", results, [
-				["xx", "xx : Array"]
+				["xx", "xx : Array[String]"]
 			]);
 		};
 		
@@ -2559,7 +2730,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @param {String} xx1\n@param {Number} xx2 */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx1", "xx1 : String"],
@@ -2570,7 +2741,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc2"] = function() {
 			var results = computeContentAssist(
 				"/** @param {Number} xx2\n@param {String} xx1\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx1", "xx1 : String"],
@@ -2581,7 +2752,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc3"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(String,Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(String, Number)", "xx2(String, Number) : Number"],
@@ -2592,7 +2763,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc4"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(a, Number)", "xx2(a, Number) : Number"],
@@ -2603,7 +2774,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test param jsdoc5"] = function() {
 			var results = computeContentAssist(
 				"/** @param {function(a:String,?Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { xx/**/ }", 
+				"var flart = function(xx1,xx2) { xx/**/ }",
 				"xx");
 			testProposals("xx", results, [
 				["xx2(a, Number)", "xx2(a, Number) : Number"],
@@ -2615,7 +2786,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		tests["test return jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"/** @return {function(a:String,?Number):Number} xx2\n */" +
-				"var flart = function(xx1,xx2) { }\nflar", 
+				"var flart = function(xx1,xx2) { }\nflar",
 				"flar");
 			// hmmmm... functions returning functions not really showing up
 			testProposals("flar", results, [
@@ -2669,7 +2840,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 			]);
 		};
 		
-		// RIGEL-138 jsdoc support for functions parameters that are in object literals
+		// SCRIPTED-138 jsdoc support for functions parameters that are in object literals
 		tests["test object literal fn param jsdoc1"] = function() {
 			var results = computeContentAssist(
 				"var obj = {\n" +
@@ -2720,11 +2891,76 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 				["yyy", "yyy : Number"]
 			]);
 		};
+		
+		// arrays and array types
+		tests["test array type1"] = function() {
+			var results = computeContentAssist(
+				"/** @type [Number] */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type2"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type [Number,String] */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type3"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Number> */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type4"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<{foo:Number}> */ var xxx;\nxxx[0].foo.toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type5"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Array.<Number>> */ var xxx;\nxxx[0][0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type6"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type Array.<Array.<Array.<Number>>> */ var xxx;\nxxx[0][0][bar].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type7"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type {...Number} */ var xxx;\nxxx[0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
+		tests["test array type8"] = function() {
+			var results = computeContentAssist(
+				// ignoring the second type
+				"/** @type {...Array.<Number>} */ var xxx;\nxxx[0][0].toF", "toF");
+			testProposals("toF", results, [
+				["toFixed(digits)", "toFixed(digits) : Number"]
+			]);
+		};
 	}
 	
 	/////////////////////////////////////
 	// various tests for reassignment
-	// reassignments are only performed 
+	// reassignments are only performed
 	// if the new type is not less general
 	// than the old type
 	/////////////////////////////////////
@@ -3046,7 +3282,7 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
-	// RIGEL-100
+	// SCRIPTED-100
 	tests["test obj literal with underscore"] = function() {
 		var results = computeContentAssist(
 			"var obj = { _myFun : function() { this._/**/ } }", "_");
@@ -3057,5 +3293,716 @@ define(["plugins/esprima/esprimaJsContentAssist", "orion/assert", "esprima/espri
 		]);
 	};
 	
+	// SCRIPTED-170
+	tests["test obj literal with underscore"] = function() {
+		var results = computeContentAssist(
+			"function hasOwnProperty() { }\n" +
+			"({}).hasOwnProperty();");
+		testProposals("", results, [
+			["Array([val])", "Array([val]) : Array"],
+			["Boolean([val])", "Boolean([val]) : Boolean"],
+			["Date([val])", "Date([val]) : Date"],
+			["decodeURI(uri)", "decodeURI(uri) : String"],
+			["decodeURIComponent(encodedURIString)", "decodeURIComponent(encodedURIString) : String"],
+			["encodeURI(uri)", "encodeURI(uri) : String"],
+			["encodeURIComponent(decodedURIString)", "encodeURIComponent(decodedURIString) : String"],
+			["Error([err])", "Error([err]) : Error"],
+			["eval(toEval)", "eval(toEval) : Object"],
+			["Function()", "Function() : Function"],
+			["isFinite(num)", "isFinite(num) : Boolean"],
+			["isNaN(num)", "isNaN(num) : Boolean"],
+			["Number([val])", "Number([val]) : Number"],
+			["Object([val])", "Object([val]) : Object"],
+			["parseFloat(str, [radix])", "parseFloat(str, [radix]) : Number"],
+			["parseInt(str, [radix])", "parseInt(str, [radix]) : Number"],
+			["RegExp([val])", "RegExp([val]) : RegExp"],
+			["Infinity", "Infinity : Number"],
+			["JSON", "JSON : JSON"],
+			["Math", "Math : Math"],
+			["NaN", "NaN : Number"],
+			["this", "this : Global"],
+			["undefined", "undefined : undefined"],
+			["", "---------------------------------"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["toLocaleString()", "toLocaleString() : String"],
+			["toString()", "toString() : String"],
+			["valueOf()", "valueOf() : Object"],
+			["prototype", "prototype : Object"]
+		]);
+	};
+	
+	// computed member expressions
+	tests["test computed member expressions1"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo['at'].b", "b");
+		testProposals("b", results, [
+			["bar", "bar : Number"]
+		]);
+	};
+	
+	tests["test computed member expressions2"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[at].b", "b");
+		testProposals("b", results, [
+		]);
+	};
+	
+	tests["test computed member expressions3"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[9].at.bar.toF", "toF");
+		testProposals("toF", results, [
+		]);
+	};
+	
+	tests["test computed member expressions4"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo['at'].bar.toF", "toF");
+		testProposals("toF", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	
+	tests["test computed member expressions5"] = function() {
+		var results = computeContentAssist(
+			"var foo = { at: { bar: 0} };\n" +
+			"foo[at.foo.bar].");
+		testProposals("", results, [
+			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["toLocaleString()", "toLocaleString() : String"],
+			["toString()", "toString() : String"],
+			["valueOf()", "valueOf() : Object"],
+			["prototype", "prototype : Object"]
+		]);
+	};
+	
+	tests["test computed member expressions6"] = function() {
+		var results = computeContentAssist(
+			"var x = 0;\n" +
+			"var foo = [];\n" +
+			"foo[x./**/]");
+		testProposals("", results, [
+			["toExponential(digits)", "toExponential(digits) : Number"],
+			["toFixed(digits)", "toFixed(digits) : Number"],
+			["toPrecision(digits)", "toPrecision(digits) : Number"],
+			["", "---------------------------------"],
+			["hasOwnProperty(property)", "hasOwnProperty(property) : boolean"],
+			["isPrototypeOf(object)", "isPrototypeOf(object) : boolean"],
+			["propertyIsEnumerable(property)", "propertyIsEnumerable(property) : boolean"],
+			["toLocaleString()", "toLocaleString() : String"],
+			["toString()", "toString() : String"],
+			["valueOf()", "valueOf() : Object"],
+			["prototype", "prototype : Object"]
+		]);
+	};
+	
+	
+	/////////////////////////////////////
+	// full file inferencing
+	/////////////////////////////////////
+	tests["test full file inferecing 1"] = function() {
+		var results = computeContentAssist(
+			"x/**/;\n" +
+			"var x = 0;", "x");
+		testProposals("x", results, [
+			["x", "x : Number"]
+		]);
+	};
+	tests["test full file inferecing 2"] = function() {
+		var results = computeContentAssist(
+			"function a() { x/**/; }\n" +
+			"var x = 0;", "x");
+		testProposals("x", results, [
+			["x", "x : Number"]
+		]);
+	};
+	tests["test full file inferecing 3"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x; y/**/}\n" +
+			"var x = 0;", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 4"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x.fff; y/**/}\n" +
+			"var x = { fff : 0 };", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 5"] = function() {
+		var results = computeContentAssist(
+			"function a() { var y = x.fff; y/**/}\n" +
+			"var x = {  };\n" +
+			"x.fff = 8;", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 6"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = x.fff; y/**/}\n" +
+			"var x = {  };\n" +
+			"x.fff = 8;", "y");
+		testProposals("y", results, [
+			["y", "y : String"]
+		]);
+	};
+	tests["test full file inferecing 7"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = x(); y/**/}\n" +
+			"var x = function() { return 8; }", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	tests["test full file inferecing 8"] = function() {
+		var results = computeContentAssist(
+			"function a() { x.fff = ''; var y = z(); y/**/}\n" +
+			"var x = function() { return 8; }, z = x", "y");
+		testProposals("y", results, [
+			["y", "y : Number"]
+		]);
+	};
+	
+	tests["test full file inferecing 9"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	tests["test full file inferecing 10"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 11a"] = function() {
+		var results = computeContentAssist(
+			"var x = {};\n" +
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 11"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 12"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 13"] = function() {
+		var results = computeContentAssist(
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 14"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  var y = x;\n" +
+			"  y.f/**/\n" +
+			"}\n" +
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 15"] = function() {
+		var results = computeContentAssist(
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// should still find the fff property here evem though it
+	// is defined after and in another funxtion
+	tests["test full file inferecing 16"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"}\n" +
+			"function b() {\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	tests["test full file inferecing 17"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.f/**/\n" +
+			"  function b() {\n" +
+			"    x.fff = '';\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 18"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  x.fff = '';\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 19"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {};", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// don't find anything because assignment is in same scope, but after
+	tests["test full file inferecing 20"] = function() {
+		var results = computeContentAssist(
+			"x./**/\n" +
+			"var x = {};\n" +
+			"x.fff = '';", "f");
+		testProposals("f", results, [
+		]);
+	};
+
+	tests["test full file inferecing 21"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"x.fff = '';\n" +
+			"}\n" +
+			"x./**/\n" +
+			"var x = {}; ", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 22"] = function() {
+		var results = computeContentAssist(
+			"x./**/\n" +
+			"function a() {\n" +
+			"x.fff = '';\n" +
+			"}\n" +
+			"var x = {}; ", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 23"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 24"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var y = x;\n" +
+			"    y.f/**/\n" +
+			"  }\n" +
+			"  x.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+	tests["test full file inferecing 25"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    x.f/**/\n" +
+			"  }\n" +
+			"  var y = x;\n" +
+			"  y.fff = '';\n" +
+			"}\n" +
+			"var x = {ff2 : ''};", "f");
+		testProposals("f", results, [
+			["ff2", "ff2 : String"],
+			["fff", "fff : String"]
+		]);
+	};
+
+
+	tests["test full file inferecing 26"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var fff = x();\n" +
+			"    f/**/;\n" +
+			"  }\n" +
+			"}\n" +
+			"function x() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// Not inferencing String because function decl comes after reference in same scope
+	tests["test full file inferecing 27"] = function() {
+		var results = computeContentAssist(
+			"var fff = x();\n" +
+			"f/**/;\n" +
+			"function x() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : {  }"]
+		]);
+	};
+	
+	// Not gonna work because of recursive
+	tests["test full file inferecing 28"] = function() {
+		var results = computeContentAssist(
+			"function x() {\n" +
+			"  var fff = x();\n" +
+			"  f/**/;\n" +
+			"  return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : undefined"]
+		]);
+	};
+
+	tests["test full file inferecing 29"] = function() {
+		var results = computeContentAssist(
+			"function a() {\n" +
+			"  function b() {\n" +
+			"    var fff = x();\n" +
+			"    f/**/;\n" +
+			"  }\n" +
+			"}\n" +
+			"var x = function() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : String"]
+		]);
+	};
+
+	// Not working because function decl comes after reference in same scope
+	tests["test full file inferecing 30"] = function() {
+		var results = computeContentAssist(
+			"var fff = x();\n" +
+			"f/**/;\n" +
+			"var x = function() { return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : {  }"]
+		]);
+	};
+	
+	// Not gonna work because of recursive
+	tests["test full file inferecing 31"] = function() {
+		var results = computeContentAssist(
+			"var x = function() { var fff = x();\nf/**/;return ''; }", "f");
+		testProposals("f", results, [
+			["fff", "fff : undefined"]
+		]);
+	};
+	
+	tests["test full file inferecing 32"] = function() {
+		var results = computeContentAssist(
+			"x/**/\n" +
+			"function x() { return ''; }", "x");
+		testProposals("x", results, [
+			["x()", "x() : String"]
+		]);
+	};
+	
+	tests["test full file inferecing 33"] = function() {
+		var results = computeContentAssist(
+			"var xxx = {\n" +
+			"	aaa: '',\n" +
+			"	bbb: this.a/**/\n" +
+			"};", "a");
+		testProposals("a", results, [
+			["aaa", "aaa : String"]
+		]);
+	};
+
+	tests["test full file inferecing 34"] = function() {
+		var results = computeContentAssist(
+			"var xxx = {\n" +
+			"	bbb: this.a/**/,\n" +
+			"	aaa: ''\n" +
+			"};", "a");
+		testProposals("a", results, [
+			["aaa", "aaa : String"]
+		]);
+	};
+	
+	/////////////////////////////////////
+	// property read inferencing
+	//
+	// tests for property reads
+	/////////////////////////////////////
+	tests["test property read before"] = function() {
+		var results = computeContentAssist(
+			"var xxx;\n" +
+			"xxx.lll++;\n" +
+			"xxx.ll", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read after"] = function() {
+		var results = computeContentAssist(
+			"var xxx;\n" +
+			"xxx.ll/**/;\n" +
+			"xxx.lll++;", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read global before"] = function() {
+		var results = computeContentAssist(
+			"lll++;\n" +
+			"ll", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	tests["test property read global after"] = function() {
+		var results = computeContentAssist(
+			"ll/**/;\n" +
+			"lll++;", "ll");
+		testProposals("ll", results, [
+			["lll", "lll : {  }"]
+		]);
+	};
+	
+	/////////////////////////////////////
+	// Array parameterization
+	/////////////////////////////////////
+	tests["test array parameterization1"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x[foo].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization2"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization3"] = function() {
+		var results = computeContentAssist(
+			"var x = [1];\n" +
+			"x['foo'].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization4"] = function() {
+		var results = computeContentAssist(
+			"([1, 0])[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization5"] = function() {
+		var results = computeContentAssist(
+			"var x = [[1]];\n" +
+			"x[0][0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization6"] = function() {
+		var results = computeContentAssist(
+			"var x = [{}];x[0].a = 8;\n" +
+			"x[0].a.toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization7"] = function() {
+		var results = computeContentAssist(
+			"var a = {a : 8}; \n var x = [a];\n" +
+			"x[0].a.toFi", "toFi");
+			// may not work because a string
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization8"] = function() {
+		var results = computeContentAssist(
+			"var x = [[1]];\n" +
+			"x = x[0];\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization9"] = function() {
+		var results = computeContentAssist(
+			"var x = [];\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization10"] = function() {
+		var results = computeContentAssist(
+			"var x = [];\n" +
+			"x[9] = '';\nx[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization11"] = function() {
+		var results = computeContentAssist(
+			"var x = (function() { return [0]; })();\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+	tests["test array parameterization10"] = function() {
+		var results = computeContentAssist(
+			"var x = ['','',''];\n" +
+			"x[9] = 0;\nx[0].toFi", "toFi");
+		testProposals("toFi", results, [
+			["toFixed(digits)", "toFixed(digits) : Number"]
+		]);
+	};
+
+	// https://github.com/scripted-editor/scripted/issues/65
+	tests["test case insensitive ordering1"] = function() {
+		var results = computeContentAssist(
+			"var xXXX = 8;\n" +
+			"var xXYZ = 8;\n" +
+			"var xxxx = 8;\n" +
+			"var xxyz = 8;\n" +
+			"x", "x");
+		testProposals("x", results, [
+			["xXXX", "xXXX : Number"],
+			["xxxx", "xxxx : Number"],
+			["xXYZ", "xXYZ : Number"],
+			["xxyz", "xxyz : Number"]
+		]);
+	};
+	// https://github.com/scripted-editor/scripted/issues/65
+	tests["test case insensitive ordering2"] = function() {
+		var results = computeContentAssist(
+			"var xXYZ = 8;\n" +
+			"var xxxx = 8;\n" +
+			"var xXXX = 8;\n" +
+			"var xxyz = 8;\n" +
+			"x", "x");
+		testProposals("x", results, [
+			["xxxx", "xxxx : Number"],
+			["xXXX", "xXXX : Number"],
+			["xXYZ", "xXYZ : Number"],
+			["xxyz", "xxyz : Number"]
+		]);
+	};
+
 	return tests;
 });

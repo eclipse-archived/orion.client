@@ -503,7 +503,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			if( selected ){
 				var ob = JSON.parse( selected );
 				
-				var styles = JSON.parse( prefs.get( 'styles' ) ); //$NON-NLS-0$
+				var stylesStr =  prefs.get( 'styles' ); //$NON-NLS-0$
+				if(!stylesStr){
+					return;
+				}
+				var styles = JSON.parse(stylesStr);
 				
 				for( var theme in styles ){
 					

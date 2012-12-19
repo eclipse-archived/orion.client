@@ -37,8 +37,8 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				if (string.lastIndexOf("'") === string.length - 1) {
 					string = string.substring(0, string.length - 1);
 				}
-				var predictions = this._getPredictions(string, typeSpec.directory, typeSpec.file);
-				return this._createCompletion(string, predictions, typeSpec.directory, typeSpec.file);
+				var predictions = this._getPredictions(string);
+				return this._createCompletion(string, predictions, typeSpec.directory, typeSpec.file, typeSpec.exist);
 			},
 
 			/**
@@ -46,36 +46,70 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * value's string representation.
 			 */
 			stringify: function(value) {
+				if (typeof(value) === "string") { //$NON-NLS-0$
+					return value;
+				}
 				return value.typedPath || this.shellPageFileService.computePathString(value);
 			},
 
 			/** @private */
 
-			_createCompletion: function(string, predictions, directory, file) {
-				var exactMatch;
-				if (predictions) {
+			_createCompletion: function(string, predictions, directory, file, exist) {
+				var message, status, value = null;
+				if (!predictions) {
+					/* parent hierarchy is not valid */
+					status = mShell.CompletionStatus.ERROR;
+					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
+				} else {
+					var exactMatch;
 					for (var i = 0; i < predictions.length; i++) {
 						var current = predictions[i];
 						if (current.name === string) {
-							if ((current.value.Directory && directory) || (!current.value.Directory && file)) {
-								exactMatch = current;
-								break;
+							exactMatch = current;
+							break;
+						}
+					}
+
+					if (exist === false) {
+						predictions = [];
+						if (exactMatch) {
+							status = mShell.CompletionStatus.ERROR;
+							message = i18nUtil.formatMessage(messages["'${0}' already exists"], string);
+						} else {
+							// TODO verify filename?
+							status = mShell.CompletionStatus.MATCH;
+							value = string;
+						}
+					} else {
+						/* filter the predictions based on directory/file */
+						var temp = [];
+						predictions.forEach(function(current) {
+							if (current.value.Directory || file) {
+								temp.push(current);
 							}
+						});
+						predictions = temp;
+
+						if (exist) {
+							if (exactMatch && ((exactMatch.value.Directory && directory) || (!exactMatch.value.Directory && file))) {
+								status = mShell.CompletionStatus.MATCH;
+								value = exactMatch.value;
+							} else if (predictions.length > 0) {
+								status = mShell.CompletionStatus.PARTIAL;
+							} else {
+								status = mShell.CompletionStatus.ERROR;
+								message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
+							}
+						} else { /* exist is undefined */
+							// TODO verify filename?
+							status = mShell.CompletionStatus.MATCH;
+							value = exactMatch ? exactMatch.value : string;
 						}
 					}
 				}
 
-				var status, message;
-				if (exactMatch) {
-					status = mShell.CompletionStatus.MATCH;
-				} else if (predictions && predictions.length > 0) {
-					status = mShell.CompletionStatus.PARTIAL;
-				} else {
-					status = mShell.CompletionStatus.ERROR;
-					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
-				}
 				return {
-					value: exactMatch ? exactMatch.value : null,
+					value: value,
 					status: status,
 					message: message,
 					predictions: predictions
@@ -89,7 +123,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				}
 				return null;
 			},
-			_getPredictions: function(text, directory, file) {
+			_getPredictions: function(text) {
 				var directoryNode = this.shellPageFileService.getDirectory(null, text);
 				if (!directoryNode) {
 					/* either invalid path or not yet retrieved */
@@ -121,16 +155,14 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				}
 				for (var i = 0; i < childNodes.length; i++) {
 					var candidate = childNodes[i];
-					if (candidate.Directory || file) {
-						if (candidate.Name.indexOf(finalSegment) === 0) {
-							var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
-							name = directoriesSegment + candidate.Name;
-							candidate.typedPath = name;
-							if (candidate.Directory) {
-								directoryPredictions.push({name: name, value: candidate, incomplete: !complete});
-							} else {
-								filePredictions.push({name: name, value: candidate, incomplete: !complete});
-							}
+					if (candidate.Name.indexOf(finalSegment) === 0) {
+						var complete = !candidate.Directory || (candidate.Children && candidate.Children.length === 0);
+						name = directoriesSegment + candidate.Name;
+						candidate.typedPath = name;
+						if (candidate.Directory) {
+							directoryPredictions.push({name: name, value: candidate, incomplete: !complete});
+						} else {
+							filePredictions.push({name: name, value: candidate, incomplete: !complete});
 						}
 					}
 				}

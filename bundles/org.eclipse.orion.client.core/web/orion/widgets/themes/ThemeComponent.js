@@ -40,7 +40,7 @@ define(['i18n!orion/settings/nls/messages', 'require'],
 		
 		function render( context ){
 				
-				if( context !== null ){
+				if( context != null ){
 					this.context = context;
 				}
 				

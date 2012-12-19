@@ -35,29 +35,9 @@
 		  }
 		});
 		window.onload = function() {
-			require(["orion/test","js-tests/esprima/esprimaJsContentAssistTests", "js-tests/esprima/navigationTests", 
-					 "js-tests/esprima/summaryBuildingTests", "js-tests/esprima/contentAssistDependencyTests"], 
-				function(test, jsTests, navTests, summaryTests, dependencyTests) {
-					// would be nice if we could just run all the tests like this, but we can't
-//					test.run(jsTests);
-//					test.run(navTests);
-//					test.run(summaryTests);
-//					test.run(dependencyTests);
-
-
-					function combine(all, toAdd) {
-						for (var prop in toAdd) {
-							if (toAdd.hasOwnProperty(prop)) {
-								all[prop] = toAdd[prop];
-							}
-						}
-					}
-					var allTests = { };
-					combine(allTests, jsTests);
-					combine(allTests, navTests);
-					combine(allTests, summaryTests);
-					combine(allTests, dependencyTests);
-					test.run(allTests);
+			require(["orion/test","js-tests/esprima/esprimaJsContentAssistTests"], 
+				function(test, jsTests) {
+					test.run(jsTests);
 				});
 		};
 	</script>
