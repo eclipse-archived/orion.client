@@ -79,7 +79,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/TooltipDi
 				var branchesNode = dojo.create( "span", { "class":"gitSecondaryDescription" }, branchesSection );  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				branchesNode.textContent = messages["branches: "];
 
-				var branchesList = dojo.create( "list", null, branchesSection);
+				var branchesList = dojo.create( "div", null, branchesSection);
 				
 				for(var i=0; i<commit.Branches.length; ++i){
 					var branchNameSpan = dojo.create("span", {"class":"gitSecondaryDescription", "style" : "padding-left:10px;"}, branchesList);
@@ -93,7 +93,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/TooltipDi
 				var tagsNode = dojo.create( "span", { "class":"gitSecondaryDescription" }, tagsSection );  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				tagsNode.textContent = messages["tags: "];
 				
-				var tagsList = dojo.create( "list", null, tagsSection);
+				var tagsList = dojo.create( "div", null, tagsSection);
 				
 				for(var i=0; i<commit.Tags.length; ++i){
 					var tagNameSpan = dojo.create("span", {"class":"gitSecondaryDescription", "style" : "padding-left:10px;"}, tagsList);

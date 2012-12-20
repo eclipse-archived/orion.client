@@ -301,7 +301,7 @@ exports.GitLogExplorer = (function() {
 		var tableNode = dojo.byId( 'table' ); //$NON-NLS-0$
 		
 		var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
-		contentParent.innerHTML = '<div id="logNode" class="mainPadding"></list>'; //$NON-NLS-0$;
+		contentParent.innerHTML = '<div id="logNode" class="mainPadding"></div>'; //$NON-NLS-0$;
 		
 		var LogModel = (function() {
 			function LogModel() {
@@ -370,13 +370,12 @@ exports.GitLogExplorer = (function() {
 					}
 					
 					if (commit.AuthorImage) {
-						var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var authorImage = dojo.create("span", {"style" : "float:left"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						
 						var image = new Image();
 						image.src = commit.AuthorImage;
 						image.name = commit.AuthorName;
-						image.width = 30;
-						image.height = 30;
+						image.className = "git-author-icon";
 						dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 					}
 					
