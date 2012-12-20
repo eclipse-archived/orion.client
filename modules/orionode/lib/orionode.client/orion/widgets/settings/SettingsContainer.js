@@ -82,8 +82,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 			this.preferences.getPreferences('/settingsContainer', 2).then(function(prefs){
 
 				var selection = prefs.get( 'selection' );
-				
+
 				var category = pageParams.category || selection; //$NON-NLS-0$
+
+				if(container.selectedCategory){
+					if( container.selectedCategory.id === category){
+						//No need to reselect the category
+						return;
+					}
+				}
+
 				container.showByCategory(category);
 				
 			} );
