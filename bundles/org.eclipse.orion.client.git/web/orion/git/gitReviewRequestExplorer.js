@@ -87,7 +87,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						slideout: true,
 						canHide: true,
 						preferenceService: that.registry.getService("orion.core.preference"),
-						content: '<div id="commitNode" class="mainPadding"></list>' //$NON-NLS-0$
+						content: '<div id="commitNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
 					var titleWrapper2 = new mSection.Section(dojo.byId("fetchDiv"), {
@@ -96,13 +96,13 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						slideout: true,
 						canHide: true,
 						preferenceService: that.registry.getService("orion.core.preference"),
-						content: '<div id="fetchNode" class="mainPadding"></list>' //$NON-NLS-0$
+						content: '<div id="fetchNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
 					var titleWrapper3 = new mSection.Section(tableNode, {
 						id: "create new clone", //$NON-NLS-0$
 						title: messages["Create new repository"], //$NON-NLS-0$
-						content: '<div id="cloneNode" class="mainPadding"></list>' //$NON-NLS-0$
+						content: '<div id="cloneNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
 					var titleWrapper4 = new mSection.Section(dojo.byId("remoteDiv"), {
@@ -111,7 +111,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						slideout: true,
 						canHide: true,
 						hidden: true,
-						content: '<div id="remoteNode" class="mainPadding"></list>' //$NON-NLS-0$
+						content: '<div id="remoteNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
 					dojo.byId("commitDiv").style.display = " none ";

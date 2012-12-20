@@ -155,7 +155,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 			}
 
 			var contentParent = dojo.create("div", {"role": "region", "class":"sectionTable"}, tableNode, "last");
-			contentParent.appendChild(dojo.create("list", {id: "commitNode", className: "mainPadding"})); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			contentParent.appendChild(dojo.create("div", {id: "commitNode", className: "mainPadding"})); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 		    var list = dojo.byId( "commitNode" );		 //$NON-NLS-0$
 			
@@ -192,12 +192,11 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 			dojo.create( "div", {"style":"padding-top:15px"}, detailsView ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("span", {"class":"git-author-icon-small"}, detailsView); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var authorImage = dojo.create("span", { "style" : "float:left"}, detailsView); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
-				image.width = 35;
-				image.height = 35;
+				image.className = "git-author-icon-small";
 				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
 			
@@ -244,7 +243,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 				title: ((tags && tags.length > 0) ? messages["Tags:"] : messages["No Tags"]),
 				iconClass: ["gitImageSprite", "git-sprite-tag"], //$NON-NLS-1$ //$NON-NLS-0$
 				slideout: true,
-				content: '<list id="tagNode"></list>', //$NON-NLS-0$
+				content: '<div id="tagNode"></div>', //$NON-NLS-0$
 				canHide: true,
 				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
 			}); 
