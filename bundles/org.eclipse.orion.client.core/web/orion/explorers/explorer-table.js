@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils', 'orion/explorers/explorer'],
-		function(messages, require, dojo, mFileUtils, mExplorer){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer'],
+		function(messages, require, lib, i18nUtil, mFileUtils, mExplorer){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -73,6 +73,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 	};
 		
 	Model.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+		var self = this;
 		// the parent already has the children fetched
 		if (parentItem.children) {
 			onComplete(parentItem.children);
@@ -80,9 +81,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			onComplete([]);
 		} else if (parentItem.Location) {
 			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
-				dojo.hitch(this, function(children) {
-					onComplete(this.processParent(parentItem, children));
-				})
+				function(children) {
+					onComplete(self.processParent(parentItem, children));
+				}
 			);
 		} else {
 			onComplete([]);
@@ -149,7 +150,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 						Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 				} else {
 					entry.file(function(file) {
-						performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(dojo.string.substitute(messages["Unzip ${0}?"], [file.name]))); //$NON-NLS-1$ //$NON-NLS-0$ 
+						performDrop(target, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
 					});
 				}
 			} else if (entry.isDirectory) {
@@ -181,11 +182,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			var explorer = this;
 			var performDrop = this.dragAndDrop;
 			
-			var dragLeave = dojo.hitch(this, function(evt) { //$NON-NLS-0$
-				dojo.removeClass(node, "dragOver"); //$NON-NLS-0$
+			var dragLeave = function(evt) { //$NON-NLS-0$
+				node.classList.remove("dragOver"); //$NON-NLS-0$
 				evt.preventDefault();
 				evt.stopPropagation();
-			});
+			};
 			// if we are rehooking listeners on a node, unhook old before hooking and remembering new
 			if (persistAndReplace) {
 				if (this._oldDragLeave) {
@@ -195,11 +196,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			}
 			node.addEventListener("dragleave", dragLeave, false); //$NON-NLS-0$
 
-			var dragEnter = dojo.hitch(this, function (evt) { //$NON-NLS-0$
-				dojo.addClass(node, "dragOver"); //$NON-NLS-0$
+			var dragEnter = function (evt) { //$NON-NLS-0$
+				node.classList.add("dragOver"); //$NON-NLS-0$
 				evt.preventDefault();
 				evt.stopPropagation();
-			});
+			};
 			if (persistAndReplace) {
 				if (this._oldDragEnter) {
 					node.removeEventListener("dragenter", this._oldDragEnter, false); //$NON-NLS-0$
@@ -220,8 +221,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 				this._oldDragOver = dragOver;
 			}
 
-			var drop = dojo.hitch(this, function(evt) { //$NON-NLS-0$
-				dojo.removeClass(node, "dragOver"); //$NON-NLS-0$
+			var drop = function(evt) { //$NON-NLS-0$
+				node.classList.remove("dragOver"); //$NON-NLS-0$
 				// webkit supports testing for and traversing directories
 				// http://wiki.whatwg.org/wiki/DragAndDropEntries
 				if (evt.dataTransfer.items && evt.dataTransfer.items.length > 0) {
@@ -233,7 +234,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 							entry = evt.dataTransfer.items[i].webkitGetAsEntry();
 						}
 						if (entry) {
-							dropFileEntry(entry, null, item, explorer, performDrop, this.fileClient);
+							dropFileEntry(entry, null, item, explorer, performDrop, explorer.fileClient);
 						}
 					}
 				} else if (evt.dataTransfer.files && evt.dataTransfer.files.length > 0) {
@@ -243,19 +244,19 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 						// The File API in HTML5 doesn't specify a way to check explicitly (when this code was written).
 						// see http://www.w3.org/TR/FileAPI/#file
 						if (!file.length && (!file.type || file.type === "")) {
-							this.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
-								{Severity: "Error", Message: dojo.string.substitute(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], [file.name])}); //$NON-NLS-1$ //$NON-NLS-0$ 
+							explorer.registry.getService("orion.page.message").setProgressResult( //$NON-NLS-0$
+								{Severity: "Error", Message: i18nUtil.formatMessage(messages["Did not drop ${0}.  Folder drop is not supported in this browser."], file.name)}); //$NON-NLS-1$ //$NON-NLS-0$ 
 						} else if (item.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
-							this.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
+							explorer.registry.getService("orion.page.message").setProgressResult({ //$NON-NLS-0$
 								Severity: "Error", Message: messages["You cannot copy files directly into the workspace.  Create a folder first."]});	 //$NON-NLS-1$ //$NON-NLS-0$ 
 						} else {
-							performDrop(item, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(dojo.string.substitute(messages["Unzip ${0}?"], [file.name]))); //$NON-NLS-1$ //$NON-NLS-0$ 
+							performDrop(item, file, explorer, file.name.indexOf(".zip") === file.name.length-4 && window.confirm(i18nUtil.formatMessage(messages["Unzip ${0}?"], file.name))); //$NON-NLS-1$ //$NON-NLS-0$ 
 						}
 					}
 				}
 				evt.preventDefault();
 				evt.stopPropagation();
-			});
+			};
 			if (persistAndReplace) {
 				if (this._oldDrop) {
 					node.removeEventListener("drop", this._oldDrop, false); //$NON-NLS-0$
@@ -275,7 +276,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			if(that.getNavHandler()){
 				//that._initSelModel();
 			}
-			dojo.hitch(that.myTree, that.myTree.refresh)(parent, children, forceExpand);
+			that.myTree.refresh.bind(that.myTree)(parent, children, forceExpand);
 		});
 	};
 	
@@ -288,7 +289,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 		var rowId = this.model.getId(item);
 		if (rowId) {
 			// I know this from my renderer below.
-			return dojo.byId(rowId+"NameLink"); //$NON-NLS-0$
+			return lib.node(rowId+"NameLink"); //$NON-NLS-0$
 		}
 	};
 		
@@ -318,7 +319,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 		}
 					
 		this._lastPath = path;
-		var parent = dojo.byId(this.parentId);			
+		var parent = lib.node(this.parentId);			
 
 		// we are refetching everything so clean up the root
 		this.treeRoot = {};
@@ -327,47 +328,49 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 			//the tree root object has changed so we need to load the new one
 			
 			// Progress indicator
-			var progress = dojo.byId("progress");  //$NON-NLS-0$
+			var progress = lib.node("progress");  //$NON-NLS-0$
 			if(!progress){
-				progress = dojo.create("div", {id: "progress"}, parent, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				progress = document.createElement("div"); //$NON-NLS-0$
+				progress.id = "progress"; //$NON-NLS-0$
+				lib.empty(parent);
+				parent.appendChild(progress);
 			}
-			dojo.empty(progress);
+			lib.empty(progress);
 			
 			var progressTimeout = setTimeout(function() {
-				dojo.empty(progress);
-				var b = dojo.create("b"); //$NON-NLS-0$
-				dojo.place(document.createTextNode(messages["Loading "]), progress, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(document.createTextNode(path), b, "last"); //$NON-NLS-0$
-				dojo.place(b, progress, "last"); //$NON-NLS-0$
-				dojo.place(document.createTextNode("..."), progress, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+				lib.empty(progress);
+				var b = document.createElement("b"); //$NON-NLS-0$
+				progress.appendChild(document.createTextNode(messages["Loading "]));
+				b.appendChild(document.createTextNode(path));
+				progress.appendChild(b);
+				progress.appendChild(document.createTextNode("..."));
 			}, 500); // wait 500ms before displaying
 				
 			this.treeRoot.Path = path;
 			var self = this;
 			
 			this.fileClient.loadWorkspace(path).then(
-				//do we really need hitch - could just refer to self rather than this
-				dojo.hitch(self, function(loadedWorkspace) {
+				function(loadedWorkspace) {
 					clearTimeout(progressTimeout);
 					//copy fields of resulting object into the tree root
 					for (var i in loadedWorkspace) {
-						this.treeRoot[i] = loadedWorkspace[i];
+						self.treeRoot[i] = loadedWorkspace[i];
 					}
-					this.model = new Model(this.registry, this.treeRoot, this.fileClient, this.parentId, this.excludeFiles, this.excludeFolders);
-					this.model.processParent(this.treeRoot, loadedWorkspace.Children);	
+					self.model = new Model(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
+					self.model.processParent(self.treeRoot, loadedWorkspace.Children);	
 					if (typeof postLoad === "function") { //$NON-NLS-0$
 						try {
 							postLoad();
 						} catch(e){
-							if (this.registry) {
-								this.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
+							if (self.registry) {
+								self.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
 							}
 						}
 					}
-					if (this.dragAndDrop) {
-						if (this._hookedDrag) {
+					if (self.dragAndDrop) {
+						if (self._hookedDrag) {
 							// rehook on the parent to indicate the new root location
-							this._makeDropTarget(this.treeRoot, parent, true);
+							self._makeDropTarget(self.treeRoot, parent, true);
 						} else {
 							// uses two different techniques from Modernizr
 							// first ascertain that drag and drop in general is supported
@@ -375,23 +378,23 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 							// then check that file transfer is actually supported, since this is what we will be doing.
 							// For example IE9 has drag and drop but not file transfer
 							supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
-							this._hookedDrag = true;
+							self._hookedDrag = true;
 							if (supportsDragAndDrop) {
-								this._makeDropTarget(this.treeRoot, parent, true);
+								self._makeDropTarget(self.treeRoot, parent, true);
 							} else {
-								this.dragAndDrop = null;
+								self.dragAndDrop = null;
 								window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
 							}
 						}
 					}
 
-					this.createTree(this.parentId, this.model, {setFocus: true, selectionPolicy: this.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+					self.createTree(self.parentId, self.model, {setFocus: true, selectionPolicy: self.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
 					// We only need to hook drag and drop up once
-					if (typeof this.onchange === "function") { //$NON-NLS-0$
-						this.onchange(this.treeRoot);
+					if (typeof self.onchange === "function") { //$NON-NLS-0$
+						self.onchange(self.treeRoot);
 					}
-				}),
-				dojo.hitch(self, function(error) {
+				},
+				function(error) {
 					clearTimeout(progressTimeout);
 					// Show an error message when a problem happens during getting the workspace
 					if (error.status && error.status !== 401){
@@ -399,11 +402,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'dojo', 'orion/fileUtils'
 							error = JSON.parse(error.responseText);
 						} catch(e) {
 						}
-						dojo.place(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message), progress, "only"); //$NON-NLS-1$
+						lib.empty(progress);
+						progress.appendChild(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message)); 
 					} else {
-						this.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
+						self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 					}
-				})
+				}
 			);
 		}
 	};
