@@ -433,42 +433,6 @@ var exports = {};
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 		}
-		
-		// TODO: not used by the git clone navigator, could be removed
-		var linkRepoCommand = new mCommands.Command({
-			name: messages["Link Repository"],
-			imageClass: "core-sprite-link", //$NON-NLS-0$
-			id: "eclipse.linkRepository", //$NON-NLS-0$
-			callback: function(data) {
-				var dialog = new orion.widgets.NewItemDialog({
-					title: messages['Link Repository'],
-					label: messages["Folder name:"],
-					func:  function(name, url, create){
-						var service = serviceRegistry.getService("orion.core.file");							 //$NON-NLS-0$
-						service.loadWorkspace("").then(function(loadedWorkspace){
-							service.createProject(loadedWorkspace.Location, name, data.items.ContentLocation, false).then(
-									function(jsonResp){
-										alert(messages["Repository was linked to "] + jsonResp.Name);
-										service.read(jsonResp.ContentLocation, true).then(function(jsonData){
-											window.location.replace(require.toUrl("navigate/table.html")+"#"+jsonData.ChildrenLocation); //redirect to the workspace to see the linked resource //$NON-NLS-1$ //$NON-NLS-0$
-										});
-									}
-								);
-						});
-					},
-					advanced: false
-				});
-				dialog.startup();
-				dialog.show();
-			},
-			visibleWhen: function(item) {
-				if(item.ContentLocation){
-					return true;
-				}
-				return false;
-				}
-			});
-		commandService.addCommand(linkRepoCommand);
 
 		var checkoutTagNameParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('name', 'text', messages["Local Branch Name:"])]); //$NON-NLS-1$ //$NON-NLS-0$
 		var checkoutTagCommand = new mCommands.Command({
