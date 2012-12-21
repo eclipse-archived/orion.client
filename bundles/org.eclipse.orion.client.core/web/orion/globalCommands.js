@@ -900,7 +900,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				searcher: searcher, 
 				searchRenderer:searcher.defaultRenderer, 
 				favoriteService:favoriteService,
-				onHide:  function() { editor.getTextView().focus(); }
+				onHide:  function() { 
+					if (editor) {
+						editor.getTextView().focus(); 
+					}
+				}
 			});
 			window.setTimeout(function() {dialog.show();}, 0);
 		};

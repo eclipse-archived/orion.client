@@ -1179,6 +1179,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 */
 		_makeButton: function(parent, context, aClass, position) {
 			var element = document.createElement("span"); //$NON-NLS-0$
+			element.role = "button"; //$NON-NLS-0$
 			element.tabIndex = 0; 
 			element.id = this.name;
 			var text = document.createTextNode(this.name);
