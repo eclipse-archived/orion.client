@@ -42,6 +42,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		'</div>'; //$NON-NLS-0$
 
 	OpenResourceDialog.prototype._init = function(options) {
+		this.title = options.title || messages['Find File Named'];
 		this._searcher = options.searcher;
 		this._onHide = options.onHide;
 		this._contentTypeService = new mContentTypes.ContentTypeService(this._searcher.registry);
@@ -54,7 +55,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this._forceUseCrawler = false;
 		this._searchOnRoot = true;
 		this._fileService = this._searcher.getFileService();
-		this._title = options.title || messages['Find File Named'];
 		if (!this._fileService) {
 			throw new Error(messages['Missing required argument: fileService']);
 		}
@@ -66,7 +66,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		if (!this._favService) {
 			throw new Error(messages['Missing required argument: favService']);
 		}
-		this._initialize(options.parent);
+		this._initialize();
 	};
 	
 	OpenResourceDialog.prototype._bindToDom = function(parent) {
@@ -267,17 +267,18 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	};
 	
 	/**
-	 * Displays the dialog.
+	 * Once the dialog is up...
 	 */
-	OpenResourceDialog.prototype.show = function() {
-		this._showDialog();
+	OpenResourceDialog.prototype._afterShowing = function() {
 		this.$fileName.focus();
 	};
 	
 	/** @private */
-	OpenResourceDialog.prototype.hide = function() {
+	OpenResourceDialog.prototype._beforeHiding = function() {
 		clearTimeout(this._timeoutId);
-		this._hideDialog();
+	};
+	
+	OpenResourceDialog.prototype._afterHiding = function() {
 		if (this._onHide) {
 			this._onHide();
 		}

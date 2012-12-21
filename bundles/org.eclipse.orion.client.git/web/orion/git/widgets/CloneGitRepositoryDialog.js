@@ -11,7 +11,7 @@
 
 /*global dojo dijit widgets*/
 /*jslint browser:true*/
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'orion/widgets/DirectoryPrompterDialog', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(messages, require, dojo, dijit) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'dijit', 'orion/webui/dialogs/DirectoryPrompterDialog', 'dijit/Dialog', 'orion/widgets/_OrionDialogMixin', 'text!orion/git/widgets/templates/CloneGitRepositoryDialog.html'], function(messages, require, dojo, dijit, DirPrompter) {
 
 /**
  * @param options {{ 
@@ -100,7 +100,7 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 		}
 		this.isExistingProject.checked = true; 
 		var self = this;
-		var dialog = new orion.widgets.DirectoryPrompterDialog({
+		var dialog = new DirPrompter.DirectoryPrompterDialog({
 				title: messages["Choose a Folder"],
 				serviceRegistry: this.options.serviceRegistry,
 				fileClient: this.options.fileClient,	
@@ -119,7 +119,6 @@ dojo.declare("orion.git.widgets.CloneGitRepositoryDialog", [dijit.Dialog, orion.
 					}
 				})
 			});
-			dialog.startup();
 			dialog.show();
 	}
 });

@@ -13,8 +13,8 @@
 /*browser:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/widgets/DirectoryPrompterDialog', 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred){
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter){
 
 	/**
 	 * Utility methods
@@ -283,7 +283,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			};
 			
 			var prompt = function(selectedItems) {
-				var dialog = new orion.widgets.DirectoryPrompterDialog({
+				var dialog = new DirPrompter.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"],
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,				
@@ -316,7 +316,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						}
 					}
 				});
-				dialog.startup();
 				dialog.show();
 			};
 			

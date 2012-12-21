@@ -12,12 +12,12 @@
 /*jslint browser:true sub:true*/
 
 define(['i18n!orion/sites/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section',
-	'orion/sites/siteMappingsTable', 'orion/i18nUtil', 'orion/widgets/DirectoryPrompterDialog', 'dijit/Dialog',
+	'orion/sites/siteMappingsTable', 'orion/i18nUtil', 'orion/webui/dialogs/DirectoryPrompterDialog', 'dijit/Dialog',
 	'orion/widgets/_OrionDialogMixin',
 	'text!orion/widgets/templates/SiteEditor.html',
 	'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
 	'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-	function(messages, widgetsMessages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable, i18nUtil, DirectoryPrompterDialog,
+	function(messages, widgetsMessages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable, i18nUtil, DirPrompter,
 		Dialog, _OrionDialogMixin) {
 
 var ConvertToSelfHostingDialog = dojo.declare("orion.widgets.ConvertToSelfHostDialog", [Dialog, _OrionDialogMixin], {
@@ -38,13 +38,12 @@ var ConvertToSelfHostingDialog = dojo.declare("orion.widgets.ConvertToSelfHostDi
 	postCreate: function() {
 		this.inherited(arguments);
 		dojo.connect(this.browseButton, 'click', function() { //$NON-NLS-1$
-			var dialog = new DirectoryPrompterDialog({
+			var dialog = new DirPrompter.DirectoryPrompterDialog({
 				title: messages["Choose Orion Source Folder"], //$NON-NLS-1$
 				serviceRegistry: this.serviceRegistry,
 				fileClient: this.fileClient,
 				func: this.onFolderChosen.bind(this)
 			});
-			dialog.startup();
 			dialog.show();
 		}.bind(this));
 		dojo.connect(this.port, 'onchange', function() { //$NON-NLS-1$
@@ -223,7 +222,7 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 			name: messages["Choose folder&#8230;"],
 			imageClass: "core-sprite-folder", //$NON-NLS-0$
 			callback: dojo.hitch(this, function() {
-				var dialog = new DirectoryPrompterDialog({
+				var dialog = new DirPrompter.DirectoryPrompterDialog({
 					serviceRegistry: this.serviceRegistry,
 					fileClient: this.fileClient,
 					func: dojo.hitch(this, function(folder) {
@@ -234,7 +233,6 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 								});
 						}
 					})});
-				dialog.startup();
 				dialog.show();
 			})});
 		choices.push({name: "URL", imageClass: "core-sprite-link", callback: addUrl}); //$NON-NLS-1$ //$NON-NLS-0$

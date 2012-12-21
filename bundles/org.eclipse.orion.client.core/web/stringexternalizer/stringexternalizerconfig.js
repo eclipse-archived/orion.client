@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
  
-/*global window define setTimeout */
+/*global window define localStorage setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/widgets/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands){
+define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/webui/dialogs/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands, DirPrompter){
 	function StringExternalizerConfig(options){
 		this.parent = options.parent;
 		this.fileClient = options.fileClient;
@@ -29,7 +29,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 					tooltip: messages["Change messages directory"],
 					id: "eclipse.changeMessagesDirectory", //$NON-NLS-0$
 					callback: function(data) {
-						var dialog = new orion.widgets.DirectoryPrompterDialog({
+						var dialog = new DirPrompter.DirectoryPrompterDialog({
 							serviceRegistry: this.serviceRegistry,
 							fileClient: this.fileClient,
 							func: dojo.hitch(this, function(folder) {
@@ -41,7 +41,6 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 									this.configChanged(true);
 								}));
 							})});
-						dialog.startup();
 						dialog.show();
 					},
 					visibleWhen: function(item) {
@@ -74,7 +73,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 				if(!this.config.module){
 					this.config.module = "i18n!messages"; //$NON-NLS-0$
 				}
-				if(this.config.marknls==null){
+				if(this.config.marknls===null){
 					this.config.marknls = true;
 				}
 				var section = new mSection.Section(this.parent, {
