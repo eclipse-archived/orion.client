@@ -1033,27 +1033,31 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var service = fileCommands[i].service;
 				var commandDeferred = mExtensionCommands._createCommandOptions(commandInfo, service, serviceRegistry, contentTypesCache, true);
 				commandDeferreds.push(commandDeferred);
-				commandDeferred.then(function(i, commandInfo, commandOptions){
-							var command = new mCommands.Command(commandOptions);
-							if (commandInfo.isEditor) {
-								command.isEditor = commandInfo.isEditor;
-							}
-							
-							commandService.addCommand(command);
-							if (!extensionGroupCreated) {
-								extensionGroupCreated = true;
-								commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
-							}
-							if (!openWithGroupCreated) {
-								openWithGroupCreated = true;
-								commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							}
-							if (commandInfo.isEditor) {
-								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
-							} else {
-								commandService.registerCommandContribution(selectionToolbarId, command.id, i, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
-							}
-						}, i, commandInfo);
+				var index = i;
+				var context = {isEditor: commandInfo.isEditor, index: i};
+				var processOptions = function(commandOptions) {
+					var command = new mCommands.Command(commandOptions);
+					if (this.isEditor) {
+						command.isEditor = this.isEditor;
+					}
+					
+					commandService.addCommand(command);
+					if (!extensionGroupCreated) {
+						extensionGroupCreated = true;
+						commandService.addCommandGroup(selectionToolbarId, "eclipse.fileCommandExtensions", 1000, null, commandGroup); //$NON-NLS-0$
+					}
+					if (!openWithGroupCreated) {
+						openWithGroupCreated = true;
+						commandService.addCommandGroup(selectionToolbarId, "eclipse.openWith", 1000, messages["Open With"], commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					}
+					if (this.isEditor) {
+						commandService.registerCommandContribution(selectionToolbarId, command.id, this.index, commandGroup + "/eclipse.fileCommandExtensions/eclipse.openWith"); //$NON-NLS-0$
+					} else {
+						commandService.registerCommandContribution(selectionToolbarId, command.id, this.index, commandGroup + "/eclipse.fileCommandExtensions"); //$NON-NLS-0$
+					}
+				};
+
+				commandDeferred.then(processOptions.bind(context));
 			}
 			Deferred.all(commandDeferreds, function(error) {return {_error: error};}).then(function(errorOrResultArray){
 				fileCommandUtils.updateNavTools(serviceRegistry, explorer, toolbarId, selectionToolbarId, explorer.treeRoot);
