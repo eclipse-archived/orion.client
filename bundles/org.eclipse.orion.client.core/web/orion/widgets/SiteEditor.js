@@ -16,7 +16,7 @@ define(['i18n!orion/sites/nls/messages', 'i18n!orion/widgets/nls/messages', 'req
 	'orion/widgets/_OrionDialogMixin',
 	'text!orion/widgets/templates/SiteEditor.html',
 	'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
-	'dijit/form/Form', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
+	'dijit/form/Form', 'dijit/form/Button', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
 	function(messages, widgetsMessages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable, i18nUtil, DirPrompter,
 		Dialog, _OrionDialogMixin) {
 
@@ -345,7 +345,7 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 		this.hostHint.set("value", this._siteConfiguration.HostHint); //$NON-NLS-0$
 
 		if (!this.mappings) {
-			this.titleWrapper = new mSection.Section(this.mappingsPlaceholder.id, {
+			this.titleWrapper = new mSection.Section(dojo.byId(this.mappingsPlaceholder.id), {
 				id: "workingDirectorySection", //$NON-NLS-0$
 				title: "Mappings", //$NON-NLS-0$
 				content: '<div id="mappingsNode"/>', //$NON-NLS-0$

@@ -37,7 +37,9 @@ exports.Explorer = (function() {
 		
 		// we have changed an item on the server at the specified parent node
 		changedItem: function(parent, children) {
-			this.myTree.bind(this.myTree)(parent, children, true);
+			if (this.myTree) {
+				this.myTree.refresh.bind(this.myTree)(parent, children, true);
+			}
 		},
 		updateCommands: function(item){
 			// update the commands in the tree if the tree exists.
@@ -367,7 +369,7 @@ exports.ExplorerFlatModel = (function() {
 		if(this.root){
 			onItem(this.root);
 		} else {
-			var self;
+			var self = this;
 			this.fetchItems(this.rootPath).then(function(item){
 				self.root = item;
 				onItem(item);
