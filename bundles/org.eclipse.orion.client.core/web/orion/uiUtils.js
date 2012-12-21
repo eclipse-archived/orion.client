@@ -89,15 +89,23 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 
 	function getUserText(id, refNode, shouldHideRefNode, initialText, onComplete, onEditDestroy, promptMessage, selectTo, isInitialValid) {
 		/** @return function(event) */
+		var done = false;
 		var handler = function(isKeyEvent) {
 			return function(event) {
+				if (done) {
+					return;
+				}
 				var editBox = lib.node(id),
 					newValue = editBox.value;
+				if (!editBox) {
+					return;
+				}
 				if (isKeyEvent && event.keyCode === lib.KEY.ESCAPE) {
 					if (shouldHideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
 					editBox.parentNode.removeChild(editBox);
+					done = true;
 					if (onEditDestroy) {
 						onEditDestroy();
 					}
@@ -109,10 +117,15 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 					if (shouldHideRefNode) {
 						refNode.style.display = "inline"; //$NON-NLS-0$
 					}
+					done = true;
 				} else {
 					onComplete(newValue);
+					done = true;
 				}
-				editBox.parentNode.removeChild(editBox);
+				// some clients remove temporary dom structures in the onComplete processing, so check that we are still in DOM
+				if (editBox.parentNode) {
+					editBox.parentNode.removeChild(editBox);
+				}
 				if (onEditDestroy) {
 					onEditDestroy();
 				}

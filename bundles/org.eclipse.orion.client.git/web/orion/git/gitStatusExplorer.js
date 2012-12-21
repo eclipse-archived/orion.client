@@ -705,7 +705,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 			var titleWrapper = new mSection.Section(tableNode, {
 				id: "commitSection", //$NON-NLS-0$
 				title: messages['Commits'],
-				content: '<list id="commitNode" class="mainPadding"></list>', //$NON-NLS-0$
+				content: '<div id="commitNode" class="mainPadding"></div>', //$NON-NLS-0$
 				slideout: true,
 				canHide: true,
 				preferenceService: this.registry.getService("orion.core.preference") //$NON-NLS-0$
@@ -824,21 +824,20 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 		};
 			
 		GitStatusExplorer.prototype.renderCommit = function(commit, outgoing, index){
-			var extensionListItem = dojo.create( "div", { "class":"sectionTableItem " + ((index % 2) ? "darkTreeTableRow" : "lightTreeTableRow") }, dojo.byId("commitNode") ); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var horizontalBox = dojo.create( "div", null, extensionListItem ); //$NON-NLS-0$
+			var extensionListItem = dojo.create( "div", { "class" : "sectionTableItem lightTreeTableRow" }, dojo.byId("commitNode") ); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var horizontalBox = dojo.create( "div", {"style" : "overflow:hidden"}, extensionListItem ); //$NON-NLS-0$
 			
 			var imgSpriteName = (outgoing ? "git-sprite-outgoing_commit" : "git-sprite-incoming_commit"); //$NON-NLS-1$ //$NON-NLS-0$
 			
 			dojo.create( "span", { "class":"sectionIcon gitImageSprite " + imgSpriteName}, horizontalBox ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			if (commit.AuthorImage) {
-				var authorImage = dojo.create("span", {"class":"git-author-icon"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var authorImage = dojo.create("span", {"style":"float:left"}, horizontalBox); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 				
 				var image = new Image();
 				image.src = commit.AuthorImage;
 				image.name = commit.AuthorName;
-				image.width = 30;
-				image.height = 30;
+				image.className = "git-author-icon";
 				dojo.place(image, authorImage, "first"); //$NON-NLS-0$
 			}
 			

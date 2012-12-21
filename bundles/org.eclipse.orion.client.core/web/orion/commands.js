@@ -661,7 +661,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				return;
 			} 
 			if (contributions) {
-				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType, userData, domNodeWrapperList);
+				this._render(this._contributionsByScopeId[scopeId], parent, items, handler, renderType || "button", userData, domNodeWrapperList); //$NON-NLS-0$
 				// If the last thing we rendered was a group, it's possible there is an unnecessary trailing separator.
 				this._checkForTrailingSeparator(parent, renderType, true);
 			}
