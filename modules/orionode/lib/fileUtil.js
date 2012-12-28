@@ -153,6 +153,84 @@ exports.rumRuff = function rumRuff(dirpath, callback) {
 	});
 };
 
+function _copyDir(srcPath, destPath, callback) {
+	var _copyRecursive, processDir, cpDir, cpFile;
+	/** @returns A promise that resolves once all directories in the tree rooted at 'root' have been copied.
+	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
+	 */
+	_copyRecursive = function(root, dirlist) {
+		var stack = [{path: root, dir: true}];
+		var treeDone = new Deferred();
+		(function handleNextDir() {
+			if (!stack.length) {
+				treeDone.resolve();
+				return;
+			}
+			var dir = stack.shift();
+			dirlist.push(dir);
+			processDir(stack, dir, dirlist).then(handleNextDir);
+		}());
+		return treeDone;
+	};
+	/** @returns A promise that resolves once all items in 'dir' have been either: deleted (if simple file) or 
+	 * pushed to 'stack' for later handling (if directory).
+	 * @param {Array} stack
+	 * @param {String} dir
+	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
+	 */
+	processDir = function(stack, dir, dirlist) {
+		return PromisedIO.all(pfs.readdir(dir.path).then(function(files) {
+			return PromisedIO.all(files.map(function(filename) {
+				var fullpath = path.join(dir.path, filename);
+				return pfs.stat(fullpath).then(function(stat) {
+					if (stat.isDirectory()) {
+						stack.push({path: fullpath, dir: true});
+					} else {
+						dirlist.push({path: fullpath, dir: false});
+					}
+					return new Deferred().resolve();
+				});
+			}));
+		}));
+	};
+	cpDir = function(dirlist) {
+		return PromisedIO.all(dirlist.map(function(d) {
+			if(d.dir){
+				var currentDestFolderPath = d.path.replace(srcPath, destPath);
+				return pfs.mkdir(currentDestFolderPath);
+			} else {
+				return function(){
+					var currentDestFolderPath = d.path.replace(srcPath, destPath);
+					var rs = pfs.createReadStream(d.path);
+					var ws = pfs.createWriteStream(currentDestFolderPath);
+					rs.pipe(ws);
+				};
+			}
+		}));
+	};
+	cpFile = function(dirlist) {
+		dirlist.forEach(function(item) {
+			if(!item.dir){
+				var currentDestFolderPath = item.path.replace(srcPath, destPath);
+				var rs = fs.createReadStream(item.path);
+				var ws = fs.createWriteStream(currentDestFolderPath);
+				rs.pipe(ws);
+			}
+		});
+	};
+	// recursively copy directories, then copy all the files cached
+	var dirlist = [];
+	_copyRecursive(srcPath, dirlist).then(function() {
+		return cpDir(dirlist);
+	}).then(function() {
+		cpFile(dirlist);
+		callback();
+	}, function(error) {
+		callback(error);
+	});
+}
+
+
 /**
  * Copy srcPath to destPath
  * @param {String} srcPath
@@ -160,11 +238,20 @@ exports.rumRuff = function rumRuff(dirpath, callback) {
  * @param {Function} callback Invoked as callback(error, destPath)
  */
 exports.copy = function(srcPath, destPath, callback) {
-	var rs = fs.createReadStream(srcPath);
-	var ws = fs.createWriteStream(destPath);
-	rs.pipe(ws);
-	rs.on('error', callback);
-	rs.on('end', callback.bind(null, null, destPath));
+	fs.stat(srcPath, function(error, stats) {
+		if (error) { callback(error); }
+		else {
+			if (stats.isDirectory()) {
+				_copyDir( srcPath, destPath, callback);
+			} else if (stats.isFile()) {
+				var rs = fs.createReadStream(srcPath);
+				var ws = fs.createWriteStream(destPath);
+				rs.pipe(ws);
+				rs.on('error', callback);
+				rs.on('end', callback.bind(null, null, destPath));
+			}
+		}
+	});
 };
 
 /**
