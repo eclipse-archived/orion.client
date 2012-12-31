@@ -77,7 +77,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 
 			var loadingDeferred = new dojo.Deferred();
 			progressService.showWhile(loadingDeferred, messages["Loading..."]);
-			this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
+			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting repository details").then( //$NON-NLS-0$
 				function(resp){					
 					if (resp.Children.length === 0) {
 						loadingDeferred.callback();
@@ -86,7 +86,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/ex
 					} else if (resp.Children.length === 1 && resp.Children[0].Type === "Commit") { //$NON-NLS-0$
 						var commits = resp.Children;
 						
-						that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then( //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation), "Getting repository details " + resp.Name).then( //$NON-NLS-0$
 							function(resp){
 								loadingDeferred.callback();
 								var repositories = resp.Children;

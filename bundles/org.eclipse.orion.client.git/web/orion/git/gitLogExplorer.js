@@ -92,7 +92,7 @@ exports.GitLogExplorer = (function() {
 			if (isRemote) {
 				var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
 				if (metadata.Git) {
-					gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation).then(function(defaultRemoteBranchJsonData, secondArg) {
+					this.registry.getService("orion.page.progress").progress(gitService.getDefaultRemoteBranch(metadata.Git.RemoteLocation), "Getting default branch for " + metadata.Name).then(function(defaultRemoteBranchJsonData, secondArg) {
 						seg.href = require.toUrl("git/git-log.html") + "#" + defaultRemoteBranchJsonData.Location + "?page=1"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					});
 				}
@@ -173,11 +173,11 @@ exports.GitLogExplorer = (function() {
 				mGitCommands.updateNavTools(that.registry, that, that.toolbarId, that.selectionToolsId, remoteResource, that.pageNavId);
 			}
 			
-			that.registry.getService("orion.git.provider").getLog(remoteResource.HeadLocation, newRefEncoded).then(function(scopedCommitsJsonData) {
+			that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(remoteResource.HeadLocation, newRefEncoded), "Getting log for " + remoteResource.Name).then(function(scopedCommitsJsonData) {
 				that.incomingCommits = scopedCommitsJsonData.Children;
 				that.outgoingCommits = [];
 				
-				that.registry.getService("orion.git.provider").doGitLog(remoteResource.CommitLocation + "?" + new dojo._Url(dojo.hash()).query).then(function(jsonData) { //$NON-NLS-0$
+				that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog(remoteResource.CommitLocation + "?" + new dojo._Url(dojo.hash()).query), "Getting incomming changes for " + remoteResource.Name).then(function(jsonData) { //$NON-NLS-0$
 					remoteResource.Children = jsonData.Children;
 					if(jsonData.NextLocation){
 						remoteResource.NextLocation = remoteResource.Location + "?" + new dojo._Url(jsonData.NextLocation).query; //$NON-NLS-0$
@@ -198,9 +198,9 @@ exports.GitLogExplorer = (function() {
 			processRemoteTrackingBranch(resource.toRef);
 		} else if (resource.toRef){
 			if (resource.toRef.RemoteLocation && resource.toRef.RemoteLocation.length===1 && resource.toRef.RemoteLocation[0].Children && resource.toRef.RemoteLocation[0].Children.length===1){
-				that.registry.getService("orion.git.provider").getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location).then(
+				that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitRemote(resource.toRef.RemoteLocation[0].Children[0].Location), "Getting log for " + resource.Name).then(
 					function(remoteJsonData, secondArg) {
-						that.registry.getService("orion.git.provider").getLog(remoteJsonData.CommitLocation, "HEAD").then(function(scopedCommitsJsonData) { //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(remoteJsonData.CommitLocation, "HEAD"), "Getting outgoing changes for " + resource.Name).then(function(scopedCommitsJsonData) { //$NON-NLS-0$
 							that.incomingCommits = [];
 							that.outgoingCommits = scopedCommitsJsonData.Children;
 							d.callback(resource);
@@ -237,15 +237,15 @@ exports.GitLogExplorer = (function() {
 		
 		var that = this;
 		var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
-		gitService.doGitLog(location).then(
+		this.registry.getService("orion.page.progress").progress(gitService.doGitLog(location), "Getting git log").then(
 			function(resp) {
 				var resource = resp;
-				gitService.getGitClone(resource.CloneLocation).then(
+				that.registry.getService("orion.page.progress").progress(gitService.getGitClone(resource.CloneLocation), "Getting repository details for " + resource.Name).then(
 					function(resp){
 						var clone = resp.Children[0];	
 						resource.Clone = clone;
 						resource.ContentLocation = clone.ContentLocation;
-						gitService.getGitBranch(clone.BranchLocation).then(
+						that.registry.getService("orion.page.progress").progress(gitService.getGitBranch(clone.BranchLocation), "Getting default branch details for " + resource.Name).then(
 							function(branches){
 								dojo.forEach(branches.Children, function(branch, i) {
 									if (branch.Current === true){

@@ -53,15 +53,21 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 		};
 		
 		exports.createOperationsCommands = function(serviceRegistry, commandService, explorer, operationsClient){
+			
+			function _isOperationRunning(item){
+				if(!item.operation || item.operation.type){
+					return false;
+				}
+				return (item.operation.type==="loadstart" || item.operation.type==="progress");
+			}
 		
 			var removeCompletedOperationsCommand = new mCommands.Command({
 				name : messages["Remove Completed"],
 				tooltip : messages["Remove all completed operations"],
 				id : "eclipse.removeCompletedOperations", //$NON-NLS-0$
 				callback : function(data) {
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					operationsClient.removeCompletedOperations().then(dojo.hitch(progress, function(item){
-						progress.removeCompletedOperations();
+					operationsClient.removeCompletedOperations().then(dojo.hitch(operationsClient, function(item){
+						operationsClient.removeCompletedOperations();
 					}));
 				},
 				visibleWhen : function(item) {
@@ -77,19 +83,16 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				id : "eclipse.removeOperation", //$NON-NLS-0$
 				callback : function(data) {
 					var items = dojo.isArray(data.items) ? data.items : [data.items];
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						operationsClient.removeOperation(item.Location).then(dojo.hitch(progress, function(item){
-							progress.removeOperationFromTheList(item.Id);
-						}, item));
+						dojo.hitch(operationsClient, operationsClient.removeOperation)(item.Location).then(function(){explorer.loadOperations.bind(explorer)();}, function(){explorer.loadOperations.bind(explorer)();});
 					}
 				},
 				visibleWhen : function(items) {
 					if(!dojo.isArray(items) || items.length===0)
-						return items.Running===false;
+						return !_isOperationRunning(items);
 					for(var i in items){
-						if(items[i].Running!=false){
+						if(_isOperationRunning(items[i])){
 							return false;
 						}
 					}
@@ -97,31 +100,6 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				}
 			});
 			commandService.addCommand(removeOperationCommand);
-			
-			var cancelOperationCommand = new mCommands.Command({
-				name : messages["Cancel"],
-				tooltip : messages["Cancel operations from the operations list."],
-				imageClass: "core-sprite-stop", //$NON-NLS-0$
-				id : "eclipse.cancelOperation", //$NON-NLS-0$
-				callback : function(data) {
-					var items = dojo.isArray(data.items) ? data.items : [data.items];
-					for (var i=0; i < items.length; i++) {
-						var item = items[i];
-						operationsClient.cancelOperation(item.Location);
-					}
-				},
-				visibleWhen : function(items) {
-					if(!dojo.isArray(items) || items.length===0)
-						return items.CanBeCanceled===true && items.Running===true;
-					for(var i in items){
-						if(items[i].CanBeCanceled!=true || items[i].Running!=true){
-							return false;
-						}
-					}
-					return true;
-				}
-			});
-			commandService.addCommand(cancelOperationCommand);
 		};
 	
 	}());	

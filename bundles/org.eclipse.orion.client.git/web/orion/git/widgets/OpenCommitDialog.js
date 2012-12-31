@@ -102,8 +102,8 @@ var OpenCommitDialog = dojo.declare("orion.git.widgets.OpenCommitDialog", [dijit
 			deferred = new dojo.Deferred();
 		
 		if (repositories.length > 0) {
-			that.serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1").then( //$NON-NLS-1$ //$NON-NLS-0$
+			serviceRegistry.getService("orion.page.progress").progress(that.serviceRegistry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
+				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1"), "Getting commit details " + commitName).then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
 					deferred.callback(resp.Children[0]);
 				},

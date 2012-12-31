@@ -99,7 +99,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
-		this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
 			function(resp){
 				if (resp.Children.length === 0) {
 					that.initTitleBar({});
@@ -123,7 +123,7 @@ exports.GitRepositoryExplorer = (function() {
 		this.loadingDeferred = new dojo.Deferred();
 		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
 		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
-		this.registry.getService("orion.git.provider").getGitClone(location).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
 			function(resp){
 				
 				// render navigation commands
@@ -155,7 +155,7 @@ exports.GitRepositoryExplorer = (function() {
 				} else if (resp.Children[0].Type === "Branch"){ //$NON-NLS-0$
 					var branches = resp.Children;
 					
-					that.registry.getService("orion.git.provider").getGitClone(branches[0].CloneLocation).then( //$NON-NLS-0$
+					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(branches[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -171,7 +171,7 @@ exports.GitRepositoryExplorer = (function() {
 				} else if (resp.Children[0].Type === "Tag"){ //$NON-NLS-0$
 					var tags = resp.Children;
 					
-					that.registry.getService("orion.git.provider").getGitClone(tags[0].CloneLocation).then( //$NON-NLS-0$
+					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(tags[0].CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -184,7 +184,7 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				} else if (resp.Children[0].Type === "Config"){ //$NON-NLS-0$
-					that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation).then( //$NON-NLS-0$
+					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(resp.CloneLocation), "Getting git repository details").then( //$NON-NLS-0$
 						function(resp){
 							var repositories = resp.Children;
 							
@@ -285,12 +285,12 @@ exports.GitRepositoryExplorer = (function() {
 							return;
 						}
 						
-						that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation).then( //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitStatus(repository.StatusLocation), "Getting status for " + repository.Name).then( //$NON-NLS-0$
 							function(resp){
 								try{
 									repository.Status = resp;
 		
-									that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
+									that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation), "Getting branches for " + repository.Name).then( //$NON-NLS-0$
 										function(resp){
 											try{
 												var branches = resp.Children || [];
@@ -310,7 +310,7 @@ exports.GitRepositoryExplorer = (function() {
 												var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 												
 												if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-													that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+													that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), "Getting incomming commits " + repository.Name).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 														function(resp){
 															if(resp.Children === undefined) { repository.CommitsToPush = 0; }
 															else { repository.CommitsToPush = resp.Children.length; }
@@ -322,7 +322,7 @@ exports.GitRepositoryExplorer = (function() {
 														}
 													);
 												} else {
-													that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
+													that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), "Getting outgoing commits " + repository.Name).then(  //$NON-NLS-1$ //$NON-NLS-0$
 														function(resp){	
 															if(resp.Children === undefined) { repository.CommitsToPush = 0; }
 															else { repository.CommitsToPush = resp.Children.length; }
@@ -481,7 +481,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Loading status"); //$NON-NLS-0$
-		this.registry.getService("orion.git.provider").getGitBranch(statusLocation).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(statusLocation), "Loading status").then( //$NON-NLS-0$
 			function(resp){
 				var status = resp;
 				progress.done();
@@ -520,7 +520,7 @@ exports.GitRepositoryExplorer = (function() {
 			deferred = new dojo.Deferred();
 		
 		if (branches.length > 0) {
-			this.registry.getService("orion.git.provider").doGitLog(branches[0].CommitLocation + "?page=1&pageSize=1").then( //$NON-NLS-1$ //$NON-NLS-0$
+			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(branches[0].CommitLocation + "?page=1&pageSize=1"), "Getting branch last commit " + branches[0].Name).then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
 					branches[0].Commit = resp.Children[0];
 					that.decorateBranches(branches.slice(1), deferred);
@@ -553,7 +553,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting branches"); //$NON-NLS-0$
-		this.registry.getService("orion.git.provider").getGitBranch(branchLocation + (mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")).then( //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(branchLocation + (mode === "full" ? "?commits=1" : "?commits=1&page=1&pageSize=5")), "Getting branches " + repository.Name).then( //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			function(resp){
 				var branches = resp.Children;
 				progress.done();
@@ -631,7 +631,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin("Getting remote branches"); //$NON-NLS-0$
-		this.registry.getService("orion.git.provider").getGitRemote(remoteLocation).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(remoteLocation), "Getting remote branches " + repository.Name).then( //$NON-NLS-0$
 			function(resp){
 				var remotes = resp.Children;
 				progress.done();
@@ -656,7 +656,7 @@ exports.GitRepositoryExplorer = (function() {
 			deferred = new dojo.Deferred();
 		
 		if (remotes.length > 0) {
-			this.registry.getService("orion.git.provider").getGitRemote(remotes[0].Location).then( //$NON-NLS-0$
+			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(remotes[0].Location), "Getting remote branches " + remotes[0].Name).then( //$NON-NLS-0$
 				function(resp){
 					var remoteBranches = resp.Children;
 					for(var i=0; (i<remoteBranches.length);i++){
@@ -734,7 +734,7 @@ exports.GitRepositoryExplorer = (function() {
 		
 		var commitsContainer = dojo.create("list", { className: "mainPadding"});
 		
-		this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation), "Getting current branch " + repository.Name).then( //$NON-NLS-0$
 			function(resp){
 				var branches = resp.Children;
 				var currentBranch;
@@ -928,7 +928,7 @@ exports.GitRepositoryExplorer = (function() {
 			deferred = new dojo.Deferred();
 		}
 		
-		this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1").then(
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").doGitLog(tag.CommitLocation + "?page=1&pageSize=1"), "Getting tag last commit " + tag.Name).then(
 			function(resp){
 				tag.Commit = resp.Children[0];
 				deferred.callback();
@@ -967,7 +967,7 @@ exports.GitRepositoryExplorer = (function() {
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin(messages["Getting tags"]);
 		var tagsContainer = dojo.create("list", {className: "mainPadding"});
-		this.registry.getService("orion.git.provider").getGitBranch(repository.TagLocation + (mode === "full" ? "?page="+page+"&pageSize="+pageSize : "?page=1&pageSize=5")).then(
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(repository.TagLocation + (mode === "full" ? "?page="+page+"&pageSize="+pageSize : "?page=1&pageSize=5")), "Getting tags " + repository.Name).then(
 			function(resp){
 				var tags = resp.Children;
 				
@@ -1100,7 +1100,7 @@ exports.GitRepositoryExplorer = (function() {
 		that.commandService.registerCommandContribution(titleWrapper.actionsNode.id, "eclipse.addRemote", 100); //$NON-NLS-0$
 		that.commandService.renderCommands(titleWrapper.actionsNode.id, titleWrapper.actionsNode.id, repository, that, "button"); //$NON-NLS-0$
 				
-		this.registry.getService("orion.git.provider").getGitRemote(remoteLocation).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitRemote(remoteLocation), "Getting remotes " + repository.Name).then( //$NON-NLS-0$
 			function(resp){
 				var remotes = resp.Children;
 				
@@ -1162,7 +1162,7 @@ exports.GitRepositoryExplorer = (function() {
 		var progress = titleWrapper.createProgressMonitor();
 		progress.begin(messages["Getting confituration"]);
 				
-		this.registry.getService("orion.git.provider").getGitCloneConfig(configLocation).then( //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitCloneConfig(configLocation), "Getting configuration of " + repository.Name).then( //$NON-NLS-0$
 			function(resp){
 				progress.worked("Rendering configuration"); //$NON-NLS-0$
 				var configurationEntries = resp.Children;

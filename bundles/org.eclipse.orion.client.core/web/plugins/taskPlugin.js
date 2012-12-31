@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define eclipse window parent document*/
 
-define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider) {
+define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domReady!"], function(xhr, PluginProvider, operation, Deferred) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
@@ -51,14 +51,7 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			});
 		},
 		getOperation: function(taskLocation) {
-			return xhr("GET", taskLocation, {
-				headers: {
-					"Orion-Version": "1"
-				},
-				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
+			return operation.handle(taskLocation);
 		},
 		removeCompletedOperations: function() {
 			return xhr("DELETE", base, {
@@ -71,27 +64,30 @@ define(["orion/xhr", "orion/plugin", "domReady!"], function(xhr, PluginProvider)
 			});
 		},
 		removeOperation: function(taskLocation) {
-			return xhr("DELETE", taskLocation, {
+			var clientDeferred = new Deferred();
+			xhr("DELETE", taskLocation, {
 				headers: {
 					"Orion-Version": "1"
 				},
 				timeout: 15000
 			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
+				clientDeferred.resolve(result.response ? JSON.parse(result.response) : null);
+			}, function(error){
+				var errorMessage = error;
+				if(error.responseText){
+					errorMessage = error.responseText;
+					try{
+						errorMessage = JSON.parse(error.responseText);
+					}catch(e){
+						//ignore
+					}
+				}
+				if(errorMessage.Message)
+					clientDeferred.reject(errorMessage);
+				else
+					clientDeferred.reject({Severity: "Error", Message: errorMessage});
 			});
-		},
-		cancelOperation: function(taskLocation) {
-			return xhr("PUT", taskLocation, {
-				data: JSON.stringify({
-					Cancel: true
-				}),
-				headers: {
-					"Orion-Version": "1"
-				},
-				timeout: 15000
-			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
-			});
+			return clientDeferred;
 		}
 	}, {
 		name: "Tasks",

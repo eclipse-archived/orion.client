@@ -28,7 +28,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstra
 			var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mProgress.ProgressService(serviceRegistry, operationsClient);
 				
-			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, "tasks-lisk", "pageActions", "selectionTools", "operationItems"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var operationsTable = new mOperationsTable.OperationsExplorer(serviceRegistry, selection, operationsClient, "tasks-list", "pageActions", "selectionTools", "operationItems"); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
 			// global commands
 			mGlobalCommands.generateBanner("orion-operationList", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
@@ -44,29 +44,8 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/bootstra
 			commandService.registerCommandContribution("operationItems", "eclipse.cancelOperation", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("selectionTools", "eclipse.cancelOperation", 2, "eclipse.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-			function displayError(error){
-				var display = [];
-				display.Severity = "Error"; //$NON-NLS-0$
-				display.HTML = false;
-				
-				try {
-					var jsonData = JSON.parse(error);
-					display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-				} catch (Exception) {
-					display.Message = error;
-				}
-				
-				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-			}
+			dojo.hitch(operationsTable, operationsTable.loadOperations)();
 			
-			try{
-				operationsClient.addOperationChangeListener(function(taskList){
-					dojo.hitch(operationsTable, operationsTable.mergeOperations)(taskList);
-				});
-			}catch (e) {
-				displayError(e);
-				dojo.hitch(operationsTable, operationsTable.mergeOperations)({Children: []});
-			}
 		});
 	});
 	

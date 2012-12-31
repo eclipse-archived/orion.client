@@ -13,7 +13,7 @@
 
 /** @namespace The global container for eclipse APIs. */
 
-define(['require', 'dojo', 'dojo/DeferredList'], function(require, dojo) {
+define(['require', 'dojo', 'orion/operation', 'dojo/DeferredList'], function(require, dojo, operation) {
 
 var eclipse = eclipse || {};
 
@@ -915,13 +915,8 @@ eclipse.GitService = (function() {
 		},
 		_getGitServiceResponse: function(clientDeferred, jsonData, xhrArgs){
 			if(xhrArgs && xhrArgs.xhr.status === 202){
-				var deferred = new dojo.Deferred();
-				deferred.callback(jsonData);
-				return this._serviceRegistry.getService("orion.page.progress").showWhile(deferred).then(function(progressResp) { //$NON-NLS-0$
-					var returnData = progressResp.Result.Severity === "Ok" ? progressResp.Result.JsonData : progressResp.Result; //$NON-NLS-0$
-					clientDeferred.callback(returnData);
-					return;
-				});
+				operation.handle(jsonData.Location).then(clientDeferred.resolve, clientDeferred.reject, clientDeferred.progress);
+				return;
 			}
 			clientDeferred.callback(jsonData);
 			return;
