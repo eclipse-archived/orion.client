@@ -186,18 +186,18 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 
 			var loadingDeferred = new dojo.Deferred();
 			progressService.showWhile(loadingDeferred, messages['Loading...']);
-			this.registry.getService("orion.git.provider").getGitStatus(location).then( //$NON-NLS-0$
+			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitStatus(location), "Getting status").then( //$NON-NLS-0$
 				function(resp){
 					if (resp.Type === "Status") { //$NON-NLS-0$
 						var status = resp;
 						that._model = new GitStatusModel();
 						that._model.init(status);
 						
-						that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation).then( //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(status.CloneLocation), "Getting repository information").then( //$NON-NLS-0$
 							function(resp){
 								var repositories = resp.Children;
 								
-								that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation).then( //$NON-NLS-0$
+								that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitCloneConfig(repositories[0].ConfigLocation), "Getting repository configuration ", repositories[0].Name).then( //$NON-NLS-0$
 									function(resp){
 										loadingDeferred.callback();
 										var config = resp.Children;
@@ -714,7 +714,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 			var progress = titleWrapper.createProgressMonitor();
 			
 			progress.begin(messages['Getting current branch']);
-			this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation).then( //$NON-NLS-0$
+			this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitBranch(repository.BranchLocation), "Getting current branch " + repository.Name).then( //$NON-NLS-0$
 				function(resp){
 					var branches = resp.Children;
 					var currentBranch;
@@ -752,7 +752,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 					
 					progress.worked(dojo.string.substitute(messages['Getting commits for \"${0}\" branch'],  [currentBranch.Name]));
 					if (tracksRemoteBranch && currentBranch.RemoteLocation[0].Children[0].CommitLocation){
-						that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD").then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.RemoteLocation[0].Children[0].CommitLocation + "?page=1&pageSize=20", "HEAD"), dojo.string.substitute(messages['Getting commits for \"${0}\" branch'],  [currentBranch.Name])).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							function(resp){
 								progress.worked(messages['Rendering commits']);
 								
@@ -763,7 +763,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 								}
 								
 								progress.worked(messages['Getting outgoing commits']);
-								that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id).then(  //$NON-NLS-1$ //$NON-NLS-0$
+								that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getLog(currentBranch.CommitLocation + "?page=1&pageSize=20", currentBranch.RemoteLocation[0].Children[0].Id), messages['Getting outgoing commits']).then(  //$NON-NLS-1$ //$NON-NLS-0$
 									function(resp){	
 										progress.worked(messages['Rendering commits']);
 										for (var i=0; i<resp.Children.length; i++){
@@ -788,7 +788,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 							}
 						);
 					} else {
-						that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20").then(  //$NON-NLS-1$ //$NON-NLS-0$
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog(currentBranch.CommitLocation + "?page=1&pageSize=20"), dojo.string.substitute(messages['Getting commits for \"${0}\" branch'],  [currentBranch.Name])).then(  //$NON-NLS-1$ //$NON-NLS-0$
 							function(resp){	
 								progress.worked(messages['Rendering commits']);
 								for (var i=0; i<resp.Children.length; i++){
