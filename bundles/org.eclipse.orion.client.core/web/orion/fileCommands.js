@@ -13,8 +13,8 @@
 /*browser:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/widgets/ImportDialog', 'orion/widgets/SFTPConnectionDialog'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter){
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/widgets/ImportDialog'],
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog){
 
 	/**
 	 * Utility methods
@@ -795,7 +795,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "orion.importSFTP", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
-				var dialog = new orion.widgets.SFTPConnectionDialog({
+				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func:  function(host,port,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -807,7 +807,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						);//refresh the root
 					}
 				});
-				dialog.startup();
 				dialog.show();
 			},
 			visibleWhen: function(item) {
@@ -822,7 +821,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			id: "eclipse.exportSFTPCommand", //$NON-NLS-0$
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
-				var dialog = new orion.widgets.SFTPConnectionDialog({
+				var dialog = new SFTPDialog.SFTPConnectionDialog({
 					func:  function(host,path,user,password, overwriteOptions){
 						var optionHeader = overwriteOptions ? "sftp,"+overwriteOptions : "sftp"; //$NON-NLS-1$ //$NON-NLS-0$
 						var exportOptions = {"OptionHeader":optionHeader,"Host":host,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -833,7 +832,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 							errorHandler);//refresh the root
 					}
 				});
-				dialog.startup();
 				dialog.show();
 			},
 			visibleWhen: function(item) {

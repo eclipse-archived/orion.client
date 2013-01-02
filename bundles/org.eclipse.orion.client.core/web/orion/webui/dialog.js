@@ -67,12 +67,12 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$parent.appendChild(contentFragment);
 			this.$buttonContainer = lib.$(".dialogButtons", parent); //$NON-NLS-0$
 			this._makeButtons();
-			if (this.modal) {
-				this._makeModal();
-			}
 			this._bindElements(this.$parent);
 			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
 				this._bindToDom(this.$parent);
+			}
+			if (this.modal) {
+				this._makeModal();
 			}
 		},
 		
@@ -106,8 +106,18 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$frame.addEventListener("blur", function(e) { //$NON-NLS-0$
 				self.$lastFocusedElement = e.target;
 			}, true);
+			this.$$modalExclusions = this.$$modalExclusions || [];
 			this._modalListener = function(e) { //$NON-NLS-0$
-				if (!lib.contains(self.$frame, e.target)) {
+				var preventFocus =	!lib.contains(self.$frame, e.target);
+				if (preventFocus) {
+					for (var i = 0; i<self.$$modalExclusions.length; i++) {
+						if (lib.contains(self.$$modalExclusions[i], e.target)) {
+							preventFocus = false;
+							break;
+						}
+					}
+				}
+				if (preventFocus) {
 					window.setTimeout(function() {
 						(self.$lastFocusedElement || self.$parent).focus();
 					}, 0);
@@ -117,8 +127,15 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$frameParent.addEventListener("focus", this._modalListener, true);  //$NON-NLS-0$
 			this.$frameParent.addEventListener("click", this._modalListener, true);  //$NON-NLS-0$
 			var children = this.$frameParent.childNodes;
+			var exclude = false;
 			for (var i=0; i<children.length; i++) {
-				if (children[i] !== self.$frame && children[i].classList) {
+				for (var j=0; j<this.$$modalExclusions.length; j++) {
+					if (lib.contains(this.$$modalExclusions[j], children[i])) {
+						exclude = true;
+						break;
+					}
+				}
+				if (!exclude && children[i] !== self.$frame && children[i].classList && !children[i].classList.contains("tooltipContainer")) { //$NON-NLS-0$
 					children[i].classList.add("modalBackdrop"); //$NON-NLS-0$
 				}
 			}
@@ -143,8 +160,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 				this._afterHiding();
 			}
 			var self = this;
-			// If necessary we could add an option to control whether destroy automatically happens on hide
-			window.setTimeout(function() { self.destroy(); }, 0);
+			if (!this.keepAlive) {
+				window.setTimeout(function() { self.destroy(); }, 0);
+			}
 		}, 
 		
 		show: function(near) {

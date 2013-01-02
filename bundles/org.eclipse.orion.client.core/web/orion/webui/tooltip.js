@@ -50,6 +50,8 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._hideDelay = options.hideDelay || 200;
 			this._tailSize = options.tailSize || 10;
 			this._trigger = options.trigger || "mouseover"; //$NON-NLS-0$
+			this._afterShowing = options.afterShowing;
+			this._afterHiding = options.afterHiding;
 			
 			var self = this;
 			// set up events
@@ -95,7 +97,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this._tip.appendChild(this._tipInner);
 				document.body.appendChild(this._tip);
 				var self = this;
-				lib.addAutoDismiss([this._tip, this._node], function() {self.destroy();});
+				lib.addAutoDismiss([this._tip, this._node], function() {self.hide();});
 			}
 			return this._tip;
 		},
@@ -214,6 +216,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					self._positionTip(self._position[0], true);  // force it in, it doesn't fit anywhere
 				}
 				self._tip.classList.add("tooltipShowing"); //$NON-NLS-0$
+				if (self._afterShowing) {
+					self._afterShowing();
+				}
 			}, this._showDelay);
 		},
 		
@@ -234,6 +239,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			var self = this;
 			this._timeout = window.setTimeout(function() {
 				self._tip.classList.remove("tooltipShowing"); //$NON-NLS-0$
+				if (self._afterHiding) {
+					self._afterHiding();
+				}
 			}, hideDelay);
 		},
 		
