@@ -1,6 +1,6 @@
 {
   "name": "orion",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "An Eclipse Orion server based on Node.js and connect.",
   "homepage": "http://eclipse.org/orion/",
   "dependencies": {
@@ -9,7 +9,10 @@
     "sax": "~0.4.2",
     "promised-io": "~0.3.0",
     "socket.io": "~0.9.11",
-    "socket.io-client": "~0.9.11"
+    "socket.io-client": "~0.9.11",
+    "dojo": "https://github.com/mamacdon/dojo/archive/1.6.1.tar.gz",
+    "dijit": "https://github.com/mamacdon/dijit/archive/1.6.1.tar.gz",
+    "dojox": "https://github.com/mamacdon/dojox/archive/1.6.1.tar.gz"
   },
   "devDependencies": {},
   "scripts": {
