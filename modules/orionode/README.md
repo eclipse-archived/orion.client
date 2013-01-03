@@ -11,8 +11,8 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Concatenation and minification of pages (requires a manual step, see **Concatenation + Minification**, below)
 
 ## Requirements
-* node.js (plus npm)
-* A modern web browser with Web Socket support (for example: Firefox 15, Chrome 22, Internet Explorer 10, Safari 6)
+* node.js (plus npm).
+* A modern web browser with Web Socket support (for example: Firefox 15, Chrome 22, Internet Explorer 10, Safari 6).
 
 ## Known Issues
 * Missing file operations: import and export.
@@ -23,15 +23,18 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 	* Output from Shell commands doesn't look nice (whitespace is not preserved, so the text runs together).
 
 ## Usage
-1. Checkout the orionode repository from GitHub. (Alternatively, you can install orionode using npm by running ```npm install orion```).
-2. If you checked out the repo from GitHub, download the dependencies by running:
-```npm install```
+1. Clone the [orion client repository](http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/) by using one of the following URLs:
+	* [git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git](git://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git)
+	* [ssh://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git](ssh://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git)
+	* [http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git](http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git)
+2. Open a command shell and change directory to ```org.eclipse.orion.client/modules/orionode```.
+2. Run this command to automatically download Orionode's dependencies:
+    ```npm install```
+(This will take a few minutes).
 3. **Recommended:** create a one-line ```password.txt``` file containing a secret password.
 4. Launch the Orion server by running one of the following commands from a shell.
 	* If you installed by checking out the Git repo:
 	```node server.js [-p port] [-w directory] [-password password.txt]```
-	* If you installed using npm, the path to server.js will be different:
-	```node ./node_modules/orionode/server.js [-p port] [-w directory] [-password password.txt]```
 	* If you're not passing any command-line arguments to the server, you can just do this:
 	```npm start```
 5. Go to **[http://localhost:8081](http://localhost:8081)** (or whatever port you chose) in your web browser to start using Orion.
