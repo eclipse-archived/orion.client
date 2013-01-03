@@ -29,7 +29,7 @@ define({
 	"Services": "Services",
 	"SFTP Transfer": "SFTP Transfer",
 	"Remote host:": "Remote host:",
-	"Port:": "Port:",
+	"Port:": "SFTP Port:",
 	"Remote path:": "Remote path:",
 	"User name:": "User name:",
 	"Password:": "Password:",

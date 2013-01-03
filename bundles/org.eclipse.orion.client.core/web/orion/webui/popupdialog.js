@@ -24,9 +24,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 
 	PopupDialog.prototype = /** @lends orion.webui.PopupDialog.prototype */ {
 		
-		_initialize: function(triggerNode) {
+		_initialize: function(triggerNode, afterShowing, afterHiding) {
 			this._tooltip = new tooltip.Tooltip({
 				node: triggerNode,
+				afterShowing: afterShowing,
+				afterHiding: afterHiding,
 				trigger: "click" //$NON-NLS-0$
 			});
 			this.$parent = this._tooltip.contentContainer();
@@ -49,10 +51,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		},
 		
 		hide: function() {
+			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
+				this._beforeHiding();
+			}
 			this._tooltip.hide();
 		}, 
 		
 		show: function() {
+			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
+				this._beforeShowing();
+			}
 			this._tooltip.show();
 		}
 	};
