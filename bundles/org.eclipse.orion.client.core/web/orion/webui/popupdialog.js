@@ -35,6 +35,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			var range = document.createRange();
 			range.selectNode(this.$parent);
 			var contentFragment = range.createContextualFragment(this.TEMPLATE);
+			if (this.messages) {
+				lib.processTextNodes(contentFragment, messages);
+			}
 			this.$parent.appendChild(contentFragment);
 			this._bindElements(this.$parent);
 			this._bindToDom(this.$parent);

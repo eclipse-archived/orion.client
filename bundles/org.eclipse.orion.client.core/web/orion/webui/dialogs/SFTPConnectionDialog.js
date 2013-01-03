@@ -25,6 +25,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	/* Internal */
  
 	function SFTPNewConnectionPopup(triggerNode, notify) {
+		this.messages = messages;
 		this._initialize(triggerNode, this._afterShowing.bind(this));
 		this._notify = notify;
 	}
@@ -32,15 +33,15 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	SFTPNewConnectionPopup.prototype = new popupdialog.PopupDialog();
 
 	SFTPNewConnectionPopup.prototype.TEMPLATE = 
-		'<div><label for="sftpHost">'+ messages['Remote host:'] +'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+		'<div><label for="sftpHost">${Remote host:}</label>' + //$NON-NLS-0$
 		'<input id="sftpHost" /></div>' + //$NON-NLS-0$
-		'<div><label for="sftpPort">'+ messages['Port:'] +'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+		'<div><label for="sftpPort">${Port:}</label>' + //$NON-NLS-0$
 		'<input id="sftpPort" /></div>' + //$NON-NLS-0$
-		'<div><label for="sftpPath">'+ messages['Remote path:'] +'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+		'<div><label for="sftpPath">${Remote path:}</label>' + //$NON-NLS-0$
 		'<input id="sftpPath" /></div>' + //$NON-NLS-0$
-		'<div><label for="sftpUser">'+ messages['User name:'] +'</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+		'<div><label for="sftpUser">${User name:}</label>' + //$NON-NLS-0$
 		'<input id="sftpUser" /></div>' + //$NON-NLS-0$
-		'<div class="layoutBlock layoutRight"><span id="addSftpConnection" role="button" class="dropdownTrigger commandButton" tabindex="0">' + messages['Add'] + '</span></div>';  //$NON-NLS-1$ //$NON-NLS-0$
+		'<div class="layoutBlock layoutRight"><span id="addSftpConnection" role="button" class="dropdownTrigger commandButton" tabindex="0">${Add}</span></div>';  //$NON-NLS-0$
 	
 	SFTPNewConnectionPopup.prototype._bindToDom = function(parent) {
 		var self = this;
@@ -74,24 +75,25 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 
 	SFTPConnectionDialog.prototype.TEMPLATE = 
 		'<div style="minimum-width = 100em;">' + //$NON-NLS-0$
-			'<div><label for="sftpPath">'+ messages['Location:'] +'</label></div>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<div><label for="sftpPath">${Location:}</label></div>' +  //$NON-NLS-0$
 			'<div><select id="sftpConnectionList" name="sftpConnectionList"></select>' + //$NON-NLS-0$
-			'<span id="newSftpConnection" role="button" style="margin-left: 16px;" class="dropdownTrigger commandButton" tabindex="0">' + messages['New'] + '<span class="dropdownArrowDown"></span></span></div>' + //$NON-NLS-1$ //$NON-NLS-0$
-			'<div><label for="sftpPassword">'+ messages['Password:'] +'</label></div>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<span id="newSftpConnection" role="button" style="margin-left: 16px;" class="dropdownTrigger commandButton" tabindex="0">${New}<span class="dropdownArrowDown"></span></span></div>' + //$NON-NLS-0$
+			'<div><label for="sftpPassword">${Password:}</label></div>' + //$NON-NLS-0$
 			'<div><input id="sftpPassword" type="password" /></div>' + //$NON-NLS-0$
-			'<p>' + messages["If the same file exists in both the source and destination:"] + '</p>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<p>${If the same file exists in both the source and destination:}</p>' + //$NON-NLS-0$
 			'<input type="radio" name="overwriteOption" id="overwriteCancel" checked value="overwriteCancel" />' + //$NON-NLS-0$
-			'<label for="overwriteCancel">' + messages["Cancel the transfer"] + '</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<label for="overwriteCancel">${Cancel the transfer}</label>' +  //$NON-NLS-0$
 			'<br />' + //$NON-NLS-0$
 			'<input type="radio" name="overwriteOption" id="overwriteAll" value="overwriteAll" />' + //$NON-NLS-0$
-			'<label for="overwriteAll">' + messages["Always overwrite destination"] + '</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<label for="overwriteAll">${Always overwrite destination}</label>' +  //$NON-NLS-0$
 			'<br />' + //$NON-NLS-0$
 			'<input type="radio" name="overwriteOption" id="overwriteOlder" value="overWriteOlder" />' +  //$NON-NLS-0$
-			'<label for="overwriteOlder">' + messages["Overwrite if source is newer"] + '</label>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<label for="overwriteOlder">${Overwrite if source is newer}</label>' + //$NON-NLS-0$
 		'</div>'; //$NON-NLS-0$
 		
 	SFTPConnectionDialog.prototype._init = function(options) {
 		this.title = "SFTP Transfer"; //$NON-NLS-0$
+		this.messages = messages;
 		this.modal = true;
 		this.buttons = [{text: messages['Start Transfer'], callback: this.done.bind(this)}]; 
 		this.sftpConnectionStoreData = JSON.parse(localStorage.getItem("orion.sftpConnections")); //$NON-NLS-0$
