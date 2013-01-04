@@ -33,9 +33,28 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domRe
 		}
 		return location;
 	}
+	
+	function makeAbsolute(location) {
+		temp.href = location;
+		return temp.href;
+	}
 
 	temp.href = "../task";
 	var base = makeParentRelative(temp.href);
+	
+	function _normalizeLocations(data) {
+		if (data && typeof data === "object") {
+			Object.keys(data).forEach(function(key) {
+				var value = data[key];
+				if (key.indexOf("Location") !== -1) {
+					data[key] = makeAbsolute(value);
+				} else {
+					_normalizeLocations(value);
+				}
+			});
+		}
+		return data;
+	}
 
 	// testing that command service handles image-less actions properly
 	provider.registerService("orion.core.operation", {
@@ -47,7 +66,9 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domRe
 				query: options,
 				timeout: options.Longpolling ? 70000 : 15000
 			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
+				result = result.response ? JSON.parse(result.response) : null;
+				_normalizeLocations(result);
+				return result;
 			});
 		},
 		getOperation: function(taskLocation) {
@@ -60,7 +81,9 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domRe
 				},
 				timeout: 15000
 			}).then(function(result) {
-				return result.response ? JSON.parse(result.response) : null;
+				result = result.response ? JSON.parse(result.response) : null;
+				_normalizeLocations(result);
+				return result;
 			});
 		},
 		removeOperation: function(taskLocation) {
@@ -71,7 +94,9 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domRe
 				},
 				timeout: 15000
 			}).then(function(result) {
-				clientDeferred.resolve(result.response ? JSON.parse(result.response) : null);
+				result = result.response ? JSON.parse(result.response) : null;		
+				_normalizeLocations(result);
+				clientDeferred.resolve(result);
 			}, function(error){
 				var errorMessage = error;
 				if(error.responseText){
