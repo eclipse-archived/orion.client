@@ -193,24 +193,36 @@ module.exports = function(options) {
 				});
 				req.on('end', function(e) {
 					var etagHeader = req.headers['if-match'];
-					fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-						if (error && error.code === 'ENOENT') {
-							res.statusCode = 404;
-							res.end();
-						} else if (etagHeader && etagHeader !== etag) {
-							res.statusCode = 412;
-							res.end();
-						} else {
-							// write buffer into file
-							fs.writeFile(filepath, requestBody, function(error) {
-								if (error) {
-									writeError(500, res, error);
-									return;
-								}
+					if(!etagHeader){//If etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
+						fs.writeFile(filepath, requestBody, function(error) {
+							if (error) {
+								writeError(500, res, error);
+								return;
+							}
+							fs.stat(filepath, function(error, stats) {
 								writeFileMetadata(res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
 							});
-						}
-					});
+						});
+					} else {
+						fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+							if (error && error.code === 'ENOENT') {
+								res.statusCode = 404;
+								res.end();
+							} else if (etagHeader && etagHeader !== etag) {
+								res.statusCode = 412;
+								res.end();
+							} else {
+								// write buffer into file
+								fs.writeFile(filepath, requestBody, function(error) {
+									if (error) {
+										writeError(500, res, error);
+										return;
+									}
+									writeFileMetadata(res, rest, filepath, stats, requestBodyETag.getValue() /*the new ETag*/);
+								});
+							}
+						});
+					}
 				});
 			}
 		},
