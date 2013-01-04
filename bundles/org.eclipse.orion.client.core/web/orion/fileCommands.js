@@ -13,8 +13,8 @@
 /*browser:true*/
 
 define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/uiUtils', 'orion/fileUtils', 'orion/commands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/compare/compareUtils', 
-	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/widgets/ImportDialog'],
-	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog){
+	'orion/Deferred', 'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialogs/SFTPConnectionDialog', 'orion/webui/dialogs/ImportDialog'],
+	function(messages, require, lib, i18nUtil, mUIUtils, mFileUtils, mCommands, mExtensionCommands, mContentTypes, mCompareUtils, Deferred, DirPrompter, SFTPDialog, ImportDialog){
 
 	/**
 	 * Utility methods
@@ -776,11 +776,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			callback : function(data) {
 				var item = forceSingleItem(data.items);
 				var ex = explorer;
-				var dialog = new orion.widgets.ImportDialog({
+				var dialog = new ImportDialog.ImportDialog({
 					importLocation: item.ImportLocation,
 					func: function() {ex.changedItem.bind(ex)(item, true); }
 				});
-				dialog.startup();
 				dialog.show();
 			},
 			visibleWhen: function(item) {
