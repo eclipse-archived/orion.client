@@ -47,13 +47,17 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 				var isDirectory = cs[1].isDirectory();
 				var timeStamp = cs[1].mtime.getTime();
 				var size = cs[1].size;
+				var location = api.join(parentLocation, childname);
+				if(isDirectory && location[location.length-1] !== "/"){
+					location = location +"/";
+				}
 				return {
 					Name: childname,
 					Id: childname,
 					Length: size,
 					LocalTimeStamp: timeStamp,
 					Directory: isDirectory,
-					Location: api.join(parentLocation, childname + (isDirectory ? '/' : '')),
+					Location: location,
 					ChildrenLocation: api.join(parentLocation, childname) + '?depth=1'
 /*
     {

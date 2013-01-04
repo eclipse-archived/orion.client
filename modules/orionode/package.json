@@ -3,6 +3,7 @@
   "version": "0.0.8",
   "description": "An Eclipse Orion server based on Node.js and connect.",
   "homepage": "http://eclipse.org/orion/",
+  "bugs": "https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Orion&component=Node",
   "dependencies": {
     "connect": "~2.4.6",
     "node-inspector": "~0.2.0beta3",

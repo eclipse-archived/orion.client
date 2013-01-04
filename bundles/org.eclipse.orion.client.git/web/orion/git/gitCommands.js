@@ -104,12 +104,12 @@ var exports = {};
 			sshService.addKnownHosts(errorData.Host + " " + errorData.KeyType + " " + errorData.HostKey).then(function(){ //$NON-NLS-1$ //$NON-NLS-0$
 				sshService.getKnownHosts().then(function(knownHosts){
 					options.knownHosts = knownHosts;
+					if(typeof options.failedOperation !== "undefined"){
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						dojo.hitch(progress, progress.removeOperation)(options.failedOperation);
+					}
 					func(options);
 				});
-				if(typeof options.failedOperation !== "undefined"){
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					dojo.hitch(progress, progress.removeOperation)(options.failedOperation);
-				}
 			});
 		}
 	};
@@ -128,10 +128,6 @@ var exports = {};
 				
 			credentialsDialog.startup();
 			credentialsDialog.show();
-			if(typeof options.failedOperation !== "undefined"){
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				dojo.hitch(progress, progress.removeOperation)(options.failedOperation);
-			}
 		};
 		
 		if((options.gitSshUsername && options.gitSshUsername!=="") ||
@@ -147,7 +143,6 @@ var exports = {};
 							var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 							dojo.hitch(progress, progress.removeOperation)(options.failedOperation);
 						}
-					
 						func({ knownHosts: options.knownHosts, gitSshUsername: credentials.gitSshUsername, gitSshPassword: credentials.gitSshPassword, gitPrivateKey: credentials.gitPrivateKey, gitPassphrase: credentials.gitPassphrase}); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						return;
 					}
@@ -380,18 +375,10 @@ var exports = {};
 			}
 			return;
 		case 401:
-			if (jsonData.failedOperation){
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-				dojo.hitch(progress, progress.removeOperation)(jsonData.failedOperation);
-			}
 			sshCallback(jsonData);
 			return;
 		case 400:
 			if(jsonData.JsonData && jsonData.JsonData.HostKey){
-				if (jsonData.failedOperation){
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					dojo.hitch(progress, progress.removeOperation)(jsonData.failedOperation);
-				}
 				sshCallback(jsonData);
 				return;
 			}
@@ -886,6 +873,7 @@ var exports = {};
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
 						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
 						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
@@ -904,11 +892,13 @@ var exports = {};
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
+								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 								commandService.collectParameters(commandInvocation);
 							}
 						);
 					} else {
 						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 						commandService.collectParameters(commandInvocation);
 					}
 				};
@@ -920,6 +910,11 @@ var exports = {};
 						commandInvocation.optionsRequested = true;
 						commandService.collectParameters(commandInvocation);
 						return;
+					}
+					
+					if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						dojo.hitch(progress, progress.removeOperation)(commandInvocation.errorData.failedOperation);
 					}
 					
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
@@ -1015,6 +1010,7 @@ var exports = {};
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
 						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
 						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
@@ -1033,6 +1029,7 @@ var exports = {};
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
+								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 								commandService.collectParameters(commandInvocation);
 							}
 						);
@@ -1048,6 +1045,12 @@ var exports = {};
 						commandInvocation.optionsRequested = true;
 						commandService.collectParameters(commandInvocation);
 						return;
+					}
+					
+					
+					if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						dojo.hitch(progress, progress.removeOperation)(commandInvocation.errorData.failedOperation);
 					}
 	
 					exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
@@ -1388,6 +1391,7 @@ var exports = {};
 					if (jsonData.JsonData.HostKey){
 						commandInvocation.parameters = null;
 						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 						commandService.collectParameters(commandInvocation);
 					} else if (!commandInvocation.optionsRequested){
 						var gitPreferenceStorage = new GitPreferenceStorage(serviceRegistry);
@@ -1406,11 +1410,13 @@ var exports = {};
 								}
 								
 								commandInvocation.errorData = jsonData.JsonData;
+								commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 								commandService.collectParameters(commandInvocation);
 							}
 						);
 					} else {
 						commandInvocation.errorData = jsonData.JsonData;
+						commandInvocation.errorData.failedOperation = jsonData.failedOperation;
 						commandService.collectParameters(commandInvocation);
 					}
 				};
@@ -1423,6 +1429,10 @@ var exports = {};
 				}
 				var gitService = serviceRegistry.getService("orion.git.provider");
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				if(commandInvocation.errorData && commandInvocation.errorData.failedOperation){
+					dojo.hitch(progress, progress.removeOperation)(commandInvocation.errorData.failedOperation);
+				}
 				
 				var handlePush = function(options, location, ref, name, force){
 					var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$

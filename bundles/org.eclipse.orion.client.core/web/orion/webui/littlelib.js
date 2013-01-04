@@ -65,7 +65,7 @@ define(['require'], function(require) {
 	function processTextNodes(node, messages) {
 		if (node.nodeType === 3) { // TEXT_NODE
 			var matches = variableRegEx.exec(node.nodeValue);
-			if (matches.length > 1) {
+			if (matches && matches.length > 1) {
 				node.parentNode.replaceChild(document.createTextNode(messages[matches[1]]), node);
 			}
 		}
