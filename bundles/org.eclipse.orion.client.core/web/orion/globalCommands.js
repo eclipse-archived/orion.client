@@ -51,6 +51,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	var authenticationIds = [];
 	
 	function startProgressService(serviceRegistry){
+		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
+		progressPane.setAttribute("aria-label", messages['Operations - Press spacebar to show current operations']); //$NON-NLS-1$ //$NON-NLS-0$
 		var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 		if(progressService) {
 			progressService.init.bind(progressService)("progressPane"); //$NON-NLS-0$
@@ -58,7 +60,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	}
 	
 	function setUserName(registry, node){
-			
 			var authService = registry.getService("orion.core.auth"); //$NON-NLS-0$
 			if (authService !== null) {
 				authService.getUser().then(function(jsonData){
@@ -152,7 +153,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		dropDownImage.tabIndex = 0;
 		dropDownImage.classList.add("advancedSearchDecorationSprite");//$NON-NLS-0$
 		dropDownImage.classList.add("core-sprite-openarrow"); //$NON-NLS-0$
-		dropDownImage.title = "advanced search";
+		dropDownImage.title = messages["Advanced search"];
 		dropDownImage.onclick = function(evt) {
 			container.toggle();
 		};
@@ -377,6 +378,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 						makeFavorite(serviceRegistry);
 					}
 				}, false);
+				faveButton.setAttribute("aria-label", messages["Add to the favorites list"]); //$NON-NLS-1$ //$NON-NLS-0$
 				new mTooltip.Tooltip({
 					node: faveButton,
 					text: messages["Add to the favorites list"],
@@ -471,7 +473,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		title = options.title;
 		if (!title) {
 			if (name) {
-				title = name + " - "+ options.task;
+				title = name + " - "+ options.task; //$NON-NLS-0$
 			} else {
 				title = options.task;
 			}
@@ -538,7 +540,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		}
 		// no reference node has been given, so use the main toolbar.
 		if (!toolNode) {
-			toolNode = lib.node("pageActions");
+			toolNode = lib.node("pageActions"); //$NON-NLS-0$
 		}
 		var node = toolNode;
 		// the trickiest part is finding where to start looking (section or main toolbar).
@@ -596,8 +598,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		a settings gear will appear at the right hand side */
 	
 	function addSettings( settings ){
-		var settingsNode = document.getElementById("settingsTab");
-		var settingsButton = document.getElementById("settingsAction");
+		var settingsNode = document.getElementById("settingsTab"); //$NON-NLS-0$
+		var settingsButton = document.getElementById("settingsAction"); //$NON-NLS-0$
 		var CLICKED = false;
 		var panel;
 		
@@ -610,50 +612,48 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				CLICKED = true;
 		
 				var TAB_HEIGHT = 24;
-				var TAB_WIDTH = 25;
 				var PANEL_HEIGHT = 150;
 				var PANEL_WIDTH = 150;
-				var BORDER_RADIUS = '3px';
-				var COLOR = '#555';
+				var BORDER_RADIUS = '3px'; //$NON-NLS-0$
+				var COLOR = '#555'; //$NON-NLS-0$
 			
 				settingsNode.style.backgroundColor = COLOR;
-				settingsNode.style.zIndex = '99';
+				settingsNode.style.zIndex = '99'; //$NON-NLS-0$
 				settingsNode.style.borderTopRightRadius = BORDER_RADIUS;
 				settingsNode.style.borderTopLeftRadius = BORDER_RADIUS;
 				
-				settingsButton.className = "core-sprite-settings-white";
+				settingsButton.className = "core-sprite-settings-white"; //$NON-NLS-0$
 				
-				settingsNode.id = 'settingsNode';
-				settingsButton.id = 'settingsButton';
+				settingsNode.id = 'settingsNode'; //$NON-NLS-0$
+				settingsButton.id = 'settingsButton'; //$NON-NLS-0$
 				
-				var rightPane = document.getElementById( 'innerPanels' );	
+				var rightPane = document.getElementById( 'innerPanels' );	 //$NON-NLS-0$
 				var rpBox = rightPane.getBoundingClientRect();
 				var box = settingsNode.getBoundingClientRect();
-				var leftPane = document.getElementById( 'outlineContainer' );
-				var lpBox = leftPane.getBoundingClientRect();
+				var leftPane = document.getElementById( 'outlineContainer' ); //$NON-NLS-0$
 				
 				if (!panel) {
-					panel = document.createElement( 'div' );
-					panel.className = 'settingsPanel';
-					panel.style.width = PANEL_WIDTH + 'px';
-					panel.style.height = PANEL_HEIGHT + 'px';
+					panel = document.createElement( 'div' ); //$NON-NLS-0$
+					panel.className = 'settingsPanel'; //$NON-NLS-0$
+					panel.style.width = PANEL_WIDTH + 'px'; //$NON-NLS-0$
+					panel.style.height = PANEL_HEIGHT + 'px'; //$NON-NLS-0$
 					panel.style.backgroundColor = COLOR;
-					panel.style.zIndex = '99';
-					panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px';
-					panel.id = 'settingsPanel';		
+					panel.style.zIndex = '99'; //$NON-NLS-0$
+					panel.style.top = box.top - rpBox.top + TAB_HEIGHT -4 + 'px'; //$NON-NLS-0$
+					panel.id = 'settingsPanel';		 //$NON-NLS-0$
 					panel.style.borderTopLeftRadius = BORDER_RADIUS;
 					panel.style.borderBottomRightRadius = BORDER_RADIUS;
 					panel.style.borderBottomLeftRadius = BORDER_RADIUS;
 					
 					rightPane.appendChild( panel );
 					lib.addAutoDismiss([settingsButton, settingsNode, panel], function() {
-						settingsButton.className = "core-sprite-settings";
-						settingsNode.style.backgroundColor = 'white';
-						panel.style.visibility = 'hidden';
+						settingsButton.className = "core-sprite-settings"; //$NON-NLS-0$
+						settingsNode.style.backgroundColor = 'white'; //$NON-NLS-0$
+						panel.style.visibility = 'hidden'; //$NON-NLS-0$
 						CLICKED = false;
 					});	
 				} else {
-					panel.style.visibility = 'visible';
+					panel.style.visibility = 'visible'; //$NON-NLS-0$
 				}
 				lib.empty(panel);	
 				settings.appendTo( panel );
@@ -681,21 +681,33 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		var range = document.createRange();
 		range.selectNode(parent);
 		var headerFragment = range.createContextualFragment(commonHTML.topHTMLFragment);
+		// do the i18n string substitutions
+		lib.processTextNodes(headerFragment, messages);
+		
 		if (parent.firstChild) {
 			parent.insertBefore(headerFragment, parent.firstChild);
 		} else {
 			parent.appendChild(headerFragment);
 		}
-		
+		var home = lib.node("home"); //$NON-NLS-0$
+		if (home) {
+			home.setAttribute("aria-label", messages['Orion Home']);  //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
 			toolbar.innerHTML = commonHTML.toolbarHTMLFragment;
 		}
+		var closeNotification = lib.node("closeNotifications"); //$NON-NLS-0$
+		if (closeNotification) {
+			closeNotification.setAttribute("aria-label", messages['Close notification']);  //$NON-NLS-1$ //$NON-NLS-0$
+		}
 		
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer) {
 			footer.innerHTML = commonHTML.bottomHTMLFragment;
+			// do the i18n string substitutions
+			lib.processTextNodes(footer, messages);
 		}
 		
 		// Set up a custom parameter collector that slides out of adjacent tool areas.
@@ -736,6 +748,13 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		if (!searchField) {
 			throw "failed to generate HTML for banner"; //$NON-NLS-0$
 		}
+		// this stuff
+		searchField.setAttribute("placeholder", messages['Search']); //$NON-NLS-1$ //$NON-NLS-0$
+		new mTooltip.Tooltip({
+			node: searchField,
+			text: messages["Type a keyword or wild card to search in root"],
+			position: ["below", "left"] //$NON-NLS-1$ //$NON-NLS-0$
+		});
 		var advSearchOptContainer = new mAdvSearchOptContainer.advSearchOptContainer(searchField, searcher, serviceRegistry,
 									{group: "advancedSearch"});//$NON-NLS-0$
 
@@ -749,7 +768,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 							fullSet.push({type: "category", label: messages["Saved searches"]});//$NON-NLS-0$
 							hasSavedSearch = true;
 						}
-						fullSet.push({type: "proposal", value: {name: searches[i].label, value: require.toUrl("search/search.html") + "#" + searches[i].value, type: "link"}});
+						fullSet.push({type: "proposal", value: {name: searches[i].label, value: require.toUrl("search/search.html") + "#" + searches[i].value, type: "link"}});  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						//fullSet.push({type: "proposal", label: searches[i].label, value: searches[i].name});//$NON-NLS-0$
 					} else {
 						if(!hasRecentSearch){
@@ -776,7 +795,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
             var promises = [];
 			serviceReferences.forEach(function(serviceRef) {
-				var filterForMe = serviceRef.getProperty("filterForMe");
+				var filterForMe = serviceRef.getProperty("filterForMe");  //$NON-NLS-0$
 				promises.push( serviceRegistry.getService(serviceRef).run(keyWord).then(function(returnValue) {
 					//The return value has to be an array of {category : string, datalist: [string,string,string...]}
 					var proposalList = {filterForMe: filterForMe, proposals: []};
@@ -825,8 +844,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			if (side && main) {
 				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main});
 				var toggleSidePanelCommand = new mCommands.Command({
-					name: "Toggle side panel",
-					tooltip:"Open or close the side panel",
+					name: messages["Toggle side panel"],
+					tooltip: messages["Open or close the side panel"],
 					id: "orion.toggleSidePane", //$NON-NLS-0$
 					callback: function() {
 						splitter.toggleSidePanel();}
@@ -845,7 +864,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
 						splitter.toggleSidePanel();
 						return true;
-					}, {name:"Toggle Outliner"});
+					}, {name: messages["Toggle Outliner"]});
 				}
 			}
 		}
@@ -1060,7 +1079,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 								var bindingString = mUIUtils.getUserKeyString(bindings[j]);
 								var span = document.createElement("span"); //$NON-NLS-0$
 								span.role = "listitem"; //$NON-NLS-0$
-								span.appendChild(document.createTextNode(bindingString + " = " + actionName)); 
+								span.appendChild(document.createTextNode(bindingString + " = " + actionName));  //$NON-NLS-0$
 								span.appendChild(document.createElement("br")); //$NON-NLS-0$
 								keyAssistDiv.appendChild(span);
 							}
