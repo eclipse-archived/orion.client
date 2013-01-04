@@ -73,7 +73,8 @@ define({
 	"Close": "Close",
 	"Expand all": "Expand all",
 	"Collapse all": "Collapse all",
-	"Search": "Search",
+	"Search" : "Search",
+	"Advanced search" : "Advanced search",
 	"Submit" : "Submit",
 	"More" : "More",
 	"Saved searches" : "Saved searches",
@@ -81,5 +82,12 @@ define({
 	"Open in new tab" : "Open in new tab", 
 	"Regular expression" : "Regular expression",
 	"Search options" : "Search options",
-	"Global search" : "Global search"
+	"Global search" : "Global search",
+	"Orion Home" : "Orion Home",
+	"Close notification" : "Close notification",
+	"Operations - Press spacebar to show current operations" : "Operations - Press spacebar to show current operations",
+	"Type a keyword or wild card to search in root" : "Type a keyword or wild card to search in root",
+	"Toggle side panel" : "Toggle side panel",
+	"Open or close the side panel": "Open or close the side panel",
+	"Toggle Outliner" : "Toggle Outliner"
 });
