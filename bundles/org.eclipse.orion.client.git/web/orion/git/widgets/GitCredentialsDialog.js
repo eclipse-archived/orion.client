@@ -133,6 +133,10 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 			if(self._sshService){
 				self._sshService.getKnownHosts().then(function(knownHosts){
 					if(self.options.func) {
+						var failedOperation = typeof self.options.failedOperation === "undefined"? self.options.errordata.failedOperation : self.options.failedOperation;
+						if(failedOperation !== "undefined"){
+							dojo.hitch(self._progressService, self._progressService.removeOperation)(failedOperation);
+						}
 						self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.isSshPassword.checked ? self.gitSshPassword.value : "",
 							gitPrivateKey: self.isPrivateKey.checked ? pKey : "", gitPassphrase: self.isPrivateKey.checked ? self.gitPassphrase.value: "", //$NON-NLS-0$
 							knownHosts: knownHosts});
@@ -142,6 +146,10 @@ dojo.declare("orion.git.widgets.GitCredentialsDialog", [dijit.Dialog, orion.widg
 				
 			}else{
 				if(self.options.func) {
+					var failedOperation = typeof self.options.failedOperation === "undefined"? self.options.errordata.failedOperation : self.options.failedOperation;
+					if(failedOperation !== "undefined"){
+						dojo.hitch(self._progressService, self._progressService.removeOperation)(failedOperation);
+					}
 					self.options.func({ gitSshUsername: self.gitSshUsername.value, gitSshPassword: self.gitSshPassword.value,
 						gitPrivateKey: pKey, gitPassphrase: self.gitPassphrase.value,
 						knownHosts: self.gitSshKnownHosts.value});
