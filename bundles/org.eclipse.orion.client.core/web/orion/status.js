@@ -182,27 +182,36 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			}
 			this._init();
 			var msg = status.Message || status;
-			var imageClass = "imageSprite core-sprite-info"; //$NON-NLS-0$
+			var imageClass = "core-sprite-info"; //$NON-NLS-0$
 			var extraClass = "progressInfo"; //$NON-NLS-0$
-			var removedClasses = "progressWarning progressError progressNormal"; //$NON-NLS-0$
+			var image = document.createElement("span"); //$NON-NLS-0$
+			image.classList.add("imageSprite"); //$NON-NLS-0$
+			var removedClasses = [];
 			var alt = "info"; //$NON-NLS-0$
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning": //$NON-NLS-0$
-					imageClass = "imageSprite core-sprite-warning"; //$NON-NLS-0$
+					imageClass = " core-sprite-warning"; //$NON-NLS-0$
 					alt = "warning"; //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
-					removedClasses = "progressInfo progressError progressNormal"; //$NON-NLS-0$
+					removedClasses.push("progressInfo");
+					removedClasses.push("progressError");
+					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					break;
 				case "Error": //$NON-NLS-0$
-					imageClass = "imageSprite core-sprite-error"; //$NON-NLS-0$
+					imageClass = "core-sprite-error"; //$NON-NLS-0$
 					alt = "error"; //$NON-NLS-0$
 					extraClass="progressError"; //$NON-NLS-0$
-					removedClasses = "progressWarning progressInfo progressNormal"; //$NON-NLS-0$
+					removedClasses.push("progressWarning");
+					removedClasses.push("progressInfo");
+					removedClasses.push("progressNormal"); //$NON-NLS-0$
 					break;
+				default:
+					removedClasses.push("progressWarning");
+					removedClasses.push("progressError");
+					removedClasses.push("progressNormal");
 				}
 			}
-			var image = document.createElement("span"); //$NON-NLS-0$
 			image.classList.add(imageClass); //$NON-NLS-0$
 			var node = lib.node(this.progressDomId);
 			var container = lib.node(this.notificationContainerDomId);

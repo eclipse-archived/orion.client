@@ -33,8 +33,8 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 	OpenResourceDialog.prototype.TEMPLATE = 
 		'<div role="search">' + //$NON-NLS-0$
-			'<div><label for="fileName">'+messages['Type the name of a file to open (? = any character, * = any string):']+'</label></div>' + //$NON-NLS-1$ //$NON-NLS-0$
-			'<div><input id="fileName" type="text" placeholder="'+messages['Search']+'"</input></div>' + //$NON-NLS-1$ //$NON-NLS-0$
+			'<div><label for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
+			'<div><input id="fileName" type="text" /></div>' + //$NON-NLS-0$
 			'<div id="crawlingProgress"></div>' + //$NON-NLS-0$
 			'<div id="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>' + //$NON-NLS-0$
 			'<div id="results" style="max-height:400px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
@@ -43,6 +43,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 	OpenResourceDialog.prototype._init = function(options) {
 		this.title = options.title || messages['Find File Named'];
+		this.messages = messages;
 		this._searcher = options.searcher;
 		this._onHide = options.onHide;
 		this._contentTypeService = new mContentTypes.ContentTypeService(this._searcher.registry);
@@ -71,6 +72,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	
 	OpenResourceDialog.prototype._bindToDom = function(parent) {
 		var self = this;
+		this.$fileName.setAttribute("placeholder", messages['Search']);  //$NON-NLS-0$
 		this.$fileName.addEventListener("input", function(evt) { //$NON-NLS-0$
 			self._time = + new Date();
 			if (self._timeoutId) {

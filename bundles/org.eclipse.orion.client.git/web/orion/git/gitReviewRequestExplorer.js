@@ -161,8 +161,8 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 				if (deferred === null)
 					deferred = new dojo.Deferred();
 				if (repositories.length > 0) {
-					that.registry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
-						"/gitapi/commit/" + sha + repositories[0].Location + "?page=1&pageSize=1", null, null, messages['Looking for the commit']).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
+						"/gitapi/commit/" + sha + repositories[0].Location + "?page=1&pageSize=1", null, null, messages['Looking for the commit']), "Looking for commit " + sha).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						function(resp){
 							that.currentCommit = resp;
 							deferred.callback(resp.Children[0].Location);
@@ -188,10 +188,10 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 				path += repositories[0].Name;
 				repositories[0].Content.Path = path;
 				
-				that.registry.getService("orion.git.provider").getGitClone(repositories[0].Git.CloneLocation).then(
+				that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitClone(repositories[0].Git.CloneLocation), "Getting repository properties " + repositories[0].Name).then(
 					function(resp){
 						resp.Children[0].Id = repositories[0].Id;
-						that.registry.getService("orion.git.provider").getGitRemote("/gitapi/remote" + repositories[0].Location).then(
+						that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").getGitRemote("/gitapi/remote" + repositories[0].Location), "Getting remotes for " + repositories[0].Name).then(
 							function(remotes){
 								var foundRemote = false;
 								for(var i=0;i<remotes.Children.length;i++){

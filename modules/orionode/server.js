@@ -11,6 +11,7 @@
 /*global __dirname console process require*/
 var connect = require('connect');
 var mime = connect.mime;
+var statik = connect['static'];
 var http = require('http');
 var socketio = require('socket.io');
 var path = require('path');
@@ -71,10 +72,18 @@ function startServer(options) {
 			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/')), {
 				socketIORoot: path.resolve(NODE_MODULES, 'socket.io-client/')
 			}))
-			.use(orionStatic(path.normalize(ORION_CLIENT), {
-				dojoRoot: path.resolve(LIBS, 'dojo/'),
+			.use(orionStatic({
+				orionClientRoot: ORION_CLIENT,
+				dojoRoot: NODE_MODULES,
 				dev: options.dev
 			}))
+			// Orion-specific Dojo overrides from orionStatic:
+			.use('/org.dojotoolkit/dojo', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.core/web/dojo')))
+			.use('/org.dojotoolkit/dojox', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.core/web/dojox')))
+			// Dojo libraries
+			.use('/org.dojotoolkit/dojo', statik(path.resolve(NODE_MODULES, 'dojo')))
+			.use('/org.dojotoolkit/dijit', statik(path.resolve(NODE_MODULES, 'dijit')))
+			.use('/org.dojotoolkit/dojox', statik(path.resolve(NODE_MODULES, 'dojox')))
 			// API handlers
 			.use(orionFile({
 				root: '/file',

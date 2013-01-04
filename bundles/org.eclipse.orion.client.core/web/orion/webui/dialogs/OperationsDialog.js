@@ -51,12 +51,10 @@ function(messages, require, lib, popupdialog) {
 
 	OperationsDialog.prototype.setOperations = function(operations){
 		this._myOperations = [];
-		if(operations.Children) {
-			for (var i=0; i<operations.Children.length; i++){
-				this._myOperations.push(operations.Children[i]);
+		if(operations)
+			for(var i in operations){
+				this._myOperations.push(operations[i]);
 			}
-		}
-		this._myOperations.sort(function(op1, op2){return parseInt(op2.Modified) - parseInt(op1.Modified);});
 		this._renderOperations();
 	};
 	
@@ -103,43 +101,37 @@ function(messages, require, lib, popupdialog) {
 			var link = document.createElement("span"); //$NON-NLS-0$
 			link.classList.add("primaryColumn"); //$NON-NLS-0$
 			div.appendChild(link);
-			link.textContent = operation.Name;
 			link.appendChild(document.createTextNode(operation.Name));
 			
-			var result =  this.parseProgressResult(operation.Result);
-			switch (result.Severity) {
+			switch (operation.type) {
 				case "Warning": //$NON-NLS-0$
 					operationIcon.classList.add("core-sprite-warning"); //$NON-NLS-0$
 					operationIcon.setAttribute("aria-label", messages["Operation resulted in a warning."]); //$NON-NLS-0$
 					break;
-				case "Error": //$NON-NLS-0$
+				case "error": //$NON-NLS-0$
 					operationIcon.classList.add("core-sprite-error"); //$NON-NLS-0$
 					operationIcon.setAttribute("aria-label", messages["Operation resulted in an error."]); //$NON-NLS-0$
 					break;
-				default:
-					if(operation.Running===true) {
-						operationIcon.classList.add("core-sprite-start"); //$NON-NLS-0$
-						operationIcon.setAttribute("aria-label", messages["Operation is running."]); //$NON-NLS-0$
-					}
-					else if(operation.Canceled===true) {
-						operationIcon.classList.add("core-sprite-stop"); //$NON-NLS-0$
-						operationIcon.setAttribute("aria-label", messages["Operation is canceled."]); //$NON-NLS-0$
-					}
-					else if(operation.Failed===true) {
-						operationIcon.classList.add("core-sprite-error"); //$NON-NLS-0$
-						operationIcon.setAttribute("aria-label", messages["Operation failed."]); //$NON-NLS-0$
-					}
-					else {
-						operationIcon.classList.add("core-sprite-ok"); //$NON-NLS-0$
-						operationIcon.setAttribute("aria-label", "Operation ok."); //$NON-NLS-1$ //$NON-NLS-0$
-					}
+				case "loadstart":
+				case "progress":
+					operationIcon.classList.add("core-sprite-start"); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["Operation is running."]); //$NON-NLS-0$
+					break;
+				case "abort":
+					operationIcon.classList.add("core-sprite-stop"); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", messages["Operation is canceled."]); //$NON-NLS-0$
+					break;
+				case "load":
+				case "loadend":
+					operationIcon.classList.add("core-sprite-ok"); //$NON-NLS-0$
+					operationIcon.setAttribute("aria-label", "Operation ok."); //$NON-NLS-1$ //$NON-NLS-0$
+					break;
 			}
 			
-			if(result.Message || operation.Message){
-				var message = result.Message || operation.Message;
-				if(result.DetailedMessage && result.DetailedMessage!=="") {
-					message += ": " + result.DetailedMessage; //$NON-NLS-0$
-				}
+			if(operation.error){
+				var message = operation.error.Message || operation.error;
+				if(operation.error.DetailedMessage && operation.error.DetailedMessage!=="")
+					message += ": " + operation.error.DetailedMessage; //$NON-NLS-0$
 				div.appendChild(document.createElement("br")); //$NON-NLS-0$
 				var span = document.createElement("span"); //$NON-NLS-0$
 				span.classList.add("secondaryColumn"); //$NON-NLS-0$
