@@ -15,7 +15,21 @@
 define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/tooltip'], 
 		function(messages, require, lib, tooltip) {
 	/**
-	 * Usage: Not instantiated by clients.  The prototype is used elsewhere.
+	 * PopupDialog is used to implement a lightweight, automatically dismissed dialog in Orion that is triggered when
+	 * clicking a DOM node.
+	 * Clients use the PopupDialog prototype and implement the following behavior:
+	 *    1.  Ensure that the HTML template for the popup content is defined in the prototype TEMPLATE variable
+	 *        prior to calling the _initialize() function. Set the following fields in the dialog prior to calling the 
+	 *        _initialize() function if applicable.
+	 *
+	 *        messages - If i18n message bindings are used in the template, set the messages field to the messages object that
+	 *            should be used to bind strings.
+	 * 
+	 *    2.  To hook event listeners to elements in the dialog, implement the _bindToDOM function.  DOM elements
+	 *        in the template will be bound to variable names prefixed by a '$' character.  For example, the
+	 *        element with id "myElement" can be referenced with this.$myElement
+	 *
+	 * Usage: Not instantiated by clients.  The prototype is used by the application popup instance.
 	 * 
 	 * @name orion.webui.PopupDialog
 	 */
@@ -24,6 +38,14 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 
 	PopupDialog.prototype = /** @lends orion.webui.PopupDialog.prototype */ {
 		
+		/* 
+		 * Called by clients once the popup dialog template has been bound to the TEMPLATE variable, and an optional message object has
+		 * been set.
+		 * @param {DOMElement} triggerNode The node that should trigger the popup.
+		 * @param {Function} afterShowing Optional.  A function to call after the popup appears.
+		 * @param {Function} afterHiding Optional.  A function to call after the popup is hidden.
+		 */
+
 		_initialize: function(triggerNode, afterShowing, afterHiding) {
 			this._tooltip = new tooltip.Tooltip({
 				node: triggerNode,
@@ -40,9 +62,14 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			}
 			this.$parent.appendChild(contentFragment);
 			this._bindElements(this.$parent);
-			this._bindToDom(this.$parent);
+			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
+				this._bindToDom(this.$parent);
+			}
 		},
 		
+		/*
+		 * Internal.  Binds any child nodes with id's to the matching field variables.
+		 */
 		_bindElements: function(node) {
 			for (var i=0; i<node.childNodes.length; i++) {
 				var child = node.childNodes[i];
@@ -53,6 +80,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			}
 		},
 		
+		/*
+		 * Internal.  Hides the dialog.  Clients should use the _beforeHiding function and
+		 * the afterHiding function passed to _initialize to do any work related to hiding the dialog,
+		 * such as destroying resources.
+		 */
 		hide: function() {
 			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
 				this._beforeHiding();
@@ -60,6 +92,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			this._tooltip.hide();
 		}, 
 		
+		/*
+		 * Internal.  Shows the dialog.  Clients should use the _beforeShowing function and the
+		 * afterShowing function passed to _initialize to do any work related to showing the dialog,
+		 * such as setting initial focus.
+		 */
 		show: function() {
 			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
 				this._beforeShowing();
