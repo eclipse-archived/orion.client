@@ -915,7 +915,7 @@ eclipse.GitService = (function() {
 		},
 		_getGitServiceResponse: function(clientDeferred, jsonData, xhrArgs){
 			if(xhrArgs && xhrArgs.xhr.status === 202){
-				operation.handle(jsonData.Location).then(clientDeferred.resolve, clientDeferred.reject, clientDeferred.progress);
+				operation.handle(jsonData.Location).then(clientDeferred.resolve, function(data){data.failedOperation=jsonData.Location; clientDeferred.reject(data);}, clientDeferred.progress);
 				return;
 			}
 			clientDeferred.callback(jsonData);
