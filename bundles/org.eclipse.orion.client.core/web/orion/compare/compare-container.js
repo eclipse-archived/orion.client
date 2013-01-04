@@ -918,8 +918,12 @@ exports.InlineCompareContainer = (function() {
 		this._editorDivId = editorDivId;
 		var editorContainer = dijit.byId(this._editorDivId);
 		if(!editorContainer){//If there is no dijit widget as the parent we need one sitting in the middle to listen to the resize event
-			mCompareUtils.destroyDijit(this._editorDivId + "_dijit_inline_compare");//Desteroy the existing dijit first 
-			var styleStr = mCompareUtils.getDijitSizeStyle(this._editorDivId);
+			var widget = dijit.byId(this._editorDivId + "_dijit_inline_compare");
+			if(widget){
+				widget.destroyRecursive();
+			}
+			var marginBox = dojo.marginBox(this._editorDivId);
+			var styleStr = "height: " + marginBox.h + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
 			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
 			wrapperWidget.placeAt(this._editorDivId);
 			wrapperWidget.layout();

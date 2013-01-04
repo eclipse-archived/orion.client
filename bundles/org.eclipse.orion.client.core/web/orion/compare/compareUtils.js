@@ -9,8 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+/*global define require orion window document console */
 
-define(['dojo', 'dijit'], function(dojo, dijit) {
+define([], function() {
 
 var orion = orion || {};
 
@@ -219,7 +220,8 @@ orion.compareUtils.generateCompareHref = function(diffLocation, options) {
 			}
 		}
 	}
-	var tempLink = dojo.create("a", {href: base + compareParam + "#" + diffLocation + diffPosition}); //$NON-NLS-1$ //$NON-NLS-0$
+	var tempLink = document.createElement("a"); //$NON-NLS-0$
+	tempLink.href = base + compareParam + "#" + diffLocation + diffPosition; //$NON-NLS-0$
 	return tempLink.href;
 };
 
@@ -242,21 +244,6 @@ orion.compareUtils.parseCompareHash = function(hash) {
 		}
 	} 
 	return diffObj;
-};
-
-orion.compareUtils.destroyDijit = function(dijitId) {
-	var widget = dijit.byId(dijitId);
-	if(widget){
-		widget.destroyRecursive();
-	}
-};
-
-orion.compareUtils.getDijitSizeStyle = function(parentId) {
-	var marginBox = dojo.marginBox(parentId);
-	var styleH = marginBox.h + "px"; //$NON-NLS-0$
-	var styleW = "100%"; //$NON-NLS-0$
-	var styleStr = "height:" + styleH + ";width:" + styleW; //$NON-NLS-1$ //$NON-NLS-0$
-	return styleStr;
 };
 
 return orion.compareUtils;
