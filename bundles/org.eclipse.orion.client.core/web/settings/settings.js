@@ -14,11 +14,11 @@
 /*jslint browser:true devel:true*/
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient',
-		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/config',
-		'orion/metatype', 'orion/settings/settingsRegistry', 'dojo/hash', 'dojo/parser', 'dojo/date/locale', 
-		'orion/widgets/settings/SettingsContainer', 'dijit/form/Button', 'dijit/ColorPalette'],
+		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/config',
+		'orion/metatype', 'orion/settings/settingsRegistry', 'orion/widgets/settings/SettingsContainer', 'dojo/hash', 'dojo/parser', 'dojo/date/locale', 
+		'dijit/form/Button', 'dijit/ColorPalette'],
 		function(messages, require, dojo, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
-			mDialogs, mGlobalCommands, mConfig, mMetaType, SettingsRegistry) {
+			mDialogs, mGlobalCommands, lib, mConfig, mMetaType, SettingsRegistry, SettingsContainer) {
 
 	dojo.addOnLoad(function() {
 		mBootstrap.startup().then(function(core) {
@@ -84,8 +84,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'orion/bootstrap'
 										settingsRegistry: settingsRegistry
 										};
 
-			var settingsContainer = new orion.widgets.settings.SettingsContainer( containerParameters, dojo.byId( "selectionAgent" ) ); //$NON-NLS-0$
-			settingsContainer.startup();
+			var settingsContainer = new SettingsContainer( containerParameters, lib.node("categoriesContainer"), lib.node("settings")); //$NON-NLS-0$
+			settingsContainer.show();
 
 			preferencesStatusService.setMessage("");
 		});

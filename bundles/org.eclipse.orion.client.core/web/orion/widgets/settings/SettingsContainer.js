@@ -8,69 +8,76 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global window console define localStorage*/
 /*jslint browser:true sub:true*/
 
 /* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate', 'orion/widgets/themes/editor/ThemeData',
-		'orion/widgets/themes/container/ThemeData', 'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/SplitSelectionLayout', 'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
-		function(messages, require, dojo, dijit, mGlobalCommands, PageUtil, mThemeBuilder, SettingsList, URITemplate, editorThemeData, containerThemeData) {
+		'orion/PageUtil', 'orion/webui/littlelib', 'orion/objects', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate', 
+		'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/container/ThemeData', 'orion/widgets/settings/SplitSelectionLayout',
+		'dijit/TooltipDialog', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane', 'orion/widgets/plugin/PluginList',
+		'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
+		function(messages, require, dojo, dijit, mGlobalCommands, PageUtil, lib, objects, mThemeBuilder, SettingsList, URITemplate, editorThemeData, containerThemeData, SplitSelectionLayout) {
 
-	dojo.declare("orion.widgets.settings.SettingsContainer", [orion.widgets.settings.SplitSelectionLayout], { //$NON-NLS-0$
+	/**
+	 * @param {Object} options
+	 * @param {DomNode} node
+	 */
+	var superPrototype = SplitSelectionLayout.prototype;
+	function SettingsContainer(options, node) {
+		SplitSelectionLayout.apply(this, arguments);
 
-		constructor: function() {		
-			this.settingsCategories = [
-				{
-					id: "userSettings", //$NON-NLS-0$
-					textContent: messages["User Profile"],
-					show: this.showUserSettings
-				},
-				{
-					id: "themeBuilder", //$NON-NLS-0$
-					textContent: 'UI Theme', // messages["Themes"],
-					show: this.showThemeBuilder
-				},
-				{
-					id: "editorThemeBuilder", //$NON-NLS-0$
-					textContent: 'Editor Theme', // messages["Themes"],
-					show: this.showEditorThemeBuilder
-				},
-				{
-					id: "plugins", //$NON-NLS-0$
-					textContent: messages["Plugins"],
-					show: this.showPlugins
-				}];
-			this.settingsCategories.forEach(function(item) {
-				item.show = item.show.bind(this, item.id);
-			}.bind(this));
-		},
+		this.settingsCategories = [
+			{
+				id: "userSettings", //$NON-NLS-0$
+				textContent: messages["User Profile"],
+				show: this.showUserSettings
+			},
+			{
+				id: "themeBuilder", //$NON-NLS-0$
+				textContent: 'UI Theme', // messages["Themes"],
+				show: this.showThemeBuilder
+			},
+			{
+				id: "editorThemeBuilder", //$NON-NLS-0$
+				textContent: 'Editor Theme', // messages["Themes"],
+				show: this.showEditorThemeBuilder
+			},
+			{
+				id: "plugins", //$NON-NLS-0$
+				textContent: messages["Plugins"],
+				show: this.showPlugins
+			}];
+		this.settingsCategories.forEach(function(item) {
+			item.show = item.show.bind(this, item.id);
+		}.bind(this));
 
-		postMixInProperties: function() {
-			// Add extension categories
-			this.settingsRegistry.getCategories().sort().forEach(function(category, i) {
-				this.settingsCategories.push({
-					id: category,
-					textContent: messages[category] || category,
-					show: this.showPluginSettings.bind(this, category)
-				});
-			}.bind(this));
-		},
+		// Add extension categories
+		this.settingsRegistry.getCategories().sort().forEach(function(category, i) {
+			this.settingsCategories.push({
+				id: category,
+				textContent: messages[category] || category,
+				show: this.showPluginSettings.bind(this, category)
+			});
+		}.bind(this));
+	}
+	objects.inherit(SettingsContainer, SplitSelectionLayout);
+	objects.mixin(SettingsContainer.prototype, {
+		show: function() {
 
-		postCreate: function() {
 			this.itemToIndexMap = {};
-			this.toolbar = dojo.byId( this.pageActions );
+			this.toolbar = lib.node( this.pageActions );
 			this.manageDefaultData(this.initialSettings);
 			// hack/workaround.  We may still be initializing the settings asynchronously in manageDefaultData, so we do not want
 			// to build the UI until there are settings to be found there.
-			window.setTimeout(dojo.hitch(this, function() {
+			window.setTimeout(function() {
 				this.drawUserInterface(this.initialSettings);
 				this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
-			}), 100);
-			dojo.subscribe("/dojo/hashchange", this, "processHash"); //$NON-NLS-1$ //$NON-NLS-0$
+			}.bind(this), 100);
+			window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
+			
 			mGlobalCommands.setPageTarget({task: 'Settings'});
 		},
 		
@@ -96,13 +103,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 				
 			} );
 			
-			window.setTimeout(dojo.hitch(this, function() {this.commandService.processURL(window.location.href);}), 0);
+			window.setTimeout(function() {this.commandService.processURL(window.location.href);}.bind(this), 0);
 		},
 		
 		displaySettings: function(id) {
 			var settingsIndex = this.itemToIndexMap[id];
 
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			var category = this.initialSettings[settingsIndex].category;
 			
@@ -162,7 +169,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 		
 			this.themeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: containerTheme });
 			
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			var themeNode = dojo.create( 'div', null, this.table );
 
@@ -183,11 +190,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 		
 			this.editorThemeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
 			
-			var command = { name:'Import', tip:'Import a theme', id:0, callback: dojo.hitch( editorTheme, 'importTheme' ) };
+			var command = { name:'Import', tip:'Import a theme', id:0, callback: editorTheme.importTheme.bind(editorTheme) };
 			
 			this.editorThemeWidget.addAdditionalCommand( command );
 			
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			var themeNode = dojo.create( 'div', null, this.table );
 
@@ -202,7 +209,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 
 			this.selectCategory(id);
 
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			if (this.userWidget) {
 				this.userWidget.destroyRecursive(true);
@@ -226,7 +233,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 		},
 		
 		initPlugins: function(id){
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			if (this.pluginWidget) {
 				this.pluginWidget.destroyRecursive(true);
@@ -256,7 +263,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 				return a.getPid().localeCompare(b.getPid());
 			}
 
-			dojo.empty(this.table);
+			lib.empty(this.table);
 
 			if (this.pluginSettingsWidget) {
 				this.pluginSettingsWidget.destroy();
@@ -312,7 +319,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 
 			dojo.addClass(this.selectedCategory, "navbar-item-selected"); //$NON-NLS-0$
 			dojo.attr(this.selectedCategory, "aria-selected", "true"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.attr(this.mainNode, "aria-labelledby", id); //$NON-NLS-0$
+			dojo.attr(this.contentNode, "aria-labelledby", id); //$NON-NLS-0$
 			this.selectedCategory.tabIndex = 0;
 			this.selectedCategory.focus();
 			
@@ -348,7 +355,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 			category.tabindex = -1;
 			category["aria-selected"] = "false"; //$NON-NLS-1$ //$NON-NLS-0$
 			category.onclick = category.show;
-			this.inherited(arguments);
+			superPrototype.addCategory.apply(this, arguments);
 		},
 
 		addCategories: function() {
@@ -360,17 +367,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 
 		drawUserInterface: function(settings) {
 
-			this.inherited(arguments);
+			superPrototype.drawUserInterface.apply(this, arguments);
 
 			this.addCategories();
 
 			this.processHash();
 
-			/* Adjusting width of mainNode - the css class is shared 
+			/* Adjusting width of contentNode - the css class is shared 
 			   so tailoring it for the preference apps */
 
-			dojo.style(this.mainNode, "maxWidth", "700px"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.style(this.mainNode, "minWidth", "500px"); //$NON-NLS-1$ //$NON-NLS-0$
+//			dojo.style(this.contentNode, "maxWidth", "800px"); //$NON-NLS-1$ //$NON-NLS-0$
+//			dojo.style(this.contentNode, "minWidth", "500px"); //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		handleError: function( error ){
@@ -445,4 +452,5 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 
 		initialSettings: []
 	});
+	return SettingsContainer;
 });
