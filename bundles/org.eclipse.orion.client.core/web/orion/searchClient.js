@@ -204,7 +204,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 						return true;
 					}
 					var contentType = contentTypeService.getFilenameContentType(fileName);
-					if(contentType && contentType['extends'] === "text/plain"){
+					if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain")){
 						return true;
 					}
 					return false;
