@@ -14,12 +14,10 @@
 /* This SettingsContainer widget is a container with a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/objects'
-		], function(messages, require, lib, objects) {
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/objects'], function(messages, require, lib, objects) {
 	/**
 	 * @name orion.widgets.settings.SplitSelectionLayout
 	 * @class
-	 * @param {Object} options.initialSettings
 	 * @param {Object} options.pageActions
 	 * @param {DomNode} selectionNode The parent node to use for display the categories.
 	 * @param {DomNode} contentNode The parent node to use for display the selected category's content.
@@ -53,8 +51,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 		 */
 		show: function() {
 			this.itemToIndexMap = {};
-			this.manageDefaultData(this.initialSettings);
-			this.drawUserInterface(this.initialSettings);
+			this.drawUserInterface();
 		},
 
 		// The knowledge that "pageActions" is the toolbar is something only "page glue" code should know.
@@ -67,21 +64,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (this.toolbar) {
 				lib.empty(this.toolbar);
 			}
-		},
-
-		displaySettings: function(id) {
-			var settingsIndex = this.itemToIndexMap[id];
-
-			lib.empty(this.table);
-
-			var category = this.initialSettings[settingsIndex].category;
-
-			var h1 = document.createElement("h1");
-			h1.id = category;
-			h1.textContent = category;
-			this.table.appendChild(h1);
-
-			// Extend here for adding section pages of your choice
 		},
 
 		/**
@@ -132,35 +114,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 		showSettings: function(id) {
 			this.selectCategory(id);
 			this.updateToolbar(id);
-			this.displaySettings(id);
 		},
 		
 		
-		drawUserInterface: function(settings) {
+		drawUserInterface: function() {
 			lib.empty(this.navbar);
 
-			for (var count = 0; count < settings.length; count++) {
-				var itemId = settings[count].category.replace(/\s/g, "").toLowerCase();
-				var item = {
-					id: itemId,
-					show: this.showSettings.bind(itemId)
-				};
-				item.textContent = settings[count].category;
-
-				this.addCategory(item, count);
-			}
-			
-			var that = this;
+			var that = this, click;
 			this.navbar.addEventListener('keypress', function(evt) {
 				if (evt.keyCode === lib.keys.LEFT || evt.keyCode === lib.KEY.UP) {
 					if (that.selectedCategory.previousSibling) {
-						var click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+						click = document.createEvent("MouseEvents"); //$NON-NLS-0$
 						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
 						that.selectedCategory.previousSibling.dispatchEvent(click);
 					}
 				} else if (evt.keyCode === lib.KEY.RIGHT || evt.keyCode === lib.KEY.DOWN) {
 					if (that.selectedCategory.nextSibling) {
-						var click = document.createEvent("MouseEvents"); //$NON-NLS-0$
+						click = document.createEvent("MouseEvents"); //$NON-NLS-0$
 						click.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null); //$NON-NLS-0$
 						that.selectedCategory.nextSibling.dispatchEvent(click);
 					}
