@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global window define document */
+/*jslint regexp:false*/
 
 define(['require'], function(require) {
 

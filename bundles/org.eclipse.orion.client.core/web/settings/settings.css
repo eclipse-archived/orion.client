@@ -49,25 +49,16 @@ button {
 	font-weight: bold;
 }
 
+.settingsSplitLayout {
+	left: 170px;
+}
+
 .categories {
-	background: #EDEDED;
+	/*background: #EDEDED;*/
 }
 
-#content-title {
-	font-size: 13px;
-	font-weight: bold;
-	color: #222;
-	margin: 0;
-	padding-bottom: 14px;
-	padding-top: 13px;
-	margin-right: 16px;
-	text-align: right;
-}
-
-#categories>ul {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
+.toolbarTarget:focus {
+	outline: none;
 }
 
 .navbar {
@@ -104,10 +95,9 @@ ul,menu,dir {
 	color: black;
 }
 
-/* Experimenting with full width */
-
 .settings {
-	min-width:800px;
+	min-width: 500px;
+	max-width: 800px;
 	/* max-width:1000px; */
 	padding-left: 20px;
 	/* padding-right: 40px; */

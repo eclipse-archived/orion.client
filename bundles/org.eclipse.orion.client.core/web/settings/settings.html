@@ -17,15 +17,19 @@
 		</script>
 	</head>
 	
-	<body id="orion-settings" style="height: 100%;" class="claro orionPage">
+	<body id="orion-settings" style="height: 100%;" class="orionPage">
 		<div class="content-fixedHeight">
-			<div class="fixedToolbarHolder mainpane mainPanelLayout">
-				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
-				<div id="mainNode" class="toolbarTarget">
-					<div id="selectionAgent" class="dijitManagesLayout settings"></div>
-				</div>
+			<div id="categoriesContainer" class="auxpane sidePanelLayout hasSplit">
+			</div>
+			<div class="split splitLayout settingsSplitLayout"></div>
+			<div id="rightPane" class="mainpane mainPanelLayout hasSplit">
+				<div class="fixedToolbarHolder">
+					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
+					<div class="toolbarTarget" tabindex="0" id="settings">
+					</div>				
 			</div>
 		</div>
 		<div class="footer-fixed-bottom footer" id="footer"></div>
-	</body>	
+		</div>
+	</body>
 </html>
