@@ -161,11 +161,15 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
 		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions)  {
+			var searchOn = useRoot ? this._searchRootLocation: this._searchLocation;
+			if(!searchOn){
+				searchOn = this._fileService.fileServiceRootURL();
+			}
 			if (nameSearch) {
 				//assume implicit trailing wildcard if there isn't one already
 				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
 				return {
-					resource: useRoot ? this._searchRootLocation: this._searchLocation,
+					resource: searchOn,
 					sort: "NameLower asc",
 					rows: 100,
 					start: 0,
@@ -174,7 +178,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				};
 			}
 			return {
-				resource: useRoot ? this._searchRootLocation: this._searchLocation,
+				resource: searchOn,
 				sort: "Path asc",
 				rows: 40,
 				start: 0,
