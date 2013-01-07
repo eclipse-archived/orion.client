@@ -20,7 +20,7 @@ var statik = connect['static'];
  */
 exports = module.exports = function(options) {
 	options = options || {};
-	options.maxAge = (1440 * 60000); // 24 hours
+	options.maxAge = options.dev ? 0 : (1440 * 60000); // 24 hours
 	options.hidden = true;
 	var orionClientRoot = options.orionClientRoot;
 	if (!orionClientRoot) { throw new Error('orion-static root path required'); }
