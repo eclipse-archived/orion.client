@@ -11,11 +11,17 @@
 
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/AddRemoteDialog', 'orion/git/widgets/GitCredentialsDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/ReviewRequestDialog', 
-        'orion/git/widgets/ContentDialog', 'orion/git/widgets/CommitDialog'], 
-        function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage) {
+define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
+        'orion/git/widgets/ConfirmPushDialog', 
+        'orion/git/widgets/CloneGitRepositoryDialog', 
+        'orion/git/widgets/GitCredentialsDialog', 
+        'orion/git/widgets/RemotePrompterDialog', 
+        'orion/git/widgets/ApplyPatchDialog', 
+        'orion/git/widgets/OpenCommitDialog', 
+        'orion/git/widgets/ReviewRequestDialog', 
+        'orion/git/widgets/ContentDialog', 
+        'orion/git/widgets/CommitDialog'], 
+        function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -661,18 +667,9 @@ var exports = {};
 					remoteLocation = item.Location;
 				}
 				
-				if (data.parameters.valueFor("name") && data.parameters.valueFor("url") && !data.parameters.optionsRequested) { //$NON-NLS-1$ //$NON-NLS-0$
+				if (data.parameters.valueFor("name") && data.parameters.valueFor("url")) { //$NON-NLS-1$ //$NON-NLS-0$
 					createRemoteFunction(remoteLocation, data.parameters.valueFor("name"), data.parameters.valueFor("url")); //$NON-NLS-1$ //$NON-NLS-0$
-				} else {
-					var dialog = new orion.git.widgets.AddRemoteDialog({
-						func : function(remote, remoteURI){
-							createRemoteFunction(remoteLocation, remote, remoteURI);
-						}
-					});
-					dialog.startup();
-					dialog.show();
-					
-				}	
+				}
 			},
 			visibleWhen: function(item) {
 				return (item.GroupNode && item.Name === "Remotes") ||  (item.Type === "Clone" && explorer.parentId === "artifacts"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -1532,7 +1529,7 @@ var exports = {};
 										if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
 											var dialog2 = dialog;
 											
-											dialog = new orion.git.widgets.ConfirmPushDialog({
+											dialog = new mConfirmPush.ConfirmPushDialog({
 												title: messages["Choose Branch"],
 												serviceRegistry: serviceRegistry,
 												gitClient: gitService,
@@ -1545,7 +1542,6 @@ var exports = {};
 											});
 										}
 										
-										dialog.startup();
 										dialog.show();
 									}
 								);
