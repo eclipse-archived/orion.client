@@ -8,48 +8,59 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
-/*jslint browser:true*/
+/*global window console define */
+/*jslint browser:true sub:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/webui/littlelib', 'orion/objects', 'orion/i18nUtil',
+		'orion/widgets/settings/Subsection', 'profile/UsersService', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledCommand'
+		], function(messages, require, mCommands, mSection, GitPreferenceStorage, lib, objects, i18nUtil, Subsection, UsersService, LabeledTextfield, LabeledCheckbox, LabeledCommand) {
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section', 'orion/git/gitPreferenceStorage', 'orion/widgets/settings/LabeledTextfield', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledCommand', 'orion/widgets/settings/LabeledToggle', 'profile/UsersService', 'orion/widgets/settings/Section', 'dijit/_Widget', 'dijit/_Templated' ], function(messages, require, dojo, dijit, mCommands, mSection, GitPreferenceStorage) {
-
-	dojo.declare("orion.widgets.settings.UserSettings", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
-	
-		// templateString: '<input type="text" name="myname" data-dojo-attach-point="textfield" data-dojo-attach-event="onchange:change"/>',
-		
+	function UserSettings(options, node) {
+		objects.mixin(this, options);
+		this.node = node;
+	}
+	objects.mixin(UserSettings.prototype, {
 		dispatch: true,
-		
-		templateString: '<div>' +  //$NON-NLS-0$
-							'<div data-dojo-attach-point="table">' +  //$NON-NLS-0$
-								'<div class="sectionWrapper toolComposite">' +
-									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['User Profile']+'</div>' + 
-									'<div id="userCommands" class="layoutRight sectionActions"></div>' +
-								'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-								'<div data-dojo-attach-point="sections">' + //$NON-NLS-0$
-								
-								'</sections>' + //$NON-NLS-0$
-								'<div></div>' +
-								
-							'</div>' + //$NON-NLS-0$
-							
-							'<div data-dojo-attach-point="gitTable">' +  //$NON-NLS-0$
-								'<div class="sectionWrapper toolComposite">' +
-									'<div class="sectionAnchor sectionTitle layoutLeft">'+messages['Git Credentials Storage']+'</div>' + 
-									'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
-								'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
-								'<div data-dojo-attach-point="gitSections">' + //$NON-NLS-0$
-								
-								'</sections>' + //$NON-NLS-0$
-								'<div></div>' +
-								
-							'</div>' + //$NON-NLS-0$
-							
-							'<div data-dojo-attach-point="linkedSection"></div>' +
-						'</div>', //$NON-NLS-0$
-						
+
+		// TODO these should be real Orion sections, not fake DIVs
+		templateString: '' +  //$NON-NLS-0$
+				'<div>' +  //$NON-NLS-0$
+					'<div class="sectionWrapper toolComposite">' +
+						'<div class="sectionAnchor sectionTitle layoutLeft">${User Profile}</div>' + 
+						'<div id="userCommands" class="layoutRight sectionActions"></div>' +
+					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
+					'<div class="sections">' + //$NON-NLS-0$
+					
+					'</div>' + //$NON-NLS-0$
+					'<div></div>' +
+					
+				'</div>' + //$NON-NLS-0$
+				
+				'<div>' +  //$NON-NLS-0$
+					'<div class="sectionWrapper toolComposite">' +
+						'<div class="sectionAnchor sectionTitle layoutLeft">${Git Credentials Storage}</div>' + 
+						'<div id="gitCommands" class="layoutRight sectionActions"></div>' +
+					'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
+					'<div class="gitSections">' + //$NON-NLS-0$
+					
+					'</div>' + //$NON-NLS-0$
+					'<div></div>' +
+					
+				'</div>' + //$NON-NLS-0$
+				
+				'<div class="linkedSection"></div>',
+
+		createElements: function() {
+			this.node.innerHTML = this.templateString;
+			lib.processTextNodes(this.node, messages);
+			
+			this.sections = lib.$('.sections', this.node);
+			this.gitSections = lib.$('.gitSections', this.node);
+			this.linkedSection = lib.$('.linkedSection', this.node);
+			
+			this.createSections();
+		},
+
 		setHash: function(iframe, hash){
 			if(iframe.src.indexOf("#")>0){ //$NON-NLS-0$
 				iframe.src = iframe.src.substr(0, iframe.src.indexOf("#")) + "#" + hash; //$NON-NLS-1$ //$NON-NLS-0$
@@ -68,59 +79,49 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			);
 		},
 		
-		postCreate: function(){
-			
-			this.inherited( arguments );
+		createSections: function(){
 			
 			/* - account ----------------------------------------------------- */
-			
-			this.accountFields = [];
-			
-			this.accountFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'} ) ); //$NON-NLS-1$
-			this.accountFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Full Name']} ) );
-			this.accountFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Email Address']} ) );
-			
-			var accountSection = new orion.widgets.settings.Section( {sectionName:messages['Account'], container: this.sections, sections: this.accountFields } );
-			
-			accountSection.startup();
-			
+			this.accountFields = [
+				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'}),
+				new LabeledTextfield( {fieldlabel:messages['Full Name']}),
+				new LabeledTextfield( {fieldlabel:messages['Email Address']})
+			];
+			var accountSubsection = new Subsection( {sectionName: messages['Account'], parentNode: this.sections, children: this.accountFields} );
+			accountSubsection.show();
+
 			/* - password ---------------------------------------------------- */
-			
-			this.passwordFields = [];
-			
-			this.passwordFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password'} ) ); //$NON-NLS-1$
-			this.passwordFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password'} ) ); //$NON-NLS-1$
-			this.passwordFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password'} ) ); //$NON-NLS-1$
-			
-			var passwordSection = new orion.widgets.settings.Section( {sectionName:messages['Password'], container: this.sections, sections: this.passwordFields } );
-			
+			this.passwordFields = [
+				new LabeledTextfield( {fieldlabel:messages['Current Password'], inputType:'password'} ), //$NON-NLS-1$
+				new LabeledTextfield( {fieldlabel:messages['New Password'], inputType:'password'} ), //$NON-NLS-1$
+				new LabeledTextfield( {fieldlabel:messages['Verify Password'], inputType:'password'} ) //$NON-NLS-1$
+			];
+			var passwordSection = new Subsection( {sectionName:messages['Password'], parentNode: this.sections, children: this.passwordFields } );
+			passwordSection.show();
+
 			/* - git --------------------------------------------------------- */
-			
-			this.gitFields = [];
-			
-			this.gitFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Git Email Address']} ) );
-			this.gitFields.push( new orion.widgets.settings.LabeledTextfield( {fieldlabel:messages['Git Username']} ) );
-			
-			var gitSection = new orion.widgets.settings.Section( {sectionName:messages["Git Config"], container: this.sections, sections: this.gitFields } );
+			this.gitFields = [
+				new LabeledTextfield( {fieldlabel:messages['Git Email Address']} ),
+				new LabeledTextfield( {fieldlabel:messages['Git Username']} )
+			];
+			var gitSection = new Subsection( {sectionName:messages["Git Config"], parentNode: this.sections, children: this.gitFields } );
+			gitSection.show();
 			
 			var updateCommand = new mCommands.Command({
 				name: messages["Update"],
 				tooltip: messages["Update Profile Settings"],
 				id: "orion.updateprofile", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					this.update(data.items);
-				})
-			
+				}.bind(this)
 			});
 			
 			this.commandService.addCommand(updateCommand);
 			this.commandService.registerCommandContribution('profileCommands', "orion.updateprofile", 3); //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('profileCommands', dojo.byId( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+			this.commandService.renderCommands('profileCommands', lib.node( 'userCommands' ), this, this, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 			
 			//--------- git credentials -------------------------------
-			this.gitCredentialsFields = [];
-			
-			this.gitCredentialsFields.push( new orion.widgets.settings.LabeledCheckbox( {fieldlabel:messages["Enable Storage"]} ) );
+			this.gitCredentialsFields = [ new LabeledCheckbox( {fieldlabel:messages["Enable Storage"]} ) ];
 			var gitCredentialsSection;
 			var that = this;
 			
@@ -137,7 +138,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 					var gitPreferenceStorage = new GitPreferenceStorage(that.registry);
 					gitPreferenceStorage.remove(repository).then(
 						function(){
-							messageService.setProgressResult(dojo.string.substitute(messages["Deleted git credentials for ${0}"], [repository]));
+							messageService.setProgressResult(i18nUtil.formatMessage(messages["Deleted git credentials for ${0}"], [repository]));
 							that.gitCredentialsFields[keyIndex+1].destroy();
 						}
 					);
@@ -154,26 +155,27 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			gitPreferenceStorage.getRepositories().then(
 				function(repositories){
 					for(var i=0; i<repositories.length; ++i){
-						var labeledCommand = new orion.widgets.settings.LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
+						var labeledCommand = new LabeledCommand( {keyIndex: i, fieldlabel: repositories[i], commandService: that.commandService, scopeId: "repositoryItemCommands"} );
 						that.gitCredentialsFields.push(labeledCommand);
 					}
 					
-					gitCredentialsSection = new orion.widgets.settings.Section( {sectionName:"", container: that.gitSections, sections: that.gitCredentialsFields} );
+					gitCredentialsSection = new Subsection( {sectionName:"", parentNode: that.gitSections, children: that.gitCredentialsFields} );
+					gitCredentialsSection.show();
 			
 					var updateGitCredentialsCommand = new mCommands.Command({
 						name: messages["Update"],
 						tooltip: messages["Update Git Credentials"],
 						id: "orion.updateGitCredentials", //$NON-NLS-0$
-						callback: dojo.hitch(that, function(data){
+						callback: function(data){
 							that.updateGitCredentials(data.items);
-						})
+						}.bind(that)
 					
 					});
 					
 					that.commandService.addCommand(updateGitCredentialsCommand);
 					that.commandService.registerCommandContribution('gitProfileCommands', "orion.updateGitCredentials", 2); //$NON-NLS-1$ //$NON-NLS-0$
 					
-					that.commandService.renderCommands('gitProfileCommands', dojo.byId( 'gitCommands' ), that, that, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
+					that.commandService.renderCommands('gitProfileCommands', lib.node( 'gitCommands' ), that, that, "button"); //$NON-NLS-1$ //$NON-NLS-0$		
 					
 				}
 			);
@@ -188,12 +190,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 							slideout: true
 			});
 			
-			//var desc = { src: "../mixlogin/manageopenids", style: "border: 0px; width: 500px" };
-			var desc = { src: "../mixloginstatic/manageOpenids.html", style: "border: 0px; width: 500px" };
 			
-			this.iframe = dojo.create("iframe", desc, dojo.byId( 'iFrameContent' ) ); //$NON-NLS-0$
-			
-			this.startUp();
+			var iframe = this.iframe = document.createElement("iframe"); //$NON-NLS-0$
+			iframe.src = "../mixloginstatic/manageOpenids.html";
+			iframe.style.border = "0";
+			iframe.style.width = "500px";
+			lib.node( 'iFrameContent' ).appendChild(iframe); //$NON-NLS-0$
 		},
 		
 		confirmOpenId: function(openid){
@@ -264,12 +266,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 							
 							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
 								messageService.setProgressResult( messages['User profile data successfully updated.'] );
-								
-								if( userdata.Name ){
-									var userMenu = dijit.byId( 'logins' ); //$NON-NLS-0$
-									//userMenu.set( 'label', userdata.Name  ); //$NON-NLS-0$
-									userMenu.containerNode.textContent = userdata.Name;
-								}	
+
+								// TODO: don't reach into User Menu internals for this. Should dispatch a service event instead, etc.
+//								if( userdata.Name ){
+//									var userMenu = lib.node( 'userTrigger' ); //$NON-NLS-0$
+//									if (userMenu) {
+//										userMenu.replaceChild(document.createTextNode(userdata.Name), userMenu.firstChild);
+//									}
+//								}
 							}, function(error){
 								messageService.setProgressResult(error);
 							});
@@ -301,7 +305,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			}
 		},
 		
-		startUp:function(){
+		show:function(){
+			this.createElements();
 			
 			this.userService = this.registry.getService("orion.core.user"); //$NON-NLS-0$
 			
@@ -345,7 +350,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 			// git authentication startup
 			this.refreshGitCredentials();
+		},
+
+		destroy: function() {
+			if (this.node) {
+				lib.empty(this.node);
+				this.node = this.sections = this.gitSections = this.linkedSection = null;
+			}
 		}
 	});
+	return UserSettings;
 });
-

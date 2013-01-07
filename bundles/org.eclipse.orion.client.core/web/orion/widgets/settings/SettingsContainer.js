@@ -11,15 +11,21 @@
 /*global window console define localStorage*/
 /*jslint browser:true sub:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
+/* This SettingsContainer widget manages a left and right side. The left is for choosing a 
    category, the right shows the resulting HTML for that category. */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/globalCommands',
-		'orion/PageUtil', 'orion/webui/littlelib', 'orion/objects', 'orion/widgets/themes/ThemeBuilder', 'orion/settings/ui/PluginSettings', 'orion/URITemplate', 
-		'orion/widgets/themes/editor/ThemeData', 'orion/widgets/themes/container/ThemeData', 'orion/widgets/settings/SplitSelectionLayout',
-		'dijit/TooltipDialog', 'orion/widgets/plugin/PluginList',
-		'orion/widgets/settings/UserSettings', 'orion/widgets/settings/InputBuilder'],
-		function(messages, require, dojo, dijit, mGlobalCommands, PageUtil, lib, objects, mThemeBuilder, SettingsList, URITemplate, editorThemeData, containerThemeData, SplitSelectionLayout) {
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
+		'orion/PageUtil', 'orion/webui/littlelib', 'orion/objects', 'orion/URITemplate', 
+		'orion/widgets/themes/ThemeBuilder', 
+		'orion/settings/ui/PluginSettings', 
+		'orion/widgets/themes/editor/ThemeData', 
+		'orion/widgets/themes/container/ThemeData', 
+		'orion/widgets/settings/SplitSelectionLayout',
+		'orion/widgets/plugin/PluginList',
+		'orion/widgets/settings/UserSettings',
+		'orion/widgets/settings/InputBuilder'
+		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
+			mThemeBuilder, SettingsList, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, InputBuilder) {
 
 	/**
 	 * @param {Object} options
@@ -166,7 +172,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 			lib.empty(this.table);
 
 			if (this.userWidget) {
-				this.userWidget.destroyRecursive(true);
+				this.userWidget.destroy();
 			}
 
 			this.updateToolbar(id);
@@ -174,7 +180,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 			var userNode = document.createElement('div'); //$NON-NLS-0$
 			this.table.appendChild(userNode);
 
-			this.userWidget = new orion.widgets.settings.UserSettings({
+			this.userWidget = new UserSettings({
 				registry: this.registry,
 				settings: this.settingsCore,
 				preferences: this.preferences,
@@ -184,7 +190,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/g
 				userClient: this.userClient
 			}, userNode);
 			
-			this.userWidget.startUp();
+			this.userWidget.show();
 		},
 		
 		initPlugins: function(id){
