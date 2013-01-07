@@ -15,7 +15,7 @@
  * @class This class contains static utility methods.
  * @name orion.util
  */
-define(['i18n!git/nls/gitmessages', 'dojo', 'dijit', 'dojo/hash', 'dijit/form/ValidationTextBox'], function(messages, dojo, dijit) {
+define(['i18n!git/nls/gitmessages'], function(messages) {
                 
 	var interestedUnstagedGroup = ["Missing","Modified","Untracked","Conflicting"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var interestedStagedGroup = ["Added", "Changed","Removed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
