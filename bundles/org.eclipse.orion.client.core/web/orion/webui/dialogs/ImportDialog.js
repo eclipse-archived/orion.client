@@ -33,7 +33,8 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 					'<div class="tipInstruction">${or if you prefer}</div>' +  //$NON-NLS-0$
 				'</div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
-		'<div>' + //$NON-NLS-0$
+		'</div>' + //$NON-NLS-0$
+		'<div class="layoutBlock layoutRight"><input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" /><span id="uploadButton" role="button" class="commandButton" tabindex="0">${Upload}</span></div>' + //$NON-NLS-0$
 	'</div>'; //$NON-NLS-0$
 	
 	ImportDialog.prototype._init = function(options) {
@@ -50,6 +51,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.$uploadContainer.addEventListener("dragover", this.dragOver.bind(this), false); //$NON-NLS-0$
 		this.$uploadContainer.addEventListener("dragleave", this.dragLeave.bind(this), false); //$NON-NLS-0$
 		this.$uploadContainer.addEventListener("drop", this.drop.bind(this), false); //$NON-NLS-0$
+		this.$uploadButton.addEventListener("click", this.uploadSelected.bind(this), false); //$NON-NLS-0$
 	};
 
 	ImportDialog.prototype.handleReadyState = function(state){	
@@ -59,8 +61,8 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		}
 	};
 
-	/* This upload works for the drag and dropped files */
-	ImportDialog.prototype.uploadDroppedFiles = function(file, unzip) {
+	ImportDialog.prototype.uploadFile = function(file) {
+		var unzip = this.$unzipCheckbox.checked && (file.name.indexOf(".zip") === file.name.length-4);
 		this.req = new XMLHttpRequest();
 		this.req.open('post', this._importLocation, true); //$NON-NLS-0$
 		this.req.setRequestHeader("X-Requested-With", "XMLHttpRequest"); //$NON-NLS-1$ //$NON-NLS-0$
@@ -72,13 +74,16 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.req.onreadystatechange = this.handleReadyState.bind(this);
 		this.req.send(file);
 	};
+	
+	// get selected file element
+	ImportDialog.prototype.uploadSelected = function(evt) {
+		if (this.$selectedFile.files && this.$selectedFile.files.length > 0) {
+			this.uploadFile(this.$selectedFile.files[0]);
+	    }
 
-	ImportDialog.prototype.handleFiles = function(files){
-		for( var i=0; i< files.length; i++ ){
-			this.uploadDroppedFiles(files[i], this.$unzipCheckbox.checked && (files[i].name.indexOf(".zip") === files[i].name.length-4)); //$NON-NLS-0$)
-		}
 	};
 
+	// Select File via drag
 	ImportDialog.prototype.dragEnter = function(evt) {
 		lib.stop(evt);
 	};
@@ -93,14 +98,14 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 
 	ImportDialog.prototype.drop = function(evt) {
 		lib.stop(evt);
- 
 		var files = evt.dataTransfer.files;
-		var count = files.length;
- 
-		if( count > 0 ){
-			this.handleFiles(files);
+		if (files.length && files.length > 0 ){
+			for(var i=0; i< files.length; i++){
+				this.uploadFile(files[i]); //$NON-NLS-0$)
+			}
 		}
 	};
+	
 
 	ImportDialog.prototype.constructor = ImportDialog;
 	//return the module exports

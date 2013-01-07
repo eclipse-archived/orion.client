@@ -66,7 +66,8 @@ define(['require'], function(require) {
 		if (node.nodeType === 3) { // TEXT_NODE
 			var matches = variableRegEx.exec(node.nodeValue);
 			if (matches && matches.length > 1) {
-				node.parentNode.replaceChild(document.createTextNode(messages[matches[1]]), node);
+				var replaceText = messages[matches[1]] || matches[1];
+				node.parentNode.replaceChild(document.createTextNode(replaceText), node);
 			}
 		}
 		if (node.hasChildNodes()) {
