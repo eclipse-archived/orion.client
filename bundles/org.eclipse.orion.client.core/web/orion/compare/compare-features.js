@@ -166,7 +166,8 @@ orion.TwoWayCompareUIFactory = (function() {
 			this.destroy();
 			var leftB = this._createLeftBorder();
 			var rightB = this._createRightBorder();
-			var styleStr = mCompareUtils.getDijitSizeStyle(this._parentDivID);
+			var marginBox = dojo.marginBox(this._parentDivID);
+			var styleStr = "height: " + marginBox.h + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
 			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
 		
 			topWidget.placeAt(this._parentDivID);
@@ -178,7 +179,10 @@ orion.TwoWayCompareUIFactory = (function() {
 		},
 		
 		destroy: function(){
-			mCompareUtils.destroyDijit(this._topWidgetId);
+			var widget = dijit.byId(this._topWidgetId);
+			if(widget){
+				widget.destroyRecursive();
+			}
 		},
 		
 		getEditorParentDivId: function(left){

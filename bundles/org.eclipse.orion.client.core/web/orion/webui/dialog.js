@@ -15,7 +15,26 @@
 define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
 		function(messages, require, lib) {
 	/**
-	 * Usage: Not instantiated by clients.  The prototype is used elsewhere.
+	 * Dialog is used to implement common dialog behavior in Orion.
+	 * Clients use the Dialog prototype and implement the following behavior:
+	 *    1.  Ensure that the HTML template for the dialog content is defined in the prototype TEMPLATE variable
+	 *        prior to calling the _initialize() function. Set the following fields in the dialog prior to calling the 
+	 *        _initialize() function if applicable.
+	 *
+	 *        messages - If i18n message bindings are used in the template, set the messages field to the messages object that
+	 *            should be used to bind strings.
+	 *        title - If the dialog should display a title, set the title field.
+	 *        buttons - If the dialog should show buttons along the bottom, set an array of button objects.  Each button should
+	 *            have a text property that labels the button and a calback property that is called when the button is pushed.
+	 *        modal - Set this field to true if modal behavior is desired.
+	 * 
+	 *    2.  To hook event listeners to elements in the dialog, implement the _bindToDOM function.  DOM elements
+	 *        in the template will be bound to variable names prefixed by a '$' character.  For example, the
+	 *        element with id "myElement" can be referenced with this.$myElement
+	 *
+	 *    3.  Implement any of _beforeShowing, _afterShowing, _beforeHiding, _afterHiding to perform initialization and cleanup work.
+	 *
+	 * Usage: Not instantiated by clients.  The prototype is used by the application dialog instance.
 	 * 
 	 * @name orion.webui.Dialog
 	 */
@@ -23,6 +42,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 	}
 
 	Dialog.prototype = /** @lends orion.webui.Dialog.prototype */ {
+	
+		/* Not used by clients */
 		CONTAINERTEMPLATE:		
 		'<div class="dialog">' + //$NON-NLS-0$
 			'<div class="dialogTitle layoutBlock"><span id="title" class="dialogTitleText layoutLeft"></span><span tabindex="0" role="button" aria-label="Close" class="dialogDismiss layoutRight core-sprite-close imageSprite" id="closeDialog"></span></div>' + //$NON-NLS-0$
@@ -31,7 +52,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			'<div id="buttons" class="dialogButtons"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>', //$NON-NLS-0$
 
-		
+		/* 
+		 * Called by clients once the dialog template has been bound to the TEMPLATE variable, and any additional options (title, buttons,
+		 * messages, modal) have been set.
+		 */
 		_initialize: function() {
 			var parent = document.body;
 			this.$frameParent = parent;
@@ -79,6 +103,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			}
 		},
 		
+		/*
+		 * Internal.  Generates any specified buttons.
+		 */
 		_makeButtons: function() {
 			if (this.$buttonContainer && Array.isArray(this.buttons)) {
 				var self = this;
@@ -104,6 +131,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			}
 		},
 		
+		/*
+		 * Internal.  Makes modal behavior by immediately returning focus to the dialog when user leaves the dialog, and by
+		 * styling the background to look faded.
+		 */
 		_makeModal: function(parent) {
 			var self = this;
 			this.$frame.addEventListener("blur", function(e) { //$NON-NLS-0$
@@ -144,6 +175,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			}
 		},
 		
+		/*
+		 * Internal.  Binds any child nodes with id's to the matching field variables.
+		 */
 		_bindElements: function(node) {
 			for (var i=0; i<node.childNodes.length; i++) {
 				var child = node.childNodes[i];
@@ -154,6 +188,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			}
 		},
 		
+		/*
+		 * Internal.  Hides the dialog.  Clients should use the before and after
+		 * hooks (_beforeHiding, _afterHiding) to do any work related to hiding the dialog, such
+		 * as destroying resources.
+		 */
 		hide: function() {
 			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
 				this._beforeHiding();
@@ -168,6 +207,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			}
 		}, 
 		
+		/*
+		 * Internal.  Shows the dialog.  Clients should use the before and after
+		 * hooks (_beforeShowing, _afterShowing) to do any work related to showing the dialog,
+		 * such as setting initial focus.
+		 */
 		show: function(near) {
 			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
 				this._beforeShowing();
@@ -200,6 +244,9 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 
 		},
 		
+		/*
+		 * Internal.  Cleanup and remove dom nodes.
+		 */
 		destroy: function() {
 			if (this.modal) {
 				lib.$$array(".modalBackdrop").forEach(function(node) { //$NON-NLS-0$
