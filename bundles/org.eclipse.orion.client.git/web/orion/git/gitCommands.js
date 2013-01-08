@@ -2747,7 +2747,7 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
 				if (items.length === 1){				
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), 'Unstaging changes').unstage(items[0].indexURI, items[0].name);
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name), 'Unstaging changes');
 					progressService.createProgressMonitor(
 						deferred, //$NON-NLS-0$
 						messages['Staging changes']);
@@ -2762,7 +2762,7 @@ var exports = {};
 						paths[i] = items[i].name;
 					}
 					
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), 'Unstaging changes').unstage(data.userData.Clone.IndexLocation, paths); //$NON-NLS-0$
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths), 'Unstaging changes'); //$NON-NLS-0$
 					progressService.createProgressMonitor(
 						deferred,
 						messages['Staging changes']);
@@ -2866,7 +2866,7 @@ var exports = {};
 						}
 						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), messages["Resetting local changes"]).unstageAll(item.IndexLocation, "HARD"); //$NON-NLS-1$ //$NON-NLS-0$ 
+						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstageAll(item.IndexLocation, "HARD"), messages["Resetting local changes"]); //$NON-NLS-1$ //$NON-NLS-0$ 
 						progressService.createProgressMonitor(
 							deferred,
 							messages["Resetting local changes"]);
@@ -2911,7 +2911,7 @@ var exports = {};
 							paths[i] = items[i].name;
 						}
 						
-						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), messages['Resetting local changes']).checkoutPath(data.userData.Clone.Location, paths); //$NON-NLS-0$
+						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), messages['Resetting local changes']); //$NON-NLS-0$
 						progressService.createProgressMonitor(
 							deferred,
 							messages['Resetting local changes']);
@@ -3024,7 +3024,7 @@ var exports = {};
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			
-			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), "Rebasing git repository").doRebase(HeadLocation, "", action); //$NON-NLS-0$ 
+			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), "Rebasing git repository"); //$NON-NLS-0$ 
 			progressService.createProgressMonitor(
 				deferred,
 				action);
