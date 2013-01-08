@@ -12,17 +12,15 @@
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
-        'orion/git/widgets/ConfirmPushDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 
+        'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/GitCredentialsDialog', 
         'orion/git/widgets/ApplyPatchDialog', 
         'orion/git/widgets/OpenCommitDialog', 
-        'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/ContentDialog', 
         'orion/git/widgets/CommitDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter) {
+        		mConfirmPush, mRemotePrompter, mReviewRequest) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -1988,11 +1986,10 @@ var exports = {};
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-						var dialog = new orion.git.widgets.ReviewRequestDialog({ title : messages["Contribution Review Request"],
+						var dialog = new mReviewRequest.ReviewRequestDialog({ title : messages["Contribution Review Request"],
 						url : reviewRequestUrl,
 						func : sendNotificationFunction
 						});
-						dialog.startup();
 						dialog.show();
 					}, displayErrorOnStatus);
 				}
