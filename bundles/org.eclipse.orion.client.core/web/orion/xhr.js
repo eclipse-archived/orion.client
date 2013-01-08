@@ -130,7 +130,7 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 					var timeoutId = setTimeout(function() {
 						d.reject(makeResult(url, options, xhr, 'Timeout exceeded')); //$NON-NLS-0$
 					}, options.timeout);
-					d.then(clearTimeout.bind(timeoutId), clearTimeout.bind(timeoutId));
+					d.then(clearTimeout.bind(null, timeoutId), clearTimeout.bind(null, timeoutId));
 				}
 			}
 			Object.keys(headers).forEach(function(key) {
