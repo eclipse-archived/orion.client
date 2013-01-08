@@ -38,6 +38,61 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 	}
 	
 	/**
+	 * Escapes all characters in the string that require escaping in Lucene queries.
+	 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
+	 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+	 * @param {String} input The string to perform escaping on
+	 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
+	 * @private
+	 */
+	function _luceneEscape(input, omitWildcards) {
+		var output = "",
+		    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
+		for (var i = 0; i < input.length; i++) {
+			var c = input.charAt(i);
+			if (specialChars.indexOf(c) >= 0) {
+				output += '\\'; //$NON-NLS-0$
+			}
+			output += c;
+		}
+		return output;
+	}
+	
+	function _generateLuceneQuery(searchParams){
+		var newKeyword = _luceneEscape(searchParams.keyword, true);
+		var newSort = searchParams.sort;
+		if(searchParams.nameSearch){ //Search file name only
+			var wildcard= (/\*$/.test(searchParams.keyword) ? "" : "*"); //$NON-NLS-0$
+			newKeyword = "NameLower:" + newKeyword + wildcard;
+		} else {
+			//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
+			if(searchParams.fileType && searchParams.fileType !== "*.*"){
+				//If the search string is not empty, we just combine the file type.
+				if(newKeyword !== ""){
+					//If the search string contains white space, we should add double quato at both end. 
+					if(newKeyword.indexOf(" ") >= 0){
+						newKeyword = "\"" + newKeyword + "\"";
+					}
+					newKeyword = encodeURIComponent(newKeyword) + "+NameLower:*." + searchParams.fileType;
+				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
+					newKeyword = "NameLower:*." + searchParams.fileType;
+					newSort = newSort.replace("Path", "NameLower");
+				}
+			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
+				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
+			} else {
+				newKeyword = encodeURIComponent(newKeyword)
+			}
+		}
+		var searchLocation = searchParams.resource;
+		var relativePath = searchLocation.indexOf("/file");
+		if( relativePath > 0){//If the search location does not start with /file, then we need to make the relative path starting with /file
+			searchLocation = searchLocation.substring(relativePath);
+		}
+		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchLocation + "*";
+	}
+	
+	/**
 	 * @class Provides operations on files, folders, and projects.
 	 * @name FileServiceImpl
 	 */
@@ -55,11 +110,16 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 		 * @return A deferred that will provide the array of child objects when complete
 		 */
 		fetchChildren: function(location) {
-			if (location===this.fileBase) {
-				return this.loadWorkspace(location).then(function(jsondata) {return jsondata.Children || [];});
+			var fetchLocation = location;
+			if (fetchLocation===this.fileBase) {
+				return this.loadWorkspace(fetchLocation).then(function(jsondata) {return jsondata.Children || [];});
+			}
+			//If fetch location does not have ?depth=, then we need to add the depth parameter. Otherwise server will not return any children
+			if (fetchLocation.indexOf("?depth=") === -1) { //$NON-NLS-0$
+				fetchLocation += "?depth=1"; //$NON-NLS-0$
 			}
 			// console.log("get children");
-			return xhr("GET", location,{
+			return xhr("GET", fetchLocation,{
 				headers: {
 					"Orion-Version": "1",
 					"Content-Type": "charset=UTF-8"
@@ -478,56 +538,6 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			}.bind(this));
 		}
 	};
-	
-	/**
-	 * Escapes all characters in the string that require escaping in Lucene queries.
-	 * See http://lucene.apache.org/java/2_4_0/queryparsersyntax.html#Escaping%20Special%20Characters
-	 * The following characters need to be escaped in lucene queries: + - && || ! ( ) { } [ ] ^ " ~ * ? : \
-	 * @param {String} input The string to perform escaping on
-	 * @param {Boolean} [omitWildcards=false] If true, the * and ? characters will not be escaped.
-	 * @private
-	 */
-	function _luceneEscape(input, omitWildcards) {
-		var output = "",
-		    specialChars = "+-&|!(){}[]^\"~:\\" + (!omitWildcards ? "*?" : ""); //$NON-NLS-1$ //$NON-NLS-0$
-		for (var i = 0; i < input.length; i++) {
-			var c = input.charAt(i);
-			if (specialChars.indexOf(c) >= 0) {
-				output += '\\'; //$NON-NLS-0$
-			}
-			output += c;
-		}
-		return output;
-	}
-	
-	function _generateLuceneQuery(searchParams){
-		var newKeyword = _luceneEscape(searchParams.keyword, true);
-		var newSort = searchParams.sort;
-		if(searchParams.nameSearch){ //Search file name only
-			var wildcard= (/\*$/.test(searchParams.keyword) ? "" : "*"); //$NON-NLS-0$
-			newKeyword = "NameLower:" + newKeyword + wildcard;
-		} else {
-			//If searching on a specific file type, we want to inject the file type into the query string so that it will be passed to the search engine. 
-			if(searchParams.fileType && searchParams.fileType !== "*.*"){
-				//If the search string is not empty, we just combine the file type.
-				if(newKeyword !== ""){
-					//If the search string contains white space, we should add double quato at both end. 
-					if(newKeyword.indexOf(" ") >= 0){
-						newKeyword = "\"" + newKeyword + "\"";
-					}
-					newKeyword = encodeURIComponent(newKeyword) + "+NameLower:*." + searchParams.fileType;
-				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
-					newKeyword = "NameLower:*." + searchParams.fileType;
-					newSort = newSort.replace("Path", "NameLower");
-				}
-			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
-				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
-			} else {
-				newKeyword = encodeURIComponent(newKeyword)
-			}
-		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchParams.resource + "*";
-	}
 	
 	function _call2(method, url, headers, body) {
 		var d = new Deferred(); // create a promise

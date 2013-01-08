@@ -146,13 +146,25 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 			this._childrenLocation = locationURL;
 		},
 		getSearchLocation: function(){
-			return this._searchLocation;
+			if(this._searchLocation){
+				return this._searchLocation;
+			} else {
+				return this._fileService.fileServiceRootURL();
+			}
 		},
 		getSearchRootLocation: function(){
-			return this._searchRootLocation;
+			if(this._searchRootLocation){
+				return this._searchRootLocation;
+			} else {
+				return this._fileService.fileServiceRootURL();
+			}
 		},
 		getChildrenLocation: function(){
-			return this._childrenLocation;
+			if(this._childrenLocation){
+				return this._childrenLocation;
+			} else {
+				return this._fileService.fileServiceRootURL();
+			}
 		},
 		/**
 		 * Returns a query object for search. The return value has the propertyies of resource and parameters.
@@ -161,11 +173,12 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 		 * @param {Boolean} [useRoot] If true, do not use the location property of the searcher. Use the root url of the file system instead.
 		 */
 		createSearchParams: function(keyword, nameSearch, useRoot, advancedOptions)  {
+			var searchOn = useRoot ? this.getSearchRootLocation(): this.getSearchLocation();
 			if (nameSearch) {
 				//assume implicit trailing wildcard if there isn't one already
 				//var wildcard= (/\*$/.test(keyword) ? "" : "*"); //$NON-NLS-0$
 				return {
-					resource: useRoot ? this._searchRootLocation: this._searchLocation,
+					resource: searchOn,
 					sort: "NameLower asc",
 					rows: 100,
 					start: 0,
@@ -174,7 +187,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				};
 			}
 			return {
-				resource: useRoot ? this._searchRootLocation: this._searchLocation,
+				resource: searchOn,
 				sort: "Path asc",
 				rows: 40,
 				start: 0,
@@ -204,7 +217,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 						return true;
 					}
 					var contentType = contentTypeService.getFilenameContentType(fileName);
-					if(contentType && contentType['extends'] === "text/plain"){
+					if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain")){
 						return true;
 					}
 					return false;

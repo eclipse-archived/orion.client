@@ -138,7 +138,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		//Load file types content type provider
 		var fTypes = [ {label: messages["All types"], value: mSearchUtils.ALL_FILE_TYPE} ];
 		for(var i = 0; i < this.contentTypesCache.length; i++){
-			if(this.contentTypesCache[i]['extends'] === "text/plain"){ //$NON-NLS-0$  //$NON-NLS-0$
+			if(this.contentTypesCache[i]['extends'] === "text/plain" || this.contentTypesCache[i].id === "text/plain"){ //$NON-NLS-0$  //$NON-NLS-0$
 				for(var j = 0; j < this.contentTypesCache[i].extension.length; j++){
 					fTypes.push({label: this.contentTypesCache[i].extension[j], value: this.contentTypesCache[i].extension[j]});
 				}

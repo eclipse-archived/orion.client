@@ -53,9 +53,6 @@ define(['i18n!orion/navigate/nls/messages', "orion/Deferred", "orion/i18nUtil"],
 		}, function() {
 			return;
 		}).then(function() {
-			if (sourceLocation.indexOf("/") === 0) { //$NON-NLS-0$
-				sourceLocation += "?depth=1"; //$NON-NLS-0$
-			}
 			return _doServiceCall(sourceService, "fetchChildren", [sourceLocation]).then(function(children) { //$NON-NLS-0$
 				var results = [];
 				for(var i = 0; i < children.length; ++i) {

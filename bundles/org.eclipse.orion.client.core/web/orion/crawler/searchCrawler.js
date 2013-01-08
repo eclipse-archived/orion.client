@@ -177,7 +177,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 						results.push(_this._buildSingleSkeleton(children[i]));
 					}else {
 						var contentType = mContentTypes.getFilenameContentType(children[i].Name, _this.contentTypesCache);
-						if(contentType && contentType['extends'] === "text/plain" && _this._onFileType(contentType)){ //$NON-NLS-0$ //$NON-NLS-0$
+						if(contentType && (contentType['extends'] === "text/plain" || contentType.id === "text/plain") && _this._onFileType(contentType)){ //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
 							results.push(_this._sniffSearch(children[i]));
 						}
 					}

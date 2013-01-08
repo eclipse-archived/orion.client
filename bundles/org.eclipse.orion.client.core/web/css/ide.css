@@ -838,8 +838,14 @@ input {
 	margin: 0 8px !important;
 }
 
-.uploadBrowser{
-	left:50px;
+/* don't try to fight the poor styling and alignment of file inputs.  The browser will defeat you.  Just make it look like its own reasonable island */
+/* the real solution is to overlay a styled button on top.  http://stackoverflow.com/questions/572768/styling-an-input-type-file-button/9546968  */
+.uploadChooser{
+	vertical-align: middle;
+	margin-right: 24px;
+	margin-bottom: 4px;
+	border: 1px solid #dedede;
+    border-radius:1px;
 }
 
 .targetSelector{
