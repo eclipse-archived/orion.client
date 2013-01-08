@@ -23,6 +23,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		var that = this;
 		
 		this.title = "Git Push";
+		this.modal = true;
 		this.messages = messages;
 		this.location = options.location;
 		this.dialog2 = options.dialog;
@@ -31,16 +32,16 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog'], function(messages, d
 		this.buttons = [];
 		this.buttons.push({
 			callback: function(){
-				that.dialog2.show();
 				that.destroy();
+				that.dialog2.show();
 			}, 
 			text: 'More'}
 		);
 		
 		this.buttons.push({
 			callback: function(){
-				that.func();
 				that.destroy();
+				that.func();
 			}, 
 			text: 'OK'}
 		);
