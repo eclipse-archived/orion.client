@@ -9,6 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global exports module define setTimeout*/
+
 (function(root, factory) { // UMD
 	if (typeof define === 'function' && define.amd) {
 		define(factory);
@@ -75,6 +76,17 @@
 		};
 	}
 
+	function createCancelError(reason) {
+		var cancelError = typeof reason === "string" ? new Error(reason) : new Error();
+		if (typeof reason === "object") {
+			Object.keys(reason).forEach(function(key) {
+				cancelError[key] = reason[key];
+			});
+		}
+		cancelError.canceled = true;
+		cancelError.name = "OperationCanceled";
+		return cancelError;
+	}
 
 	/**
 	 * @name orion.Promise
@@ -105,28 +117,56 @@
 	 * <p>Because Deferred implements the {@link orion.Promise} interface, a Deferred may be used anywhere a Promise is called for.
 	 * However, in most such cases it is recommended to use the Deferred's {@link #promise} field instead, which exposes a read-only
 	 * interface to callers.</p>
-	 * @param {Function} [optOnCancel] Will be invoked if the Deferred is canceled. The <code>optOnCancel</code> function is invoked
-	 * passing the reason the Deferred was canceled (or a new <code>Error</code> if no reason was provided).
 	 */
-	function Deferred(optOnCancel) {
-		var result, state, head, tail, canceled = false,
-			_this = this;
+	function Deferred() {
+		var result, state, head, tail, _this = this;
+
+		function attach(listener) {
+			if (head) {
+				tail.next = listener;
+			} else {
+				head = listener;
+			}
+			tail = listener;
+		}
+
+		function detach(listener) {
+			if (head === listener) {
+				head = listener.next || null;
+				if (head === null) {
+					tail = null;
+				}
+				return;
+			}
+			var current = head;
+			while (current.next) {
+				if (current.next === listener) {
+					if (listener.next) {
+						current.next = listener.next;
+					} else {
+						current.next = null;
+						tail = current;
+					}
+					return;
+				}
+				current = current.next;
+			}
+		}
 
 		function notify() {
 			while (head) {
 				var listener = head;
 				head = head.next;
 				var deferred = listener.deferred;
-				var methodName = _this.isResolved() ? "resolve" : "reject"; //$NON-NLS-0$ $NON-NLS-1$
-				if (listener[methodName]) {
+				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ $NON-NLS-1$
+				if (typeof listener[methodName] === "function") {
 					try {
 						var listenerResult = listener[methodName](result);
 						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
-							listener.cancel = listenerResult.cancel;
 							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
-							continue;
+						} else {
+							deferred.resolve(listenerResult);
 						}
-						deferred.resolve(listenerResult);
 					} catch (e) {
 						deferred.reject(e);
 					}
@@ -137,7 +177,7 @@
 			head = tail = null;
 		}
 
-		function checkFulfilled(strict) {
+		function checkCompleted(strict) {
 			if (state) {
 				if (strict) {
 					throw new Error("already " + state); //$NON-NLS-0$
@@ -156,7 +196,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.reject = function(error, strict) {
-			if (!checkFulfilled(strict)) {
+			if (!checkCompleted(strict)) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
 				if (head) {
@@ -175,7 +215,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.resolve = function(value, strict) {
-			if (!checkFulfilled(strict)) {
+			if (!checkCompleted(strict)) {
 				state = "resolved"; //$NON-NLS-0$
 				result = value;
 				if (head) {
@@ -194,7 +234,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.progress = function(update, strict) {
-			if (!checkFulfilled(strict)) {
+			if (!checkCompleted(strict)) {
 				var listener = head;
 				while (listener) {
 					if (listener.progress) {
@@ -214,23 +254,8 @@
 		 * @param {Boolean} [strict]
 		 */
 		this.cancel = function(reason, strict) {
-			if (!checkFulfilled(strict)) {
-				canceled = true;
-				if (optOnCancel) {
-					reason = optOnCancel(reason) || reason;
-				}
-				reason = reason || new Error("canceled"); //$NON-NLS-0$
-				enqueue(_this.reject.bind(_this, reason));
-				return reason;
-			}
-			var listener = head;
-			while (listener) {
-				if (listener.canceling) {
-					delete listener.canceling;
-					notify();
-					return listener.cancel && listener.cancel(reason);
-				}
-				listener = listener.next;
+			if (!checkCompleted(strict)) {
+				_this.reject(createCancelError(reason));
 			}
 		};
 
@@ -240,86 +265,48 @@
 				resolve: onResolve,
 				reject: onReject,
 				progress: onProgress,
-				cancel: this.cancel,
-				deferred: new Deferred(function(reason) {
-					listener.canceling = true;
-					return listener.cancel && listener.cancel(reason);
-				})
+				deferred: new Deferred()
 			};
-			if (head) {
-				tail.next = listener;
-			} else {
-				head = listener;
-			}
-			tail = listener;
+			attach(listener);
 			if (state) {
 				enqueue(notify, true); //runAsync
 			}
-			return listener.deferred.promise;
+
+			var promise = listener.deferred.promise;
+			promise.cancel = function(reason) {
+				if (state) {
+					return;
+				}
+				detach(listener);
+				var deferred = listener.deferred;
+				if (typeof onReject === "function") { //$NON-NLS-0$
+					try {
+						var listenerResult = onReject(createCancelError(reason));
+						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
+							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
+						} else {
+							deferred.resolve(listenerResult);
+						}
+					} catch (e) {
+						deferred.reject(e);
+					}
+				} else {
+					deferred.cancel(reason);
+				}
+			};
+			return promise;
 		};
 
 		/**
-		 * Returns whether this Deferred was resolved.
-		 * @name isResolved
-		 * @methodOf orion.Deferred.prototype
-		 * @returns {Boolean} <code>true</code> if this Deferred was resolved, otherwise <code>false</code>.
-		 */
-		this.isResolved = function() {
-			return state === "resolved"; //$NON-NLS-0$
-		};
-
-		/**
-		 * Returns whether this Deferred was rejected.
-		 * @name isRejected
-		 * @methodOf orion.Deferred.prototype
-		 * @returns {Boolean} <code>true</code> if this Deferred was rejected, otherwise <code>false</code>.
-		 */
-		this.isRejected = function() {
-			return state === "rejected"; //$NON-NLS-0$
-		};
-
-		/**
-		 * Returns whether this Deferred was fulfilled. A Deferred is <dfn>fulfilled</dfn> iff it was rejected or resolved.
-		 * Thus, calling this method is equivalent to checking <code>deferred.isResolved() || deferred.isRejected()</code>.
-		 * @name isFulfilled
-		 * @methodOf orion.Deferred.prototype
-		 * @returns {Boolean} <code>true</code> if this Deferred was fulfilled, otherwise <code>false</code>.
-		 */
-		this.isFulfilled = function() {
-			return !!state;
-		};
-
-		/**
-		 * Returns whether this Deferred was canceled.
-		 * @name isCanceled
-		 * @methodOf orion.Deferred.prototype
-		 * @returns {Boolean} <code>true</code> if this Deferred was canceled, otherwise <code>false</code>.
-		 */
-		this.isCanceled = function() {
-			return canceled;
-		};
-
-		/**
-		 * The read-only promise underlying this Deferred.
+		 * The promise exposed by this Deferred.
 		 * @name promise
 		 * @fieldOf orion.Deferred.prototype
 		 * @type orion.Promise
 		 */
 		this.promise = {
 			then: this.then,
-			cancel: this.cancel,
-			isResolved: this.isResolved,
-			isRejected: this.isRejected,
-			isFulfilled: this.isFulfilled,
-			isCanceled: this.isCanceled
+			cancel: this.cancel
 		};
-
-		//for jQuery compatibility
-		this.notify = this.progress;
-		this.state = function() {
-			return state || "pending"; //$NON-NLS-0$
-		};
-		this.promise.state = this.state;
 	}
 
 	/**
@@ -343,16 +330,20 @@
 	Deferred.all = function(promises, optOnError) {
 		var count = promises.length,
 			result = [],
-			deferred = new Deferred(function(reason) {
-				promises.forEach(function(promise) {
-					if (promise.cancel) {
-						promise.cancel(reason);
-					}
-				});
+			rejected = false,
+			deferred = new Deferred();
+
+		deferred.then(null, function() {
+			rejected = true;
+			promises.forEach(function(promise) {
+				if (promise.cancel) {
+					promise.cancel();
+				}
 			});
+		});
 
 		function onResolve(i, value) {
-			if (!deferred.isFulfilled()) {
+			if (!rejected) {
 				result[i] = value;
 				if (--count === 0) {
 					deferred.resolve(result);
@@ -361,7 +352,7 @@
 		}
 
 		function onReject(i, error) {
-			if (!deferred.isFulfilled()) {
+			if (!rejected) {
 				if (optOnError) {
 					try {
 						onResolve(i, optOnError(error));
@@ -373,6 +364,7 @@
 				deferred.reject(error);
 			}
 		}
+
 		if (count === 0) {
 			deferred.resolve(result);
 		} else {

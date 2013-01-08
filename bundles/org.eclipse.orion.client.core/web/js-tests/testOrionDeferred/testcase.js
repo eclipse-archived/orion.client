@@ -111,7 +111,6 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		first.resolve();
 
 		return d.then(function() {
-			assert.ok(first.isResolved());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
@@ -133,7 +132,6 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		first.resolve();
 
 		return d.then(function() {
-			assert.ok(first.isResolved());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
@@ -158,95 +156,55 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		return d.then(function() {
 			assert.ok(false, "Expected an exception");
 		}, function() {
-			assert.ok(first.isRejected());
 			assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 		});
 	};
 
-	tests["test cancel1"] = function() {
+	tests["test cancel a"] = function() {
 		var a = new Deferred();
-		a.cancel();
-		var result = a.then(function() {
-			assert.ok(false, "Expected an exception");
+		var result = a.promise.then(function() {
+			return assert.ok(false, "Expected an exception");
 		}, function() {
-			assert.ok(a.isCanceled());
+			// expected
 		});
+		a.promise.cancel();
 		return result;
 	};
 
-	tests["test cancel2"] = function() {
+	tests["test cancel result"] = function() {
 		var a = new Deferred();
-
-		var result = a.then(function() {
-			assert.ok(false, "Expected an exception");
+		var test = a.promise.then(function() {
+			return assert.ok(false, "Expected an exception");
 		}, function() {
-			assert.ok(a.isCanceled());
-		});
-		result.cancel();
-		return result;
-	};
-
-	tests["test cancel abc"] = function() {
-		var a = new Deferred();
-		var b = new Deferred();
-		var c = new Deferred();
-
-		var result = a.then(function() {
-			return b;
-		}).then(function() {
-			return c;
-		}).then(function() {
-			assert.ok(false, "Expected an exception");
-		}, function() {
-			assert.ok(a.isCanceled());
-		});
-		result.cancel();
-		return result;
-	};
-
-	tests["test cancel abc resolved a inner"] = function() {
-		var a = new Deferred();
-		var b = new Deferred();
-		var c = new Deferred();
-
-		var result = a.then(function() {
-			return b;
-		}).then(function() {
-			return c;
-		}).then(function() {
-			assert.ok(false, "Expected an exception");
-		}, function() {
-			assert.ok(b.isCanceled());
-		});
-
-		a.resolve();
-		result.cancel();
-		return result;
-	};
-
-	tests["test cancel abc resolved a outer"] = function() {
-		var a = new Deferred();
-		var b = new Deferred();
-		var c = new Deferred();
-		var d = new Deferred();
-
-		var outer = d.then(function() {
-			var result = a.then(function() {
-				return b;
-			}).then(function() {
-				return c;
-			}).then(function() {
-				assert.ok(false, "Expected an exception");
-			}, function() {
-				assert.ok(b.isCanceled());
-			});
 			a.resolve();
-			result.cancel();
-			return result;
 		});
-		d.resolve();
-		return outer;
+		test.cancel();
+		return a.promise;
 	};
+	
+	tests["test cancel chain"] = function() {
+		var a = new Deferred();
+		
+		var test = a.promise.then(function() {
+			return assert.ok(false, "Expected an exception");
+		}, function() {
+			// expected
+		});
+		
+		var testCancel = test.cancel;
+		test.cancel = function() {
+			a.promise.cancel();
+			testCancel();
+		};
+		test.cancel();
+		return a.promise.then(function() {
+			return assert.ok(false, "Expected an exception");
+		}, function() {
+			// expected
+		});
+	};
+	
+
 
 
 
