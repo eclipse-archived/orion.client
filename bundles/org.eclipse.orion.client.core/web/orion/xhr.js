@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global console define setTimeout XMLHttpRequest*/
+/*global console define setTimeout clearTimeout, XMLHttpRequest*/
 
 /**
  * @name orion.xhr
@@ -85,7 +85,6 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 		var headers = options.headers || {};
 		var log = options.log || false;
 		var data;
-		var i;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
 			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
 		}
@@ -128,23 +127,20 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 					});
 				} else {
 					// Use our own timer
-					setTimeout(function() {
-						if (d.state() !== 'resolved' && d.state() !== 'rejected') { //$NON-NLS-0$ //$NON-NLS-1$
-							d.reject(makeResult(url, options, xhr, 'Timeout exceeded')); //$NON-NLS-0$
-						}
+					var timeoutId = setTimeout(function() {
+						d.reject(makeResult(url, options, xhr, 'Timeout exceeded')); //$NON-NLS-0$
 					}, options.timeout);
+					d.then(clearTimeout.bind(timeoutId), clearTimeout.bind(timeoutId));
 				}
 			}
-			var headerNames = Object.keys(headers);
-			for (i=0; i < headerNames.length; i++) {
-				var headerName = headerNames[i], headerValue = headers[headerName];
-				xhr.setRequestHeader(headerName, headerValue);
-			}
+			Object.keys(headers).forEach(function(key) {
+				xhr.setRequestHeader(key, headers[key]);
+			});
 			xhr.send(data);
 		} catch (e) {
 			d.reject(makeResult(url, options, xhr, e));
 		}
-		return d;
+		return d.promise;
 	}
 	return _xhr;
 });
