@@ -89,5 +89,6 @@ define({
 	"Type a keyword or wild card to search in root" : "Type a keyword or wild card to search in root",
 	"Toggle side panel" : "Toggle side panel",
 	"Open or close the side panel": "Open or close the side panel",
+	"Projects" : "Projects",
 	"Toggle Outliner" : "Toggle Outliner"
 });

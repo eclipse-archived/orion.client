@@ -64,7 +64,7 @@
 .core-sprite-none{ background-position: 0 -463px; width: 16px; height: 16px; } 
 .core-sprite-ok{ background-position: 0 -481px; width: 16px; height: 16px; } 
 .core-sprite-openarrow{ background-position: 0 -499px; width: 16px; height: 16px; } 
-.core-sprite-orion-transparent{ background-position: 0 -517px; width: 37px; height: 14px; } 
+.core-sprite-orion-transparent{ background: url(../images/orion-dark.png) no-repeat top left; width: 37px; height: 14px; } 
 .core-sprite-problem{ background-position: 0 -533px; width: 16px; height: 16px; } 
 .core-sprite-progress_running{ background-position: 0 -551px; width: 16px; height: 16px; } 
 .core-sprite-refresh{ background-position: 0 -569px; width: 16px; height: 16px; } 
@@ -93,6 +93,24 @@
    vertical-align: middle;
    display: inline-block;
    margin-top: 4px;
+   height: 16px;
+   width: 16px;
+}
+
+.core-sprite-thumbnail {
+   background: url(../images/thumbnail.png) no-repeat top left;
+   vertical-align: middle;
+   display: inline-block;
+   margin: 7px;
+   height: 16px;
+   width: 16px;
+}
+
+.core-sprite-list {
+   background: url(../images/list.png) no-repeat top left;
+   vertical-align: middle;
+   display: inline-block;
+   margin: 7px;
    height: 16px;
    width: 16px;
 }
