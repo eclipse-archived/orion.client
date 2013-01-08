@@ -274,7 +274,7 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 					cancelPromise.then(function(result) {
 						assert.ok(false);
 					}, function(error) {
-						assert.ok(cancelPromise.isCanceled());
+						// expected
 					}).then(function() {
 						return serviceRegistry.getService("test").testCancel(true);
 					}).then(function(result) {
