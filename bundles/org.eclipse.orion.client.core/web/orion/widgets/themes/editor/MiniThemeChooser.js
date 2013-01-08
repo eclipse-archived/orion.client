@@ -23,7 +23,7 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 		
 		MiniThemeChooser.prototype.template =	'<div id="themeContainer">' +
 													'<div id="pickercontainer" style="display:block;">' +
-														'<span class="settingsPanelLabel">Chosen Theme:</span>' + 
+														'<span class="settingsPanelLabel">Theme:</span>' + 
 														'<div id="themepicker"></div>' +
 													'</div>' +
 													'<div id="sizecontainer">' +
