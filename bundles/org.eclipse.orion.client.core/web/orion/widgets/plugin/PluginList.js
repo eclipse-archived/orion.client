@@ -17,7 +17,7 @@
 
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
 		'orion/widgets/plugin/PluginEntry'
-		], function(messages, require, Deferred, mCommands, mHTMLFragments, objects, lib) {
+		], function(messages, require, Deferred, mCommands, mHTMLFragments, objects, lib, PluginEntry) {
 	
 	var defaultPluginURLs = {};
 	
@@ -247,10 +247,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.pluginCount.textContent = pluginList.length;
 
 			for( var p = 0; p < pluginList.length; p++ ){
-				var pluginEntry = new orion.widgets.plugin.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
-				list.appendChild( pluginEntry.domNode );
-				pluginEntry.startup();
-			}	                
+				var pluginEntry = new PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
+				list.appendChild( pluginEntry.node );
+				pluginEntry.show();
+			}
 		},
 				
 		pluginURLFocus: function(){

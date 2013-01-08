@@ -292,10 +292,12 @@ div.page section:last-child {
 
 .plugin-list, .plugin-entry {
 	display: block;
-	outline: none;
+/*	outline: none;
 	overflow: auto;
 	position: relative;
+*/
 }
+
 
 .plugin-icon {
 	float: left;
@@ -318,13 +320,15 @@ div.page section:last-child {
 	max-width:600px;
 }
 
+/* TODO this rule should be more narrowly scoped */
 .plugin-list>*, .plugin-entry>* {
-	display: block;
 	outline: none;
+/*	display: block;
+	clear: both;
 	overflow: auto;
-	position: relative;
+	position: relative;*/
 	line-height: 20px;
-	white-space: pre;
+	/*white-space: pre;*/
 }
 
 .plugin-title {
@@ -371,6 +375,13 @@ div.page section:last-child {
 	position: relative;
 }
 
+.serviceContainer {
+	clear: left;
+	outline: none;
+	line-height:14px;
+	padding-top: 10px;
+}
+
 .serviceCount {
 	padding-left: 3px;
 	padding-right: 3px;
@@ -393,8 +404,8 @@ div.page section:last-child {
 	font-size: 0.9em;
 }
 
-.plugin-links-view {
-	padding-right: 15px;
+.plugin-link {
+	margin-right: 5px;
 }
 
 .plugin-links {
