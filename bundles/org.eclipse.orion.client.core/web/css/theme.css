@@ -196,6 +196,10 @@ a.currentLocation:hover {
 	border: 1px solid #808080;
 }
 
+.commandButton.disabled {
+	color: #cdcdcd;
+}
+
 .commandImage {
 	border: 1px solid transparent;
     border-radius: 2px;

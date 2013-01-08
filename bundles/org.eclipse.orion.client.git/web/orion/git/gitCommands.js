@@ -12,16 +12,15 @@
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
-        'orion/git/widgets/ConfirmPushDialog', 
+        'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/GitCredentialsDialog', 
-        'orion/git/widgets/RemotePrompterDialog', 
         'orion/git/widgets/ApplyPatchDialog', 
         'orion/git/widgets/OpenCommitDialog', 
-        'orion/git/widgets/ReviewRequestDialog', 
         'orion/git/widgets/ContentDialog', 
         'orion/git/widgets/CommitDialog'], 
-        function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush) {
+        function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
+        		mConfirmPush, mRemotePrompter, mReviewRequest) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -1490,7 +1489,7 @@ var exports = {};
 											return;
 										}
 									
-										var dialog = new orion.git.widgets.RemotePrompterDialog({
+										var dialog = new mRemotePrompter.RemotePrompterDialog({
 											title: messages["Choose Branch"],
 											serviceRegistry: serviceRegistry,
 											gitClient: gitService,
@@ -1694,7 +1693,7 @@ var exports = {};
 											return;
 										}
 									
-										var dialog = new orion.git.widgets.RemotePrompterDialog({
+										var dialog = new mRemotePrompter.RemotePrompterDialog({
 											title: messages["Choose Branch"],
 											serviceRegistry: serviceRegistry,
 											gitClient: gitService,
@@ -1928,71 +1927,74 @@ var exports = {};
 		
 		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
+
 		var askForReviewCommand = new mCommands.Command({
-			name: messages["Ask for review"],
-			tooltip: messages["Ask for review tooltip"],
-			imageClass: "core-sprite-tag", //$NON-NLS-0$
-			id: "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
-			parameters: notificationParameters,
-			callback: function(data) {
-				var sshCheck = function(gitUrl){
+			name : messages["Ask for review"],
+			tooltip : messages["Ask for review tooltip"],
+			imageClass : "core-sprite-tag", //$NON-NLS-0$
+			id : "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
+			parameters : notificationParameters,
+			callback : function(data) {
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				var sshCheck = function(gitUrl) {
 					var url = gitUrl;
 					var scheme = new dojo._Url(url).scheme;
-					if(scheme === "ssh"){
+					if (scheme === "ssh") {
 						var indexOfAt = url.indexOf("@");
-						if(indexOfAt !== -1){
+						if (indexOfAt !== -1) {
 							var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
 							url = urlNoUser;
 						}
 					}
 					return url;
 				};
-				var sendNotificationFunction = function(reviewerName){
+				
+				var sendNotificationFunction = function(reviewerName) {
 					var item = data.items;
-					var headLocation = item.Location.replace(item.Name, "HEAD"); 
+					var headLocation = item.Location.replace(item.Name, "HEAD");
 					var authorName = item.AuthorName;
 					var commitName = item.Name;
 					var commitMessage = item.Message;
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.progress(serviceRegistry.getService("orion.git.provider"), "Getting repository details " + item.Name).getGitClone(item.CloneLocation).then(
-						function(clone){
+					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation), 
+							"Getting repository details " + item.Name).then(
+						function(clone) {
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 							var url = sshCheck(clone.Children[0].GitUrl);
 							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-							progress.progress(serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, reviewRequestUrl, authorName, commitMessage), "Sending review request for " + commitName).then(
-								function(result) {
-									var display = {};
-									display.Severity = "Ok"; //$NON-NLS-0$
-									display.HTML = false;
-									display.Message = result.Result;
-									serviceRegistry.getService("orion.page.message").setProgressResult(display);
-								}, displayErrorOnStatus
-							);
-						}
-					);
+							progress.progress(
+									serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation,
+											reviewerName, reviewRequestUrl, authorName, commitMessage),
+									"Sending review request for " + commitName).then(function(result) {
+								var display = {};
+								display.Severity = "Ok"; //$NON-NLS-0$
+								display.HTML = false;
+								display.Message = result.Result;
+								serviceRegistry.getService("orion.page.message").setProgressResult(display);
+							}, displayErrorOnStatus);
+						});
 				};
-			if (data.parameters.valueFor("reviewer") && !data.parameters.optionsRequested) { //$NON-NLS-0$
-				sendNotificationFunction(data.parameters.valueFor("reviewer")); //$NON-NLS-0$
-			} else {
-				var item = data.items;
-				progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation), "Getting git details " + item.Name).then(
-					function(clone){
-					var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+				
+				if (data.parameters.valueFor("reviewer") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+					sendNotificationFunction(data.parameters.valueFor("reviewer")); //$NON-NLS-0$
+				} else {
+					var item = data.items;
+					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation),
+							"Getting git details " + item.Name).then(function(clone) {
+						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-						var dialog = new orion.git.widgets.ReviewRequestDialog({
-							title: messages["Contribution Review Request"],
-							url: reviewRequestUrl,
-							func: sendNotificationFunction
-							});
-							dialog.startup();
-							dialog.show();
-					},displayErrorOnStatus);
-			}
+						var dialog = new mReviewRequest.ReviewRequestDialog({ title : messages["Contribution Review Request"],
+						url : reviewRequestUrl,
+						func : sendNotificationFunction
+						});
+						dialog.show();
+					}, displayErrorOnStatus);
+				}
 			},
-			visibleWhen: function(item) {
+			visibleWhen : function(item) {
 				return item.Type === "Commit"; //$NON-NLS-0$
 			}
 		});
@@ -2745,7 +2747,7 @@ var exports = {};
 				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
 				if (items.length === 1){				
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), 'Unstaging changes').unstage(items[0].indexURI, items[0].name);
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(items[0].indexURI, items[0].name), 'Unstaging changes');
 					progressService.createProgressMonitor(
 						deferred, //$NON-NLS-0$
 						messages['Staging changes']);
@@ -2760,7 +2762,7 @@ var exports = {};
 						paths[i] = items[i].name;
 					}
 					
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), 'Unstaging changes').unstage(data.userData.Clone.IndexLocation, paths); //$NON-NLS-0$
+					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstage(data.userData.Clone.IndexLocation, paths), 'Unstaging changes'); //$NON-NLS-0$
 					progressService.createProgressMonitor(
 						deferred,
 						messages['Staging changes']);
@@ -2864,7 +2866,7 @@ var exports = {};
 						}
 						var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), messages["Resetting local changes"]).unstageAll(item.IndexLocation, "HARD"); //$NON-NLS-1$ //$NON-NLS-0$ 
+						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").unstageAll(item.IndexLocation, "HARD"), messages["Resetting local changes"]); //$NON-NLS-1$ //$NON-NLS-0$ 
 						progressService.createProgressMonitor(
 							deferred,
 							messages["Resetting local changes"]);
@@ -2909,7 +2911,7 @@ var exports = {};
 							paths[i] = items[i].name;
 						}
 						
-						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), messages['Resetting local changes']).checkoutPath(data.userData.Clone.Location, paths); //$NON-NLS-0$
+						var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutPath(data.userData.Clone.Location, paths), messages['Resetting local changes']); //$NON-NLS-0$
 						progressService.createProgressMonitor(
 							deferred,
 							messages['Resetting local changes']);
@@ -3022,7 +3024,7 @@ var exports = {};
 			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
 			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			
-			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider"), "Rebasing git repository").doRebase(HeadLocation, "", action); //$NON-NLS-0$ 
+			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), "Rebasing git repository"); //$NON-NLS-0$ 
 			progressService.createProgressMonitor(
 				deferred,
 				action);

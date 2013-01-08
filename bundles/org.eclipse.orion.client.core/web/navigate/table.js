@@ -63,7 +63,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 			var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 
 			explorer.loadResourceList(pageParams.resource, false, function() {
-				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, isFavoriteTarget: true,
+				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
 					serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService});
 				mFileCommands.updateNavTools(serviceRegistry, explorer, "pageActions", "selectionTools", explorer.treeRoot);
 				var isAtRoot = mFileUtils.isAtRoot(explorer.treeRoot.Location);
@@ -91,7 +91,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 					// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
 					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
-						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false,
+						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false, //$NON-NLS-0$
 						descriptionProperty: "contentDescription"}); //$NON-NLS-0$
 				} else if (gettingStartedNode) {
 					lib.empty(gettingStartedNode); 
@@ -127,12 +127,12 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 	
 		// selection based command contributions in nav toolbar
 		commandService.registerCommandContribution("selectionTools", "orion.makeFavorite", 1, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.renameResource", 2, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(113, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("selectionTools", "eclipse.renameResource", 2, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(113, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-4$  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.copyFile", 3, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.moveFile", 4, "orion.selectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		commandService.registerCommandContribution("selectionTools", "eclipse.compareWithEachOther", 6, "orion.selectionGroup"); 
-		commandService.registerCommandContribution("selectionTools", "eclipse.compareWith", 7, "orion.selectionGroup"); 
+		commandService.registerCommandContribution("selectionTools", "eclipse.deleteFile", 5, "orion.selectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "explorer-tree", "Navigator")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("selectionTools", "eclipse.compareWithEachOther", 6, "orion.selectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		commandService.registerCommandContribution("selectionTools", "eclipse.compareWith", 7, "orion.selectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "orion.importZipURL", 1, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "orion.import", 2, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.registerCommandContribution("selectionTools", "eclipse.downloadFile", 3, "orion.selectionGroup/orion.importExportGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$

@@ -171,7 +171,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	var linksDropdown;
 	var pageItem;
 	var exclusions = [];
-	var favoriteTarget = null;
 	var title;
 	
 	function _emptyLinksMenu() {
@@ -343,54 +342,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	function setPageCommandExclusions(excluded) {
 		exclusions = excluded;
 	}
-	
-	function makeFavorite(serviceRegistry) {
-		var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
-		//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
-		if (!favoriteService) {
-			favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
-			favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
-		}
-		if (favoriteTarget && favoriteTarget.Location) {
-			favoriteService.hasFavorite(favoriteTarget.ChildrenLocation || favoriteTarget.Location).then(function(result) {
-				if (!result) {
-					favoriteService.makeFavorites([favoriteTarget]);
-					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" has been added to the favorites list."], 2000); //$NON-NLS-0$
-				} else {
-					serviceRegistry.getService("orion.page.message").setMessage(favoriteTarget.Name + messages[" is already a favorite."], 2000); //$NON-NLS-0$
-				}
-			});
-		} 
-	}
-	
-	// Hook up favorites button
-	function checkFavoritesButton(serviceRegistry, commandService) {
-		var faveButton = lib.node("pageFavorite"); //$NON-NLS-0$
-		if (faveButton) {
-			if (favoriteTarget && favoriteTarget.Location) {
-				faveButton.classList.add("bannerButton"); //$NON-NLS-0$
-				faveButton.addEventListener("click", function() { //$NON-NLS-0$
-					makeFavorite(serviceRegistry);
-				}, false);
-				// onClick events do not register for spans when using the keyboard
-				faveButton.addEventListener("keydown", function(e) { //$NON-NLS-0$
-					if (e.keyCode === lib.KEY.ENTER) {						
-						makeFavorite(serviceRegistry);
-					}
-				}, false);
-				faveButton.setAttribute("aria-label", messages["Add to the favorites list"]); //$NON-NLS-1$ //$NON-NLS-0$
-				new mTooltip.Tooltip({
-					node: faveButton,
-					text: messages["Add to the favorites list"],
-					position: ["left", "below", "above"] //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				});
-				faveButton.style.visibility = "visible";  //$NON-NLS-0$
-			} else {
-				faveButton.style.visibility = "hidden";  //$NON-NLS-0$
-			}
-		}
-	}
-	
+		
 	/**
 	 * Set a dirty indicator for the page.  An in-page indicator will always be set.  
 	 * If the document has a title (set via setPageTarget), then the title will also be updated
@@ -430,8 +382,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * specified, the breadcrumbTarget, fileService, task, and name will be consulted to form a root name.
 	 * @param {Object} options.breadcrumbTarget the metadata used for the breadcrumb target. Optional.  If not
 	 * specified, options.target is used as the breadcrumb target.
-	 * @param {Boolean} options.isFavoriteTarget true if the target can be a favorite. Optional. If specified, 
-	 * a favorites button will be added to the banner.  
 	 * @param {Function} options.makeAlternate a function that can supply alternate metadata for the related
 	 * pages menu if the target does not validate against a contribution.  Optional.
 	 * @param {Function} options.makeBreadcrumbLink a function that will supply a breadcrumb link based on a location
@@ -487,12 +437,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			workspaceRootSegmentName: fileSystemRootName,
 			makeHref: options.makeBreadcrumbLink
 		});
-		if (options.target && options.isFavoriteTarget) {
-			favoriteTarget = options.target;
-		} else {
-			favoriteTarget = null;
-		}
-		checkFavoritesButton(options.serviceRegistry, options.commandService);
 	}
 	
 	
@@ -1103,8 +1047,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			editor.getTextView().setAction(keyAssistCommand.id, keyAssistCommand.callback, keyAssistCommand);
 		}
 		
-		checkFavoritesButton(serviceRegistry, commandService);
-
 		renderGlobalCommands(commandService);
 		
 		generateUserInfo(serviceRegistry, keyAssistCommand.callback);

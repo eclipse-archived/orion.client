@@ -9,24 +9,6 @@
 		require({
 			  baseUrl: '..',
 			  packages: [
-			    {
-			      name: 'dojo',
-			      location: 'org.dojotoolkit/dojo',
-			      main: 'lib/main-browser',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dijit',
-			      location: 'org.dojotoolkit/dijit',
-			      main: 'lib/main',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dojox',
-			      location: 'org.dojotoolkit/dojox',
-			      main: 'lib/main',
-			      lib: '.'
-			    }		    
 			  ],
 			  paths: {
 				  text: 'requirejs/text',
@@ -39,14 +21,12 @@
 		</script>
 	</head>
 	
-		<body id="orion-delegatedContent" style="height: 100%;" class="claro orionPage">
+		<body id="orion-delegatedContent" style="height: 100%;" class="orionPage">
 		<div class="content-fixedHeight">
 			<div class="fixedToolbarHolder mainpane mainPanelLayout">
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>
 				<div id="delegatedContent" class="toolbarTarget">
-					<div id="table" class="displayTable" style="padding-bottom: 20px;">
-						<div>Loading content from plugin...</div>
-					</div>
+					<div>Loading content from plugin...</div>
 				</div>
 			</div>
 		</div>
