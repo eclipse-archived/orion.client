@@ -935,17 +935,17 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		_generateCheckedMenuItem: function(dropdown, name, checked, onChange) {
 			var itemNode = document.createElement("li"); //$NON-NLS-0$
 			dropdown.appendChild(itemNode);
+			var label = document.createElement("label"); //$NON-NLS-0$
+			label.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			var node = document.createElement("input"); //$NON-NLS-0$
 			node.type = "checkbox";//$NON-NLS-0$
 			node.role = "menuitem"; //$NON-NLS-0$
 			node.checked = checked;
-			node.classList.add("dropdownMenuItem"); //$NON-NLS-0$
 			node.classList.add("checkedMenuItem"); //$NON-NLS-0$
-			var span = document.createElement("span"); //$NON-NLS-0$
+			label.appendChild(node);
 			var text = document.createTextNode(name); //$NON-NLS-0$
-			span.appendChild(text);
-			itemNode.appendChild(node);
-			itemNode.appendChild(span);
+			label.appendChild(text);
+			itemNode.appendChild(label);
 			node.addEventListener("change", onChange, false); //$NON-NLS-0$
 		},
 		
