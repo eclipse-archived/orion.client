@@ -120,7 +120,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 						this['$'+ button.id] = button; //$NON-NLS-0$					
 					}
 					button.appendChild(document.createTextNode(buttonDefinition.text));
-					button.className = "commandButton"; //$NON-NLS-0$
+					button.className = "commandButton commandMargins"; //$NON-NLS-0$
 					var callback = buttonDefinition.callback;
 					button.addEventListener("click", function(e) { //$NON-NLS-0$
 						callback();
