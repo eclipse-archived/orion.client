@@ -136,7 +136,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 										fileMetadata = metadata;
 										mGlobalCommands.setPageTarget(
 											{task: info.name, location: metadata.Location, target: metadata, serviceRegistry: serviceRegistry, 
-												commandService: commandService, searchService: searcher, fileService: fileClient, isFavoriteTarget: true});
+												commandService: commandService, searchService: searcher, fileService: fileClient});
 										makeIFrame();
 									}
 					

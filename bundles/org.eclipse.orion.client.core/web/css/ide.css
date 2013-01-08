@@ -332,7 +332,7 @@ h2 {
 }
 
 .progressPane {
-	vertical-align: bottom;
+	vertical-align: middle;
 	margin-right: 8px;
 	background-position: 0 0; 
 	text-align: right;
@@ -342,7 +342,6 @@ h2 {
 }
 
 .progressPane_operations {
-	margin-top: 4px;
 	/* background-image: url(../images/core_sprites.png); 
 	background-position: -96px -328px; */
 	width: 16px; height: 16px; 
@@ -351,7 +350,6 @@ h2 {
 
 /* we don't sprite an animated gif */
 .progressPane_running {
-	margin-top: 8px;
 	background: url(../images/progress_running.gif) no-repeat center;  
 	width: 16px; height: 16px;
 }
@@ -369,21 +367,18 @@ h2 {
 }
 
 .progressPane_error {
-	margin-top: 4px;
 	background-image: url(../images/core_sprites.png);
 	background-position: 0 -561px; 
 	width: 16px; height: 16px;
 }
 
 .progressPane_warning {
-	margin-top: 4px;
 	background-image: url(../images/core_sprites.png);
 	background-position: -96px -1440px; 
 	width: 16px; height: 16px;
 }
 
 .progressPane_empty {
-	margin-top: 4px;
 	background: inherit;
 	visibility: hidden; /* accessibility.  don't tab here when empty */
 }
