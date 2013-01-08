@@ -1929,71 +1929,75 @@ var exports = {};
 		
 		var notificationParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter('reviewer', 'text', messages["Reviewer name"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
+
 		var askForReviewCommand = new mCommands.Command({
-			name: messages["Ask for review"],
-			tooltip: messages["Ask for review tooltip"],
-			imageClass: "core-sprite-tag", //$NON-NLS-0$
-			id: "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
-			parameters: notificationParameters,
-			callback: function(data) {
-				var sshCheck = function(gitUrl){
+			name : messages["Ask for review"],
+			tooltip : messages["Ask for review tooltip"],
+			imageClass : "core-sprite-tag", //$NON-NLS-0$
+			id : "eclipse.orion.git.askForReviewCommand", //$NON-NLS-0$
+			parameters : notificationParameters,
+			callback : function(data) {
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				
+				var sshCheck = function(gitUrl) {
 					var url = gitUrl;
 					var scheme = new dojo._Url(url).scheme;
-					if(scheme === "ssh"){
+					if (scheme === "ssh") {
 						var indexOfAt = url.indexOf("@");
-						if(indexOfAt !== -1){
+						if (indexOfAt !== -1) {
 							var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
 							url = urlNoUser;
 						}
 					}
 					return url;
 				};
-				var sendNotificationFunction = function(reviewerName){
+				
+				var sendNotificationFunction = function(reviewerName) {
 					var item = data.items;
-					var headLocation = item.Location.replace(item.Name, "HEAD"); 
+					var headLocation = item.Location.replace(item.Name, "HEAD");
 					var authorName = item.AuthorName;
 					var commitName = item.Name;
 					var commitMessage = item.Message;
-					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.progress(serviceRegistry.getService("orion.git.provider"), "Getting repository details " + item.Name).getGitClone(item.CloneLocation).then(
-						function(clone){
+					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation), 
+							"Getting repository details " + item.Name).then(
+						function(clone) {
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 							var url = sshCheck(clone.Children[0].GitUrl);
 							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-							progress.progress(serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation, reviewerName, reviewRequestUrl, authorName, commitMessage), "Sending review request for " + commitName).then(
-								function(result) {
-									var display = {};
-									display.Severity = "Ok"; //$NON-NLS-0$
-									display.HTML = false;
-									display.Message = result.Result;
-									serviceRegistry.getService("orion.page.message").setProgressResult(display);
-								}, displayErrorOnStatus
-							);
-						}
-					);
+							progress.progress(
+									serviceRegistry.getService("orion.git.provider").sendCommitReviewRequest(commitName, headLocation,
+											reviewerName, reviewRequestUrl, authorName, commitMessage),
+									"Sending review request for " + commitName).then(function(result) {
+								var display = {};
+								display.Severity = "Ok"; //$NON-NLS-0$
+								display.HTML = false;
+								display.Message = result.Result;
+								serviceRegistry.getService("orion.page.message").setProgressResult(display);
+							}, displayErrorOnStatus);
+						});
 				};
-			if (data.parameters.valueFor("reviewer") && !data.parameters.optionsRequested) { //$NON-NLS-0$
-				sendNotificationFunction(data.parameters.valueFor("reviewer")); //$NON-NLS-0$
-			} else {
-				var item = data.items;
-				progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation), "Getting git details " + item.Name).then(
-					function(clone){
-					var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
+				
+				if (data.parameters.valueFor("reviewer") && !data.parameters.optionsRequested) { //$NON-NLS-0$
+					sendNotificationFunction(data.parameters.valueFor("reviewer")); //$NON-NLS-0$
+				} else {
+					var item = data.items;
+					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation),
+							"Getting git details " + item.Name).then(function(clone) {
+						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
-						var dialog = new orion.git.widgets.ReviewRequestDialog({
-							title: messages["Contribution Review Request"],
-							url: reviewRequestUrl,
-							func: sendNotificationFunction
-							});
-							dialog.startup();
-							dialog.show();
-					},displayErrorOnStatus);
-			}
+						var dialog = new orion.git.widgets.ReviewRequestDialog({ title : messages["Contribution Review Request"],
+						url : reviewRequestUrl,
+						func : sendNotificationFunction
+						});
+						dialog.startup();
+						dialog.show();
+					}, displayErrorOnStatus);
+				}
 			},
-			visibleWhen: function(item) {
+			visibleWhen : function(item) {
 				return item.Type === "Commit"; //$NON-NLS-0$
 			}
 		});
