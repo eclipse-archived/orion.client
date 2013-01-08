@@ -45,6 +45,23 @@ img.loginWindow{
 	color: #666666;	
 }
 
+.manageOpenIdsTable{
+	border-spacing: 0;
+}
+
+.manageOpenIdRow .removeOpenId {
+	cursor: pointer;
+	visibility: hidden;
+}
+
+.manageOpenIdRow:hover .removeOpenId {
+	visibility: visible !important;
+}
+
+/*.removeOpenId {
+	cursor: pointer;
+}*/
+
 .lightTreeTableRow {
 	background-color: #FFFFFF;
 }
