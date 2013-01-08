@@ -43,6 +43,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 
 	Dialog.prototype = /** @lends orion.webui.Dialog.prototype */ {
 	
+		DISABLED: "disabled", //$NON-NLS-0$
+	
 		/* Not used by clients */
 		CONTAINERTEMPLATE:		
 		'<div class="dialog">' + //$NON-NLS-0$
@@ -113,6 +115,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 					var button = document.createElement("span"); //$NON-NLS-0$
 					button.role = "button"; //$NON-NLS-0$
 					button.tabIndex = 0; 
+					if (buttonDefinition.id) {
+						button.id = buttonDefinition.id;
+						this['$'+ button.id] = button; //$NON-NLS-0$					
+					}
 					button.appendChild(document.createTextNode(buttonDefinition.text));
 					button.className = "commandButton"; //$NON-NLS-0$
 					var callback = buttonDefinition.callback;
