@@ -116,7 +116,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 							if (toolbar) {	
 								commandService.destroy(toolbar);
-								commandService.renderCommands(toolbar.id, toolbar, editor, editor, "button"); //$NON-NLS-0$
+								commandService.renderCommands(toolbar.id, toolbar, metadata, editor, "button"); //$NON-NLS-0$
 							}
 							toolbar = lib.node("pageNavigationActions"); //$NON-NLS-0$
 							if (toolbar) {	
@@ -144,7 +144,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						mGlobalCommands.addSettings( chooser );
 						
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
-							isFavoriteTarget: true, makeAlternate: function() {
+							makeAlternate: function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
 									return fileClient.read(metadata.Parents[0].Location, true);
 								}
@@ -496,6 +496,9 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	inputManager.setInput(window.location.hash, editor);
 	
 	mGlobalCommands.generateBanner("orion-editor", serviceRegistry, commandService, preferences, searcher, editor, editor, escHandler); //$NON-NLS-0$
+	// Put the make favorite command in our toolbar."
+	commandService.registerCommandContribution("pageActions", "orion.makeFavorite", 2); //$NON-NLS-1$ //$NON-NLS-0$
+
 		
 	var syntaxChecker = new mSyntaxchecker.SyntaxChecker(serviceRegistry, editor);
 	editor.addEventListener("InputChanged", function(evt) { //$NON-NLS-0$

@@ -46,7 +46,7 @@ define(['require', 'orion/webui/littlelib'],
 		'<div id="titleArea" class="layoutBlock titleArea">' + //$NON-NLS-0$
 			'<div class="clear" style="padding-bottom:5px;display:inline;"><span id="location" class="currentLocation"></span><span id="dirty" class="currentLocation"></span></div>' + //$NON-NLS-0$
 			'<div class="layoutRight pageNav">' + //$NON-NLS-0$
-				'<span id="pageFavorite" tabindex="0" role="button" class="spacingLeft layoutLeft imageSprite core-sprite-favorite_sml"></span>' + //$NON-NLS-0$
+				'<img class="progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar"></img>' + //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
 	'</header>'; //$NON-NLS-0$
@@ -77,7 +77,6 @@ define(['require', 'orion/webui/littlelib'],
 	var toolbarHTMLFragment = 
 		'<ul class="layoutLeft commandList pageActions" id="pageActions"></ul>' + //$NON-NLS-0$
 		'<ul class="layoutLeft commandList pageActions" id="selectionTools"></ul>' + //$NON-NLS-0$
-		'<img class="layoutRight progressPane" src="'+ require.toUrl("images/none.png") +'" id="progressPane" tabindex="0" role="progressbar"></img>' + //$NON-NLS-2$  //$NON-NLS-1$ //$NON-NLS-0$
 		'<div class="layoutRight" style="padding-left:7px;padding-right:7px;margin-top:3px;" id="settingsTab" style="visibility:hidden;">' +  //$NON-NLS-0$
 			'<div class="layoutRight core-sprite-settings" id="settingsAction" role="settings" aria-live="off" style="visibility:hidden;"></div>' + //$NON-NLS-0$
 		'</div>' +  //$NON-NLS-0$
