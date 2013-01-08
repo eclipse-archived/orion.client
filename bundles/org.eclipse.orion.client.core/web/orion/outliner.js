@@ -273,6 +273,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		this._serviceRegistration = this._serviceRegistry.registerService("orion.edit.outline", this); //$NON-NLS-0$
 		this._outlinePref = this._preferences.getPreferences("/edit/outline"); //$NON-NLS-0$
 		this._provider = new Deferred();
+		this._providerResolved = false;
 	}
 	OutlineService.prototype = /** @lends orion.outliner.OutlineService.prototype */ {
 		setOutlineProviders: function(/**ServiceReference[]*/ providers) {
@@ -293,10 +294,11 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			});
 		},
 		setProvider: function(/**ServiceReference*/ provider) {
-			if (this._provider.isFulfilled()) {
+			if (this._providerResolved) {
 				this._provider = new Deferred();
 			}
 			this._provider.resolve(provider);
+			this._providerResolved = true;
 			var id = provider.getProperty("id"); //$NON-NLS-0$
 			if (id) {
 				this._outlinePref.then(function(pref) {
@@ -306,7 +308,7 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		},
 
 		getProvider: function() {
-			return this._provider;
+			return this._provider.promise;
 		},
 		emitOutline: function(contents, title, providerId) {
 			var self = this;
