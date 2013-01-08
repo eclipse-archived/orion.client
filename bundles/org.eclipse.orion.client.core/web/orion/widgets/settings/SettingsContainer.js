@@ -197,13 +197,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			lib.empty(this.table);
 
 			if (this.pluginWidget) {
-				this.pluginWidget.destroyRecursive(true);
+				this.pluginWidget.destroy();
 			}
 
 			var pluginNode = document.createElement('div');
 			this.table.appendChild(pluginNode);
 
-			this.pluginWidget = new orion.widgets.plugin.PluginList({
+			this.pluginWidget = new PluginList({
 				settings: this.settingsCore,
 				preferences: this.preferences,
 				statusService: this.preferencesStatusService,
@@ -213,7 +213,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 //				toolbarID: "pageActions" //$NON-NLS-0$
 			}, pluginNode);
 			
-			this.pluginWidget.startup();
+			this.pluginWidget.show();
 		},
 
 		initPluginSettings: function(category) {

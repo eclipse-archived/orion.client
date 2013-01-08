@@ -266,31 +266,31 @@ ul,menu,dir {
 	-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
-#plugin-settings .displaytable>section {
+/*#plugin-settings .displaytable>section {
 	display: block;
 	width: 100%;
-}
+}*/
 
 div.page section:last-child {
 	border-bottom: none;
 }
 
-#plugin-settings .displaytable>section>* {
+/*#plugin-settings .displaytable>section>* {
 	display: block;
-}
+}*/
 
-#plugin-settings-list {
+/*#plugin-settings-list {
 	min-height: 0;
 	overflow-y: hidden;
 	width: 100%;
 }
-
+*/
 .plugin-list-item {
 	padding: 10px;
 	/* width: 100%; */
 }
 
-list,grid {
+.plugin-list, .plugin-entry {
 	display: block;
 	outline: none;
 	overflow: auto;
@@ -318,7 +318,7 @@ list,grid {
 	max-width:600px;
 }
 
-list>*,grid>* {
+.plugin-list>*, .plugin-entry>* {
 	display: block;
 	outline: none;
 	overflow: auto;
@@ -333,7 +333,7 @@ list>*,grid>* {
 	padding-right: 20px;
 }
 
-#plugin-settings .displaytable {
+/*#plugin-settings .displaytable {
 	display: block;
 }
 
@@ -346,7 +346,7 @@ list>*,grid>* {
 .plugin-settings {
 	overflow-x: hidden;
 }
-
+*/
 .plugin-version {
 	font-size: 13px;
 	font-weight: 400;
