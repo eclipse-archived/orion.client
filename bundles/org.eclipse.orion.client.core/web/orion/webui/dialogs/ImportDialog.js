@@ -34,7 +34,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 				'</div>' + //$NON-NLS-0$
 			'</div>' + //$NON-NLS-0$
 		'</div>' + //$NON-NLS-0$
-		'<div class="layoutBlock layoutRight"><input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" /><span id="uploadButton" role="button" class="commandButton" tabindex="0">${Upload}</span></div>' + //$NON-NLS-0$
+		'<div class="layoutBlock layoutRight"><input type="file" name="selectedFile" id="selectedFile" class="uploadChooser" /><span id="uploadButton" role="button" class="commandButton disabled" tabindex="0">${Upload}</span></div>' + //$NON-NLS-0$
 	'</div>'; //$NON-NLS-0$
 	
 	ImportDialog.prototype._init = function(options) {
@@ -51,6 +51,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		this.$uploadContainer.addEventListener("dragover", this.dragOver.bind(this), false); //$NON-NLS-0$
 		this.$uploadContainer.addEventListener("dragleave", this.dragLeave.bind(this), false); //$NON-NLS-0$
 		this.$uploadContainer.addEventListener("drop", this.drop.bind(this), false); //$NON-NLS-0$
+		this.$selectedFile.addEventListener("change", this.checkUploadState.bind(this), false); //$NON-NLS-0$
 		this.$uploadButton.addEventListener("click", this.uploadSelected.bind(this), false); //$NON-NLS-0$
 	};
 
@@ -59,6 +60,15 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			this.hide();
 			this._func();
 		}
+	};
+	
+	ImportDialog.prototype.checkUploadState = function(evt){	
+		if (this.$selectedFile.files && this.$selectedFile.files.length > 0) {
+			this.$uploadButton.classList.remove(this.DISABLED);
+		} else {
+			this.$uploadButton.classList.add(this.DISABLED);
+		}
+		
 	};
 
 	ImportDialog.prototype.uploadFile = function(file) {
@@ -77,6 +87,9 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	
 	// get selected file element
 	ImportDialog.prototype.uploadSelected = function(evt) {
+		if (this.$uploadButton.classList.contains(this.DISABLED)) {
+			return;
+		}
 		if (this.$selectedFile.files && this.$selectedFile.files.length > 0) {
 			this.uploadFile(this.$selectedFile.files[0]);
 	    }
@@ -106,7 +119,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		}
 	};
 	
-
 	ImportDialog.prototype.constructor = ImportDialog;
 	//return the module exports
 	return {ImportDialog: ImportDialog};
