@@ -69,12 +69,13 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	});
 
 	provider.registerService('orion.shell.command', {
-		callback: function(commandArgs) {
+		callback: function(commandArgs, context) {
 			var moduleFile = commandArgs.module, args = commandArgs.args;
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('start', {
 					modulePath: moduleFile.Location,
+					context: context,
 					args: args
 				});
 			};
@@ -172,17 +173,34 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 		}]
 	});
 
-	provider.registerService('orion.shell.command',{
-		callback: function(args) {
-			return 'lol';
+	provider.registerService('orion.shell.command', {
+		callback: function(commandArgs, context) {
+			var args = commandArgs.args;
+			var sockProc = new SocketProcess();
+			sockProc.connect = function(data) {
+				sockProc.socket.emit('npm', {
+					context: context,
+					args: args
+				});
+			};
+			sockProc.started = function(app) {
+				sockProc.progress('Started app (PID: ' + app.Id + ')\n');
+			};
+			sockProc.stopped = function(app) {
+				// TODO unnecessary work, could just "resolve with progress" in one shot
+				sockProc.progress('App stopped: (PID: ' + app.Id + ')\n');
+				sockProc.resolve();
+			};
+			return sockProc.deferred;
 		}
 	}, {
 		name: 'npm',
-		description: 'Run the node package manager.',
+		description: 'Runs the node package manager.',
 		parameters: [{
-			name: 'command',
-			type: 'string',
-			description: 'The command to pass to npm.'
+			name: 'args',
+			type: { name: 'array', subtype: 'string' },
+			description: 'The command-line arguments to pass to npm.',
+			defaultValue: null
 		}]
 	});
 

@@ -548,7 +548,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				/* Use orion/Deferred since it supports progress, gcli/promise does not */
 				//var promise = context.createPromise();
 				var promise = new Deferred();
-				service.callback(args).then(
+				var node = shellPageFileService.getCurrentDirectory();
+				var location = node ? node.Location : (getCWD() || ROOT_ORIONCONTENT);
+				service.callback(args, {cwd:location}).then(
 					function(result) {
 						promise.resolve(result);
 					},
