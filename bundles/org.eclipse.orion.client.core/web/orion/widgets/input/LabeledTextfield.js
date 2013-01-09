@@ -31,7 +31,14 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			this.myfield.addEventListener('change', this.change.bind(this)); //$NON-NLS-0$
 			this.postCreate();
 		},
-	
+
+		destroy: function() {
+			if (this.node) {
+				lib.empty(this.node);
+				this.node = this.mylabel = this.myfield = null;
+			}
+		},
+
 		setStorageItem: function(){
 		
 		},
