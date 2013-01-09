@@ -191,7 +191,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			if (status.Severity) {
 				switch (status.Severity) {
 				case "Warning": //$NON-NLS-0$
-					imageClass = " core-sprite-warning"; //$NON-NLS-0$
+					imageClass = "core-sprite-warning"; //$NON-NLS-0$
 					alt = "warning"; //$NON-NLS-0$
 					extraClass="progressWarning"; //$NON-NLS-0$
 					removedClasses.push("progressInfo");
