@@ -11,9 +11,9 @@
 /*global exports module define setTimeout*/
 
 (function(root, factory) { // UMD
-	if (typeof define === 'function' && define.amd) {
+	if (typeof define === "function" && define.amd) { //$NON-NLS-0$
 		define(factory);
-	} else if (typeof exports === 'object') {
+	} else if (typeof exports === "object") { //$NON-NLS-0$
 		module.exports = factory();
 	} else {
 		root.orion = root.orion || {};
@@ -75,16 +75,19 @@
 			fn.apply(null, arguments);
 		};
 	}
+	
+	function noop() {
+	}
 
 	function createCancelError(reason) {
-		var cancelError = typeof reason === "string" ? new Error(reason) : new Error();
-		if (typeof reason === "object") {
+		var cancelError = typeof reason === "string" ? new Error(reason) : new Error(); //$NON-NLS-0$
+		if (typeof reason === "object") { //$NON-NLS-0$
 			Object.keys(reason).forEach(function(key) {
 				cancelError[key] = reason[key];
 			});
 		}
 		cancelError.canceled = true;
-		cancelError.name = "OperationCanceled";
+		cancelError.name = "OperationCanceled"; //$NON-NLS-0$
 		return cancelError;
 	}
 
@@ -158,11 +161,12 @@
 				var listener = head;
 				head = head.next;
 				var deferred = listener.deferred;
-				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ $NON-NLS-1$
-				if (typeof listener[methodName] === "function") {
+				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+				if (typeof listener[methodName] === "function") { //$NON-NLS-0$
 					try {
 						var listenerResult = listener[methodName](result);
 						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
+							deferred.cancel = listenerResult.cancel || noop;
 							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
 						} else {
 							deferred.resolve(listenerResult);
@@ -267,22 +271,18 @@
 				progress: onProgress,
 				deferred: new Deferred()
 			};
-			attach(listener);
-			if (state) {
-				enqueue(notify, true); //runAsync
-			}
-
-			var promise = listener.deferred.promise;
-			promise.cancel = function(reason) {
+			var deferred = listener.deferred;
+			var deferredCancel = deferred.cancel;
+			deferred.cancel = function(reason) {
 				if (state) {
 					return;
 				}
 				detach(listener);
-				var deferred = listener.deferred;
 				if (typeof onReject === "function") { //$NON-NLS-0$
 					try {
 						var listenerResult = onReject(createCancelError(reason));
 						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
+							deferred.cancel = listenerResult.cancel || noop;
 							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
 						} else {
 							deferred.resolve(listenerResult);
@@ -291,9 +291,18 @@
 						deferred.reject(e);
 					}
 				} else {
-					deferred.cancel(reason);
+					deferredCancel(reason);
 				}
 			};
+			var promise = deferred.promise;
+			promise.cancel = function(reason) {
+				deferred.cancel(reason); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
+			};
+			
+			attach(listener);
+			if (state) {
+				enqueue(notify, true); //runAsync
+			}
 			return promise;
 		};
 
