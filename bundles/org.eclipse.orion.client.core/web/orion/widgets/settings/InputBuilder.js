@@ -8,20 +8,16 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global window console define */
 /*jslint browser:true*/
 
-/* This InputBuilder widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
+define(["orion/objects", "orion/Deferred", "orion/widgets/input/Select", "orion/widgets/input/TextField"],
+		function(objects, Deferred, Select, TextField) {
 
-define(['require', 'dojo', 'dijit', "orion/widgets/settings/Select", "orion/widgets/settings/TextField", "orion/widgets/settings/ColorPicker"], function(require, dojo, dijit) {
-
-	dojo.declare("orion.widgets.settings.InputBuilder", null, { //$NON-NLS-0$
-	
-		constructor: function( preferences ){
-			this.preferences = preferences;
-		},
-		
+	function InputBuilder(preferences) {
+		this.preferences = preferences;
+	}
+	objects.mixin(InputBuilder.prototype, {
 		setStorageItem: function(category, subCategory, element, value, ui) {
 		
 			this.preferences.getPreferences('/settings', 2).then(function(prefs){ //$NON-NLS-0$
@@ -49,7 +45,7 @@ define(['require', 'dojo', 'dijit', "orion/widgets/settings/Select", "orion/widg
 
 			var value;
 			
-			var deferred = new dojo.Deferred();
+			var deferred = new Deferred();
 
 //			var subcategories = JSON.parse(localStorage.getItem(category));
 			
@@ -74,7 +70,8 @@ define(['require', 'dojo', 'dijit', "orion/widgets/settings/Select", "orion/widg
 
 		processInputType: function(category, label, item, node, ui) {
 		
-			var picker = dojo.create("div", null, node); //$NON-NLS-0$
+			var picker = document.createElement("div"); //$NON-NLS-0$
+			node.appendChild(picker);
 			
 			var builder = this;
 
@@ -102,40 +99,34 @@ define(['require', 'dojo', 'dijit', "orion/widgets/settings/Select", "orion/widg
 							options.push(set);
 						}
 						
-						new orion.widgets.settings.Select({ 
+						new Select({ 
 							category:category, 
 							item:label, 
 							element:item.label, 
 							ui:ui, 
 							options:options,
-							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												 //$NON-NLS-0$
+							setStorageItem: builder.setStorageItem.bind(builder)
 						}, picker );
 		
 						break;
 		
 					case "color": //$NON-NLS-0$
 		
-						new orion.widgets.settings.ColorPicker({
-							label: "   ", //$NON-NLS-0$
-							name: item.label,
-							category:category,
-							item:label,
-							setting: setting,
-							setStorageItem: dojo.hitch( builder, 'setStorageItem' ) //$NON-NLS-0$
-						}, picker);
+						throw new Error("Not implemented");
 		
 						break;
 						
 						
 					case "textfield": //$NON-NLS-0$
 					
-						new orion.widgets.settings.TextField({ 
+						var field = new TextField({ 
 							category:category, 
 							item:label, 
 							element:item.label, 
 							ui:ui, 
-							setStorageItem: dojo.hitch( builder, 'setStorageItem' )												 //$NON-NLS-0$
+							setStorageItem: builder.setStorageItem.bind(builder)
 						}, picker );
+						field.show();
 					
 						break;
 						
@@ -148,5 +139,6 @@ define(['require', 'dojo', 'dijit', "orion/widgets/settings/Select", "orion/widg
 				});
 			} 
 		});
+	return InputBuilder;
 });
 

@@ -9,10 +9,10 @@
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global orion window console define localStorage*/
-/*jslint browser:true*/
+/*jslint browser:true forin:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/widgets/themes/ThemeClass'], 
-	function(messages, require, ThemeClass) {
+define(['orion/widgets/themes/ThemeClass'], 
+	function(ThemeClass) {
 		
 		var navbar = '#333';
 		var button = '#777777';

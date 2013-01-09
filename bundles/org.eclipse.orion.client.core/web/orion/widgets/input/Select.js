@@ -8,69 +8,69 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global window console define localStorage*/
 /*jslint browser:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
+define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
-define(['i18n!orion/settings/nls/messages', 'require' ], 
-	function(messages, require) {
-	
-		function Select( options, node ){
-			this.anchor = node;		
-			this.anchor.innerHTML = this.templateString;
-			this.options = options;
-			this.options.forEach( this.addOptions.bind(this) );
-			this.anchor.firstChild.onchange = this.change.bind(this);
-		}
-		
-		var anchor;
-		
-		Select.prototype.anchor = anchor;
-		
-		var templateString = '<select class="setting-control" id="selection"></select>'; //$NON-NLS-0$
-		Select.prototype.templateString = templateString;
-		
-		function addOptions(item, index, ar){			
-			var option = document.createElement("option");
+	/**
+	 * @param {Object[]} param.options Array of {value:Object, label:String, selected:Boolean(optional)}
+	 */
+	function Select( params, node ){
+		this.node = node || document.createElement("div"); //$NON-NLS-0$
+		this.node.innerHTML = this.templateString;
+		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
+		this.select = lib.$(".setting-control", this.node); //$NON-NLS-0$
+		this.options = params.options;
+	}
+	objects.mixin(Select.prototype, {
+		templateString: '<select class="setting-control" id="selection"></select>', //$NON-NLS-0$
+
+		addOptions : function(item, index, ar){			
+			var option = document.createElement("option"); //$NON-NLS-0$
 			option.value = item.value;
-			option.appendChild(document.createTextNode(item.label));
-			this.anchor.firstChild.appendChild(option);
-			if( item.selected === true ){
-				this.anchor.firstChild.value = item.value;
+			option.appendChild(document.createTextNode(typeof item.label === "string" ? item.label : item.value)); //$NON-NLS-0$
+			if( item.selected  ){
+				option.selected = 'selected'; //$NON-NLS-0$
 			}
-		}
-		
-		Select.prototype.addOptions = addOptions;
-		
-		function setStorageItem(){
+			this.select.appendChild(option);
+		},
+
+		show: function() {
+			this.postCreate();
+		},
+
+		postCreate: function() {
+			this.options.forEach( this.addOptions.bind(this) );
+			this.select.addEventListener("change",  this.change.bind(this)); //$NON-NLS-0$
+		},
+
+		destroy: function() {
+			if (this.node) {
+				lib.empty(this.node);
+				this.node = this.select = null;
+			}
+		},
+
+		setStorageItem : function(){
 			// to be overridden with a choice of function to store the picked color
-		}
+		},
 		
-		Select.prototype.setStorageItem = setStorageItem;
-		
-		function getSelected(){
-			return this.selection.value;
-		}
-		
-		Select.prototype.getSelected = getSelected;
+		getSelected : function(){
+			return this.select.value;
+		},
 	
-		function getSelectedIndex() {
-			return this.selection.selectedIndex;
-		}
+		getSelectedIndex: function() {
+			return this.select.selectedIndex;
+		},
 		
-		Select.prototype.getSelectedIndex = getSelectedIndex;
+		setSelectedIndex : function setSelectedIndex(index) {
+			this.select.selectedIndex = index;
+		},
 	
-		function setSelectedIndex(index) {
-			this.selection.selectedIndex = index;
-		}
+		change : function change(){
 		
-		Select.prototype.setSelectedIndex = setSelectedIndex;
-	
-		function change(){
-		
-			var value = this.anchor.firstChild.value;
+			var value = this.select.value;
 			
 			if( this.category ){
 				this.setStorageItem( this.category, this.item, this.element, value, this.ui );
@@ -78,11 +78,6 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 				this.setStorageItem( value );
 			}
 		}
-		
-		Select.prototype.change = change;
-	
-		return{
-			Select:Select
-		};
-	}
-);
+	});
+	return Select;
+});

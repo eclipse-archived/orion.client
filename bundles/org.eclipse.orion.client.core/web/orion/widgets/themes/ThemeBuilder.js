@@ -7,11 +7,12 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
-/*jslint browser:true*/
+/*global window console define localStorage*/
+/*jslint browser:true forin:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/editor/ThemeData'], 
-	function(messages, require, dojo, dijit, mCommands, mGlobalCommands, PageUtil, Component, ThemeData ) {
+define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalCommands', 'orion/PageUtil', 'orion/webui/littlelib',
+		'orion/widgets/themes/ThemeComponent', 'orion/widgets/themes/editor/ThemeData', 'orion/widgets/input/Select', 'orion/widgets/input/TextField'], 
+	function(messages, mCommands, mGlobalCommands, PageUtil, lib, Component, ThemeData, Select, TextField) {
 
 		var TOP = 10;
 		var LEFT = 10; 
@@ -81,9 +82,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				name: 'Cancel',
 				tooltip: 'Revert Theme',
 				id: "orion.reverttheme", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					this.revert(data.items);
-				})
+				}.bind(this)
 			
 			});
 			
@@ -91,9 +92,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				name: 'Apply',
 				tooltip: 'Apply Theme',
 				id: "orion.applytheme", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					this.apply(data.items);
-				})
+				}.bind(this)
 			
 			});
 			
@@ -101,9 +102,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				name: 'Guide',
 				tooltip: 'Check Guide',
 				id: "orion.checkGuide", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					this.guide(data.items);
-				})
+				}.bind(this)
 			
 			});
 			
@@ -130,9 +131,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				zones[SELECTED_ZONE.id].glow( UI_SIZE, TOP );
 				this.themebuilder.drawPicker( ctx, zones[SELECTED_ZONE.id] );
 				
-				dojo.byId( 'pickercontainer' ).style.display = 'none';
-				dojo.byId( 'savecontainer' ).style.display = '';
-				dojo.byId( 'stringcontainer' ).style.display = '';
+				lib.node( 'pickercontainer' ).style.display = 'none';
+				lib.node( 'savecontainer' ).style.display = '';
+				lib.node( 'stringcontainer' ).style.display = '';
 			
 				console.log( 'apply color' );
 			}
@@ -162,7 +163,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 												'<canvas id="orionui" width="800" height="380"></canvas>' +
 												'<div id="sizecontainer" style="display:none;">' +
 													'<span class="settingsLabel">Font Size:</span>' + 
-													'<div id="fontsizepicker"></div>' +
+													'<div id="fontsizepicker" class="fontsizepicker"></div>' +
 												'</div>' +
 												/* FOR FONT FAMILY - ROUGHING THIS IN '<div id="familycontainer" style="display:block;">' +
 													'<span class="settingsLabel">Font Family:</span>' + 
@@ -170,7 +171,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 												'</div>' + */
 												'<div id="pickercontainer" style="display:block;">' +
 													'<span class="settingsLabel">Chosen Theme:</span>' + 
-													'<div id="themepicker"></div>' +
+													'<div id="themepicker" class="themepicker"></div>' +
 												'</div>' +
 												'<br>' +
 												'<div id="savecontainer" style="display:none;">' +
@@ -179,7 +180,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 												'</div>' +
 												'<div id="stringcontainer" style="position:absolute;left:425px;top:360px;display:none;">' +
 														'<span>OR HEX: </span>' + 
-														'<div id="colorstring"></div>' +
+														'<div id="colorstring" class="colorfield"></div>' +
 														'<button class = "commandButton" style="padding:5px;font-size:9pt;"type="button" id="colorButton"}">ok</button>' + 
 												'</div>' +
 											'</div>';
@@ -235,9 +236,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				tooltip: commandData.tip,
 				parameters: commitMessageParameters,
 				id: commandData.id, //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					commandData.callback(data);
-				})
+				}.bind(this)
 			});
 			
 			this.commandService.addCommand(command);
@@ -392,7 +393,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				var colorstring = document.getElementById( this.colorFieldId );
 				
 				if( !this.colfld ){
-					this.colfld = new orion.widgets.settings.TextField({}, colorstring );
+					this.colfld = new TextField({}, colorstring );
+					this.colfld.show();
 					this.colfld.width( '100px' );
 				}
 				var colorButton = document.getElementById( 'colorButton' );
@@ -446,12 +448,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 						zones[SELECTED_ZONE.id].glow( UI_SIZE, TOP );
 						this.drawPicker( ctx, zones[SELECTED_ZONE.id] );
 						
-						dojo.byId( 'pickercontainer' ).style.display = 'none';
-						dojo.byId( 'savecontainer' ).style.display = '';
+						lib.node( 'pickercontainer' ).style.display = 'none';
+						lib.node( 'savecontainer' ).style.display = '';
 						
 						if( this.AUTONAME === false ){
-							var currentTheme = dijit.byId( 'themepicker' ).getSelected();
-							dijit.byId( 'themesaver' ).setValue( currentTheme );
+							var currentTheme = this.themepicker.getSelected();
+							this.themesaver.setValue( currentTheme );
 							this.AUTONAME = true;
 						}
 						
@@ -601,7 +603,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				
 				for( var shapecount =0; shapecount < data.shapes.length; shapecount++ ){
 				
-					if( data.shapes[shapecount].fill ){ defaultValue = data.shapes[shapecount].fill; }else{ defaultValue = data.shapes[shapecount].line; };
+					if( data.shapes[shapecount].fill ){ defaultValue = data.shapes[shapecount].fill; }else{ defaultValue = data.shapes[shapecount].line; }
 				
 					this.settings[data.shapes[shapecount].family] = new Family( data.shapes[shapecount].family, defaultValue );
 				}
@@ -662,13 +664,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 		function drawOutlineData( data ){
 		
 			if( data ){ this.addData( data ); }
-			
-			position = dojo.position( 'themeContainer' );	
+
+			var bounds = lib.bounds( lib.node('themeContainer') );			
+			position = {x: bounds.left, y: bounds.top, w: bounds.width, h: bounds.height};
+			//console.log(position);
 	
 			if( !canvas ){
 				canvas = document.getElementById( 'orionui' );
 				ctx = canvas.getContext( '2d' );
-				canvas.addEventListener( "mousedown", dojo.hitch( this, 'mouseDown' ), false );	
+				canvas.addEventListener( "mousedown", this.mouseDown.bind(this), false );	
 				canvas.addEventListener( "mousemove", mouseMove, false );
 				canvas.addEventListener( "mouseup", mouseUp, false );
 			}
@@ -681,7 +685,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				
 					if( this.settings && this.settings[ this.dataset.shapes[item].family ] ){
 						 var color = this.settings[ this.dataset.shapes[item].family ].value;	 
-						 if( this.dataset.shapes[item].fill ){  this.dataset.shapes[item].fill = color; }else{ this.dataset.shapes[item].line = color; };
+						 if( this.dataset.shapes[item].fill ){  this.dataset.shapes[item].fill = color; }else{ this.dataset.shapes[item].line = color; }
 					}				
 				
 					this.drawShape( this.dataset.shapes[item], this.dataset.shapes[item].fill, this.dataset.shapes[item].line, this.dataset.shapes[item].font );
@@ -717,11 +721,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 			/* New Theme defined */
 			
-			if( dojo.byId( 'themesaver' ).value.length > 0 ){
+			if( lib.node( 'themesaver' ).value.length > 0 ){
 			
 				var newtheme = {};
 				
-				newtheme.name = dojo.byId( 'themesaver' ).value;
+				newtheme.name = lib.node( 'themesaver' ).value;
 				
 				for( var setting in this.settings ){
 					
@@ -752,8 +756,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				
 				themename = newtheme.name;
 				
-				if( dojo.byId( 'themesaver' ).value ){
-					dojo.byId( 'themesaver' ).value = '';
+				if( lib.node( 'themesaver' ).value ){
+					lib.node( 'themesaver' ).value = '';
 				}
 			}
 			
@@ -766,8 +770,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				prefs.put( 'selected', JSON.stringify(selectedTheme) );
 			} );
 			
-			dojo.byId( 'savecontainer' ).style.display = 'none';
-			dojo.byId( 'pickercontainer' ).style.display = '';
+			lib.node( 'savecontainer' ).style.display = 'none';
+			lib.node( 'pickercontainer' ).style.display = '';
 			this.updateThemePicker(themename);
 			this.AUTONAME = false;
 		}
@@ -777,8 +781,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 		function revert(data){	
 			this.initializeStorage();
 			this.guide();
-			dojo.byId( 'pickercontainer' ).style.display = '';
-			dojo.byId( 'savecontainer' ).style.display = 'none';
+			lib.node( 'pickercontainer' ).style.display = '';
+			lib.node( 'savecontainer' ).style.display = 'none';
 			this.AUTONAME = false;
 		}
 		
@@ -789,7 +793,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			OVERVIEW = true;
 			var data = this.themeData.getViewData();
 			this.drawOutlineData(data);
-			dojo.byId( 'stringcontainer' ).style.display = 'none';
+			lib.node( 'stringcontainer' ).style.display = 'none';
 		}
 		
 		ThemeBuilder.prototype.guide = guide;
@@ -858,9 +862,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			var newdiv = document.createElement('div');
 			newdiv.id = 'fontsizepicker';
 			document.getElementById( 'sizecontainer' ).appendChild(newdiv);
-			this.sizeSelect = new orion.widgets.settings.Select( {options:options}, newdiv );
-			this.sizeSelect.setStorageItem = dojo.hitch( themebuilder, 'selectFontSize' );
-	
+			this.sizeSelect = new Select( {options:options}, newdiv );
+			this.sizeSelect.setStorageItem = themebuilder.selectFontSize.bind(themebuilder);
+			this.sizeSelect.show();
 		}
 		
 		function addFontSizePicker(){
@@ -886,8 +890,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			}	
 			
 			if(!this.sizeSelect){
-				this.sizeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-				this.sizeSelect.setStorageItem = dojo.hitch( themebuilder, 'selectFontSize' );	
+				this.sizeSelect = new Select( {options:options}, picker );
+				this.sizeSelect.setStorageItem = themebuilder.selectFontSize.bind(themebuilder);	
+				this.sizeSelect.show();
 			}
 		}
 		
@@ -906,7 +911,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			
 			var themeInfo = this.themeData.getThemeStorageInfo();
 			
-			this.preferences.getPreferences(themeInfo.storage, 2).then(dojo.hitch(this, function(prefs){ //$NON-NLS-0$
+			this.preferences.getPreferences(themeInfo.storage, 2).then(function(prefs){ //$NON-NLS-0$
 
 				/* Check to see if the Orion theme is in the themes preferences ... if it is, 
 				   then we don't need to populate again, otherwise we do need to populate. */
@@ -959,13 +964,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				var picker = document.getElementById( 'themepicker' );
 				
 				if(!this.themeSelect){
-					this.themeSelect = new orion.widgets.settings.Select( {options:options}, picker );
-					this.themeSelect.setStorageItem = dojo.hitch( themebuilder, 'select' );
+					this.themeSelect = new Select( {options:options}, picker );
+					this.themeSelect.setStorageItem = themebuilder.select.bind( themebuilder );
+					this.themeSelect.show();
 					
 					var saver = document.getElementById( 'themesaver' );
-					new orion.widgets.settings.TextField({}, saver );	
+					this.themeSaver = new TextField({}, saver );
+					this.themeSaver.show();
 				}
-			} ));	
+			}.bind(this));	
 		}
 		
 		ThemeBuilder.prototype.addThemePicker = addThemePicker;
@@ -994,8 +1001,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 				var newdiv = document.createElement('div');
 				newdiv.id = 'themepicker';
 				document.getElementById( 'pickercontainer').appendChild(newdiv);
-				this.themeSelect = new orion.widgets.settings.Select( {options:options}, newdiv );
-				this.themeSelect.setStorageItem = dojo.hitch( this, 'select' );
+				this.themeSelect = new Select( {options:options}, newdiv );
+				this.themeSelect.setStorageItem = this.select.bind(this);
+				this.themeSelect.show();
 			}	
 		}
 		
@@ -1018,7 +1026,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 			element.id = this.colorFieldId;
 			
 			if( this.themeData.fontSettable ){
-				dojo.byId( 'sizecontainer' ).style.display = '';
+				lib.node( 'sizecontainer' ).style.display = '';
 			}
 	
 			this.drawOutlineData(data);	
@@ -1030,30 +1038,25 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/c
 		
 		ThemeBuilder.prototype.renderData = renderData;
 		
-		function destroy(){
-			var picker = dijit.byId( 'themepicker' );
+		ThemeBuilder.prototype.destroy = function(){
+			var picker = this.themepicker;
 			if (picker) {
 				picker.destroyRecursive();
 			}
-			var saver = dijit.byId( 'themesaver' );
+			var saver = this.themesaver;
 			if (saver) {
 				saver.destroyRecursive();
 			}
-			var colorfld = dijit.byId( this.colorFieldId );
+			var colorfld = lib.node( this.colorFieldId ); // Did this ever work?
 			if (colorfld) {
 				colorfld.destroyRecursive();
 			}
-			var fontsizepicker = dijit.byId( 'fontsizepicker' );
+			var fontsizepicker = this.fontsizepicker;
 			if (fontsizepicker) {
 				fontsizepicker.destroyRecursive();
 			}		
-		}
-		
-		ThemeBuilder.prototype.destroy = destroy;
-
-		return{
-			ThemeBuilder:ThemeBuilder,
-			destroy:destroy
 		};
+
+		return ThemeBuilder;
 	}
 );
