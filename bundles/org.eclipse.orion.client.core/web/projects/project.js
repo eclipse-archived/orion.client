@@ -22,48 +22,6 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			
 			var d = new Date();
 			
-			var cultura = new mProjectData.ProjectData( 'Online Store', 
-														d, 
-														'http://www.culturaespanola.ca', 
-														'', 
-														'Adding an online store to sell Spanish courses', 
-														'Cultura Espanol' );
-			
-			var shelterbox = new mProjectData.ProjectData( 'Map Data Project', 
-														d, 
-														'http://www.sbmapdata.appspot.com', 
-														'', 
-														'Creating a new application that allows a person to enter crisis data to be charted.', 
-														'ShelterBox' );
-														
-			var timeline = new mProjectData.ProjectData( 'Timeline Application', 
-														d, 
-														'http://www.clockplot.appspot.com', 
-														'', 
-														'Creating a visual application that plots timelines.', 
-														'Personal' );
-														
-			var blog = new mProjectData.ProjectData( 'My blog', 
-														d, 
-														'http://www.hickory.ca', 
-														'', 
-														'My web log ...', 
-														'Personal' );
-														
-														
-			var orion = new mProjectData.ProjectData( 'Orion Information Page', 
-														d, 
-														'http://www.eclipse.org/orion', 
-														'', 
-														'Orion Project Page', 
-														'Personal' );										
-
-			testData.push( blog );
-			testData.push( shelterbox );
-			testData.push( cultura );
-			testData.push( timeline );
-			testData.push( orion );
-			
 			return testData;
 		}
 	
