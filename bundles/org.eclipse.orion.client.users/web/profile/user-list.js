@@ -71,7 +71,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 			callback: function() {
 				var dialog = new NewUserDialog.NewUserDialog({
 					func : function() {
-						usersList.reloadUsers();
+						usersList.loadUsers();
 					},
 					registry : serviceRegistry
 				});
@@ -110,7 +110,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 							userService.deleteUser(item[i].Location).then(function(jsonData) {
 								usersProcessed++;
 								if(usersProcessed===item.length) {
-									usersList.reloadUsers();
+									usersList.loadUsers();
 								}
 							  });	
 						}
@@ -120,7 +120,7 @@ define(['i18n!profile/nls/messages', 'require', 'orion/webui/littlelib', 'orion/
 					item = Array.isArray(item) ? item[0] : item;
 					if (confirm(i18nUtil.formatMessage(messages["Are you sure you want to delete user ${0}?"], item.login))) {
 						userService.deleteUser(item.Location).then(function(jsonData) {
-						  usersList.reloadUsers();
+						  usersList.loadUsers();
 					  });
 					}
 				}
