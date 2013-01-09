@@ -20,9 +20,9 @@ define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, di
 
 	ResetPasswordDialog.prototype.TEMPLATE =
 		'<table>' +  //$NON-NLS-0$
-			'<tr><td><label for="password">Password:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="password">${Password:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="password" type="password" /></td></tr>' + //$NON-NLS-0$
-			'<tr><td><label for="retypePassword">Retype password:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="retypePassword">${Retype password:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="retypePassword" type="password" /></td></tr>' + //$NON-NLS-0$
 		'</table>'; //$NON-NLS-0$
 	ResetPasswordDialog.prototype._init = function(options) {
@@ -30,8 +30,8 @@ define(['i18n!profile/nls/messages','orion/webui/dialog'], function(messages, di
 		this.user = options.user;
 		this.func = options.func || function() {};
 		this.registry = options.registry;
-		this.title = messages["Change password for "] + this.user.login;
-		this.buttons = [{text: "Set Password", callback: this.done.bind(this)}]; 
+		this.title = messages['Change password for '] + this.user.login;
+		this.buttons = [{text: messages['Set Password'], callback: this.done.bind(this)}]; 
 		this._initialize();
 	};
 	
