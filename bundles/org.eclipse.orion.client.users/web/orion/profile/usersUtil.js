@@ -11,14 +11,14 @@
  *		Felipe Heidrich (IBM Corporation) - initial API and implementation
  ******************************************************************************/
  
- /*global define eclipse */
-define(['i18n!profile/nls/messages', 'dojo'], function(messages, dojo) {
+ /*global define  */
+define(['i18n!profile/nls/messages', 'orion/webui/littlelib'], function(messages, lib) {
 
 
 function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item) {
 	var eclipse = eclipse || {};
 		var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
-		var toolbar = dojo.byId(toolbarId);
+		var toolbar = lib.node(toolbarId);
 		if (toolbar) {
 			commandService.destroy(toolbar);
 		} else {
@@ -26,7 +26,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		}
 		commandService.renderCommands(toolbarId, toolbar, item, explorer, "button"); //$NON-NLS-0$
 		if (selectionToolbarId) {
-			var selectionTools = dojo.byId(selectionToolbarId);
+			var selectionTools = lib.node(selectionToolbarId);
 			if (selectionTools) {
 				commandService.destroy(selectionTools);
 				commandService.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button"); //$NON-NLS-0$
@@ -38,7 +38,7 @@ function updateNavTools (registry, explorer, toolbarId, selectionToolbarId, item
 		if (!eclipse.doOnce) {
 			eclipse.doOnce = true;
 			registry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-				var selectionTools = dojo.byId(selectionToolbarId);
+				var selectionTools = lib.node(selectionToolbarId);
 				if (selectionTools) {
 					commandService.destroy(selectionTools);
 					commandService.renderCommands(selectionToolbarId, selectionTools, event.selections, explorer, "button"); //$NON-NLS-0$
