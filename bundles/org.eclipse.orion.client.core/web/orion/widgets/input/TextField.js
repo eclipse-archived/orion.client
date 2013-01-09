@@ -32,6 +32,13 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 			this.textfield.addEventListener("change", this.change.bind(this)); //$NON-NLS-0$
 		},
 
+		destroy: function() {
+			if (this.node) {
+				lib.empty(this.node);
+				this.textfield = this.node = null;
+			}
+		},
+
 		setStorageItem: function(){
 			// to be overridden with a choice of function to store the picked color
 			console.log( 'TextField setStorageIem' ); //$NON-NLS-0$

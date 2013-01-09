@@ -488,7 +488,7 @@ div.page section:last-child {
 	display: inline-block;
 }
 
-.themepicker, .fontsizepicker, .colorfield {	
+.themepicker, .fontsizepicker, .colorfield, .themesaver {
 	display: inline-block;
 }
 

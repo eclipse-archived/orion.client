@@ -176,7 +176,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 												'<br>' +
 												'<div id="savecontainer" style="display:none;">' +
 													'<span class="settingsLabel">New theme name:</span>' + 
-													'<div id="themesaver"></div>' +
+													'<div id="themesaver" class="themesaver"></div>' +
 												'</div>' +
 												'<div id="stringcontainer" style="position:absolute;left:425px;top:360px;display:none;">' +
 														'<span>OR HEX: </span>' + 
@@ -452,8 +452,8 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 						lib.node( 'savecontainer' ).style.display = '';
 						
 						if( this.AUTONAME === false ){
-							var currentTheme = this.themepicker.getSelected();
-							this.themesaver.setValue( currentTheme );
+							var currentTheme = this.themeSelect.getSelected();
+							this.themeSaver.setValue( currentTheme );
 							this.AUTONAME = true;
 						}
 						
@@ -1039,21 +1039,21 @@ define(['i18n!orion/settings/nls/messages', 'orion/commands', 'orion/globalComma
 		ThemeBuilder.prototype.renderData = renderData;
 		
 		ThemeBuilder.prototype.destroy = function(){
-			var picker = this.themepicker;
+			var picker = this.themeSelect;
 			if (picker) {
-				picker.destroyRecursive();
+				picker.destroy();
 			}
-			var saver = this.themesaver;
+			var saver = this.themeSaver;
 			if (saver) {
-				saver.destroyRecursive();
+				saver.destroy();
 			}
-			var colorfld = lib.node( this.colorFieldId ); // Did this ever work?
+			var colorfld = this.colfld;
 			if (colorfld) {
-				colorfld.destroyRecursive();
+				colorfld.destroy();
 			}
 			var fontsizepicker = this.fontsizepicker;
 			if (fontsizepicker) {
-				fontsizepicker.destroyRecursive();
+				fontsizepicker.destroy();
 			}		
 		};
 
