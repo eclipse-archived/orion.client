@@ -182,10 +182,10 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		return a.promise;
 	};
 	
-	tests["test cancel chain"] = function() {
-		var a = new Deferred();
+	tests["test cancel parent"] = function() {
+		var parent = new Deferred();
 		
-		var test = a.promise.then(function() {
+		var test = parent.then(function() {
 			return assert.ok(false, "Expected an exception");
 		}, function() {
 			// expected
@@ -193,18 +193,32 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		
 		var testCancel = test.cancel;
 		test.cancel = function() {
-			a.promise.cancel();
+			parent.cancel();
 			testCancel();
 		};
 		test.cancel();
-		return a.promise.then(function() {
+		return parent.then(function() {
 			return assert.ok(false, "Expected an exception");
 		}, function() {
 			// expected
 		});
 	};
 	
-
+	tests["test cancel parent"] = function() {
+		var assumed = new Deferred();
+		var a = new Deferred();
+		var test = a.then(function() {
+			return assumed;
+		});
+		a.resolve().then(function() {
+			test.cancel();
+		});
+		return assumed.then(function() {
+			return assert.ok(false, "Expected an exception");
+		}, function() {
+			// expected
+		});
+	};
 
 
 
