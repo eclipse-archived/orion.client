@@ -25,7 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 		'orion/widgets/settings/UserSettings',
 		'orion/widgets/settings/InputBuilder'
 		], function(messages, require, mGlobalCommands, PageUtil, lib, objects, URITemplate, 
-			mThemeBuilder, SettingsList, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, InputBuilder) {
+			ThemeBuilder, SettingsList, editorThemeData, containerThemeData, SplitSelectionLayout, PluginList, UserSettings, InputBuilder) {
 
 	/**
 	 * @param {Object} options
@@ -81,7 +81,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			// to build the UI until there are settings to be found there.
 			window.setTimeout(function() {
 				this.drawUserInterface();
-				this.inputBuilder = new orion.widgets.settings.InputBuilder( this.preferences );
+				this.inputBuilder = new InputBuilder( this.preferences );
 			}.bind(this), 100);
 			window.addEventListener("hashchange", this.processHash.bind(this)); //$NON-NLS-0$
 			
@@ -125,7 +125,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			
 			var containerTheme = new containerThemeData.ThemeData();
 		
-			this.themeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: containerTheme });
+			this.themeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: containerTheme });
 			
 			lib.empty(this.table);
 
@@ -147,7 +147,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			
 			var editorTheme = new editorThemeData.ThemeData();
 		
-			this.editorThemeWidget = new mThemeBuilder.ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
+			this.editorThemeWidget = new ThemeBuilder({ commandService: this.commandService, preferences: this.preferences, themeData: editorTheme });
 			
 			var command = { name:'Import', tip:'Import a theme', id:0, callback: editorTheme.importTheme.bind(editorTheme) };
 			

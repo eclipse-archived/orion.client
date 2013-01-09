@@ -11,8 +11,8 @@
 /*global widgets orion window console define localStorage ActiveXObject DOMParser*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require'], 
-	function(messages, require) {
+define([], 
+	function() {
 	
 		/* Synchronizing colors and styles for HTML, CSS and JS files like this ...
 	

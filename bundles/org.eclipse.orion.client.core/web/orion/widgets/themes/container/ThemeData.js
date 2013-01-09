@@ -11,8 +11,8 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/widgets/themes/container/ThemeSheetWriter'], 
-	function(messages, require, dojo, dijit, ThemeSheetWriter) {
+define(['orion/widgets/themes/container/ThemeSheetWriter'], 
+	function(ThemeSheetWriter) {
 
 		function StyleSet(){
 		

@@ -11,8 +11,7 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require' ], 
-	function(messages, require) {
+define([], function() {
 
 		var className = null;
 		var attributes = [];
