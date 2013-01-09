@@ -134,16 +134,16 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 				return new Deferred().reject(new Error("plugin not connected"));
 			}
 
-			var requestId = _currentMessageId++;			
-			var onCancel = function(reason) {
-				if (_state === "active") {
+			var requestId = _currentMessageId++;
+			var d = new Deferred();
+			d.then(null, function(error) {
+				if (_state === "active" && error && error.canceled) {
 					_internalRegistry.postMessage({
 						id: requestId,
-						cancel: typeof reason === "string" ? reason : "canceled"
+						cancel: error.message || "canceled"
 					}, _channel);
 				}
-			};
-			var d = new Deferred(onCancel);
+			});
 			_deferredResponses[String(requestId)] = d;
 			var message = {
 				id: requestId,

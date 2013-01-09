@@ -23,8 +23,8 @@
  * depend on pretty much everything else in the file. 
  */
 
-define(["require", "dojo", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
-	function(require, dojo, mContentTypes, URITemplate, i18nUtil){
+define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
+	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
 	 * Utility methods
@@ -256,12 +256,12 @@ define(["require", "dojo", "orion/contentTypes", "orion/URITemplate", "orion/i18
 		}
 	
 		var validator = {info: info};
-		validator.validationFunction =  dojo.hitch(validator, function(items){
+		validator.validationFunction =  function(items){
 			if (typeof validationItemConverter === "function") { //$NON-NLS-0$
 				items = validationItemConverter.call(this, items);
 			}
 			if (items) {
-				if (dojo.isArray(items)){
+				if (Array.isArray(items)){
 					if ((this.info.forceSingleItem || this.info.uriTemplate) && items.length !== 1) {
 						return false;
 					}
@@ -280,12 +280,12 @@ define(["require", "dojo", "orion/contentTypes", "orion/URITemplate", "orion/i18
 				return true;
 			}
 			return false;
-		});
-		validator.generatesURI = dojo.hitch(validator, function() {
+		};
+		validator.generatesURI = function() {
 			return !!this.info.uriTemplate;
-		});
+		};
 		
-		validator.getURI = dojo.hitch(validator, function(item) {
+		validator.getURI = function(item) {
 			if (this.info.uriTemplate) {
 				var variableExpansions = {};
 				// we need the properties of the item
@@ -318,33 +318,34 @@ define(["require", "dojo", "orion/contentTypes", "orion/URITemplate", "orion/i18
 				return window.decodeURIComponent(uriTemplate.expand(variableExpansions));
 			} 
 			return null;
-		});
+		};
 		return validator;
 	};
 	
 	// Turns an info object containing the service properties and the service (or reference) into Command options.
 	extensionCommandUtils._createCommandOptions = function(/**Object*/ info, /**Service*/ serviceOrReference, serviceRegistry, contentTypesMap, /**boolean*/ createNavigateCommandCallback, /**optional function**/ validationItemConverter) {
 		
-		var deferred = new dojo.Deferred();
+		var deferred = new Deferred();
 		
 		function enhanceCommandOptions(commandOptions, deferred){
 			var validator = extensionCommandUtils._makeValidator(info, serviceRegistry, contentTypesMap, validationItemConverter);
-			commandOptions.visibleWhen = validator.validationFunction;
+			commandOptions.visibleWhen = validator.validationFunction.bind(validator);
 			
 			if (createNavigateCommandCallback) {
-				if (validator.generatesURI()) {
-					commandOptions.hrefCallback = dojo.hitch(validator, function(data){
-						var item = dojo.isArray(data.items) ? data.items[0] : data.items;
-						return this.getURI(item);
-					});
+				if (validator.generatesURI.bind(validator)()) {
+					commandOptions.hrefCallback = function(data){
+						var item = Array.isArray(data.items) ? data.items[0] : data.items;
+						return validator.getURI.bind(validator)(item);
+					};
 				} else {
-					commandOptions.callback = dojo.hitch(info, function(data){
+					var inf = info;
+					commandOptions.callback = function(data){
 						var shallowItemsClone;
-						if (this.forceSingleItem) {
-							var item = dojo.isArray() ? data.items[0] : data.items;
+						if (inf.forceSingleItem) {
+							var item = Array.isArray(data.items) ? data.items[0] : data.items;
 							shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(item);
 						} else {
-							if (dojo.isArray(data.items)) {
+							if (Array.isArray(data.items)) {
 								shallowItemsClone = [];
 								for (var j = 0; j<data.items.length; j++) {
 									shallowItemsClone.push(extensionCommandUtils._cloneItemWithoutChildren(data.items[j]));
@@ -358,7 +359,7 @@ define(["require", "dojo", "orion/contentTypes", "orion/URITemplate", "orion/i18
 						} else if (serviceRegistry) {
 							serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
 						}
-					});
+					};
 				}  // otherwise the caller will make an appropriate callback for the extension
 			}
 			deferred.resolve(commandOptions);
