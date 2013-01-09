@@ -40,7 +40,7 @@ define([],
 		
 		function render( context ){
 				
-				if( context !== null ){
+				if( context ){
 					this.context = context;
 				}
 				
