@@ -21,22 +21,22 @@ define(['i18n!profile/nls/messages', 'orion/webui/dialog'], function(messages, d
 
 	NewUserDialog.prototype.TEMPLATE =
 		'<table>' +  //$NON-NLS-0$
-			'<tr><td><label for="userName">Login:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="userName">${Login:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="userName" /></td></tr>' + //$NON-NLS-0$
-			'<tr><td><label for="password">Password:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="password">${Password:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="password" type="password" /></td></tr>' + //$NON-NLS-0$
-			'<tr><td><label for="retypePassword">Retype password:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="retypePassword">${Retype password:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="retypePassword" type="password" /></td></tr>' + //$NON-NLS-0$
-			'<tr><td><label for="email">Email:</label></td>' + //$NON-NLS-0$
+			'<tr><td><label for="email">${Email:}</label></td>' + //$NON-NLS-0$
 			'<td><input id="email" /></td></tr>' + //$NON-NLS-0$
 		'</table>'; //$NON-NLS-0$
 	
 	NewUserDialog.prototype._init = function(options) {
-		this.title = messages["Create New User"];
+		this.title = messages['Create New User'];
 		this.messages = messages;
 		this.func = options.func || function() {};
 		this.registry = options.registry;
-		this.buttons = [{text: "Create", callback: this.done.bind(this)}]; 
+		this.buttons = [{text: messages['Create'], callback: this.done.bind(this)}]; 
 		this._initialize();
 	};
 	
