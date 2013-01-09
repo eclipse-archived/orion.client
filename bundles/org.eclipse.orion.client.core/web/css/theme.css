@@ -13,7 +13,7 @@
 	border: 0;
 	background: #333;
 	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#333), color-stop(100%,#333));
-	height: 28px;
+	height: 32px;
 }
 
 a {
@@ -59,7 +59,7 @@ a:hover {
 
 .titleArea {
     margin: 0;
-    padding-top:5px;
+    padding-top:3px;
     border: 0;
     background: #EFEFEF;
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#EFEFEF), color-stop(100%,#EFEFEF));
