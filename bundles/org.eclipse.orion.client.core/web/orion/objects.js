@@ -16,19 +16,22 @@ define([], function() {
 	 */
 	return {
 		/**
-		 * Mixes all <code>src</code>'s own enumerable properties into <code>dest</code>.
+		 * Mixes all <code>source</code>'s own enumerable properties into <code>target</code>. Multiple source objects
+		 * can be passed as varags.
 		 * @name orion.objects.mixin
 		 * @function
 		 * @static
 		 * @param {Object} target
 		 * @param {Object} source
 		 */
-		mixin: function(target, source) {
-			var keys = Object.keys(source);
-			for (var i=0; i < keys.length; i++) {
-				var key = keys[i];
-				target[key] = source[key];
-			}
+		mixin: function(target/**, source..*/) {
+			Array.prototype.slice.call(arguments, 1).forEach(function(source) {
+				var keys = Object.keys(source);
+				for (var i=0; i < keys.length; i++) {
+					var key = keys[i];
+					target[key] = source[key];
+				}
+			});
 		},
 		/**
 		 * Makes <code>child</code> "inherit" from <code>parent</code> by setting <code>child</code>'s prototype

@@ -17,81 +17,83 @@
    /* this.inherited(arguments);
 			this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$ */
 
-define(['i18n!orion/settings/nls/messages', 'require' ], 
-	function(messages, require) {
-	
-		function LabeledSelect( label, options, node ){
-			this.anchor = node;		
-			this.anchor.innerHTML = this.templateString;
-			this.options = options;
-			this.options.forEach( this.addOptions.bind(this) );
-			this.anchor.firstChild.onchange = this.change.bind(this);
+define(['i18n!orion/settings/nls/messages', 'orion/objects', 'orion/webui/littlelib'], 
+	function(messages, objects, lib) {
+
+		/**
+		 * @param {Object[]} param.options Array of {value:Object, label:String, selected:Boolean(optional)}
+		 */
+		function LabeledSelect( params, node ){
+			objects.mixin( this, params );
+			this.node = node || document.createElement("div"); //$NON-NLS-0$
+			this.node.innerHTML = this.templateString;
+			this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
+			this.select = lib.$(".setting-control", this.node); //$NON-NLS-0$
+			this.options = params.options;
 		}
-		
-		var anchor;
-		
-		LabeledSelect.prototype.anchor = anchor;
-		
-		var templateString =	'<div class="setting-property">' +  //$NON-NLS-0$
+		objects.mixin(LabeledSelect.prototype, {
+			templateString :	'<div class="setting-property">' +  //$NON-NLS-0$
 									'<label>' + //$NON-NLS-0$
 										'<span class="setting-label"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 										'<select class="setting-control"></select>' + //$NON-NLS-0$
 									'</label>' +  //$NON-NLS-0$
-								'</div>'; //$NON-NLS-0$
+								'</div>', //$NON-NLS-0$
 
-		LabeledSelect.prototype.templateString = templateString;
-		
-		function addOptions(item, index, ar){			
-			var option = document.createElement("option");
-			option.value = item.value;
-			option.appendChild(document.createTextNode(item.label));
-			this.anchor.firstChild.appendChild(option);
-			if( item.selected === true ){
-				this.anchor.firstChild.value = item.value;
-			}
-		}
-		
-		LabeledSelect.prototype.addOptions = addOptions;
-		
-		function setStorageItem(){
-			// to be overridden with a choice of function to store the picked color
-		}
-		
-		LabeledSelect.prototype.setStorageItem = setStorageItem;
-		
-		function getSelected(){
-			return this.selection.value;
-		}
-		
-		LabeledSelect.prototype.getSelected = getSelected;
-	
-		function getSelectedIndex() {
-			return this.selection.selectedIndex;
-		}
-		
-		LabeledSelect.prototype.getSelectedIndex = getSelectedIndex;
-	
-		function setSelectedIndex(index) {
-			this.selection.selectedIndex = index;
-		}
-		
-		LabeledSelect.prototype.setSelectedIndex = setSelectedIndex;
-	
-		function change(){
-		
-			var value = this.anchor.firstChild.value;
+			addOptions : function(item, index, ar){			
+				var option = document.createElement("option"); //$NON-NLS-0$
+				option.value = item.value;
+				option.appendChild(document.createTextNode(typeof item.label === "string" ? item.label : item.value));
+				if( item.selected  ){
+					option.selected = 'selected'; //$NON-NLS-0$
+				}
+				this.select.appendChild(option);
+			},
+
+			show: function() {
+				this.postCreate();
+			},
+
+			postCreate: function() {
+				this.options.forEach( this.addOptions.bind(this) );
+				this.select.addEventListener("change",  this.change.bind(this)); //$NON-NLS-0$
+				this.mylabel.textContent = this.fieldlabel + ':';
+			},
+
+			destroy: function() {
+				if (this.node) {
+					lib.empty(this.node);
+					this.node = this.mylabel = this.select = null;
+				}
+			},
+
+			setStorageItem : function(){
+				// to be overridden with a choice of function to store the picked color
+			},
 			
-			if( this.category ){
-				this.setStorageItem( this.category, this.item, this.element, value, this.ui );
-			}else{
-				this.setStorageItem( value );
-			}
-		}
+			getSelected : function(){
+				return this.select.value;
+			},
 		
-		LabeledSelect.prototype.change = change;
-	
-		return{
-			LabeledSelect:LabeledSelect
-		};
+			getSelectedIndex: function() {
+				return this.select.selectedIndex;
+			},
+			
+			setSelectedIndex : function setSelectedIndex(index) {
+				this.select.selectedIndex = index;
+			},
+		
+			change : function change(){
+			
+				var value = this.select.value;
+				
+				if( this.category ){
+					this.setStorageItem( this.category, this.item, this.element, value, this.ui );
+				}else{
+					this.setStorageItem( value );
+				}
+			}
+		});
+
+		return LabeledSelect;
 	}
 );
