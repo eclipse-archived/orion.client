@@ -210,6 +210,9 @@ var AppContext = function(options) {
 	 */
 	this.startNPM = function(args, context) {
 		var npmPath = configParams.npm_path;
+		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
+		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
+		}	
 		var cwdPath = resolveModulePath(fileRoot, workspaceDir, context.cwd);
 		var app = _startApp([npmPath].concat(args || []), cwdPath);
 		app.on('exit', function(code) {
