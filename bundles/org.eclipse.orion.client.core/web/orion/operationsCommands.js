@@ -67,7 +67,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib'
 				id : "eclipse.removeCompletedOperations", //$NON-NLS-0$
 				callback : function(data) {
 					operationsClient.removeCompletedOperations().then(function(item){
-						operationsClient.removeCompletedOperations();
+						explorer.loadOperations.bind(explorer)();
 					});
 				},
 				visibleWhen : function(item) {
