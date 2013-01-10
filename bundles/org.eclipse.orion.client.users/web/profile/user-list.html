@@ -11,26 +11,7 @@
 		<script type="text/javascript">
 		require({
 			  baseUrl: '..',
-			  packages: [
-			    {
-			      name: 'dojo',
-			      location: 'org.dojotoolkit/dojo',
-			      main: 'lib/main-browser',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dijit',
-			      location: 'org.dojotoolkit/dijit',
-			      main: 'lib/main',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dojox',
-			      location: 'org.dojotoolkit/dojox',
-			      main: 'lib/main',
-			      lib: '.'
-			    }		    
-			  ],
+			  packages: [],
 			  paths: {
 				  text: 'requirejs/text',
 				  i18n: 'requirejs/i18n',
@@ -41,7 +22,7 @@
 		require(["user-list.js"]);
 		</script>
 </head>
-	<body id="orion-userList" style="height: 100%;" class="claro orionPage">
+	<body id="orion-userList" style="height: 100%;" class="orionPage">
 		<div class="content-fixedHeight">
 			<div class="fixedToolbarHolder mainpane mainPanelLayout">
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>

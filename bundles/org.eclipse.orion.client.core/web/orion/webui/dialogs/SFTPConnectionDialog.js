@@ -74,7 +74,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	SFTPConnectionDialog.prototype = new dialog.Dialog();
 
 	SFTPConnectionDialog.prototype.TEMPLATE = 
-		'<div style="minimum-width = 100em;">' + //$NON-NLS-0$
+		'<div>' + //$NON-NLS-0$
 			'<div><label for="sftpPath">${Location:}</label></div>' +  //$NON-NLS-0$
 			'<div><select id="sftpConnectionList" name="sftpConnectionList"></select>' + //$NON-NLS-0$
 			'<span id="newSftpConnection" role="button" style="margin-left: 16px;" class="dropdownTrigger commandButton" tabindex="0">${New}<span class="dropdownArrowDown"></span></span></div>' + //$NON-NLS-0$
@@ -102,6 +102,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	};
 	
 	SFTPConnectionDialog.prototype._bindToDom = function(parent) {
+		this.$sftpConnectionList.style.minWidth = "220px"; //$NON-NLS-0$
 		this._popupDialog = new SFTPNewConnectionPopup(this.$newSftpConnection, this.onAddConnection.bind(this));
 		this.$$modalExclusions = [this._popupDialog.$parent];
 		this._populateSelect();

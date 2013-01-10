@@ -9,19 +9,22 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define document orion*/
-define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/section', 'orion/i18nUtil', 'orion/Deferred',
-		'dojo', 'dijit', 'orion/widgets/settings/LabeledCheckbox', 'orion/widgets/settings/LabeledTextfield',
-		'orion/widgets/settings/LabeledSelect'],
-		function(messages, mExplorer, mSection, i18nUtil, Deferred, dojo, dijit) {
+define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/section', 'orion/i18nUtil', 'orion/Deferred', 'orion/objects',
+		'orion/widgets/input/LabeledCheckbox', 'orion/widgets/input/LabeledTextfield', 'orion/widgets/input/LabeledSelect'],
+		function(messages, mExplorer, mSection, i18nUtil, Deferred, objects, LabeledCheckbox, LabeledTextfield, LabeledSelect) {
 	var Explorer = mExplorer.Explorer, SelectionRenderer = mExplorer.SelectionRenderer, Section = mSection.Section;
 
-	var PropertyWidget = dojo.declare('orion.widgets.settings.SettingWidget', [dijit._Widget], { //$NON-NLS-0$
-		postMixInProperties: function() {
-			this.inherited(arguments);
-			this.fieldlabel = this.property.getName();
-		},
+	/**
+	 * Base mixin for plugin settings widgets. Classes this is mixed into must define these 2 methods:
+	 * changeProperty(event) -- sets the model value to reflect the given UI event.
+	 * updateField(modelValue) -- sets the UI field to reflect the modelValue.
+	 */
+	var PropertyWidget = function(options) {
+		objects.mixin(this, options);
+		this.fieldlabel = this.property.getName();
+	};
+	objects.mixin(PropertyWidget.prototype, {
 		postCreate: function() {
-			this.inherited(arguments);
 			var property = this.property, config = this.configuration;
 			var properties = config.getProperties();
 			var value;
@@ -30,14 +33,25 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 			} else {
 				value = property.getDefaultValue();
 			}
-			this.updateField(value);
+			if (typeof this.updateField === 'function') { //$NON-NLS-0$
+				this.updateField(value);
+			}
 		},
-		changeProperty: function() {},
-		updateField: function(modelValue) {}
-	}),
-	PropertyTextField = dojo.declare('orion.widgets.settings.PropertyTextField', [orion.widgets.settings.LabeledTextfield, PropertyWidget], { //$NON-NLS-0$
+		changeProperty: null, /*function() {},*/
+		updateField: null /*function(modelValue) {}*/
+	});
+
+	/**
+	 * Widget displaying a string-typed plugin setting. Mixes in LabeledTextfield and PropertyWidget.
+	 */
+	var PropertyTextField = function(options) {
+		PropertyWidget.apply(this, arguments);
+		LabeledTextfield.apply(this, arguments);
+	};
+	objects.mixin(PropertyTextField.prototype, LabeledTextfield.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
-			this.inherited(arguments);
+			LabeledTextfield.prototype.postCreate.apply(this, arguments);
+			PropertyWidget.prototype.postCreate.apply(this, arguments);
 			var type = this.property.getType();
 			if (type === 'number') { //$NON-NLS-0$
 				this.myfield.type = 'number'; //$NON-NLS-0$
@@ -51,48 +65,93 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 		updateField: function(value) {
 			this.myfield.value = value;
 		}
-	}),
-	PropertyCheckbox = dojo.declare('orion.widgets.settings.PropertyCheckbox', [orion.widgets.settings.LabeledCheckbox, PropertyWidget], { //$NON-NLS-0$
+	});
+
+	/**
+	 * Widget displaying a boolean-typed plugin setting. Mixes in LabeledCheckbox and PropertyWidget.
+	 */
+	var PropertyCheckbox = function(options) {
+		PropertyWidget.apply(this, arguments);
+		LabeledCheckbox.apply(this, arguments);
+	};
+	objects.mixin(PropertyCheckbox.prototype, LabeledCheckbox.prototype, PropertyWidget.prototype, {
 		change: function(event) {
 			this.changeProperty(event.target.checked); //$NON-NLS-0$
+		},
+		postCreate: function() {
+			PropertyWidget.prototype.postCreate.call(this);
+			LabeledCheckbox.prototype.postCreate.call(this);
 		},
 		updateField: function(value) {
 			this.myfield.checked = value;
 		}
-	}),
-	PropertySelect = dojo.declare('orion.widgets.settings.PropertySelect', [orion.widgets.settings.LabeledSelect, PropertyWidget], { //$NON-NLS-0$
+	});
+
+	/**
+	 * Widget displaying a plugin setting whose value is restricted to an enumerated set (options). Mixes in LabeledSelect and PropertyWidget.
+	 */
+	var PropertySelect = function(options) {
+		PropertyWidget.apply(this, arguments);
+		LabeledSelect.apply(this, arguments);
+	};
+	objects.mixin(PropertySelect.prototype, LabeledSelect.prototype, PropertyWidget.prototype, {
 		postCreate: function() {
 			var values = this.property.getOptionValues(), labels = this.property.getOptionLabels();
 			this.options = values.map(function(value, i) {
 				var label = (typeof labels[i] === 'string' ? labels[i] : value); //$NON-NLS-0$
 				return {value: label, label: label};
 			});
-			this.inherited(arguments);
+			LabeledSelect.prototype.postCreate.apply(this, arguments);
+			PropertyWidget.prototype.postCreate.apply(this, arguments);
 		},
 		change: function(event) {
-			this.inherited(arguments);
+			LabeledSelect.prototype.change.apply(this, arguments);
 			var selectedOptionValue = this.property.getOptionValues()[this.getSelectedIndex()];
 			if (typeof selectedOptionValue !== 'undefined') { //$NON-NLS-0$
 				this.changeProperty(selectedOptionValue);
 			}
 		},
 		updateField: function(value) {
-			this.inherited(arguments);
 			var index = this.property.getOptionValues().indexOf(value);
 			if (index !== -1) {
 				this.setSelectedIndex(index);
 			}
 		}
-	}),
-	PropertiesWidget = dojo.declare('orion.widgets.settings.PropertiesWidget', [dijit._WidgetBase, dijit._Container], { //$NON-NLS-0$
-		buildRendering: function() {
-			this.inherited(arguments);
+	});
+
+	/**
+	 * Container widget displaying the plugin settings of a single {@link orion.cm.Configuration}. Each setting is
+	 * rendered by instantiating an appropriate Property* widget and adding it as a child of this widget.
+	 */
+	var PropertiesWidget = function(options, parentNode) {
+		objects.mixin(this, options);
+		if (!parentNode) { throw "parentNode is required"; }
+		this.node = parentNode;
+	};
+	objects.mixin(PropertiesWidget.prototype, { //$NON-NLS-0$
+		createElements: function() {
 			var serviceRegistry = this.serviceRegistry;
 			var self = this;
+			this.children = [];
 			this.configAdmin = serviceRegistry.getService('orion.cm.configadmin'); //$NON-NLS-0$
 			this.initConfiguration().then(function(configuration) {
 				self.createChildren(configuration);
 			});
+		},
+		startup: function() {
+			this.createElements();
+		},
+		destroy: function() {
+			if (this.children) {
+				this.children.forEach(function(child) {
+					child.destroy();
+				});
+			}
+		},
+		addChild: function(childWidget) {
+			this.children.push(childWidget);
+			this.node.appendChild(childWidget.node);
+			childWidget.show();
 		},
 		/** Creates a new configuration if necessary */
 		initConfiguration: function() {
@@ -106,9 +165,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 					});
 				return this.configPromise;
 			} else {
-				var d = new Deferred();
-				d.resolve(configuration);
-				return d;
+				return new Deferred().resolve(configuration);
 			}
 		},
 		createChildren: function(configuration) {
@@ -186,7 +243,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 //		mNavUtils.addNavGrid(this.explorer.getNavDict(), setting, link);
 	};
 	SettingsRenderer.prototype.createPropertiesWidget = function(parent, setting, serviceRegistry) {
-		return new PropertiesWidget({containerNode: parent, serviceRegistry: this.serviceRegistry, setting: setting});
+		return new PropertiesWidget({serviceRegistry: this.serviceRegistry, setting: setting}, parent);
 	};
 	SettingsRenderer.prototype.renderTableHeader = function(tableNode) {
 		return document.createElement('div'); //$NON-NLS-0$
@@ -194,7 +251,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/explorers/explorer', 'orion/s
 	SettingsRenderer.prototype.destroy = function() {
 		if (this.childWidgets) {
 			this.childWidgets.forEach(function(widget) {
-				widget.destroyRecursive();
+				widget.destroy();
 			});
 		}
 		this.childWidgets = null;

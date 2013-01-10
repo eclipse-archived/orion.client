@@ -8,14 +8,16 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
-/*jslint browser:true*/
+/*global window console define localStorage*/
+/*jslint browser:true sub:true*/
 
 /* This PluginList widget provides a HTML list placeholder for PluginEntries, and
    provides JavaScript functions for user management of Orion plugins. It is designed
    to contain PluginEntry widgets */
 
-define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'dijit/TooltipDialog', 'orion/widgets/plugin/PluginEntry'], function(messages, require, dojo, dijit, Deferred, mCommands, mHTMLFragments) {
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
+		'orion/widgets/plugin/PluginEntry'
+		], function(messages, require, Deferred, mCommands, mHTMLFragments, objects, lib, PluginEntry) {
 	
 	var defaultPluginURLs = {};
 	
@@ -37,35 +39,54 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		});
 	}
 
-	
-	dojo.declare("orion.widgets.plugin.PluginList", [dijit._Widget, dijit._Templated], { //$NON-NLS-0$
-	
-		templateString: '<div>' +  //$NON-NLS-0$
-							'<div id="pluginSectionHeader" data-dojo-attach-point="pluginSectionHeader" class="sectionWrapper sectionWrapperAux toolComposite">' + 
-								'<div class="sectionAnchor sectionTitle layoutLeft" data-dojo-attach-point="pluginTitle"></div>' + 
-								'<div class="sectionItemCount layoutLeft" data-dojo-attach-point="pluginCount">0</div>' + 
-								'<div id="pluginCommands" data-dojo-attach-point="pluginCommands" class="layoutRight sectionActions"></div>' +
-							'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
+	function PluginList(options, parentNode) {
+		objects.mixin(this, options);
+		this.node = parentNode || document.createElement("div"); //$NON-NLS-0$
+	}
+	objects.mixin(PluginList.prototype, {
+		templateString: '' +  //$NON-NLS-0$
+						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper sectionWrapperAux toolComposite">' +  /* pluginSectionHeader */
+							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */
+							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */
+							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */
+						'</div>' + //$NON-NLS-0$
 
-					        '<div class="displaytable layoutBlock">' + //$NON-NLS-0$
-								'<div class="plugin-settings">' + //$NON-NLS-0$
-									'<list style="overflow:hidden;" data-dojo-attach-point="pluginSettingsList"></list>' + //$NON-NLS-0$
-								'</div>' + //$NON-NLS-0$
+				        '<div class="displaytable layoutBlock">' + //$NON-NLS-0$
+							'<div class="plugin-list-container">' + //$NON-NLS-0$
+								'<div class="plugin-list" style="overflow:hidden;"></div>' + //$NON-NLS-0$ /* pluginList */
 							'</div>' + //$NON-NLS-0$
-					    '</div>', //$NON-NLS-0$
+						'</div>', //$NON-NLS-0$
 				
 		pluginDialogState: false,
 		
 		includeMaker: false,
 		
 		target: "_self", //$NON-NLS-0$
+
+		createElements: function() {
+			this.node.innerHTML = this.templateString;
+			this.pluginSectionHeader = lib.$(".pluginSectionHeader", this.node); //$NON-NLS-0$
+			this.pluginTitle = lib.$(".sectionAnchor", this.node); //$NON-NLS-0$
+			this.pluginCount = lib.$(".sectionItemCount", this.node); //$NON-NLS-0$
+			this.pluginCommands = lib.$(".pluginCommands", this.node); //$NON-NLS-0$
+			this.pluginList = lib.$(".plugin-list", this.node); //$NON-NLS-0$
+			this.postCreate();
+		},
+
+		destroy: function() {
+			if (this.node) {
+				lib.empty(this.node);
+				this.node = this.pluginSectionHeader = this.pluginTitle = this.pluginCount = this.pluginCommands = this.pluginList = null;
+			}
+		},
 				
 		postCreate: function(){
 		
 			var _this = this;
 			if (this.pluginSectionHeader) {
-				var slideout = mHTMLFragments.slideoutHTMLFragment("pluginSectionHeader");
-				dojo.place(slideout, this.pluginSectionHeader);
+				var slideout = document.createDocumentFragment();
+				slideout.innerHTML = mHTMLFragments.slideoutHTMLFragment("pluginSectionHeader"); //$NON-NLS-0$
+				_this.pluginSectionHeader.appendChild(slideout);
 			}
 			this.addRows();
 
@@ -88,7 +109,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 			}
 		},
 				
-		startup: function(){
+		show: function(){
+			this.createElements();
+
 			this.updateToolbar();
 
 			// set up the toolbar level commands	
@@ -97,14 +120,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 				tooltip: messages["Install a plugin by specifying its URL"],
 				id: "orion.installPlugin", //$NON-NLS-0$
 				parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter('url', 'url', messages['Plugin URL:'], '')]), //$NON-NLS-1$ //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data) {
+				callback: function(data) {
 					if (data.parameters) {
 						var location = data.parameters.valueFor('url'); //$NON-NLS-0$
 						if (location) {
 							this.installHandler(location);
 						}
 					}
-				})
+				}.bind(this)
 			});
 			this.commandService.addCommand(installPluginCommand);
 			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -112,9 +135,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 				name: messages["Reload all"],
 				tooltip: messages["Reload all installed plugins"],
 				id: "orion.reloadAllPlugins", //$NON-NLS-0$
-				callback: dojo.hitch(this, function() {
-					this.reloadPlugins();
-				})
+				callback: this.reloadPlugins.bind(this)
 			});
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar
@@ -124,10 +145,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 				name: messages['Create'],
 				tooltip: messages["Create a new Orion Plugin"],
 				id: "orion.createPlugin", //$NON-NLS-0$
-				callback: dojo.hitch(this, function(data){
+				callback: function(data){
 					this.createPlugin(data.items);
-				})
-			
+				}.bind(this)
 			});
 			
 			this.commandService.addCommand(createPluginCommand);
@@ -215,33 +235,33 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 			this.commandService.registerCommandContribution("pluginCommand", "orion.enablePlugin", 4); //$NON-NLS-1$ //$NON-NLS-0$
 
 		
-			var list = this.pluginSettingsList;
+			var list = this.pluginList;
 		
 			if(referenceplugin){
-				list = referenceplugin.pluginSettingsList;
+				list = referenceplugin.pluginList;
 			}
 
-			dojo.empty( list );
+			lib.empty( list );
 			var pluginList = this.settings.pluginRegistry.getPlugins();
 			this.pluginTitle.textContent = messages['Plugins'];
 			this.pluginCount.textContent = pluginList.length;
 
 			for( var p = 0; p < pluginList.length; p++ ){
-				var pluginEntry = new orion.widgets.plugin.PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
-				list.appendChild( pluginEntry.domNode );
-				pluginEntry.startup();
-			}	                
+				var pluginEntry = new PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
+				list.appendChild( pluginEntry.node );
+				pluginEntry.show();
+			}
 		},
 				
 		pluginURLFocus: function(){
 			this.pluginUrlEntry.value = '';
-			dojo.style( this.pluginUrlEntry, "color", "" ); //$NON-NLS-0$
+			this.pluginUrlEntry.style.color = "" ; //$NON-NLS-0$
 		},
 		
 		pluginURLBlur: function(){
 			if( this.pluginUrlEntry.value === '' ){
 				this.pluginUrlEntry.value = messages['Type a plugin url here ...'];
-				dojo.style( this.pluginUrlEntry, "color", "#AAA" ); //$NON-NLS-1$ //$NON-NLS-0$
+				this.pluginUrlEntry.style.color = "#AAA" ; //$NON-NLS-0$
 			}
 		},
 		
@@ -265,8 +285,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		},
 		
 		installHandler: function(newPluginUrl){
-			if (/^\S+$/.test(dojo.trim(newPluginUrl))) {
-				this.statusService.setMessage(messages["Installing "] + newPluginUrl + "...", null, true); //$NON-NLS-1$ //$NON-NLS-0$
+			if (/^\S+$/.test(newPluginUrl.trim())) {
+				this.statusService.setMessage(messages["Installing "] + newPluginUrl + "...", null, true);
 				if( this.settings.pluginRegistry.getPlugin(newPluginUrl) ){
 					this.statusService.setErrorMessage(messages["Already installed"]);
 				} else {
@@ -279,7 +299,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 		
 		reloaded: function(){
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
-			this.statusService.setMessage( messages["Reloaded "] + settingsPluginList.length + messages[" plugin"] + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true ); //$NON-NLS-3$ //$NON-NLS-2$
+			this.statusService.setMessage( messages["Reloaded "] + settingsPluginList.length + messages[" plugin"] + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true );
 			this.addRows();
 		},
 		
@@ -361,4 +381,5 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'orion/D
 			}
 		}
 	});
+	return PluginList;
 });

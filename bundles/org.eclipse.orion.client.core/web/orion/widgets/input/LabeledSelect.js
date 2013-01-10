@@ -11,87 +11,35 @@
 /*global dojo dijit widgets orion  window console define localStorage*/
 /*jslint browser:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
-   
-   /* this.inherited(arguments);
-			this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$ */
+define(['orion/objects', 'orion/webui/littlelib', 'orion/widgets/input/Select'],  function(objects, lib, Select) {
 
-define(['i18n!orion/settings/nls/messages', 'require' ], 
-	function(messages, require) {
-	
-		function LabeledSelect( label, options, node ){
-			this.anchor = node;		
-			this.anchor.innerHTML = this.templateString;
-			this.options = options;
-			this.options.forEach( this.addOptions.bind(this) );
-			this.anchor.firstChild.onchange = this.change.bind(this);
-		}
-		
-		var anchor;
-		
-		LabeledSelect.prototype.anchor = anchor;
-		
-		var templateString =	'<div class="setting-property">' +  //$NON-NLS-0$
-									'<label>' + //$NON-NLS-0$
-										'<span class="setting-label"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-										'<select class="setting-control"></select>' + //$NON-NLS-0$
-									'</label>' +  //$NON-NLS-0$
-								'</div>'; //$NON-NLS-0$
-
-		LabeledSelect.prototype.templateString = templateString;
-		
-		function addOptions(item, index, ar){			
-			var option = document.createElement("option");
-			option.value = item.value;
-			option.appendChild(document.createTextNode(item.label));
-			this.anchor.firstChild.appendChild(option);
-			if( item.selected === true ){
-				this.anchor.firstChild.value = item.value;
-			}
-		}
-		
-		LabeledSelect.prototype.addOptions = addOptions;
-		
-		function setStorageItem(){
-			// to be overridden with a choice of function to store the picked color
-		}
-		
-		LabeledSelect.prototype.setStorageItem = setStorageItem;
-		
-		function getSelected(){
-			return this.selection.value;
-		}
-		
-		LabeledSelect.prototype.getSelected = getSelected;
-	
-		function getSelectedIndex() {
-			return this.selection.selectedIndex;
-		}
-		
-		LabeledSelect.prototype.getSelectedIndex = getSelectedIndex;
-	
-		function setSelectedIndex(index) {
-			this.selection.selectedIndex = index;
-		}
-		
-		LabeledSelect.prototype.setSelectedIndex = setSelectedIndex;
-	
-		function change(){
-		
-			var value = this.anchor.firstChild.value;
-			
-			if( this.category ){
-				this.setStorageItem( this.category, this.item, this.element, value, this.ui );
-			}else{
-				this.setStorageItem( value );
-			}
-		}
-		
-		LabeledSelect.prototype.change = change;
-	
-		return{
-			LabeledSelect:LabeledSelect
-		};
+	/**
+	 * This is just an orion/widgets/input/Select with a label.
+	 */
+	function LabeledSelect( params, node ){
+		Select.apply(this, arguments);
+		this.mylabel = lib.$(".setting-label", this.node); //$NON-NLS-0$
 	}
-);
+	objects.mixin(LabeledSelect.prototype, Select.prototype, {
+		templateString :	'<div class="setting-property">' +  //$NON-NLS-0$
+								'<label>' + //$NON-NLS-0$
+									'<span class="setting-label"></span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									'<select class="setting-control"></select>' + //$NON-NLS-0$
+								'</label>' +  //$NON-NLS-0$
+							'</div>', //$NON-NLS-0$
+
+		postCreate: function() {
+			Select.prototype.postCreate.call(this);
+			this.mylabel.textContent = this.fieldlabel + ':';
+		},
+
+		destroy: function() {
+			Select.prototype.destroy.call(this);
+			if (this.mylabel) {
+				this.mylabel = null;
+			}
+		}
+	});
+
+	return LabeledSelect;
+});

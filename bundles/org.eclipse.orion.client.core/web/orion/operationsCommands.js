@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window widgets eclipse:true serviceRegistry dojo */
+/*global window define */
 /*browser:true*/
-define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands'], 
-        function(messages, require, dojo, mCommands) {
+define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands'], 
+        function(messages, require, lib, mCommands) {
 	/**
 	 * @namespace The global container for eclipse APIs.
 	 */ 
@@ -23,7 +23,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 
 		exports.updateNavTools = function(registry, explorer, toolbarId, selectionToolbarId, item) {
 			var service = registry.getService("orion.page.command"); //$NON-NLS-0$
-			var toolbar = dojo.byId(toolbarId);
+			var toolbar = lib.node(toolbarId);
 			if (toolbar) {
 				service.destroy(toolbar);
 			} else {
@@ -31,7 +31,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 			}
 			service.renderCommands(toolbarId, toolbar, item, explorer, "button");   //$NON-NLS-0$
 			if (selectionToolbarId) {
-				var selectionTools = dojo.byId(selectionToolbarId);
+				var selectionTools = lib.node(selectionToolbarId);
 				if (selectionTools) {
 					service.destroy(selectionTools);
 					service.renderCommands(selectionToolbarId, selectionTools, null, explorer, "button");  //$NON-NLS-0$
@@ -42,7 +42,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 			if (!doOnce) {
 				doOnce = true;
 				registry.getService("orion.page.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-					var selectionTools = dojo.byId(selectionToolbarId);
+					var selectionTools = lib.node(selectionToolbarId);
 					if (selectionTools) {
 						var commandService = registry.getService("orion.page.command"); //$NON-NLS-0$
 						commandService.destroy(selectionTools);
@@ -58,7 +58,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				if(!item.operation || item.operation.type){
 					return false;
 				}
-				return (item.operation.type==="loadstart" || item.operation.type==="progress");
+				return (item.operation.type==="loadstart" || item.operation.type==="progress"); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 		
 			var removeCompletedOperationsCommand = new mCommands.Command({
@@ -66,9 +66,9 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				tooltip : messages["Remove all completed operations"],
 				id : "eclipse.removeCompletedOperations", //$NON-NLS-0$
 				callback : function(data) {
-					operationsClient.removeCompletedOperations().then(dojo.hitch(operationsClient, function(item){
-						operationsClient.removeCompletedOperations();
-					}));
+					operationsClient.removeCompletedOperations().then(function(item){
+						explorer.loadOperations.bind(explorer)();
+					});
 				},
 				visibleWhen : function(item) {
 					return true;
@@ -82,14 +82,14 @@ define(['i18n!orion/operations/nls/messages', 'require', 'dojo', 'orion/commands
 				imageClass: "core-sprite-delete", //$NON-NLS-0$
 				id : "eclipse.removeOperation", //$NON-NLS-0$
 				callback : function(data) {
-					var items = dojo.isArray(data.items) ? data.items : [data.items];
+					var items = Array.isArray(data.items) ? data.items : [data.items];
 					for (var i=0; i < items.length; i++) {
 						var item = items[i];
-						dojo.hitch(operationsClient, operationsClient.removeOperation)(item.Location).then(function(){explorer.loadOperations.bind(explorer)();}, function(){explorer.loadOperations.bind(explorer)();});
+						operationsClient.removeOperation.bind(operationsClient)(item.Location).then(function(){explorer.loadOperations.bind(explorer)();}, function(){explorer.loadOperations.bind(explorer)();});
 					}
 				},
 				visibleWhen : function(items) {
-					if(!dojo.isArray(items) || items.length===0)
+					if(!Array.isArray(items) || items.length===0)
 						return !_isOperationRunning(items);
 					for(var i in items){
 						if(_isOperationRunning(items[i])){

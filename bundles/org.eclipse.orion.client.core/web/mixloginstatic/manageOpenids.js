@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global alert confirm console define document window */
 
-define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
+define(["orion/xhr", "orion/webui/littlelib", "domReady!"], function(xhr, lib) {
 	var lastHash;
 	var jsonData;
 
@@ -26,46 +26,41 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 				}
 			}
 			jsonData.properties.openid = newopenids;
-	
-			dojo.xhrPut({
-				url: jsonData.Location,
-				putData: dojo.toJson(jsonData),
+
+			xhr("PUT", jsonData.Location, { //$NON-NLS-0$
+				data: JSON.stringify(jsonData),
 				headers: {
 					"Orion-Version": "1"
 				},
-				handleAs: "json",
-				timeout: 15000,
-				load: function(returnData, secondArg) {
-					loadUserData(jsonData.Location);
-				},
-				error: function(error, ioArgs) {
-					console.error(error.message);
-				}
+				timeout: 15000
+			}).then(function(xhrResult) {
+				loadUserData(jsonData.Location);
+			}, function(xhrResult) {
+				console.error(xhrResult.error);
 			});
-	
 		}
 	}
 	
 	loadAttachedOpenIds = function(userjsonData) {
 		jsonData = userjsonData;
-		var divId = "openidList";
-		var table = dojo.create("table", null, divId, "only");
+		var table = document.createElement("table"); //$NON-NLS-0$
+		table.classList.add("manageOpenIdsTable"); //$NON-NLS-0$
+		lib.node("openidList").appendChild(table); //$NON-NLS-0$
 		if (jsonData.properties && jsonData.properties.openid) {
 	
-			var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : [];
+			var openids = jsonData.properties.openid ? jsonData.properties.openid.split('\n') : []; //$NON-NLS-0$
 	
 			if (openids.length > 0) {
-				var thead = dojo.create("thead", null, table, "only");
-				dojo.addClass(thead, "navTableHeading");
-				var tr = dojo.create("tr", null, thead, "last");
-				var td = dojo.create("td", {
-					innerHTML: "<h2>External Id</h2>"
-				}, tr, "last");
-				dojo.addClass(td, "navColumn");
-				td = dojo.create("td", {
-					innerHTML: "<h2>Actions</h2>"
-				}, tr, "last");
-	
+				var thead = document.createElement("thead"); //$NON-NLS-0$
+				thead.classList.add("navTableHeading"); //$NON-NLS-0$
+				table.appendChild(thead);
+
+				var tr = document.createElement("tr"); //$NON-NLS-0$
+				thead.appendChild(tr);
+				var td = document.createElement("td"); //$NON-NLS-0$
+				td.classList.add("navColumn"); //$NON-NLS-0$
+				td.innerHTML = "<h2>External Id</h2>"; //$NON-NLS-0$
+				tr.appendChild(td);
 			}
 	
 			for (var i = 0; i < openids.length; i++) {
@@ -74,63 +69,50 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 				if (openid === "") {
 					continue;
 				}
-				var tr = dojo.create("tr", null, table, "last");
-				dojo.style(tr, "verticalAlign", "baseline");
-				dojo.addClass(tr, i % 2 === 0 ? "lightTreeTableRow" : "darkTreeTableRow");
-				var td = dojo.create("td", null, tr, "last");
-				dojo.addClass(td, "navColumn");
-				var span = dojo.create("span", null, td, "only");
-				var textNode = document.createTextNode(openid.length > 70 ? (openid.substring(0, 65) + "...") : openid);
+				var tr = document.createElement("tr"); //$NON-NLS-0$
+				tr.classList.add(i % 2 === 0 ? "lightTreeTableRow" : "darkTreeTableRow");  //$NON-NLS-1$ //$NON-NLS-0$
+				tr.classList.add("manageOpenIdRow"); //$NON-NLS-0$
+				tr.style.verticalAlign = "baseline"; //$NON-NLS-0$
+				table.appendChild(tr);
+
+				var td = document.createElement("td"); //$NON-NLS-0$
+				td.classList.add("navColumn"); //$NON-NLS-0$
+				tr.appendChild(td);
+				var span = document.createElement("span"); //$NON-NLS-0$
 				span.title = openid;
-				dojo.place(textNode, span);
-	
-	
-				td = dojo.create("td", null, tr, "last");
-				dojo.addClass(td, "navColumn");
-				var removeLink = dojo.create("a", {
-					innerHTML: "Remove",
-					title: "Remove " + openid,
-					id: "remlink" + i,
-					style: "visibility: hidden"
-				}, td, "last");
-	
-				dojo.connect(removeLink, "onclick", removeLink, dojo.hitch(this, function(openid) {
+				td.appendChild(span);
+				var textNode = document.createTextNode(openid.length > 70 ? (openid.substring(0, 65) + "...") : openid);
+				span.appendChild(textNode);
+
+				td = document.createElement("td"); //$NON-NLS-0$
+				td.classList.add("navColumn"); //$NON-NLS-0$
+				tr.appendChild(td);
+				var removeLink = document.createElement("a"); //$NON-NLS-0$
+				removeLink.classList.add("removeOpenId"); //$NON-NLS-0$
+				removeLink.id = "remlink" + i; //$NON-NLS-0$
+				removeLink.innerHTML = "Remove";
+				removeLink.style.visibility = "hidden"; //$NON-NLS-0$
+				removeLink.title = "Remove " + openid;
+				td.appendChild(removeLink);
+
+				removeLink.addEventListener("click", function(openid) { //$NON-NLS-0$
 					removeOpenId(openid);
-				}, openid));
-				dojo.connect(removeLink, "onmouseover", removeLink, dojo.hitch(this, function(removeLink) {
-					removeLink.style.cursor = "pointer";
-				}, removeLink));
-				dojo.connect(removeLink, "onmouseout", removeLink, dojo.hitch(this, function(removeLink) {
-					removeLink.style.cursor = "default";
-				}, removeLink));
-	
-				dojo.connect(tr, "onmouseover", tr, dojo.hitch(this, function(removeLink) {
-					dojo.style(removeLink, "visibility", "visible");
-				}, removeLink));
-	
-				dojo.connect(tr, "onmouseout", tr, dojo.hitch(this, function(removeLink) {
-					dojo.style(removeLink, "visibility", "hidden");
-				}, removeLink));
-	
+				}.bind(this, openid));
 			}
 		}
 	};
 	
 	loadUserData = function(userLocation){
-			dojo.xhrGet({
-				url : userLocation,
-				headers : {
-					"Orion-Version" : "1"
-				},
-				handleAs : "json",
-				timeout : 15000,
-				load : function(jsonData, secondArg) {
-					loadAttachedOpenIds(jsonData);
-				},
-				error : function(error, ioArgs) {
-					console.error(error.message);
-				}
-			});
+		xhr("GET", userLocation, { //$NON-NLS-0$
+			headers : {
+				"Orion-Version" : "1"
+			},
+			timeout : 15000
+		}).then(function(xhrResult) {
+			loadAttachedOpenIds(JSON.parse(xhrResult.response));
+		}, function(xhrResult) {
+			console.error(xhrResult.error);
+		});
 	 };
 	
 	function onHashChange(hash) {
@@ -160,22 +142,17 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 			jsonData.properties.openid += '\n' + openid;
 		}
 	
-		dojo.xhrPut({
-			url: jsonData.Location,
-			putData: dojo.toJson(jsonData),
+		xhr("PUT", jsonData.Location, { //$NON-NLS-0$
+			data: JSON.stringify(jsonData),
 			headers: {
 				"Orion-Version": "1"
 			},
-			handleAs: "json",
-			timeout: 15000,
-			load: function(returnData, secondArg) {
-				loadUserData(jsonData.Location);
-			},
-			error: function(error, ioArgs) {
-				console.error(error.message);
-			}
+			timeout: 15000
+		}).then(function(xhrResult) {
+			loadUserData(jsonData.Location);
+		}, function(xhrResult) {
+			console.error(xhrResult.error);
 		});
-	
 	};
 	
 	function confirmOpenId(openid) {
@@ -199,26 +176,25 @@ define(["dojo", "dojo/hash", "domReady!"], function(dojo) {
 	}
 
 	// Page glue code starts here
-	dojo.subscribe("/dojo/hashchange", this, function() {
-		onHashChange(dojo.hash());
+	window.addEventListener("hashchange", function() {
+		onHashChange(window.location.hash.substring(1));
 	});
 
-	onHashChange(dojo.hash());
+	onHashChange(window.location.hash.substring(1));
 
-	dojo.xhrGet({
-		url: "../mixlogin/manageopenids",
-		handleAs: "json"
-	}).then(function(providers) {
-		var providerElements = providers.map(function(provider) {
-			return createProviderLink(provider.Name, provider.Image, confirmOpenId.bind(null, provider.Url));
-		});
-		providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
-			alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
+	xhr("GET", "../mixlogin/manageopenids") //$NON-NLS-1$ //$NON-NLS-0$
+		.then(function(xhrResult) {
+			var providers = JSON.parse(xhrResult.response);
+			var providerElements = providers.map(function(provider) {
+				return createProviderLink(provider.Name, provider.Image, confirmOpenId.bind(null, provider.Url));
+			});
+			providerElements.push(createProviderLink("Mozilla Persona", "../mixloginstatic/images/persona.png",
+				alert.bind(null, "To link your account with a Persona, set your Orion email address above to match your Persona email address.")));
 
-		var openIdContainer = document.getElementById("newOpenId");
-		providerElements.forEach(function(provider) {
-			openIdContainer.appendChild(provider);
-			openIdContainer.appendChild(document.createTextNode(" "));
+			var openIdContainer = document.getElementById("newOpenId");
+			providerElements.forEach(function(provider) {
+				openIdContainer.appendChild(provider);
+				openIdContainer.appendChild(document.createTextNode(" "));
+			});
 		});
-	});
 });

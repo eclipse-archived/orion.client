@@ -37,7 +37,6 @@
 	font-size: 9px;
 	text-align: left;
 	border-collapse: collapse;
-	width: 200px;
 	-webkit-user-select: none;
 }
 	
@@ -119,7 +118,7 @@
 	padding-right:20px;
 
 	float:left;
-	// position:relative;
+	/* position:relative; */
 	overflow:hidden;
 }
 

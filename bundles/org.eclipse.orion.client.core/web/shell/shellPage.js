@@ -548,7 +548,8 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 				/* Use orion/Deferred since it supports progress, gcli/promise does not */
 				//var promise = context.createPromise();
 				var promise = new Deferred();
-				service.callback(args).then(
+				var location = getCWD();
+				service.callback(args, {cwd:location}).then(
 					function(result) {
 						promise.resolve(result);
 					},

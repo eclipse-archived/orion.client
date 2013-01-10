@@ -137,7 +137,7 @@ var AppContext = function(options) {
 		return fileUtil.safeFilePath(workspaceDir, filePath);
 	}
 
-	var fileRoot = options.fileRoot, workspaceDir = options.workspaceDir;
+	var fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, configParams = options.configParams;
 	if (!fileRoot || !workspaceDir) {
 		throw new Error('Missing fileRoot or workspaceDir');
 	}
@@ -203,16 +203,35 @@ var AppContext = function(options) {
 		}
 	}.bind(this);
 	/**
+	 * @name orionode.AppContext#startNPM
+	 * @function
+	 * @param {Array} [args] The args passed to NPM
+	 * @param {Object} [context] The context of the app. Currently context.cwd is used to know the current working directory.
+	 */
+	this.startNPM = function(args, context) {
+		var npmPath = configParams.npm_path;
+		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
+		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
+		}	
+		var cwdPath = resolveModulePath(fileRoot, workspaceDir, context.cwd);
+		var app = _startApp([npmPath].concat(args || []), cwdPath);
+		app.on('exit', function(code) {
+			console.log('App # ' + app.pid + ' exited, code=' + code);
+		});
+		return app;
+	};
+	/**
 	 * @name orionode.AppContext#startApp
 	 * @function
 	 * @param {String} modulePath The Orionode-filesystem path (ie. starting with '/file') of the module to execute
 	 * @param {Array} [args]
+	 * @param {Object} [context] The context of the app. Currently context.cwd is used to know the current working directory.
 	 * @param {Boolean} [hidden]
 	 */
-	this.startApp = function(modulePath, args, hidden) {
+	this.startApp = function(modulePath, args, context, hidden) {
 		modulePath = resolveModulePath(fileRoot, workspaceDir, modulePath);
-		// TODO cwd should be passed in, not assumed to be the module's parent folder.
-		var app = _startApp([modulePath].concat(args || []), path.dirname(modulePath), hidden);
+		var cwdPath = resolveModulePath(fileRoot, workspaceDir, context.cwd);
+		var app = _startApp([modulePath].concat(args || []), cwdPath, hidden);
 		app.on('exit', function(code) {
 			console.log('App # ' + app.pid + ' exited, code=' + code);
 		});

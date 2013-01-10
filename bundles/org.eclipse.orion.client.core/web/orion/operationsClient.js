@@ -130,22 +130,47 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 	
 	OperationsClient.prototype = {
 			getOperations: function(){
-				return this._preferenceService.getPreferences("/operations").then(function(globalOperations){
-					var operationLocations = globalOperations.keys();
-					var ret = {};
-					for(var i=0; i<operationLocations.length; i++){
-						ret[operationLocations[i]] = globalOperations.get(operationLocations[i]);
-					}
-					return ret;
+				var def = new Deferred();
+				if(this._operations){
+					def.resolve(this._operations);
+					return def;
+				}
+				var that = this;
+				this._preferenceService.getPreferences("/operations").then(function(globalOperations){
+					that._operations = globalOperations;
+					def.resolve(that._operations);
 				});
+				return def;
 			},
 			getOperation: function(operationLocation){
 				return _doServiceCall(this._getService(operationLocation), "getOperation", arguments); //$NON-NLS-0$
 			},
-			removeCompletedOperations: function(){ //TODO implement removing all operations
+			removeCompletedOperations: function(){
 				var results = [];
+				var that = this;
 				for(var i=0; i<this._services.length; i++){
-					results[i] = _doServiceCall(this._services[i], "removeCompletedOperations"); //$NON-NLS-0$
+					var pattern = this._patterns[i];
+					var def = new Deferred();
+					results[i] = def;
+					_doServiceCall(this._services[i], "removeCompletedOperations").then(function(operationsLeft){
+						if(!Array.isArray(operationsLeft)){
+							return;
+						}
+						that.getOperations.bind(that)().then(function(globalOperations){
+							var operationLocations = globalOperations.keys();
+							for(var j=0; j<operationLocations.length; j++){
+								var location = operationLocations[j];
+								if (pattern.test(location)) {
+									if(operationsLeft.indexOf(location)<0){
+										globalOperations.remove(location);
+									}
+								}
+							}
+							def.resolve();
+						});
+					}, function(error){
+						def.reject(error);
+					});
 				}
 				return Deferred.all(results);
 			},
@@ -153,7 +178,7 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 			removeOperation: function(operationLocation){
 				var that = this;
 				return _doServiceCall(this._getService(operationLocation), "removeOperation", arguments).then(function(result){
-					that._preferenceService.getPreferences("/operations").then(function(globalOperations){
+					that.getOperations.bind(that)().then(function(globalOperations){
 						globalOperations.remove(operationLocation);
 					});
 				}, function(progress){return progress;}, function(error){return error;}); //$NON-NLS-0$

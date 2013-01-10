@@ -11,8 +11,8 @@
 /*global define window */
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require'], 
-	function(messages, require) {
+define([], 
+	function() {
 
 
 		function Component(){
@@ -40,7 +40,7 @@ define(['i18n!orion/settings/nls/messages', 'require'],
 		
 		function render( context ){
 				
-				if( context != null ){
+				if( context ){
 					this.context = context;
 				}
 				

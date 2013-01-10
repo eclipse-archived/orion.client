@@ -1,8 +1,3 @@
-@import "../org.dojotoolkit/dojo/resources/dojo.css";
-@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
-@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
-@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
-@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 @import "../css/layout.css";
 @import "../css/ide.css";
 @import "../css/sections.css";
@@ -49,25 +44,16 @@ button {
 	font-weight: bold;
 }
 
+.settingsSplitLayout {
+	left: 170px;
+}
+
 .categories {
-	background: #EDEDED;
+	/*background: #EDEDED;*/
 }
 
-#content-title {
-	font-size: 13px;
-	font-weight: bold;
-	color: #222;
-	margin: 0;
-	padding-bottom: 14px;
-	padding-top: 13px;
-	margin-right: 16px;
-	text-align: right;
-}
-
-#categories>ul {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
+.toolbarTarget:focus {
+	outline: none;
 }
 
 .navbar {
@@ -104,10 +90,9 @@ ul,menu,dir {
 	color: black;
 }
 
-/* Experimenting with full width */
-
 .settings {
-	min-width:800px;
+	min-width: 500px;
+	max-width: 800px;
 	/* max-width:1000px; */
 	padding-left: 20px;
 	/* padding-right: 40px; */
@@ -276,36 +261,38 @@ ul,menu,dir {
 	-ms-transition: padding 500ms, height 400ms, opacity 800ms;
 }
 
-#plugin-settings .displaytable>section {
+/*#plugin-settings .displaytable>section {
 	display: block;
 	width: 100%;
-}
+}*/
 
 div.page section:last-child {
 	border-bottom: none;
 }
 
-#plugin-settings .displaytable>section>* {
+/*#plugin-settings .displaytable>section>* {
 	display: block;
-}
+}*/
 
-#plugin-settings-list {
+/*#plugin-settings-list {
 	min-height: 0;
 	overflow-y: hidden;
 	width: 100%;
 }
-
+*/
 .plugin-list-item {
 	padding: 10px;
 	/* width: 100%; */
 }
 
-list,grid {
+.plugin-list, .plugin-entry {
 	display: block;
-	outline: none;
+/*	outline: none;
 	overflow: auto;
 	position: relative;
+*/
 }
+
 
 .plugin-icon {
 	float: left;
@@ -328,13 +315,15 @@ list,grid {
 	max-width:600px;
 }
 
-list>*,grid>* {
-	display: block;
+/* TODO this rule should be more narrowly scoped */
+.plugin-list>*, .plugin-entry>* {
 	outline: none;
+/*	display: block;
+	clear: both;
 	overflow: auto;
-	position: relative;
+	position: relative;*/
 	line-height: 20px;
-	white-space: pre;
+	/*white-space: pre;*/
 }
 
 .plugin-title {
@@ -343,7 +332,7 @@ list>*,grid>* {
 	padding-right: 20px;
 }
 
-#plugin-settings .displaytable {
+/*#plugin-settings .displaytable {
 	display: block;
 }
 
@@ -356,7 +345,7 @@ list>*,grid>* {
 .plugin-settings {
 	overflow-x: hidden;
 }
-
+*/
 .plugin-version {
 	font-size: 13px;
 	font-weight: 400;
@@ -381,6 +370,13 @@ list>*,grid>* {
 	position: relative;
 }
 
+.serviceContainer {
+	clear: left;
+	outline: none;
+	line-height:14px;
+	padding-top: 10px;
+}
+
 .serviceCount {
 	padding-left: 3px;
 	padding-right: 3px;
@@ -403,8 +399,8 @@ list>*,grid>* {
 	font-size: 0.9em;
 }
 
-.plugin-links-view {
-	padding-right: 15px;
+.plugin-link {
+	margin-right: 5px;
 }
 
 .plugin-links {
@@ -487,11 +483,7 @@ list>*,grid>* {
 	display: inline-block;
 }
 
-
-
-
-
-
-
-
+.themepicker, .fontsizepicker, .colorfield, .themesaver {
+	display: inline-block;
+}
 
