@@ -29,6 +29,14 @@ html,body {
 	padding-right: 40px;*/
 }
 
+.statusField {
+	padding: 0 10px 0 10px;
+}
+
+.inlineAction {
+	padding-left: 10px;
+}
+
 .domCommandToolbar {
 	padding-left: 8px;
 }
