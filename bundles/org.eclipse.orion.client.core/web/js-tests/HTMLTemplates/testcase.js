@@ -32,5 +32,18 @@ define(["orion/assert", "orion/HTMLTemplates-shim", "domReady!"], function(asser
 		assert.equal(document.body.querySelectorAll("div.comment3").length, 1);
 	};
 
+	tests.testNewTemplateElement = function() {
+		var template = document.createElement("template");
+		template.id="xyzzy";
+		document.body.appendChild(template);
+		assert.equal(document.body.querySelectorAll("template#xyzzy").length, 1);
+	};
+	
+	tests.testTemplateElementAgain = function() {
+		assert.equal(document.body.querySelectorAll("div.comment3").length, 1);
+		document.body.appendChild(document.getElementById("commentTemplate3").content.cloneNode(true));
+		assert.equal(document.body.querySelectorAll("div.comment3").length, 2);
+	};
+
 	return tests;
 });

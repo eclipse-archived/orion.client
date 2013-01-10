@@ -14,22 +14,6 @@
 /*global console TestCase require jstestdriver*/
 var requireJSConfig = {
 	baseUrl: '/',
-	packages: [{
-		name: 'dojo',
-		location: 'org.dojotoolkit/dojo',
-		main: 'lib/main-browser',
-		lib: '.'
-	}, {
-		name: 'dijit',
-		location: 'org.dojotoolkit/dijit',
-		main: 'lib/main',
-		lib: '.'
-	}, {
-		name: 'dojox',
-		location: 'org.dojotoolkit/dojox',
-		main: 'lib/main',
-		lib: '.'
-	}],
 	paths: {
 		text: 'requirejs/text',
 		i18n: 'requirejs/i18n',

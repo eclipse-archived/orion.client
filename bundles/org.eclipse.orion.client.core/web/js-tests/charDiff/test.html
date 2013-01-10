@@ -2,30 +2,11 @@
 <html>
 <head>
 <!-- standard scripts -->
-	<script type="text/javascript" src="../../requirejs/require.js"></script>
-	<script type="text/javascript">
+	<script src="../../requirejs/require.js"></script>
+	<script>
+	/*global window define require*/
 	require({
 		  baseUrl: '../..',
-		  packages: [
-		    {
-		      name: 'dojo',
-		      location: 'org.dojotoolkit/dojo',
-		      main: 'lib/main-browser',
-		      lib: '.'
-		    },
-		    {
-		      name: 'dijit',
-		      location: 'org.dojotoolkit/dijit',
-		      main: 'lib/main',
-		      lib: '.'
-		    },
-		    {
-		      name: 'dojox',
-		      location: 'org.dojotoolkit/dojox',
-		      main: 'lib/main',
-		      lib: '.'
-		    }		    
-		  ],
 		  paths: {
 			  text: 'requirejs/text',
 			  i18n: 'requirejs/i18n',

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global setTimeout orion dojo eclipse importScripts */
+/*global setTimeout orion eclipse importScripts */
 
 importScripts("../../orion/Deferred.js");
 importScripts("../../orion/plugin.js");

@@ -11,7 +11,7 @@
 
 /*global define setTimeout*/
 
-define(["orion/assert","dojo", "orion/test"], function(assert, dojo, mTest) {
+define(["orion/assert","orion/Deferred", "orion/test"], function(assert, Deferred, mTest) {
 	
 var tests = {};
 // dummy change
@@ -26,7 +26,7 @@ tests["test subtest"] = {
 };
 
 tests["test basic asynch"] = function() {
-	var d = new dojo.Deferred();
+	var d = new Deferred();
 	setTimeout(function(){
 		assert.ok(true);
 		d.resolve();
@@ -38,7 +38,7 @@ tests["test expected asynch failure"] = function() {
 	
 	var failureTest = {
 		"test Failure": function() {
-			var d = new dojo.Deferred();
+			var d = new Deferred();
 			setTimeout(function(){
 				try {
 					assert.ok(false, "expected failure");
@@ -65,7 +65,7 @@ tests["test expected asynch failure"] = function() {
 };
 
 tests["test basic asynch2"] = function() {
-	var d = new dojo.Deferred();
+	var d = new Deferred();
 	setTimeout(function(){
 		d.resolve();
 	}, 100);
@@ -75,7 +75,7 @@ tests["test basic asynch2"] = function() {
 };
 
 tests["test expected asynch2 failure"] = function() {
-	var d = new dojo.Deferred();
+	var d = new Deferred();
 	setTimeout(function(){
 		d.resolve();
 	}, 100);
@@ -104,7 +104,7 @@ tests["test basic list"] = function() {
 };
 
 tests["test blow stack with promise"] = function() {
-	var first = new dojo.Deferred(),
+	var first = new Deferred(),
 		d = first, i, recurses = 0, max = 1500;
 	function returnPromise() {
 		recurses++;
@@ -116,13 +116,12 @@ tests["test blow stack with promise"] = function() {
 	first.resolve();
 	
 	return d.then(function() {
-		assert.equal(first.fired, 0);
 		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 	});
 };
 
 tests["test blow stack with value"] = function() {
-	var first = new dojo.Deferred(),
+	var first = new Deferred(),
 		d = first, i, recurses = 0, max = 1500;
 	
 	function returnValue() {
@@ -136,35 +135,28 @@ tests["test blow stack with value"] = function() {
 	first.resolve();
 	
 	return d.then(function() {
-		assert.equal(first.fired, 0);
 		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 	});
 };
 
 tests["test blow stack with exception"] = function() {
-	var first = new dojo.Deferred(),
+	var first = new Deferred(),
 		d = first, i, recurses = 0, max = 1500;
 	
-	dojo.config.deferredOnError = function(){};
-	try {
-		function throwException() {
-			recurses++;
-			throw "exception";
-		}
-	
-		for (i = 0; i < max; i++) {
-			d = d.then(throwException, throwException);
-		}
-	
-		first.resolve();
-	} finally {
-		delete dojo.config.deferredOnError;
+	function throwException() {
+		recurses++;
+		throw "exception";
 	}
+
+	for (i = 0; i < max; i++) {
+		d = d.then(throwException, throwException);
+	}
+
+	first.resolve();
 	
 	return d.then(function(){
 		assert.ok(false, "Expected an exception");
 	}, function() {
-		assert.equal(first.fired, 0);
 		assert.ok(max === recurses, "Stack blown at " + recurses + " recurses.");
 	});
 };
@@ -173,13 +165,13 @@ tests["test timeout causes reject"] = function() {
 	var timeout = 2000;
 	var timeoutTest = {
 		"test timeout": function() {
-			return new dojo.Deferred();
+			return new Deferred();
 		}
 	};
 	timeoutTest["test timeout"].timeout = timeout;
 	var newTest = new mTest.Test();
 	// by adding a dummy listener we avoid the error from useConsole() which is added if there are no listeners
-	var d = new dojo.Deferred();
+	var d = new Deferred();
 	var testDone = false;
 	newTest.addEventListener("testDone", function(event) {
 		assert.strictEqual(event.result, false, "Expected test failure");
