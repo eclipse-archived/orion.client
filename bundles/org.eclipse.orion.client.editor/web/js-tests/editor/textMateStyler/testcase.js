@@ -12,8 +12,8 @@
 /*jslint laxbreak:true regexp:false*/
 /*global define eclipse */
 
-define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "testGrammars.js"],
-		function(dojo, assert, mMockTextView, mTextMateStyler, mTestGrammars) {
+define(["orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "testGrammars.js"],
+		function(assert, mMockTextView, mTextMateStyler, mTestGrammars) {
 	var tests = {};
 	
 	// TODO: run tests with both Windows and Linux delimiters since a few cases have failed with
@@ -104,8 +104,8 @@ define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyl
 		assert.ok(styleRanges !== null && styleRanges !== undefined, true, "lineStyleEvent.ranges exists");
 		assert.equal(styleRanges.length, scopeRegions.length, "Line " + lineIndex + ": Number of styled regions matches");
 		var ok, last;
-		ok = dojo.every(scopeRegions, function(scopeRegion) {
-				return dojo.some(styleRanges, function(styleRange) {
+		ok = scopeRegions.every(function(scopeRegion) {
+				return styleRanges.some(function(styleRange) {
 					var start = scopeRegion[0],
 					    end = scopeRegion[1],
 					    scope = scopeRegion[2],
@@ -118,7 +118,7 @@ define(["dojo", "orion/assert", "../mockTextView.js", "orion/editor/textMateStyl
 				});
 			});
 		
-		var rangeStrs = dojo.map(styleRanges, function(styleRange) {
+		var rangeStrs = styleRanges.map(function(styleRange) {
 				var start = styleRange.start - lineStart,
 				    end = styleRange.end - lineStart,
 				    nicerScope = styleRange.style.styleClass.split(" ").pop().replace(/-/g, "."); // make easier to read

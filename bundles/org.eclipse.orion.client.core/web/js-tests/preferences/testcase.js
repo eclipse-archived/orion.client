@@ -8,8 +8,8 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define top orion console localStorage document window dojo*/
-define(["orion/assert","dojo"], function(assert, dojo) {
+/*global define top orion console localStorage document window*/
+define(["orion/assert", "orion/Deferred"], function(assert, Deferred) {
 	var tests = {};
 	
 	function saveStorage(storage) {
@@ -64,7 +64,7 @@ define(["orion/assert","dojo"], function(assert, dojo) {
 	};
 	
 	tests["DISABLING FOR NOW test storage eventing"] = function() {
-		var d = new dojo.Deferred();	
+		var d = new Deferred();	
 		function handleStorage(event) {
 			event = event || window.event;
 			if (!event.key) {

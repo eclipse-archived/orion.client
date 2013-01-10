@@ -11,7 +11,7 @@
 
 /*global define require setTimeout window */
 
-define(['examples/textview/demoSetup'], function(mSetup) {
+define(['examples/textview/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
 
 	var tests = {};
 	
@@ -32,23 +32,8 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 		return mSetup.setupView(text, lang, options);
 	}
 	
-	function getDeferred () {
-		var dojo = tests.noDojo ? null : require("dojo");
-		if (dojo) {
-			return new dojo.Deferred();
-		}
-		return null;
-	}
-	
-	function resolve(d) {
-		if (d && d.resolve) {
-			d.resolve(true);
-		}
-		return d;
-	}
-	
 	function doAction(action, max) {
-		var d = getDeferred();
+		var d = new Deferred();
 		var view = mSetup.view || setupView(mSetup.getFile("/examples/textview/text.txt"), "java");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
@@ -65,7 +50,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (model.getLineAtOffset(view.getCaretOffset()) !== caretLine && (max === undefined || --max > 0)) {
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log("time(",action,")=", (new Date().getTime() - start));
 			}
 		}
@@ -99,7 +84,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testCaretUpDown = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "", i;
 		for (i = 0; i < 256;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -124,7 +109,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(CaretUpDown)=", (new Date().getTime() - start));
 			}
 		}
@@ -134,7 +119,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testInsertText = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "", i;
 		for (i = 0; i < 512;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -148,7 +133,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(InsertText)=", (new Date().getTime() - start));
 			}
 		}
@@ -158,7 +143,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testAppendText = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "", i;
 		for (i = 0; i < 512;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -173,7 +158,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(AppendText)=", (new Date().getTime() - start));
 			}
 		}
@@ -183,7 +168,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testChangeText = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "", i;
 		for (i = 0; i < 1024;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -203,7 +188,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(ChangeText)=", (new Date().getTime() - start));
 			}
 		}
@@ -213,7 +198,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testCaretNextPrevious = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "", i;
 		for (i = 0; i < 256;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -239,7 +224,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--max > 0) {			
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(CaretNextPrevious)=", (new Date().getTime() - start));
 			}
 		}
@@ -249,7 +234,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 	};
 	
 	tests.testScrollLeft = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var buffer = "";
 		for (var i = 0; i < 1000;i++) {
 			buffer += "var id; function() {return 30;} var foo; ";
@@ -265,7 +250,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 				view.setHorizontalPixel(hscroll + 4);
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log ("time(setHorizontalPixel)=", (new Date().getTime() - start));
 			}
 		}
@@ -274,7 +259,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 		return d;
 	};
 	tests.testGetLocationAtOffset = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
@@ -292,7 +277,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--count > 0) {
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log("time(getLocationAtOffset)=" + (new Date().getTime() - start));
 			}
 		}
@@ -300,7 +285,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 		return d;
 	};
 	tests.testGetLocationAtOffsetStyled = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var count = 10;
 		var buffer = "";
 		for (var i = 0; i < 10;i++) {
@@ -318,7 +303,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--count > 0) {
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log("time(getLocationAtOffset)[styled]=" + (new Date().getTime() - start));
 			}
 		}
@@ -326,7 +311,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 		return d;
 	};
 	tests.testGetOffsetAtLocation = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var count = 100;
 		var buffer = "";
 		for (var i = 0; i < 3;i++) {
@@ -344,7 +329,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--count > 0) {
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log("time(getOffseAtLocation)=" + (new Date().getTime() - start));
 			}
 		}
@@ -352,7 +337,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 		return d;
 	};
 	tests.testGetOffsetAtLocationStyled = function () {
-		var d = getDeferred();
+		var d = new Deferred();
 		var count = 100;
 		var buffer = "";
 		for (var i = 0; i < 3;i++) {
@@ -370,7 +355,7 @@ define(['examples/textview/demoSetup'], function(mSetup) {
 			if (--count > 0) {
 				setTimeout(t, 0);
 			} else {
-				resolve(d);
+				d.resolve(true);
 				log("time(getOffseAtLocation)[styled]=" + (new Date().getTime() - start));
 			}
 		}

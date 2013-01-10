@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["dojo", "orion/assert", "orion/searchUtils"], function(dojo, assert, mSearchUtils) {
+define(["orion/assert", "orion/searchUtils"], function(assert, mSearchUtils) {
 
 	/**
 	 * Generate a dummy search model node on a file.

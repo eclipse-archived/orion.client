@@ -12,7 +12,7 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["dojo", "orion/assert", "orion/editor/jsTemplateContentAssist"], function(dojo, assert, mContentAssist) {
+define(["orion/assert", "orion/editor/jsTemplateContentAssist"], function(assert, mContentAssist) {
 	/**
 	 * Helper function to invoke content assist on a given test case. The test case is a string that contains
 	 * a special marker '@@@' indicating the cursor position. For example: "var x; x.@@@".

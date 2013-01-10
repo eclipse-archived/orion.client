@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*global define orion */
 
-define(["dojo", "orion/assert", "orion/compare/jsdiffAdapter"], function(dojo, assert, mJSDiffAdapter) {
+define(["orion/assert", "orion/compare/jsdiffAdapter"], function(assert, mJSDiffAdapter) {
 
 	
 	var tests = {};
