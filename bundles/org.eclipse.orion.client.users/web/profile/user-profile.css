@@ -1,11 +1,3 @@
-@import "../org.dojotoolkit/dojo/resources/dojo.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
-
 @import "../css/layout.css";
 
 @import "../settings/settings.css";
@@ -15,3 +7,11 @@
 @import "../css/images.css";
 
 @import "../css/sections.css";
+
+.userInput {
+	min-width: 200px;
+}
+
+.userLabel {
+	min-width: 100px;
+}
