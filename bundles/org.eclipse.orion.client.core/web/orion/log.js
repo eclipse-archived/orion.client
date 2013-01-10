@@ -11,7 +11,7 @@
 
 /*global define window */
 
-define(['i18n!orion/nls/messages', "dojo"], function(messages, dojo){
+define(['i18n!orion/nls/messages'], function(messages){
 
 var exports = {};
 
