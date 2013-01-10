@@ -91,7 +91,7 @@ exports.install = function(options) {
 			try {
 				checkParamType(data, 'modulePath', 'string');
 				checkParamType(data, 'port', 'number');
-				var app = appContext.debugApp(data.modulePath, data.port, handshakeData.headers, handshakeData.url);
+				var app = appContext.debugApp(data.modulePath, data.port, data.args, data.context, handshakeData.headers, handshakeData.url);
 				pipeStreams(app, socket);
 				app.on('exit', function(c) {
 					socket.emit('stopped', app.toJson());

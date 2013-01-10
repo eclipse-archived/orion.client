@@ -137,6 +137,15 @@ var AppContext = function(options) {
 		return fileUtil.safeFilePath(workspaceDir, filePath);
 	}
 
+	/** @throws {Error} If modulePath is unsafe */
+	function _resolveCWD(fileRoot, workspaceDir, cwdPath) {
+		var filePath = api.rest(fileRoot, cwdPath);
+		if(!filePath){
+			filePath = api.rest(fileRoot, fileRoot);
+		}
+		return fileUtil.safeFilePath(workspaceDir, filePath);
+	}
+
 	var fileRoot = options.fileRoot, workspaceDir = options.workspaceDir, configParams = options.configParams;
 	if (!fileRoot || !workspaceDir) {
 		throw new Error('Missing fileRoot or workspaceDir');
@@ -213,7 +222,7 @@ var AppContext = function(options) {
 		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
 		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
 		}	
-		var cwdPath = resolveModulePath(fileRoot, workspaceDir, context.cwd);
+		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
 		var app = _startApp([npmPath].concat(args || []), cwdPath);
 		app.on('exit', function(code) {
 			console.log('App # ' + app.pid + ' exited, code=' + code);
@@ -230,7 +239,7 @@ var AppContext = function(options) {
 	 */
 	this.startApp = function(modulePath, args, context, hidden) {
 		modulePath = resolveModulePath(fileRoot, workspaceDir, modulePath);
-		var cwdPath = resolveModulePath(fileRoot, workspaceDir, context.cwd);
+		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
 		var app = _startApp([modulePath].concat(args || []), cwdPath, hidden);
 		app.on('exit', function(code) {
 			console.log('App # ' + app.pid + ' exited, code=' + code);
@@ -242,10 +251,10 @@ var AppContext = function(options) {
 	 * @param {String} modulePath
 	 * @param {Number} port
 	 */
-	this.debugApp = function(modulePath, port, headers, requestUrl) {
+	this.debugApp = function(modulePath, port, args, context, headers, requestUrl) {
 		var resolvedPath = resolveModulePath(fileRoot, workspaceDir, modulePath);
-		// TODO cwd should be passed in, not assumed to be the module's parent folder.
-		var app = _startApp(["--debug-brk=" + port, resolvedPath], path.dirname(resolvedPath));
+		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);
 		app.debug = url.format({
 			protocol: parsedRequestUrl.protocol,
