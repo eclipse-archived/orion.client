@@ -44,9 +44,10 @@ function handleError(err) {
 function noop(req, res, next) { next(); }
 
 function auth(options) {
-	if (typeof options.configParams.pwd === 'string' && options.configParams.pwd.length > 0) {
-		return connect.basicAuth(function(user, pwd) {
-			return pwd === options.configParams.pwd;
+	var pwd = options.password ? options.password : options.configParams.pwd;
+	if (typeof pwd === 'string' && pwd.length > 0) {
+		return connect.basicAuth(function(user, password) {
+			return password === pwd;
 		});
 	}
 	return noop;
@@ -127,19 +128,22 @@ var workspaceDir = workspaceArg ? path.resolve(process.cwd(), workspaceArg) : pa
 var tempDir = path.join(workspaceDir, '.temp');
 var config_params = {};
 argslib.createDirs([workspaceDir, tempDir], function(dirs, tempDir) {
-	//var passwordFile = args.password || args.pwd;
-	argslib.readConfigFile("./server.conf", function(configParams) {
-		if(configParams){
-			config_params = configParams;
-		}
-		startServer({
-			port: port,
-			workspaceDir: dirs[0],
-			tempDir: dirs[1],
-			//passwordFile: passwordFile,
-			configParams: config_params,
-			dev: args.hasOwnProperty('dev'),
-			log: args.hasOwnProperty('log')
+	var passwordFile = args.password || args.pwd;
+	argslib.readPasswordFile(passwordFile, function(password) {
+		argslib.readConfigFile("./server.conf", function(configParams) {
+			if(configParams){
+				config_params = configParams;
+			}
+			startServer({
+				port: port,
+				workspaceDir: dirs[0],
+				tempDir: dirs[1],
+				passwordFile: passwordFile,
+				password: password,
+				configParams: config_params,
+				dev: args.hasOwnProperty('dev'),
+				log: args.hasOwnProperty('log')
+			});
 		});
 	});
 });
