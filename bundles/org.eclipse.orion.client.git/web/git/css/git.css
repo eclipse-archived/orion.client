@@ -68,6 +68,10 @@
 .gitDefaultItem {
 }
 
+.gitPanel {
+	min-width: 800px;
+}
+
 /* sprites */
 .gitCommandSprite {
 	background: url(../images/git_sprites.png) no-repeat top left;
