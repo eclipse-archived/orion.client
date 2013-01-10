@@ -708,13 +708,22 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			description: messages["Create an empty folder on the Orion server.  You can import, upload, or create content in the editor."],
 			id: "orion.new.project", //$NON-NLS-0$
 			callback: function(data) {
-				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					createProject(explorer, fileClient, progressService, data.parameters.valueFor('name')); //$NON-NLS-0$
-				} else {
-					getNewItemName(data.items, data.domNode.id, messages['New Folder'], function(name) {
-						createProject(explorer, fileClient, progressService, name);
-					});
-				}
+				// Check selection service first, then use the provided item
+				explorer.selection.getSelections(function(selections) {
+					var item;
+					if (selections.length === 1 && selections[0].Directory) {
+						newFolderCommand.callback(data);
+					} else {
+						item = forceSingleItem(data.items);
+						if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
+							createProject(explorer, fileClient, progressService, data.parameters.valueFor('name')); //$NON-NLS-0$
+						} else {
+							getNewItemName(data.items, data.domNode.id, messages['New Folder'], function(name) {
+								createProject(explorer, fileClient, progressService, name);
+							});
+						}
+					} 
+				});
 			},
 			visibleWhen: canCreateProject
 		});
