@@ -9,18 +9,16 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global confirm define dojo dijit orion window*/
+/*global confirm define window*/
 /*jslint browser:true*/
 
 /*
  * Glue code for site.html
  */
-define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
-	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/PageUtil',
-	'dojo/hash','orion/widgets/SiteEditor'], 
-	function(messages, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil) {
-
-	dojo.addOnLoad(function() {
+define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
+	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
+	'orion/PageUtil', 'orion/widgets/SiteEditor'], 
+	function(messages,mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -37,11 +35,11 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			mGlobalCommands.generateBanner("orion-site", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 
+			var widget;
 			var updateTitle = function() {
-				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
-				var site = editor && editor.getSiteConfiguration();
-				if (editor && site) {
-					var item = 	{};
+				var site = widget && widget.getSiteConfiguration();
+				if (widget && site) {
+					var item ={};
 					item.Parents = [];
 					item.Name = site.Name;
 					item.Parents[0] = {};
@@ -53,44 +51,42 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 						},
 						serviceRegistry: serviceRegistry, searchService: searcher, fileService: fileClient, commandService: commandService
 					});
-					mGlobalCommands.setDirtyIndicator(editor.isDirty());
+					mGlobalCommands.setDirtyIndicator(widget.isDirty());
 				}
 			};
-			
+
 			var onHashChange = function() {
 				var params = PageUtil.matchResourceParameters();
 				var resource = params.resource;
-				var editor = dijit.byId("site-editor"); //$NON-NLS-0$
-				if (resource && resource !== editor.getResource()) {
-					var doit = !editor.isDirty() || confirm(messages['There are unsaved changes. Do you still want to navigate away?']);
+				if (resource && resource !== widget.getResource()) {
+					var doit = !widget.isDirty() || confirm(messages['There are unsaved changes. Do you still want to navigate away?']);
 					if (doit) {
-						editor.load(resource).then(
+						widget.load(resource).then(
 							function() {
 								updateTitle();
 							});
 					}
 				}
 			};
-			dojo.subscribe("/dojo/hashchange", null, onHashChange); //$NON-NLS-0$
+			window.addEventListener("hashchange", onHashChange);
 			
 			// Initialize the widget
-			var widget;
 			(function() {
-				widget = new orion.widgets.SiteEditor({
+				widget = new SiteEditor({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
 					siteClient: siteClient,
 					commandService: commandService,
 					statusService: statusService,
 					progressService: progressService,
-					commandsContainer: dojo.byId("pageActions"), //$NON-NLS-0$
+					commandsContainer: document.getElementById("pageActions"), //$NON-NLS-0$
 					id: "site-editor"}); //$NON-NLS-0$
-				dojo.place(widget.domNode, dojo.byId("site"), "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				widget.startup();
-				
-				dojo.connect(widget, "onSuccess", updateTitle); //$NON-NLS-0$
-				dojo.connect(widget, "setDirty", updateTitle); //$NON-NLS-0$
-				
+				document.getElementById("site").appendChild(widget.node); //$NON-NLS-0$
+				widget.show();
+
+				widget.addEventListener("success", updateTitle); //$NON-NLS-0$
+				widget.addEventListener("dirty", updateTitle); //$NON-NLS-0$
+
 				onHashChange();
 			}());
 			
@@ -105,5 +101,4 @@ define(['i18n!orion/sites/nls/messages', 'dojo', 'orion/bootstrap', 'orion/statu
 			commandService.registerCommandContribution("pageActions", "orion.site.stop", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageActions", "orion.site.convert", 3); //$NON-NLS-1$ //$NON-NLS-0$
 		});
-	});
 });
