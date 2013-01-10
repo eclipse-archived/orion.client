@@ -11,61 +11,79 @@
 /*global define orion*/
 /*jslint browser:true sub:true*/
 
-define(['i18n!orion/sites/nls/messages', 'i18n!orion/widgets/nls/messages', 'require', 'dojo', 'dijit', 'orion/commands', 'orion/section',
-	'orion/sites/siteMappingsTable', 'orion/i18nUtil', 'orion/webui/dialogs/DirectoryPrompterDialog', 'dijit/Dialog',
-	'orion/widgets/_OrionDialogMixin',
-	'text!orion/widgets/templates/SiteEditor.html',
-	'dojo/DeferredList', 'dijit/layout/ContentPane', 'dijit/Tooltip', 'dijit/_Templated',
-	'dijit/form/Form', 'dijit/form/Button', 'dijit/form/TextBox', 'dijit/form/ValidationTextBox'],
-	function(messages, widgetsMessages, require, dojo, dijit, mCommands, mSection, mSiteMappingsTable, i18nUtil, DirPrompter,
-		Dialog, _OrionDialogMixin) {
+define(['i18n!orion/sites/nls/messages', 'i18n!orion/widgets/nls/messages',  'orion/commands', 'orion/Deferred', 'orion/section',
+	'orion/objects', 'orion/sites/siteMappingsTable', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/EventTarget',
+	'orion/webui/dialogs/DirectoryPrompterDialog', 'orion/webui/dialog',
+	'text!orion/widgets/templates/SiteEditor.html', 'text!orion/widgets/templates/ConvertToSelfHostingDialog.html'],
+	function(messages, widgetsMessages, mCommands, Deferred, mSection, objects, mSiteMappingsTable, i18nUtil, lib, EventTarget,
+		DirPrompter, dialog, SiteEditorTemplate, ConvertToSelfHostingDialogTemplate) {
+var Dialog = dialog.Dialog;
 
-var ConvertToSelfHostingDialog = dojo.declare("orion.widgets.ConvertToSelfHostDialog", [Dialog, _OrionDialogMixin], {
+var ConvertToSelfHostingDialog = function(options) {
+	options = options || {};
+	this.options = options;
+	objects.mixin(this, options);
+	this._init(options);
+};
+ConvertToSelfHostingDialog.prototype = new Dialog();
+objects.mixin(ConvertToSelfHostingDialog.prototype, {
 	DEFAULT_PORT: 8080,
-	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'widgets/templates/ConvertToSelfHostingDialog.html'), //$NON-NLS-1$ //$NON-NLS-0$
+	TEMPLATE: ConvertToSelfHostingDialogTemplate,
+	_init: function(options) {
+		this.title = options.title || messages['Convert to Self-Hosting']; //$NON-NLS-1$
+		this.buttons = [{ text: widgetsMessages['OK'], callback: this.okButtonClicked.bind(this) }];
+		this.modal = true;
 
-	constructor: function(options) {
-		this.options = options || {};
+		this.messages = {};
+		objects.mixin(this.messages, messages);
+		this.messages['SelectRepoSourceFolder'] = i18nUtil.formatMessage(messages['SelectRepoSourceFolder'], ["org.eclipse.orion.client"]); //$NON-NLS-0$
+		this.messages['EnterPortNumber'] = i18nUtil.formatMessage(messages['EnterPortNumber'], this.DEFAULT_PORT); //$NON-NLS-1$
+
+		this._initialize();
 	},
-	postMixInProperties: function() {
-		this.options.title = messages['Convert to Self-Hosting']; //$NON-NLS-1$
-		this.message = i18nUtil.formatMessage(messages["SelectRepoSourceFolder"], ["<b>org.eclipse.orion.client</b>"]); //$NON-NLS-1$ //$NON-NLS-0$
-		this.browseMessage = widgetsMessages['Browse...']; //$NON-NLS-1$
-		this.portMessage = i18nUtil.formatMessage(messages["EnterPortNumber"], this.DEFAULT_PORT); //$NON-NLS-1$
-		this.inherited(arguments);
-	},
-	postCreate: function() {
-		this.inherited(arguments);
-		dojo.connect(this.browseButton, 'click', function() { //$NON-NLS-1$
-			var dialog = new DirPrompter.DirectoryPrompterDialog({
+	_bindToDom: function() {
+		this.$okButton = this.$buttonContainer.firstChild;
+		this.$okButton.classList.add('disabled'); //$NON-NLS-0$
+		this.$browseButton.addEventListener('click', function() { //$NON-NLS-0$
+			var browseFolderDialog = new DirPrompter.DirectoryPrompterDialog({
 				title: messages["Choose Orion Source Folder"], //$NON-NLS-1$
 				serviceRegistry: this.serviceRegistry,
 				fileClient: this.fileClient,
 				func: this.onFolderChosen.bind(this)
 			});
-			dialog.show();
+			// Allow the child DirectoryPrompterDialog, and this ConvertToSelfHostingDialog, to lose focus to each other.
+			browseFolderDialog.$$modalExclusions = [this.$frame];
+			this.$$modalExclusions = [browseFolderDialog.$frame];
+			browseFolderDialog.show();
 		}.bind(this));
-		dojo.connect(this.port, 'onchange', function() { //$NON-NLS-1$
-			this.portNumber = parseInt(this.port.value, 10);
-			this.validate();
+		this.$port.addEventListener('change', function() { //$NON-NLS-1$
+			this.portNumber = parseInt(this.$port.value, 10);
+			this.updateValidity();
 		}.bind(this));
-		this.portNumber = this.port.value = this.DEFAULT_PORT;
-		this.validate();
+		this.portNumber = this.$port.value = this.DEFAULT_PORT;
+		this.updateValidity();
 	},
 	onFolderChosen: function(folder) {
 		this.folder = folder;
-		this.folderText.textContent = folder ? folder.Name : ''; //$NON-NLS-1$
-		this.validate();
+		this.$folderText.textContent = folder ? folder.Name : ''; //$NON-NLS-1$
+		this.updateValidity();
 	},
-	validate: function() {
-		var isValid = (this.folder && !isNaN(this.portNumber) && this.portNumber > 0);
-		this.okButton.set('disabled', !isValid); //$NON-NLS-1$
+	isValid: function() {
+		return (this.folder && !isNaN(this.portNumber) && this.portNumber > 0);
 	},
-	execute: function() {
-		this.onHide();
-		if (typeof this.options.func === 'function') { //$NON-NLS-1$
-			this.options.func(this.folder, this.portNumber);
+	updateValidity: function() {
+		if (!this.isValid()) {
+			this.$okButton.classList.add('disabled'); //$NON-NLS-0$
+		} else {
+			this.$okButton.classList.remove('disabled'); //$NON-NLS-0$
+		}
+	},
+	okButtonClicked: function() {
+		if (this.isValid()) {
+			this.hide();
+			if (typeof this.options.func === 'function') { //$NON-NLS-1$
+				this.options.func(this.folder, this.portNumber);
+			}
 		}
 	}
 });
@@ -78,10 +96,29 @@ var ROOT = "/"; //$NON-NLS-0$
  * @class Editor for an individual site configuration.
  * @param {Object} options Options bag for creating the widget.
  */
-var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentPane, dijit._Templated], { //$NON-NLS-0$
-	widgetsInTemplate: true,
-	templateString: dojo.cache('orion', 'widgets/templates/SiteEditor.html'), //$NON-NLS-1$ //$NON-NLS-0$
+var SiteEditor = function(options, parentNode) {
+	options = options || {};
+	objects.mixin(this, options);
 
+	this.options = options;
+	this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteClient", "commandService", "statusService", "progressService"]); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
+	this._fileClient = this.options.fileClient;
+	this._siteClient = this.options.siteClient;
+	this._commandService = this.options.commandService;
+	this._statusService = this.options.statusService;
+	this._progressService = this.options.progressService;
+	
+	this._commandsContainer = this.options.commandsContainer;
+
+	if (this.options.location) {
+		this.load(this.options.location);
+	}
+
+	this.node = parentNode || document.createElement("div"); //$NON-NLS-0$
+};
+EventTarget.attach(SiteEditor.prototype);
+objects.mixin(SiteEditor.prototype, {
 	/** SiteConfiguration */
 	_siteConfiguration: null,
 	
@@ -99,55 +136,57 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 	
 	_autoSaveTimer: null,
 
-	constructor: function() {
-		this.inherited(arguments);
-		this.options = arguments[0] || {};
-		this.checkOptions(this.options, ["serviceRegistry", "fileClient", "siteClient", "commandService", "statusService", "progressService"]); //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	show: function() {
+		this.createElements();
+		this.postCreate();
+	},
 
-		this._fileClient = this.options.fileClient;
-		this._siteClient = this.options.siteClient;
-		this._commandService = this.options.commandService;
-		this._statusService = this.options.statusService;
-		this._progressService = this.options.progressService;
-		
-		this._commandsContainer = this.options.commandsContainer;
-		
-		if (this.options.location) {
-			this.load(this.options.location);
-		}
+	createElements: function() {
+		this.node.innerHTML = SiteEditorTemplate;
+		lib.processTextNodes(this.node, messages);
+
+		this.siteForm = lib.$(".siteForm", this.node); //$NON-NLS-0$
+		this.name = lib.$(".siteConfigName", this.node); //$NON-NLS-0$
+		this.name.id = this.id + "_name"; //$NON-NLS-0$
+		this.nameInvalid = lib.$(".nameInvalid", this.node); //$NON-NLS-0$
+		this.hostHint = lib.$(".hostHint", this.node); //$NON-NLS-0$
+		this.hostHint.id = this.id + "_hostHint"; //$NON-NLS-0$
+		this.hostInvalid = lib.$(".hostInvalid", this.node); //$NON-NLS-0$
+		this.hostingStatus = lib.$(".hostingStatus", this.node); //$NON-NLS-0$
+		this.siteStartedWarning = lib.$(".siteStartedWarning", this.node); //$NON-NLS-0$
+		this.mappingsPlaceholder = lib.$(".mappingsGridTable"); //$NON-NLS-0$
+		this.mappingsPlaceholder.id = this.id + "_mappingsPlaceholder"; //$NON-NLS-0$
+		this.convertToolbar = lib.$(".convertToolbar"); //$NON-NLS-0$
+		this.convertToolbar.id = this.id + "_convertToolbar"; //$NON-NLS-0$
+
+		lib.$(".siteConfigNameLabel", this.node).htmlFor = (/*"htmlFor", */name.id); //$NON-NLS-1$ //$NON-NLS-0$
+		lib.$(".hostHintLabel", this.node).htmlFor = (/*"htmlFor", */this.hostHint.id); //$NON-NLS-1$ //$NON-NLS-0$
 	},
-	
-	postMixInProperties: function() {
-		this.inherited(arguments);
-		this.siteConfigNameLabelText = messages["Name:"];
-		this.mappingsLabelText = messages["Mappings:"];
-		this.hostHintLabelText = messages["Hostname hint:"];
-		this.hostingStatusLabelText = messages["Status:"];
-		
-		this.hostHintEm = messages["Optional; used to determine the URL where a started site can be accessed."];
-		this.siteStartedWarningEm = messages["Changes you make here won't affect the running site."];
-	},
-	
+
 	postCreate: function() {
-		this.inherited(arguments);
-		this.refocus = false; // Dojo 10654
-		
-		// Validation
-		this.name.set("invalidMessage", messages["Not a valid name"]); //$NON-NLS-0$
-		this.name.set("isValid", dojo.hitch(this, function(focused) { //$NON-NLS-0$
-			return focused || dojo.trim(this.name.get("value")) !== ""; //$NON-NLS-0$
-		}));
-		this.hostHint.set("invalidMessage", messages["Not a valid hostname"]); //$NON-NLS-0$
-		this.hostHint.set("isValid", dojo.hitch(this, function(focused) { //$NON-NLS-0$
-			var hostish = /^(?:\s*|[A-Za-z0-9-_]+)$/;
-			return focused || hostish.test(this.hostHint.get("value")); //$NON-NLS-0$
-		}));
-		
-		dijit.byId("siteForm").onSubmit = dojo.hitch(this, this.save); //$NON-NLS-0$
+		var _self = this;
+		this.name.addEventListener("input", function(event) { //$NON-NLS-0$
+			if (_self.name.checkValidity()) {
+				_self.name.classList.remove("invalid");
+				_self.nameInvalid.classList.remove("visible");
+			} else {
+				_self.name.classList.add("invalid");
+				_self.nameInvalid.classList.add("visible");
+			}
+		});
+		this.hostHint.addEventListener("change", function(event) { //$NON-NLS-0$
+			if (_self.hostHint.checkValidity()) {
+				_self.hostHint.classList.remove("invalid");
+				_self.hostInvalid.classList.remove("visible");
+			} else {
+				_self.hostHint.classList.add("invalid");
+				_self.hostInvalid.classList.add("visible");
+			}
+		});
 
 		// "Convert to self hosting" command
 		var self = this;
-		dojo.when(this.siteClient._canSelfHost(), function(canSelfHost) {
+		Deferred.when(this.siteClient._canSelfHost(), function(canSelfHost) {
 			var convertCommand = new mCommands.Command({
 				name: messages["Convert to Self-Hosting"],
 				tooltip: messages["Enable the site configuration to launch an Orion server running your local client code"],
@@ -157,11 +196,11 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 					return !!item.Location && canSelfHost && !self._isSelfHostingSite;
 				},
 				// FIXME selfhosting 
-				callback: dojo.hitch(self, self.convertToSelfHostedSite)});
+				callback: self.convertToSelfHostedSite.bind(self)});
 			self._commandService.addCommand(convertCommand);
 		});
 
-		this._autoSaveTimer = setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
+		this._autoSaveTimer = setTimeout(this.autoSave.bind(this), AUTOSAVE_INTERVAL);
 	},
 	
 	checkOptions: function(options, names) {
@@ -179,7 +218,7 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 	 * @returns {Array}
 	 */
 	_makeAddMenuChoices: function(proposals, items, userData) {
-		items = dojo.isArray(items) ? items[0] : items;
+		items = Array.isArray(items) ? items[0] : items;
 		proposals = proposals.sort(function(a, b) {
 				return a.FriendlyPath.toLowerCase().localeCompare(b.FriendlyPath.toLowerCase());
 			});
@@ -219,22 +258,24 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 			choices.push({}); // Separator
 		}
 		choices.push({
-			name: messages["Choose folder&#8230;"],
+			name: messages["Choose folder..."],
 			imageClass: "core-sprite-folder", //$NON-NLS-0$
-			callback: dojo.hitch(this, function() {
+			callback: function() {
 				var dialog = new DirPrompter.DirectoryPrompterDialog({
 					serviceRegistry: this.serviceRegistry,
 					fileClient: this.fileClient,
-					func: dojo.hitch(this, function(folder) {
+					func: function(folder) {
 						if (!!folder) {
 							this._siteClient.getMappingObject(this.getSiteConfiguration(), folder.Location, folder.Name).then(
 								function(mapping) {
 									callback.call({mapping: mapping});
 								});
 						}
-					})});
+					}.bind(this)
+				});
 				dialog.show();
-			})});
+			}.bind(this)
+		});
 		choices.push({name: "URL", imageClass: "core-sprite-link", callback: addUrl}); //$NON-NLS-1$ //$NON-NLS-0$
 		return choices;
 	},
@@ -256,26 +297,25 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 					});
 			}
 		});
-		dialog.startup();
 		dialog.show();
 	},
 	
 	/**
 	 * Loads site configuration from a URL into the editor.
 	 * @param {String} location URL of the site configuration to load.
-	 * @returns {dojo.Deferred} A deferred, resolved when the editor has loaded & refreshed itself.
+	 * @returns {orion.Promise} A promise, resolved when the editor has loaded & refreshed itself.
 	 */
 	load: function(location) {
-		var deferred = new dojo.Deferred();
+		var deferred = new Deferred();
 		this._busyWhile(deferred, "Loading..."); //$NON-NLS-0$
 		this._siteClient.loadSiteConfiguration(location).then(
-			dojo.hitch(this, function(siteConfig) {
+			function(siteConfig) {
 				this._setSiteConfiguration(siteConfig);
 				this.setDirty(false);
-				deferred.callback(siteConfig);
-			}),
+				deferred.resolve(siteConfig);
+			}.bind(this),
 			function(error) {
-				deferred.errback(error);
+				deferred.reject(error);
 			});
 		return deferred;
 	},
@@ -286,7 +326,7 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 
 		// Ask the service for the proposals to put in the dropdown menu
 		if (!this._mappingProposals) {
-			this._mappingProposals = this._siteClient.getMappingProposals(siteConfiguration).then(dojo.hitch(this, function(proposals) {
+			this._mappingProposals = this._siteClient.getMappingProposals(siteConfiguration).then(function(proposals) {
 				// Register command used for adding mapping
 				var addMappingCommand = new mCommands.Command({
 					name: messages["Add"],
@@ -296,21 +336,26 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 					visibleWhen: function(item) {
 						return true;
 					},
-					choiceCallback: dojo.hitch(this, this._makeAddMenuChoices, proposals)});
+					choiceCallback: this._makeAddMenuChoices.bind(this, proposals)});
 				this._commandService.addCommand(addMappingCommand);
 				var toolbar = this.titleWrapper.actionsNode;
 				this._commandService.registerCommandContribution(toolbar.id, "orion.site.mappings.add", 1); //$NON-NLS-0$
 				// do we really have to render here
 				this._commandService.renderCommands(toolbar.id, toolbar, this.mappings, this, "button"); //$NON-NLS-0$
-			}));
+			}.bind(this));
 		}
 
 		this._refreshCommands();
 		this._refreshFields();
 	},
-	
+
+	/**
+	 * @event setDirty
+	 * Clients can listen for "dirty" event to receive notification of the dirty state change.
+	 */
 	setDirty: function(value) {
 		this._isDirty = value;
+		this.dispatchEvent({type: "dirty", value: value});
 	},
 	
 	isDirty: function() {
@@ -341,11 +386,11 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 	},
 
 	_refreshFields: function() {
-		this.name.set("value", this._siteConfiguration.Name); //$NON-NLS-0$
-		this.hostHint.set("value", this._siteConfiguration.HostHint); //$NON-NLS-0$
+		this.name.setAttribute("value", this._siteConfiguration.Name); //$NON-NLS-0$
+		this.hostHint.setAttribute("value", this._siteConfiguration.HostHint); //$NON-NLS-0$
 
 		if (!this.mappings) {
-			this.titleWrapper = new mSection.Section(dojo.byId(this.mappingsPlaceholder.id), {
+			this.titleWrapper = new mSection.Section(document.getElementById(this.mappingsPlaceholder.id), {
 				id: "workingDirectorySection", //$NON-NLS-0$
 				title: "Mappings", //$NON-NLS-0$
 				content: '<div id="mappingsNode"/>', //$NON-NLS-0$
@@ -362,18 +407,21 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 
 		var hostStatus = this._siteConfiguration.HostingStatus;
 		if (hostStatus && hostStatus.Status === "started") { //$NON-NLS-0$
-			dojo.style(this.siteStartedWarning, {display: "block"}); //$NON-NLS-0$
+			this.siteStartedWarning.style.display = "block"; //$NON-NLS-0$
 			this.hostingStatus.textContent = messages["Started at "];
-			var a = dojo.create("a", {href: hostStatus.URL, target: "_new"}, this.hostingStatus, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var a = document.createElement("a"); //$NON-NLS-0$
+			a.href = hostStatus.URL;
+			a.target = "_new"; //$NON-NLS-0$
+			this.hostingStatus.appendChild(a);
 			a.textContent = hostStatus.URL;
-		} else if (hostStatus && hostStatus.Status === "stopped") {
-			dojo.style(this.siteStartedWarning, {display: "none"}); //$NON-NLS-0$
+		} else if (hostStatus && hostStatus.Status === "stopped") {//$NON-NLS-0$
+			this.siteStartedWarning.style.display = "none"; //$NON-NLS-0$
 			this.hostingStatus.textContent = messages["Stopped"];
 		}
 
-		setTimeout(dojo.hitch(this, function() {
+		setTimeout(function() {
 			this._attachListeners(this._siteConfiguration);
-		}), 0);
+		}.bind(this), 0);
 	},
 	
 	/**
@@ -386,29 +434,32 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 		
 		var editor = this;
 		function bindText(widget, modelField) {
-			function commitWidgetValue() {
-				var value = widget.get("value"); //$NON-NLS-0$
+			function commitWidgetValue(event) {
+				var value = widget.value; //$NON-NLS-0$
 				var oldValue = site[modelField];
 				site[modelField] = value;
 				var isChanged = oldValue !== value;
 				editor.setDirty(isChanged || editor.isDirty());
 			}
-			editor._modelListeners.push(dojo.connect(widget, "onChange", commitWidgetValue)); //$NON-NLS-0$
-			editor._modelListeners.push(dojo.connect(widget, "onKeyUp", commitWidgetValue)); //$NON-NLS-0$
+			widget.addEventListener("input", commitWidgetValue);
+			editor._modelListeners.push({target: widget, type: "input", listener: commitWidgetValue}); //$NON-NLS-0$
 		}
 		
 		bindText(this.name, messages["Name"]);
 		bindText(this.hostHint, messages["HostHint"]);
-		
-		this._modelListeners.push(dojo.connect(this.mappings, "setDirty", this, function(dirty) { //$NON-NLS-0$
-			this.setDirty(dirty);
-		}));
+
+		var dirtyListener = function(dirtyEvent) {
+			editor.setDirty(dirtyEvent.value);
+		};
+		this.mappings.addEventListener("dirty", dirtyListener);
+		this._modelListeners.push({target: this.mappings, type: "dirty", listener: dirtyListener});
 	},
 	
 	_detachListeners: function() {
 		if (this._modelListeners) {
 			for (var i=0; i < this._modelListeners.length; i++) {
-				dojo.disconnect(this._modelListeners[i]);
+				var l = this._modelListeners[i];
+				l.target.removeEventListener(l.type, l.listener);
 			}
 			this._modelListeners.splice(0);
 		}
@@ -432,42 +483,37 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 	 */
 	save: function(refreshUI) {
 		refreshUI = typeof refreshUI === "undefined" ? true : refreshUI; //$NON-NLS-0$
-		var form = dijit.byId("siteForm"); //$NON-NLS-0$
-		if (form.isValid()) {
-			var siteConfig = this._siteConfiguration;
-			// Omit the HostingStatus field from the object we send since it's likely to be updated from the
-			// sites page, and we don't want to overwrite
-			var status = siteConfig.HostingStatus;
-			delete siteConfig.HostingStatus;
-			var self = this;
-			var deferred = this._siteClient.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
-				function(updatedSiteConfig) {
-					self.setDirty(false);
-					if (refreshUI) {
-						self._setSiteConfiguration(updatedSiteConfig);
-						return updatedSiteConfig;
-					} else {
-						siteConfig.HostingStatus = status;
-						self._refreshCommands();
-						return siteConfig;
-					}
-				});
-			this._busyWhile(deferred);
-			return true;
-		} else {
-			return false;
-		}
+		var siteConfig = this._siteConfiguration;
+		// Omit the HostingStatus field from the object we send since it's likely to be updated from the
+		// sites page, and we don't want to overwrite
+		var status = siteConfig.HostingStatus;
+		delete siteConfig.HostingStatus;
+		var self = this;
+		var deferred = this._siteClient.updateSiteConfiguration(siteConfig.Location, siteConfig).then(
+			function(updatedSiteConfig) {
+				self.setDirty(false);
+				if (refreshUI) {
+					self._setSiteConfiguration(updatedSiteConfig);
+					return updatedSiteConfig;
+				} else {
+					siteConfig.HostingStatus = status;
+					self._refreshCommands();
+					return siteConfig;
+				}
+			});
+		this._busyWhile(deferred);
+		return true;
 	},
 
 	autoSave: function() {
 		if (this.isDirty()) {
 			this.save(false);
 		}
-		setTimeout(dojo.hitch(this, this.autoSave), AUTOSAVE_INTERVAL);
+		setTimeout(this.autoSave.bind(this), AUTOSAVE_INTERVAL);
 	},
 
 	_busyWhile: function(deferred, msg) {
-		deferred.then(dojo.hitch(this, this._onSuccess), dojo.hitch(this, this._onError));
+		deferred.then(this._onSuccess.bind(this), this._onError.bind(this));
 		this.progressService.showWhile(deferred, msg);
 	},
 	
@@ -481,17 +527,21 @@ var SiteEditor = dojo.declare("orion.widgets.SiteEditor", [dijit.layout.ContentP
 	},
 	
 	/**
-	 * Clients can dojo.connect() to this function to receive notifications about server calls that succeeded.
-	 * @param {dojo.Deferred} deferred The deferred that succeeded.
+	 * @event success
+	 * Clients can listen for an "success" event to receive notifications about server calls that succeeded.
+	 * @param {orion.Promise} deferred The deferred that succeeded.
 	 */
 	onSuccess: function(deferred) {
+		this.dispatchEvent({type: "success", deferred: deferred});
 	},
 		
 	/**
-	 * Clients can dojo.connect() to this function to receive notifications about server called that failed.
-	 * @param {dojo.Deferred} deferred The deferred that errback'd.
+	 * @event error
+	 * Clients can listen for an "error" event to receive notifications about server calls that failed.
+	 * @param {orion.Promise} deferred The deferred that rejected.
 	 */
 	onError: function(deferred) {
+		this.dispatchEvent({type: "error", deferred: deferred});
 	}
 });
 	return SiteEditor;

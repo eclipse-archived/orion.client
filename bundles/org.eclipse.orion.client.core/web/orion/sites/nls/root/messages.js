@@ -23,7 +23,7 @@ define({
 	"Enable the site configuration to launch an Orion server running your local client code": "Enable the site configuration to launch an Orion server running your local client code",
 	"Save": "Save",
 	"Save the site configuration": "Save the site configuration",
-	"Choose folder&#8230;": "Choose folder&#8230;",
+	"Choose folder...": "Choose folder\u2026",
 	"Choose Orion Source Folder": "Choose Orion Source Folder",
 	"SelectRepoSourceFolder": "Select the folder where you checked out the ${0} repository:",
 	"Loading...": "Loading...",

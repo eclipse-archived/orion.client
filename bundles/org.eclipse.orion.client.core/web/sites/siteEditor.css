@@ -1,6 +1,10 @@
 .siteEditorTable td, .siteEditorTable th {
 	padding: 10px 10px 5px 10px;
 }
+.siteEditorTable th {
+	text-align: left;
+}
+
 /* Style leftmost column of siteEditorTable */
 .siteEditorTable>tbody>tr>td:first-child {
 	vertical-align: top;
@@ -32,3 +36,4 @@
 .siteForm {
 	display: table;
 }
+

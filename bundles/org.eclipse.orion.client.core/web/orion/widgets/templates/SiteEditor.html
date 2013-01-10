@@ -3,42 +3,42 @@
 		<div>
 			<div class="sectionTableItem ">
 				
-				<div dojoType="dijit.form.Form" id="siteForm">
+				<form id="siteForm" class="siteForm">
 					<table class="siteEditorTable">
 						<tr>
 							<td>
-								<label dojoAttachPoint="siteConfigNameLabel" for="${id}_name">${siteConfigNameLabelText}</label>
+								<label class="siteConfigNameLabel">${Name:}</label>
 							</td>
 							<td>
-								<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="name" id="${id}_name"
-									required="true" value="">
-							</td>
-						</tr>
-						
-						<tr>
-							<td>
-								<label dojoAttachPoint="hostHintLabel" for="${id}_hostHint">${hostHintLabelText}</label>
-							</td>
-							<td>
-								<input dojoType="dijit.form.ValidationTextBox" dojoAttachPoint="hostHint" id="${id}_hostHint"
-									required="false" value="">
-								<em>${hostHintEm}</em>
+								<input class="siteConfigName" required="required" pattern="\s*\S+\s*" value="">
+								<div class="nameInvalid">${Not a valid name}</div>
 							</td>
 						</tr>
 						
 						<tr>
 							<td>
-								<label dojoAttachPoint="hostingStatusLabel">${hostingStatusLabelText}</label>
+								<label class="hostHintLabel">${Hostname hint:}</label>
 							</td>
 							<td>
-								<span dojoAttachPoint="hostingStatus"></span>
-								<span dojoAttachPoint="siteStartedWarning">
-									<em>${siteStartedWarningEm}</em>
+								<input class="hostHint" required="required" pattern="^(?:\s*|[A-Za-z0-9-_]+)$" value="">
+								<em>${Optional; used to determine the URL where a started site can be accessed.}</em>
+								<div class="hostInvalid">${Not a valid hostname}</div>
+							</td>
+						</tr>
+						
+						<tr>
+							<td>
+								<label class="hostingStatusLabel">${Status:}</label>
+							</td>
+							<td>
+								<span class="hostingStatus"></span>
+								<span class="siteStartedWarning">
+									<em>${Changes you make here won't affect the running site.}</em>
 								</span>
 							</td>
 						</tr>
 					</table>
-				</div>
+				</form>
 				
 				
 			</div>
@@ -48,13 +48,13 @@
 	<table class="siteEditorTable" style="width:100%;">
 			<tr>
 				<td>
-					<div dojoAttachPoint="mappingsPlaceholder" class="mappingsGridTable" id="${id}_mappingsPlaceholder"></div>
+					<div class="mappingsGridTable"></div>
 				</td>
 			</tr>
 			
 			<tr>
 				<td>
-					<div dojoAttachPoint="convertToolbar" id="${id}_convertToolbar"></div>
+					<div class="convertToolbar"></div>
 				</td>
 			</tr>		
 	</table>
