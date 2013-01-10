@@ -10,7 +10,7 @@
 
 @import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
 
-@import "../settings/settings.css";
+@import "../css/layout.css";
 
 @import "../css/ide.css";
 
@@ -32,3 +32,6 @@ html,body {
 	font-weight: bold;
 }
 
+.sitePanel {
+	min-width: 800px;
+}
