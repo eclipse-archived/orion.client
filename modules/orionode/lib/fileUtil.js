@@ -58,16 +58,7 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 					LocalTimeStamp: timeStamp,
 					Directory: isDirectory,
 					Location: location,
-					ChildrenLocation: api.join(parentLocation, childname) + '?depth=1'
-/*
-    {
-      "ChildrenLocation": "http://orion.eclipse.org/file/D/myworkspace/?depth=1",
-      "ExportLocation": "http://orion.eclipse.org/xfer/export/D/myworkspace.zip",
-      "Id": "B6",
-      "ImportLocation": "http://orion.eclipse.org/xfer/import/D/myworkspace",
-      "LocalTimeStamp": 1339179396000,
-      "Location": "http://orion.eclipse.org/file/D/myworkspace/",
-*/
+					ChildrenLocation: isDirectory ? api.join(parentLocation, childname) + '?depth=1' : null
 				};
 			});
 			callback(children); //yay
