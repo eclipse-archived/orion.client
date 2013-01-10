@@ -84,6 +84,7 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 			mOperationsCommands.updateNavTools(this.registry, this, this.toolbarId, this.selectionToolsId, this.operations);
 			this.model = new exports.OperationsModel(operationsList);
 			this.createTree(this.parentId, this.model);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, operationsList);
 		};
 		
 		OperationsExplorer.prototype.changedItem = function(location){
