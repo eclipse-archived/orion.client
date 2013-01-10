@@ -3,8 +3,8 @@
 <head>
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script src="../orion/Deferred.js"></script>
+	<script src="../orion/plugin.js"></script>
 	<script type="text/javascript">
 /*******************************************************************************
  * Copyright (c) 2010, 2011 IBM Corporation and others All rights reserved. This
@@ -15,6 +15,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*global console orion window*/
 
 /** @namespace The global container for eclipse APIs. */
 var eclipse = eclipse || {};
@@ -40,7 +41,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		fetchChildren: function(location) {
 			console.log("fetchChildren: " + location);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback([
 			{
 				Directory: false,
@@ -74,7 +75,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		createWorkspace: function(name) {
 			console.log("createWorkspace: " + name);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -85,7 +86,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		loadWorkspaces: function() {
 			console.log("loadWorkspaces");
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback([]);
 			return d;
 		},
@@ -98,7 +99,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		loadWorkspace: function(location) {
 			console.log("loadWorkspace: " + location);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({Children:[
 			{
 				Directory: true,
@@ -146,7 +147,7 @@ eclipse.SampleFileServiceImpl= (function() {
 				return;
 			}
 			console.log("createProject: " + url + ", name: " + projectName + ", path: " + serverPath + ", create: " + create);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -158,7 +159,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		createFolder: function(parentLocation, folderName) {
 			console.log("createFolder: " + parentLocation+ ", folderName: " + folderName);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -171,7 +172,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		createFile: function(parentLocation, fileName) {
 			console.log("createFile: " + parentLocation+ ", fileName: " + fileName);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -181,7 +182,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */
 		deleteFile: function(location) {
 			console.log("deleteFile: " + location);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -213,7 +214,7 @@ eclipse.SampleFileServiceImpl= (function() {
 				name = segments.pop() || segments.pop();
 			}
 			console.log("docopymove: " + sourceLocation+ ", targetLocation: " + targetLocation+ ", isMove: " + isMove+ ", name: " + name);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		},
@@ -226,7 +227,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback("Hello World");
 			return d;
 		},
@@ -239,7 +240,7 @@ eclipse.SampleFileServiceImpl= (function() {
 		 */		
 		write: function(location, contents) {
 			console.log("writing at location: " + location + ", contents: " + contents);
-			var d = new dojo.Deferred();
+			var d = new orion.Deferred();
 			d.callback({});
 			return d;
 		}
@@ -247,7 +248,7 @@ eclipse.SampleFileServiceImpl= (function() {
 	return FileServiceImpl;
 }());
 	</script>
-	<script type="text/javascript">
+	<script>
 		window.onload = function() {
 			var service = new eclipse.SampleFileServiceImpl();
 			var provider = new orion.PluginProvider();
