@@ -1,13 +1,12 @@
-@import "../org.dojotoolkit/dojo/resources/dojo.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
-
 @import "../css/layout.css";
 
 @import "../css/ide.css";
 
 @import "../css/images.css";
 
+button {
+	margin: 2px 8px 2px;
+}
 .testSuccess {
 	line-height: 20px;	
 }
