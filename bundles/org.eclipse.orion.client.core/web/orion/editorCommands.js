@@ -143,7 +143,7 @@ exports.EditorCommandFactory = (function() {
 					tooltip: messages["Save this file"],
 					id: "orion.save", //$NON-NLS-0$
 					callback: function(data) {
-						data.items.getTextView().invokeAction("save"); //$NON-NLS-0$
+						editor.getTextView().invokeAction("save"); //$NON-NLS-0$
 					}});
 					
 				
@@ -287,7 +287,7 @@ exports.EditorCommandFactory = (function() {
 				var makeCommand = function(info, service, options) {
 					options.callback = function(data) {
 						// command service will provide editor parameter but editor widget callback will not
-						editor = data ? data.items || this : this;
+						editor = this;
 						var selection = editor.getSelection();
 						var model = editor.getModel();
 						var text = model.getText();
@@ -376,7 +376,7 @@ exports.UndoCommandFactory = (function() {
 				name: messages['Undo'],
 				id: "orion.undo", //$NON-NLS-0$
 				callback: function(data) {
-					data.items.getTextView().invokeAction("undo"); //$NON-NLS-0$
+					this.getTextView().invokeAction("undo"); //$NON-NLS-0$
 				}});
 			editor.getTextView().setAction("undo", function() { //$NON-NLS-0$
 				undoStack.undo();
@@ -388,7 +388,7 @@ exports.UndoCommandFactory = (function() {
 				name: messages['Redo'],
 				id: "orion.redo", //$NON-NLS-0$
 				callback: function(data) {
-					data.items.getTextView().invokeAction("redo"); //$NON-NLS-0$
+					this.getTextView().invokeAction("redo"); //$NON-NLS-0$
 				}});
 			editor.getTextView().setAction("redo", function() { //$NON-NLS-0$
 				undoStack.redo();
