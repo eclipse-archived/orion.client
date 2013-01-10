@@ -3,11 +3,11 @@
 <head>
 	<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011,2012." >
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="filePlugin/webdavImpl.js"></script>
-	<script type="text/javascript">
-		/*global window console dojo eclipse */
+	<script src="../orion/Deferred.js"></script>
+	<script src="../orion/plugin.js"></script>
+	<script src="filePlugin/webdavImpl.js"></script>
+	<script>
+		/*global window console eclipse orion*/
 		/*jslint browser:true*/
 		window.onload = function() {
 			function trace(implementation) {
@@ -23,7 +23,7 @@
 									console.log(" [" + arg + "] " + arguments[arg]);
 								}
 								var result = implementation[methodName].apply(implementation, Array.prototype.slice.call(arguments));
-								dojo.when(result, function(json) {
+								orion.Deferred.when(result, function(json) {
 									console.log(json);
 								});
 								return result;
@@ -45,21 +45,21 @@
 </head>
 <body>
 <h1>WebDAV Orion FileSystem plugin</h1>
-This plugin provides support for a WebDAV file system plugin.  The plugin and associated files must be placed in the WebDAV server directory
-and installed as a plugin within Orion.<p>
-Certain files are needed for the plugin to be successfully loaded and these files can be placed in the same directory as the webdavFilePlugin.html.
-Once the files are added, this file must be modified as follows<p>
-<h3> Change from:<h3>
+<p>This plugin provides support for a WebDAV file system plugin.  The plugin and associated files must be placed in the WebDAV server directory
+and installed as a plugin within Orion.</p>
+<p>Certain files are needed for the plugin to be successfully loaded and these files can be placed in the same directory as the webdavFilePlugin.html.
+Once the files are added, this file must be modified as follows</p>
+<h3> Change from:</h3>
 <code>
-	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="../orion/plugin.js"></script>
-	<script type="text/javascript" src="filePlugin/webdavImpl.js"></script>
+	&lt;script src="../orion/Deferred.js">&lt;/script>
+	&lt;script src="../orion/plugin.js">&lt;/script>
+	&lt;script src="filePlugin/webdavImpl.js">&lt;/script>
 </code>
-<h3> Change to:<h3>
+<h3> Change to:</h3>
 <code>
-	<script type="text/javascript" src="dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="plugin.js"></script>
-	<script type="text/javascript" src="webdavImpl.js"></script>
+	&lt;script src="orion/Deferred.js">&lt;/script>
+	&lt;script src="orion/plugin.js">&lt;/script>
+	&lt;script src="webdavImpl.js">&lt;/script>
 </code>
 </body>
 </html>
