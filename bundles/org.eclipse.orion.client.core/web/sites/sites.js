@@ -9,15 +9,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define dojo orion window widgets*/
+/*global define window*/
 /*jslint browser:true*/
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/selection', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/sitesExplorer','dojo/hash', 'dojo/date/locale'], 
-		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands,
-			mSiteUtils, mSiteCommands, SitesExplorer) {
-
-	dojo.addOnLoad(function() {
+		'orion/sites/sitesExplorer'], 
+	function(mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mSelection, mDialogs, mGlobalCommands, mSiteUtils, mSiteCommands, SitesExplorer) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -51,6 +48,5 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 			var explorer = new SitesExplorer(serviceRegistry, selection, "table"); //$NON-NLS-0$
 			createCommands();
 			explorer.display();
-		});
 	});
 });
