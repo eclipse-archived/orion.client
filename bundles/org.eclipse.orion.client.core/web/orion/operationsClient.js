@@ -114,11 +114,7 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
 				return;
 			}
-			if("timeout"===error.dojoType) { //$NON-NLS-0$
-				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
-			} else {
-				setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
-			}
+			setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
 		});
 	}
 	
