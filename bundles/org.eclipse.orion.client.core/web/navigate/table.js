@@ -69,19 +69,24 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 				var isAtRoot = mFileUtils.isAtRoot(explorer.treeRoot.Location);
 				var gettingStartedNode = lib.node("gettingStartedTasks"); //$NON-NLS-0$
 				if (isAtRoot && !gettingStartedNode) { 
-					// create a command that represents each "orion.navigate.content" extension point
-					var newContentContributions = serviceRegistry.getServiceReferences("orion.navigate.content"); //$NON-NLS-0$
+					// create a command that represents each "orion.core.content" extension point
+					var newContentContributions = serviceRegistry.getServiceReferences("orion.core.content"); //$NON-NLS-0$
 					var tasks = [];
 					for (var i=0; i<newContentContributions.length; i++) {
 						var contribution = newContentContributions[i];
-						var href = null;
+						var href, hrefContent, uriTemplate = null;
 						var id = contribution.getProperty("id"); //$NON-NLS-0$
 						var template = contribution.getProperty("uriTemplate"); //$NON-NLS-0$
 						if (template) {
-							var uriTemplate = new URITemplate(template);
+							uriTemplate = new URITemplate(template);
 							href = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
 						}
-						var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, contribution.getProperty("command"), explorer, fileClient, progress, contribution.getProperty("folder"), contribution.getProperty("parameters"));
+						template = contribution.getProperty("contentURITemplate"); //$NON-NLS-0$
+						if (template) {
+							uriTemplate = new URITemplate(template);
+							hrefContent = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
+						}
+						var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
 						wrappingCommand.contentDescription = contribution.getProperty("description"); //$NON-NLS-0$
 						commandService.addCommand(wrappingCommand);
 						tasks.push({commandId: id});
