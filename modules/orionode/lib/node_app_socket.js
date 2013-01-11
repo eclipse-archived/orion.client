@@ -67,7 +67,7 @@ exports.install = function(options) {
 				app.on('exit', function(c) {
 					socket.emit('stopped', app.toJson());
 				});
-				//socket.emit('started', app.toJson());
+				socket.emit('started', app.toJson());
 			} catch (error) {
 				console.log(error && error.stack);
 				emitError(socket, error);
