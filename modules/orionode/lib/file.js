@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*global Buffer console module process require*/
 var compat = require('./compat');
+var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -45,6 +46,7 @@ module.exports = function(options) {
 	var fileRoot = options.root;
 	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw 'options.root is required'; }
+	if (!workspaceDir) { throw 'options.workspaceDir is required'; }
 
 	function getSafeFilePath(rest) {
 		return fileUtil.safeFilePath(workspaceDir, rest);
@@ -147,7 +149,9 @@ module.exports = function(options) {
 	/*
 	 * Handler begins here
 	 */
-	return resource(fileRoot, {
+	return connect()
+	.use(connect.json())
+	.use(resource(fileRoot, {
 		GET: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
@@ -332,5 +336,5 @@ module.exports = function(options) {
 				}
 			});
 		}
-	});
+	}));
 };
