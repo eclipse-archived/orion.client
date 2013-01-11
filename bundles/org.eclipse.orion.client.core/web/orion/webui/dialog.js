@@ -126,6 +126,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 					}
 					if (buttonDefinition.isDefault) {
 						self._defaultCallback = buttonDefinition.callback;
+						self._defaultButton = button;
 					}
 					button.appendChild(document.createTextNode(buttonDefinition.text));
 					button.className = "commandButton commandMargins"; //$NON-NLS-0$
@@ -144,6 +145,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 				});
 			}
 		},
+
 		
 		/*
 		 * Internal.  Makes modal behavior by immediately returning focus to the dialog when user leaves the dialog, and by
@@ -248,14 +250,22 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 				left = Math.max(0, (totalRect.width - rect.width) / 2);
 				top = Math.max(0, (totalRect.height - rect.height) / 2);
 			}
+			this.$lastFocusedElement = document.activeElement;
 			this.$frame.style.top = top + "px"; //$NON-NLS-0$
 			this.$frame.style.left = left + "px"; //$NON-NLS-0$ 
 			this.$frame.classList.add("dialogShowing"); //$NON-NLS-0$
 			if (typeof this._afterShowing === "function") { //$NON-NLS-0$
 				this._afterShowing();
 			}
-			this.$lastFocusedElement = document.activeElement;
-
+			if (!this.customFocus) {
+				// We should set the focus.  Pick the first tabbable content field, otherwise use default button.
+				// If neither, find any button at all.
+				var focusField = lib.firstTabbable(this.$parent) || 
+					this._defaultButton ||
+					lib.firstTabbable(this.$buttonContainer) ||
+					this.$close;
+				focusField.focus();
+			}
 		},
 		
 		/*

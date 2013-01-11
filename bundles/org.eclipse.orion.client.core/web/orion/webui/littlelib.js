@@ -61,6 +61,24 @@ define(['require'], function(require) {
 		}
 	}
 	
+	/* 
+	 * Inspired by http://brianwhitmer.blogspot.com/2009/05/jquery-ui-tabbable-what.html
+	 */
+	function firstTabbable(node) {
+		if (node.tabIndex >= 0) {
+			return node;
+		}
+		if (node.hasChildNodes()) {
+			for (var i=0; i<node.childNodes.length; i++) {
+				var result = firstTabbable(node.childNodes[i]);
+				if (result) {
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+	
 	var variableRegEx = /\$\{([^\}]+)\}/;
 	
 	function processTextNodes(node, messages) {
@@ -142,6 +160,7 @@ define(['require'], function(require) {
 		contains: contains,
 		bounds: bounds,
 		empty: empty,
+		firstTabbable: firstTabbable,
 		stop: stop,
 		processTextNodes: processTextNodes,
 		addAutoDismiss: addAutoDismiss,

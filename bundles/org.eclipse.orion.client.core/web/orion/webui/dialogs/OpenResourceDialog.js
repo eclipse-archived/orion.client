@@ -269,13 +269,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		};
 	};
 	
-	/**
-	 * Once the dialog is up...
-	 */
-	OpenResourceDialog.prototype._afterShowing = function() {
-		this.$fileName.focus();
-	};
-	
 	/** @private */
 	OpenResourceDialog.prototype._beforeHiding = function() {
 		clearTimeout(this._timeoutId);
