@@ -241,11 +241,12 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			var that = this;
 			if(message){
 				that.setProgressMessage(message);
-				deferred.addBoth(function(){
+				var finish = function(){
 					if(message === that.currentMessage){
 						that.setProgressMessage("");		
 					}
-				});
+				};
+				deferred = deferred.then(finish, finish);
 			}
 			return deferred;
 		},
