@@ -15,12 +15,9 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * A modern web browser with Web Socket support (for example: Firefox 15, Chrome 22, Internet Explorer 10, Safari 6).
 
 ## Known Issues
-* Missing file operations: import and export.
-* Copy and Move only work on files, not folders (yet, see issue #4).
-* The breadcrumb is buggy (see issue #10).
-* The node.js development features are a work in progress. Current limitations are:
+* See the [list of open bugs](https://bugs.eclipse.org/bugs/buglist.cgi?list_id=4064489&classification=Eclipse&query_format=advanced&bug_status=UNCONFIRMED&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED&component=Node&product=Orion).
+* In particular, the node.js development features are a work in progress. Current limitations are:
     * There's no way to provide standard input to a running node app.
-	* Output from Shell commands doesn't look nice (whitespace is not preserved, so the text runs together).
 
 ## Usage
 1. Clone the [orion client repository](http://git.eclipse.org/c/orion/org.eclipse.orion.client.git/) by using one of the following URLs:
