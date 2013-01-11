@@ -51,6 +51,7 @@ tr.treeTableRow td:first-child {
 
 .treetable th {
 	font-weight: bold;
+	text-align: left;
 }
 
 .treetable td {
