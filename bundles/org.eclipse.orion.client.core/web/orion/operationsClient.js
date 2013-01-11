@@ -23,6 +23,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 			function(error) {
 				//forward other errors to client
 				clientDeferred.reject(error);
+			},
+			function(progress) {
+				clientDeferred.progress(progress);
 			}
 		);
 		return clientDeferred;

@@ -43,8 +43,8 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 			timeout: 15000
 		}).then(function(result) {
 			var operationJson = result.response ? JSON.parse(result.response) : null;
+			deferred.progress(operationJson);
 			if(_isRunning(operationJson.type)){
-				deferred.progress(operationJson);
 				setTimeout(function(){
 					_getOperation(operationLocation, deferred);
 				}, 2000);
