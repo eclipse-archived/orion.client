@@ -82,8 +82,9 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		}, false);
 		this.$fileName.addEventListener("keydown",function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === lib.KEY.ENTER) {
-				var link = lib.$("a", self._results); //$NON-NLS-0$
+				var link = lib.$("a", self.$results); //$NON-NLS-0$
 				if (link) {
+					lib.stop(evt);
 					window.open(link.href);
 					self.hide();
 				}

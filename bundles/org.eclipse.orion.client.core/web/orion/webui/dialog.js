@@ -74,18 +74,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$close.addEventListener("click", function(event) { //$NON-NLS-0$
 				self.hide();
 			}, false);
-			// onClick events do not register for spans when using the keyboard without a screen reader
-			this.$close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-				if(e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {
-					self.hide();
-				}
-			}, false);
-			this.$frame.addEventListener("keydown", function (e) { //$NON-NLS-0$
-				if(e.keyCode === lib.KEY.ESCAPE) {
-					self.hide();
-				}
-			}, false);
-			
+						
 			this.$parent = lib.$(".dialogContent", this.$frame); //$NON-NLS-0$
 			range = document.createRange();
 			range.selectNode(this.$parent);
@@ -96,6 +85,22 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$parent.appendChild(contentFragment);
 			this.$buttonContainer = lib.$(".dialogButtons", this.$frame); //$NON-NLS-0$
 			this._makeButtons();
+			
+			// hook key handlers.  This must be done after _makeButtons so that the default callback (if any)
+			// is established.
+			this.$close.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				if(e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {
+					self.hide();
+				}
+			}, false);
+			this.$frame.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				if(e.keyCode === lib.KEY.ESCAPE) {
+					self.hide();
+				} else if (e.keyCode === lib.KEY.ENTER && typeof(self._defaultCallback === "function")) { //$NON-NLS-0$
+					self._defaultCallback();
+				}
+			}, false);
+			
 			this._bindElements(this.$parent);
 			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
 				this._bindToDom(this.$parent);
@@ -117,7 +122,10 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 					button.tabIndex = 0; 
 					if (buttonDefinition.id) {
 						button.id = buttonDefinition.id;
-						this['$'+ button.id] = button; //$NON-NLS-0$					
+						self['$'+ button.id] = button; //$NON-NLS-0$					
+					}
+					if (buttonDefinition.isDefault) {
+						self._defaultCallback = buttonDefinition.callback;
 					}
 					button.appendChild(document.createTextNode(buttonDefinition.text));
 					button.className = "commandButton commandMargins"; //$NON-NLS-0$
