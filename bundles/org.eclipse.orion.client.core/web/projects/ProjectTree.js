@@ -58,7 +58,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 
 							'<div role="button" class="projectInlineBlock projectButton projectButtonMain" tabindex="0" aria-expanded="false" aria-haspopup="true">' +
 								'<div class="projectInlineBlock">' +
 									'<div class="projectInlineBlock">' +
-										'<div class="projectInlineBlock">CREATE A PROJECT</div>' +
+										'<div class="projectInlineBlock">Create A Project</div>' +
 											'<div class="projectInlineBlock">&nbsp;</div>' + 
 										'</div>' +
 									'</div>' +

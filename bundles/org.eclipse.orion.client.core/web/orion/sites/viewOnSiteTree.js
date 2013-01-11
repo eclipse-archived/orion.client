@@ -10,9 +10,10 @@
  ******************************************************************************/
 /*global define document*/
 /*jslint sub:true*/
-define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
-		'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable'],
-		function(messages, i18nUtil, dojo, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable) {
+define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'orion/commands', 'orion/globalCommands',
+		'orion/selection', 'orion/sites/siteUtils', 'orion/sites/siteClient', 'orion/sites/siteCommands', 'orion/webui/treetable',
+		'orion/webui/littlelib'],
+		function(messages, i18nUtil, Deferred, mCommands, mGlobalCommands, mSelection, mSiteUtils, mSiteClient, mSiteCommands, treetable, lib) {
 	var formatMessage = i18nUtil.formatMessage;
 	var TableTree = treetable.TableTree;
 	var ViewOnSiteTree;
@@ -33,7 +34,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 			getRoot: function(/**function*/ onItem) {
 				onItem(this._root);
 			},
-			getChildren: function(/**dojo.data.Item*/ parentItem, /**Function(items)*/ onComplete) {
+			getChildren: function(/**Object*/ parentItem, /**Function(items)*/ onComplete) {
 				if (parentItem.children) {
 					// The parent already has the children fetched
 					onComplete(parentItem.children);
@@ -47,7 +48,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 					return onComplete([]);
 				}
 			},
-			getId: function(/**dojo.data.Item|String*/ item) {
+			getId: function(/**Object|String*/ item) {
 				return (item === this._root || item === this._id) ? this._id : item.Id;
 			}
 		};
@@ -67,39 +68,49 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 		}
 		SitesRenderer.prototype = /** @lends orion.sites.SitesRenderer.prototype */{
 			initTable: function (tableNode, tableTree) {
-				dojo.addClass(tableNode, "treetable");
+				tableNode.classList.add("treetable"); //$NON-NLS-0$
 			},
 			render: function(item, tableRow) {
-				dojo.addClass(tableRow, "treeTableRow sitesTableRow"); //$NON-NLS-0$
+				tableRow.className += "treeTableRow addsitesTableRow"; //$NON-NLS-0$
 				
-				var siteConfigCol = dojo.create("td", {id: tableRow.id + "col1"}); //$NON-NLS-1$ //$NON-NLS-0$
-				var actionCol = dojo.create("td", {id: tableRow.id + "col4"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var siteConfigCol = document.createElement("td"); //$NON-NLS-0$
+				siteConfigCol.id = tableRow.id + "col1"; //$NON-NLS-0$
+				var actionCol = document.createElement("td"); //$NON-NLS-0$
+				actionCol.id = tableRow.id + "col4"; //$NON-NLS-0$
 				
 				// Site config column
 				var href = mSiteUtils.generateEditSiteHref(item);
-				var nameLink = dojo.create("a", {href: href}, siteConfigCol, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.place(document.createTextNode(item.Name), nameLink, "last"); //$NON-NLS-0$
+				var nameLink = document.createElement("a"); //$NON-NLS-0$
+				nameLink.href = href;
+				siteConfigCol.appendChild(nameLink);
+				nameLink.textContent = item.Name;
 				
-				var statusField = dojo.create("span", {"style" : "padding-left:10px; padding-right:10px"}, siteConfigCol, "last");
+				var statusField = document.createElement("span"); //$NON-NLS-0$
+				statusField.style.padding = "0 10px 0 10px"; //$NON-NLS-0$
+				siteConfigCol.appendChild(statusField);
 				
 				// Status, URL columns
 				var status = item.HostingStatus;
 				if (typeof status === "object") { //$NON-NLS-0$
 					if (status.Status === "started") { //$NON-NLS-0$
-						dojo.place(document.createTextNode(messages["Started"]), statusField, "last"); //$NON-NLS-1$
-						var link = dojo.create("a", null, siteConfigCol, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						dojo.place(document.createTextNode(status.URL), link, "last"); //$NON-NLS-0$
+						statusField.appendChild(document.createTextNode(messages["Started"]));
+						var link = document.createElement("a"); //$NON-NLS-0$
 						link.href = status.URL;
+						link.textContent = status.URL;
+						siteConfigCol.appendChild(link);
 					} else {
 						var statusString = status.Status.substring(0,1).toUpperCase() + status.Status.substring(1);
-						dojo.place(document.createTextNode(statusString), statusField, "last"); //$NON-NLS-0$
+						statusField.appendChild(document.createTextNode(statusString));
 					}
 				} else {
-					dojo.place(document.createTextNode(messages["Unknown"]), statusField, "last"); //$NON-NLS-1$
+					statusField.appendChild(document.createTextNode(messages["Unknown"]));
 				}
 				
 				// Action column
-				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper", "class":"sectionTableItemActions"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var actionsWrapper = document.createElement("span"); //$NON-NLS-0$
+				actionsWrapper.id = tableRow.id + "actionswrapper"; //$NON-NLS-0$
+				actionsWrapper.classList.add("sectionTableItemActions"); //$NON-NLS-0$
+				actionCol.appendChild(actionsWrapper);
 				var options = this._options;
 				var userData = {
 					startCallback: options.startCallback,
@@ -110,19 +121,16 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 					}
 				};
 				this._commandService.renderCommands(options.actionScopeId, actionsWrapper, item, null /*handler*/, "tool", userData); //$NON-NLS-0$
-				
-				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
-				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
+
+				tableRow.appendChild(siteConfigCol);
+				tableRow.appendChild(actionCol);
 			},
 			rowsChanged: function() {
-				dojo.query(".treeTableRow").forEach(function(node, i) { //$NON-NLS-0$
-					if (i % 2) {
-						dojo.addClass(node, "darkTreeTableRow"); //$NON-NLS-0$
-						dojo.removeClass(node, "lightTreeTableRow"); //$NON-NLS-0$
-					} else {
-						dojo.addClass(node, "lightTreeTableRow"); //$NON-NLS-0$
-						dojo.removeClass(node, "darkTreeTableRow"); //$NON-NLS-0$
-					}
+				lib.$$array(".treeTableRow").forEach(function(node, i) { //$NON-NLS-0$
+					var on = (i % 2) ? "darkTreeTableRow" : "lightTreeTableRow";
+					var off = (on === "darkTreeTableRow") ? "lightTreeTableRow" : "darkTreeTableRow";
+					node.classList.add(on);
+					node.classList.remove(off);
 				});
 			},
 			labelColumnIndex: 0
@@ -208,31 +216,40 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 		ViewOnSiteRenderer.prototype = {
 			initTable: function (tableNode, tableTree) {
 				this.tableTree = tableTree;
-				dojo.addClass(tableNode, "treetable"); //$NON-NLS-0$
-				var thead = dojo.create("thead", null); //$NON-NLS-0$
-				var nameCol = dojo.create("th", null, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
-				var actionsCol = dojo.create("th", null, thead, "last"); //$NON-NLS-2$ //$NON-NLS-0$
+				tableNode.classList.add("treetable"); //$NON-NLS-0$
+				tableNode.classList.add("viewOnSiteTable"); //$NON-NLS-0$
+				var thead = document.createElement("thead"); //$NON-NLS-0$
+				var nameCol = document.createElement("th");
+				thead.appendChild(nameCol);
+				var actionsCol = document.createElement("th"); //$NON-NLS-0$
+				thead.appendChild(actionsCol);
 				nameCol.textContent = messages['Name'];
 				actionsCol.textContent = messages['Actions'];
 				tableNode.appendChild(thead);
 			},
 			render: function(item, tableRow) {
 				var siteConfig = item.SiteConfiguration;
-				dojo.addClass(tableRow, "treeTableRow sitesTableRow"); //$NON-NLS-0$
+				tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
+				tableRow.classList.add("sitesTableRow"); //$NON-NLS-0$
 				if (item.Placeholder) {
-					dojo.addClass(tableRow, "newSiteRow"); //$NON-NLS-0$
+					tableRow.classList.add("newSiteRow"); //$NON-NLS-0$
 				}
-				var siteConfigCol = dojo.create("td", { //$NON-NLS-0$
-					id: tableRow.id + "col1", //$NON-NLS-0$
-					className: item.Placeholder ? "newSiteCol" : ""}); //$NON-NLS-0$ //$NON-NLS-1$
-				var actionCol = dojo.create("td", {id: tableRow.id + "col2"}); //$NON-NLS-1$ //$NON-NLS-0$
-				
+				var siteConfigCol = document.createElement("td"); //$NON-NLS-0$
+				siteConfigCol.id = tableRow.id + "col1"; //$NON-NLS-0$
+				if (item.Placeholder) {
+					siteConfigCol.classList.add("newSiteCol"); //$NON-NLS-0$
+				}
+
+				var actionCol = document.createElement("td");
+				actionCol.id = tableRow.id + "col2"; //$NON-NLS-0$
+
 				// Site config column
-				var name = item.Placeholder ? messages["New Site"] : siteConfig.Name;
-				dojo.place(document.createTextNode(name), siteConfigCol, "last"); //$NON-NLS-0$
+				siteConfigCol.textContent = item.Placeholder ? messages["New Site"] : siteConfig.Name;
 
 				// Action column
-				var actionsWrapper = dojo.create("span", {id: tableRow.id + "actionswrapper"}, actionCol, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var actionsWrapper = document.createElement("span"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				actionsWrapper.id = tableRow.id + "actionswrapper";
+				actionCol.appendChild(actionsWrapper);
 
 				var userData = {
 					file: this.file,
@@ -241,8 +258,8 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 				};
 				this._commandService.renderCommands("viewOnSiteScope", actionsWrapper, item,  null /*handler*/, "button", userData); //$NON-NLS-1$ //$NON-NLS-0$
 
-				dojo.place(siteConfigCol, tableRow, "last"); //$NON-NLS-0$
-				dojo.place(actionCol, tableRow, "last"); //$NON-NLS-0$
+				tableRow.appendChild(siteConfigCol);
+				tableRow.appendChild(actionCol);
 			},
 			rowsChanged: SitesRenderer.prototype.rowsChanged,
 			labelColumnIndex: 0
@@ -293,7 +310,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'dojo', 'orion/Deferr
 
 				options.renderer = new ViewOnSiteRenderer(options);
 				if (options.label) {
-					dojo.byId(options.label).textContent = formatMessage(messages.ViewOnSiteCaption, file.Name);
+					document.getElementById(options.label).textContent = formatMessage(messages.ViewOnSiteCaption, file.Name);
 				}
 
 				// Create tree widget

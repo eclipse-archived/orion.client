@@ -132,12 +132,16 @@ h2 {
 	border: 1px solid #808080;
 }
 
+label.parameterInput{
+	color:silver;
+}
+
 .parameterInput {
 	margin-right: 16px;
 	margin-bottom: 8px;
 	font-weight: normal;
 	vertical-align: baseline;
-	color:silver;
+	color:#333;
 }
 
 .parameterInputurl {

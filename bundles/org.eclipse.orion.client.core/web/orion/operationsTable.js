@@ -56,9 +56,8 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						operations.remove(operationLocation);
 						continue;
 					}
-					operation.deferred = that.operationsClient.getOperation(operationLocation);
 					var success = function (result){
-						operations[this].operation = operations.operation || {};
+						operations[this].operation = operations[this].operation || {};
 						operations[this].operation.type = "loadend";
 						that.changedItem(this);
 					};
@@ -69,7 +68,7 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 							that._loadOperationsList.bind(that)(operations);
 							return;
 						}
-						operations[this].operation = operations.operation || {};
+						operations[this].operation = operations[this].operation || {};
 						operations[this].operation.type = "error";
 						operations[this].operation.error = error;
 						that.changedItem(this);
@@ -78,7 +77,7 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						operations[this].operation = operation;
 						that.changedItem(this);
 					};
-					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
+					operation.deferred = that.operationsClient.getOperation(operationLocation).then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 				}
 				that._loadOperationsList.bind(that)(operations);
 			}, displayError);
