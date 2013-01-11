@@ -81,9 +81,19 @@ define(["orion/assert", "orion/URL-shim", "domReady!"], function(assert) {
 		assert.equal(url.search, "?a=1&b=3&b=4&c=5&a%20param=a%20value&empty&b=6");
 		url.query['delete']("b");
 		assert.equal(url.search, "?a=1&c=5&a%20param=a%20value&empty");
+		var search = "?";
+		var pairs = [];
+		url.query.forEach(function(value, key) {
+			var pair = encodeURIComponent(key);
+			if (value) {
+				pair += "=" + encodeURIComponent(value);
+			}
+			pairs.push(pair);
+		});
+		search += pairs.join("&");
+		assert.equal(url.search, search);
 		url.query.clear();
 		assert.equal(url.search, "");
-		
 	};
 
 	return tests;
