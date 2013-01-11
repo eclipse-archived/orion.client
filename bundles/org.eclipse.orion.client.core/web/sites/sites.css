@@ -22,11 +22,19 @@ html,body {
 	font-weight: bold;
 }
 
-.sites {
-	min-width: 800px;
-	max-width: 900px;
-	padding-left: 20px;
-	padding-right: 40px;
+.sitesPanel {
+	min-width: 600px;
+	/*max-width: 900px;*/
+	/*padding-left: 20px;
+	padding-right: 40px;*/
+}
+
+.statusField {
+	padding: 0 10px 0 10px;
+}
+
+.inlineAction {
+	padding-left: 10px;
 }
 
 .domCommandToolbar {

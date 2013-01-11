@@ -201,7 +201,6 @@ function(mSetup, mTestPerformance, util) {
 	option.appendChild(document.createTextNode("Test"));
 	sTest.appendChild(option);
 	var prefix = "test"; //$NON-NLS-0$
-	mTestPerformance.noDojo = true;
 	for (var property in mTestPerformance) {
 		if (property.indexOf(prefix) === 0) {
 			option = util.createElement(document, "option"); //$NON-NLS-0$

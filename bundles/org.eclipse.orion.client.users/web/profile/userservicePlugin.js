@@ -51,10 +51,10 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 			"sections" : [
                             {"id": "personalInformation", "name" : "Personal Information", "data" :[
                                                                                                     {"type": "TextBox", "props": {"id": "pi_login", "readOnly" : false, "name" : "login"}, "label": "Login"},
-                                                                                                    {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "type" : "", "name" : "Name"}, "label" : "Name"},
-                                                                                                  	 {"type": "TextBox", "props": {"id": "pi_email", "readOnly" : false,  "type" : "", "name" : "email"}, "label" : "Email"},
-                                                                                                  	 {"type": "CheckBox", "props": {"id": "pi_emailConfirmed", "readOnly" : true,  "type" : "", "name" : "emailConfirmed"}, "label" : "Email confirmed"},
-                                                                                                    {"type": "eclipse.DateLong", "props": {"id": "pi_lastLogin", "readOnly" : true,  "type" : "", "name" : "LastLogInTimestamp"}, "label" : "Last login"}
+                                                                                                    {"type": "TextBox", "props": {"id": "pi_name", "readOnly" : false,  "name" : "Name"}, "label" : "Name"},
+                                                                                                  	 {"type": "TextBox", "props": {"id": "pi_email", "readOnly" : false, "name" : "email"}, "label" : "Email"},
+                                                                                                  	 {"type": "CheckBox", "props": {"id": "pi_emailConfirmed", "readOnly" : true, "name" : "emailConfirmed"}, "label" : "Email confirmed"},
+                                                                                                    {"type": "DateLong", "props": {"id": "pi_lastLogin", "name" : "LastLogInTimestamp"}, "label" : "Last login"}
                                                                                                     ]
                             },
                             {"id": "gitInformation", "name" : "Git (Defaults used to configure clones)", "data" : [
@@ -62,7 +62,7 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
    				  	                                                                                            {"type": "TextBox", "props": {"id": "git_name", "readOnly" : false, "name" : "GitName"}, "label" : "Git Name"}
    				  	                                                                                            ]
    				  	        },
-                          {"id": "openids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": "../mixloginstatic/manageOpenids.html", "style" : "border: 0px; width: 500px"}}
+                          {"id": "openids", "name": "Manage External Accounts", "type": "iframe", "data" : {"src": "../mixloginstatic/manageOpenids.html"}}
                             ]
 		};
 
@@ -84,6 +84,7 @@ define(["orion/plugin", "profile/UsersService", "domReady!"], function(PluginPro
 		switch (action) {
 		case "saveProfile":
 			return this.updateUserInfo(url, jsonData, function (url, jsonResp) {
+				// these events are poorly named but I was afraid to change it.  Not sure what user profile has to do with required plugins.
 				this.initProfile(url, "requiredPluginsChanged", "userInfoChanged");
 				return (jsonResp && jsonResp.Message) ? jsonResp : {
 					Message: "Profile saved!",

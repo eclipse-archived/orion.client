@@ -59,7 +59,10 @@ module.exports = function(options) {
 
 	function getParents(filepath, wwwpath) {
 		var segs = wwwpath.split('/');
-		segs.pop();
+		if(segs && segs.length > 0 && segs[segs.length-1] === ""){// pop the last segment if it is empty. In this case wwwpath ends with "/".
+			segs.pop();
+		}
+		segs.pop();//The last segment now is the directory itself. We do not need it in the parents array.
 		var loc = fileRoot;
 		var parents = [];
 		for (var i=0; i < segs.length; i++) {
@@ -124,13 +127,14 @@ module.exports = function(options) {
 	}
 
 	function writeFileMetadata(res, rest, filepath, stats, etag) {
+		var isDir = stats.isDirectory();
 		var metaObj = {
 			Name: decodeURIComponent(path.basename(filepath)),
 			Location: api.join(fileRoot, rest),
-			Directory: stats.isDirectory(),
+			Directory: isDir,
 			LocalTimeStamp: stats.mtime.getTime(),
 			Parents: getParents(filepath, rest),
-			ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
+			ChildrenLocation: isDir ? api.join(fileRoot, rest) + '?depth=1' : null,
 			//Charset: "UTF-8",
 			Attributes: {
 				// TODO fix this

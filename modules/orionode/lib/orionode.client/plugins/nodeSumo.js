@@ -141,12 +141,15 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	});
 
 	provider.registerService('orion.shell.command',{
-		callback: function(commandArgs) {
+		callback: function(commandArgs, context) {
+			var moduleFile = commandArgs.module, args = commandArgs.args;
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('debug', {
-					modulePath: commandArgs.module.Location,
-					port: commandArgs.port
+					modulePath: moduleFile.Location,
+					port: commandArgs.port,
+					context: context,
+					args: args
 				});
 			};
 			sockProc.started = function(app) {
@@ -170,6 +173,11 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 			type: { name: 'number', min: 1 },
 			description: 'The debug port number to pass to the child process.',
 			defaultValue: 5860
+		}, {
+			name: 'args',
+			type: { name: 'array', subtype: 'string' },
+			description: 'Optional command-line arguments to pass to the app.',
+			defaultValue: null
 		}]
 	});
 

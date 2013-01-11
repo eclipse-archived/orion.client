@@ -63,6 +63,20 @@ exports.createDirs = function(dirs, callback) {
 };
 
 /**
+ * @param {Function} callback Invoked as function(password), the password is null if the file couldn't be read.
+ */
+exports.readPasswordFile = function(passwordFile, callback) {
+	if (passwordFile) {
+		fs.readFile(passwordFile, function(err, data) {
+			if (err) { throw err; }
+			callback(String.prototype.trim.call(data));
+		});
+	} else {
+		callback(null);
+	}
+};
+
+/**
  * @param {Function} callback Invoked as function(configObject), the configObject is null if the file couldn't be read.
  */
 exports.readConfigFile = function(configFile, callback) {

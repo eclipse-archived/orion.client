@@ -9,13 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- /*global eclipse:true dojo document console define window dijit*/
+ /*global document console define window */
 
 
-define(['require', 'dojo', 'dijit', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
+define(['require', 'orion/webui/littlelib', 'orion/serviceregistry', 'orion/pluginregistry', 'orion/bootstrap', 'orion/commands', 
 		'orion/fileClient', 'orion/searchClient', 'orion/globalCommands', 'orion/webui/treetable', "orion/URITemplate", 
-		'orion/PageUtil', 'dojo/hash', 'dijit/form/Button'],
-        function(require, dojo, dijit, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
+		'orion/PageUtil'],
+        function(require, lib, mServiceRegistry, mPluginRegistry, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, 
             mTreetable, URITemplate, mPageUtil) {
 	
 
@@ -38,7 +38,7 @@ UnitTestModel.prototype = {
 	getId: function(/* item */ item){
 		var result;
 		if (item === this.root) {
-			result = "treetable";
+			result = "treetable"; //$NON-NLS-0$
 		} else {
 			result = item.Name;
 		} 
@@ -52,80 +52,98 @@ function UnitTestRenderer () {
 UnitTestRenderer.prototype = {
 	initTable: function (tableNode, tableTree) {
 		this.tableTree = tableTree;
-		
-		dojo.addClass(tableNode, 'treetable');
+		tableNode.classList.add('treetable'); //$NON-NLS-0$
 	},
 	
 	render: function(item, tableRow) {
 		
-		tableRow.cellSpacing = "8px";
-		dojo.style(tableRow, "verticalAlign", "baseline");
-		dojo.addClass(tableRow, "treeTableRow");
+		tableRow.cellSpacing = "8px"; //$NON-NLS-0$
+		tableRow.style.verticalAlign = "baseline"; //$NON-NLS-0$
+		tableRow.classList.add("treeTableRow"); //$NON-NLS-0$
 		var col, div, link, button;
 		if (item.Directory) {
-			col = document.createElement('td');
+			col = document.createElement('td'); //$NON-NLS-0$
 			tableRow.appendChild(col);
-			var nameId =  tableRow.id + "__expand";
-			div = dojo.create("div", null, col, "only");
-			var expandImg = dojo.create("img", {src: require.toUrl("images/collapsed-gray.png"), name: nameId}, div, "last");
-			dojo.create("img", {src: require.toUrl("images/folder.gif")}, div, "last");
-			link = dojo.create("a", {className: "navlinkonpage", href: "#" + item.ChildrenLocation}, div, "last");
-			dojo.place(document.createTextNode(item.Name), link, "only");
-			expandImg.onclick = dojo.hitch(this, function(evt) {
-				this.tableTree.toggle(tableRow.id);
-			});
+			var nameId =  tableRow.id + "__expand"; //$NON-NLS-0$
+			div = document.createElement("div"); //$NON-NLS-0$
+			col.appendChild(div);
+			var expandImg = document.createElement("img");  //$NON-NLS-0$
+			expandImg.src = require.toUrl("images/collapsed-gray.png");  //$NON-NLS-0$
+			expandImg.name = nameId; 
+			div.appendChild(expandImg);
+			var folderImg = document.createElement("img");  //$NON-NLS-0$
+			folderImg.src = require.toUrl("images/folder.gif"); //$NON-NLS-0$
+			div.appendChild(folderImg);
+			link = document.createElement("a");  //$NON-NLS-0$
+			link.className = "navlinkonpage";  //$NON-NLS-0$
+			link.href = "#" + item.ChildrenLocation;  //$NON-NLS-0$
+			div.appendChild(link);
+			link.appendChild(document.createTextNode(item.Name));
+			var tableTree = this.tableTree;
+			expandImg.addEventListener("click", function(evt) { //$NON-NLS-0$
+				tableTree.toggle(tableRow.id);
+			}, false);
 		} else {
-			col = document.createElement('td');
+			col = document.createElement('td'); //$NON-NLS-0$
 			tableRow.appendChild(col);
-			div = dojo.create("div", null, col, "only");
-			div.className = (item.result? "testSuccess" : "testFailure");
-			dojo.attr(div, "id", item.Name);
-			dojo.create("img", {src: item.result?require.toUrl("images/unit_test/testok.gif"):require.toUrl("images/unit_test/testfail.gif")}, div, "first");
-			dojo.place(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"), div, "last");
+			div = document.createElement("div");  //$NON-NLS-0$
+			col.appendChild(div);
+			div.className = (item.result? "testSuccess" : "testFailure");  //$NON-NLS-1$ //$NON-NLS-0$
+			div.id = item.Name;
+			var img = document.createElement("img"); //$NON-NLS-0$
+			img.src = item.result ? require.toUrl("images/unit_test/testok.gif") : require.toUrl("images/unit_test/testfail.gif");  //$NON-NLS-1$ //$NON-NLS-0$
+			div.appendChild(img);
+			div.appendChild(document.createTextNode(item.Name + " (" + (item.millis / 1000) + "s)"));  //$NON-NLS-1$ //$NON-NLS-0$
 
 			
 			if (!item.result) {
-				var msg = "[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : "");
-				
-				// display failure message in a tooltip dialog
-				button = new dijit.form.DropDownButton({
-					label: "[Show Failure]",
-					dropDown: new dijit.TooltipDialog({
-						connectId: [item.Name],
+				var msg = "[FAILURE][" + item.Name + "][" + item.message + "]\n" + ((item.stack !== undefined && item.stack) ? item.stack : ""); //$NON-NLS-0$
+				button = document.createElement("button"); //$NON-NLS-0$
+				button.appendChild(document.createTextNode("Show Failure"));
+				button.orionState = true;
+				div.appendChild(button);
+				button.addEventListener("click", function(evt) { //$NON-NLS-0$
+					if (evt.target.orionState) {
 						// TODO we should make this prettier
-						content: "<pre>" + msg + "</pre>"
-					})
-				});
-				dojo.place(button.domNode, div, "last");
+						var pre = document.createElement("pre");  //$NON-NLS-0$
+						pre.appendChild(document.createTextNode(msg));
+						div.appendChild(pre);
+						evt.target.textContent = "Hide Failure";
+						evt.target.orionState = false;
+					} else {
+						var parentDiv = evt.target.parentNode;
+						parentDiv.removeChild(parentDiv.lastChild);
+						evt.target.textContent = "Show Failure";
+						evt.target.orionState = true;
+					}
+				}, false);
 				if (!item.logged) {
 					console.log(msg);
 					item.logged =true;
 				}
 			}
 			
-			// create a link to rerun the test:
+			// create a button to rerun the test:
 			var browserURL = window.location.toString();
-			var testlink = browserURL.split('#')[0]+"#";
+			var testlink = browserURL.split('#')[0]+"#"; //$NON-NLS-1$ //$NON-NLS-0$
 			var testfile = mPageUtil.matchResourceParameters(window.location.toString()).resource;
-			var hreflink = new URITemplate(testlink+"{+resource,params*}").expand({resource: testfile, params: {"test":item.Name}});
-			button = new dijit.form.Button({
-				label: "rerun",
-					onClick: function(){
-						window.location.href = hreflink;
-						window.location.reload(true);
-					}
-			});
-			dojo.place(button.domNode,div,"last");
+			var hreflink = new URITemplate(testlink+"{+resource,params*}").expand({resource: testfile, params: {"test":item.Name}}); //$NON-NLS-1$ //$NON-NLS-0$
+			button = document.createElement("button"); //$NON-NLS-0$
+			button.appendChild(document.createTextNode("Rerun"));
+			div.appendChild(button);
+			button.addEventListener("click", function(){ //$NON-NLS-0$
+				window.location.href = hreflink;
+				window.location.reload(true);
+			}, false);
 		}
 		
-		var resultColumn = document.createElement('td');
+		var resultColumn = document.createElement('td'); //$NON-NLS-0$
 		tableRow.appendChild(resultColumn);
 	},
 	rowsChanged: function() {
 	}
 };
 
-dojo.addOnLoad(function() {
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
@@ -134,23 +152,26 @@ dojo.addOnLoad(function() {
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		// global banner
-		mGlobalCommands.generateBanner("orion-unittest", serviceRegistry, commandService, preferences, searcher);
+		mGlobalCommands.generateBanner("orion-unittest", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		
 		function runTests(testSelectionURI) {
 			// testSelectionURI specifies a test file and optionally a specific test
-			// e.g. "foo/mytests.html,test=testThisSpecificThing"
-			var matched = mPageUtil.matchResourceParameters("#" + testSelectionURI);
+			// e.g. "#foo/mytests.html,test=testThisSpecificThing"
+			var matched = mPageUtil.matchResourceParameters(testSelectionURI); //$NON-NLS-0$
 			var specificTest = matched.test;
 			var fileURI = matched.resource;
 			// console.log("installing non-persistent plugin: " + fileURI);
-			var testOverview = dojo.byId("test-overview");
-			dojo.empty(testOverview);
-			var testTree = dojo.byId("test-tree");
-			dojo.empty(testTree);
+			var testOverview = lib.node("test-overview"); //$NON-NLS-0$
+			lib.empty(testOverview);
+			var testTree = lib.node("test-tree"); //$NON-NLS-0$
+			lib.empty(testTree);
 			
-			dojo.place(document.createTextNode("Running tests from: "), testOverview, "last");
-			var link = dojo.create("a", {className: "navlink", href: require.toUrl("edit/edit.html") + "#" + fileURI}, testOverview, "last");
-			dojo.place(document.createTextNode(fileURI), link, "last");
+			testOverview.appendChild(document.createTextNode("Running tests from: "));
+			var link = document.createElement("a"); //$NON-NLS-0$
+			link.className = "navlink";  //$NON-NLS-0$
+			link.href = require.toUrl("edit/edit.html") + "#" + fileURI;  //$NON-NLS-1$ //$NON-NLS-0$
+			testOverview.appendChild(link);
+			link.appendChild(document.createTextNode(fileURI));
 			
 			// these are isolated from the regular service and plugin registry
 			var testServiceRegistry = new mServiceRegistry.ServiceRegistry();
@@ -160,15 +181,15 @@ dojo.addOnLoad(function() {
 			}).then(function(plugin) {
 				return plugin.start();
 			}).then(function() {
-				var service = testServiceRegistry.getService("orion.test.runner");
+				var service = testServiceRegistry.getService("orion.test.runner"); //$NON-NLS-0$
 				//console.log("got service: " + service);
-
+	
 				var root = {children:[]};
 	
 				var myTree = new mTreetable.TableTree({
 					model: new UnitTestModel(root),
 					showRoot: false,
-					parent: "test-tree",
+					parent: "test-tree", //$NON-NLS-0$
 					labelColumnIndex: 0,  // 1 if with checkboxes
 					renderer: new UnitTestRenderer()
 				});			
@@ -176,16 +197,16 @@ dojo.addOnLoad(function() {
 				var times = {};
 				var testCount = 0;
 				var _top;
-				service.addEventListener("runStart", function(event) {
-					var n = event.name ? event.name : "<top>";
+				service.addEventListener("runStart", function(event) { //$NON-NLS-0$
+					var n = event.name ? event.name : "<top>"; //$NON-NLS-0$
 					if (!_top) {
 						_top = n;
 					}
 	//				console.log("[Test Run] - " + name + " start");
 					times[n] = new Date().getTime();
 				});
-				service.addEventListener("runDone", function(event) {
-					var n = event.name ? event.name : "<top>";
+				service.addEventListener("runDone", function(event) { //$NON-NLS-0$
+					var n = event.name ? event.name : "<top>"; //$NON-NLS-0$
 	//				var result = [];
 	//				result.push("[Test Run] - " + name + " done - ");
 	//				result.push("[Failures:" + obj.failures + (name === top ? ", Test Count:" + testCount : "") +"] ");
@@ -193,11 +214,11 @@ dojo.addOnLoad(function() {
 					delete times[n];
 	//				console.log(result.join(""));
 				});
-				service.addEventListener("testStart", function(event) {
+				service.addEventListener("testStart", function(event) { //$NON-NLS-0$
 					times[event.name] = new Date().getTime();
 					testCount++;
 				});
-				service.addEventListener("testDone", function(event) {
+				service.addEventListener("testDone", function(event) { //$NON-NLS-0$
 	//				var result = [];
 	//				result.push(obj.result ? " [passed] " : " [failed] ");
 	//				result.push(name);
@@ -208,7 +229,7 @@ dojo.addOnLoad(function() {
 	//					result.push("\n  " + obj.message);
 	//				}
 	//				console.log(result.join(""));
-					root.children.push({"Name":event.name, result: event.result, message: event.message, stack: event.stack, millis: millis});
+					root.children.push({"Name":event.name, result: event.result, message: event.message, stack: event.stack, millis: millis}); //$NON-NLS-0$
 					myTree.refresh(root, root.children);
 				});	
 				if (specificTest) {
@@ -221,16 +242,16 @@ dojo.addOnLoad(function() {
 					});
 				}
 			}, function(error) {
-				dojo.create("img", {src: require.toUrl("images/unit_test/testfail.gif")}, testTree, "first");
-				dojo.place(document.createTextNode(error), testTree, "last");
+				var img = document.createElement("img");  //$NON-NLS-0$
+				img.src = require.toUrl("images/unit_test/testfail.gif");  //$NON-NLS-0$
+				testTree.appendChild(img);
+				testTree.appendChild(document.createTextNode(error));
 			});
 		}
 	
-		dojo.subscribe("/dojo/hashchange", this, function() {
-				runTests(dojo.hash());
-		});
-		runTests(dojo.hash());
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
+				runTests(window.location.hash);
+		}, false);
+		runTests(window.location.hash);
 	});
-});
-
 });

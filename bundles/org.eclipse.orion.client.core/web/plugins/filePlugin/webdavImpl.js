@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global dojo window eclipse:true XMLSerializer DOMParser XMLHttpRequest*/
+/*global window eclipse:true XMLSerializer DOMParser XMLHttpRequest orion*/
 /*jslint forin:true devel:true*/
 
 function serializeChildren(node) {
@@ -157,7 +157,7 @@ function createFile(response) {
 }
 
 function _call(method, url, headers, body) {
-	var d = new dojo.Deferred(); // create a promise
+	var d = new orion.Deferred(); // create a promise
 	var xhr = new XMLHttpRequest();
 	var header;
 	try {
@@ -484,7 +484,7 @@ eclipse.DAVFileServiceImpl= (function() {
 	};
 
 	function _call2(method, url, headers, body) {
-		var d = new dojo.Deferred(); // create a promise
+		var d = new orion.Deferred(); // create a promise
 		var xhr = new XMLHttpRequest();
 		try {
 			xhr.open(method, url);

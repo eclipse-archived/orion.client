@@ -75,9 +75,8 @@
 			fn.apply(null, arguments);
 		};
 	}
-	
-	function noop() {
-	}
+
+	function noop() {}
 
 	function createCancelError(reason) {
 		var cancelError = typeof reason === "string" ? new Error(reason) : new Error(); //$NON-NLS-0$
@@ -298,7 +297,7 @@
 			promise.cancel = function(reason) {
 				deferred.cancel(reason); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
 			};
-			
+
 			attach(listener);
 			if (state) {
 				enqueue(notify, true); //runAsync

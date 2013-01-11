@@ -8,10 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define dojo dijit orion window document */
+/*global define orion window document */
 
-define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/extensionCommands'], 
-			function(require, dojo, dijit, assert, mServiceregistry, mCommands, mExtensionCommands) {
+define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'orion/extensionCommands'], 
+			function(require, assert, mServiceregistry, mCommands, mExtensionCommands) {
 			
 	/**
 	 * mock services
@@ -47,7 +47,7 @@ define(['require', 'dojo', 'dijit', 'orion/assert', 'orion/serviceregistry', 'or
 	 */
 	function makeInfo(validationProperty, uriTemplate) {
 		var info = {};
-		if (dojo.isArray(validationProperty)) {
+		if (Array.isArray(validationProperty)) {
 			info.validationProperties = validationProperty;
 		} else {
 			info.validationProperties = [validationProperty];

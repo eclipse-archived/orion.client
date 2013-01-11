@@ -99,14 +99,14 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 		/**
 		 * Displays an error message to the user.
 		 *
-		 * @param {String|dojoError|orionError} st The error to display. Can be a simple String,
-		 * or an error object from a dojo XHR error callback, or the body of an error response 
+		 * @param {String|orionError} st The error to display. Can be a simple String,
+		 * or an error object from a  XHR error callback, or the body of an error response 
 		 * from the Orion server.
 		 */
 		setErrorMessage : function(st) {
 			this.currentMessage = st;
 			this._init();
-			//could be: responseText from xhrGet, dojo deferred error object, or plain string
+			//could be: responseText from xhrGet, deferred error object, or plain string
 			var status = st.responseText || st.message || st;
 			//accept either a string or a JSON representation of an IStatus
 			try {
@@ -166,8 +166,8 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 		
 		/**
 		 * Set a message that indicates that a long-running (progress) operation is complete.
-		 * @param {String|dojoError|orionError} message The error to display. Can be a simple String,
-		 * or an error object from a dojo XHR error callback, or the body of an error response 
+		 * @param {String|orionError} message The error to display. Can be a simple String,
+		 * or an error object from a XHR error callback, or the body of an error response 
 		 * from the Orion server.
 		 */
 		setProgressResult : function(message) {
@@ -241,11 +241,12 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 			var that = this;
 			if(message){
 				that.setProgressMessage(message);
-				deferred.addBoth(function(){
+				var finish = function(){
 					if(message === that.currentMessage){
 						that.setProgressMessage("");		
 					}
-				});
+				};
+				deferred = deferred.then(finish, finish);
 			}
 			return deferred;
 		},
@@ -255,7 +256,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 		
 		/**
 		 * Creates a ProgressMonitor that will be displayed on the status area.
-		 * @param {dojo.Deferred} deferred [optional] that updates this monitor
+		 * @param {Deferred} deferred [optional] that updates this monitor
 		 * @param {String} message [optional] messaged to be shown until deferred is not resolved
 		 * @returns {ProgressMonitor}
 		 */
@@ -333,8 +334,8 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 	/**
 	 * Sets the progress monitor as done. If no status is provided the message will be
 	 * removed from the status.
-	 * @param {String|dojoError|orionError} status [optional] The error to display. Can be a simple String,
-	 * or an error object from a dojo XHR error callback, or the body of an error response 
+	 * @param {String|orionError} status [optional] The error to display. Can be a simple String,
+	 * or an error object from a XHR error callback, or the body of an error response 
 	 * from the Orion server.
 	 */
 	ProgressMonitor.prototype.done = function(status){

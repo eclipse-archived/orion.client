@@ -472,6 +472,12 @@ define(['require', 'orion/assert', 'orion/serviceregistry', 'orion/commands', 'o
 		return d;		
 	};	
 	
+	/* for testing the unit test page, uncomment when we need to see failures 
+	tests.testFailOnPurpose = function() {
+		assert.equal(1,2);
+	};
+	*/
+	
 	/**
 	 * Test url binding execution, not rendered command
 	 */

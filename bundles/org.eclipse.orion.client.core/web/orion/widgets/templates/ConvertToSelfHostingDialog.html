@@ -1,10 +1,4 @@
-<div class="dijitDialog" tabindex="-1" waiRole="dialog" waiState="labelledby-${id}_title">
-	<div data-dojo-attach-point="titleBar" class="dijitDialogTitleBar">
-		<span data-dojo-attach-point="titleNode" class="dijitDialogTitle" id="${id}_title"></span>
-		<span data-dojo-attach-point="closeButtonNode" class="dijitDialogCloseIcon" dojoAttachEvent="onclick: onCancel" title="${buttonCancel}">
-			<span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>
-		</span>
-	</div>
+<div>
 	<style>
 	.form {
 		width: auto;
@@ -33,33 +27,23 @@
 		clear: both;
 	}
 	</style>
-	<div data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">
-		<!-- Actual content here -->
+	<div>
 		<ul class="form">
 			<li class="msg">
-				<div>${message}</div>
+				<div>${SelectRepoSourceFolder}</div>
 			</li>
 			<li class="pad1">
 				<div class="col">
-					<button data-dojo-attach-point="browseButton" id="${id}_browseButton"
-						class="commandButton">${browseMessage}</button>
-					<span data-dojo-attach-point="folderText"></span>
+					<button class="browseButton commandButton" id="browseButton">${Browse...}</button>
+					<span class="folderText" id="folderText"></span>
 				</div>
 			</li>
 			<li class="msg pad2">
-				<div>${portMessage}</div>
+				<div>${EnterPortNumber}</div>
 			</li>
 			<li class="pad1">
-				<input class="field" data-dojo-attach-point="port" id="${id}_port" type="number" />
-			</li>
-			<li class="msg">
-				<button data-dojo-attach-point="okButton" 
-					data-dojo-type="dijit.form.Button"
-					value="OK"
-					data-dojo-props="class:'okButton', type: 'submit'">
-				${buttonOk}
-				</button>
+				<input class="field port" id="port" type="number" />
 			</li>
 		</ul>
-	</div> <!-- content pane -->
+	</div>
 </div>

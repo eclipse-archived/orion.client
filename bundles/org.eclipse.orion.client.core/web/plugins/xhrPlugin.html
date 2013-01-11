@@ -2,14 +2,15 @@
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<script type="text/javascript" src="../org.dojotoolkit/dojo/dojo.js.uncompressed.js"></script>
-	<script type="text/javascript" src="../orion/plugin.js"></script>
+	<script src="../orion/Deferred.js"></script>
+	<script src="../orion/plugin.js"></script>
 	<script>
+	/*globals window orion*/
 		window.onload = function() {
 			var provider = new orion.PluginProvider();
 			provider.registerService("xhr", {
 				call : function(method, url, headers, message) {
-					var d = new dojo.Deferred(); // create a promise
+					var d = new orion.Deferred(); // create a promise
 					var xhr = new XMLHttpRequest();
 					var header;
 					try {
@@ -31,9 +32,9 @@
 									responseText: xhr.responseText
 								});
 							}
-						}
+						};
 					} catch (e) {
-						d.reject(e)
+						d.reject(e);
 					}
 					return d; // return the promise immediately
 				}
