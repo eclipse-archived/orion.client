@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global document window*/
+/*global document window StopIteration*/
 // URL Shim -- see http://http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
 
 (function() {
@@ -18,7 +18,7 @@
 	}
 
 	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
-	var STOP_ITERATION = new Error("Stop Iteration");
+	var STOP_ITERATION = typeof StopIteration !== "undefined" ? StopIteration : new Error("Stop Iteration");
 
 	function _parseSearch(search) {
 		return search ? search.slice(1).split("&") : [];
