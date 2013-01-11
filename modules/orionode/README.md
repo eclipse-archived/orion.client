@@ -6,6 +6,7 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Basic Editor operations (Edit file, save file, ETags)
 * Plugin operations
 * Shell command for launching a node app (type ```help node``` in the Shell page to find out more)
+* Shell command for supporting npm. You use it the same way as you do in Bash.
 * Client caching for static content (cache time: 2 hours)
 * Gzip
 * Concatenation and minification of pages (requires a manual step, see **Concatenation + Minification**, below)
@@ -25,16 +26,23 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 	* [ssh://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git](ssh://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git)
 	* [http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git](http://git.eclipse.org/gitroot/orion/org.eclipse.orion.client.git)
 2. Open a command shell and change directory to ```org.eclipse.orion.client/modules/orionode```.
-2. Run this command to automatically download Orionode's dependencies:
+3. Run this command to automatically download Orionode's dependencies:
     ```npm install```
 (This will take a few minutes).
-3. **Recommended:** create a one-line ```password.txt``` file containing a secret password.
-4. Launch the Orion server by running one of the following commands from a shell.
+4. Verify the default path of npm-cli.js.
+   In the same directory, open the server.conf file. The default value of npm_path is ../lib/node_modules/npm/bin/npm-cli.js.
+   This is the npm module path to support npm command. Make sure if this default path is correct, relative to the node executable directory in your environment.
+   If you installed a recent version of nodejs the NPM should be installed automatically. The default value of npm_path should work in most of the cases.
+   How to confirm:
+   For instance, if you are using Bash just type "which npm" and see where the command is. The command should eventually use the npm-cli.js file. Make sure your npm-cli.js matches the npm_path value.
+   If not, then change the npm-path value to match your environment. It can be either an absolute path or a path relative to your node executable.
+5. **Recommended:** create a one-line ```password.txt``` file containing a secret password. If you do not want a separate file for password, you can still define that in the server.conf or just leave the pwd value as empty.
+6. Launch the Orion server by running one of the following commands from a shell.
 	* If you installed by checking out the Git repo:
 	```node server.js [-p port] [-w directory] [-password password.txt]```
 	* If you're not passing any command-line arguments to the server, you can just do this:
 	```npm start```
-5. Go to **[http://localhost:8081](http://localhost:8081)** (or whatever port you chose) in your web browser to start using Orion.
+7. Go to **[http://localhost:8081](http://localhost:8081)** (or whatever port you chose) in your web browser to start using Orion.
 
 ##### Optional command line arguments:
 * ```-p``` or ```-port```: the port that the Orion server will listen on. Defaults to **8081**.
