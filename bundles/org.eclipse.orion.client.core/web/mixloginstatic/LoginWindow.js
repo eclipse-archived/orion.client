@@ -12,60 +12,11 @@
 /*jslint browser:true devel:true*/
 /*global define navigator window*/
 
-define(['domReady', 'orion/xhr', 'orion/PageUtil', 'persona/include'], function(domReady, xhr, PageUtil) {
+define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, lib) {
 	var userCreationEnabled;
 	var registrationURI;
 	var forceUserEmail;
 	var personaLoginClicked = false;
-
-	function injectPlaceholderShims() {
-		function textFocus(e) {
-			var input = e.target;
-			if (input.value === input.getAttribute('placeholder')) {
-				input.value = '';
-			}
-		}
-		function textBlur(e) {
-			var input = e.target;
-			if (input.value === '') {
-				input.value = input.getAttribute('placeholder');
-			}
-		}
-		function passwordFocus(e) {
-			var input = e.target;
-			if (input.value === input.getAttribute('placeholder')) {
-				input.value = '';
-				input.type = 'password';
-			}
-		}
-		function passwordBlur(e) {
-			var input = e.target;
-			if (input.value === '') {
-				input.value = input.getAttribute('placeholder');
-				input.type = 'text';
-			}
-		}
-		if (typeof document.createElement('input').placeholder === 'undefined') {
-			var inputs = document.getElementsByTagName('input');
-			for (var i=0 ; i < inputs.length; i++) {
-				var input = inputs[i];
-				var placeholderText = input.getAttribute('placeholder');
-				switch (placeholderText && input.type) {
-					case 'text':
-						input.value = placeholderText;
-						input.addEventListener('focus', textFocus);
-						input.addEventListener('blur', textBlur);
-						break;
-					case 'password':
-						input.value = placeholderText;
-						input.addEventListener('focus', passwordFocus);
-						input.addEventListener('blur', passwordBlur);
-						input.type = 'text';
-						break;
-				}
-			}
-		}
-	}
 
 	function getParam(key) {
 		var regex = new RegExp('[\\?&]' + key + '=([^&#]*)');
@@ -77,7 +28,6 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'persona/include'], function(
 	}
 
 	function decodeBase64(input) {
-
 		var _keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 		var output = "";
 		var chr1, chr2, chr3;
@@ -477,85 +427,94 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'persona/include'], function(
 				var currentDate = new Date();
 				var startDate = new Date(messages[0].startdate);
 				startDate.setHours(0, 0, 0, 0);
-				if (startDate > currentDate) return;
+				if (startDate > currentDate) { return; }
 				var endDate = new Date(messages[0].enddate);
 				endDate.setHours(23, 59, 59);
-				if (endDate <= currentDate)  return;
+				if (endDate <= currentDate)  { return; }
 				document.getElementById("orionInfoArea").style.visibility = '';
 				document.getElementById("orionInfoMessage").textContent = messages[0].title;
 			}
 		}, function(error) {
 		});
 
-		injectPlaceholderShims();
-
 		// TODO: Temporary --- old page logic
-		document.getElementById("login").onkeypress = function(event) {
-			if (event.keyCode === 13) {
+		document.getElementById("login").addEventListener("keypress", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
 				confirmLogin();
-			} else {
-				return true;
+				lib.stop(event);
 			}
-		};
+		});
 
-		document.getElementById("password").onkeypress = function(event) {
-			if (event.keyCode === 13) {
+		document.getElementById("password").addEventListener("keypress", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
 				confirmLogin();
-			} else {
-				return true;
+				lib.stop(event);
 			}
-		};
+		});
 
-		document.getElementById("loginButton").onclick = function() {
+		document.getElementById("loginButton").addEventListener("click", function() {
 			confirmLogin();
-		};
+		});
 
-		document.getElementById("orionInfoArea").onclick = openServerInformation;
-
-		document.getElementById("resetUserLink").onclick = revealResetUser;
-
-		document.getElementById("reset").onkeypress = function(event) {
-			if (event.keyCode === 13) {
-				confirmResetUser();
+		document.getElementById("orionLoginForm").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ESCAPE) {
+				cancelLogin();
+				lib.stop(event);
 			}
-			return true;
-		};
-		
-		document.getElementById("resetEmail").onkeypress = function(event) {
-			if (event.keyCode === 13) {
+		});
+
+		document.getElementById("orionInfoArea").addEventListener("click", openServerInformation);
+
+		document.getElementById("resetUserLink").addEventListener("click",  revealResetUser);
+
+		document.getElementById("reset").addEventListener("keypress", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
 				confirmResetUser();
+				lib.stop(event);
 			}
-			return true;
-		};
+		});
 
-		document.getElementById("registerButton").onclick = revealRegistration;
-		document.getElementById("registerButton").onkeydown = revealRegistration;
+		document.getElementById("resetEmail").addEventListener("keypress", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
+				confirmResetUser();
+				lib.stop(event);
+			}
+		});
 
-		document.getElementById("create_password").onkeyup = function(event) {
-			if (event.keyCode === 13) {
+		document.getElementById("registerButton").addEventListener("click", revealRegistration);
+		document.getElementById("registerButton").addEventListener("keydown", revealRegistration);
+
+		document.getElementById("create_password").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
 				confirmCreateUser();
 			} else {
 				validatePassword();
 			}
-		};
+		});
 
-		document.getElementById("create_passwordRetype").onkeyup = function(event) {
-			if (event.keyCode === 13) {
+		document.getElementById("create_passwordRetype").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ENTER) {
 				confirmCreateUser();
 			} else {
 				validatePassword();
 			}
-		};
+		});
 
-		document.getElementById("createButton").onclick = confirmCreateUser;
-		document.getElementById('cancelLoginButton').onclick = cancelLogin;
+		document.getElementById("newUserHeaderShown").addEventListener("keyup", function(event) {
+			if (event.keyCode === lib.KEY.ESCAPE) {
+				hideRegistration();
+			}
+		});
 
-		document.getElementById("hideRegisterButton").onclick = hideRegistration;
+		document.getElementById("createButton").addEventListener("click", confirmCreateUser);
+		document.getElementById('cancelLoginButton').addEventListener("click", cancelLogin);
+
+		document.getElementById("hideRegisterButton").addEventListener("click", hideRegistration);
 
 		document.getElementById("googleLoginLink").href = createOpenIdLink("https://www.google.com/accounts/o8/id");
-		document.getElementById("googleLogin").onkeydown = googleLogin;
+		document.getElementById("googleLogin").addEventListener("keydown", googleLogin);
 		
-		document.getElementById("orionLoginLink").onclick = revealLogin;
+		document.getElementById("orionLoginLink").addEventListener("click", revealLogin);
 		document.getElementById("orionLogin").onkeydown = revealLogin;
 		
 		document.getElementById("personaLogin").onclick = personaLogin;
