@@ -192,19 +192,16 @@ input[type="button"]:active {
 	padding:10px;
 }
 
-.orion-login-header, .orion-reset-header {
+.orion-form-header, .orion-sheet-header {
 	font-weight: bold;
 	font-size:15px;
 	padding-bottom: 10px;
+}
+
+.orion-form-header {
 	margin-bottom:5px;
 	border-bottom: solid 1px #EEE;
 	color:#666;
-}
-
-.orion-account-header {
-	padding-bottom:10px;
-	font-weight: bold;
-	font-size: 15px;
 }
 
 .orion-register-header{
@@ -484,6 +481,6 @@ a.loginwindow {
 	border-radius: 4px;
 }
 
-.openIdWrapper{
+.loginIcon{
 	float:left;
 }
