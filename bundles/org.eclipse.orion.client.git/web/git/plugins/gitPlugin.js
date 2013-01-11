@@ -49,7 +49,7 @@ define(["orion/plugin", "orion/xhr", "domReady!"], function(PluginProvider, xhr)
 		forceSingleItem: true
 	});
 	
-	provider.registerService("orion.navigate.content", null, {
+	provider.registerService("orion.core.content", null, {
 		id: "orion.content.gitClone",
 		name: "Clone Git Repository",
 		description: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",

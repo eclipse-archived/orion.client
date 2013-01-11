@@ -107,6 +107,7 @@ define({
 	"File URL:" : "File URL:",
 	"Copy a file from a URL and optionally unzip it" : "Copy a file from a URL and optionally unzip it",
 	"Unzip *.zip files:" : "Unzip *.zip files:",
+	"Extracted from:" : "Extracted from:",
 	"Did not drop ${0}.  Folder drop is not supported in this browser.": "Did not drop ${0}.  Folder drop is not supported in this browser.",
 	"You cannot copy files directly into the workspace.  Create a folder first.": "You cannot copy files directly into the workspace.  Create a folder first.",
 	"Unzip ${0}?": "Unzip ${0}?"

@@ -96,40 +96,18 @@
 		var pluginHelloWorld = document.createElement('a');
 		pluginHelloWorld.href = "./contentTemplates/pluginHelloWorld.zip";
 
-		provider.registerService("orion.navigate.content", null, {
-			id: "orion.content.fromURL",
+		provider.registerService("orion.core.content", null, {
+			id: "orion.content.html5",
 			name: "Sample HTML5 Site",
 			description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
-			folder: "Hello World",
-			command: "orion.importZipURL",
-			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: htmlHelloWorld.href},
-				{name: "unzip", type: "boolean", label: "Unzip:", defaultValue: true}]
+			contentURITemplate: htmlHelloWorld.href
 		});
 
-		provider.registerService("orion.navigate.content", null, {
+		provider.registerService("orion.core.content", null, {
 			id: "orion.content.plugin",
 			name: "Sample Orion Plugin",
 			description: "Generate a sample plugin for integrating with Orion.",
-			folder: "Hello World Plugin",
-			command: "orion.importZipURL",
-			parameters: [{name: "url", type: "url", label: "Extracted from:", defaultValue: pluginHelloWorld.href},
-				{name: "unzip", type: "boolean", label: "Unzip:", defaultValue: true}]
-		});
-
-		provider.registerService("orion.navigate.content", null, {
-			id: "orion.content.fromSFTP",
-			name: "SFTP Import",
-			description: "Import content from an SFTP location into an Orion folder. You will be prompted for the SFTP location and credentials.",
-			folder: "Imported Content",
-			command: "orion.importSFTP"
-		});
-
-		provider.registerService("orion.navigate.content", null, {
-			id: "orion.content.fromZip",
-			name: "Upload a File",
-			description: "Upload content from a local file into an Orion folder. You will be prompted for the local file.",
-			folder: "Uploaded Content",
-			command: "orion.import"
+			contentURITemplate: pluginHelloWorld.href
 		});
 
 		provider.registerService("orion.core.setting", null, {
