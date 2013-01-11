@@ -192,11 +192,11 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				});
 			};
 			sockProc.started = function(app) {
-				sockProc.progress('Started app (PID: ' + app.Id + ')\n');
+				//sockProc.progress('Started app (PID: ' + app.Id + ')\n');
 			};
 			sockProc.stopped = function(app) {
 				// TODO unnecessary work, could just "resolve with progress" in one shot
-				sockProc.progress('App stopped: (PID: ' + app.Id + ')\n');
+				//sockProc.progress('App stopped: (PID: ' + app.Id + ')\n');
 				sockProc.resolve();
 			};
 			return sockProc.deferred;
