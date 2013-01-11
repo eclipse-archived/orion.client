@@ -9,15 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document dojo dijit orion window widgets*/
+/*global define document window */
 /*jslint */
-define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
+define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
 		'orion/searchClient', 'orion/globalCommands', 'orion/sites/siteUtils', 'orion/sites/siteCommands', 
-		'orion/sites/viewOnSiteTree', 'orion/PageUtil','dojo/hash', 'dojo/date/locale'], 
-		function(require, dojo, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
-			mSiteUtils, mSiteCommands, ViewOnSiteTree, PageUtil) {
-
-	dojo.addOnLoad(function() {
+		'orion/sites/viewOnSiteTree', 'orion/PageUtil', 'orion/webui/littlelib'],
+	function(mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
+			mSiteUtils, mSiteCommands, ViewOnSiteTree, PageUtil, lib) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
 			var preferences = core.preferences;
@@ -36,7 +34,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 				var parentId = 'table'; //$NON-NLS-0$
 				var labelId = 'viewOnSiteCaption'; //$NON-NLS-0$
 				if (treeWidget) {
-					dojo.empty(parentId);
+					lib.empty(document.getElementById(parentId));
 				}
 				treeWidget = new ViewOnSiteTree({
 					id: 'view-on-site-table', //$NON-NLS-0$
@@ -55,12 +53,9 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 
 					mSiteCommands.createViewOnSiteCommands(serviceRegistry);
 				}
 			}
-			dojo.subscribe("/dojo/hashchange", null, function() { //$NON-NLS-0$
-				processParameters();
-			});
+			window.addEventListener("hashchange", processParameters()); //$NON-NLS-0$
 
 			processParameters();
 			mGlobalCommands.generateBanner('orion-viewSites', serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-		});
 	});
 });
