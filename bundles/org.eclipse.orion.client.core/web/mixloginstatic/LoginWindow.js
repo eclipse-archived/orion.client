@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*jslint browser:true devel:true*/
+/*jslint browser:true devel:true regexp:false*/
 /*global define navigator window*/
 
 define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'persona/include'], function(domReady, xhr, PageUtil, lib) {
@@ -259,6 +259,7 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
 		}
+		document.getElementById("registerButton").focus();
 	}
 
 	function confirmCreateUser() {
@@ -351,14 +352,14 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 		}
 	}
 	
-	function cancelLogin(){
+	function hideLogin(){
 		document.getElementById('orionLoginForm').style.visibility = 'hidden';
 		document.getElementById('orionOpen').style.visibility = '';
 		
 		if (userCreationEnabled || registrationURI) {
 			document.getElementById('orionRegister').style.visibility = '';
 		}
-		
+		document.getElementById("orionLogin").focus();
 		hideErrorMessage();
 	}
 
@@ -458,12 +459,14 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 
 		document.getElementById("orionLoginForm").addEventListener("keyup", function(event) {
 			if (event.keyCode === lib.KEY.ESCAPE) {
-				cancelLogin();
+				hideLogin();
 				lib.stop(event);
 			}
 		});
 
 		document.getElementById("orionInfoArea").addEventListener("click", openServerInformation);
+
+		document.getElementById("orionInfoArea").onclick = openServerInformation;
 
 		document.getElementById("resetUserLink").addEventListener("click",  revealResetUser);
 
@@ -507,7 +510,13 @@ define(['domReady', 'orion/xhr', 'orion/PageUtil', 'orion/webui/littlelib', 'per
 		});
 
 		document.getElementById("createButton").addEventListener("click", confirmCreateUser);
-		document.getElementById('cancelLoginButton').addEventListener("click", cancelLogin);
+		document.getElementById('cancelLoginButton').addEventListener("click", hideLogin);
+
+		document.getElementById("newUserHeaderShown").onkeyup = function(event) {
+			if (event.keyCode === lib.KEY.ESCAPE) {
+				hideRegistration();
+			}
+		};
 
 		document.getElementById("hideRegisterButton").addEventListener("click", hideRegistration);
 
