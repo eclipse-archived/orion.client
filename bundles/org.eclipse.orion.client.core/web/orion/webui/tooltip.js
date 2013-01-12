@@ -47,7 +47,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (!this._node) { throw "no dom node for tooltip found"; } //$NON-NLS-0$
 			this._position = options.position || ["right", "above", "below", "left"]; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this._text = options.text;
-			this._hideDelay = options.hideDelay || 200;
+			this._hideDelay = options.hideDelay === undefined ? 200 : options.hideDelay;
 			this._tailSize = options.tailSize || 10;
 			this._trigger = options.trigger || "mouseover"; //$NON-NLS-0$
 			this._afterShowing = options.afterShowing;
@@ -64,7 +64,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					}
 				}, false);
 			} else {
-				this._showDelay = options.showDelay || 1000;
+				this._showDelay = options.showDelay === undefined ? 1000 : options.showDelay;
 				var leave = ["mouseout", "click"];  //$NON-NLS-1$ //$NON-NLS-0$
 				this._node.addEventListener("mouseover", function(event) { //$NON-NLS-0$
 					if (lib.contains(self._node, event.target)) {
