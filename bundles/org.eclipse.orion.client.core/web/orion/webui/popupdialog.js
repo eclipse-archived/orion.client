@@ -49,7 +49,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		_initialize: function(triggerNode, afterShowing, afterHiding) {
 			this._tooltip = new tooltip.Tooltip({
 				node: triggerNode,
-				afterShowing: afterShowing,
+				hideDelay: 0,
+				afterShowing: this._afterShowingFunction(afterShowing).bind(this), 
 				afterHiding: afterHiding,
 				trigger: "click" //$NON-NLS-0$
 			});
@@ -61,6 +62,13 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				lib.processTextNodes(contentFragment, messages);
 			}
 			this.$parent.appendChild(contentFragment);
+			var tip = this._tooltip;
+			this.$parent.addEventListener("keydown", function (e) { //$NON-NLS-0$
+				if(e.keyCode === lib.KEY.ESCAPE) {
+					tip.hide();
+				} 
+			}, false);
+
 			this._bindElements(this.$parent);
 			if (typeof this._bindToDom === "function") { //$NON-NLS-0$
 				this._bindToDom(this.$parent);
@@ -80,27 +88,34 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			}
 		},
 		
+		_afterShowingFunction: function(clientAfterShowing) {
+			return function () {
+				if (clientAfterShowing) {
+					clientAfterShowing.bind(this)();
+				}
+				if (!this.customFocus) {
+					// We should set the focus.  Pick the first tabbable field, otherwise don't change focus.
+					var focusField = lib.firstTabbable(this.$parent);
+					if (focusField) {
+						focusField.focus();
+					}
+				}
+			};
+		},
+		
 		/*
-		 * Internal.  Hides the dialog.  Clients should use the _beforeHiding function and
-		 * the afterHiding function passed to _initialize to do any work related to hiding the dialog,
-		 * such as destroying resources.
+		 * Internal.  Hides the dialog.  There are other cases where the tooltip can hide on its own,
+		 * without a client calling this function.  
 		 */
 		hide: function() {
-			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
-				this._beforeHiding();
-			}
 			this._tooltip.hide();
 		}, 
 		
 		/*
-		 * Internal.  Shows the dialog.  Clients should use the _beforeShowing function and the
-		 * afterShowing function passed to _initialize to do any work related to showing the dialog,
-		 * such as setting initial focus.
+		 * Internal.  Shows the dialog.  There are other cases where the tooltip can show on its own,
+		 * without a client calling this function.
 		 */
 		show: function() {
-			if (typeof this._beforeShowing === "function") { //$NON-NLS-0$
-				this._beforeShowing();
-			}
 			this._tooltip.show();
 		}
 	};

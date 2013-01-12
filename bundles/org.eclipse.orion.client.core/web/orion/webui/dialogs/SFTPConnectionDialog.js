@@ -26,7 +26,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
  
 	function SFTPNewConnectionPopup(triggerNode, notify) {
 		this.messages = messages;
-		this._initialize(triggerNode, this._afterShowing.bind(this));
+		this._initialize(triggerNode);
 		this._notify = notify;
 	}
 	
@@ -50,10 +50,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 			self._notify({name: connectionString});
 			self.hide();
 		}, false);
-	};
-	
-	SFTPNewConnectionPopup.prototype._afterShowing = function() {
-		this.$sftpHost.focus();
 	};
 	
 	SFTPNewConnectionPopup.prototype.constructor = SFTPNewConnectionPopup;
