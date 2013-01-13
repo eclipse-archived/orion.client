@@ -360,8 +360,12 @@ label.parameterInput{
 
 .progressPane_running_dialog {
 	vertical-align: middle;
-	background: url(../images/progress_running.gif) no-repeat center;  
-	width: 16px; height: 16px;
+	margin: 2px 8px 2px 2px;	
+	background-position: 0 0; 
+	text-align: right;
+	border: 0;
+	width: 16px;
+	height: 16px;
 }
 
 .progressPane_finished_dialog {
