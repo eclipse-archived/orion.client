@@ -343,10 +343,21 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 								shallowItemsClone = extensionCommandUtils._cloneItemWithoutChildren(data.items);
 							}
 						}
+						if(serviceRegistry){
+							var progress = serviceRegistry.getService("orion.page.progress");
+						}
 						if(serviceOrReference.run) {
-							serviceOrReference.run(shallowItemsClone);
+							if(progress){
+								progress.progress(serviceOrReference.run(shallowItemsClone), "Running command: " + commandOptions.name);
+							}else {
+								serviceOrReference.run(shallowItemsClone);
+							}
 						} else if (serviceRegistry) {
-							serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
+							if(progress){
+								progress.progress(serviceRegistry.getService(serviceOrReference).run(shallowItemsClone), "Running command: " + commandOptions.name);
+							} else {
+								serviceRegistry.getService(serviceOrReference).run(shallowItemsClone);
+							}
 						}
 					};
 				}  // otherwise the caller will make an appropriate callback for the extension
