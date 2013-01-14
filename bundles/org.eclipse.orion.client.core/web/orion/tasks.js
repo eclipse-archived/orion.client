@@ -21,6 +21,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/se
 	 * @class A user interface element showing a list of various user tasks.
 	 * @param {Object} options The service options
 	 * @param {Object} options.parent The parent of this task list
+	 * @prarm {String} options.id The id of the section
 	 * @param {String} options.tasks The array of tasks this list should display
 	 * @param {String} options.title The title of the task list
 	 * @param {String} options.description A description of the task list shown the user
@@ -61,8 +62,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib', 'orion/se
 				var contentId = "taskListContent"+this._title; //$NON-NLS-0$
 				var contentDiv = document.createElement("div"); //$NON-NLS-0$
 				contentDiv.id = contentId;
-				this.fileSystemsSection = new mSection.Section(this._parent, {
-					id: "taskListSection"+this._title, //$NON-NLS-0$
+				this._taskSection = new mSection.Section(this._parent, {
+					id: this._id, //$NON-NLS-0$
 					title: this._title,
 					content: contentDiv,
 					preferenceService: this._registry.getService("orion.core.preference"), //$NON-NLS-0$
