@@ -14,6 +14,10 @@ var path = require('path');
 var mime = connect.mime;
 var statik = connect['static'];
 
+mime.define({
+	'application/json': ['pref', 'json']
+});
+
 /**
  * @param {Object} options Options to be passed to connect/static
  * @param {Number} [options.maxAge]

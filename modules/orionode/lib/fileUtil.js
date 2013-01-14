@@ -25,11 +25,14 @@ var api = require('./api');
 /**
  * Builds up an array of a directory's children, as File objects.
  * @param {String} parentLocation Parent location in the file api for child items (ugh)
- * @param {Array} [exclude] Filenames of children to hide. May be null (in which case everything is included).
+ * @param {Array} [exclude] Filenames of children to hide. If omitted, everything is included.
+ * @param {Function} callback
  * @returns {Array}
  */
 // TODO depth
 exports.getChildren = function(directory, parentLocation, excludes, callback) {
+	// If 'excludes' is omitted, the callback can be given as the 3rd argument
+	callback = excludes || callback;
 	pfs.readdir(directory).then(function(files) {
 		// stat each file to find if it's a Directory -- ugh
 		var childStatPromises = files.map(function(file) {

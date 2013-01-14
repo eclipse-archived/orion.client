@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global console exports process require*/
+/*jslint regexp:false*/
 var compat = require('./compat');
 var fs = require('fs');
 var path = require('path');

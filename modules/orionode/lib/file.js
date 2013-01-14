@@ -44,17 +44,10 @@ function writeEmptyFilePathError(res, rest) {
 module.exports = function(options) {
 	var fileRoot = options.root;
 	var workspaceDir = options.workspaceDir;
-	var tempDir = options.tempDir;
 	if (!fileRoot) { throw 'options.root is required'; }
 
 	function getSafeFilePath(rest) {
 		return fileUtil.safeFilePath(workspaceDir, rest);
-	}
-
-	/** @returns {String} Path to a file in the temp dir that hopefully doesn't already exist. */
-	function getTempFile(filepath) {
-		var filename = new Buffer([process.pid, new Date().getTime(), filepath].join('/')).toString('base64');
-		return path.join(tempDir, filename);
 	}
 
 	function getParents(filepath, wwwpath) {
