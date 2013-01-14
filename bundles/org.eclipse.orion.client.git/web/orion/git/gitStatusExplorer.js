@@ -433,7 +433,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 									hasConflicts: hasConflict,
 									readonly: true,
 									editableInComparePage: true,
-									complexURL: item.diffUri,
+									resource: item.diffUri,
 									callback : function(){}
 								};
 								
@@ -631,7 +631,7 @@ define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/s
 									diffProvider: diffProvider,
 									hasConflicts: hasConflict,
 									readonly: true,
-									complexURL: item.diffUri,
+									resource: item.diffUri,
 									callback : function(){}
 								};
 								

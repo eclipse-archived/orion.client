@@ -79,7 +79,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 						dojo.addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
 						dojo.addClass(diffStatusIcon, "core-sprite-file"); //$NON-NLS-0$
 						displayName = item.name;
-						linkRef = mCompareUtils.generateCompareHref(item.fileURL + "," + item.fileURLBase, {readonly: true});
+						linkRef = mCompareUtils.generateCompareHref(item.fileURL, {compareTo: item.fileURLBase, readonly: true});
 						break;
 				}
 			}
