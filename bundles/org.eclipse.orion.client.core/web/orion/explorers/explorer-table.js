@@ -197,9 +197,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			node.addEventListener("dragleave", dragLeave, false); //$NON-NLS-0$
 
 			var dragEnter = function (evt) { //$NON-NLS-0$
+				if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
+					// only supported in Chrome.
+						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+				}   
 				node.classList.add("dragOver"); //$NON-NLS-0$
-				evt.preventDefault();
-				evt.stopPropagation();
+				lib.stop(evt);
 			};
 			if (persistAndReplace) {
 				if (this._oldDragEnter) {
@@ -213,8 +218,14 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			var dragOver = function (evt) { //$NON-NLS-0$
 				// default behavior is to not trigger a drop, so we override the default
 				// behavior in order to enable drop.  
-				evt.preventDefault();
-				evt.stopPropagation();
+				// we have to specify "copy" again here, even though we did in dragEnter
+				if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+					evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+					evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
+					// only supported in Chrome.
+						evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+				}   
+				lib.stop(evt);
 			};
 			if (persistAndReplace && !this._oldDragOver) {
 				node.addEventListener("dragover", dragOver, false); //$NON-NLS-0$
@@ -254,8 +265,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						}
 					}
 				}
-				evt.preventDefault();
-				evt.stopPropagation();
+				lib.stop(evt);
 			};
 			if (persistAndReplace) {
 				if (this._oldDrop) {
