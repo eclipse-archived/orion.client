@@ -42,6 +42,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 		this._initialize();
 	},
 	_bindToDom: function() {
+		var self = this;
 		this.$okButton = this.$buttonContainer.firstChild;
 		this.$okButton.classList.add('disabled'); //$NON-NLS-0$
 		this.$browseButton.addEventListener('click', function() { //$NON-NLS-0$
@@ -51,9 +52,7 @@ objects.mixin(ConvertToSelfHostingDialog.prototype, {
 				fileClient: this.fileClient,
 				func: this.onFolderChosen.bind(this)
 			});
-			// Allow the child DirectoryPrompterDialog, and this ConvertToSelfHostingDialog, to lose focus to each other.
-			browseFolderDialog.$$modalExclusions = [this.$frame];
-			this.$$modalExclusions = [browseFolderDialog.$frame];
+			self._addChildDialog(browseFolderDialog);
 			browseFolderDialog.show();
 		}.bind(this));
 		this.$port.addEventListener('change', function() { //$NON-NLS-1$
