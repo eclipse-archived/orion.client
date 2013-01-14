@@ -15,7 +15,12 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	/**
 	 * Attaches dropdown behavior to a given node.  Assumes the triggering node and dropdown node
 	 * have the same parent.  Trigger should have "dropdownTrigger" class, and the dropdown node should 
-	 * have "dropdownMenu" class.
+	 * have "dropdownMenu" class.  Dropdown items should be <li> elements, so typically the dropdown node
+	 * supplied is a <ul>.
+	 * 
+	 * Nested ("sub") menu behavior is accomplished by adding the class "dropdownSubMenu" to one of the <li> items.
+	 * This item can then parent another trigger and <ul>.
+	 *
 	 * @param {Object} options The options object, which must minimally specify the dropdown dom node
 	 * @param options.dropdown The node for the dropdown presentation.  Required.
 	 * @param options.populate A function that should be called to populate the dropdown before it

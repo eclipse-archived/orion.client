@@ -35,7 +35,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" /></div>' + //$NON-NLS-0$
-			'<div id="crawlingProgress"></div>' + //$NON-NLS-0$
+			'<div id="progress" style="padding: 2px 0 0;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>' + //$NON-NLS-0$
 			'<div id="results" style="max-height:400px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
 			'<div id="statusbar"></div>' + //$NON-NLS-0$
@@ -82,8 +82,9 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		}, false);
 		this.$fileName.addEventListener("keydown",function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === lib.KEY.ENTER) {
-				var link = lib.$("a", self._results); //$NON-NLS-0$
+				var link = lib.$("a", self.$results); //$NON-NLS-0$
 				if (link) {
+					lib.stop(evt);
 					window.open(link.href);
 					self.hide();
 				}
@@ -152,19 +153,20 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 				var crawler = new mSearchCrawler.SearchCrawler(self._searcher.registry, self._fileService, "", {searchOnName: true, location: searchLoc}); 
 				self._searcher.setCrawler(crawler);
 				crawler.buildSkeleton(function() {
-					self.$crawlingProgress.classList.add("progressPane_running_dialog"); //$NON-NLS-0$
-					self.$crawlingProgress.appendChild(document.createTextNode(messages['Building file skeleton...']));
+					self.$crawlingProgress.style.visibility = "visible"; //$NON-NLS-0$
+					self.$progress.appendChild(document.createTextNode(messages['Building file skeleton...']));
 					}, function(){
-						self.$crawlingProgress.classList.remove("progressPane_running_dialog"); //$NON-NLS-0$
-						lib.empty(self.$crawlingProgress);
+						self.$crawlingProgress.style.visibility = "hidden"; //$NON-NLS-0$
+						self.$progress.removeChild(self.$progress.lastChild);
 					});
 			}
 		}, 0);
+		self.$crawlingProgress.style.visibility = "hidden"; //$NON-NLS-0$
 	};
 
 	/** @private kick off initial population of favorites */
 	OpenResourceDialog.prototype.populateFavorites = function() {
-		var div = document.createElement("div");
+		var div = document.createElement("div"); //$NON-NLS-0$
 		div.appendChild(document.createTextNode(messages['Populating favorites&#x2026;']));
 		lib.empty(this.$favresults);
 		this.$favresults.appendChild(div);
@@ -266,13 +268,6 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 				}
 			}, false);
 		};
-	};
-	
-	/**
-	 * Once the dialog is up...
-	 */
-	OpenResourceDialog.prototype._afterShowing = function() {
-		this.$fileName.focus();
 	};
 	
 	/** @private */

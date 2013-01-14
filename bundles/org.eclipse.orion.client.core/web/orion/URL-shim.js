@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global document window*/
+/*global document window StopIteration*/
 // URL Shim -- see http://http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
 
 (function() {
@@ -18,13 +18,46 @@
 	}
 
 	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
+	var STOP_ITERATION = typeof StopIteration !== "undefined" ? StopIteration : new Error("Stop Iteration");
 
-	function _createMapIterator(entries, kind) {
+	function _parseSearch(search) {
+		return search ? search.slice(1).split("&") : [];
+	}
+
+	function _stringifySearch(pairs) {
+		if (pairs.length === 0) {
+			return "";
+		}
+		return "?" + pairs.join("&");
+	}
+
+	function _parsePair(pair) {
+		var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
+		var key = parsed[1] ? decodeURIComponent(parsed[1]) : "";
+		var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
+		return [key, value];
+	}
+
+	function _stringifyPair(entry) {
+		var pair = encodeURIComponent(entry[0]);
+		if (entry[1]) {
+			pair += "=" + encodeURIComponent(entry[1]);
+		}
+		return pair;
+	}
+
+	function _createMapIterator(anchor, kind) {
+		var search = "";
+		var pairs = [];
 		var index = 0;
 		return {
 			next: function() {
-				if (index < entries.length) {
-					var entry = entries[index++];
+				if (search !== anchor.search) {
+					search = anchor.search;
+					pairs = _parseSearch(search);
+				}
+				if (index < pairs.length) {
+					var entry = _parsePair(pairs[index++]);
 					switch (kind) {
 						case "keys":
 							return entry[0];
@@ -36,36 +69,9 @@
 							throw new TypeError();
 					}
 				}
-				throw new Error("Stop Iteration");
+				throw STOP_ITERATION;
 			}
 		};
-	}
-
-	function _parseSearch(search) {
-		var entries = [];
-		if (search) {
-			var pairs = search.slice(1).split("&");
-			pairs.forEach(function(pair) {
-				var parsed = /([^=]*)(?:=?)(.*)/.exec(pair);
-				var key = parsed[1] ? decodeURIComponent(parsed[1]) : "";
-				var value = parsed[2] ? decodeURIComponent(parsed[2]) : "";
-				entries.push([key, value]);
-			}, this);
-		}
-		return entries;
-	}
-
-	function _stringifySearch(entries) {
-		if (entries.length === 0) {
-			return "";
-		}
-		return "?" + entries.map(function(entry) {
-			var pair = encodeURIComponent(entry[0]);
-			if (entry[1]) {
-				pair += "=" + encodeURIComponent(entry[1]);
-			}
-			return pair;
-		}).join("&");
 	}
 
 	function _checkString(txt) {
@@ -86,8 +92,9 @@
 			value: function(key) {
 				_checkString(key);
 				var result;
-				var entries = _parseSearch(this._anchor.search);
-				entries.some(function(entry) {
+				var pairs = _parseSearch(this._anchor.search);
+				pairs.some(function(pair) {
+					var entry = _parsePair(pair);
 					if (entry[0] === key) {
 						result = entry[1];
 						return true;
@@ -101,25 +108,28 @@
 			value: function(key, value) {
 				_checkString(key);
 				_checkString(value);
-				var entries = _parseSearch(this._anchor.search);
-				var found = entries.some(function(entry) {
+				var pairs = _parseSearch(this._anchor.search);
+				var found = pairs.some(function(pair, i) {
+					var entry = _parsePair(pair);
 					if (entry[0] === key) {
 						entry[1] = value;
+						pairs[i] = _stringifyPair(entry);
 						return true;
 					}
 				});
 				if (!found) {
-					entries.push([key, value]);
+					pairs.push(_stringifyPair([key, value]));
 				}
-				this._anchor.search = _stringifySearch(entries);
+				this._anchor.search = _stringifySearch(pairs);
 			},
 			enumerable: true
 		},
 		has: {
 			value: function(key) {
 				_checkString(key);
-				var entries = _parseSearch(this._anchor.search);
-				return entries.some(function(entry) {
+				var pairs = _parseSearch(this._anchor.search);
+				return pairs.some(function(pair) {
+					var entry = _parsePair(pair);
 					if (entry[0] === key) {
 						return true;
 					}
@@ -130,11 +140,12 @@
 		"delete": {
 			value: function(key) {
 				_checkString(key);
-				var entries = _parseSearch(this._anchor.search);
-				var filtered = entries.filter(function(entry) {
+				var pairs = _parseSearch(this._anchor.search);
+				var filtered = pairs.filter(function(pair) {
+					var entry = _parsePair(pair);
 					return entry[0] !== key;
 				});
-				if (filtered.length !== entries.length) {
+				if (filtered.length !== pairs.length) {
 					this._anchor.search = _stringifySearch(filtered);
 					return true;
 				}
@@ -150,28 +161,38 @@
 		},
 		forEach: {
 			value: function(callback, thisArg) {
-				var thisMap = this;
-				_parseSearch(this._anchor.search).forEach(function(entry) {
-					callback.call(thisArg, entry[1], entry[0], thisMap);
-				});
+				if (typeof callback !== "function") {
+					throw new TypeError();
+				}
+				var iterator = _createMapIterator(this._anchor, "keys+values");
+				try {
+					while (true) {
+						var entry = iterator.next();
+						callback.call(thisArg, entry[1], entry[0], this);
+					}
+				} catch (e) {
+					if (e !== STOP_ITERATION) {
+						throw e;
+					}
+				}
 			},
 			enumerable: true
 		},
 		keys: {
 			value: function() {
-				return _createMapIterator(_parseSearch(this._anchor.search), "keys");
+				return _createMapIterator(this._anchor, "keys");
 			},
 			enumerable: true
 		},
 		values: {
 			value: function() {
-				return _createMapIterator(_parseSearch(this._anchor.search), "values");
+				return _createMapIterator(this._anchor, "values");
 			},
 			enumerable: true
 		},
 		items: {
 			value: function() {
-				return _createMapIterator(_parseSearch(this._anchor.search), "keys+values");
+				return _createMapIterator(this._anchor, "keys+values");
 			}
 		},
 		size: {
@@ -183,10 +204,15 @@
 		getAll: {
 			value: function(key) {
 				_checkString(key);
-				var entries = _parseSearch(this._anchor.search);
-				return entries.filter(function(entry) {
-					return entry[0] === key;
+				var result = [];
+				var pairs = _parseSearch(this._anchor.search);
+				pairs.forEach(function(pair) {
+					var entry = _parsePair(pair);
+					if (entry[0] === key) {
+						result.push(entry[1]);
+					}
 				});
+				return result;
 			},
 			enumerable: true
 		},
@@ -194,9 +220,9 @@
 			value: function(key, value) {
 				_checkString(key);
 				_checkString(value);
-				var entries = _parseSearch(this._anchor.search);
-				entries.push([key, value]);
-				this._anchor.search = _stringifySearch(entries);
+				var pairs = _parseSearch(this._anchor.search);
+				pairs.push(_stringifyPair([key, value]));
+				this._anchor.search = _stringifySearch(pairs);
 			},
 			enumerable: true
 		}

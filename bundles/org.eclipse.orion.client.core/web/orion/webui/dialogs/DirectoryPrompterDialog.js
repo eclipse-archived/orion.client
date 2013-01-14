@@ -56,7 +56,8 @@ function(messages, lib, dialog, mFileUtils, mSelection, mNavUtils, mExplorer, mE
 	DirectoryPrompterDialog.prototype._init = function(options) {
 		this.title = options.title || messages['Choose a Folder'];
 		this.modal = true;
-		this.buttons = [{text: messages['OK'], callback: this.done.bind(this)}]; 
+		this.buttons = [{text: messages['OK'], isDefault: true, callback: this.done.bind(this)}]; 
+		this.customFocus = true;
 		this._fileClient = options.fileClient;
 		this._serviceRegistry = options.serviceRegistry;
 		this._message = options.message || "";
