@@ -195,7 +195,8 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 		},
 		outlineChanged: function(outlinerService, title, contents) {
 			var self = this;
-			outlinerService.getOutline(contents, title).then(function(outlineModel) {
+			var progress = this._serviceRegistry.getService("orion.page.progress");
+			progress.progress(outlinerService.getOutline(contents, title), "Getting outline for " + title).then(function(outlineModel) {
 				self._renderOutline(outlineModel, title);
 			});
 		},
@@ -314,7 +315,8 @@ define(['i18n!orion/nls/messages', 'orion/Deferred', 'orion/webui/littlelib', 'o
 			var self = this;
 			
 			Deferred.when(this.getProvider(), function(provider) {
-				self._serviceRegistry.getService(provider).getOutline(contents, title).then(function(outline) {
+				var progress = self._serviceRegistry.getService("orion.page.progress");
+				progress.progress(self._serviceRegistry.getService(provider).getOutline(contents, title), "Getting outline for " + title + " from " + provider.displayName).then(function(outline) {
 					if (outline) {
 						self.dispatchEvent({type:"outline", outline: outline, title: title, providerId: provider.getProperty("id")}); //$NON-NLS-1$ //$NON-NLS-0$
 					}

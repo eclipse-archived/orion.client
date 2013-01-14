@@ -284,6 +284,7 @@ exports.EditorCommandFactory = (function() {
 				// iterate through the extension points and generate commands for each one.
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
 				var input = this.inputManager;
+				var progress = this.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var makeCommand = function(info, service, options) {
 					options.callback = function(data) {
 						// command service will provide editor parameter but editor widget callback will not
@@ -291,7 +292,8 @@ exports.EditorCommandFactory = (function() {
 						var selection = editor.getSelection();
 						var model = editor.getModel();
 						var text = model.getText();
-						service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()).then(function(result){
+						var selectedText = model.getText(selection.start,selection.end);
+						progress.progress(service.run(selectedText, text,selection, input.getInput()), "Running " + info.name + (selectedText ? (" on \"" + selectedText.substring(0, 15) + (selection.end-selection.start>15 ? "...\"":"\"")) : "")).then(function(result){
 							if (result && result.text) {
 								editor.setText(result.text);
 								if (result.selection) {
