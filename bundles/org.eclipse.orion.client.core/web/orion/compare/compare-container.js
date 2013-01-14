@@ -25,18 +25,15 @@ exports.DefaultDiffProvider = (function() {
 		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 	}	
 	DefaultDiffProvider.prototype = {
-		_resolveComplexDiff: function(complexURL, onlyDiff, errorCallback) {
-			var compareTwoIndex = complexURL.indexOf(","); //$NON-NLS-0$
-			if(compareTwoIndex > 0){
-				var fileLocNew = complexURL.substring(0, compareTwoIndex);
-				var fileLocBase = complexURL.substring(compareTwoIndex+1);
+		_resolveDiff: function(resource, compareTo, onlyDiff, errorCallback) {
+			if(compareTo){
 				var that = this;
-				var dl = new dojo.DeferredList([ that._getContentType(fileLocBase), that._getContentType(fileLocNew) ]);
+				var dl = new dojo.DeferredList([ that._getContentType(compareTo), that._getContentType(resource) ]);
 				dl.then(function(results) {
 					var baseFileContentType = results[0][1];
 					var newFileContentType = results[1][1];
-					that.callBack({ baseFile:{URL: fileLocBase, Name: that._resolveFileName(fileLocBase), Type: baseFileContentType},
-					 			newFile:{URL: fileLocNew, Name: that._resolveFileName(fileLocNew), Type: newFileContentType}
+					that.callBack({ baseFile:{URL: compareTo, Name: that._resolveFileName(compareTo), Type: baseFileContentType},
+					 			newFile:{URL: resource, Name: that._resolveFileName(resource), Type: newFileContentType}
 							 });
 				}, errorCallback);
 			} else {
@@ -45,7 +42,7 @@ exports.DefaultDiffProvider = (function() {
 					return;
 				}
 				var that = this;
-				that._diffProvider.getDiffContent(complexURL).then(function(jsonData, secondArg) {
+				that._diffProvider.getDiffContent(resource).then(function(jsonData, secondArg) {
 					if (that._hasConflicts) {
 						that._diffContent = jsonData.split("diff --git")[1]; //$NON-NLS-0$
 					} else {
@@ -56,7 +53,7 @@ exports.DefaultDiffProvider = (function() {
 				 			diff: that._diffContent
 						 });
 					} else {
-						that._resolveComplexFileURL(complexURL);
+						that._resolveComplexFileURL(resource);
 					}
 				}, errorCallback);
 			}
@@ -89,10 +86,10 @@ exports.DefaultDiffProvider = (function() {
 			}, errorCallback);
 		},
 		
-		provide: function(complexURL, onlyDiff, hasConflicts,callBack, errorCallBack) {
+		provide: function(resource, compareTo, onlyDiff, hasConflicts,callBack, errorCallBack) {
 			this.callBack = callBack;
 			this._hasConflicts = hasConflicts;
-			this._resolveComplexDiff(complexURL, onlyDiff, errorCallBack);
+			this._resolveDiff(resource, compareTo, onlyDiff, errorCallBack);
 		}
 	};
 	return DefaultDiffProvider;
@@ -153,7 +150,8 @@ exports.CompareContainer = (function() {
 				this.options.charDiff = (options.charDiff !== undefined &&  options.charDiff !== null) ? options.charDiff : this.options.charDiff;
 				this.options.hasConflicts = (options.hasConflicts !== undefined &&  options.hasConflicts !== null) ? options.hasConflicts : this.options.hasConflicts;
 				this.options.diffProvider = options.diffProvider ? options.diffProvider : this.options.diffProvider;
-				this.options.complexURL = options.complexURL ?  options.complexURL : this.options.complexURL;
+				this.options.resource = options.resource ?  options.resource : this.options.resource;
+				this.options.compareTo = options.compareTo ?  options.compareTo : this.options.compareTo;
 				
 				this.options.baseFile.URL = (options.baseFile && options.baseFile.URL) ? options.baseFile.URL : this.options.baseFile.URL;
 				this.options.baseFile.Name = (options.baseFile && typeof(options.baseFile.Name) === "string") ? options.baseFile.Name : this.options.baseFile.Name; //$NON-NLS-0$
@@ -225,7 +223,7 @@ exports.CompareContainer = (function() {
 				id: "orion.compare.generateLink", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return item.options.complexURL && item.options.generateLink;
+					return item.options.resource && item.options.generateLink;
 				},
 				callback : function(data) {
 					data.items.generateLink();
@@ -237,7 +235,7 @@ exports.CompareContainer = (function() {
 				id: "orion.compare.openComparePage", //$NON-NLS-0$
 				groupId: "orion.compareGroup", //$NON-NLS-0$
 				visibleWhen: function(item) {
-					return item.options.complexURL && !item.options.generateLink;
+					return item.options.resource && !item.options.generateLink;
 				},
 				hrefCallback: function(data) {
 					return data.items.openComparePage();
@@ -341,7 +339,8 @@ exports.CompareContainer = (function() {
 		
 		generateLink: function(){	
 			var diffPos = this.getCurrentDiffPos();
-			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
+			var href = mCompareUtils.generateCompareHref(this.options.resource, {
+				compareTo: this.options.compareTo,
 				readonly: this.options.readonly,
 				conflict: this.options.hasConflicts,
 				block: diffPos.block ? diffPos.block : 1, 
@@ -352,7 +351,8 @@ exports.CompareContainer = (function() {
 		
 		openComparePage: function(){	
 			var diffPos = this.getCurrentDiffPos();
-			var href = mCompareUtils.generateCompareHref(this.options.complexURL, {
+			var href = mCompareUtils.generateCompareHref(this.options.resource, {
+				compareTo: this.options.compareTo,
 				readonly: !this.options.editableInComparePage,
 				conflict: this.options.hasConflicts,
 				block: diffPos.block ? diffPos.block : 1, 
@@ -395,13 +395,13 @@ exports.CompareContainer = (function() {
 			return delim;
 		},
 
-		resolveComplexDiff: function(onsave) {
+		resolveDiff: function(onsave) {
 			if(!this.options.diffProvider){
 				console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$
 				return;
 			}
 			var that = this;
-			that.options.diffProvider.provide(that.options.complexURL, onsave, that.options.hasConflicts, function(diffParam){
+			that.options.diffProvider.provide(that.options.resource, that.options.compareTo, onsave, that.options.hasConflicts, function(diffParam){
 				that.options.baseFile.URL = (diffParam.baseFile && typeof(diffParam.baseFile.URL) === "string") ? diffParam.baseFile.URL : that.options.baseFile.URL; //$NON-NLS-0$
 				that.options.baseFile.Name = (diffParam.baseFile && typeof(diffParam.baseFile.Name) === "string") ? diffParam.baseFile.Name : that.options.baseFile.Name; //$NON-NLS-0$
 				that.options.baseFile.Type = (diffParam.baseFile && typeof(diffParam.baseFile.Type) === "object") ? diffParam.baseFile.Type : that.options.baseFile.Type; //$NON-NLS-0$
@@ -498,8 +498,8 @@ exports.CompareContainer = (function() {
 		
 		startup: function(onsave, onLoadContents){
 			this._onLoadContents = onLoadContents;
-			if(this.options.complexURL){
-				this.resolveComplexDiff(onsave);
+			if(this.options.resource){
+				this.resolveDiff(onsave);
 			} else if(!this.resolveDiffByContents(onsave)){
 				//resolve from mapper
 			}

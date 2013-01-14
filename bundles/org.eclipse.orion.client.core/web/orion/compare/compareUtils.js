@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global define require orion window document console */
 
-define([], function() {
+define(['orion/URITemplate'], function(URITemplate) {
 
 var orion = orion || {};
 
@@ -177,7 +177,7 @@ orion.compareUtils.isMapperConflict = function(mapper, mapperIndex){
 	return mapper[mapperIndex][3] === 1;
 };
 
-orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex, lineDelim){
+orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex, lineDelim){//test
 	for(var i = 0; i < newDiffBlocks.length; i++){
 		var startLineIndex = newDiffBlocks[i][0];
 		var mapperIndex = newDiffBlocks[i][1];
@@ -200,51 +200,17 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 
 orion.compareUtils.generateCompareHref = function(diffLocation, options) {
 	var base =  require.toUrl("compare/compare.html"); //$NON-NLS-0$
-	var compareParam = "";
-	var diffPosition = "";
-	if(options){
-		if(options.readonly){
-			compareParam = "?readonly"; //$NON-NLS-0$
-		}
-		if(options.conflict){
-			if(compareParam === ""){
-				compareParam = "?conflict"; //$NON-NLS-0$
-			} else {
-				compareParam = compareParam + "&conflict"; //$NON-NLS-0$
-			}
-		}
-		if(options.block && options.block > 0){
-			diffPosition = ",block=" + options.block; //$NON-NLS-0$
-			if(options.change && options.change > 0){
-				diffPosition = diffPosition + "&change="+ options.change; //$NON-NLS-0$
-			}
-		}
+	if(!options.conflict){
+		options.conflict = undefined;
 	}
-	var tempLink = document.createElement("a"); //$NON-NLS-0$
-	tempLink.href = base + compareParam + "#" + diffLocation + diffPosition; //$NON-NLS-0$
-	return tempLink.href;
+	if(!options.readonly){
+		options.readonly = undefined;
+	}
+	var href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
+		resource: diffLocation,
+		params: options
+	});
+	return href;
 };
-
-orion.compareUtils.parseCompareHash = function(hash) {
-	var diffObj = {complexURL: hash};
-	var diffPosIndex = hash.indexOf(",block="); //$NON-NLS-0$
-	if(diffPosIndex > 0){
-		diffObj.complexURL = hash.substring(0, diffPosIndex);
-		var diffPosStr = hash.substring(diffPosIndex+1);
-		var splitDiffPosStr = diffPosStr.split("&"); //$NON-NLS-0$
-		for(var i=0; i < splitDiffPosStr.length; i++){
-			var splitParams = splitDiffPosStr[i].split("="); //$NON-NLS-0$
-			if(splitParams.length === 2){
-				if(splitParams[0] === "block"){ //$NON-NLS-0$
-					diffObj.block = parseInt(splitParams[1]);
-				} else if(splitParams[0] === "change"){ //$NON-NLS-0$
-					diffObj.change = parseInt(splitParams[1]);
-				} 
-			}
-		}
-	} 
-	return diffObj;
-};
-
 return orion.compareUtils;
 });
