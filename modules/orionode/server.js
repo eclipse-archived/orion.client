@@ -10,7 +10,6 @@
  *******************************************************************************/
 /*global __dirname console process require*/
 var connect = require('connect');
-var mime = connect.mime;
 var statik = connect['static'];
 var http = require('http');
 var socketio = require('socket.io');
@@ -29,13 +28,6 @@ var orionStatic = require('./lib/orion_static');
 var LIBS = path.normalize(path.join(__dirname, 'lib/'));
 var NODE_MODULES = path.normalize(path.join(__dirname, 'node_modules/'));
 var ORION_CLIENT = path.normalize(path.join(__dirname, '../../'));
-
-// vroom vroom
-http.globalAgent.maxSockets = 25;
-
-mime.define({
-	'application/json': ['pref', 'json']
-});
 
 function handleError(err) {
 	throw err;
@@ -58,7 +50,7 @@ function logger(options) {
 }
 
 function startServer(options) {
-	var workspaceDir = options.workspaceDir, tempDir = options.tempDir, configParams = options.configParams;
+	var workspaceDir = options.workspaceDir, configParams = options.configParams;
 	try {
 		var appContext = new AppContext({fileRoot: '/file', workspaceDir: workspaceDir, configParams: configParams});
 
@@ -88,14 +80,12 @@ function startServer(options) {
 			// API handlers
 			.use(orionFile({
 				root: '/file',
-				workspaceDir: workspaceDir,
-				tempDir: tempDir
+				workspaceDir: workspaceDir
 			}))
 			.use(orionWorkspace({
 				root: '/workspace',
 				fileRoot: '/file',
-				workspaceDir: workspaceDir,
-				tempDir: tempDir
+				workspaceDir: workspaceDir
 			}))
 			.use(orionNode({
 				appContext: appContext,
@@ -125,9 +115,8 @@ var args = argslib.parseArgs(process.argv);
 var port = args.port || args.p || 8081;
 var workspaceArg = args.workspace || args.w;
 var workspaceDir = workspaceArg ? path.resolve(process.cwd(), workspaceArg) : path.join(__dirname, '.workspace');
-var tempDir = path.join(workspaceDir, '.temp');
 var config_params = {};
-argslib.createDirs([workspaceDir, tempDir], function(dirs, tempDir) {
+argslib.createDirs([workspaceDir], function(dirs) {
 	var passwordFile = args.password || args.pwd;
 	argslib.readPasswordFile(passwordFile, function(password) {
 		argslib.readConfigFile("./server.conf", function(configParams) {
@@ -137,7 +126,6 @@ argslib.createDirs([workspaceDir, tempDir], function(dirs, tempDir) {
 			startServer({
 				port: port,
 				workspaceDir: dirs[0],
-				tempDir: dirs[1],
 				passwordFile: passwordFile,
 				password: password,
 				configParams: config_params,
