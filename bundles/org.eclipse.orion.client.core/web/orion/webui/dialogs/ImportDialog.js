@@ -98,6 +98,12 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 
 	// Select File via drag
 	ImportDialog.prototype.dragEnter = function(evt) {
+		if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+			evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+			evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
+			// only supported in Chrome.
+				evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+		}   
 		lib.stop(evt);
 	};
 	
@@ -106,6 +112,12 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	};
 
 	ImportDialog.prototype.dragOver = function(evt) {
+		if (evt.dataTransfer.effectAllowed === "all" ||   //$NON-NLS-0$
+			evt.dataTransfer.effectAllowed === "uninitialized" ||  //$NON-NLS-0$
+			evt.dataTransfer.effectAllowed.indexOf("copy") >= 0) {   //$NON-NLS-0$
+			// only supported in Chrome.
+				evt.dataTransfer.dropEffect = "copy";  //$NON-NLS-0$
+		}   
 		lib.stop(evt);
 	};
 
