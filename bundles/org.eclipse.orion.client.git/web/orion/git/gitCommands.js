@@ -12,15 +12,15 @@
 /*global alert confirm orion window widgets eclipse:true serviceRegistry define */
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
-        'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 
-        'orion/git/widgets/CloneGitRepositoryDialog', 
+        'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
+        
         'orion/git/widgets/GitCredentialsDialog', 
         'orion/git/widgets/ApplyPatchDialog', 
         'orion/git/widgets/OpenCommitDialog', 
         'orion/git/widgets/ContentDialog', 
         'orion/git/widgets/CommitDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter, mReviewRequest) {
+        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2241,7 +2241,7 @@ var exports = {};
 				if (data.parameters.valueFor("url") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 					cloneFunction(data.parameters.valueFor("url")); //$NON-NLS-0$
 				} else {
-					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+					var dialog = new mCloneGitRepository.CloneGitRepositoryDialog({
 						serviceRegistry: serviceRegistry,
 						fileClient: fileClient,
 						url: data.parameters.valueFor("url"), //$NON-NLS-0$
@@ -2249,7 +2249,6 @@ var exports = {};
 						func: cloneFunction
 					});
 							
-					dialog.startup();
 					dialog.show();
 				}
 			},
@@ -2285,7 +2284,7 @@ var exports = {};
 						});
 					});
 				};
-				var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+				var dialog = new mCloneGitRepository.CloneGitRepositoryDialog({
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,
 					url: data.userData,
@@ -2293,9 +2292,7 @@ var exports = {};
 					func: cloneFunction
 				});
 						
-				dialog.startup();
 				dialog.show();
-
 			},
 			visibleWhen : function(item) {
 				return true;
@@ -2462,7 +2459,7 @@ var exports = {};
 				if (data.parameters.valueFor("folderName") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 					initRepositoryFunction(null, null, data.parameters.valueFor("folderName")); //$NON-NLS-0$
 				} else {
-					var dialog = new orion.git.widgets.CloneGitRepositoryDialog({
+					var dialog = new mCloneGitRepository.CloneGitRepositoryDialog({
 						serviceRegistry: serviceRegistry,
 						title: messages['Init Git Repository'],
 						fileClient: fileClient,
@@ -2470,7 +2467,6 @@ var exports = {};
 						func: initRepositoryFunction
 					});
 							
-					dialog.startup();
 					dialog.show();
 				}
 			},
