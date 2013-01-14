@@ -66,9 +66,10 @@ var SyntaxChecker = (function () {
 						return data.problems || data.errors;
 					};
 					var problemPromises = [];
+					var progress = self.registry.getService("orion.page.progress");
 					for (var i=0; i < validators.length; i++) {
 						var validator = validators[i];
-						problemPromises.push(self.registry.getService(validator).checkSyntax(title, contents).then(extractProblems));
+						problemPromises.push(progress.progress(self.registry.getService(validator).checkSyntax(title, contents), "Validating " + title).then(extractProblems));
 					}
 					
 					Deferred.all(problemPromises, function(error) {return {_error: error}; })

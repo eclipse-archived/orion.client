@@ -223,7 +223,12 @@ define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 				for (var i = 0; i < this.services.length; i++) {
 					var service = this.services[i];
 					if (service.setContentType) {
-						service.setContentType(this.contentType);
+						var progress = this.serviceRegistry.getService("orion.page.progress");
+						if(progress){
+							progress.progress(service.setContentType(this.contentType), "Styling content type: " + this.contentType.id ? this.contentType.id: this.contentType);
+						} else {
+							service.setContentType(this.contentType);
+						}
 					}
 				}
 			}
@@ -246,7 +251,12 @@ define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 				service.addEventListener("orion.edit.highlighter.styleReady", this.listener.onStyleReady);
 				this.services.push(service);
 				if (service.setContentType && this.contentType) {
-					service.setContentType(this.contentType);
+					var progress = this.serviceRegistry.getService("orion.page.progress");
+					if(progress){
+						progress.progress(service.setContentType(this.contentType), "Styling content type: " + this.contentType.id ? this.contentType.id: this.contentType);
+					} else {
+						service.setContentType(this.contentType);
+					}
 				}
 			} else {
 				if (typeof console !== "undefined") {
