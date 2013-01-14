@@ -169,7 +169,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 			}
 		}
 		});
-
+		
+		this._addChildDialog(dialog);
 		dialog.show();
 	};
 

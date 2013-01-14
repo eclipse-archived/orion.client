@@ -100,7 +100,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	SFTPConnectionDialog.prototype._bindToDom = function(parent) {
 		this.$sftpConnectionList.style.minWidth = "220px"; //$NON-NLS-0$
 		this._popupDialog = new SFTPNewConnectionPopup(this.$newSftpConnection, this.onAddConnection.bind(this));
-		this.$$modalExclusions = [this._popupDialog.$parent];
+		this._addChildDialog(this._popupDialog);
 		this._populateSelect();
 	};
 	
