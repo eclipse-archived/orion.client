@@ -14,36 +14,28 @@
 define(["orion/assert", "orion/HTMLTemplates-shim", "domReady!"], function(assert, URITemplate) {
 	var tests = {};
 	
-	tests.testTemplateScript = function() {
-		assert.equal(document.body.querySelectorAll("div.comment").length, 0);
-		document.body.appendChild(document.getElementById("commentTemplate").content.cloneNode(true));
-		assert.equal(document.body.querySelectorAll("div.comment").length, 1);
-	};
-	
-	tests.testTemplateScriptCommented = function() {
-		assert.equal(document.body.querySelectorAll("div.comment2").length, 0);
-		document.body.appendChild(document.getElementById("commentTemplate2").content.cloneNode(true));
-		assert.equal(document.body.querySelectorAll("div.comment2").length, 1);
-	};
-	
 	tests.testTemplateElement = function() {
 		assert.equal(document.body.querySelectorAll("div.comment3").length, 0);
 		document.body.appendChild(document.getElementById("commentTemplate3").content.cloneNode(true));
 		assert.equal(document.body.querySelectorAll("div.comment3").length, 1);
 	};
 
-	tests.testNewTemplateElement = function() {
-		var template = document.createElement("template");
-		template.id="xyzzy";
-		document.body.appendChild(template);
-		assert.equal(document.body.querySelectorAll("template#xyzzy").length, 1);
-	};
-	
 	tests.testTemplateElementAgain = function() {
 		assert.equal(document.body.querySelectorAll("div.comment3").length, 1);
 		document.body.appendChild(document.getElementById("commentTemplate3").content.cloneNode(true));
 		assert.equal(document.body.querySelectorAll("div.comment3").length, 2);
 	};
+
+	tests.testNewTemplateElement = function() {
+		var template = document.createElement("template");
+		template.id="xyzzy";
+		template.innerHTML = "<div></div>";
+		document.body.appendChild(template);
+		assert.ok(template.content);
+		assert.equal(document.body.querySelectorAll("template#xyzzy").length, 1);
+		assert.equal(document.body.querySelectorAll("template#xyzzy div").length, 0);
+	};
+	
 
 	return tests;
 });
