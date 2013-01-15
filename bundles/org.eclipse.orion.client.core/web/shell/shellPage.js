@@ -15,9 +15,9 @@
 
 define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred"],
+		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred", 'orion/status', 'orion/progress', 'orion/operationsClient'],
 	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred) {
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress, mOperationsClient) {
 
 	var shellPageFileService, fileClient, output;
 	var hashUpdated = false;
@@ -542,14 +542,23 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	 * Creates a gcli exec function that wraps a 'callback' function contributed by
 	 * an 'orion.shell.command' service implementation.
 	 */
-	function contributedExecFunc(service) {
+	function contributedExecFunc(service, name, progress) {
 		if (typeof(service.callback) === "function") { //$NON-NLS-0$
 			return function(args, context) {
 				/* Use orion/Deferred since it supports progress, gcli/promise does not */
 				//var promise = context.createPromise();
 				var promise = new Deferred();
 				var location = getCWD();
-				service.callback(args, {cwd:location}).then(
+				function toString(name, args){
+					var ret = "";
+					ret+=name;
+					for(key in args){
+						ret+=" ";
+						ret+=args[key];
+					}
+					return ret;
+				}
+				progress.progress(service.callback(args, {cwd:location}), "Executing command " + toString(name, args)).then(
 					function(result) {
 						promise.resolve(result);
 					},
@@ -577,6 +586,9 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			fileClient = new mFileClient.FileClient(serviceRegistry);
 			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+			new mProgress.ProgressService(serviceRegistry, operationsClient);
 			mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 			mGlobalCommands.setPageTarget({task: messages.Shell});
 
@@ -789,6 +801,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 			
 			/* add commands contributed through the plug-in API */
 			var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
+			var progress = serviceRegistry.getService("orion.page.progress");
 			for (var i = 0; i < allReferences.length; ++i) {
 				var ref = allReferences[i];
 				var service = serviceRegistry.getService(ref);
@@ -796,10 +809,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 					if (ref.getProperty("nls") && ref.getProperty("descriptionKey")){  //$NON-NLS-1$ //$NON-NLS-0$
 						i18nUtil.getMessageBundle(ref.getProperty("nls")).then( //$NON-NLS-0$
 							function(ref, commandMessages) {
+								var name = ref.getProperty("name"); //$NON-NLS-0$
 								shell.registerCommand({
-									name: ref.getProperty("name"), //$NON-NLS-0$
+									name: name,
 									description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
-									callback: contributedExecFunc(service),
+									callback: contributedExecFunc(service, name, progress),
 									returnType: "string", //$NON-NLS-0$
 									parameters: ref.getProperty("parameters"), //$NON-NLS-0$
 									manual: ref.getProperty("manual") //$NON-NLS-0$
@@ -807,10 +821,11 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 							},
 							ref);
 					} else {
+						var name = ref.getProperty("name"); //$NON-NLS-0$
 						shell.registerCommand({
-							name: ref.getProperty("name"), //$NON-NLS-0$
+							name: name,
 							description: ref.getProperty("description"), //$NON-NLS-0$
-							callback: contributedExecFunc(service),
+							callback: contributedExecFunc(service, name, progress),
 							returnType: "string", //$NON-NLS-0$
 							parameters: ref.getProperty("parameters"), //$NON-NLS-0$
 							manual: ref.getProperty("manual") //$NON-NLS-0$

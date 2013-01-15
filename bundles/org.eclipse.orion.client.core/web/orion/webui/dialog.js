@@ -61,6 +61,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 		_initialize: function() {
 			var parent = document.body;
 			this.$frameParent = parent;
+			this.$$modalExclusions = this.$$modalExclusions || [];
 			var range = document.createRange();
 			range.selectNode(parent);
 			var frameFragment = range.createContextualFragment(this.CONTAINERTEMPLATE);
@@ -156,7 +157,6 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$frame.addEventListener("blur", function(e) { //$NON-NLS-0$
 				self.$lastFocusedElement = e.target;
 			}, true);
-			this.$$modalExclusions = this.$$modalExclusions || [];
 			this._modalListener = function(e) { //$NON-NLS-0$
 				var preventFocus =	!lib.contains(self.$frame, e.target);
 				if (preventFocus) {
@@ -178,6 +178,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			this.$frameParent.addEventListener("click", this._modalListener, true);  //$NON-NLS-0$
 			var children = this.$frameParent.childNodes;
 			var exclude = false;
+			this._addedBackdrop = [];
 			for (var i=0; i<children.length; i++) {
 				for (var j=0; j<this.$$modalExclusions.length; j++) {
 					if (lib.contains(this.$$modalExclusions[j], children[i])) {
@@ -186,9 +187,18 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 					}
 				}
 				if (!exclude && children[i] !== self.$frame && children[i].classList && !children[i].classList.contains("tooltipContainer")) { //$NON-NLS-0$
-					children[i].classList.add("modalBackdrop"); //$NON-NLS-0$
+					var child = children[i];
+					if (!child.classList.contains("modalBackdrop")) {  //$NON-NLS-0$
+						child.classList.add("modalBackdrop"); //$NON-NLS-0$
+						this._addedBackdrop.push(child);
+					} 
 				}
 			}
+		},
+		
+		_addChildDialog: function(dialog) {
+			// Allow the child dialog to take focus.
+			this.$$modalExclusions.push(dialog.$frame || dialog.$parent);
 		},
 		
 		/*
@@ -213,6 +223,11 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			if (typeof this._beforeHiding === "function") { //$NON-NLS-0$
 				this._beforeHiding();
 			}
+			if (this._modalListener) {
+				this.$frameParent.removeEventListener("focus", this._modalListener, true);  //$NON-NLS-0$
+				this.$frameParent.removeEventListener("click", this._modalListener, true);  //$NON-NLS-0$
+			}
+
 			this.$frame.classList.remove("dialogShowing"); //$NON-NLS-0$
 			if (typeof this._afterHiding === "function") { //$NON-NLS-0$
 				this._afterHiding();
@@ -272,8 +287,8 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 		 * Internal.  Cleanup and remove dom nodes.
 		 */
 		destroy: function() {
-			if (this.modal) {
-				lib.$$array(".modalBackdrop").forEach(function(node) { //$NON-NLS-0$
+			if (this._addedBackdrop && this._addedBackdrop.length > 0) {
+				this._addedBackdrop.forEach(function(node) { //$NON-NLS-0$
 					node.classList.remove("modalBackdrop"); //$NON-NLS-0$
 				});
 			}

@@ -21,7 +21,6 @@ module.exports = function(options) {
 	var workspaceRoot = options.root;
 	var fileRoot = options.fileRoot;
 	var workspaceDir = options.workspaceDir;
-	var tempDir = options.tempDir;
 	if (!workspaceRoot) { throw 'options.root path required'; }
 
 	var workspaceId = 'orionode';
@@ -53,7 +52,7 @@ module.exports = function(options) {
 			} else if (rest === workspaceId) {
 				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_workspace_metadata
 				var parentFileLocation = fileRoot;
-				fileUtil.getChildren(workspaceDir, parentFileLocation, [path.basename(tempDir)], function(children) {
+				fileUtil.getChildren(workspaceDir, parentFileLocation, function(children) {
 					// TODO this is basically a File object with 1 more field. Should unify the JSON between workspace.js and file.js
 					var ws = JSON.stringify({
 						Directory: true,

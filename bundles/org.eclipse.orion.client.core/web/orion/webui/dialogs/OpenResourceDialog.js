@@ -35,7 +35,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
 			'<div><input id="fileName" type="text" /></div>' + //$NON-NLS-0$
-			'<div id="progress" style="padding: 2px 0 0;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>' + //$NON-NLS-0$
 			'<div id="results" style="max-height:400px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
 			'<div id="statusbar"></div>' + //$NON-NLS-0$
@@ -72,6 +72,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	
 	OpenResourceDialog.prototype._bindToDom = function(parent) {
 		var self = this;
+		self.$crawlingProgress.style.display = "none"; //$NON-NLS-0$
 		this.$fileName.setAttribute("placeholder", messages['Search']);  //$NON-NLS-0$
 		this.$fileName.addEventListener("input", function(evt) { //$NON-NLS-0$
 			self._time = + new Date();
@@ -153,15 +154,14 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 				var crawler = new mSearchCrawler.SearchCrawler(self._searcher.registry, self._fileService, "", {searchOnName: true, location: searchLoc}); 
 				self._searcher.setCrawler(crawler);
 				crawler.buildSkeleton(function() {
-					self.$crawlingProgress.style.visibility = "visible"; //$NON-NLS-0$
+					self.$crawlingProgress.style.display = "inline"; //$NON-NLS-0$
 					self.$progress.appendChild(document.createTextNode(messages['Building file skeleton...']));
 					}, function(){
-						self.$crawlingProgress.style.visibility = "hidden"; //$NON-NLS-0$
+						self.$crawlingProgress.style.display = "none"; //$NON-NLS-0$
 						self.$progress.removeChild(self.$progress.lastChild);
 					});
 			}
 		}, 0);
-		self.$crawlingProgress.style.visibility = "hidden"; //$NON-NLS-0$
 	};
 
 	/** @private kick off initial population of favorites */

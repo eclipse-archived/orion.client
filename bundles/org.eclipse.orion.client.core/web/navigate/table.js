@@ -99,7 +99,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false, //$NON-NLS-0$
 						descriptionProperty: "contentDescription"}); //$NON-NLS-0$
 				} else if (gettingStartedNode) {
-					lib.empty(gettingStartedNode); 
+					lib.empty(gettingStartedNode.parentNode); 
 				}
 			});
 		}

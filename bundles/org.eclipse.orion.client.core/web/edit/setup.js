@@ -428,6 +428,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var contentAssistFactory = isReadOnly ? null
 		: {
 			createContentAssistMode: function(editor) {
+				var progress = serviceRegistry.getService("orion.page.progress");
 				var contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
 				contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 					// Content assist is about to be activated; set its providers.
@@ -445,6 +446,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						}
 					}
 					contentAssist.setProviders(providers);
+					contentAssist.setProgress(progress);
 				});
 				var widget = new mContentAssist.ContentAssistWidget(contentAssist, "contentassist"); //$NON-NLS-0$
 				return new mContentAssist.ContentAssistMode(contentAssist, widget);

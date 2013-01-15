@@ -494,7 +494,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					if(data.items[0].Directory && data.items[1].Directory){
 						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location; //$NON-NLS-1$ //$NON-NLS-0$
 					}
-					return mCompareUtils.generateCompareHref(data.items[0].Location + "," + data.items[1].Location, {readonly: true}); //$NON-NLS-0$
+					return mCompareUtils.generateCompareHref(data.items[0].Location, {compareTo: data.items[1].Location, readonly: true}); //$NON-NLS-0$
 				}
 			});
 		commandService.addCommand(compareWithEachOtherCommand);
