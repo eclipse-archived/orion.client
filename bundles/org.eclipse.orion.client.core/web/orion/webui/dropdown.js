@@ -101,12 +101,19 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		_positionDropdown: function() {
 			this._dropdownNode.style.left = "";
 			var bounds = lib.bounds(this._dropdownNode);
-			var totalBounds = lib.bounds(document.documentElement);
+			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
 			if (bounds.left + bounds.width > totalBounds.left + totalBounds.width) {
-				var left = totalBounds.width - bounds.width - 4;
-				this._dropdownNode.style.left = left + "px"; //$NON-NLS-0$
+				this._dropdownNode.style.left = (totalBounds.width - bounds.width - 2) + "px"; //$NON-NLS-0$
 			}
 		},
+		
+		_boundingNode: function(node) {
+			if (node.style.right !== "" || node.style.position === "absolute" || !node.parentNode || !node.parentNode.style) { //$NON-NLS-0$
+				return node;
+			}
+			return this._boundingNode(node.parentNode);
+		},
+		
 		
 		/**
 		 * Close the dropdown.
