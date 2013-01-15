@@ -40,7 +40,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		this.favorites = [];
 		var self = this;
 		var service = this.registry.getService("orion.core.favorite"); //$NON-NLS-0$
-		service.getFavorites().then(function(favs) {
+		if(!progressService)
+			progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
+		progressService.progress(service.getFavorites(), "Getting favorites").then(function(favs) {
 			self.cacheFavorites(favs.navigator);
 		});
 		service.addEventListener("favoritesChanged", function(event) { //$NON-NLS-0$
