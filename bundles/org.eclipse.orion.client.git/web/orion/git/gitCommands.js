@@ -13,14 +13,13 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 
         
         'orion/git/widgets/ApplyPatchDialog', 
-        'orion/git/widgets/OpenCommitDialog', 
         'orion/git/widgets/ContentDialog', 
         'orion/git/widgets/CommitDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials) {
+        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2602,7 +2601,7 @@ var exports = {};
 				
 				var openCommit = function(repositories) {
 					if (data.parameters.optionsRequested) {
-						new orion.git.widgets.OpenCommitDialog(
+						new mOpenCommit.OpenCommitDialog(
 							{repositories: repositories, serviceRegistry: serviceRegistry, commitName: data.parameters.valueFor("commitName")} //$NON-NLS-0$
 						).show();
 					} else {
