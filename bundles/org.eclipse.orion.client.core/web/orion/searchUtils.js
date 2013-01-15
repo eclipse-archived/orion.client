@@ -157,51 +157,30 @@ exports.searchUtils.generateSearchHref = function(options) {
 };
 
 exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
-	var binding = ",find="; //$NON-NLS-0$
-	if (inFileQuery.wildCard) {
-		binding = binding + "@@useRegEx@@"; //$NON-NLS-0$
+	var params = {
+		find: inFileQuery.searchStr,
+		regEx: inFileQuery.wildCard ? true : undefined,
+		caseSensitive: searchParams.caseSensitive ? true : undefined,
+		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined,
+		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined
 	}
-	if (searchParams.caseSensitive) {
-		binding = binding + "@@caseSensitive@@"; //$NON-NLS-0$
-	}
-	binding = binding + encodeURIComponent(inFileQuery.searchStr);
-	if (typeof(replaceStr) === "string") { //$NON-NLS-0$
-		binding = binding + "@@replaceWith@@" + encodeURIComponent(replaceStr); //$NON-NLS-0$
-	}
-	if (typeof(lineNumber) === "number") { //$NON-NLS-0$
-		binding = binding + "@@atLine@@" + lineNumber; //$NON-NLS-0$
-	}
-	return binding;
+	var binding = new URITemplate("{,params*}").expand({ //$NON-NLS-0$
+		params: params
+	});
+	return "," + binding;
 };
 
-exports.searchUtils.parseFindURLBinding = function(findParam) {
-	var lineNumber = null;
-	var splitParam = findParam.split("@@atLine@@");
-	if(splitParam.length > 1){
-		lineNumber = parseInt(splitParam[1]);
-		if(lineNumber < 1){
-			lineNumber = 1;
-		}
+exports.searchUtils.convertFindURLBinding = function(findParams) {
+	if(typeof findParams.regEx === "string"){
+		findParams.regEx = (findParams.regEx.toLowerCase() === "true");
 	}
-	var findAndReplaceQuery = splitParam[0];
-	var replaceStr = null;
-	var splitQuery = findAndReplaceQuery.split("@@replaceWith@@");
-	var	findQuery = splitQuery[0];
-	var useRegEx = false;
-	var caseSensitive = false;
-	if(findQuery.indexOf("@@useRegEx@@") === 0){
-		useRegEx = true;
-		findQuery = findQuery.split("@@useRegEx@@")[1];
-	} 
-	if(findQuery.indexOf("@@caseSensitive@@") === 0){
-		caseSensitive = true;
-		findQuery = findQuery.split("@@caseSensitive@@")[1];
+	if(typeof findParams.caseSensitive === "string"){
+		findParams.caseSensitive = (findParams.caseSensitive.toLowerCase() === "true");
 	}
-	if(splitQuery.length > 1){
-		replaceStr = splitQuery[1];
+	if(typeof findParams.atLine === "string"){
+		findParams.atLine = parseInt(findParams.atLine);
 	}
-	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx, caseSensitive: caseSensitive};
-};
+}
 
 exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);
