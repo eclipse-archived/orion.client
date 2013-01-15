@@ -93,6 +93,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	
 	advSearchOptRenderer.prototype.getOptions = function(){
 		return {searchStr: this._searchBox.value,
+				caseSensitive: this._caseSensitiveCB.checked,
 		        regEx: this._regExCB.checked,
 		        type: this._fileTypes.options[this._fileTypes.selectedIndex].value
 		};
@@ -133,6 +134,7 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 	advSearchOptRenderer.prototype._initControls = function(){
 		this._searchBox = document.getElementById("advSearchInput"); //$NON-NLS-0$
 		this._fileTypes = document.getElementById("advSearchTypes"); //$NON-NLS-0$
+		this._caseSensitiveCB = document.getElementById("advSearchCaseSensitive"); //$NON-NLS-0$
 		this._regExCB = document.getElementById("advSearchRegEx"); //$NON-NLS-0$
 		this._submitButton = document.getElementById("advSearchSubmit"); //$NON-NLS-0$
 		//Load file types content type provider
@@ -183,7 +185,8 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 		document.getElementById("advSearchLabel").appendChild(document.createTextNode(messages["Files that contain:"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchInput").placeholder = messages["Type a search term"]; //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchTypeLabel").appendChild(document.createTextNode(messages["File type:"])); //$NON-NLS-0$ //$NON-NLS-0$
-		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression:"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchCaseSensitiveLabel").appendChild(document.createTextNode(messages["Case sensitive"])); //$NON-NLS-0$ //$NON-NLS-0$
+		document.getElementById("advSearchRegExLabel").appendChild(document.createTextNode(messages["Regular expression"])); //$NON-NLS-0$ //$NON-NLS-0$
 		document.getElementById("advSearchSubmit").value = messages["Search"]; //$NON-NLS-0$ //$NON-NLS-0$
 	};
 	
@@ -214,7 +217,11 @@ define(['i18n!orion/globalSearch/nls/messages', 'require', 'orion/searchUtils', 
 									'<select id="advSearchTypes"></select>' +
 								'</li>' +
 								'<li class="advSearchOptLIControl">' +
-									'<label>' + messages["Regular expression:"] + '</label>' +
+									'<label>' + messages["Case sensitive"] + '</label>' +
+									'<input type="checkbox" id="advSearchCaseSensitive"></input>' +
+								'</li>' +
+								'<li class="advSearchOptLIControl">' +
+									'<label>' + messages["Regular expression"] + '</label>' +
 									'<input type="checkbox" id="advSearchRegEx"></input>' +
 								'</li>' +
 								'<li class="advSearchOptLIControl">' +

@@ -71,7 +71,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		_search: function(resultsNode, searchParams) {
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
-			this.crawling = searchParams.regEx;
+			this.crawling = searchParams.regEx || searchParams.caseSensitive;
 			var parent = dojo.byId(this.resultsId);
 			if(this.crawling){
 				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$

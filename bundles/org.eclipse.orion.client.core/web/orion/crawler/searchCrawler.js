@@ -35,6 +35,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		this._searchOnName = options && options.searchOnName;
 		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
+		this._searchParams = searchParams;
 		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.generateSearchHelper(searchParams);
 		this._location = options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
@@ -190,7 +191,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	};
 
 	SearchCrawler.prototype._hitOnceWithinFile = function( fileContentText){
-		var lineString = fileContentText.toLowerCase();
+		var lineString = this._searchParams.caseSensitive ? fileContentText : fileContentText.toLowerCase();
 		var result;
 		if(this.searchHelper.inFileQuery.wildCard){
 			result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);

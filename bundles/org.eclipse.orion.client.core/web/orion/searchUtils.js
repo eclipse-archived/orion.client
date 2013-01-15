@@ -24,7 +24,7 @@ exports.searchUtils = exports.searchUtils || {};
 
 exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
 
-function _generateSearchHelperRegEx(inFileQuery, fromStart){
+function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	var prefix = ""; //$NON-NLS-1$
 	if(fromStart){
 		prefix = "^"; //$NON-NLS-1$
@@ -33,7 +33,10 @@ function _generateSearchHelperRegEx(inFileQuery, fromStart){
 	if (regexp) {
 		var pattern = regexp.pattern;
 		var flags = regexp.flags;
-		flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
+		if(flags.indexOf("i") === -1 && !searchParams.caseSensitive){ //$NON-NLS-1$ 
+			//If the regEx flag does not include 'i' then we have to add it by searchParams.caseSensitive
+			flags = flags + "i";//$NON-NLS-1$
+		}
 		inFileQuery.regExp = {pattern: pattern, flags: flags};
 		inFileQuery.wildCard = true;
 	}
@@ -95,16 +98,16 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 			searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if(!hasStar && !hasQMark && !searchParams.nameSearch){
-			inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
+			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr.split("\\").join("") : searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
 			inFileQuery.wildCard = false;
 		} else {
-			inFileQuery.searchStr =searchStr.toLowerCase();
-			_generateSearchHelperRegEx(inFileQuery, fromStart);
+			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr : searchStr.toLowerCase();
+			_generateSearchHelperRegEx(inFileQuery, searchParams, fromStart);
 			inFileQuery.wildCard = true;
 		}
 	} else {
 		inFileQuery.searchStr =searchStr;
-		_generateSearchHelperRegEx(inFileQuery, fromStart);
+		_generateSearchHelperRegEx(inFileQuery, searchParams, fromStart);
 	}
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return {params: searchParams, inFileQuery: inFileQuery, displayedSearchTerm: displayedSearchTerm};
@@ -119,6 +122,9 @@ exports.searchUtils.convertSearchParams = function(searchParams) {
 	}
 	if(typeof searchParams.regEx === "string"){
 		searchParams.regEx = (searchParams.regEx.toLowerCase() === "true");
+	}
+	if(typeof searchParams.caseSensitive === "string"){
+		searchParams.caseSensitive = (searchParams.caseSensitive.toLowerCase() === "true");
 	}
 	if(typeof searchParams.nameSearch === "string"){
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true");
@@ -150,10 +156,13 @@ exports.searchUtils.generateSearchHref = function(options) {
 	return href;
 };
 
-exports.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
+exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
 	var binding = ",find="; //$NON-NLS-0$
 	if (inFileQuery.wildCard) {
-		binding = binding + "@@useRegEx@@true@@"; //$NON-NLS-0$
+		binding = binding + "@@useRegEx@@"; //$NON-NLS-0$
+	}
+	if (searchParams.caseSensitive) {
+		binding = binding + "@@caseSensitive@@"; //$NON-NLS-0$
 	}
 	binding = binding + encodeURIComponent(inFileQuery.searchStr);
 	if (typeof(replaceStr) === "string") { //$NON-NLS-0$
@@ -179,14 +188,19 @@ exports.searchUtils.parseFindURLBinding = function(findParam) {
 	var splitQuery = findAndReplaceQuery.split("@@replaceWith@@");
 	var	findQuery = splitQuery[0];
 	var useRegEx = false;
-	if(findQuery.indexOf("@@useRegEx@@true@@") === 0){
+	var caseSensitive = false;
+	if(findQuery.indexOf("@@useRegEx@@") === 0){
 		useRegEx = true;
-		findQuery = findQuery.split("@@useRegEx@@true@@")[1];
+		findQuery = findQuery.split("@@useRegEx@@")[1];
+	} 
+	if(findQuery.indexOf("@@caseSensitive@@") === 0){
+		caseSensitive = true;
+		findQuery = findQuery.split("@@caseSensitive@@")[1];
 	}
 	if(splitQuery.length > 1){
 		replaceStr = splitQuery[1];
 	}
-	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx};
+	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx, caseSensitive: caseSensitive};
 };
 
 exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
