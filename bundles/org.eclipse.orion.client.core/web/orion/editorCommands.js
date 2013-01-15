@@ -222,7 +222,7 @@ exports.EditorCommandFactory = (function() {
 								}
 							}
 							if(parsedParam){
-								that._searcher.setOptions({useRegExp: parsedParam.useRegExp});
+								that._searcher.setOptions({useRegExp: parsedParam.useRegExp, ignoreCase: !parsedParam.caseSensitive});
 								if(parsedParam.lineNumber){
 									var offset = editor.getModel().getLineStart(parsedParam.lineNumber-1);
 									editor.moveSelection(offset, offset, function(){

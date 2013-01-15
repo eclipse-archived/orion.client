@@ -191,6 +191,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				sort: "Path asc",
 				rows: 40,
 				start: 0,
+				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
 				fileType: advancedOptions ? advancedOptions.type : undefined,
 				keyword: keyword

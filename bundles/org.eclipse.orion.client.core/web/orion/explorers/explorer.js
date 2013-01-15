@@ -493,7 +493,7 @@ exports.ExplorerRenderer = (function() {
 			if (checked) {
 				checkBox.classList.add("core-sprite-check_on"); //$NON-NLS-0$
 			} else {
-				checkBox.classlist.remove("core-sprite-check_on"); //$NON-NLS-0$
+				checkBox.classList.remove("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			if(this.onCheckedFunc){
 				this.onCheckedFunc(checkBox.itemId, checked, manually);
