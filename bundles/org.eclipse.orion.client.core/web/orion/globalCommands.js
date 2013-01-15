@@ -834,10 +834,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			callback: function(data) {
 				var items = Array.isArray(data.items) ? data.items : [data.items];
 				var favService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				var doAdd = function(item) {
 					return function(result) {
 						if (!result) {
-							favService.makeFavorites(item);
+							progress.progress(favService.makeFavorites(item), "Making favorite " + item.Name);
 						} else {
 							serviceRegistry.getService("orion.page.message").setMessage(item.Name + messages[' is already a favorite.'], 2000); //$NON-NLS-0$
 						}
@@ -845,7 +846,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				};
 				for (var i = 0; i < items.length; i++) {
 					var item = items[i];
-					favService.hasFavorite(item.ChildrenLocation || item.Location).then(doAdd(item));
+					progress.progress(favService.hasFavorite(item.ChildrenLocation || item.Location), "Checking favorite " + item.Name).then(doAdd(item));
 				}
 			}});
 		commandService.addCommand(favoriteCommand);
@@ -853,6 +854,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		// open resource
 		var openResourceDialog = function(searcher, serviceRegistry, /* optional */ editor) {
 			var favoriteService = serviceRegistry.getService("orion.core.favorite"); //$NON-NLS-0$
+			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			//TODO Shouldn't really be making service selection decisions at this level. See bug 337740
 			if (!favoriteService) {
 				favoriteService = new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
@@ -861,6 +863,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 			}
 			var dialog = new openResource.OpenResourceDialog({
 				searcher: searcher, 
+				progress: progress,
 				searchRenderer:searcher.defaultRenderer, 
 				favoriteService:favoriteService,
 				onHide:  function() { 
