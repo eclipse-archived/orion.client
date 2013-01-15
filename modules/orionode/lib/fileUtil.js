@@ -50,7 +50,7 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 				var isDirectory = cs[1].isDirectory();
 				var timeStamp = cs[1].mtime.getTime();
 				var size = cs[1].size;
-				var location = api.join(parentLocation, childname);
+				var location = api.join(parentLocation, encodeURIComponent(childname));
 				if(isDirectory && location[location.length-1] !== "/"){
 					location = location +"/";
 				}
@@ -144,11 +144,7 @@ exports.rumRuff = function rumRuff(dirpath, callback) {
 	var dirlist = [];
 	unlinkRecursive(dirpath, dirlist).then(function() {
 		return rmdirs(dirlist);
-	}).then(function() {
-		callback();
-	}, function(error) {
-		callback(error);
-	});
+	}).then(callback.bind(null, null), callback);
 };
 
 function _copyDir(srcPath, destPath, callback) {
