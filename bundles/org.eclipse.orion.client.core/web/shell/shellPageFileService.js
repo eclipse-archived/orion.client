@@ -22,6 +22,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 	orion.shellPage = {};
 	
 	var fileClient;
+	var serviceRegistry;
 
 	orion.shellPage.ShellPageFileService = (function() {
 		function ShellPageFileService() {
@@ -127,7 +128,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				return node.parent;
 			},
 			loadWorkspace: function(path) {
-				return fileClient.loadWorkspace(path);
+				var progress = serviceRegistry.getService("orion.page.progress");
+				return (progress? progress.progress(fileClient.loadWorkspace(path), "Loading workspace " + path) : fileClient.loadWorkspace(path));
 			},
 			/**
 			 * Sets the current directory node and initiates retrieval of its
@@ -144,7 +146,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					}
 				} else if (node.ChildrenLocation) {
 					var self = this;
-					fileClient.fetchChildren(node.ChildrenLocation).then(
+					var progress = serviceRegistry.getService("orion.page.progress");
+					(progress ? progress.progress(fileClient.fetchChildren(node.ChildrenLocation), "Getting children of " + node.Name) : fileClient.fetchChildren(node.ChildrenLocation)).then(
 						function(children) {
 							self._sort(children);
 							var parents = node.Parents ? node.Parents.slice(0) : [];
@@ -172,7 +175,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 			},
 			withNode: function(location, func, errorFunc) {
 				var self = this;
-				fileClient.loadWorkspace(location).then(
+				var progress = serviceRegistry.getService("orion.page.progress");
+				(progress?progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location):fileClient.loadWorkspace(location)).then(
 					function(node) {
 						self._retrieveNode(node, func, errorFunc);
 					},
@@ -216,7 +220,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					} else if (node.Parents.length === 0) {
 						/* node's parent is the root of a file service */
 						var location = fileClient.fileServiceRootURL(node.Location);
-						fileClient.loadWorkspace(location).then(
+						var progress = serviceRegistry.getService("orion.page.progress");
+						(progress?progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location):fileClient.loadWorkspace(location)).then(
 							function(parent) {
 								parent.parent = self.rootNode;
 								node.parent = parent;
@@ -231,7 +236,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					}
 				};
 				if (!node.Parents && !node.Projects && node.Location !== self.SEPARATOR && node.Name !== fileClient.fileServiceName(node.Location)) {
-					fileClient.loadWorkspace(node.Location).then(
+					var progress = serviceRegistry.getService("orion.page.progress");
+					(progress?progress.progress(fileClient.loadWorkspace(node.Location), "Loading workspace " + node.Location):fileClient.loadWorkspace(node.Location)).then(
 						function(metadata) {
 							node.Parents = metadata.Parents;
 							updateParents(node);
@@ -267,7 +273,7 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 
 	dojo.ready(function() {
 		mBootstrap.startup().then(function(core) {
-			var serviceRegistry = core.serviceRegistry;
+			serviceRegistry = core.serviceRegistry;
 			fileClient = new mFileClient.FileClient(serviceRegistry);
 		});
 	});

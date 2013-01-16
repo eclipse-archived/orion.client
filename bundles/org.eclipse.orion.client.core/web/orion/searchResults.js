@@ -71,7 +71,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		_search: function(resultsNode, searchParams) {
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
-			this.crawling = searchParams.regEx;
+			this.crawling = searchParams.regEx || searchParams.caseSensitive;
 			var parent = dojo.byId(this.resultsId);
 			if(this.crawling){
 				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
@@ -82,7 +82,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				//var queryToService = qObj.nonAdvQueryStr;
 				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 				try{
-					this.fileService.search(searchParams).then(
+					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then(
 						dojo.hitch(this, function(jsonData) {
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}));

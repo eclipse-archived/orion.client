@@ -34,7 +34,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 							fileClient: this.fileClient,
 							func: dojo.hitch(this, function(folder) {
 								var that = this;
-								this.fileClient.read(folder.Location, true).then(dojo.hitch(that, function(metadata){
+								this.serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(folder.Location, true), "Getting metadata of " + folder.Location).then(dojo.hitch(that, function(metadata){
 									//read metadata again, because the returned item does not contain all info
 									this.config.directory = metadata;
 									this.render(this.config.root);
@@ -148,7 +148,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 				localStorage.setItem("StringExternalizerConfig_"+this.config.root.Location, JSON.stringify(this.config)); //$NON-NLS-0$
 				if(changedFile){
 					this.config.fileLocation = this.config.directory.Location+"/root/"+this.config.file; //$NON-NLS-0$
-					this.fileClient.read(this.config.fileLocation).then(function(contents){
+					this.serviceRegistry.getService("orion.page.progress").progress(this.fileClient.read(this.config.fileLocation), "Reading nls configuration file " + this.config.fileLocation).then(function(contents){
 						var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 						var messages = {};
 						if(match){

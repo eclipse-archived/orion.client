@@ -27,6 +27,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.location2ModelMap = [];
 		this._lineDelimiter = "\n";  //$NON-NLS-0$
 		this.onMatchNumberChanged = options.onMatchNumberChanged;
+		this._searchParams = searchParams;
 		this.searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
@@ -124,7 +125,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(!model.stale){
 			return;
 		} else {
-			this.fileClient.read(model.location).then(
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
 				dojo.hitch(this, function(contents) {
 					if(this.hitOnceWithinFile(contents)){
 						model.stale = false;
@@ -171,7 +172,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				
 				var etag = fileItem.ETag;
 				var args = etag ? { "ETag" : etag }: null; //$NON-NLS-0$
-				this.fileClient.write(model.location, contents, args).then(
+				this.registry.getService("orion.page.progress").progress(this.fileClient.write(model.location, contents, args), "Saving changes to " + model.location).then(
 					dojo.hitch(this, function(result) {
 						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" }); //$NON-NLS-0$
 						this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
@@ -226,9 +227,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(fileItem.contents){
 			onComplete(fileItem);
 		} else {
-			this.fileClient.read(fileItem.location).then(
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
 				dojo.hitch(this, function(jsonData) {
-					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode());
+					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 					if(this.onMatchNumberChanged && !writing){
 						this.onMatchNumberChanged(fileItem);
 					}
@@ -254,9 +255,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			if(this.searchHelper.params.keyword === ""){
 				return;
 			}
-			this.fileClient.read(parentItem.location).then(
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then(
 					dojo.hitch(this, function(jsonData) {
-						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode());
+						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 						  if(this.onMatchNumberChanged){
 							  this.onMatchNumberChanged(parentItem);
 						  }
@@ -389,7 +390,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
@@ -457,7 +458,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
-		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
+		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
 		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
@@ -885,7 +886,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 		var item = this.model.indexedFileItems[index];
 		var that = this;
-		this.fileClient.read(item.location, true).then(
+		this.registry.getService("orion.page.progress").progress(this.fileClient.read(item.location, true), "Getting file metadata " + item.location).then(
 			dojo.hitch(this, function(meta) {
 				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 				item.parentLocation = meta.Parents[0].Location;
@@ -1231,7 +1232,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(typeof(this.model.searchHelper.displayedSearchTerm) === "string" && typeof(searchParams.resource) === "string" ){ //$NON-NLS-1$ //$NON-NLS-0$
 			qName = "\'" + this.model.searchHelper.displayedSearchTerm + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
 			if(searchParams.resource.length > 0){
-				this.fileClient.read(searchParams.resource, true).then(
+				this.registry.getService("orion.page.progress").progress(this.fileClient.read(searchParams.resource, true), "Getting file metadata " + searchParams.resource).then(
 					dojo.hitch(this, function(meta) {
 						var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 						var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name; //$NON-NLS-0$

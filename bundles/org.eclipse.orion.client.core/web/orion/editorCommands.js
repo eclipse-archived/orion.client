@@ -16,8 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils'], 
-	function(messages, lib, Deferred, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils) {
+define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+	function(messages, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
 
@@ -105,7 +105,12 @@ exports.EditorCommandFactory = (function() {
 						var contents = editor.getText();
 						var etag = self.inputManager.getFileMetadata().ETag;
 						var args = { "ETag" : etag }; //$NON-NLS-0$
-						self.fileClient.write(self.inputManager.getInput(), contents, args).then(
+						var def = self.fileClient.write(self.inputManager.getInput(), contents, args);
+						var progress = self.serviceRegistry.getService("orion.page.progress");
+						if(progress){
+							progress.progress(def, "Saving file " + self.inputManager.getInput());
+						}
+						def.then(
 							function(result) {
 								self.inputManager.getFileMetadata().ETag = result.ETag;
 								editor.setInput(self.inputManager.getInput(), null, contents, true);
@@ -120,7 +125,11 @@ exports.EditorCommandFactory = (function() {
 									var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 									if (forceSave) {
 										// repeat save operation, but without ETag 
-										self.fileClient.write(self.inputManager.getInput(), contents).then(
+										var def = self.fileClient.write(self.inputManager.getInput(), contents)
+										if(progress){
+											progress.progress(def, "Saving file " + self.inputManager.getInput());
+										}
+										def.then(
 											function(result) {
 												self.inputManager.getFileMetadata().ETag = result.ETag;
 												editor.setInput(self.inputManager.getInput(), null, contents, true);
@@ -216,22 +225,22 @@ exports.EditorCommandFactory = (function() {
 								fromSelection = true;
 							} else {//If there is no selection from editor, we want to parse the parameter from URL binding
 								if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
-									var findParam = data.parameters.valueFor('find');
-									var parsedParam = mSearchUtils.parseFindURLBinding(findParam);
-									searchString = parsedParam.searchStr;
+									searchString = data.parameters.valueFor('find');
+									parsedParam = mPageUtil.matchResourceParameters();
+									mSearchUtils.convertFindURLBinding(parsedParam);
 								}
 							}
 							if(parsedParam){
-								that._searcher.setOptions({useRegExp: parsedParam.useRegExp});
-								if(parsedParam.lineNumber){
-									var offset = editor.getModel().getLineStart(parsedParam.lineNumber-1);
+								that._searcher.setOptions({useRegExp: parsedParam.regEx, ignoreCase: !parsedParam.caseSensitive});
+								if(parsedParam.atLine){
+									var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 									editor.moveSelection(offset, offset, function(){
-										that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+										that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
 										that._searcher.findNext(true);
 										}, 
 									focus);
 								} else {
-									that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+									that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
 									that._searcher.findNext(true);
 								}
 							} else {
@@ -293,7 +302,39 @@ exports.EditorCommandFactory = (function() {
 						var model = editor.getModel();
 						var text = model.getText();
 						var selectedText = model.getText(selection.start,selection.end);
-						progress.progress(service.run(selectedText, text,selection, input.getInput()), "Running " + info.name + (selectedText ? (" on \"" + selectedText.substring(0, 15) + (selection.end-selection.start>15 ? "...\"":"\"")) : "")).then(function(result){
+						
+						var deferred;
+						if (info.uiURITemplate) {
+							deferred = new Deferred();
+							var uriTemplate = new URITemplate(info.uiURITemplate);
+							var href = uriTemplate.expand(input.getFileMetadata());
+							var iframe = document.createElement("iframe"); //$NON-NLS-0$
+							iframe.id = info.id;
+							iframe.name = info.id;
+							iframe.type = "text/html"; //$NON-NLS-0$
+							iframe.frameborder = 1;
+							iframe.src = href;
+							iframe.className = "delegatedUI"; //$NON-NLS-0$
+							window.document.body.appendChild(iframe);
+							// Listen for notification from the iframe.  This should eventually belong as part of the plugin registry.
+							// This mechanism should become generalized into a "page services" API for plugin iframes to contact the outer context.
+							window.addEventListener("message", function(event) { //$NON-NLS-0$
+								if (typeof event.data === "string") { //$NON-NLS-0$
+									var data = JSON.parse(event.data);
+									if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
+										if (data.cancelled) {
+											deferred.cancel();
+										} else if (data.result) {
+											deferred.resolve(data.result);
+										}
+										window.document.body.removeChild(iframe);
+									}
+								}
+							}, false);
+						} else {
+							deferred = service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()); 
+						}
+						progress.progress(deferred, "Running " + info.name).then(function(result){
 							if (result && result.text) {
 								editor.setText(result.text);
 								if (result.selection) {

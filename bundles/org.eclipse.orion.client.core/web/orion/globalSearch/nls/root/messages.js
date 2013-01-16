@@ -17,5 +17,6 @@ define({
 	"File type:": "File type:",
 	"All ${0} files": "All ${0} files",
 	"Type a search term": "Type a search term",
-	"Regular expression:" : "Regular expression:"
+	"Case sensitive": "Case sensitive",
+	"Regular expression" : "Regular expression"
 });

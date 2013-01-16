@@ -9,54 +9,66 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global document */
+/*global document addEventListener console*/
 // HTML Templates Shim -- see http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/templates/index.html
 
 (function() {
 	document.body.insertAdjacentHTML("beforeend", "<template id='__testTemplate__'><div></div></template>");
 	var testTemplate = document.getElementById("__testTemplate__");
-	var supportsTemplate = !!testTemplate.content;
+	var supportsTemplate = !! testTemplate.content;
 	document.body.removeChild(testTemplate);
-
-	var templateScripts = document.querySelectorAll("script[type='text/x-html-template']");
-	var templateElements = supportsTemplate ? [] : document.querySelectorAll("template");
-	if (templateScripts.length === 0 && templateElements.length === 0) {
+	if (supportsTemplate) {
 		return;
-	}
-
-	if (!supportsTemplate) {
-		var templateStyle = document.createElement("style");
-		templateStyle.textContent = "template{display:none;}";
-		document.head.appendChild(templateStyle);
 	}
 
 	var templatesDoc = document.implementation.createHTMLDocument("");
 
-	// process templateScripts
-	Array.prototype.forEach.call(templateScripts, function(templateScript) {
-		var text = templateScript.textContent;
-		if (text.match(/^\s*<!--/) && text.match(/-->\s*$/)) {
-			text = text.replace(/^\s*<!--|-->\s*$/g, "");
-		}
-		templatesDoc.body.insertAdjacentHTML("beforeend", text);
-	});
-	var templates = templatesDoc.querySelectorAll("template");
-	Array.prototype.forEach.call(templates, function(template) {
-		if (!supportsTemplate) {
-			template.content = templatesDoc.createDocumentFragment();
-			while (template.firstChild) {
-				template.content.appendChild(template.firstChild);
+	function shimTemplate(template) {
+		templatesDoc = templatesDoc || document.implementation.createHTMLDocument("");
+		Object.defineProperty(template, "content", {
+			value: templatesDoc.createDocumentFragment(),
+			enumerable: true
+		});
+		Object.defineProperty(template, "innerHTML", {
+			set: function(text) {
+				while (this.content.firstChild) {
+					this.content.removeChild(this.content.firstChild);
+				}
+				var template = templatesDoc.createElement("template");
+				template.innerHTML = text;
+				while (template.firstChild) {
+					this.content.appendChild(template.firstChild);
+				}
+			},
+			get: function() {
+				var template = templatesDoc.createElement("template");
+				template.appendChild(this.content.cloneNode(true));
+				return template.innerHTML;
 			}
-		}
-		document.body.appendChild(template);
-	});
-	templatesDoc.body.innerHTML = "";
-
-	//process templateElements
-	Array.prototype.forEach.call(templateElements, function(template) {
-		template.content = templatesDoc.createDocumentFragment();
+		});
 		while (template.firstChild) {
 			template.content.appendChild(template.firstChild);
+		}
+	}
+
+	// hide template styling
+	var templateStyle = document.createElement("style");
+	templateStyle.textContent = "template{display:none;}";
+	document.head.appendChild(templateStyle);
+
+	//process existing templateElements
+	Array.prototype.forEach.call(document.querySelectorAll("template"), function(template) {
+		if (!template.content) {
+			shimTemplate(template);
+		}
+	});
+
+	// listen for new template additions
+	// Note: we use DOMNodeInserted because this has to happen synchronously to let code access the "content" property
+	addEventListener("DOMNodeInserted", function(mutationEvent) {
+		var target = mutationEvent.target;
+		if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
+			shimTemplate(target);
 		}
 	});
 }());
