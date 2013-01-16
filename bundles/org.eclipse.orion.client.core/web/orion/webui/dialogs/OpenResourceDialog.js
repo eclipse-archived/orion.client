@@ -237,7 +237,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		var showFavs = this.showFavorites();
 		// update favorites
 		if(this._progress){
-			this._progress(this._favService.queryFavorites(text), "Getting favorites for: " + text).then(function(favs) {
+			this._progress.progress(this._favService.queryFavorites(text), "Getting favorites for: " + text).then(function(favs) {
 				showFavs(favs);
 			});
 		}else{
