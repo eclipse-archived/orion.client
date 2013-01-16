@@ -2545,28 +2545,6 @@ var exports = {};
 		});
 		commandService.addCommand(applyPatchCommand);
 		
-		var showContentCommand = new mCommands.Command({
-			name : messages["Show content"],
-			tooltip: messages['Apply a patch on the selected repository'],
-			id : "eclipse.orion.git.showContent", //$NON-NLS-0$
-			imageClass: "git-sprite-apply_patch", //$NON-NLS-0$
-			spriteClass: "gitCommandSprite", //$NON-NLS-0$
-			callback: function(data) {
-				var item = forceSingleItem(data.items);
-				var dialog = new orion.git.widgets.ContentDialog({
-					title: messages['Content'],
-					diffLocation: item.DiffLocation
-				});
-						dialog.startup();
-						dialog.show();
-	
-			}
-			//visibleWhen : function(item) {
-				//return item.Type === "Clone" ;
-			//}
-		});
-		commandService.addCommand(showContentCommand);
-		
 		var openCommitParameters = new mCommands.ParametersDescription([new mCommands.CommandParameter("commitName", "text", messages["Commit name:"])], {hasOptionalParameters: true}); //$NON-NLS-1$ //$NON-NLS-0$
 		
 		var openCommitCommand = new mCommands.Command({
