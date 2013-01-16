@@ -73,19 +73,18 @@
 			}
 		});
 	}
-	
+
 	if (document.readyState === "complete") {
 		shim();
 	} else {
 		var called = false;
-		document.addEventListener("DOMContentLoaded", function() {
-			called = true;
-			shim();
-		}, false);
-		addEventListener("load", function() {
+		var once = function() {
 			if (!called) {
+				called = true;
 				shim();
 			}
-		}, false);
+		};
+		document.addEventListener("DOMContentLoaded", once, false);
+		addEventListener("load", once, false);
 	}
 }());
