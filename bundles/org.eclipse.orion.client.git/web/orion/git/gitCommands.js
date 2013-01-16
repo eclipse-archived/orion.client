@@ -15,8 +15,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
         'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog',
         
-        'orion/git/widgets/ApplyPatchDialog', 
-        'orion/git/widgets/ContentDialog'], 
+        'orion/git/widgets/ApplyPatchDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
         		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit,
         		mCommit) {
