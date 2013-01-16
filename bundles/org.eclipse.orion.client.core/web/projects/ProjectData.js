@@ -14,15 +14,23 @@
 define(['i18n!orion/settings/nls/messages', 'require' ], 
 	
 	function(messages, require) {
-
-		function ProjectData( name, date, path, type, description, client ){
+		
+		function ProjectData( project ){
+		
+			/*  project is a block of json data that looks like this:
+				{ "name":"My Blog", 
+				  "date": "16/01/2013", 
+				  "path": "http://www.hickory.ca",
+				  "type": "", 
+				  "description": "My web log ...", 
+				  "client": "Personal", 
+				  "drives": [{ "drivename":"Hickory Website" }] } */
+					
+			for(var key in project) {
+			    this[key] = project[key];
+			}
 			
-			this.name = name;
-			this.date = date;
-			this.path = path;
-			this.type = type;
-			this.description = description;
-			this.client = client;
+			this.date = new Date( this.date );
 		}
 		
 		var name;
@@ -41,8 +49,6 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 		
 		ProjectData.prototype.constructor = ProjectData;
 		
-		return{
-			ProjectData:ProjectData
-		};
+		return ProjectData;
 	}
 );
