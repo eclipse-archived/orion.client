@@ -26,7 +26,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			seg.href = mSearchUtils.generateSearchHref(newParams);
 		}
 	
-		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams){
+		function setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams, progress){
 			var searchLoc = searchParams.resource;
 			if(searchLoc){
 				if(searchLoc === fileClient.fileServiceRootURL(searchLoc)){
@@ -38,7 +38,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 						searcher.setChildrenLocationbyURL(searchLoc);
 						searchResultsGenerator.loadResults(searchParams);
 				} else {
-					fileClient.read(searchLoc, true).then(
+					progress.progress(fileClient.read(searchLoc, true), "Loading file metadata " + searchLoc).then(
 						dojo.hitch(this, function(metadata) {
 							mGlobalCommands.setPageTarget({task: "Search", target: metadata, serviceRegistry: serviceRegistry, 
 								fileService: fileClient, commandService: commandService, searchService: searcher, breadcrumbRootName: "Search",
@@ -66,7 +66,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			new mProgress.ProgressService(serviceRegistry, operationsClient);
+			var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			// favorites and saved searches
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
@@ -87,13 +87,13 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				commandService.renderCommands(toolbar.id, toolbar, searcher, searcher, "button"); //$NON-NLS-0$
 			}
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient, searcher, false/*crawling*/); //$NON-NLS-0$
-			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams);
+			setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams, progress);
 			//searchResultsGenerator.loadResults(queryString);
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
 				searchParams = PageUtil.matchResourceParameters();
 				mSearchUtils.convertSearchParams(searchParams);
-				setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams);
+				setPageInfo(serviceRegistry, fileClient, commandService, searcher, searchResultsGenerator, searchParams, progress);
 				//searchResultsGenerator.loadResults(query);
 				var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 				if (toolbar) {	

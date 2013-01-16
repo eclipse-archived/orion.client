@@ -28,10 +28,19 @@
 		template.content = templatesDoc.createDocumentFragment();
 		Object.defineProperty(template, "innerHTML", {
 			set: function(text) {
-				this.content.innerHTML = text;
+				while (this.content.firstChild) {
+					this.content.removeChild(this.content.firstChild);
+				}
+				var template = templatesDoc.createElement("template");
+				template.innerHTML = text;
+				while (template.firstChild) {
+					this.content.appendChild(template.firstChild);
+				}
 			},
 			get: function() {
-				return this.content.innerHTML;
+				var template = templatesDoc.createElement("template");
+				template.appendChild(this.content.cloneNode(true));
+				return template.innerHTML;
 			}
 		});
 		while (template.firstChild) {
@@ -46,14 +55,16 @@
 
 	//process existing templateElements
 	Array.prototype.forEach.call(document.querySelectorAll("template"), function(template) {
-		shimTemplate(template);
+		if (!template.content) {
+			shimTemplate(template);
+		}
 	});
 
 	// listen for new template additions
 	// Note: we use DOMNodeInserted because this has to happen synchronously
 	addEventListener("DOMNodeInserted", function(mutationEvent) {
 		var target = mutationEvent.target;
-		if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document) {
+		if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
 			shimTemplate(target);
 		}
 	});

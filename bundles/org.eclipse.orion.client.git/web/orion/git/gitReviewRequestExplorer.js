@@ -72,7 +72,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			dojo.empty(dojo.byId("fetchDiv"));
 			dojo.empty(dojo.byId("remoteDiv"));
 			
-			this.fileClient.loadWorkspace().then(
+			 this.registry.getService("orion.page.progress").progress(this.fileClient.loadWorkspace(), "Loading default workspace info").then(
 				function(workspace){
 					that.defaultPath = workspace.ChildrenLocation;
 					that.commandService.registerCommandContribution("fetch", "eclipse.orion.git.fetch", 200);

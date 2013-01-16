@@ -41,7 +41,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 		function saveFileContents(fileClient, targetMetadata, contents, afterSave) {
 			var etag = targetMetadata.ETag;
 			var args = { "ETag" : etag }; //$NON-NLS-0$
-			fileClient.write(targetMetadata.Location, contents, args).then(
+			progressService.progress(fileClient.write(targetMetadata.Location, contents, args), "Saving file " + targetMetadata.Location).then(
 				function(result) {
 					if (afterSave) {
 						afterSave();
@@ -55,7 +55,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 						var forceSave = window.confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 						if (forceSave) {
 							// repeat save operation, but without ETag 
-							fileClient.write(targetMetadata.Location, contents).then(
+							progressService.progress(fileClient.write(targetMetadata.Location, contents), "Saving file " + targetMetadata.Location).then(
 								function(result) {
 										targetMetadata.ETag = result.ETag;
 										if (afterSave) {
@@ -128,7 +128,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 						// TODO should we have the plugin specify whether it needs a Location?
 						// If there is metadata, we want to fill in the location object with the name.
 						if (locationObject.Location && locationObject.Location.length > 0) {
-							fileClient.read(locationObject.Location, true).then(
+							progressService.progress(fileClient.read(locationObject.Location, true), "Getting content of " + locationObject.Location).then(
 								function(metadata) {
 									if (metadata) {
 										// store info used for iframe and saving
