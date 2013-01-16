@@ -41,7 +41,8 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 				var siteServiceRef = data.items, siteService = serviceRegistry.getService(siteServiceRef);
 				var fileService = getFileService(siteServiceRef);
 				var name = data.parameters && data.parameters.valueFor('name'); //$NON-NLS-0$
-				fileService.loadWorkspaces().then(function(workspaces) {
+				var progress = serviceRegistry.getService("orion.page.progress");
+				(progress ? progress.progress(fileService.loadWorkspaces(), "Loading workspaces") : fileService.loadWorkspaces()).then(function(workspaces) {
 			        var workspaceId = workspaces && workspaces[0] && workspaces[0].Id;
 			        if (workspaceId && name) {
 				        siteService.createSiteConfiguration(name, workspaceId).then(function(site) {
@@ -244,7 +245,8 @@ define(['i18n!orion/sites/nls/messages', 'require', 'orion/commands', 'orion/sit
 			callback: function(data) {
 				var file = data.userData.file;
 				var site = data.items.SiteConfiguration;
-				return fileService.loadWorkspaces().then(function(workspaces) {
+				var progress = serviceRegistry.getService("orion.page.progress");
+				return (progress ? progress.progress(fileService.loadWorkspaces(), "Loading workspaces") : fileService.loadWorkspaces()).then(function(workspaces) {
 					return mSiteClient.forFileLocation(serviceRegistry, file.Location).mapOnSiteAndStart(site, file, workspaces[0].Id);
 				}).then(data.userData.addToCallback, data.userData.errorCallback);
 			}}));

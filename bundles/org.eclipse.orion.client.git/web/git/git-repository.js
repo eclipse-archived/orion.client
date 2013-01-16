@@ -28,7 +28,7 @@ mBootstrap.startup().then(function(core) {
 	new mSshTools.SshService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-	new mProgress.ProgressService(serviceRegistry, operationsClient);
+	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 	new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 	// ...
@@ -57,11 +57,6 @@ mBootstrap.startup().then(function(core) {
 	
 	commandService.registerCommandContribution("reposPageActions", "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			new mCommands.CommandKeyBinding('h', true, true), new mCommands.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	commandService.registerCommandContribution("reposPageActions", "eclipse.orion.git.showContent", 1100, null, true, new mCommands.CommandKeyBinding('e', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	
-	commandService.registerCommandContribution("repoPageActions", "eclipse.orion.git.openCommitCommand", 1000, "eclipse.gitGroup", true,  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mCommands.CommandKeyBinding('h', true, true), new mCommands.URLBinding("openGitCommit", "commitName")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-	commandService.registerCommandContribution("repoPageActions", "eclipse.orion.git.showContent", 1100, null, true, new mCommands.CommandKeyBinding('e', true, true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	// object contributions
 	commandService.registerCommandContribution("itemLevelCommands", "eclipse.openCloneContent", 100); //$NON-NLS-1$ //$NON-NLS-0$
@@ -106,7 +101,7 @@ mBootstrap.startup().then(function(core) {
 	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 	commandService.processURL(window.location.href);
 	
-	fileClient.loadWorkspace().then(
+	progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
 			explorer.redisplay();
@@ -128,7 +123,7 @@ mBootstrap.startup().then(function(core) {
 		if(previousResourceValue !== resource){
 			previousResourceValue = resource;
 		
-			fileClient.loadWorkspace().then(
+			progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 				function(workspace){
 					explorer.setDefaultPath(workspace.Location);
 					explorer.redisplay();

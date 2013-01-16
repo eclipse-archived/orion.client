@@ -56,7 +56,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				this._crawler.searchName(searchParams, function(jsonData){renderer(transform(jsonData), null);});
 			} else {
 				try {
-					this._fileService.search(searchParams).then(function(jsonData) {
+					this.registry.getService("orion.page.progress").progress(this._fileService.search(searchParams), "Searching " + searchParams.keyword).then(function(jsonData) {
 						/**
 						 * transforms the jsonData so that the result conforms to the same
 						 * format as the favourites list. This way renderer implementation can
@@ -191,6 +191,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				sort: "Path asc",
 				rows: 40,
 				start: 0,
+				caseSensitive: advancedOptions ? advancedOptions.caseSensitive : undefined,
 				regEx: advancedOptions ? advancedOptions.regEx : undefined,
 				fileType: advancedOptions ? advancedOptions.type : undefined,
 				keyword: keyword

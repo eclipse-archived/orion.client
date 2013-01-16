@@ -45,6 +45,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		this.title = options.title || messages['Find File Named'];
 		this.messages = messages;
 		this._searcher = options.searcher;
+		this._progress = options.progress;
 		this._onHide = options.onHide;
 		this._contentTypeService = new mContentTypes.ContentTypeService(this._searcher.registry);
 		if (!this._searcher) {
@@ -173,7 +174,11 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 		
 		// initially, show all favorites
 		var self = this;
-		this._favService.getFavorites().then(self.showFavorites());
+		if(this._progress){
+			this._progress.progress(this._favService.getFavorites(), "Getting favorites").then(self.showFavorites());
+		} else {
+			this._favService.getFavorites().then(self.showFavorites());
+		}
 		// need to add the listener since favorites may not 
 		// have been initialized after first getting the favorites
 		this._favService.addEventListener("favoritesChanged", self.showFavorites()); //$NON-NLS-0$
@@ -231,9 +236,15 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 		var showFavs = this.showFavorites();
 		// update favorites
-		this._favService.queryFavorites(text).then(function(favs) {
-			showFavs(favs);
-		});
+		if(this._progress){
+			this._progress.progress(this._favService.queryFavorites(text), "Getting favorites for: " + text).then(function(favs) {
+				showFavs(favs);
+			});
+		}else{
+			this._favService.queryFavorites(text).then(function(favs) {
+				showFavs(favs);
+			});
+		}
 
 		// don't do a server-side query for an empty text box
 		if (text) {

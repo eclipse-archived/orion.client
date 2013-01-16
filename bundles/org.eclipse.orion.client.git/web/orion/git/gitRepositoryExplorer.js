@@ -266,7 +266,7 @@ exports.GitRepositoryExplorer = (function() {
 		}
 		
 		
-		this.registry.getService("orion.core.file").loadWorkspace(repository.ContentLocation + "?parts=meta").then( //$NON-NLS-1$ //$NON-NLS-0$
+		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.core.file").loadWorkspace(repository.ContentLocation + "?parts=meta"), "Loading workspace info").then( //$NON-NLS-1$ //$NON-NLS-0$
 				function(resp){
 					try{
 						repository.Content = {};

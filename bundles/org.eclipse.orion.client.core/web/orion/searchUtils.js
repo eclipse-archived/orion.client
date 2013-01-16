@@ -24,7 +24,7 @@ exports.searchUtils = exports.searchUtils || {};
 
 exports.searchUtils.ALL_FILE_TYPE = "*.*"; //$NON-NLS-0$
 
-function _generateSearchHelperRegEx(inFileQuery, fromStart){
+function _generateSearchHelperRegEx(inFileQuery, searchParams, fromStart){
 	var prefix = ""; //$NON-NLS-1$
 	if(fromStart){
 		prefix = "^"; //$NON-NLS-1$
@@ -33,7 +33,10 @@ function _generateSearchHelperRegEx(inFileQuery, fromStart){
 	if (regexp) {
 		var pattern = regexp.pattern;
 		var flags = regexp.flags;
-		flags = flags + (flags.indexOf("i") === -1 ? "i" : ""); //$NON-NLS-1$ //$NON-NLS-0$ //$NON-NLS-0$ //$NON-NLS-0$
+		if(flags.indexOf("i") === -1 && !searchParams.caseSensitive){ //$NON-NLS-1$ 
+			//If the regEx flag does not include 'i' then we have to add it by searchParams.caseSensitive
+			flags = flags + "i";//$NON-NLS-1$
+		}
 		inFileQuery.regExp = {pattern: pattern, flags: flags};
 		inFileQuery.wildCard = true;
 	}
@@ -95,16 +98,16 @@ exports.searchUtils.generateSearchHelper = function(searchParams, fromStart) {
 			searchStr = searchStr.split("?").join("."); //$NON-NLS-1$ //$NON-NLS-0$
 		}
 		if(!hasStar && !hasQMark && !searchParams.nameSearch){
-			inFileQuery.searchStr =searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
+			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr.split("\\").join("") : searchStr.split("\\").join("").toLowerCase(); //$NON-NLS-0$
 			inFileQuery.wildCard = false;
 		} else {
-			inFileQuery.searchStr =searchStr.toLowerCase();
-			_generateSearchHelperRegEx(inFileQuery, fromStart);
+			inFileQuery.searchStr = searchParams.caseSensitive ? searchStr : searchStr.toLowerCase();
+			_generateSearchHelperRegEx(inFileQuery, searchParams, fromStart);
 			inFileQuery.wildCard = true;
 		}
 	} else {
 		inFileQuery.searchStr =searchStr;
-		_generateSearchHelperRegEx(inFileQuery, fromStart);
+		_generateSearchHelperRegEx(inFileQuery, searchParams, fromStart);
 	}
 	inFileQuery.searchStrLength = inFileQuery.searchStr.length;
 	return {params: searchParams, inFileQuery: inFileQuery, displayedSearchTerm: displayedSearchTerm};
@@ -119,6 +122,9 @@ exports.searchUtils.convertSearchParams = function(searchParams) {
 	}
 	if(typeof searchParams.regEx === "string"){
 		searchParams.regEx = (searchParams.regEx.toLowerCase() === "true");
+	}
+	if(typeof searchParams.caseSensitive === "string"){
+		searchParams.caseSensitive = (searchParams.caseSensitive.toLowerCase() === "true");
 	}
 	if(typeof searchParams.nameSearch === "string"){
 		searchParams.nameSearch = (searchParams.nameSearch.toLowerCase() === "true");
@@ -150,44 +156,31 @@ exports.searchUtils.generateSearchHref = function(options) {
 	return href;
 };
 
-exports.searchUtils.generateFindURLBinding = function(inFileQuery, lineNumber, replaceStr) {
-	var binding = ",find="; //$NON-NLS-0$
-	if (inFileQuery.wildCard) {
-		binding = binding + "@@useRegEx@@true@@"; //$NON-NLS-0$
+exports.searchUtils.generateFindURLBinding = function(searchParams, inFileQuery, lineNumber, replaceStr) {
+	var params = {
+		find: inFileQuery.searchStr,
+		regEx: inFileQuery.wildCard ? true : undefined,
+		caseSensitive: searchParams.caseSensitive ? true : undefined,
+		replaceWith: typeof(replaceStr) === "string" ? replaceStr : undefined,
+		atLine: typeof(lineNumber) === "number" ? lineNumber : undefined
 	}
-	binding = binding + encodeURIComponent(inFileQuery.searchStr);
-	if (typeof(replaceStr) === "string") { //$NON-NLS-0$
-		binding = binding + "@@replaceWith@@" + encodeURIComponent(replaceStr); //$NON-NLS-0$
-	}
-	if (typeof(lineNumber) === "number") { //$NON-NLS-0$
-		binding = binding + "@@atLine@@" + lineNumber; //$NON-NLS-0$
-	}
-	return binding;
+	var binding = new URITemplate("{,params*}").expand({ //$NON-NLS-0$
+		params: params
+	});
+	return "," + binding;
 };
 
-exports.searchUtils.parseFindURLBinding = function(findParam) {
-	var lineNumber = null;
-	var splitParam = findParam.split("@@atLine@@");
-	if(splitParam.length > 1){
-		lineNumber = parseInt(splitParam[1]);
-		if(lineNumber < 1){
-			lineNumber = 1;
-		}
+exports.searchUtils.convertFindURLBinding = function(findParams) {
+	if(typeof findParams.regEx === "string"){
+		findParams.regEx = (findParams.regEx.toLowerCase() === "true");
 	}
-	var findAndReplaceQuery = splitParam[0];
-	var replaceStr = null;
-	var splitQuery = findAndReplaceQuery.split("@@replaceWith@@");
-	var	findQuery = splitQuery[0];
-	var useRegEx = false;
-	if(findQuery.indexOf("@@useRegEx@@true@@") === 0){
-		useRegEx = true;
-		findQuery = findQuery.split("@@useRegEx@@true@@")[1];
+	if(typeof findParams.caseSensitive === "string"){
+		findParams.caseSensitive = (findParams.caseSensitive.toLowerCase() === "true");
 	}
-	if(splitQuery.length > 1){
-		replaceStr = splitQuery[1];
+	if(typeof findParams.atLine === "string"){
+		findParams.atLine = parseInt(findParams.atLine);
 	}
-	return {searchStr: findQuery, replaceStr: replaceStr, lineNumber: lineNumber, useRegExp: useRegEx};
-};
+}
 
 exports.searchUtils.replaceRegEx = function(text, regEx, replacingStr){
 	var regexp = new RegExp(regEx.pattern, regEx.flags);

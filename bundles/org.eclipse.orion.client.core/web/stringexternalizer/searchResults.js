@@ -47,7 +47,8 @@ define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer'
 		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
 		_search: function(resultsNode, root) {
-			var search = new mSearchUtils.NonNlsSearch(this.fileService, root);
+			var progress = this.registry.getService("orion.page.progress");
+			var search = new mSearchUtils.NonNlsSearch(this.fileService, root, progress);
 			try{
 				var self = this;
 				search.getNonNls().then(function(nonNLS){

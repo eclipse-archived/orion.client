@@ -35,6 +35,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		this._searchOnName = options && options.searchOnName;
 		this._buildSkeletonOnly = options && options.buildSkeletonOnly;
 		this._fetchChildrenCallBack = options && options.fetchChildrenCallBack;
+		this._searchParams = searchParams;
 		this.searchHelper = (this._searchOnName || this._buildSkeletonOnly) ? null: mSearchUtils.generateSearchHelper(searchParams);
 		this._location = options && options.location;
 		this._childrenLocation = options && options.childrenLocation ? options.childrenLocation : this._location;   
@@ -167,7 +168,8 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 		if(this._fetchChildrenCallBack){
 			this._fetchChildrenCallBack(directoryLocation);
 		}
-		return _this.fileClient.fetchChildren(directoryLocation).then(function(children) { //$NON-NLS-0$
+		var progress = _this.registry.getService("orion.page.progress");
+		return (progress ? progress.progress(_this.fileClient.fetchChildren(directoryLocation), "Crawling search for children of " + directoryLocation) : _this.fileClient.fetchChildren(directoryLocation)).then(function(children) { //$NON-NLS-0$
 			var len = children.length;
 			for (var i = 0; i < children.length ; i++){
 				if(children[i].Directory!==undefined && children[i].Directory===false){
@@ -190,7 +192,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 	};
 
 	SearchCrawler.prototype._hitOnceWithinFile = function( fileContentText){
-		var lineString = fileContentText.toLowerCase();
+		var lineString = this._searchParams.caseSensitive ? fileContentText : fileContentText.toLowerCase();
 		var result;
 		if(this.searchHelper.inFileQuery.wildCard){
 			result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);
@@ -216,7 +218,7 @@ define(['i18n!orion/crawler/nls/messages', 'require', 'orion/i18nUtil', 'orion/s
 			this._reportSingleHit(fileObj);
 			this.registry.getService("orion.page.message").setProgressResult({Message: i18nUtil.formatMessage(messages["${0} files found out of ${1}"], this._hitCounter, this._totalCounter)});
 		} else {
-			return self.fileClient.read(fileObj.Location).then(function(jsonData) { //$NON-NLS-0$
+			return this.registry.getService("orion.page.progress").progress(self.fileClient.read(fileObj.Location), "Reading file " + fileObj.Location).then(function(jsonData) { //$NON-NLS-0$
 				//self.registry.getService("orion.page.message").setProgressResult({Message: messages['Searching file:'] + " " + fileObj.Name});
 				if(self._hitOnceWithinFile(jsonData)){
 					self._reportSingleHit(fileObj);

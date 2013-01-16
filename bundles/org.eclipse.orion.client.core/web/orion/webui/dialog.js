@@ -12,8 +12,8 @@
 /*jslint browser:true*/
 /*global define orion window */
 
-define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'], 
-		function(messages, require, lib) {
+define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', 'orion/uiUtils'], 
+		function(messages, require, lib, uiUtil) {
 	/**
 	 * Dialog is used to implement common dialog behavior in Orion.
 	 * Clients use the Dialog prototype and implement the following behavior:
@@ -47,7 +47,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 	
 		/* Not used by clients */
 		CONTAINERTEMPLATE:		
-		'<div class="dialog">' + //$NON-NLS-0$
+		'<div class="dialog" role="dialog">' + //$NON-NLS-0$
 			'<div class="dialogTitle layoutBlock"><span id="title" class="dialogTitleText layoutLeft"></span><span tabindex="0" role="button" aria-label="Close" class="dialogDismiss layoutRight core-sprite-close imageSprite" id="closeDialog"></span></div>' + //$NON-NLS-0$
 			'<div class="layoutBlock"><hr/></div>' + //$NON-NLS-0$
 			'<div id="dialogContent" class="dialogContent layoutBlock"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
@@ -118,9 +118,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			if (this.$buttonContainer && Array.isArray(this.buttons)) {
 				var self = this;
 				this.buttons.forEach(function(buttonDefinition) {
-					var button = document.createElement("span"); //$NON-NLS-0$
-					button.role = "button"; //$NON-NLS-0$
-					button.tabIndex = 0; 
+					var button = uiUtil.createButton(buttonDefinition.text, buttonDefinition.callback);
 					if (buttonDefinition.id) {
 						button.id = buttonDefinition.id;
 						self['$'+ button.id] = button; //$NON-NLS-0$					
@@ -129,31 +127,19 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 						self._defaultCallback = buttonDefinition.callback;
 						self._defaultButton = button;
 					}
-					button.appendChild(document.createTextNode(buttonDefinition.text));
-					button.className = "commandButton commandMargins"; //$NON-NLS-0$
-					var callback = buttonDefinition.callback;
-					button.addEventListener("click", function(e) { //$NON-NLS-0$
-						callback();
-						lib.stop(e);
-					}, false);
-					button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-						if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
-							callback();
-							lib.stop(e);
-						}				
-					}, false);
 					self.$buttonContainer.appendChild(button);
 				});
 			}
 		},
-
 		
+
 		/*
 		 * Internal.  Makes modal behavior by immediately returning focus to the dialog when user leaves the dialog, and by
 		 * styling the background to look faded.
 		 */
 		_makeModal: function(parent) {
 			var self = this;
+			// We listen to focus lost and remember the last one with focus.  This is great for clicks away from dialog.
 			this.$frame.addEventListener("blur", function(e) { //$NON-NLS-0$
 				self.$lastFocusedElement = e.target;
 			}, true);
@@ -193,6 +179,21 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 						this._addedBackdrop.push(child);
 					} 
 				}
+			}
+			
+			// When tabbing out of the dialog, using the above technique (restore to last focus) will put the focus on the last element, but
+			// we want it on the first element, so let's prevent the user from tabbing out of the dialog.
+			var lastTabbable =  lib.lastTabbable(this.$buttonContainer) || lib.lastTabbable(this.$parent);
+			if (lastTabbable) {
+				lastTabbable.addEventListener("keydown", function (e) { //$NON-NLS-0$
+					if(e.keyCode === lib.KEY.TAB) {
+						var firstTabbable = self._getFirstFocusField();
+						if (firstTabbable && firstTabbable !== e.target) {
+							firstTabbable.focus();
+						}
+						lib.stop(e);
+					} 
+				}, false);
 			}
 		},
 		
@@ -275,12 +276,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			if (!this.customFocus) {
 				// We should set the focus.  Pick the first tabbable content field, otherwise use default button.
 				// If neither, find any button at all.
-				var focusField = lib.firstTabbable(this.$parent) || 
-					this._defaultButton ||
-					lib.firstTabbable(this.$buttonContainer) ||
-					this.$close;
+				var focusField = this._getFirstFocusField();
 				focusField.focus();
 			}
+		},
+		
+		_getFirstFocusField: function() {
+			return lib.firstTabbable(this.$parent) || 
+				this._defaultButton ||
+				lib.firstTabbable(this.$buttonContainer) ||
+				this.$close;
 		},
 		
 		/*
