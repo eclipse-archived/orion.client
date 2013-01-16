@@ -1,6 +1,6 @@
 /******************************************************************************* 
  * @license
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -13,13 +13,13 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog',
         
         'orion/git/widgets/ApplyPatchDialog', 
-        'orion/git/widgets/ContentDialog', 
-        'orion/git/widgets/CommitDialog'], 
+        'orion/git/widgets/ContentDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit) {
+        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit,
+        		mCommit) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -2826,12 +2826,11 @@ var exports = {};
 				if (body.Message && body.CommitterName && body.CommitterEmail && !data.parameters.optionsRequested) {
 					commitFunction(body);
 				} else {
-					var dialog = new orion.git.widgets.CommitDialog({
+					var dialog = new mCommit.CommitDialog({
 						body: body,
 						func: commitFunction
 					});
-							
-					dialog.startup();
+
 					dialog.show();
 				}
 			},
