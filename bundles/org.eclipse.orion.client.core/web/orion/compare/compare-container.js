@@ -9,12 +9,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window dijit */
-/*jslint browser:true devel:true */
-define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
+//*jslint browser:true devel:true */
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/compare/diff-parser', 'orion/compare/compare-rulers', 'orion/editor/contentAssist',
         'orion/editorCommands','orion/editor/editor','orion/editor/editorFeatures','orion/globalCommands', 'orion/commands',
-        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient', 'dojo/DeferredList'], 
-		function(messages, require, dojo, dijit, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
+        'orion/textview/textModel','orion/textview/textView', 'orion/compare/compare-features', 'orion/compare/compareUtils', 'orion/compare/diff-provider', 'orion/compare/jsdiffAdapter', 'orion/highlight', 'orion/compare/diffTreeNavigator', 'orion/searchAndReplace/textSearcher', 'orion/fileClient'], 
+		function(messages, require, Deferred, lib, mDiffParser, mCompareRulers, mContentAssist, mEditorCommands, mEditor, mEditorFeatures, mGlobalCommands,
 				mCommands, mTextModel, mTextView, mCompareFeatures, mCompareUtils, mDiffProvider, mJSDiffAdapter, Highlight, mDiffTreeNavigator, mSearcher, mFileClient) {
 
 var exports = {};
@@ -25,17 +24,27 @@ exports.DefaultDiffProvider = (function() {
 		this._diffProvider = new mDiffProvider.DiffProvider(serviceRegistry);
 	}	
 	DefaultDiffProvider.prototype = {
+		_resolveTwoFiles: function(baseFileURL, newFileURL, errorCallback){
+			var that = this;
+			var compareTwo = function(results) {
+				if(results[0]._error && errorCallback){
+					errorCallback(results[0]._error);
+				}
+				if(results[1]._error && errorCallback){
+					errorCallback(results[1]._error);
+				}
+				var baseFileContentType = results[0];//.extension[0];
+				var newFileContentType = results[1];//.extension[0];
+				that.callBack({ baseFile:{URL: baseFileURL, Name: that._resolveFileName(baseFileURL), Type: baseFileContentType},
+				 			newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType}
+						 });
+			};
+			new Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
+		},
+		
 		_resolveDiff: function(resource, compareTo, onlyDiff, errorCallback) {
 			if(compareTo){
-				var that = this;
-				var dl = new dojo.DeferredList([ that._getContentType(compareTo), that._getContentType(resource) ]);
-				dl.then(function(results) {
-					var baseFileContentType = results[0][1];
-					var newFileContentType = results[1][1];
-					that.callBack({ baseFile:{URL: compareTo, Name: that._resolveFileName(compareTo), Type: baseFileContentType},
-					 			newFile:{URL: resource, Name: that._resolveFileName(resource), Type: newFileContentType}
-							 });
-				}, errorCallback);
+				this._resolveTwoFiles(compareTo, resource, errorCallback);
 			} else {
 				if(!this._diffProvider){
 					console.log("A diff provider is needed for compound diff URL"); //$NON-NLS-0$
@@ -74,15 +83,7 @@ exports.DefaultDiffProvider = (function() {
 		_resolveComplexFileURL: function(complexURL, errorCallback) {
 			var that = this;
 			this._diffProvider.getDiffFileURI(complexURL).then(function(jsonData, secondArg) {
-				var dl = new dojo.DeferredList([ that._getContentType(jsonData.Old), that._getContentType(jsonData.New) ]);
-				dl.then(function(results) {
-					var baseFileContentType = results[0][1];
-					var newFileContentType = results[1][1];
-					that.callBack({ baseFile:{URL: jsonData.Old, Name: that._resolveFileName(jsonData.Old), Type: baseFileContentType},
-					 			newFile:{URL: jsonData.New, Name: that._resolveFileName(jsonData.New), Type: newFileContentType},
-					 			diff: that._diffContent
-							 });
-				}, errorCallback);
+				that._resolveTwoFiles(jsonData.Old, jsonData.New, errorCallback);
 			}, errorCallback);
 		},
 		
@@ -318,7 +319,7 @@ exports.CompareContainer = (function() {
 			if(!commandSpanId){
 				return;
 			}
-			dojo.empty(commandSpanId);
+			lib.empty(lib.node(commandSpanId));
 			if(this.options.gridRenderer && this.options.gridRenderer.navGridHolder){
 				this.options.gridRenderer.navGridHolder.splice(0, this.options.gridRenderer.navGridHolder.length);
 				if(this.options.gridRenderer.additionalCmdRender){
@@ -534,23 +535,30 @@ exports.TwoWayCompareContainer = (function() {
 		this.setOptions(options, true);
 		
 		var that = this;
+		var newFileTitleNode = lib.node(this._uiFactory.getTitleDivId(true));
+		if(newFileTitleNode){
+			lib.empty(newFileTitleNode);
+		}
+		var baseFileTitleNode = lib.node(this._uiFactory.getTitleDivId(true));
+		if(baseFileTitleNode){
+			lib.empty(baseFileTitleNode);
+		}
 		if(!this.options.callback){
 			this.options.callback = function(baseFileName, newFileName) {
-				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
-					dojo.place(document.createTextNode(newFileName), that._uiFactory.getTitleDivId(true), "only"); //$NON-NLS-0$
-					dojo.place(document.createTextNode(baseFileName), that._uiFactory.getTitleDivId(false), "only"); //$NON-NLS-0$
+				if (newFileTitleNode && baseFileTitleNode) {
+					newFileTitleNode.appendChild(document.createTextNode(newFileName));
+					baseFileTitleNode.appendChild(document.createTextNode(baseFileName));
 				}
 			};
 		}
-
 		if(!this._errorCallback){
 			this._errorCallback = function(errorResponse, ioArgs) {
-				if (that._uiFactory.getTitleDivId(true) && that._uiFactory.getTitleDivId(false)) {
+				if (newFileTitleNode && baseFileTitleNode) {
 					var message = typeof (errorResponse.message) === "string" ? errorResponse.message : ioArgs.xhr.statusText; //$NON-NLS-0$
-					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(true), "only"); //$NON-NLS-0$
-					dojo.place(document.createTextNode(message), that._uiFactory.getTitleDivId(false), "only"); //$NON-NLS-0$
-					dojo.style(uiFactory.getTitleDivId(true), "color", "red"); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.style(uiFactory.getTitleDivId(false), "color", "red"); //$NON-NLS-1$ //$NON-NLS-0$
+					newFileTitleNode.appendChild(document.createTextNode(message));
+					baseFileTitleNode.appendChild(document.createTextNode(message));
+					newFileTitleNode.style.color = "red"; //$NON-NLS-1$
+					baseFileTitleNode.style.color = "red"; //$NON-NLS-1$
 				}
 			};
 		}
@@ -577,24 +585,24 @@ exports.TwoWayCompareContainer = (function() {
 			setInput: function(fileURI, editor) {
 				if(this.onSetTitle){
 					this.onSetTitle(fileURI,
-							dojo.hitch(this, function(title) {
+							function(title) {
 								this.setTitle(title);
-							}),
-							dojo.hitch(this, function(error) {
+							}.bind(this),
+							function(error) {
 								console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
 								this.setTitle(fileURI);
-							})
+							}.bind(this)
 					);
 				} else {
 					that._fileClient.read(fileURI, true).then(
-						dojo.hitch(this, function(metadata) {
+						function(metadata) {
 							this._fileMetadata = metadata;
 							this.setTitle(metadata.Location, metadata);
-						}),
-						dojo.hitch(this, function(error) {
+						}.bind(this),
+						function(error) {
 							console.error("Error loading file metadata: " + error.message); //$NON-NLS-0$
 							this.setTitle(fileURI);
-						})
+						}.bind(this)
 					);
 				}
 				this.lastFilePath = fileURI;
@@ -640,7 +648,7 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
 		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.options.readonly ,createLineStyler , this.options.newFile);
 		if( this.options.onPage){
-			var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
+			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
 				this._commandService.destroy(toolbar);
 				this._commandService.renderCommands(toolbar.id, toolbar, this._leftEditor, this._leftEditor, "button"); //$NON-NLS-0$
@@ -682,8 +690,9 @@ exports.TwoWayCompareContainer = (function() {
 	};
 	
 	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
-		var editorContainerDomNode = dojo.byId(parentDivId);
-		var editorContainer = dijit.byId(parentDivId);
+		var editorContainerDomNode = lib.node(parentDivId);
+		//TODO we will use splitter 
+		//var editorContainer = dijit.byId(parentDivId);
 		var that = this;
 		
 		var textModel = new mTextModel.TextModel(content , delim);
@@ -701,9 +710,12 @@ exports.TwoWayCompareContainer = (function() {
 			if(that.onLoad){
 				that.onLoad();
 			}
-			dojo.connect(editorContainer, "resize", dojo.hitch(this, function (e){ //$NON-NLS-0$
+			//TODO should use splitter resize listener eventually
+			/*
+			editorContainer.domNode.addEventListener("onresize", function (e){ //$NON-NLS-0$
 				view.resize();
-			}));
+			}.bind(this), false);
+			*/
 			return view;
 		};
 		/*
@@ -742,7 +754,7 @@ exports.TwoWayCompareContainer = (function() {
 			} else {
 				status = message;
 			}
-			dojo.byId(statusDivId).textContent = dirtyIndicator +  status;
+			lib.node(statusDivId).textContent = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(that._registry, that._commandService, "pageActions"); //$NON-NLS-0$
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
@@ -889,8 +901,12 @@ exports.InlineCompareContainer = (function() {
 		var that = this;
 		if(!this.options.callback){
 			this.options.callback = function(baseFileName, newFileName) {
-				dojo.place(document.createTextNode(that._diffTitle), "fileNameInViewer", "only"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.style("fileNameInViewer", "color", "#6d6d6d"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				var diffTitleNode = lib.node("fileNameInViewer"); //$NON-NLS-2$
+				if(difTitleNode){
+					lib.empty(diffTitleNode);
+					diffTitleNode.appendChild(document.createTextNode(that._diffTitle));
+					diffTitleNode.style.color = "#6d6d6d"; //$NON-NLS-2$
+				}
 				that._statusService.setProgressMessage("");
 			};
 		}
@@ -916,19 +932,22 @@ exports.InlineCompareContainer = (function() {
 		this._highlighter = [];
 		this._highlighter.push( new exports.CompareStyler(this._registry));
 		this._editorDivId = editorDivId;
+		//TODO we need the splitter to handle this later
+		/*
 		var editorContainer = dijit.byId(this._editorDivId);
 		if(!editorContainer){//If there is no dijit widget as the parent we need one sitting in the middle to listen to the resize event
 			var widget = dijit.byId(this._editorDivId + "_dijit_inline_compare");
 			if(widget){
 				widget.destroyRecursive();
 			}
-			var marginBox = dojo.marginBox(this._editorDivId);
-			var styleStr = "height: " + marginBox.h + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
+			var bound = lib.bounds(lib.node(this._editorDivId));
+			var styleStr = "height: " + bound.height + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
 			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
 			wrapperWidget.placeAt(this._editorDivId);
 			wrapperWidget.layout();
 			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
 		}
+		*/
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$
 		this.hasContent = false;
 	}
@@ -969,8 +988,8 @@ exports.InlineCompareContainer = (function() {
 	};
 
 	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileObj){
-		var editorContainerDomNode = dojo.byId(this._editorDivId);
-		var editorContainer = dijit.byId(this._editorDivId);
+		var editorContainerDomNode = lib.node(this._editorDivId);
+		//var editorContainer = dijit.byId(this._editorDivId);
 		var that = this;
 		var model = new mTextModel.TextModel(content, delim);
 
@@ -981,9 +1000,12 @@ exports.InlineCompareContainer = (function() {
 				readonly: true,
 				tabSize: 4
 			});
-			dojo.connect(editorContainer, "resize", dojo.hitch(this, function (e){ //$NON-NLS-0$
+			//TODO should use splitter resize listener eventually
+			/*
+			editorContainer.domNode.addEventListener("onresize", function (e){ //$NON-NLS-0$
 				textView.resize();
-			}));
+			}.bind(this), false);
+			*/
 			return textView;
 		};
 			
@@ -1126,7 +1148,7 @@ exports.toggleableCompareContainer = (function() {
 			options.blockNumber = diffPos.block;
 			options.changeNumber = diffPos.change;
 			this._widget.destroy();
-			dojo.empty(this._parentDivId);
+			lib.empty(lib.node(this._parentDivId));
 			if(this.widgetType === "inline"){ //$NON-NLS-0$
 				this.widgetType = "twoWay"; //$NON-NLS-0$
 				this._widget = new exports.TwoWayCompareContainer(this._serviceRegistry, this._parentDivId, null, options);

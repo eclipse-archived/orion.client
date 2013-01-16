@@ -106,7 +106,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage(messages["Are you sure you want to delete '${0}' from the favorites?"], items[0].name) : i18nUtil.formatMessage(messages["Are you sure you want to delete these ${0} favorites?"], items.length);
 				if(window.confirm(confirmMessage)) {
 					for (var i=0; i<items.length; i++) {
-						options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path); //$NON-NLS-0$
+						options.serviceRegistry.getService("orion.page.progress").progress(options.serviceRegistry.getService("orion.core.favorite").removeFavorite(items[i].path), "Removing favorite " + items[i].name); //$NON-NLS-0$
 					}
 				}
 			}
@@ -124,7 +124,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				var item = Array.isArray(data.items) ? data.items[0] : data.items;
 				
 				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
-					reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
+					reg.getService("orion.page.progress").progress(reg.getService("orion.core.favorite").renameFavorite(item.path, data.parameters.valueFor('name')), "Rename favorite " + item.name + " to " + data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
 				}
 			}
 		});
@@ -133,11 +133,12 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
 		var favoritesService = this._registry.getService("orion.core.favorite"); //$NON-NLS-0$
+		var progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 
 		if (favoritesService) {
 			// render the favorites
 			var registry = this._registry;
-			favoritesService.getFavorites().then(function(favs) {
+			progress.progress(favoritesService.getFavorites(), "Getting favorites").then(function(favs) {
 				self.render(favs.navigator, registry);
 			});
 

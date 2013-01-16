@@ -27,6 +27,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.location2ModelMap = [];
 		this._lineDelimiter = "\n";  //$NON-NLS-0$
 		this.onMatchNumberChanged = options.onMatchNumberChanged;
+		this._searchParams = searchParams;
 		this.searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
@@ -228,7 +229,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else {
 			this.fileClient.read(fileItem.location).then(
 				dojo.hitch(this, function(jsonData) {
-					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode());
+					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 					if(this.onMatchNumberChanged && !writing){
 						this.onMatchNumberChanged(fileItem);
 					}
@@ -256,7 +257,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			}
 			this.fileClient.read(parentItem.location).then(
 					dojo.hitch(this, function(jsonData) {
-						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode());
+						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 						  if(this.onMatchNumberChanged){
 							  this.onMatchNumberChanged(parentItem);
 						  }
@@ -389,7 +390,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
@@ -457,7 +458,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
-		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
+		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
 		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$

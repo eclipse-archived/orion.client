@@ -13,14 +13,13 @@
 /*jslint browser:true eqeqeq:false laxbreak:true */
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/commands', 'orion/uiUtils', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 
         
-        'orion/git/widgets/GitCredentialsDialog', 
         'orion/git/widgets/ApplyPatchDialog', 
-        'orion/git/widgets/OpenCommitDialog', 
         'orion/git/widgets/ContentDialog', 
         'orion/git/widgets/CommitDialog'], 
         function(messages, require, dojo, mCommands, mUIUtils, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository) {
+        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -123,15 +122,14 @@ var exports = {};
 		var repository = errorData.Url;
 		
 		var failure = function(){
-			var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+			var credentialsDialog = new mGitCredentials.GitCredentialsDialog({
 				title: title,
 				serviceRegistry: serviceRegistry,
 				func: func,
 				errordata: options.errordata,
 				failedOperation: options.failedOperation
 			});
-				
-			credentialsDialog.startup();
+
 			credentialsDialog.show();
 		};
 		
@@ -329,14 +327,13 @@ var exports = {};
 			}
 				
 			// use the old creds dialog
-			var credentialsDialog = new orion.git.widgets.GitCredentialsDialog({
+			var credentialsDialog = new mGitCredentials.GitCredentialsDialog({
 				title: title,
 				serviceRegistry: serviceRegistry,
 				func: triggerCallback,
 				errordata: errorData
 			});
-				
-			credentialsDialog.startup();
+			
 			credentialsDialog.show();
 			return;
 		};
@@ -2604,7 +2601,7 @@ var exports = {};
 				
 				var openCommit = function(repositories) {
 					if (data.parameters.optionsRequested) {
-						new orion.git.widgets.OpenCommitDialog(
+						new mOpenCommit.OpenCommitDialog(
 							{repositories: repositories, serviceRegistry: serviceRegistry, commitName: data.parameters.valueFor("commitName")} //$NON-NLS-0$
 						).show();
 					} else {

@@ -154,6 +154,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 		 */
 		_makeModal: function(parent) {
 			var self = this;
+			// We listen to focus lost and remember the last one with focus.  This is great for clicks away from dialog.
 			this.$frame.addEventListener("blur", function(e) { //$NON-NLS-0$
 				self.$lastFocusedElement = e.target;
 			}, true);
@@ -193,6 +194,21 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 						this._addedBackdrop.push(child);
 					} 
 				}
+			}
+			
+			// When tabbing out of the dialog, using the above technique (restore to last focus) will put the focus on the last element, but
+			// we want it on the first element, so let's prevent the user from tabbing out of the dialog.
+			var lastTabbable =  lib.lastTabbable(this.$buttonContainer) || lib.lastTabbable(this.$parent);
+			if (lastTabbable) {
+				lastTabbable.addEventListener("keydown", function (e) { //$NON-NLS-0$
+					if(e.keyCode === lib.KEY.TAB) {
+						var firstTabbable = self._getFirstFocusField();
+						if (firstTabbable && firstTabbable !== e.target) {
+							firstTabbable.focus();
+						}
+						lib.stop(e);
+					} 
+				}, false);
 			}
 		},
 		
@@ -275,12 +291,16 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib'],
 			if (!this.customFocus) {
 				// We should set the focus.  Pick the first tabbable content field, otherwise use default button.
 				// If neither, find any button at all.
-				var focusField = lib.firstTabbable(this.$parent) || 
-					this._defaultButton ||
-					lib.firstTabbable(this.$buttonContainer) ||
-					this.$close;
+				var focusField = this._getFirstFocusField();
 				focusField.focus();
 			}
+		},
+		
+		_getFirstFocusField: function() {
+			return lib.firstTabbable(this.$parent) || 
+				this._defaultButton ||
+				lib.firstTabbable(this.$buttonContainer) ||
+				this.$close;
 		},
 		
 		/*

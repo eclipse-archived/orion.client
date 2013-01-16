@@ -79,6 +79,21 @@ define(['require'], function(require) {
 		return null;
 	}
 	
+	function lastTabbable(node) {
+		if (node.tabIndex >= 0) {
+			return node;
+		}
+		if (node.hasChildNodes()) {
+			for (var i=node.childNodes.length - 1; i>=0; i--) {
+				var result = lastTabbable(node.childNodes[i]);
+				if (result) {
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+	
 	var variableRegEx = /\$\{([^\}]+)\}/;
 	
 	function processTextNodes(node, messages) {
@@ -142,6 +157,7 @@ define(['require'], function(require) {
 	}
 	
 	var KEY = {
+		TAB: 9,
 		ENTER: 13,
 		ESCAPE: 27,
 		SPACE: 32,
@@ -161,6 +177,7 @@ define(['require'], function(require) {
 		bounds: bounds,
 		empty: empty,
 		firstTabbable: firstTabbable,
+		lastTabbable: lastTabbable,
 		stop: stop,
 		processTextNodes: processTextNodes,
 		addAutoDismiss: addAutoDismiss,

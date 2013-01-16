@@ -16,8 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils'], 
-	function(messages, lib, Deferred, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils) {
+define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+	function(messages, lib, Deferred, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
 
@@ -216,22 +216,22 @@ exports.EditorCommandFactory = (function() {
 								fromSelection = true;
 							} else {//If there is no selection from editor, we want to parse the parameter from URL binding
 								if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
-									var findParam = data.parameters.valueFor('find');
-									var parsedParam = mSearchUtils.parseFindURLBinding(findParam);
-									searchString = parsedParam.searchStr;
+									searchString = data.parameters.valueFor('find');
+									parsedParam = mPageUtil.matchResourceParameters();
+									mSearchUtils.convertFindURLBinding(parsedParam);
 								}
 							}
 							if(parsedParam){
-								that._searcher.setOptions({useRegExp: parsedParam.useRegExp});
-								if(parsedParam.lineNumber){
-									var offset = editor.getModel().getLineStart(parsedParam.lineNumber-1);
+								that._searcher.setOptions({useRegExp: parsedParam.regEx, ignoreCase: !parsedParam.caseSensitive});
+								if(parsedParam.atLine){
+									var offset = editor.getModel().getLineStart(parsedParam.atLine-1);
 									editor.moveSelection(offset, offset, function(){
-										that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+										that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
 										that._searcher.findNext(true);
 										}, 
 									focus);
 								} else {
-									that._searcher.buildToolBar(searchString, parsedParam ? parsedParam.replaceStr : null);
+									that._searcher.buildToolBar(searchString, parsedParam.replaceWith);
 									that._searcher.findNext(true);
 								}
 							} else {
