@@ -29,11 +29,16 @@ define(["orion/assert", "orion/HTMLTemplates-shim", "domReady!"], function(asser
 	tests.testNewTemplateElement = function() {
 		var template = document.createElement("template");
 		template.id="xyzzy";
-		template.innerHTML = "<div></div>";
 		document.body.appendChild(template);
+		template.innerHTML = "<img src='404.jpg'><div class='comment4'></div>";
 		assert.ok(template.content);
 		assert.equal(document.body.querySelectorAll("template#xyzzy").length, 1);
 		assert.equal(document.body.querySelectorAll("template#xyzzy div").length, 0);
+		document.body.appendChild(document.getElementById("xyzzy").content.cloneNode(true));
+		assert.equal(document.body.querySelectorAll("div.comment4").length, 1);
+		template.content.appendChild(document.createElement("h1"));
+		document.body.appendChild(document.getElementById("xyzzy").content.cloneNode(true));
+		assert.equal(document.body.querySelectorAll("div.comment4").length, 2);
 	};
 	
 
