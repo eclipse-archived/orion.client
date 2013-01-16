@@ -109,7 +109,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 		if(fileItem.contents){
 			onComplete(fileItem);
 		} else {
-			this.fileClient.read(fileItem.Location).then(
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(
 				dojo.hitch(this, function(contents) {
 					fileItem.contents = contents;
 					onComplete(fileItem);
@@ -152,7 +152,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 			var that = this;
 			this.messageService.setProgressMessage(dojo.string.substitute(messages["Writing files ${0} of ${1}"], [i+1, this._listRoot.children.length]));	
 			if(fileItem.checked){
-				this.fileClient.read(fileItem.Location, true).then(function(metadata){
+				this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location, true), "Reading file metadata " + fileItem.Location).then(function(metadata){
 					if(fileItem.LocalTimeStamp!==metadata.LocalTimeStamp){
 						console.error("File " + metadata.Name + " has been modified."); //$NON-NLS-1$ //$NON-NLS-0$
 						dojo.hitch(that, that.writeIncrementalNewContent(config, i+1), onFinish);
@@ -162,8 +162,8 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 					function writeNonnls(fileItem){
 						var newContents = mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, config, true);
 						if(config.messages && config.messages!=={}){
-								mNonnlsSearchUtil.writeMessagesFile(that.fileClient, config, config.messages).then(function(){
-									that.fileClient.write(fileItem.Location, newContents).then(function(){										
+								mNonnlsSearchUtil.writeMessagesFile(that.fileClient, config, config.messages, that.registry.getService("orion.page.progress")).then(function(){
+									that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function(){										
 										dojo.hitch(that, that.writeIncrementalNewContent(config, i+1), onFinish);
 									},
 									function(error){
@@ -175,7 +175,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 								dojo.hitch(that, that.writeIncrementalNewContent(config, i+1), onFinish);
 							});
 						} else {
-							that.fileClient.write(fileItem.Location, newContents).then(function(){										
+							that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function(){										
 								dojo.hitch(that, that.writeIncrementalNewContent(config, i+1), onFinish);
 							},
 							function(error){
@@ -186,7 +186,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 					}
 					
 					if(!fileItem.contents){
-						that.fileClient.read(fileItem.Location).then(function(contents){
+						that.registry.getService("orion.page.progress").progress(that.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(function(contents){
 							fileItem.contents = contents;
 							dojo.hitch(that, writeNonnls)(fileItem, config);
 						},

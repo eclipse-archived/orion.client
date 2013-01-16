@@ -28,7 +28,7 @@ mBootstrap.startup().then(function(core) {
 	new mSshTools.SshService(serviceRegistry);
 	var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 	var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-	new mProgress.ProgressService(serviceRegistry, operationsClient);
+	var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 	new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	
 	// ...
@@ -101,7 +101,7 @@ mBootstrap.startup().then(function(core) {
 	// process the URL to find our bindings, since we can't be sure these bindings were defined when the URL was first processed.
 	commandService.processURL(window.location.href);
 	
-	fileClient.loadWorkspace().then(
+	progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 		function(workspace){
 			explorer.setDefaultPath(workspace.Location);
 			explorer.redisplay();
@@ -123,7 +123,7 @@ mBootstrap.startup().then(function(core) {
 		if(previousResourceValue !== resource){
 			previousResourceValue = resource;
 		
-			fileClient.loadWorkspace().then(
+			progress.progress(fileClient.loadWorkspace(), "Loading default workspace").then(
 				function(workspace){
 					explorer.setDefaultPath(workspace.Location);
 					explorer.redisplay();

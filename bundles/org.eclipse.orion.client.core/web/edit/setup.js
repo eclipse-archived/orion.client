@@ -33,13 +33,14 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 	var problemService;
 	var outlineService;
 	var contentTypeService;
+	var progressService;
 	
 	// Initialize the plugin registry
 	(function() {
 		selection = new mSelection.Selection(serviceRegistry);
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		statusReportingService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		new mProgress.ProgressService(serviceRegistry, operationsClient);
+		progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
 		new mDialogs.DialogService(serviceRegistry);
 		commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
@@ -128,7 +129,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 							// page target is the file, but if any interesting links fail, try the parent folder metadata.
 							altPageTarget = function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
-									return fileClient.read(metadata.Parents[0].Location, true);
+									return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
 								}
 							};
 							name = metadata.Name;
@@ -146,7 +147,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						mGlobalCommands.setPageTarget({task: "Coding", name: name, target: metadata,  //$NON-NLS-0$
 							makeAlternate: function() {
 								if (metadata.Parents && metadata.Parents.length > 0) {
-									return fileClient.read(metadata.Parents[0].Location, true);
+									return progressService.progress(fileClient.read(metadata.Parents[0].Location, true), "Getting metadata of " + metadata.Parents[0].Location);
 								}
 							},
 							serviceRegistry: serviceRegistry, commandService: commandService,
@@ -181,7 +182,7 @@ exports.setUpEditor = function(serviceRegistry, preferences, isReadOnly){
 						}
 						setInput(contentOrError, metadataOrError);
 					};
-					new Deferred.all([fileClient.read(fileURI), fileClient.read(fileURI, true)], function(error) { return {_error: error}; }).then(load);
+					new Deferred.all([progressService.progress(fileClient.read(fileURI), "Reading " + fileURI), progressService.progress(fileClient.read(fileURI, true), "Reading metedata of " + fileURI)], function(error) { return {_error: error}; }).then(load);
 				}
 				this.lastFilePath = fileURI;
 			} else {

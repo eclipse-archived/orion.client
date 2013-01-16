@@ -132,7 +132,11 @@ mSiteMappingsTable.Renderer = (function() {
 					col.appendChild(span);
 					span.textContent = "\u2026"; //$NON-NLS-0$
 					// use file service directly to avoid retrying in case of failure
-					self.options.fileClient._getService(loc).read(loc, true).then(
+					var def = self.options.fileClient._getService(loc).read(loc, true);
+					if(self.options.progress){
+						self.options.progress.progress(def, "Reading metadata of " + loc);
+					}
+					def.then(
 						function(object) {
 							var isDirectory = object && object.Directory;
 							var spriteClass = isDirectory ? "core-sprite-folder" : "core-sprite-file"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -194,6 +198,7 @@ mSiteMappingsTable.MappingsTable = (function() {
 				siteConfiguration: options.siteConfiguration,
 				siteClient: options.siteClient,
 				fileClient: options.fileClient,
+				progress: options.serviceRegistry.getService("orion.page.progress"),
 				actionScopeId: "siteMappingCommand" //$NON-NLS-0$
 			}, this);
 		this.myTree = null;

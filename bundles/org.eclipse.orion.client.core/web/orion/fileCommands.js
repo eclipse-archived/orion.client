@@ -207,7 +207,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (mFileUtils.isAtRoot(explorer.treeRoot.ChildrenLocation)) {
 				loadedWorkspace = explorer.treeRoot;
 			} else {
-				loadedWorkspace = fileClient.loadWorkspace("");
+				loadedWorkspace = progressService.progress(fileClient.loadWorkspace(""), "Loading workspace");
 			}
 			Deferred.when(loadedWorkspace, function(workspace) {
 				var deferred = fileClient.createProject(workspace.ChildrenLocation, name);
@@ -216,7 +216,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 				deferred.then(function(project) {
 					// we need folder metadata for the commands, not the project object
-					fileClient.read(project.ContentLocation, true).then(function(folder) {
+					progress.progress(fileClient.read(project.ContentLocation, true), "Reading metadata of newly created project " + name).then(function(folder) {
 						if (populateFunction) {
 							populateFunction(folder);
 						}

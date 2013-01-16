@@ -114,8 +114,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/fileClient', 'dijit
 		writeJSContent: function(){
 		
 			var content = this.prepareJSContent();
-		
-			this.fileClient.write( this.javascriptFile, content ).then(
+			var def = this.fileClient.write( this.javascriptFile, content );
+			var progress = this.serviceRegistry.getService("orion.page.progress");
+			if(progress){
+				progress.progress(def, "Writing javascript content for " + this.pluginName);
+			}
+			def.then(
 							dojo.hitch(this, 'handleSuccess', 'js', this.pluginName ), //$NON-NLS-1$ //$NON-NLS-0$
 							this.handleError);
 		},
@@ -182,7 +186,12 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/fileClient', 'dijit
 									'\tline-height:20px;\n' + //$NON-NLS-0$
 								'}'; //$NON-NLS-0$
 								
-			this.fileClient.write( this.cssFile, content ).then(
+			var def = this.fileClient.write( this.cssFile, content );
+			var progress = this.serviceRegistry.getService("orion.page.progress");
+			if(progress){
+				progress.progress(def, "Writing css content for " + this.pluginName);
+			}
+			def.then(
 							dojo.hitch(this, 'handleSuccess', 'css', this.pluginName ), //$NON-NLS-1$ //$NON-NLS-0$
 							this.handleError);
 		
@@ -192,14 +201,22 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/fileClient', 'dijit
 		
 			var content = this.prepareHTMLContent();
 		
-			this.fileClient.write( this.htmlFile, content ).then(
-							dojo.hitch(this, 'handleSuccess', 'html', this.pluginName), //$NON-NLS-1$ //$NON-NLS-0$
+			var def = this.fileClient.write( this.htmlFile, content );
+			var progress = this.serviceRegistry.getService("orion.page.progress");
+			if(progress){
+				progress.progress(def, "Writing html content for " + this.pluginName);
+			}
+			def.then(dojo.hitch(this, 'handleSuccess', 'html', this.pluginName), //$NON-NLS-1$ //$NON-NLS-0$
 							this.handleError);
 		},
 		
 		createNewFolder: function( name ){
-			this.fileClient.createFolder( this.path, name ).then(
-							dojo.hitch(this, 'createNewFiles'), //$NON-NLS-0$
+			var def = this.fileClient.createFolder( this.path, name );
+			var progress = this.serviceRegistry.getService("orion.page.progress");
+			if(progress){
+				progress.progress(def, "Creating folder " + name);
+			}
+			def.then(dojo.hitch(this, 'createNewFiles'), //$NON-NLS-0$
 							this.handleError);
 		},
 		
@@ -212,16 +229,30 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/fileClient', 'dijit
 			this.javascriptFile = this.path + '/' + this.pluginName + '/' + pluginjs; //$NON-NLS-1$ //$NON-NLS-0$
 			this.htmlFile = this.path + '/' + this.pluginName + '/' + pluginhtml; //$NON-NLS-1$ //$NON-NLS-0$
 			this.cssFile = this.path + '/' + this.pluginName + '/' + plugincss; //$NON-NLS-1$ //$NON-NLS-0$
-
-			this.fileClient.createFile( this.path + '/' + this.pluginName , pluginjs ).then( //$NON-NLS-0$
+			
+			var progress = this.serviceRegistry.getService("orion.page.progress");
+			var def = this.fileClient.createFile( this.path + '/' + this.pluginName , pluginjs );
+			if(progress){
+				progress.progress("Creating javascript file for plugin " + this.pluginName);
+			}
+			def.then( //$NON-NLS-0$
 							dojo.hitch(this, 'writeJSContent'), //$NON-NLS-0$
 							this.handleError);
+			
 							
-			this.fileClient.createFile( this.path + '/' + this.pluginName , pluginhtml ).then( //$NON-NLS-0$
+			def = this.fileClient.createFile( this.path + '/' + this.pluginName , pluginhtml )
+			if(progress){
+				progress.progress("Creating html file for plugin " + this.pluginName);
+			}
+			def.then( //$NON-NLS-0$
 							dojo.hitch(this, 'writeHTMLContent'), //$NON-NLS-0$
 							this.handleError);
 							
-			this.fileClient.createFile( this.path + '/' + this.pluginName , plugincss ).then( //$NON-NLS-0$
+			def = this.fileClient.createFile( this.path + '/' + this.pluginName , plugincss )
+			if(progress){
+				progress.progress("Creating css file for plugin " + this.pluginName);
+			}
+			def.then( //$NON-NLS-0$
 							dojo.hitch(this, 'writeCSSContent'), //$NON-NLS-0$
 							this.handleError);
 		},
