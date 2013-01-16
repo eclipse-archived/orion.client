@@ -25,7 +25,10 @@
 
 	function shimTemplate(template) {
 		templatesDoc = templatesDoc || document.implementation.createHTMLDocument("");
-		template.content = templatesDoc.createDocumentFragment();
+		Object.defineProperty(template, "content", {
+			value: templatesDoc.createDocumentFragment(),
+			enumerable: true
+		});
 		Object.defineProperty(template, "innerHTML", {
 			set: function(text) {
 				while (this.content.firstChild) {
@@ -61,7 +64,7 @@
 	});
 
 	// listen for new template additions
-	// Note: we use DOMNodeInserted because this has to happen synchronously
+	// Note: we use DOMNodeInserted because this has to happen synchronously to let code access the "content" property
 	addEventListener("DOMNodeInserted", function(mutationEvent) {
 		var target = mutationEvent.target;
 		if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
