@@ -16,8 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
-	function(messages, lib, Deferred, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
+define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+	function(messages, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
 
@@ -302,7 +302,39 @@ exports.EditorCommandFactory = (function() {
 						var model = editor.getModel();
 						var text = model.getText();
 						var selectedText = model.getText(selection.start,selection.end);
-						progress.progress(service.run(selectedText, text,selection, input.getInput()), "Running " + info.name + (selectedText ? (" on \"" + selectedText.substring(0, 15) + (selection.end-selection.start>15 ? "...\"":"\"")) : "")).then(function(result){
+						
+						var deferred;
+						if (info.uiURITemplate) {
+							deferred = new Deferred();
+							var uriTemplate = new URITemplate(info.uiURITemplate);
+							var href = uriTemplate.expand(input.getFileMetadata());
+							var iframe = document.createElement("iframe"); //$NON-NLS-0$
+							iframe.id = info.id;
+							iframe.name = info.id;
+							iframe.type = "text/html"; //$NON-NLS-0$
+							iframe.frameborder = 1;
+							iframe.src = href;
+							iframe.className = "delegatedUI"; //$NON-NLS-0$
+							window.document.body.appendChild(iframe);
+							// Listen for notification from the iframe.  This should eventually belong as part of the plugin registry.
+							// This mechanism should become generalized into a "page services" API for plugin iframes to contact the outer context.
+							window.addEventListener("message", function(event) { //$NON-NLS-0$
+								if (typeof event.data === "string") { //$NON-NLS-0$
+									var data = JSON.parse(event.data);
+									if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
+										if (data.cancelled) {
+											deferred.cancel();
+										} else if (data.result) {
+											deferred.resolve(data.result);
+										}
+										window.document.body.removeChild(iframe);
+									}
+								}
+							}, false);
+						} else {
+							deferred = service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()); 
+						}
+						progress.progress(deferred, "Running " + info.name).then(function(result){
 							if (result && result.text) {
 								editor.setText(result.text);
 								if (result.selection) {
