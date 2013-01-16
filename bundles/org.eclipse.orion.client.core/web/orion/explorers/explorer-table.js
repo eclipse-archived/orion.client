@@ -80,7 +80,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		} else if (parentItem.Directory!==undefined && parentItem.Directory===false) {
 			onComplete([]);
 		} else if (parentItem.Location) {
-			this.fileClient.fetchChildren(parentItem.ChildrenLocation).then( 
+			var progress = this.registry.getService("orion.page.progress");
+			progress.progress(this.fileClient.fetchChildren(parentItem.ChildrenLocation), "Fetching children of " + parentItem.Name).then( 
 				function(children) {
 					onComplete(self.processParent(parentItem, children));
 				}
@@ -162,15 +163,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						}
 					});
 				};
+				var progress = explorer.registry.getService("orion.page.progress");
 				if (target.Location.indexOf('/workspace') === 0){ //$NON-NLS-0$
-					fileClient.createProject(target.ChildrenLocation, entry.name).then(function(project) {
+					progress.progress(fileClient.createProject(target.ChildrenLocation, entry.name), "Initializing project " + entry.name).then(function(project) {
 					explorer.loadResourceList(explorer.treeRoot.Path, true);					
-					fileClient.read(project.ContentLocation, true).then(function(folder) {
+					progress.progress(fileClient.read(project.ContentLocation, true), "Loading project info " + project.name).then(function(folder) {
 							traverseChildren(folder);
 						});
 					});
 				} else {
-					fileClient.createFolder(target.Location, entry.name).then(function(subFolder) {
+					progress.progress(fileClient.createFolder(target.Location, entry.name), "Creating folder " + entry.name).then(function(subFolder) {
 						explorer.changedItem(target, true);
 						traverseChildren(subFolder);
 					});
@@ -280,7 +282,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	// we have changed an item on the server at the specified parent node
 	FileExplorer.prototype.changedItem = function(parent, forceExpand) {
 		var that = this;
-		this.fileClient.fetchChildren(parent.ChildrenLocation).then(function(children) {
+		var progress = this.registry.getService("orion.page.progress");
+		progress.progress(this.fileClient.fetchChildren(parent.ChildrenLocation), "Fetching children of " + parent.Name).then(function(children) {
 			children = that.model.processParent(parent, children);
 			//If a key board navigator is hooked up, we need to sync up the model
 			if(that.getNavHandler()){
@@ -359,7 +362,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			this.treeRoot.Path = path;
 			var self = this;
 			
-			this.fileClient.loadWorkspace(path).then(
+			(this.registry ? this.registry.getService("orion.page.progress").progress(this.fileClient.loadWorkspace(path), "Loading workspace " + path) : this.fileClient.loadWorkspace(path)).then(
 				function(loadedWorkspace) {
 					clearTimeout(progressTimeout);
 					//copy fields of resulting object into the tree root

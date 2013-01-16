@@ -88,7 +88,7 @@ exports.GitLogExplorer = (function() {
 			return;
 		}
 			
-		fileClient.read(location, true).then(dojo.hitch(this, function(metadata) {
+		this.registry.getService("orion.page.progress").progress(fileClient.read(location, true), "Getting git informatiob about " + location).then(dojo.hitch(this, function(metadata) {
 			if (isRemote) {
 				var gitService = this.registry.getService("orion.git.provider"); //$NON-NLS-0$
 				if (metadata.Git) {
@@ -121,7 +121,7 @@ exports.GitLogExplorer = (function() {
 		var that = this;
 		
 		if(fileURI){		
-			this.fileClient.read(fileURI, true).then(dojo.hitch(this, function(metadata) {
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileURI, true), "Getting metadata of " + fileURI).then(dojo.hitch(this, function(metadata) {
 				this.isDirectory = metadata.Directory;
 				
 				var title = branchName ? branchName + " on " + metadata.Name + " - Git Log" : metadata.Name + " - " + "Git Log";

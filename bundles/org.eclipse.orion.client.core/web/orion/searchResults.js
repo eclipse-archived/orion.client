@@ -82,7 +82,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 				//var queryToService = qObj.nonAdvQueryStr;
 				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
 				try{
-					this.fileService.search(searchParams).then(
+					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then(
 						dojo.hitch(this, function(jsonData) {
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
 						}));

@@ -443,7 +443,7 @@ exports.CompareContainer = (function() {
 				return;
 			}
 			var that = this;
-			that._fileClient.read(files[currentIndex].URL).then(function(contents) {
+			that._progress.progress(that._fileClient.read(files[currentIndex].URL), "Getting contents of " + files[currentIndex].URL).then(function(contents) {
 				files[currentIndex].Content = contents;
 				if(currentIndex < (files.length - 1)){
 					that.getFileContent(files, currentIndex+1);
@@ -521,6 +521,7 @@ exports.TwoWayCompareContainer = (function() {
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._searchService = this._registry.getService("orion.core.search"); //$NON-NLS-0$
+		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this._uiFactory = uiFactory;
 		if(!this._uiFactory){
 			this._uiFactory = new mCompareFeatures.TwoWayCompareUIFactory({
@@ -594,7 +595,7 @@ exports.TwoWayCompareContainer = (function() {
 							}.bind(this)
 					);
 				} else {
-					that._fileClient.read(fileURI, true).then(
+					that._progress.progress(that._fileClient.read(fileURI, true), "Getting file metadata " + fileURI).then(
 						function(metadata) {
 							this._fileMetadata = metadata;
 							this.setTitle(metadata.Location, metadata);
@@ -895,6 +896,7 @@ exports.InlineCompareContainer = (function() {
 		this._commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		this._fileClient = new mFileClient.FileClient(serviceRegistry);
 		this._statusService = this._registry.getService("orion.page.message"); //$NON-NLS-0$
+		this._progress = this._registry.getService("orion.page.progress"); //$NON-NLS-0$
 		this.setOptions(options, true);
 		this.setOptions({readonly: true});
 

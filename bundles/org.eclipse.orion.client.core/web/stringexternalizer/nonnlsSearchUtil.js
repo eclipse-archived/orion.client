@@ -11,9 +11,10 @@
  *******************************************************************************/
 define(['dojo'], function(dojo){
 	
-	function NonNlsSearch(fileClient, root){
+	function NonNlsSearch(fileClient, root, progress){
 		this.fileClient = fileClient;
 		this.root = root;
+		this.progress = progress;
 	}
 	
 	NonNlsSearch.prototype.getNonNls = function(){
@@ -23,8 +24,12 @@ define(['dojo'], function(dojo){
 	NonNlsSearch.prototype.parseDirectory = function(root){
 		var deferred = new dojo.Deferred();
 		var self = this;
-			
-		this.fileClient.read(root, true).then(function(jsonData){
+				
+		var def = this.fileClient.read(root, true)
+		if(this.progress){
+			this.progress.progress(def, "Reading files from " + root);
+		}
+		def.then(function(jsonData){
 			dojo.hitch(self, self.parseDirectoryData)(jsonData).then(function(result){
 				deferred.callback(result);
 			},
@@ -68,8 +73,16 @@ define(['dojo'], function(dojo){
 			}
 		} else {
 			if(jsonData.Name.lastIndexOf(".js")===(jsonData.Name.length-3)){ //$NON-NLS-0$
-				self.fileClient.read(jsonData.Location, true).then(function(jsonData){
-					self.fileClient.read(jsonData.Location, false).then(function(contents){
+				var def = self.fileClient.read(jsonData.Location, true);
+				if(self.progress){
+					self.progress.progress(def, "Preparing to extract strings from file " + jsonData.Name);
+				}
+				def.then(function(jsonData){
+					var def1 = self.fileClient.read(jsonData.Location, false);
+					if(self.progress){
+						self.progress.progress(def, "Getting file contents " + jsonData.Name);
+					}
+					def1.then(function(contents){
 						jsonData.nonnls = dojo.hitch(self, self.parseFile)(contents);
 						var ret;
 						if(jsonData.nonnls.length>0){
@@ -293,13 +306,17 @@ define(['dojo'], function(dojo){
 		return ret;
 	}
 	
-	function writeMessagesFile(fileClient, config, messages){
+	function writeMessagesFile(fileClient, config, messages, progress){
 		var deferred = new dojo.Deferred();
 		var keyToMessage = {};
 		for(var message in messages){
 			keyToMessage[messages[message]] = message;
 		}
-		fileClient.read(config.fileLocation).then(function(contents){
+		var def = fileClient.read(config.fileLocation);
+		if(progress){
+			progress.progress(def, "Reading messages file " + config.fileLocation);
+		}
+		def.then(function(contents){
 			var match = new RegExp("define\\(\\{(.*\\r?\\n*)*\\}\\);", "gmi").exec(contents); //$NON-NLS-1$ //$NON-NLS-0$
 			if(match){
 				var messagesString = match[0].substring("define(".length, match[0].length-");".length); //$NON-NLS-1$ //$NON-NLS-0$
@@ -307,7 +324,11 @@ define(['dojo'], function(dojo){
 			} else {
 				contents = "define(" + stringify(keyToMessage)+");"; //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			fileClient.write(config.fileLocation, contents).then(
+			var def1 = fileClient.write(config.fileLocation, contents);
+			if(progress){
+				progress.progress(def1, "Writing messages file " + config.fileLocation);
+			}
+			def1.then(
 					function(){
 						deferred.resolve();
 					},
@@ -317,11 +338,23 @@ define(['dojo'], function(dojo){
 		},function(error){
 			if(error.status===404){
 				function create(){
-					fileClient.createFolder(config.directory.Location, "root").then( //$NON-NLS-0$
+					var def1 = fileClient.createFolder(config.directory.Location, "root");
+					if(progress){
+						progress.progress(def1, "Creating messages directory " + config.directory.Location);
+					}
+					def1.then( //$NON-NLS-0$
 							function(metadata){
-								fileClient.createFile(metadata.Location, config.file).then(
+								var def2 = fileClient.createFile(metadata.Location, config.file);
+								if(progress){
+									progress.progress(def1, "Creating messages file " + metadata.Location);
+								}
+								def2.then(
 									function(metadata){
-										fileClient.write(metadata.Location, "define(" + stringify(keyToMessage)+");").then( //$NON-NLS-1$ //$NON-NLS-0$
+										var def3 = fileClient.write(metadata.Location, "define(" + stringify(keyToMessage)+");");
+										if(progress){
+											progress.progress(def3, "Writing messages file " + metadata.Location);
+										}
+										def3.then( //$NON-NLS-1$ //$NON-NLS-0$
 												function(){
 													deferred.resolve();
 												},
@@ -335,11 +368,19 @@ define(['dojo'], function(dojo){
 								},
 							function(error){deferred.reject(error);});
 				}
-				fileClient.read(config.directory.Location, true).then(function(metadata){
+				var def2 = fileClient.read(config.directory.Location, true);
+				if(progress){
+					progress.progress(def2, "Reading messages directory " + config.directory.Location);
+				}
+				def2.then(function(metadata){
 					create();
 				}, function(error){
 					if(error.status===404){
-						fileClient.createFolder(config.directory.Parents[0].Location, config.directory.Name).then(function(metadata){
+						var def3 = fileClient.createFolder(config.directory.Parents[0].Location, config.directory.Name);
+						if(progress){
+							progress.progress(def3, "Creating messages directory " +  config.directory.Name);
+						}
+						def3.then(function(metadata){
 							create();
 						}, function(error){
 							deferred.reject(error);

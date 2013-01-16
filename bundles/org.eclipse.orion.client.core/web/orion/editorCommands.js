@@ -105,7 +105,12 @@ exports.EditorCommandFactory = (function() {
 						var contents = editor.getText();
 						var etag = self.inputManager.getFileMetadata().ETag;
 						var args = { "ETag" : etag }; //$NON-NLS-0$
-						self.fileClient.write(self.inputManager.getInput(), contents, args).then(
+						var def = self.fileClient.write(self.inputManager.getInput(), contents, args);
+						var progress = self.serviceRegistry.getService("orion.page.progress");
+						if(progress){
+							progress.progress(def, "Saving file " + self.inputManager.getInput());
+						}
+						def.then(
 							function(result) {
 								self.inputManager.getFileMetadata().ETag = result.ETag;
 								editor.setInput(self.inputManager.getInput(), null, contents, true);
@@ -120,7 +125,11 @@ exports.EditorCommandFactory = (function() {
 									var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 									if (forceSave) {
 										// repeat save operation, but without ETag 
-										self.fileClient.write(self.inputManager.getInput(), contents).then(
+										var def = self.fileClient.write(self.inputManager.getInput(), contents)
+										if(progress){
+											progress.progress(def, "Saving file " + self.inputManager.getInput());
+										}
+										def.then(
 											function(result) {
 												self.inputManager.getFileMetadata().ETag = result.ETag;
 												editor.setInput(self.inputManager.getInput(), null, contents, true);

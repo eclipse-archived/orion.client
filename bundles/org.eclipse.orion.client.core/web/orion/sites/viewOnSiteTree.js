@@ -282,10 +282,15 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/Deferred', 'or
 		function ViewOnSiteTree(options) {
 			var serviceRegistry = options.serviceRegistry;
 			var commandService = serviceRegistry.getService("orion.page.command"); //$NON-NLS-0$
+			var progress =  serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 			var siteService = this.siteService = mSiteClient.forFileLocation(serviceRegistry, options.fileLocation);
 			var fileClient = options.fileClient;
 			
-			fileClient.read(options.fileLocation, true).then(function(file) { //$NON-NLS-0$
+			var def = fileClient.read(options.fileLocation, true);
+			if(progress){
+				progress.progress(def, "Reading file metadata " + options.fileLocation);
+			}
+			def.then(function(file) { //$NON-NLS-0$
 				options.siteService = siteService;
 				options.model = new ViewOnSiteTreeModel(siteService, options.id, file);
 				options.file = this.file = file;

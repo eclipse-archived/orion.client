@@ -31,8 +31,8 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			return qStr;
 		}
 	
-		function setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner){		
-			fileClient.read(dojo.hash(), true).then(
+		function setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress){		
+			progress.progress(fileClient.read(dojo.hash(), true), "Getting file metadata " + dojo.hash()).then(
 					dojo.hitch(this, function(metadata) {
 						mGlobalCommands.setPageTarget({task: "Externalize Strings", target: metadata, 
 							makeBreadcrumbLink: function(seg,location){seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;}, //$NON-NLS-0$
@@ -56,7 +56,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			var dialogService = new mDialogs.DialogService(serviceRegistry);
 			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			new mProgress.ProgressService(serviceRegistry, operationsClient);
+			var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
 			// Favorites
 			new mFavorites.FavoritesService({serviceRegistry: serviceRegistry});
@@ -82,11 +82,11 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 				}
 			}
 			updateToolbar();
-			setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner);
+			setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
 			searchResultsGenerator.loadResults(dojo.hash());
 			//every time the user manually changes the hash, we need to load the results with that name
 			dojo.subscribe("/dojo/hashchange", searchResultsGenerator, function() { //$NON-NLS-0$
-				setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner);
+				setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
 				searchResultsGenerator.loadResults(dojo.hash());
 				updateToolbar();   
 			});

@@ -130,6 +130,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		this.registry = registry;
 		this._commandService = commandService;
 		this._fileClient = new mFileClient.FileClient(this.registry);
+		this._progress = registry.getService("orion.page.progress");
 		this.parentId = parentId;
 		this.renderer = new CompareTreeExplorerRenderer({checkbox: false}, this);
 		//this.declareCommands();
@@ -185,7 +186,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	
 	CompareTreeExplorer.prototype._loadOneFileMetaData =  function(index, onComplete){
 		var item = this._compareResults[index];
-		this._fileClient.read(item.fileURL, true).then(
+		this._progress.progress(this._fileClient.read(item.fileURL, true), "Reading file metadata " + item.fileURL).then(
 			dojo.hitch(this, function(meta) {
 				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 				item.parentLocation = meta.Parents[0].ChildrenLocation;
@@ -221,7 +222,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			return;
 		}
 		var that = this;
-		that._fileClient.read(locations[index].URL, true).then(function(meta) {
+		that._progress.progress(that._fileClient.read(locations[index].URL, true), "Reading file metadata " + locations[index].URL).then(function(meta) {
 			locations[index].childrenLocation = meta.ChildrenLocation;
 			if(index < (locations.length - 1)){
 				that._getChildrenLocation(locations, index+1, onComplete);
@@ -244,7 +245,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			return;
 		}
 		var that = this;
-		that._fileClient.read(files[currentIndex].URL).then(function(contents) {
+		that._progress.progress(that._fileClient.read(files[currentIndex].URL), "Reading file " + files[currentIndex].URL).then(function(contents) {
 			files[currentIndex].Content = contents;
 			if(currentIndex < (files.length - 1)){
 				that._getFileContent(files, currentIndex+1, OveralIndex);
