@@ -12,59 +12,107 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mProjectGrid, mProjectData ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mProjectGrid, mProjectData, mProjectDataManager ){
 	
 		function createTestData(){
 			
 			var testData = [];
 			
+			
 			var d = new Date();
+			
+			var cultura = new mProjectData( 'Online Store', 
+											d, 
+											'http://www.culturaespanola.ca', 
+											'', 
+											'Adding an online store to sell Spanish courses', 
+											'Cultura Espanol' );
+			
+			var shelterbox = new mProjectData( 'Map Data Project', 
+												d, 
+												'http://www.sbmapdata.appspot.com', 
+												'', 
+												'Creating a new application that allows a person to enter crisis data to be charted.', 
+												'ShelterBox' );
+														
+			var timeline = new mProjectData( 'Timeline Application', 
+											 d, 
+														'http://www.clockplot.appspot.com', 
+														'', 
+														'Creating a visual application that plots timelines.', 
+														'Personal' );
+														
+			var blog = new mProjectData( 'My blog', 
+														d, 
+														'http://www.hickory.ca', 
+														'', 
+														'My web log ...', 
+														'Personal' );
+														
+														
+			var orion = new mProjectData( 'Orion Information Page', 
+														d, 
+														'http://www.eclipse.org/orion', 
+														'', 
+														'Orion Project Page', 
+														'Personal' );										
+
+			testData.push( blog );
+			testData.push( shelterbox );
+			testData.push( cultura );
+			testData.push( timeline );
+			testData.push( orion );
 			
 			return testData;
 		}
-	
-		function fetchProjectData(){
 		
-			/* This function should read the user's project data from the 
-			   file system */
+	
+		function showProjectGrid( projectData ){
 			
-			var projectData;
-			
-			projectData = createTestData();
-			
-			return projectData;
+			var projectList = [];
+		
+			for( var project = 0; project < projectData.length; project++ ){
+				var orionProject = new mProjectData( projectData[project] );
+				projectList.push( orionProject );
+			}
+		
+			console.log( projectList );
+			var mainPanel = document.getElementById( 'projectGrid' );
+			var projectGrid = new mProjectGrid.ProjectGrid( mainPanel, projectList );
 		}
+		
+		var projectMetaData;
 		
 		mBootstrap.startup().then(
 		
-		function(core) {
-		
-			/* Render the page */
+			function(core) {
 			
-			var serviceRegistry = core.serviceRegistry;
+				/* Render the page */
+				
+				var serviceRegistry = core.serviceRegistry;
+	
+				this.projectDataManager = new mProjectDataManager( serviceRegistry );
+				
+				var preferences = core.preferences;
 			
-			var preferences = core.preferences;
-		
-			var selection = new mSelection.Selection(serviceRegistry);
+				var selection = new mSelection.Selection(serviceRegistry);
+				
+				var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 			
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-		
-			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );	
+				mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );	
+				
+				/* Create the content */
+				
+				var sidePanel = document.getElementById( 'projectTree' );
+				
+				var projectTree = new mProjectTree.ProjectTree( sidePanel );
+				
+				this.projectDataManager.getProjectData( showProjectGrid ); 
+				
+	//			var projectData = fetchProjectData(serviceRegistry);
 			
-			/* Create the content */
-			
-			var sidePanel = document.getElementById( 'projectTree' );
-			
-			var projectTree = new mProjectTree.ProjectTree( sidePanel );
-			
-			var mainPanel = document.getElementById( 'projectGrid' );
-			
-			var projectData = fetchProjectData();
-			
-			var projectGrid = new mProjectGrid.ProjectGrid( mainPanel, projectData );
-		
 		});
 	}	
 );
