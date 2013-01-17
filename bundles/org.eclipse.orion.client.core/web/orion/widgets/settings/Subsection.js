@@ -8,11 +8,11 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
+/* Shows labeled sections */
+// TODO convert to orion/section
 
 define([], function() {
 

@@ -8,7 +8,7 @@
  * 
  * Contributors: Anton McConville - IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global dojo dijit widgets orion  window console define localStorage*/
+/*global orion window console define localStorage*/
 /*jslint browser:true*/
 
 define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {

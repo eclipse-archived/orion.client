@@ -654,7 +654,7 @@ exports.ExplorerNavHandler = (function() {
 exports.ExplorerNavDict = (function() {
 	/**
 	 * Creates a new explorer navigation dictionary. The key of the dictionary is the model id. The value is a wrapper object that holds .modelItem, .rowDomNode and .gridChildren properties.
-	 * The .modelItem property helps quickly looking up a model object by a given id. The .rowDomNode also helps to find out the row DOM node instead of doing dojo.byId(). 
+	 * The .modelItem property helps quickly looking up a model object by a given id. The .rowDomNode also helps to find out the row DOM node instead of doing a query. 
 	 * The .gridChildren is an array representing all the grid navigation information, which the caller has to fill the array out.
 	 *
 	 * @name orion.ExplorerNavHandler.ExplorerNavDict

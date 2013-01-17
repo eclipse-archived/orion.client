@@ -72,7 +72,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		return children;
 	};
 		
-	Model.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+	Model.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
 		var self = this;
 		// the parent already has the children fetched
 		if (parentItem.children) {
