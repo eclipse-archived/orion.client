@@ -12,7 +12,7 @@
 /*global define dojo dijit console document window */
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/commands', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 
-        'orion/git/util', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog', 'dojo/date/locale'], 
+        'orion/git/util', 'orion/git/gitCommands', 'orion/git/widgets/CommitTooltipDialog', 'dojo/date/locale', 'dojo/hash'], 
 		function(messages, dojo, mExplorer, mSelection, mSection, mCommands, mGlobalCommands, mDiffProvider , mCompareContainer, mGitUtil, mGitCommands) {
 	
 	var exports = {};
