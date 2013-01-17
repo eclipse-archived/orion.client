@@ -319,7 +319,7 @@ exports.EditorCommandFactory = (function() {
 							window.document.body.appendChild(iframe);
 							// Listen for notification from the iframe.  This should eventually belong as part of the plugin registry.
 							// This mechanism should become generalized into a "page services" API for plugin iframes to contact the outer context.
-							window.addEventListener("message", function(event) { //$NON-NLS-0$
+							window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
 								if (event.source !== iframe.contentWindow) {
 									return;
 								}
@@ -331,6 +331,7 @@ exports.EditorCommandFactory = (function() {
 										} else if (data.result) {
 											deferred.resolve(data.result);
 										}
+										window.removeListener("message", _messageHandler, false);
 										window.document.body.removeChild(iframe);
 									}
 								}
