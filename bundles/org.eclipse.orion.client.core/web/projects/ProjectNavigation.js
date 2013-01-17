@@ -1,0 +1,128 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2012 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ * 
+ * Contributors: Anton McConville - IBM Corporation - initial API and implementation
+ ******************************************************************************/
+/*global orion window console define localStorage*/
+/*jslint browser:true*/
+
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileClient' ], 
+	
+	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileClient ) {
+
+		function ProjectNavigation( anchor, serviceRegistry, commandService ){
+		
+			var isExpanded = false;
+			var that = this;
+			
+			this.anchor = anchor;
+			
+			this.anchor.innerHTML = this.template;
+			
+			this.workingSetNode = this.anchor.firstChild.children[1];
+		
+			this.workingSetSection = new mSection.Section(this.workingSetNode, {
+					id: "workingset", //$NON-NLS-0$
+					title: "Working Set", //$NON-NLS-0$
+					content: '<div id="WorkingSet"></div>', //$NON-NLS-0$
+					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
+					canHide: true,
+					useAuxStyle: true,
+					slideout: true,
+					onExpandCollapse: function(isExpanded, section) {
+						commandService.destroy(section.selectionNode);
+						if (isExpanded) {
+							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
+						}
+				}
+			});	
+			
+			this.drivesNode = this.anchor.firstChild.children[2];
+		
+			this.workingSetSection = new mSection.Section(this.workingSetNode, {
+					id: "drives", //$NON-NLS-0$
+					title: "Drives", //$NON-NLS-0$
+					content: '<div id="Drives"></div>', //$NON-NLS-0$
+					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
+					canHide: true,
+					useAuxStyle: true,
+					slideout: true,
+					onExpandCollapse: function(isExpanded, section) {
+						commandService.destroy(section.selectionNode);
+						if (isExpanded) {
+							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
+						}
+				}
+			});	
+			
+			this.repositoriesNode = this.anchor.firstChild.children[3];
+		
+			this.workingSetSection = new mSection.Section(this.workingSetNode, {
+					id: "repositories", //$NON-NLS-0$
+					title: "Repositories", //$NON-NLS-0$
+					content: '<div id="Repositories"></div>', //$NON-NLS-0$
+					preferenceService: serviceRegistry.getService("orion.core.preference"), //$NON-NLS-0$
+					canHide: true,
+					useAuxStyle: true,
+					slideout: true,
+					onExpandCollapse: function(isExpanded, section) {
+						commandService.destroy(section.selectionNode);
+						if (isExpanded) {
+							commandService.renderCommands(section.selectionNode.id, section.selectionNode, null, that, "button"); //$NON-NLS-0$
+						}
+				}
+			});	
+			
+			var fileClient = new mFileClient.FileClient( serviceRegistry );			
+					
+			this.selection = new mSelection.Selection( serviceRegistry, "orion.directoryPrompter.selection" ); //$NON-NLS-0$
+
+			this.explorer = new mExplorerTable.FileExplorer({
+				treeRoot: {children:[]}, 
+				selection: this.selection, 
+				serviceRegistry: serviceRegistry,
+				fileClient: fileClient, 
+				parentId: "Drives", 
+				rendererFactory: function(explorer) {  //$NON-NLS-0$
+					return new DriveTreeRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
+			}}); //$NON-NLS-0$
+			
+			this.explorer.loadResourceList( '/', true );
+		}
+		
+		var workingSetNode;
+		ProjectNavigation.prototype.workingSetNode = workingSetNode;
+		
+		var drivesNode;
+		ProjectNavigation.prototype.workingSetNode = drivesNode;
+		
+		var repositoriesNode;
+		ProjectNavigation.prototype.workingSetNode = repositoriesNode;
+		
+		
+		var anchor;
+		ProjectNavigation.prototype.anchor = anchor;
+		
+		var template = '<div>' +
+							'<div id="configuration"></div>' +
+							'<div id="workingSet">' +
+							'<div>' +
+							'<div id="drives">' +
+							'<div>' +
+							'<div id="repositories">' +
+							'<div>' +
+						'</div>';
+		ProjectNavigation.prototype.template = template;
+		
+		var workingSetSection;
+		ProjectNavigation.prototype.workingSetSection = workingSetSection;
+			
+		return ProjectNavigation;
+	}
+);
+			

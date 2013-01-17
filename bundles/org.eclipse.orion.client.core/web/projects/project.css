@@ -141,8 +141,7 @@ user agent stylesheetdiv {
 	width:30px;
 	background-color: whiteSmoke;
 	color: #444;
-	border: 1px solid #FF00FF;
-	border: 1px solid rgba(0, 0, 0, 0.1);
+	border: 1px solid gainsboro;
 	display:inline-block;
 }
 
@@ -151,7 +150,7 @@ user agent stylesheetdiv {
 	width:30px;
 	background-color: whiteSmoke;
 	color: #444;
-	border: 1px solid #FF00FF;
+	border: 1px solid gainsboro;
 	display:inline-block;
 }
 
@@ -286,4 +285,14 @@ table tr:nth-child(even) {
 	padding-top: 10px;
 	padding-left: 10px;
 	white-space: nowrap;
+}
+
+.projectConfiguration{
+	padding-left:20px;
+}
+
+.coaching {
+font-family: "Helvetica Neue", HelveticaNeue, "Droid Sans", Roboto, Helvetica, sans-serif;
+color: #444;
+font-size: 12px;
 }

@@ -45,10 +45,17 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	
 	SFTPNewConnectionPopup.prototype._bindToDom = function(parent) {
 		var self = this;
-		this.$addSftpConnection.addEventListener("click", function() { //$NON-NLS-0$
-			var connectionString = self.$sftpUser.value + "@" + self.$sftpHost.value +":" + self.$sftpPort.value + self.$sftpPath.value; //$NON-NLS-1$ //$NON-NLS-0$
-			self._notify({name: connectionString});
-			self.hide();
+		var addConnection = function() { 
+			var connectionString = this.$sftpUser.value + "@" + this.$sftpHost.value +":" + this.$sftpPort.value + this.$sftpPath.value; //$NON-NLS-1$ //$NON-NLS-0$
+			this._notify({name: connectionString});
+			this.hide();
+		};
+		this.$addSftpConnection.addEventListener("click", addConnection.bind(self), false); //$NON-NLS-0$
+		this.$addSftpConnection.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				addConnection.bind(self)();
+				lib.stop(e);
+			}				
 		}, false);
 	};
 	
@@ -98,8 +105,15 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 	};
 	
 	SFTPConnectionDialog.prototype._bindToDom = function(parent) {
+		var self = this;
 		this.$sftpConnectionList.style.minWidth = "220px"; //$NON-NLS-0$
 		this._popupDialog = new SFTPNewConnectionPopup(this.$newSftpConnection, this.onAddConnection.bind(this));
+		this.$newSftpConnection.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				self._popupDialog.show();
+				lib.stop(e);
+			}				
+		}, false);
 		this._addChildDialog(this._popupDialog);
 		this._populateSelect();
 	};

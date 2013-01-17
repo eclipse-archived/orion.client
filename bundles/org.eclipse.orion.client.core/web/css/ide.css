@@ -890,3 +890,12 @@ input {
 	float: right;
 	padding: 10px;
 }
+
+.delegatedUI {
+	position: absolute; 
+	min-width: 600px; 
+	min-height: 400px; 
+	left: 150px; 
+	top: 150px; 
+	z-index: 150;
+}

@@ -13,59 +13,78 @@
 // HTML Templates Shim -- see http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/templates/index.html
 
 (function() {
-	document.body.insertAdjacentHTML("beforeend", "<template id='__testTemplate__'><div></div></template>");
-	var testTemplate = document.getElementById("__testTemplate__");
-	var supportsTemplate = !! testTemplate.content;
-	document.body.removeChild(testTemplate);
-	if (supportsTemplate) {
-		return;
-	}
+	function shim() {
+		document.body.insertAdjacentHTML("beforeend", "<template id='__testTemplate__'><div></div></template>");
+		var testTemplate = document.getElementById("__testTemplate__");
+		var supportsTemplate = !! testTemplate.content;
+		document.body.removeChild(testTemplate);
+		if (supportsTemplate) {
+			return;
+		}
 
-	var templatesDoc = document.implementation.createHTMLDocument("");
+		var templatesDoc = document.implementation.createHTMLDocument("");
 
-	function shimTemplate(template) {
-		templatesDoc = templatesDoc || document.implementation.createHTMLDocument("");
-		template.content = templatesDoc.createDocumentFragment();
-		Object.defineProperty(template, "innerHTML", {
-			set: function(text) {
-				while (this.content.firstChild) {
-					this.content.removeChild(this.content.firstChild);
+		function shimTemplate(template) {
+			templatesDoc = templatesDoc || document.implementation.createHTMLDocument("");
+			Object.defineProperty(template, "content", {
+				value: templatesDoc.createDocumentFragment(),
+				enumerable: true
+			});
+			Object.defineProperty(template, "innerHTML", {
+				set: function(text) {
+					while (this.content.firstChild) {
+						this.content.removeChild(this.content.firstChild);
+					}
+					var template = templatesDoc.createElement("template");
+					template.innerHTML = text;
+					while (template.firstChild) {
+						this.content.appendChild(template.firstChild);
+					}
+				},
+				get: function() {
+					var template = templatesDoc.createElement("template");
+					template.appendChild(this.content.cloneNode(true));
+					return template.innerHTML;
 				}
-				var template = templatesDoc.createElement("template");
-				template.innerHTML = text;
-				while (template.firstChild) {
-					this.content.appendChild(template.firstChild);
-				}
-			},
-			get: function() {
-				var template = templatesDoc.createElement("template");
-				template.appendChild(this.content.cloneNode(true));
-				return template.innerHTML;
+			});
+			while (template.firstChild) {
+				template.content.appendChild(template.firstChild);
+			}
+		}
+
+		// hide template styling
+		var templateStyle = document.createElement("style");
+		templateStyle.textContent = "template{display:none;}";
+		document.head.appendChild(templateStyle);
+
+		//process existing templateElements
+		Array.prototype.forEach.call(document.querySelectorAll("template"), function(template) {
+			if (!template.content) {
+				shimTemplate(template);
 			}
 		});
-		while (template.firstChild) {
-			template.content.appendChild(template.firstChild);
-		}
+
+		// listen for new template additions
+		// Note: uisng DOMNodeInserted instead of MutationObserver to allow code access the "content" property immediately
+		addEventListener("DOMNodeInserted", function(mutationEvent) {
+			var target = mutationEvent.target;
+			if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
+				shimTemplate(target);
+			}
+		});
 	}
 
-	// hide template styling
-	var templateStyle = document.createElement("style");
-	templateStyle.textContent = "template{display:none;}";
-	document.head.appendChild(templateStyle);
-
-	//process existing templateElements
-	Array.prototype.forEach.call(document.querySelectorAll("template"), function(template) {
-		if (!template.content) {
-			shimTemplate(template);
-		}
-	});
-
-	// listen for new template additions
-	// Note: we use DOMNodeInserted because this has to happen synchronously
-	addEventListener("DOMNodeInserted", function(mutationEvent) {
-		var target = mutationEvent.target;
-		if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
-			shimTemplate(target);
-		}
-	});
+	if (document.readyState === "complete") {
+		shim();
+	} else {
+		var called = false;
+		var once = function() {
+			if (!called) {
+				called = true;
+				shim();
+			}
+		};
+		document.addEventListener("DOMContentLoaded", once, false);
+		addEventListener("load", once, false);
+	}
 }());

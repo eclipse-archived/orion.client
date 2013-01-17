@@ -194,12 +194,34 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			window.location = href;
 		}
 	}
+	
+	function createButton(text, callback) {
+		var button = document.createElement("span"); //$NON-NLS-0$
+		button.role = "button"; //$NON-NLS-0$
+		button.tabIndex = 0; 
+		button.appendChild(document.createTextNode(text));
+		button.className = "commandButton commandMargins"; //$NON-NLS-0$
+		button.addEventListener("click", function(e) { //$NON-NLS-0$
+			callback();
+			lib.stop(e);
+		}, false);
+		button.addEventListener("keydown", function(e) { //$NON-NLS-0$
+			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				callback();
+				lib.stop(e);
+			}				
+		}, false);
+		return button;	
+	}
+
+		
 
 	//return module exports
 	return {
 		getUserKeyString: getUserKeyString,
 		getUserText: getUserText,
 		openInNewWindow: openInNewWindow,
-		followLink: followLink
+		followLink: followLink,
+		createButton: createButton
 	};
 });
