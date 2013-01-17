@@ -8,8 +8,6 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/* jslint browser:true */
-/* global define orion window dojo dijit */
 
 define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib', 'dojo/date/locale' ], function(
 		messages, i18nUtil, Deferred, dialog, lib) {

@@ -10,6 +10,7 @@
  *******************************************************************************/
 /*global Buffer console module process require*/
 var compat = require('./compat');
+var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -20,13 +21,21 @@ var resource = require('./resource');
 var USER_WRITE_FLAG = parseInt('0200', 8);
 var USER_EXECUTE_FLAG = parseInt('0100', 8);
 
-function getPartsParam(req) {
+function getParam(req, paramName) {
 	var parsedUrl = url.parse(req.url, true);
-	return parsedUrl && parsedUrl.query.parts;
+	return parsedUrl && parsedUrl.query && parsedUrl.query[paramName];
 }
 
-function parseBoolean(strOrBool) {
-	return typeof strOrBool === 'boolean' ? strOrBool : (strOrBool === 'false' ? false : true);
+/**
+ * Copes with Orion server REST API's use of "true" and "false" strings
+ */
+function parseBoolean(obj) {
+	if (typeof obj === 'boolean') {
+		return obj;
+	} else if (obj === 'false') {
+		return false;
+	}
+	return !!obj;
 }
 
 function writeEmptyFilePathError(res, rest) {
@@ -45,9 +54,10 @@ module.exports = function(options) {
 	var fileRoot = options.root;
 	var workspaceDir = options.workspaceDir;
 	if (!fileRoot) { throw 'options.root is required'; }
+	if (!workspaceDir) { throw 'options.workspaceDir is required'; }
 
-	function getSafeFilePath(rest) {
-		return fileUtil.safeFilePath(workspaceDir, rest);
+	function getSafeFilePath(res, wwwpath) {
+		return fileUtil.safeFilePath(workspaceDir, wwwpath);
 	}
 
 	function getParents(filepath, wwwpath) {
@@ -70,64 +80,14 @@ module.exports = function(options) {
 		return parents.reverse();
 	}
 
-	function getContents(req, res, next, rest, filepath) {
-		fs.exists(filepath, function(exists) {
-			if (!exists) {
-				res.setHeader('Content-Type', 'application/json');
-				res.writeHead(404);
-				res.end(JSON.stringify({Message: 'File not found: ' + rest}));
-			} else {
-				fs.stat(filepath, function(error, stats) {
-					if (stats.isDirectory()) {
-						// TODO ?depth parameter
-						fileUtil.getChildren(filepath, api.join(fileRoot, rest)/*this dir*/, null/*omit nothing*/, function(children) {
-							var name = path.basename(filepath);
-							if (name[name.length-1] === path.sep) {
-								name = name.substring(0, name.length-1);
-							}
-							var childrenJSON = JSON.stringify(children);
-							var folder = JSON.stringify({
-								Attributes: {},
-								Children: children,
-								Directory: true,
-								ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
-								LocalTimeStamp: stats.mtime.getTime(),
-								Location: api.join(fileRoot, rest),
-								Name: decodeURIComponent(name),
-								Parents: getParents(filepath, rest)
-								
-							});
-							res.setHeader('Content-Type', 'application/json');
-							res.setHeader('Content-Length', folder.length);
-							res.end(folder);
-						});
-					} else {
-						var stream = fs.createReadStream(filepath);
-						res.setHeader('Content-Length', stats.size);
-						stream.pipe(res);
-						stream.on('error', function(e) {
-							res.writeHead(500, e.toString());
-							res.end();
-						});
-						stream.on('end', function() {
-							res.statusCode = 200;
-							res.end();
-						});
-					}
-				});
-			}
-		});
-	}
-
-	function writeFileMetadata(res, rest, filepath, stats, etag) {
+	function writeFileMetadata(res, rest, filepath, stats, etag, includeChildren) {
 		var isDir = stats.isDirectory();
 		var metaObj = {
 			Name: decodeURIComponent(path.basename(filepath)),
-			Location: api.join(fileRoot, rest),
+			Location: api.join(fileRoot, rest) + (isDir ? '/' : ''),
 			Directory: isDir,
 			LocalTimeStamp: stats.mtime.getTime(),
 			Parents: getParents(filepath, rest),
-			ChildrenLocation: isDir ? api.join(fileRoot, rest) + '?depth=1' : null,
 			//Charset: "UTF-8",
 			Attributes: {
 				// TODO fix this
@@ -137,43 +97,89 @@ module.exports = function(options) {
 		};
 		if (etag) {
 			metaObj.ETag = etag;
+			res.setHeader('ETag', etag);
 		}
-		var meta = JSON.stringify(metaObj);
-		res.setHeader('Content-Type', 'application/json');
-		res.setHeader('Content-Length', meta.length);
-		res.end(meta);
+		if (!isDir) {
+			write(null, res, null, metaObj);
+		} else {
+			// Orion's File Client expects ChildrenLocation to always be present
+			metaObj.ChildrenLocation = api.join(fileRoot, rest) + '?depth=1';
+			if (!includeChildren) {
+				write(null, res, null, metaObj);
+			} else {
+				fileUtil.getChildren(filepath, api.join(fileRoot, rest)/*this dir*/, null/*omit nothing*/, function(children) {
+					var name = path.basename(filepath);
+					if (name[name.length-1] === path.sep) {
+						name = name.substring(0, name.length-1);
+					}
+					metaObj.Children = children;
+	//				var childrenJSON = JSON.stringify(children);
+	//				var folder = JSON.stringify({
+	//					ChildrenLocation: api.join(fileRoot, rest) + '?depth=1',
+	//					LocalTimeStamp: stats.mtime.getTime(),
+	//					Location: api.join(fileRoot, rest),
+	//					Name: decodeURIComponent(name),
+	//					Parents: getParents(filepath, rest)
+	//				});
+	//				write(200, res, null, folder)
+					write(null, res, null, metaObj);
+				});
+			}
+		}
+	}
+
+	function writeFileContents(res, rest, filepath, stats, etag) {
+		if (stats.isDirectory()) {
+			//shouldn't happen
+			writeError(500, res, "Expected a file not a directory");
+		} else {
+			var stream = fs.createReadStream(filepath);
+			res.setHeader('Content-Length', stats.size);
+			res.setHeader('ETag', etag);
+			stream.pipe(res);
+			stream.on('error', function(e) {
+				res.writeHead(500, e.toString());
+				res.end();
+			});
+			stream.on('end', function() {
+				res.statusCode = 200;
+				res.end();
+			});
+		}
 	}
 
 	/*
 	 * Handler begins here
 	 */
-	return resource(fileRoot, {
+	return connect()
+	.use(connect.json())
+	.use(resource(fileRoot, {
 		GET: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(rest);
-			if (getPartsParam(req) === 'meta') {
-				// GET metadata
-				fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-					if (error) {
-						res.statusCode = 500;
-						res.end({Message: error && error.toString()});
-						return;
-					}
-					writeFileMetadata(res, rest, filepath, stats, etag);
-				});
-			} else {
-				// GET file contents
-				getContents(req, res, next, rest, filepath);
-			}
+			var filepath = getSafeFilePath(res, rest);
+			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
+				if (error && error.code === 'ENOENT') {
+					writeError(404, res, 'File not found: ' + rest);
+				} else if (error) {
+					writeError(500, res, error);
+				} else if (stats.isFile() && getParam(req, 'parts') !== 'meta') {
+					// GET file contents
+					writeFileContents(res, rest, filepath, stats, etag);
+				} else {
+					// TODO handle depth > 1 for directories
+					var includeChildren = (stats.isDirectory() && getParam(req, 'depth') === '1');
+					writeFileMetadata(res, rest, filepath, stats, etag, includeChildren);
+				}
+			});
 		},
 		PUT: function(req, res, next, rest) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(rest);
-			if (getPartsParam(req) === 'meta') {
+			var filepath = getSafeFilePath(res, rest);
+			if (getParam(req, 'parts') === 'meta') {
 				// TODO implement put of file attributes
 				res.statusCode = 501;
 				return;
@@ -189,8 +195,8 @@ module.exports = function(options) {
 					console.warn(e);
 				});
 				req.on('end', function(e) {
-					var etagHeader = req.headers['if-match'];
-					if(!etagHeader){//If etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
+					var ifMatchHeader = req.headers['if-match'];
+					if(!ifMatchHeader){//If etag is not defined, we are writing blob. In this case the file does not exist yet so we need create it.
 						fs.writeFile(filepath, requestBody, function(error) {
 							if (error) {
 								writeError(500, res, error);
@@ -205,7 +211,7 @@ module.exports = function(options) {
 							if (error && error.code === 'ENOENT') {
 								res.statusCode = 404;
 								res.end();
-							} else if (etagHeader && etagHeader !== etag) {
+							} else if (ifMatchHeader && ifMatchHeader !== etag) {
 								res.statusCode = 412;
 								res.end();
 							} else {
@@ -235,7 +241,7 @@ module.exports = function(options) {
 				write(400, res, 'Missing Slug header or Name property');
 				return;
 			}
-			var destFilepath = getSafeFilePath(path.join(rest, name));
+			var destFilepath = getSafeFilePath(res, path.join(rest, name));
 			fs.exists(destFilepath, function(destExists) {
 				function writeCreatedFile(error) {
 					if (error) {
@@ -246,12 +252,13 @@ module.exports = function(options) {
 						// TODO: maybe set ReadOnly and Executable based on fileAtts
 					}
 					// serialize the file metadata and we're done
+					res.statusCode = 201;
 					fileUtil.withStats(destFilepath, function(error, stats) {
 						if (error) {
 							writeError(500, res, error);
 							return;
 						}
-						writeFileMetadata(res, rest, destFilepath, stats, null);
+						writeFileMetadata(res, api.join(rest, encodeURIComponent(name)), destFilepath, stats, null);
 					});
 				}
 				function createFile() {
@@ -267,7 +274,7 @@ module.exports = function(options) {
 						writeError(400, res, 'Missing Location property in request body');
 						return;
 					}
-					var sourceFilepath = getSafeFilePath(api.rest(fileRoot, api.matchHost(req, sourceUrl)));
+					var sourceFilepath = getSafeFilePath(res, api.rest(fileRoot, api.matchHost(req, sourceUrl)));
 					fs.exists(sourceFilepath, function(sourceExists) {
 						if (!sourceExists) {
 							write(404, res, null, 'File not found: ' + sourceUrl);
@@ -307,14 +314,14 @@ module.exports = function(options) {
 			if (writeEmptyFilePathError(res, rest)) {
 				return;
 			}
-			var filepath = getSafeFilePath(rest);
+			var filepath = getSafeFilePath(res, rest);
 			fileUtil.withStatsAndETag(filepath, function(error, stats, etag) {
-				var etagHeader = req.headers['if-match'];
+				var ifMatchHeader = req.headers['if-match'];
 				if (error && error.code === 'ENOENT') {
 					res.statusCode = 204;
 					res.end();
-				} else if (etagHeader && etag !== etag) {
-					write(214, res);
+				} else if (ifMatchHeader && ifMatchHeader !== etag) {
+					write(412, res);
 				} else {
 					var callback = function(error) {
 						if (error) {
@@ -332,5 +339,5 @@ module.exports = function(options) {
 				}
 			});
 		}
-	});
+	}));
 };

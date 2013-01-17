@@ -15,9 +15,12 @@
     "dijit": "https://github.com/mamacdon/dijit/archive/1.6.1.tar.gz",
     "dojox": "https://github.com/mamacdon/dojox/archive/1.6.1.tar.gz"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "mocha": "*",
+    "supertest": "*"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha --reporter spec"
   },
   "repository": {
     "type": "git",

@@ -9,14 +9,12 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define document dijit */
-/*browser:true*/
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
+define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands',
         'orion/dialogs', 'orion/selection', 'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands', 'orion/git/gitClient',
         'orion/ssh/sshTools', 'orion/git/gitLogExplorer', 'orion/git/gitCommands',
-	    'orion/links', 'dojo/hash'], 
-		function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, mFileClient, mOperationsClient,
-					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks) {
+	    'orion/links', 'orion/PageUtil'], 
+		function(messages, require, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection, mFileClient, mOperationsClient,
+					mSearchClient, mGlobalCommands, mGitClient, mSshTools, mGitLogExplorer, mGitCommands, mLinks, PageUtil) {
 
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
@@ -69,12 +67,12 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 			commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.previousLogPage", 1); //$NON-NLS-1$ //$NON-NLS-0$
 			commandService.registerCommandContribution("pageNavigationActions", "eclipse.orion.git.nextLogPage", 2); //$NON-NLS-1$ //$NON-NLS-0$
 
-			explorer.redisplay();
+			var pageParams = PageUtil.matchResourceParameters();
+			explorer.display(pageParams.resourceRaw);
 
-			// every time the user manually changes the hash, we need to load the
-			// workspace with that name
-			dojo.subscribe("/dojo/hashchange", explorer, function(){
-				explorer.redisplay();
-			});
+			window.addEventListener("hashchange", function() {
+				var pageParams = PageUtil.matchResourceParameters();
+				explorer.display(pageParams.resourceRaw);
+			}, false);
 		});
 	});

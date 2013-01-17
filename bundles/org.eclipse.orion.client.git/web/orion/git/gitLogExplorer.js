@@ -12,7 +12,7 @@
 /*global define dijit console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/explorers/explorer', 'orion/commands', 'orion/section', 'orion/globalCommands', 
-        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog', 'dojo/date/locale'], 
+        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/git/widgets/CommitTooltipDialog', 'dojo/date/locale', 'dojo/hash'], 
 		function(messages, require, dojo, mExplorer, mCommands, mSection, mGlobalCommands, mGitCommands, mNavUtils) {
 var exports = {};
 

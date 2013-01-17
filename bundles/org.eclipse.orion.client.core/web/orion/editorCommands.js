@@ -312,13 +312,17 @@ exports.EditorCommandFactory = (function() {
 							iframe.id = info.id;
 							iframe.name = info.id;
 							iframe.type = "text/html"; //$NON-NLS-0$
+							iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
 							iframe.frameborder = 1;
 							iframe.src = href;
 							iframe.className = "delegatedUI"; //$NON-NLS-0$
 							window.document.body.appendChild(iframe);
 							// Listen for notification from the iframe.  This should eventually belong as part of the plugin registry.
 							// This mechanism should become generalized into a "page services" API for plugin iframes to contact the outer context.
-							window.addEventListener("message", function(event) { //$NON-NLS-0$
+							window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
+								if (event.source !== iframe.contentWindow) {
+									return;
+								}
 								if (typeof event.data === "string") { //$NON-NLS-0$
 									var data = JSON.parse(event.data);
 									if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
@@ -327,6 +331,7 @@ exports.EditorCommandFactory = (function() {
 										} else if (data.result) {
 											deferred.resolve(data.result);
 										}
+										window.removeListener("message", _messageHandler, false);
 										window.document.body.removeChild(iframe);
 									}
 								}

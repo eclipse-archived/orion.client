@@ -59,7 +59,6 @@ function startServer(options) {
 			.use(logger(options))
 			.use(connect.urlencoded())
 			.use(auth(options))
-			.use(connect.json())
 			.use(connect.compress())
 			// static code
 			.use(orionNodeStatic(path.normalize(path.join(LIBS, 'orionode.client/')), {

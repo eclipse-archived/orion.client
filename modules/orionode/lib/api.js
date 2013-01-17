@@ -58,8 +58,10 @@ function join(/*varags*/) {
  * @param {Object|String} [body] If Object, response will be JSON. If string, response will be text/plain.
  */
 function write(code, res, headers, body) {
-	res.statusCode = code;
-	if (headers) {
+	if (typeof code === 'number') {
+		res.statusCode = code;
+	}
+	if (headers && typeof headers === 'object') {
 		Object.keys(headers).forEach(function(header) {
 			res.setHeader(header, headers[header]);
 		});
@@ -82,14 +84,15 @@ function write(code, res, headers, body) {
  * @param {String|Error} [msg]
  */
 function writeError(code, res, msg) {
-	res.statusCode = code;
 	msg = msg instanceof Error ? msg.message : msg;
 	if (typeof msg === 'string') {
 		var err = JSON.stringify({Error: msg, Message: msg});
 		res.setHeader('Content-Type', 'application/json');
 		res.setHeader('Content-Length', err.length);
+		res.writeHead(code, msg);
 		res.end(err);
 	} else {
+		res.writeHead(code, msg);
 		res.end();
 	}
 }

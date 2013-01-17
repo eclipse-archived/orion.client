@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 /*global module require*/
+var connect = require('connect');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -26,7 +27,9 @@ module.exports = function(options) {
 	var workspaceId = 'orionode';
 	var workspaceName = 'Orionode Workspace';
 
-	return resource(workspaceRoot, {
+	return connect()
+	.use(connect.json())
+	.use(resource(workspaceRoot, {
 		GET: function(req, res, next, rest) {
 			if (rest === '') {
 				// http://wiki.eclipse.org/Orion/Server_API/Workspace_API#Getting_the_list_of_available_workspaces
@@ -111,5 +114,5 @@ module.exports = function(options) {
 				}
 			}
 		}
-	});
+	}));
 };

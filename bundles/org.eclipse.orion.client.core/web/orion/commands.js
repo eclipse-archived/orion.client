@@ -266,18 +266,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				var command = this._commandList[commandId];
 				var enabled = command && (command.visibleWhen ? command.visibleWhen(item) : true);
 				if (enabled && command.callback) {
-					window.setTimeout(function() {
-						self._invoke(new CommandInvocation(self, handler, item, null, command), parameters);
-					}, 0);
+					self._invoke(new CommandInvocation(self, handler, item, null, command), parameters);
 				}
 			} else {
 				//TODO should we be keeping invocation context for commands without bindings? 
 				var binding = this._urlBindings[commandId];
 				if (binding && binding.command) {
 					if (binding.command.callback) {
-						window.setTimeout(function() {
-							self._invoke(binding.invocation, parameters);
-						}, 0);
+						self._invoke(binding.invocation, parameters);
 					}
 				}
 			}

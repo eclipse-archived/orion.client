@@ -308,7 +308,7 @@ exports.ExplorerModel = (function() {
 				onItem(item);
 			});
 		},
-		getChildren: function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+		getChildren: function(parentItem, /* function(items) */ onComplete){
 			// the parent already has the children fetched
 			if (parentItem.Children) {
 				onComplete(parentItem.Children);
@@ -377,7 +377,7 @@ exports.ExplorerFlatModel = (function() {
 		}
 	};
 	
-	ExplorerFlatModel.prototype.getChildren = function(/* dojo.data.Item */ parentItem, /* function(items) */ onComplete){
+	ExplorerFlatModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
 		if(parentItem === this.root){
 			onComplete(this.root);
 		}else{

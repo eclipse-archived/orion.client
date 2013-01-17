@@ -10,12 +10,11 @@
  ******************************************************************************/
 
 var eclipse;
-/*global define document dojo dijit serviceRegistry:true */
-/*browser:true*/
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
+
+define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/PageUtil', 'orion/commands', 'orion/dialogs', 'orion/selection', 
         'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'dojo/hash'], 
-		function(messages, require, dojo, mBootstrap, mStatus, mProgress, PageUtil, mCommands, mDialogs, mSelection, 
+        'orion/git/gitRepositoryExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links'], 
+		function(messages, require, mBootstrap, mStatus, mProgress, PageUtil, mCommands, mDialogs, mSelection, 
 				mFileClient, mOperationsClient, mSearchClient, mGlobalCommands, 
 				mGitRepositoryExplorer, mGitCommands, mGitClient, mSshTools, mLinks) {
 
@@ -111,9 +110,7 @@ mBootstrap.startup().then(function(core) {
 	// previously saved resource value
 	var previousResourceValue = "";
 	
-	//every time the user manually changes the hash, we need to load the workspace with that name
-	dojo.subscribe("/dojo/hashchange", explorer, function(changedHash) { //$NON-NLS-0$
-		
+	window.addEventListener("hashchange", function() {
 		// make sure to close all parameter collectors
 		commandService.closeParameterCollector();
 		
@@ -130,8 +127,8 @@ mBootstrap.startup().then(function(core) {
 				}	
 			);	
 		}
-	});
-	
+	}, false);
+		
 });
 
 //end of define
