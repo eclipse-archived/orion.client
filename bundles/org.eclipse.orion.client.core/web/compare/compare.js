@@ -17,8 +17,6 @@ define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsCl
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
 		var preferences = core.preferences;
-		// we use internal border containers so we need dojo to parse.
-		//dojo.parser.parse();
 		var commandService = new mCommands.CommandService({
 			serviceRegistry: serviceRegistry
 		});
