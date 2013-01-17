@@ -11,9 +11,6 @@
 /*global window console define*/
 /*jslint browser:true*/
 
-/* This SettingsContainer widget is a dojo border container with a left and right side. The left is for choosing a 
-   category, the right shows the resulting HTML for that category. */
-
 define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
 
 	function LabeledCheckbox(options, node) {
