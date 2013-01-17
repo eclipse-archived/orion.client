@@ -15,6 +15,10 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	/**
 	 * Constructs a new Splitter with the given options.  A splitter manages the layout
 	 * of two panels, a side panel and a main panel.  A toggle button will open or close the side panel.
+	 * The relative proportions of the side and main panels are determined by the position of the splitter bar
+	 * in the document.  The panels will pin themselves to the splitter by default.  Once the user moves
+	 * the splitter, the positions are remembered.
+	 *
 	 * @param {Object} options The options object which must specify the split dom node
 	 * @param options.node The node for the splitter presentation.  Required.
 	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
