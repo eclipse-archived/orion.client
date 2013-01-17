@@ -10,15 +10,13 @@
  ******************************************************************************/
 
 var eclipse;
-/*global define document dojo dijit serviceRegistry:true */
-/*browser:true*/
-define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
+
+define(['i18n!git/nls/gitmessages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/dialogs', 'orion/selection',
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/globalCommands',
-	'orion/git/gitStatusExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'orion/contentTypes',
-	'dojo/hash'],
-	function(messages, require, dojo, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
+	'orion/git/gitStatusExplorer', 'orion/git/gitCommands', 'orion/git/gitClient', 'orion/ssh/sshTools', 'orion/links', 'orion/contentTypes', 'orion/PageUtil'],
+	function(messages, require, mBootstrap, mStatus, mProgress, mCommands, mDialogs, mSelection,
 		mFileClient, mOperationsClient, mSearchClient, mGlobalCommands,
-		mGitStatusExplorer, mGitCommands, mGitClient, mSshTools, mLinks, mContentTypes) {
+		mGitStatusExplorer, mGitCommands, mGitClient, mSshTools, mLinks, mContentTypes, PageUtil) {
 
 	mBootstrap.startup().then(function(core) {
 		var serviceRegistry = core.serviceRegistry;
@@ -69,12 +67,13 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo', 'orion/bootstrap', 'orion
 			}
 		});
 		commandService.addCommand(viewAllCommand);
+		
+		var pageParams = PageUtil.matchResourceParameters();
+		explorer.display(pageParams.resource);
 
-		explorer.display(dojo.hash());
-
-		//every time the user manually changes the hash, we need to load the commit with that name
-		dojo.subscribe("/dojo/hashchange", explorer, function() { //$NON-NLS-0$
-			explorer.display(dojo.hash());
-		});
+		window.addEventListener("hashchange", function() {
+			var pageParams = PageUtil.matchResourceParameters();
+			explorer.display(pageParams.resource);
+		}, false);
 	});
 }); //end of define
