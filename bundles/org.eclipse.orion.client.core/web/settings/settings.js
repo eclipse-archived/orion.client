@@ -13,10 +13,10 @@
 /*global define window widgets localStorage*/
 /*jslint browser:true devel:true*/
 
-define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/commands', 'orion/profile/usersClient',
+define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/profile/usersClient',
 		'orion/operationsClient', 'orion/fileClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/config',
 		'orion/metatype', 'orion/settings/settingsRegistry', 'orion/widgets/settings/SettingsContainer'],
-		function(messages, mBootstrap, mStatus, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
+		function(messages, mBootstrap, mStatus, mProgress, mCommands, mUsersClient, mOperationsClient, mFileClient, mSearchClient, 
 			mDialogs, mGlobalCommands, lib, mConfig, mMetaType, SettingsRegistry, SettingsContainer) {
 
 	mBootstrap.startup().then(function(core) {
@@ -27,6 +27,7 @@ define(['i18n!orion/settings/nls/messages', 'orion/bootstrap', 'orion/status', '
 		// Register services
 		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
 		var preferencesStatusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		new mProgress.ProgressService(serviceRegistry, operationsClient);
 		var commandService = new mCommands.CommandService({
 			serviceRegistry: serviceRegistry
 		});
