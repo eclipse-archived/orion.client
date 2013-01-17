@@ -650,10 +650,10 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'dojo', 'dijit'
 					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
 					that.twoWayCompareContainer.startup();
 				} else {
-					dojo.empty(that.uiFactoryCompare.getTitleDivId());
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(), "only"); //$NON-NLS-1$
-					dojo.empty(that.uiFactoryCompare.getTitleDivId(true));
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDivId(true), "only"); //$NON-NLS-1$
+					dojo.empty(that.uiFactoryCompare.getTitleDiv());
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
+					dojo.empty(that.uiFactoryCompare.getTitleDiv(true));
+					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
 					that.twoWayCompareContainer.setOptions(options);
 					that.twoWayCompareContainer.setEditor();
 				}

@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(messages, mCompareUtils, dojo, dijit) {
-
+define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'orion/webui/littlelib', 'text!orion/compare/compare-features.html'], 
+function(messages, mCompareUtils, lib, FeatureTemplate) {
 
 var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
@@ -24,185 +24,68 @@ orion.TwoWayCompareUIFactory = (function() {
 		this._showLineStatus = option.showLineStatus;
 	}	
 	TwoWayCompareUIFactory.prototype = {
-		_createNoWrapTextDiv:function(textDivId , defaultText , align, createCommandSpan){
-			var table = document.createElement('table'); //$NON-NLS-0$
-			table.width = "100%"; //$NON-NLS-0$
-			var row = document.createElement('tr'); //$NON-NLS-0$
-			table.appendChild(row);
-			var td = document.createElement('td'); //$NON-NLS-0$
-			td.noWrap = true;
-			if(align)
-				td.align = align;
-			row.appendChild(td);
-			var textDiv =  document.createElement('h2'); //$NON-NLS-0$
-			textDiv.id = textDivId;
-			dojo.place(document.createTextNode(defaultText), textDiv, "only"); //$NON-NLS-0$
-			td.appendChild(textDiv);
-			if (createCommandSpan && !this._commandSpanId) {//If there is already a command span defined for the compare command, we do not want to create it here
-				this._commandSpanId = "compare_rightContainerCommands"; //$NON-NLS-0$
-				td = document.createElement('td'); //$NON-NLS-0$
-				td.id = this._commandSpanId; 
-				row.appendChild(td);
-				td.noWrap = true;
-				td.align = "right"; //$NON-NLS-0$
-				table.align = "right"; //$NON-NLS-0$
-			}
-			return table;
-		},
-		
-		_createEditorParentDiv: function(editorParentDivId ,containerDivId) {
-			var editorParentDiv = new dijit.layout.ContentPane({id :editorParentDivId ,region: "center"}); //$NON-NLS-0$
-			dojo.addClass(editorParentDiv.domNode, 'paneScrolled'); //$NON-NLS-0$
-			dojo.addClass(editorParentDiv.domNode, 'compareEditorParent'); //$NON-NLS-0$
-			return editorParentDiv;
-		},
-		
-		_createCompareCanvasDiv: function(canvasDivId ,containerDivId){
-			var canvasContainer = new dijit.layout.ContentPane({ region: "leading", splitter: false}); //$NON-NLS-0$
-			dojo.addClass(canvasContainer.domNode, 'canvasContainer'); //$NON-NLS-0$
+		_init: function(){
+			var prefix = this._parentDivID + "_";
+			this._leftEditorParentDiv = lib.node("left_editor_id");
+			this._leftEditorParentDiv.id = prefix + "left_editor_id";
+			this._rightEditorParentDiv = lib.node("right_editor_id");
+			this._rightEditorParentDiv.id = prefix + "right_editor_id";
+			this._rightEditorWrapperDiv = lib.node("right_editor_wrapper_id");
+			this._rightEditorWrapperDiv.id = prefix + "right_editor_wrapper_id";
 			
-			var canvas = document.createElement('canvas'); //$NON-NLS-0$
-			canvas.id = canvasDivId;
-			canvas.width = 46;
-			canvas.height = 3000;
-			dojo.toggleClass(canvas, "compareCanvas", true); //$NON-NLS-0$
-			canvasContainer.attr('content', canvas); //$NON-NLS-0$
-			return canvasContainer;
-		},
-		
-		_appendDomNode:function(parent,child){
-			child.placeAt(parent);
-		},
-		
-		_createTileDiv: function(titleDivId, titleStr, createCommandArea) {
-			var table = this._createNoWrapTextDiv(titleDivId , titleStr ? titleStr: messages["Compare..."], "left", createCommandArea); //$NON-NLS-1$
-			var titleContainer = new dijit.layout.ContentPane({region: "top"}); //$NON-NLS-0$
-			dojo.addClass(titleContainer.domNode, 'titleContainer'); //$NON-NLS-0$
-			titleContainer.attr('content', table); //$NON-NLS-0$
-			return titleContainer;
-		},
-		
-		_createStatusDiv: function(statusDivId) {
-			var table = this._createNoWrapTextDiv(statusDivId , messages["Line 0 : Col 0"] , "center"); //$NON-NLS-1$
-			var statusContainer = new dijit.layout.ContentPane({region: "bottom"}); //$NON-NLS-0$
-			dojo.addClass(statusContainer.domNode, 'statusContainer'); //$NON-NLS-0$
-			statusContainer.attr('content', table); //$NON-NLS-0$
-			return statusContainer;
-		},
-		
-		_createLeftEditorParentDiv: function(editorParentDivId ,containerDivId) {
-			return this._createEditorParentDiv(editorParentDivId ,containerDivId);
-		},
-		
-		_createRightEditorParentDiv: function(editorParentDivId ,canvasId) {
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false}); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(bc.domNode, 'borderContainer'); //$NON-NLS-0$
-			this._appendDomNode(bc,this._createCompareCanvasDiv(canvasId));
-			this._appendDomNode(bc,this._createEditorParentDiv(editorParentDivId));
-			return bc;
-		},
-				
-		_createLeftBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"leading" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(bc.domNode, 'leftBorder'); //$NON-NLS-0$
+			this._leftTitleDiv = lib.node("left_title_id");
+			this._leftTitleDiv.id = prefix + "left_title_id";
+			this._rightTitleDiv = lib.node("right_title_id");
+			this._rightTitleDiv.id = prefix + "right_title_id";
 			
-			if(this._showTitle){
-				this._leftTitleDivId = this._parentDivID + "_left_title_id"; //$NON-NLS-0$
-				this._appendDomNode(bc , this._createTileDiv(this._leftTitleDivId, this._leftTitle, false));
-			}
-			this._leftEditorParentDivId = this._parentDivID + "_left_editor_id"; //$NON-NLS-0$
-			this._appendDomNode(bc , this._createLeftEditorParentDiv(this._leftEditorParentDivId));
+			this._leftStatusDiv = lib.node("left_status_id");
+			this._leftStatusDiv.id = prefix + "left_status_id";
+			this._rightStatusDiv = lib.node("right_status_id");
+			this._rightStatusDiv.id = prefix + "right_status_id";
 
-			if(this._showLineStatus){
-				this._leftStatusDivId = this._parentDivID + "_left_status_id"; //$NON-NLS-0$
-				this._appendDomNode(bc , this._createStatusDiv(this._leftStatusDivId));
-			}
+			this._diffCanvasDiv = lib.node("diff_canvas_id");
+			this._diffCanvasDiv.id = prefix + "diff_canvas_id";
 			
-			return bc;
+			if(!this._showTitle){
+				this._leftEditorParentDiv.style.top = "0px";
+				this._rightEditorWrapperDiv.style.top = "0px";
+				this._leftTitleDiv.style.height = "0px";
+				this._rightTitleDiv.style.height = "0px";
+			}
+			if(!this._showTitle){
+				this._leftEditorParentDiv.style.marginBottom = "0px";
+				this._rightEditorWrapperDiv.style.marginBottom = "0px";
+				this._leftStatusDiv.style.height = "0px";
+				this._rightStatusDiv.style.height = "0px";
+			}
 		},
 		
-		_createRightBorder:function(){
-			var bc = new dijit.layout.BorderContainer({region:"center" ,gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false}); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(bc.domNode, 'rightBorder'); //$NON-NLS-0$
-			
-			if(this._showTitle){
-				this._rightTitleDivId = this._parentDivID + "_right_title_id"; //$NON-NLS-0$
-				this._appendDomNode(bc ,this._createTileDiv(this._rightTitleDivId, this._rightTitle, true));
-			}
-			
-			this._rightEditorParentDivId = this._parentDivID + "_right_editor_id"; //$NON-NLS-0$
-			this._diffCanvasDivId = this._parentDivID + "_diff_canvas_id"; //$NON-NLS-0$
-			this._appendDomNode(bc , this._createRightEditorParentDiv(this._rightEditorParentDivId , this._diffCanvasDivId));
-
-			if(this._showLineStatus){
-				this._rightStatusDivId = this._parentDivID + "_right_status_id"; //$NON-NLS-0$
-				this._appendDomNode(bc , this._createStatusDiv(this._rightStatusDivId));
-			}
-			
-			return bc;
-		},
-		
-		/**
-		 * Force a layout in the parent tree of the specified node, if there are layout managers assigned.
-		 *
-		 * @param {DomNode} node the node triggering new layout.
-		 */
-		_forceLayout: function(node) {
-			if (typeof node === "string") { //$NON-NLS-0$
-				node = dojo.byId(node);
-			}
-			while (node) {
-				var widget = dijit.byId(node.id);
-				if (widget && typeof widget.layout === "function") { //$NON-NLS-0$
-					widget.layout();
-					return;
-				}
-				node = node.parentNode;
-			}
-		},
-	
 		buildUI:function(){
-			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
-			this.destroy();
-			var leftB = this._createLeftBorder();
-			var rightB = this._createRightBorder();
-			var marginBox = dojo.marginBox(this._parentDivID);
-			var styleStr = "height: " + marginBox.h + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
-			var topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-		
-			topWidget.placeAt(this._parentDivID);
-			topWidget.addChild(leftB);
-			topWidget.addChild(rightB);
-			topWidget.startup();
-			this._forceLayout(this._parentDivID);
-			//topWidget.layout();
+			lib.node(this._parentDivID).innerHTML = FeatureTemplate;//appendChild(topNode);
+			this._init();
 		},
 		
 		destroy: function(){
-			var widget = dijit.byId(this._topWidgetId);
-			if(widget){
-				widget.destroyRecursive();
-			}
 		},
 		
-		getEditorParentDivId: function(left){
-			return (left ? this._leftEditorParentDivId : this._rightEditorParentDivId);
+		getEditorParentDiv: function(left){
+			return (left ? this._leftEditorParentDiv : this._rightEditorParentDiv);
 		},
 		
-		getTitleDivId: function(left){
-			return (left ? this._leftTitleDivId : this._rightTitleDivId);
+		getTitleDiv: function(left){
+			return (left ? this._leftTitleDiv : this._rightTitleDiv);
 		},
 		
-		getStatusDivId: function(left){
-			return (left ? this._leftStatusDivId : this._rightStatusDivId);
+		getStatusDiv: function(left){
+			return (left ? this._leftStatusDiv : this._rightStatusDiv);
 		},
 		
 		getCommandSpanId: function(){
 			return this._commandSpanId;
 		},
 		
-		getDiffCanvasDivId: function(){
-			return this._diffCanvasDivId;
+		getDiffCanvasDiv: function(){
+			return this._diffCanvasDiv;
 		}
 
 	};
