@@ -14,7 +14,7 @@
 /*jslint regexp:false browser:true forin:true*/
 
 define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container' ,'orion/git/gitCommands','dijit/TooltipDialog', 'orion/git/widgets/CommitTooltipDialog'], 
+        'orion/compare/compare-container' ,'orion/git/gitCommands','dijit/TooltipDialog', 'orion/git/widgets/CommitTooltipDialog', 'dojo/hash'], 
 		function(messages, require, dojo, dijit , mSection, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands) {
 	var exports = {};
 

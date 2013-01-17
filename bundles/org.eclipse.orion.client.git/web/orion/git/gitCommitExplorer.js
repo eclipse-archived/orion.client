@@ -12,7 +12,7 @@
 /*global define console document Image*/
 
 define(['i18n!git/nls/gitmessages', 'dojo', 'orion/section', 'orion/explorers/explorer', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container', 'orion/git/gitCommands', 'dojo/date/locale'], 
+        'orion/compare/compare-container', 'orion/git/gitCommands', 'dojo/date/locale', 'dojo/hash'], 
 		function(messages, dojo, mSection, mExplorer, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands) {
 	var exports = {};
 
