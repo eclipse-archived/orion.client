@@ -83,7 +83,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/git/gitPreferenceStorage', 'orion/we
 			that.destroy();
 			that._execute();
 		},
-		text : 'OK'
+		text : 'OK',
+		isDefault: true
 		});
 
 		// Start the dialog initialization.
