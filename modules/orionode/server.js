@@ -70,8 +70,8 @@ function startServer(options) {
 				dev: options.dev
 			}))
 			// Orion-specific Dojo overrides from orionStatic:
-			.use('/org.dojotoolkit/dojo', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.core/web/dojo')))
-			.use('/org.dojotoolkit/dojox', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.core/web/dojox')))
+			.use('/org.dojotoolkit/dojo', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.ui/web/dojo')))
+			.use('/org.dojotoolkit/dojox', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.ui/web/dojox')))
 			// Dojo libraries
 			.use('/org.dojotoolkit/dojo', statik(path.resolve(NODE_MODULES, 'dojo')))
 			.use('/org.dojotoolkit/dijit', statik(path.resolve(NODE_MODULES, 'dijit')))
