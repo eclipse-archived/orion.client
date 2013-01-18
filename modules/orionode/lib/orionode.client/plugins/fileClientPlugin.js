@@ -11,7 +11,7 @@
 
 /*global window document parent define console eclipse*/
 
-define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
+define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/nodeFileImpl" /*node!*/, "domReady!"], function(Deferred, PluginProvider, FileServiceImpl) {
 	function trace(implementation) {
 		var method;
 		var traced = {};
@@ -56,7 +56,7 @@ define(["orion/Deferred", "orion/plugin", "plugins/filePlugin/fileImpl", "domRea
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
 	var headers = {
-		name: "Orion File Service",
+		name: "Orion Node File Service",
 		version: "1.0",
 		description: "This plugin provides file access to a user's workspace.",
 		login: login
