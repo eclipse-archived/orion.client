@@ -184,6 +184,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	
 	RemotePrompterDialog.prototype._afterShowing = function() {
 		this.$treeContentPane.focus();
+		this._validate();
 	};
 
 	RemotePrompterDialog.prototype._loadRemoteChildren = function() {
@@ -212,12 +213,12 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 
 	RemotePrompterDialog.prototype._validate = function(selection) {
 		var validateFunction = function(theSelection) {
-			if (theSelection.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-				this.$remoteOk.classList.removeClass(this.DISABLED);
+			if (theSelection && theSelection.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+				this.$remoteOk.classList.remove(this.DISABLED);
 				return;
-			} else if (theSelection.Type === "Remote") { //$NON-NLS-0$
+			} else if (theSelection && theSelection.Type === "Remote") { //$NON-NLS-0$
 				if (this.$newBranch.value !== "") {
-					this.$remoteOk.classList.removeClass(this.DISABLED);
+					this.$remoteOk.classList.remove(this.DISABLED);
 					return;
 				}
 			}
