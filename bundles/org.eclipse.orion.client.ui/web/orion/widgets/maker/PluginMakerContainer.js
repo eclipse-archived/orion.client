@@ -20,7 +20,7 @@ define(['require', 'dojo', 'dijit', 'orion/commands', 'orion/fileClient', 'dijit
 		
 		fileClient: null,
 		
-		path: '/file/FF/bundles/org.eclipse.orion.client.core/web/plugins/', //$NON-NLS-0$
+		path: '/file/FF/bundles/org.eclipse.orion.client.ui/web/plugins/', //$NON-NLS-0$
 		
 		csscomplete: false,
 		jscomplete: false,
