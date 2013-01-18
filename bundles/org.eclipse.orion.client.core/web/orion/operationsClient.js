@@ -150,8 +150,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 				for(var i=0; i<this._services.length; i++){
 					var pattern = this._patterns[i];
 					var def = new Deferred();
-					results[i] = def;
-					_doServiceCall(this._services[i], "removeCompletedOperations").then(function(operationsLeft){
+					results[i] = def.promise;
+					_doServiceCall(this._services[i], "removeCompletedOperations").then(function(def){
+						return function(operationsLeft){
 						if(!Array.isArray(operationsLeft)){
 							return;
 						}
@@ -167,9 +168,9 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 							}
 							def.resolve();
 						});
-					}, function(error){
+					};}(def), function(def){return function(error){
 						def.reject(error);
-					});
+					};}(def));
 				}
 				return Deferred.all(results);
 			},
