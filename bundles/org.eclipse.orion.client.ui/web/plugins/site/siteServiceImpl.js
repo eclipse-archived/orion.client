@@ -117,12 +117,12 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 	function getSelfHostingMappings(basePath, port) {
 		var hostPrefix = "http://localhost" + ":" + port + makeHostRelative(getContext());
 		return [
-			["/", basePath + "/bundles/org.eclipse.orion.client.core/web/index.html"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.ui/web/index.html"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.ui/web"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.core/web"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.editor/web"],
-			["/", basePath + "/bundles/org.eclipse.orion.client.ui/web"],
-			["/org.dojotoolkit/dojo", basePath + "/bundles/org.eclipse.orion.client.core/web/dojo"],
-			["/org.dojotoolkit/dojox", basePath + "/bundles/org.eclipse.orion.client.core/web/dojox"],
+			["/org.dojotoolkit/dojo", basePath + "/bundles/org.eclipse.orion.client.ui/web/dojo"],
+			["/org.dojotoolkit/dojox", basePath + "/bundles/org.eclipse.orion.client.ui/web/dojox"],
 			["/file", hostPrefix + "file"],
 			["/prefs", hostPrefix + "prefs"],
 			["/workspace", hostPrefix + "workspace"],

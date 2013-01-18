@@ -32,7 +32,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'dojo', 'dijit', 'dijit/T
 			installer.href = root + 'settings/settings.html#,category=plugins,installPlugin=' + path; //$NON-NLS-0$
 			
 			var code = dojo.byId( "code" ); //$NON-NLS-0$
-			code.href =  root + 'edit/edit.html#/file/FF/bundles/org.eclipse.orion.client.core/web/plugins/' + name + '/' + name + '.js'; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			code.href =  root + 'edit/edit.html#/file/FF/bundles/org.eclipse.orion.client.ui/web/plugins/' + name + '/' + name + '.js'; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 				
 		getData: function(){
