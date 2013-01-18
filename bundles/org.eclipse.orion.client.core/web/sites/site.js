@@ -17,7 +17,7 @@
  */
 define(['i18n!orion/sites/nls/messages', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 
 	'orion/fileClient', 'orion/operationsClient', 'orion/searchClient', 'orion/dialogs', 'orion/globalCommands', 'orion/sites/siteClient', 'orion/sites/siteCommands',
-	'orion/PageUtil', 'orion/widgets/SiteEditor'], 
+	'orion/PageUtil', 'orion/sites/SiteEditor'], 
 	function(messages,mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, mDialogs, mGlobalCommands, mSiteClient, mSiteCommands, PageUtil, SiteEditor) {
 		mBootstrap.startup().then(function(core) {
 			var serviceRegistry = core.serviceRegistry;
