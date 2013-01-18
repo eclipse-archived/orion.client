@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "mocha": "*",
+    "requirejs": "~2.1.2",
     "supertest": "*"
   },
   "scripts": {

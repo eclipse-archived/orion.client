@@ -27,7 +27,7 @@ var BUNDLE_WEB_FOLDER = './web/';
 var IS_WINDOWS = process.platform === 'win32';
 
 var pathToNode = process.execPath;
-var pathToRjs = path.resolve(__dirname, 'r.js');
+var pathToRjs = require.resolve('requirejs');
 var pathToBuildFile = path.resolve(__dirname, process.argv[2] || './orion.build.js');
 var pathToOrionClientBundlesFolder = path.resolve(path.dirname(pathToBuildFile), '../../../bundles/');
 var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
