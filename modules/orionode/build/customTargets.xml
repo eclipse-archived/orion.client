@@ -119,6 +119,7 @@ lastMapTag=${mapsTagTag}
 			<arg value="-t=${jsdocHome}/templates/jsdoc" />
 			<arg value="-d=${buildDirectory}/plugins/org.eclipse.orion.doc.isv/jsdoc" />
 			<arg value="${buildDirectory}/plugins/org.eclipse.orion.client.core/web/orion/" />
+			<arg value="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web/orion/" />
 			<arg value="${buildDirectory}/plugins/org.eclipse.orion.client.editor/web/orion/" />
 			<arg value="${buildDirectory}/plugins/org.eclipse.orion.client.git/web/orion/" />
 			<arg value="${buildDirectory}/plugins/org.eclipse.orion.client.users/web/orion/" />
@@ -189,39 +190,37 @@ lastMapTag=${mapsTagTag}
 
 		<copy todir="${buildDirectory}/optimization" >
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="**"/>
+			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.editor/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.git/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.users/web" includes="**"/>
 		</copy>
 		<copy todir="${dojoFolder}" >
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="dojo/**" />
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="dijit/**" />
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="dojox/**" />
+			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dojo/**" />
+			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dijit/**" />
+			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dojox/**" />
 		</copy>
 
 		<!-- invoke requirejs -->
-		<optimize pageDir="." name="index" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="navigate" name="table" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="edit" name="edit" bundle="org.eclipse.orion.client.core" />
-<!--
-		<optimize pageDir="compare" name="compare" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="search" name="search" bundle="org.eclipse.orion.client.core" />
--->
-		<optimize pageDir="settings" name="settings" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.core" />		
-
-		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.core" />
-<!--
-		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.core" />		
-		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.core" />
-		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.core" />		
-		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.core" />
+<!--		<optimize pageDir="." name="index" bundle="org.eclipse.orion.client.ui" />		-->
+		<optimize pageDir="navigate" name="table" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="edit" name="edit" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="compare" name="compare" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="search" name="search" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="settings" name="settings" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="shell" name="shellPage" bundle="org.eclipse.orion.client.ui" />		
+<!--		<optimize pageDir="plugins/site" name="sitePlugin" bundle="org.eclipse.orion.client.ui" />		-->
+<!--		<optimize pageDir="plugins" name="authenticationPlugin" bundle="org.eclipse.orion.client.ui" />		-->
+		<optimize pageDir="plugins" name="fileClientPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins" name="jslintPlugin" bundle="org.eclipse.orion.client.ui" />
+<!--		<optimize pageDir="plugins" name="preferencesPlugin" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="plugins" name="taskPlugin" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="sites" name="site" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="sites" name="sites" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="sites" name="view" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="mixloginstatic" name="LoginWindow" bundle="org.eclipse.orion.client.ui" />		
+		<optimize pageDir="mixloginstatic" name="manageOpenids" bundle="org.eclipse.orion.client.ui" />
+		<optimize pageDir="git/plugins" name="gitPlugin" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-log" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-status2" bundle="org.eclipse.orion.client.git" />
 		<optimize pageDir="git" name="git-repository" bundle="org.eclipse.orion.client.git" />
@@ -229,7 +228,6 @@ lastMapTag=${mapsTagTag}
 		<optimize pageDir="profile" name="user-list" bundle="org.eclipse.orion.client.users" />
 		<optimize pageDir="profile" name="userservicePlugin" bundle="org.eclipse.orion.client.users" />
 -->
-
 		<java classname="org.mozilla.javascript.tools.shell.Main">
 			<classpath>
 				<pathelement location="${requirejsHome}/lib/rhino/js.jar" />
@@ -244,7 +242,7 @@ lastMapTag=${mapsTagTag}
 		</java>
 
 		<!-- copy css back -->
-		<copy todir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" >
+		<copy todir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" >
 			<fileset dir="${buildDirectory}/optimization" includes="**/*.css" excludes="org.dojotoolkit/,git/,profile/"/>
 		</copy>
 		<copy todir="${buildDirectory}/plugins/org.eclipse.orion.client.git/web" >
@@ -255,9 +253,11 @@ lastMapTag=${mapsTagTag}
 		</copy>
 	</target>
 
+	<!--
 	<target name="preGenerate">
 		<replace file="${buildDirectory}/features/org.eclipse.pde.build.container.feature/feature.xml" token="1.0.0" value="0.5.0.qualifier" />
 	</target>
+	-->
 
 	<target name="postBuild" >
 		<property name="buildResultLocation" value="${buildDirectory}/${buildLabel}" />
