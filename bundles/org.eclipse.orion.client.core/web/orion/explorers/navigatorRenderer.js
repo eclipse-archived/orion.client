@@ -11,8 +11,111 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
-		function(messages, require, lib, mExplorer, mNavUtils, mExtensionCommands){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/navigationUtils', 'orion/extensionCommands', 'orion/contentTypes'],
+		function(messages, require, Deferred, lib, mExplorer, mNavUtils, mExtensionCommands){
+		
+	/* Internal */
+	function isImage(contentType) {
+		switch (contentType && contentType.id) {
+			case "image/jpeg": //$NON-NLS-0$
+			case "image/png": //$NON-NLS-0$
+			case "image/gif": //$NON-NLS-0$
+			case "image/ico": //$NON-NLS-0$
+			case "image/tiff": //$NON-NLS-0$
+			case "image/svg": //$NON-NLS-0$
+				return true;
+		}
+		return false;
+	}
+	
+	/* Internal */
+	function addImageToLink(contentType, link, location) {
+		var image;
+		switch (contentType && contentType.id) {
+			case "image/jpeg": //$NON-NLS-0$
+			case "image/png": //$NON-NLS-0$
+			case "image/gif": //$NON-NLS-0$
+			case "image/ico": //$NON-NLS-0$
+			case "image/tiff": //$NON-NLS-0$
+			case "image/svg": //$NON-NLS-0$
+				image = document.createElement("img"); //$NON-NLS-0$
+				image.src = location;
+				image.classList.add("thumbnail"); //$NON-NLS-0$
+				break;
+			default:
+				if (contentType && contentType.image) {
+					image = document.createElement("img"); //$NON-NLS-0$
+					image.src = contentType.image;
+					// to minimize the height/width in case of a large one
+					image.classList.add("thumbnail"); //$NON-NLS-0$
+				} else {	
+					image = document.createElement("span"); //$NON-NLS-0$
+					image.className = "core-sprite-file_model modelDecorationSprite"; //$NON-NLS-0$
+				}
+				break;
+		}
+		if (link.firstChild) {
+			link.insertBefore(image, link.firstChild);
+		} else {
+			link.appendChild(image);
+		}
+	}
+		
+	/* Exported so that it can be used by other UI that wants to use navigator-style links 
+	 * folderURL should be the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
+	 * item is a json object describing an Orion file or folder
+	 * commandService and contentTypeService  are necessary to compute the proper editor for a file.  The command service must be a synchronous, in-page
+	 * service, not retrieved from the service registry.
+	 * openWithCommands and defaultEditor will be computed if not provided.  
+	 */
+	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor) {
+		var link;
+		if (item.Directory) {
+			link = document.createElement("a"); //$NON-NLS-0$
+			link.className = "navlinkonpage"; //$NON-NLS-0$
+			link.id = idPrefix+"NameLink"; //$NON-NLS-0$
+			link.href = folderPageURL + "#" + item.ChildrenLocation; //$NON-NLS-0$
+			link.appendChild(document.createTextNode(item.Name));
+		} else {
+			var i;			
+			// Images: always generate link to file. Non-images: use the "open with" href if one matches,
+			// otherwise use default editor.
+			if (!openWithCommands) {
+				openWithCommands = mExtensionCommands.getOpenWithCommands(commandService);
+			}
+			if (!defaultEditor) {
+				for (i=0; i < openWithCommands.length; i++) {
+					if (openWithCommands[i].isEditor === "default") { //$NON-NLS-0$
+						defaultEditor = openWithCommands[i];
+					}
+				}
+			}
+			link = document.createElement("a"); //$NON-NLS-0$
+			link.className= "navlink targetSelector"; //$NON-NLS-0$
+			link.id = idPrefix+"NameLink"; //$NON-NLS-0$
+			link.target = this.target;
+			link.appendChild(document.createTextNode(item.Name)); //$NON-NLS-0$
+
+			var href = item.Location, foundEditor = false;
+			for (i=0; i < openWithCommands.length; i++) {
+				var openWithCommand = openWithCommands[i];
+				if (openWithCommand.visibleWhen(item)) {
+					href = openWithCommand.hrefCallback({items: item});
+					foundEditor = true;
+					break; // use the first one
+				}
+			}
+			Deferred.when(contentTypeService.getFileContentType(item), function(contentType) {
+				if (!foundEditor && defaultEditor && !isImage(contentType)) {
+					href = defaultEditor.hrefCallback({items: item});
+				}
+				addImageToLink(contentType, link, item.Location);			
+				link.href = href;
+			});
+		}
+		return link;
+	}
+		
 	/**
 	 * Renders json items into columns in the tree
 	 */
@@ -44,47 +147,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	};
 	
 	NavigatorRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		function isImage(contentType) {
-			switch (contentType && contentType.id) {
-				case "image/jpeg": //$NON-NLS-0$
-				case "image/png": //$NON-NLS-0$
-				case "image/gif": //$NON-NLS-0$
-				case "image/ico": //$NON-NLS-0$
-				case "image/tiff": //$NON-NLS-0$
-				case "image/svg": //$NON-NLS-0$
-					return true;
-			}
-			return false;
-		}
-		
-		function addImageToLink(contentType, link) {
-			switch (contentType && contentType.id) {
-				case "image/jpeg": //$NON-NLS-0$
-				case "image/png": //$NON-NLS-0$
-				case "image/gif": //$NON-NLS-0$
-				case "image/ico": //$NON-NLS-0$
-				case "image/tiff": //$NON-NLS-0$
-				case "image/svg": //$NON-NLS-0$
-					var thumbnail = document.createElement("img"); //$NON-NLS-0$
-					thumbnail.src = item.Location;
-					thumbnail.classList.add("thumbnail"); //$NON-NLS-0$
-					link.appendChild(thumbnail);
-					break;
-				default:
-					if (contentType && contentType.image) {
-						var image = document.createElement("img"); //$NON-NLS-0$
-						image.src = contentType.image;
-						link.appendChild(image);
-						// to minimize the height/width in case of a large one
-						image.classList.add("thumbnail"); //$NON-NLS-0$
-					} else {	
-						var fileIcon = document.createElement("span"); //$NON-NLS-0$
-						link.appendChild(fileIcon);
-						fileIcon.className = "core-sprite-file_model modelDecorationSprite"; //$NON-NLS-0$
-					}
-			}
-		}
-		
 		switch(col_no){
 
 		case 0:
@@ -97,12 +159,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
-				link = document.createElement("a"); //$NON-NLS-0$
-				link.className = "navlinkonpage"; //$NON-NLS-0$
-				link.id = tableRow.id+"NameLink"; //$NON-NLS-0$
-				link.href = "#" + item.ChildrenLocation; //$NON-NLS-0$
+				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService);
 				span.appendChild(link); //$NON-NLS-0$
-				link.appendChild(document.createTextNode(item.Name));
 				this.explorer._makeDropTarget(item, tableRow);
 				this.explorer._makeDropTarget(item, link);
 			} else {
@@ -117,28 +175,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						}
 					}
 				}
-				var href = item.Location, foundEditor = false;
-				for (i=0; i < this.openWithCommands.length; i++) {
-					var openWithCommand = this.openWithCommands[i];
-					if (openWithCommand.visibleWhen(item)) {
-						href = openWithCommand.hrefCallback({items: item});
-						foundEditor = true;
-						break; // use the first one
-					}
-				}
-				var contentType = this.contentTypeService.getFileContentType(item);
-				if (!foundEditor && this.defaultEditor && !isImage(contentType)) {
-					href = this.defaultEditor.hrefCallback({items: item});
-				}				
-
-				link = document.createElement("a"); //$NON-NLS-0$
-				link.className= "navlink targetSelector"; //$NON-NLS-0$
-				link.id = tableRow.id+"NameLink"; //$NON-NLS-0$
-				link.href = href;
-				link.target = this.target;
+				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor);
 				span.appendChild(link); //$NON-NLS-0$
-				addImageToLink(contentType, link);
-				link.appendChild(document.createTextNode(item.Name)); //$NON-NLS-0$
 			}
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 			// render any inline commands that are present.
@@ -168,6 +206,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	
 	//return module exports
 	return {
-		NavigatorRenderer: NavigatorRenderer
+		NavigatorRenderer: NavigatorRenderer,
+		createLink: createLink
 	};
 });

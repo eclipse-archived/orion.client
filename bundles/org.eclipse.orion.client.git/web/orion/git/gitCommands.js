@@ -395,25 +395,13 @@ var exports = {};
 			parameters: checkoutTagNameParameters,
 			callback: function(data) {
 				var item = data.items;
-				function getBranchItem(){
-					if (item.Repository)
-						return item.Repository.BranchLocation;
-					
-					for(var child_no in item.parent.parent.children){
-						if(item.parent.parent.children[child_no].Name==="Branches"){ //$NON-NLS-0$
-							return item.parent.parent.children[child_no];
-						}
-					}
-					return item.parent.parent;
-				}
 				
 				var checkoutTagFunction = function(repositoryLocation, itemName, name){
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").checkoutTag(repositoryLocation, itemName, name), i18nUtil.formatMessage(messages["Checking out tag ${0}"], name)); //$NON-NLS-0$
-					serviceRegistry.getService("orion.page.message").createProgressMonitor(deferred,
-							i18nUtil.formatMessage(messages["Checking out tag ${0}"], name));
-					deferred.then(function() {
-						explorer.changedItem(getBranchItem());
+					
+					progress.showWhile(serviceRegistry.getService("orion.git.provider").checkoutTag(
+							repositoryLocation, itemName, name), i18nUtil.formatMessage(messages["Checking out tag ${0}"], name)).then(function() {
+						explorer.changedItem();
 					}, displayErrorOnStatus);
 				};
 				

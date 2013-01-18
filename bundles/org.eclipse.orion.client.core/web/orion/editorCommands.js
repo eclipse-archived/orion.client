@@ -287,8 +287,12 @@ exports.EditorCommandFactory = (function() {
 				//          resourceName (string) - the resource being edited
 				//        the return value of the run function will be used as follows:
 				//          if the return value is a string, the current selection in the editor will be replaced with the returned string
-				//          if the return value is an object, its "text" attribute (required) will be used to replace the contents of the editor,
+				//          if the return value is an object with "text" attribute, its "text" attribute will be used to replace the contents of the editor,
 				//                                            and its "selection" attribute (optional) will be used to set the new selection.
+				//          if the return value is an object with "uriTemplate" attribute, its "uriTemplate" attribute will be used to open a delegated UI in
+				//                                            in an iframe.  The "width" (optional) and "height" (optional) attributes will be used to set the size
+				//                                            of the delegated UI.  The delegated UI will post a message when it is finished, including either a "result"
+				//                                            (text and selection) object or a "cancelled" property.
 			
 				// iterate through the extension points and generate commands for each one.
 				var actionReferences = this.serviceRegistry.getServiceReferences("orion.edit.command"); //$NON-NLS-0$
@@ -303,43 +307,7 @@ exports.EditorCommandFactory = (function() {
 						var text = model.getText();
 						var selectedText = model.getText(selection.start,selection.end);
 						
-						var deferred;
-						if (info.uiURITemplate) {
-							deferred = new Deferred();
-							var uriTemplate = new URITemplate(info.uiURITemplate);
-							var href = uriTemplate.expand(input.getFileMetadata());
-							var iframe = document.createElement("iframe"); //$NON-NLS-0$
-							iframe.id = info.id;
-							iframe.name = info.id;
-							iframe.type = "text/html"; //$NON-NLS-0$
-							iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
-							iframe.frameborder = 1;
-							iframe.src = href;
-							iframe.className = "delegatedUI"; //$NON-NLS-0$
-							window.document.body.appendChild(iframe);
-							// Listen for notification from the iframe.  This should eventually belong as part of the plugin registry.
-							// This mechanism should become generalized into a "page services" API for plugin iframes to contact the outer context.
-							window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
-								if (event.source !== iframe.contentWindow) {
-									return;
-								}
-								if (typeof event.data === "string") { //$NON-NLS-0$
-									var data = JSON.parse(event.data);
-									if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
-										if (data.cancelled) {
-											deferred.cancel();
-										} else if (data.result) {
-											deferred.resolve(data.result);
-										}
-										window.removeListener("message", _messageHandler, false);
-										window.document.body.removeChild(iframe);
-									}
-								}
-							}, false);
-						} else {
-							deferred = service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()); 
-						}
-						progress.progress(deferred, "Running " + info.name).then(function(result){
+						var processEditorResult = function(result) {
 							if (result && result.text) {
 								editor.setText(result.text);
 								if (result.selection) {
@@ -352,6 +320,48 @@ exports.EditorCommandFactory = (function() {
 									editor.setSelection(selection.start, selection.start + result.length);
 									editor.getTextView().focus();
 								}
+							}
+						}; 
+						
+						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), "Running " + info.name).then(function(result){
+							if (result && result.uriTemplate) {
+								var uriTemplate = new URITemplate(result.uriTemplate);
+								var href = uriTemplate.expand(input.getFileMetadata());
+								var iframe = document.createElement("iframe"); //$NON-NLS-0$
+								iframe.id = info.id;
+								iframe.name = info.id;
+								iframe.type = "text/html"; //$NON-NLS-0$
+								iframe.sandbox = "allow-scripts allow-same-origin"; //$NON-NLS-0$
+								iframe.frameborder = 1;
+								iframe.src = href;
+								iframe.className = "delegatedUI"; //$NON-NLS-0$
+								if (result.width) {
+									iframe.style.width = result.width;
+								}
+								if (result.height) {
+									iframe.style.height = result.height;
+								}
+								window.document.body.appendChild(iframe);
+								// Listen for notification from the iframe.  We expect either a "result" or a "cancelled" property.
+								window.addEventListener("message", function _messageHandler(event) { //$NON-NLS-0$
+									if (event.source !== iframe.contentWindow) {
+										return;
+									}
+									if (typeof event.data === "string") { //$NON-NLS-0$
+										var data = JSON.parse(event.data);
+										if (data.pageService === "orion.page.delegatedUI" && data.source === info.id) { //$NON-NLS-0$
+											if (data.cancelled) {
+												// console.log("Delegated UI Cancelled");
+											} else if (data.result) {
+												processEditorResult(data.result);
+											}
+											window.removeListener("message", _messageHandler, false);
+											window.document.body.removeChild(iframe);
+										}
+									}
+								}, false);
+							} else {
+								processEditorResult(result);
 							}
 						});
 						return true;

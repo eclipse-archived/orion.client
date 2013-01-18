@@ -11,6 +11,7 @@
 //NLS_CHARSET=UTF-8
 
 define({
+	"OK": "OK",
 	"Name:": "Name:",
 	"Path":"Path",
 	"Mount at (server path)": "Mount at (server path)",

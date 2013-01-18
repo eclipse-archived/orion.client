@@ -12,7 +12,8 @@
 /*global window document define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/navigationUtils'], function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExplorer, mNavUtils){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/explorer', 'orion/explorers/navigatorRenderer', 'orion/explorers/navigationUtils'], 
+function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExplorer, mNavRenderer, mNavUtils){
 
 	function NavOutlineRenderer (options, explorer) {
 		this.explorer = explorer;
@@ -24,15 +25,15 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		return 0;
 	};
 	NavOutlineRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-		var href, clazz, name;
+		var href, clazz, name, link;
+		var col = document.createElement("td"); //$NON-NLS-0$
+		tableRow.appendChild(col);
+		col.classList.add("mainNavColumn"); //$NON-NLS-0$
+		col.classList.add("singleNavColumn"); //$NON-NLS-0$
 		if (item.directory) {
-			href = require.toUrl("navigate/table.html") + "#" + item.path; //$NON-NLS-1$ //$NON-NLS-0$
-			clazz = "navlinkonpage"; //$NON-NLS-0$
-			name = item.name;
+			link = mNavRenderer.createLink(require.toUrl("navigate/table.html"), {Name: item.name, ChildrenLocation: item.path}, "", this.commandService, this.contentTypeService); //$NON-NLS-0$
 		} else if (item.path) {
-			href = require.toUrl("edit/edit.html") + "#" + item.path; //$NON-NLS-1$ //$NON-NLS-0$
-			clazz = "navlink"; //$NON-NLS-0$
-			name = item.name;
+			link = mNavRenderer.createLink("", { Name: item.name, Location: item.path }, "", this.commandService, this.contentTypeService); //$NON-NLS-0$
 		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			href = require.toUrl("navigate/table.html") + "#" + item.getProperty("top"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			clazz = "navlinkonpage"; //$NON-NLS-0$
@@ -44,23 +45,22 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		if (href === "#") { //$NON-NLS-0$
 			href="";
 		}
-
-		var col = document.createElement("td"); //$NON-NLS-0$
-		tableRow.appendChild(col);
-		col.classList.add("mainNavColumn"); //$NON-NLS-0$
-		col.classList.add("singleNavColumn"); //$NON-NLS-0$
-		var link = document.createElement("a"); //$NON-NLS-0$
+		if (!link) {
+			link = document.createElement("a"); //$NON-NLS-0$
+			link.href = href;
+			link.className = clazz;
+			link.appendChild(document.createTextNode(name));
+		}
 		col.appendChild(link);
-		link.href = href;
-		link.className = clazz;
-		link.appendChild(document.createTextNode(name));
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
 
-	function NavOutlineExplorer(serviceRegistry, selection) {
+	function NavOutlineExplorer(serviceRegistry, selection, commandService) {
 		this.selection = selection;
 		this.registry = serviceRegistry;
 		this.renderer = new NavOutlineRenderer({checkbox: false}, this);
+		this.renderer.commandService = commandService;
+		this.renderer.contentTypeService = serviceRegistry.getService("orion.core.contenttypes");
 	}
 	NavOutlineExplorer.prototype = mExplorer.Explorer.prototype;	
 	NavOutlineExplorer.prototype.constructor = NavOutlineExplorer;
@@ -75,6 +75,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @param {Object} options The service options
 	 * @param {Object} options.parent The parent of this outliner widget
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
+	 * @param {orion.commands.CommandService} options.commandService The in-page (synchronous) command service.
 	 */
 	function NavigationOutliner(options) {
 		var parent = lib.node(options.parent);
@@ -82,6 +83,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
 		this._registry = options.serviceRegistry;
+		this.commandService = options.commandService;
 		var reg = options.serviceRegistry;
 		var self = this;
 		
@@ -128,7 +130,6 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				}
 			}
 		});
-		this.commandService = this._registry.getService("orion.page.command"); //$NON-NLS-0$
 		// register commands 
 		this.commandService.addCommand(deleteFaveCommand);
 		this.commandService.addCommand(renameFaveCommand);
@@ -225,7 +226,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				});
 			}
 			if (favorites.length > 0) {
-				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection);
+				this.explorer = new NavOutlineExplorer(serviceRegistry, this.favoritesSelection, this.commandService);
 				this.favoritesTable = this.explorer.createTree("favoritesContent", new mExplorer.SimpleFlatModel(favorites, "fav", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
 					return item.path || "";
 				}));

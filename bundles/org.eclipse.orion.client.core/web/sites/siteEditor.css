@@ -1,3 +1,15 @@
+.siteEditorTable {
+	-webkit-user-select: none;
+	-moz-user-select: -moz-none; /*required so .hostingStatusArea can override*/
+	user-select: none;
+}
+
+.hostingStatusArea {
+	-webkit-user-select: text;
+	-moz-user-select: text;
+	user-select: text;
+}
+
 .siteEditorTable td, .siteEditorTable th {
 	padding: 10px 10px 5px 10px;
 }
