@@ -11,19 +11,20 @@
 
 /*global define console document*/
 
-define(['i18n!orion/compare/nls/messages', 'dojo'], function(messages, dojo) {
+define(['i18n!orion/compare/nls/messages', 'orion/Deferred'], function(messages, Deferred) {
 
 	function _doServiceCall(fileService, funcName, funcArgs) {
-		var clientDeferred = new dojo.Deferred();
+	
+		var clientDeferred = new Deferred();
 		fileService[funcName].apply(fileService, funcArgs).then(
 			//on success, just forward the result to the client
 			function(result) {
-				clientDeferred.callback(result);
+				clientDeferred.resolve(result);
 			},
 			//on failure we might need to retry
 			function(error) {
 				//forward other errors to client
-				clientDeferred.errback(error);
+				clientDeferred.reject(error);
 			}
 		);
 		return clientDeferred;

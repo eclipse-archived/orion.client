@@ -261,8 +261,9 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 					options.push(set);
 				}	
 				
-				this.sizeSelect = new Select.Select( options, picker );
+				this.sizeSelect = new Select( { options: options }, picker );
 				this.sizeSelect.setStorageItem = chooser.selectFontSize.bind(chooser);
+				this.sizeSelect.show();
 			});
 		}
 		
@@ -320,8 +321,9 @@ define(['i18n!orion/settings/nls/messages', 'require','orion/widgets/themes/edit
 			
 				var picker = document.getElementById( 'themepicker' );
 				
-				this.themeSelect = new Select.Select( options, picker );
+				this.themeSelect = new Select( { options: options }, picker );
 				this.themeSelect.setStorageItem = chooser.selectTheme.bind(chooser); 
+				this.themeSelect.show();
 			}
 		
 		MiniThemeChooser.prototype.setUpPicker = setUpPicker;

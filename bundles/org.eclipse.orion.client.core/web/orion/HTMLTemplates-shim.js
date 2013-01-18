@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global document addEventListener console*/
+/*global window document addEventListener removeEventListener*/
 // HTML Templates Shim -- see http://dvcs.w3.org/hg/webcomponents/raw-file/tip/spec/templates/index.html
 
 (function() {
@@ -25,6 +25,9 @@
 		var templatesDoc = document.implementation.createHTMLDocument("");
 
 		function shimTemplate(template) {
+			if (template.ownerDocument !== document || template.content) {
+				return;
+			}
 			templatesDoc = templatesDoc || document.implementation.createHTMLDocument("");
 			Object.defineProperty(template, "content", {
 				value: templatesDoc.createDocumentFragment(),
@@ -52,37 +55,57 @@
 			}
 		}
 
-		// hide template styling
 		var templateStyle = document.createElement("style");
 		templateStyle.textContent = "template{display:none;}";
 		document.head.appendChild(templateStyle);
 
-		//process existing templateElements
 		Array.prototype.forEach.call(document.querySelectorAll("template"), function(template) {
 			if (!template.content) {
 				shimTemplate(template);
 			}
 		});
 
-		// listen for new template additions
-		// Note: uisng DOMNodeInserted instead of MutationObserver to allow code access the "content" property immediately
-		addEventListener("DOMNodeInserted", function(mutationEvent) {
-			var target = mutationEvent.target;
-			if (target.nodeType === 1 && target.localName === "template" && target.ownerDocument === document && !target.content) {
-				shimTemplate(target);
+		var documentCreateElement = document.createElement;
+		document.createElement = function(tagName) {
+			var el = documentCreateElement.apply(document, arguments);
+			if (tagName === "template") {
+				shimTemplate(el);
 			}
-		});
+			return el;
+		};
+
+		var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+		if (MutationObserver) {
+			var observer = new MutationObserver(function(mutations) {
+				mutations.forEach(function(mutation) {
+					Array.prototype.forEach.call(mutation.addedNodes, function(node) {
+						if (node.nodeType === 1 && node.localName === "template") {
+							shimTemplate(node);
+						}
+					});
+				});
+			});
+			observer.observe(document.documentElement, {
+				childList: true,
+				subtree: true
+			});
+		} else {
+			addEventListener("DOMNodeInserted", function(mutationEvent) {
+				var node = mutationEvent.target;
+				if (node.nodeType === 1 && node.localName === "template") {
+					shimTemplate(node);
+				}
+			});
+		}
 	}
 
 	if (document.readyState === "complete") {
 		shim();
 	} else {
-		var called = false;
 		var once = function() {
-			if (!called) {
-				called = true;
-				shim();
-			}
+			document.removeEventListener("DOMContentLoaded", once, false);
+			removeEventListener("load", once, false);
+			shim();
 		};
 		document.addEventListener("DOMContentLoaded", once, false);
 		addEventListener("load", once, false);

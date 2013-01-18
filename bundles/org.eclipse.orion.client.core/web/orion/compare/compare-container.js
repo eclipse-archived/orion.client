@@ -536,11 +536,11 @@ exports.TwoWayCompareContainer = (function() {
 		this.setOptions(options, true);
 		
 		var that = this;
-		var newFileTitleNode = lib.node(this._uiFactory.getTitleDivId(true));
+		var newFileTitleNode = this._uiFactory.getTitleDiv(true);
 		if(newFileTitleNode){
 			lib.empty(newFileTitleNode);
 		}
-		var baseFileTitleNode = lib.node(this._uiFactory.getTitleDivId(true));
+		var baseFileTitleNode = this._uiFactory.getTitleDiv(false);
 		if(baseFileTitleNode){
 			lib.empty(baseFileTitleNode);
 		}
@@ -564,8 +564,8 @@ exports.TwoWayCompareContainer = (function() {
 			};
 		}
 		
-		this._leftEditorDivId = this._uiFactory.getEditorParentDivId(true);
-		this._rightEditorDivId = this._uiFactory.getEditorParentDivId(false);
+		this._leftEditorDiv = this._uiFactory.getEditorParentDiv(true);
+		this._rightEditorDiv = this._uiFactory.getEditorParentDiv(false);
 		
 		this.initCommands();
 		var that = this;
@@ -638,7 +638,7 @@ exports.TwoWayCompareContainer = (function() {
 			this._inputManager.onSetTitle = this.options.onSetTitle;	
 		}
 		
-		this._curveRuler = new mCompareRulers.CompareCurveRuler(document.getElementById(this._uiFactory.getDiffCanvasDivId()));
+		this._curveRuler = new mCompareRulers.CompareCurveRuler(this._uiFactory.getDiffCanvasDiv());
 		this._highlighter = [];
 		this._highlighter.push( new exports.CompareStyler(this._registry));//left side styler
 		this._highlighter.push( new exports.CompareStyler(this._registry));//right side styler
@@ -647,7 +647,7 @@ exports.TwoWayCompareContainer = (function() {
 	TwoWayCompareContainer.prototype = new exports.CompareContainer();
 	
 	TwoWayCompareContainer.prototype.initEditorContainers = function(delim , leftContent , rightContent , mapper, createLineStyler){	
-		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDivId , this._uiFactory.getStatusDivId(true) ,this.options.readonly ,createLineStyler , this.options.newFile);
+		this._leftEditor = this.createEditorContainer(leftContent , delim , mapper, 0 , this._leftEditorDiv , this._uiFactory.getStatusDiv(true) ,this.options.readonly ,createLineStyler , this.options.newFile);
 		if( this.options.onPage){
 			var toolbar = lib.node("pageActions"); //$NON-NLS-0$
 			if (toolbar) {	
@@ -656,7 +656,7 @@ exports.TwoWayCompareContainer = (function() {
 			}
 		}
 		this._leftTextView = this._leftEditor.getTextView();
-		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDivId , this._uiFactory.getStatusDivId(false) ,true, createLineStyler , this.options.baseFile);
+		this._rightEditor = this.createEditorContainer(rightContent , delim , mapper ,1 , this._rightEditorDiv , this._uiFactory.getStatusDiv(false) ,true, createLineStyler , this.options.baseFile);
 		this._rightTextView = this._rightEditor.getTextView();
 		var that = this;
 		this._overviewRuler  = new mCompareRulers.CompareOverviewRuler("right", {styleClass: "ruler overview"} , null, //$NON-NLS-1$ //$NON-NLS-0$
@@ -690,16 +690,13 @@ exports.TwoWayCompareContainer = (function() {
 		this._curveRuler.copyToLeft();
 	};
 	
-	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDivId , statusDivId ,readOnly , createLineStyler , fileObj){
-		var editorContainerDomNode = lib.node(parentDivId);
-		//TODO we will use splitter 
-		//var editorContainer = dijit.byId(parentDivId);
+	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDiv , statusDiv ,readOnly , createLineStyler , fileObj){
 		var that = this;
 		
 		var textModel = new mTextModel.TextModel(content , delim);
 		var textViewFactory = function() {
 			var view = new mTextView.TextView({
-				parent: editorContainerDomNode,
+				parent: parentDiv,
 				model: textModel,
 				readonly: readOnly,
 				tabSize: 4
@@ -748,14 +745,14 @@ exports.TwoWayCompareContainer = (function() {
 		var dirtyIndicator = "";
 		var status = "";
 		var statusReporter = function(message, isError) {
-			if(!statusDivId)
+			if(!statusDiv)
 				return;
 			if (isError) {
 				status =  messages["ERROR: "] + message;
 			} else {
 				status = message;
 			}
-			lib.node(statusDivId).textContent = dirtyIndicator +  status;
+			statusDiv.textContent = dirtyIndicator +  status;
 		};
 		var undoStackFactory = readOnly ? new mEditorFeatures.UndoFactory() : new mEditorCommands.UndoCommandFactory(that._registry, that._commandService, "pageActions"); //$NON-NLS-0$
 		var annotationFactory = new mEditorFeatures.AnnotationFactory();
@@ -767,7 +764,7 @@ exports.TwoWayCompareContainer = (function() {
 			//contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: statusReporter,
-			domNode: editorContainerDomNode
+			domNode: parentDiv
 		});
 				
 		editor.installTextView();

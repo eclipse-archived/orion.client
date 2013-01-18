@@ -13,7 +13,7 @@
 /*jslint forin:true devel:true browser:true*/
 
 
-define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr) {
+define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 	/**
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
@@ -81,7 +81,7 @@ define(["orion/Deferred", "orion/xhr", "orion/es5shim"], function(Deferred, xhr)
 			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
 				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
 			} else {
-				newKeyword = encodeURIComponent(newKeyword)
+				newKeyword = encodeURIComponent(newKeyword);
 			}
 		}
 		var searchLocation = searchParams.resource;
