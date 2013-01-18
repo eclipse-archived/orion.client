@@ -708,12 +708,23 @@ exports.TwoWayCompareContainer = (function() {
 			if(that.onLoad){
 				that.onLoad();
 			}
-			//TODO should use splitter resize listener eventually
-			/*
-			editorContainer.domNode.addEventListener("onresize", function (e){ //$NON-NLS-0$
-				view.resize();
-			}.bind(this), false);
-			*/
+			var splitter = that._uiFactory.getSplitter();
+			if(splitter){
+				var creatingLeft = (columnIndex === 0);
+				splitter.addResizeListener(function(node) {
+					if(node){
+						var doResize = false;
+						if (that._uiFactory.isLeftPane(node) ) {
+							doResize = creatingLeft;
+						} else {
+							doResize = !creatingLeft;
+						}
+						if(doResize){
+							view.resize();
+						}
+					}
+				});
+			}
 			return view;
 		};
 		/*
@@ -931,22 +942,6 @@ exports.InlineCompareContainer = (function() {
 		this._highlighter = [];
 		this._highlighter.push( new exports.CompareStyler(this._registry));
 		this._editorDivId = editorDivId;
-		//TODO we need the splitter to handle this later
-		/*
-		var editorContainer = dijit.byId(this._editorDivId);
-		if(!editorContainer){//If there is no dijit widget as the parent we need one sitting in the middle to listen to the resize event
-			var widget = dijit.byId(this._editorDivId + "_dijit_inline_compare");
-			if(widget){
-				widget.destroyRecursive();
-			}
-			var bound = lib.bounds(lib.node(this._editorDivId));
-			var styleStr = "height: " + bound.height + "px; width: 100%;"; //$NON-NLS-1$ //$NON-NLS-0$
-			var wrapperWidget = new dijit.layout.BorderContainer({id: this._editorDivId + "_dijit_inline_compare", style: styleStr, region:"center", gutters:false ,design:"headline", liveSplitters:false, persist:false , splitter:false }); //$NON-NLS-1$ //$NON-NLS-0$
-			wrapperWidget.placeAt(this._editorDivId);
-			wrapperWidget.layout();
-			this._editorDivId = this._editorDivId + "_dijit_inline_compare";
-		}
-		*/
 		this.initEditorContainers("" , "\n" , [],[]); //$NON-NLS-0$
 		this.hasContent = false;
 	}
@@ -988,7 +983,6 @@ exports.InlineCompareContainer = (function() {
 
 	InlineCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , diffArray ,createLineStyler , fileObj){
 		var editorContainerDomNode = lib.node(this._editorDivId);
-		//var editorContainer = dijit.byId(this._editorDivId);
 		var that = this;
 		var model = new mTextModel.TextModel(content, delim);
 
@@ -999,12 +993,6 @@ exports.InlineCompareContainer = (function() {
 				readonly: true,
 				tabSize: 4
 			});
-			//TODO should use splitter resize listener eventually
-			/*
-			editorContainer.domNode.addEventListener("onresize", function (e){ //$NON-NLS-0$
-				textView.resize();
-			}.bind(this), false);
-			*/
 			return textView;
 		};
 			
