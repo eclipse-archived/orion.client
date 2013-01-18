@@ -29,22 +29,19 @@ exports = module.exports = function(options) {
 	var orionClientRoot = options.orionClientRoot;
 	if (!orionClientRoot) { throw new Error('orion-static root path required'); }
 
-/* To run the base Orion client code, we need the following resource mappings, in order of priority
- * (ie. an earlier mapping wins over a later one, when both contain a requested path).
+/* To run the base Orion client code, we need the following resource mappings:
  *
  * Web path                  File path                                                        Comment
  * ------------------------------------------------------------------------------------------------------------
- *  /                        lib/orion.client/bundles/org.eclipse.orion.client.core/web       Orion IDE
+ *  /                        lib/orion.client/bundles/org.eclipse.orion.client.core/web       Orion core
+ *  /                        lib/orion.client/bundles/org.eclipse.orion.client.ui/web         Orion IDE
  *  /                        lib/orion.client/bundles/org.eclipse.orion.client.editor/web     Orion editor
- *  /                        lib/orion.client/bundles/org.eclipse.orion.client.core/web/dojo  Orion-specific Dojo fixes
- *  /org.dojotoolkit/dojo    node_modules/dojo                                                Dojo
- *  /org.dojotoolkit/dijit   node_modules/dijit                                               Dijit
- *  /org.dojotoolkit/dojox   node_modules/dojox                                               Dojox
  */
 
 	// Handle the Orion IDE and Orion editor mappings:
 	return connect(
 		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.core/web'), options),
-		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.editor/web'), options)
+		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.editor/web'), options),
+		statik(path.resolve(orionClientRoot, './bundles/org.eclipse.orion.client.ui/web'), options)
 	);
 };
