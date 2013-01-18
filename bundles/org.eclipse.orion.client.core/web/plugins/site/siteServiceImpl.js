@@ -120,6 +120,7 @@ define(['require', 'orion/xhr'], function(require, xhr) {
 			["/", basePath + "/bundles/org.eclipse.orion.client.core/web/index.html"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.core/web"],
 			["/", basePath + "/bundles/org.eclipse.orion.client.editor/web"],
+			["/", basePath + "/bundles/org.eclipse.orion.client.ui/web"],
 			["/org.dojotoolkit/dojo", basePath + "/bundles/org.eclipse.orion.client.core/web/dojo"],
 			["/org.dojotoolkit/dojox", basePath + "/bundles/org.eclipse.orion.client.core/web/dojox"],
 			["/file", hostPrefix + "file"],
