@@ -104,7 +104,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 			});
 		}
 		refresh();
-		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favorites", serviceRegistry: serviceRegistry}); //$NON-NLS-0$
+		var navOutliner = new mNavOutliner.NavigationOutliner({parent: "favorites", commandService: commandService, serviceRegistry: serviceRegistry}); //$NON-NLS-0$
 							
 		// commands shared by navigators
 		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
