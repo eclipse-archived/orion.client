@@ -10,8 +10,8 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'orion/webui/littlelib', 'text!orion/compare/compare-features.html'], 
-function(messages, mCompareUtils, lib, FeatureTemplate) {
+define(['i18n!orion/compare/nls/messages', 'orion/compare/compareUtils', 'orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/compare/compare-features.html'], 
+function(messages, mCompareUtils, lib, mSplitter, FeatureTemplate) {
 
 var orion = orion || {};
 orion.TwoWayCompareUIFactory = (function() {
@@ -25,7 +25,12 @@ orion.TwoWayCompareUIFactory = (function() {
 	}	
 	TwoWayCompareUIFactory.prototype = {
 		_init: function(){
+			//Have to add prefix to the local dome node ids inside the widget, to support multiple widgets by the same template. 
 			var prefix = this._parentDivID + "_";
+			
+			this._topWidgetDiv = lib.node("topWidget_id");
+			this._topWidgetDiv.id = prefix + "topWidget_id";
+			
 			this._leftEditorParentDiv = lib.node("left_editor_id");
 			this._leftEditorParentDiv.id = prefix + "left_editor_id";
 			this._rightEditorParentDiv = lib.node("right_editor_id");
@@ -60,12 +65,31 @@ orion.TwoWayCompareUIFactory = (function() {
 			}
 		},
 		
+		_createSplitter: function(){
+			var splitNode = lib.$(".split", this._topWidgetDiv); //$NON-NLS-0$
+			var leftPane = lib.$(".leftPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
+			var rightPane = lib.$(".rightPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
+			if (splitNode && leftPane && rightPane) {
+				this._splitter = new mSplitter.Splitter({node: splitNode, sidePanel: leftPane, mainPanel: rightPane});
+			}
+		},
+				
 		buildUI:function(){
 			lib.node(this._parentDivID).innerHTML = FeatureTemplate;//appendChild(topNode);
 			this._init();
+			this._createSplitter();
 		},
 		
 		destroy: function(){
+		},
+		
+		getSplitter: function(){
+			return this._splitter;
+		},
+		
+		isLeftPane: function(node){
+			var leftPane = lib.$(".leftPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
+			return leftPane === node;
 		},
 		
 		getEditorParentDiv: function(left){
