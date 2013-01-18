@@ -235,8 +235,8 @@ mSiteMappingsTable.MappingsTable = (function() {
 				var oldCell = lib.$(".isValidCell", rowNode); //$NON-NLS-0$
 				var col_no = lib.$$array("td", rowNode).indexOf(oldCell); //$NON-NLS-0$
 				var cell = this.renderer.getIsValidCell(col_no, item, rowNode);
-				lib.empty(oldCell);
-				oldCell.appendChild(cell);
+				// replace oldCell with cell
+				oldCell.parentNode.replaceChild(cell, oldCell);
 			}
 		},
 		registerCommands: function() {
