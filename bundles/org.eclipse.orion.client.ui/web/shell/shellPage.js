@@ -13,19 +13,61 @@
 /*global define window*/
 /*jslint browser:true sub:true*/
 
-define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
+define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "orion/fileClient", "orion/searchClient", "orion/globalCommands",
 		"orion/widgets/Shell", "orion/webui/treetable", "shell/shellPageFileService", "shell/paramType-file", "shell/paramType-plugin", "shell/paramType-service",
-		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred", 'orion/status', 'orion/progress', 'orion/operationsClient'],
-	function(messages, require, dojo, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
-		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress, mOperationsClient) {
+		"orion/i18nUtil", "shell/extensionCommands", "orion/contentTypes", "orion/pluginregistry", "orion/PageUtil", "orion/URITemplate", "orion/Deferred",
+		"orion/status", "orion/progress", "orion/operationsClient", "shell/resultWriters"],
+	function(messages, mBootstrap, mCommands, mFileClient, mSearchClient, mGlobalCommands, mShell, mTreeTable, mShellPageFileService, mFileParamType,
+		mPluginParamType, mServiceParamType, i18nUtil, mExtensionCommands, mContentTypes, mPluginRegistry, PageUtil, URITemplate, Deferred, mStatus, mProgress,
+		mOperationsClient, mResultWriters) {
 
-	var shellPageFileService, fileClient, output;
+	var shellPageFileService, fileClient, output, fileType;
 	var hashUpdated = false;
 	var contentTypeService, openWithCommands = [], serviceRegistry;
 	var pluginRegistry, pluginType, preferences, serviceElementCounter = 0;
 
 	var ROOT_ORIONCONTENT = "/file"; //$NON-NLS-0$
 	var PAGE_TEMPLATE = "{OrionHome}/shell/shellPage.html#{,resource}"; //$NON-NLS-0$
+
+	var CommandResult = (function() {
+		function CommandResult(value, type) {
+			this.value = value;
+			this.array = false;
+			if (type.indexOf("[") === 0 && type.lastIndexOf("]") === type.length - 1) { //$NON-NLS-1$ //$NON-NLS-0$
+				this.array = true;
+				type = type.substring(1, type.length - 1);
+			}
+			this.type = type;
+		}
+		CommandResult.prototype = {
+			getType: function() {
+				return this.type;
+			},
+			getValue: function() {
+				return this.value;
+			},
+			isArray: function() {
+				return this.array;
+			},
+			stringify: function() {
+				if (this.type !== "string") { //$NON-NLS-0$
+					return "(" + (this.array ? "[" : "") + this.value + (this.array ? "]" : "") + ")"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				if (!this.array) {
+					return this.value;
+				}
+				var result = "";
+				for (var i = 0; i < this.value.length; i++) {
+					result += this.value[i];
+					if (i !== this.value.length - 1) {
+						result += "\n"; //$NON-NLS-0$
+					}
+				}
+				return result;
+			}
+		};
+		return CommandResult;
+	}());
 
 	/* model and renderer for displaying services */
 
@@ -216,10 +258,10 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 	}
 	
 	function cdExec(args, context) {
-		var node = args.directory;
-		if (!node) {
+		if (!args.directory) {
 			return "";
 		}
+		var node = args.directory.value[0];
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
 		setCWD(node.Location);
@@ -231,7 +273,7 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 		if (!node.file) {
 			return;
 		}
-		var url = computeEditURL(node.file);
+		var url = computeEditURL(node.file.value[0]);
 		window.open(url);
 	}
 
@@ -538,245 +580,375 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 
 	/* functions for handling contributed commands */
 
+	function outputString(string, writer) {
+		var segments = string.split("\n"); //$NON-NLS-0$
+		segments.forEach(function(segment) {
+			writer.appendText(segment);
+			writer.appendNewline();
+		});
+		return writer.write();
+	}
+
+	function processBlobResult(promise, result, output) {
+		var element, writer;
+		if (output) {
+			writer = new mResultWriters.FileBlobWriter(output, shellPageFileService);
+		} else {
+			element = document.createElement("div"); //$NON-NLS-0$
+			writer = new mResultWriters.ShellBlobWriter(element);
+		}
+
+		var value = result.getValue();
+		if (!result.isArray()) {
+			value = [value];
+		}
+		value.forEach(function(current) {
+			writer.addBlob(current);
+		});
+		writer.write().then(
+			function() {
+				promise.resolve(element);
+			},
+			function(error) {
+				outputString(error).then(
+					function() {
+						element = element || document.createElement("div"); //$NON-NLS-0$
+						promise.resolve(element);
+					},
+					function(error) {
+						promise.resolve();
+					}
+				);
+			}
+		);
+	}
+
+	function processStringResult(promise, result, output) {
+		var element, writer;
+		if (output) {
+			writer = new mResultWriters.FileStringWriter(output, shellPageFileService);
+		} else {
+			element = document.createElement("div"); //$NON-NLS-0$
+			writer = new mResultWriters.ShellStringWriter(element);
+		}
+
+		outputString(result.stringify(), writer).then(
+			function() {
+				promise.resolve(element);
+			},
+			function(error) {
+				outputString(error).then(
+					function() {
+						element = element || document.createElement("div"); //$NON-NLS-0$
+						promise.resolve(element);
+					},
+					function(error) {
+						promise.resolve();
+					}
+				);
+			}
+		);
+	}
+
+	function processResult(promise, result, output) {
+		var type = result.getType();
+		if (type === "file") { //$NON-NLS-0$
+			// TODO generalize this to look up any custom type
+			fileType.processResult(promise, result, output);
+			return;
+		}
+		/* handle built-in types */
+		if (type === "blob") { //$NON-NLS-0$
+			processBlobResult(promise, result, output);
+		} else {
+			/* either string or unknown type */
+			processStringResult(promise, result, output);
+		}
+	}
+
 	/*
 	 * Creates a gcli exec function that wraps a 'callback' function contributed by
 	 * an 'orion.shell.command' service implementation.
 	 */
-	function contributedExecFunc(service, name, progress) {
-		if (typeof(service.callback) === "function") { //$NON-NLS-0$
-			return function(args, context) {
-				/* Use orion/Deferred since it supports progress, gcli/promise does not */
-				//var promise = context.createPromise();
-				var promise = new Deferred();
-				var location = getCWD();
-				function toString(name, args){
-					var ret = "";
-					ret+=name;
-					for(key in args){
-						ret+=" ";
-						ret+=args[key];
-					}
-					return ret;
+	function contributedExecFunc(service, name, progress, returnType, addedOutputFunction) {
+		if (typeof(service.callback) !== "function") { //$NON-NLS-0$
+			return undefined;
+		}
+
+		return function(args, context) {
+			/* Use orion/Deferred since it supports progress, gcli/promise does not */
+			//var promise = context.createPromise();
+			var promise = new Deferred();
+
+			var output = null;
+			if (addedOutputFunction) {
+				output = args["output"]; //$NON-NLS-0$
+				if (output) {
+					output = output.getValue();
 				}
-				progress.progress(service.callback(args, {cwd:location}), "Executing command " + toString(name, args)).then(
+				delete args.output;
+			}
+
+			/*
+			 * The following function calls getPluginRepresentation(), if present, on all
+			 * properties in object, in order to give custom types an opportunity to provide
+			 * plugins with different representations of their instances than are used
+			 * internally.
+			 */
+			var convertToPluginArgs = function(object, resultFn) {
+				var keys = Object.keys(object);
+				if (keys.length === 0) {
+					resultFn(object);
+				} else {
+					var resultCount = 0;
+					keys.forEach(function(current) {
+						(function(key) {
+							(function(value, fn) {
+								if (value && value.getPluginRepresentation) {
+									value.getPluginRepresentation().then(function(newValue) {
+										fn(newValue);
+									});
+								} else {
+									fn(value);
+								}
+							}(object[key], function(newValue) {
+								object[key] = newValue;
+								if (++resultCount === keys.length) {
+									resultFn(object);
+								}
+							}));
+						}(current));
+					});
+				}
+			};
+
+			convertToPluginArgs(args, function(pluginArgs) {
+				function getCommandString(name, args) {
+					var result = name;
+					for (var key in args){
+						result += " "; //$NON-NLS-0$
+						result += args[key];
+					}
+					return result;
+				}
+				progress.progress(service.callback(pluginArgs, {cwd:getCWD()}), "Executing command " + getCommandString(name, args)).then( //$NON-NLS-0$
 					function(result) {
-						promise.resolve(result);
+						var commandResult = new CommandResult(result, returnType);
+						processResult(promise, commandResult, output);
 					},
 					function(error) {
 						resolveError(promise, error);
 					},
 					function(data) {
-						if (typeof promise.progress === "function") {
+						if (typeof promise.progress === "function") { //$NON-NLS-0$
 							promise.progress(data);
 						}
 					}
 				);
-				return promise;
-			};
-		}
-		return undefined; 
+			});
+			return promise;
+		};
 	}
 
-	dojo.addOnLoad(function() {
-		mBootstrap.startup().then(function(core) {
-			pluginRegistry = core.pluginRegistry;
-			serviceRegistry = core.serviceRegistry;
-			preferences = core.preferences;
+	mBootstrap.startup().then(function(core) {
+		pluginRegistry = core.pluginRegistry;
+		serviceRegistry = core.serviceRegistry;
+		preferences = core.preferences;
 
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
-			fileClient = new mFileClient.FileClient(serviceRegistry);
-			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
-			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			new mProgress.ProgressService(serviceRegistry, operationsClient);
-			mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-			mGlobalCommands.setPageTarget({task: messages.Shell});
+		var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry});
+		fileClient = new mFileClient.FileClient(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		new mProgress.ProgressService(serviceRegistry, operationsClient);
+		mGlobalCommands.generateBanner("orion-shellPage", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+		mGlobalCommands.setPageTarget({task: messages.Shell});
 
-			output = document.getElementById("shell-output"); //$NON-NLS-0$
-			var input = document.getElementById("shell-input"); //$NON-NLS-0$
-			var shell = new mShell.Shell({input: input, output: output});
+		output = document.getElementById("shell-output"); //$NON-NLS-0$
+		var input = document.getElementById("shell-input"); //$NON-NLS-0$
+		var shell = new mShell.Shell({input: input, output: output});
 
-			var parameters = PageUtil.matchResourceParameters(window.location.href);
-			if (parameters.command) {
-				shell.setInputText(parameters.command);
-				delete parameters.command;
-				var template = new URITemplate(PAGE_TEMPLATE);
-				var url = template.expand(parameters);
-				window.location.href = url;
+		var parameters = PageUtil.matchResourceParameters(window.location.href);
+		if (parameters.command) {
+			shell.setInputText(parameters.command);
+			delete parameters.command;
+			var template = new URITemplate(PAGE_TEMPLATE);
+			var url = template.expand(parameters);
+			window.location.href = url;
+		}
+
+		shell.setFocus();
+
+		shellPageFileService = new mShellPageFileService.ShellPageFileService();
+		var location = getCWD();
+		shellPageFileService.loadWorkspace(location || ROOT_ORIONCONTENT).then(
+			function(node) {
+				shellPageFileService.setCurrentDirectory(node);
 			}
+		);
+		if (!location) {
+			hashUpdated = true;
+			setCWD(ROOT_ORIONCONTENT);
+		}
 
-			shell.setFocus();
+		/* add the locally-defined types */
+		fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService); //$NON-NLS-0$
+		shell.registerType(fileType);
+		pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
+		shell.registerType(pluginType);
+		var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
+		shell.registerType(serviceType);
 
-			shellPageFileService = new mShellPageFileService.ShellPageFileService();
-			var location = getCWD();
-			shellPageFileService.loadWorkspace(location || ROOT_ORIONCONTENT).then(
-				function(node) {
-					shellPageFileService.setCurrentDirectory(node);
-				}
-			);
-			if (!location) {
-				hashUpdated = true;
-				setCWD(ROOT_ORIONCONTENT);
+		/* add the locally-defined commands */
+		shell.registerCommand({
+			name: "cd", //$NON-NLS-0$
+			description: messages["Changes the current directory"],
+			callback: cdExec,
+			parameters: [{
+				name: "directory", //$NON-NLS-0$
+				type: {name: "file", directory: true, exist: true}, //$NON-NLS-0$
+				description: messages["The name of the directory"]
+			}],
+			returnType: "html" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "edit", //$NON-NLS-0$
+			description: messages["Edits a file"],
+			callback: editExec,
+			parameters: [{
+				name: "file", //$NON-NLS-0$
+				type: {name: "file", file: true, exist: true}, //$NON-NLS-0$
+				description: messages["The name of the file"]
+			}]
+		});
+		shell.registerCommand({
+			name: "ls", //$NON-NLS-0$
+			description: messages["Lists the files in the current directory"],
+			callback: lsExec,
+			returnType: "html" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "pwd", //$NON-NLS-0$
+			description: messages["Prints the current directory location"],
+			callback: pwdExec,
+			returnType: "html" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "clear", //$NON-NLS-0$
+			description: messages["Clears the shell screen"],
+			callback: function(args, context) {
+				shell.clear();
 			}
+		});
 
-			/* add the locally-defined types */
-			var fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService); //$NON-NLS-0$
-			shell.registerType(fileType);
-			pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
-			shell.registerType(pluginType);
-			var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
-			shell.registerType(serviceType);
+		/* plug-in management commands */
+		shell.registerCommand({
+			name: "plugins", //$NON-NLS-0$
+			description: messages["Commands for working with plug-ins"]
+		});
+		shell.registerCommand({
+			name: "plugins list", //$NON-NLS-0$
+			description: messages["Lists all registered plug-ins"],
+			callback: pluginsListExec,
+			returnType: "html" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins install", //$NON-NLS-0$
+			description: messages["Installs a plug-in from a URL"],
+			callback: pluginsInstallExec,
+			parameters: [{
+				name: "url", //$NON-NLS-0$
+				type: "string", //$NON-NLS-0$
+				description: messages["The plug-in URL"]
+			}],
+			returnType: "string" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins uninstall", //$NON-NLS-0$
+			description: messages["Uninstalls a contributed plug-in from the configuration"],
+			callback: pluginsUninstallExec,
+			parameters: [{
+				name: "plugin", //$NON-NLS-0$
+				type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
+				description: messages["The name of the contributed plug-in"]
+			}],
+			returnType: "string" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins reload", //$NON-NLS-0$
+			description: messages["Reloads a plug-in"],
+			callback: pluginsReloadExec,
+			parameters: [{
+				name: "plugin", //$NON-NLS-0$
+				type: {name: "plugin", multiple: true, excludeDefaultPlugins: false}, //$NON-NLS-0$
+				description: messages["The name of the plug-in"]
+			}],
+			returnType: "string" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins enable", //$NON-NLS-0$
+			description: messages["Enables a contributed plug-in"],
+			callback: pluginsEnableExec,
+			parameters: [{
+				name: "plugin", //$NON-NLS-0$
+				type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
+				description: messages["The name of the contributed plug-in"]
+			}],
+			returnType: "string" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins disable", //$NON-NLS-0$
+			description: messages["Disables a contributed plug-in"],
+			callback: pluginsDisableExec,
+			parameters: [{
+				name: "plugin", //$NON-NLS-0$
+				type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
+				description: messages["The name of the contributed plug-in"]
+			}],
+			returnType: "string" //$NON-NLS-0$
+		});
+		shell.registerCommand({
+			name: "plugins services", //$NON-NLS-0$
+			description: messages["Displays a plug-in's services"],
+			callback: pluginServicesExec,
+			parameters: [{
+				name: "plugin", //$NON-NLS-0$
+				type: {name: "plugin", multiple: false, excludeDefaultPlugins: false}, //$NON-NLS-0$
+				description: messages["The name of the plug-in"]
+			}],
+			returnType: "html" //$NON-NLS-0$
+		});
 
-			/* add the locally-defined commands */
-			shell.registerCommand({
-				name: "cd", //$NON-NLS-0$
-				description: messages["Changes the current directory"],
-				callback: cdExec,
-				parameters: [{
-					name: "directory", //$NON-NLS-0$
-					type: {name: "file", directory: true, exist: true}, //$NON-NLS-0$
-					description: messages["The name of the directory"]
-				}],
-				returnType: "html" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "edit", //$NON-NLS-0$
-				description: messages["Edits a file"],
-				callback: editExec,
-				parameters: [{
-					name: "file", //$NON-NLS-0$
-					type: {name: "file", file: true, exist: true}, //$NON-NLS-0$
-					description: messages["The name of the file"]
-				}]
-			});
-			shell.registerCommand({
-				name: "ls", //$NON-NLS-0$
-				description: messages["Lists the files in the current directory"],
-				callback: lsExec,
-				returnType: "html" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "pwd", //$NON-NLS-0$
-				description: messages["Prints the current directory location"],
-				callback: pwdExec,
-				returnType: "html" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "clear", //$NON-NLS-0$
-				description: messages["Clears the shell screen"],
-				callback: function(args, context) {
-					shell.clear();
-				}
-			});
+		/* service management commands */
+		shell.registerCommand({
+			name: "service", //$NON-NLS-0$
+			description: messages["Commands for working with a service"]
+		});
 
-			/* plug-in management commands */
-			shell.registerCommand({
-				name: "plugins", //$NON-NLS-0$
-				description: messages["Commands for working with plug-ins"]
-			});
-			shell.registerCommand({
-				name: "plugins list", //$NON-NLS-0$
-				description: messages["Lists all registered plug-ins"],
-				callback: pluginsListExec,
-				returnType: "html" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins install", //$NON-NLS-0$
-				description: messages["Installs a plug-in from a URL"],
-				callback: pluginsInstallExec,
-				parameters: [{
-					name: "url", //$NON-NLS-0$
-					type: "string", //$NON-NLS-0$
-					description: messages["The plug-in URL"]
-				}],
-				returnType: "string" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins uninstall", //$NON-NLS-0$
-				description: messages["Uninstalls a contributed plug-in from the configuration"],
-				callback: pluginsUninstallExec,
-				parameters: [{
-					name: "plugin", //$NON-NLS-0$
-					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
-					description: messages["The name of the contributed plug-in"]
-				}],
-				returnType: "string" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins reload", //$NON-NLS-0$
-				description: messages["Reloads a plug-in"],
-				callback: pluginsReloadExec,
-				parameters: [{
-					name: "plugin", //$NON-NLS-0$
-					type: {name: "plugin", multiple: true, excludeDefaultPlugins: false}, //$NON-NLS-0$
-					description: messages["The name of the plug-in"]
-				}],
-				returnType: "string" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins enable", //$NON-NLS-0$
-				description: messages["Enables a contributed plug-in"],
-				callback: pluginsEnableExec,
-				parameters: [{
-					name: "plugin", //$NON-NLS-0$
-					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
-					description: messages["The name of the contributed plug-in"]
-				}],
-				returnType: "string" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins disable", //$NON-NLS-0$
-				description: messages["Disables a contributed plug-in"],
-				callback: pluginsDisableExec,
-				parameters: [{
-					name: "plugin", //$NON-NLS-0$
-					type: {name: "plugin", multiple: true, excludeDefaultPlugins: true}, //$NON-NLS-0$
-					description: messages["The name of the contributed plug-in"]
-				}],
-				returnType: "string" //$NON-NLS-0$
-			});
-			shell.registerCommand({
-				name: "plugins services", //$NON-NLS-0$
-				description: messages["Displays a plug-in's services"],
-				callback: pluginServicesExec,
-				parameters: [{
-					name: "plugin", //$NON-NLS-0$
-					type: {name: "plugin", multiple: false, excludeDefaultPlugins: false}, //$NON-NLS-0$
-					description: messages["The name of the plug-in"]
-				}],
-				returnType: "html" //$NON-NLS-0$
-			});
+		shell.registerCommand({
+			name: "service contributors", //$NON-NLS-0$
+			description: messages["Displays all plug-in contributions for a service"],
+			callback: serviceContributorsExec,
+			parameters: [{
+				name: "id", //$NON-NLS-0$
+				type: "service", //$NON-NLS-0$
+				description: messages["The service identifier"]
+			}],
+			returnType: "html" //$NON-NLS-0$
+		});
 
-			/* service management commands */
-			shell.registerCommand({
-				name: "service", //$NON-NLS-0$
-				description: messages["Commands for working with a service"]
-			});
-
-			shell.registerCommand({
-				name: "service contributors", //$NON-NLS-0$
-				description: messages["Displays all plug-in contributions for a service"],
-				callback: serviceContributorsExec,
-				parameters: [{
-					name: "id", //$NON-NLS-0$
-					type: "service", //$NON-NLS-0$
-					description: messages["The service identifier"]
-				}],
-				returnType: "html" //$NON-NLS-0$
-			});
-
-			/* initialize the editors cache (used by some of the build-in commands */
-			contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-			serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
-				var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
-				var fn = function(command) {
-					openWithCommands.push(command);
-				};
-				for (var i = 0; i < commands.length; i++) {
-					var commandDeferred = mExtensionCommands._createCommandOptions(commands[i].properties, commands[i].service, serviceRegistry, contentTypes, true);
-					commandDeferred.then(fn);
-				}
-			});
+		/* initialize the editors cache (used by some of the built-in commands */
+		contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+		serviceRegistry.getService("orion.core.contenttypes").getContentTypes().then(function(contentTypes) { //$NON-NLS-0$
+			var commands = mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypes);
+			var fn = function(command) {
+				openWithCommands.push(command);
+			};
+			for (var i = 0; i < commands.length; i++) {
+				var commandDeferred = mExtensionCommands._createCommandOptions(commands[i].properties, commands[i].service, serviceRegistry, contentTypes, true);
+				commandDeferred.then(fn);
+			}
+		});
 
 			// TODO
 			/* add types contributed through the plug-in API */
@@ -799,62 +971,81 @@ define(["i18n!orion/shell/nls/messages", "require", "dojo", "orion/bootstrap", "
 //				}
 //			}
 			
-			/* add commands contributed through the plug-in API */
-			var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
-			var progress = serviceRegistry.getService("orion.page.progress");
-			for (var i = 0; i < allReferences.length; ++i) {
-				var ref = allReferences[i];
-				var service = serviceRegistry.getService(ref);
-				if (service) {
-					if (ref.getProperty("nls") && ref.getProperty("descriptionKey")){  //$NON-NLS-1$ //$NON-NLS-0$
-						i18nUtil.getMessageBundle(ref.getProperty("nls")).then( //$NON-NLS-0$
-							function(ref, commandMessages) {
-								var name = ref.getProperty("name"); //$NON-NLS-0$
-								shell.registerCommand({
-									name: name,
-									description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
-									callback: contributedExecFunc(service, name, progress),
-									returnType: "string", //$NON-NLS-0$
-									parameters: ref.getProperty("parameters"), //$NON-NLS-0$
-									manual: ref.getProperty("manual") //$NON-NLS-0$
-								});
-							},
-							ref);
-					} else {
-						var name = ref.getProperty("name"); //$NON-NLS-0$
-						shell.registerCommand({
-							name: name,
-							description: ref.getProperty("description"), //$NON-NLS-0$
-							callback: contributedExecFunc(service, name, progress),
-							returnType: "string", //$NON-NLS-0$
-							parameters: ref.getProperty("parameters"), //$NON-NLS-0$
-							manual: ref.getProperty("manual") //$NON-NLS-0$
-						});
+		/* add commands contributed through the plug-in API */
+		var allReferences = serviceRegistry.getServiceReferences("orion.shell.command"); //$NON-NLS-0$
+		var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+		for (var i = 0; i < allReferences.length; ++i) {
+			var ref = allReferences[i];
+			var service = serviceRegistry.getService(ref);
+			if (service) {
+				var OUTPUT_STRING = "output"; //$NON-NLS-0$
+				parameters = ref.getProperty("parameters"); //$NON-NLS-0$
+				var outputFound;
+				for (var j = 0; j < parameters.length; j++) {
+					if (parameters[j].name === OUTPUT_STRING) {
+						outputFound = true;
+						break;
 					}
+				}
+				if (!outputFound) {
+					parameters.push({
+						name: "output", //$NON-NLS-0$
+	                    type: {name: "file", file: true, directory: true}, //$NON-NLS-0$
+	                    description: messages["The file or directory to re-direct output to"], //$NON-NLS-0$
+	                    defaultValue: null
+					});
+				}
+
+				var returnType = ref.getProperty("returnType") || "string"; //$NON-NLS-1$ //$NON-NLS-0$
+
+				if (ref.getProperty("nls") && ref.getProperty("descriptionKey")){  //$NON-NLS-1$ //$NON-NLS-0$
+					i18nUtil.getMessageBundle(ref.getProperty("nls")).then( //$NON-NLS-0$
+						function(ref, commandMessages) {
+							var name = ref.getProperty("name"); //$NON-NLS-0$
+							shell.registerCommand({
+								name: name,
+								description: commandMessages[ref.getProperty("descriptionKey")], //$NON-NLS-0$
+								callback: contributedExecFunc(service, name, progress, returnType, !outputFound),
+								returnType: "html", //$NON-NLS-0$
+								parameters: parameters,
+								manual: commandMessages[ref.getProperty("manual")] //$NON-NLS-0$
+							});
+						},
+						ref);
+				} else {
+					var name = ref.getProperty("name"); //$NON-NLS-0$
+					shell.registerCommand({
+						name: name,
+						description: ref.getProperty("description"), //$NON-NLS-0$
+						callback: contributedExecFunc(service, name, progress, returnType, !outputFound),
+						returnType: "html", //$NON-NLS-0$
+						parameters: parameters,
+						manual: ref.getProperty("manual") //$NON-NLS-0$
+					});
 				}
 			}
+		}
 
-			window.onhashchange = function() {
-				if (hashUpdated) {
-					hashUpdated = false;
-					return;
-				}
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
+			if (hashUpdated) {
+				hashUpdated = false;
+				return;
+			}
 
-				var hash = window.location.hash.substring(1);
-				if (hash.length === 0) {
-					hash = ROOT_ORIONCONTENT;
-				}
-				shellPageFileService.loadWorkspace(hash).then(
-					function(node) {
-						if (shellPageFileService.getCurrentDirectory().Location !== node.Location) {
-							shellPageFileService.setCurrentDirectory(node);
-							var buffer = shellPageFileService.computePathString(node);
-							shell.output(getChangedToElement(buffer));
-							setCWD(node.Location);
-						}
+			var hash = window.location.hash.substring(1);
+			if (hash.length === 0) {
+				hash = ROOT_ORIONCONTENT;
+			}
+			shellPageFileService.loadWorkspace(hash).then(
+				function(node) {
+					if (shellPageFileService.getCurrentDirectory().Location !== node.Location) {
+						shellPageFileService.setCurrentDirectory(node);
+						var buffer = shellPageFileService.computePathString(node);
+						shell.output(getChangedToElement(buffer));
+						setCWD(node.Location);
 					}
-				);
-			};
+				}
+			);
 		});
 	});
 });
