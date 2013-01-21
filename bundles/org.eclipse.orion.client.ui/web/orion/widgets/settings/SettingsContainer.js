@@ -69,7 +69,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/globalCommands',
 			});
 		}.bind(this));
 	}
-	objects.inherit(SettingsContainer, SplitSelectionLayout);
+	SettingsContainer.prototype = Object.create(SplitSelectionLayout.prototype);
 	objects.mixin(SettingsContainer.prototype, {
 		show: function() {
 
