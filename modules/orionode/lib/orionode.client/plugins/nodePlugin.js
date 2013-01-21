@@ -71,10 +71,13 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	provider.registerService('orion.shell.command', {
 		callback: function(commandArgs, context) {
 			var moduleFile = commandArgs.module, args = commandArgs.args;
+			if (!moduleFile) {
+				return 'No file to start was provided.';
+			}
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('start', {
-					modulePath: moduleFile.Location,
+					modulePath: moduleFile.path,
 					context: context,
 					args: args
 				});
@@ -143,10 +146,13 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	provider.registerService('orion.shell.command',{
 		callback: function(commandArgs, context) {
 			var moduleFile = commandArgs.module, args = commandArgs.args;
+			if (!moduleFile) {
+				return 'No file to debug was provided.';
+			}
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('debug', {
-					modulePath: moduleFile.Location,
+					modulePath: moduleFile.path,
 					port: commandArgs.port,
 					context: context,
 					args: args

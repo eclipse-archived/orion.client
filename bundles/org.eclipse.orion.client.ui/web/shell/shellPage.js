@@ -985,7 +985,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 			var service = serviceRegistry.getService(ref);
 			if (service) {
 				var OUTPUT_STRING = "output"; //$NON-NLS-0$
-				parameters = ref.getProperty("parameters"); //$NON-NLS-0$
+				parameters = ref.getProperty("parameters") || []; //$NON-NLS-0$
 				var outputFound;
 				for (var j = 0; j < parameters.length; j++) {
 					if (parameters[j].name === OUTPUT_STRING) {
