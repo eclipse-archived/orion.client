@@ -145,7 +145,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg, typeSpec) {
-				var string = arg || "";
+				var string = arg.text || "";
 				if (string.indexOf("'") === 0) {
 					string = string.substring(1);
 				}
