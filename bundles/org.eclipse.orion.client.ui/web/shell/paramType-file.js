@@ -194,17 +194,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 					return this;
 				};
 
-				var destination;
-				if (!output) {
-					destination = this.shellPageFileService.getCurrentDirectory();
-				} else if (output.resourceExists()) {
-					/* value is an array of nodes, in this context will always have a size of 1 */
-					destination = output.getValue()[0];
-				} else {
-					/* value is a string representing a non-existent resource */
-					destination = output.getValue();
-				}
-
+				var destination = output || this.shellPageFileService.getCurrentDirectory();
 				waitCount++;
 				this.shellPageFileService.ensureDirectory(null, destination).then(
 					function(directory) {
