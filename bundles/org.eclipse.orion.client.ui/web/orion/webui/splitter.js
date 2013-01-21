@@ -38,7 +38,6 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._tracking = null;
 			this._resizeListeners = [];
 			this._animationDelay = 501;  // longer than CSS transitions in layout.css
-			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
 			this.$node = lib.node(options.node);
 			if (!this.$node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
 			this.$sideNode = lib.node(options.sidePanel);
@@ -46,7 +45,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this.$mainNode = lib.node(options.mainPanel);
 			if (!this.$mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
 			this._vertical = options.vertical;
-			
+			this._prefix = "/orion/splitter/" + (this.$node.id || document.body.id || "");  //$NON-NLS-0$
 			if (options.toggle) {
 				this._thumb = document.createElement("div"); //$NON-NLS-0$
 				this.$node.appendChild(this._thumb);
