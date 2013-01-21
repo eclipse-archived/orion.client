@@ -9,8 +9,8 @@
 
 /*global define*/
 
-define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orion/i18nUtil"],
-	function(messages, require, mShell, i18nUtil) {
+define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"],
+	function(messages, mShell, i18nUtil) {
 
 	var orion = {};
 	orion.shellPage = {};

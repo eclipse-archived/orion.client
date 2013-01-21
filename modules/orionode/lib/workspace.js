@@ -14,7 +14,7 @@ var fs = require('fs');
 var path = require('path');
 var url = require('url');
 var util = require('util');
-var api = require('./api');
+var api = require('./api'), writeError = api.writeError;
 var fileUtil = require('./fileUtil');
 var resource = require('./resource');
 
@@ -113,6 +113,14 @@ module.exports = function(options) {
 					});
 				}
 			}
+		},
+		PUT: function(req, res, next, rest) {
+			// Would 501 be more appropriate?
+			writeError(403, res);
+		},
+		DELETE: function(req, res, next, rest) {
+			// Would 501 be more appropriate?
+			writeError(403, res);
 		}
 	}));
 };

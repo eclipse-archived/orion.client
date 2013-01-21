@@ -13,16 +13,16 @@
 /*browser:true*/
 
 /*
- * This file is basically a copy from the orion root directory.  It provides functions
+ * This file is basically a copy from the client root directory.  It provides functions
  * that are needed by the Shell page, but are marked as private and therefore can
  * break unsuspecting clients at any time.  If public equivalents offering the required
  * functionality become available in the future then it should be possible to get rid
  * of this copy.
  *
  * shellPage.js calls _createOpenWithCommands() and _createCommandOptions(), which
- * depend on pretty much everything else in the file. 
+ * depend on everything else in the file. 
  */
-
+ 
 define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
 	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 

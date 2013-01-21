@@ -27,11 +27,10 @@ var BUNDLE_WEB_FOLDER = './web/';
 var IS_WINDOWS = process.platform === 'win32';
 
 var pathToNode = process.execPath;
-var pathToRjs = path.resolve(__dirname, 'r.js');
+var pathToRjs = require.resolve('requirejs');
 var pathToBuildFile = path.resolve(__dirname, process.argv[2] || './orion.build.js');
 var pathToOrionClientBundlesFolder = path.resolve(path.dirname(pathToBuildFile), '../../../bundles/');
 var pathToOrionodeClient = path.resolve(path.dirname(pathToBuildFile), '../lib/orionode.client/');
-var pathToDojo = path.resolve(path.dirname(pathToBuildFile), '../lib/dojo/');
 var pathToTempDir = path.resolve(__dirname, '.temp');
 
 /**
@@ -100,12 +99,12 @@ function spawn(cmd, args, options) {
 }
 
 function getCopyFileCmd(srcFile, destFile) {
-	return IS_WINDOWS ? format('echo f | xcopy /y "${0}" "${1}"', srcFile, destFile) : format("cp ${0} ${1}", srcFile, destFile);
+	return IS_WINDOWS ? format('echo f | xcopy /y /i "${0}" "${1}"', srcFile, destFile) : format("cp ${0} ${1}", srcFile, destFile);
 }
 
 /** @returns {String} command for performing recursive copy of src directory to dest directory. */
 function getCopyDirCmd(src, dest) {
-	return IS_WINDOWS ? format('xcopy /e /h /q /y "${0}" "${1}"', src, dest) : format("cp -R ${0}/* ${1}", src, dest);
+	return IS_WINDOWS ? format('xcopy /e /h /q /y /i "${0}" "${1}"', src, dest) : format("cp -R ${0}/* ${1}", src, dest);
 }
 
 /**
@@ -235,33 +234,24 @@ function build(optimizeElements) {
 		}));
 	}).then(function() {
 		if (steps.css === false) { return new Deferred.resolve(); }
-
-		// We need all Dojo's .css files to be in .temp/org.dojotoolkit since they are @import'ed from Orion css files.
-		section('Copying Dojo CSS files');
-		var copyDojoCss = IS_WINDOWS 
-			? format('robocopy "${0}" "${1}" *.css /s /nfl /ndl /nc /njh ', pathToDojo, pathToTempDir)
-			: format('rsync -rv --include="*/" --include="*.css" --exclude="*" ${0} ${1}', path.join(pathToDojo, 'org.dojotoolkit'), pathToTempDir);
-		return execCommand(copyDojoCss, null, !!IS_WINDOWS /*robocopy returns non-0 exit codes on success, ignore them*/)
-		.then(function() {
-			// Optimize each page's corresponding ${page}.css file.
-			// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
-			section('Optimizing page CSS files');
-			return PromisedIO.seq(cssFiles.map(function(cssFile) {
-				 return function() {
-					return exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
-						if (exists) {
-							return spawn(pathToNode, [
-									pathToRjs,
-									"-o",
-									pathToBuildFile,
-									"cssIn=.temp/" + cssFile.path,
-									"out=.temp/" + cssFile.path
-								], { cwd: path.dirname(pathToBuildFile) });
-						}
-					});
-				};
-			}));
-		});
+		// Optimize each page's corresponding ${page}.css file.
+		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
+		section('Optimizing page CSS files');
+		return PromisedIO.seq(cssFiles.map(function(cssFile) {
+			 return function() {
+				return exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
+					if (exists) {
+						return spawn(pathToNode, [
+								pathToRjs,
+								"-o",
+								pathToBuildFile,
+								"cssIn=.temp/" + cssFile.path,
+								"out=.temp/" + cssFile.path
+							], { cwd: path.dirname(pathToBuildFile) });
+					}
+				});
+			};
+		}));
 	}).then(function() {
 		if (steps.updateHtml === false) { return new Deferred().resolve(); }
 		section('Running updateHTML');
@@ -297,10 +287,10 @@ function build(optimizeElements) {
 					originalFolder: path.join(pathToOrionClientBundlesFolder, op.bundle, BUNDLE_WEB_FOLDER, op.pageDir)
 				};
 				if (IS_WINDOWS) {
-					return PromisedIO.all([
-						execCommand(format('xcopy /q /y ${builtJsFile} ${originalFolder}', args)),
-						execCommand(format('xcopy /q /y ${htmlFile} ${originalFolder}', args))
-					]);
+					return execCommand(format('xcopy /q /y /i ${builtJsFile} ${originalFolder}', args)).then(
+							function() {
+								return execCommand(format('xcopy /q /y /i ${htmlFile} ${originalFolder}', args));
+							});
 				} else {
 					return execCommand(format("cp ${builtJsFile} ${htmlFile} ${originalFolder}", args));
 				}

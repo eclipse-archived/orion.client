@@ -8,148 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define window document */
 
-define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/explorer', 'orion/widgets/ExplorerTree' ], function(messages, dialog, mExplorer) {
-
-	function RemotePrompterDialog(options) {
-		this._init(options);
-	}
-
-	RemotePrompterDialog.prototype = new dialog.Dialog();
-
-	RemotePrompterDialog.prototype.TEMPLATE = '<div>'
-			+ '<div id="treeContentPane" style="width:25em; min-height: 25em; max-height: 30em; height: auto; overflow-y: auto; padding: 8px"></div>'
-			+ '<div id="newBranchPane" style="padding: 8px">' + '<label for="newBranch">${New Branch:}</label>'
-			+ '<input id="newBranch" value="" disabled=true/>' + '</div>' + '</div>';
-
-	RemotePrompterDialog.prototype._init = function(options) {
-		var that = this;
-
-		this.title = options.title || messages['Choose a Folder'];
-		this.modal = true;
-		this.messages = messages;
-		this.func = options.func;
-		this.treeRoot = options.treeRoot;
-		this.gitClient = options.gitClient;
-		this.hideNewBranch = options.hideNewBranch;
-
-		this.buttons = [];
-
-		this.buttons.push({ callback : function() {
-			that.destroy();
-			that._execute();
-		},
-		text : 'OK'
-		});
-	};
-
-	RemotePrompterDialog.prototype._bindToDom = function(parent) {
-		var that = this;
-
-		this.$newBranch.addEventListener("input", function(evt) { //$NON-NLS-0$
-			that._validate();
-		});
-
-		if (this.hideNewBranch) {
-			this.$newBranchPane.style.display = "none"; //$NON-NLS-0$
-		}
-	};
-
-	RemotePrompterDialog.prototype._beforeShowing = function() {
-		// Start the dialog initialization.
-		this._initialize();
-
-		this._loadRemoteChildren();
-	};
-
-	RemotePrompterDialog.prototype._loadRemoteChildren = function() {
-		var myTreeModel = new GitClonesModel(this.gitClient, null, this.gitClient.getGitClone, this.treeRoot);
-		this._createTree(myTreeModel);
-	};
-
-	RemotePrompterDialog.prototype._createTree = function(myTreeModel) {
-		var that = this;
-
-		this.treeWidget = new orion.widgets.ExplorerTree({ style : "width:100%; height:100%", //$NON-NLS-0$
-		model : myTreeModel,
-		region : "center", //$NON-NLS-0$
-		showRoot : false,
-		persist : true, // remember expanded state
-		openOnClick : false,
-		getLabel : function(item) {
-			if (item.Type === "RemoteTrackingBranch" && !item.Id) { //$NON-NLS-0$
-				return item.Name + messages[" [New branch]"];
-			}
-			return item.Name;
-		},
-		getIconClass : function(item, opened) {
-			if (item.BranchLocation && item.RemoteLocation) {
-				return "gitRepoItem"; //$NON-NLS-0$
-			}
-			if (item.GroupNode) {
-				return item.Name === "Branch" ? "gitBranchesItem" : "gitRemotesItem"; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			}
-			if (item.Type === "Branch" || item.Type === "RemoteTrackingBranch") { //$NON-NLS-1$ //$NON-NLS-0$
-				return "gitBranchItem"; //$NON-NLS-0$
-			}
-			if (item.Type === "Remote") { //$NON-NLS-0$
-				return "gitRemoteItem"; //$NON-NLS-0$
-			}
-			return "gitDefaultItem"; //$NON-NLS-0$
-		}
-		});
-
-		this.treeWidget._inheritedSelectNode = this.treeWidget._selectNode;
-
-		this.treeWidget._selectNode = function(node) {
-			that.treeWidget._inheritedSelectNode(node);
-			if (node.item && node.item.Type === "Remote") { //$NON-NLS-0$
-				that.$newBranch.disabled = false;
-			} else {
-				that.$newBranch.disabled = true;
-			}
-			that._validate();
-		};
-
-		this.treeWidget.startup();
-
-		var treeContentPane = this.$treeContentPane;
-		treeContentPane.appendChild(this.treeWidget.domNode);
-	};
-
-	RemotePrompterDialog.prototype._validate = function() {
-		var selectedItems = this.treeWidget.getSelectedItems();
-		if (selectedItems.length === 1) {
-			if (selectedItems[0].Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-				this.RemoteBrowserButton.disabled = false;
-				return;
-			} else if (selectedItems[0].Type === "Remote") { //$NON-NLS-0$
-				if (this.$newBranch.value !== "") {
-					this.RemoteBrowserButton.disabled = false;
-					return;
-				}
-			}
-		}
-		this.RemoteBrowserButton.disabled = true;
-	};
-
-	RemotePrompterDialog.prototype._execute = function() {
-		var selectedItems = this.treeWidget.getSelectedItems();
-		if (this.func) {
-			if (selectedItems[0].Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-				this.func(selectedItems[0], selectedItems[0].parent);
-			} else {
-				var id = selectedItems[0].CloneLocation.split("/")[4];
-				var newBranchObject = new Object();
-				newBranchObject.parent = selectedItems[0];
-				newBranchObject.FullName = "refs/remotes/" + selectedItems[0].Name + "/" + this.$newBranch.value;
-				newBranchObject.Name = selectedItems[0].Name + "/" + this.$newBranch.value;
-				newBranchObject.Type = "RemoteTrackingBranch";
-				newBranchObject.Location = "/gitapi/remote/" + selectedItems[0].Name + "/" + this.$newBranch.value + "/file/" + id;
-				this.func(null, selectedItems[0], newBranchObject);
-			}
-		}
-	};
+define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/explorer', 'orion/selection'], function(messages, dialog, mExplorer, mSelection) {
 
 	var GitClonesModel = function() {
 		/**
@@ -177,19 +38,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 				that.root = item;
 				onItem(item);
 			});
-		};
-
-		GitClonesModel.prototype.mayHaveChildren = function(item) {
-			if (item.children || item.Children) {
-				return true;
-			} else if (item.BranchLocation && item.RemoteLocation) {
-				return true;
-			} else if (item.GroupNode) {
-				return true;
-			} else if (item.Type === "Remote") { //$NON-NLS-0$
-				return true;
-			}
-			return false;
 		};
 
 		GitClonesModel.prototype.getIdentity = function(/* item */item) {
@@ -251,6 +99,155 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 
 		return GitClonesModel;
 	}();
+
+	function RemotePrompterRenderer (options, explorer) {
+		this.explorer = explorer;
+		this._init(options);
+	}
+	RemotePrompterRenderer.prototype = new mExplorer.SelectionRenderer(); 
+	RemotePrompterRenderer.prototype.constructor = RemotePrompterRenderer;
+	RemotePrompterRenderer.prototype.getLabelColumnIndex = function() {
+		return 0;
+	};
+	RemotePrompterRenderer.prototype.getCellElement = function(col_no, item, tableRow){
+		var col = document.createElement("td"); //$NON-NLS-0$
+		tableRow.appendChild(col);
+		var span = document.createElement("span"); //$NON-NLS-0$
+		span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
+		col.appendChild(span);
+		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
+		if (item.children || item.Children || item.GroupNode || item.Type === "Remote" || (item.BranchLocation && item.RemoteLocation)) { //$NON-NLS-0$
+			this.getExpandImage(tableRow, span);
+		}
+		var name = item.Name;
+		if (item.Type === "RemoteTrackingBranch" && !item.Id) { //$NON-NLS-0$
+			name = item.Name + messages[" [New branch]"];
+		}
+		span.appendChild(document.createTextNode(name)); 
+	};
+
+	function RemotePrompterDialog(options) {
+		this._init(options);
+	}
+
+	RemotePrompterDialog.prototype = new dialog.Dialog();
+
+	RemotePrompterDialog.prototype.TEMPLATE = '<div>'
+			+ '<div id="treeContentPane" style="width:25em; min-height: 25em; max-height: 30em; height: auto; overflow-y: auto; padding: 8px"></div>'
+			+ '<div id="newBranchPane" style="padding: 8px">' + '<label for="newBranch">${New Branch:}</label>'
+			+ '<input id="newBranch" value="" disabled=true/>' + '</div>' + '</div>';
+
+	RemotePrompterDialog.prototype._init = function(options) {
+		var that = this;
+
+		this.title = options.title || messages['Choose a Folder'];
+		this.modal = true;
+		this.messages = messages;
+		this.func = options.func;
+		this.treeRoot = options.treeRoot;
+		this.gitClient = options.gitClient;
+		this.hideNewBranch = options.hideNewBranch;
+		this.serviceRegistry = options.serviceRegistry;
+
+		this.buttons = [];
+
+		this.buttons.push({ callback : function() {
+			if (that.$remoteOk.classList.contains(this.DISABLED)) {
+				return;
+			}
+			that.destroy();
+			that._execute();
+		},
+		text : 'OK',
+		isDefault: true,
+		id: "remoteOk"
+		});
+	};
+
+	RemotePrompterDialog.prototype._bindToDom = function(parent) {
+		var that = this;
+
+		this.$newBranch.addEventListener("input", function(evt) { //$NON-NLS-0$
+			that._validate();
+		});
+
+		if (this.hideNewBranch) {
+			this.$newBranchPane.style.display = "none"; //$NON-NLS-0$
+		}
+	};
+
+	RemotePrompterDialog.prototype._beforeShowing = function() {
+		// Start the dialog initialization.
+		this._initialize();
+		this._loadRemoteChildren();
+	};
+	
+	RemotePrompterDialog.prototype._afterShowing = function() {
+		this.$treeContentPane.focus();
+		this._validate();
+	};
+
+	RemotePrompterDialog.prototype._loadRemoteChildren = function() {
+		var myTreeModel = new GitClonesModel(this.gitClient, null, this.gitClient.getGitClone, this.treeRoot);
+		this._createTree(myTreeModel);
+	};
+
+	RemotePrompterDialog.prototype._createTree = function(myTreeModel) {
+		var that = this;
+		
+		var selection = new mSelection.Selection(this.serviceRegistry, "orion.remotePrompter.selection"); //$NON-NLS-0$
+		var renderer = new RemotePrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter"});
+		this.explorer = new mExplorer.Explorer(this.serviceRegistry, selection, renderer);
+		// TODO yuck.  Renderer needs to know explorer.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=389529
+		renderer.explorer = this.explorer;
+		this.explorer.createTree("treeContentPane", myTreeModel); //$NON-NLS-0$
+		this.serviceRegistry.getService("orion.remotePrompter.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+			if (event.selection && event.selection.Type === "Remote") { //$NON-NLS-0$
+				that.$newBranch.disabled = false;
+			} else {
+				that.$newBranch.disabled = true;
+			}
+			that._validate(event.selection);
+		});
+	};
+
+	RemotePrompterDialog.prototype._validate = function(selection) {
+		var validateFunction = function(theSelection) {
+			if (theSelection && theSelection.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+				this.$remoteOk.classList.remove(this.DISABLED);
+				return;
+			} else if (theSelection && theSelection.Type === "Remote") { //$NON-NLS-0$
+				if (this.$newBranch.value !== "") {
+					this.$remoteOk.classList.remove(this.DISABLED);
+					return;
+				}
+			}
+			this.$remoteOk.classList.add(this.DISABLED);
+		};
+		if (selection) {
+			validateFunction.bind(this)(selection);
+		} else {
+			this.serviceRegistry.getService("orion.remotePrompter.selection").getSelection(validateFunction.bind(this)); //$NON-NLS-0$
+		}
+	};
+
+	RemotePrompterDialog.prototype._execute = function() {
+		var selectedItems = this.treeWidget.getSelectedItems();
+		if (this.func) {
+			if (selectedItems[0].Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+				this.func(selectedItems[0], selectedItems[0].parent);
+			} else {
+				var id = selectedItems[0].CloneLocation.split("/")[4];
+				var newBranchObject = new Object();
+				newBranchObject.parent = selectedItems[0];
+				newBranchObject.FullName = "refs/remotes/" + selectedItems[0].Name + "/" + this.$newBranch.value;
+				newBranchObject.Name = selectedItems[0].Name + "/" + this.$newBranch.value;
+				newBranchObject.Type = "RemoteTrackingBranch";
+				newBranchObject.Location = "/gitapi/remote/" + selectedItems[0].Name + "/" + this.$newBranch.value + "/file/" + id;
+				this.func(null, selectedItems[0], newBranchObject);
+			}
+		}
+	};
 
 	RemotePrompterDialog.prototype.constructor = RemotePrompterDialog;
 

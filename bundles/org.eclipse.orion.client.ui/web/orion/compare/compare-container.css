@@ -32,19 +32,6 @@
 	background: #EE9999;
 }
 
-.fileNameCheckedRow {
-	background-color: #FFFFCC !important;
-	color: white;
-}
-
-.fileNameSelectedRow {
-	background-color: #6d6d6d !important;
-}
-
-.fileNameNormalRow {
-	color: #0000FF;
-}
-
 .compareCanvas {
 	background: #EEEEEE;
 	border: 0px;
@@ -93,24 +80,10 @@
 	text-align: center;  
 }
 
-.borderContainer {
-	width:100%;
-	height: 100%;
-}
-
-.leftBorder {
-	width:50%;
-	height: 100%;
-}
-
-.rightBorder {
-	height: 100%;
-}
-
 .leftPanelLayout {
 	display: block;
-	position: relative;
-	float: left;
+	position: absolute;
+	left: 0;
     overflow: hidden;
 	width: 50%;
 	height: 100%;
@@ -118,11 +91,22 @@
 
 .rightPanelLayout {
 	display: block;
-	position: relative;
-	float: right;
+	position: absolute;
+	right: 0;
     overflow: hidden;
 	width: 50%;
 	height: 100%;
+}
+
+.compareSplitLayout {
+	position: absolute;
+	left: 50%;  /* override this value if you want a different proportion of the two split panes */
+	height: 100%;
+	z-index: 50;
+	width: 3px;
+	cursor: e-resize;
+	background: white;
+	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
 /*** Styles for diff annotations ***/

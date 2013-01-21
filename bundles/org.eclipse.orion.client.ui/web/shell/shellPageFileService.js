@@ -16,13 +16,16 @@
  * This module stores one 'current' directory node and proactively fetches
  * its child nodes in an attempt to answer them synchronously when requested.
  */ 
-define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstrap, mFileClient) {
-
+define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", "orion/Deferred"], function (messages, mBootstrap, mFileClient, Deferred) {
 	var orion = {};
 	orion.shellPage = {};
-	
-	var fileClient;
-	var serviceRegistry;
+
+	var fileClient, serviceRegistry;
+
+	mBootstrap.startup().then(function(core) {
+		serviceRegistry = core.serviceRegistry;
+		fileClient = new mFileClient.FileClient(serviceRegistry);
+	});
 
 	orion.shellPage.ShellPageFileService = (function() {
 		function ShellPageFileService() {
@@ -32,7 +35,9 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				this.SEPARATOR,
 				function(node) {
 					self.rootNode = node;
-				});
+				}
+			);
+			this.currentRetrievals = {};
 		}
 
 		ShellPageFileService.prototype = {
@@ -55,6 +60,100 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					path += this.SEPARATOR;
 				}
 				return path;
+			},
+			createDirectory: function(parentNode, name) {
+				return this._createResource(parentNode, name, true);
+			},
+			createFile: function(parentNode, name) {
+				return this._createResource(parentNode, name, false);
+			},
+			ensureDirectory: function(parentNode, directory) {
+				var result = new Deferred();
+				if (typeof(directory) !== "string") { //$NON-NLS-0$
+					/* the resource already exists */
+					if (directory.Directory) {
+						result.resolve(directory);
+					} else {
+						result.reject(messages["Cannot create directory, it already exists as a file"]);
+					}
+				} else {
+					parentNode = parentNode || this.getCurrentDirectory();
+					var self = this;
+					this.withChildren(
+						parentNode,
+						function(children) {
+							if (children) {
+								for (var i = 0; i < children.length; i++) {
+									if (children[i].Name === directory) {
+										if (children[i].Directory) {
+											/* directory already exists, so nothing to do */
+											result.resolve(children[i]);
+										} else {
+											result.reject(messages["Cannot create directory, it already exists as a file"]);
+										}
+										return;
+									}
+								}
+							}
+							self.createDirectory(parentNode, directory).then(
+								function(directory) {
+									result.resolve(directory);
+								},
+								function(error) {
+									result.reject(error);
+								}
+							);
+						},
+						function(error) {
+							result.reject(error);
+						}
+					);
+				}
+				return result;
+			},
+			ensureFile: function(parentNode, file) {
+				var result = new Deferred();
+				if (typeof(file) !== "string") { //$NON-NLS-0$
+					/* the resource already exists */
+					if (!file.Directory) {
+						result.resolve(file);
+					} else {
+						result.reject(messages["Cannot create file, it already exists as a directory"]);
+					}
+				} else {
+					parentNode = parentNode || this.getCurrentDirectory();
+					var self = this;
+					this.withChildren(
+						parentNode,
+						function(children) {
+							if (children) {
+								for (var i = 0; i < children.length; i++) {
+									if (children[i].Name === file) {
+										if (!children[i].Directory) {
+											/* file already exists, so nothing to do */
+											result.resolve(children[i]);
+										} else {
+											result.reject(messages["Cannot create file, it already exists as a directory"]);
+										}
+										return;
+									}
+								}
+							}
+							self.createFile(parentNode, file).then(
+								function(file) {
+									result.resolve(file);
+								},
+								function(error) {
+									result.reject(error);
+								}
+							);
+						},
+						function(error) {
+							result.reject(error);
+						}
+					);
+				}
+				return result;
 			},
 			getChild: function(node, name) {
 				if (name.length === 0) {
@@ -128,8 +227,20 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 				return node.parent;
 			},
 			loadWorkspace: function(path) {
-				var progress = serviceRegistry.getService("orion.page.progress");
-				return (progress? progress.progress(fileClient.loadWorkspace(path), "Loading workspace " + path) : fileClient.loadWorkspace(path));
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				return (progress ? progress.progress(fileClient.loadWorkspace(path), "Loading workspace " + path) : fileClient.loadWorkspace(path)); //$NON-NLS-0$
+			},
+			read: function(node) {
+				return fileClient.read(node.Location, false);
+			},
+			readBlob: function(node) {
+				var sourceService = fileClient._getService(node.Location);
+				if (!sourceService.readBlob) {
+					var promise = new Deferred();
+					promise.reject(messages["Source file service does not support binary read"]);
+					return promise;
+				}
+				return sourceService.readBlob(node.Location);
 			},
 			/**
 			 * Sets the current directory node and initiates retrieval of its
@@ -146,8 +257,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					}
 				} else if (node.ChildrenLocation) {
 					var self = this;
-					var progress = serviceRegistry.getService("orion.page.progress");
-					(progress ? progress.progress(fileClient.fetchChildren(node.ChildrenLocation), "Getting children of " + node.Name) : fileClient.fetchChildren(node.ChildrenLocation)).then(
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					(progress ? progress.progress(fileClient.fetchChildren(node.ChildrenLocation), "Getting children of " + node.Name) : fileClient.fetchChildren(node.ChildrenLocation)).then( //$NON-NLS-0$
 						function(children) {
 							self._sort(children);
 							var parents = node.Parents ? node.Parents.slice(0) : [];
@@ -175,16 +286,61 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 			},
 			withNode: function(location, func, errorFunc) {
 				var self = this;
-				var progress = serviceRegistry.getService("orion.page.progress");
-				(progress?progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location):fileClient.loadWorkspace(location)).then(
+				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				(progress ? progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location) : fileClient.loadWorkspace(location)).then( //$NON-NLS-0$
 					function(node) {
 						self._retrieveNode(node, func, errorFunc);
 					},
 					errorFunc);
 			},
+			write: function(node, content) {
+				return fileClient.write(node.Location, content);
+			},
+			writeBlob: function(node, content) {
+				var targetService = fileClient._getService(node.Location);
+				if (!targetService.writeBlob) {
+					var promise = new Deferred();
+					promise.reject(messages["Target file service does not support binary write"]);
+					return promise;
+				}
+				return targetService.writeBlob(node.Location, content);
+			},
 
 			/** @private */
-			
+
+			_createResource: function(parentNode, name, isDirectory) {
+				var key = parentNode.Location + this.SEPARATOR + name;
+				var result = new Deferred();
+				var retrievals = this.currentRetrievals[key] || [];
+				retrievals.push(result);
+				if (retrievals.length === 1) {
+					/* this is the first request to create this file or directory */
+					this.currentRetrievals[key] = retrievals;
+					var self = this;
+					var notifySuccess = function(result) {
+						/* work around core bug that results in created folders not having the correct name field */
+						if (isDirectory) {
+							result.Name = name;
+						}
+						self.currentRetrievals[key].forEach(function(current) {
+							current.resolve(result);
+						});
+						delete self.currentRetrievals[key];
+					};
+					var notifyError = function(error) {
+						self.currentRetrievals[key].forEach(function(current) {
+							current.reject(error.responseText);
+						});
+						delete self.currentRetrievals[key];
+					};
+					if (isDirectory) {
+						fileClient.createFolder(parentNode.Location, name).then(notifySuccess, notifyError);
+					} else {
+						fileClient.createFile(parentNode.Location, name).then(notifySuccess, notifyError);
+					}
+				}
+				return result;
+			},
 			_retrieveNode: function(node, func, errorFunc) {
 				if (node.parent && node.Children) {
 					if (func) {
@@ -220,8 +376,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					} else if (node.Parents.length === 0) {
 						/* node's parent is the root of a file service */
 						var location = fileClient.fileServiceRootURL(node.Location);
-						var progress = serviceRegistry.getService("orion.page.progress");
-						(progress?progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location):fileClient.loadWorkspace(location)).then(
+						var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+						(progress ? progress.progress(fileClient.loadWorkspace(location), "Loading workspace " + location) : fileClient.loadWorkspace(location)).then( //$NON-NLS-0$
 							function(parent) {
 								parent.parent = self.rootNode;
 								node.parent = parent;
@@ -236,8 +392,8 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 					}
 				};
 				if (!node.Parents && !node.Projects && node.Location !== self.SEPARATOR && node.Name !== fileClient.fileServiceName(node.Location)) {
-					var progress = serviceRegistry.getService("orion.page.progress");
-					(progress?progress.progress(fileClient.loadWorkspace(node.Location), "Loading workspace " + node.Location):fileClient.loadWorkspace(node.Location)).then(
+					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+					(progress ? progress.progress(fileClient.loadWorkspace(node.Location), "Loading workspace " + node.Location) : fileClient.loadWorkspace(node.Location)).then( //$NON-NLS-0$
 						function(metadata) {
 							node.Parents = metadata.Parents;
 							updateParents(node);
@@ -270,13 +426,6 @@ define(["dojo", "orion/bootstrap", "orion/fileClient"], function (dojo, mBootstr
 		};
 		return ShellPageFileService;
 	}());
-
-	dojo.ready(function() {
-		mBootstrap.startup().then(function(core) {
-			serviceRegistry = core.serviceRegistry;
-			fileClient = new mFileClient.FileClient(serviceRegistry);
-		});
-	});
 
 	return orion.shellPage;
 });

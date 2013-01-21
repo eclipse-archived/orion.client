@@ -48,5 +48,13 @@ define({
 	"disabled": "disabled",
 	"Open in Shell": "Open in Shell",
 	"Open in Shell page": "Open in Shell page",
-	"'${0}' already exists": "'${0}' already exists"
+	"'${0}' already exists": "'${0}' already exists",
+	"Source file service does not support binary read": "Source file service does not support binary read",
+	"Target file service does not support binary write": "Target file service does not support binary write",
+	"Cannot create file, it already exists as a directory": "Cannot create file, it already exists as a directory",
+	"Cannot create directory, it already exists as a file": "Cannot create directory, it already exists as a file",
+	"Wrote ${0}": "Wrote ${0}",
+	"Failed to write ${0}": "Failed to write ${0}",
+	"Cannot write ${0}, it is not a descendent of the output directory": "Cannot write ${0}, it is not a descendent of the output directory",
+	"The file or directory to re-direct output to": "The file or directory to re-direct output to"
 });
