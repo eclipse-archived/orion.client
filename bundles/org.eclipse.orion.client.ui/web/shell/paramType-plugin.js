@@ -122,7 +122,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg, typeSpec) {
-				var string = arg || "";
+				var string = arg.text || "";
 				if (string.indexOf("'") === 0) { //$NON-NLS-0$
 					string = string.substring(1);
 				}
