@@ -504,7 +504,24 @@ define(["orion/assert", "orion/serviceregistry", "orion/pluginregistry", "orion/
 			return pluginRegistry.stop();
 		});
 	};
-	
+
+	tests["test error"] = function() {
+		var serviceRegistry = new mServiceregistry.ServiceRegistry();
+		var pluginRegistry = new mPluginregistry.PluginRegistry(serviceRegistry, {storage:{}});
+		pluginRegistry.init();
+		return pluginRegistry.installPlugin("testPlugin.html").then(function(plugin) {
+			return plugin.start({"lazy":true}).then(function() {
+				return serviceRegistry.getService("test").testError().then(function() {
+					assert.fail("testError() should have rejected");
+				}, function(error) {
+					assert.ok(error instanceof Error, "error is Error");
+					assert.ok(error.toString().indexOf("helloerror") !== -1, "has a sensible toString()");
+					return pluginRegistry.stop();
+				});
+			});
+		});
+	};
+
 /*
 	tests["test plugin states"] = function() {
 		var storage = {};
