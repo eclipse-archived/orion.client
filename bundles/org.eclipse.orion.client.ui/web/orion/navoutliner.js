@@ -31,7 +31,7 @@ function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExp
 		col.classList.add("mainNavColumn"); //$NON-NLS-0$
 		col.classList.add("singleNavColumn"); //$NON-NLS-0$
 		if (item.directory) {
-			link = mNavRenderer.createLink(require.toUrl("navigate/table.html"), {Name: item.name, ChildrenLocation: item.path}, "", this.commandService, this.contentTypeService); //$NON-NLS-0$
+			link = mNavRenderer.createLink(require.toUrl("navigate/table.html"), { Name: item.name, ChildrenLocation: item.path, Directory: true }, "", this.commandService, this.contentTypeService); //$NON-NLS-0$
 		} else if (item.path) {
 			link = mNavRenderer.createLink("", { Name: item.name, Location: item.path }, "", this.commandService, this.contentTypeService); //$NON-NLS-0$
 		} else if (typeof(item.getProperty) === "function" && item.getProperty("Name") && item.getProperty("top")) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
