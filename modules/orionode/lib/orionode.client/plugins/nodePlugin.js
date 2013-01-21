@@ -114,9 +114,14 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				if (!data.Apps.length) {
 					return 'No running apps.';
 				}
-				return data.Apps.map(function(app) {
-					return ['PID: ' + app.Id, 'URL: ' + app.Location, app.DebugURL ? ('Debug URL: ' + app.DebugURL) : ''].join(', ');
-				}).join('\n');
+				var space = '\t\t\t';
+				return [
+					['PID','URL','Debug URL'].join(space),
+					['---','---','---------'].join(space)
+				].concat(data.Apps.map(function(app) {
+					return [app.Id, app.Location, (app.DebugURL || '')].join(space);
+				}))
+				.join('\n');
 			});
 		}
 	}, {
@@ -159,7 +164,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				});
 			};
 			sockProc.started = function(app) {
-				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + app.DebugURL);
+				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + app.DebugURL + '\n');
 			};
 			sockProc.stopped = function(app) {
 				sockProc.progress('App stopped (PID: ' + app.Id + ')');
