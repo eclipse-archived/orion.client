@@ -246,7 +246,7 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 						that.setProgressMessage("");		
 					}
 				};
-				deferred = deferred.then(finish, finish);
+				deferred.then(finish, finish);
 			}
 			return deferred;
 		},
