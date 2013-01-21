@@ -185,11 +185,30 @@ hard-coded numbers elsewhere.
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
+.splitVerticalLayout {
+	position: absolute;
+	top: 33%;  /* override this value if you want a different proportion of the two split panes */
+	width: 100%;
+	z-index: 50;
+	height: 3px;
+	margin-bottom: 3px;
+	cursor: n-resize;
+	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
+}
+
 .splitThumbLayout {
 	position: relative;
 	left: 0;
 	height: 2em;
 	top: 49%;
+	cursor: pointer;
+}
+
+splitVerticalThumbLayout {
+	position: relative;
+	top: 0;
+	width: 2em;
+	left: 49%;
 	cursor: pointer;
 }
 
