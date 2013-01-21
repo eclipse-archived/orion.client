@@ -153,7 +153,12 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				NewType.prototype = Object.create(CustomType.prototype);
 				NewType.prototype.name = type.name;
 				NewType.prototype.parse = function(arg) {
-					var completion = type.parse(arg.toString().trim(), this.typeSpec);
+					var string = arg.toString().trim();
+					if (string.indexOf("--") === 0) {	/* named arg */	//$NON-NLS-0$
+						var index = string.indexOf(" ");
+						string = string.substring(index + 1);
+					}
+					var completion = type.parse(string, this.typeSpec);
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
 						switch (completion.status) {
