@@ -23,6 +23,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * @param options.node The node for the splitter presentation.  Required.
 	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
 	 * @param options.mainPanel The node for the main panel.  Required.
+	 * @param options.toggle Specifies that the side node should be able to toggle.  Optional.
 	 * @name orion.splitter.Splitter
 	 */
 	function Splitter(options) {
@@ -41,10 +42,13 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
 			this._mainNode = lib.node(options.mainPanel);
 			if (!this._mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
-			this._thumb = document.createElement("div"); //$NON-NLS-0$
-			this._node.appendChild(this._thumb);
-			this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
-			this._thumb.classList.add("splitThumbLayout"); //$NON-NLS-0$
+			
+			if (options.toggle) {
+				this._thumb = document.createElement("div"); //$NON-NLS-0$
+				this._node.appendChild(this._thumb);
+				this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
+				this._thumb.classList.add("splitThumbLayout"); //$NON-NLS-0$
+			}
 			this._initializeFromStoredSettings();
 			
 			if (this._closed) {
@@ -98,24 +102,28 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 
 		_adjustToSplitPosition: function(updateStorage) {
 			var rect = lib.bounds(this._node);
-			this._splitWidth = rect.width;//rect.right - rect.left;
+			this._splitWidth = rect.width;
 			if (updateStorage || !this._splitLeft){
-				this._splitLeft = this._node.offsetLeft;
+				this._splitLeft = rect.left;
 				localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			this._sideNode.style.width = this._splitLeft + "px"; //$NON-NLS-0$
-			this._sideNode.style.right = this._splitLeft - 1 +"px"; //$NON-NLS-0$
+			var left = this._splitLeft;
+			if (this._node.parentNode.style.position === "relative") { //$NON-NLS-0$
+				var parentRect = lib.bounds(this._node.parentNode);
+				left = this._splitLeft - parentRect.left;
+			}
+			this._sideNode.style.width = left + "px"; //$NON-NLS-0$
+			this._sideNode.style.right = left - 1 +"px"; //$NON-NLS-0$
 			this._sideNode.style.display = "block"; //$NON-NLS-0$ 
-			this._node.style.left = this._splitLeft + "px"; //$NON-NLS-0$ 
+			this._node.style.left = left + "px"; //$NON-NLS-0$ 
 			this._resize();
 		},
 		
 		_resize: function(animationDelay) {
 			animationDelay = animationDelay || 0;
-			var rect = lib.bounds(this._node.parentNode);
-			this._totalWidth = rect.width;
-			rect = lib.bounds(this._node);
-			this._mainNode.style.width = (this._totalWidth - (this._node.offsetLeft + rect.width)) +"px"; //$NON-NLS-0$ 
+			var parentRect = lib.bounds(this._node.parentNode);
+			var rect = lib.bounds(this._node);
+			this._mainNode.style.width = (parentRect.width - (rect.left - parentRect.left + rect.width)) +"px"; //$NON-NLS-0$ 
 			var self = this;
 			window.setTimeout(function() { self._notifyResizeListeners(self._mainNode); }, animationDelay);
 			window.setTimeout(function() { self._notifyResizeListeners(self._sideNode); }, animationDelay);
@@ -181,8 +189,13 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		
 		_mouseMove: function(event) {
 			if (this._tracking) {
-				this._splitLeft = event.clientX;
-				this._node.style.left = event.clientX + "px"; //$NON-NLS-0$ 
+				this._splitLeft = event.clientX;	
+				var left = this._splitLeft;
+				if (this._node.parentNode.style.position === "relative") { //$NON-NLS-0$
+					var parentRect = lib.bounds(this._node.parentNode);
+					left = this._splitLeft - parentRect.left;
+				}
+				this._node.style.left = left + "px"; //$NON-NLS-0$ 
 				this._adjustToSplitPosition(true);
 				lib.stop(event);
 			}
