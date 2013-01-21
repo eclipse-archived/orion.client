@@ -9,6 +9,8 @@
 	font-size: 0.9em;
 	float:left;
 	-webkit-user-select: none;
+	-moz-user-select: -moz-none;
+	user-select: none;
 	cursor:pointer;
 }
 
@@ -23,6 +25,8 @@
 	font-size: 0.9em;
 	float:left;
 	-webkit-user-select: none;
+	-moz-user-select: -moz-none;
+	user-select: none;
 	cursor:pointer;
 }
 
@@ -82,6 +86,7 @@
 }
 
 .serviceRailsVisible{
+	display: block;
 	white-space: nowrap;
 	border-top: solid 1px #EEE;
 	border-bottom: solid 1px #EEE;
@@ -90,27 +95,19 @@
 	-webkit-user-select: none;
 	transition:height 1s;
 	width:700px;
-	-moz-transition:height 1s; /* Firefox 4 */
-	-webkit-transition:height 1s; /* Safari and Chrome */
-	-o-transition:height 1s;
-	-ms-transition:height 1s; /* Safari and Chrome */
 }
 	
 .serviceRailsHidden{
+	display: none;
 	white-space: nowrap;
 	border-top: solid 1px #EEE;
 	border-bottom: solid 1px #EEE;
 	margin-top:30px;
 	margin-right:20px;
 	overflow:hidden;
-	visibility:hidden;
 	height:0px;
 	transition:height 1s;
 	width:700px;
-	-moz-transition:height 1s; /* Firefox 4 */
-	-webkit-transition:height 1s; /* Safari and Chrome */
-	-o-transition:height 1s;
-	-ms-transition:height 1s; /* Safari and Chrome */
 }
 
 .serviceList{
@@ -158,6 +155,9 @@
 	font-size: 13px;
 	background: #222;
 	text-align:right;
+	-webkit-user-select: none;
+	-moz-user-select: -moz-none;
+	user-select: none;
 }
 	
 .carouselControl:hover{
