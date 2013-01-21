@@ -69,7 +69,11 @@ exports.getChildren = function(directory, parentLocation, excludes, callback) {
 	});
 };
 
-var _safeFilePath = function(workspaceDir, p) {
+/**
+ * @parma {String} p A location in the local filesystem (eg C:\\Users\\whatever\\foo)
+ * @throws {Error} If p is outside the workspaceDir (and thus is unsafe)
+ */
+var _safeFilePath = exports.safePath = function(workspaceDir, p) {
 	workspaceDir = path.normalize(workspaceDir);
 	p = path.normalize(p);
 	var relativePath = path.relative(workspaceDir, p);
