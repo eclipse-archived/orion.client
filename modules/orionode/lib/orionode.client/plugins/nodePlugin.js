@@ -58,9 +58,9 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	}
 
 	var provider = new PluginProvider({
-		name: "NodeSumo",
+		name: "Node Support",
 		version: "1.0",
-		description: "Provides cool Node.js control through commands for the Orion Shell."
+		description: "Provides control for Node.js functionality."
 	});
 
 	provider.registerService('orion.shell.command', {}, {
