@@ -19,7 +19,6 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		 * @name orion.git.widgets.GitClonesModel
 		 */
 		function GitClonesModel(gitClient, rootPath, fetchItems, root) {
-			// TODO: Consolidate with eclipse.TreeModel
 			this.gitClient = gitClient;
 			this.rootPath = rootPath;
 			this.fetchItems = fetchItems;
@@ -156,7 +155,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 				return;
 			}
 			that.destroy();
-			that._execute();
+			that._execute.bind(that)();
 		},
 		text : 'OK',
 		isDefault: true,
@@ -196,7 +195,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 		var that = this;
 		
 		var selection = new mSelection.Selection(this.serviceRegistry, "orion.remotePrompter.selection"); //$NON-NLS-0$
-		var renderer = new RemotePrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter"});
+		var renderer = new RemotePrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter"}); //$NON-NLS-0$
 		this.explorer = new mExplorer.Explorer(this.serviceRegistry, selection, renderer);
 		// TODO yuck.  Renderer needs to know explorer.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=389529
 		renderer.explorer = this.explorer;
@@ -232,21 +231,24 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	};
 
 	RemotePrompterDialog.prototype._execute = function() {
-		var selectedItems = this.treeWidget.getSelectedItems();
-		if (this.func) {
-			if (selectedItems[0].Type === "RemoteTrackingBranch") { //$NON-NLS-0$
-				this.func(selectedItems[0], selectedItems[0].parent);
-			} else {
-				var id = selectedItems[0].CloneLocation.split("/")[4];
-				var newBranchObject = new Object();
-				newBranchObject.parent = selectedItems[0];
-				newBranchObject.FullName = "refs/remotes/" + selectedItems[0].Name + "/" + this.$newBranch.value;
-				newBranchObject.Name = selectedItems[0].Name + "/" + this.$newBranch.value;
-				newBranchObject.Type = "RemoteTrackingBranch";
-				newBranchObject.Location = "/gitapi/remote/" + selectedItems[0].Name + "/" + this.$newBranch.value + "/file/" + id;
-				this.func(null, selectedItems[0], newBranchObject);
-			}
-		}
+		var that = this;
+		this.serviceRegistry.getService("orion.remotePrompter.selection").getSelection(function(selection) { //$NON-NLS-0$
+			if (that.func) {
+				if (selection.Type === "RemoteTrackingBranch") { //$NON-NLS-0$
+					that.func(selection, selection.parent);
+				} else {
+					var id = selection.CloneLocation.split("/")[4]; //$NON-NLS-0$
+					var newBranchObject = { };
+					newBranchObject.parent = selection;
+					newBranchObject.FullName = "refs/remotes/" + selection.Name + "/" + this.$newBranch.value; //$NON-NLS-1$ //$NON-NLS-0$
+					newBranchObject.Name = selection.Name + "/" + this.$newBranch.value; //$NON-NLS-0$
+					newBranchObject.Type = "RemoteTrackingBranch"; //$NON-NLS-0$
+					newBranchObject.Location = "/gitapi/remote/" + selection.Name + "/" + this.$newBranch.value + "/file/" + id; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					that.func(null, selection, newBranchObject);
+				}
+			}		
+		}); //$NON-NLS-0$
+
 	};
 
 	RemotePrompterDialog.prototype.constructor = RemotePrompterDialog;
