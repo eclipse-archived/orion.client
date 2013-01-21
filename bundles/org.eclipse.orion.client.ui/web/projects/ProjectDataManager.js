@@ -98,6 +98,46 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		}
 		
+		function getProject( projectName, callback ){
+			
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			
+			var fileClient = this.fileClient;
+			
+			var project;
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				
+						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
+						
+						if( projectsIndex ){
+							
+							fileClient.read( folders.Children[projectsIndex].ChildrenLocation ).then( function(files){
+								files = JSON.parse( files );
+								var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
+							
+								fileClient.read( files.Children[projectFile].Location ).then( function( content ){	
+									var projects = JSON.parse( content );
+									
+									
+									for( var p = 0; p < projects.length; p++ ){
+										if( projects[p].name === projectName ){
+											project = projects[p];
+										}
+									}
+									
+									callback( project );
+								} );
+							});
+						}
+					}
+				);
+			});
+		
+		}
+		
 		function modifyProject( projectData, callback ){
 		
 		}
@@ -109,6 +149,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		ProjectDataManager.prototype.findInWorkspace = findInWorkspace;
 		ProjectDataManager.prototype.createProjectData = createProjectData;
 		ProjectDataManager.prototype.getProjectData = getProjectData;
+		ProjectDataManager.prototype.getProject = getProject;
 		ProjectDataManager.prototype.addNewProject = addNewProject;
 		ProjectDataManager.prototype.modifyProject = modifyProject;
 		ProjectDataManager.prototype.removeProject = removeProject;

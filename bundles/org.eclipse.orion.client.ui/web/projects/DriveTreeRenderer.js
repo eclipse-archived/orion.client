@@ -19,9 +19,15 @@ function(messages, mExplorer) {
 		this._init(options);
 	}
 	
+	function setTarget( target ){
+	
+	}
+	
 	DriveTreeRenderer.prototype = new mExplorer.SelectionRenderer(); 
 	
 	DriveTreeRenderer.prototype.constructor = DriveTreeRenderer;
+	
+	DriveTreeRenderer.prototype.setTarget = setTarget;
 	
 	DriveTreeRenderer.prototype.getLabelColumnIndex = function() {
 		return 0;

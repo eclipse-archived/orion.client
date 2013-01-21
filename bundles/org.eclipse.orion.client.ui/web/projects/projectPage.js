@@ -12,9 +12,13 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
+	
+		var serviceRegistry;
+		var preferences;
+		var commandService;
 	
 		function createTestData(){
 			
@@ -32,7 +36,23 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			
 			projectData = createTestData();
 			
+			
 			return projectData;
+		}
+		
+		function startProjectComponents( project ){
+		
+			var sidePanel = document.getElementById( 'projectNavigation' );
+			
+			var projectTree = new mProjectNavigation( project, sidePanel, serviceRegistry, commandService );
+			
+			var mainPanel = document.getElementById( 'SFTPConfiguration' );
+			
+			var projectData = fetchProjectData();
+			
+			var SFTPConfiguration = new mSFTPConfiguration( project, mainPanel, projectData, commandService, serviceRegistry );	
+		
+			console.log( project );
 		}
 		
 		mBootstrap.startup().then(
@@ -41,27 +61,25 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		
 			/* Render the page */
 			
-			var serviceRegistry = core.serviceRegistry;
+			serviceRegistry = core.serviceRegistry;
 			
-			var preferences = core.preferences;
+			preferences = core.preferences;
 		
 			var selection = new mSelection.Selection(serviceRegistry);
 			
-			var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
-		
-			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );	
-			
+			commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+
+			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );			
+			var projectName = PageUtil.matchResourceParameters();
+
 			/* Create the content */
+			projectName = projectName.resource.split('=')[1];
 			
-			var sidePanel = document.getElementById( 'projectNavigation' );
+			var projectDataManager = new ProjectDataManager(serviceRegistry);
 			
-			var projectTree = new mProjectNavigation( sidePanel, serviceRegistry, commandService );
+			projectDataManager.getProject( projectName, startProjectComponents );
 			
-			var mainPanel = document.getElementById( 'SFTPConfiguration' );
 			
-			var projectData = fetchProjectData();
-			
-			var SFTPConfiguration = new mSFTPConfiguration( mainPanel, projectData, commandService, serviceRegistry );	
 		});
 	}	
 );
