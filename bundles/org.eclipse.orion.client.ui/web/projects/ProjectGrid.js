@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ], 
 	
-	function(messages, require) {
+	function(messages, require, URITemplate) {
 
 		function ProjectGrid( node, projects ){
 		
@@ -25,8 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 			this.listButton = this.projectNode.firstChild.lastChild;
 			this.tileButton.onclick = this.showProjectTiles.bind(this);
 			this.listButton.onclick = this.showProjectTable.bind(this);
-			this.showProjectTable( this.listNode );
-			
+			this.showProjectTable( this.listNode );	
 		}
 		
 		ProjectGrid.prototype.constructor = ProjectGrid;
@@ -77,11 +76,22 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 			
 			for( var count = 0; count< this.projectData.length; count++ ){
 				
+				var uriTemplate = "{OrionHome}/projects/projectPage.html#?project={project}";
+				
+				var projectname = this.projectData[count].name;
+				
+				var template = new URITemplate(uriTemplate);
+				var url = template.expand({
+					project: projectname
+				});
+
 				var listItem = document.createElement('li');
+				listItem.onclick = function(){ window.location.href = url; };
 				
 				var date = this.projectData[count].date.getMonth() + 1 + "." + this.projectData[count].date.getDate() + "." + this.projectData[count].date.getFullYear();
 				
 				var w = this.listNode.clientWidth * 0.79;
+				
 				var h = w * 0.75;
 				
 				var content = '<a href="#" height="' + h + 'px"></a>';

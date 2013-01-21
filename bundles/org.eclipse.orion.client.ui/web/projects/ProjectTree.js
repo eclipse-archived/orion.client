@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 'projects/ProjectType', 'projects/page/SFTPProject', 'orion/webui/littlelib' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 'projects/ProjectType', 'projects/page/SFTPProject', 'orion/webui/littlelib', 'orion/URITemplate' ], 
 	
-	function( messages, require, mProjectTypes, mProjectType, mSFTPProject, lib ) {
+	function( messages, require, mProjectTypes, mProjectType, mSFTPProject, lib, URITemplate ) {
 
 		function ProjectTree( node ){
 
@@ -35,12 +35,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 
 			var basic = new mProjectType.ProjectType( 'Basic HTML5 Project', 'A hosted HTML5 project with a HTML page, CSS file, and JS file' );
 			var sftp = new mProjectType.ProjectType( 'SFTP Project', 'A project associated with an SFTP hosted website' );
 			
+			
+			var uriTemplate = "{OrionHome}/projects/projectPage.html#?project={project}";
+			
+			var template = new URITemplate(uriTemplate);
+
+			
 			basic.create = function(){
 				console.log( 'basic create' );
+				var url = template.expand({
+					project: 'basic'
+				});
+				
+				window.location.href = url;
 			};
 			
 			sftp.create = function(){
 				console.log( 'sftp create' );
+				
+				var url = template.expand({
+					project: 'sftp'
+				});
+				
+				window.location.href = url;
 			};
 			
 			
