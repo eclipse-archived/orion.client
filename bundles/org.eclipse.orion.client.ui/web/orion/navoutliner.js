@@ -237,7 +237,7 @@ function(messages, require, lib, i18nUtil, mCommands, mSection, mSelection, mExp
 				if (faves) {
 					lib.empty(faves);
 					var p = document.createElement("p"); //$NON-NLS-0$
-					p.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu."], "'"+messages["Make Favorite"]+"'", "'"+messages["Actions"]+"''"))); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					p.appendChild(document.createTextNode(i18nUtil.formatMessage(messages["You can create favorites by selecting any file or folder in the navigator and choosing ${0} from the ${1} menu."], "'"+messages["Make Favorite"]+"'", "'"+messages["Actions"]+"'"))); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					faves.appendChild(p);
 				}
 			}
