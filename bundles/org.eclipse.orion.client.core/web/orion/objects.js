@@ -32,18 +32,6 @@ define([], function() {
 					target[key] = source[key];
 				}
 			});
-		},
-		/**
-		 * Makes <code>child</code> "inherit" from <code>parent</code> by setting <code>child</code>'s prototype
-		 * to extend <code>parent</code>'s prototype.
-		 * @name orion.objects.inherit
-		 * @function
-		 * @static
-		 * @param {Function} child
-		 * @param {Function} parent
-		 */
-		inherit: function(child, parent) {
-			child.prototype = Object.create(parent.prototype);
 		}
 	};
 });
