@@ -14,7 +14,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
 	/**
 	 * Constructs a new Splitter with the given options.  A splitter manages the layout
-	 * of two panels, a side panel and a main panel.  A toggle button will open or close the side panel.
+	 * of two panels, a side panel and a main panel.  An optional toggle button can open or close the 
+	 * side panel.
+	 *
 	 * The relative proportions of the side and main panels are determined by the position of the splitter bar
 	 * in the document.  The panels will pin themselves to the splitter by default.  Once the user moves
 	 * the splitter, the positions are remembered.
@@ -24,6 +26,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * @param options.sidePanel The node for the side (toggling) panel.  Required.
 	 * @param options.mainPanel The node for the main panel.  Required.
 	 * @param options.toggle Specifies that the side node should be able to toggle.  Optional.
+	 * @param options.vertical Specifies that the nodes are stacked vertically rather than horizontal.
 	 * @name orion.splitter.Splitter
 	 */
 	function Splitter(options) {
@@ -36,16 +39,17 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._resizeListeners = [];
 			this._animationDelay = 501;  // longer than CSS transitions in layout.css
 			this._prefix = "/orion/splitter/" + document.body.id;  //$NON-NLS-0$
-			this._node = lib.node(options.node);
-			if (!this._node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
-			this._sideNode = lib.node(options.sidePanel);
-			if (!this._sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
-			this._mainNode = lib.node(options.mainPanel);
-			if (!this._mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
+			this.$node = lib.node(options.node);
+			if (!this.$node) { throw "no dom node for splitter found"; } //$NON-NLS-0$
+			this.$sideNode = lib.node(options.sidePanel);
+			if (!this.$sideNode) { throw "no dom node for side panel found"; } //$NON-NLS-0$
+			this.$mainNode = lib.node(options.mainPanel);
+			if (!this.$mainNode) { throw "no dom node for main panel found"; } //$NON-NLS-0$
+			this._vertical = options.vertical;
 			
 			if (options.toggle) {
 				this._thumb = document.createElement("div"); //$NON-NLS-0$
-				this._node.appendChild(this._thumb);
+				this.$node.appendChild(this._thumb);
 				this._thumb.classList.add("splitThumb"); //$NON-NLS-0$
 				this._thumb.classList.add("splitThumbLayout"); //$NON-NLS-0$
 			}
@@ -57,10 +61,10 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			} else {
 				this._adjustToSplitPosition();
 			}
-			this._node.style.visibility = "visible"; //$NON-NLS-0$ 
-			this._mainNode.style.display = "block"; //$NON-NLS-0$ 
-			this._sideNode.style.display = "block"; //$NON-NLS-0$ 
-			this._node.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
+			this.$node.style.visibility = "visible"; //$NON-NLS-0$ 
+			this.$mainNode.style.display = "block"; //$NON-NLS-0$ 
+			this.$sideNode.style.display = "block"; //$NON-NLS-0$ 
+			this.$node.addEventListener("mousedown", this._mouseDown.bind(this), false); //$NON-NLS-0$
 			window.addEventListener("mouseup", this._mouseUp.bind(this), false); //$NON-NLS-0$
 			window.addEventListener("resize", this._resize.bind(this), false);  //$NON-NLS-0$
 		},
@@ -93,40 +97,70 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		  */
 		 _initializeFromStoredSettings: function() {
 			this._closed = localStorage.getItem(this._prefix+"/toggleState") === "closed";  //$NON-NLS-1$ //$NON-NLS-0$
-			var pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
-			if (pos) {
-				this._splitLeft = parseInt(pos, 10);
+			var pos;
+			if (this._vertical) {
+				pos = localStorage.getItem(this._prefix+"/yPosition"); //$NON-NLS-0$
+				if (pos) {
+					this._splitTop = parseInt(pos, 10);
+				}
+			} else {
+				pos = localStorage.getItem(this._prefix+"/xPosition"); //$NON-NLS-0$
+				if (pos) {
+					this._splitLeft = parseInt(pos, 10);
+				}
 			}
 			
 		 },
 		 
 		_adjustToSplitPosition: function(updateStorage) {
-			var rect = lib.bounds(this._node);
-			this._splitWidth = rect.width;
-			if (updateStorage || !this._splitLeft){
-				this._splitLeft = rect.left;
-				localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
+			var rect = lib.bounds(this.$node);
+			var parentRect = lib.bounds(this.$node.parentNode);
+			if (this._vertical) {
+				this._splitHeight = rect.height;
+				if (updateStorage || !this._splitTop){
+					this._splitTop = rect.top;
+					localStorage.setItem(this._prefix+"/yPosition", this._splitTop);  //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				var top = this._splitTop;
+				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
+					top = this._splitTop - parentRect.top;
+				}
+				this.$sideNode.style.height = top + "px"; //$NON-NLS-0$
+				this.$sideNode.style.bottom = top - 1 +"px"; //$NON-NLS-0$
+				this.$sideNode.style.display = "block"; //$NON-NLS-0$ 
+				this.$node.style.top = top + "px"; //$NON-NLS-0$ 
+				this._resize();
+			} else {
+				this._splitWidth = rect.width;
+				if (updateStorage || !this._splitLeft){
+					this._splitLeft = rect.left;
+					localStorage.setItem(this._prefix+"/xPosition", this._splitLeft);  //$NON-NLS-1$ //$NON-NLS-0$
+				}
+				var left = this._splitLeft;
+				if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$		
+					left = this._splitLeft - parentRect.left;
+				}
+				this.$sideNode.style.width = left + "px"; //$NON-NLS-0$
+				this.$sideNode.style.right = left - 1 +"px"; //$NON-NLS-0$
+				this.$sideNode.style.display = "block"; //$NON-NLS-0$ 
+				this.$node.style.left = left + "px"; //$NON-NLS-0$ 
+				this._resize();
 			}
-			var left = this._splitLeft;
-			if (this._node.parentNode.style.position === "relative") { //$NON-NLS-0$
-				var parentRect = lib.bounds(this._node.parentNode);
-				left = this._splitLeft - parentRect.left;
-			}
-			this._sideNode.style.width = left + "px"; //$NON-NLS-0$
-			this._sideNode.style.right = left - 1 +"px"; //$NON-NLS-0$
-			this._sideNode.style.display = "block"; //$NON-NLS-0$ 
-			this._node.style.left = left + "px"; //$NON-NLS-0$ 
-			this._resize();
 		},
 		
 		_resize: function(animationDelay) {
 			animationDelay = animationDelay || 0;
-			var parentRect = lib.bounds(this._node.parentNode);
-			var rect = lib.bounds(this._node);
-			this._mainNode.style.width = (parentRect.width - (rect.left - parentRect.left + rect.width)) +"px"; //$NON-NLS-0$ 
+			var parentRect = lib.bounds(this.$node.parentNode);
+			var rect = lib.bounds(this.$node);
+			if (this._vertical) {
+				this.$mainNode.style.height = (parentRect.height - (rect.top - parentRect.top + rect.height)) + "px"; //$NON-NLS-0$ 
+			} else {
+				this.$mainNode.style.width = (parentRect.width - (rect.left - parentRect.left + rect.width)) +"px"; //$NON-NLS-0$ 
+			}
 			var self = this;
-			window.setTimeout(function() { self._notifyResizeListeners(self._mainNode); }, animationDelay);
-			window.setTimeout(function() { self._notifyResizeListeners(self._sideNode); }, animationDelay);
+			window.setTimeout(function() { self._notifyResizeListeners(self.$mainNode); }, animationDelay);
+			window.setTimeout(function() { self._notifyResizeListeners(self.$sideNode); }, animationDelay);
+
 		},
 		
 		_notifyResizeListeners: function(node) {
@@ -139,15 +173,25 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (this._closed) {
 				this._closed = false;
 				this._addAnimation();
-				this._sideNode.style.width = this._splitLeft+"px"; //$NON-NLS-0$ 
-				this._node.style.left = this._splitLeft+"px"; //$NON-NLS-0$
+				if (this._vertical) {
+					this.$sideNode.style.height = this._splitTop+"px"; //$NON-NLS-0$ 
+					this.$node.style.top = this._splitTop+"px"; //$NON-NLS-0$
+				} else {
+					this.$sideNode.style.width = this._splitLeft+"px"; //$NON-NLS-0$ 
+					this.$node.style.left = this._splitLeft+"px"; //$NON-NLS-0$
+				}
 				this._resize(this._animationDelay);
 				this._removeAnimation();
 			} else {
 				this._closed = true;
 				this._addAnimation();
-				this._sideNode.style.width = 0;
-				this._node.style.left = "1px"; //$NON-NLS-0$ 
+				if (this._vertical) {
+					this.$sideNode.style.top = 0;
+					this.$node.style.top = "1px"; //$NON-NLS-0$ 
+				} else {
+					this.$sideNode.style.width = 0;
+					this.$node.style.left = "1px"; //$NON-NLS-0$ 
+				}
 				this._resize(this._animationDelay);
 				this._removeAnimation();
 			}
@@ -159,17 +203,17 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			// in a timeout to ensure the animations are complete.
 			var self = this;
 			window.setTimeout(function() {
-				self._sideNode.classList.remove("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-				self._mainNode.classList.remove("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
-				self._node.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
+				self.$sideNode.classList.remove("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
+				self.$mainNode.classList.remove("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+				self.$node.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
 				self._thumb.classList.remove("splitLayoutAnimation"); //$NON-NLS-0$ 
 			}, this._animationDelay);
 		},
 		
 		_addAnimation: function() {
-			this._sideNode.classList.add("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
-			this._mainNode.classList.add("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
-			this._node.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
+			this.$sideNode.classList.add("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
+			this.$mainNode.classList.add("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
+			this.$node.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
 			this._thumb.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
 		},
 		
@@ -180,22 +224,33 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (this._tracking) {
 				return;
 			}
-			this._node.classList.add("splitTracking"); //$NON-NLS-0$
-			this._mainNode.classList.add("panelTracking"); //$NON-NLS-0$
-			this._sideNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this.$node.classList.add("splitTracking"); //$NON-NLS-0$
+			this.$mainNode.classList.add("panelTracking"); //$NON-NLS-0$
+			this.$sideNode.classList.add("panelTracking"); //$NON-NLS-0$
 			this._tracking = this._mouseMove.bind(this);
 			window.addEventListener("mousemove", this._tracking); //$NON-NLS-0$
 		},
 		
 		_mouseMove: function(event) {
 			if (this._tracking) {
-				this._splitLeft = event.clientX;	
-				var left = this._splitLeft;
-				if (this._node.parentNode.style.position === "relative") { //$NON-NLS-0$
-					var parentRect = lib.bounds(this._node.parentNode);
-					left = this._splitLeft - parentRect.left;
+				var parentRect;
+				if (this._vertical) {
+					this._splitTop = event.clientY;	
+					var top = this._splitTop;
+					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
+						parentRect = lib.bounds(this.$node.parentNode);
+						top = this._splitTop - parentRect.top;
+					}
+					this.$node.style.top = top + "px"; //$NON-NLS-0$ 
+				} else {
+					this._splitLeft = event.clientX;	
+					var left = this._splitLeft;
+					if (this.$node.parentNode.style.position === "relative") { //$NON-NLS-0$
+						parentRect = lib.bounds(this.$node.parentNode);
+						left = this._splitLeft - parentRect.left;
+					}
+					this.$node.style.left = left + "px"; //$NON-NLS-0$ 
 				}
-				this._node.style.left = left + "px"; //$NON-NLS-0$ 
 				this._adjustToSplitPosition(true);
 				lib.stop(event);
 			}
@@ -205,9 +260,9 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			if (this._tracking) {
 				window.removeEventListener("mousemove", this._tracking); //$NON-NLS-0$
 				this._tracking = null;
-				this._node.classList.remove("splitTracking"); //$NON-NLS-0$
-				this._mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
-				this._sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
+				this.$node.classList.remove("splitTracking"); //$NON-NLS-0$
+				this.$mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
+				this.$sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
 			}
 		}
 	};
