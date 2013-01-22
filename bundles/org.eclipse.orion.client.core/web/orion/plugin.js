@@ -10,8 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-/*global window ArrayBuffer addEventListener removeEventListener self XMLHttpRequest define*/
-(function() {
+/*global window ArrayBuffer addEventListener removeEventListener self XMLHttpRequest define*/ (function() {
 	var global = this;
 	if (!global.define) {
 		global.define = function(f) {
@@ -30,7 +29,7 @@ define(function() {
 		var _connected = false;
 		var _activePromises = {};
 		var _target = null;
-	
+
 		function _publish(message) {
 			if (_target) {
 				if (typeof(ArrayBuffer) === "undefined") { //$NON-NLS-0$
@@ -43,26 +42,44 @@ define(function() {
 				}
 			}
 		}
-		
+
 		function _getPluginData() {
 			var services = [];
 			// we filter out the service implementation from the data
 			for (var i = 0; i < _services.length; i++) {
-				services.push({serviceId: i, names: _services[i].names, methods: _services[i].methods, properties: _services[i].properties });
+				services.push({
+					serviceId: i,
+					names: _services[i].names,
+					methods: _services[i].methods,
+					properties: _services[i].properties
+				});
 			}
-			return {headers: _headers || {}, services: services};		
+			return {
+				headers: _headers || {},
+				services: services
+			};
 		}
-		
+
 		function _jsonXMLHttpRequestReplacer(name, value) {
 			if (value && value instanceof XMLHttpRequest) {
 				return {
-					status: value.status, 
+					status: value.status,
 					statusText: value.statusText
 				};
 			}
 			return value;
 		}
-		
+
+		function _serializeError(error) {
+			var result = error ? JSON.parse(JSON.stringify(error, _jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object
+			if (error instanceof Error) {
+				result.__isError = true;
+				result.message = result.message || error.message;
+				result.name = result.name || error.name;
+			}
+			return result;
+		}
+
 		function _createListener(serviceId) {
 			return function(event) {
 				if (_connected) {
@@ -73,11 +90,11 @@ define(function() {
 					};
 					_publish(message);
 				}
-            };
-        }
-		
+			};
+		}
+
 		function _handleRequest(event) {
-			if (event.source !== _target ) {
+			if (event.source !== _target) {
 				return;
 			}
 			var message = (typeof event.data !== "string" ? event.data : JSON.parse(event.data)); //$NON-NLS-0$
@@ -85,34 +102,38 @@ define(function() {
 				var promise = _activePromises[message.id];
 				if (promise) {
 					delete _activePromises[message.id];
-					if(promise.cancel) {
+					if (promise.cancel) {
 						promise.cancel(message.cancel);
 					}
 				}
 				return;
-			}	
+			}
 			var serviceId = message.serviceId;
 			var methodName = message.method;
 			var params = message.params;
 			var service = _services[serviceId];
 			var implementation = service.implementation;
 			var method = implementation[methodName];
-			
+
 			var type;
-			if (methodName==="addEventListener") {
+			if (methodName === "addEventListener") {
 				type = params[0];
 				service.listeners[type] = service.listeners[type] || _createListener(serviceId);
-				params = [type, service.listeners[type]]; 
-			} else if (methodName==="removeEventListener") {
+				params = [type, service.listeners[type]];
+			} else if (methodName === "removeEventListener") {
 				type = params[0];
 				params = [type, service.listeners[type]];
 				delete service.listeners[type];
 			}
-			
-			var response = {id: message.id, result: null, error: null};		
+
+			var response = {
+				id: message.id,
+				result: null,
+				error: null
+			};
 			try {
 				var promiseOrResult = method.apply(implementation, params);
-				if(promiseOrResult && typeof promiseOrResult.then === "function"){ //$NON-NLS-0$
+				if (promiseOrResult && typeof promiseOrResult.then === "function") { //$NON-NLS-0$
 					_activePromises[message.id] = promiseOrResult;
 					promiseOrResult.then(function(result) {
 						delete _activePromises[message.id];
@@ -121,40 +142,44 @@ define(function() {
 					}, function(error) {
 						if (_activePromises[message.id]) {
 							delete _activePromises[message.id];
-							response.error = error ? JSON.parse(JSON.stringify(error, _jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
+							response.error = _serializeError(error);
 							_publish(response);
 						}
 					}, function() {
-						_publish({requestId: message.id, method: "progress", params: Array.prototype.slice.call(arguments)}); //$NON-NLS-0$
+						_publish({
+							requestId: message.id,
+							method: "progress",
+							params: Array.prototype.slice.call(arguments)
+						}); //$NON-NLS-0$
 					});
 				} else {
 					response.result = promiseOrResult;
 					_publish(response);
 				}
 			} catch (error) {
-				response.error = error ? JSON.parse(JSON.stringify(error, _jsonXMLHttpRequestReplacer)) : error; // sanitizing Error object 
+				response.error = _serializeError(error);
 				_publish(response);
 			}
 		}
-	
+
 		this.updateHeaders = function(headers) {
 			if (_connected) {
 				throw new Error("Cannot update headers. Plugin Provider is connected");
 			}
 			_headers = headers;
 		};
-		
+
 		this.registerService = function(names, implementation, properties) {
 			if (_connected) {
 				throw new Error("Cannot register service. Plugin Provider is connected");
 			}
-			
+
 			if (typeof names === "string") {
 				names = [names];
 			} else if (!Array.isArray(names)) {
-				names =[];
+				names = [];
 			}
-			
+
 			var method = null;
 			var methods = [];
 			for (method in implementation) {
@@ -163,10 +188,16 @@ define(function() {
 				}
 			}
 			var serviceId = _services.length;
-			_services[serviceId] = {names: names, methods: methods, implementation: implementation, properties: properties || {}, listeners: {}};
+			_services[serviceId] = {
+				names: names,
+				methods: methods,
+				implementation: implementation,
+				properties: properties || {},
+				listeners: {}
+			};
 		};
 		this.registerServiceProvider = this.registerService; // (deprecated) backwards compatibility only
-		
+
 		this.connect = function(callback, errback) {
 			if (_connected) {
 				if (callback) {
@@ -174,7 +205,7 @@ define(function() {
 				}
 				return;
 			}
-	
+
 			if (typeof(window) === "undefined") { //$NON-NLS-0$
 				_target = self;
 			} else if (window !== window.parent) {
@@ -198,9 +229,9 @@ define(function() {
 				callback();
 			}
 		};
-		
+
 		this.disconnect = function() {
-			if (_connected) { 
+			if (_connected) {
 				removeEventListener("message", _handleRequest); //$NON-NLS-0$
 				_target = null;
 				_connected = false;
