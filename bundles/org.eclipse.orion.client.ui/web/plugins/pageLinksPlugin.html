@@ -63,6 +63,13 @@
 			uriTemplate: "http://mamacdon.github.com/#?target={OrionHome}/settings/settings.html&version=" + VERSION + "&OrionHome={OrionHome}"
 		});
 		
+		provider.registerService("orion.page.link", serviceImpl, {
+			nameKey: "Projects",
+			id: "orion.projects",
+			nls: "orion/nls/messages",
+			uriTemplate: "{OrionHome}/projects/project.html"
+		});
+		
 		provider.registerService("orion.page.link.related", null, {
 			id: "orion.navigateFromMetadata",
 			nameKey: "Navigator",
