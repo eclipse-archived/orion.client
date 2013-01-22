@@ -213,11 +213,14 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this.$sideNode.classList.add("sidePanelLayoutAnimation"); //$NON-NLS-0$ 
 			this.$mainNode.classList.add("mainPanelLayoutAnimation"); //$NON-NLS-0$ 
 			this.$node.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
-			this._thumb.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
+			if (this._thumb) {
+				this._thumb.classList.add("splitLayoutAnimation"); //$NON-NLS-0$ 
+			}
 		},
 		
 		_mouseDown: function(event) {
 			if (event.target === this._thumb) {
+				lib.stop(event);
 				return this._thumbDown(event);
 			}
 			if (this._tracking) {
@@ -228,6 +231,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this.$sideNode.classList.add("panelTracking"); //$NON-NLS-0$
 			this._tracking = this._mouseMove.bind(this);
 			window.addEventListener("mousemove", this._tracking); //$NON-NLS-0$
+			lib.stop(event);
 		},
 		
 		_mouseMove: function(event) {
@@ -262,6 +266,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 				this.$node.classList.remove("splitTracking"); //$NON-NLS-0$
 				this.$mainNode.classList.remove("panelTracking"); //$NON-NLS-0$
 				this.$sideNode.classList.remove("panelTracking"); //$NON-NLS-0$
+				lib.stop(event);
 			}
 		}
 	};
