@@ -153,5 +153,22 @@ define(["orion/assert", "orion/serviceregistry", "orion/EventTarget", "orion/Def
 		assert.equal(1, serviceRemovedCount);
 	};
 
+	tests.testError = function() {
+		var registry = new mServiceRegistry.ServiceRegistry();
+		var impl = {
+			testError : function() {
+				throw new Error("helloerror");
+			}
+		};
+
+		registry.registerService(["testError"], impl);
+		return registry.getService("testError").testError().then(function() {
+			assert.fail("testError() should have rejected");
+		}, function(error) {
+			assert.ok(error instanceof Error, "error is Error");
+			assert.ok(error.toString().indexOf("helloerror") !== -1, "has a sensible toString()");
+		});
+	};
+
 	return tests;
 });

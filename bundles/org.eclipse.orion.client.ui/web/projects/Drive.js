@@ -11,7 +11,7 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/fileClient', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileUtils', 'orion/Deferred' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/fileClient', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileUtils', 'orion/Deferred', 'projects/ProjectDataManager' ], 
 	
 	function(messages, require, mCommands, mFileClient, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileUtils, Deferred) {
 	
@@ -24,7 +24,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 
 		function Drive( details, commandService, serviceRegistry ){
 			
-			this.name = details.drivename;
+			this.drivename = details.drivename;
 			this.address = details.address;
 			this.port = details.port;
 			this.type = details.type;
@@ -40,9 +40,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.content = this.entryNode.firstChild.firstChild.children[1];
 			
-			this.setDriveName( this.name );
+			this.setDriveName( this.drivename );
 			
-			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.name );
+			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address );
 			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
 			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
@@ -63,7 +63,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var registry = this.serviceRegsitry;
 			
 			// set up the toolbar level commands	
-			var installPluginCommand = new mCommands.Command({
+			var saveDriveCommand = new mCommands.Command({
 				name: 'Save', //messages["Install"],
 				tooltip: 'Save configuration', //messages["Install a plugin by specifying its URL"],
 				id: "orion.driveSave",
@@ -110,7 +110,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}.bind(this)
 			});
 			
-			this.commandService.addCommand(installPluginCommand);
+			this.commandService.addCommand(saveDriveCommand);
 			this.commandService.registerCommandContribution('driveCommand', "orion.driveSave", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands('driveCommand', this.saveButton, this, this, "button"); //$NON-NLS-0$
 		}

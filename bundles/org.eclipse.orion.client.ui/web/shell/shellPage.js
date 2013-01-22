@@ -684,7 +684,13 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 			if (addedOutputFunction) {
 				output = args["output"]; //$NON-NLS-0$
 				if (output) {
-					output = output.getValue();
+					if (output.resourceExists()) {
+						/* value is an array of nodes, in this context will always have a size of 1 */
+						output = output.getValue()[0];
+					} else {
+						/* value is a string representing a non-existent resource */
+						output = output.getValue();
+					}
 				}
 				delete args.output;
 			}
@@ -979,7 +985,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 			var service = serviceRegistry.getService(ref);
 			if (service) {
 				var OUTPUT_STRING = "output"; //$NON-NLS-0$
-				parameters = ref.getProperty("parameters"); //$NON-NLS-0$
+				parameters = ref.getProperty("parameters") || []; //$NON-NLS-0$
 				var outputFound;
 				for (var j = 0; j < parameters.length; j++) {
 					if (parameters[j].name === OUTPUT_STRING) {

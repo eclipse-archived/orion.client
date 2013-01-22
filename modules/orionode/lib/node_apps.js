@@ -131,13 +131,19 @@ var AppContext = function(options) {
 //		return true;
 //	}
 
-	/** @throws {Error} If modulePath is unsafe */
-	function resolveModulePath(fileRoot, workspaceDir, modulePath) {
-		var filePath = api.rest(fileRoot, modulePath);
-		return fileUtil.safeFilePath(workspaceDir, filePath);
+	/**
+	 * @parma {String} resolvedCwd The current working directory (fs path)
+	 * @param {String} modulePath The module's path relative to the resolvedCwd
+	 * @throws {Error} If modulePath is unsafe
+	 */
+	function resolveModulePath(workspaceDir, resolvedCwd, modulePath) {
+		return fileUtil.safePath(workspaceDir, path.join(resolvedCwd, modulePath));
 	}
 
-	/** @throws {Error} If modulePath is unsafe */
+	/**
+	 * @param {String} cwdPath The cwd, as a www path (eg. /file/whatever/myfolder)
+	 * @throws {Error} If modulePath is unsafe
+	 */
 	function _resolveCWD(fileRoot, workspaceDir, cwdPath) {
 		var filePath = api.rest(fileRoot, cwdPath);
 		if(!filePath){
@@ -238,8 +244,9 @@ var AppContext = function(options) {
 	 * @param {Boolean} [hidden]
 	 */
 	this.startApp = function(modulePath, args, context, hidden) {
-		modulePath = resolveModulePath(fileRoot, workspaceDir, modulePath);
 		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+		debugger;
+		modulePath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp([modulePath].concat(args || []), cwdPath, hidden);
 		app.on('exit', function(code) {
 			console.log('App # ' + app.pid + ' exited, code=' + code);
@@ -252,8 +259,8 @@ var AppContext = function(options) {
 	 * @param {Number} port
 	 */
 	this.debugApp = function(modulePath, port, args, context, headers, requestUrl) {
-		var resolvedPath = resolveModulePath(fileRoot, workspaceDir, modulePath);
 		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+		var resolvedPath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);
 		app.debug = url.format({

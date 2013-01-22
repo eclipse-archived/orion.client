@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/* global define console document Image */
+/*global define console document Image */
 
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/section', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/i18nUtil', 'orion/webui/littlelib',
@@ -198,7 +198,7 @@ define(
 
 					if (commit.AuthorImage) {
 						var authorImage = document.createElement("div");
-						authorImage.style.float = "left";
+						authorImage.style['float'] = "left";
 						var image = new Image();
 						image.src = commit.AuthorImage;
 						image.name = commit.AuthorName;

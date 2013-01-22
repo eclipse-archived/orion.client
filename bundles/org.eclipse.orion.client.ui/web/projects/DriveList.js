@@ -94,12 +94,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.commandService.addCommand(addDriveCommand);
 			this.commandService.registerCommandContribution("driveCommands", "orion.addDrive", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			
-//			this.commandService.addCommand(createPluginCommand);
-//	
-//			if( this.includeMaker === true ){
-//				this.commandService.registerCommandContribution("driveCommands", "orion.createPlugin", 2); //$NON-NLS-0$
-//			}
-			
 			// Render the commands in the heading, emptying any old ones.
 			this.commandService.renderCommands("driveCommands", "driveCommands", this, this, "button"); //$NON-NLS-0$
 		},
@@ -138,21 +132,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 		},
 				
-		newDrive: function(){
+		newDrive: function(driveData){
 		
 			var driveName = 'New Drive ' + ( this.driveElements.length + 1 );
 		
 			var emptyDrive = { drivename: driveName, type:'SFTP', address:'', port:'', password:'', username:'' };
 			
-			var newDrive = new Drive( emptyDrive, this.commandService, this.serviceRegistry );
+			if( !driveData ){ driveData = emptyDrive; }
+			
+			var newDrive = new Drive( driveData, this.commandService, this.serviceRegistry );
 			
 			this.driveElements.push( newDrive );
 			
-			this.DriveList.appendChild( newDrive.entryNode );
+//			this.DriveList.appendChild( newDrive.entryNode );
 			
-			this.driveCount.textContent = this.driveElements.length;
+//			this.driveCount.textContent = this.driveElements.length;
 			
-//			this.addRows();
+			this.addRows();
 		},
 
 		handleError: function( error ){

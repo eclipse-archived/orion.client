@@ -58,9 +58,9 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	}
 
 	var provider = new PluginProvider({
-		name: "NodeSumo",
+		name: "Node Support",
 		version: "1.0",
-		description: "Provides cool Node.js control through commands for the Orion Shell."
+		description: "Provides control for Node.js functionality."
 	});
 
 	provider.registerService('orion.shell.command', {}, {
@@ -71,10 +71,13 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	provider.registerService('orion.shell.command', {
 		callback: function(commandArgs, context) {
 			var moduleFile = commandArgs.module, args = commandArgs.args;
+			if (!moduleFile) {
+				return 'No file to start was provided.';
+			}
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('start', {
-					modulePath: moduleFile.Location,
+					modulePath: moduleFile.path,
 					context: context,
 					args: args
 				});
@@ -111,9 +114,14 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				if (!data.Apps.length) {
 					return 'No running apps.';
 				}
-				return data.Apps.map(function(app) {
-					return ['PID: ' + app.Id, 'URL: ' + app.Location, app.DebugURL ? ('Debug URL: ' + app.DebugURL) : ''].join(', ');
-				}).join('\n');
+				var space = '\t\t\t';
+				return [
+					['PID','URL','Debug URL'].join(space),
+					['---','---','---------'].join(space)
+				].concat(data.Apps.map(function(app) {
+					return [app.Id, app.Location, (app.DebugURL || '')].join(space);
+				}))
+				.join('\n');
 			});
 		}
 	}, {
@@ -143,17 +151,20 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	provider.registerService('orion.shell.command',{
 		callback: function(commandArgs, context) {
 			var moduleFile = commandArgs.module, args = commandArgs.args;
+			if (!moduleFile) {
+				return 'No file to debug was provided.';
+			}
 			var sockProc = new SocketProcess();
 			sockProc.connect = function(data) {
 				sockProc.socket.emit('debug', {
-					modulePath: moduleFile.Location,
+					modulePath: moduleFile.path,
 					port: commandArgs.port,
 					context: context,
 					args: args
 				});
 			};
 			sockProc.started = function(app) {
-				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + app.DebugURL);
+				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + app.DebugURL + '\n');
 			};
 			sockProc.stopped = function(app) {
 				sockProc.progress('App stopped (PID: ' + app.Id + ')');

@@ -153,7 +153,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				NewType.prototype = Object.create(CustomType.prototype);
 				NewType.prototype.name = type.name;
 				NewType.prototype.parse = function(arg) {
-					var completion = type.parse(arg.toString().trim(), this.typeSpec);
+					var completion = type.parse(arg, this.typeSpec);
 					var status = mTypes.Status.VALID;
 					if (completion.status) {
 						switch (completion.status) {

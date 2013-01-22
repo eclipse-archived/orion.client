@@ -11,14 +11,20 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileClient' ], 
-	
-	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileClient ) {
 
-		function ProjectNavigation( anchor, serviceRegistry, commandService ){
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient' ], 
+	
+	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileClient, Deferred, mStatus, mProgress, mOperationsClient ) {
+
+		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
+		
+			this.commandService = commandService;
 		
 			var isExpanded = false;
 			var that = this;
+			
+			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+			var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			
 			this.anchor = anchor;
 			
@@ -92,7 +98,31 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					return new DriveTreeRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
 			}}); //$NON-NLS-0$
 			
-			this.explorer.loadResourceList( '/', true );
+			
+			var myexplorer = this.explorer;
+			var loadedWorkspace = fileClient.loadWorkspace("");
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+//				var drivepath = workspace.Drives[0].ChildrenLocation;
+			
+				myexplorer.loadResourceList( workspace.DriveLocation, true, null );
+			});
+			
+			var saveConfigCommand = new mCommands.Command({
+				name: 'Configure', //messages["Install"],
+				tooltip: 'Configure Project',
+				id: "orion.projectConfiguration", //$NON-NLS-0$
+				callback: function(data) {
+					console.log( 'configure project' );
+//					driveListContainer.newDrive();
+				}.bind(this)
+			});
+			
+			this.commandService.addCommand(saveConfigCommand);
+			this.commandService.registerCommandContribution("projectConfiguration", "orion.projectConfiguration", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.renderCommands("projectConfiguration", "projectConfiguration", this, this, "button"); //$NON-NLS-0$
+			
 		}
 		
 		var workingSetNode;

@@ -49,13 +49,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			 * status and predictions for an argument with this parameter type.
 			 */
 			parse: function(arg) {
-				var string = arg || "";
-				if (string.indexOf("'") === 0) { //$NON-NLS-0$
-					string = string.substring(1);
-				}
-				if (string.lastIndexOf("'") === string.length - 1) { //$NON-NLS-0$
-					string = string.substring(0, string.length - 1);
-				}
+				var string = arg.text || "";
 				var predictions = this._getPredictions(string);
 				return this._createCompletion(string, predictions);
 			},

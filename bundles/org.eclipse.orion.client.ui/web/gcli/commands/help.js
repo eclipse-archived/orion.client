@@ -149,7 +149,7 @@ function getManTemplateData(command, context) {
     describe: function(item, element) {
       var text = item.manual || item.description;
       var parent = element.ownerDocument.createElement('div');
-      util.setContents(parent, text);
+      util.setTextContent(parent, text);
       return parent.childNodes;
     },
 
