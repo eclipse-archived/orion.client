@@ -10,9 +10,7 @@
     "sax": "~0.4.2",
     "promised-io": "~0.3.0",
     "socket.io": "~0.9.11",
-    "socket.io-client": "~0.9.11",
-    "dojo": "https://github.com/mamacdon/dojo/archive/1.6.1.tar.gz",
-    "dijit": "https://github.com/mamacdon/dijit/archive/1.6.1.tar.gz"
+    "socket.io-client": "~0.9.11"
   },
   "devDependencies": {
     "mocha": "*",
