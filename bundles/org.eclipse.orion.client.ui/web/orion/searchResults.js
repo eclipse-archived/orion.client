@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, dojo, mCommands, mSearchExplorer, mSearchUtils, mSearchCrawler){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mCommands, mSearchExplorer, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search results generator.
@@ -34,7 +34,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		_renderSearchResult: function(crawling, resultsNode, searchParams, jsonData, incremental) {
 			var foundValidHit = false;
 			var resultLocation = [];
-			dojo.empty(resultsNode);
+			lib.empty(lib.node(resultsNode));
 			if (jsonData.response.numFound > 0) {
 				for (var i=0; i < jsonData.response.docs.length; i++) {
 					var hit = jsonData.response.docs[i];
@@ -72,23 +72,25 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 			//For crawling search, temporary
 			//TODO: we need a better way to render the progress and allow user to be able to cancel hte crawling search
 			this.crawling = searchParams.regEx || searchParams.caseSensitive;
-			var parent = dojo.byId(this.resultsId);
+			var parent = lib.node(this.resultsId);
 			if(this.crawling){
-				dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
+				lib.empty(parent);
+				parent.appendChild(document.createTextNode(""));
 				var self = this;
 				var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
 				crawler.search(function(jsonData, incremental){self._renderSearchResult(true, resultsNode, searchParams, jsonData, incremental);});
 			} else {
-				//var queryToService = qObj.nonAdvQueryStr;
-				dojo.place(document.createTextNode(messages["Searching..."]), parent, "only"); //$NON-NLS-1$
+				lib.empty(parent);
+				parent.appendChild(document.createTextNode(messages["Searching..."]));
 				try{
 					this.registry.getService("orion.page.progress").progress(this.fileService.search(searchParams), "Searching " + searchParams.keyword).then(
-						dojo.hitch(this, function(jsonData) {
+						function(jsonData) {
 							this._renderSearchResult(false, resultsNode, searchParams, jsonData);
-						}));
+						}.bind(this));
 				}
 				catch(error){
-					dojo.place(document.createTextNode(""), parent, "only"); //$NON-NLS-1$
+					lib.empty(parent);
+					parent.appendChild(document.createTextNode(""));
 					if(typeof(error) === "string" && error.indexOf("search") > -1){ //$NON-NLS-0$
 						var self = this;
 						var crawler = new mSearchCrawler.SearchCrawler(this.registry, this.fileService, searchParams, {childrenLocation: this.searcher.getChildrenLocation()});
@@ -107,7 +109,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/commands', '
 		 */
 		loadResults: function(query) {
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
-			var parent = dojo.byId(this.resultsId);
+			var parent = lib.node(this.resultsId);
 			this._search(parent, query);
 		}
 		

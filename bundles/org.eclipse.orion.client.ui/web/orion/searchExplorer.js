@@ -12,9 +12,71 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'dijit/TooltipDialog'], 
-		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils) {
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils'], 
+		function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils) {
 
+	function _empty(nodeToEmpty){
+		var node = lib.node(nodeToEmpty);
+		if(node){
+			lib.empty(node);
+		}
+	}
+	
+	function _connect(nodeOrId, event, eventHandler){
+		var node = lib.node(nodeOrId);
+		if(node){
+			node.addEventListener(event, eventHandler, false); 
+		}
+	}
+	
+	function _place(ndoeToPlace, parent, position){
+		var parentNode = lib.node(parent);
+		if(parentNode){
+			if(position === "only"){
+				lib.empty(parentNode);
+			}
+			parentNode.appendChild(ndoeToPlace);
+		}
+	}
+	
+	function _createElement(elementTag, classNames, id, parent){
+		var element = document.createElement(elementTag);
+		if(classNames){
+			if(Array.isArray(classNames)){
+				for(var i = 0; i < classNames.length; i++){
+					element.classList.add(classNames[i]);
+				}
+			} else if(typeof classNames === "string"){
+				element.className = classNames;
+			}
+		}
+		if(id){
+			element.id = id;
+		}
+		var parentNode = lib.node(parent);
+		if(parentNode){
+			parentNode.appendChild(element);
+		}
+		return element;
+	}
+	
+	function _createLink(classNames, id, href, parent, linkName){
+		var link = _createElement('a', classNames, id, parent); //$NON-NLS-2$
+		link.href = href;
+		if(linkName){
+			link.appendChild(document.createTextNode(linkName));
+		}
+		return link;
+	}
+	
+	function _createSpan(classNames, id, parent, spanName){
+		var span = _createElement('span', classNames, id, parent); //$NON-NLS-2$
+		if(spanName){
+			span.appendChild(document.createTextNode(spanName));
+		}
+		return span;
+	}
+	
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchParams, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
@@ -126,17 +188,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			return;
 		} else {
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
-				dojo.hitch(this, function(contents) {
+				function(contents) {
 					if(this.hitOnceWithinFile(contents)){
 						model.stale = false;
 					} else {
 						onComplete(model);
 					}
-				}),
-				dojo.hitch(this, function(error) {
+				}.bind(this),
+				function(error) {
 					console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
 					onComplete(model);
-				})
+				}.bind(this)
 			);
 		}
 	};
@@ -164,7 +226,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 		var matchesReplaced = this.matchesReplaced(model);
 		if(matchesReplaced > 0){
-			this.getFileContent(model, dojo.hitch(this, function(fileItem){
+			this.getFileContent(model, function(fileItem){
 				matchesReplaced = this.matchesReplaced(fileItem);
 				var newContents = [];
 				mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, replaceStr, this.searchHelper.inFileQuery.searchStrLength); 
@@ -173,11 +235,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				var etag = fileItem.ETag;
 				var args = etag ? { "ETag" : etag }: null; //$NON-NLS-0$
 				this.registry.getService("orion.page.progress").progress(this.fileClient.write(model.location, contents, args), "Saving changes to " + model.location).then(
-					dojo.hitch(this, function(result) {
+					function(result) {
 						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" }); //$NON-NLS-0$
 						this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
-					}),
-					dojo.hitch(this, function(error) {
+					}.bind(this),
+					function(error) {
 						// expected error - HTTP 412 Precondition Failed 
 						// occurs when file is out of sync with the server
 						if (error.status === 412) {
@@ -189,10 +251,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 							reportList.push({model: model, message: messages["Failed to write file."],  matchesReplaced: matchesReplaced, status: "failed" }); //$NON-NLS-1$
 						}
 						this.writeIncrementalNewContent(replaceStr, modelList, reportList, index+1, onComplete);
-					})
+					}.bind(this)
 				);
 				
-			}), true);
+			}.bind(this), true);
 			
 		} else {
 			this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
@@ -228,17 +290,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			onComplete(fileItem);
 		} else {
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
-				dojo.hitch(this, function(jsonData) {
+				function(jsonData) {
 					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 					if(this.onMatchNumberChanged && !writing){
 						this.onMatchNumberChanged(fileItem);
 					}
 					onComplete(fileItem);
-				}),
-				dojo.hitch(this, function(error) {
+				}.bind(this),
+				function(error) {
 					console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 					onComplete(null);
-				})
+				}.bind(this)
 			);
 		}
 	};
@@ -256,17 +318,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				return;
 			}
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then(
-					dojo.hitch(this, function(jsonData) {
+					function(jsonData) {
 						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
 						  if(this.onMatchNumberChanged){
 							  this.onMatchNumberChanged(parentItem);
 						  }
 						  onComplete(parentItem.children);
-					}),
-					dojo.hitch(this, function(error) {
+					}.bind(this),
+					function(error) {
 						console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 						onComplete([]);
-					})
+					}.bind(this)
 			);
 		} else {
 			onComplete([]);
@@ -287,62 +349,66 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if (this._useCheckboxSelection) {
 			var th = document.createElement('th'); //$NON-NLS-0$
 			var check = document.createElement("span"); //$NON-NLS-0$
-			dojo.addClass(check, "selectionCheckmarkSprite core-sprite-check"); //$NON-NLS-0$
+			check.classList.add('selectionCheckmarkSprite'); //$NON-NLS-0$
+			check.classList.add('core-sprite-check'); //$NON-NLS-0$
 			if(this.getCheckedFunc){
 				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
-				dojo.toggleClass(check, "core-sprite-check_on", check.checked); //$NON-NLS-0$
+				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			th.appendChild(check);
-			dojo.connect(check, "onclick", dojo.hitch(this, function(evt) { //$NON-NLS-0$
+			_connect(check, "onclick", function(evt) { //$NON-NLS-0$
 				var newValue = evt.target.checked ? false : true;
 				this.onCheck(null, evt.target, newValue);
-			}));
+			}.bind(this));
 			return th;
 		}
 	};
 	
 	SearchResultRenderer.prototype.getCellHeaderElement = function(col_no){	
+		if(col_no > 2){
+			return null;
+		}
 		var title, header;
-		if(col_no === 1){
-			title = dojo.create("th"); //$NON-NLS-0$
-			header = dojo.create("h2", null, title); //$NON-NLS-0$
-			header.textContent = messages["Results"]; //$NON-NLS-0$
-			
-			if( this.explorer.model.searchHelper.displayedSearchTerm){
-				if(this.explorer.numberOnPage > 0){
-					var startNumber = this.explorer.model.searchHelper.params.start + 1;
-					var endNumber = startNumber + this.explorer.numberOnPage - 1;
-					title.innerHTML = "";
-					var textBold = dojo.create("h2", null, title, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-					var displayStr = "";
-					if(!this.explorer.model.replaceMode()){
-						displayStr = dojo.string.substitute(messages["Files ${0} of ${1} matching ${2}"], 
-						[startNumber +"-"+ endNumber, this.explorer.totalNumber, this.explorer.model.searchHelper.displayedSearchTerm]); 
-					} else {
-						displayStr = dojo.string.substitute(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
-						[this.explorer.model.searchHelper.displayedSearchTerm,
-						this.explorer._replaceStr, 
-						startNumber +"-"+ endNumber, //$NON-NLS-2$
-						this.explorer.totalNumber
-						]);
+		if(col_no !== 0){
+			title = document.createElement("th"); //$NON-NLS-2
+			header = document.createElement("h2"); //$NON-NLS-2
+			title.appendChild(header);
+			if(col_no === 1){
+				var displayStr = messages["Results"]; //$NON-NLS-0$
+				if( this.explorer.model.searchHelper.displayedSearchTerm){
+					if(this.explorer.numberOnPage > 0){
+						var startNumber = this.explorer.model.searchHelper.params.start + 1;
+						var endNumber = startNumber + this.explorer.numberOnPage - 1;
+						//lib.empty(title);
+						//var textBold = document.createElement("h2"); //$NON-NLS-2
+						//title.appendChild(textBold);
+						displayStr = "";
+						if(!this.explorer.model.replaceMode()){
+							displayStr = i18nUtil.formatMessage(messages["Files ${0} of ${1} matching ${2}"], 
+							startNumber +"-"+ endNumber, this.explorer.totalNumber, this.explorer.model.searchHelper.displayedSearchTerm); 
+						} else {
+							displayStr = i18nUtil.formatMessage(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
+							this.explorer.model.searchHelper.displayedSearchTerm,
+							this.explorer._replaceStr, 
+							startNumber +"-"+ endNumber, //$NON-NLS-2$
+							this.explorer.totalNumber
+							);
+						}
 					}
-					dojo.place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
 				}
-			}
+				_place(document.createTextNode(displayStr), header, "only"); //$NON-NLS-0$
+				return title;
+			} else if(col_no === 2){
+				header.textContent = messages["Location"];
+			} 
 			return title;
-		} else if(col_no === 2){
-			title = dojo.create("th"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-0$
-			header = dojo.create("h2", null, title);
-			header.textContent = messages["Location"];
-			return title;
-		} else if(col_no === 0){
-			return dojo.create("th"); //$NON-NLS-0$
+		} else {
+			return document.createElement("th"); //$NON-NLS-0$
 		}
 	};
 	
-	
 	SearchResultRenderer.prototype.focus = function(){
-	    var resultParentDiv = dojo.byId(this.explorer.getParentDivId());
+	    var resultParentDiv = lib.node(this.explorer.getParentDivId());
 	    window.setTimeout(function(){
 	    	resultParentDiv.focus();
 	    	}, 10);
@@ -351,19 +417,19 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultRenderer.prototype.staleFileElement = function(item){
 		if(item.stale){
 			var navGridHolder = this.explorer.getNavDict() ? this.explorer.getNavDict().getGridNavHolder(item, true) : null;
-			mNavUtils.removeNavGrid(navGridHolder, dojo.byId(this.getItemLinkId(item)));
-			var span = dojo.byId(this.getFileSpanId(item));
-			dojo.empty(span);
-			dojo.place(document.createTextNode(item.name), span, "last"); //$NON-NLS-0$
-			span = dojo.byId(this.getFileIconId(item));
-			dojo.empty(span);
+			mNavUtils.removeNavGrid(navGridHolder, lib.node(this.getItemLinkId(item)));
+			var span = lib.node(this.getFileSpanId(item));
+			_empty(span);
+			_place(document.createTextNode(item.name), span, "last"); //$NON-NLS-0$
+			span = lib.node(this.getFileIconId(item));
+			_empty(span);
 		}
 	};
 	
 	SearchResultRenderer.prototype.replaceFileElement = function(item){
 		var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name; //$NON-NLS-1$ //$NON-NLS-0$
-		var linkDiv = dojo.byId( this.getItemLinkId(item));
-		dojo.place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
+		var linkDiv = lib.node( this.getItemLinkId(item));
+		_place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
 	};
 	
 	SearchResultRenderer.prototype.replaceDetailIcon = function(item , direction){
@@ -373,37 +439,46 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(! item || item.type !== "detail"){ //$NON-NLS-0$
 			return;
 		}
-		var iconSpan = dojo.byId(this.getDetailIconId(item));
+		var iconSpan = lib.node(this.getDetailIconId(item));
 		if(!iconSpan){
 			return;
 		}
-		dojo.empty(iconSpan);
-		var icon = dojo.create("span", null, iconSpan, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.addClass(icon, "imageSprite"); //$NON-NLS-0$
+		_empty(iconSpan);
+		var icon = document.createElement("span"); //$NON-NLS-0$
+		icon.classList.add('imageSprite'); //$NON-NLS-0$
 		if(direction === "right"){ //$NON-NLS-0$
-			dojo.addClass(icon, "core-sprite-rightarrow"); //$NON-NLS-0$
+			icon.classList.add('core-sprite-rightarrow'); //$NON-NLS-0$
 		} else if(direction === "left"){ //$NON-NLS-0$
-			dojo.addClass(icon, "core-sprite-leftarrow"); //$NON-NLS-0$
+			icon.classList.add('core-sprite-leftarrow'); //$NON-NLS-0$
 		} else {
-			dojo.addClass(icon, "core-sprite-none"); //$NON-NLS-0$
+			icon.classList.add('core-sprite-none'); //$NON-NLS-0$
 		}
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr)}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		dojo.place(document.createTextNode(renderName), link, "only"); //$NON-NLS-0$
+		var href = item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr);
+		var link = _createLink('navlink', this.getItemLinkId(item), href, spanHolder, renderName); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
 	
 	SearchResultRenderer.prototype.generateContextTip = function(detailModel){
-		var tableNode = dojo.create( "table",{bgcolor:"#FFFFCC"}); //$NON-NLS-1$ //$NON-NLS-0$
+		var tableNode = document.createElement('table');
+		tableNode.className = "search_context_tip";
 		for(var i = 0; i < detailModel.context.length; i++){
-			var lineDiv = dojo.create("tr",{},tableNode); //$NON-NLS-0$
+			var lineDiv = document.createElement('tr'); //$NON-NLS-0$
+			tableNode.appendChild(lineDiv);
 			if(detailModel.context[i].current){
-				var lineTd = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-0$
-				this.generateDetailHighlight(detailModel, dojo.create("span",{className: "primaryColumn"},lineTd)); //$NON-NLS-1$ //$NON-NLS-0$
+				var lineTd = document.createElement('td');
+				lineTd.noWrap = true;
+				lineDiv.appendChild(lineTd);
+				var span = document.createElement('span');
+				span.className = "primaryColumn";
+				lineTd.appendChild(span);
+				this.generateDetailHighlight(detailModel, span); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				var td = dojo.create( "td", { noWrap: true}, lineDiv ); //$NON-NLS-1$ //$NON-NLS-0$
+				var td = document.createElement('td');
+				td.noWrap = true;
+				lineDiv.appendChild(td);
 				td.textContent = detailModel.context[i].context + "\u00a0"; //$NON-NLS-0$
 			}
 		}
@@ -423,20 +498,21 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			}
 			
 			if(startIndex !== detailModel.matches[i].startIndex){
-				dojo.place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
+				_place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
 			}
-			var matchSegBold = dojo.create("b", null, parentSpan, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			var matchSegBold = document.createElement('b');
+			parentSpan.appendChild(matchSegBold); //$NON-NLS-1$
 			if(this.explorer.model.searchHelper.inFileQuery.wildCard){
 				gap = detailModel.matches[i].length;
 			}
-			dojo.place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
+			_place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
 			startIndex = detailModel.matches[i].startIndex + gap;
 			if(this.explorer.model.replaceMode()){
 				break;
 			}
 		}
 		if(startIndex < (detailModel.name.length - 1)){
-			dojo.place(document.createTextNode(detailModel.name.substring(startIndex)), parentSpan, "last"); //$NON-NLS-0$
+			_place(document.createTextNode(detailModel.name.substring(startIndex)), parentSpan, "last"); //$NON-NLS-0$
 		}
 	};
 	
@@ -450,27 +526,29 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		
 	SearchResultRenderer.prototype.renderDetailLineNumber = function(item, spanHolder){
 		if(!this.explorer.model.replaceMode() || item.matches.length <= 1){
-			dojo.place(document.createTextNode(item.lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			_place(document.createTextNode(item.lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
 		} else {
-			dojo.place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			_place(document.createTextNode(item.lineNumber + "(" + item.matchNumber+ "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		}
 	};
-		
+	
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
 		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
-		var link = dojo.create("a", {className: "navlink", id: this.getItemLinkId(item), href: linkLocation}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var link = _createLink('navlink', this.getItemLinkId(item), linkLocation, spanHolder); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
+		_connect(link, "onclick", function() { //$NON-NLS-0$
 			that.explorer.getNavHandler().cursorOn(item);
 		});
-		return dojo.create("span", null, link, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+		var span = document.createElement('span'); //$NON-NLS-0$
+		link.appendChild(span);
+		return span;
 	};
 	
 	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
 	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
 	SearchResultRenderer.prototype.getRowActionElement = function(tableRowId){
-		return dojo.byId(this.getItemLinkId(tableRowId));
+		return lib.node(this.getItemLinkId(tableRowId));
 	};
 	
 	SearchResultRenderer.prototype.getLocationSpanId = function(item){
@@ -497,20 +575,19 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 	
 	SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan){
-		var spanHolder = onSpan ? onSpan: dojo.byId(this.getLocationSpanId(item));
-		dojo.empty(spanHolder);
+		var spanHolder = onSpan ? onSpan: lib.node(this.getLocationSpanId(item));
+		_empty(spanHolder);
 		var qParams = mSearchUtils.copySearchParams(this.explorer.model.searchHelper.params, true);
 		qParams.resource = item.parentLocation;
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
-		var link = dojo.create("a", {className: "navlinkonpage", href: href}, spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		link.title = dojo.string.substitute(messages["Search again in this folder with \"${0}\""], [this.explorer.model.searchHelper.displayedSearchTerm]);
+		var link = _createLink('navlinkonpage', null, href, spanHolder, item.fullPathName); //$NON-NLS-0$
+		link.title = i18nUtil.formatMessage(messages["Search again in this folder with \"${0}\""], this.explorer.model.searchHelper.displayedSearchTerm);
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
-		dojo.connect(link, "onclick", link, function() { //$NON-NLS-0$
+		_connect(link, "onclick", function() { //$NON-NLS-0$
 			that.explorer.closeContextTip();
 		});
-		dojo.place(document.createTextNode(item.fullPathName), link, "only"); //$NON-NLS-0$
 	};
 	
 	SearchResultRenderer.prototype.getPrimColumnStyle = function(){
@@ -528,16 +605,16 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			col = document.createElement('td'); //$NON-NLS-0$
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				col.noWrap = true;
-				span = dojo.create("span", {id: this.getFileIconId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				span = _createSpan(null, this.getFileIconId(item), col, null);
 				if(this.explorer.model.searchHelper.params.keyword !== ""){
 					this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
 				} else {
-					var decorateImage = dojo.create("span", null, span, "last"); //$NON-NLS-0$ //$NON-NLS-0$
-					dojo.addClass(decorateImage, "imageSprite"); //$NON-NLS-0$
-					dojo.addClass(decorateImage, "core-sprite-file");//$NON-NLS-0$
+					var decorateImage = _createSpan(null, null, col, null);
+					decorateImage.classList.add('imageSprite'); //$NON-NLS-0$
+					decorateImage.classList.add('core-sprite-file'); //$NON-NLS-0$
 				}
 			} else {
-				span = dojo.create("span", {}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				span = _createSpan(null, null, col, null);
 				col.noWrap = true;
 				col.align = "right"; //$NON-NLS-0$
 				this.renderDetailLineNumber(item,  span);
@@ -546,24 +623,24 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		case 1:
 			var col, span, link;
 			col = document.createElement('td'); //$NON-NLS-0$
-			span = dojo.create("span", {id: this.getFileSpanId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			span = _createSpan(null, this.getFileSpanId(item), col, null);
 			var that = this;
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name; //$NON-NLS-1$ //$NON-NLS-0$
 				this.renderFileElement(item, span, renderName);
 			} else {
 				this.renderDetailElement(item, tableRow, span);
-				var iconSpan = dojo.create("span", {id: this.getDetailIconId(item)}, span, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				var icon = dojo.create("span", null, iconSpan, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				dojo.addClass(icon, "imageSprite"); //$NON-NLS-0$
-				dojo.addClass(icon, "core-sprite-none"); //$NON-NLS-0$
+				var iconSpan = _createSpan(null, this.getDetailIconId(item), span, null);
+				var icon = _createSpan(null, null, iconSpan, null);
+				icon.classList.add('imageSprite'); //$NON-NLS-0$
+				icon.classList.add('core-sprite-none'); //$NON-NLS-0$
 			}
 			return col;
 			
 		case 2:
 			col = document.createElement('td'); //$NON-NLS-0$
 			if(item.type ===  "file"){ //$NON-NLS-0$
-				span = dojo.create("span", {id: this.getLocationSpanId(item)}, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+				span = _createSpan(null, this.getLocationSpanId(item), col, null);
 				if(item.parentLocation){
 					this.renderLocationElement(item, span);
 				}
@@ -586,13 +663,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		var th, h2;
 		switch(col_no){
 			case 0: 
-				th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-				h2 = dojo.create("h2", null, th); //$NON-NLS-0$
+				th = _createElement('th', "search_report", null, null);//$NON-NLS-1$ //$NON-NLS-0$
+				h2 = _createElement('h2', null, null, th);//$NON-NLS-1$
 				h2.textContent = messages["Files replaced"];
 				break;
 			case 1: 
-				th = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-				h2 = dojo.create("h2", null, th); //$NON-NLS-0$
+				th = _createElement('th', "search_report", null, null);//$NON-NLS-1$ //$NON-NLS-0$
+				h2 = _createElement('h2', null, null, th);//$NON-NLS-1$
 				h2.textContent = messages["Status"];
 				break;
 		}
@@ -601,34 +678,33 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchReportRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
 		case 0:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-			var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var col = _createElement('td', "search_report", null, null);//$NON-NLS-1$ //$NON-NLS-0$
+			var div = _createElement('div', null, null, col);//$NON-NLS-1$
+			var span = _createElement('span', "primaryColumn", null, div);//$NON-NLS-1$ //$NON-NLS-0$
 
-			dojo.place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
+			_place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			_connect(span, "onclick", function() { //$NON-NLS-0$
 				window.open(item.model.linkLocation);
 			});
-			dojo.connect(span, "onmouseover", span, function() { //$NON-NLS-0$
+			_connect(span, "onmouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$
 			});
-			dojo.connect(span, "onmouseout", span, function() { //$NON-NLS-0$
+			_connect(span, "onmouseout", function() { //$NON-NLS-0$
 				span.style.cursor ="default"; //$NON-NLS-0$
 			});
 			
-			var operationIcon = dojo.create("span", null, div, "first"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(operationIcon, "imageSprite"); //$NON-NLS-0$
-			
+			var operationIcon = _createElement('span', null, null, div);//$NON-NLS-1$ //$NON-NLS-0$
+			operationIcon.classList.add('imageSprite'); //$NON-NLS-0$
 			if(item.status){
 				switch (item.status) {
 					case "warning": //$NON-NLS-0$
-						dojo.addClass(operationIcon, "core-sprite-warning"); //$NON-NLS-0$
+						operationIcon.classList.add('core-sprite-warning'); //$NON-NLS-0$
 						return col;
 					case "failed": //$NON-NLS-0$
-						dojo.addClass(operationIcon, "core-sprite-error"); //$NON-NLS-0$
+						operationIcon.classList.add('core-sprite-error'); //$NON-NLS-0$
 						return col;
 					case "pass": //$NON-NLS-0$
-						dojo.addClass(operationIcon, "core-sprite-ok"); //$NON-NLS-0$
+						operationIcon.classList.add('core-sprite-ok'); //$NON-NLS-0$
 						return col;
 				}
 			}
@@ -644,10 +720,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 						statusMessage = item.message;
 						break;
 					case "pass": //$NON-NLS-0$
-						statusMessage = dojo.string.substitute(messages["${0} out of ${1}  matches replaced."], [item.matchesReplaced, item.model.totalMatches]);
+						statusMessage = i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches);
 						break;
 				}
-				var td = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
+				var td = _createElement('td', "search_report", null, null);//$NON-NLS-1$ //$NON-NLS-0$
 				td.textContent = statusMessage;
 				return td;
 			}
@@ -734,7 +810,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.saveSearch(that.searchParams);
 			},
 			visibleWhen : function(item) {
-				return !that.model.replaceMode();
+				return that.model && !that.model.replaceMode();
 			}
 		});
 	
@@ -746,7 +822,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.preview();
 			},
 			visibleWhen : function(item) {
-				return !that.model.replaceMode() && that.model.searchHelper.params.keyword !== "";
+				return that.model && !that.model.replaceMode() && that.model.searchHelper.params.keyword !== "";
 			}
 		});
 		
@@ -758,7 +834,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.searchHelper.params.keyword !== "";
+				return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.searchHelper.params.keyword !== "";
 			}
 		});
 	
@@ -770,7 +846,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.toggleCompare(false);
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting && that._uiFactory;
+				return that.model && that.model.replaceMode() && !that._reporting && that._uiFactory;
 			}
 		});
 	
@@ -782,7 +858,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				that.toggleCompare(true);
 			},
 			visibleWhen : function(item) {
-				return that.model.replaceMode() && !that._reporting && !that._uiFactory;
+				return that.model && that.model.replaceMode() && !that._reporting && !that._uiFactory;
 			}
 		});
 	
@@ -794,7 +870,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				return that.searchAgain();
 			},
 			visibleWhen : function(item) {
-				return that._reporting || that.model.replaceMode();
+				return that._reporting || (that.model && that.model.replaceMode());
 			}
 		});
 	
@@ -887,7 +963,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		var item = this.model.indexedFileItems[index];
 		var that = this;
 		this.registry.getService("orion.page.progress").progress(this.fileClient.read(item.location, true), "Getting file metadata " + item.location).then(
-			dojo.hitch(this, function(meta) {
+			function(meta) {
 				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 				item.parentLocation = meta.Parents[0].Location;
 				item.stale = (item.lastModified !== meta.LocalTimeStamp);
@@ -900,7 +976,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				} else {
 					//this.renderer.renderLocationElement(item);
 				}
-			    if(index === this.model.indexedFileItems.length){	
+			    if(index === (this.model.indexedFileItems.length-1)){	
 			    	if(onComplete){
 			    		onComplete();
 			    	} else {
@@ -909,8 +985,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			    } else {
 					this.loadOneFileMetaData(index+1, onComplete);
 			    }
-			}),
-			dojo.hitch(this, function(error) {
+			}.bind(this),
+			function(error) {
 				console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
 				//If we can't load file meta data we have to stale the file.
 				item.stale = true;
@@ -924,7 +1000,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				} else {
 					this.loadOneFileMetaData( index+1, onComplete);
 				}
-			})
+			}.bind(this)
 		);
 	};
 
@@ -941,10 +1017,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			replaceStringDiv.name = "ReplaceWith:"; //$NON-NLS-0$
 			replaceStringDiv.id = "globalSearchReplaceWith"; //$NON-NLS-0$
 			replaceStringDiv.placeholder="Replace With"; //$NON-NLS-0$
-			//dojo.addClass(replaceStringDiv, 'searchCmdGroupMargin');
 			replaceStringDiv.onkeydown = function(e){
-				if (e.keyCode === dojo.keys.ENTER) {
-					var replaceInputDiv = dojo.byId("globalSearchReplaceWith"); //$NON-NLS-0$
+				if (e.keyCode === 13/*Enter*/) {
+					var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
 					that._commandService.closeParameterCollector();
 					return that.doPreview(replaceInputDiv.value);
 				}
@@ -957,7 +1032,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 
 			// create the command span for Replace
 			var span = document.createElement('span'); //$NON-NLS-0$
-			dojo.addClass(span, "parameters"); //$NON-NLS-0$
+			span.classList.add('parameters'); //$NON-NLS-0$
 			span.id = "globalSearchReplaceCommands"; //$NON-NLS-0$
 			parentDiv.appendChild(span);
 			return replaceStringDiv;
@@ -977,7 +1052,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			id : "orion.globalSearch.innerReplaceAll", //$NON-NLS-0$
 			groupId : "orion.searchGroup", //$NON-NLS-0$
 			callback : function() {
-				var replaceInputDiv = dojo.byId("globalSearchReplaceWith"); //$NON-NLS-0$
+				var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
 				that._commandService.closeParameterCollector();
 				return that.doPreview(replaceInputDiv.value);
 			}
@@ -993,7 +1068,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex){
 		var filItem = this.model.indexedFileItems[fileIndex];
 		if(detailIndex === null || detailIndex === undefined){
-			return {childrenNumber: 0, childDiv: dojo.byId(this.model.getId(filItem))};
+			return {childrenNumber: 0, childDiv: lib.node(this.model.getId(filItem))};
 		}
 		if(filItem.children && filItem.children.length > 0){
 			if(detailIndex < 0){
@@ -1001,7 +1076,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			} else if (detailIndex >= filItem.children.length){
 				detailIndex = 0;
 			}
-			return  {childrenNumber: filItem.children.length, childDiv: dojo.byId(this.model.getId(filItem.children[detailIndex]))};
+			return  {childrenNumber: filItem.children.length, childDiv: lib.node(this.model.getId(filItem.children[detailIndex]))};
 		}
 		return {childrenNumber: 0, childDiv: null};
 	};
@@ -1040,7 +1115,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.reportStatus(messages["Writing files..."]);	
 		this.model.writeIncrementalNewContent( this._replaceStr, this.model.indexedFileItems, reportList, 0, function(modellist){
 			
-			dojo.empty(that.getParentDivId());
+			_empty(that.getParentDivId());
 			var reporter = new SearchReportExplorer(that.getParentDivId(), reportList);
 			reporter.report();
 			that.reportStatus("");	
@@ -1053,7 +1128,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	
 	SearchResultExplorer.prototype.replacePreview = function(init, comparing) {
 
-		dojo.empty(this.getParentDivId());
+		_empty(this.getParentDivId());
 		if(comparing){
 			this._uiFactory = new mSearchFeatures.SearchUIFactory({
 				parentDivID: this.getParentDivId()
@@ -1117,7 +1192,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			hasCheckedItems = checked;
 			this.onItemChecked(this.model._listRoot, checked, manually);
 		} else {
-			var row = dojo.byId(rowId);
+			var row = lib.node(rowId);
 			if(row && row._item){
 				this.onItemChecked(row._item, checked, manually);
 			}
@@ -1140,7 +1215,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		if(item.type === "file" || item.isRoot){ //$NON-NLS-0$
 			if(item.children){
 				for(var i = 0; i < item.children.length; i++){
-					var checkBox  = dojo.byId(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
+					var checkBox  = lib.node(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
 					if(checkBox){
 						this.renderer.onCheck(null, checkBox, checked, false);
 					} else {
@@ -1154,10 +1229,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		} else if(manually){
 			this.onNewContentChanged(item.parent);
 		}
-	};
-	
-	SearchResultExplorer.prototype._getContentType = function(fileItem){
-		return this.registry.getService("orion.core.contenttypes").getFilenameContentType(fileItem.name); //$NON-NLS-0$
 	};
 	
 	SearchResultExplorer.prototype.buildPreview = function(updating) {
@@ -1177,46 +1248,44 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		this.model.getFileContent(fileItem, function(fileItem){
 			mSearchUtils.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model.searchHelper.inFileQuery.searchStrLength); 
 			// Diff operations
-			var fType = that._getContentType(fileItem);
-			dojo.when(fType, function(fType) {
-				var options = {
-					readonly: true,
-					hasConflicts: false,
-					newFile: {
-						Name: fileItem.location,
-						Type: fType,
-						Content: fileItem.contents.join(that.model._lineDelimiter)
-					},
-					baseFile: {
-						Name: fileItem.location,
-						Type: fType,
-						Content: that._currentReplacedContents.join(that.model._lineDelimiter)
-					}
-				};
-				if(!that.twoWayCompareContainer){
-					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
-						parentDivID: uiFactory.getCompareDivID(),
-						showTitle: true,
-						rightTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.name]),
-						leftTitle: dojo.string.substitute(messages["Original File (${0})"], [fileItem.name]),
-						showLineStatus: false
-					});
-					that.uiFactoryCompare.buildUI();
-					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
-					that.twoWayCompareContainer.startup();
-				} else {
-					dojo.empty(that.uiFactoryCompare.getTitleDiv());
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
-					dojo.empty(that.uiFactoryCompare.getTitleDiv(true));
-					dojo.place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.name])), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
-					that.twoWayCompareContainer.setOptions(options);
-					that.twoWayCompareContainer.setEditor();
+			var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
+			var fType = contentTypeService.getFilenameContentType(fileItem.name);
+			var options = {
+				readonly: true,
+				hasConflicts: false,
+				newFile: {
+					Name: fileItem.location,
+					Type: fType,
+					Content: fileItem.contents.join(that.model._lineDelimiter)
+				},
+				baseFile: {
+					Name: fileItem.location,
+					Type: fType,
+					Content: that._currentReplacedContents.join(that.model._lineDelimiter)
 				}
-				window.setTimeout(function(){
-					dijit.byId(that.getParentDivId()).resize();
-					that.renderer.focus();
-				}, 100);
-			});
+			};
+			if(!that.twoWayCompareContainer){
+				that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+					parentDivID: uiFactory.getCompareDivID(),
+					showTitle: true,
+					rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileItem.name),
+					leftTitle: i18nUtil.formatMessage(messages["Original File (${0})"], fileItem.name),
+					showLineStatus: false
+				});
+				that.uiFactoryCompare.buildUI();
+				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
+				that.twoWayCompareContainer.startup();
+			} else {
+				_empty(that.uiFactoryCompare.getTitleDiv());
+				_place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
+				_empty(that.uiFactoryCompare.getTitleDiv(true));
+				_place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
+				that.twoWayCompareContainer.setOptions(options);
+				that.twoWayCompareContainer.setEditor();
+			}
+			window.setTimeout(function(){
+				that.renderer.focus();
+			}, 100);
 		});
 	};
 	
@@ -1233,15 +1302,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			qName = "\'" + this.model.searchHelper.displayedSearchTerm + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
 			if(searchParams.resource.length > 0){
 				this.registry.getService("orion.page.progress").progress(this.fileClient.read(searchParams.resource, true), "Getting file metadata " + searchParams.resource).then(
-					dojo.hitch(this, function(meta) {
+					function(meta) {
 						var parentName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 						var fullName = parentName.length === 0 ? meta.Name: parentName + "/" + meta.Name; //$NON-NLS-0$
 						this.addSavedSearch(qName + fullName, query);
-					}),
-					dojo.hitch(this, function(error) {
+					}.bind(this),
+					function(error) {
 						console.error("Error loading file meta data: " + error.message); //$NON-NLS-0$
 						this.addSavedSearch(qName + "root", query); //$NON-NLS-0$
-					})
+					}.bind(this)
 				);
 			} else {
 				this.addSavedSearch(qName + "root", query); //$NON-NLS-0$
@@ -1306,8 +1375,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	    var modelLinkId = this.renderer.getDetailIconId(model);
 		var tableNode = this.renderer.generateContextTip(model);
 	    that.contextTipDialog.attr("content", tableNode); //$NON-NLS-0$
-		//var pos = dojo.position(modelLinkId, true);
- 	    var aroundNode = dojo.byId(modelLinkId);
+ 	    var aroundNode = lib.node(modelLinkId);
 	    var orient = {'TR':'TL', 'TR':'TL'}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	    if(aroundNode){
 		    var parentNode = this.myTree._parent;
@@ -1321,16 +1389,20 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				}
 			}
 	    }
-	    dijit.popup.open({
+	    //TODO: use orionPopUp
+	    /*
+	    orionPopUp.popup.open({
         	popup: that.contextTipDialog,
 	        around: aroundNode,
 	        orient: orient
 	    });
+	    */
 	};
 	
 	SearchResultExplorer.prototype.closeContextTip = function(remainFlag){
 		if(!this.model.replaceMode()){
-			dijit.popup.close(this.contextTipDialog);
+			//TODO: use orionPopUp
+			//orionPopUp.popup.close(this.contextTipDialog);
 			if(!remainFlag){
 				this._popUpContext = false;
 			}
@@ -1373,15 +1445,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	};
 			
 	SearchResultExplorer.prototype.forceExpandFunc = function(modelToExpand, childPosition, callback){
-		this.myTree.expand(modelToExpand, dojo.hitch(this, function() {
+		this.myTree.expand(modelToExpand, function() {
 			this.onExpand(modelToExpand , childPosition, callback);
-		}));
+		}.bind(this));
 		return null;
 	};
 	
 	//Provide the key listening div.If not provided this._myTree._parent will be used.
 	SearchResultExplorer.prototype.keyEventListeningDiv = function(secondLevel){
-		return dojo.byId(this.getParentDivId(secondLevel));
+		return lib.node(this.getParentDivId(secondLevel));
 
 	};
 	
@@ -1396,12 +1468,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 			return true;
 		}
 		if(!this.model.replaceMode() && !e.ctrlKey && model.type === "detail"){ //$NON-NLS-0$
-			if(e.keyCode === dojo.keys.LEFT_ARROW && this._popUpContext){
+			if(e.keyCode === 37 /*left*/ && this._popUpContext){
 				this.closeContextTip();
 				e.preventDefault();
 				return true;
 			}
-			if(e.keyCode === dojo.keys.RIGHT_ARROW && !this._popUpContext){
+			if(e.keyCode === 39/*right*/ && !this._popUpContext){
 				this._popUpContext = true;
 				this.renderer.replaceDetailIcon(model, "left"); //$NON-NLS-0$
 				this.popupContext(model);
@@ -1460,12 +1532,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultExplorer.prototype.hookUpNavHandler = function(){
 		if(!this.getNavHandler()){
 			var options = {
-					preventDefaultFunc: dojo.hitch(this, function(event, model) {
+					preventDefaultFunc: function(event, model) {
 						return this.preventDefaultFunc(event, model);
-					}),
-					onCursorChanged: dojo.hitch(this, function(prevModel, currentModel) {
+					}.bind(this),
+					onCursorChanged: function(prevModel, currentModel) {
 						this.onCursorChanged(prevModel, currentModel);
-					}) 
+					}.bind(this) 
 			};
 			var selModel = this.getSelectionModel();
 			selModel.navHandler = new mNavHandler.ExplorerNavHandler(this, this.selectionModel.navDict, options);
@@ -1478,7 +1550,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 	SearchResultExplorer.prototype.startUp = function() {
 		if(this.model.searchHelper.displayedSearchTerm){
 			if (this.numberOnPage > 0) {
-				var pageTitle = dojo.byId("pageTitle"); //$NON-NLS-0$
+				var pageTitle = lib.node("pageTitle"); //$NON-NLS-0$
 				if(pageTitle){
 					if(!this.model.replaceMode()){
 						pageTitle.textContent = messages["Search Results"];
@@ -1488,24 +1560,25 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 				}
 			} else {
 				this.parentNode.textContent = "";
-				var textBold = dojo.create("b", null, this.parentNode, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-				var displayStr = dojo.string.substitute(messages["No matches found for ${0}"], 
-					[this.model.searchHelper.displayedSearchTerm]); 
-				dojo.place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
+				var textBold = _createElement('b', null, null, this.parentNode);//$NON-NLS-1$ //$NON-NLS-0$
+				var displayStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model.searchHelper.displayedSearchTerm); 
+				_place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
 				return;
 			} 
 		}
 		var that = this;
 		this.model.buildResultModel();
 		if(!this.model.replaceMode()){
-		    this.contextTipDialog = new dijit.TooltipDialog({
+			//TODO: use orionPopUp
+			/*
+		    this.contextTipDialog = new orionPopUp.TooltipDialog({
 		        content: "",
 		        onBlur: function(){
 		            that.closeContextTip();
 		        }
-		    });
+		    });*/
 			this.initCommands();
-			dojo.empty(this.getParentDivId());
+			_empty(this.getParentDivId());
 			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
 			this.hookUpNavHandler();
 			this.gotoCurrent(this.restoreLocationStatus());
@@ -1593,9 +1666,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'dijit','orion/expl
 		}
 		this.getNavHandler().cursorOn(modelToExpand, true);
 		if(modelToExpand && detailIndex && detailIndex !== "none"){ //$NON-NLS-0$
-			this.myTree.expand(modelToExpand, dojo.hitch(this, function() {
+			this.myTree.expand(modelToExpand, function() {
 				this.onExpand(modelToExpand, detailIndex);
-			}));
+			}.bind(this));
 		}
 	};
 	
