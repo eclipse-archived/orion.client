@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global window define */
 
-define(['text!orion/globalSearch/search-features.html', 'orion/webui/littlelib', 'orion/webui/splitter'], function(FeatureTemplate, lib, splitter) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/globalSearch/search-features.html'], function(lib, splitter, FeatureTemplate) {
 
 
 var orion = orion || {};
@@ -26,9 +26,10 @@ orion.SearchUIFactory = (function() {
 			parent.innerHTML = FeatureTemplate;
 			var top = lib.$("#replaceTop", parent); //$NON-NLS-0$
 			var bottom = lib.$("#replaceBottom", parent); //$NON-NLS-0$
-			var split = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
-			split.id = "replaceSplitter"; //$NON-NLS-0$
-			var splitter = splitter.Splitter({node: split, sidePanel: top, mainPanel: bottom, vertical: true});
+			var splitNode = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
+			splitNode.id = "replaceSplitter"; //$NON-NLS-0$
+			var split = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+			// TODO attach a resize listener here that will resize the compare widgets
 		},
 		
 		destroy: function(){
