@@ -8,9 +8,62 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 
+define(['i18n!orion/compare/nls/messages', 'require', 'orion/webui/littlelib', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 
 		'orion/explorers/navigationUtils', 'orion/crawler/searchCrawler', 'orion/compare/compareUtils', 'orion/searchUtils', 'orion/selection'], 
-		function(messages, require, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
+		function(messages, require, lib, mExplorer, mNavHandler, mFileClient, mCommands, mNavUtils, mSearchCrawler, mCompareUtils, mSearchUtils, mSelection) {
+
+	function _empty(nodeToEmpty){
+		var node = lib.node(nodeToEmpty);
+		if(node){
+			lib.empty(node);
+		}
+	}
+	
+	function _connect(nodeOrId, event, eventHandler){
+		var node = lib.node(nodeOrId);
+		if(node){
+			node.addEventListener(event, eventHandler, false); 
+		}
+	}
+	
+	function _place(ndoeToPlace, parent, position){
+		var parentNode = lib.node(parent);
+		if(parentNode){
+			if(position === "only"){
+				lib.empty(parentNode);
+			}
+			parentNode.appendChild(ndoeToPlace);
+		}
+	}
+	
+	function _addClass(nodeOrId, className){
+		var node = lib.node(nodeOrId);
+		if(node){
+			node.classList.add(className); 
+		}
+	}
+	
+	function _createElement(elementTag, classNames, id, parent){
+		var element = document.createElement(elementTag);
+		if(classNames){
+			if(Array.isArray(classNames)){
+				for(var i = 0; i < classNames.length; i++){
+					element.classList.add(classNames[i]);
+				}
+			} else if(typeof classNames === "string"){
+				element.className = classNames;
+			}
+		}
+		if(id){
+			element.id = id;
+		}
+		var parentNode = lib.node(parent);
+		if(parentNode){
+			parentNode.appendChild(element);
+		}
+		return element;
+	}
+	
 	/**
 	 * Creates a new compare tree explorer.
 	 * @name orion.CompareTreeExplorer
@@ -40,83 +93,80 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorerRenderer.prototype.getCellHeaderElement = function(col_no){
 		var col, h2;
 		switch(col_no){
-			case 0: 
-				col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-				h2 = dojo.create("h2", col); //$NON-NLS-0$
+			case 0:
+				col = _createElement('th'); //$NON-NLS-1$
+				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-1$
 				h2.textContent = this.explorer._compareResults.length + " of " + this.explorer._totalFiles + messages["files changed"]; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				break;
+				return col;
 			case 1: 
-				col = dojo.create("th", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-4$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				h2 = dojo.create("h2", col); //$NON-NLS-0$
-				h2.textContent = messages["Location"];
-				break;
+				col = _createElement('th'); //$NON-NLS-1$
+				h2 = _createElement('h2', "compare_tree_grid", null, col); //$NON-NLS-1$ //$NON-NLS-1$
+				h2.textContent = messages["Location"]; //$NON-NLS-1$
+			return col;
 		}
 	};
 	
 	CompareTreeExplorerRenderer.prototype.getCellElement = function(col_no, item, tableRow){
 		switch(col_no){
 		case 0:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
-			var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			var col = _createElement('td'); //$NON-NLS-1$ //$NON-NLS-1$
+			var div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$
 			
-			var diffStatusIcon = dojo.create("span", null, div, "first"); //$NON-NLS-1$ //$NON-NLS-0$
-			//dojo.addClass(operationIcon, "imageSprite"); //$NON-NLS-0$
+			var diffStatusIcon = _createElement("span", null, null, div); //$NON-NLS-1$
 			var linkRef, displayName;
 			if(item.type){
-				//dojo.addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
 				switch (item.type) {
 					case "added": //$NON-NLS-0$
-						dojo.addClass(diffStatusIcon, "compareAdditionSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "compareAdditionSprite"); //$NON-NLS-0$
 						displayName = item.name;
 						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL;
 						break;
 					case "removed": //$NON-NLS-0$
-						dojo.addClass(diffStatusIcon, "compareRemovalSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "compareRemovalSprite"); //$NON-NLS-0$
 						displayName = item.name;
 						linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL;
 						break;
 					case "modified": //$NON-NLS-0$
-						dojo.addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
-						dojo.addClass(diffStatusIcon, "core-sprite-file"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "imageSprite"); //$NON-NLS-0$
+						_addClass(diffStatusIcon, "core-sprite-file"); //$NON-NLS-0$
 						displayName = item.name;
-						linkRef = mCompareUtils.generateCompareHref(item.fileURL, {compareTo: item.fileURLBase, readonly: true});
+						linkRef = mCompareUtils.generateCompareHref(item.fileURL, {compareTo: item.fileURLBase, readonly: this.explorer.readonly()});
 						break;
 				}
 			}
 			
-			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(document.createTextNode(displayName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-2$ //$NON-NLS-1$
+			_place(document.createTextNode(displayName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
-			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
+			_connect(span, "click", function() { //$NON-NLS-0$
 				window.open(linkRef);
 			});
-			dojo.connect(span, "onmouseover", span, function() { //$NON-NLS-0$
+			_connect(span, "mouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$
 			});
-			dojo.connect(span, "onmouseout", span, function() { //$NON-NLS-0$
+			_connect(span, "mouseout", function() { //$NON-NLS-0$
 				span.style.cursor ="default"; //$NON-NLS-0$
 			});
 			return col;
 		case 1:
-			var col = dojo.create("td", {style: "padding-left: 5px; padding-right: 5px"}); //$NON-NLS-1$ //$NON-NLS-0$
 			if(!item.fullPathName){
 				return;
 			}
-			var div = dojo.create("div", null, col, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			var col = _createElement('td'); //$NON-NLS-1$ //$NON-NLS-1$
+			var div = _createElement('div', "compare_tree_grid", null, col); //$NON-NLS-1$
 			
-			var span = dojo.create("span", { className: "primaryColumn"}, div, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-2$ //$NON-NLS-1$
 			var linkRef = require.toUrl("navigate/table.html") + "#" + item.parentLocation;
-			//var linkRef = require.toUrl("edit/edit.html") + "#" + item.fileURL
 			var fileService = this.explorer.getFileServiceName(item);
-			dojo.place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			_place(document.createTextNode(fileService + "/" + item.fullPathName), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, span);
-			dojo.connect(span, "onclick", span, function() { //$NON-NLS-0$
+			_connect(span, "click", function() { //$NON-NLS-0$
 				window.open(linkRef);
 			});
-			dojo.connect(span, "onmouseover", span, function() { //$NON-NLS-0$
+			_connect(span, "mouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$
 			});
-			dojo.connect(span, "onmouseout", span, function() { //$NON-NLS-0$
+			_connect(span, "mouseout", function() { //$NON-NLS-0$
 				span.style.cursor ="default"; //$NON-NLS-0$
 			});
 			return col;
@@ -187,7 +237,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 	CompareTreeExplorer.prototype._loadOneFileMetaData =  function(index, onComplete){
 		var item = this._compareResults[index];
 		this._progress.progress(this._fileClient.read(item.fileURL, true), "Reading file metadata " + item.fileURL).then(
-			dojo.hitch(this, function(meta) {
+			function(meta) {
 				item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 				item.parentLocation = meta.Parents[0].ChildrenLocation;
 				item.name = meta.Name;
@@ -200,8 +250,8 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 			    } else {
 					this._loadOneFileMetaData(index+1, onComplete);
 			    }
-			}),
-			dojo.hitch(this, function(error) {
+			}.bind(this),
+			function(error) {
 				console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
 				if(index === (this._compareResults.length-1)){
 			    	if(onComplete){
@@ -212,7 +262,7 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 				} else {
 					this._loadOneFileMetaData( index+1, onComplete);
 				}
-			})
+			}.bind(this)
 		);
 	};
 
@@ -313,11 +363,11 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		this._testSameFiles(0);
 	};
 
-	CompareTreeExplorer.prototype.prepareResults = function(twoFolders) {
-		var twoFoldersIndex = twoFolders.indexOf(","); //$NON-NLS-0$
-		if(twoFoldersIndex > 0){
-			this._folderNew = twoFolders.substring(0, twoFoldersIndex);
-			this._folderBase = twoFolders.substring(twoFoldersIndex+1);
+	CompareTreeExplorer.prototype.prepareResults = function(compareParams) {
+		this._compareParams = compareParams;
+		if(this._compareParams.resource && this._compareParams.compareTo){
+			this._folderNew = this._compareParams.resource;
+			this._folderBase = this._compareParams.compareTo;
 			this._fileServiceNameNew = this._fileClient.fileServiceName(this._folderNew);
 			this._fileServiceNameBase = this._fileClient.fileServiceName(this._folderBase);
 			
@@ -347,13 +397,19 @@ define(['i18n!orion/compare/nls/messages', 'require', 'dojo', 'dijit','orion/exp
 		} 
 	};
 
-	CompareTreeExplorer.prototype.startup = function(twoFolders) {
+	CompareTreeExplorer.prototype.startup = function(compareParams) {
+		_empty(this.parentId);
 		this.reportStatus("Generating compare tree result...");	
-		this.prepareResults(twoFolders);
+		this.prepareResults(compareParams);
+	};
+
+	CompareTreeExplorer.prototype.readonly = function() {
+		return (this._compareParams.readonly === "true" ? true : false);
 	};
 
 	CompareTreeExplorer.prototype._addOptions = function() {
 		var that = this;
+		_empty("pageNavigationActions");
 		var optionMenu = that._commandService._createDropdownMenu("pageNavigationActions", messages['Options']);
 		that._commandService._generateCheckedMenuItem(optionMenu.menu, messages["Sort by folders"], false,
 			function(event) {
