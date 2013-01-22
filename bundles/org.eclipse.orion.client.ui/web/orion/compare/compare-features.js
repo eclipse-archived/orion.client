@@ -51,6 +51,8 @@ orion.TwoWayCompareUIFactory = (function() {
 			this._diffCanvasDiv = lib.node("diff_canvas_id");
 			this._diffCanvasDiv.id = prefix + "diff_canvas_id";
 			
+			this._splitterId = prefix+"orion_splitter";
+			
 			if(!this._showTitle){
 				this._leftEditorParentDiv.style.top = "0px";
 				this._rightEditorWrapperDiv.style.top = "0px";
@@ -67,6 +69,7 @@ orion.TwoWayCompareUIFactory = (function() {
 		
 		_createSplitter: function(){
 			var splitNode = lib.$(".split", this._topWidgetDiv); //$NON-NLS-0$
+			splitNode.id = this._splitterId;
 			var leftPane = lib.$(".leftPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
 			var rightPane = lib.$(".rightPanelLayout", this._topWidgetDiv); //$NON-NLS-0$
 			if (splitNode && leftPane && rightPane) {

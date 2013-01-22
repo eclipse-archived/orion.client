@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global window define */
 
-define(['text!orion/globalSearch/search-features.html', 'orion/webui/littlelib'], function(FeatureTemplate, lib) {
+define(['text!orion/globalSearch/search-features.html', 'orion/webui/littlelib', 'orion/webui/splitter'], function(FeatureTemplate, lib, splitter) {
 
 
 var orion = orion || {};
@@ -22,18 +22,24 @@ orion.SearchUIFactory = (function() {
 	SearchUIFactory.prototype = {
 		
 		buildUI:function(){
-			lib.node(this._parentDivID).innerHTML = FeatureTemplate;
+			var parent = lib.node(this._parentDivID);
+			parent.innerHTML = FeatureTemplate;
+			var top = lib.$("#replaceTop", parent); //$NON-NLS-0$
+			var bottom = lib.$("#replaceBottom", parent); //$NON-NLS-0$
+			var split = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
+			split.id = "replaceSplitter"; //$NON-NLS-0$
+			var splitter = splitter.Splitter({node: split, sidePanel: top, mainPanel: bottom, vertical: true});
 		},
 		
 		destroy: function(){
 		},
 		
 		getMatchDivID: function(){
-			return "replaceTop"; //$NON-NLS-2$
+			return "replaceTop"; //$NON-NLS-0$
 		},
 		
 		getCompareDivID: function(){
-			return "replaceBottom"; //$NON-NLS-2$
+			return "replaceBottom"; //$NON-NLS-0$
 		}
 
 	};
