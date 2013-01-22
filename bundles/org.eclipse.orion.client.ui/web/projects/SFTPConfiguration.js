@@ -77,7 +77,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 
 		function createEmptyProject( projectData ){
 			var projectCount = projectData.length;
-			var projectName = 'Project ' + projectCount;
+			var projectNumber = projectCount +1;
+			var projectName = 'Project ' + projectNumber ;
 			this.setProjectName( projectName );		
 			this.driveWidget.newDrive();
 			this.driveWidget.addRows();
