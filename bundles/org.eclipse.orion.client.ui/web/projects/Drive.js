@@ -16,16 +16,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 	function(messages, require, mCommands, mFileClient, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileUtils, Deferred) {
 	
 		var NAME_INDEX = 0;
-		var ADDRESS_INDEX = 1;
-		var PORT_INDEX = 2;
-		var USERNAME_INDEX = 3;
-		var PASSWORD_INDEX = 4;
-		var LAST_INDEX = 5;
+		var ADDRESS_INDEX = NAME_INDEX + 1;
+		var PATH_INDEX = ADDRESS_INDEX + 1;
+		var PORT_INDEX =  PATH_INDEX + 1;	
+		var USERNAME_INDEX = PORT_INDEX + 1;
+		var PASSWORD_INDEX = USERNAME_INDEX + 1;
+		var LAST_INDEX = PASSWORD_INDEX + 1;
 
 		function Drive( details, commandService, serviceRegistry ){
 			
 			this.drivename = details.drivename;
 			this.address = details.address;
+			this.path = details.path;
 			this.port = details.port;
 			this.type = details.type;
 			this.username = details.username;
@@ -44,9 +46,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address );
+			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
 			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
 			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
-			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password );
+			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password, "password" );
 			
 			for( var element = NAME_INDEX; element < this.elements.length; element++ ){
 				this.content.appendChild( this.elements[element] );
@@ -64,8 +67,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			// set up the toolbar level commands	
 			var saveDriveCommand = new mCommands.Command({
-				name: 'Save', //messages["Install"],
-				tooltip: 'Save configuration', //messages["Install a plugin by specifying its URL"],
+				name: 'Connect', //messages["Install"],
+				tooltip: 'Connect to drive', //messages["Install a plugin by specifying its URL"],
 				id: "orion.driveSave",
 				callback: function(data) {
 				
@@ -128,7 +131,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		Drive.prototype.templateString = templateString;	
 		
-		function makeDriveElement( name, value ){
+		function makeDriveElement( name, value, type ){
+		
+			if( !type ){ type = "text"; }
 		
 			var element = document.createElement( 'div' );
 			
@@ -136,7 +141,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			element.innerHTML = '<label>' + //$NON-NLS-0$
 									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-									'<input class="setting-control" type="text" name="myname">' + //$NON-NLS-0$
+									'<input class="setting-control" type="' + type + '" name="myname">' + //$NON-NLS-0$
 								'</label>';   //$NON-NLS-0$
 								
 			element.firstChild.children[1].value = value;
@@ -166,13 +171,28 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		Drive.prototype.setDriveAddress = setDriveAddress;
 
+		function toJSONData(){
+			
+			var jsonDrive = { 'drivename': elements[NAME_INDEX].getValue(), 
+							  'address': elements[ADDRESS_INDEX].getValue(), 
+						      'path': elements[PATH_INDEX].getValue(),
+						      'port': elements[PORT_INDEX].getValue(),
+						      'username': elements[USERNAME_INDEX].getValue() };
+								
+			return jsonDrive;
+		}
+		
+		Drive.prototype.toJSONData = toJSONData;
+
 		var name;
 		var address;
 		var port;
 		var type;
 		var username;
 		var password;
+		var path;
 		
+		Drive.prototype.path = path;
 		Drive.prototype.name = name;
 		Drive.prototype.type = type;
 		Drive.prototype.port = port;
