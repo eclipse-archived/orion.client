@@ -34,7 +34,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.password = details.password;
 
 			this.commandService = commandService;
-			this.serviceRegsitry = serviceRegistry;
+			this.serviceRegistry = serviceRegistry;
 
 			this.entryNode = document.createElement( 'div' );
 			
@@ -57,16 +57,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			var buttonArea = document.createElement( 'div' );
 			buttonArea.className = "setting-property";
-			buttonArea.innerHTML = '<div style="float:right;"></div>';
-			this.saveButton = buttonArea.firstChild;
+			buttonArea.innerHTML = '<div style="float:right;"></div><div style="float:right;"></div>';
+			this.disconnectbutton = buttonArea.children[0];
+			this.connectbutton = buttonArea.children[1];
 			
 			this.content.appendChild( buttonArea );
 			
 			var elements = this.elements;
-			var registry = this.serviceRegsitry;
+			var registry = this.serviceRegistry;
 			
+			var thisDrive = this;
+					
 			// set up the toolbar level commands	
-			var saveDriveCommand = new mCommands.Command({
+			var connectCommand = new mCommands.Command({
 				name: 'Connect', //messages["Install"],
 				tooltip: 'Connect to drive', //messages["Install a plugin by specifying its URL"],
 				id: "orion.driveSave",
@@ -87,14 +90,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 					console.log( url );
 					
-					var fileClient = new mFileClient.FileClient( registry );			
+					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
-					this.selection = new mSelection.Selection(registry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
+					this.selection = new mSelection.Selection(this.serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 
 					this.explorer = new mExplorerTable.FileExplorer({
 						treeRoot: {children:[]}, 
 						selection: this.selection, 
-						serviceRegistry: this._serviceRegistry,
+						serviceRegistry: this.serviceRegistry,
 						fileClient: fileClient, 
 						parentId: "Drives", 
 						excludeFiles: true, 
@@ -113,9 +116,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}.bind(this)
 			});
 			
-			this.commandService.addCommand(saveDriveCommand);
+			this.commandService.addCommand(connectCommand);
 			this.commandService.registerCommandContribution('driveCommand', "orion.driveSave", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('driveCommand', this.saveButton, this, this, "button"); //$NON-NLS-0$
+			
+			var disconnectCommand = new mCommands.Command({
+				name: 'Disconnect', //messages["Install"],
+				tooltip: 'Disconnect drive', //messages["Install a plugin by specifying its URL"],
+				id: "orion.driveDisconnect",
+				callback: thisDrive.disconnect.bind(thisDrive)
+			});
+			
+			this.commandService.addCommand(disconnectCommand);
+			this.commandService.registerCommandContribution('driveCommand', "orion.driveDisconnect", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+//			this.commandService.renderCommands('driveCommand', this.disconnectbutton, this, this, "button"); //$NON-NLS-0$
+			this.commandService.renderCommands('driveCommand', this.connectbutton, this, this, "button"); //$NON-NLS-0$
 		}
 		
 		var elements = [];
@@ -159,6 +174,42 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		Drive.prototype.makeDriveElement = makeDriveElement;
 		
+		
+		function disconnect(data){
+			var fileClient = new mFileClient.FileClient( this.serviceRegistry );
+					
+			var loadedWorkspace = fileClient.loadWorkspace("");
+		
+			console.log( 'disconnect' );
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+
+				var drives = workspace.DriveLocation;
+				
+				fileClient.read( workspace.DriveLocation, true ).then( function(folders){
+					var f = folders;
+					
+					var driveName = elements[NAME_INDEX].getValue();
+					
+					for( var folder = 0; folder < folders.Children.length;folder++ ){
+					
+						if( folders.Children[folder].Name === driveName ){
+							fileClient.deleteFile( folders.Children[folder].Location, true ).then(function(input){
+							
+							});
+							
+							console.log( 'deleted drive: ' + driveName );
+							
+							break;
+						}
+					}
+					
+				});
+	
+				// myexplorer.loadResourceList( workspace.DriveLocation, true, null );
+			});
+		}
+		
 		function setDriveName( name ){
 			this.entryNode.firstChild.firstChild.firstChild.innerHTML = name;			
 		}
@@ -177,8 +228,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							  'address': elements[ADDRESS_INDEX].getValue(), 
 						      'path': elements[PATH_INDEX].getValue(),
 						      'port': elements[PORT_INDEX].getValue(),
-						      'username': elements[USERNAME_INDEX].getValue() };
-								
+						      'username': elements[USERNAME_INDEX].getValue() };					
 			return jsonDrive;
 		}
 		
@@ -191,6 +241,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		var username;
 		var password;
 		var path;
+		
+		Drive.prototype.disconnect = disconnect;
 		
 		Drive.prototype.path = path;
 		Drive.prototype.name = name;

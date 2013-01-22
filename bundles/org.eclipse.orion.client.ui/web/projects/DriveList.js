@@ -130,7 +130,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.driveCount.textContent = DriveList.length;
 
 			for( var p = 0; p < DriveList.length; p++ ){
-				var entry = new Drive( DriveList[p], this.commandService );
+				var entry = new Drive( DriveList[p], this.commandService, this.serviceRegistry );
 				list.appendChild( entry.entryNode );
 //				entry.show();
 			}
