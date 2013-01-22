@@ -11,38 +11,36 @@
 
 /*global define document */
 
-define(['dojo', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
-		'orion/compare/compareTreeExplorer', 'orion/compare/compareUtils', 'orion/contentTypes', 'dojo/parser', 'dojo/hash', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
-		function(dojo, mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mCompareTreeExplorer, mCompareUtils, mContentTypes) {
-		dojo.addOnLoad(function(){
-			mBootstrap.startup().then(function(core) {
-				var serviceRegistry = core.serviceRegistry;
-				var preferences = core.preferences;
-				// we use internal border containers so we need dojo to parse.
-				dojo.parser.parse();
-				var commandService = new mCommands.CommandService({
-					serviceRegistry: serviceRegistry
-				});
-				// File operations
-				var fileClient = new mFileClient.FileClient(serviceRegistry);
-				new mContentTypes.ContentTypeService(serviceRegistry);
-				var searcher = new mSearchClient.Searcher({
-					serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
-				});
-				var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-				var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-				var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
-
-				mGlobalCommands.generateBanner("orion-compare-tree", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-				var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandService); //$NON-NLS-0$
-				compareTreeExplorer.startup(dojo.hash());
-
-				// every time the user manually changes the hash, we need to load the diff.
-				dojo.subscribe("/dojo/hashchange", compareTreeExplorer, function() { //$NON-NLS-0$
-					mGlobalCommands.generateBanner("orion-compare-tree", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
-					var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compareContainer", commandService); //$NON-NLS-0$
-					compareTreeExplorer.startup(dojo.hash());
-				});
-			});
+define(['orion/bootstrap', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/globalCommands',
+		'orion/contentTypes', 'orion/PageUtil', 'orion/compare/compareTreeExplorer'],
+		function(mBootstrap, mStatus, mProgress, mOperationsClient, mCommands, mFileClient, mSearchClient, mGlobalCommands, mContentTypes, PageUtil, mCompareTreeExplorer) {
+	mBootstrap.startup().then(function(core) {
+		var serviceRegistry = core.serviceRegistry;
+		var preferences = core.preferences;
+		var commandService = new mCommands.CommandService({
+			serviceRegistry: serviceRegistry
 		});
+		// File operations
+		var fileClient = new mFileClient.FileClient(serviceRegistry);
+		new mContentTypes.ContentTypeService(serviceRegistry);
+		var searcher = new mSearchClient.Searcher({
+			serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient
+		});
+		var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+		var statusService = new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+		var progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
+
+		mGlobalCommands.generateBanner("orion-compare-tree", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
+
+		var startWidget = function(){
+			var compareParams = PageUtil.matchResourceParameters();
+			var compareTreeExplorer = new mCompareTreeExplorer.CompareTreeExplorer(serviceRegistry, "compare-tree-results", commandService); //$NON-NLS-0$
+			compareTreeExplorer.startup(compareParams);
+		};
+		startWidget();
+		// every time the user manually changes the hash, we need to reastart the compare widget.
+		window.addEventListener("hashchange", function() { //$NON-NLS-0$
+			startWidget();
+		}, false);		
+	});
 });

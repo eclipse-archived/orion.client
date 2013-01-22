@@ -212,5 +212,15 @@ orion.compareUtils.generateCompareHref = function(diffLocation, options) {
 	});
 	return href;
 };
+
+orion.compareUtils.generateCompareTreeHref = function(folderToCompare, options) {
+	var base =  require.toUrl("compare-tree/compare-tree.html"); //$NON-NLS-0$
+	var href = new URITemplate(base + "#{,resource,params*}").expand({ //$NON-NLS-0$
+		resource: folderToCompare,
+		params: options
+	});
+	return href;
+};
+
 return orion.compareUtils;
 });
