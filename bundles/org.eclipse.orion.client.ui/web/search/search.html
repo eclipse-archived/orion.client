@@ -11,26 +11,6 @@
 		<script type="text/javascript">
 		require({
 			  baseUrl: '..',
-			  packages: [
-			    {
-			      name: 'dojo',
-			      location: 'org.dojotoolkit/dojo',
-			      main: 'lib/main-browser',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dijit',
-			      location: 'org.dojotoolkit/dijit',
-			      main: 'lib/main',
-			      lib: '.'
-			    },
-			    {
-			      name: 'dojox',
-			      location: 'org.dojotoolkit/dojox',
-			      main: 'lib/main',
-			      lib: '.'
-			    }		    
-			  ],
 			  paths: {
 				  text: 'requirejs/text',
 				  i18n: 'requirejs/i18n',
@@ -43,7 +23,7 @@
 	  	 	
    </head>
    
-       <body id="orion-searchResults" style="height: 100%;" class="claro orionPage">
+       <body id="orion-searchResults" style="height: 100%;" class="orionPage">
 		<div class="content-fixedHeight">
 			<div id="outlineContainer" class="auxpane sidePanelLayout hasSplit">
 				<div class="sidePanelMargins" id="searchProgress"></div>
@@ -53,7 +33,7 @@
 				<div class="fixedToolbarHolder">
 					<div class="mainToolbar toolComposite" id="pageToolbar"></div>
 					<div class="toolbarTarget" tabindex="0">
-						<div class="mainpane dijitManagesLayout" id="results" tabindex="0" dojoType="dijit.layout.BorderContainer" design="headline" liveSplitters="false">
+						<div class="mainpane" id="results" tabindex="0" style="height:100%;width:100%;position:relative;">
 						</div>
 					</div>
 				</div>

@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global window define */
 
-define(['dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(dojo, dijit) {
+define(['text!orion/globalSearch/search-features.html', 'orion/webui/littlelib'], function(FeatureTemplate, lib) {
 
 
 var orion = orion || {};
@@ -22,40 +22,18 @@ orion.SearchUIFactory = (function() {
 	SearchUIFactory.prototype = {
 		
 		buildUI:function(){
-			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
-			this._matchWidgetId = this._parentDivID + "_matches"; //$NON-NLS-0$
-			this._compareWidgetId = this._parentDivID + "_compare"; //$NON-NLS-0$
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
-			
-			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(matchWidget.domNode, 'topBorder'); //$NON-NLS-0$
-			dojo.addClass(compareWidget.domNode, 'bottomBorderReplace'); //$NON-NLS-0$
-			
-			topWidget.placeAt(this._parentDivID);
-			topWidget.addChild(matchWidget);
-			topWidget.addChild(compareWidget);
-			topWidget.startup();
+			lib.node(this._parentDivID).innerHTML = FeatureTemplate;
 		},
 		
 		destroy: function(){
-			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
 		},
 		
 		getMatchDivID: function(){
-			return this._matchWidgetId;
+			return "replaceTop"; //$NON-NLS-2$
 		},
 		
 		getCompareDivID: function(){
-			return this._compareWidgetId;
+			return "replaceBottom"; //$NON-NLS-2$
 		}
 
 	};
