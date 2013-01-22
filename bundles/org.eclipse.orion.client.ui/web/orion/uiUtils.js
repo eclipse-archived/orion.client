@@ -84,6 +84,9 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 		if (character) {
 			return userString+character;
 		}
+		if (binding.keyCode >= 112 && binding.keyCode <= 123) {
+			return userString+"F"+ (binding.keyCode - 111); //$NON-NLS-0$
+		}
 		return userString+String.fromCharCode(binding.keyCode);
 	}
 
