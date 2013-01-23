@@ -66,7 +66,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * item is a json object describing an Orion file or folder
 	 * commandService and contentTypeService  are necessary to compute the proper editor for a file.  The command service must be a synchronous, in-page
 	 * service, not retrieved from the service registry.
-	 * openWithCommands and defaultEditor will be computed if not provided.  
+	 * openWithCommands and defaultEditor will be computed if not provided.  However callers must have already processed the open with
+	 * service extension and added to the command registry (such as done in mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache)).
 	 */
 	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor) {
 		var link;
