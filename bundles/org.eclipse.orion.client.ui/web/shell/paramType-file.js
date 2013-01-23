@@ -375,11 +375,16 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				var index = text.lastIndexOf(this.shellPageFileService.SEPARATOR) + 1;
 				var directoriesSegment = text.substring(0, index);
 				var finalSegment = text.substring(index);
+				var inDirectoryNode = finalSegment.length === 0 || finalSegment === "."; //$NON-NLS-0$
 
 				var directoryPredictions = [];
 				var filePredictions = [];
 				var name;
-				if (finalSegment.length === 0 || finalSegment === "." || finalSegment === "..") { //$NON-NLS-1$ //$NON-NLS-0$
+				if (inDirectoryNode) {
+					name = directoriesSegment + "."; //$NON-NLS-0$
+					directoryPredictions.push({name: name, value: directoryNode, incomplete: true});
+				}
+				if (inDirectoryNode || finalSegment === "..") { //$NON-NLS-0$
 					var parentNode = this.shellPageFileService.getParent(directoryNode);
 					if (parentNode) {
 						name = directoriesSegment + ".."; //$NON-NLS-0$
