@@ -605,6 +605,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		};
 	}
 	
+	var mainSplitter = null;
+	
+	function getMainSplitter(){
+		return mainSplitter;
+	}
 	/**
 	 * Generates the banner at the top of a page.
 	 * @name orion.globalCommands#generateBanner
@@ -780,33 +785,33 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		});
 
 		// hook up split behavior - the splitter widget and the associated global command/key bindings.
-		var splitter;
 		var splitNode = lib.$(".split"); //$NON-NLS-0$
 		if (splitNode) {
 			var side = lib.$(".sidePanelLayout"); //$NON-NLS-0$
 			var main = lib.$(".mainPanelLayout"); //$NON-NLS-0$
 			if (side && main) {
-				splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true});
+				mainSplitter = {side: side, main: main};
+				mainSplitter.splitter = new mSplitter.Splitter({node: splitNode, sidePanel: side, mainPanel: main, toggle: true});
 				var toggleSidePanelCommand = new mCommands.Command({
 					name: messages["Toggle side panel"],
 					tooltip: messages["Open or close the side panel"],
 					id: "orion.toggleSidePane", //$NON-NLS-0$
 					callback: function() {
-						splitter.toggleSidePanel();}
+						mainSplitter.splitter.toggleSidePanel();}
 				});
 				commandService.addCommand(toggleSidePanelCommand);
 				commandService.registerCommandContribution("pageActions", "orion.toggleSidePane", 1, null, true, new mCommands.CommandKeyBinding('o', true)); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 				// editor behavior if needed
 				if (editor) {
-					splitter.addResizeListener(function(node) {
+					mainSplitter.splitter.addResizeListener(function(node) {
 						if (editor && node === main) {
 							editor.getTextView().resize();
 						}
 					});
 					editor.getTextView().setKeyBinding(new mKeyBinding.KeyBinding("o", true), "toggleOutliner"); //$NON-NLS-1$ //$NON-NLS-0$
 					editor.getTextView().setAction("toggleOutliner", function(){ //$NON-NLS-0$
-						splitter.toggleSidePanel();
+						mainSplitter.splitter.toggleSidePanel();
 						return true;
 					}, {name: messages["Toggle Outliner"]});
 				}
@@ -1092,6 +1097,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		addSettings: addSettings,
 		generateBanner: generateBanner,
 		getToolbarElements: getToolbarElements,
+		getMainSplitter: getMainSplitter,
 		layoutToolbarElements: layoutToolbarElements,
 		setPageTarget: setPageTarget,
 		setDirtyIndicator: setDirtyIndicator,

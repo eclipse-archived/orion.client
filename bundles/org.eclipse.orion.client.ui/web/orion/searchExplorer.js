@@ -1261,7 +1261,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				});
 				that.uiFactoryCompare.buildUI();
 				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
-				that.twoWayCompareContainer.startup();
+				that.twoWayCompareContainer.startup(false, function(){that._uiFactory.setCompareWidget(that.twoWayCompareContainer);});
 			} else {
 				_empty(that.uiFactoryCompare.getTitleDiv());
 				_place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
