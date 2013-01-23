@@ -12,12 +12,9 @@
 define(
 		[ 'i18n!git/nls/gitmessages', 'orion/explorers/explorer', 'orion/selection', 'orion/section', 'orion/PageUtil', 'orion/webui/littlelib',
 				'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 'orion/compare/compare-container', 'orion/git/util',
-				'orion/git/gitCommands', 'orion/Deferred'/*
-															 * ,
-															 * 'orion/git/widgets/CommitTooltipDialog'
-															 */],
+				'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'],
 		function(messages, mExplorer, mSelection, mSection, PageUtil, lib, i18nUtil, mGlobalCommands, mDiffProvider, mCompareContainer, mGitUtil, mGitCommands,
-				Deferred) {
+				Deferred, mCommitTooltip) {
 
 			var exports = {};
 
@@ -950,47 +947,22 @@ define(
 					titleLink.textContent = commit.Message;
 					detailsView.appendChild(titleLink);
 
-					// var _timer;
-					//			
-					// var tooltipDialog = new
-					// orion.git.widgets.CommitTooltipDialog({
-					// commit: commit,
-					// onMouseLeave: function(){
-					// if(dijit.popup.hide)
-					// dijit.popup.hide(tooltipDialog); //close doesn't work on
-					// FF
-					// dijit.popup.close(tooltipDialog);
-					// },
-					// onMouseEnter: function(){
-					// window.clearTimeout(_timer);
-					// }
-					// });
-					//			
-					// dojo.connect(titleLink, "onmouseover", titleLink,
-					// function() { //$NON-NLS-0$
-					// window.clearTimeout(_timer);
-					//				
-					// _timer = window.setTimeout(function(){
-					// dijit.popup.open({
-					// popup: tooltipDialog,
-					// around: titleLink,
-					// orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$
-					// //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					// });
-					// }, 600);
-					// });
-					//			
-					// dojo.connect(titleLink, "onmouseout", titleLink,
-					// function() { //$NON-NLS-0$
-					// window.clearTimeout(_timer);
-					//				
-					// _timer = window.setTimeout(function(){
-					// if(dijit.popup.hide)
-					// dijit.popup.hide(tooltipDialog); //close doesn't work on
-					// FF
-					// dijit.popup.close(tooltipDialog);
-					// }, 200);
-					// });
+					var _timer;
+					
+					var tooltipDialog = new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
+					titleLink.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
+						clearTimeout(_timer);
+						_timer = setTimeout(function(){
+							tooltipDialog.show();
+						}, 600);
+					});
+					
+					titleLink.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
+						clearTimeout(_timer);
+						_timer = setTimeout(function(){
+							tooltipDialog.hide();
+						}, 200);
+					});
 
 					var d = document.createElement("div");
 					detailsView.appendChild(d);
