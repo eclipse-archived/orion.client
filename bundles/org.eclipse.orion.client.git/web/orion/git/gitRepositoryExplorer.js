@@ -967,22 +967,7 @@ exports.GitRepositoryExplorer = (function() {
 		titleLink.textContent = commit.Message;
 		detailsView.appendChild(titleLink);
 
-		var _timer;
-		
-		var tooltipDialog = new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
-		titleLink.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
-			clearTimeout(_timer);
-			_timer = setTimeout(function(){
-				tooltipDialog.show();
-			}, 600);
-		});
-		
-		titleLink.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
-			clearTimeout(_timer);
-			_timer = setTimeout(function(){
-				tooltipDialog.hide();
-			}, 200);
-		});
+		new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
 		
 		var div = document.createElement("div");
 		detailsView.appendChild(div);
@@ -1140,22 +1125,7 @@ exports.GitRepositoryExplorer = (function() {
 		description.appendChild(document.createTextNode(messages[" by "] + commit.AuthorName + messages[" on "] + 
 				new Date(commit.Time).toLocaleString()));
 						
-		var _timer;
-		
-		var tooltipDialog = new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: link});
-		link.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
-			clearTimeout(_timer);
-			_timer = setTimeout(function(){
-				tooltipDialog.show();
-			}, 600);
-		});
-		
-		link.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
-			clearTimeout(_timer);
-			_timer = setTimeout(function(){
-				tooltipDialog.hide();
-			}, 200);
-		});
+		 new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: link});
 	};
 	
 	// Git Remotes
