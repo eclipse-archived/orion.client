@@ -22,6 +22,22 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 
 	CommitTooltipDialog.prototype._init = function(options) {
 		this.commit = options.commit;
+		
+		var that = this;
+		
+		options.triggerNode.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
+			clearTimeout(that._timer);
+			that._timer = setTimeout(function(){
+				that.show();
+			}, 600);
+		});
+		
+		options.triggerNode.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
+			clearTimeout(that._timer);
+			that._timer = setTimeout(function(){
+				that.hide();
+			}, 200);
+		});
 
 		// Start the dialog initialization.
 		this._initialize(options.triggerNode);
@@ -32,7 +48,17 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 	};
 
 	CommitTooltipDialog.prototype._displayCommit = function(commit) {
+		var that = this;
+		
 		var tableNode = this.$parentPane;
+		
+		tableNode.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
+			clearTimeout(that._timer);
+		});
+		
+		tableNode.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
+			that.hide();
+		});
 
 		var commitMessage0 = commit.Message.split(/(\r?\n|$)/)[0];
 		var link = document.createElement("a");

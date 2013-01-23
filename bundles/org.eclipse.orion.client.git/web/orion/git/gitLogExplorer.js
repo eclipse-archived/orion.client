@@ -431,34 +431,7 @@ exports.GitLogExplorer = (function() {
 					//Add the commit page link as the first grid of the row
 					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, titleLink);
 					
-					var _timer;
-					
-					var tooltipDialog = new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
-					titleLink.addEventListener("mouseover", function(evt) {  //$NON-NLS-0$
-						clearTimeout(_timer);
-						_timer = setTimeout(function(){
-							tooltipDialog.show();
-						}, 600);
-					});
-					
-					titleLink.addEventListener("mouseout", function(evt) {  //$NON-NLS-0$
-						clearTimeout(_timer);
-						_timer = setTimeout(function(){
-							tooltipDialog.hide();
-						}, 200);
-					});
-					
-//					var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-//					    commit: commit,
-//					    onMouseLeave: function(){
-//					    	if(dijit.popup.hide)
-//								dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//							dijit.popup.close(tooltipDialog);
-//			            },
-//			            onMouseEnter: function(){
-//					    	clearTimeout(_timer);
-//			            }
-//					});
+					new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
 
 					var d = document.createElement("div");
 					detailsView.appendChild(d);
