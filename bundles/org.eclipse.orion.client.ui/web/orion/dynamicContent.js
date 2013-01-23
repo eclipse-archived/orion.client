@@ -8,7 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
- define(['dojo', 'orion/webui/tooltip'], function(dojo, mTooltip){
+ define(['orion/webui/littlelib', 'orion/webui/tooltip'], function(lib, mTooltip){
  
 	/**
 	* Progress indicator in form of a simple spinner.
@@ -35,23 +35,28 @@
 		* [interface] starts the progress indicator
 		*/
 		start: function(){
-			dojo.create("img", {"id":this._prefix+this._id, "src":"/images/none.png", "class":"progressPane_running"}, this._anchor);	
+			var image = document.createElement("img");
+			image.id = this._prefix+this._id;
+			image.src = "/images/none.png";
+			image.className = "progressPane_running";
+			this._anchor.appendChild(image);
 		},
 		
 		/**
 		* [interface] stops the progress indicator
 		*/
 		stop: function(){
-			dojo.destroy(dojo.byId(this._prefix+this._id));
+			var indicator = lib.node(this._prefix+this._id)
+			indicator.parentNode.removeChild(indicator);
 		},
 		
 		/**
 		* [interface] renders the progress indicator after an population error
 		*/
 		error: function(err){
-			var indicator = dojo.byId(this._prefix+this._id);
+			var indicator = lib.node(this._prefix+this._id);
 			indicator.src = "/images/problem.gif";
-			dojo.removeAttr(indicator, "class");
+			indicator.className = "";
 			
 			new mTooltip.Tooltip({
 				node: indicator,
@@ -88,24 +93,31 @@
 		* [interface] starts the progress indicator
 		*/
 		start: function(){
-			dojo.create("span", {"id":this._prefix+this._id, "style":"text-decoration:blink;", innerHTML:" ..."}, this._anchor);
+			var image = document.createElement("img");
+			image.id = this._prefix+this._id;
+			image.style.textDecoration = "blink";
+			image.appendChild(document.createTextNode(" ..."));
+			this._anchor.appendChild(image);
 		},
 		
 		/**
 		* [interface] stops the progress indicator
 		*/
 		stop: function(){
-			dojo.destroy(dojo.byId(this._prefix+this._id));
+			var indicator = lib.node(this._prefix+this._id)
+			indicator.parentNode.removeChild(indicator);
 		},
 		
 		/**
 		* [interface] renders the progress indicator after an population error
 		*/
 		error: function(err){
-			var indicator = dojo.byId(this._prefix+this._id);
-			dojo.destroy(indicator);
+			var indicator = lib.node(this._prefix+this._id)
+			indicator.parentNode.removeChild(indicator);
 			
-			dojo.create("img", {"src":"/images/problem.gif"}, this._anchor);
+			var image = document.createElement("img");
+			image.src = "/images/problem.gif";
+			this._anchor.appendChild(image);
 			
 			new mTooltip.Tooltip({
 				node: indicator,
