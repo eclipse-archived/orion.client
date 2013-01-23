@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global window define */
 
-define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/globalSearch/search-features.html'], function(lib, splitter, FeatureTemplate) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'orion/globalCommands', 'text!orion/globalSearch/search-features.html'], function(lib, splitter, mGlobalCommands, FeatureTemplate) {
 
 
 var orion = orion || {};
@@ -29,10 +29,31 @@ orion.SearchUIFactory = (function() {
 			var splitNode = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
 			splitNode.id = "replaceSplitter"; //$NON-NLS-0$
 			var split = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
-			// TODO attach a resize listener here that will resize the compare widgets
+			
+			//Here for the h-splitter we only need to resize both editors in the compare widget at the bottom.
+			split.addResizeListener(function(node) {
+				if(node === bottom && this._compareWidget && this._compareWidget.resizeEditors){
+					this._compareWidget.resizeEditors();
+				}
+			}.bind(this));
+			
+			//Here we need the listener to handle the global splitter resize on the RHS only.
+			//We only want the bottom compare widget to ask its splitter: "hey, your position has changed, please simulate a move as if you are dragged".
+			var mainSplitter = mGlobalCommands.getMainSplitter();
+			if(mainSplitter && mainSplitter.splitter){
+				mainSplitter.splitter.addResizeListener(function(node) {
+					if(node === mainSplitter.main && this._compareWidget && this._compareWidget.getSplitter()){
+						this._compareWidget.getSplitter()._adjustToSplitPosition(true);
+					}
+				}.bind(this));
+			}
 		},
 		
 		destroy: function(){
+		},
+		
+		setCompareWidget: function(compareWidget){
+			this._compareWidget = compareWidget;
 		},
 		
 		getMatchDivID: function(){

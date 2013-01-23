@@ -430,6 +430,9 @@ exports.CompareContainer = (function() {
 				if(!this.options.diffContent && !this._mapper){
 					this.options.diffContent = "";//SomeDiffEngine.createPatch(this.options.baseFile.Name, this.options.baseFile.Content, this.options.newFile.Content, "", "") ; //$NON-NLS-0$
 				}
+				if(this._onLoadContents){
+					this._onLoadContents();
+				}
 				this.setEditor(onsave);
 				return true;
 			} else {
@@ -690,6 +693,19 @@ exports.TwoWayCompareContainer = (function() {
 		this._curveRuler.copyToLeft();
 	};
 	
+	TwoWayCompareContainer.prototype.resizeEditors = function(){	
+		if(this._leftTextView){
+			this._leftTextView.resize();
+		}
+		if(this._rightTextView){
+			this._rightTextView.resize();
+		}
+	};
+	
+	TwoWayCompareContainer.prototype.getSplitter = function(){	
+		return this._uiFactory.getSplitter();
+	};
+	
 	TwoWayCompareContainer.prototype.createEditorContainer = function(content , delim , mapper , columnIndex , parentDiv , statusDiv ,readOnly , createLineStyler , fileObj){
 		var that = this;
 		
@@ -708,7 +724,7 @@ exports.TwoWayCompareContainer = (function() {
 			if(that.onLoad){
 				that.onLoad();
 			}
-			var splitter = that._uiFactory.getSplitter();
+			var splitter = that.getSplitter();
 			if(splitter){
 				var creatingLeft = (columnIndex === 0);
 				splitter.addResizeListener(function(node) {
