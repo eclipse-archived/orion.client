@@ -1,13 +1,3 @@
-@import "../org.dojotoolkit/dojo/resources/dojo.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/claro.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/layout/BorderContainer.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/form/Common.css";
-
-@import "../org.dojotoolkit/dijit/themes/claro/form/Button.css";
-
 @import "../css/layout.css";
 
 @import "../css/ide.css";
@@ -18,4 +8,4 @@
 
 @import "../orion/compare/compare-container.css";
 
-@import "../orion/globalSearch/globalSearch.css";
+@import "../orion/compare/compareTreeExplorer.css";

@@ -12,7 +12,7 @@
 /*global window define setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget'], function(messages, require, dojo, mSection, mCommands, mSelection, mExplorer, EventTarget){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/section', 'orion/commands', 'orion/selection', 'orion/explorers/explorer', 'orion/EventTarget'], function(messages, require, lib, i18nUtil, mSection, mCommands, mSelection, mExplorer, EventTarget){
 
 	/**
 	 * Instantiates the saved search service. This service is used internally by the
@@ -142,10 +142,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 		var href;
 		if (item.query) {
 			href=require.toUrl("search/search.html") + "#" + item.query; //$NON-NLS-1$ //$NON-NLS-0$
-			var col = dojo.create("td", null, tableRow, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(col, "mainNavColumn singleNavColumn"); //$NON-NLS-0$
-			var link = dojo.create("a", {href: href, className: "navlinkonpage"}, col, "only"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(item.name), link, "only"); //$NON-NLS-0$
+			var col = document.createElement("td"); //$NON-NLS-2
+			tableRow.appendChild(col);
+			col.classList.add('mainNavColumn'); //$NON-NLS-2
+			col.classList.add('singleNavColumn'); //$NON-NLS-2
+			var link = document.createElement('a');
+			link.href = href;
+			link.className = 'navlinkonpage'; //$NON-NLS-2
+			col.appendChild(link);
+			link.appendChild(window.document.createTextNode(item.name));
 		} 
 	};
 
@@ -169,10 +174,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 	 * @param {orion.serviceregistry.ServiceRegistry} options.serviceRegistry The service registry
 	 */
 	function SearchOutliner(options) {
-		var parent = options.parent;
-		if (typeof(parent) === "string") { //$NON-NLS-0$
-			parent = dojo.byId(parent);
-		}
+		var parent = lib.node(options.parent);
 		if (!parent) { throw "no parent"; } //$NON-NLS-0$
 		if (!options.serviceRegistry) {throw "no service registry"; } //$NON-NLS-0$
 		this._parent = parent;
@@ -185,22 +187,22 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 			id: "eclipse.renameSearch", //$NON-NLS-0$
 			parameters: new mCommands.ParametersDescription([new mCommands.CommandParameter("name", "text", 'Name:', '')]), //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			visibleWhen: function(items) {
-				items = dojo.isArray(items) ? items : [items];
+				items = Array.isArray(items) ? items : [items];
 				return items.length === 1 && items[0].query;
 			},
-			callback: dojo.hitch(this, function(data) {
-				var item = dojo.isArray(data.items) ? data.items[0] : data.items;
+			callback: function(data) {
+				var item = Array.isArray(data.items) ? data.items[0] : data.items;
 				if (data.parameters && data.parameters.valueFor('name')) { //$NON-NLS-0$
 					reg.getService("orion.core.savedSearches").renameSearch(item.query, data.parameters.valueFor('name')); //$NON-NLS-1$ //$NON-NLS-0$
 				}
-			})
+			}.bind(this)
 		});
 		var deleteSearchCommand = new mCommands.Command({
 			name: "Delete", //$NON-NLS-0$
 			imageClass: "core-sprite-delete", //$NON-NLS-0$
 			id: "eclipse.deleteSearch", //$NON-NLS-0$
 			visibleWhen: function(items) {
-				items = dojo.isArray(items) ? items : [items];
+				items = Array.isArray(items) ? items : [items];
 				if (items.length === 0) {
 					return false;
 				}
@@ -212,8 +214,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 				return true;
 			},
 			callback: function(data) {
-				var items = dojo.isArray(data.items) ? data.items : [data.items];
-				var confirmMessage = items.length === 1 ? dojo.string.substitute("Are you sure you want to delete '${0}' from the searches?", [items[0].name]) : dojo.string.substitute("Are you sure you want to delete these ${0} searches?", [items.length]); //$NON-NLS-1$ //$NON-NLS-0$
+				var items = Array.isArray(data.items) ? data.items : [data.items];
+				var confirmMessage = items.length === 1 ? i18nUtil.formatMessage("Are you sure you want to delete '${0}' from the searches?", items[0].name) : i18nUtil.formatMessage("Are you sure you want to delete these ${0} searches?", items.length); //$NON-NLS-1$ //$NON-NLS-0$
 				if(window.confirm(confirmMessage)) {
 					for (var i=0; i<items.length; i++) {
 						options.serviceRegistry.getService("orion.core.savedSearches").removeSearch(items[i].query); //$NON-NLS-0$
@@ -230,14 +232,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 		if (savedSearches) {
 			// render the searches
 			var registry = this._registry;
-			savedSearches.getSearches().then(dojo.hitch(searchOutliner, function(searches) {
+			savedSearches.getSearches().then(function(searches) {
 				this.render(searches.searches, registry);
-			}));
+			}.bind(searchOutliner));
 
-			savedSearches.addEventListener("searchesChanged", dojo.hitch(searchOutliner, //$NON-NLS-0$
+			savedSearches.addEventListener("searchesChanged", //$NON-NLS-0$
 				function(event) {
 					this.render(event.searches, event.registry);
-				}));
+				}.bind(searchOutliner));
 		}
 	}
 	SearchOutliner.prototype = /** @lends orion.navoutliner.SearchOutliner.prototype */ {
@@ -262,7 +264,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 				this.commandService.registerCommandContribution(selectionId, "eclipse.deleteSearch", 2, null, false, new mCommands.CommandKeyBinding(46, false, false, false, false, "searchContent"));//$NON-NLS-0$//$NON-NLS-1$	
 				commandService.registerSelectionService(selectionId, this.searchSelection);
 				serviceRegistry.getService("orion.searches.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
-					var selectionTools = dojo.byId(selectionId);
+					var selectionTools = lib.node(selectionId);
 					if (selectionTools) {
 						commandService.destroy(selectionTools);
 						commandService.renderCommands(selectionId, selectionTools, event.selections, this, "button"); //$NON-NLS-0$
@@ -275,7 +277,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'dojo', 'orion/section', 'o
 					return item.query;
 				}));	
 			} else {
-				dojo.place("<p>"+dojo.string.substitute(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>", "searchContent", "only"); //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+				var sContents = lib.node("searchContent");
+				if(sContents){
+					sContents.innerHTML = "<p>"+ i18nUtil.formatMessage(messages["You can save frequently used by searches by choosing ${0} in the search toolbar."], ["<b>"+"Save Search"+"</b>"])+"</p>";
+				}
 			}
 		}
 	};//end navigation outliner prototype

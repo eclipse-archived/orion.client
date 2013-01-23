@@ -61,14 +61,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 			this.tileButton.style.background = '#E0E0E0';
 			this.listButton.style.background = 'white';
 		
-			this.listNode = this.anchorNode.firstChild.lastChild;
+			this.listNode = document.getElementById( 'listNode' );
+			this.listNode.innerHTML = '';
 			
-			var listChild = this.listNode.firstChild;
-
-			while( listChild ) {
-			    this.listNode.removeChild( listChild );
-			    listChild = this.listNode.firstChild;
-			}
+//			var listChild = this.listNode.firstChild;
+//
+//			while( listChild ) {
+//			    this.listNode.removeChild( listChild );
+//			    listChild = this.listNode.firstChild;
+//			}
 		
 			var tileTemplate = '<ol class="thumb-grid group"></ol>';
 			
@@ -86,7 +87,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				});
 
 				var listItem = document.createElement('li');
-				listItem.onclick = function(){ window.location.href = url; };
 				
 				var date = this.projectData[count].date.getMonth() + 1 + "." + this.projectData[count].date.getDate() + "." + this.projectData[count].date.getFullYear();
 				
@@ -96,16 +96,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				
 				var content = '<a href="#" height="' + h + 'px"></a>';
 				
-				if( this.projectData[count].path ){
+				if( this.projectData[count].address ){
 				
 					/* iframe.sandbox = "allow-scripts allow-same-origin" */
-					
-					content = '<div class="tab"><a href="#"><div class="iframeOverlay"></div><iframe src="' + this.projectData[count].path + '"height="' + h + 'px" width="' + w + 'px" scrolling="no"></iframe></a></div>';
+					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectname + '"><div class="iframeOverlay"></div><iframe src="' + this.projectData[count].address + '"height="' + h + 'px" width="' + w + 'px" scrolling="no"></iframe></a></div>';
 				}
 				
 				listItem.innerHTML = content + '<div class="tileTitle">' + this.projectData[count].name + '</div><div class="tileDate">Last modified: ' + date + '</div>';
 				
-				this.listNode.lastChild.appendChild( listItem );
+				var reference = this.listNode.lastChild.appendChild( listItem );
 			}
 		}
 		
@@ -129,9 +128,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 			
 			this.listNode.innerHTML = tableTemplate;
 			
+			
+			
 			for( var count = 0; count< this.projectData.length; count++ ){
 			
+				var projectname = this.projectData[count].name;
+				
+				var uriTemplate = "{OrionHome}/projects/projectPage.html#?project={project}";
+				
+				var template = new URITemplate(uriTemplate);
+				var url = template.expand({
+					project: projectname
+				});
+
+			
 				var row = document.createElement('tr');
+				
+				row.onclick = function(){ window.location.href = url; };
 				
 				var date = this.projectData[count].date.getMonth() + 1 + "." + this.projectData[count].date.getDate() + "." + this.projectData[count].date.getFullYear();
 		

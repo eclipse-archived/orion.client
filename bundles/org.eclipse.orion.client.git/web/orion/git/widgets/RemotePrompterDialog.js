@@ -194,13 +194,16 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 	RemotePrompterDialog.prototype._createTree = function(myTreeModel) {
 		var that = this;
 		
-		var selection = new mSelection.Selection(this.serviceRegistry, "orion.remotePrompter.selection"); //$NON-NLS-0$
+		var selection = this.serviceRegistry.getService("orion.remotePrompter.selection"); //$NON-NLS-0$
+		if (!selection) {
+			selection = new mSelection.Selection(this.serviceRegistry, "orion.remotePrompter.selection"); //$NON-NLS-0$
+		}
 		var renderer = new RemotePrompterRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter"}); //$NON-NLS-0$
 		this.explorer = new mExplorer.Explorer(this.serviceRegistry, selection, renderer);
 		// TODO yuck.  Renderer needs to know explorer.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=389529
 		renderer.explorer = this.explorer;
 		this.explorer.createTree("treeContentPane", myTreeModel); //$NON-NLS-0$
-		this.serviceRegistry.getService("orion.remotePrompter.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+		selection.addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
 			if (event.selection && event.selection.Type === "Remote") { //$NON-NLS-0$
 				that.$newBranch.disabled = false;
 			} else {
@@ -240,10 +243,10 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialog', 'orion/explorers/expl
 					var id = selection.CloneLocation.split("/")[4]; //$NON-NLS-0$
 					var newBranchObject = { };
 					newBranchObject.parent = selection;
-					newBranchObject.FullName = "refs/remotes/" + selection.Name + "/" + this.$newBranch.value; //$NON-NLS-1$ //$NON-NLS-0$
-					newBranchObject.Name = selection.Name + "/" + this.$newBranch.value; //$NON-NLS-0$
+					newBranchObject.FullName = "refs/remotes/" + selection.Name + "/" + that.$newBranch.value; //$NON-NLS-1$ //$NON-NLS-0$
+					newBranchObject.Name = selection.Name + "/" + that.$newBranch.value; //$NON-NLS-0$
 					newBranchObject.Type = "RemoteTrackingBranch"; //$NON-NLS-0$
-					newBranchObject.Location = "/gitapi/remote/" + selection.Name + "/" + this.$newBranch.value + "/file/" + id; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+					newBranchObject.Location = "/gitapi/remote/" + selection.Name + "/" + that.$newBranch.value + "/file/" + id; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 					that.func(null, selection, newBranchObject);
 				}
 			}		

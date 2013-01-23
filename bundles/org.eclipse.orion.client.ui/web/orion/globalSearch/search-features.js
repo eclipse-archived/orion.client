@@ -11,7 +11,7 @@
  *******************************************************************************/
 /*global window define */
 
-define(['dojo', 'dijit', 'dijit/layout/ContentPane', 'dijit/layout/BorderContainer'], function(dojo, dijit) {
+define(['orion/webui/littlelib', 'orion/webui/splitter', 'text!orion/globalSearch/search-features.html'], function(lib, splitter, FeatureTemplate) {
 
 
 var orion = orion || {};
@@ -22,40 +22,25 @@ orion.SearchUIFactory = (function() {
 	SearchUIFactory.prototype = {
 		
 		buildUI:function(){
-			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
-			this._matchWidgetId = this._parentDivID + "_matches"; //$NON-NLS-0$
-			this._compareWidgetId = this._parentDivID + "_compare"; //$NON-NLS-0$
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
-			
-			topWidget = new dijit.layout.BorderContainer({id: this._topWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			var matchWidget = new dijit.layout.BorderContainer({id: this._matchWidgetId, region:"center", gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			var compareWidget = new dijit.layout.BorderContainer({id:this._compareWidgetId, region:"bottom" ,gutters:false ,design:"headline", liveSplitters:true, persist:false , splitter:true }); //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.addClass(matchWidget.domNode, 'topBorder'); //$NON-NLS-0$
-			dojo.addClass(compareWidget.domNode, 'bottomBorderReplace'); //$NON-NLS-0$
-			
-			topWidget.placeAt(this._parentDivID);
-			topWidget.addChild(matchWidget);
-			topWidget.addChild(compareWidget);
-			topWidget.startup();
+			var parent = lib.node(this._parentDivID);
+			parent.innerHTML = FeatureTemplate;
+			var top = lib.$("#replaceTop", parent); //$NON-NLS-0$
+			var bottom = lib.$("#replaceBottom", parent); //$NON-NLS-0$
+			var splitNode = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
+			splitNode.id = "replaceSplitter"; //$NON-NLS-0$
+			var split = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+			// TODO attach a resize listener here that will resize the compare widgets
 		},
 		
 		destroy: function(){
-			this._topWidgetId = this._parentDivID + "_topWidget"; //$NON-NLS-0$
-			var topWidget = dijit.byId(this._topWidgetId);
-			if(topWidget){
-				topWidget.destroyRecursive();
-			}
 		},
 		
 		getMatchDivID: function(){
-			return this._matchWidgetId;
+			return "replaceTop"; //$NON-NLS-0$
 		},
 		
 		getCompareDivID: function(){
-			return this._compareWidgetId;
+			return "replaceBottom"; //$NON-NLS-0$
 		}
 
 	};

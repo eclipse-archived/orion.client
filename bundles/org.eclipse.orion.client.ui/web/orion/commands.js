@@ -455,6 +455,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 					for (var i=0; i<scopes[scopedBinding].length; i++) {
 						binding = scopes[scopedBinding][i];
 						bindingString = UIUtil.getUserKeyString(binding.keyBinding);
+						span = document.createElement("span"); //$NON-NLS-0$
 						span.role = "listitem"; //$NON-NLS-0$
 						span.appendChild(document.createTextNode(bindingString+ " = " + binding.command.name)); //$NON-NLS-0$
 						span.appendChild(document.createElement("br")); //$NON-NLS-0$
@@ -1347,7 +1348,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		this.mod3 = mod3 !== undefined && mod3 !== null ? mod3 : false;
 		this.mod4 = mod4 !== undefined && mod4 !== null ? mod4 : false;
 		this.domScope = lib.node(domScope);
-		this.scopeName = scopeName || domScope ? domScope.id : null;
+		this.scopeName = scopeName || (domScope ? domScope.id : null);
 	}
 	CommandKeyBinding.prototype = /** @lends orion.commands.CommandKeyBinding.prototype */ {
 		/**

@@ -16,23 +16,25 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 	function(messages, require, mCommands, mFileClient, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileUtils, Deferred) {
 	
 		var NAME_INDEX = 0;
-		var ADDRESS_INDEX = 1;
-		var PORT_INDEX = 2;
-		var USERNAME_INDEX = 3;
-		var PASSWORD_INDEX = 4;
-		var LAST_INDEX = 5;
+		var ADDRESS_INDEX = NAME_INDEX + 1;
+		var PATH_INDEX = ADDRESS_INDEX + 1;
+		var PORT_INDEX =  PATH_INDEX + 1;	
+		var USERNAME_INDEX = PORT_INDEX + 1;
+		var PASSWORD_INDEX = USERNAME_INDEX + 1;
+		var LAST_INDEX = PASSWORD_INDEX + 1;
 
 		function Drive( details, commandService, serviceRegistry ){
 			
 			this.drivename = details.drivename;
 			this.address = details.address;
+			this.path = details.path;
 			this.port = details.port;
 			this.type = details.type;
 			this.username = details.username;
 			this.password = details.password;
 
 			this.commandService = commandService;
-			this.serviceRegsitry = serviceRegistry;
+			this.serviceRegistry = serviceRegistry;
 
 			this.entryNode = document.createElement( 'div' );
 			
@@ -44,9 +46,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address );
+			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
 			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
 			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
-			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password );
+			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password, "password" );
 			
 			for( var element = NAME_INDEX; element < this.elements.length; element++ ){
 				this.content.appendChild( this.elements[element] );
@@ -54,18 +57,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			var buttonArea = document.createElement( 'div' );
 			buttonArea.className = "setting-property";
-			buttonArea.innerHTML = '<div style="float:right;"></div>';
-			this.saveButton = buttonArea.firstChild;
+			buttonArea.innerHTML = '<div style="float:right;"></div><div style="float:right;"></div>';
+			this.disconnectbutton = buttonArea.children[0];
+			this.connectbutton = buttonArea.children[1];
 			
 			this.content.appendChild( buttonArea );
 			
 			var elements = this.elements;
-			var registry = this.serviceRegsitry;
+			var registry = this.serviceRegistry;
 			
+			var thisDrive = this;
+					
 			// set up the toolbar level commands	
-			var saveDriveCommand = new mCommands.Command({
-				name: 'Save', //messages["Install"],
-				tooltip: 'Save configuration', //messages["Install a plugin by specifying its URL"],
+			var connectCommand = new mCommands.Command({
+				name: 'Connect', //messages["Install"],
+				tooltip: 'Connect to drive', //messages["Install a plugin by specifying its URL"],
 				id: "orion.driveSave",
 				callback: function(data) {
 				
@@ -84,14 +90,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 					console.log( url );
 					
-					var fileClient = new mFileClient.FileClient( registry );			
+					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
-					this.selection = new mSelection.Selection(registry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
+					this.selection = new mSelection.Selection(this.serviceRegistry, "orion.directoryPrompter.selection"); //$NON-NLS-0$
 
 					this.explorer = new mExplorerTable.FileExplorer({
 						treeRoot: {children:[]}, 
 						selection: this.selection, 
-						serviceRegistry: this._serviceRegistry,
+						serviceRegistry: this.serviceRegistry,
 						fileClient: fileClient, 
 						parentId: "Drives", 
 						excludeFiles: true, 
@@ -110,9 +116,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}.bind(this)
 			});
 			
-			this.commandService.addCommand(saveDriveCommand);
+			this.commandService.addCommand(connectCommand);
 			this.commandService.registerCommandContribution('driveCommand', "orion.driveSave", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			this.commandService.renderCommands('driveCommand', this.saveButton, this, this, "button"); //$NON-NLS-0$
+			
+			var disconnectCommand = new mCommands.Command({
+				name: 'Disconnect', //messages["Install"],
+				tooltip: 'Disconnect drive', //messages["Install a plugin by specifying its URL"],
+				id: "orion.driveDisconnect",
+				callback: thisDrive.disconnect.bind(thisDrive)
+			});
+			
+			this.commandService.addCommand(disconnectCommand);
+			this.commandService.registerCommandContribution('driveCommand', "orion.driveDisconnect", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
+//			this.commandService.renderCommands('driveCommand', this.disconnectbutton, this, this, "button"); //$NON-NLS-0$
+			this.commandService.renderCommands('driveCommand', this.connectbutton, this, this, "button"); //$NON-NLS-0$
 		}
 		
 		var elements = [];
@@ -128,7 +146,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		Drive.prototype.templateString = templateString;	
 		
-		function makeDriveElement( name, value ){
+		function makeDriveElement( name, value, type ){
+		
+			if( !type ){ type = "text"; }
 		
 			var element = document.createElement( 'div' );
 			
@@ -136,7 +156,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			element.innerHTML = '<label>' + //$NON-NLS-0$
 									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-									'<input class="setting-control" type="text" name="myname">' + //$NON-NLS-0$
+									'<input class="setting-control" type="' + type + '" name="myname">' + //$NON-NLS-0$
 								'</label>';   //$NON-NLS-0$
 								
 			element.firstChild.children[1].value = value;
@@ -154,6 +174,42 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		Drive.prototype.makeDriveElement = makeDriveElement;
 		
+		
+		function disconnect(data){
+			var fileClient = new mFileClient.FileClient( this.serviceRegistry );
+					
+			var loadedWorkspace = fileClient.loadWorkspace("");
+		
+			console.log( 'disconnect' );
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+
+				var drives = workspace.DriveLocation;
+				
+				fileClient.read( workspace.DriveLocation, true ).then( function(folders){
+					var f = folders;
+					
+					var driveName = elements[NAME_INDEX].getValue();
+					
+					for( var folder = 0; folder < folders.Children.length;folder++ ){
+					
+						if( folders.Children[folder].Name === driveName ){
+							fileClient.deleteFile( folders.Children[folder].Location, true ).then(function(input){
+							
+							});
+							
+							console.log( 'deleted drive: ' + driveName );
+							
+							break;
+						}
+					}
+					
+				});
+	
+				// myexplorer.loadResourceList( workspace.DriveLocation, true, null );
+			});
+		}
+		
 		function setDriveName( name ){
 			this.entryNode.firstChild.firstChild.firstChild.innerHTML = name;			
 		}
@@ -166,13 +222,29 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		Drive.prototype.setDriveAddress = setDriveAddress;
 
+		function toJSONData(){
+			
+			var jsonDrive = { 'drivename': elements[NAME_INDEX].getValue(), 
+							  'address': elements[ADDRESS_INDEX].getValue(), 
+						      'path': elements[PATH_INDEX].getValue(),
+						      'port': elements[PORT_INDEX].getValue(),
+						      'username': elements[USERNAME_INDEX].getValue() };					
+			return jsonDrive;
+		}
+		
+		Drive.prototype.toJSONData = toJSONData;
+
 		var name;
 		var address;
 		var port;
 		var type;
 		var username;
 		var password;
+		var path;
 		
+		Drive.prototype.disconnect = disconnect;
+		
+		Drive.prototype.path = path;
 		Drive.prototype.name = name;
 		Drive.prototype.type = type;
 		Drive.prototype.port = port;

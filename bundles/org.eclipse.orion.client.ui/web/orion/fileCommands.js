@@ -494,7 +494,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				},
 				hrefCallback: function(data) {
 					if(data.items[0].Directory && data.items[1].Directory){
-						return require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + data.items[1].Location; //$NON-NLS-1$ //$NON-NLS-0$
+						return mCompareUtils.generateCompareTreeHref(data.items[0].Location, {compareTo: data.items[1].Location, readonly: true});
 					}
 					return mCompareUtils.generateCompareHref(data.items[0].Location, {compareTo: data.items[1].Location, readonly: true}); //$NON-NLS-0$
 				}
@@ -514,17 +514,17 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 				return false;
 			},
 			callback: function(data) {
-				var dialog = new orion.widgets.DirectoryPrompterDialog({
+				var dialog = new DirPrompter.DirectoryPrompterDialog({
 					title: messages["Choose a Folder"],
 					serviceRegistry: serviceRegistry,
 					fileClient: fileClient,				
 					func: function(targetFolder) { 
 						if (targetFolder && targetFolder.Location) {
-							window.open(require.toUrl("compare-tree/compare-tree.html#") + data.items[0].Location + "," + targetFolder.Location);  //$NON-NLS-1$ //$NON-NLS-0$
+							var compareURL = mCompareUtils.generateCompareTreeHref(data.items[0].Location, {compareTo: targetFolder.Location, readonly: true});
+							window.open(compareURL);
 						}
 					}
 				});
-				dialog.startup();
 				dialog.show();
 			} 
 		});

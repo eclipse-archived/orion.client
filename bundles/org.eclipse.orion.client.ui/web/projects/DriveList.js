@@ -99,17 +99,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 		
 		getDrives: function(){
-			var drives = [];
+			return this.driveElements;
+		},
+		
+		getJSONDrives: function(){
+		
+			var JSONDrives = [];
+		
+			for( var d = 0; d < this.driveElements.length; d++ ){
 			
-//			var sftpDrive = { drivename:'Hickory Website', type:'SFTP', address:'hickory.ca', port:'81', password:'', username:'' }; 
-//			
-//			var googleDrive = { drivename:"Anton's Google Drive", type:'Google', address:'', port:'', password:'', username:'' };  
-//			
-//			drives.push( sftpDrive );
-//			
-//			drives.push( googleDrive );
+				var data = this.driveElements[d].toJSONData();
+				
+				JSONDrives.push( data );
+			}
 			
-			return drives;
+			return JSONDrives;	
 		},
 		
 		addRows: function(referenceDrive){
@@ -126,7 +130,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.driveCount.textContent = DriveList.length;
 
 			for( var p = 0; p < DriveList.length; p++ ){
-				var entry = new Drive( DriveList[p], this.commandService );
+				var entry = new Drive( DriveList[p], this.commandService, this.serviceRegistry );
 				list.appendChild( entry.entryNode );
 //				entry.show();
 			}

@@ -39,6 +39,7 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 		var type;
 		var description;
 		var client;
+		var drives = [];
 		
 		ProjectData.prototype.type = type;
 		ProjectData.prototype.path = path;
@@ -46,6 +47,7 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 		ProjectData.prototype.name = name;
 		ProjectData.prototype.description = description;
 		ProjectData.prototype.client = client;
+		ProjectData.prototype.drives = drives;
 		
 		ProjectData.prototype.constructor = ProjectData;
 		

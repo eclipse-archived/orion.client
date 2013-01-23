@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'orion/commands', 'projects/ProjectDataManager' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'orion/commands', 'projects/ProjectDataManager', 'projects/ProjectData' ], 
 	
-	function(messages, require, DriveList, mCommands, ProjectDataManager ) {
+	function(messages, require, DriveList, mCommands, ProjectDataManager, ProjectData ) {
 
 		function SFTPConfiguration( project, node, projectData, commandService, serviceRegistry ){
 		
@@ -31,7 +31,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 
 			this.driveWidget = new DriveList( {}, drivelist, commandService, serviceRegistry );
 			
-//			this.projectDataManager = new ProjectDataManager( serviceRegistry );
+			this.projectDataManager = new ProjectDataManager( serviceRegistry );
 			this.driveWidget.show();
 			/* Read project name from url */
 			
@@ -43,14 +43,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 			var driveListContainer = this.driveWidget;
 			
+			var thisSFTPConfiguration = this;
+			
 			var saveConfigCommand = new mCommands.Command({
 				name: 'Save', //messages["Install"],
 				tooltip: 'Saves configuration',
 				id: "orion.saveProjectConfig", //$NON-NLS-0$
-				callback: function(data) {
-					console.log( 'new project' );
-					driveListContainer.newDrive();
-				}.bind(this)
+				callback: thisSFTPConfiguration.saveConfiguration.bind(thisSFTPConfiguration)
 			});
 			
 			this.commandService.addCommand(saveConfigCommand);
@@ -64,18 +63,40 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 				this.setProjectName( project.name );
 			
-				this.setProjectAddress( project.path );
+				this.setProjectAddress( project.address );
 			
 				for( var d = 0; d < project.drives.length; d++ ){
 					this.driveWidget.newDrive( project.drives[d] );
 					this.driveWidget.addRows();
 				}
 			}else{
-				this.driveWidget.newDrive();
-				this.driveWidget.addRows();
+				this.projectDataManager.getProjectData( this.createEmptyProject.bind( this ) );
 			}
 		}
 
+
+		function createEmptyProject( projectData ){
+			var projectCount = projectData.length;
+			var projectNumber = projectCount +1;
+			var projectName = 'Project ' + projectNumber ;
+			this.setProjectName( projectName );		
+			this.driveWidget.newDrive();
+			this.driveWidget.addRows();
+		}
+		
+		function saveConfiguration(){
+			
+			var project = new ProjectData();
+			project.name = this.getProjectName();
+			project.address = this.getProjectAddress();
+			project.drives = this.driveWidget.getJSONDrives();
+		
+			this.projectDataManager.save( project, this.handleFeedback.bind( this) );
+		}
+		
+		function handleFeedback(){
+		
+		}
 
 		var template =	'<div id="configuration" class="projectConfiguration" role="tabpanel" style="padding-left:30px;max-width: 700px; min-width: 500px;" aria-labelledby="userSettings">' +	
 							'<div class="sectionWrapper toolComposite">' +
@@ -99,11 +120,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 											'<input id="projectAddress" class="setting-control" type="text" name="myname">' + //$NON-NLS-0$
 										'</label>' +  //$NON-NLS-0$
 									'</div>' +
+									'<div class="setting-property">' +  //$NON-NLS-0$
+										'<label>' + //$NON-NLS-0$
+											'<span class="setting-label" style="vertical-align:top;">Project Description:</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+											'<textarea class="setting-control" rows="4" cols="50"></textarea>' + //$NON-NLS-0$
+										'</label>' +  //$NON-NLS-0$
+									'</div>' +
 								'</div>' +
 							'</section>' +
 						'</div>';							
 											
 		SFTPConfiguration.prototype.template = template;
+		
+		var projectDataManager;
 		
 		function showProjectConfiguration(parent, name){
 
@@ -130,13 +159,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			var address;
 			var addressNode = document.getElementById( "projectAddress" );
 			address = addressNode.value;
-			return name;
+			return address;
 		}
 		
-		
+		SFTPConfiguration.prototype.projectDataManager = projectDataManager;
+		SFTPConfiguration.prototype.handleFeedback = handleFeedback;
+		SFTPConfiguration.prototype.saveConfiguration = saveConfiguration;
+		SFTPConfiguration.prototype.createEmptyProject = createEmptyProject;
 		SFTPConfiguration.prototype.showProjectConfiguration = showProjectConfiguration;
 		SFTPConfiguration.prototype.setProjectName = setProjectName;
 	 	SFTPConfiguration.prototype.setProjectAddress = setProjectAddress;	
+	 	SFTPConfiguration.prototype.getProjectName = getProjectName;
+	 	SFTPConfiguration.prototype.getProjectAddress = getProjectAddress;
 
 		return SFTPConfiguration;
 	}

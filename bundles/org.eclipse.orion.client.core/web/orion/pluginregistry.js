@@ -753,6 +753,14 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					var serializer = new XMLSerializer();
 					return {Severity: "Error", HTML: true, Message: serializer.serializeToString(span)};
 				}
+				if (error.__isError) {
+					var original = error;
+					error = new Error(original.message);
+					Object.keys(original).forEach(function(key) {
+						error[key] = original[key];
+					});
+					delete error.__isError;
+				}
 				return error;
 			}
 		};
