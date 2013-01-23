@@ -42,6 +42,9 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		
 		function startProjectComponents( project ){
 		
+			var titleArea = document.getElementById( 'titleArea');
+			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+		
 			var sidePanel = document.getElementById( 'projectNavigation' );
 			
 			var projectTree = new mProjectNavigation( project, sidePanel, serviceRegistry, commandService );
@@ -78,8 +81,6 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			var projectDataManager = new ProjectDataManager(serviceRegistry);
 			
 			projectDataManager.getProject( projectName, startProjectComponents );
-			
-			
 		});
 	}	
 );
