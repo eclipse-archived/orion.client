@@ -159,6 +159,9 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 				if (name.length === 0) {
 					return null;
 				}
+				if (name === ".") { //$NON-NLS-0$
+					return node;
+				}
 				if (name === "..") { //$NON-NLS-0$
 					return this.getParent(node);
 				}
