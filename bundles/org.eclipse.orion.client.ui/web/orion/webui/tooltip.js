@@ -24,7 +24,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * @param options.node The node showing the tooltip.  Required.
 	 * @param options.text The text in the tooltip.  Optional.  If not specified, the client is expected to add content
 	 * to the tooltip prior to triggering it.
-	 * @param options.trigger The event that triggers the tooltip.  Can be one of "click" or "mouseover".  Optional.
+	 * @param options.trigger The event that triggers the tooltip.  Can be one of "none" or "click" or "mouseover". If "none" is defined, the caller has to call show, hide and destroy function. Optional.
 	 * Defaults to "mouseover". If "mouseover" then the aria attributes for tooltips will be set up.
 	 * @param options.position An array specifying the preferred positions to try positioning the tooltip.  Positions can be "left", "right", 
 	 * "above", or "below".  If no position will fit on the screen, the first position specified is used.  Optional.  Defaults to 
@@ -63,7 +63,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 						lib.stop(event);
 					}
 				}, false);
-			} else {
+			} else if (this._trigger !== "none") { //$NON-NLS-0$
 				this._showDelay = options.showDelay === undefined ? 1000 : options.showDelay;
 				var leave = ["mouseout", "click"];  //$NON-NLS-1$ //$NON-NLS-0$
 				this._node.addEventListener("mouseover", function(event) { //$NON-NLS-0$
