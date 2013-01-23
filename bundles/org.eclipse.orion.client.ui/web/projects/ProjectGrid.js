@@ -63,13 +63,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 		
 			this.listNode = document.getElementById( 'listNode' );
 			this.listNode.innerHTML = '';
-			
-//			var listChild = this.listNode.firstChild;
-//
-//			while( listChild ) {
-//			    this.listNode.removeChild( listChild );
-//			    listChild = this.listNode.firstChild;
-//			}
 		
 			var tileTemplate = '<ol class="thumb-grid group"></ol>';
 			
@@ -100,6 +93,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				
 					/* iframe.sandbox = "allow-scripts allow-same-origin" */
 					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectname + '"><div class="iframeOverlay"></div><iframe src="' + this.projectData[count].address + '"height="' + h + 'px" width="' + w + 'px" scrolling="no"></iframe></a></div>';
+				}else{
+					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectname + '"><div class="iframeOverlay"></div><img src="../images/placeholder.png"></img></a></div>';
+	
+				
 				}
 				
 				listItem.innerHTML = content + '<div class="tileTitle">' + this.projectData[count].name + '</div><div class="tileDate">Last modified: ' + date + '</div>';
@@ -115,20 +112,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 			this.tileButton.style.background = 'white';
 			this.listButton.style.background = '#E0E0E0';
 		
-			this.listNode = this.anchorNode.firstChild.lastChild;
-			
-			var listChild = this.listNode.firstChild;
-
-			while( listChild ) {
-			    this.listNode.removeChild( listChild );
-			    listChild = this.listNode.firstChild;
-			}
+			this.listNode = document.getElementById( 'listNode' );
+			this.listNode.innerHTML = '';
 		
 			var tableTemplate = '<table><th>Project Name</th><th>Description</th><th>Last Modified</th></table>';
 			
 			this.listNode.innerHTML = tableTemplate;
-			
-			
 			
 			for( var count = 0; count< this.projectData.length; count++ ){
 			

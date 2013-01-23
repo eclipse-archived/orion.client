@@ -90,6 +90,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			project.name = this.getProjectName();
 			project.address = this.getProjectAddress();
 			project.drives = this.driveWidget.getJSONDrives();
+			
+			var titleArea = document.getElementById( 'titleArea');
+			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 		
 			this.projectDataManager.save( project, this.handleFeedback.bind( this) );
 		}
