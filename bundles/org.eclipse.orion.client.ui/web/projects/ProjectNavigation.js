@@ -12,9 +12,9 @@
 /*jslint browser:true*/
 
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes' ], 
 	
-	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileClient, Deferred, mStatus, mProgress, mOperationsClient ) {
+	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, mNavigatorRenderer,  mFileClient, Deferred, mStatus, mProgress, mOperationsClient, mContentTypes ) {
 
 		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
 		
@@ -88,6 +88,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 			this.selection = new mSelection.Selection( serviceRegistry, "orion.directoryPrompter.selection" ); //$NON-NLS-0$
 
+			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+
 			this.explorer = new mExplorerTable.FileExplorer({
 				treeRoot: {children:[]}, 
 				selection: this.selection, 
@@ -95,9 +97,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				fileClient: fileClient, 
 				parentId: "Drives", 
 				rendererFactory: function(explorer) {  //$NON-NLS-0$
-					return new DriveTreeRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
+				
+					return new mNavigatorRenderer.NavigatorRenderer({
+						checkbox: false, 
+						cachePrefix: "Navigator"}, explorer, commandService, contentTypeService);
 			}}); //$NON-NLS-0$
-			
 			
 			var myexplorer = this.explorer;
 			var loadedWorkspace = fileClient.loadWorkspace("");
