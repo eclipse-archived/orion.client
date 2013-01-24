@@ -748,7 +748,7 @@ function(messages, mUndoStack, mKeyBinding, mRulers, mAnnotations, mTooltip, mTe
 	
 	/**
 	 * @param {orion.editor.Editor} editor
-	 * @param {orion.textView.UndoStack} undoStack
+	 * @param {orion.editor.UndoStack} undoStack
 	 * @param {orion.editor.ContentAssist} [contentAssist]
 	 * @param {orion.editor.LinkedMode} [linkedMode]
 	 */
