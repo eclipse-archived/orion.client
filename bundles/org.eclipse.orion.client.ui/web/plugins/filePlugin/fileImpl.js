@@ -9,11 +9,11 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define XMLHttpRequest BlobBuilder*/
+/*global window define URL XMLHttpRequest BlobBuilder*/
 /*jslint forin:true devel:true browser:true*/
 
 
-define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
+define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr) {
 	/**
 	 * An implementation of the file service that understands the Orion 
 	 * server file API. This implementation is suitable for invocation by a remote plugin.
@@ -392,11 +392,14 @@ define(["orion/Deferred", "orion/xhr"], function(Deferred, xhr) {
 		 * @return A deferred that will be provided with the contents or metadata when available
 		 */
 		read: function(location, isMetadata) {
-			return xhr("GET", location, {
+			var url = new URL(location, window.location);
+			if (isMetadata) {
+				url.query.set("parts", "meta");
+			}
+			return xhr("GET", url.href, {
 				timeout: 5000,
 				headers: { "Orion-Version": "1" },
-				log: false,
-				query: isMetadata ? { "parts": "meta" } : {}
+				log: false
 			}).then(function(result) {
 				if (isMetadata) {
 					return result.response ? JSON.parse(result.response) : null;
