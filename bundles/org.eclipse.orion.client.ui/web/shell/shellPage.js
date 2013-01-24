@@ -741,6 +741,34 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		var input = document.getElementById("shell-input"); //$NON-NLS-0$
 		var shell = new mShell.Shell({input: input, output: output});
 
+		/*
+		 * Assign focus to the input element when a non-focusable element in
+		 * the output area is clicked.  Do not interfere with output area user
+		 * interactions such as selecting text, showing context menus, following
+		 * links, etc.
+		 *
+		 * The user gesture that should trigger this is essentially a click with
+		 * no mouse movement, since mouse movement within a mousedown/mouseup pair
+		 * can perform selection in adjacent elements, even if the target element
+		 * for both events is the same div.  For this reason, separate mousedown/
+		 * mouseup listeners are used instead of a single click listener, and the
+		 * event coordinates are compared (a variance of 2 pixels is allowed).
+		 */
+		var ALLOWANCE = 2;
+		output.onmousedown = function(mouseDownEvent) {
+			output.onmouseup = null;
+			if (mouseDownEvent.button === 0 && mouseDownEvent.target.tagName.toUpperCase() === "DIV") { //$NON-NLS-0$
+				output.onmouseup = function(mouseUpEvent) {
+					output.onmouseup = null;
+					if (mouseUpEvent.target === mouseDownEvent.target &&
+						Math.abs(mouseUpEvent.clientX - mouseDownEvent.clientX) <= ALLOWANCE &&
+						Math.abs(mouseUpEvent.clientY - mouseDownEvent.clientY) <= ALLOWANCE) {
+							shell.setFocusToInput();
+					}
+				};
+			}
+		};
+
 		var parameters = PageUtil.matchResourceParameters(window.location.href);
 		if (parameters.command) {
 			shell.setInputText(parameters.command);
@@ -750,7 +778,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 			window.location.href = url;
 		}
 
-		shell.setFocus();
+		shell.setFocusToInput();
 
 		shellPageFileService = new mShellPageFileService.ShellPageFileService();
 		var location = getCWD();
