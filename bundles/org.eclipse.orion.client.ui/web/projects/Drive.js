@@ -86,7 +86,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					/* constuct the URL - example:
 			           sftp://oriontest:orion2012@planetorion.org/home/oriontest/sampledata */
 					
-					var url = 'sftp://' + elements[USERNAME_INDEX].getValue() + ':' + elements[PASSWORD_INDEX].getValue() + '@' + elements[ADDRESS_INDEX].getValue();
+					var url = 'sftp://' + elements[USERNAME_INDEX].getValue() + ':' + elements[PASSWORD_INDEX].getValue() + '@' + elements[ADDRESS_INDEX].getValue() + elements[PATH_INDEX].getValue();
 					
 					console.log( url );
 					
@@ -128,8 +128,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.commandService.addCommand(disconnectCommand);
 			this.commandService.registerCommandContribution('driveCommand', "orion.driveDisconnect", 1, /* not grouped */ null, false, /* no key binding yet */ null, null); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			
-//			this.commandService.renderCommands('driveCommand', this.disconnectbutton, this, this, "button"); //$NON-NLS-0$
 			this.commandService.renderCommands('driveCommand', this.connectbutton, this, this, "button"); //$NON-NLS-0$
 		}
 		
@@ -138,7 +136,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 	
 		var templateString = '<div style="overflow:hidden;">' + //$NON-NLS-0$
 								'<section class="setting-row" role="region" aria-labelledby="Navigation-header">' +
-									'<h3 class="setting-header" data-dojo-attach-point="titleNode"></h3>' +
+									'<h3 class="setting-header" id="titleNode"></h3>' +
 									'<div class="setting-content">' +
 									'</div>' +
 								'</section>' +
@@ -187,23 +185,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				var drives = workspace.DriveLocation;
 				
 				fileClient.read( workspace.DriveLocation, true ).then( function(folders){
-					var f = folders;
 					
 					var driveName = elements[NAME_INDEX].getValue();
 					
 					for( var folder = 0; folder < folders.Children.length;folder++ ){
 					
 						if( folders.Children[folder].Name === driveName ){
-							fileClient.deleteFile( folders.Children[folder].Location, true ).then(function(input){
-							
-							});
-							
-							console.log( 'deleted drive: ' + driveName );
-							
-							break;
+							for( var p =0; p< folders.Projects.length; p++ ){
+								if( folders.Children[folder].Id === folders.Projects[p].Id ){
+									fileClient.deleteFile( folders.Projects[p].Location, true ).then(function(input){
+									
+									});
+									
+									break;
+								}
+							}
 						}
 					}
-					
 				});
 	
 				// myexplorer.loadResourceList( workspace.DriveLocation, true, null );

@@ -18,8 +18,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 
 		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
 		
-			
-		
 			this.commandService = commandService;
 		
 			var isExpanded = false;
