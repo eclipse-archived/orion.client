@@ -179,7 +179,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 					message = i18nUtil.formatMessage(messages["'${0}' is not valid"], string);
 				}
 				return {
-					value: exactMatch ? exactMatch.value : null,
+					value: exactMatch ? exactMatch.value : undefined,
 					status: status,
 					message: message,
 					predictions: predictions
