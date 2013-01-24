@@ -868,8 +868,13 @@ var exports = {};
 									);
 								}, function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
-										function() {
-										}, function (jsonData) {
+									function() {
+										progress.progress(gitService.getGitRemote(path), "Getting remote details " + path).then(
+											function(jsonData){
+												explorer.changedItem(item);
+											}, displayErrorOnStatus
+										);
+									}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
 									);
@@ -997,7 +1002,11 @@ var exports = {};
 								}, function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 										function() {
-										
+											progress.progress(gitService.getGitRemote(path), "Getting remote information " + path).then(
+												function(jsonData){
+													explorer.changedItem(item);
+												}, displayErrorOnStatus
+											);
 										}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
@@ -1353,7 +1362,7 @@ var exports = {};
 						}, function(jsonData, secondArg) {
 							exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 								function() {
-								
+									explorer.changedItem();
 								}, function (jsonData) {
 									handleResponse(jsonData, commandInvocation);
 								}
@@ -1547,7 +1556,7 @@ var exports = {};
 						}, function(jsonData, secondArg) {
 							exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 								function() {
-								
+									explorer.changedItem(item);
 								}, function (jsonData) {
 									handleResponse(jsonData, commandInvocation);
 								}
@@ -2245,6 +2254,11 @@ var exports = {};
 											},function(jsonData, secondArg) {
 												exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 													function() {
+														progress.progress(gitService.getGitRemote(remoteToFetch.Location), "Getting remote details " + name).then(
+																function(jsonData){
+																	explorer.changedItem(item);
+																}, displayErrorOnStatus
+															);
 													}, function (jsonData) {
 														handleResponse(jsonData, commandInvocation);
 													}
