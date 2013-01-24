@@ -62,6 +62,11 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						that.changedItem(this);
 					};
 					var failure = function(error) {
+						if(error.canceled){
+							operation.deferred = that.operationsClient.getOperation(this);
+							operation.deferred.then(success.bind(this), failure.bind(this), progress.bind(this));
+							return;
+						}
 						if(error.HttpCode==404 && error.JsonData && error.JsonData.taskNotFound){
 							globalOperations.remove(this);
 							delete operations[this];
@@ -69,7 +74,11 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 							return;
 						}
 						operations[this].operation = operations[this].operation || {};
-						operations[this].operation.type = "error";
+						if(error.Severity=="Cancel"){
+							operations[this].operation.type = "abort";
+						}else{
+							operations[this].operation.type = "error";
+						}
 						operations[this].operation.error = error;
 						that.changedItem(this);
 					}; 
@@ -77,7 +86,8 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 						operations[this].operation = operation;
 						that.changedItem(this);
 					};
-					operation.deferred = that.operationsClient.getOperation(operationLocation).then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
+					operation.deferred = that.operationsClient.getOperation(operationLocation);
+					operation.deferred.then(success.bind(operationLocation), failure.bind(operationLocation), progress.bind(operationLocation));
 				}
 				that._loadOperationsList.bind(that)(operations);
 			}, displayError);
@@ -118,10 +128,8 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 		
 		OperationsModel.prototype.getItem = function(location){
 			var operationInfo = this.operations[location];
-			return {Location: location,
-				Name: operationInfo.Name,
-				deferred: operationInfo.deferred,
-				operation: operationInfo.operation};	
+			operationInfo.Location = location;
+			return operationInfo;
 		};
 		
 		OperationsModel.prototype.getChildren = function(parentItem, onComplete){

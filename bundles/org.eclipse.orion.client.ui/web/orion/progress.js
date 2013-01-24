@@ -14,12 +14,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/Deferred', 'orion/webui/lit
 function(messages, require, Deferred, lib, mOperationsDialog) {
 	
 	
-	function ProgressMonitorTool(progressPane){
+	function ProgressMonitorTool(progressPane, serviceRegistry){
 		if(this._progressPane){
 			return;
 		}
 		this._progressPane = lib.node(progressPane);
-		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane});
+		this._operationsDialog = new mOperationsDialog.OperationsDialog({triggerNode: this._progressPane, serviceRegistry: serviceRegistry});
 		var that = this;
 		this._progressPane.addEventListener("keydown", function(evt) {  //$NON-NLS-0$
 			if(evt.charOrCode === ' ' || evt.keyCode === lib.KEY.ENTER) { //$NON-NLS-0$
@@ -36,7 +36,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				this._lastIconClass = iconClass;
 				this._progressPane.classList.add(this._lastIconClass);
 			},
-			generateOperationsInfo: function(operations){
+			generateOperationsInfo: function(operations, deferreds){
 				
 				var operationsToDisplay = {};
 				for(var i in operations){
@@ -52,7 +52,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 					if(this._progressPane.hasAttribute("aria-valuetext")) { //$NON-NLS-0$
 						this._progressPane.removeAttribute("aria-valuetext"); //$NON-NLS-0$
 					}
-					this._operationsDialog.setOperations(operationsToDisplay);
+					this._operationsDialog.setOperations(operationsToDisplay, deferreds);
 					return;
 				}
 				
@@ -97,7 +97,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 					}
 					this._switchIconTo("progressPane_operations");					 //$NON-NLS-0$
 				}
-				this._operationsDialog.setOperations(operationsToDisplay);
+				this._operationsDialog.setOperations(operationsToDisplay, deferreds);
 			},
 			_isEmpty: function(object){
 				for(var key in object){
@@ -121,6 +121,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 		this._serviceRegistration = serviceRegistry.registerService("orion.page.progress", this); //$NON-NLS-0$ 
 		this._operationsClient = operationsClient;
 		this._operations = {};
+		this._operationDeferrds = {};
 		this._operationsIndex = 0;
 		this._lastOperation = null;
 		this._lastIconClass = null;
@@ -132,7 +133,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				if(this._progressMonitorClass){
 					return; // we have an other progress monitor implementation, we don't need to initialize our UI
 				}
-				this._progressMonitorTool = new ProgressMonitorTool(progressPane);
+				this._progressMonitorTool = new ProgressMonitorTool(progressPane, this._serviceRegistry);
 			},
 			progress: function(deferred, operationName, progressMonitor){
 				var that = this;
@@ -151,7 +152,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 						if(progressMonitor){
 							operation.progressMonitor = progressMonitor;
 						}
-						that.writeOperation.bind(that)(operationsIndex, operation);
+						that.writeOperation.bind(that)(operationsIndex, operation, deferred);
 						if(!operation.Location){
 							that._removeOperationFromTheList.bind(that)(operationsIndex);
 						}
@@ -165,9 +166,9 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 							operation.progressMonitor = progressMonitor;
 						}
 						that._lastOperation = operation;
-						operation.type = "error";
+						operation.type = error.canceled ? "abort" : "error";
 						operation.error = error; 
-						that.writeOperation.bind(that)(operationsIndex, operation);
+						that.writeOperation.bind(that)(operationsIndex, operation, deferred);
 						if(!operation.Location){
 							that._removeOperationFromTheList.bind(that)(operationsIndex);
 						}
@@ -178,7 +179,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 					if(progressMonitor){
 						operation.progressMonitor = progressMonitor;
 					}
-					that.writeOperation.bind(that)(operationsIndex, operation);
+					that.writeOperation.bind(that)(operationsIndex, operation, deferred);
 				});
 				return deferred;
 			},
@@ -195,10 +196,11 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 			_removeOperationFromTheList: function(operationId){
 				var progressMonitor = this._operations[operationId].progressMonitor;
 				delete this._operations[operationId];
+				delete this._operationDeferrds[operationId];
 				if(progressMonitor){
 					progressMonitor.done();
 				}else{
-					this._progressMonitorTool.generateOperationsInfo(this._operations); 
+					this._progressMonitorTool.generateOperationsInfo(this._operations, this._operationDeferrds); 
 				}
 			},
 			removeCompletedOperations: function(){
@@ -209,9 +211,10 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 						if(progressMonitor)
 							progressMonitor.done();
 						delete this._operations[i];
+						delete this._operationDeferrds[i];
 					}
 				}
-				this._progressMonitorTool.generateOperationsInfo(operations);
+				this._progressMonitorTool.generateOperationsInfo(operations, this._operationDeferrds);
 			},
 			setProgressResult: function(result){
 				this._serviceRegistry.getService("orion.page.message").setProgressResult(result); //$NON-NLS-0$
@@ -237,8 +240,9 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				});
 				return this.progress(deferred, message);
 			},
-			writeOperation: function(operationIndex, operation){
+			writeOperation: function(operationIndex, operation, deferred){
 				this._operations[operationIndex] = operation;
+				this._operationDeferrds[operationIndex] = deferred;
 				if(operation.Location){
 					serviceRegistry.getService("orion.core.preference").getPreferences("/operations").then(function(globalOperations){
 						globalOperations.put(operation.Location, {Name: operation.Name, expires: operation.expires});
@@ -247,7 +251,7 @@ function(messages, require, Deferred, lib, mOperationsDialog) {
 				if(operation.progressMonitor){
 					operation.progressMonitor.progress(operation.Name);
 				}else{
-					this._progressMonitorTool.generateOperationsInfo(this._operations);
+					this._progressMonitorTool.generateOperationsInfo(this._operations, this._operationDeferrds);
 				}
 			}
 	};

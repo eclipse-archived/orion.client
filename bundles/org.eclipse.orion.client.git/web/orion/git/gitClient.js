@@ -959,10 +959,12 @@ eclipse.GitService = (function() {
 			var response =  result.response ? JSON.parse(result.response) : null;
 			
 			if (result.xhr && result.xhr.status === 202) {
-				operation.handle(response.Location).then(deferred.resolve, function(data) {
+				var def = operation.handle(response.Location);
+				def.then(deferred.resolve, function(data) {
 					data.failedOperation = response.Location;
 					deferred.reject(data);
 				}, deferred.progress);
+				deferred.then(null, function(error){def.reject(error);});
 				return;
 			}
 			deferred.resolve(response);

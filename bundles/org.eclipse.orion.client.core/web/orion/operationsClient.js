@@ -13,22 +13,7 @@
 define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messages, Deferred){
 	
 	function _doServiceCall(operationsService, funcName, funcArgs) {
-		var clientDeferred = new Deferred();
-		operationsService[funcName].apply(operationsService, funcArgs).then(
-			//on success, just forward the result to the client
-			function(result) {
-				clientDeferred.resolve(result);
-			},
-			//on failure we might need to retry
-			function(error) {
-				//forward other errors to client
-				clientDeferred.reject(error);
-			},
-			function(progress) {
-				clientDeferred.progress(progress);
-			}
-		);
-		return clientDeferred;
+		return operationsService[funcName].apply(operationsService, funcArgs);
 	}
 	
 	function _getOperations(operationsService, options){
@@ -93,32 +78,6 @@ define(['i18n!orion/operations/nls/messages', "orion/Deferred"], function(messag
 			result.Children = result.Children.concat(lists[i].Children);
 		}
 		return result;
-	}
-	
-	function _registerOperationChangeListener(service, listener, longpollingId){
-		var that = this;
-		var args = {Longpolling: true};
-		if(longpollingId){
-			args.LongpollingId = longpollingId;
-		}
-		_doServiceCall(service, "getOperations", [args]).then(function(result){ //$NON-NLS-0$
-			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
-				return;
-			}
-			listener(result, longpollingId);
-			if(result.LongpollingId){
-				that._currentLongpollingIds.push(result.LongpollingId);
-				_registerOperationChangeListener.bind(that)(service, listener, result.LongpollingId);
-			} else {
-				_registerOperationChangeListener.bind(that)(service, listener, longpollingId);
-			}
-			
-		}, function(error){
-			if(longpollingId && that._currentLongpollingIds.indexOf(longpollingId)<0){
-				return;
-			}
-			setTimeout(function(){_registerOperationChangeListener.bind(that)(service, listener, longpollingId);}, 2000); //TODO display error and ask user to retry rather than retry every 2 sec
-		});
 	}
 	
 	function _notifyChangeListeners(result){
