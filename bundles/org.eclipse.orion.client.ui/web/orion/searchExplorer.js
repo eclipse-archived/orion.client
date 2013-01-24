@@ -360,7 +360,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
 				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
-			_connect(check, "onclick", function(evt) { //$NON-NLS-0$
+			_connect(check, "click", function(evt) { //$NON-NLS-0$
 				var newValue = evt.target.checked ? false : true;
 				this.onCheck(null, evt.target, newValue);
 			}.bind(this));
@@ -530,7 +530,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
 		var link = _createLink('navlink', this.getItemLinkId(item), linkLocation, spanHolder); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
-		_connect(link, "onclick", function() { //$NON-NLS-0$
+		_connect(link, "click", function() { //$NON-NLS-0$
 			that.explorer.getNavHandler().cursorOn(item);
 		});
 		var span = _createElement('span', null, null, link); //$NON-NLS-0$
@@ -577,7 +577,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		link.title = i18nUtil.formatMessage(messages["Search again in this folder with \"${0}\""], this.explorer.model.searchHelper.displayedSearchTerm);
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
-		_connect(link, "onclick", function() { //$NON-NLS-0$
+		_connect(link, "click", function() { //$NON-NLS-0$
 			that.explorer.closeContextTip();
 		});
 	};
@@ -675,13 +675,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			var span = _createElement('span', "primaryColumn", null, div);//$NON-NLS-1$ //$NON-NLS-0$
 
 			_place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
-			_connect(span, "onclick", function() { //$NON-NLS-0$
+			_connect(span, "click", function() { //$NON-NLS-0$
 				window.open(item.model.linkLocation);
 			});
-			_connect(span, "onmouseover", function() { //$NON-NLS-0$
+			_connect(span, "mouseover", function() { //$NON-NLS-0$
 				span.style.cursor ="pointer"; //$NON-NLS-0$
 			});
-			_connect(span, "onmouseout", function() { //$NON-NLS-0$
+			_connect(span, "mouseout", function() { //$NON-NLS-0$
 				span.style.cursor ="default"; //$NON-NLS-0$
 			});
 			
