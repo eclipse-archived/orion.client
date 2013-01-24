@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define setTimeout*/
-define(['orion/Deferred', 'orion/assert', 'orion/textview/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
+define(['orion/Deferred', 'orion/assert', 'orion/editor/textModel', 'js-tests/editor/mockTextView', 'orion/editor/contentAssist'],
 		function(Deferred, assert, mTextModel, mMockTextView, mContentAssist) {
 	var ContentAssist = mContentAssist.ContentAssist,
 	    TextModel = mTextModel.TextModel,

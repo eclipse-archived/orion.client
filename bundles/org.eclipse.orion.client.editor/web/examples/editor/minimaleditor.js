@@ -13,7 +13,7 @@
 /*jslint browser:true devel:true*/
 
 
-define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures"],
+define(["require", "orion/editor/textView", "orion/editor/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures"],
 
 function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 	

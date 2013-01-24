@@ -1,6 +1,6 @@
 /*jslint browser:true*/
 /*global define esprima */
-define(['orion/plugin', 'orion/textview/textModel', 'esprima/esprima', 'domReady!'], function(PluginProvider, mTextModel) {
+define(['orion/plugin', 'orion/editor/textModel', 'esprima/esprima', 'domReady!'], function(PluginProvider, mTextModel) {
 	var provider = new PluginProvider({
 		name: 'JS Syntax Model Provider',
 		description: 'Constructs an abstract syntax tree (AST) for JavaScript code that can be used by other plugins to provide JS language tooling.',

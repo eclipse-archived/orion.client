@@ -11,7 +11,7 @@
 
 /*global define */
 
-define(["orion/assert", 'orion/textview/textModel', 'orion/textview/projectionTextModel'], function(assert, mTextModel, mProjectionTextModel) {
+define(["orion/assert", 'orion/editor/textModel', 'orion/editor/projectionTextModel'], function(assert, mTextModel, mProjectionTextModel) {
 
 	var tests = {};
 	

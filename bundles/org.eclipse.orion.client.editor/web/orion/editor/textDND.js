@@ -13,7 +13,7 @@
  
 /*global define */
 
-define("orion/textview/textDND", [], function() { //$NON-NLS-0$
+define("orion/editor/textDND", [], function() { //$NON-NLS-0$
 
 	function TextDND(view, undoStack) {
 		this._view = view;

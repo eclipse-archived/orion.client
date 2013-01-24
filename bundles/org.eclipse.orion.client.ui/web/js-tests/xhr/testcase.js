@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global console define navigator setTimeout XMLHttpRequest*/
-define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
+define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/editor/eventTarget"],
 		function(assert, mTest, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;

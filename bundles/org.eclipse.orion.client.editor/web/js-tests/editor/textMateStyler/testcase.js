@@ -93,7 +93,7 @@ define(["orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "te
 	
 	/**
 	 * Helper
-	 * @param {orion.textview.StyleRange[]} styleRanges
+	 * @param {orion.editor.StyleRange[]} styleRanges
 	 * @param {Array} scopeRegions
 	 */
 	function assertStylesMatchScopes(view, styler, lineIndex, styleRanges, /**Array*/ scopeRegions) {
@@ -128,7 +128,7 @@ define(["orion/assert", "../mockTextView.js", "orion/editor/textMateStyler", "te
 	}
 	
 //	/**
-//	 * Fails if the {@link orion.textview.StyleRange[]} ranges returned by running the styler on the line number
+//	 * Fails if the {@link orion.editor.StyleRange[]} ranges returned by running the styler on the line number
 //	 * <tt>lineIndex</tt> do not exactly match the expected result given in <tt>scopeRegions</tt>.
 //	 * @see #assertDisplayedLineScope
 //	 */
