@@ -30,7 +30,7 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
     ```npm install```
 (This will take a few minutes).
 4. Verify the default path of npm-cli.js.
-   In the same directory, open the server.conf file. The default value of npm_path is ../lib/node_modules/npm/bin/npm-cli.js.
+   In the same directory, open the orion.conf file. The default value of npm_path is ../lib/node_modules/npm/bin/npm-cli.js.
    This is the npm module path to support npm command. Make sure if this default path is correct, relative to the node executable directory in your environment.
    If you installed a recent version of nodejs the NPM should be installed automatically. The default value of npm_path should work in most of the cases.
    How to confirm:
