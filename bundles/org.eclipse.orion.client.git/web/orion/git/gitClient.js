@@ -104,49 +104,7 @@ eclipse.GitService = (function() {
 			
 			return clientDeferred;
 		},
-		
-//		getDiffContent: function(diffURI){
-//			var service = this;
-//			var clientDeferred = new dojo.Deferred();
-//			dojo.xhrGet({
-//				url: diffURI , 
-//				headers: {
-//					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
-//				},
-//				content: { "parts": "diff" }, //$NON-NLS-1$ //$NON-NLS-0$
-//				handleAs: "text", //$NON-NLS-0$
-//				timeout: 15000,
-//				load: function(jsonData, xhrArgs) {
-//					service._getGitServiceResponse(clientDeferred, jsonData, xhrArgs);
-//				},
-//				error: function(error, ioArgs) {
-//					service._handleGitServiceResponseError(clientDeferred, error);
-//				}
-//			});
-//			return clientDeferred;
-//		},
-		
-//		getDiffFileURI: function(diffURI){
-//			var service = this;
-//			var clientDeferred = new dojo.Deferred();
-//			dojo.xhrGet({
-//				url: diffURI , 
-//				headers: {
-//					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
-//				},
-//				content: { "parts": "uris" }, //$NON-NLS-1$ //$NON-NLS-0$
-//				handleAs: "json", //$NON-NLS-0$
-//				timeout: 15000,
-//				load: function(jsonData, xhrArgs) {
-//					service._getGitServiceResponse(clientDeferred, jsonData, xhrArgs);
-//				},
-//				error: function(error, ioArgs) {
-//					service._handleGitServiceResponseError(clientDeferred, error);
-//				}
-//			});
-//			return clientDeferred;
-//		},
-		
+	
 		getGitStatus: function(url){
 			var service = this;
 			
