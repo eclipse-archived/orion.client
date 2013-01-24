@@ -185,18 +185,18 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				mTypes.registerType(NewType);
 			},
 			/**
+			 * Sets focus to the Shell's input area.
+			 */
+			setFocusToInput: function() {
+				this.inputText.focus();
+			},
+			/**
 			 * Populates the Shell's input area with a string value.
 			 */
 			setInputText: function(value) {
 				if (value) {
 					this.inputText.value = value.toString();
 				}
-			},
-			/**
-			 * Sets focus to the Shell's input area.
-			 */
-			setFocus: function() {
-				this.inputText.focus();
 			},
 			
 			/** @private */
