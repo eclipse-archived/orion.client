@@ -45,13 +45,14 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * @param {Function} afterShowing Optional. A function to call after the popup appears.
 		 * @param {Function} afterHiding Optional. A function to call after the popup is hidden.
 		 * @param {String} trigger Optional. The event that triggers the popup. Defaults to "click". Can be one of "mouseover",
+		 * @param {Number} hideDelay Optional.  The delay to be used when hiding the popup.
 		 * "click", or "none".  If "none" then the creator will be responsible for showing, hiding, and destroying the popup.
 		 */
 
-		_initialize: function(triggerNode, afterShowing, afterHiding, trigger) {
+		_initialize: function(triggerNode, afterShowing, afterHiding, trigger, hideDelay) {
 			this._tooltip = new tooltip.Tooltip({
 				node: triggerNode,
-				hideDelay: 0,
+				hideDelay: hideDelay || 0,
 				afterShowing: this._afterShowingFunction(afterShowing).bind(this), 
 				afterHiding: afterHiding,
 				trigger: trigger ? trigger : "click" //$NON-NLS-0$

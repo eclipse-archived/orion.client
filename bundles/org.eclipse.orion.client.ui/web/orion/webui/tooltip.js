@@ -103,6 +103,21 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					 this._tipInner.id = "tooltip" + new Date().getTime().toString(); //$NON-NLS-0$
 					 this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$
 				}
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=398960
+				// mousing over the tip itself will cancel any pending timeout to close it, but then we must
+				// also close it when we leave the tip.
+				this._tip.addEventListener("mouseover", function(event) { //$NON-NLS-0$
+					if (self._timeout) {
+						window.clearTimeout(self._timeout);
+						self._timeout = null;
+					}
+					self._tip.addEventListener("mouseout", function(event) { //$NON-NLS-0$
+						if (lib.contains(self._tip, event.target)) {
+							self.hide();
+							lib.stop(event);
+						}
+					}, false);
+				}, false);
 			}
 			return this._tip;
 		},

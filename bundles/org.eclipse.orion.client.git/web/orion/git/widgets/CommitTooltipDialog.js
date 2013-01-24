@@ -24,7 +24,7 @@ define([ 'i18n!git/nls/gitmessages', 'require', 'orion/webui/littlelib', 'orion/
 		this.commit = options.commit;
 
 		// Start the dialog initialization.
-		this._initialize(options.triggerNode, null, null, "mouseover");
+		this._initialize(options.triggerNode, null, null, "mouseover", 1000);
 	};
 
 	CommitTooltipDialog.prototype._bindToDom = function(parent) {
