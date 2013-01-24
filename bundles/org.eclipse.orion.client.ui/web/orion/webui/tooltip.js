@@ -24,7 +24,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * @param options.node The node showing the tooltip.  Required.
 	 * @param options.text The text in the tooltip.  Optional.  If not specified, the client is expected to add content
 	 * to the tooltip prior to triggering it.
-	 * @param options.trigger The event that triggers the tooltip.  Optional.  Defaults to "mouseover."  Can be one of "mouseover",
+	 * @param options.trigger The event that triggers the tooltip.  Optional.  Defaults to "mouseover".  Can be one of "mouseover",
 	 * "click", or "none".  If "none" then the creator will be responsible for showing, hiding, and destroying the tooltip.
 	 * If "mouseover" then the aria attributes for tooltips will be set up.
 	 * @param options.position An array specifying the preferred positions to try positioning the tooltip.  Positions can be "left", "right", 
