@@ -8,9 +8,9 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-/*global define eclipse window parent document*/
+/*global define eclipse window parent document URL*/
 
-define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domReady!"], function(xhr, PluginProvider, operation, Deferred) {
+define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "orion/URL-shim", "domReady!"], function(xhr, PluginProvider, operation, Deferred) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
@@ -59,11 +59,16 @@ define(["orion/xhr", "orion/plugin", "orion/operation", "orion/Deferred", "domRe
 	// testing that command service handles image-less actions properly
 	provider.registerService("orion.core.operation", {
 		getOperations: function(options) {
-			return xhr("GET", base, {
+			var url = new URL(base, window.location);
+			if (options && typeof options === "object") {
+				Object.keys(options).forEach(function(param) {
+					url.query.set(param, options[param]);
+				});
+			}
+			return xhr("GET", url.href, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				query: options,
 				timeout: options.Longpolling ? 70000 : 15000
 			}).then(function(result) {
 				result = result.response ? JSON.parse(result.response) : null;

@@ -1,5 +1,5 @@
-/*global define document*/
-define(["orion/plugin", "orion/xhr", "domReady!"], function(PluginProvider, xhr) {
+/*global define document URL window*/
+define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(PluginProvider, xhr) {
 	var temp = document.createElement('a');
 	temp.href = "../mixloginstatic/LoginWindow.html";
 	var login = temp.href;
@@ -197,22 +197,24 @@ define(["orion/plugin", "orion/xhr", "domReady!"], function(PluginProvider, xhr)
 	var base = temp.href;
 	provider.registerService("orion.core.diff", {
 		getDiffContent: function(diffURI){	
-			return xhr("GET", diffURI, {
+			var url = new URL(diffURI, window.location);
+			url.query.set("parts", "diff");
+			return xhr("GET", url.href, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				query: { "parts": "diff" },
 				timeout: 15000
 			}).then(function(xhrResult) {
 				return xhrResult.responseText;
 			});
 		},			
 		getDiffFileURI: function(diffURI){
-			return xhr("GET", diffURI, {
+			var url = new URL(diffURI, window.location);
+			url.query.set("parts", "uris");
+			return xhr("GET", url.href, {
 				headers: {
 					"Orion-Version": "1"
 				},
-				query: { "parts": "uris" },
 				timeout: 15000
 			}).then(function(xhrResult) {
 				return JSON.parse(xhrResult.responseText);
