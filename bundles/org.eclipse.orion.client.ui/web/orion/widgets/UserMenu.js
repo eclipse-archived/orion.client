@@ -53,7 +53,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			element.addEventListener("click", click, false); //$NON-NLS-0$
 			// onClick events do not register for spans when using the keyboard
 			element.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {	
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {	
 					click();
 				}
 			}, false);

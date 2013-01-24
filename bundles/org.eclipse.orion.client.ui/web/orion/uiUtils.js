@@ -209,7 +209,7 @@ define(['i18n!orion/nls/messages', 'orion/webui/littlelib'], function(messages, 
 			lib.stop(e);
 		}, false);
 		button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 				callback();
 				lib.stop(e);
 			}				

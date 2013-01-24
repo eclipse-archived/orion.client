@@ -111,7 +111,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					}, false);
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-						if(e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {
+						if(e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
 							self.close();
 						}
 					}, false);
@@ -275,7 +275,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 					}, false);
 					// onClick events do not register for spans when using the keyboard without a screen reader
 					options.addEventListener("keydown", function (e) { //$NON-NLS-0$
-						if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {			
+						if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {			
 							commandInvocation.parameters.optionsRequested = true;
 							finish(self);
 						}
@@ -288,7 +288,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				}, false);
 				// onClick events do not register for spans when using the keyboard without a screen reader
 					ok.addEventListener("keydown", function (e) { //$NON-NLS-0$
-					if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {
+					if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {
 						finish(self);
 					}
 				}, false);
@@ -303,7 +303,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/webui/littlelib'],
 				}, false);
 				// onClick events do not register for spans when using the keyboard without a screen reader
 				close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-					if(e.keyCode === lib.KEY.ENTER  || e.charCode === lib.KEY.SPACE) {
+					if(e.keyCode === lib.KEY.ENTER  || e.keyCode === lib.KEY.SPACE) {
 						localClose();
 					}
 				}, false);

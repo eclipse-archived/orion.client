@@ -52,7 +52,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/webui/littlelib', 'orion/webui
 		};
 		this.$addSftpConnection.addEventListener("click", addConnection.bind(self), false); //$NON-NLS-0$
 		this.$addSftpConnection.addEventListener("keydown", function(e) { //$NON-NLS-0$
-			if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+			if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 				addConnection.bind(self)();
 				lib.stop(e);
 			}				
