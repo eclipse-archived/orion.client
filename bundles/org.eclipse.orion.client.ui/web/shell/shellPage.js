@@ -258,9 +258,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	}
 	
 	function cdExec(args, context) {
-		if (!args.directory) {
-			return "";
-		}
 		var node = args.directory.value[0];
 		shellPageFileService.setCurrentDirectory(node);
 		hashUpdated = true;
@@ -269,11 +266,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		return getChangedToElement(pathString);
 	}
 
-	function editExec(node) {
-		if (!node.file) {
-			return;
-		}
-		var url = computeEditURL(node.file.value[0]);
+	function editExec(args) {
+		var url = computeEditURL(args.file.getValue()[0]);
 		window.open(url);
 	}
 
@@ -344,10 +338,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	/* implementations of built-in plug-in management commands */
 
 	function pluginServicesExec(args, context) {
-		if (!args.plugin) {
-			return "";
-		}
-
 		var result = document.createElement("div"); //$NON-NLS-0$
 		var services = args.plugin.getServiceReferences();
 		services.forEach(function(service) {
@@ -404,13 +394,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	}
 
 	function pluginsDisableExec(args, context) {
-		var plugin = args.plugin;
-		if (!plugin) {
-			return "";
-		}
-
 		var result = context.createPromise();
-		plugin.stop().then(
+		args.plugin.stop().then(
 			function() {
 				result.resolve(messages.Succeeded);
 			},
@@ -422,13 +407,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	}
 
 	function pluginsEnableExec(args, context) {
-		var plugin = args.plugin;
-		if (!plugin) {
-			return "";
-		}
-
 		var result = context.createPromise();
-		plugin.start({lazy:true}).then(
+		args.plugin.start({lazy:true}).then(
 			function() {
 				result.resolve(messages.Succeeded);
 			},
@@ -470,13 +450,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	}
 
 	function pluginsReloadExec(args, context) {
-		var plugin = args.plugin;
-		if (!plugin) {
-			return "";
-		}
-
 		var result = context.createPromise();
-		plugin.update().then(
+		args.plugin.update().then(
 			function() {
 				result.resolve(messages.Succeeded);
 			},
@@ -488,10 +463,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	}
 
 	function pluginsUninstallExec(args, context) {
-		if (!args.plugin) {
-			return "";
-		}
-
 		var result = context.createPromise();
 		if (args.plugin.isAllPlugin) {
 			var msg = messages["Are you sure you want to uninstall all contributed plug-ins?"];
@@ -537,10 +508,6 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 	/* implementations of built-in service management commands */
 
 	function serviceContributorsExec(args, context) {
-		if (!args.id) {
-			return "";
-		}
-
 		var serviceId = args.id.trim();
 		var result = document.createElement("div"); //$NON-NLS-0$
 		var plugins = pluginType.getPlugins();

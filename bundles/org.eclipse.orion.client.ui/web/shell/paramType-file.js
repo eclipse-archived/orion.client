@@ -275,14 +275,14 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 				if (!predictions) {
 					/* parent hierarchy is not valid */
 					return {
-						value: null,
+						value: undefined,
 						status: mShell.CompletionStatus.ERROR,
 						message: i18nUtil.formatMessage(messages["'${0}' is not valid"], string),
 						predictions: null
 					};
 				}
 
-				var message, status, value = null;
+				var message, status, value;
 				if (typeSpec.exist === false) {
 					var exactMatch;
 					for (var i = 0; i < predictions.length; i++) {
