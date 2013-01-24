@@ -54,8 +54,6 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			var projectData = fetchProjectData();
 			
 			var SFTPConfiguration = new mSFTPConfiguration( project, mainPanel, projectData, commandService, serviceRegistry );	
-		
-			console.log( project );
 		}
 		
 		mBootstrap.startup().then(
