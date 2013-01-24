@@ -105,7 +105,7 @@
 	z-index: 50;
 	width: 3px;
 	cursor: e-resize;
-	background: white;
+	background: #dedede;
 	visibility: hidden;  /* use visibility vs. display because we need a position in calculations */
 }
 
