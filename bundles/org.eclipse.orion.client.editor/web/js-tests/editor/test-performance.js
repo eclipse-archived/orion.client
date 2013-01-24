@@ -11,7 +11,7 @@
 
 /*global define require setTimeout window */
 
-define(['examples/textview/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
+define(['examples/editor/demoSetup', 'orion/Deferred'], function(mSetup, Deferred) {
 
 	var tests = {};
 	
@@ -34,7 +34,7 @@ define(['examples/textview/demoSetup', 'orion/Deferred'], function(mSetup, Defer
 	
 	function doAction(action, max) {
 		var d = new Deferred();
-		var view = mSetup.view || setupView(mSetup.getFile("/examples/textview/text.txt"), "java");
+		var view = mSetup.view || setupView(mSetup.getFile("/examples/editor/text.txt"), "java");
 		var model = view.getModel();
 		if (action.toLowerCase().indexOf("down") !== -1) {
 			view.setSelection(0, 0);

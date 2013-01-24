@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/textview/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
+define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
 
 var exports = {};
 
@@ -631,7 +631,7 @@ exports.DiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
@@ -757,7 +757,7 @@ exports.TwoWayDiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
@@ -814,7 +814,7 @@ exports.inlineDiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.inlineDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */

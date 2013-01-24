@@ -13,7 +13,7 @@
  
 /*globals define window */
 
-define(['examples/textview/demoSetup', 'tests/textview/test-performance', 'orion/textview/util'],   
+define(['examples/editor/demoSetup', 'tests/editor/test-performance', 'orion/editor/util'],   
  
 function(mSetup, mTestPerformance, util) {
 	
@@ -125,11 +125,11 @@ function(mSetup, mTestPerformance, util) {
 	}
 	
 	function createJavaScriptSample() {
-		return setupView(mSetup.getFile("/orion/textview/textView.js"), "js"); //$NON-NLS-1$ //$NON-NLS-0$
+		return setupView(mSetup.getFile("/orion/editor/textView.js"), "js"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 
 	function createHtmlSample() {
-		return setupView(mSetup.getFile("/examples/textview/demo.html"), "html"); //$NON-NLS-1$ //$NON-NLS-0$
+		return setupView(mSetup.getFile("/examples/editor/demo.html"), "html"); //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	function createPlainTextSample() {

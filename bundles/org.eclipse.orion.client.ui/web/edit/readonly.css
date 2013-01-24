@@ -6,10 +6,10 @@
 
 @import "../css/sections.css"; /* for outliner */
 
-@import "../orion/textview/textview.css";
-@import "../orion/textview/rulers.css";
-@import "../orion/textview/annotations.css";
-@import "../orion/textview/tooltip.css";
+@import "../orion/editor/textview.css";
+@import "../orion/editor/rulers.css";
+@import "../orion/editor/annotations.css";
+@import "../orion/editor/tooltip.css";
 @import "../css/editor-theme.css";
 
 .outlineExplorer {

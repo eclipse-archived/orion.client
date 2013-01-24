@@ -11,13 +11,13 @@
 
 /*global define */
 
-define("orion/textview/undoStack", [], function() { //$NON-NLS-0$
+define("orion/editor/undoStack", [], function() { //$NON-NLS-0$
 
 	/** 
 	 * Constructs a new Change object.
 	 * 
 	 * @class 
-	 * @name orion.textview.Change
+	 * @name orion.editor.Change
 	 * @private
 	 */
 	function Change(offset, text, previousText) {
@@ -69,7 +69,7 @@ define("orion/textview/undoStack", [], function() { //$NON-NLS-0$
 	 * Constructs a new CompoundChange object.
 	 * 
 	 * @class 
-	 * @name orion.textview.CompoundChange
+	 * @name orion.editor.CompoundChange
 	 * @private
 	 */
 	function CompoundChange () {
@@ -117,16 +117,16 @@ define("orion/textview/undoStack", [], function() { //$NON-NLS-0$
 	/**
 	 * Constructs a new UndoStack on a text view.
 	 *
-	 * @param {orion.textview.TextView} view the text view for the undo stack.
+	 * @param {orion.editor.TextView} view the text view for the undo stack.
 	 * @param {Number} [size=100] the size for the undo stack.
 	 *
-	 * @name orion.textview.UndoStack
+	 * @name orion.editor.UndoStack
 	 * @class The UndoStack is used to record the history of a text model associated to an view. Every
 	 * change to the model is added to stack, allowing the application to undo and redo these changes.
 	 *
 	 * <p>
 	 * <b>See:</b><br/>
-	 * {@link orion.textview.TextView}<br/>
+	 * {@link orion.editor.TextView}<br/>
 	 * </p>
 	 */
 	function UndoStack (view, size) {
@@ -150,7 +150,7 @@ define("orion/textview/undoStack", [], function() { //$NON-NLS-0$
 		model.addEventListener("Changing", this._listener.onChanging); //$NON-NLS-0$
 		view.addEventListener("Destroy", this._listener.onDestroy); //$NON-NLS-0$
 	}
-	UndoStack.prototype = /** @lends orion.textview.UndoStack.prototype */ {
+	UndoStack.prototype = /** @lends orion.editor.UndoStack.prototype */ {
 		/**
 		 * Adds a change to the stack.
 		 * 

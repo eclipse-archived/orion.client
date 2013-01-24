@@ -12,7 +12,7 @@
 /*global define */
 /*jslint maxerr:150 browser:true devel:true */
 
-define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/editor/Deferred', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
+define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/Deferred', 'orion/editor/util'], function(messages, mKeyBinding, mEventTarget, Deferred, util) {
 	/**
 	 * @name orion.editor.ContentAssistProvider
 	 * @class Interface defining a provider of content assist proposals.
@@ -30,7 +30,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 * @class
 	 * @property {String} line The text of the line on which content assist is being requested.
 	 * @property {String} prefix Any non-whitespace, non-symbol characters preceding the offset.
-	 * @property {orion.textview.Selection} selection The current selection.
+	 * @property {orion.editor.Selection} selection The current selection.
 	 */
 
 	/**
@@ -45,10 +45,10 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 	 * {@link #apply}, after which the ContentAssist becomes deactivated. An active ContentAssist may be deactivated
 	 * by calling {@link #deactivate}.<p>
 	 * A ContentAssist dispatches events when it becomes activated or deactivated, and when proposals have been computed.
-	 * @param {orion.textview.TextView} textView The TextView to provide content assist for.
-	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
-	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
-	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
+	 * @param {orion.editor.TextView} textView The TextView to provide content assist for.
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	/**
 	 * Dispatched when a ContentAssist is about to be activated.
@@ -149,7 +149,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 		deactivate: function() {
 			this.setState(State.INACTIVE);
 		},
-		/** @returns {orion.textview.TextView} */
+		/** @returns {orion.editor.TextView} */
 		getTextView: function() {
 			return this.textView;
 		},
@@ -158,7 +158,7 @@ define("orion/editor/contentAssist", ['i18n!orion/editor/nls/messages', 'orion/t
 			return this.state === State.ACTIVE || this.state === State.FILTERING;
 		},
 		/** @returns {Boolean} <code>true</code> if the event describes a change that should deactivate content assist. */
-		isDeactivatingChange: function(/**orion.textview.ModelChangingEvent*/ event) {
+		isDeactivatingChange: function(/**orion.editor.ModelChangingEvent*/ event) {
 			var deletion = event.removedCharCount > 0 && event.addedCharCount === 0,
 			    view = this.textView,
 			    overWhitespace = (event.start+1 <= view.getModel().getCharCount()) && /^\s*$/.test(view.getText(event.start, event.start+1));

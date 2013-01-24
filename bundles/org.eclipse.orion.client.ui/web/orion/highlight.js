@@ -10,8 +10,8 @@
  ******************************************************************************/
 
 /*global define*/
-define(['examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
-			'examples/textview/textStylerOptions', 'orion/bootstrap', 'orion/textview/util', 'orion/Deferred'], 
+define(['examples/editor/textStyler', 'orion/editor/textMateStyler', 'orion/editor/AsyncStyler',
+			'examples/editor/textStylerOptions', 'orion/bootstrap', 'orion/editor/util', 'orion/Deferred'], 
 		function(mTextStyler, mTextMateStyler, AsyncStyler, mTextStylerOptions, mBootstrap, util, Deferred) {
 	/**
 	 * Returns a promise that will provide a styler for the given content type.
@@ -19,8 +19,8 @@ define(['examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/ed
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry
 	 * @param {orion.core.ContentTypeService} contentTypeService
 	 * @param {orion.core.ContentType} contentType
-	 * @param {orion.textview.TextView} textView
-	 * @param {orion.textview.AnnotationModel} annotationModel
+	 * @param {orion.editor.TextView} textView
+	 * @param {orion.editor.AnnotationModel} annotationModel
 	 * @param {String} [fileName] Deprecated.
 	 * @param {Boolean} [allowAsync=true]
 	 * @returns {orion.Deferred}
@@ -125,8 +125,8 @@ define(['examples/textview/textStyler', 'orion/editor/textMateStyler', 'orion/ed
 	SyntaxHighlighter.prototype = /** @lends orion.highlight.SyntaxHighlighter.prototype */ {
 		/**
 		 * @param {orion.core.ContentType} contentType
-		 * @param {orion.textview.TextView} textView
-		 * @param {orion.textview.AnnotationModel} annotationModel
+		 * @param {orion.editor.TextView} textView
+		 * @param {orion.editor.AnnotationModel} annotationModel
 		 * @param {String} [fileName] <i>Deprecated.</i> For backwards compatibility only, service-contributed highlighters
 		 * will be checked against the file extension instead of contentType.
 		 * @param {Boolean} [allowAsync=true] If true, plugin-contributed asynchronous highlighters (i.e. <code>type == "highlighter"</code>

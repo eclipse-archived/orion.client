@@ -14,7 +14,7 @@
 
 /*global define*/
 
-define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/util'], function(mTextModel, mKeyBinding, mEventTarget, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/util'], function(mTextModel, mKeyBinding, mEventTarget, util) { //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 
 	/** @private */
 	function getWindow(document) {
@@ -201,25 +201,25 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * Constructs a new Selection object.
 	 * 
 	 * @class A Selection represents a range of selected text in the view.
-	 * @name orion.textview.Selection
+	 * @name orion.editor.Selection
 	 */
 	function Selection (start, end, caret) {
 		/**
 		 * The selection start offset.
 		 *
-		 * @name orion.textview.Selection#start
+		 * @name orion.editor.Selection#start
 		 */
 		this.start = start;
 		/**
 		 * The selection end offset.
 		 *
-		 * @name orion.textview.Selection#end
+		 * @name orion.editor.Selection#end
 		 */
 		this.end = end;
 		/** @private */
 		this.caret = caret; //true if the start, false if the caret is at end
 	}
-	Selection.prototype = /** @lends orion.textview.Selection.prototype */ {
+	Selection.prototype = /** @lends orion.editor.Selection.prototype */ {
 		/** @private */
 		clone: function() {
 			return new Selection(this.start, this.end, this.caret);
@@ -276,7 +276,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		this.right = rect.right;
 		this.bottom = rect.bottom;
 	}
-	TextRect.prototype = /** @lends orion.textview.TextRect.prototype */ {
+	TextRect.prototype = /** @lends orion.editor.TextRect.prototype */ {
 		/** @private */
 		toString: function() {
 			return "{l=" + this.left + ", t=" + this.top + ", r=" + this.right + ", b=" + this.bottom + "}"; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
@@ -286,28 +286,28 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * Constructs a new TextLine object.
 	 * 
 	 * @class A TextLine represents a line of text in the view.
-	 * @name orion.textview.TextLine
+	 * @name orion.editor.TextLine
 	 * @private
 	 */
 	function TextLine (view, lineIndex, lineDiv) {
 		/**
 		 * The view.
 		 *
-		 * @name orion.textview.TextLine#view
+		 * @name orion.editor.TextLine#view
 		 * @private
 		 */
 		this.view = view;
 		/**
 		 * The line index.
 		 *
-		 * @name orion.textview.TextLine#lineIndex
+		 * @name orion.editor.TextLine#lineIndex
 		 * @private
 		 */
 		this.lineIndex = lineIndex;
 		
 		this._lineDiv = lineDiv;
 	}
-	TextLine.prototype = /** @lends orion.textview.TextLine.prototype */ {
+	TextLine.prototype = /** @lends orion.editor.TextLine.prototype */ {
 		/** @private */
 		create: function(parent, div) {
 			if (this._lineDiv) { return; }
@@ -1017,14 +1017,14 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	 * @class This object describes the options for the text view.
 	 * <p>
 	 * <b>See:</b><br/>
-	 * {@link orion.textview.TextView}<br/>
-	 * {@link orion.textview.TextView#setOptions}
-	 * {@link orion.textview.TextView#getOptions}	 
+	 * {@link orion.editor.TextView}<br/>
+	 * {@link orion.editor.TextView#setOptions}
+	 * {@link orion.editor.TextView#getOptions}	 
 	 * </p>		 
-	 * @name orion.textview.TextViewOptions
+	 * @name orion.editor.TextViewOptions
 	 *
 	 * @property {String|DOMElement} parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
-	 * @property {orion.textview.TextModel} [model] the text model for the view. If it is not set the view creates an empty {@link orion.textview.TextModel}.
+	 * @property {orion.editor.TextModel} [model] the text model for the view. If it is not set the view creates an empty {@link orion.editor.TextModel}.
 	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
 	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
 	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view or is used for focus traversal.
@@ -1036,26 +1036,26 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 	/**
 	 * Constructs a new text view.
 	 * 
-	 * @param {orion.textview.TextViewOptions} options the view options.
+	 * @param {orion.editor.TextViewOptions} options the view options.
 	 * 
 	 * @class A TextView is a user interface for editing text.
-	 * @name orion.textview.TextView
-	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
-	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
-	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
+	 * @name orion.editor.TextView
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function TextView (options) {
 		this._init(options);
 	}
 	
-	TextView.prototype = /** @lends orion.textview.TextView.prototype */ {
+	TextView.prototype = /** @lends orion.editor.editor.prototype */ {
 		/**
 		 * Adds a ruler to the text view at the specified position.
 		 * <p>
 		 * The position is relative to the ruler location.
 		 * </p>
 		 *
-		 * @param {orion.textview.Ruler} ruler the ruler.
+		 * @param {orion.editor.Ruler} ruler the ruler.
 		 * @param {Number} [index=length] the ruler index.
 		 */
 		addRuler: function (ruler, index) {
@@ -1216,7 +1216,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Returns the action description for a given action ID.
 		 *
-		 * @returns {orion.textview.ActionDescrition} the action description
+		 * @returns {orion.editor.ActionDescrition} the action description
 		 */
 		getActionDescription: function(actionID) {
 			var action = this._actions[actionID];
@@ -1395,7 +1395,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * Returns all the key bindings associated to the given action ID.
 		 *
 		 * @param {String} actionID the action ID.
-		 * @returns {orion.textview.KeyBinding[]} the array of key bindings associated to the given action ID.
+		 * @returns {orion.editor.KeyBinding[]} the array of key bindings associated to the given action ID.
 		 *
 		 * @see #setKeyBinding
 		 * @see #setAction
@@ -1482,13 +1482,13 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Returns the specified view options.
 		 * <p>
-		 * The returned value is either a <code>orion.textview.TextViewOptions</code> or an option value. An option value is returned when only one string paremeter
-		 * is specified. A <code>orion.textview.TextViewOptions</code> is returned when there are no paremeters, or the parameters are a list of options names or a
-		 * <code>orion.textview.TextViewOptions</code>. All view options are returned when there no paremeters.
+		 * The returned value is either a <code>orion.editor.TextViewOptions</code> or an option value. An option value is returned when only one string paremeter
+		 * is specified. A <code>orion.editor.TextViewOptions</code> is returned when there are no paremeters, or the parameters are a list of options names or a
+		 * <code>orion.editor.TextViewOptions</code>. All view options are returned when there no paremeters.
 		 * </p>
 		 *
-		 * @param {String|orion.textview.TextViewOptions} [options] The options to return.
-		 * @return {Object|orion.textview.TextViewOptions} The requested options or an option value.
+		 * @param {String|orion.editor.TextViewOptions} [options] The options to return.
+		 * @return {Object|orion.editor.TextViewOptions} The requested options or an option value.
 		 *
 		 * @see #setOptions
 		 */
@@ -1520,7 +1520,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Returns the text model of the text view.
 		 *
-		 * @returns {orion.textview.TextModel} the text model of the view.
+		 * @returns {orion.editor.TextModel} the text model of the view.
 		 */
 		getModel: function() {
 			return this._model;
@@ -1560,7 +1560,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * document. The character at end offset is not included in the selection.
 		 * </p>
 		 * 
-		 * @returns {orion.textview.Selection} the view selection
+		 * @returns {orion.editor.Selection} the view selection
 		 *
 		 * @see #setSelection
 		 */
@@ -1660,11 +1660,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the user right clicks or otherwise invokes the context menu of the view. 
 		 * <p> 
 		 * <b>See:</b><br/> 
-		 * {@link orion.textview.TextView}<br/> 
-		 * {@link orion.textview.TextView#event:onContextMenu} 
+		 * {@link orion.editor.TextView}<br/> 
+		 * {@link orion.editor.TextView#event:onContextMenu} 
 		 * </p> 
 		 * 
-		 * @name orion.textview.ContextMenuEvent 
+		 * @name orion.editor.ContextMenuEvent 
 		 * 
 		 * @property {Number} x The pointer location on the x axis, relative to the document the user is editing. 
 		 * @property {Number} y The pointer location on the y axis, relative to the document the user is editing. 
@@ -1677,7 +1677,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * This event is sent when the user invokes the view context menu. 
 		 * 
 		 * @event 
-		 * @param {orion.textview.ContextMenuEvent} contextMenuEvent the event 
+		 * @param {orion.editor.ContextMenuEvent} contextMenuEvent the event 
 		 */ 
 		onContextMenu: function(contextMenuEvent) {
 			return this.dispatchEvent(contextMenuEvent); 
@@ -1707,16 +1707,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text view is destroyed.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onDestroy}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onDestroy}
 		 * </p>
-		 * @name orion.textview.DestroyEvent
+		 * @name orion.editor.DestroyEvent
 		 */
 		/**
 		 * This event is sent when the text view has been destroyed.
 		 *
 		 * @event
-		 * @param {orion.textview.DestroyEvent} destroyEvent the event
+		 * @param {orion.editor.DestroyEvent} destroyEvent the event
 		 *
 		 * @see #destroy
 		 */
@@ -1727,10 +1727,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This object is used to define style information for the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onLineStyle}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name orion.textview.Style
+		 * @name orion.editor.Style
 		 * 
 		 * @property {String} styleClass A CSS class name.
 		 * @property {Object} style An object with CSS properties.
@@ -1741,36 +1741,36 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This object is used to style range.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onLineStyle}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name orion.textview.StyleRange
+		 * @name orion.editor.StyleRange
 		 * 
 		 * @property {Number} start The start character offset, relative to the document, where the style should be applied.
 		 * @property {Number} end The end character offset (exclusive), relative to the document, where the style should be applied.
-		 * @property {orion.textview.Style} style The style for the range.
+		 * @property {orion.editor.Style} style The style for the range.
 		 */
 		/**
 		 * @class This is the event sent when the text view needs the style information for a line.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onLineStyle}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onLineStyle}
 		 * </p>		 
-		 * @name orion.textview.LineStyleEvent
+		 * @name orion.editor.LineStyleEvent
 		 * 
-		 * @property {orion.textview.TextView} textView The text view.		 
+		 * @property {orion.editor.TextView} textView The text view.		 
 		 * @property {Number} lineIndex The line index.
 		 * @property {String} lineText The line text.
 		 * @property {Number} lineStart The character offset, relative to document, of the first character in the line.
-		 * @property {orion.textview.Style} style The style for the entire line (output argument).
-		 * @property {orion.textview.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
+		 * @property {orion.editor.Style} style The style for the entire line (output argument).
+		 * @property {orion.editor.StyleRange[]} ranges An array of style ranges for the line (output argument).		 
 		 */
 		/**
 		 * This event is sent when the text view needs the style information for a line.
 		 *
 		 * @event
-		 * @param {orion.textview.LineStyleEvent} lineStyleEvent the event
+		 * @param {orion.editor.LineStyleEvent} lineStyleEvent the event
 		 */
 		onLineStyle: function(lineStyleEvent) {
 			return this.dispatchEvent(lineStyleEvent);
@@ -1779,11 +1779,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text in the model has changed.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onModelChanged}<br/>
-		 * {@link orion.textview.TextModel#onChanged}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onModelChanged}<br/>
+		 * {@link orion.editor.TextModel#onChanged}
 		 * </p>
-		 * @name orion.textview.ModelChangedEvent
+		 * @name orion.editor.ModelChangedEvent
 		 * 
 		 * @property {Number} start The character offset in the model where the change has occurred.
 		 * @property {Number} removedCharCount The number of characters removed from the model.
@@ -1795,7 +1795,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * This event is sent when the text in the model has changed.
 		 *
 		 * @event
-		 * @param {orion.textview.ModelChangedEvent} modelChangedEvent the event
+		 * @param {orion.editor.ModelChangedEvent} modelChangedEvent the event
 		 */
 		onModelChanged: function(modelChangedEvent) {
 			return this.dispatchEvent(modelChangedEvent);
@@ -1804,11 +1804,11 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text in the model is about to change.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onModelChanging}<br/>
-		 * {@link orion.textview.TextModel#onChanging}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onModelChanging}<br/>
+		 * {@link orion.editor.TextModel#onChanging}
 		 * </p>
-		 * @name orion.textview.ModelChangingEvent
+		 * @name orion.editor.ModelChangingEvent
 		 * 
 		 * @property {String} text The text that is about to be inserted in the model.
 		 * @property {Number} start The character offset in the model where the change will occur.
@@ -1821,7 +1821,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * This event is sent when the text in the model is about to change.
 		 *
 		 * @event
-		 * @param {orion.textview.ModelChangingEvent} modelChangingEvent the event
+		 * @param {orion.editor.ModelChangingEvent} modelChangingEvent the event
 		 */
 		onModelChanging: function(modelChangingEvent) {
 			return this.dispatchEvent(modelChangingEvent);
@@ -1830,10 +1830,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text is modified by the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onModify}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onModify}
 		 * </p>
-		 * @name orion.textview.ModifyEvent
+		 * @name orion.editor.ModifyEvent
 		 */
 		/**
 		 * This event is sent when the text view has changed text in the model.
@@ -1843,7 +1843,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * </p>
 		 *
 		 * @event
-		 * @param {orion.textview.ModifyEvent} modifyEvent the event
+		 * @param {orion.editor.ModifyEvent} modifyEvent the event
 		 */
 		onModify: function(modifyEvent) {
 			return this.dispatchEvent(modifyEvent);
@@ -1867,19 +1867,19 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the selection changes in the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onSelection}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onSelection}
 		 * </p>		 
-		 * @name orion.textview.SelectionEvent
+		 * @name orion.editor.SelectionEvent
 		 * 
-		 * @property {orion.textview.Selection} oldValue The old selection.
-		 * @property {orion.textview.Selection} newValue The new selection.
+		 * @property {orion.editor.Selection} oldValue The old selection.
+		 * @property {orion.editor.Selection} newValue The new selection.
 		 */
 		/**
 		 * This event is sent when the text view selection has changed.
 		 *
 		 * @event
-		 * @param {orion.textview.SelectionEvent} selectionEvent the event
+		 * @param {orion.editor.SelectionEvent} selectionEvent the event
 		 */
 		onSelection: function(selectionEvent) {
 			return this.dispatchEvent(selectionEvent);
@@ -1888,10 +1888,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text view scrolls.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onScroll}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onScroll}
 		 * </p>		 
-		 * @name orion.textview.ScrollEvent
+		 * @name orion.editor.ScrollEvent
 		 * 
 		 * @property oldValue The old scroll {x,y}.
 		 * @property newValue The new scroll {x,y}.
@@ -1900,7 +1900,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * This event is sent when the text view scrolls vertically or horizontally.
 		 *
 		 * @event
-		 * @param {orion.textview.ScrollEvent} scrollEvent the event
+		 * @param {orion.editor.ScrollEvent} scrollEvent the event
 		 */
 		onScroll: function(scrollEvent) {
 			return this.dispatchEvent(scrollEvent);
@@ -1909,10 +1909,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text is about to be modified by the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onVerify}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onVerify}
 		 * </p>
-		 * @name orion.textview.VerifyEvent
+		 * @name orion.editor.VerifyEvent
 		 * 
 		 * @property {String} text The text being inserted.
 		 * @property {Number} start The start offset of the text range to be replaced.
@@ -1930,7 +1930,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * </p>
 		 *
 		 * @event
-		 * @param {orion.textview.VerifyEvent} verifyEvent the event
+		 * @param {orion.editor.VerifyEvent} verifyEvent the event
 		 */
 		onVerify: function(verifyEvent) {
 			return this.dispatchEvent(verifyEvent);
@@ -1939,16 +1939,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text view is focused.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onFocus}<br/>
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onFocus}<br/>
 		 * </p>
-		 * @name orion.textview.FocusEvent
+		 * @name orion.editor.FocusEvent
 		 */
 		/**
 		 * This event is sent when the text view is focused.
 		 *
 		 * @event
-		 * @param {orion.textview.FocusEvent} focusEvent the event
+		 * @param {orion.editor.FocusEvent} focusEvent the event
 		 */
 		onFocus: function(focusEvent) {
 			return this.dispatchEvent(focusEvent);
@@ -1957,16 +1957,16 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This is the event sent when the text view goes out of focus.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#event:onBlur}<br/>
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#event:onBlur}<br/>
 		 * </p>
-		 * @name orion.textview.BlurEvent
+		 * @name orion.editor.BlurEvent
 		 */
 		/**
 		 * This event is sent when the text view goes out of focus.
 		 *
 		 * @event
-		 * @param {orion.textview.BlurEvent} blurEvent the event
+		 * @param {orion.editor.BlurEvent} blurEvent the event
 		 */
 		onBlur: function(blurEvent) {
 			return this.dispatchEvent(blurEvent);
@@ -2075,7 +2075,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Removes a ruler from the text view.
 		 *
-		 * @param {orion.textview.Ruler} ruler the ruler.
+		 * @param {orion.editor.Ruler} ruler the ruler.
 		 */
 		removeRuler: function (ruler) {
 			var rulers = this._rulers;
@@ -2097,10 +2097,10 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * @class This object describes an action for the text view.
 		 * <p>
 		 * <b>See:</b><br/>
-		 * {@link orion.textview.TextView}<br/>
-		 * {@link orion.textview.TextView#setAction}
+		 * {@link orion.editor.TextView}<br/>
+		 * {@link orion.editor.TextView#setAction}
 		 * </p>		 
-		 * @name orion.textview.ActionDescription
+		 * @name orion.editor.ActionDescription
 		 *
 		 * @property {String} [name] the name to be used when showing the action as text.
 		 */
@@ -2114,7 +2114,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 *
 		 * @param {String} actionID the action ID.
 		 * @param {Function} handler the action handler.
-		 * @param {orion.textview.ActionDescription} [actionDescription=undefined] the action description.
+		 * @param {orion.editor.ActionDescription} [actionDescription=undefined] the action description.
 		 *
 		 * @see #getActions
 		 * @see #invokeAction
@@ -2134,7 +2134,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		 * association with the specified key binding is overwriten. If the
 		 * action ID is <code>null</code>, the association is removed.
 		 * 
-		 * @param {orion.textview.KeyBinding} keyBinding the key binding
+		 * @param {orion.editor.KeyBinding} keyBinding the key binding
 		 * @param {String} actionID the action ID
 		 */
 		setKeyBinding: function(keyBinding, actionID) {
@@ -2218,7 +2218,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Sets the text model of the text view.
 		 *
-		 * @param {orion.textview.TextModel} model the text model of the view.
+		 * @param {orion.editor.TextModel} model the text model of the view.
 		 */
 		setModel: function(model) {
 			if (!model) { return; }
@@ -2258,7 +2258,7 @@ define("orion/textview/textView", ['orion/textview/textModel', 'orion/textview/k
 		/**
 		 * Sets the view options for the view.
 		 *
-		 * @param {orion.textview.TextViewOptions} options the view options.
+		 * @param {orion.editor.TextViewOptions} options the view options.
 		 * 
 		 * @see #getOptions
 		 */
