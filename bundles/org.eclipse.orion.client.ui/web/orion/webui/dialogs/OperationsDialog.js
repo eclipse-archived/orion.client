@@ -11,8 +11,8 @@
 /*global define*/
 /*jslint browser:true*/
 
-define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/popupdialog'],
-function(messages, require, lib, popupdialog) {
+define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib', 'orion/webui/popupdialog', 'orion/operationsCommands'],
+function(messages, require, lib, popupdialog, mOperationsCommands) {
 	
 	/**
 	 * Usage: <code>new OperationsDialog(options).show();</code>
@@ -22,7 +22,7 @@ function(messages, require, lib, popupdialog) {
 	 * @param {DOMNode} [options.triggerNode] The node that triggers the dialog.
 	 */
 	function OperationsDialog(options) {
-		this._init(options);
+		this._options = options;
 	}
 	
 	OperationsDialog.prototype = new popupdialog.PopupDialog();
@@ -41,6 +41,10 @@ function(messages, require, lib, popupdialog) {
 
 	OperationsDialog.prototype._init = function(options) {
 		this._myOperations = [];
+		this._operationsDeferreds = [];
+		this._commandService = options.serviceRegistry.getService("orion.page.command");
+		mOperationsCommands.createOperationsCommands(this._commandService);		
+		this._commandService.registerCommandContribution("operationsDialogItems", "eclipse.cancelOperation", 1); //$NON-NLS-1$ //$NON-NLS-0$
 		this._initialize(options.triggerNode);
 	};
 	
@@ -49,11 +53,16 @@ function(messages, require, lib, popupdialog) {
 		this._setOperationsVisibility();
 	};
 
-	OperationsDialog.prototype.setOperations = function(operations){
+	OperationsDialog.prototype.setOperations = function(operations, deferreds){
+		if(!this._myOperations){
+			this._init(this._options)
+		}
 		this._myOperations = [];
+		this._operationsDeferreds = [];
 		if(operations)
 			for(var i in operations){
 				this._myOperations.push(operations[i]);
+				this._operationsDeferreds.push(deferreds[i]);
 			}
 		this._renderOperations();
 	};
@@ -78,10 +87,10 @@ function(messages, require, lib, popupdialog) {
 	};
 	
 	OperationsDialog.prototype._renderOperations = function(){
-		this._renderOperationsTable(this.$myOperationsList, this._myOperations);
+		this._renderOperationsTable(this.$myOperationsList, this._myOperations, this._operationsDeferreds);
 	};
 	
-	OperationsDialog.prototype._renderOperationsTable = function(operationsTable, operations){
+	OperationsDialog.prototype._renderOperationsTable = function(operationsTable, operations, deferreds){
 		lib.empty(operationsTable);
 		for(var i=0; i<operations.length; i++){
 			var operation = operations[i];
@@ -139,6 +148,10 @@ function(messages, require, lib, popupdialog) {
 				div.appendChild(span);
 				span.textContent = message;
 			}
+			
+			var operationActions = document.createElement("span"); //$NON-NLS-0$
+			div.appendChild(operationActions);
+			this._commandService.renderCommands("operationsDialogItems", div, {operation: operation, deferred: deferreds[i]}, this, "tool");  //$NON-NLS-0$
 			
 			operationsTable.appendChild(tr);
 		}
