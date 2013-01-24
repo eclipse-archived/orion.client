@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made 
  * available under the terms of the Eclipse Public License v1.0 
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
@@ -124,12 +124,9 @@ define(['require', 'orion/xhr', 'orion/editor/regex'], function(require, xhr, re
 			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.ui/web" },
 			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.core/web" },
 			{ type: TYPE_FILE, source: "/", targetSuffix: "/bundles/org.eclipse.orion.client.editor/web" },
-			{ type: TYPE_FILE, source: "/org.dojotoolkit/dojo", targetSuffix: "/bundles/org.eclipse.orion.client.ui/web/dojo" },
-			{ type: TYPE_FILE, source: "/org.dojotoolkit/dojox", targetSuffix: "/bundles/org.eclipse.orion.client.ui/web/dojox" },
 			{ type: TYPE_API, source: "/file", targetSuffix: "file" },
 			{ type: TYPE_API, source: "/prefs", targetSuffix: "prefs" },
 			{ type: TYPE_API, source: "/workspace", targetSuffix: "workspace" },
-			{ type: TYPE_API, source: "/org.dojotoolkit", targetSuffix: "org.dojotoolkit" },
 			{ type: TYPE_API, source: "/users", targetSuffix: "users" },
 			{ type: TYPE_API, source: "/authenticationPlugin.html", targetSuffix: "authenticationPlugin.html" },
 			{ type: TYPE_API, source: "/login", targetSuffix: "login" },
