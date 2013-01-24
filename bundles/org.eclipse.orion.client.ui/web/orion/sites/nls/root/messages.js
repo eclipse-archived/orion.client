@@ -68,5 +68,6 @@ define({
 	"Changes you make here won't affect the running site." : "Changes you make here won't affect the running site.",
 	"Stopped" : "Stopped",
 	"Started at " : "Started at ",
-	"EnterPortNumber": "Enter the HTTP port number that the Orion server is running on (default is ${0}):"
+	"EnterPortNumber": "Enter the HTTP port number that the Orion server is running on (default is ${0}):",
+	"SitesCommandScope": "Sites"
 });
