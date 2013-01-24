@@ -1239,7 +1239,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				lib.stop(e);
 			}, false);
 			domNode.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 					if (before) { before(); }
 					context.commandService._invoke(context);					
 					if (after) { after(); }
@@ -1274,7 +1274,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 						}
 					}, false); 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
-						if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
+						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 							if (event.target.choice) {
 								event.target.choice.callback.call(event.target.choice, items);
 							}

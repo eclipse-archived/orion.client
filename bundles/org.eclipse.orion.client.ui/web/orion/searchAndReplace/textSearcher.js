@@ -226,7 +226,7 @@ orion.TextSearcher = (function() {
 			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
 			var self = this;
 			button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 					callback.bind(self)();			
 				} else if (e.keyCode === lib.KEY.ESCAPE) {
 					self.closeUI();

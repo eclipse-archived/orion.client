@@ -51,7 +51,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			// if trigger node is not key enabled...
 			if (this._triggerNode.tagName.toLowerCase() === "span") { //$NON-NLS-0$
 				this._triggerNode.addEventListener("keydown", function(event) { //$NON-NLS-0$
-					if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
+					if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 						self.toggle();
 						lib.stop(event);
 					}
