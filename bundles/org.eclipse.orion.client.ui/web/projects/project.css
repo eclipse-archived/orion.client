@@ -238,6 +238,7 @@ table tr:nth-child(even) {
 
 .tileTitle{
 	color:#333;
+	padding-top: 30px;
 }
 
 .tab{
@@ -292,7 +293,7 @@ table tr:nth-child(even) {
 }
 
 .coaching {
-font-family: "Helvetica Neue", HelveticaNeue, "Droid Sans", Roboto, Helvetica, sans-serif;
-color: #444;
-font-size: 12px;
+	font-family: "Helvetica Neue", HelveticaNeue, "Droid Sans", Roboto, Helvetica, sans-serif;
+	color: #444;
+	font-size: 12px;
 }

@@ -12,8 +12,9 @@
 /*global define dijit console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/section', 'orion/globalCommands', 
-        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred'/*, 'orion/git/widgets/CommitTooltipDialog'*/], 
-		function(messages, require, mExplorer, PageUtil, lib, mCommands, mSection, mGlobalCommands, mGitCommands, mNavUtils, Deferred) {
+        'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, mExplorer, PageUtil, lib, mCommands, mSection, mGlobalCommands, mGitCommands, mNavUtils, Deferred,
+				mCommitTooltip) {
 var exports = {};
 
 exports.GitLogExplorer = (function() {
@@ -430,43 +431,8 @@ exports.GitLogExplorer = (function() {
 					//Add the commit page link as the first grid of the row
 					mNavUtils.addNavGrid(this.explorer.getNavDict(), item, titleLink);
 					
-					var _timer;
-					
-//					var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-//					    commit: commit,
-//					    onMouseLeave: function(){
-//					    	if(dijit.popup.hide)
-//								dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//							dijit.popup.close(tooltipDialog);
-//			            },
-//			            onMouseEnter: function(){
-//					    	clearTimeout(_timer);
-//			            }
-//					});
-//					
-//					dojo.connect(titleLink, "onmouseover", titleLink, function() { //$NON-NLS-0$
-//						clearTimeout(_timer);
-//						
-//						_timer = setTimeout(function(){
-//							dijit.popup.open({
-//								popup: tooltipDialog,
-//								around: titleLink,
-//								orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//							});
-//						}, 600);
-//					});
-//					
-//					dojo.connect(titleLink, "onmouseout", titleLink, function() { //$NON-NLS-0$
-//						clearTimeout(_timer);
-//						
-//						_timer = setTimeout(function(){
-//							if(dijit.popup.hide)
-//								dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//							dijit.popup.close(tooltipDialog);
-//						}, 200);
-//					});
-					
-					
+					new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
+
 					var d = document.createElement("div");
 					detailsView.appendChild(d);
 

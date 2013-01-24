@@ -12,11 +12,13 @@
 /*jslint browser:true*/
 
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/explorers/navigatorRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes', 'orion/fileCommands' ], 
 	
-	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileClient, Deferred, mStatus, mProgress, mOperationsClient ) {
+	function(messages, require, mCommands, mSection, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mNavigatorRenderer,  mFileClient, Deferred, mStatus, mProgress, mOperationsClient, mContentTypes, mFileCommands ) {
 
 		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
+		
+			
 		
 			this.commandService = commandService;
 		
@@ -87,6 +89,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var fileClient = new mFileClient.FileClient( serviceRegistry );			
 					
 			this.selection = new mSelection.Selection( serviceRegistry, "orion.directoryPrompter.selection" ); //$NON-NLS-0$
+			
+			var projectCommandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: this.selection});
+
+			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
 
 			this.explorer = new mExplorerTable.FileExplorer({
 				treeRoot: {children:[]}, 
@@ -95,9 +101,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				fileClient: fileClient, 
 				parentId: "Drives", 
 				rendererFactory: function(explorer) {  //$NON-NLS-0$
-					return new DriveTreeRenderer({checkbox: false, singleSelection: true, treeTableClass: "directoryPrompter" }, explorer);   //$NON-NLS-0$
+				
+					var renderer = new DriveTreeRenderer({
+						checkbox: false, 
+						cachePrefix: "Navigator"}, explorer, projectCommandService, contentTypeService);
+						
+					return renderer;
 			}}); //$NON-NLS-0$
 			
+			mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, projectCommandService, this.explorer );
 			
 			var myexplorer = this.explorer;
 			var loadedWorkspace = fileClient.loadWorkspace("");
@@ -122,7 +134,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.addCommand(saveConfigCommand);
 			this.commandService.registerCommandContribution("projectConfiguration", "orion.projectConfiguration", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands("projectConfiguration", "projectConfiguration", this, this, "button"); //$NON-NLS-0$
-			
 		}
 		
 		var workingSetNode;

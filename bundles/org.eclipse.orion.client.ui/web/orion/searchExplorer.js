@@ -12,9 +12,9 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils'], 
-		function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils) {
-
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'], 
+		function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils, mTooltip) {
+	/* Internal wrapper functions*/
 	function _empty(nodeToEmpty){
 		var node = lib.node(nodeToEmpty);
 		if(node){
@@ -77,6 +77,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		return span;
 	}
 	
+	/* Internal tool tip sub class to support the context tips on details match */
+ 
+    /*
+     *	The model to support the search result
+    */
 	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchParams, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
@@ -347,15 +352,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
 	SearchResultRenderer.prototype.initCheckboxColumn = function(tableNode){	
 		if (this._useCheckboxSelection) {
-			var th = document.createElement('th'); //$NON-NLS-0$
-			var check = document.createElement("span"); //$NON-NLS-0$
+			var th = _createElement('th'); //$NON-NLS-0$
+			var check = _createElement("span", null, null, th); //$NON-NLS-0$
 			check.classList.add('selectionCheckmarkSprite'); //$NON-NLS-0$
 			check.classList.add('core-sprite-check'); //$NON-NLS-0$
 			if(this.getCheckedFunc){
 				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
 				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
-			th.appendChild(check);
 			_connect(check, "onclick", function(evt) { //$NON-NLS-0$
 				var newValue = evt.target.checked ? false : true;
 				this.onCheck(null, evt.target, newValue);
@@ -370,18 +374,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		}
 		var title, header;
 		if(col_no !== 0){
-			title = document.createElement("th"); //$NON-NLS-2
-			header = document.createElement("h2"); //$NON-NLS-2
-			title.appendChild(header);
+			title = _createElement("th"); //$NON-NLS-2
+			header = _createElement("h2", null, null, title); //$NON-NLS-2
 			if(col_no === 1){
 				var displayStr = messages["Results"]; //$NON-NLS-0$
 				if( this.explorer.model.searchHelper.displayedSearchTerm){
 					if(this.explorer.numberOnPage > 0){
 						var startNumber = this.explorer.model.searchHelper.params.start + 1;
 						var endNumber = startNumber + this.explorer.numberOnPage - 1;
-						//lib.empty(title);
-						//var textBold = document.createElement("h2"); //$NON-NLS-2
-						//title.appendChild(textBold);
 						displayStr = "";
 						if(!this.explorer.model.replaceMode()){
 							displayStr = i18nUtil.formatMessage(messages["Files ${0} of ${1} matching ${2}"], 
@@ -403,7 +403,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			} 
 			return title;
 		} else {
-			return document.createElement("th"); //$NON-NLS-0$
+			return _createElement("th"); //$NON-NLS-0$
 		}
 	};
 	
@@ -444,7 +444,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			return;
 		}
 		_empty(iconSpan);
-		var icon = document.createElement("span"); //$NON-NLS-0$
+		var icon = _createSpan(null, null, iconSpan);
 		icon.classList.add('imageSprite'); //$NON-NLS-0$
 		if(direction === "right"){ //$NON-NLS-0$
 			icon.classList.add('core-sprite-rightarrow'); //$NON-NLS-0$
@@ -462,24 +462,18 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultRenderer.prototype.generateContextTip = function(detailModel){
-		var tableNode = document.createElement('table');
-		tableNode.className = "search_context_tip";
+		var tableNode = _createElement('table', "search_context_tip");
 		for(var i = 0; i < detailModel.context.length; i++){
-			var lineDiv = document.createElement('tr'); //$NON-NLS-0$
-			tableNode.appendChild(lineDiv);
+			var lineDiv = _createElement('tr', null, null, tableNode); //$NON-NLS-0$
 			if(detailModel.context[i].current){
-				var lineTd = document.createElement('td');
+				var lineTd = _createElement('td', null, null, lineDiv);
 				lineTd.noWrap = true;
-				lineDiv.appendChild(lineTd);
-				var span = document.createElement('span');
-				span.className = "primaryColumn";
-				lineTd.appendChild(span);
+				var span = _createElement('span', "primaryColumn", null, lineTd);
 				this.generateDetailHighlight(detailModel, span); //$NON-NLS-1$ //$NON-NLS-0$
 			} else {
-				var td = document.createElement('td');
-				td.noWrap = true;
-				lineDiv.appendChild(td);
-				td.textContent = detailModel.context[i].context + "\u00a0"; //$NON-NLS-0$
+				var lineTd = _createElement('td', null, null, lineDiv);
+				lineTd.noWrap = true;
+				lineTd.textContent = detailModel.context[i].context + "\u00a0"; //$NON-NLS-0$
 			}
 		}
 		return tableNode;
@@ -500,8 +494,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			if(startIndex !== detailModel.matches[i].startIndex){
 				_place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
 			}
-			var matchSegBold = document.createElement('b');
-			parentSpan.appendChild(matchSegBold); //$NON-NLS-1$
+			var matchSegBold = _createElement('b', null, null, parentSpan);
 			if(this.explorer.model.searchHelper.inFileQuery.wildCard){
 				gap = detailModel.matches[i].length;
 			}
@@ -540,8 +533,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		_connect(link, "onclick", function() { //$NON-NLS-0$
 			that.explorer.getNavHandler().cursorOn(item);
 		});
-		var span = document.createElement('span'); //$NON-NLS-0$
-		link.appendChild(span);
+		var span = _createElement('span', null, null, link); //$NON-NLS-0$
 		return span;
 	};
 	
@@ -602,7 +594,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		switch(col_no){
 		case 0:
 			var col, span, link;
-			col = document.createElement('td'); //$NON-NLS-0$
+			col = _createElement('td'); //$NON-NLS-0$
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				col.noWrap = true;
 				span = _createSpan(null, this.getFileIconId(item), col, null);
@@ -622,7 +614,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			return col;
 		case 1:
 			var col, span, link;
-			col = document.createElement('td'); //$NON-NLS-0$
+			col = _createElement('td'); //$NON-NLS-0$
 			span = _createSpan(null, this.getFileSpanId(item), col, null);
 			var that = this;
 			if(item.type ===  "file"){ //$NON-NLS-0$
@@ -638,7 +630,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			return col;
 			
 		case 2:
-			col = document.createElement('td'); //$NON-NLS-0$
+			col = _createElement('td'); //$NON-NLS-0$
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				span = _createSpan(null, this.getLocationSpanId(item), col, null);
 				if(item.parentLocation){
@@ -1012,10 +1004,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var that = this;
 		this._commandService.openParameterCollector("pageActions", function(parentDiv) { //$NON-NLS-0$
 			// create replace text
-			var replaceStringDiv = document.createElement('input'); //$NON-NLS-0$
+			var replaceStringDiv = _createElement('input', null, "globalSearchReplaceWith", parentDiv); //$NON-NLS-0$
 			replaceStringDiv.type = "text"; //$NON-NLS-0$
 			replaceStringDiv.name = "ReplaceWith:"; //$NON-NLS-0$
-			replaceStringDiv.id = "globalSearchReplaceWith"; //$NON-NLS-0$
 			replaceStringDiv.placeholder="Replace With"; //$NON-NLS-0$
 			replaceStringDiv.onkeydown = function(e){
 				if (e.keyCode === 13/*Enter*/) {
@@ -1028,13 +1019,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 					return false;
 				}
 			};
-			parentDiv.appendChild(replaceStringDiv);
 
 			// create the command span for Replace
-			var span = document.createElement('span'); //$NON-NLS-0$
-			span.classList.add('parameters'); //$NON-NLS-0$
-			span.id = "globalSearchReplaceCommands"; //$NON-NLS-0$
-			parentDiv.appendChild(span);
+			var span = _createElement('span', 'parameters', "globalSearchReplaceCommands", parentDiv); //$NON-NLS-0$
 			return replaceStringDiv;
 		});
 		
@@ -1274,7 +1261,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				});
 				that.uiFactoryCompare.buildUI();
 				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
-				that.twoWayCompareContainer.startup();
+				that.twoWayCompareContainer.startup(false, function(){that._uiFactory.setCompareWidget(that.twoWayCompareContainer);});
 			} else {
 				_empty(that.uiFactoryCompare.getTitleDiv());
 				_place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
@@ -1371,12 +1358,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype.popupContext = function(model){
+		if(this.contextTip){
+			this.contextTip.destroy();
+			this.contextTip = null;
+		}
 		var that =this;
 	    var modelLinkId = this.renderer.getDetailIconId(model);
 		var tableNode = this.renderer.generateContextTip(model);
-	    that.contextTipDialog.attr("content", tableNode); //$NON-NLS-0$
  	    var aroundNode = lib.node(modelLinkId);
-	    var orient = {'TR':'TL', 'TR':'TL'}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+	    var orient = ["below", "right"]; //$NON-NLS-3$ //$NON-NLS-2$
 	    if(aroundNode){
 		    var parentNode = this.myTree._parent;
 			var parentRect = parentNode.getClientRects()[0];
@@ -1384,31 +1374,34 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			for (var i = 0, l = rects.length; i < l; i++) {
 				var r = rects[i];
 				if((r.bottom + 100) > parentRect.bottom){
-				    orient = {'TR':'BL', 'TR':'BL'}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+				    orient = ["above", "right"]; //$NON-NLS-3$ //$NON-NLS-2$
 					break;
 				}
 			}
 	    }
-	    //TODO: use orionPopUp
-	    /*
-	    orionPopUp.popup.open({
-        	popup: that.contextTipDialog,
-	        around: aroundNode,
-	        orient: orient
-	    });
-	    */
+		this.contextTip = new mTooltip.Tooltip({
+			node: aroundNode,
+			showDelay: 0,
+			trigger: "none", //$NON-NLS-0$
+			position: orient
+		});
+		var toolTipContent = this.contextTip.contentContainer();
+		//toolTipContent.classList.add("parameterPopup"); //$NON-NLS-0$
+		toolTipContent.appendChild(tableNode);
+		this.contextTip.show();
 	};
 	
 	SearchResultExplorer.prototype.closeContextTip = function(remainFlag){
 		if(!this.model.replaceMode()){
-			//TODO: use orionPopUp
-			//orionPopUp.popup.close(this.contextTipDialog);
+			if(this.contextTip){
+				this.contextTip.destroy();
+				this.contextTip = null;
+			}
 			if(!remainFlag){
 				this._popUpContext = false;
 			}
 			this.renderer.replaceDetailIcon(this.getNavHandler().currentModel(), "right"); //$NON-NLS-0$
 		}
-		
 	};
 	
 	SearchResultExplorer.prototype.onCollapse = function(model) {
@@ -1569,14 +1562,6 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var that = this;
 		this.model.buildResultModel();
 		if(!this.model.replaceMode()){
-			//TODO: use orionPopUp
-			/*
-		    this.contextTipDialog = new orionPopUp.TooltipDialog({
-		        content: "",
-		        onBlur: function(){
-		            that.closeContextTip();
-		        }
-		    });*/
 			this.initCommands();
 			_empty(this.getParentDivId());
 			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$

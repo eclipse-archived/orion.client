@@ -10,8 +10,9 @@
  ******************************************************************************/
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/commands', 'orion/section', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/dynamicContent', 'orion/fileUtils', 
-        'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred' /*, 'orion/git/widgets/CommitTooltipDialog'*/], 
-		function(messages, require, mCommands, mSection, i18nUtil, lib, PageUtil, mDynamicContent, mFileUtils, PageUtil, mGlobalCommands, mGitCommands, Deferred) {
+        'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, mCommands, mSection, i18nUtil, lib, PageUtil, mDynamicContent, mFileUtils, PageUtil, mGlobalCommands, mGitCommands, Deferred,
+				mCommitTooltip) {
 var exports = {};
 
 exports.GitRepositoryExplorer = (function() {
@@ -966,41 +967,7 @@ exports.GitRepositoryExplorer = (function() {
 		titleLink.textContent = commit.Message;
 		detailsView.appendChild(titleLink);
 
-//		var _timer;
-//		
-//		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-//		    commit: commit,
-//		    onMouseLeave: function(){
-//		    	if(dijit.popup.hide)
-//					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//				dijit.popup.close(tooltipDialog);
-//            },
-//            onMouseEnter: function(){
-//		    	clearTimeout(_timer);
-//            }
-//		});
-//		
-//		dojo.connect(titleLink, "onmouseover", titleLink, function() { //$NON-NLS-0$
-//			clearTimeout(_timer);
-//			
-//			_timer = setTimeout(function(){
-//				dijit.popup.open({
-//					popup: tooltipDialog,
-//					around: titleLink,
-//					orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//				});
-//			}, 600);
-//		});
-//		
-//		dojo.connect(titleLink, "onmouseout", titleLink, function() { //$NON-NLS-0$
-//			clearTimeout(_timer);
-//			
-//			_timer = setTimeout(function(){
-//				if(dijit.popup.hide)
-//					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//				dijit.popup.close(tooltipDialog);
-//			}, 200);
-//		});
+		new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: titleLink});
 		
 		var div = document.createElement("div");
 		detailsView.appendChild(div);
@@ -1158,41 +1125,7 @@ exports.GitRepositoryExplorer = (function() {
 		description.appendChild(document.createTextNode(messages[" by "] + commit.AuthorName + messages[" on "] + 
 				new Date(commit.Time).toLocaleString()));
 						
-//		var _timer;
-//						
-//		var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-//		    commit: commit,
-//		    onMouseLeave: function(){
-//		    	if(dijit.popup.hide)
-//					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//				dijit.popup.close(tooltipDialog);
-//		          },
-//		          onMouseEnter: function(){
-//		    	clearTimeout(_timer);
-//		          }
-//		});
-//						
-//		dojo.connect(link, "onmouseover", link, function() { //$NON-NLS-0$
-//			clearTimeout(_timer);
-//			
-//			_timer = setTimeout(function(){
-//				dijit.popup.open({
-//					popup: tooltipDialog,
-//					around: link,
-//					orient: {'BR':'TL', 'TR':'BL'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//				});
-//			}, 600);
-//		});
-//						
-//		dojo.connect(link, "onmouseout", link, function() { //$NON-NLS-0$
-//			clearTimeout(_timer);
-//							
-//			_timer = setTimeout(function(){
-//				if(dijit.popup.hide)
-//					dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-//				dijit.popup.close(tooltipDialog);
-//			}, 200);
-//		});
+		 new mCommitTooltip.CommitTooltipDialog({commit: commit, triggerNode: link});
 	};
 	
 	// Git Remotes
