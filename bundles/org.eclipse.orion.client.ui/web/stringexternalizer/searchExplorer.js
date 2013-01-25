@@ -12,9 +12,9 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/webui/littlelib', 'dojo', 'dijit', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'stringexternalizer/nonnlsSearchUtil', 'dijit/TooltipDialog'],
+define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'dojo', 'dijit', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'stringexternalizer/nonnlsSearchUtil', 'dijit/TooltipDialog'],
 
-function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNonnlsSearchUtil) {
+function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNonnlsSearchUtil) {
 
 	/* Internal wrapper functions*/
 	function _empty(nodeToEmpty){
@@ -214,7 +214,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 		}
 		var fileItem = this._listRoot.children[i];
 		var that = this;
-		this.messageService.setProgressMessage(dojo.string.substitute(messages["Writing files ${0} of ${1}"], [i + 1, this._listRoot.children.length]));
+		this.messageService.setProgressMessage(i18nUtil.formatMessage(messages["Writing files ${0} of ${1}"], i + 1, this._listRoot.children.length));
 		if (fileItem.checked) {
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location, true), "Reading file metadata " + fileItem.Location).then(function(metadata) {
 				if (fileItem.LocalTimeStamp !== metadata.LocalTimeStamp) {
@@ -287,12 +287,12 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 	// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=339500
 	SearchResultRenderer.prototype.initCheckboxColumn = function(tableNode) {
 		if (this._useCheckboxSelection) {
-			var th = document.createElement('th'); //$NON-NLS-0$
-			var check = document.createElement("span", ["selectionCheckmarkSprite", "core-sprite-check"]); //$NON-NLS-0$
+			var th = _createElement('th'); //$NON-NLS-0$
+			var check = _createElement("span", ["selectionCheckmarkSprite", "core-sprite-check"]); //$NON-NLS-0$
 			//check.classList.add("selectionCheckmarkSprite core-sprite-check"); //$NON-NLS-0$
 			if (this.getCheckedFunc) {
 				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
-				dojo.toggleClass(check, "core-sprite-check_on", check.checked); //$NON-NLS-0$
+				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			th.appendChild(check);
 			_connect(check, "click",function(evt) { //$NON-NLS-0$
@@ -369,7 +369,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 	//This is an optional function for explorerNavHandler. It provides the div with the "href" attribute.
 	//The explorerNavHandler hooked up by the explorer will check if the href exist as the attribute and react on enter key press.
 	SearchResultRenderer.prototype.getRowActionElement = function(tableRowId) {
-		return dojo.byId(this.getItemLinkId(tableRowId));
+		return document.getElementById(this.getItemLinkId(tableRowId));
 	};
 
 	SearchResultRenderer.prototype.getLocationSpanId = function(item) {
@@ -396,21 +396,21 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 	};
 
 	SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan) {
-		var spanHolder = onSpan ? onSpan : dojo.byId(this.getLocationSpanId(item));
+		var spanHolder = onSpan ? onSpan : document.getElementById(this.getLocationSpanId(item));
 		var href = require.toUrl("stringexternalizer/search.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 		var link = _createLink(
 			"navlink", //$NON-NLS-2$
 			null,
 			href,
 			spanHolder, item.fullPathName);
-		link.title = dojo.string.substitute(messages["Externalize string from ${0} only"], [item.fullPathName]);
+		link.title = i18nUtil.formatMessage(messages["Externalize string from ${0} only"], item.fullPathName);
 	};
 
 	SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
 				var col, span;
 		switch (col_no) {
 			case 0:
-				col = document.createElement('td'); //$NON-NLS-0$
+				col = _createElement('td'); //$NON-NLS-0$
 				if (item.type === "file") { //$NON-NLS-0$
 					col.noWrap = true;
 					span = _createElement("span", null,
@@ -425,12 +425,12 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 				}
 				return col;
 			case 1:
-				col = document.createElement('td'); //$NON-NLS-0$
+				col = _createElement('td'); //$NON-NLS-0$
 				span = _createElement("span", null,
 					this.getFileSpanId(item),
 				col); //$NON-NLS-1$ //$NON-NLS-0$
 				if (item.type === "file") { //$NON-NLS-0$
-					var renderName = item.nonnls ? dojo.string.substitute(messages["${0} (${1} matches)"], [item.Name, item.nonnls.length]) : item.Name;
+					var renderName = item.nonnls ? i18nUtil.formatMessage(messages["${0} (${1} matches)"], item.Name, item.nonnls.length) : item.Name;
 					this.renderFileElement(item, span, renderName);
 				} else {
 					this.renderDetailElement(item, tableRow, span);
@@ -444,7 +444,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 				return col;
 
 			case 2:
-				col = document.createElement('td'); //$NON-NLS-0$
+				col = _createElement('td'); //$NON-NLS-0$
 				if (item.type === "file") { //$NON-NLS-0$
 					span = _createElement("span", {
 						id: this.getLocationSpanId(item)
@@ -652,7 +652,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 			this.onItemChecked(this.model._listRoot, checked, manually);
 			return;
 		}
-		var row = dojo.byId(rowId);
+		var row = document.getElementById(rowId);
 		if (row && row._item) {
 			this.onItemChecked(row._item, checked, manually);
 		}
@@ -677,7 +677,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 			}
 
 			for (var i = 0; i < children.length; i++) {
-				checkBox = dojo.byId(this.renderer.getCheckBoxId(this.model.getId(children[i])));
+				checkBox = document.getElementById(this.renderer.getCheckBoxId(this.model.getId(children[i])));
 				if (checkBox) {
 					if (item.isRoot) {
 						this.renderer.onCheck(this.getRow(children[i]), checkBox, checked, true);
@@ -693,7 +693,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 			}
 		} else if (manually) {
 			if (checked) {
-				checkBox = dojo.byId(this.renderer.getCheckBoxId(this.model.getId(item.parent)));
+				checkBox = document.getElementById(this.renderer.getCheckBoxId(this.model.getId(item.parent)));
 				if (checkBox) {
 					this.renderer.onCheck(null, checkBox, checked, false);
 				}
@@ -721,49 +721,51 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 			this._currentReplacedContents = [];
 		}
 		var that = this;
+		
+		var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
+		var fType = contentTypeService.getFilenameContentType(fileItem.name);
+		
 		this.model.getFileContent(fileItem, function(fileItem) {
 			// Diff operations
 			var fType = that._getContentType(fileItem);
-			dojo.when(fType, function(fType) {
-				var options = {
-					readonly: true,
-					hasConflicts: false,
-					newFile: {
-						Name: fileItem.Location,
-						Type: fType,
-						Content: fileItem.contents
-					},
-					baseFile: {
-						Name: fileItem.Location,
-						Type: fType,
-						Content: fileItem.checked ? mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, that.config) : fileItem.contents
-					}
-				};
-
-				if (!that.twoWayCompareContainer) {
-					that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
-						parentDivID: uiFactory.getCompareDivID(),
-						showTitle: true,
-						rightTitle: dojo.string.substitute(messages["Replaced File (${0})"], [fileItem.Name]),
-						leftTitle: dojo.string.substitute(messages["Original File (${0})"], [fileItem.Name]),
-						showLineStatus: false
-					});
-					that.uiFactoryCompare.buildUI();
-					that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
-					that.twoWayCompareContainer.startup();
-				} else {
-					_empty(that.uiFactoryCompare.getTitleDiv());
-					_place(document.createTextNode(dojo.string.substitute(messages['Replaced File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
-					_empty(that.uiFactoryCompare.getTitleDiv(true));
-					_place(document.createTextNode(dojo.string.substitute(messages['Original File (${0})'], [fileItem.Name])), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
-					that.twoWayCompareContainer.setOptions(options);
-					that.twoWayCompareContainer.setEditor();
+			var options = {
+				readonly: true,
+				hasConflicts: false,
+				newFile: {
+					Name: fileItem.Location,
+					Type: fType,
+					Content: fileItem.contents
+				},
+				baseFile: {
+					Name: fileItem.Location,
+					Type: fType,
+					Content: fileItem.checked ? mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, that.config) : fileItem.contents
 				}
-				window.setTimeout(function() {
-					that.renderer.focus();
-				}, 100);
+			};
+
+			if (!that.twoWayCompareContainer) {
+				that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
+					parentDivID: uiFactory.getCompareDivID(),
+					showTitle: true,
+					rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileItem.Name),
+					leftTitle: i18nUtil.formatMessage(messages["Original File (${0})"], fileItem.Name),
+					showLineStatus: false
+				});
+				that.uiFactoryCompare.buildUI();
+				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
+				that.twoWayCompareContainer.startup();
+			} else {
+				_empty(that.uiFactoryCompare.getTitleDiv());
+				_place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.Name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
+				_empty(that.uiFactoryCompare.getTitleDiv(true));
+				_place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileItem.Name)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
+				that.twoWayCompareContainer.setOptions(options);
+				that.twoWayCompareContainer.setEditor();
+			}
+			window.setTimeout(function() {
+				that.renderer.focus();
+			}, 100);
 			});
-		});
 	};
 
 	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber) {
@@ -810,7 +812,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 
 	//Provide the key listening div.If not provided this._myTree._parent will be used.
 	SearchResultExplorer.prototype.keyEventListeningDiv = function() {
-		return dojo.byId(this.getParentDivId());
+		return document.getElementById(this.getParentDivId());
 
 	};
 
@@ -823,12 +825,12 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 			return true;
 		}
 		if (!this.model.replaceMode() && !e.ctrlKey && model.type === "detail") { //$NON-NLS-0$
-			if (e.keyCode === dojo.keys.LEFT_ARROW && this._popUpContext) {
+			if (e.keyCode === 37 && this._popUpContext) {
 				this.closeContextTip();
 				e.preventDefault();
 				return true;
 			}
-			if (e.keyCode === dojo.keys.RIGHT_ARROW && !this._popUpContext) {
+			if (e.keyCode === 39 && !this._popUpContext) {
 				this._popUpContext = true;
 				this.popupContext(model);
 				e.preventDefault();
@@ -918,7 +920,7 @@ function(messages, require, lib, dojo, dijit, mExplorer, mNavHandler, mFileClien
 
 	SearchResultExplorer.prototype.startUp = function() {
 		//TODO setup title
-		//var pageTitle = dojo.byId("pageTitle"); //$NON-NLS-0$
+		//var pageTitle = document.getElementById("pageTitle"); //$NON-NLS-0$
 		this.model.buildResultModel();
 		this.replacePreview(true, true);
 	};
