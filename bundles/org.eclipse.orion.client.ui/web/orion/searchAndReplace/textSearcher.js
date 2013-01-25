@@ -12,7 +12,7 @@
  ******************************************************************************/
 /*global define window document navigator*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/textview/annotations', 'orion/commands', 'orion/searchUtils' ], 
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/editor/annotations', 'orion/commands', 'orion/searchUtils' ], 
 	function(messages, require, lib, mAnnotations, mCommands, mSearchUtils){
 	
 var orion = orion || {};
@@ -226,7 +226,7 @@ orion.TextSearcher = (function() {
 			button.addEventListener("click", callback.bind(this), false); //$NON-NLS-0$
 			var self = this;
 			button.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 					callback.bind(self)();			
 				} else if (e.keyCode === lib.KEY.ESCAPE) {
 					self.closeUI();

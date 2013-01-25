@@ -52,13 +52,20 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib'
 			}
 		};
 		
-		exports.createOperationsCommands = function(serviceRegistry, commandService, explorer, operationsClient){
+		exports.createOperationsCommands = function(commandService, explorer, operationsClient){
 			
 			function _isOperationRunning(item){
-				if(!item.operation || item.operation.type){
+				if(!item.operation || !item.operation.type){
 					return false;
 				}
 				return (item.operation.type==="loadstart" || item.operation.type==="progress"); //$NON-NLS-1$ //$NON-NLS-0$
+			}
+			
+			function _isOperationCancelable(item){
+				if(item.operation && item.operation.cancelable){
+					return true;
+				}
+				return false;
 			}
 		
 			var removeCompletedOperationsCommand = new mCommands.Command({
@@ -100,6 +107,34 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/webui/littlelib'
 				}
 			});
 			commandService.addCommand(removeOperationCommand);
+			
+			var cancelOperationCommand = new mCommands.Command({
+				name : messages["Cancel"],
+				tooltip : messages["Cancel operations from the operations list."],
+				imageClass: "core-sprite-stop", //$NON-NLS-0$
+				id : "eclipse.cancelOperation", //$NON-NLS-0$
+				callback : function(data) {
+					var items = Array.isArray(data.items) ? data.items : [data.items];
+					for (var i=0; i < items.length; i++) {
+						var item = items[i];
+						if(item.deferred){
+							item.deferred.cancel();
+						}
+					}
+				},
+				visibleWhen : function(items) {
+					if(!Array.isArray(items) || items.length===0){
+						return (_isOperationRunning(items) && _isOperationCancelable(items));
+					}
+					for(var i in items){
+						if(!_isOperationRunning(items[i]) || !_isOperationCancelable(items[i])){
+							return false;
+						}
+					}
+					return true;
+				}
+			});
+			commandService.addCommand(cancelOperationCommand);
 		};
 	
 	}());	

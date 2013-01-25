@@ -1,6 +1,6 @@
 /*******************************************************************************
  * @license
- * Copyright (c) 2012 IBM Corporation and others.
+ * Copyright (c) 2012, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License v1.0
  * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution
@@ -9,13 +9,9 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define console document orion Image*/
-/*global dojo eclipse:true widgets*/
-/*jslint regexp:false browser:true forin:true*/
-
-define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 'orion/i18nUtil', 'orion/globalCommands', 'orion/compare/diff-provider', 
-        'orion/compare/compare-container' ,'orion/git/gitCommands','dijit/TooltipDialog', 'orion/git/widgets/CommitTooltipDialog', 'dojo/hash'], 
-		function(messages, require, dojo, dijit , mSection, i18nUtil, mGlobalCommands, mDiffProvider , mCompareContainer, mGitCommands) {
+define(['i18n!git/nls/gitmessages', 'require', 'orion/section', 'orion/i18nUtil', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/globalCommands',
+        'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog',], 
+		function(messages, require, mSection, i18nUtil, PageUtil, lib, mGlobalCommands, mGitCommands, Deferred, mCommitTooltip) {
 	var exports = {};
 
 	exports.GitReviewRequestExplorer = (function() {
@@ -41,12 +37,13 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 		};
 		
 		GitReviewRequestExplorer.prototype.redisplay = function(){
-			this.display(dojo.hash());
+			var pageParams = PageUtil.matchResourceParameters();
+			this.display(pageParams.resource);
 		};
 		
 		GitReviewRequestExplorer.prototype.display = function(remote_sha){
 			this.progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-			this.loadingDeferred = new dojo.Deferred();
+			this.loadingDeferred = new Deferred();
 			this.progressService.showWhile(this.loadingDeferred, messages["Loading Contribution Review Request..."]); //$NON-NLS-0$
 			var that = this;
 			var params = [];
@@ -66,11 +63,11 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			this.url = params[2];
 			this.initTitleBar(params[1], params[0]);
 
-			dojo.empty(dojo.byId("welcomeDiv"));
-			dojo.empty(dojo.byId("cloneDiv"));
-			dojo.empty(dojo.byId("commitDiv"));
-			dojo.empty(dojo.byId("fetchDiv"));
-			dojo.empty(dojo.byId("remoteDiv"));
+			lib.empty(lib.node("welcomeDiv"));
+			lib.empty(lib.node("cloneDiv"));
+			lib.empty(lib.node("commitDiv"));
+			lib.empty(lib.node("fetchDiv"));
+			lib.empty(lib.node("remoteDiv"));
 			
 			 this.registry.getService("orion.page.progress").progress(this.fileClient.loadWorkspace(), "Loading default workspace info").then(
 				function(workspace){
@@ -78,10 +75,18 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 					that.commandService.registerCommandContribution("fetch", "eclipse.orion.git.fetch", 200);
 					that.commandService.registerCommandContribution("fetch", "eclipse.orion.git.fetchForce", 250);
 					that.commandService.registerCommandContribution("add", "eclipse.addRemoteReviewRequestCommand", 300);
-					var tableNode = dojo.byId("cloneDiv");
-					dojo.create("div", {"class" : "stretch", id : "descriptionHeader", style: "width: 500px, height: 100px" }, dojo.byId("welcomeDiv"));
-					dojo.create("div", {style: "padding-top: 30px" }, dojo.byId("welcomeDiv"));
-					var titleWrapper1 = new mSection.Section(dojo.byId("commitDiv"), {
+					var tableNode = lib.node("cloneDiv");
+					
+					var descriptionHeader = document.createElement("div");
+					descriptionHeader.id = "descriptionHeader";
+					descriptionHeader.className = "stretch";
+					lib.node("welcomeDiv").appendChild(descriptionHeader);
+					
+					var div = document.createElement("div");
+					div.style.paddingTop = "30px";
+					lib.node("welcomeDiv").appendChild(div);
+					
+					var titleWrapper1 = new mSection.Section(lib.node("commitDiv"), {
 						id: "open commit from existing repository", //$NON-NLS-0$
 						title: messages["The commit can be found in the following repositories"], //$NON-NLS-0$
 						slideout: true,
@@ -90,7 +95,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						content: '<div id="commitNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
-					var titleWrapper2 = new mSection.Section(dojo.byId("fetchDiv"), {
+					var titleWrapper2 = new mSection.Section(lib.node("fetchDiv"), {
 						id: "fetch section", //$NON-NLS-0$
 						title: messages["Try to update your repositories"], //$NON-NLS-0$
 						slideout: true,
@@ -105,7 +110,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						content: '<div id="cloneNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
-					var titleWrapper4 = new mSection.Section(dojo.byId("remoteDiv"), {
+					var titleWrapper4 = new mSection.Section(lib.node("remoteDiv"), {
 						id: "add", //$NON-NLS-0$
 						title: messages["Attach the remote to one of your existing repositories"], //$NON-NLS-0$
 						slideout: true,
@@ -114,18 +119,28 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 						content: '<div id="remoteNode" class="mainPadding"></div>' //$NON-NLS-0$
 					});
 					
-					dojo.byId("commitDiv").style.display = " none ";
-					dojo.byId("fetchDiv").style.display = " none ";
-					dojo.byId("remoteDiv").style.display = " none ";
-					dojo.byId("moreOptionsDiv").style.display = " none ";
+					lib.node("commitDiv").style.display = " none ";
+					lib.node("fetchDiv").style.display = " none ";
+					lib.node("remoteDiv").style.display = " none ";
+					lib.node("moreOptionsDiv").style.display = " none ";
 					
-					var text = dojo.string.substitute(messages["You are reviewing contribution ${0} from ${1}"], [params[1], params[2]]);
+					var text = i18nUtil.formatMessage(messages["You are reviewing contribution ${0} from ${1}"], params[1], params[2]);
 					var text2 = messages["Unfortunately the commit can not be found in your workspace. To see it try one of the following: "];
-					dojo.byId("moreOptionsDiv").textContent = messages["To review the commit you can also:"];
-					var description = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "padding : 5px, display: block", "id": "welcome"}, dojo.byId("descriptionHeader"));
+					lib.node("moreOptionsDiv").textContent = messages["To review the commit you can also:"];
+					
+					var description = document.createElement("span");
+					description.id = "welcome";
+					description.style.padding = "5px";
+					description.style.display = "block";
 					description.textContent = text;
-					var description2 = dojo.create("span", {"class" : "gitSecondaryDescription", "style" : "display: block", "id" : "instruction"}, dojo.byId("descriptionHeader"));
+					lib.node("descriptionHeader").appendChild(description);
+					
+					var description2 = document.createElement("span");
+					description2.id = "instruction";
+					description2.style.display = "block";
 					description2.textContent = text2;
+					lib.node("descriptionHeader").appendChild(description2);
+					
 					that.renderCloneSection(params);
 					
 					var repositories = [];
@@ -136,7 +151,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 					}
 					
 					if(repositories.length === 0){
-						dojo.byId("instruction").style.display = " block ";
+						lib.node("instruction").style.display = " block ";
 						return;
 					}
 					that.renderSections(repositories, params[0], params[2], params[1]);
@@ -149,9 +164,13 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			var that = this;
 			that.progressService.setProgressMessage("");
 			that.commandService.registerCommandContribution("clone", "eclipse.cloneGitRepositoryReviewReq", 200);
-			that.commandService.renderCommands("clone", dojo.byId("cloneNode"), "clone", that, "button", params[0]);
-			var mainDescription = dojo.create("span", { style: "padding: 0px; text-align: left;", "class": "gitMainDescription" },  dojo.byId("cloneNode"));
+			that.commandService.renderCommands("clone", lib.node("cloneNode"), "clone", that, "button", params[0]);
+			
+			var mainDescription = document.createElement("span");
+			mainDescription.style.padding = "0px";
+			mainDescription.style.textAlign = "left";
 			mainDescription.textContent = " using " + params[0];
+			lib.node("cloneNode").appendChild(mainDescription);
 		};
 		
 		GitReviewRequestExplorer.prototype.renderSections = function(repositories, url1, url2, sha){
@@ -159,20 +178,20 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 
 			var findCommitLocation = function (repositories, commitName, deferred, that) {
 				if (deferred === null)
-					deferred = new dojo.Deferred();
+					deferred = new Deferred();
 				if (repositories.length > 0) {
 					that.registry.getService("orion.page.progress").progress(that.registry.getService("orion.git.provider").doGitLog( //$NON-NLS-0$
 						"/gitapi/commit/" + sha + repositories[0].Location + "?page=1&pageSize=1", null, null, messages['Looking for the commit']), "Looking for commit " + sha).then( //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						function(resp){
 							that.currentCommit = resp;
-							deferred.callback(resp.Children[0].Location);
+							deferred.resolve(resp.Children[0].Location);
 						},
 						function(error) {
-							deferred.errback();
+							deferred.reject();
 						}
 					);
 				} else {
-					deferred.errback();
+					deferred.reject();
 				}
 				
 				return deferred;
@@ -203,55 +222,42 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 								if(foundRemote){
 									findCommitLocation(repositories, sha, null, that).then(	
 										function(commitLocation){
-											var _timer;
 											var commitPageURL = "/git/git-commit.html#" + commitLocation + "?page=1&pageSize=1";
 											var repoURL = "/git/git-repository.html#" + resp.Children[0].Location;
-											dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow"},  dojo.byId("commitNode"));
-											dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch"},  dojo.byId(resp.Children[0].Id + "tableitem"));
-											dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-											var link2 = dojo.create("a", {style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
+											
+											var sectionItem = document.createElement("div");
+											sectionItem.className = "sectionTableItem lightTreeTableRow";
+											lib.node("commitNode").appendChild(sectionItem);
+											
+											var div = document.createElement("div");
+											div.className = "stretch";
+											sectionItem.appendChild(div);
+											
+											var divCommands = document.createElement("div");
+											divCommands.className = "sectionTableItemActions";
+											sectionItem.appendChild(divCommands);
+
+											var link2 = document.createElement("a");
+											link2.href = repoURL;
 											link2.textContent = repositories[0].Name;
-											var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+											link2.style.display = "inline-block";
+											link2.style.width = "150px";
+											div.appendChild(link2);
+											
+											var span = document.createElement("span");
 											span.textContent = messages["location: "] + repositories[0].Content.Path;
-											var link = dojo.create("a", {id : resp.Children[0].Id + "a", style: "padding: 0px; text-align: left; width: 50px", href: commitPageURL },  dojo.byId(resp.Children[0].Id + "divCommands"));
+											div.appendChild(span);
+											
+											var link = document.createElement("a");
+											link.href = commitPageURL;
 											link.textContent = messages["Open Commit"];
-											dojo.byId("commitDiv").style.display = " block ";
-											dojo.byId("moreOptionsDiv").style.display = " block ";
-											dojo.byId("instruction").style.display = " none ";
-											var tooltipDialog = new orion.git.widgets.CommitTooltipDialog({
-											    commit: that.currentCommit.Children[0],
-											    onMouseLeave: function(){
-													if(dijit.popup.hide)
-														dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-													dijit.popup.close(tooltipDialog);
-												},
-												onMouseEnter: function(){
-													clearTimeout(_timer);
-												}
-											});
+											divCommands.appendChild(link);
 											
-											dojo.connect(link, "onmouseover", link2, function() { //$NON-NLS-0$
-												clearTimeout(_timer);
-												
-												_timer = setTimeout(function(){
-													dijit.popup.open({
-														popup: tooltipDialog,
-														around: link,
-														position: "before",
-														orient: {'BL':'TL', 'TR':'BR'} //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-													});
-												}, 600);
-											});
+											lib.node("commitDiv").style.display = " block ";
+											lib.node("moreOptionsDiv").style.display = " block ";
+											lib.node("instruction").style.display = " none ";
 											
-											dojo.connect(link, "onmouseout", link, function() { //$NON-NLS-0$
-												clearTimeout(_timer);
-												
-												_timer = setTimeout(function(){
-													if(dijit.popup.hide)
-														dijit.popup.hide(tooltipDialog); //close doesn't work on FF
-													dijit.popup.close(tooltipDialog);
-												}, 200);
-											});
+											new mCommitTooltip.CommitTooltipDialog({commit: that.currentCommit.Children[0], triggerNode: link});
 										},
 										function(){
 											var index;
@@ -262,36 +268,73 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 												}
 											}
 											var repoURL = "/git/git-repository.html#" + resp.Children[0].Location;
-											dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow" , style: "height: 20px"},  dojo.byId("fetchNode"));
-											dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-											dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-											var link = dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
-											link.textContent = resp.Children[0].Name + "    ";
-											var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+											
+											var sectionItem = document.createElement("div");
+											sectionItem.className = "sectionTableItem lightTreeTableRow";
+											lib.node("fetchNode").appendChild(sectionItem);
+											
+											var div = document.createElement("div");
+											div.className = "stretch";
+											sectionItem.appendChild(div);
+											
+											var divCommands = document.createElement("div");
+											divCommands.className = "sectionTableItemActions";
+											sectionItem.appendChild(divCommands);
+
+											var link = document.createElement("a");
+											link.href = repoURL;
+											link.textContent = resp.Children[0].Name;
+											link.style.display = "inline-block";
+											link.style.width = "150px";
+											div.appendChild(link);
+											
+											var span = document.createElement("span");
 											span.textContent = messages["location: "] + repositories[0].Content.Path;
-											that.commandService.renderCommands("fetch", dojo.byId(resp.Children[0].Id + "divCommands"), remotes.Children[index], that, "tool");
-											dojo.byId("fetchDiv").style.display = " block ";
-											var style = dojo.style("commitDiv", "display");
+											div.appendChild(span);
+
+											that.commandService.renderCommands("fetch", divCommands, remotes.Children[index], that, "tool");
+											lib.node("fetchDiv").style.display = " block ";
 										}
 									);	
 								} else {
 									var repoURL = "/git/git-repository.html#" + resp.Children[0].Location;
-									dojo.create("div", {id : resp.Children[0].Id + "tableitem" , "class": "sectionTableItem lightTreeTableRow"},  dojo.byId("remoteNode"));
-									dojo.create("div", {id : resp.Children[0].Id + "div" , "class": "stretch" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-									dojo.create("div", {id : resp.Children[0].Id + "divCommands" , "class": "sectionTableItemActions" },  dojo.byId(resp.Children[0].Id + "tableitem"));
-									var repoLink = dojo.create("a", {id : resp.Children[0].Id, style: "padding: 0px; text-align: left; display: inline-block;  width: 150px", href: repoURL },  dojo.byId(resp.Children[0].Id + "div"));
-									repoLink.textContent = resp.Children[0].Name + "    ";
-									var span = dojo.create("span", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
+									
+									var sectionItem = document.createElement("div");
+									sectionItem.className = "sectionTableItem lightTreeTableRow";
+									lib.node("remoteNode").appendChild(sectionItem);
+									
+									var div = document.createElement("div");
+									div.className = "stretch";
+									sectionItem.appendChild(div);
+									
+									var divCommands = document.createElement("div");
+									divCommands.className = "sectionTableItemActions";
+									sectionItem.appendChild(divCommands);
+									
+									var link = document.createElement("a");
+									link.href = repoURL;
+									link.textContent = resp.Children[0].Name;
+									link.style.display = "inline-block";
+									link.style.width = "150px";
+									div.appendChild(link);
+									
+									var span = document.createElement("span");
 									span.textContent = messages["location: "] + repositories[0].Content.Path;
-									that.commandService.renderCommands("add", dojo.byId(resp.Children[0].Id + "divCommands"), resp.Children[0], that, "tool",  url1);
-									dojo.byId("remoteDiv").style.display = " block ";
-									 for(var i=0;i<remotes.Children.length;i++){	
-										dojo.create("div", {}, dojo.byId(resp.Children[0].Id + "div"));
+									div.appendChild(span);
+
+									that.commandService.renderCommands("add", divCommands, resp.Children[0], that, "tool",  url1);
+									lib.node("remoteDiv").style.display = " block ";
+									
+									for(var i=0;i<remotes.Children.length;i++){											
 										resp.Children[0].RemoteLocation = "/gitapi/remote" + repositories[0].Location;
-										var div = dojo.create("div", {"class": "gitSecondaryDescription"},dojo.byId(resp.Children[0].Id + "div"));
-										div.textContent = remotes.Children[i].Name + " : " + remotes.Children[i].GitUrl;
+										
+										var remoteDiv = document.createElement("div");
+										remoteDiv.style.padding = "6px 150px 0";
+										remoteDiv.textContent = remotes.Children[i].Name + " : " + remotes.Children[i].GitUrl;
+										div.appendChild(remoteDiv);
 									}
 								}
+								
 								that.renderSections(repositories.slice(1), url1, url2, sha);
 							}
 						);
@@ -301,7 +344,7 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 		};
 		
 		GitReviewRequestExplorer.prototype.initTitleBar = function(commit, url){
-			var title = dojo.string.substitute(messages["Contribution Review Request for ${0} on ${1}"], [commit, url]);
+			var title = i18nUtil.formatMessage(messages["Contribution Review Request for ${0} on ${1}"], commit, url);
 			
 			var item = {};
 			item.Name = title;
@@ -312,18 +355,21 @@ define(['i18n!git/nls/gitmessages', 'require', 'dojo','dijit', 'orion/section', 
 			});
 		};
 		
-		GitReviewRequestExplorer.prototype.sshCheck = function(remote){
-				var url = remote;
-				var scheme = new dojo._Url(url).scheme;
-				if(scheme === "ssh"){
-					var indexOfAt = url.indexOf("@");
-					if(indexOfAt !== -1){
-						var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
-						url = urlNoUser;
-					}
+		GitReviewRequestExplorer.prototype.sshCheck = function(gitUrl) {
+			var url = gitUrl;
+			var parser = document.createElement('a');
+			parser.href = url;
+			var scheme = parser.protocol;
+			
+			if (scheme === "ssh:") {
+				var indexOfAt = url.indexOf("@");
+				if (indexOfAt !== -1) {
+					var urlNoUser = "ssh://" + url.substr(indexOfAt + 1);
+					url = urlNoUser;
 				}
-				return url;
-			};
+			}
+			return url;
+		};
 		
 		return GitReviewRequestExplorer;
 	}());

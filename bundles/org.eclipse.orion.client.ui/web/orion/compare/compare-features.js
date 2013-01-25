@@ -59,7 +59,7 @@ orion.TwoWayCompareUIFactory = (function() {
 				this._leftTitleDiv.style.height = "0px";
 				this._rightTitleDiv.style.height = "0px";
 			}
-			if(!this._showTitle){
+			if(!this._showLineStatus){
 				this._leftEditorParentDiv.style.marginBottom = "0px";
 				this._rightEditorWrapperDiv.style.marginBottom = "0px";
 				this._leftStatusDiv.style.height = "0px";

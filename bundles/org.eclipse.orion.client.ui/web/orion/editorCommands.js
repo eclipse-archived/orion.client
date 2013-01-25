@@ -16,7 +16,7 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/textview/keyBinding', 'orion/textview/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/keyBinding', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
 	function(messages, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
@@ -270,7 +270,7 @@ exports.EditorCommandFactory = (function() {
 				//        required attribute: name - the name of the command
 				//        required attribute: id - the id of the action, namespace qualified
 				//        optional attribute: tooltip - the tooltip to use for the command
-				//        optional attribute: key - an array with values to pass to the orion.textview.KeyBinding constructor
+				//        optional attribute: key - an array with values to pass to the orion.editor.KeyBinding constructor
 				//        optional attribute: img - a URL to an image for the action
 				//      optional attribute: contentType - an array of content types for which this command is valid
 				//      optional attribute: validationProperties - an array of validation properties used to read the resource

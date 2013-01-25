@@ -68,7 +68,7 @@ define(['require', 'dojo', 'orion/bootstrap', 'orion/status', 'orion/progress','
 			mGlobalCommands.generateBanner("orion-externalizeResults", serviceRegistry, commandService, preferences, searcher, searcher); //$NON-NLS-0$
 			
 			var searchResultsGenerator = new mSearchResults.SearchResultsGenerator(serviceRegistry, "results", commandService, fileClient); //$NON-NLS-0$
-			var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({parent: "favoriteProgress", serviceRegistry: serviceRegistry, fileClient: fileClient, commandService: commandService, setConfig: dojo.hitch(searchResultsGenerator, searchResultsGenerator.setConfig)}); //$NON-NLS-0$
+			var configOutliner = new mStringExternalizerConfig.StringExternalizerConfig({parent: dojo.byId("favoriteProgress"), serviceRegistry: serviceRegistry, fileClient: fileClient, commandService: commandService, setConfig: dojo.hitch(searchResultsGenerator, searchResultsGenerator.setConfig)}); //$NON-NLS-0$
 			function updateToolbar() {
 				var toolbar = dojo.byId("pageActions"); //$NON-NLS-0$
 				if (toolbar) {	

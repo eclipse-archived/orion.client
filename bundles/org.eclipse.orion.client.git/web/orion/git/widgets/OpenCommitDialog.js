@@ -8,9 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*globals define document clearTimeout setTimeout window*/
 
-define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib' ], function(
-		messages, i18nUtil, Deferred, dialog, lib) {
+define(['i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/webui/dialog', 'orion/webui/littlelib'], function(
+messages, i18nUtil, Deferred, dialog, lib) {
 
 	/**
 	 * Usage:
@@ -25,8 +26,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 
 	OpenCommitDialog.prototype = new dialog.Dialog();
 
-	OpenCommitDialog.prototype.TEMPLATE = '<div><label for="resourceName">${Type the commit name (sha1):}</label></div>'
-			+ '<div><input type="text" id="resourceName"></div>' + '<div id="results" style="max-height:400px; height:auto; overflow-y:auto;"></div>';
+	OpenCommitDialog.prototype.TEMPLATE = '<div><label for="resourceName">${Type the commit name (sha1):}</label></div><div><input type="text" id="resourceName"></div><div id="results" style="max-height:400px; height:auto; overflow-y:auto;"></div>';
 
 	OpenCommitDialog.prototype._init = function(options) {
 		var that = this;
@@ -53,11 +53,12 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 
 		this.buttons = [];
 
-		this.buttons.push({ callback : function() {
-			that.destroy();
-			that._execute();
-		},
-		text : 'OK'
+		this.buttons.push({
+			callback: function() {
+				that.destroy();
+				that._execute();
+			},
+			text: 'OK'
 		});
 
 		// Start the dialog initialization.
@@ -104,18 +105,19 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 
 	OpenCommitDialog.prototype._findCommitLocation = function(repositories, commitName, deferred) {
 		var that = this;
-		if (deferred == null)
+		if (deferred === null) {
 			deferred = new Deferred();
+		}
 
 		if (repositories.length > 0) {
-			serviceRegistry.getService("orion.page.progress").progress(
-					that.serviceRegistry.getService("orion.git.provider").doGitLog(
-							"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1"), "Getting commit details " + commitName)
-					.then(function(resp) {
-						deferred.resolve(resp.Children[0]);
-					}, function(error) {
-						that._findCommitLocation(repositories.slice(1), commitName, deferred);
-					});
+			this.serviceRegistry.getService("orion.page.progress").progress(
+			that.serviceRegistry.getService("orion.git.provider").doGitLog(
+				"/gitapi/commit/" + commitName + repositories[0].ContentLocation + "?page=1&pageSize=1"), "Getting commit details " + commitName)
+				.then(function(resp) {
+				deferred.resolve(resp.Children[0]);
+			}, function(error) {
+				that._findCommitLocation(repositories.slice(1), commitName, deferred);
+			});
 		} else {
 			deferred.reject();
 		}
@@ -171,7 +173,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 				that.hide();
 			}
 		}, false);
-		
+
 		link.addEventListener("keyup", function(evt) { //$NON-NLS-0$
 			if (evt.keyCode === lib.KEY.ENTER) {
 				that.hide();
@@ -186,8 +188,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 		if (commit.Parents && commit.Parents.length > 0) {
 			var parentDiv = document.createElement("div"); //$NON-NLS-0$
 			parentDiv.style.padding = "4px 0 0 4px";
-			
-			var link = document.createElement("a"); //$NON-NLS-0$
+
+			link = document.createElement("a"); //$NON-NLS-0$
 			link.href = "/git/git-commit.html#" + commit.Parents[0].Location + "?page=1&pageSize=1";
 			link.appendChild(document.createTextNode(messages['parent:'] + commit.Parents[0].Name));
 			parentDiv.appendChild(link);
@@ -198,47 +200,13 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 					that.hide();
 				}
 			}, false);
-			
+
 			link.addEventListener("keyup", function(evt) { //$NON-NLS-0$
 				if (evt.keyCode === lib.KEY.ENTER) {
 					that.hide();
 				}
 			}, false);
 		}
-
-		// dojo.create("div", { "style" : "padding-top:15px"
-		// }, tableNode);
-		// //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		//
-		// if (commit.AuthorImage) {
-		// var authorImage = dojo.create("span", { "class" :
-		// "git-author-icon-small",
-		// "style" : "margin-bottom:30px"}, tableNode); //$NON-NLS-4$
-		// //$NON-NLS-3$
-		// //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-		// var image = new Image();
-		// image.src = commit.AuthorImage;
-		// image.name = commit.AuthorName;
-		// image.width = 35;
-		// image.height = 35;
-		// dojo.place(image, authorImage, "first"); //$NON-NLS-0$
-		// }
-		//
-		// var authoredBySpan = dojo.create("span", { "class" :
-		// "gitSecondaryDescription"}, tableNode); //$NON-NLS-2$
-		// //$NON-NLS-1$ //$NON-NLS-0$
-		// authoredBySpan.textContent =
-		// dojo.string.substitute(messages["authored by ${0} (${1})) on ${2}"],
-		// [ commit.AuthorName, commit.AuthorEmail,
-		// dojo.date.locale.format(new Date(commit.Time), { formatLength :
-		// "short"}) ]); //$NON-NLS-0$
-		// dojo.create("div", null, tableNode); //$NON-NLS-0$
-		// var committedBySpan = dojo.create("span", { "class" :
-		// "gitSecondaryDescription"}, tableNode); //$NON-NLS-2$
-		// //$NON-NLS-1$ //$NON-NLS-0$
-		// committedBySpan.textContent =
-		// dojo.string.substitute(messages['committed by 0 (1)'], [
-		// commit.CommitterName, commit.CommitterEmail ]);
 	};
 
 	OpenCommitDialog.prototype._beforeHiding = function() {
@@ -248,7 +216,8 @@ define([ 'i18n!git/nls/gitmessages', 'orion/i18nUtil', 'orion/Deferred', 'orion/
 	OpenCommitDialog.prototype.constructor = OpenCommitDialog;
 
 	// return the module exports
-	return { OpenCommitDialog : OpenCommitDialog
+	return {
+		OpenCommitDialog: OpenCommitDialog
 	};
 
 });

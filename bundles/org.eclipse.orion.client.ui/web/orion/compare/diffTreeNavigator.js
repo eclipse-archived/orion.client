@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/textview/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
+define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
 
 var exports = {};
 
@@ -282,6 +282,9 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		replaceAllAnnotations: function(removeExisting, wrapperIndex, wordOrBlock, normal, replacingList){
+			if(!this.editorWrapper[wrapperIndex].annoTypes){
+				return;
+			}
 			for(var i = 0; i < this.editorWrapper[wrapperIndex].annoTypes.length; i++){
 				if(this.editorWrapper[wrapperIndex].annoTypes[i].type === wordOrBlock){
 					this.replaceDiffAnnotations(this.editorWrapper[wrapperIndex].editor, replacingList ? replacingList : this.editorWrapper[wrapperIndex].annoTypes[i].list, 
@@ -402,7 +405,14 @@ exports.DiffTreeNavigator = (function() {
 			if(blockIndex < 0){
 				blockIndex = 0;
 			}
-			return this.getFeeder().getDiffBlocks().length === 0 ? -1 : this.getFeeder().getDiffBlocks()[blockIndex][1];
+			var diffBlocks = this.getFeeder().getDiffBlocks();
+			if(!diffBlocks || diffBlocks.length === 0){
+				return -1;
+			}
+			if(blockIndex > (diffBlocks.length - 1) ){
+				blockIndex = 0;
+			}
+			return diffBlocks[blockIndex][1];
 		},
 		
 		replaceDiffAnnotations: function(editor, overallAnnotations, type, removeExisting){
@@ -445,8 +455,12 @@ exports.DiffTreeNavigator = (function() {
 				annoType0 = this.editorWrapper[0].diffFeeder.getCurrentBlockAnnoType(cursor.index);
 				annoType1 = this.editorWrapper[1].diffFeeder.getCurrentBlockAnnoType(cursor.index);
 			}
-			this.replaceDiffAnnotations(this.editorWrapper[0].editor, [new (mAnnotations.AnnotationType.getType(annoType0.current))(annoPosOld.start, annoPosOld.end)], annoType0, true);
-			this.replaceDiffAnnotations(this.editorWrapper[1].editor, [new (mAnnotations.AnnotationType.getType(annoType1.current))(annoPosNew.start, annoPosNew.end)], annoType1, true);
+			if(annoType0){
+				this.replaceDiffAnnotations(this.editorWrapper[0].editor, [new (mAnnotations.AnnotationType.getType(annoType0.current))(annoPosOld.start, annoPosOld.end)], annoType0, true);
+			}
+			if(annoType1){
+				this.replaceDiffAnnotations(this.editorWrapper[1].editor, [new (mAnnotations.AnnotationType.getType(annoType1.current))(annoPosNew.start, annoPosNew.end)], annoType1, true);
+			}
 			if(moveSelection){
 				this.autoSelecting = true;
 				this.editorWrapper[0].editor.setSelection(cursor.oldA.start, cursor.oldA.end, true);
@@ -552,6 +566,9 @@ exports.DiffTreeNavigator = (function() {
 
 		_positionDiffBlock: function(){
 			var blockIndex = this.getCurrentBlockIndex();
+			if(blockIndex < 0){
+				blockIndex = 0;
+			}
 			var diffBlocks = this.getFeeder().getDiffBlocks();
 			if(diffBlocks.length === 0)
 				return;
@@ -614,7 +631,7 @@ exports.DiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
@@ -684,7 +701,7 @@ exports.DiffBlockFeeder = (function() {
 		},
 		
 		getDiffBlockH: function(diffBlockIndex){
-			if(!this._diffBlocks){
+			if(!this._diffBlocks || this._diffBlocks.length === 0){
 				return -1;
 			}
 			var mapperIndex = this._diffBlocks[diffBlockIndex][1];
@@ -700,6 +717,9 @@ exports.DiffBlockFeeder = (function() {
 		},
 		
 		getCharRange: function(blockIndex){
+			if(!this._diffBlocks || this._diffBlocks.length === 0){
+				return null;
+			}
 			var mapperIndex = this._diffBlocks[blockIndex][1];
 			var startLine = this._diffBlocks[blockIndex][0];
 			var endLine = startLine + this._mapper[mapperIndex][this._mapperColumnIndex] -1;
@@ -712,6 +732,9 @@ exports.DiffBlockFeeder = (function() {
 		},
 		
 		getTextOnBlock: function(blockIndex){
+			if(!this._diffBlocks || this._diffBlocks.length === 0){
+				return null;
+			}
 			var mapperIndex = this._diffBlocks[blockIndex][1];
 			if(this._mapper[mapperIndex][0] === 0 || this._mapper[mapperIndex][1] === 0 || this._mapper[mapperIndex][2] === 0){
 				//return null;
@@ -734,7 +757,7 @@ exports.TwoWayDiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.TwoWayDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
@@ -768,6 +791,9 @@ exports.TwoWayDiffBlockFeeder = (function() {
 		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []}); //$NON-NLS-0$
 	};
 	TwoWayDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
+		if(!this._diffBlocks || this._diffBlocks.length === 0){
+			return null;
+		}
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
 		if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
 			return {normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_TOPONLY, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_TOPONLY};
@@ -788,7 +814,7 @@ exports.inlineDiffBlockFeeder = (function() {
 	 *
 	 * @name orion.DiffTreeNavigator.inlineDiffBlockFeeder
 	 * @class A feeder to feed all the diff blocks based on the line index and mapper index.
-	 * @param {orion.textview.TextModel} The text model of the whole text.
+	 * @param {orion.editor.TextModel} The text model of the whole text.
 	 * @param {array} The mapper generated from the unified diff.
 	 * @param {integer} The column index where the line index can be calculated.
 	 */
@@ -838,6 +864,9 @@ exports.inlineDiffBlockFeeder = (function() {
 		result.push({type: "block", normal: DiffAnnoTypes.ANNO_DIFF_BLOCK_CONFLICT, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_BLOCK_CONFLICT, list: []}); //$NON-NLS-0$
 	};
 	inlineDiffBlockFeeder.prototype.getCurrentBlockAnnoType = function(diffBlockIndex){
+		if(!this._diffBlocks || this._diffBlocks.length === 0){
+			return null;
+		}
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
 		if(this._mapper[mapperIndex][this._mapperColumnIndex] === 0){
 			//We do not want to show the empty line annotation i ninline compare
@@ -851,7 +880,7 @@ exports.inlineDiffBlockFeeder = (function() {
 		return {type: "block", normal: DiffAnnoTypes.ANNO_DIFF_DELETED_BLOCK, current: DiffAnnoTypes.ANNO_DIFF_CURRENT_DELETED_BLOCK, list: []}; //$NON-NLS-0$
 	};
 	inlineDiffBlockFeeder.prototype.getDiffBlockH = function(diffBlockIndex){
-		if(!this._diffBlocks){
+		if(!this._diffBlocks || this._diffBlocks.length === 0){
 			return -1;
 		}
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];

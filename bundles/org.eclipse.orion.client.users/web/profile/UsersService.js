@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 /*global define escape */
-define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], function(Deferred, xhr, EventTarget, urlencode) {
+define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/form'], function(Deferred, xhr, EventTarget, form) {
 
 	function getJSON(data) {
 		return data === "" ? null : JSON.parse(data);
@@ -124,7 +124,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout: 15000,
-				data: urlencode.encodeFormData({
+				data: form.encodeFormData({
 					login : userName,
 					password : password,
 					email: email
@@ -212,7 +212,7 @@ define(["orion/Deferred", "orion/xhr", 'orion/EventTarget', 'orion/urlencode'], 
 					"Orion-Version" : "1" //$NON-NLS-1$ //$NON-NLS-0$
 				},
 				timeout : 15000,
-				data : urlencode.encodeFormData({
+				data : form.encodeFormData({
 					reset: true,
 					login : login,
 					password : password

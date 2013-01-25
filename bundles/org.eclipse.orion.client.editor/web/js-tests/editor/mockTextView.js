@@ -12,7 +12,7 @@
 /*jslint browser:true */
 /*global define*/
 
-define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel", "orion/textview/annotations", "orion/editor/mirror"],
+define(["orion/assert", "orion/editor/eventTarget", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
 		function(assert, mEventTarget, mTextModel) {
 	var EventTarget = mEventTarget.EventTarget;
 
@@ -67,8 +67,8 @@ define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel"
 	/**
 	 * @private
 	 * @name orion.test.editor.MockTextView
-	 * @class Mock {@link orion.textview.TextView} that does not depend on the DOM.
-	 * @description Fake version of {@link orion.textview.TextView} for testing stylers in headless (no DOM) scenarios.
+	 * @class Mock {@link orion.editor.TextView} that does not depend on the DOM.
+	 * @description Fake version of {@link orion.editor.TextView} for testing stylers in headless (no DOM) scenarios.
 	 * Dispatches these event types: Changing, Changed, LineStyle, Verify
 	 */
 	function MockTextView(options) {
@@ -108,8 +108,8 @@ define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel"
 		 * @returns {Object} The output argument from onLineStyle for the given line, or <code>null</code>. When an object is 
 		 * returned, it will have one of the following properties:
 		 * <dl>
-		 * <dt><code>ranges</code></dt><dd>{@link orion.textview.StyleRange[]}</dd>
-		 * <dt><code>style</code></dt><dd>{@link orion.textview.Style}</dd>
+		 * <dt><code>ranges</code></dt><dd>{@link orion.editor.StyleRange[]}</dd>
+		 * <dt><code>style</code></dt><dd>{@link orion.editor.Style}</dd>
 		 * </dl>
 		 */
 		_getLineStyle: function(lineIndex) {

@@ -58,6 +58,7 @@ define([], function(){
 		this._proposalIndex = -1;
 		this._dismissed = true;
 		this._mouseDown = false;
+		this._dataList = [];
 		this._initUI();
 		
 		var that = this;

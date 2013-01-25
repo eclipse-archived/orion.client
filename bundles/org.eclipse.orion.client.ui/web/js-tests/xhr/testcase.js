@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /*global console define navigator setTimeout XMLHttpRequest*/
-define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/textview/eventTarget"],
+define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/editor/eventTarget"],
 		function(assert, mTest, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
@@ -198,7 +198,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				data: 'my request body',
 				headers: {'X-Foo': 'bar'},
 				log: true,
-				query: {param: 'value'},
 				responseType: 'text',
 				timeout: 1500
 			}, new OkXhr())
@@ -207,8 +206,7 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				assert.equal(result.args.data, 'my request body');
 				assert.equal(result.args.headers['X-Foo'], 'bar');
 				assert.equal(result.args.log, true);
-				assert.ok(!!result.args.query);
-				assert.equal(result.args.query.param, 'value');
+				assert.ok(result.url);
 				assert.equal(result.args.responseType, 'text');
 				assert.equal(result.args.timeout, 1500);
 				assert.equal(result.status, 200);
@@ -223,7 +221,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				data: 'my request body',
 				headers: {'X-Foo': 'bar'},
 				log: false,
-				query: {param: 'value'},
 				responseType: 'text',
 				timeout: 1500
 			}, new FailXhr())
@@ -232,8 +229,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 				assert.equal(result.args.data, 'my request body');
 				assert.equal(result.args.headers['X-Foo'], 'bar');
 				assert.equal(result.args.log, false);
-				assert.ok(!!result.args.query);
-				assert.equal(result.args.query.param, 'value');
 				assert.equal(result.args.responseType, 'text');
 				assert.equal(result.args.timeout, 1500);
 				assert.ok(result.xhr instanceof MockXMLHttpRequest);
@@ -277,66 +272,6 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/text
 		};
 		xhr('GET', '/', null, headerCheckerXhr);
 		return d;
-	};
-
-	tests['test GET query params'] = function() {
-		return xhr('GET', '/', {
-			query: {
-				'foo': 3,
-				'bar': 'baz'
-			}
-		}, new OkXhr())
-		.then(function(result) {
-			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
-		}, fail);
-	};
-
-	// Bug 382381
-	tests['test POST query params'] = function() {
-		return xhr('POST', '/', {
-			query: {
-				'foo': 3,
-				'bar': 'baz'
-			}
-		}, new OkXhr())
-		.then(function(result) {
-			assert.strictEqual(result.url, '/?foo=3&bar=baz', null);
-		}, fail);
-	};
-
-	tests['test GET query params encoding'] = function() {
-		return xhr('GET', '/', {
-			query: {
-				'foo!bar': 31337,
-				'baz': 'fizz buzz'
-			}
-		}, new OkXhr())
-		.then(function(result) {
-			assert.strictEqual(result.url, '/?foo%21bar=31337&baz=fizz%20buzz', null);
-		}, fail);
-	};
-
-	tests['test GET query params with fragment'] = function() {
-		return xhr('GET', '/#some?junk&we?dont&care?about', {
-			query: {
-				'foo*bar': 'baz',
-				'quux': 'a b'
-			}
-		}, new OkXhr())
-		.then(function(result) {
-			assert.strictEqual(result.url, '/?foo%2Abar=baz&quux=a%20b#some?junk&we?dont&care?about', null);
-		}, fail);
-	};
-
-	tests['test GET query params with existing params and fragment'] = function() {
-		return xhr('GET', '/?a%20=b#some?junk&we?dont&care?about', {
-			query: {
-				'foo*bar': 'baz'
-			}
-		}, new OkXhr())
-		.then(function(result) {
-			assert.strictEqual(result.url, '/?a%20=b&foo%2Abar=baz#some?junk&we?dont&care?about', null);
-		}, fail);
 	};
 
 	tests['test GET with headers'] = function() {

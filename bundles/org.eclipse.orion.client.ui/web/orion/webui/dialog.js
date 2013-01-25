@@ -90,7 +90,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 			// hook key handlers.  This must be done after _makeButtons so that the default callback (if any)
 			// is established.
 			this.$close.addEventListener("keydown", function (e) { //$NON-NLS-0$
-				if(e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {
+				if(e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {
 					self.hide();
 				}
 			}, false);

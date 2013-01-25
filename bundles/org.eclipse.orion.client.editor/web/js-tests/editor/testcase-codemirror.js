@@ -12,14 +12,14 @@
 /*jslint */
 /*global define*/
 
-define(["orion/assert", "orion/textview/eventTarget", "orion/textview/textModel", "orion/textview/annotations", "orion/editor/mirror"],
+define(["orion/assert", "orion/editor/eventTarget", "orion/editor/textModel", "orion/editor/annotations", "orion/editor/mirror"],
 		function(assert, mEventTarget, mTextModel, mAnnotations, mMirror) {
 	var tests = {};
 	
 	function SampleMode(codeMirror) {
 	}
 	
-	// Fake version of orion.textview.TextView for testing. Just dispatches events, doesn't touch the DOM.
+	// Fake version of orion.editor.TextView for testing. Just dispatches events, doesn't touch the DOM.
 	function MockTextView() {
 		this.model = new mTextModel.TextModel();
 	}

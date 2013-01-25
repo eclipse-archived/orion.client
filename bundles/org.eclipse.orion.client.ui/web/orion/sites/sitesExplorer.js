@@ -103,7 +103,7 @@ define(['i18n!orion/sites/nls/messages', 'orion/i18nUtil', 'orion/explorers/expl
 					
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$
-					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.delete', 40); //$NON-NLS-0$
+					commandService.registerCommandContribution(that.selectionActionsWrapperId, 'orion.site.delete', 40, null, false, new mCommands.CommandKeyBinding(lib.KEY.DEL, false, false, false, false, null, messages['SitesCommandScope'])); //$NON-NLS-0$
 					
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.start', 20); //$NON-NLS-0$
 					commandService.registerCommandContribution(that.defaultActionWrapperId, 'orion.site.stop', 30); //$NON-NLS-0$

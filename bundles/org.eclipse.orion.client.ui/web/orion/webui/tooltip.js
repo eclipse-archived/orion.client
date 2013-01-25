@@ -24,7 +24,7 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 	 * @param options.node The node showing the tooltip.  Required.
 	 * @param options.text The text in the tooltip.  Optional.  If not specified, the client is expected to add content
 	 * to the tooltip prior to triggering it.
-	 * @param options.trigger The event that triggers the tooltip.  Optional.  Defaults to "mouseover."  Can be one of "mouseover",
+	 * @param options.trigger The event that triggers the tooltip.  Optional.  Defaults to "mouseover".  Can be one of "mouseover",
 	 * "click", or "none".  If "none" then the creator will be responsible for showing, hiding, and destroying the tooltip.
 	 * If "mouseover" then the aria attributes for tooltips will be set up.
 	 * @param options.position An array specifying the preferred positions to try positioning the tooltip.  Positions can be "left", "right", 
@@ -103,6 +103,21 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 					 this._tipInner.id = "tooltip" + new Date().getTime().toString(); //$NON-NLS-0$
 					 this._node.setAttribute("aria-describedby", this._tipInner.id); //$NON-NLS-0$
 				}
+				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=398960
+				// mousing over the tip itself will cancel any pending timeout to close it, but then we must
+				// also close it when we leave the tip.
+				this._tip.addEventListener("mouseover", function(event) { //$NON-NLS-0$
+					if (self._timeout) {
+						window.clearTimeout(self._timeout);
+						self._timeout = null;
+					}
+					self._tip.addEventListener("mouseout", function(event) { //$NON-NLS-0$
+						if (lib.contains(self._tip, event.target)) {
+							self.hide();
+							lib.stop(event);
+						}
+					}, false);
+				}, false);
 			}
 			return this._tip;
 		},

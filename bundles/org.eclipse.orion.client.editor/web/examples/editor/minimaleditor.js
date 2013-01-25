@@ -13,7 +13,7 @@
 /*jslint browser:true devel:true*/
 
 
-define(["require", "orion/textview/textView", "orion/textview/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures"],
+define(["require", "orion/editor/textView", "orion/editor/keyBinding", "orion/editor/editor", "orion/editor/editorFeatures"],
 
 function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 	
@@ -44,10 +44,11 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 				editor.setInput(null, null, null, true);
 				var text = editor.getTextView().getText();
 				var problems = [];
+				var line, character;
 				for (var i=0; i<text.length; i++) {
 					if (text.charAt(i) === 'z') {
-						var line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
-						var character = i - editor.getTextView().getModel().getLineStart(line);
+						line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
+						character = i - editor.getTextView().getModel().getLineStart(line);
 						problems.push({
 							start: character + 1,
 							end: character + 1,
@@ -57,6 +58,30 @@ function(require, mTextView, mKeyBinding, mEditor, mEditorFeatures){
 					}
 				}
 				editor.showProblems(problems);
+				
+				var occurrences = [];
+				var sel = editor.getTextView().getSelection();
+				var word = editor.getTextView().getText(sel.start, sel.end);
+				var index = text.indexOf(word);
+				if (index !== -1) {
+					for (i = index; i < text.length - word.length; i++) {
+						var w = '';
+						for (var j = 0; j < word.length; j++) {
+							w = w + text.charAt (i + j);
+						}
+						if (w === word) {
+							line = editor.getTextView().getModel().getLineAtOffset(i) + 1;
+							character = i - editor.getTextView().getModel().getLineStart(line);
+							occurrences.push({
+							readAccess: (line % 2) === 0 ? false : true,
+							line: line + 1,
+							start: character + 1,
+							end: character + word.length,
+							description: ((line % 2) === 0 ? "write occurrence of " : "occurrence of ") + w });
+						} 
+					}
+				} 
+				editor.showOccurrences(occurrences);
 				return true;
 		});
 	};

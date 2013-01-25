@@ -12,14 +12,14 @@
  /*global define*/
  /*jslint maxerr:150 browser:true devel:true laxbreak:true regexp:false*/
 
-define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview/keyBinding', 'orion/textview/eventTarget', 'orion/textview/tooltip', 'orion/textview/annotations', 'orion/textview/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/keyBinding', 'orion/editor/eventTarget', 'orion/editor/tooltip', 'orion/editor/annotations', 'orion/editor/util'], function(messages, mKeyBinding, mEventTarget, mTooltip, mAnnotations, util) { //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	var Animation;
 	
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError"; //$NON-NLS-0$
 
 	/**
 	 * @name orion.editor.Editor
-	 * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.textview.TextView}.
+	 * @class An <code>Editor</code> is a user interface for editing text that provides additional features over the basic {@link orion.editor.TextView}.
 	 * Some of <code>Editor</code>'s features include:
 	 * <ul>
 	 * <li>Additional actions and key bindings for editing text</li>
@@ -42,9 +42,9 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 	 * @param {Object} options.undoStackFactory
 	 * @param {Object} options.textDNDFactory
 	 *
-	 * @borrows orion.textview.EventTarget#addEventListener as #addEventListener
-	 * @borrows orion.textview.EventTarget#removeEventListener as #removeEventListener
-	 * @borrows orion.textview.EventTarget#dispatchEvent as #dispatchEvent
+	 * @borrows orion.editor.EventTarget#addEventListener as #addEventListener
+	 * @borrows orion.editor.EventTarget#removeEventListener as #removeEventListener
+	 * @borrows orion.editor.EventTarget#dispatchEvent as #dispatchEvent
 	 */
 	function Editor(options) {
 		this._textViewFactory = options.textViewFactory;
@@ -83,7 +83,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the annotation model of the editor. 
 		 *
-		 * @returns {orion.textview.AnnotationModel}
+		 * @returns {orion.editor.AnnotationModel}
 		 */
 		getAnnotationModel: function() {
 			return this._annotationModel;
@@ -91,7 +91,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the annotation ruler of the editor. 
 		 *
-		 * @returns {orion.textview.AnnotationRuler}
+		 * @returns {orion.editor.AnnotationRuler}
 		 */
 		getAnnotationRuler: function() {
 			return this._annotationRuler;
@@ -99,7 +99,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the annotation styler of the editor. 
 		 *
-		 * @returns {orion.textview.AnnotationStyler}
+		 * @returns {orion.editor.AnnotationStyler}
 		 */
 		getAnnotationStyler: function() {
 			return this._annotationStyler;
@@ -107,7 +107,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the folding ruler of the editor. 
 		 *
-		 * @returns {orion.textview.FoldingRuler}
+		 * @returns {orion.editor.FoldingRuler}
 		 */
 		getFoldingRuler: function() {
 			return this._foldingRuler;
@@ -115,7 +115,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the line number ruler of the editor. 
 		 *
-		 * @returns {orion.textview.LineNumberRuler}
+		 * @returns {orion.editor.LineNumberRuler}
 		 */
 		getLineNumberRuler: function() {
 			return this._lineNumberRuler;
@@ -123,7 +123,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the base text model of this editor.
 		 *
-		 * @returns orion.textview.TextModel
+		 * @returns orion.editor.TextModel
 		 */
 		getModel: function() {
 			var model = this._textView.getModel();
@@ -135,14 +135,14 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		/**
 		 * Returns the overview ruler of the editor. 
 		 *
-		 * @returns {orion.textview.OverviewRuler}
+		 * @returns {orion.editor.OverviewRuler}
 		 */
 		getOverviewRuler: function() {
 			return this._overviewRuler;
 		},
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
-		 * @returns orion.textview.TextView the editor text view.
+		 * @returns orion.editor.TextView the editor text view.
 		 */
 		getTextView: function() {
 			return this._textView;
@@ -343,7 +343,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 		},
 				
 		/**
-		 * @param {orion.textview.TextView} textView
+		 * @param {orion.editor.TextView} textView
 		 * @param {Number} start
 		 * @param {Number} [end]
 		 * @param {function} callBack A call back function that is used after the move animation is done
@@ -603,6 +603,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
+						styler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 						styler.addAnnotationType(HIGHLIGHT_ERROR_ANNOTATION);
 					}
 				}
@@ -659,6 +661,8 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_MATCHING_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_BRACKET);
 					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_CURRENT_LINE);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE);
+					ruler.addAnnotationType(mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE);
 				}
 				this.setOverviewRulerVisible(true);
 			}
@@ -748,6 +752,38 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/textview
 						var start = lineStart + problem.start - 1;
 						var end = lineStart + problem.end;
 						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, escapedDescription);
+						add.push(annotation);
+					}
+				}
+			}
+			annotationModel.replaceAnnotations(remove, add);
+		},
+		
+		showOccurrences: function(occurrences) {
+			var annotationModel = this._annotationModel;
+			if (!annotationModel) {
+				return;
+			}
+			var remove = [], add = [];
+			var model = annotationModel.getTextModel();
+			var annotations = annotationModel.getAnnotations(0, model.getCharCount()), annotation;
+			while (annotations.hasNext()) {
+				annotation = annotations.next();
+				if (annotation.type === mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE || annotation.type === mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE) {
+					remove.push(annotation);
+				}
+			}
+			if (occurrences) { 
+				for (var i = 0; i < occurrences.length; i++) {
+					var occurrence = occurrences[i];
+					if (occurrence) {
+						var lineIndex = occurrence.line - 1;
+						var lineStart = model.getLineStart(lineIndex);
+						var start = lineStart + occurrence.start - 1;
+						var end = lineStart + occurrence.end;
+						var type = occurrence.readAccess === true ? mAnnotations.AnnotationType.ANNOTATION_READ_OCCURRENCE : mAnnotations.AnnotationType.ANNOTATION_WRITE_OCCURRENCE;
+						var description = occurrence.description;
+						annotation = mAnnotations.AnnotationType.createAnnotation(type, start, end, description);
 						add.push(annotation);
 					}
 				}

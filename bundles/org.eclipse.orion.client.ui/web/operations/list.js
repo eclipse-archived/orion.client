@@ -32,7 +32,7 @@ define(['i18n!orion/operations/nls/messages', 'require', 'orion/bootstrap', 'ori
 		// global commands
 		mGlobalCommands.generateBanner("orion-operationList", serviceRegistry, commandService, preferences, searcher); //$NON-NLS-0$
 		mGlobalCommands.setPageTarget({task: "Operations"});
-		mOperationsCommands.createOperationsCommands(serviceRegistry, commandService, operationsTable, operationsClient);
+		mOperationsCommands.createOperationsCommands(commandService, operationsTable, operationsClient);
 		
 		commandService.addCommandGroup("pageActions", "eclipse.taskGroup.unlabeled", 100); //$NON-NLS-1$ //$NON-NLS-0$
 		commandService.addCommandGroup("selectionTools", "eclipse.selectionGroup", 500, messages["More"]); //$NON-NLS-1$ //$NON-NLS-0$

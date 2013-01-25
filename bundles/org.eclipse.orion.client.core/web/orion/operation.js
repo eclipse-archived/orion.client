@@ -35,6 +35,18 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 		});
 	}
 
+	function _cancelOperation(operationLocation){
+		xhr("PUT", operationLocation, {
+			headers: {
+				"Orion-Version": "1"
+			},
+			data: JSON.stringify({
+				abort: true
+			}),
+			timeout: 15000
+		});
+	}
+	
 	function _getOperation(operationLocation, deferred) {
 		xhr("GET", operationLocation, {
 			headers: {
@@ -50,7 +62,7 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 				}, 2000);
 				return;
 			}
-			if(operationJson.type=="error"){
+			if(operationJson.type=="error" || operationJson.type=="abort"){
 				deferred.reject(operationJson.Result);
 			} else {
 				deferred.resolve(operationJson.Result.JsonData);
@@ -74,8 +86,18 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 				deferred.reject({Severity: "Error", Message: error});
 		});
 	}
+	
+	function _trackCancel(operationLocation, deferred){
+		deferred.then(null, function(error){
+			if(error.canceled){
+				_cancelOperation(operationLocation);
+			}
+		});
+	}
+	
 	function handle(operationLocation){
 		var def = new Deferred();
+		_trackCancel(operationLocation, def);
 		_getOperation(operationLocation, def);
 		return def;
 	}

@@ -66,16 +66,8 @@ function startServer(options) {
 			}))
 			.use(orionStatic({
 				orionClientRoot: ORION_CLIENT,
-				dojoRoot: NODE_MODULES,
 				dev: options.dev
 			}))
-			// Orion-specific Dojo overrides from orionStatic:
-			.use('/org.dojotoolkit/dojo', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.ui/web/dojo')))
-			.use('/org.dojotoolkit/dojox', statik(path.resolve(ORION_CLIENT, './bundles/org.eclipse.orion.client.ui/web/dojox')))
-			// Dojo libraries
-			.use('/org.dojotoolkit/dojo', statik(path.resolve(NODE_MODULES, 'dojo')))
-			.use('/org.dojotoolkit/dijit', statik(path.resolve(NODE_MODULES, 'dijit')))
-			.use('/org.dojotoolkit/dojox', statik(path.resolve(NODE_MODULES, 'dojox')))
 			// API handlers
 			.use(orionFile({
 				root: '/file',
@@ -118,7 +110,7 @@ var config_params = {};
 argslib.createDirs([workspaceDir], function(dirs) {
 	var passwordFile = args.password || args.pwd;
 	argslib.readPasswordFile(passwordFile, function(password) {
-		argslib.readConfigFile("./server.conf", function(configParams) {
+		argslib.readConfigFile("./orion.conf", function(configParams) {
 			if(configParams){
 				config_params = configParams;
 			}

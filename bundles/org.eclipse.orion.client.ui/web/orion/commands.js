@@ -482,11 +482,11 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 * @param {String} groupId The id of the group, must be unique.  May be used for a dom node id of
 		 *  the element representing the group
 		 * @param {Number} position The relative position of the group within its parent.  Required.
-		 * @param {String} title The title of the group, optional
-		 * @param {String} parentPath The path of parent groups, separated by '/'.  For example,
+		 * @param {String} [title] The title of the group, optional
+		 * @param {String} [parentPath] The path of parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id" indicates that the group belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
-		 * @param {String} emptyGroupMessage A message to show if the group is empty and the user activates the UI element
+		 * @param {String} [emptyGroupMessage] A message to show if the group is empty and the user activates the UI element
 		 *  representing the group.  Optional.  If not specified, then the group UI element won't be shown when it is empty.
 		 */	
 		 
@@ -550,12 +550,12 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 *  This scope id is used when rendering commands.
 		 * @param {String} commandId the id of the command.  Required.
 		 * @param {Number} position the relative position of the command within its parent.  Required.
-		 * @param {String} parentPath the path of any parent groups, separated by '/'.  For example,
+		 * @param {String} [parentPath=null] the path of any parent groups, separated by '/'.  For example,
 		 *  a path of "group1Id/group2Id/command" indicates that the command belongs as a child of 
 		 *  group2Id, which is itself a child of group1Id.  Optional.
-		 * @param {boolean} bindingOnly if true, then the command is never rendered, but the key or URL binding is hooked.
-		 * @param {orion.commands.CommandKeyBinding} keyBinding a keyBinding for the command.  Optional.
-		 * @param {orion.commands.URLBinding} urlBinding a url binding for the command.  Optional.
+		 * @param {boolean} [bindingOnly=false] if true, then the command is never rendered, but the key or URL binding is hooked.
+		 * @param {orion.commands.CommandKeyBinding} [keyBinding] a keyBinding for the command.  Optional.
+		 * @param {orion.commands.URLBinding} [urlBinding] a url binding for the command.  Optional.
 		 */
 		registerCommandContribution: function(scopeId, commandId, position, parentPath, bindingOnly, keyBinding, urlBinding) {
 			if (!this._contributionsByScopeId[scopeId]) {
@@ -623,14 +623,14 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 		 *  Only contributions made to this scope will be rendered.
 		 * @param {DOMElement} parent The element in which commands should be rendered.  If commands have been
 		 *  previously rendered into this element, it is up to the caller to empty any previously generated content.
-		 * @param {Object} items An item or array of items to which the command applies.  Optional.  If not
+		 * @param {Object} [items] An item or array of items to which the command applies.  Optional.  If not
 		 *  items are specified and a selection service was specified at creation time, then the selection
 		 *  service will be used to determine which items are involved. 
 		 * @param {Object} handler The object that should perform the command
 		 * @param {String} renderType The style in which the command should be rendered.  "tool" will render
 		 *  a tool image in the dom.  "button" will render a text button.  "menu" will render menu items.  
-		 * @param {Object} userData Optional user data that should be attached to generated command callbacks
-		 * @param {Array} domNodeWrapperList Optional an array used to record any DOM nodes that are rendered during this call.
+		 * @param {Object} [userData] Optional user data that should be attached to generated command callbacks
+		 * @param {Array} [domNodeWrapperList] Optional an array used to record any DOM nodes that are rendered during this call.
 		 *  If an array is provided, then as commands are rendered, an object will be created to represent the command's node.  
 		 *  The object will always have the property "domNode" which contains the node created for the command.  If the command is
 		 *  rendered using other means (toolkit widget) then the optional property "widget" should contain the toolkit
@@ -1007,25 +1007,25 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 	 * @param {String} options.id the unique id to be used when referring to the command in the command service.
 	 * @param {String} options.name the name to be used when showing the command as text.
 	 * @param {String} options.tooltip the tooltip description to use when explaining the purpose of the command.
-	 * @param {Function} options.callback the callback to call when the command is activated.  The callback should either 
+	 * @param {Function} [options.callback] the callback to call when the command is activated.  The callback should either 
 	 *  perform the command or return a deferred that represents the asynchronous performance of the command.  Optional.
-	 * @param {Function} options.hrefcallback if specified, this callback is used to retrieve
+	 * @param {Function} [options.hrefcallback] if specified, this callback is used to retrieve
 	 *  a URL that can be used as the location for a command represented as a hyperlink.  The callback should return 
 	 *  the URL.  In this release, the callback may also return a deferred that will eventually return the URL, but this 
 	 *  functionality may not be supported in the future.  See https://bugs.eclipse.org/bugs/show_bug.cgi?id=341540.
 	 *  Optional.
-	 * @param {Function} options.choicecallback a callback which retrieves choices that should be shown in a secondary
+	 * @param {Function} [options.choicecallback] a callback which retrieves choices that should be shown in a secondary
 	 *  menu from the command itself.  Returns a list of choices that supply the name and image to show, and the callback
 	 *  to call when the choice is made.  Optional.
-	 * @param {String} options.imageClass a CSS class name suitable for showing a background image.  Optional.
-	 * @param {String} options.spriteClass an additional CSS class name that can be used to specify a sprite background image.  This
+	 * @param {String} [options.imageClass] a CSS class name suitable for showing a background image.  Optional.
+	 * @param {String} [options.spriteClass] an additional CSS class name that can be used to specify a sprite background image.  This
 	 *  useful with some sprite generation tools, where imageClass specifies the location in a sprite, and spriteClass describes the
 	 *  sprite itself.  Optional.
-	 * @param {Function} options.visibleWhen A callback that returns a boolean to indicate whether the command should be visible
+	 * @param {Function} [options.visibleWhen] A callback that returns a boolean to indicate whether the command should be visible
 	 *  given a particular set of items that are selected.  Optional, defaults to always visible.
-	 * @param {orion.commands.ParametersDescription} options.parameters A description of parameters that should be collected before invoking
+	 * @param {orion.commands.ParametersDescription} [options.parameters] A description of parameters that should be collected before invoking
 	 *  the command.
-	 * @param {Image} options.image the image that may be used to represent the callback.  A text link will be shown in lieu
+	 * @param {Image} [options.image] the image that may be used to represent the callback.  A text link will be shown in lieu
 	 *  of an image if no image is supplied.  Optional.
 	 * @class A command is an object that describes an action a user can perform, as well as when and
 	 *  what it should look like when presented in various contexts.  Commands are identified by a
@@ -1239,7 +1239,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 				lib.stop(e);
 			}, false);
 			domNode.addEventListener("keydown", function(e) { //$NON-NLS-0$
-				if (e.keyCode === lib.KEY.ENTER || e.charCode === lib.KEY.SPACE) {						
+				if (e.keyCode === lib.KEY.ENTER || e.keyCode === lib.KEY.SPACE) {						
 					if (before) { before(); }
 					context.commandService._invoke(context);					
 					if (after) { after(); }
@@ -1274,7 +1274,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/uiUtils', 'orion/PageUtil',
 						}
 					}, false); 
 					node.addEventListener("keydown", function(event) { //$NON-NLS-0$
-						if (event.keyCode === lib.KEY.ENTER || event.charCode === lib.KEY.SPACE) {
+						if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.SPACE) {
 							if (event.target.choice) {
 								event.target.choice.callback.call(event.target.choice, items);
 							}

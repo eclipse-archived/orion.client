@@ -15,7 +15,7 @@
  * @name orion.xhr
  * @namespace Provides a promise-based API to {@link XMLHttpRequest}.
  */
-define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
+define(['orion/Deferred'], function(Deferred) {
 
 	/**
 	 * @name orion.xhr.Result
@@ -65,7 +65,6 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 	 * @param {Object|ArrayBuffer|Blob|Document} [options.data] The raw data to send as the request body. (Only allowed for POST and PUT).
 	 * @param {Object} [options.headers] A map of header names and values to set on the request.
 	 * @param {Boolean} [options.log=false] If <code>true</code>, failed requests will be logged to the JavaScript console.
-	 * @param {Object} [options.query] A map giving the query parameters to add to the URL.
 	 * @param {String} [options.responseType=''] Determines the type of the response object returned. Value must be one of the following:
 	 * <ul><li><code>'arraybuffer'</code>
 	 * <li><code>'blob'</code>
@@ -87,10 +86,6 @@ define(['orion/Deferred', 'orion/urlencode'], function(Deferred, urlencode) {
 		var data;
 		if (typeof headers['X-Requested-With'] === 'undefined') { //$NON-NLS-1$ //$NON-NLS-0$
 			headers['X-Requested-With'] = 'XMLHttpRequest'; //$NON-NLS-1$ //$NON-NLS-0$
-		}
-		if (options.query && typeof options.query === 'object') { //$NON-NLS-0$
-			var queryString = urlencode.encodeQuery(options.query);
-			url = urlencode.appendQuery(url, queryString);
 		}
 		if (typeof options.data !== 'undefined' && (method === 'POST' || method === 'PUT')) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			data = options.data;

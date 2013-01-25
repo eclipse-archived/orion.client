@@ -109,7 +109,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 							'</div>' + //$NON-NLS-2$ //$NON-NLS-0$
 							
 							'<section class="setting-row" role="region" aria-labelledby="Navigation-header">' +
-								'<h3 class="setting-header" data-dojo-attach-point="titleNode">Details</h3>' +
+								'<h3 class="setting-header" id="titleNode">Details</h3>' +
 								'<div class="setting-content">' +
 									'<div class="setting-property">' +  //$NON-NLS-0$
 										'<label>' + //$NON-NLS-0$

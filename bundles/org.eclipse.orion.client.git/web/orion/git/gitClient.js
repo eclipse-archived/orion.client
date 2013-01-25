@@ -104,49 +104,7 @@ eclipse.GitService = (function() {
 			
 			return clientDeferred;
 		},
-		
-//		getDiffContent: function(diffURI){
-//			var service = this;
-//			var clientDeferred = new dojo.Deferred();
-//			dojo.xhrGet({
-//				url: diffURI , 
-//				headers: {
-//					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
-//				},
-//				content: { "parts": "diff" }, //$NON-NLS-1$ //$NON-NLS-0$
-//				handleAs: "text", //$NON-NLS-0$
-//				timeout: 15000,
-//				load: function(jsonData, xhrArgs) {
-//					service._getGitServiceResponse(clientDeferred, jsonData, xhrArgs);
-//				},
-//				error: function(error, ioArgs) {
-//					service._handleGitServiceResponseError(clientDeferred, error);
-//				}
-//			});
-//			return clientDeferred;
-//		},
-		
-//		getDiffFileURI: function(diffURI){
-//			var service = this;
-//			var clientDeferred = new dojo.Deferred();
-//			dojo.xhrGet({
-//				url: diffURI , 
-//				headers: {
-//					"Orion-Version": "1" //$NON-NLS-1$ //$NON-NLS-0$
-//				},
-//				content: { "parts": "uris" }, //$NON-NLS-1$ //$NON-NLS-0$
-//				handleAs: "json", //$NON-NLS-0$
-//				timeout: 15000,
-//				load: function(jsonData, xhrArgs) {
-//					service._getGitServiceResponse(clientDeferred, jsonData, xhrArgs);
-//				},
-//				error: function(error, ioArgs) {
-//					service._handleGitServiceResponseError(clientDeferred, error);
-//				}
-//			});
-//			return clientDeferred;
-//		},
-		
+	
 		getGitStatus: function(url){
 			var service = this;
 			
@@ -959,10 +917,12 @@ eclipse.GitService = (function() {
 			var response =  result.response ? JSON.parse(result.response) : null;
 			
 			if (result.xhr && result.xhr.status === 202) {
-				operation.handle(response.Location).then(deferred.resolve, function(data) {
+				var def = operation.handle(response.Location);
+				def.then(deferred.resolve, function(data) {
 					data.failedOperation = response.Location;
 					deferred.reject(data);
 				}, deferred.progress);
+				deferred.then(null, function(error){def.reject(error);});
 				return;
 			}
 			deferred.resolve(response);

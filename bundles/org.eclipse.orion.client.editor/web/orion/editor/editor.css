@@ -1,8 +1,8 @@
-@import "../../orion/textview/textview.css";
-@import "../../orion/textview/rulers.css";
-@import "../../orion/textview/annotations.css";
-@import "../../orion/textview/tooltip.css";
+@import "../../orion/editor/textview.css";
+@import "../../orion/editor/rulers.css";
+@import "../../orion/editor/annotations.css";
+@import "../../orion/editor/tooltip.css";
 
-@import "../../examples/textview/textstyler.css";
+@import "../../examples/editor/textstyler.css";
 @import "../../examples/editor/htmlStyles.css";
 @import "../../orion/editor/default-theme.css";

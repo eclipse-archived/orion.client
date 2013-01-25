@@ -10,7 +10,7 @@
  ******************************************************************************/
 /*jslint browser:true regexp:true*/
 /*global console define*/
-define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/textview/annotations'], function(messages, mAnnotations) {
+define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/editor/annotations'], function(messages, mAnnotations) {
 	var SERVICE_NAME = "orion.edit.highlighter";
 	var HIGHLIGHT_ERROR_ANNOTATION = "orion.annotation.highlightError";
 	var badServiceError = SERVICE_NAME + " service must be an event emitter";
@@ -35,16 +35,16 @@ define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 	 * <p>A style provider monitors changes to the TextView (typically using an <code>orion.edit.model</code> service) and 
 	 * dispatches a service event of type <code>'orion.edit.highlighter.styleReady'</code> when it has style information to send.
 	 * The event carries a payload of style information for one or more lines in the TextView. The AsyncStyler then applies
-	 * the style information fron the event to the TextView using the {@link orion.textview.TextView#event:onLineStyle} API.
+	 * the style information fron the event to the TextView using the {@link orion.editor.TextView#event:onLineStyle} API.
 	 * </p>
 	 *
 	 * <p>Applying style information may cause the TextView to be redrawn, which is potentially expensive. To minimize the 
 	 * number of redraws, a provider should provide style for many lines in a single StyleReadyEvent.
 	 * </p>
 	 *
-	 * @param {orion.textview.TextView} textView The TextView to style.
+	 * @param {orion.editor.TextView} textView The TextView to style.
 	 * @param {orion.serviceregistry.ServiceRegistry} serviceRegistry The ServiceRegistry to monitor for highlighter services.
-	 * @param {orion.textview.AnnotationModel} [annotationModel] The Annotation Model to use for creating error and warning annotations.
+	 * @param {orion.editor.AnnotationModel} [annotationModel] The Annotation Model to use for creating error and warning annotations.
 	 * @see orion.editor.StyleReadyEvent
 	 */
 	function AsyncStyler(textView, serviceRegistry, annotationModel) {
@@ -194,7 +194,7 @@ define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 			}
 			var style = this.lineStyles[e.lineIndex];
 			if (style) {
-				// The 'ranges', 'errors' are of type {@link orion.textview.LineStyleEvent#ranges}, except the 
+				// The 'ranges', 'errors' are of type {@link orion.editor.LineStyleEvent#ranges}, except the 
 				// start and end indices are line-relative offsets, not document-relative.
 				if (style.ranges) { e.ranges = _toDocumentOffset(style.ranges, e.lineStart); }
 				else if (style.style) { e.style = style.style; }
@@ -293,8 +293,8 @@ define("orion/editor/AsyncStyler", ['i18n!orion/editor/nls/messages', 'orion/tex
 	 * @description Represents style information for a line.
 	 * <p>Note that the offsets given in the {@link #ranges} and {@link #errors} properties are relative to the start of the
 	 * line that this LineStyle is associated with, not the start of the document.</p>
-	 * @property {orion.textview.StyleRange[]} ranges Optional; Gives the styles for this line.
-	 * @property {orion.textview.StyleRange[]} errors Optional; Gives the error styles for this line. Error styles will be 
+	 * @property {orion.editor.StyleRange[]} ranges Optional; Gives the styles for this line.
+	 * @property {orion.editor.StyleRange[]} errors Optional; Gives the error styles for this line. Error styles will be 
 	 * presented as annotations in the UI.
 	 */
 

@@ -540,7 +540,7 @@ var RegexUtil = {
 	 * 
 	 * @description Creates a new TextMateStyler.
 	 * @extends orion.editor.AbstractStyler
-	 * @param {orion.textview.TextView} textView The <code>TextView</code> to provide styling for.
+	 * @param {orion.editor.TextView} textView The <code>TextView</code> to provide styling for.
 	 * @param {Object} grammar The TextMate grammar to use for styling the <code>TextView</code>, as a JavaScript object. You can
 	 * produce this object by running a PList-to-JavaScript conversion tool on a TextMate <code>.tmLanguage</code> file.
 	 * @param {Object[]} [externalGrammars] Additional grammar objects that will be used to resolve named rule references.
@@ -1158,7 +1158,7 @@ var RegexUtil = {
 			}
 		},
 		/**
-		 * @param model {orion.textview.TextModel}
+		 * @param model {orion.editor.TextModel}
 		 * @param node {Node}
 		 * @param pos {Number}
 		 * @param [matchRulesOnly] {Boolean} Optional, if true only "match" subrules will be considered.

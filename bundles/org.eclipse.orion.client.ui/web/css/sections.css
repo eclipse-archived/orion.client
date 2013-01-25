@@ -74,6 +74,7 @@
 	color: gray;
 	padding-bottom:3px;
 	margin-bottom:5px;
+	overflow: hidden;
 }
 
 .sectionWrapperAux {

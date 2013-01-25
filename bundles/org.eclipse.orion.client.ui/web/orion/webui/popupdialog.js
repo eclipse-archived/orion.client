@@ -42,17 +42,20 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		 * Called by clients once the popup dialog template has been bound to the TEMPLATE variable, and an optional message object has
 		 * been set.
 		 * @param {DOMElement} triggerNode The node that should trigger the popup.
-		 * @param {Function} afterShowing Optional.  A function to call after the popup appears.
-		 * @param {Function} afterHiding Optional.  A function to call after the popup is hidden.
+		 * @param {Function} afterShowing Optional. A function to call after the popup appears.
+		 * @param {Function} afterHiding Optional. A function to call after the popup is hidden.
+		 * @param {String} trigger Optional. The event that triggers the popup. Defaults to "click". Can be one of "mouseover",
+		 * @param {Number} hideDelay Optional.  The delay to be used when hiding the popup.
+		 * "click", or "none".  If "none" then the creator will be responsible for showing, hiding, and destroying the popup.
 		 */
 
-		_initialize: function(triggerNode, afterShowing, afterHiding) {
+		_initialize: function(triggerNode, afterShowing, afterHiding, trigger, hideDelay) {
 			this._tooltip = new tooltip.Tooltip({
 				node: triggerNode,
-				hideDelay: 0,
+				hideDelay: hideDelay || 0,
 				afterShowing: this._afterShowingFunction(afterShowing).bind(this), 
 				afterHiding: afterHiding,
-				trigger: "click" //$NON-NLS-0$
+				trigger: trigger ? trigger : "click" //$NON-NLS-0$
 			});
 			this.$parent = this._tooltip.contentContainer();
 			this.$parent.role = "dialog"; //$NON-NLS-0$

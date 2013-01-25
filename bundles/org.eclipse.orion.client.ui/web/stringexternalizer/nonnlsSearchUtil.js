@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-define(['dojo'], function(dojo){
+define(['dojo', 'dojo/DeferredList'], function(dojo){
 	
 	function NonNlsSearch(fileClient, root, progress){
 		this.fileClient = fileClient;
