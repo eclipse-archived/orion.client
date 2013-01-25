@@ -857,24 +857,16 @@ var exports = {};
 								function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 										function() {
-											progress.progress(gitService.getGitRemote(path), "Getting remote details " + path).then(
-												function(jsonData){
-													explorer.changedItem(item);
-												}, displayErrorOnStatus
-											);
+											explorer.changedItem(item);
 										}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
 									);
 								}, function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
-									function() {
-										progress.progress(gitService.getGitRemote(path), "Getting remote details " + path).then(
-											function(jsonData){
-												explorer.changedItem(item);
-											}, displayErrorOnStatus
-										);
-									}, function (jsonData) {
+										function() {
+											explorer.changedItem(item);
+										}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
 									);
@@ -990,11 +982,7 @@ var exports = {};
 								function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 										function() {
-											progress.progress(gitService.getGitRemote(path), "Getting remote information " + path).then(
-												function(jsonData){
-													explorer.changedItem(item);
-												}, displayErrorOnStatus
-											);
+											explorer.changedItem(item);
 										}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
@@ -1002,11 +990,7 @@ var exports = {};
 								}, function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 										function() {
-											progress.progress(gitService.getGitRemote(path), "Getting remote information " + path).then(
-												function(jsonData){
-													explorer.changedItem(item);
-												}, displayErrorOnStatus
-											);
+											explorer.changedItem(item);
 										}, function (jsonData) {
 											handleResponse(jsonData, commandInvocation);
 										}
@@ -2254,11 +2238,7 @@ var exports = {};
 											},function(jsonData, secondArg) {
 												exports.handleGitServiceResponse(jsonData, serviceRegistry, 
 													function() {
-														progress.progress(gitService.getGitRemote(remoteToFetch.Location), "Getting remote details " + name).then(
-																function(jsonData){
-																	explorer.changedItem(item);
-																}, displayErrorOnStatus
-															);
+														explorer.changedItem(item);
 													}, function (jsonData) {
 														handleResponse(jsonData, commandInvocation);
 													}
