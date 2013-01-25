@@ -19,7 +19,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
 		
 			this.commandService = commandService;
-		
+			this.serviceRegistry = serviceRegistry;
 			var isExpanded = false;
 			var that = this;
 			
@@ -27,6 +27,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
 			
 			this.anchor = anchor;
+			
+			document.addEventListener( 'build', that.updateNavigation.bind(that), false);
 			
 			this.anchor.innerHTML = this.template;
 			
@@ -114,8 +116,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
-//				var drivepath = workspace.Drives[0].ChildrenLocation;
-			
 				myexplorer.loadResourceList( workspace.DriveLocation, true, null );
 			});
 			
@@ -157,6 +157,45 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							'<div>' +
 						'</div>';
 		ProjectNavigation.prototype.template = template;
+		
+		function updateNavigation(){
+			var serviceRegistry = this.serviceRegistry;
+		
+			var fileClient = new mFileClient.FileClient( serviceRegistry );			
+					
+			this.selection = new mSelection.Selection( serviceRegistry, "orion.directoryPrompter.selection" ); //$NON-NLS-0$
+			
+			var projectCommandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: this.selection});
+
+			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+
+			this.explorer = new mExplorerTable.FileExplorer({
+				treeRoot: {children:[]}, 
+				selection: this.selection, 
+				serviceRegistry: serviceRegistry,
+				fileClient: fileClient, 
+				parentId: "Drives", 
+				rendererFactory: function(explorer) {  //$NON-NLS-0$
+				
+					var renderer = new DriveTreeRenderer({
+						checkbox: false, 
+						cachePrefix: "Navigator"}, explorer, projectCommandService, contentTypeService);
+						
+					return renderer;
+			}}); //$NON-NLS-0$
+			
+			mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, projectCommandService, this.explorer );
+			
+			var myexplorer = this.explorer;
+			var loadedWorkspace = fileClient.loadWorkspace("");
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				myexplorer.loadResourceList( workspace.DriveLocation, true, null );
+			});
+		}
+		
+		ProjectNavigation.prototype.updateNavigation = updateNavigation;
 		
 		var workingSetSection;
 		ProjectNavigation.prototype.workingSetSection = workingSetSection;

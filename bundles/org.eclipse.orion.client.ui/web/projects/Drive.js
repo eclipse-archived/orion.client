@@ -190,7 +190,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						if( folders.Children[folder].Name === driveName ){
 							for( var p =0; p< folders.Projects.length; p++ ){
 								if( folders.Children[folder].Id === folders.Projects[p].Id ){
-									fileClient.deleteFile( folders.Projects[p].Location, true ).then(responseHandler.handleSuccess.bind( responseHandler), responseHandler.handleError.bind( responseHandler) );								
+									fileClient.deleteFile( folders.Projects[p].Location, true ).then(responseHandler.handleSuccess.bind( responseHandler), responseHandler.handleError.bind( responseHandler ) );								
 									break;
 								}
 							}
@@ -227,10 +227,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		Drive.prototype.toJSONData = toJSONData;
 		
 		function handleSuccess( result ){
-			var messageText = result.responseText;
-			var message = JSON.parse( messageText );
-			message = message.DetailedMessage;
-			this.responseHandler.handleSuccess( message );
+		
+			var evt = document.createEvent('Event');
+			// define that the event name is `build`
+			evt.initEvent('build', true, true);
+			 
+			// elem is any element
+			this.entryNode.dispatchEvent(evt);
+			
+			this.responseHandler.handleSuccess( 'OK' );
 		}
 		
 		Drive.prototype.handleSuccess = handleSuccess;
