@@ -14,19 +14,20 @@
 
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mProjectGrid, mProjectData, mProjectDataManager ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
+	
+		var projectGrid;
 	
 		function showProjectGrid( projectData ){
 			
 			var projectList = [];
 		
 			for( var project = 0; project < projectData.length; project++ ){
-				var orionProject = new mProjectData( projectData[project] );
+				var orionProject = new ProjectData( projectData[project] );
 				projectList.push( orionProject );
 			}
 		
-			var mainPanel = document.getElementById( 'projectGrid' );
-			var projectGrid = new mProjectGrid.ProjectGrid( mainPanel, projectList );
+			projectGrid.setProjectData( projectList );
 		}
 		
 		var projectMetaData;
@@ -39,7 +40,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				
 				var serviceRegistry = core.serviceRegistry;
 	
-				this.projectDataManager = new mProjectDataManager( serviceRegistry );
+				this.projectDataManager = new ProjectDataManager( serviceRegistry );
 				
 				var preferences = core.preferences;
 			
@@ -54,6 +55,10 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				var sidePanel = document.getElementById( 'projectTree' );
 				
 				var projectTree = new mProjectTree.ProjectTree( sidePanel );
+				
+				var mainPanel = document.getElementById( 'projectGrid' );
+				
+				projectGrid = new ProjectGrid( mainPanel );
 				
 				this.projectDataManager.getProjectData( showProjectGrid ); 
 		});
