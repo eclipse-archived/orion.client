@@ -43,7 +43,10 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		function startProjectComponents( project ){
 		
 			var titleArea = document.getElementById( 'titleArea');
-			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+			
+			if(project){
+				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+			}
 		
 			var sidePanel = document.getElementById( 'projectNavigation' );
 			
