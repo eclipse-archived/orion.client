@@ -36,7 +36,8 @@ exports.DefaultDiffProvider = (function() {
 				var baseFileContentType = results[0];//.extension[0];
 				var newFileContentType = results[1];//.extension[0];
 				that.callBack({ baseFile:{URL: baseFileURL, Name: that._resolveFileName(baseFileURL), Type: baseFileContentType},
-				 			newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType}
+				 			newFile:{URL: newFileURL, Name: that._resolveFileName(newFileURL), Type: newFileContentType},
+				 			diff: that._diffContent
 						 });
 			};
 			new Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
@@ -475,12 +476,13 @@ exports.CompareContainer = (function() {
 		
 		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
+			this._diffParser.setLineDelim(delim);
 			if(this.options.mapper && this.options.toggler){
 				return {delim:delim , mapper:this.options.mapper, output: this.options.newFile.Content, diffArray:this.options.diffArray};
 			}
 			if(output){
 				var adapter = new mJSDiffAdapter.JSDiffAdapter();
-				var maps = adapter.adapt(input, output);
+				var maps = adapter.adapt(input, output, delim);
 				if(this.options.toggler){
 					this.options.mapper = maps.mapper;
 					this.options.newFile.Content = output;
@@ -488,7 +490,6 @@ exports.CompareContainer = (function() {
 				}
 				return {delim:delim , mapper:maps.mapper, output: output, diffArray:maps.changContents};
 			} else {
-				this._diffParser.setLineDelim(delim);
 				var result = this._diffParser.parse(input, diff, detectConflicts ,doNotBuildNewFile);
 				var diffArray = this._diffParser.getDiffArray();
 				if(this.options.toggler){
