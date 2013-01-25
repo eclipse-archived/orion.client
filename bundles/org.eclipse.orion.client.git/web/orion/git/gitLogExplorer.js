@@ -9,7 +9,7 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global define dijit console document Image */
+/*global define console document Image */
 
 define(['i18n!git/nls/gitmessages', 'require', 'orion/explorers/explorer', 'orion/PageUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/section', 'orion/globalCommands', 
         'orion/git/gitCommands', 'orion/explorers/navigationUtils', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 

@@ -294,14 +294,6 @@ label.parameterInput{
 	padding-top: 2px;
     padding-bottom: 8px;
 }
-
-.claro .dijitDialogTitleBar {
-    background: white;
-    color: black;
-    font: 8px;
-    outline: 0 none;
-    padding: 5px 6px 3px;
-}
  
 .help {
 	font-weight: bold;
