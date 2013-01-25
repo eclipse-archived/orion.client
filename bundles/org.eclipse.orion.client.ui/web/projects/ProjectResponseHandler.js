@@ -22,7 +22,7 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 		function handleError( message ){
 			this.target.innerHTML = 'There was a problem: ' + message;
 			this.target.className = 'alert-error';
-			setInterval(this.clear.bind(this),10000);
+			setInterval(this.clear.bind(this),5000);
 		}
 		
 		function clear(){
@@ -32,7 +32,7 @@ define(['i18n!orion/settings/nls/messages', 'require' ],
 		function handleSuccess( message ){
 			this.target.innerHTML = 'Request succeeded: ' + message;
 			this.target.className = 'alert-success';
-			setInterval(this.clear.bind(this),10000);
+			setInterval(this.clear.bind(this),5000);
 		}
 		
 		function handleInformation( message ){
