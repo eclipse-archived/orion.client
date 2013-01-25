@@ -12,73 +12,63 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'dojo', 'dijit', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'stringexternalizer/nonnlsSearchUtil', 'dijit/TooltipDialog'],
-
-function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNonnlsSearchUtil) {
+define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'stringexternalizer/nonnlsSearchUtil'], function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNonnlsSearchUtil) {
 
 	/* Internal wrapper functions*/
-	function _empty(nodeToEmpty){
+	function _empty(nodeToEmpty) {
 		var node = lib.node(nodeToEmpty);
-		if(node){
+		if (node) {
 			lib.empty(node);
 		}
 	}
-	
-	function _connect(nodeOrId, event, eventHandler){
+
+	function _connect(nodeOrId, event, eventHandler) {
 		var node = lib.node(nodeOrId);
-		if(node){
-			node.addEventListener(event, eventHandler, false); 
+		if (node) {
+			node.addEventListener(event, eventHandler, false);
 		}
 	}
-	
-	function _place(ndoeToPlace, parent, position){
+
+	function _place(ndoeToPlace, parent, position) {
 		var parentNode = lib.node(parent);
-		if(parentNode){
-			if(position === "only"){
+		if (parentNode) {
+			if (position === "only") {
 				lib.empty(parentNode);
 			}
 			parentNode.appendChild(ndoeToPlace);
 		}
 	}
-	
-	function _createElement(elementTag, classNames, id, parent){
+
+	function _createElement(elementTag, classNames, id, parent) {
 		var element = document.createElement(elementTag);
-		if(classNames){
-			if(Array.isArray(classNames)){
-				for(var i = 0; i < classNames.length; i++){
+		if (classNames) {
+			if (Array.isArray(classNames)) {
+				for (var i = 0; i < classNames.length; i++) {
 					element.classList.add(classNames[i]);
 				}
-			} else if(typeof classNames === "string"){
+			} else if (typeof classNames === "string") {
 				element.className = classNames;
 			}
 		}
-		if(id){
+		if (id) {
 			element.id = id;
 		}
 		var parentNode = lib.node(parent);
-		if(parentNode){
+		if (parentNode) {
 			parentNode.appendChild(element);
 		}
 		return element;
 	}
-	
-	function _createLink(classNames, id, href, parent, renderName){
+
+	function _createLink(classNames, id, href, parent, renderName) {
 		var link = _createElement('a', classNames, id, parent); //$NON-NLS-2$
 		link.href = href;
-		if(renderName){
+		if (renderName) {
 			link.appendChild(document.createTextNode(renderName));
 		}
 		return link;
 	}
-	
-	function _createSpan(classNames, id, parent, spanName){
-		var span = _createElement('span', classNames, id, parent); //$NON-NLS-2$
-		if(spanName){
-			span.appendChild(document.createTextNode(spanName));
-		}
-		return span;
-	}
-	
+
 	function SearchResultModel(serviceRegistry, fileClient, root, options) {
 		this.registry = serviceRegistry;
 		this.fileClient = fileClient;
@@ -175,10 +165,12 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 			onComplete(fileItem);
 		} else {
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(
+
 			function(contents) {
 				fileItem.contents = contents;
 				onComplete(fileItem);
 			}.bind(this),
+
 			function(error) {
 				console.error("Error loading file content: " + error.message); //$NON-NLS-0$
 				onComplete(null);
@@ -204,7 +196,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 	};
 
 	SearchResultModel.prototype.writeIncrementalNewContent = function(config, i, onFinish) {
-		if (!i) { i = 0;}
+		if (!i) {
+			i = 0;
+		}
 		if (i >= this._listRoot.children.length) {
 			this.messageService.setProgressMessage("");
 			if (onFinish) {
@@ -219,7 +213,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location, true), "Reading file metadata " + fileItem.Location).then(function(metadata) {
 				if (fileItem.LocalTimeStamp !== metadata.LocalTimeStamp) {
 					console.error("File " + metadata.Name + " has been modified."); //$NON-NLS-1$ //$NON-NLS-0$
-					dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+					that.writeIncrementalNewContent(config, i + 1, onFinish);
 					return;
 				}
 
@@ -228,25 +222,25 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 					if (config.messages && config.messages !== {}) {
 						mNonnlsSearchUtil.writeMessagesFile(that.fileClient, config, config.messages, that.registry.getService("orion.page.progress")).then(function() {
 							that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function() {
-								dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+								that.writeIncrementalNewContent(config, i + 1, onFinish);
 							},
 
 							function(error) {
 								console.error(error);
-								dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+								that.writeIncrementalNewContent(config, i + 1, onFinish);
 							});
 						}, function(error) {
 							console.error(error);
-							dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+							that.writeIncrementalNewContent(config, i + 1, onFinish);
 						});
 					} else {
 						that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function() {
-							dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+							that.writeIncrementalNewContent(config, i + 1, onFinish);
 						},
 
 						function(error) {
 							console.error(error);
-							dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+							that.writeIncrementalNewContent(config, i + 1, onFinish);
 						});
 					}
 				}
@@ -254,12 +248,12 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 				if (!fileItem.contents) {
 					that.registry.getService("orion.page.progress").progress(that.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(function(contents) {
 						fileItem.contents = contents;
-						dojo.hitch(that, writeNonnls)(fileItem, config);
+						writeNonnls(fileItem, config);
 					},
 
 					function(error) {
 						console.error(error);
-						dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+						that.writeIncrementalNewContent(config, i + 1, onFinish);
 					});
 				} else {
 					writeNonnls(fileItem, config);
@@ -268,10 +262,10 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 
 			}, function(error) {
 				console.error(error);
-				dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+				that.writeIncrementalNewContent(config, i + 1, onFinish);
 			});
 		} else {
-			dojo.hitch(that, that.writeIncrementalNewContent(config, i + 1), onFinish);
+			that.writeIncrementalNewContent(config, i + 1, onFinish);
 		}
 	};
 
@@ -295,7 +289,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			th.appendChild(check);
-			_connect(check, "click",function(evt) { //$NON-NLS-0$
+			_connect(check, "click", function(evt) { //$NON-NLS-0$
 				var newValue = evt.target.checked ? false : true;
 				this.onCheck(null, evt.target, newValue);
 			}.bind(this));
@@ -330,9 +324,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName) {
 		var nameSpan = _createLink(
 			"primaryColumn", //$NON-NLS-2$
-			this.getItemLinkId(item),
-			item.linkLocation,
-			spanHolder, renderName);
+		this.getItemLinkId(item),
+		item.linkLocation,
+		spanHolder, renderName);
 		nameSpan.title = messages["Click to compare"];
 	};
 
@@ -346,15 +340,15 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 	SearchResultRenderer.prototype.renderDetailElement = function(item, tableRow, spanHolder, renderNumber) {
 		var nameSpan = _createElement("span",
 			"primaryColumn",
-			this.getItemLinkId(item),
+		this.getItemLinkId(item),
 		spanHolder); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		this.generateDetailHighlight(item, nameSpan);
 		nameSpan.title = messages["Click to find"];
 		var that = this;
 
-		var link = _createElement("span", 
+		var link = _createElement("span",
 			"navlink",
-			this.getItemLinkId(item),
+		this.getItemLinkId(item),
 		spanHolder);
 		_connect(link, "click", function() { //$NON-NLS-0$
 			that.explorer.getNavHandler().cursorOn(item);
@@ -400,21 +394,21 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 		var href = require.toUrl("stringexternalizer/search.html") + "#" + item.parentLocation; //$NON-NLS-1$ //$NON-NLS-0$
 		var link = _createLink(
 			"navlink", //$NON-NLS-2$
-			null,
-			href,
-			spanHolder, item.fullPathName);
+		null,
+		href,
+		spanHolder, item.fullPathName);
 		link.title = i18nUtil.formatMessage(messages["Externalize string from ${0} only"], item.fullPathName);
 	};
 
 	SearchResultRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
-				var col, span;
+		var col, span;
 		switch (col_no) {
 			case 0:
 				col = _createElement('td'); //$NON-NLS-0$
 				if (item.type === "file") { //$NON-NLS-0$
 					col.noWrap = true;
 					span = _createElement("span", null,
-						this.getFileIconId(item),
+					this.getFileIconId(item),
 					col); //$NON-NLS-1$ //$NON-NLS-0$
 					this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
 				} else {
@@ -427,7 +421,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 			case 1:
 				col = _createElement('td'); //$NON-NLS-0$
 				span = _createElement("span", null,
-					this.getFileSpanId(item),
+				this.getFileSpanId(item),
 				col); //$NON-NLS-1$ //$NON-NLS-0$
 				if (item.type === "file") { //$NON-NLS-0$
 					var renderName = item.nonnls ? i18nUtil.formatMessage(messages["${0} (${1} matches)"], item.Name, item.nonnls.length) : item.Name;
@@ -435,7 +429,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 				} else {
 					this.renderDetailElement(item, tableRow, span);
 					var iconSpan = _createElement("span", null,
-						this.getDetailIconId(item),
+					this.getDetailIconId(item),
 					span); //$NON-NLS-1$ //$NON-NLS-0$
 					var icon = _createElement("span", null, null, iconSpan); //$NON-NLS-1$ //$NON-NLS-0$
 					icon.classList.add("imageSprite"); //$NON-NLS-0$
@@ -665,7 +659,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 	};
 
 	SearchResultExplorer.prototype.onItemChecked = function(item, checked, manually) {
-	var checkBox;
+		var checkBox;
 		item.checked = checked;
 		if ((item.type === "file" && manually) || item.isRoot) { //$NON-NLS-0$
 			var children = [];
@@ -721,10 +715,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 			this._currentReplacedContents = [];
 		}
 		var that = this;
-		
+
 		var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
-		var fType = contentTypeService.getFilenameContentType(fileItem.name);
-		
+
 		this.model.getFileContent(fileItem, function(fileItem) {
 			// Diff operations
 			var fType = that._getContentType(fileItem);
@@ -753,7 +746,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 				});
 				that.uiFactoryCompare.buildUI();
 				that.twoWayCompareContainer = new mCompareContainer.TwoWayCompareContainer(that.registry, uiFactory.getCompareDivID(), that.uiFactoryCompare, options);
-				that.twoWayCompareContainer.startup();
+				that.twoWayCompareContainer.startup(false, function() {
+					that._uiFactory.setCompareWidget(that.twoWayCompareContainer);
+				});
 			} else {
 				_empty(that.uiFactoryCompare.getTitleDiv());
 				_place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.Name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
@@ -765,7 +760,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, dojo, dijit, mExplorer
 			window.setTimeout(function() {
 				that.renderer.focus();
 			}, 100);
-			});
+		});
 	};
 
 	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber) {

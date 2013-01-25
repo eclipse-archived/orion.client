@@ -15,7 +15,7 @@
 define(['require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs',
 	'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient',
 	'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/globalCommands',
-	'orion/contentTypes', 'dojo/hash', 'dojo/parser', 'dijit/layout/BorderContainer', 'dijit/layout/ContentPane'],
+	'orion/contentTypes'],
 
 function(require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig,
 mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, mContentTypes) {
