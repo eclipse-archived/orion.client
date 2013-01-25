@@ -53,7 +53,8 @@ define(['i18n!orion/operations/nls/messages',  'require', 'orion/webui/littlelib
 					operations[operationLocation]= operation;
 					if(operation.expires && new Date().getTime()>operation.expires){
 						//operations expired
-						operations.remove(operationLocation);
+						globalOperations.remove(operationLocation);
+						delete operations[operationLocation];
 						continue;
 					}
 					var success = function (result){
