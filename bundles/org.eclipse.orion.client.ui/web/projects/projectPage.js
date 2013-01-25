@@ -12,10 +12,10 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil', 'orion/operationsClient', 'orion/status'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
-	
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil, mOperationsClient, mStatus ){
+		
 		var serviceRegistry;
 		var preferences;
 		var commandService;
@@ -79,6 +79,10 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			var projectDataManager = new ProjectDataManager(serviceRegistry);
 			
 			projectDataManager.getProject( projectName, startProjectComponents );
+			
+//			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);	
+//			new mStatus.StatusReportingService(serviceRegistry, operationsClient, "statusPane", "notifications", "notificationArea"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$			
+//			serviceRegistry.getService("orion.page.message").setErrorMessage('this is a test');
 		});
 	}	
 );

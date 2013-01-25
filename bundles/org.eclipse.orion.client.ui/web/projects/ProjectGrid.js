@@ -25,7 +25,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 			this.listButton = this.projectNode.firstChild.lastChild;
 			this.tileButton.onclick = this.showProjectTiles.bind(this);
 			this.listButton.onclick = this.showProjectTable.bind(this);
-			this.showProjectTable( this.listNode );	
+			
+			this.listNode = document.getElementById( 'listNode' );
+			this.listNode.innerHTML = '';
+		
+			var tableTemplate = '<table><th>Project Name</th><th>Description</th><th>Last Modified</th></table>';
+			
+			this.listNode.innerHTML = tableTemplate;
 		}
 		
 		ProjectGrid.prototype.constructor = ProjectGrid;
@@ -56,7 +62,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 											
 		ProjectGrid.prototype.template = template;
 		
-		function showProjectTiles(parent, name){
+		function showProjectTiles(){
 		
 			this.tileButton.style.background = '#E0E0E0';
 			this.listButton.style.background = 'white';
@@ -105,7 +111,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 		
 		ProjectGrid.prototype.showProjectTiles = showProjectTiles;
 		
-		function showProjectTable(parent, name){
+		function showProjectTable(){
 		
 			this.tileButton.style.background = 'white';
 			this.listButton.style.background = '#E0E0E0';
@@ -127,7 +133,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				var url = template.expand({
 					project: projectname
 				});
-
 			
 				var row = document.createElement('tr');
 				
@@ -143,9 +148,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 		}
 		
 		ProjectGrid.prototype.showProjectTable = showProjectTable;
+		
+		function setProjectData( projects ){
+			this.projectData = projects;
+			this.showProjectTable();
+		}
+		
+		ProjectGrid.prototype.setProjectData = setProjectData;
 
-		return{
-			ProjectGrid:ProjectGrid
-		};
+		return ProjectGrid;
 	}
 );

@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/fileClient', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileUtils', 'orion/Deferred', 'projects/ProjectDataManager' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/fileClient', 'orion/selection', 'orion/explorers/navigationUtils', 'orion/explorers/explorer', 'orion/explorers/explorer-table', 'projects/DriveTreeRenderer', 'orion/fileUtils', 'orion/Deferred', 'projects/ProjectResponseHandler', 'projects/ProjectDataManager' ], 
 	
-	function(messages, require, mCommands, mFileClient, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileUtils, Deferred) {
+	function(messages, require, mCommands, mFileClient, mSelection, mNavUtils, mExplorer, mExplorerTable, DriveTreeRenderer, mFileUtils, Deferred, ProjectResponseHandler) {
 	
 		var NAME_INDEX = 0;
 		var ADDRESS_INDEX = NAME_INDEX + 1;
@@ -32,6 +32,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.type = details.type;
 			this.username = details.username;
 			this.password = details.password;
+			this.responseHandler = new ProjectResponseHandler( 'informationPane' );
 
 			this.commandService = commandService;
 			this.serviceRegistry = serviceRegistry;
@@ -78,17 +79,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					var drivename = elements[NAME_INDEX].getValue();
 				
 					this.setDriveName( drivename );
-				
-					for( var item in elements ){
-						console.log( elements[item].getValue() );
-					}
 					
 					/* constuct the URL - example:
 			           sftp://oriontest:orion2012@planetorion.org/home/oriontest/sampledata */
 					
 					var url = 'sftp://' + elements[USERNAME_INDEX].getValue() + ':' + elements[PASSWORD_INDEX].getValue() + '@' + elements[ADDRESS_INDEX].getValue() + elements[PATH_INDEX].getValue();
-					
-					console.log( url );
 					
 					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
@@ -108,8 +103,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					if (drivename) {
 						var loadedWorkspace = fileClient.loadWorkspace("");
 						
+						var responseHandler = this;
+						
 						Deferred.when(loadedWorkspace, function(workspace) {
-							fileClient.createProject( workspace.ChildrenLocation, drivename, url, true);
+							fileClient.createProject( workspace.ChildrenLocation, drivename, url, true).then( responseHandler.handleSuccess.bind( responseHandler), responseHandler.handleError.bind( responseHandler) );
 						});
 					}
 
@@ -178,8 +175,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 			var loadedWorkspace = fileClient.loadWorkspace("");
 		
-			console.log( 'disconnect' );
-			
 			Deferred.when( loadedWorkspace, function(workspace) {
 
 				var drives = workspace.DriveLocation;
@@ -188,15 +183,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 					var driveName = elements[NAME_INDEX].getValue();
 					
+					var responseHandler = this;
+					
 					for( var folder = 0; folder < folders.Children.length;folder++ ){
 					
 						if( folders.Children[folder].Name === driveName ){
 							for( var p =0; p< folders.Projects.length; p++ ){
 								if( folders.Children[folder].Id === folders.Projects[p].Id ){
-									fileClient.deleteFile( folders.Projects[p].Location, true ).then(function(input){
-									
-									});
-									
+									fileClient.deleteFile( folders.Projects[p].Location, true ).then(responseHandler.handleSuccess.bind( responseHandler), responseHandler.handleError.bind( responseHandler) );								
 									break;
 								}
 							}
@@ -231,6 +225,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		}
 		
 		Drive.prototype.toJSONData = toJSONData;
+		
+		function handleSuccess( result ){
+			var messageText = result.responseText;
+			var message = JSON.parse( messageText );
+			message = message.DetailedMessage;
+			this.responseHandler.handleSuccess( message );
+		}
+		
+		Drive.prototype.handleSuccess = handleSuccess;
+		
+		function handleError( result ){
+			var messageText = result.responseText;
+			var message = JSON.parse( messageText );
+			message = message.DetailedMessage;
+			this.responseHandler.handleError( message );
+		}
+		
+		Drive.prototype.handleError = handleError;
 
 		var name;
 		var address;
