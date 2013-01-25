@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer', 'stringexternalizer/nonnlsSearchUtil'], function(require, dojo, mCommands, mSearchExplorer, mSearchUtils){
+define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'stringexternalizer/nonnlsSearchUtil'], function(require, mCommands, mSearchExplorer, mSearchUtils){
 
 	/**
 	 * Creates a new search results generator.
@@ -30,7 +30,7 @@ define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer'
 	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
 
 		_renderSearchResult: function(resultsNode, jsonData) {
-			dojo.empty(resultsNode);
+			resultsNode.innerHTML = "";
 			this.explorer.setResult(resultsNode, jsonData);
 			this.explorer.startUp();
 		},
@@ -70,13 +70,14 @@ define(['require', 'dojo', 'orion/commands', 'stringexternalizer/searchExplorer'
 		loadResults: function(root) {
 			this.root = root;
 			// console.log("loadResourceList old " + this._lastHash + " new " + path);
-			var parent = dojo.byId(this.resultsId);
-			dojo.place(document.createTextNode("Searching for non externalized strings..."), parent, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+			var parent = document.getElementById(this.resultsId);
+			parent.innerHTML = "";
+			parent.appendChild(document.createTextNode("Searching for non externalized strings..."));
 			this._search(parent, root);
 		},
 		
 		setConfig: function(config){
-			dojo.hitch(this.explorer, this.explorer.setConfig)(config);
+			this.explorer.setConfig(config);
 		}
 		
 	};
