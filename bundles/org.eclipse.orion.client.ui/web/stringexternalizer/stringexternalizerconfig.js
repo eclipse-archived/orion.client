@@ -131,7 +131,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 				self.configChanged.bind(self)(true);
 			}, false);
 
-			p = document.createElemen("p", null, sectionContent); //$NON-NLS-0$
+			p = document.createElement("p"); //$NON-NLS-0$
 			sectionContent.appendChild(p);
 			b = document.createElement("b"); //$NON-NLS-0$
 			p.appendChild(b);
@@ -147,7 +147,7 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/we
 				self.configChanged.bind(self)(false);
 			}, false);
 
-			p = document.createElemen("p", null, sectionContent); //$NON-NLS-0$
+			p = document.createElement("p"); //$NON-NLS-0$
 			sectionContent.appendChild(p);
 			b = document.createElement("b"); //$NON-NLS-0$
 			p.appendChild(b);
