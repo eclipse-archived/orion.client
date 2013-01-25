@@ -9,10 +9,10 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
-/*global window define localStorage setTimeout */
+/*global window document define localStorage setTimeout */
 /*jslint forin:true*/
 
-define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', 'orion/commands', 'orion/webui/dialogs/DirectoryPrompterDialog'], function(messages, dojo, mSection, mCommands, DirPrompter) {
+define(['i18n!orion/stringexternalizer/nls/messages', 'orion/section', 'orion/webui/littlelib', 'orion/commands', 'orion/webui/dialogs/DirectoryPrompterDialog'], function(messages, mSection, lib, mCommands, DirPrompter) {
 	function StringExternalizerConfig(options) {
 		this.parent = options.parent;
 		this.fileClient = options.fileClient;
@@ -90,14 +90,16 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 			this.commandService.renderCommands(section.actionsNode.id, section.actionsNode.id, this.config, this, "button"); //$NON-NLS-0$
 
 
-			var sectionContent = dojo.byId('stringexternalizerConfigContent'); //$NON-NLS-0$
-			var p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
-			var b = dojo.create("b", null, p); //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(messages["Messages directory:"]), b, "only"); //$NON-NLS-1$
-			dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			var sectionContent = lib.node('stringexternalizerConfigContent'); //$NON-NLS-0$
+			var p = document.createElement("p"); //$NON-NLS-0$
+			sectionContent.appendChild(p);
+			var b = document.createElement("b"); //$NON-NLS-0$
+			p.appendChild(b);
+			b.appendChild(document.createTextNode(messages["Messages directory:"]));
+			p.appendChild(document.createElement("br"));  //$NON-NLS-0$
 			if (this.config.directory.Parents) {
 				for (var i = this.config.directory.Parents.length - 1; i >= 0; i--) {
-					dojo.place(window.document.createTextNode(this.config.directory.Parents[i].Name + "/"), p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+					p.appendChild(document.createTextNode(this.config.directory.Parents[i].Name + "/")); //$NON-NLS-0$
 				}
 			} else if (this.config.directory.parent) {
 				var parent = this.config.directory.parent;
@@ -109,50 +111,56 @@ define(['i18n!orion/stringexternalizer/nls/messages', 'dojo', 'orion/section', '
 					}
 					parent = parent.parent;
 				}
-				dojo.place(window.document.createTextNode(path), p, "last"); //$NON-NLS-0$
+				p.appendChild(document.createTextNode(path)); //$NON-NLS-0$
 			}
-			dojo.place(window.document.createTextNode(this.config.directory.Name + "/"), p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+			p.appendChild(document.createTextNode(this.config.directory.Name + "/"));  //$NON-NLS-0$
 
-			p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
-			b = dojo.create("b", null, p); //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(messages["Messages file name:"]), b, "only"); //$NON-NLS-1$
-			dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			var fileName = dojo.create("input", {
-				type: "text",
-				value: this.config.file,
-				size: 40
-			}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(fileName, "onchange", null, function() { //$NON-NLS-0$
-				this.config.file = fileName.value;
-				this.configChanged(true);
-			}.bind(this));
+			p = document.createElement("p"); //$NON-NLS-0$
+			sectionContent.appendChild(p);
+			b = document.createElement("b"); //$NON-NLS-0$
+			p.appendChild(b);
+			b.appendChild(document.createTextNode(messages["Messages file name:"])); 
+			p.appendChild(document.createElement("br")); //$NON-NLS-0$
+			var fileName = document.createElement("input"); //$NON-NLS-0$
+			fileName.value = this.config.file;
+			fileName.size = 40;
+			p.appendChild(fileName);
+			var self = this;
+			fileName.addEventListener("change", function() { //$NON-NLS-0$
+				self.config.file = fileName.value;
+				self.configChanged.bind(self)(true);
+			}, false);
 
-			p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
-			b = dojo.create("b", null, p); //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(messages["Messages module:"]), b, "only"); //$NON-NLS-1$
-			dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			var moduleName = dojo.create("input", {
-				type: "text",
-				value: this.config.module,
-				size: 40
-			}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(moduleName, "onchange", null, function() { //$NON-NLS-0$
-				this.config.module = moduleName.value;
-				this.configChanged(false);
-			}.bind(this));
+			p = document.createElemen("p", null, sectionContent); //$NON-NLS-0$
+			sectionContent.appendChild(p);
+			b = document.createElement("b"); //$NON-NLS-0$
+			p.appendChild(b);
+			b.appendChild(document.createTextNode(messages["Messages module:"])); 
+			p.appendChild(document.createElement("br")); //$NON-NLS-0$
 
-			p = dojo.create("p", null, sectionContent); //$NON-NLS-0$
-			b = dojo.create("b", null, p); //$NON-NLS-0$
-			dojo.place(window.document.createTextNode(messages["Mark not exported as NON-NLS:"]), b, "only"); //$NON-NLS-1$
-			dojo.create("br", null, p, "last"); //$NON-NLS-1$ //$NON-NLS-0$
-			var markNls = dojo.create("input", {
-				type: "checkbox",
-				checked: this.config.marknls
-			}, p, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-			dojo.connect(markNls, "onchange", null, function() { //$NON-NLS-0$
-				this.config.marknls = markNls.checked;
-				this.configChanged(false);
-			}.bind(this));
+			var moduleName = document.createElement("input"); //$NON-NLS-0$
+			moduleName.value = this.config.module;
+			moduleName.size = 40;
+			p.appendChild(moduleName);
+			moduleName.addEventListener("change", function() { //$NON-NLS-0$
+				self.config.module = moduleName.value;
+				self.configChanged.bind(self)(false);
+			}, false);
+
+			p = document.createElemen("p", null, sectionContent); //$NON-NLS-0$
+			sectionContent.appendChild(p);
+			b = document.createElement("b"); //$NON-NLS-0$
+			p.appendChild(b);
+			b.appendChild(document.createTextNode(messages["Mark not exported as NON-NLS:"]));
+			p.appendChild(document.createElement("br")); //$NON-NLS-0$
+			var markNls = document.createElement("input"); //$NON-NLS-0$
+			markNls.type = "checkbox"; //$NON-NLS-0$
+			markNls.checked = this.config.marknls;
+			p.appendChild(markNls);
+			markNls.addEventListener("change", function() { //$NON-NLS-0$
+				self.config.marknls = markNls.checked;
+				self.configChanged.bind(self)(false);
+			}, false);
 			this.configChanged(true);
 		},
 		configChanged: function(changedFile) {
