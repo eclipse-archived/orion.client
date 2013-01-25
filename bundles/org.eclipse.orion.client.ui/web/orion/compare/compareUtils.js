@@ -177,7 +177,7 @@ orion.compareUtils.isMapperConflict = function(mapper, mapperIndex){
 	return mapper[mapperIndex][3] === 1;
 };
 
-orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex, lineDelim){//test
+orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mapper, diffArray, diffArraySubstrIndex, lineDelim){
 	for(var i = 0; i < newDiffBlocks.length; i++){
 		var startLineIndex = newDiffBlocks[i][0];
 		var mapperIndex = newDiffBlocks[i][1];
@@ -186,9 +186,6 @@ orion.compareUtils.mergeDiffBlocks = function(oldTextModel, newDiffBlocks, mappe
 			var text = "";
 			for(var j = 0; j < mapperItem[0]; j++){
 				var lineText = diffArray[mapperItem[2]-1+j];
-				if(lineText[lineText.length-1] === "\r"){
-					lineText = lineText.substring(0, lineText.length-1);
-				}
 				text = text + lineText.substring(diffArraySubstrIndex) + lineDelim;
 			}
 			var lineCount = oldTextModel.getLineCount();

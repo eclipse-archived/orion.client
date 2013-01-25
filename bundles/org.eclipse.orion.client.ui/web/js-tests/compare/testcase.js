@@ -155,7 +155,7 @@ define(["orion/assert", "orion/compare/diff-parser", "orion/compare/jsdiffAdapte
 			// Note: This is not a great way to do tests. Each test should be separate
 			tests["test jsDiff adapter " + j + ": " + description] = function(input, output, expectedMapping) {
 				return function() {
-					var result = adapter.adapt(input, output);
+					var result = adapter.adapt(input, output, "\n");
 					_mapperPartialEqual(result.mapper, expectedMapping);
 				};				
 			}(input,  output, expectedMapping);
