@@ -161,7 +161,7 @@ define([ 'i18n!git/nls/gitmessages', 'orion/webui/dialogs/DirectoryPrompterDialo
 				that.$shownGitPath.appendChild(makePathSegment(targetFolder));
 
 				var currentFolder = targetFolder;
-				while (currentFolder.parent && !currentFolder.parent.Projects) {
+				while (currentFolder.parent && currentFolder.parent.Location !== "/") {
 					that.$shownGitPath.insertBefore(document.createTextNode("/"), that.$shownGitPath.firstChild); //$NON-NLS-0$
 					that.$shownGitPath.insertBefore(makePathSegment(currentFolder.parent), that.$shownGitPath.firstChild);
 					currentFolder = currentFolder.parent;
