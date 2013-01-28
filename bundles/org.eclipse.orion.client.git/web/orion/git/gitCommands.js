@@ -425,21 +425,19 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var service = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
-				var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-				var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+				var messageService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+				var progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 				
-				var checkingOutDeferred = new Deferred();
-				progressService.createProgressMonitor(checkingOutDeferred,
+				messageService.setProgressMessage(
 					item.Name ? i18nUtil.formatMessage(messages["Checking out branch ${0}..."], item.Name) : messages["Checking out branch..."]);
+					
 				if (item.Type === "Branch") { //$NON-NLS-0$
-					progress.progress(service.checkoutBranch(item.CloneLocation, item.Name), "Checking out branch " + item.Name).then(
+					progressService.progress(service.checkoutBranch(item.CloneLocation, item.Name), "Checking out branch " + item.Name).then(
 						function(){
+							messageService.setProgressResult(messages["Branch checked out."]);
 							explorer.changedItem(item.parent);
-							checkingOutDeferred.resolve();
-							progressService.setProgressResult(messages["Branch checked out."]);
 						},
 						 function(error){
-							checkingOutDeferred.resolve(); 
 							displayErrorOnStatus(error);
 						 }
 					);
@@ -451,21 +449,19 @@ var exports = {};
 						branchLocation = item.parent.parent.BranchLocation;
 					}
 					
-					progress.progress(service.addBranch(branchLocation, null, item.Name), "Adding branch " + item.Name).then(
+					progressService.progress(service.addBranch(branchLocation, null, item.Name), "Adding branch " + item.Name).then(
 						function(branch){
-							progress.progress(service.checkoutBranch(branch.CloneLocation, branch.Name), "Checking out branch " + item.Name).then(
+							progressService.progress(service.checkoutBranch(branch.CloneLocation, branch.Name), "Checking out branch " + item.Name).then(
 								function(){
+									messageService.setProgressResult(messages['Branch checked out.']);
 									explorer.changedItem(item.Repository ? item.Repository.BranchLocation : item.parent.parent.parent);
-									progressService.setProgressResult(messages['Branch checked out.']);
 								},
 								function(error){
-									checkingOutDeferred.resolve(); 
 									displayErrorOnStatus(error);
 								}
 							);
 						},
 						function(error){
-							checkingOutDeferred.resolve(); 
 							displayErrorOnStatus(error);
 						 }
 					);
