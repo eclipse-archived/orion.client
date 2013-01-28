@@ -4,33 +4,6 @@
 @import "../css/images.css";
 @import "./services.css";
 
-html,body {
-	height: 100%;
-	font-size: 8pt;
-}
-
-h1 {
-	position: relative;
-	margin-top: 18px
-}
-
-select {
-	border: 1px #999 solid;
-	color: #222;
-	cursor: pointer;
-	background: white;
-	background-image:-webkit-linear-gradient(top,whiteSmoke,#F1F1F1);
-}
-
-button {
-	background: white;
-	color: #222;
-	border: solid 1px #999;
-	border-radius: 2px;
-	font-size: 0.9em;
-	cursor: pointer;
-}
-
 #pluginUrlEntry {
 	background: white;
 	color: #222;
@@ -50,10 +23,6 @@ button {
 
 .categories {
 	/*background: #EDEDED;*/
-}
-
-.toolbarTarget:focus {
-	outline: none;
 }
 
 .navbar {
@@ -78,11 +47,6 @@ button {
 	cursor: pointer;
 	/* margin-right: 8px; */
 	list-style: none;
-}
-
-ul,menu,dir {
-	display: block;
-	list-style-type: disc;
 }
 
 .navbar-item-selected {
@@ -118,15 +82,6 @@ ul,menu,dir {
 	color: #222;
 	margin: 2px;
 	padding-left: 5px;
-}
-
-.sectionProgress {
-	float: left; font-size : 1.2em; font-weight : bold; color : #222;
-	margin-left: 2px;
-	text-decoration: blink;
-	font-size: 1.2em;
-	font-weight: bold;
-	color: #222;
 }
 
 .pluginSubTitle {
@@ -306,13 +261,6 @@ div.page section:last-child {
   	background-position:left;
 	-webkit-user-select: none;
 	opacity: 0.5;
-}
-
-.stretch {
-	float: left;
-	position: relative;
-	white-space:normal;
-	max-width:600px;
 }
 
 /* TODO this rule should be more narrowly scoped */
