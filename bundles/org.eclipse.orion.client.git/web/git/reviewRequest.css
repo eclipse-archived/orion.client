@@ -1,5 +1,3 @@
-@import "../settings/settings.css";
-
 @import "../css/layout.css";
 
 @import "../css/ide.css";
@@ -7,8 +5,6 @@
 @import "../css/images.css";
 
 @import "../css/sections.css";
-
-@import "../orion/compare/compare-container.css";
 
 @import "css/git.css";
 
