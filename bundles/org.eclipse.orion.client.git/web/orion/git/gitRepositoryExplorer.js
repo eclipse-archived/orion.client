@@ -712,9 +712,13 @@ exports.GitRepositoryExplorer = (function() {
 				}
 				progress = titleWrapper.createProgressMonitor();
 				progress.begin(messages["Rendering branches"]);
-				that.displayRemoteBranches2(titleWrapper, remotes, repository).addBoth(function(){
-					progress.done();
-				});
+				that.displayRemoteBranches2(titleWrapper, remotes, repository).then(
+					function(){
+						progress.done();
+					}, function(error){
+						progress.done();
+					}
+				);
 			}, function(error){
 				progress.done(error);
 			}
@@ -736,8 +740,8 @@ exports.GitRepositoryExplorer = (function() {
 					}
 					
 					that.displayRemoteBranches2(titleWrapper, remotes.slice(1), repository, deferred, (anyRemoteBranch || (remoteBranches.length > 0)), remoteBranches);
-				}, function () {
-					
+				}, function (error) {
+					deferred.reject(error);
 				}
 			);
 		} else {
