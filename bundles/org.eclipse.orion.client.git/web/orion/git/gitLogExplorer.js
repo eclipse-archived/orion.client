@@ -409,7 +409,7 @@ exports.GitLogExplorer = (function() {
 					
 					if (commit.AuthorImage) {
 						var authorImage = document.createElement("div");
-						authorImage.style.float = "left";
+						authorImage.style["float"] = "left";
 						var image = new Image();
 						image.src = commit.AuthorImage;
 						image.name = commit.AuthorName;
