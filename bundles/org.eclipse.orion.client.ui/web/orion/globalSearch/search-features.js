@@ -29,6 +29,9 @@ orion.SearchUIFactory = (function() {
 			var splitNode = lib.$(".replaceSplitLayout", parent); //$NON-NLS-0$
 			splitNode.id = "replaceSplitter"; //$NON-NLS-0$
 			var split = new splitter.Splitter({node: splitNode, sidePanel: top, mainPanel: bottom, vertical: true});
+			//The vertical splitter has to adjust the top and bottm pane when the replace page is refreshed by the click on browser's refresh.
+			//Otherwise there the bottom pane is a little offset.
+			window.setTimeout(function() { split._adjustToSplitPosition(true); }, 100);
 			
 			//Here for the h-splitter we only need to resize both editors in the compare widget at the bottom.
 			split.addResizeListener(function(node) {

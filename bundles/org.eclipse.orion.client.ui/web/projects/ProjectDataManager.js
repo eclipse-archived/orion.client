@@ -166,16 +166,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									
 									projectData.date = new Date();
 									
+									var existingProject = false;
+									
 									for( var p = 0; p < projects.length; p++ ){
-										if( projects[p].name === projectData.name ){
+										if( projects[p].name == projectData.name ){
 											projects[p] = projectData;
+											existingProject = true;
 											break;
 										}
 									}
 									
-									if( project ){
-										projects[p] = projectData;
-									}else{
+									if( !existingProject ){
 										projects.push( projectData );
 									}
 									

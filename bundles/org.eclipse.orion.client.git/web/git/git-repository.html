@@ -1,14 +1,15 @@
 <!doctype html>
-<html style="height: 100%" >
+<html style="height: 100%;" >
     <head>
 		<meta name="copyright" content="Copyright (c) IBM Corporation and others 2011, 2012." >
 		<meta http-equiv="Content-Language" content="en-us">
 		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
-    	<title>Git</title>
-    	<link rel="stylesheet" type="text/css" href="git-repository.css" />
+		<title>Git</title>
+		<link rel="stylesheet" type="text/css" href="git-repository.css" />
 		<link rel="shortcut icon" href="/repository.ico" />
-    	<script type="text/javascript" src="../requirejs/require.js"></script>
-		<script type="text/javascript">
+		<script src="../requirejs/require.js"></script>
+		<script>
+		/*globals require*/
 		require({
 		  baseUrl: '..',
 		
@@ -25,7 +26,7 @@
 		require(["git-repository.js"]);
 		</script>
 </head>
-	<body id="orion-repository" style="height: 100%;" class="claro orionPage">
+	<body id="orion-repository" style="height: 100%;" class="orionPage">
 		<div class="content-fixedHeight">
 			<div class="fixedToolbarHolder mainpane mainPanelLayout">
 				<div class="mainToolbar toolComposite" id="pageToolbar"></div>

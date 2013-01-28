@@ -15,7 +15,7 @@
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
 	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
-	
+		
 		var serviceRegistry;
 		var preferences;
 		var commandService;
@@ -43,7 +43,10 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		function startProjectComponents( project ){
 		
 			var titleArea = document.getElementById( 'titleArea');
-			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+			
+			if(project){
+				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+			}
 		
 			var sidePanel = document.getElementById( 'projectNavigation' );
 			

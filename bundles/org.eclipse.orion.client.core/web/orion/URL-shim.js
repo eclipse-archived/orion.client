@@ -13,8 +13,11 @@
 // URL Shim -- see http://http://url.spec.whatwg.org/ and http://dvcs.w3.org/hg/url/raw-file/tip/Overview.html
 
 (function() {
-	if (typeof window.URL === "function" && new window.URL("http://www.w3.org").protocol === "http:") {
-		return;
+	try {
+		if (typeof window.URL === "function" && new window.URL("http://www.w3.org").protocol === "http:") {
+			return;
+		}
+	} catch (e) {
 	}
 
 	var _USERNAME_PASSWORD_RE = /([^:]*):?(.*)/;
@@ -318,7 +321,7 @@
 				_checkString(value);
 				var parsed = _USERNAME_PASSWORD_RE.exec(this._userinfo);
 				var userpass = [encodeURIComponent(value || "")];
-				if (parsed[2] !== null) {
+				if (parsed[2]) {
 					userpass.push(parsed[2]);
 				}
 				this._userinfo = userpass.join(":");

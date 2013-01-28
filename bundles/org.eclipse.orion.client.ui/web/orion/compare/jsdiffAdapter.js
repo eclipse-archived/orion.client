@@ -25,9 +25,12 @@ orion.JSDiffAdapter = (function() {
 	function JSDiffAdapter() {
 	}
 	JSDiffAdapter.prototype = {
-		adapt: function(oldStr, newStr){
-			var splitOld = oldStr.split("\n"); //$NON-NLS-0$
-			var splitNew = newStr.split("\n"); //$NON-NLS-0$
+		adapt: function(oldStr, newStr, lineDelim){
+			if(!lineDelim){
+				lineDelim = "\n";
+			}
+			var splitOld = oldStr.split(lineDelim); //$NON-NLS-0$
+			var splitNew = newStr.split(lineDelim); //$NON-NLS-0$
 			var newLineAtEndOld = (splitOld[splitOld.length-1] === "");
 			var newLineAtEndNew = (splitNew[splitNew.length-1] === "");
 			
@@ -42,7 +45,7 @@ orion.JSDiffAdapter = (function() {
 		    for (var i = 0; i < diff.length; i++) {
 		    	var current = diff[i];
 		        //var lines = current.lines || current.value.replace(/\n$/, "").split("\n");
-		        var lines = current.lines || current.value.split("\n"); //$NON-NLS-0$
+		        var lines = current.lines || current.value.split(lineDelim); //$NON-NLS-0$
 		        var currentLineNumber = lines.length;
 		        var startNumber = 0;
 		        if(lines.length > 1 && lines[lines.length-1] === ""){
