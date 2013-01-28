@@ -8,10 +8,10 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
-
+/*global define document Image window*/
 define(['i18n!git/nls/gitmessages', 'require', 'orion/commands', 'orion/section', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/PageUtil', 'orion/dynamicContent', 'orion/fileUtils', 
-        'orion/PageUtil', 'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
-		function(messages, require, mCommands, mSection, i18nUtil, lib, PageUtil, mDynamicContent, mFileUtils, PageUtil, mGlobalCommands, mGitCommands, Deferred,
+        'orion/globalCommands', 'orion/git/gitCommands', 'orion/Deferred', 'orion/git/widgets/CommitTooltipDialog'], 
+		function(messages, require, mCommands, mSection, i18nUtil, lib, PageUtil, mDynamicContent, mFileUtils, mGlobalCommands, mGitCommands, Deferred,
 				mCommitTooltip) {
 var exports = {};
 
@@ -952,7 +952,7 @@ exports.GitRepositoryExplorer = (function() {
 
 		if (commit.AuthorImage) {
 			var authorImage = document.createElement("div");
-			authorImage.style.float = "left";
+			authorImage.style["float"] = "left";
 			var image = new Image();
 			image.src = commit.AuthorImage;
 			image.name = commit.AuthorName;
