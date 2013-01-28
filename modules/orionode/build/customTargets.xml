@@ -177,28 +177,12 @@ lastMapTag=${mapsTagTag}
 		<copy file="${builder}/scripts/orion.build.js" tofile="${buildDirectory}/optimization/orion.build.js" overwrite="true"/>
 
 		<!-- Stage files for optimization -->
-		<pathconvert property="dojoJar" >
-			<last>
-				<sort>
-					<fileset dir="${transformedRepoLocation}/plugins" includes="org.dojotoolkit_*.jar" />
-				</sort>
-			</last>
-		</pathconvert>
-		<property name="dojoFolder" value="${buildDirectory}/optimization/org.dojotoolkit" />
-		<mkdir dir="${dojoFolder}" />
-		<unzip src="${dojoJar}" dest="${dojoFolder}" overwrite="false"/>
-
 		<copy todir="${buildDirectory}/optimization" >
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.core/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.editor/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.git/web" includes="**"/>
 			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.users/web" includes="**"/>
-		</copy>
-		<copy todir="${dojoFolder}" >
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dojo/**" />
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dijit/**" />
-			<fileset dir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" includes="dojox/**" />
 		</copy>
 
 		<!-- invoke requirejs -->
@@ -243,7 +227,7 @@ lastMapTag=${mapsTagTag}
 
 		<!-- copy css back -->
 		<copy todir="${buildDirectory}/plugins/org.eclipse.orion.client.ui/web" >
-			<fileset dir="${buildDirectory}/optimization" includes="**/*.css" excludes="org.dojotoolkit/,git/,profile/"/>
+			<fileset dir="${buildDirectory}/optimization" includes="**/*.css" excludes="git/,profile/"/>
 		</copy>
 		<copy todir="${buildDirectory}/plugins/org.eclipse.orion.client.git/web" >
 			<fileset dir="${buildDirectory}/optimization" includes="git/**/*.css" />
