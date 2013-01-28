@@ -2,10 +2,10 @@
 !.gitignore
 .project
 
-lib/dojo/
 node_modules/
 npm-debug.log
 
 # Per-user Orionode data
 .workspace/
-.temp/
+build/.temp/
+test/.test_workspace/
