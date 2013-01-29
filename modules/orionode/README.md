@@ -12,7 +12,7 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Concatenation and minification of pages
 
 ## Usage
-Run ```npm start``` or ```node server.js```.
+Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
 
 For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node).
 
