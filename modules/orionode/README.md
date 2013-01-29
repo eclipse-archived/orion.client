@@ -14,4 +14,7 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 ## Usage
 Run ```npm start``` or ```node server.js```.
 
-For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node)
+For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node).
+
+## License
+Dual-licensed under the [Eclipse Public License v1.0](http://www.eclipse.org/legal/epl-v10.html) and the [Eclipse Distribution License v1.0](http://www.eclipse.org/org/documents/edl-v10.html).
