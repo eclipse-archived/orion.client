@@ -221,22 +221,17 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			});
 		}
 		
+		var _update; // this is a forward reference to a function declared above this.update
+		
 		function _responseHandler(message) {
 			var deferred;
 			try {
 				if (message.method) {
 					if ("manifest" === message.method || "plugin" === message.method) { //$NON-NLS-0$
 						var manifest = message.params[0];
-						manifest.headers = manifest.headers || {};
-						manifest.services = manifest.services || {};
-						
-						if (_equal(manifest.headers, _headers) && _equal(manifest.services, _services)) {
+						_update({headers: manifest.headers, services: manifest.services}).then(function() {
 							_deferredLoad.resolve(_this);
-						} else {
-							_this.update({headers: manifest.headers, services: manifest.services}).then(function() {
-								_deferredLoad.resolve(_this);
-							});
-						}
+						});
 					} else if ("dispatchEvent" === message.method){ //$NON-NLS-0$
 						var proxy = _registeredServices[message.serviceId].proxy;
 						proxy.dispatchEvent.apply(proxy, message.params);		
@@ -471,8 +466,8 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			
 			return deferredStateChange.promise;
 		};
-		
-		this.update = function(input) {
+
+		_update = function(input) {
 			if (_state === "uninstalled") {
 				return new Deferred().reject(new Error("Plugin is uninstalled"));
 			}
@@ -482,9 +477,12 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					_lastModified = new Date().getTime();
 					_persist();
 				}
-				return _internalRegistry.loadManifest(_url).then(this.update.bind(this));
+				return _internalRegistry.loadManifest(_url).then(_update);
 			}
 			
+			var oldHeaders = _headers;
+			var oldServices = _services;
+			var oldAutostart = _autostart;
 			_headers = input.headers || {};
 			_services = input.services || {};
 			_autostart = input.autostart || _autostart;
@@ -494,6 +492,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			} else {
 				_lastModified = new Date().getTime();
 				_persist();
+			}
+			
+			if (_equal(_headers, oldHeaders) && _equal(_services, oldServices) && _autostart === oldAutostart) {
+				return new Deferred().resolve();
 			}
 			
 			if (_state === "active" || _state === "starting") {
@@ -548,9 +550,13 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					_internalRegistry.dispatchEvent(new PluginEvent("stopped", _this));
 				});
 			}
-
-			_internalRegistry.dispatchEvent(new PluginEvent("updated", _this));
 			return new Deferred().resolve();
+		};
+
+		this.update = function(input) {
+			return _update(input).then(function() {
+				_internalRegistry.dispatchEvent(new PluginEvent("updated", _this));
+			});
 		};
 		
 		/**
@@ -857,6 +863,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			}
 
 			var deferreds = [];
+			var now = new Date().getTime();
 			_plugins.forEach(function(plugin) {
 				var autostart = plugin._getAutostart();
 				if (plugin.getLastModified() === 0) {
@@ -876,6 +883,9 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					deferreds.push(plugin.start({"transient":true}));
 				} else if ("lazy" === autostart) {
 					deferreds.push(plugin.start({"lazy":true, "transient":true}));
+					if (now > plugin.getLastModified() + 86400000) { // 24 hours
+						plugin.update();
+					}
 				} else {
 					plugin._resolve();
 				}
