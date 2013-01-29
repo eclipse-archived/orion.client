@@ -40,9 +40,9 @@ define(["orion/assert", "orion/searchUtils"], function(assert, mSearchUtils) {
 	 * Search in a file with key word and replace the file wiht replace string.
 	 */
 	function replaceFile(fileContentText, fileModel, inFileQuery, replaceString) {
-		var newContents = [];
-		mSearchUtils.generateNewContents(fileModel.contents,/*fileContentText.split("\n"),*/ newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
-		return newContents.join("\n");
+		var newContents = {contents: null};
+		mSearchUtils.generateNewContents(true, fileModel.contents, newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
+		return newContents.contents.join("\n");
 	}
 	
 	
