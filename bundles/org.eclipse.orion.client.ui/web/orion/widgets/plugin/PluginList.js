@@ -359,8 +359,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				plugin.uninstall();
 				this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
 				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-					plugins.remove(url);
-					this.addRows(this);
+					plugins.keys().some(function(key) {
+						if (_normalizeURL(key) === url) {
+							plugins.remove(key);
+							this.addRows(this);
+							return true;
+						}
+					});
 				}.bind(this)); // this will force a sync
 				this.addRows();
 			}
@@ -370,7 +375,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 		removePlugin: function( url ){
 
-			/* 	The id of the source element is programmed with the
+			/* The id of the source element is programmed with the
 				url of the plugin to remove. */
 				
 			// TODO: Should be internationalized
