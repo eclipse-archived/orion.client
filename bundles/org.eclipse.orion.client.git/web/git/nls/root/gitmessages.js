@@ -133,6 +133,7 @@ define({
 	" commit(s) to push.": " commit(s) to push.",
 	"You have no changes to commit.": "You have no changes to commit.",
 	"You have changes to commit in your workspace!": "You have changes to commit in your workspace!",
+	"Rebase in progress!": "Rebase in progress!",
 	"View all local and remote tracking branches": "View all local and remote tracking branches",
 	"tracks no branch, ": "tracks no branch, ",
 	"tracks ${0}, ": "tracks ${0}, ",

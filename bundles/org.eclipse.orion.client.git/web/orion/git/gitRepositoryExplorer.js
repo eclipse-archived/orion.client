@@ -450,6 +450,11 @@ exports.GitRepositoryExplorer = (function() {
 				detailsView.appendChild(div);
 
 				span = document.createElement("span");
+				span.id = "repositoryState"+i;
+				span.style.paddingLeft = "10px";
+				detailsView.appendChild(span);
+				
+				span = document.createElement("span");
 				span.id = "workspaceState"+i;
 				span.style.paddingLeft = "10px";
 				detailsView.appendChild(span);
@@ -489,6 +494,11 @@ exports.GitRepositoryExplorer = (function() {
 			var workspaceState = ((unstaged > 0 || staged > 0) 
 				? i18nUtil.formatMessage(messages["${0} file(s) to stage and ${1} file(s) to commit."], unstaged, staged)
 				: messages["Nothing to commit."]);
+			
+			
+			if (status.RepositoryState !== "SAFE"){
+				lib.node("repositoryState"+index).textContent = messages["Rebase in progress!"];
+			}
 			
 			lib.node("workspaceState"+index).textContent = workspaceState;
 			
@@ -538,7 +548,7 @@ exports.GitRepositoryExplorer = (function() {
 		var horizontalBox = document.createElement("div");
 		horizontalBox.style.overflow = "hidden";
 		sectionItem.appendChild(horizontalBox);
-
+		
 		var unstaged = status.Untracked.length + status.Conflicting.length + status.Modified.length;
 		var staged = status.Changed.length + status.Added.length + status.Removed.length;
 		var workspaceState = messages["You have no changes to commit."];
@@ -549,6 +559,15 @@ exports.GitRepositoryExplorer = (function() {
 		var detailsView = document.createElement("div");
 		detailsView.style.overflow = "vbox stretch details-view";
 		horizontalBox.appendChild(detailsView);
+		
+		if (status.RepositoryState !== "SAFE"){
+			var repositoryState = document.createElement("span");
+			repositoryState.textContent = messages["Rebase in progress!"];
+			detailsView.appendChild(repositoryState);
+			
+			var div = document.createElement("div");
+			detailsView.appendChild(div);
+		}
 		
 		var title = document.createElement("span");
 		title.textContent = workspaceState;
