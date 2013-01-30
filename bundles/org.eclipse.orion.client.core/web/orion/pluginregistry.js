@@ -240,7 +240,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 						deferred.progress.apply(deferred, message.params);	
 					} else if ("timeout" === message.method){
 						if (_deferredLoad) {
-							_deferredLoad.reject(new Error("Load timeout for plugin: " + _url));
+							_deferredLoad.reject(message.error);
 						}
 					} else {
 						throw new Error("Bad response method: " + message.method);
@@ -635,46 +635,33 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					url: url
 				};
 				
-				function sendTimeout() {
-					handler({method:"timeout"});
+				function sendTimeout(message) {
+					var error = new Error(message);
+					error.name ="timeout";
+					handler({method:"timeout", error: error});
 				}
 				
-				var loadTimeout = setTimeout(sendTimeout, timeout || 15000);
-				
-				if (url.match(/\.js$/) && typeof(Worker) !== "undefined") { //$NON-NLS-0$
-					var worker = new Worker(url);
-					worker.onmessage = function(event) {
-						if (typeof channel.useStructuredClone === "undefined") { //$NON-NLS-0$
-							channel.useStructuredClone = typeof event.data !== "string"; //$NON-NLS-0$
-						}
-						channel.handler(channel.useStructuredClone ? event.data : JSON.parse(event.data));
-					};
-					channel.target = worker;
-					channel.close = function() {
-						worker.terminate();
-					};
-				} else {
-					var iframe = document.createElement("iframe"); //$NON-NLS-0$
-					iframe.name = url + "_" + new Date().getTime();
-					if (!configuration.visible) {
-						iframe.style.display = "none"; //$NON-NLS-0$
-						iframe.style.visibility = "hidden"; //$NON-NLS-0$
+				var loadTimeout = setTimeout(sendTimeout.bind(null, "Load timeout for: " + url), timeout || 15000);
+				var iframe = document.createElement("iframe"); //$NON-NLS-0$
+				iframe.name = url + "_" + new Date().getTime();
+				if (!configuration.visible) {
+					iframe.style.display = "none"; //$NON-NLS-0$
+					iframe.style.visibility = "hidden"; //$NON-NLS-0$
+				}
+				iframe.src = url;
+				iframe.onload = function() {
+					clearTimeout(loadTimeout);
+					setTimeout(sendTimeout.bind(null, "Plugin handshake timeout for: " + url), 5000);
+				};
+				iframe.sandbox = "allow-scripts allow-same-origin";
+				document.body.appendChild(iframe);
+				channel.target = iframe.contentWindow;
+				channel.close = function() {
+					if (iframe) {
+						document.body.removeChild(iframe);
+						iframe = null;
 					}
-					iframe.src = url;
-					iframe.onload = function() {
-						clearTimeout(loadTimeout);
-						setTimeout(sendTimeout, 5000);
-					};
-					iframe.sandbox = "allow-scripts allow-same-origin";
-					document.body.appendChild(iframe);
-					channel.target = iframe.contentWindow;
-					channel.close = function() {
-						if (iframe) {
-							document.body.removeChild(iframe);
-							iframe = null;
-						}
-					};
-				}
+				};
 				_channels.push(channel);
 				return channel;
 			},
@@ -729,7 +716,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 					} else if ("timeout" === message.method){
 						internalRegistry.disconnect(channel);
 						channel = null;
-						d.reject(new Error("Load timeout for plugin: " + url));
+						d.reject(message.error);
 					}
 				});
 				return d.promise;
@@ -838,10 +825,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			if (configuration.plugins) {
 				Object.keys(configuration.plugins).forEach(function(url) {
 					url = _normalizeURL(url);
-					if (!httpOrHttps.test(url)) {
-						console.log("Illegal Plugin URL: " + url);
-						return;
-					}
+//					if (!httpOrHttps.test(url)) {
+//						console.log("Illegal Plugin URL: " + url);
+//						return;
+//					}
 					var plugin = this.getPlugin(url);
 					if (!plugin) {
 						var manifest = configuration.plugins[url];
@@ -938,9 +925,9 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		 */
 		this.installPlugin = function(url, optManifest) {
 			url = _normalizeURL(url);
-			if (!httpOrHttps.test(url)) {
-				return new Deferred().reject("Illegal Plugin URL: " + url);
-			}
+//			if (!httpOrHttps.test(url)) {
+//				return new Deferred().reject("Illegal Plugin URL: " + url);
+//			}
 			var plugin = this.getPlugin(url);
 			if (plugin) {
 				return new Deferred().resolve(plugin);
