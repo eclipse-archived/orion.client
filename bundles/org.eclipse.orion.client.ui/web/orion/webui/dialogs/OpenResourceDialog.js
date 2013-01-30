@@ -34,7 +34,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 	OpenResourceDialog.prototype.TEMPLATE = 
 		'<div role="search">' + //$NON-NLS-0$
 			'<div><label for="fileName">${Type the name of a file to open (? = any character, * = any string):}</label></div>' + //$NON-NLS-0$
-			'<div><input id="fileName" type="text" /></div>' + //$NON-NLS-0$
+			'<div><input id="fileName" type="text" class="setting-control" style="width:90%;"/></div>' + //$NON-NLS-0$
 			'<div id="progress" style="padding: 2px 0 0; width: 100%;"><img src="'+ require.toUrl("../../../images/progress_running.gif") + '" class="progressPane_running_dialog" id="crawlingProgress"></img></div>' +  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="favresults" style="max-height:400px; height:auto; overflow-y:auto;"></div>' + //$NON-NLS-0$
 			'<div id="results" style="max-height:400px; height:auto; overflow-y:auto;" aria-live="off"></div>' + //$NON-NLS-0$
@@ -201,7 +201,10 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 					that.decorateResult.bind(that), that.showFavoritesImage);
 			renderFunction(favs);
 			if (favs && favs.length > 0) {
-				that.$favresults.appendChild(document.createElement("hr")); //$NON-NLS-0$
+				var linebreak = document.createElement( 'div' );
+				linebreak.style.borderBottom = '1px dashed #BBBBBB';
+				linebreak.style.padding = '5px';
+				that.$favresults.appendChild(linebreak); //$NON-NLS-0$
 			}
 		};
 	};

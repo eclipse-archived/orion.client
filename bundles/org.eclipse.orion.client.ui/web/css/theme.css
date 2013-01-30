@@ -496,7 +496,7 @@ a.currentLocation:hover {
 	position: absolute;
 	background-color: #fbfbfb;
 	border-radius: 3px;
-	border: 1px solid #DDD;
+	border: 1px solid #BBB;
 }
 
 .dialogShowing {
@@ -504,19 +504,33 @@ a.currentLocation:hover {
 }
 
 .dialogTitle {
-	padding: 2px;
 	display: block;
 }
 
+.dialogTitle {
+	padding-top: 5px;
+	display: inline-block;
+	background: #555;
+	width: 100%;
+	padding-bottom: 5px;
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+}
+
+
 .dialogTitleText {
 	margin: 2px 2px 0;
-	color: #222;
-	font-size: 1.1em;
+	color: silver;
+	font-size: 1em;
+	height: 18px;
+	padding-left: 4px;
 }
+
 
 .dialogDismiss {
 	display: block;
 	cursor: pointer;
+	padding:2px;
 }
 
 .dialogContent {
