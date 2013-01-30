@@ -677,6 +677,12 @@ exports.TwoWayCompareContainer = (function() {
 		return this._uiFactory.getCommandSpanId();
 	};
 	
+	TwoWayCompareContainer.prototype.gotoDiff = function(lineNumber, offsetInTheLine, leftEditor){
+		var textView = leftEditor ? this._leftTextView : this._rightTextView;
+		var offset = textView.getModel().getLineStart(lineNumber) + offsetInTheLine;
+		this._diffNavigator.gotoDiff(offset, textView);
+	};
+
 	TwoWayCompareContainer.prototype.gotoMatch = function(lineNumber, match, newMatch, defaultGap, onScroll, onLoad){	
 		if(!this.onScroll){
 			this.onScroll = onScroll;
