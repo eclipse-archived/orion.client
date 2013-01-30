@@ -68,8 +68,9 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	 * service, not retrieved from the service registry.
 	 * openWithCommands and defaultEditor will be computed if not provided.  However callers must have already processed the open with
 	 * service extension and added to the command registry (such as done in mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache)).
+	 * linkProperties gives additional properties to mix in to the HTML anchor element.
 	 */
-	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor) {
+	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
 		var link;
 		if (item.Directory) {
 			link = document.createElement("a"); //$NON-NLS-0$
@@ -94,7 +95,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			link = document.createElement("a"); //$NON-NLS-0$
 			link.className= "navlink targetSelector"; //$NON-NLS-0$
 			link.id = idPrefix+"NameLink"; //$NON-NLS-0$
-			link.target = this.target;
+			if (linkProperties && typeof linkProperties === "object") { //$NON-NLS-0$
+				Object.keys(linkProperties).forEach(function(property) {
+					link[property] = linkProperties[property];
+				});
+			}
 			link.appendChild(document.createTextNode(item.Name)); //$NON-NLS-0$
 
 			var href = item.Location, foundEditor = false;
@@ -142,7 +147,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			th.style.height = "8px"; //$NON-NLS-0$
 		}
 	};
-		
+
+	/**
+	 * Sets the link target to be used for file links.
+	 * @param {String} target The target (eg. "new", "_self").
+	 */
 	NavigatorRenderer.prototype.setTarget = function(target){
 		this.target = target;
 	};
@@ -176,7 +185,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 						}
 					}
 				}
-				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor);
+				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService, this.openWithCommands, this.defaultEditor, { target: this.target });
 				span.appendChild(link); //$NON-NLS-0$
 			}
 			mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
