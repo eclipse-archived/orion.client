@@ -57,7 +57,8 @@
 .core-sprite-javascript{ background-position: 0 -350px; width: 16px; height: 16px; } 
 .core-sprite-leftarrow{ background-position: 0 -368px; width: 16px; height: 16px; } 
 .core-sprite-link{ background-position: 0 -386px; width: 16px; height: 16px; } 
-.core-sprite-makeFavorite{ background-position: 0 -404px; width: 16px; height: 16px; } 
+/* .core-sprite-makeFavorite{ background-position: 0 -404px; width: 16px; height: 16px; } */ 
+.core-sprite-makeFavorite{ background:url(../images/favorite.png) no-repeat top left; width: 16px; height: 16px; } 
 .core-sprite-menu_twistie{ background-position: 0 -422px; width: 5px; height: 3px; } 
 .core-sprite-move_down{ background-position: 0 -427px; width: 16px; height: 16px; } 
 .core-sprite-move_up{ background-position: 0 -445px; width: 16px; height: 16px; } 
@@ -78,6 +79,8 @@
 .core-sprite-stylesheet{ background-position: 0 -703px; width: 16px; height: 16px; } 
 .core-sprite-warning{ background-position: 0 -721px; width: 16px; height: 16px; } 
  
+ 
+
    
 .core-sprite-settings {
    background: url(../images/gear.png) no-repeat top left;
