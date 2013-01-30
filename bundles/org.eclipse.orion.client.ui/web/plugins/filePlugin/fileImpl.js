@@ -58,7 +58,8 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		return output;
 	}
 	
-	function _generateLuceneQuery(searchParams){
+	function _appendLuceneQuery(searchParams, url){
+		var q = url.query;
 		var newKeyword = _luceneEscape(searchParams.keyword, true);
 		var newSort = searchParams.sort;
 		if(searchParams.nameSearch){ //Search file name only
@@ -69,19 +70,19 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 			if(searchParams.fileType && searchParams.fileType !== "*.*"){
 				//If the search string is not empty, we just combine the file type.
 				if(newKeyword !== ""){
-					//If the search string contains white space, we should add double quato at both end. 
+					//If the search string contains white space, we should add double quotes at both end. 
 					if(newKeyword.indexOf(" ") >= 0){
 						newKeyword = "\"" + newKeyword + "\"";
 					}
-					newKeyword = encodeURIComponent(newKeyword) + "+NameLower:*." + searchParams.fileType;
+					newKeyword = newKeyword + "+NameLower:*." + searchParams.fileType;
 				} else {//If the search string is empty, we have to simulate a file name search on *.fileType.
 					newKeyword = "NameLower:*." + searchParams.fileType;
 					newSort = newSort.replace("Path", "NameLower");
 				}
-			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quato at both end.
-				newKeyword = encodeURIComponent("\"" + newKeyword + "\"");
+			} else if(newKeyword.indexOf(" ") >= 0){//If the search string contains white space, we should add double quotes at both end.
+				newKeyword = "\"" + newKeyword + "\"";
 			} else {
-				newKeyword = encodeURIComponent(newKeyword);
+				newKeyword = newKeyword;
 			}
 		}
 		var searchLocation = searchParams.resource;
@@ -89,7 +90,11 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		if( relativePath > 0){//If the search location does not start with /file, then we need to make the relative path starting with /file
 			searchLocation = searchLocation.substring(relativePath);
 		}
-		return "?" + "sort=" + newSort + "&rows=" + searchParams.rows + "&start=" + searchParams.start + "&q=" + newKeyword + "+Location:" + searchLocation + "*";
+
+		q.set("sort", newSort); //$NON-NLS-0$
+		q.set("rows", String(searchParams.rows)); //$NON-NLS-0$
+		q.set("start", String(searchParams.start)); //$NON-NLS-0$
+		q.set("q", newKeyword + "+Location:" + searchLocation + "*"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 	}
 	
 	/**
@@ -524,8 +529,9 @@ define(["orion/Deferred", "orion/xhr", "orion/URL-shim"], function(Deferred, xhr
 		 * @param {integer} searchParams.rows Optional. The number of hits of the range. E.g if there are 1000 hits in total and start=5 and rows=40, then the return range is 6th-45th.
 		 */
 		search: function(searchParams) {
-			var query = _generateLuceneQuery(searchParams);
-			return xhr("GET", "/filesearch" + query, {
+			var url = new URL("/filesearch", window.location);
+			_appendLuceneQuery(searchParams, url);
+			return xhr("GET", url.href, {
 				headers: {
 					"Accept": "application/json",
 					"Orion-Version": "1"
