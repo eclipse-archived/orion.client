@@ -202,7 +202,7 @@ exports.searchUtils.searchOnelineLiteral =  function(inFileQuery, lineString, on
 		if (i < 0) {
 			break;
 		} else {
-			result.push({startIndex: i});
+			result.push({startIndex: i, length: inFileQuery.searchStrLength});
 			found = true;
 			if(onlyOnce){
 				break;
@@ -245,8 +245,8 @@ exports.searchUtils.findRegExp =  function(text, pattern, flags, startIndex) {
 	var result = null, match = null;
 	result = regexp.exec(text.substring(startIndex));
 	return result && {
-		startIndex : result.index + startIndex,
-		length : result[0].length
+		startIndex: result.index + startIndex,
+		length: result[0].length
 	};
 };
 

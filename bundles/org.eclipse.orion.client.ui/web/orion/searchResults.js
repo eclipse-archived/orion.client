@@ -49,7 +49,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				}
 			}
 			this.explorer.setCrawling(crawling);
-			this.explorer.setResult(resultsNode, resultLocation, searchParams, jsonData.response.numFound);
+			var that = this;
+	        var searchModel = new mSearchExplorer.SearchResultModel(this.registry, this.fileService, resultLocation, jsonData.response.numFound, searchParams, {
+	            onMatchNumberChanged: function(fileItem) {
+	                that.explorer.renderer.replaceFileElement(fileItem);
+	            }
+	        });
+			this.explorer.setResult(resultsNode, searchModel);
 			if(incremental){
 				this.explorer.incrementalRender();
 			} else {

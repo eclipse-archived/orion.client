@@ -250,7 +250,6 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
      * tooltip: String. The tooltip of the link.
      */
     SearchResultModel.prototype.getScopingParams = function(modelItem) {
-        //TODO: Ask the model to give the HREF
         var qParams = mSearchUtils.copySearchParams(this._searchHelper.params, true);
         qParams.resource = modelItem.parentLocation;
         qParams.start = 0;
@@ -261,6 +260,30 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             href: href,
             tooltip: tooltip
         };
+    };
+
+    /**
+     * Get the detail match infomation by a given model item. Required function.
+     * This function is for matching the compare widget diff annotation when a detail match item is selected.
+      * @param {Object} modelItem The given detail match model item.
+     * The return value is an object containing the following properties:
+     * lineString: String. The lline string of hte detail match.
+     * lineNumber: Number. The zero-based line number of the detail match, in the file.
+     * name: Number. The zero-based line number of the detail match, in the file.
+     * matches: Array. All the matches on this line.  Each item of the array contains:
+     *         startIndex: The zero-based offset of the match in the line. If line is "foo bar foo" and the match is "bar", then the offset is 4.
+     *         length: The length of the match in characters.
+     * matchNumber: Number. The zero-based match number in matches.
+     */
+    SearchResultModel.prototype.getDetailInfo = function(modelItem) {
+    	return {lineString: modelItem.name, lineNumber: modelItem.lineNumber -1, matches:modelItem.matches, matchNumber: (modelItem.matchNumber ? modelItem.matchNumber - 1 : 0)};
+    };
+
+    /**
+     * Get the file name by a given model item. Required function.
+     */
+    SearchResultModel.prototype.getFileName = function(modelItem) {
+    	return modelItem.name;
     };
 
     /**
@@ -287,18 +310,24 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
     /**
      * Get the file contents by a given file model. Sync call. Required function.
      */
-    SearchResultModel.prototype.getFileContent = function(fileItem) {
+    SearchResultModel.prototype.getFileContents = function(fileItem) {
         return fileItem.contents.join(this._lineDelimiter);
     }
 
     /**
      * Get the replaced file contents by a given file model. Sync call. Required function.
+     * @param {Object} newContentHolder The returned replaced file content holder. The content holder has to have a property called "contents". It can be either type of the below:
+     * 		   String type: the pure contents of the file
+     * 		   Array type: the lines of the file exclude the line delimeter. If an array type of contents is provided, the lineDelim property has to be defined. Otherwise "\n" is used.
+     * @param {Boolean} updating The flag indicating if getting replaced file contets based on existing newContentHolder.contents. It can be ignored if over riding this function does not care the case below.
+     *         The explorer basically caches the current file's replaced contents. If only check box is changed on the same file, the falg is set to true when call this fucntion.
+     *         Lets say a file with 5000 lines has been changed only because one line is changed, then we do not have to replace the whole 5000 lines but only one line.
+     * @param {Object} fileItem The file item that generates the replaced contents.
      */
-    SearchResultModel.prototype.getReplacedFileContent = function(fileItem) {
-        return fileItem.contents.join(this._lineDelimiter);
+    SearchResultModel.prototype.getReplacedFileContent = function(newContentHolder, updating, fileItem) {
+    	mSearchUtils.generateNewContents(updating, fileItem.contents, newContentHolder, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
+		newContentHolder.lineDelim = this._lineDelimiter;
     }
-
-
 
     /**
      * Write the replace file contents. Required function.
@@ -320,9 +349,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         if (matchesReplaced > 0) {
             this.provideFileContent(model, function(fileItem) {
                 matchesReplaced = this._matchesReplaced(fileItem);
-                var newContents = [];
-                mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
-                var contents = newContents.join(this._lineDelimiter);
+                var newContents = {};
+                mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
+                var contents = newContents.contents.join(this._lineDelimiter);
 
                 var etag = fileItem.ETag;
                 var args = etag ? {
@@ -554,7 +583,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             title = _createElement("th"); //$NON-NLS-2
             header = _createElement("h2", "search_header", null, title); //$NON-NLS-2
             if (col_no === 1) {
-                var displayStr = _headerString(this.explorer.model);
+                header.textContent = _headerString(this.explorer.model);
                 return title;
             } else if (col_no === 2) {
                 header.textContent = messages["Location"];
@@ -578,14 +607,14 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             mNavUtils.removeNavGrid(navGridHolder, lib.node(this.getItemLinkId(item)));
             var span = lib.node(this.getFileSpanId(item));
             _empty(span);
-            _place(document.createTextNode(item.name), span, "last"); //$NON-NLS-0$
+            _place(document.createTextNode(this.explorer.model.getFileName(item)), span, "last"); //$NON-NLS-0$
             span = lib.node(this.getFileIconId(item));
             _empty(span);
         }
     };
 
     SearchResultRenderer.prototype.replaceFileElement = function(item) {
-        var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name; //$NON-NLS-1$ //$NON-NLS-0$
+        var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" : this.explorer.model.getFileName(item); //$NON-NLS-1$ //$NON-NLS-0$
         var linkDiv = lib.node(this.getItemLinkId(item));
         _place(document.createTextNode(renderName), linkDiv, "only"); //$NON-NLS-0$
     };
@@ -618,7 +647,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         if (this.explorer.model._provideSearchHelper) {
             helper = this.explorer.model._provideSearchHelper();
         }
-        var href = item.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, this.explorer._replaceStr) : "");
+        var href = item.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, helper.params.replace) : "");
         var link = _createLink('navlink', this.getItemLinkId(item), href, spanHolder, renderName); //$NON-NLS-0$
         mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
     };
@@ -643,31 +672,27 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
 
     SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan) {
         var startIndex = 0;
-        //TODO: ask the model to provide the highlighting model
-        var gap = this.explorer.model._searchHelper.inFileQuery.searchStrLength;
-        for (var i = 0; i < detailModel.matches.length; i++) {
-            if (startIndex >= detailModel.name.length) break;
+        var detailInfo = this.explorer.model.getDetailInfo(detailModel);
+        for (var i = 0; i < detailInfo.matches.length; i++) {
+            if (startIndex >= detailInfo.lineString.length) break;
             if (this.explorer.model.replaceMode()) {
-                if (i !== (detailModel.matchNumber - 1)) {
+                if (i !== detailInfo.matchNumber) {
                     continue;
                 }
             }
-
-            if (startIndex !== detailModel.matches[i].startIndex) {
-                _place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
+            if (startIndex !== detailInfo.matches[i].startIndex) {
+                _place(document.createTextNode(detailInfo.lineString.substring(startIndex, detailInfo.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
             }
             var matchSegBold = _createElement('b', null, null, parentSpan);
-            if (this.explorer.model._searchHelper.inFileQuery.wildCard) {
-                gap = detailModel.matches[i].length;
-            }
-            _place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
-            startIndex = detailModel.matches[i].startIndex + gap;
+            var  gap = detailInfo.matches[i].length;
+            _place(document.createTextNode(detailInfo.lineString.substring(detailInfo.matches[i].startIndex, detailInfo.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
+            startIndex = detailInfo.matches[i].startIndex + gap;
             if (this.explorer.model.replaceMode()) {
                 break;
             }
         }
-        if (startIndex < (detailModel.name.length - 1)) {
-            _place(document.createTextNode(detailModel.name.substring(startIndex)), parentSpan, "last"); //$NON-NLS-0$
+        if (startIndex < (detailInfo.lineString.length - 1)) {
+            _place(document.createTextNode(detailInfo.lineString.substring(startIndex)), parentSpan, "last"); //$NON-NLS-0$
         }
     };
 
@@ -680,10 +705,13 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
     };
 
     SearchResultRenderer.prototype.renderDetailLineNumber = function(item, spanHolder) {
-        if (!this.explorer.model.replaceMode() || item.matches.length <= 1) {
-            _place(document.createTextNode(item.lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
+    	var detailInfo = this.explorer.model.getDetailInfo(item);
+    	var lineNumber = detailInfo.lineNumber + 1;
+        if (!this.explorer.model.replaceMode() || detailInfo.matches.length <= 1) {
+            _place(document.createTextNode(lineNumber + ":"), spanHolder, "last"); //$NON-NLS-1$ //$NON-NLS-0$
         } else {
-            _place(document.createTextNode(item.lineNumber + "(" + item.matchNumber + "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+        	var matchNumber = detailInfo.matchNumber + 1;
+            _place(document.createTextNode(lineNumber + "(" + matchNumber + "):"), spanHolder, "last"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
         }
     };
 
@@ -693,7 +721,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         if (this.explorer.model._provideSearchHelper) {
             helper = this.explorer.model._provideSearchHelper();
         }
-        var linkLocation = item.parent.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, this.explorer._replaceStr) : "");
+        var linkLocation = item.parent.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, helper.params.replace) : "");
         var link = _createLink('navlink', this.getItemLinkId(item), linkLocation, spanHolder); //$NON-NLS-0$
         mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
         _connect(link, "click", function() { //$NON-NLS-0$
@@ -761,14 +789,13 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 if (item.type === "file") { //$NON-NLS-0$
                     col.noWrap = true;
                     span = _createSpan(null, this.getFileIconId(item), col, null);
-                    //TODO: ask the model to give the condition
-                    if (this.explorer.model._searchHelper.params.keyword !== "") {
-                        this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
-                    } else {
+                    if(this.explorer.model._provideSearchHelper && this.explorer.model._provideSearchHelper().params.keyword === ""){
                         var decorateImage = _createSpan(null, null, col, null);
                         decorateImage.classList.add('imageSprite'); //$NON-NLS-0$
                         decorateImage.classList.add('core-sprite-file'); //$NON-NLS-0$
-                    }
+                    } else {
+                        this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
+                    } 
                 } else {
                     span = _createSpan(null, null, col, null);
                     col.noWrap = true;
@@ -782,7 +809,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 span = _createSpan(null, this.getFileSpanId(item), col, null);
                 var that = this;
                 if (item.type === "file") { //$NON-NLS-0$
-                    var renderName = item.totalMatches ? item.name + " (" + item.totalMatches + " matches)" : item.name; //$NON-NLS-1$ //$NON-NLS-0$
+                    var renderName = item.totalMatches ? this.explorer.model.getFileName(item) + " (" + item.totalMatches + " matches)" : this.explorer.model.getFileName(item); //$NON-NLS-1$ //$NON-NLS-0$
                     this.renderFileElement(item, span, renderName);
                 } else {
                     this.renderDetailElement(item, tableRow, span);
@@ -930,18 +957,10 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
      */
     SearchResultExplorer.prototype.onchange = function(item) {};
 
-    SearchResultExplorer.prototype.setResult = function(parentNode, resultLocation, searchParams, totalNumber) {
+    SearchResultExplorer.prototype.setResult = function(parentNode, model) {
         var that = this;
         this.parentNode = parentNode;
-        this.searchParams = searchParams;
-        this.numberOnPage = resultLocation.length;
-        this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, totalNumber, searchParams, {
-            onMatchNumberChanged: function(fileItem) {
-                that.renderer.replaceFileElement(fileItem);
-            }
-        });
-        //TODO: ask model to provide replaceStr
-        this._replaceStr = this.model._searchHelper.params.replace;
+        this.model = model;
         if (this.model.replaceMode()) {
             this._hasCheckedItems = true;
             this.checkbox = true;
@@ -985,7 +1004,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             tooltip: messages["Save search query"],
             id: "orion.saveSearchResults", //$NON-NLS-0$
             callback: function(data) {
-                that.saveSearch(that.searchParams);
+                that.saveSearch(that.model._searchHelper.params);
             },
             visibleWhen: function(item) {
                 return that.model && that.model._provideSearchHelper && !that.model.replaceMode();
@@ -1304,7 +1323,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         qParams.replace = replacingStr;
         if (all) {
             qParams.start = 0;
-            qParams.rows = this.totalNumber;
+            qParams.rows = this.model.getPagingParams().totalNumber;
         }
         var href = mSearchUtils.generateSearchHref(qParams);
         window.location.href = href;
@@ -1474,31 +1493,35 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             if (that.model.onMatchNumberChanged) {
                 that.model.onMatchNumberChanged(fileItem);
             }
-            //TODO: ask the model to give new contents
-            mSearchUtils.generateNewContents(updating, fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model._searchHelper.inFileQuery.searchStrLength);
+    		that.model.getReplacedFileContent(that._currentReplacedContents, updating, fileItem);
+    		var replacedContents = that._currentReplacedContents.contents;
+    		if(Array.isArray(replacedContents)){
+    			replacedContents = that._currentReplacedContents.contents.join(that._currentReplacedContents.lineDelim);
+    		}
             // Diff operations
             var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
-            var fType = contentTypeService.getFilenameContentType(fileItem.name);
+            var fileName = that.model.getFileName(fileItem);
+            var fType = contentTypeService.getFilenameContentType(fileName);
             var options = {
                 readonly: true,
                 hasConflicts: false,
                 newFile: {
                     Name: fileItem.location,
                     Type: fType,
-                    Content: fileItem.contents.join(that.model._lineDelimiter)
+                    Content: that.model.getFileContents(fileItem)
                 },
                 baseFile: {
                     Name: fileItem.location,
                     Type: fType,
-                    Content: that._currentReplacedContents.contents.join(that.model._lineDelimiter)
+                    Content: replacedContents
                 }
             };
             if (!that.twoWayCompareContainer) {
                 that.uiFactoryCompare = new mCompareFeatures.TwoWayCompareUIFactory({
                     parentDivID: uiFactory.getCompareDivID(),
                     showTitle: true,
-                    rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileItem.name),
-                    leftTitle: i18nUtil.formatMessage(messages["Original File (${0})"], fileItem.name),
+                    rightTitle: i18nUtil.formatMessage(messages["Replaced File (${0})"], fileName),
+                    leftTitle: i18nUtil.formatMessage(messages["Original File (${0})"], fileName),
                     showLineStatus: false
                 });
                 that.uiFactoryCompare.buildUI();
@@ -1508,9 +1531,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 });
             } else {
                 _empty(that.uiFactoryCompare.getTitleDiv());
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
+                _place(document.createTextNode(i18nUtil.formatMessage(messages['Replaced File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(), "only"); //$NON-NLS-1$
                 _empty(that.uiFactoryCompare.getTitleDiv(true));
-                _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileItem.name)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
+                _place(document.createTextNode(i18nUtil.formatMessage(messages['Original File (${0})'], fileName)), that.uiFactoryCompare.getTitleDiv(true), "only"); //$NON-NLS-1$
                 that.twoWayCompareContainer.setOptions(options);
                 that.twoWayCompareContainer.setEditor();
             }
@@ -1555,7 +1578,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         }
     };
 
-    SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber) {
+    SearchResultExplorer.prototype.caculateNextPage = function() {
         var pagingParams = this.model.getPagingParams();
         if ((pagingParams.start + pagingParams.rows) >= pagingParams.totalNumber) {
             return {
@@ -1744,22 +1767,14 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             this.buildPreview();
         }
         if (currentModel.type === "detail") { //$NON-NLS-0$
+        	//TODO:
+        	/*
             if (!currentModel.newMatches) {
                 that.renderer.focus();
                 return;
-            }
-            //TODO: ask model to decide the line NUmber
-            this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber - 1, currentModel.matches[currentModel.matchNumber - 1],
-            currentModel.newMatches[currentModel.matchNumber - 1], this.model._searchHelper.inFileQuery.searchStrLength,
-
-            function() {
-                window.setTimeout(function() {
-                    that.renderer.focus();
-                }, 200);
-            });
-            window.setTimeout(function() {
-                that.renderer.focus();
-            }, 0);
+            }*/
+            var detailInfo = this.model.getDetailInfo(currentModel);
+            this.twoWayCompareContainer.gotoDiff(detailInfo.lineNumber, detailInfo.matches[detailInfo.matchNumber].startIndex, false);
         }
     };
 
@@ -1820,25 +1835,17 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
     };
 
     SearchResultExplorer.prototype.startUp = function() {
-        //TODO: ask model to decide the numberOnPage
-        if (this.model._searchHelper.displayedSearchTerm) {
-            if (this.numberOnPage > 0) {
-                var pageTitle = lib.node("pageTitle"); //$NON-NLS-0$
-                if (pageTitle) {
-                    if (!this.model.replaceMode()) {
-                        pageTitle.textContent = messages["Search Results"];
-                    } else {
-                        pageTitle.textContent = messages["Replace All Matches"];
-                    }
-                }
-            } else {
-                this.parentNode.textContent = "";
-                var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
-                var displayStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._searchHelper.displayedSearchTerm);
-                _place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
-                return;
-            }
-        }
+    	var pagingParams = this.model.getPagingParams();
+        if (pagingParams.numberOnPage === 0) {
+			var message = messages["No matches"];
+			if(this.model._provideSearchHelper){
+            	message = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._provideSearchHelper().displayedSearchTerm);
+			}
+            this.parentNode.textContent = "";
+            var textBold = _createElement('b', null, null, this.parentNode); //$NON-NLS-1$ //$NON-NLS-0$
+            _place(document.createTextNode(message), textBold, "only"); //$NON-NLS-0$
+            return;
+        } 
         var that = this;
         this.model.buildResultModel();
         if (!this.model.replaceMode()) {
@@ -1950,6 +1957,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
 
     //return module exports
     return {
-        SearchResultExplorer: SearchResultExplorer
+        SearchResultExplorer: SearchResultExplorer,
+        SearchResultModel: SearchResultModel
     };
 });
