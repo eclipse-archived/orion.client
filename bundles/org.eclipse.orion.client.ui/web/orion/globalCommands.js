@@ -16,10 +16,10 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	'orion/extensionCommands', 'orion/uiUtils', 'orion/editor/keyBinding', 'orion/breadcrumbs', 'orion/webui/littlelib', 'orion/webui/splitter', 
 	'orion/webui/dropdown', 'orion/webui/tooltip', 'orion/favorites', 'orion/contentTypes', 'orion/URITemplate', 'orion/PageUtil', 'orion/widgets/themes/container/ThemeSheetWriter', 
 	'orion/searchUtils', 'orion/inputCompletion/inputCompletion', 'orion/globalSearch/advSearchOptContainer', 'orion/Deferred',
-	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog'], 
+	'orion/widgets/UserMenu', 'orion/PageLinks', 'orion/webui/dialogs/OpenResourceDialog', 'text!orion/banner/banner.html', 'text!orion/banner/footer.html', 'text!orion/banner/toolbar.html'], 
         function(messages, require, commonHTML, mCommands, mParameterCollectors, mExtensionCommands, mUIUtils, mKeyBinding, mBreadcrumbs, lib, mSplitter, 
         mDropdown, mTooltip, mFavorites, mContentTypes, URITemplate, PageUtil, ThemeSheetWriter, mSearchUtils, mInputCompletion, 
-        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource){
+        mAdvSearchOptContainer, Deferred, mUserMenu, PageLinks, openResource, BannerTemplate, FooterTemplate, ToolbarTemplate){
 
 	/**
 	 * This class contains static utility methods. It is not intended to be instantiated.
@@ -67,7 +67,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 					if( jsonData.Name ){
 						text = document.createTextNode(jsonData.Name); 
 					}else if( jsonData.login ){
-						var text = document.createTextNode(jsonData.login);
+						text = document.createTextNode(jsonData.login);
 					} 
 					if (text) {
 						if (node.childNodes.length > 0) {
@@ -574,7 +574,6 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 				var rightPane = document.getElementById( 'innerPanels' );	 //$NON-NLS-0$
 				var rpBox = rightPane.getBoundingClientRect();
 				var box = settingsNode.getBoundingClientRect();
-				var leftPane = document.getElementById( 'outlineContainer' ); //$NON-NLS-0$
 				
 				if (!panel) {
 					panel = document.createElement( 'div' ); //$NON-NLS-0$
@@ -616,11 +615,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 	 * @function
 	 */
 	function generateBanner(parentId, serviceRegistry, commandService, prefsService, searcher, handler, /* optional */ editor, /* optional */ escapeProvider) {
-		var text;
-		
 		applyTheme( prefsService );
 		
-		var target = "_self"; //$NON-NLS-0$
 		var parent = lib.node(parentId);
 		
 		if (!parent) {
@@ -629,7 +625,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		// place the HTML fragment for the header.
 		var range = document.createRange();
 		range.selectNode(parent);
-		var headerFragment = range.createContextualFragment(commonHTML.topHTMLFragment);
+		var headerFragment = range.createContextualFragment(BannerTemplate);
 		// do the i18n string substitutions
 		lib.processTextNodes(headerFragment, messages);
 		
@@ -638,14 +634,18 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		} else {
 			parent.appendChild(headerFragment);
 		}
+		// TODO not entirely happy with this.  Dynamic behavior that couldn't be in the html template, maybe it could be dynamically
+		// bound in a better way like we do with NLS strings
 		var home = lib.node("home"); //$NON-NLS-0$
-		if (home) {
-			home.setAttribute("aria-label", messages['Orion Home']);  //$NON-NLS-1$ //$NON-NLS-0$
-		}
+		home.href = require.toUrl("navigate/table.html"); //$NON-NLS-0$
+		home.setAttribute("aria-label", messages['Orion Home']);  //$NON-NLS-1$ //$NON-NLS-0$
+		var progressPane = lib.node("progressPane"); //$NON-NLS-0$
+		progressPane.src = require.toUrl("images/none.png"); //$NON-NLS-0$
+
 		var toolbar = lib.node("pageToolbar"); //$NON-NLS-0$
 		if (toolbar) {
 			toolbar.classList.add("toolbarLayout"); //$NON-NLS-0$
-			toolbar.innerHTML = commonHTML.toolbarHTMLFragment;
+			toolbar.innerHTML = ToolbarTemplate + commonHTML.slideoutHTMLFragment("mainToolbar"); //$NON-NLS-0$
 		}
 		var closeNotification = lib.node("closeNotifications"); //$NON-NLS-0$
 		if (closeNotification) {
@@ -654,7 +654,7 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		
 		var footer = lib.node("footer"); //$NON-NLS-0$
 		if (footer) {
-			footer.innerHTML = commonHTML.bottomHTMLFragment;
+			footer.innerHTML = FooterTemplate;
 			// do the i18n string substitutions
 			lib.processTextNodes(footer, messages);
 		}
@@ -765,8 +765,8 @@ define(['i18n!orion/nls/messages', 'require', 'orion/commonHTMLFragments', 'orio
 		//Create and hook up the inputCompletion instance with the search box dom node.
 		//The defaultProposalProvider provides proposals from the recent and saved searches.
 		//The exendedProposalProvider provides proposals from plugins.
-		var searchCompletion = new mInputCompletion.InputCompletion(searchField, defaultProposalProvider,
-									{group: "globalSearch", extendedProvider: exendedProposalProvider});//$NON-NLS-0$
+		new mInputCompletion.InputCompletion(searchField, defaultProposalProvider,
+									{group: "globalSearch", extendedProvider: exendedProposalProvider}); //$NON-NLS-0$
 		//Both inputCompletion and here are listening keydown events on searchField
 		//But here listener should yield to inputCompletion on its "already handled" events.
 		searchField.addEventListener("keydown", function(e) { //$NON-NLS-0$

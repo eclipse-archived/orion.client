@@ -77,237 +77,45 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		return span;
 	}
 	
-	/* Internal tool tip sub class to support the context tips on details match */
+	/*** Internal model wrapper functions ***/
  
+ 	function _getFileModel(modelItem){
+		if(!modelItem){
+			return null;
+		}
+		if(modelItem.type === "file"){ //$NON-NLS-0$
+			return modelItem;
+		}
+		return modelItem.parent;
+	};
+	
+	function _onSameFile(modelItem1, modelItem2){
+		return _getFileModel(modelItem1) === _getFileModel(modelItem2);
+	};
+
     /*
-     *	The model to support the search result
+     *	The model to support the search result.
     */
-	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, searchParams, options) {
+	function SearchResultModel(	serviceRegistry, fileClient, resultLocation, totalNumber, searchParams, options) {
 		this.registry= serviceRegistry;
 		this.fileClient = fileClient; 
 		this._resultLocation = resultLocation;
+		this._totalNumber = totalNumber;
 		this._listRoot = {
 				isRoot: true,
 				children:[]
 		};
-		this.indexedFileItems = [];
-		this.location2ModelMap = [];
+		this._indexedFileItems = [];
+		this._location2ModelMap = [];
 		this._lineDelimiter = "\n";  //$NON-NLS-0$
 		this.onMatchNumberChanged = options.onMatchNumberChanged;
-		this._searchParams = searchParams;
-		this.searchHelper = mSearchUtils.generateSearchHelper(searchParams);
+		this._searchHelper = mSearchUtils.generateSearchHelper(searchParams);
 	}
 	SearchResultModel.prototype = new mExplorer.ExplorerModel(); 
 	
-	SearchResultModel.prototype.replaceMode = function(){
-		return (typeof this.searchHelper.params.replace === "string"); //$NON-NLS-0$
-	};
-	
-	SearchResultModel.prototype.sameFile = function(prevSelection, curSelection){
-		return this.fileModel(prevSelection) === this.fileModel(curSelection);
-	};
-	
-	SearchResultModel.prototype.fileModel = function(model){
-		if(!model){
-			return null;
-		}
-		if(model.type === "file"){ //$NON-NLS-0$
-			return model;
-		}
-		return model.parent;
-	};
-	
-	SearchResultModel.prototype.model2Index = function(model, list){
-		var lookAt = list;
-		if(!lookAt && model.parent){
-			lookAt = model.parent.children;
-		}
-		if(lookAt){
-			for(var i = 0 ; i < lookAt.length; i++){
-				if(lookAt[i] === model){
-					return i;
-				}
-			}
-		}
-		return -1;
-	};
-	
-	SearchResultModel.prototype.location2Model = function(location){
-		if(location && this.location2ModelMap[location]){
-			return this.location2ModelMap[location];
-		}
-		if(this.indexedFileItems.length > 0){
-			return this.indexedFileItems[0];
-		}
-		return null;
-	};
-	
-	SearchResultModel.prototype.storeStatus = function(currentModel) {
-		if(currentModel){
-			var fileItem = this.fileModel(currentModel);
-			window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
-			if(currentModel.type === "file"){ //$NON-NLS-0$
-				window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
-			} else {
-				window.sessionStorage[this.searchHelper.params.keyword + "_search_result_currentDetailIndex"] = JSON.stringify(this.model2Index(currentModel)); //$NON-NLS-0$
-			}
-			
-		}
-	};
-	
-	SearchResultModel.prototype.restoreGlobalStatus = function() {
-		this.defaultReplaceStr = this.searchHelper.displayedSearchTerm;
-		var defaultReplaceStr = window.sessionStorage["global_search_default_replace_string"]; //$NON-NLS-0$
-		if (typeof defaultReplaceStr === "string") { //$NON-NLS-0$
-			if (defaultReplaceStr.length > 0) {
-				this.defaultReplaceStr= defaultReplaceStr;
-			} 
-		}
-		this.sortByName = (this.searchHelper.params.sort.indexOf("Name") > -1); //$NON-NLS-0$
-	};
-	
+	/*** Over write all the prototypes defined by mExplorer.ExplorerModel ***/
 	SearchResultModel.prototype.getRoot = function(onItem){
-		onItem(this._listRoot);
-	};
-	
-	SearchResultModel.prototype.getTopIterationNodes = function(){
-		return this.indexedFileItems;
-	};
-	
-	SearchResultModel.prototype.buildResultModel = function(){
-		this.restoreGlobalStatus();
-		this.indexedFileItems = [];
-		for(var i = 0; i < this._resultLocation.length; i++){
-			var childNode = {parent: this._listRoot, type: "file", name: this._resultLocation[i].name,lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
-							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
-							parentLocation:  mSearchUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
-							fullPathName: mSearchUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)};
-			this.location2ModelMap[childNode.location] = childNode;
-			this._listRoot.children.push(childNode);
-			this.indexedFileItems.push(childNode);
-		}
-	};
-	
-	SearchResultModel.prototype.checkStale = function(model, onComplete){
-		if(!model.stale){
-			return;
-		} else {
-			this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
-				function(contents) {
-					if(this.hitOnceWithinFile(contents)){
-						model.stale = false;
-					} else {
-						onComplete(model);
-					}
-				}.bind(this),
-				function(error) {
-					console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
-					onComplete(model);
-				}.bind(this)
-			);
-		}
-	};
-	
-	SearchResultModel.prototype.matchesReplaced = function(model){
-		var matchesReplaced = 0;
-		if(!model.children){
-			return model.checked === false ? 0: 1;
-		}
-		if(model.children){
-			for(var j = 0; j < model.children.length; j++){
-				if(!(model.children[j].checked === false)){
-					matchesReplaced += 1;
-				}
-			}
-		}
-		return matchesReplaced;
-	};
-	
-	SearchResultModel.prototype.writeIncrementalNewContent = function(replaceStr, modelList, reportList,  index, onComplete){
-		var model = modelList[index];
-		if(!model || index === modelList.length){
-			onComplete(modelList);
-			return;
-		}
-		var matchesReplaced = this.matchesReplaced(model);
-		if(matchesReplaced > 0){
-			this.getFileContent(model, function(fileItem){
-				matchesReplaced = this.matchesReplaced(fileItem);
-				var newContents = [];
-				mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, replaceStr, this.searchHelper.inFileQuery.searchStrLength); 
-				var contents = newContents.join(this._lineDelimiter);
-				
-				var etag = fileItem.ETag;
-				var args = etag ? { "ETag" : etag }: null; //$NON-NLS-0$
-				this.registry.getService("orion.page.progress").progress(this.fileClient.write(model.location, contents, args), "Saving changes to " + model.location).then(
-					function(result) {
-						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" }); //$NON-NLS-0$
-						this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
-					}.bind(this),
-					function(error) {
-						// expected error - HTTP 412 Precondition Failed 
-						// occurs when file is out of sync with the server
-						if (error.status === 412) {
-							reportList.push({model: model, message: messages["Resource has been changed by others."], matchesReplaced: matchesReplaced, status: "failed" }); //$NON-NLS-1$
-						}
-						// unknown error
-						else {
-							error.log = true;
-							reportList.push({model: model, message: messages["Failed to write file."],  matchesReplaced: matchesReplaced, status: "failed" }); //$NON-NLS-1$
-						}
-						this.writeIncrementalNewContent(replaceStr, modelList, reportList, index+1, onComplete);
-					}.bind(this)
-				);
-				
-			}.bind(this), true);
-			
-		} else {
-			this.writeIncrementalNewContent( replaceStr, modelList, reportList, index+1, onComplete);
-		}
-		
-	};
-	
-	SearchResultModel.prototype.getId = function(item){
-		var result;
-		if (item === this._listRoot) {
-			result = this.rootId;
-		} else {
-			result = item.location;
-			// remove all non valid chars to make a dom id. 
-			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
-		} 
-		return result;
-	};
-	
-	SearchResultModel.prototype.hitOnceWithinFile = function( fileContentText){
-		var lineString = fileContentText.toLowerCase();
-		var result;
-		if(this.searchHelper.inFileQuery.wildCard){
-			result = mSearchUtils.searchOnelineRegEx(this.searchHelper.inFileQuery, lineString, true);
-		} else {
-			result = mSearchUtils.searchOnelineLiteral(this.searchHelper.inFileQuery, lineString, true);
-		}
-		return result;
-	};
-
-	SearchResultModel.prototype.getFileContent = function(fileItem, onComplete, writing){
-		if(fileItem.contents){
-			onComplete(fileItem);
-		} else {
-			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
-				function(jsonData) {
-					mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
-					if(this.onMatchNumberChanged && !writing){
-						this.onMatchNumberChanged(fileItem);
-					}
-					onComplete(fileItem);
-				}.bind(this),
-				function(error) {
-					console.error("Error loading file content: " + error.message); //$NON-NLS-0$
-					onComplete(null);
-				}.bind(this)
-			);
-		}
+		onItem(this.getListRoot());
 	};
 	
 	SearchResultModel.prototype.getChildren = function(parentItem, onComplete){
@@ -319,12 +127,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		} else if (parentItem.type === "detail") { //$NON-NLS-0$
 			onComplete([]);
 		} else if (parentItem.type === "file" && parentItem.location) { //$NON-NLS-0$
-			if(this.searchHelper.params.keyword === ""){
+			if(this._searchHelper.params.keyword === ""){
 				return;
 			}
 			this.registry.getService("orion.page.progress").progress(this.fileClient.read(parentItem.location), "Getting file contents " + parentItem.name).then(
 					function(jsonData) {
-						  mSearchUtils.searchWithinFile(this.searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchParams.caseSensitive);
+						  mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, parentItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
 						  if(this.onMatchNumberChanged){
 							  this.onMatchNumberChanged(parentItem);
 						  }
@@ -340,8 +148,279 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		}
 	};
 	
+	SearchResultModel.prototype.getId = function(item){
+		var result;
+		if (item === this.getListRoot()) {
+			result = this.rootId;
+		} else {
+			result = item.location;
+			// remove all non valid chars to make a dom id. 
+			result = result.replace(/[^\.\:\-\_0-9A-Za-z]/g, "");
+		} 
+		return result;
+	};
+	
+	/*** Prototypes required by the search/replace renderer and explorer ***/
+	
+	/**
+	 * Return the root model. Required function.
+	 * There should be three layers of the root model. Any model item in each layer must have a string property called type.
+	 * The top layer is the root model whose type is "root". It should have a property callded children which is an array object.
+	 * The middle layer is the files whose type is "file". It should have a property callded children which is an array object and a property called parent which points to the root model.
+	 * The bottom layer is the detail matches within a file, whose type is "detail". It should have a property called parent which points to the file item.
+	 */
+	SearchResultModel.prototype.getListRoot = function(){
+		return this._listRoot;
+	};
+	
+	/**
+	 * build the model tree. Required function.
+	 * There should be three layers of the root model. Any model item in each layer must have a string property called type.
+	 * The top layer is the root model whose type is "root". It should have a property callded children which is an array object.
+	 * The middle layer is the files whose type is "file". It should have a property callded children which is an array object and a property called parent which points to the root model.
+	 * The bottom layer is the detail matches within a file, whose type is "detail". It should have a property called parent which points to the file item.
+	 */
+	SearchResultModel.prototype.buildResultModel = function(){
+		this._restoreGlobalStatus();
+		this._indexedFileItems = [];
+		for(var i = 0; i < this._resultLocation.length; i++){
+			var childNode = {parent: this.getListRoot(), type: "file", name: this._resultLocation[i].name,lastModified: this._resultLocation[i].lastModified, //$NON-NLS-0$
+							linkLocation: this._resultLocation[i].linkLocation, location: this._resultLocation[i].location, 
+							parentLocation:  mSearchUtils.path2FolderName(this._resultLocation[i].location, this._resultLocation[i].name, true),
+							fullPathName: mSearchUtils.path2FolderName(this._resultLocation[i].path, this._resultLocation[i].name)};
+			this._location2ModelMap[childNode.location] = childNode;
+			this.getListRoot().children.push(childNode);
+			this._indexedFileItems.push(childNode);
+		}
+	};
+	
+	/**
+	 * A flag function that determins if the model is in replace mode. Required function.
+	 */
+	SearchResultModel.prototype.replaceMode = function(){
+		return (typeof this._searchHelper.params.replace === "string"); //$NON-NLS-0$
+	};
+	
+	/**
+	 * Get the paging paramerterss. Required function.
+	 * The return value is an object containing the following properties:
+	 * totalNumber: the total number of files in the model
+	 * start: the zero-based number of the starting number of the file in this page.
+	 * rows: max number of files per page.
+	 */
+	SearchResultModel.prototype.getPagingParams = function(){
+		return {totalNumber: this._totalNumber, start: this._searchHelper.params.start, rows: this._searchHelper.params.rows}; 
+	};
+	
+	/**
+	 * The function to return the list of valid files. Required function.
+	 * Mormally returns the children of the root model.
+	 * In case that staled files appear in the children of the root model, theses files hav eto be filtered out.
+	 */
+	SearchResultModel.prototype.getValidFileList = function(){
+		return this._indexedFileItems;
+	};
+	
+	/**
+	 * Get the file contents by a given file model. Async call. Required function.
+	 */
+	SearchResultModel.prototype.provideFileContent = function(fileItem, onComplete){
+		if(fileItem.contents){
+			onComplete(fileItem);
+		} else {
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
+				function(jsonData) {
+					mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
+					onComplete(fileItem);
+				}.bind(this),
+				function(error) {
+					console.error("Error loading file content: " + error.message); //$NON-NLS-0$
+					onComplete(null);
+				}.bind(this)
+			);
+		}
+	};
+	
+	/**
+	 * Get the file contents by a given file model. Sync call. Required function.
+	 */
+	SearchResultModel.prototype.getFileContent = function(fileItem){
+		return fileItem.contents.join(this._lineDelimiter);
+	}
+
+	/**
+	 * Get the replaced file contents by a given file model. Sync call. Required function.
+	 */
+	SearchResultModel.prototype.getReplacedFileContent = function(fileItem){
+		return fileItem.contents.join(this._lineDelimiter);
+	}
+
+
+
+	/**
+	 * Write the replace file contents. Required function.
+	 * @param {Number} index The index of the result of this.getValidFileList. The function has to recursively increase the number till the lengh of the file list.
+	 * @param {Array} reportList The array of the report items.
+	 * Each item of the reportList contains the following properties
+	 * model: the file item
+	 * matchesReplaced: The number of matches that replaced in this file
+	 * status: "pass" or "failed"
+	 * message: Optional. The error message when writing fails.
+	 */
+	SearchResultModel.prototype.writeIncrementalNewContent = function(reportList,  index, onComplete){
+		var model = this.getValidFileList()[index];
+		if(!model || index === this.getValidFileList().length){
+			onComplete(this.getValidFileList());
+			return;
+		}
+		var matchesReplaced = this._matchesReplaced(model);
+		if(matchesReplaced > 0){
+			this.provideFileContent(model, function(fileItem){
+				matchesReplaced = this._matchesReplaced(fileItem);
+				var newContents = [];
+				mSearchUtils.generateNewContents(fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength); 
+				var contents = newContents.join(this._lineDelimiter);
+				
+				var etag = fileItem.ETag;
+				var args = etag ? { "ETag" : etag }: null; //$NON-NLS-0$
+				this.registry.getService("orion.page.progress").progress(this.fileClient.write(model.location, contents, args), "Saving changes to " + model.location).then(
+					function(result) {
+						reportList.push({model: model, matchesReplaced: matchesReplaced, status: "pass" }); //$NON-NLS-0$
+						this.writeIncrementalNewContent( reportList, index+1, onComplete);
+					}.bind(this),
+					function(error) {
+						// expected error - HTTP 412 Precondition Failed 
+						// occurs when file is out of sync with the server
+						if (error.status === 412) {
+							reportList.push({model: model, message: messages["Resource has been changed by others."], matchesReplaced: matchesReplaced, status: "failed" }); //$NON-NLS-1$
+						}
+						// unknown error
+						else {
+							error.log = true;
+							reportList.push({model: model, message: messages["Failed to write file."],  matchesReplaced: matchesReplaced, status: "failed" }); //$NON-NLS-1$
+						}
+						this.writeIncrementalNewContent(reportList, index+1, onComplete);
+					}.bind(this)
+				);
+				
+			}.bind(this));
+			
+		} else {
+			this.writeIncrementalNewContent(reportList, index+1, onComplete);
+		}
+		
+	};
+
+	
+	/**
+	 * Store the current selected model in to a session storage. Optional function.
+	 * If defined, this function is called every time a selection on the model is changed by user.
+	 */
+	SearchResultModel.prototype.storeLocationStatus = function(currentModel) {
+		if(currentModel){
+			var fileItem = _getFileModel(currentModel);
+			window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
+			if(currentModel.type === "file"){ //$NON-NLS-0$
+				window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
+			} else {
+				window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = JSON.stringify(this._model2Index(currentModel)); //$NON-NLS-0$
+			}
+		}
+	};
+	
+	/**
+	 * Restore the previously selected model when the page is restored. Optional function.
+	 * If defined, this function is called every time when the page is loaded.
+	 */
+	SearchResultModel.prototype.restoreLocationStatus = function() {
+		var currentFileLocation = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"]; //$NON-NLS-0$
+		var fileModel = this._location2Model(currentFileLocation);
+		var currentDetailIndex = "none"; //$NON-NLS-0$
+		var detailIndexCached = window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
+		if (typeof detailIndexCached === "string") { //$NON-NLS-0$
+			if (detailIndexCached.length > 0) {
+				currentDetailIndex = detailIndexCached;
+			} 
+		}
+		return {file: fileModel, detail: currentDetailIndex};
+	};
+	
+	
+	/*** Internal model functions ***/
+
+	SearchResultModel.prototype._provideSearchHelper = function() {
+		return this._searchHelper;
+	};
+
+	SearchResultModel.prototype._model2Index = function(model, list){
+		var lookAt = list;
+		if(!lookAt && model.parent){
+			lookAt = model.parent.children;
+		}
+		if(lookAt){
+			for(var i = 0 ; i < lookAt.length; i++){
+				if(lookAt[i] === model){
+					return i;
+				}
+			}
+		}
+		return -1;
+	};
+	
+	SearchResultModel.prototype._location2Model = function(location){
+		if(location && this._location2ModelMap[location]){
+			return this._location2ModelMap[location];
+		}
+		if(this._indexedFileItems.length > 0){
+			return this._indexedFileItems[0];
+		}
+		return null;
+	};
+	
+	SearchResultModel.prototype._restoreGlobalStatus = function() {
+		this.defaultReplaceStr = this._searchHelper.displayedSearchTerm;
+		var defaultReplaceStr = window.sessionStorage["global_search_default_replace_string"]; //$NON-NLS-0$
+		if (typeof defaultReplaceStr === "string") { //$NON-NLS-0$
+			if (defaultReplaceStr.length > 0) {
+				this.defaultReplaceStr= defaultReplaceStr;
+			} 
+		}
+		this.sortByName = (this._provideSearchHelper().params.sort.indexOf("Name") > -1); //$NON-NLS-0$
+	};
+	
+	SearchResultModel.prototype._storeGlobalStatus = function(replacingStr) {
+		window.sessionStorage["global_search_default_replace_string"] = replacingStr; //$NON-NLS-0$
+	};
+	
+	SearchResultModel.prototype._matchesReplaced = function(model){
+		var matchesReplaced = 0;
+		if(!model.children){
+			return model.checked === false ? 0: 1;
+		}
+		if(model.children){
+			for(var j = 0; j < model.children.length; j++){
+				if(!(model.children[j].checked === false)){
+					matchesReplaced += 1;
+				}
+			}
+		}
+		return matchesReplaced;
+	};
+	
+	SearchResultModel.prototype._hitOnceWithinFile = function( fileContentText){
+		var lineString = fileContentText.toLowerCase();
+		var result;
+		if(this._searchHelper.inFileQuery.wildCard){
+			result = mSearchUtils.searchOnelineRegEx(this._searchHelper.inFileQuery, lineString, true);
+		} else {
+			result = mSearchUtils.searchOnelineLiteral(this._searchHelper.inFileQuery, lineString, true);
+		}
+		return result;
+	};
+
 	SearchResultModel.prototype.constructor = SearchResultModel;
 	
+	//Renderer to render the model
 	function SearchResultRenderer(options, explorer){
 		this._init(options);
 		this.explorer = explorer;
@@ -357,7 +436,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			check.classList.add('selectionCheckmarkSprite'); //$NON-NLS-0$
 			check.classList.add('core-sprite-check'); //$NON-NLS-0$
 			if(this.getCheckedFunc){
-				check.checked = this.getCheckedFunc(this.explorer.model._listRoot);
+				check.checked = this.getCheckedFunc(this.explorer.model.getListRoot());
 				check.classList.toggle("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			_connect(check, "click", function(evt) { //$NON-NLS-0$
@@ -378,20 +457,22 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			header = _createElement("h2", null, null, title); //$NON-NLS-2
 			if(col_no === 1){
 				var displayStr = messages["Results"]; //$NON-NLS-0$
-				if( this.explorer.model.searchHelper.displayedSearchTerm){
+				//TODO: ask the model to provide the title string
+				if( this.explorer.model._searchHelper.displayedSearchTerm){
 					if(this.explorer.numberOnPage > 0){
-						var startNumber = this.explorer.model.searchHelper.params.start + 1;
+						var startNumber = this.explorer.model.getPagingParams().start + 1;
 						var endNumber = startNumber + this.explorer.numberOnPage - 1;
 						displayStr = "";
+						var pagingParams = this.explorer.model.getPagingParams();
 						if(!this.explorer.model.replaceMode()){
 							displayStr = i18nUtil.formatMessage(messages["Files ${0} of ${1} matching ${2}"], 
-							startNumber +"-"+ endNumber, this.explorer.totalNumber, this.explorer.model.searchHelper.displayedSearchTerm); 
+							startNumber +"-"+ endNumber, pagingParams.totalNumber, this.explorer.model._searchHelper.displayedSearchTerm); 
 						} else {
 							displayStr = i18nUtil.formatMessage(messages["Replace ${0} with ${1} for files ${2} of ${3}"],
-							this.explorer.model.searchHelper.displayedSearchTerm,
+							this.explorer.model._searchHelper.displayedSearchTerm,
 							this.explorer._replaceStr, 
 							startNumber +"-"+ endNumber, //$NON-NLS-2$
-							this.explorer.totalNumber
+							pagingParams.totalNumber
 							);
 						}
 					}
@@ -456,7 +537,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultRenderer.prototype.renderFileElement = function(item, spanHolder, renderName){
-		var href = item.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, null, this.explorer._replaceStr);
+		var helper = null;
+		if(this.explorer.model._provideSearchHelper){
+			helper = this.explorer.model._provideSearchHelper();
+		}
+		var href = item.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, null, this.explorer._replaceStr) : "");
 		var link = _createLink('navlink', this.getItemLinkId(item), href, spanHolder, renderName); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 	};
@@ -481,7 +566,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	
 	SearchResultRenderer.prototype.generateDetailHighlight = function(detailModel, parentSpan){
 		var startIndex = 0;
-		var gap = this.explorer.model.searchHelper.inFileQuery.searchStrLength;
+		//TODO: ask the model to provide the highlighting model
+		var gap = this.explorer.model._searchHelper.inFileQuery.searchStrLength;
 		for(var i = 0; i < detailModel.matches.length; i++){
 			if(startIndex >= detailModel.name.length)
 				break;
@@ -495,7 +581,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				_place(document.createTextNode(detailModel.name.substring(startIndex, detailModel.matches[i].startIndex)), parentSpan, "last"); //$NON-NLS-0$
 			}
 			var matchSegBold = _createElement('b', null, null, parentSpan);
-			if(this.explorer.model.searchHelper.inFileQuery.wildCard){
+			if(this.explorer.model._searchHelper.inFileQuery.wildCard){
 				gap = detailModel.matches[i].length;
 			}
 			_place(document.createTextNode(detailModel.name.substring(detailModel.matches[i].startIndex, detailModel.matches[i].startIndex + gap)), matchSegBold, "only"); //$NON-NLS-0$
@@ -527,7 +613,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	
 	SearchResultRenderer.prototype.getDetailElement = function(item, tableRow, spanHolder){
 		var that = this;
-		var linkLocation = item.parent.linkLocation + mSearchUtils.generateFindURLBinding(this.explorer.model._searchParams, this.explorer.model.searchHelper.inFileQuery, item.lineNumber, this.explorer._replaceStr);
+		var helper = null;
+		if(this.explorer.model._provideSearchHelper){
+			helper = this.explorer.model._provideSearchHelper();
+		}
+		var linkLocation = item.parent.linkLocation + (helper ? mSearchUtils.generateFindURLBinding(helper.params, helper.inFileQuery, item.lineNumber, this.explorer._replaceStr) : "");
 		var link = _createLink('navlink', this.getItemLinkId(item), linkLocation, spanHolder); //$NON-NLS-0$
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		_connect(link, "click", function() { //$NON-NLS-0$
@@ -569,12 +659,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	SearchResultRenderer.prototype.renderLocationElement = function(item, onSpan){
 		var spanHolder = onSpan ? onSpan: lib.node(this.getLocationSpanId(item));
 		_empty(spanHolder);
-		var qParams = mSearchUtils.copySearchParams(this.explorer.model.searchHelper.params, true);
+		var qParams = mSearchUtils.copySearchParams(this.explorer.model._searchHelper.params, true);
 		qParams.resource = item.parentLocation;
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
 		var link = _createLink('navlinkonpage', null, href, spanHolder, item.fullPathName); //$NON-NLS-0$
-		link.title = i18nUtil.formatMessage(messages["Search again in this folder with \"${0}\""], this.explorer.model.searchHelper.displayedSearchTerm);
+		link.title = i18nUtil.formatMessage(messages["Search again in this folder with \"${0}\""], this.explorer.model._searchHelper.displayedSearchTerm);
 		mNavUtils.addNavGrid(this.explorer.getNavDict(), item, link);
 		var that = this;
 		_connect(link, "click", function() { //$NON-NLS-0$
@@ -598,7 +688,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			if(item.type ===  "file"){ //$NON-NLS-0$
 				col.noWrap = true;
 				span = _createSpan(null, this.getFileIconId(item), col, null);
-				if(this.explorer.model.searchHelper.params.keyword !== ""){
+				if(this.explorer.model._searchHelper.params.keyword !== ""){
 					this.getExpandImage(tableRow, span, "core-sprite-file"); //$NON-NLS-0$
 				} else {
 					var decorateImage = _createSpan(null, null, col, null);
@@ -763,11 +853,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var that = this;
 		this.parentNode = parentNode;
 		this.searchParams = searchParams;
-		this.totalNumber = totalNumber;
 		this.numberOnPage = resultLocation.length;
-		this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, searchParams, 
+		this.model = new SearchResultModel(this.registry, this.fileClient, resultLocation, totalNumber, searchParams, 
 						 { onMatchNumberChanged: function(fileItem){that.renderer.replaceFileElement(fileItem);}});
-		this._replaceStr = this.model.searchHelper.params.replace;
+		//TODO: ask model to provide replaceStr
+		this._replaceStr = this.model._searchHelper.params.replace;
 		if(this.model.replaceMode()){
 			this._hasCheckedItems = true;
 			this.checkbox = true;
@@ -782,7 +872,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._reporting = false;
 		this._uiFactory = null;
 		this._currentPreviewModel = null;
-		this._currentReplacedContents = null;
+		this._currentReplacedContents = {contents:null};
 		this._popUpContext = false;
 		this.timerRunning -= false;
 		this._timer = null;
@@ -814,7 +904,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				that.preview();
 			},
 			visibleWhen : function(item) {
-				return that.model && !that.model.replaceMode() && that.model.searchHelper.params.keyword !== "";
+				return that.model && !that.model.replaceMode() && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
 			}
 		});
 		
@@ -826,7 +916,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				that.replaceAll();
 			},
 			visibleWhen : function(item) {
-				return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model.searchHelper.params.keyword !== "";
+				return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
 			}
 		});
 	
@@ -885,14 +975,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			tooltip: messages["Show previous page of search result"],
 			id : "orion.search.prevPage", //$NON-NLS-0$
 			hrefCallback : function() {
-				var prevPage = that.caculatePrevPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
-				var qParams = mSearchUtils.copySearchParams(that.model.searchHelper.params, true);
+				if(!that.model._provideSearchHelper){
+					return null;
+				}
+				var prevPage = that.caculatePrevPage();
+				var qParams = mSearchUtils.copySearchParams(that.model._provideSearchHelper().params, true);
 				qParams.start = prevPage.start;
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var prevPage = that.caculatePrevPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
-				return (prevPage.start !== that.model.searchHelper.params.start);
+				var prevPage = that.caculatePrevPage();
+				return (prevPage.start !== that.model.getPagingParams().start);
 			}
 		});
 		var nextPage = new mCommands.Command({
@@ -900,14 +993,17 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			tooltip: messages["Show next page of search result"],
 			id : "orion.search.nextPage", //$NON-NLS-0$
 			hrefCallback : function() {
-				var nextPage = that.caculateNextPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
-				var qParams = mSearchUtils.copySearchParams(that.model.searchHelper.params, true);
+				if(!that.model._provideSearchHelper){
+					return null;
+				}
+				var nextPage = that.caculateNextPage();
+				var qParams = mSearchUtils.copySearchParams(that.model._provideSearchHelper().params, true);
 				qParams.start = nextPage.start;
 				return mSearchUtils.generateSearchHref(qParams);
 			},
 			visibleWhen : function(item) {
-				var nextPage = that.caculateNextPage(that.model.searchHelper.params.start, that.model.searchHelper.params.rows, that.totalNumber);
-				return (nextPage.start !== that.model.searchHelper.params.start);
+				var nextPage = that.caculateNextPage();
+				return (nextPage.start !== that.model.getPagingParams().start);
 			}
 		});
 		var nextResultCommand = new mCommands.Command({
@@ -937,7 +1033,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._commandService.addCommand(nextResultCommand);
 		this._commandService.addCommand(prevResultCommand);
 		mExplorer.createExplorerCommands(this._commandService, function(item){
-			return !item._reporting && that.model.searchHelper.params.keyword !== "";
+			return !item._reporting && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
 		});
 		// Register command contributions
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -948,11 +1044,31 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 6); //$NON-NLS-1$ //$NON-NLS-0$
 	};
 	
-	SearchResultExplorer.prototype.loadOneFileMetaData =  function(index, onComplete){
+	SearchResultExplorer.prototype._checkStale = function(model, onComplete){
+		if(!model.stale){
+			return;
+		} else {
+			this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
+				function(contents) {
+					if(this.model._hitOnceWithinFile(contents)){
+						model.stale = false;
+					} else {
+						onComplete(model);
+					}
+				}.bind(this),
+				function(error) {
+					console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
+					onComplete(model);
+				}.bind(this)
+			);
+		}
+	};
+	
+	SearchResultExplorer.prototype._loadOneFileMetaData =  function(index, onComplete){
 		if(this._crawling){
 			return;
 		}
-		var item = this.model.indexedFileItems[index];
+		var item = this.model.getValidFileList()[index];
 		var that = this;
 		this.registry.getService("orion.page.progress").progress(this.fileClient.read(item.location, true), "Getting file metadata " + item.location).then(
 			function(meta) {
@@ -961,21 +1077,21 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				item.stale = (item.lastModified !== meta.LocalTimeStamp);
 				item.ETag = meta.ETag;
 				if(item.stale){
-					this.model.checkStale(item, function(item){
+					this._checkStale(item, function(item){
 						//that.renderer.renderLocationElement(item);
 						that.renderer.staleFileElement(item);
 					});
 				} else {
 					//this.renderer.renderLocationElement(item);
 				}
-			    if(index === (this.model.indexedFileItems.length-1)){	
+			    if(index === (this.model.getValidFileList().length-1)){	
 			    	if(onComplete){
 			    		onComplete();
 			    	} else {
 			    		return; 
 			    	}
 			    } else {
-					this.loadOneFileMetaData(index+1, onComplete);
+					this._loadOneFileMetaData(index+1, onComplete);
 			    }
 			}.bind(this),
 			function(error) {
@@ -983,14 +1099,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				//If we can't load file meta data we have to stale the file.
 				item.stale = true;
 				this.renderer.staleFileElement(item);
-				if(index === this.model.indexedFileItems.length){
+				if(index === this.model.getValidFileList().length){
 			    	if(onComplete){
 			    		onComplete();
 			    	} else {
 			    		return; 
 			    	}
 				} else {
-					this.loadOneFileMetaData( index+1, onComplete);
+					this._loadOneFileMetaData( index+1, onComplete);
 				}
 			}.bind(this)
 		);
@@ -1012,7 +1128,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				if (e.keyCode === 13/*Enter*/) {
 					var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
 					that._commandService.closeParameterCollector();
-					return that.doPreview(replaceInputDiv.value);
+					return that._doPreview(replaceInputDiv.value);
 				}
 				if( e.keyCode === 27/*ESC*/ ){
 					that._commandService.closeParameterCollector();
@@ -1041,7 +1157,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			callback : function() {
 				var replaceInputDiv = lib.node("globalSearchReplaceWith"); //$NON-NLS-0$
 				that._commandService.closeParameterCollector();
-				return that.doPreview(replaceInputDiv.value);
+				return that._doPreview(replaceInputDiv.value);
 			}
 		});
 
@@ -1053,7 +1169,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype._fileExpanded = function(fileIndex, detailIndex){
-		var filItem = this.model.indexedFileItems[fileIndex];
+		var filItem = this.model.getValidFileList()[fileIndex];
 		if(detailIndex === null || detailIndex === undefined){
 			return {childrenNumber: 0, childDiv: lib.node(this.model.getId(filItem))};
 		}
@@ -1068,9 +1184,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		return {childrenNumber: 0, childDiv: null};
 	};
 	
-	SearchResultExplorer.prototype.doPreview = function(replacingStr, all) {
-		window.sessionStorage["global_search_default_replace_string"] = replacingStr; //$NON-NLS-0$
-		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params, true);
+	SearchResultExplorer.prototype._doPreview = function(replacingStr, all) {
+		if(!this.model._provideSearchHelper){
+			return;
+		}
+		if(this.model._storeGlobalStatus){
+			this.model._storeGlobalStatus(replacingStr);
+		}
+		var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params, true);
 		qParams.replace = replacingStr;
 		if(all){
 			qParams.start = 0;
@@ -1081,7 +1202,10 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 
 	SearchResultExplorer.prototype.searchAgain = function() {
-		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params, true);
+		if(!this.model._provideSearchHelper){
+			return;
+		}
+		var qParams = mSearchUtils.copySearchParams(this.model._provideSearchHelper().params, true);
 		qParams.replace = null;
 		if(qParams.rows > this.defaulRows ){
 			qParams.rows = this.defaulRows;
@@ -1100,8 +1224,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._reporting = true;
 		this.initCommands();
 		this.reportStatus(messages["Writing files..."]);	
-		this.model.writeIncrementalNewContent( this._replaceStr, this.model.indexedFileItems, reportList, 0, function(modellist){
-			
+		this.model.writeIncrementalNewContent(reportList, 0, function(modellist){
 			_empty(that.getParentDivId());
 			var reporter = new SearchReportExplorer(that.getParentDivId(), reportList);
 			reporter.report();
@@ -1140,12 +1263,12 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 
 		if(init){
 			this.hookUpNavHandler();
-			this.gotoCurrent(this.restoreLocationStatus());
+			this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
 			this.reportStatus("");	
-			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
+			this._loadOneFileMetaData(0, function(){that.refreshIndex();});
 		} else {
 			this.hookUpNavHandler();
-			this.gotoCurrent(this.restoreLocationStatus());
+			this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
 		}
 	};
 	
@@ -1157,15 +1280,15 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype._checkedItem = function() {
-		for(var i = 0; i < this.model.indexedFileItems.length; i++){
-			if(this.model.indexedFileItems[i].checked){
+		for(var i = 0; i < this.model.getValidFileList().length; i++){
+			if(this.model.getValidFileList()[i].checked){
 				return true;
 			}
-			if(!this.model.indexedFileItems[i].children){
+			if(!this.model.getValidFileList()[i].children){
 				continue;
 			}
-			for(var j = 0; j < this.model.indexedFileItems[i].children.length; j++){
-				if(this.model.indexedFileItems[i].children[j].checked){
+			for(var j = 0; j < this.model.getValidFileList()[i].children.length; j++){
+				if(this.model.getValidFileList()[i].children[j].checked){
 					return true;
 				}
 			}
@@ -1177,7 +1300,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var hasCheckedItems;
 		if(!rowId){
 			hasCheckedItems = checked;
-			this.onItemChecked(this.model._listRoot, checked, manually);
+			this.onItemChecked(this.model.getListRoot(), checked, manually);
 		} else {
 			var row = lib.node(rowId);
 			if(row && row._item){
@@ -1192,14 +1315,14 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype.onNewContentChanged = function(fileItem) {
-		if(fileItem === this.model.fileModel(this.getNavHandler().currentModel())){
+		if(fileItem === _getFileModel(this.getNavHandler().currentModel())){
 			this.buildPreview(true);
 		}
 	};
 	
 	SearchResultExplorer.prototype.onItemChecked = function(item, checked, manually) {
 		item.checked = checked;
-		if(item.type === "file" || item.isRoot){ //$NON-NLS-0$
+		if(item.type === "file" || item === this.model.getListRoot()){ //$NON-NLS-0$
 			if(item.children){
 				for(var i = 0; i < item.children.length; i++){
 					var checkBox  = lib.node(this.renderer.getCheckBoxId(this.model.getId(item.children[i])));
@@ -1222,18 +1345,18 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		if(!this._uiFactory){
 			return;
 		}
-		if(this.model.indexedFileItems.length === 0){
+		if(this.model.getValidFileList().length === 0){
 			return;
 		}
 		var uiFactory = this._uiFactory;
-		var fileItem = this.model.fileModel(this.getNavHandler().currentModel());
+		var fileItem = _getFileModel(this.getNavHandler().currentModel());
 		this._currentPreviewModel = fileItem;
-		if(!updating || !this._currentReplacedContents){
-			this._currentReplacedContents = [];
-		}
 		var that = this;
-		this.model.getFileContent(fileItem, function(fileItem){
-			mSearchUtils.generateNewContents(fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model.searchHelper.inFileQuery.searchStrLength); 
+		this.model.provideFileContent(fileItem, function(fileItem){
+			if(that.model.onMatchNumberChanged){
+				that.model.onMatchNumberChanged(fileItem);
+			}
+			mSearchUtils.generateNewContents(updating, fileItem.contents, that._currentReplacedContents, fileItem, that._replaceStr, that.model._searchHelper.inFileQuery.searchStrLength); 
 			// Diff operations
 			var contentTypeService = new mContentTypes.ContentTypeService(that.registry);
 			var fType = contentTypeService.getFilenameContentType(fileItem.name);
@@ -1248,7 +1371,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				baseFile: {
 					Name: fileItem.location,
 					Type: fType,
-					Content: that._currentReplacedContents.join(that.model._lineDelimiter)
+					Content: that._currentReplacedContents.contents.join(that.model._lineDelimiter)
 				}
 			};
 			if(!that.twoWayCompareContainer){
@@ -1285,8 +1408,8 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		var query = mSearchUtils.generateSearchHref(searchParams).split("#")[1];
 		var qName = query;
 		
-		if(typeof(this.model.searchHelper.displayedSearchTerm) === "string" && typeof(searchParams.resource) === "string" ){ //$NON-NLS-1$ //$NON-NLS-0$
-			qName = "\'" + this.model.searchHelper.displayedSearchTerm + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
+		if(typeof(this.model._searchHelper.displayedSearchTerm) === "string" && typeof(searchParams.resource) === "string" ){ //$NON-NLS-1$ //$NON-NLS-0$
+			qName = "\'" + this.model._searchHelper.displayedSearchTerm + "\' in ";// +queryObj.location; //$NON-NLS-1$ //$NON-NLS-0$
 			if(searchParams.resource.length > 0){
 				this.registry.getService("orion.page.progress").progress(this.fileClient.read(searchParams.resource, true), "Getting file metadata " + searchParams.resource).then(
 					function(meta) {
@@ -1308,14 +1431,16 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype.caculateNextPage = function(currentStart, pageSize, totalNumber){
-		if((currentStart + pageSize) >= totalNumber){
-			return {start:currentStart};
+		var pagingParams = this.model.getPagingParams();
+		if((pagingParams.start + pagingParams.rows) >= pagingParams.totalNumber){
+			return {start:pagingParams.start};
 		}
-		return {start: currentStart+pageSize};
+		return {start: pagingParams.start + pagingParams.rows};
 	};
 	
-	SearchResultExplorer.prototype.caculatePrevPage = function(currentStart, pageSize, totalNumber){
-		var start = currentStart - pageSize;
+	SearchResultExplorer.prototype.caculatePrevPage = function(){
+		var pagingParams = this.model.getPagingParams();
+		var start = pagingParams.start - pagingParams.rows;
 		if(start < 0){
 			start = 0;
 		}
@@ -1330,7 +1455,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this._commandService.destroy("pageNavigationActions"); //$NON-NLS-0$
 		this._commandService.renderCommands("pageNavigationActions", "pageNavigationActions", that, that, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		
-		if(this.model.searchHelper.params.keyword !== ""){
+		if(this.model._searchHelper.params.keyword !== ""){
 			var newMenu = this._commandService._createDropdownMenu("pageNavigationActions", messages['Options'], false, function() { //$NON-NLS-0$
 				if(!that.model.replaceMode()){
 					that._commandService._generateCheckedMenuItem(newMenu.menu, messages["Sort by Name"], that.model.sortByName,
@@ -1410,7 +1535,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			return;
 		}
 		if(curModel.type === "detail"){ //$NON-NLS-0$
-			var curFileModel = this.model.fileModel(model);
+			var curFileModel = _getFileModel(model);
 			if(curFileModel === model){
 				this.getNavHandler().cursorOn(model);
 			}
@@ -1479,7 +1604,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	
 	SearchResultExplorer.prototype.onReplaceCursorChanged = function(prevModel, currentModel){
 		var that = this;
-		if(!this.model.sameFile(this._currentPreviewModel, currentModel)){
+		if(!_onSameFile(this._currentPreviewModel, currentModel)){
 			this.buildPreview();
 		}
 		if(currentModel.type === "detail"){ //$NON-NLS-0$
@@ -1488,7 +1613,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				return;
 			}
 			this.twoWayCompareContainer.gotoMatch(currentModel.lineNumber-1, currentModel.matches[currentModel.matchNumber-1], 
-					currentModel.newMatches[currentModel.matchNumber-1], this.model.searchHelper.inFileQuery.searchStrLength,
+					currentModel.newMatches[currentModel.matchNumber-1], this.model._searchHelper.inFileQuery.searchStrLength,
 					function(){window.setTimeout(function(){that.renderer.focus();}, 200);});
 			window.setTimeout(function(){that.renderer.focus();}, 0);
 		}
@@ -1496,7 +1621,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	
 	SearchResultExplorer.prototype.onCursorChanged = function(prevModel, currentModel){
 		this.renderer.replaceDetailIcon(prevModel, "none");	 //$NON-NLS-0$
-		this.model.storeStatus(currentModel);
+		if(this.model.storeLocationStatus){
+			this.model.storeLocationStatus(currentModel);
+		}
 		var that = this;
 		if(this.model.replaceMode() ){
 			if(!this._uiFactory){
@@ -1537,11 +1664,11 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		} else {
 			this.getNavHandler().focus();
 		}
-		this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
+		this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
 	};
 	
 	SearchResultExplorer.prototype.startUp = function() {
-		if(this.model.searchHelper.displayedSearchTerm){
+		if(this.model._searchHelper.displayedSearchTerm){
 			if (this.numberOnPage > 0) {
 				var pageTitle = lib.node("pageTitle"); //$NON-NLS-0$
 				if(pageTitle){
@@ -1554,7 +1681,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			} else {
 				this.parentNode.textContent = "";
 				var textBold = _createElement('b', null, null, this.parentNode);//$NON-NLS-1$ //$NON-NLS-0$
-				var displayStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model.searchHelper.displayedSearchTerm); 
+				var displayStr = i18nUtil.formatMessage(messages["No matches found for ${0}"], this.model._searchHelper.displayedSearchTerm); 
 				_place(document.createTextNode(displayStr), textBold, "only"); //$NON-NLS-0$
 				return;
 			} 
@@ -1566,9 +1693,9 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 			_empty(this.getParentDivId());
 			this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
 			this.hookUpNavHandler();
-			this.gotoCurrent(this.restoreLocationStatus());
+			this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
 			this.reportStatus("");	
-			this.loadOneFileMetaData(0, function(){that.refreshIndex();});
+			this._loadOneFileMetaData(0, function(){that.refreshIndex();});
 		} else {
 			that.replacePreview(true, true);
 		}
@@ -1580,52 +1707,39 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 		this.createTree(this.getParentDivId(), this.model, {selectionPolicy: "cursorOnly", indent: 0, onCollapse: function(model){that.onCollapse(model);}}); //$NON-NLS-0$
 	};
 	
-	SearchResultExplorer.prototype.restoreLocationStatus = function() {
-		var currentFileLocation = window.sessionStorage[this.model.searchHelper.params.keyword + "_search_result_currentFileLocation"]; //$NON-NLS-0$
-		var fileModel = this.model.location2Model(currentFileLocation);
-		var currentDetailIndex = "none"; //$NON-NLS-0$
-		var detailIndexCached = window.sessionStorage[this.model.searchHelper.params.keyword + "_search_result_currentDetailIndex"]; //$NON-NLS-0$
-		if (typeof detailIndexCached === "string") { //$NON-NLS-0$
-			if (detailIndexCached.length > 0) {
-				currentDetailIndex = detailIndexCached;
-			} 
-		}
-		return {file: fileModel, detail: currentDetailIndex};
-	};
-	
 	SearchResultExplorer.prototype.refreshIndex = function(){
 		var newIndex = [];
-		var currentFileItem = this.model.fileModel(this.getNavHandler().currentModel());
-		for(var i = 0; i <  this.model.indexedFileItems.length; i++){
-			if(!this.model.indexedFileItems[i].stale){
-				newIndex.push(this.model.indexedFileItems[i]);
-			} else if(currentFileItem === this.model.indexedFileItems[i]){
+		var currentFileItem = _getFileModel(this.getNavHandler().currentModel());
+		for(var i = 0; i <  this.model.getValidFileList().length; i++){
+			if(!this.model.getValidFileList()[i].stale){
+				newIndex.push(this.model.getValidFileList()[i]);
+			} else if(currentFileItem === this.model.getValidFileList()[i]){
 				currentFileItem = null;
 			}
 		}
-		this.model.indexedFileItems = newIndex;
-		if(this.model.indexedFileItems.length === 0){
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
+		this.model._indexedFileItems = newIndex;
+		if(this.model.getValidFileList().length === 0){
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
 			this.getNavHandler().cursorOn(null, true);
 		} else if(!currentFileItem){
 			this.getNavHandler().cursorOn(null, true);
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
 			this.gotoCurrent();
 		} else {
-			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model._listRoot.children, true);
+			this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children, true);
 		}
 	};
 	
 	//provide to the expandAll/collapseAll commands
 	SearchResultExplorer.prototype.getItemCount  = function(){
-		return this.model._listRoot.children.length;
+		return this.model.getListRoot().children.length;
 	};
 	
 	SearchResultExplorer.prototype.sortWithName = function(byName) {
 		if(this.model.sortByName === byName){
 			return;
 		}
-		var qParams = mSearchUtils.copySearchParams(this.model.searchHelper.params);
+		var qParams = mSearchUtils.copySearchParams(this.model._searchHelper.params);
 		qParams.sort = byName ? "NameLower asc" : "Path asc"; //$NON-NLS-1$ //$NON-NLS-0$
 		qParams.start = 0;
 		var href =  mSearchUtils.generateSearchHref(qParams);
@@ -1658,7 +1772,7 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 	};
 	
 	SearchResultExplorer.prototype.gotoNext = function(next, forceExpand)	{
-		if(this.model.indexedFileItems.length === 0){
+		if(this.model.getValidFileList().length === 0){
 			return;
 		}
 		this.getNavHandler().iterate(next, forceExpand);

@@ -273,13 +273,10 @@ exports.searchUtils.searchOnelineRegEx =  function(inFileQuery, lineString, only
 	return null;
 };
 
-exports.searchUtils.generateNewContents = function( oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
+exports.searchUtils.generateNewContents = function( updating, oldContents, newContents, fileModelNode, replaceStr, searchStrLength){
 	if(fileModelNode && oldContents){
-		var updating;
-		if(newContents.length > 0){
-			updating = true;
-		} else {
-			updating = false;
+		if(!updating){
+			newContents.contents = [];
 		}
 		for(var i = 0; i < oldContents.length ; i++){
 			var lineStringOrigin = oldContents[i];
@@ -320,12 +317,12 @@ exports.searchUtils.generateNewContents = function( oldContents, newContents, fi
 					}
 				}
 				if(updating){
-					newContents[i] = newStr;
+					newContents.contents[i] = newStr;
 				} else {
-					newContents.push(newStr);
+					newContents.contents.push(newStr);
 				}
 			} else if(!updating){
-				newContents.push(lineStringOrigin);
+				newContents.contents.push(lineStringOrigin);
 			}
 		}
 	}
