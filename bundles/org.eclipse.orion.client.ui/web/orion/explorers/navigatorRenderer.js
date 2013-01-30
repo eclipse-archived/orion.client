@@ -61,14 +61,17 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 		}
 	}
 		
-	/* Exported so that it can be used by other UI that wants to use navigator-style links 
-	 * folderURL should be the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
-	 * item is a json object describing an Orion file or folder
-	 * commandService and contentTypeService  are necessary to compute the proper editor for a file.  The command service must be a synchronous, in-page
-	 * service, not retrieved from the service registry.
-	 * openWithCommands and defaultEditor will be computed if not provided.  However callers must have already processed the open with
+	/**
+	 * Exported so that it can be used by other UI that wants to use navigator-style links. commandService and contentTypeService  are necessary to compute 
+	 * the proper editor for a file.
+	 * @param {String} folderPageURL the page you want to direct folders to (such as navigator).  Using a blank string will just hash the current page.
+	 * @param {Object} item a json object describing an Orion file or folder
+	 * @param {Object} commandService necessary to compute the proper editor for a file. Must be a synchronous, in-page service, not retrieved 
+	 * from the service registry.
+	 * @param {Object[]} [openWithCommands] will be computed if not provided. However callers must have already processed the open with
 	 * service extension and added to the command registry (such as done in mExtensionCommands._createOpenWithCommands(serviceRegistry, contentTypesCache)).
-	 * linkProperties gives additional properties to mix in to the HTML anchor element.
+	 * @param {Object} [defaultEditor] will be computed if not provided, but subject to the same caveat as openWithCommands.
+	 * @param {Object} [linkProperties] gives additional properties to mix in to the HTML anchor element.
 	 */
 	function createLink(folderPageURL, item, idPrefix, commandService, contentTypeService, /* optional */ openWithCommands, /* optional */defaultEditor, /* optional */ linkProperties) {
 		var link;
