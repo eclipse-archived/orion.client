@@ -81,7 +81,7 @@ var exports = {};
 	};
 
 	exports.handleSshAuthenticationError = function(serviceRegistry, errorData, options, func, title){
-		var repository = errorData.Url;
+		var repository = errorData ? errorData.Url : undefined;
 		
 		var failure = function(){
 			var credentialsDialog = new mGitCredentials.GitCredentialsDialog({
@@ -154,7 +154,7 @@ var exports = {};
 			jsonData = translateResponseToStatus(jsonData);
 		}
 
-		if (!jsonData || !jsonData.HttpCode) {
+		if (!jsonData || jsonData.HttpCode===undefined) {
 			if (callback) {
 				callback(jsonData);
 			}

@@ -72,7 +72,7 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 			}
 		}, function(error){
 			var errorMessage = error;
-			if(error.responseText){
+			if(error.responseText!==undefined){
 				errorMessage = error.responseText;
 				try{
 					errorMessage = JSON.parse(error.responseText);
@@ -80,10 +80,12 @@ define(["orion/xhr", "orion/Deferred"],  function(xhr, Deferred) {
 					//ignore
 				}
 			}
-			if(errorMessage.Message)
+			if(errorMessage.Message!==undefined){
+				errorMessage.HttpCode = errorMessage.HttpCode===undefined ? error.status : errorMessage.HttpCode;
+				errorMessage.Severity = errorMessage.Severity===undefined ? "Error" : errorMessage.Severity;
 				deferred.reject(errorMessage);
-			else
-				deferred.reject({Severity: "Error", Message: error});
+			}else
+				deferred.reject({Severity: "Error", Message: errorMessage, HttpCode: error.status});
 		});
 	}
 	
