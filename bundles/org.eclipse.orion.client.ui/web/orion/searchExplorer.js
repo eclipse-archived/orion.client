@@ -12,9 +12,9 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
+define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/contentTypes', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/explorers/explorerNavHandler', 'orion/fileClient', 'orion/commands', 'orion/searchUtils', 'orion/globalSearch/search-features', 'orion/compare/compare-features', 'orion/compare/compare-container', 'orion/explorers/navigationUtils', 'orion/webui/tooltip'],
 
-function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils, mTooltip) {
+function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler, mFileClient, mCommands, mSearchUtils, mSearchFeatures, mCompareFeatures, mCompareContainer, mNavUtils, mTooltip) {
     /* Internal wrapper functions*/
     function _empty(nodeToEmpty) {
         var node = lib.node(nodeToEmpty);
@@ -426,7 +426,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 var div = _createElement('div', null, null, col); //$NON-NLS-1$
                 var span = _createElement('span', "primaryColumn", null, div); //$NON-NLS-1$ //$NON-NLS-0$
 
-                _place(document.createTextNode(item.model.fullPathName + "/" + item.model.name), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
+                _place(document.createTextNode(item.model.fullPathName + "/" + this.explorer.resultModel.getFileName(item.model)), span, "only"); //$NON-NLS-1$ //$NON-NLS-0$
                 _connect(span, "click", function() { //$NON-NLS-0$
                     window.open(item.model.linkLocation);
                 });
@@ -470,7 +470,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                             break;
                         case "pass":
                             //$NON-NLS-0$
-                            statusMessage = i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches);
+                            statusMessage = item.model.totalMatches ? i18nUtil.formatMessage(messages["${0} out of ${1}  matches replaced."], item.matchesReplaced, item.model.totalMatches) : item.message;
                             break;
                     }
                     var td = _createElement('td', "search_report", null, null); //$NON-NLS-1$ //$NON-NLS-0$
@@ -482,9 +482,10 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
 
     SearchReportRenderer.prototype.constructor = SearchReportRenderer;
 
-    function SearchReportExplorer(parentId, reportList) {
+    function SearchReportExplorer(parentId, reportList, resultModel) {
         this.parentId = parentId;
         this.reportList = reportList;
+        this.resultModel = resultModel;
         this.renderer = new SearchReportRenderer({
             checkbox: false
         }, this);
@@ -592,7 +593,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 that.replaceAll();
             },
             visibleWhen: function(item) {
-                return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
+                return that.model && that.model.replaceMode() && !that._reporting && that._hasCheckedItems;
             }
         });
 
@@ -628,7 +629,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 return that.searchAgain();
             },
             visibleWhen: function(item) {
-                return that._reporting || (that.model && that.model.replaceMode());
+                return that.model._provideSearchHelper ? (that._reporting || that.model && that.model.replaceMode()) : false;
             }
         });
 
@@ -711,7 +712,11 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         this._commandService.addCommand(nextResultCommand);
         this._commandService.addCommand(prevResultCommand);
         mExplorer.createExplorerCommands(this._commandService, function(item) {
-            return !item._reporting && that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword !== "";
+        	var emptyKeyword = false;
+        	if(that.model._provideSearchHelper && that.model._provideSearchHelper().params.keyword === ""){
+        		emptyKeyword = true;
+        	}
+            return !item._reporting && !emptyKeyword;
         });
         // Register command contributions
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.explorer.expandAll", 1); //$NON-NLS-1$ //$NON-NLS-0$
@@ -729,7 +734,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
 
             function(contents) {
-                if (this.model._hitOnceWithinFile(contents)) {
+                if (this.model.staleCheck(contents)) {
                     model.stale = false;
                 } else {
                     onComplete(model);
@@ -742,56 +747,45 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             }.bind(this));
         }
     };
-
-    SearchResultExplorer.prototype._loadOneFileMetaData = function(index, onComplete) {
-        if (this._crawling) {
+    
+    SearchResultExplorer.prototype.staleCheck = function(onComplete){
+        if (this._crawling || !this.model.staleCheck) {
             return;
         }
-        var item = _validFiles(this.model)[index];
-        var that = this;
-        this.registry.getService("orion.page.progress").progress(this.fileClient.read(item.location, true), "Getting file metadata " + item.location).then(
-
-        function(meta) {
-            item.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
-            item.parentLocation = meta.Parents[0].Location;
-            item.stale = (item.lastModified !== meta.LocalTimeStamp);
-            item.ETag = meta.ETag;
-            if (item.stale) {
-                this._checkStale(item, function(item) {
-                    //that.renderer.renderLocationElement(item);
-                    that.renderer.staleFileElement(item);
-                });
-            } else {
-                //this.renderer.renderLocationElement(item);
-            }
-            if (index === (_validFiles(this.model).length - 1)) {
-                if (onComplete) {
-                    onComplete();
-                } else {
-                    return;
-                }
-            } else {
-                this._loadOneFileMetaData(index + 1, onComplete);
-            }
-        }.bind(this),
-
-        function(error) {
-            console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
-            //If we can't load file meta data we have to stale the file.
-            item.stale = true;
-            this.renderer.staleFileElement(item);
-            if (index === _validFiles(this.model).length) {
-                if (onComplete) {
-                    onComplete();
-                } else {
-                    return;
-                }
-            } else {
-                this._loadOneFileMetaData(index + 1, onComplete);
-            }
-        }.bind(this));
+        var promises = [];
+		_validFiles(this.model).forEach(function(fileItem) {
+			promises.push(this._loadFileMetaData(fileItem));
+		}.bind(this));
+		new Deferred.all(promises, function(error) { return {_error: error}; }).then(onComplete);
+    }
+    
+    SearchResultExplorer.prototype._loadFileMetaData = function(fileItem) {
+        var deferred = new Deferred();
+        this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then(
+	        function(meta) {
+	            fileItem.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
+	            fileItem.parentLocation = meta.Parents[0].Location;
+	            fileItem.stale = (fileItem.lastModified !== meta.LocalTimeStamp);
+	            fileItem.ETag = meta.ETag;
+	            if (fileItem.stale) {
+	                this._checkStale(fileItem, function(fileItem) {
+	                    this.renderer.staleFileElement(fileItem);
+	                }.bind(this));
+	            }
+				deferred.resolve(fileItem);
+	        }.bind(this),
+	        function(error) {
+	            console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
+	            //If we can't load file meta data we have to stale the file.
+	            fileItem.stale = true;
+	            this.renderer.staleFileElement(fileItem);
+	            deferred.reject(error);
+	        }.bind(this)
+		);
+		return deferred;
     };
-
+    
+    
     SearchResultExplorer.prototype.setCrawling = function(crawling) {
         this._crawling = crawling;
     };
@@ -915,7 +909,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         this.reportStatus(messages["Writing files..."]);
         this.model.writeIncrementalNewContent(reportList, 0, function(modellist) {
             _empty(that.getParentDivId());
-            var reporter = new SearchReportExplorer(that.getParentDivId(), reportList);
+            var reporter = new SearchReportExplorer(that.getParentDivId(), reportList, that.model);
             reporter.report();
             that.reportStatus("");
         });
@@ -926,7 +920,6 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
     };
 
     SearchResultExplorer.prototype.replacePreview = function(init, comparing) {
-
         _empty(this.getParentDivId());
         if (comparing) {
             this._uiFactory = new mSearchFeatures.SearchUIFactory({
@@ -957,14 +950,12 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         }); //$NON-NLS-0$
 
         if (init) {
-            this.hookUpNavHandler();
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            this._loadOneFileMetaData(0, function() {
-                that.refreshIndex();
+            this.staleCheck(function() {
+                that.refreshValidFiles();
             });
         } else {
-            this.hookUpNavHandler();
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
         }
     };
@@ -1328,7 +1319,7 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             this.buildPreview();
         }
         if (currentModel.type === "detail") { //$NON-NLS-0$
-        	//TODO:
+        	//TODO:This has to be removed but not quite sure why it was there
         	/*
             if (!currentModel.newMatches) {
                 that.renderer.focus();
@@ -1377,24 +1368,6 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         }
     };
 
-    SearchResultExplorer.prototype.hookUpNavHandler = function() {
-        if (!this.getNavHandler()) {
-            var options = {
-                preventDefaultFunc: function(event, model) {
-                    return this.preventDefaultFunc(event, model);
-                }.bind(this),
-                onCursorChanged: function(prevModel, currentModel) {
-                    this.onCursorChanged(prevModel, currentModel);
-                }.bind(this)
-            };
-            var selModel = this.getSelectionModel();
-            selModel.navHandler = new mNavHandler.ExplorerNavHandler(this, this.selectionModel.navDict, options);
-        } else {
-            this.getNavHandler().focus();
-        }
-        this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
-    };
-
     SearchResultExplorer.prototype.startUp = function() {
     	var pagingParams = this.model.getPagingParams();
         if (pagingParams.numberOnPage === 0) {
@@ -1418,12 +1391,11 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 onCollapse: function(model) {
                     that.onCollapse(model);
                 }
-            }); //$NON-NLS-0$
-            this.hookUpNavHandler();
+            });
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            this._loadOneFileMetaData(0, function() {
-                that.refreshIndex();
+            this.staleCheck(function() {
+                that.refreshValidFiles();
             });
         } else {
             that.replacePreview(true, true);
@@ -1434,15 +1406,15 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
         var that = this;
         this.model.buildResultModel();
         this.createTree(this.getParentDivId(), this.model, {
-            selectionPolicy: "cursorOnly",
+            selectionPolicy: "cursorOnly", //$NON-NLS-0$
             indent: 0,
             onCollapse: function(model) {
                 that.onCollapse(model);
             }
-        }); //$NON-NLS-0$
+        });
     };
 
-    SearchResultExplorer.prototype.refreshIndex = function() {
+    SearchResultExplorer.prototype.refreshValidFiles = function() {
         var newIndex = [];
         var currentFileItem = _getFileModel(this.getNavHandler().currentModel());
         var fileList = _validFiles(this.model);
@@ -1453,16 +1425,18 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
                 currentFileItem = null;
             }
         }
-        this.model._indexedFileItems = newIndex;
+        if(this.model.setValidFileList){
+        	this.model.setValidFileList(newIndex);
+        }
         if (_validFiles(this.model).length === 0) {
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
+            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model));
             this.getNavHandler().cursorOn(null, true);
         } else if (!currentFileItem) {
             this.getNavHandler().cursorOn(null, true);
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children);
+            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model));
             this.gotoCurrent();
         } else {
-            this.getNavHandler().refreshModel(this.getNavDict(), this.model, this.model.getListRoot().children, true);
+            this.getNavHandler().refreshModel(this.getNavDict(), this.model, _validFiles(this.model), true);
         }
     };
 
@@ -1498,6 +1472,9 @@ function(messages, require, lib, mContentTypes, i18nUtil, mExplorer, mNavHandler
             detailIndex = cachedItem.detail;
         } else {
             modelToExpand = this.getNavHandler().currentModel();
+        }
+        if(!modelToExpand){
+        	modelToExpand = _validFiles(this.model).length > 0 ? _validFiles(this.model)[0] : null;
         }
         this.getNavHandler().cursorOn(modelToExpand, true);
         if (modelToExpand && detailIndex && detailIndex !== "none") { //$NON-NLS-0$
