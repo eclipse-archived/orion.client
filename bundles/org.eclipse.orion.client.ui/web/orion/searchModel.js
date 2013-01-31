@@ -28,13 +28,6 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
         return modelItem.parent;
     };
 
-    function _validFiles(searchModel) {
-        if (typeof searchModel.getValidFileList === "function") { //$NON-NLS-0$
-            return searchModel.getValidFileList();
-        }
-        return searchModel.getListRoot().children;
-    };
-
     /*
      *	The model to support the search result.
      */
@@ -268,9 +261,10 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
      * @param {Number} index The index of the result of the valid file list. The function has to recursively increase the number till the lengh of the file list.
      */
     SearchResultModel.prototype.writeIncrementalNewContent = function(reportList, index, onComplete) {
-        var model = _validFiles(this)[index];
-        if (!model || index === _validFiles(this).length) {
-            onComplete(_validFiles(this));
+    	var validFileList = this.getValidFileList();
+        var model = validFileList[index];
+        if (!model || index === validFileList.length) {
+            onComplete(validFileList);
             return;
         }
         var matchesReplaced = this._matchesReplaced(model);
@@ -365,12 +359,22 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
     };
 
     /**
+     * Set the list of valid files. Optional.
+     */
+    SearchResultModel.prototype.setValidFileList = function(validList) {
+        this._indexedFileItems = validList;
+    };
+
+    /**
      * Store the current selected model in to a session storage. Optional.
      * If defined, this function is called every time a selection on the model is changed by user.
      */
     SearchResultModel.prototype.storeLocationStatus = function(currentModel) {
         if (currentModel) {
             var fileItem = _getFileModel(currentModel);
+            if(!fileItem){
+            	return;
+            }
             window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentFileLocation"] = fileItem.location; //$NON-NLS-0$
             if (currentModel.type === "file") { //$NON-NLS-0$
                 window.sessionStorage[this._searchHelper.params.keyword + "_search_result_currentDetailIndex"] = "none"; //$NON-NLS-1$ //$NON-NLS-0$
@@ -399,7 +403,21 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
             detail: currentDetailIndex
         };
     };
-
+    
+    /**
+     * Check if the given file content still contain the search term. Optional.
+     * If defined, the explorer will check all the files that has different time stamp between the search result and the file meta data. Then ask this function to do the final judge.
+     */
+    SearchResultModel.prototype.staleCheck = function(fileContentText) {
+        var lineString = fileContentText.toLowerCase();
+        var result;
+        if (this._searchHelper.inFileQuery.wildCard) {
+            result = mSearchUtils.searchOnelineRegEx(this._searchHelper.inFileQuery, lineString, true);
+        } else {
+            result = mSearchUtils.searchOnelineLiteral(this._searchHelper.inFileQuery, lineString, true);
+        }
+        return result;
+    };
 
     /*** Internal model functions ***/
 
@@ -460,17 +478,6 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
             }
         }
         return matchesReplaced;
-    };
-
-    SearchResultModel.prototype._hitOnceWithinFile = function(fileContentText) {
-        var lineString = fileContentText.toLowerCase();
-        var result;
-        if (this._searchHelper.inFileQuery.wildCard) {
-            result = mSearchUtils.searchOnelineRegEx(this._searchHelper.inFileQuery, lineString, true);
-        } else {
-            result = mSearchUtils.searchOnelineLiteral(this._searchHelper.inFileQuery, lineString, true);
-        }
-        return result;
     };
 
     SearchResultModel.prototype.constructor = SearchResultModel;
