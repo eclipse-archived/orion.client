@@ -16,8 +16,8 @@
 /**
  * @namespace The global container for orion APIs.
  */ 
-define(['i18n!orion/edit/nls/messages', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/keyBinding', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
-	function(messages, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
+define(['i18n!orion/edit/nls/messages', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/Deferred', 'orion/URITemplate', 'orion/commands', 'orion/globalCommands', 'orion/extensionCommands', 'orion/contentTypes', 'orion/editor/keyBinding', 'orion/editor/undoStack', 'orion/searchUtils', 'orion/PageUtil'], 
+	function(messages, i18nUtil, lib, Deferred, URITemplate, mCommands, mGlobalCommands, mExtensionCommands, mContentTypes, mKeyBinding, mUndoStack, mSearchUtils, mPageUtil) {
 
 var exports = {};
 
@@ -106,9 +106,9 @@ exports.EditorCommandFactory = (function() {
 						var etag = self.inputManager.getFileMetadata().ETag;
 						var args = { "ETag" : etag }; //$NON-NLS-0$
 						var def = self.fileClient.write(self.inputManager.getInput(), contents, args);
-						var progress = self.serviceRegistry.getService("orion.page.progress");
+						var progress = self.serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 						if(progress){
-							progress.progress(def, "Saving file " + self.inputManager.getInput());
+							progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], self.inputManager.getInput()));
 						}
 						def.then(
 							function(result) {
@@ -125,9 +125,9 @@ exports.EditorCommandFactory = (function() {
 									var forceSave = confirm(messages["Resource is out of sync with the server. Do you want to save it anyway?"]);
 									if (forceSave) {
 										// repeat save operation, but without ETag 
-										var def = self.fileClient.write(self.inputManager.getInput(), contents)
+										var def = self.fileClient.write(self.inputManager.getInput(), contents);
 										if(progress){
-											progress.progress(def, "Saving file " + self.inputManager.getInput());
+											progress.progress(def, i18nUtil.formatMessage(messages['Saving file {0}'], self.inputManager.getInput()));
 										}
 										def.then(
 											function(result) {
@@ -222,10 +222,9 @@ exports.EditorCommandFactory = (function() {
 							if (selection.end > selection.start) {//If there is selection from editor, we want to use it as the default keyword
 								var model = editor.getModel();
 								searchString = model.getText(selection.start, selection.end);
-								fromSelection = true;
 							} else {//If there is no selection from editor, we want to parse the parameter from URL binding
 								if (data.parameters && data.parameters.valueFor('find')) { //$NON-NLS-0$
-									searchString = data.parameters.valueFor('find');
+									searchString = data.parameters.valueFor('find'); //$NON-NLS-0$
 									parsedParam = mPageUtil.matchResourceParameters();
 									mSearchUtils.convertFindURLBinding(parsedParam);
 								}
@@ -305,7 +304,6 @@ exports.EditorCommandFactory = (function() {
 						var selection = editor.getSelection();
 						var model = editor.getModel();
 						var text = model.getText();
-						var selectedText = model.getText(selection.start,selection.end);
 						
 						var processEditorResult = function(result) {
 							if (result && result.text) {
@@ -323,7 +321,7 @@ exports.EditorCommandFactory = (function() {
 							}
 						}; 
 						
-						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), "Running " + info.name).then(function(result){
+						progress.progress(service.run(model.getText(selection.start,selection.end),text,selection, input.getInput()), i18nUtil.formatMessage(messages['Running {0}'], info.name)).then(function(result){
 							if (result && result.uriTemplate) {
 								var uriTemplate = new URITemplate(result.uriTemplate);
 								var href = uriTemplate.expand(input.getFileMetadata());
@@ -355,7 +353,7 @@ exports.EditorCommandFactory = (function() {
 											} else if (data.result) {
 												processEditorResult(data.result);
 											}
-											window.removeListener("message", _messageHandler, false);
+											window.removeListener("message", _messageHandler, false); //$NON-NLS-0$
 											window.document.body.removeChild(iframe);
 										}
 									}
@@ -371,13 +369,13 @@ exports.EditorCommandFactory = (function() {
 				};
 				Deferred.when(getContentTypes(this.serviceRegistry), function() {
 					var deferreds = [];
-					for (var i=0; i<actionReferences.length; i++) {
-						var serviceReference = actionReferences[i];
-						var service = self.serviceRegistry.getService(actionReferences[i]);
+					var position = 100;
+					actionReferences.forEach(function(serviceReference) {
+						var service = self.serviceRegistry.getService(serviceReference);
 						var info = {};
-						var propertyNames = actionReferences[i].getPropertyKeys();
+						var propertyNames = serviceReference.getPropertyKeys();
 						for (var j = 0; j < propertyNames.length; j++) {
-							info[propertyNames[j]] = actionReferences[i].getProperty(propertyNames[j]);
+							info[propertyNames[j]] = serviceReference.getProperty(propertyNames[j]);
 						}
 						info.forceSingleItem = true;  // for compatibility with mExtensionCommands._createCommandOptions
 						
@@ -389,7 +387,7 @@ exports.EditorCommandFactory = (function() {
 						deferred.then(function(commandOptions){
 							var command = makeCommand(info, service, commandOptions);
 							self.commandService.addCommand(command);
-							self.commandService.registerCommandContribution(self.toolbarId, command.id, 100+i);
+							self.commandService.registerCommandContribution(self.toolbarId, command.id, position);
 							if (info.key) {
 								// add it to the editor as a keybinding
 								var textView = editor.getTextView();
@@ -397,7 +395,8 @@ exports.EditorCommandFactory = (function() {
 								textView.setAction(command.id, command.callback, command);
 							}				
 						});
-					}
+						position++;
+					});
 					Deferred.all(deferreds, function(error) {return {_error: error}; }).then(function(promises) {
 						// In the editor, we generate page level commands to the banner.  Don't bother if we don't know the input
 						// metadata, because we'll generate again once we know.
