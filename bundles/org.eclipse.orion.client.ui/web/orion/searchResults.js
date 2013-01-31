@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/searchExplorer', 'orion/searchModel', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mCommands, mSearchExplorer, mSearchModel, mSearchUtils, mSearchCrawler){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/searchExplorer', 'orion/searchModel', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mSearchExplorer, mSearchModel, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search results generator.
