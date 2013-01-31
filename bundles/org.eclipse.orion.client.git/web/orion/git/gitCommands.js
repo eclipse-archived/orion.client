@@ -134,69 +134,65 @@ var exports = {};
 		});
 		return def;
 	};
-
-	function translateResponseToStatus(response){
+	
+	function translateResponseToStatus(response) {
 		var json;
-		try{
+		try {
 			json = JSON.parse(response.responseText);
-		}catch (e) {
-			json = {Result: response.responseText};
+		} catch (e) {
+			json = { 
+				Message : messages["Problem while performing the action"]
+			};
 		}
 		json.HttpCode = response.status;
 		return json;
 	};
 
 	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
-		if(jsonData && jsonData.status){
+
+		if (jsonData && jsonData.status !== 'undefined') {
 			jsonData = translateResponseToStatus(jsonData);
 		}
-		if(!jsonData || !jsonData.HttpCode){
-			if(callback){
+
+		if (!jsonData || !jsonData.HttpCode) {
+			if (callback) {
 				callback(jsonData);
 			}
 			return;
 		}
 		
 		switch (jsonData.HttpCode) {
-		case 200:
-		case 201:
-		case 202:
-			if(callback){
-				callback(jsonData.Result);
-			}
-			return;
-		case 401:
-			if(jsonData.JsonData){
-				options.errordata = jsonData.JsonData;
-			}
-			if(jsonData.failedOperation){
-				options.failedOperation = jsonData.failedOperation;
-			}
-			exports.handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
-			return;
-		case 400:
-			if(jsonData.JsonData && jsonData.JsonData.HostKey){
+			case 401:
+				if(jsonData.JsonData){
+					options.errordata = jsonData.JsonData;
+				}
 				if(jsonData.failedOperation){
 					options.failedOperation = jsonData.failedOperation;
 				}
-				exports.handleKnownHostsError(serviceRegistry, jsonData.JsonData, options, callee);
+				exports.handleSshAuthenticationError(serviceRegistry, jsonData.JsonData, options, callee, title);
 				return;
-			}
-		default:
-			var display = [];
-			display.Severity = "Error"; //$NON-NLS-0$
-			display.HTML = false;
-			
-			try {
+			case 400:
+				if(jsonData.JsonData && jsonData.JsonData.HostKey){
+					if(jsonData.failedOperation){
+						options.failedOperation = jsonData.failedOperation;
+					}
+					exports.handleKnownHostsError(serviceRegistry, jsonData.JsonData, options, callee);
+					return;
+				}
+			default:
+				if (jsonData.Severity !== "Error" && jsonData.Severity !== "Warning") {
+					callback(jsonData.Result);
+					return;
+				}
+	
+				var display = [];
+				display.Severity = "Error"; //$NON-NLS-0$
+				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-			} catch (e) {
-				display.Message = e.message;
-			}
-			
-			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-			break;
+				
+				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				break;
 		}
-			
 	};
 
 	exports.gatherSshCredentials = function(serviceRegistry, data, title){
@@ -320,45 +316,40 @@ var exports = {};
 	};
 	
 	exports.handleGitServiceResponse = function(jsonData, serviceRegistry, callback, sshCallback){
-		if(jsonData && jsonData.status){
+
+		if (jsonData && jsonData.status !== 'undefined') {
 			jsonData = translateResponseToStatus(jsonData);
 		}
-		if(!jsonData || !jsonData.HttpCode){
-			if(callback){
+
+		if (!jsonData || !jsonData.HttpCode) {
+			if (callback) {
 				callback(jsonData);
 			}
 			return;
 		}
 		
 		switch (jsonData.HttpCode) {
-		case 200:
-		case 201:
-		case 202:
-			if(callback){
-				callback(jsonData.Result);
-			}
-			return;
-		case 401:
-			sshCallback(jsonData);
-			return;
-		case 400:
-			if(jsonData.JsonData && jsonData.JsonData.HostKey){
+			case 401:
 				sshCallback(jsonData);
 				return;
-			}
-		default:
-			var display = [];
-			display.Severity = "Error"; //$NON-NLS-0$
-			display.HTML = false;
-			
-			try {
+			case 400:
+				if(jsonData.JsonData && jsonData.JsonData.HostKey){
+					sshCallback(jsonData);
+					return;
+				}
+			default:
+				if (jsonData.Severity !== "Error" && jsonData.Severity !== "Warning") {
+					callback(jsonData.Result);
+					return;
+				}
+	
+				var display = [];
+				display.Severity = "Error"; //$NON-NLS-0$
+				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-			} catch (e) {
-				display.Message = e.message;
-			}
-			
-			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-			break;
+				
+				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				break;
 		}
 			
 	};
@@ -366,20 +357,16 @@ var exports = {};
 	exports.createFileCommands = function(serviceRegistry, commandService, explorer, toolbarId) {
 		
 		function displayErrorOnStatus(error) {
-			
-			if (error.status === 401 || error.status === 403)
-				return;
-			
-			var display = [];
-			
+			var display = {};
 			display.Severity = "Error"; //$NON-NLS-0$
 			display.HTML = false;
 			
 			try {
 				var resp = JSON.parse(error.responseText);
-				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : 
+					(resp.Message ? resp.Message : messages["Problem while performing the action"]);
 			} catch (Exception) {
-				display.Message = error.message;
+				display.Message = messages["Problem while performing the action"];
 			}
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -883,9 +870,9 @@ var exports = {};
 								function(resp){
 									commandInvocation.items.GitUrl = resp.Children[0].GitUrl;
 									fetchLogic();
-								}
+								}, displayErrorOnStatus
 							);
-						}
+						}, displayErrorOnStatus
 					);
 				} else { fetchLogic(); }
 			},
@@ -1947,23 +1934,16 @@ var exports = {};
 	exports.createGitClonesCommands = function(serviceRegistry, commandService, explorer, toolbarId, selectionTools, fileClient) {
 		
 		function displayErrorOnStatus(error) {
-		
-		if(error){
-		}
-			
-			if (error.status === 401 || error.status === 403)
-				return;
-			
-			var display = [];
-			
+			var display = {};
 			display.Severity = "Error"; //$NON-NLS-0$
 			display.HTML = false;
 			
 			try {
 				var resp = JSON.parse(error.responseText);
-				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : 
+					(resp.Message ? resp.Message : messages["Problem while performing the action"]);
 			} catch (Exception) {
-				display.Message = error.message;
+				display.Message = messages["Problem while performing the action"];
 			}
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
@@ -2454,19 +2434,16 @@ var exports = {};
 	exports.createGitStatusCommands = function(serviceRegistry, commandService, explorer) {
 		
 		function displayErrorOnStatus(error) {
-			if (error.status === 401 || error.status === 403)
-				return;
-			
-			var display = [];
-			
+			var display = {};
 			display.Severity = "Error"; //$NON-NLS-0$
 			display.HTML = false;
 			
 			try {
 				var resp = JSON.parse(error.responseText);
-				display.Message = resp.DetailedMessage ? resp.DetailedMessage : resp.Message;
+				display.Message = resp.DetailedMessage ? resp.DetailedMessage : 
+					(resp.Message ? resp.Message : messages["Problem while performing the action"]);
 			} catch (Exception) {
-				display.Message = error.message;
+				display.Message = messages["Problem while performing the action"];
 			}
 			
 			serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$

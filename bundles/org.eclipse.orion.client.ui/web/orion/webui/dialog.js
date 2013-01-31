@@ -48,8 +48,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 		/* Not used by clients */
 		CONTAINERTEMPLATE:		
 		'<div class="dialog" role="dialog">' + //$NON-NLS-0$
-			'<div class="dialogTitle layoutBlock"><span id="title" class="dialogTitleText layoutLeft"></span><span tabindex="0" role="button" aria-label="Close" class="dialogDismiss layoutRight core-sprite-close imageSprite" id="closeDialog"></span></div>' + //$NON-NLS-0$
-			'<div class="layoutBlock"><hr/></div>' + //$NON-NLS-0$
+			'<div class="dialogTitle"><span id="title" class="dialogTitleText layoutLeft"></span><span tabindex="0" role="button" aria-label="Close" class="dialogDismiss layoutRight core-sprite-close imageSprite" id="closeDialog"></span></div>' + //$NON-NLS-0$
 			'<div id="dialogContent" class="dialogContent layoutBlock"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 			'<div id="buttons" class="dialogButtons"></div>' + //$NON-NLS-1$ //$NON-NLS-0$
 		'</div>', //$NON-NLS-0$

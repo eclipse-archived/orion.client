@@ -792,6 +792,11 @@ define(
 												break;
 											}
 										}
+										
+										if (!currentBranch){
+											progress.done();
+											return;
+										}
 
 										var tracksRemoteBranch = (currentBranch.RemoteLocation.length === 1 && currentBranch.RemoteLocation[0].Children.length === 1);
 

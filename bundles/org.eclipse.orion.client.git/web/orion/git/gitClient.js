@@ -930,11 +930,7 @@ eclipse.GitService = (function() {
 		},
 		
 		_handleGitServiceResponseError: function(deferred, error){
-			if(!deferred) {
-				deferred = new Deferred();
-			}
 			deferred.reject(error);
-			return deferred;
 		}
 	};
 	return GitService;

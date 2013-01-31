@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/searchExplorer', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mCommands, mSearchExplorer, mSearchUtils, mSearchCrawler){
+define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/searchExplorer', 'orion/searchModel', 'orion/searchUtils', 'orion/crawler/searchCrawler'], function(messages, require, lib, mCommands, mSearchExplorer, mSearchModel, mSearchUtils, mSearchCrawler){
 
 	/**
 	 * Creates a new search results generator.
@@ -49,7 +49,13 @@ define(['i18n!orion/search/nls/messages', 'require', 'orion/webui/littlelib', 'o
 				}
 			}
 			this.explorer.setCrawling(crawling);
-			this.explorer.setResult(resultsNode, resultLocation, searchParams, jsonData.response.numFound);
+			var that = this;
+	        var searchModel = new mSearchModel.SearchResultModel(this.registry, this.explorer.fileClient, resultLocation, jsonData.response.numFound, searchParams, {
+	            onMatchNumberChanged: function(fileItem) {
+	                that.explorer.renderer.replaceFileElement(fileItem);
+	            }
+	        });
+			this.explorer.setResult(resultsNode, searchModel);
 			if(incremental){
 				this.explorer.incrementalRender();
 			} else {
