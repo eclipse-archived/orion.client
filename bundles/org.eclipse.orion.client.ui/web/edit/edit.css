@@ -29,7 +29,7 @@
 	vertical-align: top;
     cursor: pointer;
     display: inline-block;
-    padding: 2px;
+    padding: 4px;
     margin-left: 8px;
     border-radius:1px;
     font-weight: normal;
@@ -45,7 +45,7 @@
 	color: silver;
 	background-color: transparent;
 	border: 1px solid transparent;
-	padding: 2px;
+	padding: 1px;
     font-weight: normal;
     margin: 0;
     margin-left: 8px;
