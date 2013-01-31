@@ -169,7 +169,7 @@ exports.Explorer = (function() {
 				parent: parentId,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
-				showRoot: !!options.showRoot,  // if unspecified, we want false as default.
+				showRoot: options ? !!options.showRoot : false,  
 				indent: options ? options.indent: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
 				tableElement: options ? options.tableElement : undefined,
