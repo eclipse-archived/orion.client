@@ -150,7 +150,7 @@ var exports = {};
 
 	exports.handleProgressServiceResponse = function(jsonData, options, serviceRegistry, callback, callee, title){
 
-		if (jsonData && jsonData.status !== 'undefined') {
+		if (jsonData && jsonData.status !== undefined) {
 			jsonData = translateResponseToStatus(jsonData);
 		}
 
@@ -317,7 +317,7 @@ var exports = {};
 	
 	exports.handleGitServiceResponse = function(jsonData, serviceRegistry, callback, sshCallback){
 
-		if (jsonData && jsonData.status !== 'undefined') {
+		if (jsonData && jsonData.status !== undefined) {
 			jsonData = translateResponseToStatus(jsonData);
 		}
 
