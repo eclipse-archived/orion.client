@@ -29,5 +29,7 @@ define({
 	"Undo": "Undo",
 	"Redo": "Redo",
 	"Find": "Find",
-	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again."
+	"No response from server.  Check your internet connection and try again.": "No response from server.  Check your internet connection and try again.",
+	"Saving file {0}": "Saving file {0}",
+	"Running {0}": "Running {0}"
 });

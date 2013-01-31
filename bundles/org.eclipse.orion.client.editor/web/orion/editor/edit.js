@@ -1,0 +1,163 @@
+/*******************************************************************************
+ * @license
+ * Copyright (c) 2013 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials are made 
+ * available under the terms of the Eclipse Public License v1.0 
+ * (http://www.eclipse.org/legal/epl-v10.html), and the Eclipse Distribution 
+ * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+ 
+/*globals define window document */
+
+define('orion/editor/edit', [
+	
+	"orion/editor/textView", 
+	"orion/editor/textModel",
+	"orion/editor/projectionTextModel",
+	"orion/editor/eventTarget",
+	"orion/editor/keyBinding",
+	"orion/editor/rulers",
+	"orion/editor/annotations",
+	"orion/editor/tooltip",
+	"orion/editor/undoStack",
+	"orion/editor/textDND",
+	
+	"orion/editor/editor",
+	"orion/editor/editorFeatures",
+	
+	"orion/editor/contentAssist",
+	"orion/editor/cssContentAssist",
+	"orion/editor/htmlContentAssist",
+	"orion/editor/jsTemplateContentAssist",
+	
+	"orion/editor/AsyncStyler",
+	"orion/editor/mirror",
+	"orion/editor/textMateStyler",
+	"orion/editor/htmlGrammar",
+	"examples/editor/textStyler"
+], function(mTextView, mTextModel, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
+
+	/**
+	 * @class This object describes the options for <code>edit</code>.
+	 * @name orion.editor.EditOptions
+	 *
+	 * @property {String|DOMElement} parent the parent element for the view, it can be either a DOM element or an ID for a DOM element.
+	 * @property {Boolean} [readonly=false] whether or not the view is read-only.
+	 * @property {Boolean} [fullSelection=true] whether or not the view is in full selection mode.
+	 * @property {Boolean} [tabMode=true] whether or not the tab keypress is consumed by the view or is used for focus traversal.
+	 * @property {Boolean} [expandTab=false] whether or not the tab key inserts white spaces.
+	 * @property {String} [themeClass] the CSS class for the view theming.
+	 * @property {Number} [tabSize=4] The number of spaces in a tab.
+	 * @property {Boolean} [wrapMode=false] whether or not the view wraps lines.
+	 * @property {Function} [statusReporter] a status reporter.
+	 * @property {String} [title=""] the editor title.
+	 * @property {String} [contents=""] the editor contents.
+	 * @property {String} [lang] the styler language. Plain text by default.
+	 */
+	/**
+	 * Creates an editor instance configured with the given options.
+	 * 
+	 * @param {orion.editor.EditOptions} options the editor options.
+	 */
+	function edit(options) {
+		var parent = options.parent;
+		if (!parent) { parent = "editor"; }
+		if (typeof(parent) === "string") { //$NON-NLS-0$
+			parent = (options.document || document).getElementById(parent);
+		}
+		if (!parent) { throw "no parent"; } //$NON-NLS-0$
+	
+		var textViewFactory = function() {
+			return new mTextView.TextView({
+				parent: parent,
+				tabSize: options.tabSize ? options.tabSize : 4,
+				readonly: options.readonly,
+				fullSelection: options.fullSelection,
+				tabMode: options.tabMode,
+				expandTab: options.expandTab,
+				themeClass: options.themeClass,
+				wrapMode: options.wrapMode
+			});
+		};
+
+		var contentAssist;
+		var contentAssistFactory = {
+			createContentAssistMode: function(editor) {
+				contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+				var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist);
+				return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
+			}
+		};
+		var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
+		var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
+	
+		// Canned highlighters for js, java, and css. Grammar-based highlighter for html
+		var syntaxHighlighter = {
+			styler: null, 
+			
+			highlight: function(lang, editor) {
+				if (this.styler) {
+					this.styler.destroy();
+					this.styler = null;
+				}
+				if (lang) {
+					var textView = editor.getTextView();
+					var annotationModel = editor.getAnnotationModel();
+					switch(lang) {
+						case "js":
+						case "java":
+						case "css":
+							this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
+							break;
+						case "html":
+							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
+							break;
+					}
+				}
+			}
+		};
+		
+		var keyBindingFactory = function(editor, keyModeStack, undoStack, contentAssist) {
+			
+			// Create keybindings for generic editing
+			var genericBindings = new mEditorFeatures.TextActions(editor, undoStack);
+			keyModeStack.push(genericBindings);
+			
+			// create keybindings for source editing
+			var codeBindings = new mEditorFeatures.SourceCodeActions(editor, undoStack, contentAssist);
+			keyModeStack.push(codeBindings);
+		};
+			
+		var editor = new mEditor.Editor({
+			textViewFactory: textViewFactory,
+			undoStackFactory: new mEditorFeatures.UndoFactory(),
+			annotationFactory: new mEditorFeatures.AnnotationFactory(),
+			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
+			contentAssistFactory: contentAssistFactory,
+			keyBindingFactory: keyBindingFactory, 
+			statusReporter: options.statusReporter,
+			domNode: parent
+		});
+			
+		editor.installTextView();
+		// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
+		if (options.contents) {
+			editor.setInput(options.title, null, options.contents);
+		}
+		syntaxHighlighter.highlight(options.lang, editor);
+		contentAssist.addEventListener("Activating", function() {
+			if (/\.css$/.test(options.lang)) {
+				contentAssist.setProviders([cssContentAssistProvider]);
+			} else if (/\.js$/.test(options.lang)) {
+				contentAssist.setProviders([jsTemplateContentAssistProvider]);
+			}
+		});
+		
+		return editor;
+	}
+	
+	return edit;
+});

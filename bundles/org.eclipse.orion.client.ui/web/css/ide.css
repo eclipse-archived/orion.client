@@ -7,6 +7,7 @@
 html {
   overflow-x: hidden; /* workaround to get rid of horizontal scrollbar */
   cursor: default;
+  height: 100%;
 }
 
 html, body {
@@ -114,7 +115,9 @@ h2 {
 	color: #404040;
 	vertical-align: middle;
 	font-weight: normal;
-	color:silver;
+	color: silver;
+	padding: 3px;
+	padding-bottom: 0;
 }
 
 .dismiss {
@@ -397,11 +400,12 @@ label.parameterInput{
 
 .slideContainer {
 	height: auto;
-	width: 97%;
+	width: 99%;
 	clear: both;
 	float: left;
 	border-radius: 2px;
-	margin: 8px;
+	margin: 2px;
+	margin-top: 4px;
 	display: none;
 	vertical-align: middle;
 	font-size: 11px;
@@ -747,6 +751,7 @@ input {
 
 .searchCmdGroupMargin {
 	margin-left: 16px;
+	margin-top: 2px;
 }
 
 .LoginWindowLeft {
