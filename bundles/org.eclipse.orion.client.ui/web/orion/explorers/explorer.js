@@ -166,10 +166,10 @@ exports.Explorer = (function() {
 			this.myTree = new mTreeTable.TableTree({
 				id: treeId,
 				model: model,
-				showRoot: false,
 				parent: parentId,
 				labelColumnIndex: this.renderer.getLabelColumnIndex(),
 				renderer: this.renderer,
+				showRoot: options ? !!options.showRoot : false,  
 				indent: options ? options.indent: undefined,
 				onCollapse: options ? options.onCollapse: undefined,
 				tableElement: options ? options.tableElement : undefined,

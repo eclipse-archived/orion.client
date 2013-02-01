@@ -12,7 +12,7 @@
 /*global define window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'stringexternalizer/nonnlsSearchUtil'], function(require, mCommands, mSearchExplorer, mSearchUtils){
+define(['require', 'orion/searchExplorer', 'stringexternalizer/strExternalizerModel', 'stringexternalizer/nonnlsSearchUtil'], function(require, mSearchExplorer, mStrExternalizerModel, mSearchUtils){
 
 	/**
 	 * Creates a new search results generator.
@@ -24,14 +24,17 @@ define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'strin
 		this.fileService = fileService;
 		this.resultsId = resultsId;
 		this.commandService = commandService;
-		this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService, this);
+		this.explorer = new mSearchExplorer.SearchResultExplorer(this.registry, this.commandService);
 	}
 
 	SearchResultsGenerator.prototype = /** @lends orion.searchResults.SearchResultsGenerator.prototype */ {
-
 		_renderSearchResult: function(resultsNode, jsonData) {
 			resultsNode.innerHTML = "";
-			this.explorer.setResult(resultsNode, jsonData);
+	        var searchModel = new mStrExternalizerModel.StrExternalizerModel(this.registry, this.explorer.fileClient,jsonData);
+	        if(this.config){
+	        	searchModel.setConfig(this.config);
+	        }
+			this.explorer.setResult(resultsNode, searchModel);
 			this.explorer.startUp();
 		},
 
@@ -39,12 +42,6 @@ define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'strin
 		 * Runs a search and displays the results under the given DOM node.
 		 * @public
 		 * @param {DOMNode} resultsNode Node under which results will be added.
-		 * @param {String} query URI of the query to run.
-		 * @param {String} [excludeFile] URI of a file to exclude from the result listing.
-		 * @param {Boolean} [generateHeading] generate a heading for the results
-		 * @param {Function(DOMNode)} [onResultReady] If any results were found, this is called on the resultsNode.
-		 * @param {Boolean} [hideSummaries] Don't show the summary of what matched beside each result.
-		 * @param {Boolean} [useSimpleFormat] Use simple format that only shows the file name to show the result, other wise use a complex format with search details.
 		 */
 		_search: function(resultsNode, root) {
 			var progress = this.registry.getService("orion.page.progress");
@@ -69,7 +66,6 @@ define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'strin
 		 */
 		loadResults: function(root) {
 			this.root = root;
-			// console.log("loadResourceList old " + this._lastHash + " new " + path);
 			var parent = document.getElementById(this.resultsId);
 			parent.innerHTML = "";
 			parent.appendChild(document.createTextNode("Searching for non externalized strings..."));
@@ -77,7 +73,11 @@ define(['require', 'orion/commands', 'stringexternalizer/searchExplorer', 'strin
 		},
 		
 		setConfig: function(config){
-			this.explorer.setConfig(config);
+			this.config = config;
+			if(this.explorer.model){
+				this.explorer.model.setConfig(config);
+			}
+			this.explorer.buildPreview();
 		}
 		
 	};

@@ -14,7 +14,7 @@
 
 define(['require', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/dialogs',
 	'orion/commands', 'orion/favorites', 'stringexternalizer/stringexternalizerconfig', 'orion/searchClient',
-	'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/searchResults', 'orion/globalCommands',
+	'orion/fileClient', 'orion/operationsClient', 'stringexternalizer/strExternalizerResults', 'orion/globalCommands',
 	'orion/contentTypes'],
 
 function(require, mBootstrap, mStatus, mProgress, mDialogs, mCommands, mFavorites, mStringExternalizerConfig,
@@ -32,7 +32,7 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 				task: "Externalize Strings",
 				target: metadata,
 				makeBreadcrumbLink: function(seg, location) {
-					seg.href = require.toUrl("stringexternalizer/search.html") + "#" + location;
+					seg.href = require.toUrl("stringexternalizer/strExternalizer.html") + "#" + location;
 				}, //$NON-NLS-0$
 				serviceRegistry: serviceRegistry,
 				fileService: fileClient,
@@ -79,26 +79,12 @@ mSearchClient, mFileClient, mOperationsClient, mSearchResults, mGlobalCommands, 
 			commandService: commandService,
 			setConfig: searchResultsGenerator.setConfig.bind(searchResultsGenerator)
 		}); //$NON-NLS-0$
-		function updateToolbar() {
-			var toolbar = document.getElementById("pageActions"); //$NON-NLS-0$
-			if (toolbar) {
-				commandService.destroy(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, searchResultsGenerator, searchResultsGenerator, "button"); //$NON-NLS-0$
-			}
-			toolbar = document.getElementById("pageNavigationActions"); //$NON-NLS-0$
-			if (toolbar) {
-				commandService.destroy(toolbar);
-				commandService.renderCommands(toolbar.id, toolbar, searchResultsGenerator, searchResultsGenerator, "button"); // use true when we want to force toolbar items to text //$NON-NLS-0$
-			}
-		}
-		updateToolbar();
 		setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
 		searchResultsGenerator.loadResults(locationHash());
 		//every time the user manually changes the hash, we need to load the results with that name
 		window.addEventListener("hashchange", function() { //$NON-NLS-0$
 			setPageInfo(fileClient, searcher, serviceRegistry, commandService, configOutliner, progress);
 			searchResultsGenerator.loadResults(locationHash());
-			updateToolbar();
 		}, false);
 	});
 });
