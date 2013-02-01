@@ -772,7 +772,6 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
 		);
     };
     
-    
     SearchResultExplorer.prototype.setCrawling = function(crawling) {
         this._crawling = crawling;
     };
