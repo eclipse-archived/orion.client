@@ -635,7 +635,10 @@ var exports = {};
 					}, function(jsonData, secondArg) {
 						if(pullOperationLocation)
 							jsonData.failedOperation = pullOperationLocation;
-						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages["Pull Git Repository"]);
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, 
+							function() {
+								explorer.changedItem(item);
+							}, func, messages["Pull Git Repository"]);
 					}, function(operation){
 						pullOperationLocation = operation.Location;
 					});
