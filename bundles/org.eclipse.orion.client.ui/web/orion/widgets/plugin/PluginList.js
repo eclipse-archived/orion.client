@@ -16,9 +16,12 @@
    to contain PluginEntry widgets */
 
 define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/commands', 'orion/commandRegistry', 'orion/commonHTMLFragments', 'orion/objects', 'orion/webui/littlelib',
-		'orion/widgets/plugin/PluginEntry'
-		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry) {
-	
+		'orion/widgets/plugin/PluginEntry', 'orion/explorers/explorer'
+		], function(messages, require, Deferred, mCommands, mCommandRegistry, mHTMLFragments, objects, lib, PluginEntry, mExplorer) {
+
+	var Explorer = mExplorer.Explorer;
+	var SelectionRenderer = mExplorer.SelectionRenderer;
+
 	var defaultPluginURLs = {};
 	
 	function _normalizeURL(location) {
@@ -39,6 +42,34 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		});
 	}
 
+	/**
+	 * PluginListRenderer
+	 */
+	function PluginListRenderer(commandService, explorer) {
+		SelectionRenderer.call(this, {}, explorer);
+		this.commandService = commandService;
+	}
+	PluginListRenderer.prototype = Object.create(SelectionRenderer.prototype);
+	PluginListRenderer.prototype.getCellElement = function(col_no, item, tableRow) {
+		if (col_no === 0) {
+			var pluginEntry = new PluginEntry( {plugin: item, commandService: this.commandService}  );
+			pluginEntry.show();
+			return pluginEntry.node;
+		}
+	};
+
+	/**
+	 * PluginListExplorer
+	 */
+	function PluginListExplorer(commandService) {
+		this.renderer = new PluginListRenderer(commandService, this);
+	}
+	PluginListExplorer.prototype = Object.create(Explorer.prototype);
+
+	/**
+	 * PluginList
+	 * UI interface element showing a list of plugins
+	 */
 	function PluginList(options, parentNode) {
 		objects.mixin(this, options);
 		this.node = parentNode || document.createElement("div"); //$NON-NLS-0$
@@ -53,7 +84,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 				        '<div class="displaytable layoutBlock">' + //$NON-NLS-0$
 							'<div class="plugin-list-container">' + //$NON-NLS-0$
-								'<div class="plugin-list" style="overflow:hidden;"></div>' + //$NON-NLS-0$ /* pluginList */
+								'<div class="plugin-list" id="plugin-list" style="overflow:hidden;"></div>' + //$NON-NLS-0$ /* pluginList */
 							'</div>' + //$NON-NLS-0$
 						'</div>', //$NON-NLS-0$
 				
@@ -81,7 +112,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		},
 				
 		postCreate: function(){
-		
 			var _this = this;
 			if (this.pluginSectionHeader) {
 				// add a slideout
@@ -91,7 +121,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				slideoutFragment = range.createContextualFragment(slideoutFragment);
 				this.pluginSectionHeader.appendChild(slideoutFragment);
 			}
-			this.addRows();
+			this.render();
 
 			this.registry.registerService("orion.cm.managedservice", //$NON-NLS-0$
 				{	updated: function(properties) {
@@ -158,12 +188,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if( this.includeMaker === true ){
 				this.commandService.registerCommandContribution("pluginCommands", "orion.createPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			}
-			
+
 			// Render the commands in the heading, emptying any old ones.
 			this.commandService.renderCommands("pluginCommands", "pluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
-		
-		addRows: function(referenceplugin){
+	
+		render: function(referenceplugin){
 		
 			// Declare row-level commands so they will be rendered when the rows are added.
 			var reloadPluginCommand = new mCommands.Command({
@@ -244,16 +274,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				list = referenceplugin.pluginList;
 			}
 
-			lib.empty( list );
-			var pluginList = this.settings.pluginRegistry.getPlugins();
+			// mamacdon: re-rendering the list starts here
+//			lib.empty( list );
+			var plugins = this.settings.pluginRegistry.getPlugins();
 			this.pluginTitle.textContent = messages['Plugins'];
-			this.pluginCount.textContent = pluginList.length;
+			this.pluginCount.textContent = plugins.length;
 
-			for( var p = 0; p < pluginList.length; p++ ){
-				var pluginEntry = new PluginEntry( {plugin:pluginList[p], commandService:this.commandService}  );
-				list.appendChild( pluginEntry.node );
-				pluginEntry.show();
-			}
+			// TODO maybe this should only be done once
+			this.explorer = new PluginListExplorer(this.commandService);
+			this.pluginListTree = this.explorer.createTree(this.pluginList.id, new mExplorer.SimpleFlatModel(plugins, "plugin", function(item) { //$NON-NLS-1$ //$NON-NLS-0$
+				return item.getLocation();
+			}), { setFocus: false });
+
+//			for( var p = 0; p < plugins.length; p++ ){
+//				var pluginEntry = new PluginEntry( {plugin: plugins[p], commandService:this.commandService}  );
+//				list.appendChild( pluginEntry.node );
+//				pluginEntry.show();
+//			}
 		},
 				
 		pluginURLFocus: function(){
@@ -279,7 +316,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				plugins.put(pluginUrl, true);
 			}); // this will force a sync
 			
-			this.addRows();
+			this.render();
 
 		},
 
@@ -303,14 +340,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		reloaded: function(){
 			var settingsPluginList = this.settings.pluginRegistry.getPlugins();
 			this.statusService.setMessage( messages["Reloaded "] + settingsPluginList.length + messages[" plugin"] + ( settingsPluginList.length===1 ? "": "s") + ".", 5000, true );
-			this.addRows();
+			this.render();
 		},
 		
 		/* reloads a single plugin */
 		reloadPlugin: function(url) {
 			var plugin = this.settings.pluginRegistry.getPlugin(url);
 			if (plugin) {
-				plugin.update().then(this.addRows.bind(this));
+				plugin.update().then(this.render.bind(this));
 				this.statusService.setMessage(messages['Reloaded '] + url, 5000, true);
 			}
 		},
@@ -322,9 +359,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				this.statusService.setMessage("Disabled " + url, 5000, true);
 				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 					plugins.put(url, false);
-					this.addRows(this);
+					this.render(this);
 				}.bind(this)); // this will force a sync
-				this.addRows();
+				this.render();
 			}
 		},
 	
@@ -335,9 +372,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				this.statusService.setMessage("Enabled " + url, 5000, true);
 				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 					plugins.put(url, false);
-					this.addRows(this);
+					this.render(this);
 				}.bind(this)); // this will force a sync
-				this.addRows();
+				this.render();
 			}
 		},
 
@@ -361,17 +398,17 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if (plugin) {
 				plugin.uninstall().then(function() {
 					this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
-					var _self = this;
 					this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
 						plugins.keys().some(function(key) {
 							if (_normalizeURL(key) === url) {
 								plugins.remove(key);
-								_self.addRows(_self);
+								this.render(this);
 								return true;
 							}
 						});
-					}); // this will force a sync
-				}.bind(this));
+					}.bind(this)); // this will force a sync
+					this.render();
+				});
 			}
 		},
 		
