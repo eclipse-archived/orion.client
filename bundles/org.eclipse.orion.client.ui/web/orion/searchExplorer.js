@@ -727,62 +727,49 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._commandService.registerCommandContribution("pageNavigationActions", "orion.search.nextPage", 6); //$NON-NLS-1$ //$NON-NLS-0$
     };
 
-    SearchResultExplorer.prototype._checkStale = function(model, onComplete) {
-        if (!model.stale) {
-            return;
-        } else {
-            this.registry.getService("orion.page.progress").progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale").then(
-
-            function(contents) {
-                if (this.model.staleCheck(contents)) {
-                    model.stale = false;
-                } else {
-                    onComplete(model);
-                }
-            }.bind(this),
-
-            function(error) {
-                console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
-                onComplete(model);
-            }.bind(this));
-        }
-    };
+    SearchResultExplorer.prototype._checkStale = function(model) {
+        return this.registry.getService("orion.page.progress")
+            .progress(this.fileClient.read(model.location), "Checing file " + model.location + " for stale")
+            .then(function(contents) {
+            if (this.model.staleCheck(contents)) {
+                model.stale = false;
+            }
+        }.bind(this), function(error) {
+            console.error("Error loading file contents: " + error.message); //$NON-NLS-0$
+            throw error;
+        }.bind(this));
+    }; 
     
-    SearchResultExplorer.prototype.staleCheck = function(onComplete){
-        if (this._crawling || !this.model.staleCheck) {
-            return;
-        }
+    SearchResultExplorer.prototype.staleCheck = function(){
         var promises = [];
 		_validFiles(this.model).forEach(function(fileItem) {
 			promises.push(this._loadFileMetaData(fileItem));
 		}.bind(this));
-		new Deferred.all(promises, function(error) { return {_error: error}; }).then(onComplete);
-    }
+		return Deferred.all(promises, function(error) { return {_error: error}; });
+    };
     
     SearchResultExplorer.prototype._loadFileMetaData = function(fileItem) {
-        var deferred = new Deferred();
-        this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then(
+        return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location, true), "Getting file metadata " + fileItem.location).then(
 	        function(meta) {
 	            fileItem.fullPathName = mSearchUtils.fullPathNameByMeta(meta.Parents);
 	            fileItem.parentLocation = meta.Parents[0].Location;
 	            fileItem.stale = (fileItem.lastModified !== meta.LocalTimeStamp);
 	            fileItem.ETag = meta.ETag;
 	            if (fileItem.stale) {
-	                this._checkStale(fileItem, function(fileItem) {
-	                    this.renderer.staleFileElement(fileItem);
+	                return this._checkStale(fileItem).then(function(){
+	                   this.renderer.staleFileElement(fileItem);
 	                }.bind(this));
 	            }
-				deferred.resolve(fileItem);
+				return fileItem;
 	        }.bind(this),
 	        function(error) {
 	            console.error("Error loading file metadata: status " + error.status); //$NON-NLS-0$
 	            //If we can't load file meta data we have to stale the file.
 	            fileItem.stale = true;
 	            this.renderer.staleFileElement(fileItem);
-	            deferred.reject(error);
+	            throw error;
 	        }.bind(this)
 		);
-		return deferred;
     };
     
     
@@ -952,9 +939,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         if (init) {
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            this.staleCheck(function() {
-                that.refreshValidFiles();
-            });
+            if(!this._crawling && this.model.staleCheck) {
+	            this.staleCheck().then(function() {
+	                that.refreshValidFiles();
+	            });
+            }
         } else {
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
         }
@@ -1394,9 +1383,11 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
             });
             this.gotoCurrent(this.model.restoreLocationStatus ? this.model.restoreLocationStatus() : null);
             this.reportStatus("");
-            this.staleCheck(function() {
-                that.refreshValidFiles();
-            });
+            if(!this._crawling && this.model.staleCheck) {
+	            this.staleCheck().then(function() {
+	                that.refreshValidFiles();
+	            });
+            }
         } else {
             that.replacePreview(true, true);
         }
