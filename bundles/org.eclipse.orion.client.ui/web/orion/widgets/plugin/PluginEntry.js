@@ -81,13 +81,13 @@ define(['i18n!orion/settings/nls/messages', 'orion/PageUtil', 'orion/objects', '
 							'<div class="plugin-list-item">' + //$NON-NLS-0$
 								'<div>' + //$NON-NLS-0$
 									'<div class="plugin-icon"></div>' + //$NON-NLS-0$
+									'<span class="plugin-commands"></span>' + //$NON-NLS-0$
 									'<div class="stretch">' + //$NON-NLS-0$
 										'<span class="plugin-title"></span>' + //$NON-NLS-0$
 										'<div></div>' + //$NON-NLS-0$
 										'<span class="plugin-description"></span>' + //$NON-NLS-0$
 										'<div class="plugin-links" style="font-size:11px"></div>' + //$NON-NLS-0$ 
 									'</div>' + //$NON-NLS-0$
-									'<span class="plugin-commands"></span>' + //$NON-NLS-0$
 								'</div>' + //$NON-NLS-0$
 							'</div>'+ //$NON-NLS-0$
 							'<div class="plugin-service-item" ></div>' + //$NON-NLS-0$ 
