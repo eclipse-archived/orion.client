@@ -40,7 +40,7 @@ exports.DefaultDiffProvider = (function() {
 				 			diff: that._diffContent
 						 });
 			};
-			new Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
+			Deferred.all([ that._getContentType(baseFileURL), that._getContentType(newFileURL)], function(error) { return {_error: error}; }).then(compareTwo);
 		},
 		
 		_resolveDiff: function(resource, compareTo, onlyDiff, errorCallback) {
@@ -397,7 +397,7 @@ exports.CompareContainer = (function() {
 			return delim;
 		},
 
-		resolveDiff: function(onsave) {
+		resolveDiffByProvider: function(onsave) {
 			if(!this.options.diffProvider){
 				console.log("A diff provider is needed for Complex diff URL"); //$NON-NLS-0$
 				return;
@@ -418,10 +418,16 @@ exports.CompareContainer = (function() {
 				if (onsave || typeof(that.options.baseFile.Content) === "string"){ //$NON-NLS-0$
 					that.setEditor(onsave);
 				} else {
-					if(that.options.callback)
+					if(that.options.callback){
 						that.options.callback(that.options.baseFile.Name, that.options.newFile.Name);
-					that.options.diffContent ? that.getFileContent([that.options.baseFile/*, that.options.newFile*/], 0) : 
-					                           that.getFileContent([that.options.baseFile, that.options.newFile], 0);
+					}
+					var filesToLoad = ( that.options.diffContent ? 	[that.options.baseFile/*, that.options.newFile*/] : [that.options.baseFile, that.options.newFile]); 
+					that.getFilesContents(filesToLoad).then( function(){
+						var viewHeight = this.setEditor();
+						if(this._onLoadContents){
+							this._onLoadContents(viewHeight);
+						}
+					}.bind(that));
 				}
 			}, that.options.errorCallback);
 		},
@@ -429,7 +435,7 @@ exports.CompareContainer = (function() {
 		resolveDiffByContents: function(onsave) {
 			if (typeof(this.options.baseFile.Content) === "string" && typeof(this.options.newFile.Content) === "string"){ //$NON-NLS-1$ //$NON-NLS-0$
 				if(!this.options.diffContent && !this._mapper){
-					this.options.diffContent = "";//SomeDiffEngine.createPatch(this.options.baseFile.Name, this.options.baseFile.Content, this.options.newFile.Content, "", "") ; //$NON-NLS-0$
+					this.options.diffContent = ""; //$NON-NLS-0$
 				}
 				if(this._onLoadContents){
 					this._onLoadContents();
@@ -441,38 +447,30 @@ exports.CompareContainer = (function() {
 			}
 		},
 		
-		getFileContent: function(files, currentIndex) {
-			if(!this._fileClient){
-				console.log("A file client is needed for getting file content"); //$NON-NLS-0$
-				return;
-			}
-			var that = this;
-			that._progress.progress(that._fileClient.read(files[currentIndex].URL), "Getting contents of " + files[currentIndex].URL).then(function(contents) {
-				files[currentIndex].Content = contents;
-				if(currentIndex < (files.length - 1)){
-					that.getFileContent(files, currentIndex+1);
-				} else {
-					var viewHeight = that.setEditor();
-					if(that._onLoadContents){
-						that._onLoadContents(viewHeight);
+	    getFilesContents: function(files){
+	        var promises = [];
+			files.forEach(function(file) {
+				promises.push(this._loadSingleFile(file));
+			}.bind(this));
+			return Deferred.all(promises, function(error) { return {_error: error}; });
+	    },
+	    
+	    _loadSingleFile: function(file) {
+	        return this._registry.getService("orion.page.progress").progress(this._fileClient.read(file.URL), "Getting contents of " + file.URL).then(
+		        function(contents) {
+		        	file.Content = contents;
+					return file;
+		        }.bind(this),
+		        function(error, ioArgs) {
+					if (error.status === 404) {
+						file.Content = "";
+					} else if (this.errorCallback) {
+						this.errorCallback(error, ioArgs);
 					}
-				}
-			}, function(error, ioArgs) {
-				if (error.status === 404) {
-					files[currentIndex].Content = "";
-					if(currentIndex < (files.length - 1)){
-						that.getFileContent(files, currentIndex+1);
-					} else {
-						var viewHeight = that.setEditor();
-						if(that._onLoadContents){
-							that._onLoadContents(viewHeight);
-						}
-					}
-				} else if (that.errorCallback) {
-					that.errorCallback(error, ioArgs);
-				}
-			});
-		},
+					return file;
+		        }.bind(this)
+			);
+	    },
 		
 		parseMapper: function(input, output, diff , detectConflicts ,doNotBuildNewFile){
 			var delim = this._getLineDelim(input , diff);
@@ -504,9 +502,9 @@ exports.CompareContainer = (function() {
 		startup: function(onsave, onLoadContents){
 			this._onLoadContents = onLoadContents;
 			if(this.options.resource){
-				this.resolveDiff(onsave);
-			} else if(!this.resolveDiffByContents(onsave)){
-				//resolve from mapper
+				this.resolveDiffByProvider(onsave);
+			} else {
+				this.resolveDiffByContents(onsave);
 			}
 		}
 	};
