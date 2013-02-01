@@ -13,58 +13,9 @@
 
 /*global define*/
 
-define(['orion/editor/i18n!orion/editor/nls/messages'], function(bundle) {
+define(['orion/editor/i18n!orion/editor/nls/messages', 'orion/editor/nls/root/messages'], function(bundle, root) {
 	var result = {
-		root: {
-			"multipleAnnotations": "Multiple annotations:", //$NON-NLS-1$ //$NON-NLS-0$
-			"line": "Line: ${0}", //$NON-NLS-1$ //$NON-NLS-0$
-			"breakpoint": "Breakpoint", //$NON-NLS-1$ //$NON-NLS-0$
-			"bookmark": "Bookmark", //$NON-NLS-1$ //$NON-NLS-0$
-			"task": "Task", //$NON-NLS-1$ //$NON-NLS-0$
-			"error": "Error", //$NON-NLS-1$ //$NON-NLS-0$
-			"warning": "Warning", //$NON-NLS-1$ //$NON-NLS-0$
-			"matchingSearch": "Matching Search", //$NON-NLS-1$ //$NON-NLS-0$
-			"currentSearch": "Current Search", //$NON-NLS-1$ //$NON-NLS-0$
-			"currentLine": "Current Line", //$NON-NLS-1$ //$NON-NLS-0$
-			"matchingBracket": "Matching Bracket", //$NON-NLS-1$ //$NON-NLS-0$
-			"currentBracket": "Current Bracket", //$NON-NLS-1$ //$NON-NLS-0$
-			
-			"Comment": "Comment",
-			"Flat outline": "Flat outline",
-			"incrementalFind": "Incremental find: ${0}",
-			"incrementalFindNotFound": "Incremental find: ${0} (not found)",
-			"find": "Find...",
-			"undo": "Undo",
-			"redo": "Redo",
-			"cancelMode": "Cancel Current Mode",
-			"findNext": "Find Next Occurrence",
-			"findPrevious": "Find Previous Occurrence",
-			"incrementalFindKey": "Incremental Find",
-			"indentLines": "Indent Lines",
-			"unindentLines": "Unindent Lines",
-			"moveLinesUp": "Move Lines Up",
-			"moveLinesDown": "Move Lines Down",
-			"copyLinesUp": "Copy Lines Up",
-			"copyLinesDown": "Copy Lines Down",
-			"deleteLines": "Delete Lines",
-			"gotoLine": "Goto Line...",
-			"gotoLinePrompty": "Goto Line:",
-			"nextAnnotation": "Next Annotation",
-			"prevAnnotation": "Previous Annotation",
-			"expand": "Expand",
-			"collapse": "Collapse",
-			"expandAll": "Expand All", 
-			"collapseAll": "Collapse All",
-			"lastEdit": "Last Edit Location",
-			"toggleLineComment": "Toggle Line Comment",
-			"addBlockComment": "Add Block Comment",
-			"removeBlockComment": "Remove Block Comment",
-			"linkedModeEntered": "Linked Mode entered",
-			"linkedModeExited": "Linked Mode exited",
-			"syntaxError": "Syntax Error",
-			"contentAssist": "Content Assist",
-			"lineColumn": "Line ${0} : Col ${1}"
-		}
+		root: root
 	};
 	Object.keys(bundle).forEach(function(key) {
 		if (typeof result[key] === 'undefined') {
