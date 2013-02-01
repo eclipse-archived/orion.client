@@ -31,8 +31,6 @@ function(messages, Deferred, mNavigatorRenderer, mExtensionCommands) {
 		/* Internal */
 	function addImageToLink(contentType, link, location) {
 	
-		console.log( 'add image to link' );
-	
 		var image;
 		switch (contentType && contentType.id) {
 			case "image/jpeg": //$NON-NLS-0$
@@ -126,27 +124,6 @@ function(messages, Deferred, mNavigatorRenderer, mExtensionCommands) {
 	}
 	
 	DriveTreeRenderer.prototype = Object.create( mNavigatorRenderer.NavigatorRenderer.prototype ); 
-	
-//	
-//	DriveTreeRenderer.prototype.setTarget = setTarget;
-//	
-//	DriveTreeRenderer.prototype.getLabelColumnIndex = function() {
-//		return 0;
-//	};
-//	
-//	DriveTreeRenderer.prototype.getCellElement = function(col_no, item, tableRow){
-//		var col = document.createElement("td"); //$NON-NLS-0$
-//		tableRow.appendChild(col);
-//		var span = document.createElement("span"); //$NON-NLS-0$
-//		span.id = tableRow.id+"navSpan"; //$NON-NLS-0$
-//		col.appendChild(span);
-//		span.className = "mainNavColumn singleNavColumn"; //$NON-NLS-0$
-//		this.getExpandImage(tableRow, span);
-//		span.appendChild(document.createTextNode(item.Name)); 
-//	};
-
-
-
 	
 	return DriveTreeRenderer;
 });
