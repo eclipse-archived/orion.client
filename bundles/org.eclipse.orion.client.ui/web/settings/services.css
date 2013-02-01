@@ -88,8 +88,8 @@
 .serviceRailsVisible{
 	display: block;
 	white-space: nowrap;
-	border-top: solid 1px #EEE;
-	border-bottom: solid 1px #EEE;
+	/*border-top: solid 1px #EEE;
+	border-bottom: solid 1px #EEE;*/
 	margin-top:30px;
 	overflow:hidden;
 	-webkit-user-select: none;
@@ -100,8 +100,8 @@
 .serviceRailsHidden{
 	display: none;
 	white-space: nowrap;
-	border-top: solid 1px #EEE;
-	border-bottom: solid 1px #EEE;
+	/*border-top: solid 1px #EEE;
+	border-bottom: solid 1px #EEE;*/
 	margin-top:30px;
 	margin-right:20px;
 	overflow:hidden;
