@@ -16,7 +16,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 	function(messages, require, mProjectData, mFileClient, Deferred) {
 	
 		var PROJECTS_FOLDER = 'projectData';
-		
+		var WORKSPACES_FOLDER = 'workspaces';
 		var PROJECTS_METADATA = 'project.json';
 
 		function ProjectDataManager( serviceRegistry ){
@@ -59,6 +59,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 								var file = projectFile;					
 							    fileClient.write( projectFile.Location, '[]' );
 							});
+							
+							fileClient.createFolder( projectData.ContentLocation, WORKSPACES_FOLDER ).then( function( result ){} );
 						});
 					}	
 				});
@@ -91,6 +93,27 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 						}
 					}
 				);
+			});
+		}
+		
+		function createProjectWorkspaces( callback ){
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			
+			var fileClient = this.fileClient;
+			
+			var projectDataManager = this;
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				
+					var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
+					
+					fileClient.createFolder( folders.Children[ projectsIndex ].ChildrenLocation, WORKSPACES_FOLDER ).then( function( result ){
+						callback( result );
+					});
+					
+				});
 			});
 		}
 		
@@ -136,7 +159,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 					}
 				);
 			});
-		
 		}
 		
 		function save( projectData, callback ){
@@ -169,7 +191,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									var existingProject = false;
 									
 									for( var p = 0; p < projects.length; p++ ){
-										if( projects[p].name == projectData.name ){
+										if( projects[p].name === projectData.name ){
 											projects[p] = projectData;
 											existingProject = true;
 											break;
@@ -178,6 +200,25 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									
 									if( !existingProject ){
 										projects.push( projectData );
+										
+										/* Create a workspace for this new project */
+										
+										var fileClient = this.fileClient;
+			
+										var projectDataManager = this;
+										
+										Deferred.when( loadedWorkspace, function(workspace) {
+										
+											fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+											
+												var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
+												
+												fileClient.createFolder( folders.Children[ projectsIndex ].ChildrenLocation, WORKSPACES_FOLDER ).then( function( result ){
+													callback( result );
+												});
+												
+											});
+										});		
 									}
 									
 									var fileData = JSON.stringify( projects );
@@ -199,6 +240,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		ProjectDataManager.prototype.findInWorkspace = findInWorkspace;
 		ProjectDataManager.prototype.createProjectData = createProjectData;
+		ProjectDataManager.prototype.createProjectWorkspaces = createProjectWorkspaces;
 		ProjectDataManager.prototype.getProjectData = getProjectData;
 		ProjectDataManager.prototype.getProject = getProject;
 		ProjectDataManager.prototype.addNewProject = addNewProject;

@@ -25,6 +25,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			this.responseHandler = new ProjectResponseHandler( 'informationPane' );
 			
 			var drivelist = document.createElement( 'div' );
+			
 			this.projectData = project;
 			
 			this.projectNode.appendChild( drivelist );
@@ -32,12 +33,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			this.driveWidget = new DriveList( {}, drivelist, commandService, serviceRegistry );
 			
 			this.projectDataManager = new ProjectDataManager( serviceRegistry );
+			
 			this.driveWidget.show();
-			/* Read project name from url */
-			
-//			var projectName = '';
-			
-//			this.projectData = this.projectDataManager.getProject( projectName );
 
 			/* Set up drives */
 			
@@ -71,11 +68,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 					this.driveWidget.newDrive( project.drives[d] );
 					this.driveWidget.addRows();
 				}
+				
+				if( !project.workspace ){
+					this.projectDataManager.createProjectWorkspace();
+				}
+				
 			}else{
 				this.projectDataManager.getProjectData( this.createEmptyProject.bind( this ) );
 			}
 		}
-
 
 		function createEmptyProject( projectData ){
 			var projectCount = projectData.length;
@@ -84,6 +85,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			this.setProjectName( projectName );		
 			this.driveWidget.newDrive();
 			this.driveWidget.addRows();
+			
+			this.saveConfiguration();		
 		}
 		
 		function saveConfiguration(){
@@ -201,11 +204,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 		SFTPConfiguration.prototype.createEmptyProject = createEmptyProject;
 		SFTPConfiguration.prototype.showProjectConfiguration = showProjectConfiguration;
 		SFTPConfiguration.prototype.setProjectName = setProjectName;
-	 	SFTPConfiguration.prototype.setProjectAddress = setProjectAddress;	
-	 	SFTPConfiguration.prototype.getProjectName = getProjectName;
-	 	SFTPConfiguration.prototype.getProjectAddress = getProjectAddress;
-	 	SFTPConfiguration.prototype.setProjectDescription = setProjectDescription;
-	 	SFTPConfiguration.prototype.getProjectDescription = getProjectDescription;
+		SFTPConfiguration.prototype.setProjectAddress = setProjectAddress;	
+		SFTPConfiguration.prototype.getProjectName = getProjectName;
+		SFTPConfiguration.prototype.getProjectAddress = getProjectAddress;
+		SFTPConfiguration.prototype.setProjectDescription = setProjectDescription;
+		SFTPConfiguration.prototype.getProjectDescription = getProjectDescription;
 
 		return SFTPConfiguration;
 	}
