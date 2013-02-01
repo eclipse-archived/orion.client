@@ -135,11 +135,12 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			// We only want the direct li children, not any descendants.  But we can't preface a query with ">"
 			// So we do some reachy filtering here.
 			var filtered = [];
-			for (var i=0; i<items.length; i++) {
-				if (items[i].parentNode.parentNode === this._dropdownNode) {
-					filtered.push(items[i]);
+			var self = this;
+			items.forEach(function(item) {
+				if (item.parentNode.parentNode === self._dropdownNode) {
+					filtered.push(item);
 				}
-			}
+			});
 			return filtered;
 		},
 		
@@ -148,12 +149,13 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 		 */
 		empty: function() {
 			var items = lib.$$array("li", this._dropdownNode); //$NON-NLS-0$
+			var self = this;
 			// We only want the direct li children, not any descendants. 
-			for (var i=0; i<items.length; i++) {
-				if (items[i].parentNode === this._dropdownNode) {
-					items[i].parentNode.removeChild(items[i]);
+			items.forEach(function(item) {
+				if (item.parentNode === self._dropdownNode) {
+					item.parentNode.removeChild(item);
 				}
-			}
+			});
 		},
 		
 		 
@@ -170,20 +172,17 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 						if (event.keyCode === lib.KEY.UP && index > 0) {
 							index--;
 							items[index].focus();
-							lib.stop(event);
 						} else if (event.keyCode === lib.KEY.DOWN && index < items.length - 1) {
 							index++;
 							items[index].focus();
-							lib.stop(event);
 						} else if (event.keyCode === lib.KEY.ENTER || event.keyCode === lib.KEY.RIGHT) {
 							if (focusItem.classList.contains("dropdownTrigger") && focusItem.dropdown) { //$NON-NLS-0$
 								focusItem.dropdown.open();
-								lib.stop(event);
 							}
 						} else if (event.keyCode === lib.KEY.LEFT && focusItem.parentNode.parentNode.classList.contains("dropdownMenuOpen")) { //$NON-NLS-0$
 							this.close(true);
-							lib.stop(event);
 						}
+						lib.stop(event);
 					}
 				}
 			} else if (event.keyCode === lib.KEY.ESCAPE) {
