@@ -97,8 +97,6 @@ exports.GitRepositoryExplorer = (function() {
 			});
 		}
 		
-		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
 		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
 			function(resp){
 				if (resp.Children.length === 0) {
@@ -121,8 +119,6 @@ exports.GitRepositoryExplorer = (function() {
 	GitRepositoryExplorer.prototype.displayRepository = function(location){
 		var that = this;
 		this.loadingDeferred = new Deferred();
-		var progressService = this.registry.getService("orion.page.message"); //$NON-NLS-0$
-		progressService.showWhile(this.loadingDeferred, "Loading..."); //$NON-NLS-0$
 		this.registry.getService("orion.page.progress").progress(this.registry.getService("orion.git.provider").getGitClone(location), "Getting git repository details").then( //$NON-NLS-0$
 			function(resp){
 				
@@ -197,8 +193,6 @@ exports.GitRepositoryExplorer = (function() {
 						}
 					);
 				}
-				//that.commandService.processURL(window.location.href);
-				progressService.setProgressMessage("");
 			}, function(error){
 				that.handleError(error);
 			}
@@ -387,7 +381,6 @@ exports.GitRepositoryExplorer = (function() {
 					});
 					titleWrapper.setTitle(mode === "full" ? messages["No Repositories"] : messages["Repository Not Found"]); //$NON-NLS-0$
 					that.loadingDeferred.resolve();
-					progressService.setProgressMessage("");
 					return;
 				}
 				
@@ -400,7 +393,6 @@ exports.GitRepositoryExplorer = (function() {
 			
 			cleanupRender : function(){
 				that.loadingDeferred.resolve();
-				progressService.setProgressMessage("");
 			},
 			
 			renderBeforeItemPopulation : function(i){
