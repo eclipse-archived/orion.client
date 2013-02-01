@@ -190,7 +190,7 @@ define(
 					var progressService = this.registry.getService("orion.page.progress"); //$NON-NLS-0$
 
 					progressService
-							.showWhile(this.registry.getService("orion.git.provider").getGitStatus(location), messages['Loading...']).then( //$NON-NLS-0$
+							.progress(this.registry.getService("orion.git.provider").getGitStatus(location), messages['Loading...']).then( //$NON-NLS-0$
 									function(resp) {
 										if (resp.Type === "Status") { //$NON-NLS-0$
 											var status = resp;

@@ -82,6 +82,7 @@
 .gitImageSprite {
 	background: url(../images/git_sprites.png) no-repeat top left;
 	display: inline-block;
+	padding-right: 10px;
 	margin: 1px;
 	vertical-align: middle;
 }

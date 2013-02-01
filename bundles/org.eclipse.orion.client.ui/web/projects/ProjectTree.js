@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 'projects/ProjectType', 'projects/page/SFTPProject', 'orion/webui/littlelib', 'orion/URITemplate' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectTypes', 'projects/ProjectType', 'orion/webui/littlelib', 'orion/URITemplate' ], 
 	
-	function( messages, require, mProjectTypes, mProjectType, mSFTPProject, lib, URITemplate ) {
+	function( messages, require, mProjectTypes, mProjectType, lib, URITemplate ) {
 
 		function ProjectTree( node ){
 

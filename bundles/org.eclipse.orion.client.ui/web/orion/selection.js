@@ -30,7 +30,7 @@ define(["orion/EventTarget"], function(EventTarget){
 		this._serviceRegistry = serviceRegistry;
 		EventTarget.attach(this);
 		this._serviceRegistration = serviceRegistry.registerService(selectionServiceId, this);
-		this._selections = [];
+		this._selections = null;  // so we can quickly recognize the "empty" case without comparing arrays.
 	}
 	 
 	Selection.prototype = /** @lends orion.selection.Selection.prototype */ {
@@ -48,7 +48,7 @@ define(["orion/EventTarget"], function(EventTarget){
 		 * @param onDone The function to invoke with the selections
 		 */
 		getSelections: function(onDone) {
-			onDone(this._selections);
+			onDone(this._selections || []);
 		},
 		
 		_getSingleSelection: function() {
@@ -63,14 +63,17 @@ define(["orion/EventTarget"], function(EventTarget){
 		 * @param itemOrArray A single selected item or an array of selected items
 		 */
 		setSelections: function(itemOrArray) {
+			var oldSelection = this._selections;
 			if (Array.isArray(itemOrArray)) {	
-				this._selections = itemOrArray;
+				this._selections = itemOrArray.length > 0 ? itemOrArray : null;
 			} else if (itemOrArray) {
 				this._selections = [itemOrArray];
 			} else {
 				this._selections = null;
 			}
-			this.dispatchEvent({type:"selectionChanged", selection: this._getSingleSelection(), selections: this._selections}); //$NON-NLS-0$
+			if (oldSelection !== this._selections) {
+				this.dispatchEvent({type:"selectionChanged", selection: this._getSingleSelection(), selections: this._selections}); //$NON-NLS-0$
+			}
 		}
 	};
 	Selection.prototype.constructor = Selection;

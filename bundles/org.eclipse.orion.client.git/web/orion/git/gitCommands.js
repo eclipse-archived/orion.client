@@ -180,17 +180,15 @@ var exports = {};
 					return;
 				}
 			default:
-				if (jsonData.Severity !== "Error" && jsonData.Severity !== "Warning") {
-					callback(jsonData.Result);
-					return;
-				}
-	
 				var display = [];
 				display.Severity = "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-				
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				
+				if (callback) {
+					callback(jsonData);
+				}
 				break;
 		}
 	};
@@ -338,17 +336,15 @@ var exports = {};
 					return;
 				}
 			default:
-				if (jsonData.Severity !== "Error" && jsonData.Severity !== "Warning") {
-					callback(jsonData.Result);
-					return;
-				}
-	
 				var display = [];
 				display.Severity = "Error"; //$NON-NLS-0$
 				display.HTML = false;
 				display.Message = jsonData.DetailedMessage ? jsonData.DetailedMessage : jsonData.Message;
-				
 				serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+				
+				if (callback) {
+					callback(jsonData);
+				}
 				break;
 		}
 			
@@ -639,7 +635,10 @@ var exports = {};
 					}, function(jsonData, secondArg) {
 						if(pullOperationLocation)
 							jsonData.failedOperation = pullOperationLocation;
-						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function() {}, func, messages["Pull Git Repository"]);
+						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, 
+							function() {
+								explorer.changedItem(item);
+							}, func, messages["Pull Git Repository"]);
 					}, function(operation){
 						pullOperationLocation = operation.Location;
 					});
@@ -1030,8 +1029,6 @@ var exports = {};
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = result.Result;
-						
-						explorer.changedItem(item);
 					} else if(result.Result){
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -1069,17 +1066,20 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
+					explorer.changedItem(item);
 				}, function (error, ioArgs) {
-						var display = [];
+					var display = [];
 
-						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage //$NON-NLS-0$
-						+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					display.Severity = "Error"; //$NON-NLS-0$
+					display.HTML = true;
+					display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage //$NON-NLS-0$
+					+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+					+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					
+					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					explorer.changedItem(item);
 				});
 			},
 			visibleWhen : function(item) {
@@ -1112,8 +1112,6 @@ var exports = {};
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = result.Result;
-						
-						explorer.changedItem(item);
 					} else if(result.Result){
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
@@ -1137,17 +1135,18 @@ var exports = {};
 					}
 
 					progressService.setProgressResult(display);
+					explorer.changedItem(item);
 				}, function (error, ioArgs) {
-						var display = [];
-
-						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
-
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage //$NON-NLS-0$
-						+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					var display = [];
+					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+					display.Severity = "Error"; //$NON-NLS-0$
+					display.HTML = true;
+					display.Message = "<span>" + JSON.stringify(ioArgs.xhr.responseText).DetailedMessage //$NON-NLS-0$
+					+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+					+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+					
+					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					explorer.changedItem(item);
 				});
 			},
 			visibleWhen : function(item) {
@@ -1176,61 +1175,61 @@ var exports = {};
 				var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(item.HeadLocation, item.Name, "BEGIN"), item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']); //$NON-NLS-1$ //$NON-NLS-0$
 				progressService.createProgressMonitor(deferred, 
 				item.Name ? messages["Rebase on top of "] + item.Name: messages['Rebase']);
-				deferred.then(function(jsonData){
-					var display = [];
-					var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
-
-					if (jsonData.Result == "OK" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE" ) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						// operation succeeded
-						display.Severity = "Ok"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = jsonData.Result;
-						
+				deferred.then(
+					function(jsonData){
+						var display = [];
+						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
+	
+						if (jsonData.Result == "OK" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE" ) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							// operation succeeded
+							display.Severity = "Ok"; //$NON-NLS-0$
+							display.HTML = false;
+							display.Message = jsonData.Result;
+						}
+						// handle special cases
+						else if (jsonData.Result == "STOPPED") { //$NON-NLS-0$
+							display.Severity = "Warning"; //$NON-NLS-0$
+							display.HTML = true;
+							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
+								+ messages[". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing"]
+								+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+								+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						}
+						else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") { //$NON-NLS-0$
+							display.Severity = "Error"; //$NON-NLS-0$
+							display.HTML = true;
+							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
+								+ messages[". Repository state is invalid (i.e. already during rebasing)"]
+								+ i18nUtil.formatMessage(". Go to ${0}.", "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						}
+						else if (jsonData.Result == "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
+							display.Severity = "Error"; //$NON-NLS-0$
+							display.HTML = true;
+							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
+								+ messages[". Repository contains unmerged paths"]
+								+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+	   							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						}
+						else if (jsonData.Result == "FAILED_PENDING_CHANGES") { //$NON-NLS-0$
+							display.Severity = "Error"; //$NON-NLS-0$
+							display.HTML = true;
+							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
+								+ messages[". Repository contains pending changes. Please commit or stash them"]
+								+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+								+ statusLocation +"\">"+"Git Status page"+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						}
+						// handle other cases
+						else {
+							display.Severity = "Warning"; //$NON-NLS-0$
+							display.HTML = true;
+							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
+							+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
+							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
+						} 
+	
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 						explorer.changedItem(item);
-					}
-					// handle special cases
-					else if (jsonData.Result == "STOPPED") { //$NON-NLS-0$
-						display.Severity = "Warning"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
-							+ messages[". Some conflicts occurred. Please resolve them and continue, skip patch or abort rebasing"]
-							+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-					}
-					else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") { //$NON-NLS-0$
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
-							+ messages[". Repository state is invalid (i.e. already during rebasing)"]
-							+ i18nUtil.formatMessage(". Go to ${0}.", "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-					}
-					else if (jsonData.Result == "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
-							+ messages[". Repository contains unmerged paths"]
-							+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-   							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-					}
-					else if (jsonData.Result == "FAILED_PENDING_CHANGES") { //$NON-NLS-0$
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
-							+ messages[". Repository contains pending changes. Please commit or stash them"]
-							+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-							+ statusLocation +"\">"+"Git Status page"+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-					}
-					// handle other cases
-					else {
-						display.Severity = "Warning"; //$NON-NLS-0$
-						display.HTML = true;
-						display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
-						+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
-						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-					} 
-
-					serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
 					}, 
 					displayErrorOnStatus
 				);
