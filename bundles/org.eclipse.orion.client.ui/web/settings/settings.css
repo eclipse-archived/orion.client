@@ -237,8 +237,6 @@ div.page section:last-child {
 }
 */
 .plugin-list-item {
-	padding: 10px;
-	/* width: 100%; */
 }
 
 .plugin-list, .plugin-entry {
@@ -252,6 +250,8 @@ div.page section:last-child {
 .plugin-entry {
 	border-bottom: solid 1px #EEE;
 	padding-bottom: 10px;
+
+	padding: 15px 10px 15px 10px;
 }
 
 .plugin-icon {
@@ -338,7 +338,7 @@ div.page section:last-child {
 	float: left;
 	color: #AAA;
 	text-align: center;
-	font-size: 8px;
+	font-size: 9px;
 	font-weight: normal;
 	margin-left: 5px;
 	border: 1px solid #CCC;
@@ -361,7 +361,6 @@ div.page section:last-child {
 }
 
 .plugin-service-item {
-	padding-left:10px;
 	min-width:700px;
 	/* margin-left: 63px; */
 }
