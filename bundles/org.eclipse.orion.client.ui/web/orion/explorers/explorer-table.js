@@ -18,7 +18,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	/**
 	 * Tree model used by the FileExplorer
 	 */
-	function Model(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders) {
+	function FileModel(serviceRegistry, root, fileClient, idPrefix, excludeFiles, excludeFolders) {
 		this.registry = serviceRegistry;
 		this.root = root;
 		this.fileClient = fileClient;
@@ -26,16 +26,16 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		this.excludeFiles = !!excludeFiles;
 		this.excludeFolders = !!excludeFolders;
 	}
-	Model.prototype = new mExplorer.ExplorerModel(); 
+	FileModel.prototype = new mExplorer.ExplorerModel(); 
 	
-	Model.prototype.getRoot = function(onItem){
+	FileModel.prototype.getRoot = function(onItem){
 		onItem(this.root);
 	};
 	
 	/*
 		Process the parent and children, doing any filtering or sorting that may be necessary.
 	*/
-	Model.prototype.processParent = function(parent, children) {
+	FileModel.prototype.processParent = function(parent, children) {
 		if (this.excludeFiles || this.excludeFolders) {
 			var filtered = [];
 			for (var i in children) {
@@ -72,7 +72,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		return children;
 	};
 		
-	Model.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
+	FileModel.prototype.getChildren = function(parentItem, /* function(items) */ onComplete){
 		var self = this;
 		// the parent already has the children fetched
 		if (parentItem.children) {
@@ -90,7 +90,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 			onComplete([]);
 		}
 	};
-	Model.prototype.constructor = Model;
+	FileModel.prototype.constructor = FileModel;
 
 
 	/**
@@ -369,7 +369,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 					for (var i in loadedWorkspace) {
 						self.treeRoot[i] = loadedWorkspace[i];
 					}
-					self.model = new Model(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
+					self.model = new FileModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
 					self.model.processParent(self.treeRoot, loadedWorkspace.Children);	
 					if (typeof postLoad === "function") { //$NON-NLS-0$
 						try {
@@ -434,6 +434,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 
 	//return module exports
 	return {
-		FileExplorer: FileExplorer
+		FileExplorer: FileExplorer,
+		FileModel: FileModel
 	};
 });

@@ -12,9 +12,9 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
 	
 		var projectGrid;
 	
@@ -39,16 +39,18 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				/* Render the page */
 				
 				var serviceRegistry = core.serviceRegistry;
-	
-				this.projectDataManager = new ProjectDataManager( serviceRegistry );
+				
+				var fileClient = new mFileClient.FileClient( serviceRegistry );			
 				
 				var preferences = core.preferences;
 			
 				var selection = new mSelection.Selection(serviceRegistry);
 				
 				var commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
+				
+				var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 			
-				mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );	
+				mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences, searcher );	
 				
 				/* Create the content */
 				
@@ -59,7 +61,9 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				var mainPanel = document.getElementById( 'projectGrid' );
 				
 				projectGrid = new ProjectGrid( mainPanel );
-				
+	
+				this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
+
 				this.projectDataManager.getProjectData( showProjectGrid ); 
 		});
 	}	
