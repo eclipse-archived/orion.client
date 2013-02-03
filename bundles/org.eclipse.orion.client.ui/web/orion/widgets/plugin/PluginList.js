@@ -45,7 +45,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 	objects.mixin(PluginList.prototype, {
 		templateString: '' +  //$NON-NLS-0$
-						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper sectionWrapperAux toolComposite">' +  /* pluginSectionHeader */
+						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper toolComposite">' +  /* pluginSectionHeader */
 							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */
 							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */
 							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */
@@ -68,7 +68,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.pluginSectionHeader = lib.$(".pluginSectionHeader", this.node); //$NON-NLS-0$
 			this.pluginTitle = lib.$(".sectionAnchor", this.node); //$NON-NLS-0$
 			this.pluginCount = lib.$(".sectionItemCount", this.node); //$NON-NLS-0$
-			this.pluginCommands = lib.$(".pluginCommands", this.node); //$NON-NLS-0$
+			this.pluginCommands = lib.$(".pluginCommands", this.node); //$NON-NLS-0$	
 			this.pluginList = lib.$(".plugin-list", this.node); //$NON-NLS-0$
 			this.postCreate();
 		},
@@ -84,9 +84,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		
 			var _this = this;
 			if (this.pluginSectionHeader) {
-				var slideout = document.createDocumentFragment();
-				slideout.innerHTML = mHTMLFragments.slideoutHTMLFragment("pluginSectionHeader"); //$NON-NLS-0$
-				_this.pluginSectionHeader.appendChild(slideout);
+				// add a slideout
+				var slideoutFragment = mHTMLFragments.slideoutHTMLFragment("pluginSlideout"); //$NON-NLS-0$
+				var range = document.createRange();
+				range.selectNode(this.pluginSectionHeader);
+				slideoutFragment = range.createContextualFragment(slideoutFragment);
+				this.pluginSectionHeader.appendChild(slideoutFragment);
 			}
 			this.addRows();
 
