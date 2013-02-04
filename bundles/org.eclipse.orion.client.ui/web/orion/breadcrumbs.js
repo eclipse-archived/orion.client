@@ -14,14 +14,14 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 
 	/**
 	 * Constructs a new BreadCrumb with the given options.
-	 * @param {Object} options The options object which must specify the parent container
+	 * @param {Object} options The options object, which must specify the parent container.
 	 * @param options.container The parent container for the bread crumb presentation
-	 * @param options.resource The current resource
-	 * @param options.rootSegmentName The name to use for the root segment in lieu of the metadata name.  Optional.
-	 * @param options.workspaceRootSegmentName The name to use for the workspace root. If not specified, the workspace root
+	 * @param [options.resource] The current resource
+	 * @param [options.rootSegmentName] The name to use for the root segment in lieu of the metadata name.
+	 * @param [options.workspaceRootSegmentName] The name to use for the workspace root. If not specified, the workspace root
 	 * will not be shown.
-	 * @param [options.makeHref] The call back function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
-	 * @param [option.getFirstSegment] The call back function to make DOM node for the first segment in breadcrumb. 
+	 * @param {Function} [options.makeHref] The callback function to make the href on a bread crumb item. If not defined "/navigate/table.html#" is used.
+	 * @param {Function} [option.getFirstSegment] The callback function to make DOM node for the first segment in breadcrumb. 
 	 * @class Bread crumbs show the current position within a resource tree and allow navigation
 	 * to different places in the tree. Unlike the fairy tale, bread crumbs typically don't lead
 	 * to a cottage made of gingerbread. Sorry!

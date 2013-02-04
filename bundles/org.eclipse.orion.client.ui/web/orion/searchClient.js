@@ -225,7 +225,7 @@ function(messages, require, lib, i18nUtil, mSearchUtils, mSearchCrawler){
 				}
 				/**
 				 * Displays links to resources under the given DOM node.
-				 * @param [{name, path, lineNumber, directory, isExternalResource}] resources array of resources.  
+				 * @param {Object[]} resources array of resources. The shape of a resource is {name, path, lineNumber, directory, isExternalResource}
 				 *	Both directory and isExternalResource cannot be true at the same time.
 				 * @param {String} [queryName] A human readable name to display when there are no matches.  If 
 				 *  not used, then there is nothing displayed for no matches

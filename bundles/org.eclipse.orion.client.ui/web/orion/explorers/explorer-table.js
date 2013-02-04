@@ -321,7 +321,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	/**
 	 * Load the resource at the given path.
 	 * @param path The path of the resource to load
-	 * @param [force] If true, force reload even if the path is unchanged. Useful
+	 * @param {Boolean} [force] If true, force reload even if the path is unchanged. Useful
 	 * when the client knows the resource underlying the current path has changed.
 	 * @param postLoad a function to call after loading the resource
 	 */

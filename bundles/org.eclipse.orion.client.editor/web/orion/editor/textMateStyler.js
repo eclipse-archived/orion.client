@@ -1159,9 +1159,9 @@ var RegexUtil = {
 		},
 		/**
 		 * @param model {orion.editor.TextModel}
-		 * @param node {Node}
-		 * @param pos {Number}
-		 * @param [matchRulesOnly] {Boolean} Optional, if true only "match" subrules will be considered.
+		 * @param {Node} node
+		 * @param {Number} pos
+		 * @param {Boolean} [matchRulesOnly] Optional, if true only "match" subrules will be considered.
 		 * @returns {Object} A match info object with properties:
 		 * {Boolean} isEnd
 		 * {Boolean} isSub
@@ -1496,7 +1496,7 @@ var RegexUtil = {
 		},
 		/**
 		 * Applies the grammar to obtain the {@link eclipse.StyleRange[]} for the given line.
-		 * @returns eclipse.StyleRange[]
+		 * @returns {eclipse.StyleRange[]}
 		 * @private
 		 */
 		toStyleRanges: function(/**ScopeRange[]*/ scopeRanges) {
