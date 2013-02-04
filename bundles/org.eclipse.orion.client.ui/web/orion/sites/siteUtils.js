@@ -11,7 +11,7 @@
 
 /*global define */
 
-define(['require', 'orion/fileUtils', 'orion/URITemplate', 'orion/sites/siteUtils'],
+define(['require', 'orion/fileUtils', 'orion/URITemplate'],
 		function(require, mFileUtil, URITemplate) {
 	/**
 	 * Returns a relative URL pointing to the editing page for the given site configuration. 
