@@ -12,18 +12,33 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils', 'stringexternalizer/nonnlsSearchUtil'],
+define(['i18n!orion/stringexternalizer/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils', 'stringexternalizer/nonnlsSearchUtil'],
 
-function(messages, require, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil) {
+function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil) {
     
-    function _writeReport(reportList, fileItem, passed) {
+    function _writeReport(reportList, fileItem, passed, message) {
         reportList.push({
             model: fileItem,
-            message: passed ? "passed" : "failed", //$NON-NLS-0$
-            status: passed ? "pass" : "failed", //$NON-NLS-0$
+            message: message ? message : (passed ? messages["Passed"] : messages["Failed"]),
+            status: passed ? "pass" : "failed", //$NON-NLS-0$ //$NON-NLS-0$
         });
     };
     
+    function _matchesReplaced(fileModel) {
+        var matchesReplaced = 0;
+        if (!fileModel.children) {
+            return fileModel.checked === false ? 0 : 1;
+        }
+        if (fileModel.children) {
+            for (var j = 0; j < fileModel.children.length; j++) {
+                if (!(fileModel.children[j].checked === false)) {
+                    matchesReplaced += 1;
+                }
+            }
+        }
+        return matchesReplaced;
+    };
+
     /*
      *	The model to support the string externalizer in the generaic searchExplorer.
      */
@@ -241,87 +256,30 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil
      * matchesReplaced: The number of matches that replaced in this file
      * status: "pass" or "failed"
      * message: Optional. The error message when writing fails.
-     * @param {Number} index The index of the result of the valid file list. The function has to recursively increase the number till the lengh of the file list.
-     */
-    StrExternalizerModel.prototype.writeIncrementalNewContent = function(reportList, index, onComplete) {
-		var i = index;
-		var config = this.config;
-		if (!i) {
-			i = 0;
-		}
-		if (i >= this._listRoot.children.length) {
-			this.messageService.setProgressMessage("");
-			if (onComplete) {
-				onComplete();
-			}
-			return;
-		}
-		var fileItem = this._listRoot.children[i];
+	 * @returns {orion.Promise} A new promise. The returned promise is generally fulfilled to an <code>Array</code> whose elements
+	 * writes all the new contetns by checking the checked flag on all details matches. A file with no checked flag on all detail matches should not be written a new replaced contents.
+	 */
+    StrExternalizerModel.prototype.writeReplacedContents = function(reportList){
+    	var promises = [];
+		this._listRoot.children.forEach(function(fileItem) {
+			promises.push(this._writeOneFile(fileItem, reportList));
+		}.bind(this));
 		var that = this;
-		this.messageService.setProgressMessage(i18nUtil.formatMessage(messages["Writing files ${0} of ${1}"], i + 1, this._listRoot.children.length));
-		if (fileItem.checked) {
-			this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location, true), "Reading file metadata " + fileItem.Location).then(function(metadata) {
-				if (fileItem.LocalTimeStamp !== metadata.LocalTimeStamp) {
-					console.error("File " + metadata.Name + " has been modified."); //$NON-NLS-1$ //$NON-NLS-0$
-					that.writeIncrementalNewContent(reportList, i+1, onComplete);
-					return;
-				}
-
-				function writeNonnls(fileItem) {
-					var newContents = mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, config, true);
-					if (config.messages && config.messages !== {}) {
-						mNonnlsSearchUtil.writeMessagesFile(that.fileClient, config, config.messages, that.registry.getService("orion.page.progress")).then(function() {
-							that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function() {
-							_writeReport(reportList, fileItem, true);
-							that.writeIncrementalNewContent(reportList, i+1, onComplete);
-							},
-							function(error) {
-								console.error(error);
-								_writeReport(reportList, fileItem, false);
-								that.writeIncrementalNewContent(reportList, i+1, onComplete);
-							});
-						}, function(error) {
-							console.error(error);
-							that.writeIncrementalNewContent(reportList, i+1, onComplete);
-						});
-					} else {
-						that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function() {
-							_writeReport(reportList, fileItem, true);
-							that.writeIncrementalNewContent(reportList, i+1, onComplete);
-						},
-
-						function(error) {
-							console.error(error);
-							_writeReport(reportList, fileItem, false);
-							that.writeIncrementalNewContent(reportList, i+1, onComplete);
-						});
-					}
-				}
-
-				if (!fileItem.contents) {
-					that.registry.getService("orion.page.progress").progress(that.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(function(contents) {
-						fileItem.contents = contents;
-						writeNonnls(fileItem, config);
-					},
-
-					function(error) {
-						console.error(error);
-						that.writeIncrementalNewContent(reportList, i+1, onComplete);
-					});
-				} else {
-					writeNonnls(fileItem, config);
-				}
-
-
-			}, function(error) {
-				console.error(error);
-				that.writeIncrementalNewContent(reportList, i+1, onComplete);
-			});
-		} else {
-			that.writeIncrementalNewContent(reportList, i+1, onComplete);
-		}
-	};
-
+		return Deferred.all(promises, function(error) { return {_error: error}; }).then(function () {
+			if (that.config.messages && that.config.messages !== {}) {
+	            return mNonnlsSearchUtil.writeMessagesFile(that.fileClient, that.config, that.config.messages, that.registry.getService("orion.page.progress")).then(function() {
+	                return new Deferred().resolve();
+	            }, function(error) {
+	                console.error(error);
+	                return new Deferred().resolve();
+	            });
+				
+			} else {
+				return new Deferred().resolve();
+			}
+		});
+    };
+    
 	/*** Optional model functions ***/
     
     /**
@@ -337,11 +295,48 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils, mNonnlsSearchUtil
 	};
 
     /*** Internal model functions ***/
-   
-   StrExternalizerModel.prototype.constructor = StrExternalizerModel;
-
-    //return module exports
     
+    StrExternalizerModel.prototype._writeNonnls = function(fileItem, reportList) {
+        var that = this;
+        var newContents = mNonnlsSearchUtil.replaceNls(fileItem.contents, fileItem.nonnls, that.config, true);
+        return that.registry.getService("orion.page.progress").progress(that.fileClient.write(fileItem.Location, newContents), "Writing changes to " + fileItem.Location).then(function() {
+            _writeReport(reportList, fileItem, true);
+        },
+        function(error) {
+            console.error(error);
+            _writeReport(reportList, fileItem, false);
+        });
+    };    
+    
+    StrExternalizerModel.prototype._writeOneFile = function(fileItem, reportList) {
+        var matchesReplaced = _matchesReplaced(fileItem);
+        var that = this;
+        if (matchesReplaced > 0) {
+            return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.Location, true), "Reading file metadata " + fileItem.Location).then(function(metadata) {
+                //If the file has been modified by others when trying to write it, we should report this status in the report list
+                if (fileItem.LocalTimeStamp !== metadata.LocalTimeStamp) {
+                    _writeReport(reportList, fileItem, false, messages["Resource has been changed by others"]);
+                } else if (!fileItem.contents) {//If fiel item does not have contents yet, we should get the contents first
+                    return that.registry.getService("orion.page.progress").progress(that.fileClient.read(fileItem.Location), "Reading file " + fileItem.Location).then(function(contents) {
+                        fileItem.contents = contents;
+                        return that._writeNonnls(fileItem, reportList);
+                    },
+
+                    function(error) {
+                        console.error(error);
+                    });
+                } else {
+                    return that._writeNonnls(fileItem, reportList);
+                }
+            }, function(error) {
+                console.error(error);
+            });
+        } else {
+            return new Deferred().resolve(fileItem);
+        }
+    }; 
+   
+	StrExternalizerModel.prototype.constructor = StrExternalizerModel;
     return {
         StrExternalizerModel: StrExternalizerModel
     };

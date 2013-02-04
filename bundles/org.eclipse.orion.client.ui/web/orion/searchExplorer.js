@@ -893,7 +893,7 @@ function(messages, require, Deferred, lib, mContentTypes, i18nUtil, mExplorer, m
         this._reporting = true;
         this.initCommands();
         this.reportStatus(messages["Writing files..."]);
-        this.model.writeIncrementalNewContent(reportList, 0, function(modellist) {
+        this.model.writeReplacedContents(reportList).then(function(modellist) {
             _empty(that.getParentDivId());
             var reporter = new SearchReportExplorer(that.getParentDivId(), reportList, that.model);
             reporter.report();

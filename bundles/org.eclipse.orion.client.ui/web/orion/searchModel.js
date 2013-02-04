@@ -262,14 +262,10 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
      * matchesReplaced: The number of matches that replaced in this file
      * status: "pass" or "failed"
      * message: Optional. The error message when writing fails.
-     * @param {Number} index The index of the result of the valid file list. The function has to recursively increase the number till the lengh of the file list.
-     */
-    SearchResultModel.prototype.writeIncrementalNewContent = function(reportList, index, onComplete) {
-    	var validFileList = this.getValidFileList();
-    	this._writeReplacedContents(reportList).then(function(){onComplete(validFileList);})
-    };
-
-    SearchResultModel.prototype._writeReplacedContents = function(reportList){
+	 * @returns {orion.Promise} A new promise. The returned promise is generally fulfilled to an <code>Array</code> whose elements
+	 * writes all the new contetns by checking the checked flag on all details matches. A file with no checked flag on all detail matches should not be written a new replaced contents.
+	 */
+    SearchResultModel.prototype.writeReplacedContents = function(reportList){
         var promises = [];
    		var validFileList = this.getValidFileList();
 		validFileList.forEach(function(fileItem) {
@@ -278,57 +274,6 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 		return Deferred.all(promises, function(error) { return {_error: error}; });
     };
     
-    SearchResultModel.prototype._writeOneFile = function(fileItem, reportList) {
-       var matchesReplaced = this._matchesReplaced(fileItem);
-       if (matchesReplaced > 0) {
-           return this._provideFileContent(fileItem).then(function() {
-       		   matchesReplaced = this._matchesReplaced(fileItem);
-               var newContents = {};
-               mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
-               var contents = newContents.contents.join(this._lineDelimiter);
-               var etag = fileItem.ETag;
-               var args = etag ? {
-                   "ETag": etag
-               } : null; //$NON-NLS-0$
-               return this.registry.getService("orion.page.progress").progress(this.fileClient.write(fileItem.location, contents, args), "Saving changes to " + fileItem.location).then(
-
-               function(result) {
-                   reportList.push({
-                       model: fileItem,
-                       matchesReplaced: matchesReplaced,
-                       status: "pass"
-                   }); //$NON-NLS-0$
-                   this.writeIncrementalNewContent(reportList, index + 1, onComplete);
-               }.bind(this),
-
-               function(error) {
-                   // expected error - HTTP 412 Precondition Failed 
-                   // occurs when file is out of sync with the server
-                   if (error.status === 412) {
-                       reportList.push({
-                           model: fileItem,
-                           message: messages["Resource has been changed by others."],
-                           matchesReplaced: matchesReplaced,
-                           status: "failed"
-                       }); //$NON-NLS-1$
-                   }
-                   // unknown error
-                   else {
-                       error.log = true;
-                       reportList.push({
-                           model: fileItem,
-                           message: messages["Failed to write file."],
-                           matchesReplaced: matchesReplaced,
-                           status: "failed"
-                       }); //$NON-NLS-1$
-                   }
-               }.bind(this));
-           }.bind(this));
-       } else {
-           return new Deferred().resolve(fileItem);
-       }	
-	};    
-   
     /**
      * Return the string that describe the header of the file column. Optional.
      * If not defined, "Results" is used.
@@ -472,6 +417,56 @@ function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
         window.sessionStorage["global_search_default_replace_string"] = replacingStr; //$NON-NLS-0$
     };
 
+    SearchResultModel.prototype._writeOneFile = function(fileItem, reportList) {
+       var matchesReplaced = this._matchesReplaced(fileItem);
+       if (matchesReplaced > 0) {
+           return this._provideFileContent(fileItem).then(function() {
+       		   matchesReplaced = this._matchesReplaced(fileItem);
+               var newContents = {};
+               mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
+               var contents = newContents.contents.join(this._lineDelimiter);
+               var etag = fileItem.ETag;
+               var args = etag ? {
+                   "ETag": etag
+               } : null; //$NON-NLS-0$
+               return this.registry.getService("orion.page.progress").progress(this.fileClient.write(fileItem.location, contents, args), "Saving changes to " + fileItem.location).then(
+
+               function(result) {
+                   reportList.push({
+                       model: fileItem,
+                       matchesReplaced: matchesReplaced,
+                       status: "pass"
+                   }); //$NON-NLS-0$
+               }.bind(this),
+
+               function(error) {
+                   // expected error - HTTP 412 Precondition Failed 
+                   // occurs when file is out of sync with the server
+                   if (error.status === 412) {
+                       reportList.push({
+                           model: fileItem,
+                           message: messages["Resource has been changed by others."],
+                           matchesReplaced: matchesReplaced,
+                           status: "failed"
+                       }); //$NON-NLS-1$
+                   }
+                   // unknown error
+                   else {
+                       error.log = true;
+                       reportList.push({
+                           model: fileItem,
+                           message: messages["Failed to write file."],
+                           matchesReplaced: matchesReplaced,
+                           status: "failed"
+                       }); //$NON-NLS-1$
+                   }
+               }.bind(this));
+           }.bind(this));
+       } else {
+           return new Deferred().resolve(fileItem);
+       }	
+	};    
+   
     SearchResultModel.prototype._matchesReplaced = function(model) {
         var matchesReplaced = 0;
         if (!model.children) {
