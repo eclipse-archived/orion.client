@@ -84,6 +84,9 @@ exports.TreeModelIterator = (function() {
 		
 		_forward: function(forceExpand){
 			//first we will try to dive into the current cursor
+			if(!this._cursor){
+				return null;
+			}
 			var next = this._diveIn(this._cursor);
 			if(!next){
 				if(forceExpand && this._expandable(this._cursor) && this.forceExpandFunc){
@@ -99,6 +102,9 @@ exports.TreeModelIterator = (function() {
 		},
 		
 		_backward: function(forceExpand){
+			if(!this._cursor){
+				return null;
+			}
 			var previous = this._findSibling(this._cursor, false);
 			if(previous && previous !== this._cursor.parent){
 				previous = this._drillToLast(previous);
@@ -245,6 +251,9 @@ exports.TreeModelIterator = (function() {
 		 * When the parent model containing the cursor is collapsed, the cursor has to be surfaced to the parent
 		 */
 		collapse: function(collapsedModel) {
+			if(!this._cursor){
+				return null;
+			}
 			if(this._inParentChain(this._cursor, collapsedModel)){
 				this.setCursor(collapsedModel);
 				return this._cursor;
