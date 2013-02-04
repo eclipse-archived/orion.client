@@ -12,9 +12,9 @@
 /*global define console window*/
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/search/nls/messages', 'require', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
+define(['i18n!orion/search/nls/messages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/explorers/explorer', 'orion/searchUtils'],
 
-function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
+function(messages, require, Deferred, i18nUtil, mExplorer, mSearchUtils) {
 
     /*** Internal model wrapper functions ***/
 
@@ -211,23 +211,27 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
      * Get the file contents by a given file model. Async call. Required function.
      */
     SearchResultModel.prototype.provideFileContent = function(fileItem, onComplete) {
+    	this._provideFileContent(fileItem).then(function() { onComplete(fileItem);});
+    };
+
+    SearchResultModel.prototype._provideFileContent = function(fileItem) {
         if (fileItem.contents) {
-            onComplete(fileItem);
+            return new Deferred().resolve(fileItem);
         } else {
-            this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
+            return this.registry.getService("orion.page.progress").progress(this.fileClient.read(fileItem.location), "Getting file contents " + fileItem.Name).then(
 
             function(jsonData) {
                 mSearchUtils.searchWithinFile(this._searchHelper.inFileQuery, fileItem, jsonData, this._lineDelimiter, this.replaceMode(), this._searchHelper.params.caseSensitive);
-                onComplete(fileItem);
+                return fileItem;
             }.bind(this),
 
             function(error) {
                 console.error("Error loading file content: " + error.message); //$NON-NLS-0$
-                onComplete(null);
+                return fileItem;
             }.bind(this));
         }
-    };
-
+    };    
+    
     /**
      * Get the file contents by a given file model. Sync call. Required function.
      */
@@ -262,66 +266,69 @@ function(messages, require, i18nUtil, mExplorer, mSearchUtils) {
      */
     SearchResultModel.prototype.writeIncrementalNewContent = function(reportList, index, onComplete) {
     	var validFileList = this.getValidFileList();
-        var model = validFileList[index];
-        if (!model || index === validFileList.length) {
-            onComplete(validFileList);
-            return;
-        }
-        var matchesReplaced = this._matchesReplaced(model);
-        if (matchesReplaced > 0) {
-            this.provideFileContent(model, function(fileItem) {
-                matchesReplaced = this._matchesReplaced(fileItem);
-                var newContents = {};
-                mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
-                var contents = newContents.contents.join(this._lineDelimiter);
-
-                var etag = fileItem.ETag;
-                var args = etag ? {
-                    "ETag": etag
-                } : null; //$NON-NLS-0$
-                this.registry.getService("orion.page.progress").progress(this.fileClient.write(model.location, contents, args), "Saving changes to " + model.location).then(
-
-                function(result) {
-                    reportList.push({
-                        model: model,
-                        matchesReplaced: matchesReplaced,
-                        status: "pass"
-                    }); //$NON-NLS-0$
-                    this.writeIncrementalNewContent(reportList, index + 1, onComplete);
-                }.bind(this),
-
-                function(error) {
-                    // expected error - HTTP 412 Precondition Failed 
-                    // occurs when file is out of sync with the server
-                    if (error.status === 412) {
-                        reportList.push({
-                            model: model,
-                            message: messages["Resource has been changed by others."],
-                            matchesReplaced: matchesReplaced,
-                            status: "failed"
-                        }); //$NON-NLS-1$
-                    }
-                    // unknown error
-                    else {
-                        error.log = true;
-                        reportList.push({
-                            model: model,
-                            message: messages["Failed to write file."],
-                            matchesReplaced: matchesReplaced,
-                            status: "failed"
-                        }); //$NON-NLS-1$
-                    }
-                    this.writeIncrementalNewContent(reportList, index + 1, onComplete);
-                }.bind(this));
-
-            }.bind(this));
-
-        } else {
-            this.writeIncrementalNewContent(reportList, index + 1, onComplete);
-        }
-
+    	this._writeReplacedContents(reportList).then(function(){onComplete(validFileList);})
     };
 
+    SearchResultModel.prototype._writeReplacedContents = function(reportList){
+        var promises = [];
+   		var validFileList = this.getValidFileList();
+		validFileList.forEach(function(fileItem) {
+			promises.push(this._writeOneFile(fileItem, reportList));
+		}.bind(this));
+		return Deferred.all(promises, function(error) { return {_error: error}; });
+    };
+    
+    SearchResultModel.prototype._writeOneFile = function(fileItem, reportList) {
+       var matchesReplaced = this._matchesReplaced(fileItem);
+       if (matchesReplaced > 0) {
+           return this._provideFileContent(fileItem).then(function() {
+       		   matchesReplaced = this._matchesReplaced(fileItem);
+               var newContents = {};
+               mSearchUtils.generateNewContents(false, fileItem.contents, newContents, fileItem, this._searchHelper.params.replace, this._searchHelper.inFileQuery.searchStrLength);
+               var contents = newContents.contents.join(this._lineDelimiter);
+               var etag = fileItem.ETag;
+               var args = etag ? {
+                   "ETag": etag
+               } : null; //$NON-NLS-0$
+               return this.registry.getService("orion.page.progress").progress(this.fileClient.write(fileItem.location, contents, args), "Saving changes to " + fileItem.location).then(
+
+               function(result) {
+                   reportList.push({
+                       model: fileItem,
+                       matchesReplaced: matchesReplaced,
+                       status: "pass"
+                   }); //$NON-NLS-0$
+                   this.writeIncrementalNewContent(reportList, index + 1, onComplete);
+               }.bind(this),
+
+               function(error) {
+                   // expected error - HTTP 412 Precondition Failed 
+                   // occurs when file is out of sync with the server
+                   if (error.status === 412) {
+                       reportList.push({
+                           model: fileItem,
+                           message: messages["Resource has been changed by others."],
+                           matchesReplaced: matchesReplaced,
+                           status: "failed"
+                       }); //$NON-NLS-1$
+                   }
+                   // unknown error
+                   else {
+                       error.log = true;
+                       reportList.push({
+                           model: fileItem,
+                           message: messages["Failed to write file."],
+                           matchesReplaced: matchesReplaced,
+                           status: "failed"
+                       }); //$NON-NLS-1$
+                   }
+               }.bind(this));
+           }.bind(this));
+       } else {
+           return new Deferred().resolve(fileItem);
+       }	
+	};    
+   
     /**
      * Return the string that describe the header of the file column. Optional.
      * If not defined, "Results" is used.

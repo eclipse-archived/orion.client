@@ -11,23 +11,27 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'orion/selection', 'orion/explorers/navigationUtils', 'projects/DriveTreeRenderer', 'orion/fileClient', 'orion/Deferred', 'orion/status', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
 	
-	function(messages, require, mCommands, mSection, mSelection, mNavUtils, DriveTreeRenderer, mFileClient, Deferred, mStatus, mProgress, mOperationsClient, mContentTypes, mFileCommands, ProjectExplorer ) {
+	function(messages, require, mCommands, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
 
-		function ProjectNavigation( project, anchor, serviceRegistry, commandService ){
+		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService ){
 		
 			this.commandService = commandService;
 			
 			this.serviceRegistry = serviceRegistry;
 			
-			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
-			
-			var progress = new mProgress.ProgressService(serviceRegistry, operationsClient);
-			
 			this.anchor = anchor;
 			
-			document.addEventListener( 'build', this.addExternalDrives.bind(this), false);
+			this.progressService = progressService;
+			
+			this.fileClient = fileClient;
+			
+			this.contentTypeService = contentTypeService;
+			
+			this.workspace = workspace;
+			
+			document.addEventListener( 'build', this.addDrives.bind(this), false);
 			
 			this.anchor.innerHTML = this.template;
 			
@@ -63,46 +67,30 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		ProjectNavigation.prototype.template = template;
 		
-		function addTree( parentNode, item ){
-			var serviceRegistry = this.serviceRegistry;
+		function addDrivesTree( parentNode ){
 		
-			var fileClient = new mFileClient.FileClient( serviceRegistry );			
-					
-			this.selection = new mSelection.Selection( serviceRegistry, "orion.directoryPrompter.selection" ); //$NON-NLS-0$
-			
-			var projectCommandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: this.selection});
-
-			var contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
-
-			this.explorer = new ProjectExplorer({
-				treeRoot: {Name: "Orion Content", ChildrenLocation: ""}, 
-				showRoot: true,
+			this.explorer = new ProjectExplorer({							
 				selection: this.selection, 
-				serviceRegistry: serviceRegistry,
-				fileClient: fileClient, 
+				serviceRegistry: this.serviceRegistry,
+				fileClient: this.fileClient, 
 				parentId: parentNode, 
 				rendererFactory: function(explorer) {  //$NON-NLS-0$
 				
 					var renderer = new DriveTreeRenderer({
 						checkbox: false, 
-						cachePrefix: "Navigator"}, explorer, projectCommandService, contentTypeService);
+						cachePrefix: "Navigator"}, explorer, this.commandService, this.contentTypeService);
 						
 					return renderer;
 			}}); //$NON-NLS-0$
 			
-			mFileCommands.createAndPlaceFileCommandsExtension(serviceRegistry, projectCommandService, this.explorer );
+			// We need to run this code so that all of the file-based commands, including open-with commands are registered and can be shown in our navigator tree.
+			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.explorer );
 			
 			var myexplorer = this.explorer;
-			var loadedWorkspace = fileClient.loadWorkspace("");
-			
-			Deferred.when( loadedWorkspace, function(workspace) {	
-				var location = workspace.Location;
-				if( item === 'DRIVES' ){ location = workspace.DriveLocation; }
-				myexplorer.loadResourceList( location, true, null );
-			});
+			myexplorer.loadDriveList(this.workspace);
 		}
 		
-		ProjectNavigation.prototype.addTree = addTree;		
+		ProjectNavigation.prototype.addDrivesTree = addDrivesTree;
 		
 		function createSection( node, content, id, title, scope ){
 		
@@ -144,13 +132,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 			this.drivesNode = this.anchor.firstChild.children[2];
 			
-			var driveContent = '<div id="Content"></div><div id="Drives"></div>';
+			var driveContent = '<div id="Drives"></div>';
 			
 			this.drivesSection = this.createSection( this.workingSetNode, driveContent, 'drives', "Drives", scope );
 			
-			this.addOrionDrive();
-			
-			this.addExternalDrives();
+			this.addDrivesTree("Drives");
+						
 		}
 		
 		ProjectNavigation.prototype.addDrives = addDrives;
@@ -168,19 +155,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		ProjectNavigation.prototype.addStreams = addStreams;
 		
 		ProjectNavigation.prototype.createSection = createSection;
-		
-		function addOrionDrive(){
-			this.addTree( 'Content', 'ORIONDRIVE' );
-		}
-		
-		ProjectNavigation.prototype.addOrionDrive = addOrionDrive;
-		
-		function addExternalDrives(){
-			this.addTree( 'Drives', 'DRIVES' );
-		}
-		
-		ProjectNavigation.prototype.addExternalDrives = addExternalDrives;
-		
+					
 		function addCommands(){
 		
 			var saveConfigCommand = new mCommands.Command({

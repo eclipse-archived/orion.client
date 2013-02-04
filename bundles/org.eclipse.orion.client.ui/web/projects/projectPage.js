@@ -12,13 +12,17 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
+	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
 		
 		var serviceRegistry;
 		var preferences;
 		var commandService;
+		var progressService;
+		var contentTypeService;
+		var fileClient;
 	
 		function createTestData(){
 			
@@ -40,7 +44,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			return projectData;
 		}
 		
-		function startProjectComponents( project ){
+		function startProjectComponents( project, workspace ){
 		
 			var titleArea = document.getElementById( 'titleArea');
 			
@@ -49,8 +53,8 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			}
 		
 			var sidePanel = document.getElementById( 'projectNavigation' );
-			
-			var projectTree = new mProjectNavigation( project, sidePanel, serviceRegistry, commandService );
+
+			var projectTree = new mProjectNavigation( project, workspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService );
 			
 			var mainPanel = document.getElementById( 'SFTPConfiguration' );
 			
@@ -70,16 +74,27 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			preferences = core.preferences;
 		
 			var selection = new mSelection.Selection(serviceRegistry);
-			
+
 			commandService = new mCommands.CommandService({serviceRegistry: serviceRegistry, selection: selection});
 
-			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences );			
+			var operationsClient = new mOperationsClient.OperationsClient(serviceRegistry);
+			
+			progressService = new mProgress.ProgressService(serviceRegistry, operationsClient);
+			
+			fileClient = new mFileClient.FileClient( serviceRegistry );			
+					
+			contentTypeService = new mContentTypes.ContentTypeService(serviceRegistry);
+
+			var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
+			
+			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences, searcher );			
+			
 			var projectName = PageUtil.matchResourceParameters();
 
 			/* Create the content */
 			projectName = projectName.resource.split('=')[1];
 			
-			var projectDataManager = new ProjectDataManager(serviceRegistry);
+			var projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);
 			
 			projectDataManager.getProject( projectName, startProjectComponents );
 		});

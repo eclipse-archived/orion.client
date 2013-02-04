@@ -248,6 +248,10 @@ div.page section:last-child {
 */
 }
 
+.plugin-entry {
+	border-bottom: solid 1px #EEE;
+	padding-bottom: 10px;
+}
 
 .plugin-icon {
 	float: left;

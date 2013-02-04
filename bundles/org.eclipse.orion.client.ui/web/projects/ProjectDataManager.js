@@ -19,9 +19,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		var WORKSPACES_FOLDER = 'workspaces';
 		var PROJECTS_METADATA = 'project.json';
 
-		function ProjectDataManager( serviceRegistry ){
+		function ProjectDataManager( serviceRegistry, fileClient ){
 			this.serviceRegistry = serviceRegistry;
-			this.fileClient = new mFileClient.FileClient( serviceRegistry );
+			this.fileClient = fileClient;
+			
+			// set up a deferred for getting the workspace.  Anyone who uses it should ensure the workspace retrieved is set back into this variable
+			// so that it doesn't have to be retrieved multiple times.
+			this.loadedWorkspace = this.fileClient.loadWorkspace("");
+			
 			this.createProjectData();
 		}
 		
@@ -40,64 +45,36 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		}
 		
 		function createProjectData( callback ){
-		
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
-			
+					
 			var fileClient = this.fileClient;
 			
 			var projectDataManager = this;
 			
+			var loadedWorkspace = this.loadedWorkspace;
+			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
-				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				// cache workspace so that repeated calls won't need to get it again.
+				projectDataManager.loadedWorkspace = workspace;
 				
-					var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
-					
-					if( !projectsIndex ){
-						fileClient.createFolder( workspace.ChildrenLocation, PROJECTS_FOLDER ).then( function(projectData){
-							fileClient.createFile( projectData.ContentLocation, PROJECTS_METADATA ).then( function( projectFile ){
-								var file = projectFile;					
-							    fileClient.write( projectFile.Location, '[]' );
-							});
-							
-							fileClient.createFolder( projectData.ContentLocation, WORKSPACES_FOLDER ).then( function( result ){} );
+				var projectsIndex = projectDataManager.findInWorkspace( workspace.Children, PROJECTS_FOLDER );
+				
+				if( !projectsIndex ){
+					fileClient.createFolder( workspace.ChildrenLocation, PROJECTS_FOLDER ).then( function(projectData){
+						fileClient.createFile( projectData.ContentLocation, PROJECTS_METADATA ).then( function( projectFile ){
+							var file = projectFile;					
+						    fileClient.write( projectFile.Location, '[]' );  
 						});
-					}	
-				});
+						
+						fileClient.createFolder( projectData.ContentLocation, WORKSPACES_FOLDER ).then( function( result ){} );
+					});
+				}	
 			});
 		}
 		
 		function getProjectData( callback ){
 		
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
-			
-			var fileClient = this.fileClient;
-			
-			Deferred.when( loadedWorkspace, function(workspace) {
-			
-				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
-				
-						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
-						
-						if( projectsIndex ){
-							
-							fileClient.read( folders.Children[projectsIndex].ChildrenLocation ).then( function(files){
-								files = JSON.parse( files );
-								var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
-							
-								fileClient.read( files.Children[projectFile].Location ).then( function( content ){	
-									var projects = JSON.parse( content );
-									callback( projects );
-								} );
-							});
-						}
-					}
-				);
-			});
-		}
-		
-		function createProjectWorkspaces( callback ){
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			var loadedWorkspace = this.loadedWorkspace;
 			
 			var fileClient = this.fileClient;
 			
@@ -105,6 +82,38 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
+				// cache workspace so that repeated calls won't need to get it again.
+				projectDataManager.loadedWorkspace = workspace;
+			
+				var projectsIndex = findInWorkspace( workspace.Children, PROJECTS_FOLDER );
+						
+				if( projectsIndex ){
+					
+					fileClient.read( workspace.Children[projectsIndex].ChildrenLocation ).then( function(files){
+						files = JSON.parse( files );
+						var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
+					
+						fileClient.read( files.Children[projectFile].Location ).then( function( content ){	
+							var projects = JSON.parse( content );
+							callback( projects, workspace );
+						} );
+					});
+				}
+			});
+		}
+		
+		function createProjectWorkspaces( callback ){
+			var loadedWorkspace = this.loadedWorkspace;
+			
+			var fileClient = this.fileClient;
+			
+			var projectDataManager = this;
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				// cache workspace so that repeated calls won't need to get it again.
+				projectDataManager.loadedWorkspace = workspace;
+				
 				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 				
 					var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
@@ -123,47 +132,50 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		function getProject( projectName, callback ){
 			
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			var loadedWorkspace = this.loadedWorkspace;
 			
 			var fileClient = this.fileClient;
+			
+			var projectDataManager = this;
 			
 			var project;
 			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
-				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				// cache workspace so that repeated calls won't need to get it again.
+				projectDataManager.loadedWorkspace = workspace;
+			
+				var projectsIndex = findInWorkspace( workspace.Children, PROJECTS_FOLDER );
 				
-						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
-						
-						if( projectsIndex ){
+				if( projectsIndex ){
+					
+					fileClient.read( workspace.Children[projectsIndex].ChildrenLocation ).then( function(files){
+						files = JSON.parse( files );
+						var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
+					
+						fileClient.read( files.Children[projectFile].Location ).then( function( content ){	
+							var projects = JSON.parse( content );
 							
-							fileClient.read( folders.Children[projectsIndex].ChildrenLocation ).then( function(files){
-								files = JSON.parse( files );
-								var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
 							
-								fileClient.read( files.Children[projectFile].Location ).then( function( content ){	
-									var projects = JSON.parse( content );
-									
-									
-									for( var p = 0; p < projects.length; p++ ){
-										if( projects[p].name === projectName ){
-											project = projects[p];
-											break;
-										}
-									}
-									
-									callback( project );
-								} );
-							});
-						}
-					}
-				);
+							for( var p = 0; p < projects.length; p++ ){
+								if( projects[p].name === projectName ){
+									project = projects[p];
+									break;
+								}
+							}
+							
+							callback( project, workspace );
+						} );
+					});
+				}
 			});
 		}
 		
 		function save( projectData, callback ){
 			
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			var loadedWorkspace = this.loadedWorkspace;
+			
+			var projectDataManager = this;
 			
 			var fileClient = this.fileClient;
 			
@@ -171,6 +183,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
+				// cache workspace so that repeated calls won't need to get it again.
+				projectDataManager.loadedWorkspace = workspace;
+				
 				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 				
 						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
@@ -201,15 +216,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									if( !existingProject ){
 										projects.push( projectData );
 										
-										/* Create a workspace for this new project */
-										
-										var fileClient = this.fileClient;
-			
-										var projectDataManager = this;
-										
-										Deferred.when( loadedWorkspace, function(workspace) {
-										
-											fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+										fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 											
 												var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
 												
@@ -217,8 +224,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 													callback( result );
 												});
 												
-											});
-										});		
+										});	
 									}
 									
 									var fileData = JSON.stringify( projects );
