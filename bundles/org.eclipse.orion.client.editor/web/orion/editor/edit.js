@@ -174,9 +174,9 @@ define('orion/editor/edit', [
 		editor.setInput(options.title, null, contents);
 		syntaxHighlighter.highlight(options.lang, editor);
 		contentAssist.addEventListener("Activating", function() {
-			if (/\.css$/.test(options.lang)) {
+			if (/css$/.test(options.lang)) {
 				contentAssist.setProviders([cssContentAssistProvider]);
-			} else if (/\.js$/.test(options.lang)) {
+			} else if (/js$/.test(options.lang)) {
 				contentAssist.setProviders([jsTemplateContentAssistProvider]);
 			}
 		});
