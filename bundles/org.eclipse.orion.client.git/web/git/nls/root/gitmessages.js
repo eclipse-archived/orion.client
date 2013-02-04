@@ -237,7 +237,7 @@ define({
 	"Are you sure you want to delete remote ${0}?": "Are you sure you want to delete remote ${0}?",
 	"Pull": "Pull",
 	"Pull from the repository": "Pull from the repository",
-	"Pulling : ": "Pulling : ",
+	"Pulling: ": "Pulling: ",
 	"Pull Git Repository": "Pull Git Repository",
 	"Git Log": "Git Log",
 	"Go to Git Log": "Go to Git Log",
