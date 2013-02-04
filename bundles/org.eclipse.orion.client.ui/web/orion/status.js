@@ -59,8 +59,8 @@ define(['require', 'orion/webui/littlelib', 'orion/globalCommands'], function(re
 		/**
 		 * Displays a status message to the user.
 		 * @param {String} msg Message to display.
-		 * @param [Number] timeout Optional time to display the message before hiding it.
-		 * @param [Boolean] isAccessible Optional, if <code>true</code>, a screen reader will read this message.
+		 * @param {Number} [timeout] Time to display the message before hiding it.
+		 * @param {Boolean} [isAccessible] If <code>true</code>, a screen reader will read this message.
 		 * Otherwise defaults to the domNode default.
 		 */
 		setMessage : function(msg, timeout, isAccessible) {

@@ -16,19 +16,18 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/com
 	 * 
 	 * @name orion.widgets.Section
 	 * @class Generates a section
-	 * @param parent {DomNode} parent node
-	 * @param options.id {String} id of the section header
-	 * @param options.title {String} title (in HTML) of the section
-	 * @param [options.preferenceService] used to store the hidden/shown state of the section if specified
-	 * @param [options.iconClass] {String|Array} a class or array of classes to use in the icon decorating section, no icon displayed if not provided
-	 * @param [options.getItemCount] {Function} function to return the count of items in the section. If not provided, no count is shown.
-	 * @param [options.content] {String|DomNode} HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
-	 * @param [options.slideout] {Boolean} if true section will contain generated slideout
-	 * @param [options.canHide] {Boolean} if true section may be hidden
-	 * @param [options.hidden] {Boolean} if true section will be hidden at first display
-	 * @param [options.useAuxStyle] {Boolean} if true the section will be styled for an auxiliary pane
-	 * @param [options.onExpandCollapse] {Function} a function that will be called when the expanded/collapsed state changes
-	 * @returns Section object
+	 * @param {DomNode} parent parent node
+	 * @param {String} options.id id of the section header
+	 * @param {String} options.title title (in HTML) of the section
+	 * @param {orion.preferences.PreferencesService} [options.preferenceService] used to store the hidden/shown state of the section if specified
+	 * @param {String|Array} [options.iconClass] a class or array of classes to use in the icon decorating section, no icon displayed if not provided
+	 * @param {Function} [options.getItemCount] function to return the count of items in the section. If not provided, no count is shown.
+	 * @param {String|DomNode} [options.content] HTML or DOM node giving the Section's initial contents. May be set later using {@link #setContent()}
+	 * @param {Boolean} [options.slideout] if true section will contain generated slideout
+	 * @param {Boolean} [options.canHide] if true section may be hidden
+	 * @param {Boolean} [options.hidden] if true section will be hidden at first display
+	 * @param {Boolean} [options.useAuxStyle] if true the section will be styled for an auxiliary pane
+	 * @param {Function} [options.onExpandCollapse] a function that will be called when the expanded/collapsed state changes
 	 */
 	function Section(parent, options) {
 		
@@ -213,7 +212,7 @@ define(['orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/com
 		},
 
 		/**
-		 * @returns The dom node that holds the section contents.
+		 * @returns {DomNode} The dom node that holds the section contents.
 		 */
 		getContentElement: function() {
 			return this._contentParent;

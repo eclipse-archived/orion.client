@@ -123,7 +123,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 		/**
 		 * Returns the base text model of this editor.
 		 *
-		 * @returns orion.editor.TextModel
+		 * @returns {orion.editor.TextModel}
 		 */
 		getModel: function() {
 			var model = this._textView.getModel();
@@ -142,7 +142,7 @@ define("orion/editor/editor", ['i18n!orion/editor/nls/messages', 'orion/editor/k
 		},
 		/**
 		 * Returns the underlying <code>TextView</code> used by this editor. 
-		 * @returns orion.editor.TextView the editor text view.
+		 * @returns {orion.editor.TextView} the editor text view.
 		 */
 		getTextView: function() {
 			return this._textView;

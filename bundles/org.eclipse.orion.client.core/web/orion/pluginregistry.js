@@ -920,7 +920,7 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 		 * @name orion.pluginregistry.PluginRegistry#installPlugin
 		 * @param {String} url The location of the plugin
 		 * @param {Object} [optManifest] The plugin metadata
-		 * @returns A promise that will resolve when the plugin has been installed.
+		 * @returns {orion.Promise} A promise that will resolve when the plugin has been installed.
 		 * @function 
 		 */
 		this.installPlugin = function(url, optManifest) {

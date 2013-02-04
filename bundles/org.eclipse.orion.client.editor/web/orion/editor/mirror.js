@@ -80,7 +80,7 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 			}
 		},
 		backUp: function(/**Number*/ n) { this.pos -= n; },
-		/** @returns Number */
+		/** @returns {Number} */
 		column: function() {
 			var col = 0, i = 0;
 			while (i < this.tokenStart) {
@@ -97,7 +97,7 @@ define("orion/editor/mirror", ["i18n!orion/editor/nls/messages", "orion/editor/e
 			}
 			return col;
 		},
-		/** @returns String */
+		/** @returns {String} */
 		current: function() { return this.string.substring(this.tokenStart, this.pos); },
 		advance: function() { this.tokenStart = this.pos; }
 	};
