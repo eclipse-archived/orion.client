@@ -105,16 +105,18 @@ define('orion/editor/edit', [
 			});
 		};
 
-		var contentAssist;
-		var contentAssistFactory = {
-			createContentAssistMode: function(editor) {
-				contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
-				var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist);
-				return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
-			}
-		};
-		var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
-		var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
+		var contentAssist, contentAssistFactory;
+		if (!options.readonly) {
+			contentAssistFactory = {
+				createContentAssistMode: function(editor) {
+					contentAssist = new mContentAssist.ContentAssist(editor.getTextView());
+					var contentAssistWidget = new mContentAssist.ContentAssistWidget(contentAssist);
+					return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
+				}
+			};
+			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
+			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
+		}
 	
 		// Canned highlighters for js, java, and css. Grammar-based highlighter for html
 		var syntaxHighlighter = {
@@ -173,13 +175,15 @@ define('orion/editor/edit', [
 		editor.installTextView();
 		editor.setInput(options.title, null, contents);
 		syntaxHighlighter.highlight(options.lang, editor);
-		contentAssist.addEventListener("Activating", function() {
-			if (/css$/.test(options.lang)) {
-				contentAssist.setProviders([cssContentAssistProvider]);
-			} else if (/js$/.test(options.lang)) {
-				contentAssist.setProviders([jsTemplateContentAssistProvider]);
-			}
-		});
+		if (contentAssist) {
+			contentAssist.addEventListener("Activating", function() {
+				if (/css$/.test(options.lang)) {
+					contentAssist.setProviders([cssContentAssistProvider]);
+				} else if (/js$/.test(options.lang)) {
+					contentAssist.setProviders([jsTemplateContentAssistProvider]);
+				}
+			});
+		}
 		
 		return editor;
 	}
