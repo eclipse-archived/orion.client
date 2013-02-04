@@ -102,6 +102,66 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			});
 		}
 		
+				/* Create a folder workspace for a project */ 
+		
+		function createWorkspace( project, callback ){
+		
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			
+			var fileClient = this.fileClient;
+			
+			var projectDataManager = this;
+			
+			this.checkForWorkspaces( function( result ){
+				
+				if( result === true ){
+				
+					Deferred.when( loadedWorkspace, function(workspace) {
+			
+						fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+						
+							var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
+							
+							fileClient.read( folders.Children[projectsIndex].ChildrenLocation, true ).then( function(folders){
+								
+								var workspacesIndex = projectDataManager.findInWorkspace( folders.Children, WORKSPACES_FOLDER );
+								
+								fileClient.read( folders.Children[workspacesIndex].ChildrenLocation, true ).then( function(folderResult){
+								
+									fileClient.createFolder( folderResult.Location, project.name ).then( function( outcome ){
+									
+										project.workspace = outcome.Name;
+									
+										projectDataManager.save( project );
+									});
+								});
+							});
+						});
+					});
+				
+				}else{
+					
+					Deferred.when( loadedWorkspace, function(workspace) {
+			
+						fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+						
+							var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
+							
+							fileClient.createFolder( folders.Children[ projectsIndex ].ChildrenLocation, WORKSPACES_FOLDER ).then( function( result ){				
+								
+								fileClient.createFolder( result.Location, project.name ).then( function( folderResult ){
+								
+									project.workspace = folderResult.Name;
+								
+									projectDataManager.save( project );
+								});
+							});
+						});
+					});				
+				}
+			});
+		}
+		
 		function createProjectWorkspaces( callback ){
 			var loadedWorkspace = this.loadedWorkspace;
 			
@@ -173,9 +233,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		function save( projectData, callback ){
 			
-			var loadedWorkspace = this.loadedWorkspace;
-			
-			var projectDataManager = this;
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
 			
 			var fileClient = this.fileClient;
 			
@@ -183,9 +241,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
-				// cache workspace so that repeated calls won't need to get it again.
-				projectDataManager.loadedWorkspace = workspace;
-				
 				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 				
 						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
@@ -216,7 +271,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									if( !existingProject ){
 										projects.push( projectData );
 										
-										fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+										/* Create a workspace for this new project */
+			
+										var projectDataManager = this;
+										
+										Deferred.when( loadedWorkspace, function(workspace) {
+										
+											fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 											
 												var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
 												
@@ -224,14 +285,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 													callback( result );
 												});
 												
-										});	
+											});
+										});		
 									}
 									
 									var fileData = JSON.stringify( projects );
 									
 									fileClient.write( fileLocation, fileData );
 									
-									callback( project );
+									callback( true );
 								} );
 							});
 						}

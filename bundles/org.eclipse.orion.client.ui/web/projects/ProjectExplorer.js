@@ -20,8 +20,27 @@ function(messages, Deferred, mFileExplorer, lib, mFileUtils, mExplorer) {
 	
 	ProjectExplorer.prototype = Object.create( mFileExplorer.FileExplorer.prototype ); 
 	
-	ProjectExplorer.prototype.loadDriveList = function(workspace) {
+	ProjectExplorer.prototype.includeDrive = function( driveName ){
+	
+		var outcome = false;
+		
+		if( this.driveNames ){
+			for( var drive = 0; drive < this.driveNames.length; drive++ ){
+			
+				if( this.driveNames[drive] === driveName ){
+					outcome = true;
+					break;
+				}
+			}
+		}
+		
+		return outcome;
+	};
+	
+	ProjectExplorer.prototype.loadDriveList = function( workspace, driveNames ) {
 		var parent = lib.node(this.parentId);			
+		
+		this.driveNames = driveNames;
 		
 		// Progress indicator
 		var progress = lib.node("progress");  //$NON-NLS-0$
@@ -72,7 +91,10 @@ function(messages, Deferred, mFileExplorer, lib, mFileUtils, mExplorer) {
 			self.fileClient.loadWorkspace(workspace.DriveLocation).then(function (driveRoot) {
 				driveRoot.Children.forEach(function(drive) {
 					// drives relevant to the project should be pushed onto the treeRoots array.
-					treeRoots.push(drive);
+					
+					if( self.includeDrive( drive.Name ) ){
+						treeRoots.push(drive);
+					}
 				});
 				treeRoots.push(orionFileSystem);
 				result.resolve(treeRoots);

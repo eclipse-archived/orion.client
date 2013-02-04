@@ -82,7 +82,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			// set up the toolbar level commands	
 			var addDriveCommand = new mCommands.Command({
-				name: 'Configure', //messages["Install"],
+				name: 'Add a new configuration', //messages["Install"],
 				tooltip: 'Adds a new drive configuration',
 				id: "orion.addDrive", //$NON-NLS-0$
 				callback: function(data) {
