@@ -612,6 +612,7 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var path = item.Location;
+				var name = item.Name;
 				exports.getDefaultSshOptions(serviceRegistry).then(function(options) {
 					var func = arguments.callee;
 					var gitService = serviceRegistry.getService("orion.git.provider"); //$NON-NLS-0$
@@ -622,9 +623,9 @@ var exports = {};
 							options.gitSshPassword,
 							options.knownHosts,
 							options.gitPrivateKey,
-							options.gitPassphrase), messages["Pulling : "] + path);
+							options.gitPassphrase), messages["Pulling: "] + name);
  
-					statusService.createProgressMonitor(pullDeferred, messages["Pulling : "] + path);
+					statusService.createProgressMonitor(pullDeferred, messages["Pulling: "] + name);
 					var pullOperationLocation;
 					pullDeferred.then(function(jsonData) {
 						exports.handleProgressServiceResponse(jsonData, options, serviceRegistry, function(jsonData) {
@@ -773,6 +774,7 @@ var exports = {};
 			callback: function(data) {
 				var item = data.items;
 				var path = item.Location;
+				var name = item.Name;
 				var commandInvocation = data;
 				
 				var handleResponse = function(jsonData, commandInvocation){
@@ -833,8 +835,8 @@ var exports = {};
 									options.gitSshPassword,
 									options.knownHosts,
 									options.gitPrivateKey,
-									options.gitPassphrase), messages["Fetching remote: "] + path);
-							statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + path);
+									options.gitPassphrase), messages["Fetching remote: "] + name);
+							statusService.createProgressMonitor(deferred, messages["Fetching remote: "] + name);
 							deferred.then(
 								function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
@@ -863,7 +865,7 @@ var exports = {};
 					// have to determine manually
 					var gitService = serviceRegistry.getService("orion.git.provider");
 					var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-					progress.progress(gitService.getGitRemote(path), "Getting remote details " + path).then(
+					progress.progress(gitService.getGitRemote(path), "Getting remote details " + name).then(
 						function(resp){
 							progress.progress(gitService.getGitClone(resp.CloneLocation), "Getting git repository information " + resp.Name).then(
 								function(resp){
@@ -899,6 +901,7 @@ var exports = {};
 				
 				var item = data.items;
 				var path = item.Location;
+				var name = item.Name;
 				var commandInvocation = data;
 				
 				var handleResponse = function(jsonData, commandInvocation){
@@ -958,8 +961,8 @@ var exports = {};
 									options.gitSshPassword,
 									options.knownHosts,
 									options.gitPrivateKey,
-									options.gitPassphrase), messages['Fetching remote: '] + path);
-							statusService.createProgressMonitor(deferred, messages['Fetching remote: '] + path);
+									options.gitPassphrase), messages['Fetching remote: '] + name);
+							statusService.createProgressMonitor(deferred, messages['Fetching remote: '] + name);
 							deferred.then(
 								function(jsonData, secondArg) {
 									exports.handleGitServiceResponse(jsonData, serviceRegistry, 
@@ -1407,7 +1410,7 @@ var exports = {};
 												location: item.RemoteLocation[0].Children[0].Name,
 												func: function(){
 													commandInvocation.targetBranch = item.RemoteLocation[0].Children[0];
-													handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", item.Location, false);
+													handlePush(options,item.RemoteLocation[0].Children[0].Location, "HEAD", item.Name, false);
 												}
 											});
 										}

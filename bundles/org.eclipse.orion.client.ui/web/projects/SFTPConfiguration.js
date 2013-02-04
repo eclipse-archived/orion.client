@@ -15,7 +15,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 	
 	function(messages, require, DriveList, mCommands, ProjectDataManager, ProjectData, ProjectResponseHandler ) {
 
-		function SFTPConfiguration( project, node, projectData, commandService, serviceRegistry ){
+		function SFTPConfiguration( project, node, projectData, commandService, serviceRegistry, fileClient ){
 		
 			this.commandService = commandService;
 			this.serviceRegistry = serviceRegistry;
@@ -32,7 +32,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 
 			this.driveWidget = new DriveList( {}, drivelist, commandService, serviceRegistry );
 			
-			this.projectDataManager = new ProjectDataManager( serviceRegistry );
+			this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
 			
 			this.driveWidget.show();
 
@@ -70,7 +70,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 				}
 				
 				if( !project.workspace ){
-					this.projectDataManager.createProjectWorkspace();
+					this.projectDataManager.createWorkspace( project );
 				}
 				
 			}else{
@@ -100,10 +100,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			var titleArea = document.getElementById( 'titleArea');
 			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 		
-			this.projectDataManager.save( project, this.handleFeedback.bind( this) );
+			this.projectDataManager.save( project, this.handleFeedback.bind( this ) );
 		}
 		
-		function handleFeedback( x, y ){
+		function handleFeedback( result ){
 			this.handleSuccess();
 		}
 
