@@ -21,6 +21,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.serviceRegistry = serviceRegistry;
 			
+			this.project = project;
+			
 			this.anchor = anchor;
 			
 			this.progressService = progressService;
@@ -40,6 +42,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.addDrives( this );
 			
 			this.addCommands();
+			
+			
 		}
 		
 		var workingSetNode;
@@ -54,6 +58,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		var anchor;
 		ProjectNavigation.prototype.anchor = anchor;
 		
+		var project;
+		ProjectNavigation.prototype.project = project;
+		
 		var template = '<div>' +
 							'<div id="configuration"></div>' +
 							'<div id="workingSet">' +
@@ -67,7 +74,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		ProjectNavigation.prototype.template = template;
 		
-		function addDrivesTree( parentNode ){
+		function addDrivesTree( parentNode, drivenames ){
 		
 			this.explorer = new ProjectExplorer({							
 				selection: this.selection, 
@@ -87,7 +94,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.explorer );
 			
 			var myexplorer = this.explorer;
-			myexplorer.loadDriveList(this.workspace);
+			myexplorer.loadDriveList( this.workspace, drivenames );
 		}
 		
 		ProjectNavigation.prototype.addDrivesTree = addDrivesTree;
@@ -136,7 +143,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.drivesSection = this.createSection( this.workingSetNode, driveContent, 'drives', "Drives", scope );
 			
-			this.addDrivesTree("Drives");
+			var drivenames = [];
+			
+			for( var p = 0; p < this.project.drives.length; p++ ){
+				drivenames.push( this.project.drives[p].drivename );
+			}
+			
+			this.addDrivesTree("Drives", drivenames );
 						
 		}
 		
