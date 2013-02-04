@@ -78,6 +78,10 @@ define('orion/editor/edit', [
 	 * @property {String} [title=""] the editor title.
 	 * @property {String} [contents=""] the editor contents.
 	 * @property {String} [lang] the styler language. Plain text by default.
+	 * @property {Boolean} [showLinesRuler=true] whether or not the lines ruler is shown.
+	 * @property {Boolean} [showAnnotationRuler=true] whether or not the annotation ruler is shown.
+	 * @property {Boolean} [showOverviewRuler=true] whether or not the overview ruler is shown.
+	 * @property {Boolean} [showFoldingRuler=true] whether or not the folding ruler is shown.
 	 */
 	/**
 	 * Creates an editor instance configured with the given options.
@@ -95,6 +99,7 @@ define('orion/editor/edit', [
 		var textViewFactory = function() {
 			return new mTextView.TextView({
 				parent: parent,
+				model: new mProjModel.ProjectionTextModel(new mTextModel.TextModel("")),
 				tabSize: options.tabSize ? options.tabSize : 4,
 				readonly: options.readonly,
 				fullSelection: options.fullSelection,
@@ -135,6 +140,7 @@ define('orion/editor/edit', [
 						case "java":
 						case "css":
 							this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
+							editor.setFoldingRulerVisible(options.showFoldingRuler == undefined || options.showFoldingRuler);
 							break;
 						case "html":
 							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
@@ -160,6 +166,8 @@ define('orion/editor/edit', [
 			undoStackFactory: new mEditorFeatures.UndoFactory(),
 			annotationFactory: new mEditorFeatures.AnnotationFactory(),
 			lineNumberRulerFactory: new mEditorFeatures.LineNumberRulerFactory(),
+			foldingRulerFactory: new mEditorFeatures.FoldingRulerFactory(),
+			textDNDFactory: new mEditorFeatures.TextDNDFactory(),
 			contentAssistFactory: contentAssistFactory,
 			keyBindingFactory: keyBindingFactory, 
 			statusReporter: options.statusReporter,
@@ -173,6 +181,10 @@ define('orion/editor/edit', [
 		if (!contents) { contents=""; }
 		
 		editor.installTextView();
+		editor.setLineNumberRulerVisible(options.showLinesRuler == undefined || options.showLinesRuler);
+		editor.setAnnotationRulerVisible(options.showAnnotationRuler == undefined || options.showFoldingRuler);
+		editor.setOverviewRulerVisible(options.showOverviewRuler == undefined || options.showOverviewRuler);
+		editor.setFoldingRulerVisible(options.showFoldingRuler == undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents);
 		syntaxHighlighter.highlight(options.lang, editor);
 		if (contentAssist) {
