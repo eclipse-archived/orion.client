@@ -40,6 +40,28 @@ define('orion/editor/edit', [
 	"examples/editor/textStyler"
 ], function(mTextView, mTextModel, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
+	/**	@private */
+	function getTextFromElement(element) {
+		if (!window.getSelection) {
+			return element.innerText || element.textContent;
+		}
+		var newRange = document.createRange();
+		newRange.selectNode(element);
+		var selection = window.getSelection();
+		var oldRanges = [], i;
+		for (i = 0; i < selection.rangeCount; i++) {
+			oldRanges.push(selection.getRangeAt(i));
+		}
+		selection.removeAllRanges();
+		selection.addRange(newRange);
+		var text = selection.toString();
+		selection.removeAllRanges();
+		for (i = 0; i < oldRanges.length; i++) {
+			selection.addRange(oldRanges[i]);
+		}
+		return text;
+	}
+	
 	/**
 	 * @class This object describes the options for <code>edit</code>.
 	 * @name orion.editor.EditOptions
@@ -141,12 +163,15 @@ define('orion/editor/edit', [
 			statusReporter: options.statusReporter,
 			domNode: parent
 		});
-			
-		editor.installTextView();
-		// if there is a mechanism to change which file is being viewed, this code would be run each time it changed.
-		if (options.contents) {
-			editor.setInput(options.title, null, options.contents);
+		
+		var contents = options.contents;
+		if (contents === undefined) {
+			contents = getTextFromElement(parent); 
 		}
+		if (!contents) { contents=""; }
+		
+		editor.installTextView();
+		editor.setInput(options.title, null, contents);
 		syntaxHighlighter.highlight(options.lang, editor);
 		contentAssist.addEventListener("Activating", function() {
 			if (/\.css$/.test(options.lang)) {
