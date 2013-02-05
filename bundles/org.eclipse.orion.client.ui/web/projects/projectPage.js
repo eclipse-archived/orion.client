@@ -15,7 +15,7 @@
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
 	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, mSFTPConfiguration, mProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
+	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, SFTPConfiguration, ProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
 		
 		var serviceRegistry;
 		var preferences;
@@ -23,26 +23,6 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		var progressService;
 		var contentTypeService;
 		var fileClient;
-	
-		function createTestData(){
-			
-			var testData = [];
-
-			return testData;
-		}
-	
-		function fetchProjectData(){
-		
-			/* This function should read the user's project data from the 
-			   file system */
-			
-			var projectData;
-			
-			projectData = createTestData();
-			
-			
-			return projectData;
-		}
 		
 		function startProjectComponents( project, workspace ){
 		
@@ -54,13 +34,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		
 			var sidePanel = document.getElementById( 'projectNavigation' );
 
-			var projectTree = new mProjectNavigation( project, workspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService );
+			var projectTree = new ProjectNavigation( project, workspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService );
 			
 			var mainPanel = document.getElementById( 'SFTPConfiguration' );
 			
-			var projectData = fetchProjectData();
-			
-			var SFTPConfiguration = new mSFTPConfiguration( project, mainPanel, projectData, commandService, serviceRegistry, fileClient );	
+			var configuration = new SFTPConfiguration( project, mainPanel, commandService, serviceRegistry, fileClient );	
 		}
 		
 		mBootstrap.startup().then(

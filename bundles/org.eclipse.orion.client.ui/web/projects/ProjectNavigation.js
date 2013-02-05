@@ -41,9 +41,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.addDrives( this );
 			
-			this.addCommands();
-			
-			
+			this.addCommands();	
 		}
 		
 		var workingSetNode;
@@ -145,12 +143,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			var drivenames = [];
 			
-			for( var p = 0; p < this.project.drives.length; p++ ){
-				drivenames.push( this.project.drives[p].drivename );
+			if( this.project ){
+				for( var p = 0; p < this.project.drives.length; p++ ){
+					drivenames.push( this.project.drives[p].drivename );
+				}
 			}
 			
-			this.addDrivesTree("Drives", drivenames );
-						
+			this.addDrivesTree("Drives", drivenames );			
 		}
 		
 		ProjectNavigation.prototype.addDrives = addDrives;
@@ -162,7 +161,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			var streamsContent = '<div id="streams"></div>';
 			
 			this.streamsSection = this.createSection( this.workingSetNode, streamsContent, 'streams', 'Streams', scope ); 
-		
+	
 		}
 		
 		ProjectNavigation.prototype.addStreams = addStreams;
@@ -183,7 +182,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.addCommand(saveConfigCommand);
 			this.commandService.registerCommandContribution("projectConfiguration", "orion.projectConfiguration", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands("projectConfiguration", "projectConfiguration", this, this, "button"); //$NON-NLS-0$
-		
 		}
 		
 		ProjectNavigation.prototype.addCommands = addCommands;
