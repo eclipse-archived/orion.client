@@ -51,7 +51,7 @@ define(['orion/PageUtil'], function(PageUtil) {
 	 *     segmentStr: String. The string in the segment.
 	 *     isValidURL: Boolean. The flag indicating if the segment is a valid URL.
 	 */
-	function rendeStrSegments(parentNode, segments) {
+	function processURLSegments(parentNode, segments) {
 		segments.forEach(function(segment) {
 			if(segment.isValidURL){
 				var link = document.createElement('a');
@@ -69,6 +69,6 @@ define(['orion/PageUtil'], function(PageUtil) {
 	//return module exports
 	return {
 		detectValidURL: detectValidURL,
-		rendeStrSegments: rendeStrSegments
+		processURLSegments: processURLSegments
 	};
 });
