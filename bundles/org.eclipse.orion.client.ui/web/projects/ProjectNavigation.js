@@ -73,7 +73,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		ProjectNavigation.prototype.template = template;
 		
 		function addDrivesTree( parentNode, drivenames ){
-		
+			
+			var self = this;
+			
 			this.explorer = new ProjectExplorer({							
 				selection: this.selection, 
 				serviceRegistry: this.serviceRegistry,
@@ -83,7 +85,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				
 					var renderer = new DriveTreeRenderer({
 						checkbox: false, 
-						cachePrefix: "Navigator"}, explorer, this.commandService, this.contentTypeService);
+						cachePrefix: "Navigator"}, explorer, self.commandService, self.contentTypeService);
 						
 					return renderer;
 			}}); //$NON-NLS-0$
