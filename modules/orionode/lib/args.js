@@ -13,9 +13,7 @@
 var compat = require('./compat');
 var fs = require('fs');
 var path = require('path');
-var pfs = require('promised-io/fs');
-//var PromisedIO = require('promised-io');
-var Deferred = require('promised-io').Deferred;
+var Deferred = require('deferred-fs').Deferred;
 
 /**
  * @param {Array} argv
