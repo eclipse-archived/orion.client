@@ -172,7 +172,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
-				link = createLink("", item, tableRow.id, this.commandService, this.contentTypeService);
+				link = createLink(this.folderLink || "", item, tableRow.id, this.commandService, this.contentTypeService);
 				span.appendChild(link); //$NON-NLS-0$
 				this.explorer._makeDropTarget(item, tableRow);
 				this.explorer._makeDropTarget(item, link);
