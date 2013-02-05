@@ -41,7 +41,7 @@ define(["orion/assert", "orion/searchUtils"], function(assert, mSearchUtils) {
 	 */
 	function replaceFile(fileContentText, fileModel, inFileQuery, replaceString) {
 		var newContents = {contents: null};
-		mSearchUtils.generateNewContents(true, fileModel.contents, newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
+		mSearchUtils.generateNewContents(false, fileModel.contents, newContents, fileModel, replaceString, inFileQuery.searchStrLength); 
 		return newContents.contents.join("\n");
 	}
 	
