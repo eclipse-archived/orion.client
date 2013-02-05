@@ -231,6 +231,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			});
 		}
 		
+		function removefromArray( array, from, to) {
+		  var rest = array.slice((to || from) + 1 || array.length);
+		  array.length = from < 0 ? array.length + from : from;
+		  return array.push.apply(array, rest);
+		}
+		
 		function save( projectData, callback ){
 			
 			var loadedWorkspace = this.fileClient.loadWorkspace("");
@@ -247,17 +253,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 				
 						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
 						
-						
-						
 						if( projectsIndex ){
 							
 							fileClient.read( folders.Children[projectsIndex].ChildrenLocation ).then( function(files){
+								
 								files = JSON.parse( files );
+								
 								var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
 								
 								var fileLocation = files.Children[projectFile].Location;
 							
 								fileClient.read( fileLocation ).then( function( content ){	
+								
 									var projects = JSON.parse( content );
 									
 									projectData.date = new Date();
@@ -273,12 +280,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									}
 									
 									if( !existingProject ){
+									
 										projects.push( projectData );
 										
 										/* Create a workspace for this new project */
 			
-										
-										
 										Deferred.when( loadedWorkspace, function(workspace) {
 										
 											fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
@@ -287,8 +293,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 												
 												fileClient.createFolder( folders.Children[ projectsIndex ].ChildrenLocation, WORKSPACES_FOLDER ).then( function( result ){
 													callback( result );
-												});
-												
+												});											
 											});
 										});		
 									}
@@ -308,6 +313,68 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		function removeProject( projectName, callback ){
 		
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			
+			var fileClient = this.fileClient;
+			
+			this.removeFromArray = function( array, from, to) {
+			  var rest = array.slice((to || from) + 1 || array.length);
+			  array.length = from < 0 ? array.length + from : from;
+			  return array.push.apply(array, rest);
+			};
+			
+			var remover = this;
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				
+					var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
+					
+					if( projectsIndex ){
+					
+						var projectDataLocation = folders.Children[projectsIndex].ChildrenLocation;
+				
+						
+						fileClient.read( projectDataLocation ).then( function(files){
+						
+							files = JSON.parse( files );
+						
+							var projectFile = findInWorkspace( files.Children, PROJECTS_METADATA );
+							
+							var fileLocation = files.Children[projectFile].Location;
+						
+							fileClient.read( fileLocation ).then( function( content ){	
+							
+								var projects = JSON.parse( content );
+								
+								var index;
+								
+								for( var p = 0; p < projects.length; p++ ){
+								
+									if( projects[p].name === projectName ){
+										index = p;
+										break;
+									}	
+								}
+								
+								if( index >= 0 ){
+								
+									var newProjects = remover.removeFromArray( projects, index );
+									var fileData = JSON.stringify( projects );
+									fileClient.write( fileLocation, fileData ).then( function( outcome ){
+									
+										callback();
+									
+									} );
+									
+									
+								}
+							});
+						});
+					}
+				});
+			});
 		}
 		
 		ProjectDataManager.prototype.findInWorkspace = findInWorkspace;
@@ -317,6 +384,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		ProjectDataManager.prototype.getProject = getProject;
 		ProjectDataManager.prototype.addNewProject = addNewProject;
 		ProjectDataManager.prototype.save = save;
+		ProjectDataManager.prototype.removefromArray = removefromArray;
 		ProjectDataManager.prototype.removeProject = removeProject;
 		ProjectDataManager.prototype.constructor = ProjectDataManager;
 		

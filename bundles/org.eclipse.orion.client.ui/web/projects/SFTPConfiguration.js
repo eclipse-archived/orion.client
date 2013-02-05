@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'orion/commands', 'projects/ProjectDataManager', 'projects/ProjectData', 'projects/ProjectResponseHandler' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'orion/commands', 'projects/ProjectDataManager', 'projects/ProjectData', 'projects/ProjectResponseHandler', 'orion/URITemplate' ], 
 	
-	function(messages, require, DriveList, mCommands, ProjectDataManager, ProjectData, ProjectResponseHandler ) {
+	function(messages, require, DriveList, mCommands, ProjectDataManager, ProjectData, ProjectResponseHandler, URITemplate ) {
 
 		function SFTPConfiguration( project, node, commandService, serviceRegistry, fileClient ){
 		
@@ -49,8 +49,18 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 				callback: thisSFTPConfiguration.saveConfiguration.bind(thisSFTPConfiguration)
 			});
 			
+			var deleteConfigCommand = new mCommands.Command({
+				name: 'Delete', //messages["Install"],
+				tooltip: 'Delete configuration',
+				id: "orion.deleteConfigCommand", //$NON-NLS-0$
+				callback: thisSFTPConfiguration.deleteConfiguration.bind(thisSFTPConfiguration)
+			});
+			
+			this.commandService.addCommand(deleteConfigCommand);
+			this.commandService.registerCommandContribution("configurationCommands", "orion.deleteConfigCommand", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.addCommand(saveConfigCommand);
 			this.commandService.registerCommandContribution("configurationCommands", "orion.saveProjectConfig", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			
 			this.commandService.renderCommands("configurationCommands", "configurationCommands", this, this, "button"); //$NON-NLS-0$
 		
 			this.projectNode.appendChild( drivelist );
@@ -100,8 +110,41 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 			var titleArea = document.getElementById( 'titleArea');
 			titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
+			
+			parent.location.hash = '?project=' + project.name;
 		
 			this.projectDataManager.save( project, this.handleFeedback.bind( this ) );
+		}
+		
+		function deleteConfiguration(){
+		
+			var x;
+			var confirmation = confirm( "Are you sure you want to delete this project?" );
+			
+			if( confirmation === true ){
+				
+				console.log( 'delete' );		
+				this.projectDataManager.removeProject( this.getProjectName(), this.handleDeletion.bind( this ) );
+			
+			}else{
+
+			}
+		}
+		
+		function handleDeletion(){
+		
+			var uriTemplate = "{OrionHome}/projects/project.html#";
+			
+			
+			var template = new URITemplate(uriTemplate);
+			var url = template.expand({
+				project: ''
+			});
+		
+			window.location = url;
+		
+			console.log( 'deleted' );
+		
 		}
 		
 		function handleFeedback( result ){
@@ -202,11 +245,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 		SFTPConfiguration.prototype.projectDataManager = projectDataManager;
 		SFTPConfiguration.prototype.handleFeedback = handleFeedback;
 		SFTPConfiguration.prototype.saveConfiguration = saveConfiguration;
+		SFTPConfiguration.prototype.deleteConfiguration = deleteConfiguration;
 		SFTPConfiguration.prototype.createEmptyProject = createEmptyProject;
 		SFTPConfiguration.prototype.showProjectConfiguration = showProjectConfiguration;
 		SFTPConfiguration.prototype.setProjectName = setProjectName;
 		SFTPConfiguration.prototype.setProjectAddress = setProjectAddress;	
 		SFTPConfiguration.prototype.getProjectName = getProjectName;
+		SFTPConfiguration.prototype.handleDeletion = handleDeletion;
 		SFTPConfiguration.prototype.getProjectAddress = getProjectAddress;
 		SFTPConfiguration.prototype.setProjectDescription = setProjectDescription;
 		SFTPConfiguration.prototype.getProjectDescription = getProjectDescription;
