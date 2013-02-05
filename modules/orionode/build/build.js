@@ -14,14 +14,13 @@
 // compat shim for v0.6-0.8 differences
 require('../lib/compat');
 
+var async = require('../lib/async');
 var child_process = require('child_process');
+var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var constants = require('constants');
 var fs = require('fs');
-var pfs = require('promised-io/fs');
 var path = require('path');
-var PromisedIO = require('promised-io');
 var sax = require('sax'), strictSax = true;
-var Deferred = PromisedIO.Deferred;
 
 var BUNDLE_WEB_FOLDER = './web/';
 var IS_WINDOWS = process.platform === 'win32';
@@ -46,20 +45,6 @@ function format(str/*, args..*/) {
 	return str.replace(/\$\{([^}]+)\}/g, function(match, param) {
 		return args[param];
 	});
-}
-
-/**
- * Workaround for Promised-IO's ridiculous treatment of fs.exists.
- * @returns {Deferred} A promise that resolves to a boolean giving whether the given filesystem path exists.
- */
-function exists(path) {
-	var d = new Deferred();
-	try {
-		fs.exists(path, d.resolve);
-	} catch (e) {
-		d.reject(e);
-	}
-	return d;
 }
 
 /**
@@ -123,14 +108,6 @@ function section(name) {
 	console.log('-------------------------------------------------------\n' + name + '...\n');
 }
 
-/**
- * Workaround for pfs.readFile() always returning Buffer
- * @see https://github.com/kriszyp/promised-io/issues/24
- */
-function debuf(maybeBuf) {
-	return Buffer.isBuffer(maybeBuf) ? maybeBuf.toString('utf8') : maybeBuf;
-}
-
 function build(optimizeElements) {
 	var optimizes = optimizeElements.map(function(optimize) {
 		var pageDir = optimize.attributes.pageDir;
@@ -163,7 +140,7 @@ function build(optimizeElements) {
 		updateHtml: true,
 		copyBack: true
 	};
-	return exists(pathToTempDir).then(function(exists) {
+	return dfs.exists(pathToTempDir).then(function(exists) {
 		if (exists) {
 			section('Removing old temp dir ' + pathToTempDir);
 			var buildDir = __dirname;
@@ -176,7 +153,7 @@ function build(optimizeElements) {
 		}
 	}).then(function() {
 		section('Creating temp dir ' + pathToTempDir);
-		return pfs.mkdir(pathToTempDir);
+		return dfs.mkdir(pathToTempDir);
 	}).then(function() {
 		// Copy all required files into the .temp directory for doing the build
 		if (steps.copy === false) { return new Deferred().resolve(); }
@@ -184,9 +161,9 @@ function build(optimizeElements) {
 
 		// Get the list of bundles from the orion.client lib:
 		var bundles = [];
-		return pfs.readdir(pathToOrionClientBundlesFolder).then(function(contents) {
-			return PromisedIO.all(contents.map(function(item) {
-				return pfs.stat(path.join(pathToOrionClientBundlesFolder, item)).then(function(stats) {
+		return dfs.readdir(pathToOrionClientBundlesFolder).then(function(contents) {
+			return Deferred.all(contents.map(function(item) {
+				return dfs.stat(path.join(pathToOrionClientBundlesFolder, item)).then(function(stats) {
 					if (stats.isDirectory()) {
 						bundles.push(item);
 					}
@@ -198,18 +175,16 @@ function build(optimizeElements) {
 			 * structure, we need to copy all the bundles' "./web/" folders into the temp dir, so that modules
 			 * will resolve in later optimization steps.
 			 */
-			return PromisedIO.seq(bundles.map(function(bundle) {
-				return function() {
-					var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
-					return exists(bundleWebFolder).then(function(exists) {
-						if (exists) {
-							return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
-						} else {
-							console.log('Bundle has no web/ folder, skip: ' + bundle);
-							return;
-						}
-					});
-				};
+			return async.sequence(bundles.map(function(bundle) {
+				var bundleWebFolder = path.resolve(pathToOrionClientBundlesFolder, bundle, BUNDLE_WEB_FOLDER);
+				return dfs.exists(bundleWebFolder).then(function(exists) {
+					if (exists) {
+						return execCommand(getCopyDirCmd(bundleWebFolder, pathToTempDir));
+					} else {
+						console.log('Bundle has no web/ folder, skip: ' + bundle);
+						return;
+					}
+				});
 			}));
 		}).then(function() {
 			console.log('Copying orionode.client');
@@ -218,7 +193,7 @@ function build(optimizeElements) {
 	}).then(function() {
 		if (steps.optimize === false) { return new Deferred().resolve(); }
 		section('Optimizing page JS (' + optimizes.length + ')');
-		return PromisedIO.seq(optimizes.map(function(op) {
+		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				// TODO check existence of path.join(pageDir, name) -- skip if the file doesn't exist
 				var pageDir = op.pageDir, name = op.name;
@@ -237,9 +212,9 @@ function build(optimizeElements) {
 		// Optimize each page's corresponding ${page}.css file.
 		// TODO This is probably a dumb way to do it, but i don't understand how CSS optimization works in the real Orion build.
 		section('Optimizing page CSS files');
-		return PromisedIO.seq(cssFiles.map(function(cssFile) {
+		return async.sequence(cssFiles.map(function(cssFile) {
 			 return function() {
-				return exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
+				return dfs.exists(path.join(pathToTempDir, cssFile.path)).then(function(exists) {
 					if (exists) {
 						return spawn(pathToNode, [
 								pathToRjs,
@@ -255,18 +230,17 @@ function build(optimizeElements) {
 	}).then(function() {
 		if (steps.updateHtml === false) { return new Deferred().resolve(); }
 		section('Running updateHTML');
-		return PromisedIO.seq(optimizes.map(function(op) {
+		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				// TODO stat minifiedFilePath, only perform the replace if minifiedfile.size > 0
 				var name = op.name;
 				var builtResult = 'require(["built-' + name + '.js"]);';
 				console.log("updateHTML " + op.htmlFilePath);
-				return pfs.readFile(op.htmlFilePath, 'utf8').then(function(htmlFile) {
-					htmlFile = debuf(htmlFile);
+				return dfs.readFile(op.htmlFilePath, 'utf8').then(function(htmlFile) {
 					htmlFile = htmlFile.replace("require(['" + name + ".js']);", builtResult);
 					htmlFile = htmlFile.replace('require(["' + name + '.js"]);', builtResult);
 					htmlFile = htmlFile.replace("requirejs/require.js", "requirejs/require.min.js");
-					return pfs.writeFile(op.htmlFilePath, htmlFile);
+					return dfs.writeFile(op.htmlFilePath, htmlFile);
 				}, function(error) {
 					// log and continue
 					console.log(error.stack || error);
@@ -279,7 +253,7 @@ function build(optimizeElements) {
 		// Copy the built files from our .temp directory back to their original locations in the bundles folder
 		// TODO: should create a separate 'optimized' source folder to avoid polluting the lib/orion.client/ folder.
 		section('Copy built files to ' + pathToOrionClientBundlesFolder);
-		return PromisedIO.seq(optimizes.map(function(op) {
+		return async.sequence(optimizes.map(function(op) {
 			return function() {
 				var args = {
 					builtJsFile: op.minifiedFilePath,
@@ -297,10 +271,10 @@ function build(optimizeElements) {
 			};
 		})).then(function() {
 			section('Copy optimized CSS files to ' + pathToOrionClientBundlesFolder);
-			return PromisedIO.seq(cssFiles.map(function(cssFile) {
+			return async.sequence(cssFiles.map(function(cssFile) {
 				return function() {
 					var optimizedCssPath = path.join(pathToTempDir, cssFile.path);
-					return exists(optimizedCssPath).then(function(exists) {
+					return dfs.exists(optimizedCssPath).then(function(exists) {
 						if (exists) {
 							return execCommand(getCopyFileCmd(optimizedCssPath, path.join(pathToOrionClientBundlesFolder, cssFile.bundlePath)));
 						}
@@ -312,7 +286,7 @@ function build(optimizeElements) {
 }
 
 function exitFail(error) {
-	if (error) { console.log(error.stack || error); }
+	if (error) { console.log('An error occurred: ' + (error.stack || error)); }
 	process.exit(1);
 }
 
@@ -345,7 +319,3 @@ function processFile(filepath) {
 processFile(path.join(__dirname, 'customTargets.xml')).then(
 	exitSuccess,
 	exitFail);
-
-//pfs.readFile(path.join(__dirname, 'customTargets.xml'), 'utf8').then(function(xml) {
-//	return processFile(debuf(xml));
-//}, exitFail).then(exitSuccess, exitFail);
