@@ -14,6 +14,17 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 		function(assert, mTest, Deferred, xhr, mEventTarget) {
 	var EventTarget = mEventTarget.EventTarget;
 	var isIE = navigator.appName.indexOf("Microsoft Internet Explorer") !== -1;
+	var hasReadyStateOpenedBug = (function() {
+		var x = new XMLHttpRequest();
+		x.open('GET', '.', true);
+		try {
+			x.status;
+		} catch (e) {
+			return true;
+		}
+		return false;
+	}());
+
 	/**
 	 * Fake version of XMLHttpRequest for testing without actual network accesses. Eemulates the
 	 * supported XHR features of the browser running the test as closely as possible.
@@ -48,8 +59,8 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 				return this._responseText;
 			},
 			set: function(response) {
-				// Bug 381396: if this test is running in IE, emulate IE's non-support for 'response' attribute.
-				if (!isIE) {
+				// Bug 381396: emulate browser's non-support for 'response' attribute (eg. IE 9)
+				if (typeof new XMLHttpRequest().response !== "undefined") {
 					this._response = response;
 				}
 				if (this.responseType === '' || this.responseType === 'text') {
@@ -59,7 +70,9 @@ define(["orion/assert", "orion/test", "orion/Deferred", "orion/xhr", "orion/edit
 		});
 		Object.defineProperty(this, 'status', {
 			get: function() {
-				if (this.readyState === this.UNSENT || this.readyState === this.OPENED || this._errorFlag) {
+				if (hasReadyStateOpenedBug && this.readyState === this.OPENED) {
+					throw new Error('xhr in wrong readyState');
+				} else if (this.readyState === this.UNSENT || this.readyState === this.OPENED || this._errorFlag) {
 					return 0;
 				}
 				return this._status;
