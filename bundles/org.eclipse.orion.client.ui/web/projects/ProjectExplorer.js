@@ -37,6 +37,99 @@ function(messages, Deferred, mFileExplorer, lib, mFileUtils, mExplorer) {
 		return outcome;
 	};
 	
+	
+	ProjectExplorer.prototype.loadWorkingSets = function( workspace, driveNames, workingsets ) {
+	
+		var parent = lib.node(this.parentId);			
+		
+		this.driveNames = driveNames;
+		
+		// Progress indicator
+		var progress = lib.node("progress");  //$NON-NLS-0$
+		if(!progress){
+			progress = document.createElement("div"); //$NON-NLS-0$
+			progress.id = "progress"; //$NON-NLS-0$
+			lib.empty(parent);
+			parent.appendChild(progress);
+		}
+		lib.empty(progress);
+		
+		var progressTimeout = setTimeout(function() {
+			lib.empty(progress);
+			var b = document.createElement("b"); //$NON-NLS-0$
+			progress.appendChild(document.createTextNode("Loading Drives..."));
+			progress.appendChild(b);
+		}, 500); // wait 500ms before displaying
+			
+		var self = this;
+		
+		var errorHandler = function(error) {
+			clearTimeout(progressTimeout);
+			// Show an error message when a problem happens during getting the workspace
+			if (error.status && error.status !== 401){
+				try {
+					error = JSON.parse(error.responseText);
+				} catch(e) {
+				}
+				lib.empty(progress);
+				progress.appendChild(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message)); 
+			} else {
+				self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
+			}
+		};
+		
+		// Create a root that represents the workspace (Orion file system) root.  But rename it "Orion Content".  Renaming it is a cheat, we know that
+		// we are dealing with the Orion file system.
+		var orionFileSystem = {};
+		for (var property in workspace) {
+			orionFileSystem[property] = workspace[property];
+		}
+		orionFileSystem.Name = "Orion Content"; //$NON-NLS-0$
+		
+		var treeRoots = [];
+		var result;
+		if (workspace.DriveLocation) {
+			result = new Deferred();
+			self.fileClient.loadWorkspace(workspace.DriveLocation).then(function (driveRoot) {
+				driveRoot.Children.forEach(function(drive) {
+					// drives relevant to the project should be pushed onto the treeRoots array.
+					
+					if( self.includeDrive( drive.Name ) ){
+						treeRoots.push(drive);
+					}
+				});
+				treeRoots.push(orionFileSystem);
+				result.resolve(treeRoots);
+
+			}, errorHandler);
+		} else {
+			treeRoots.push(orionFileSystem);
+			result = treeRoots;
+		}
+		Deferred.when(result, function(roots) {
+			self.treeRoot = { Children: roots };
+			self.model = new mFileExplorer.FileModel(self.registry, self.treeRoot, self.fileClient, self.parentId);
+			self.model.processParent(self.treeRoot, roots);	
+
+			clearTimeout(progressTimeout);	
+			self.createTree( 	self.parentId, 
+								self.model, 
+								{	setFocus: true, 
+									selectionPolicy: self.renderer.selectionPolicy, 
+									onCollapse: 
+									function(model){
+										if( self.getNavHandler() ){
+											self.getNavHandler().onCollapse(model);
+										}
+									}
+								} );
+								
+			if (typeof self.onchange === "function") { //$NON-NLS-0$
+				self.onchange(self.treeRoot);
+			}
+		}, errorHandler);
+	};
+	
 	ProjectExplorer.prototype.loadDriveList = function( workspace, driveNames ) {
 		var parent = lib.node(this.parentId);			
 		

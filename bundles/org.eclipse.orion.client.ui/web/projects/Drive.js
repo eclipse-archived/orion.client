@@ -47,10 +47,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address );
-			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
-			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
-			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
-			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password, "password" );
+//			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
+//			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
+//			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
+//			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password, "password" );
 			
 			for( var element = NAME_INDEX; element < this.elements.length; element++ ){
 				this.content.appendChild( this.elements[element] );
@@ -83,7 +83,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					/* constuct the URL - example:
 			           sftp://oriontest:orion2012@planetorion.org/home/oriontest/sampledata */
 					
-					var url = 'sftp://' + elements[USERNAME_INDEX].getValue() + ':' + elements[PASSWORD_INDEX].getValue() + '@' + elements[ADDRESS_INDEX].getValue() + elements[PATH_INDEX].getValue();
+					var url = 'sftp://:@' + elements[ADDRESS_INDEX].getValue();
 					
 					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
@@ -150,18 +150,35 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			element.className = "setting-property";
 			
 			element.innerHTML = '<label>' + //$NON-NLS-0$
-									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-									'<input class="setting-control" type="' + type + '" name="myname">' + //$NON-NLS-0$
+//									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+//									'<input class="setting-control" type="' + type + '">' + //$NON-NLS-0$
 								'</label>';   //$NON-NLS-0$
 								
-			element.firstChild.children[1].value = value;
+			var label = document.createElement( 'label' );
+			
+			
+			var span = document.createElement( 'span' );
+			span.className = 'setting-label';
+			span.innerHTML = name;
+								
+			var input = document.createElement( 'input' );
+			input.className = 'setting-control';
+			input.type = type;
+			
+			label.appendChild( span );
+			label.appendChild( input );
+			
+			element.appendChild( label );
+								
+			input.value = value;
+//			element.firstChild.children[1].value = value;
 			
 			element.getLabel = function(){
-				return element.firstChild.children[0].innerHTML;
+				return span.innerHTML;
 			};
 			
 			element.getValue = function(){
-				return element.firstChild.children[1].value;
+				return input.value;
 			};
 							
 			return element;
@@ -216,11 +233,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 
 		function toJSONData(){
 			
-			var jsonDrive = { 'drivename': elements[NAME_INDEX].getValue(), 
-							  'address': elements[ADDRESS_INDEX].getValue(), 
-						      'path': elements[PATH_INDEX].getValue(),
+			var jsonDrive = { 'drivename': this.elements[NAME_INDEX].getValue(), 
+							  'address': this.elements[ADDRESS_INDEX].getValue()
+							  /*, 'path': elements[PATH_INDEX].getValue(),
 						      'port': elements[PORT_INDEX].getValue(),
-						      'username': elements[USERNAME_INDEX].getValue() };					
+						      'username': elements[USERNAME_INDEX].getValue() */ };					
 			return jsonDrive;
 		}
 		
