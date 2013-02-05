@@ -87,7 +87,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				id: "orion.addDrive", //$NON-NLS-0$
 				callback: function(data) {
 					console.log( 'new drive' );
-					driveListContainer.newDrive();
+					driveListContainer.newDriveAndShow();
 				}.bind(this)
 			});
 			
@@ -144,14 +144,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			
 			if( !driveData ){ driveData = emptyDrive; }
 			
-			var newDrive = new Drive( driveData, this.commandService, this.serviceRegistry );
-			
-			this.driveElements.push( newDrive );
-			
-//			this.DriveList.appendChild( newDrive.entryNode );
-			
-//			this.driveCount.textContent = this.driveElements.length;
-			
+			this.driveElements.push( new Drive( driveData, this.commandService, this.serviceRegistry ) );
+		},
+		
+		newDriveAndShow: function(driveData){
+			this.newDrive(driveData);
 			this.addRows();
 		},
 

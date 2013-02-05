@@ -15,7 +15,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 	
 	function(messages, require, DriveList, mCommands, ProjectDataManager, ProjectData, ProjectResponseHandler ) {
 
-		function SFTPConfiguration( project, node, projectData, commandService, serviceRegistry, fileClient ){
+		function SFTPConfiguration( project, node, commandService, serviceRegistry, fileClient ){
 		
 			this.commandService = commandService;
 			this.serviceRegistry = serviceRegistry;
@@ -52,8 +52,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			this.commandService.addCommand(saveConfigCommand);
 			this.commandService.registerCommandContribution("configurationCommands", "orion.saveProjectConfig", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands("configurationCommands", "configurationCommands", this, this, "button"); //$NON-NLS-0$
-			
-			var drivelist = document.createElement( 'div' );
+		
 			this.projectNode.appendChild( drivelist );
 
 			if( project ){	
@@ -66,8 +65,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 				for( var d = 0; d < project.drives.length; d++ ){
 					this.driveWidget.newDrive( project.drives[d] );
-					this.driveWidget.addRows();
+
 				}
+				
+				this.driveWidget.addRows();
 				
 				if( !project.workspace ){
 					this.projectDataManager.createWorkspace( project );

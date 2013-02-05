@@ -239,11 +239,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			
 			var project;
 			
+			var projectDataManager = this;
+			
 			Deferred.when( loadedWorkspace, function(workspace) {
 			
 				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
 				
 						var projectsIndex = findInWorkspace( folders.Children, PROJECTS_FOLDER );
+						
+						
 						
 						if( projectsIndex ){
 							
@@ -273,7 +277,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 										
 										/* Create a workspace for this new project */
 			
-										var projectDataManager = this;
+										
 										
 										Deferred.when( loadedWorkspace, function(workspace) {
 										
