@@ -353,7 +353,7 @@ exports.EditorCommandFactory = (function() {
 											} else if (data.result) {
 												processEditorResult(data.result);
 											}
-											window.removeListener("message", _messageHandler, false); //$NON-NLS-0$
+											window.removeEventListener("message", _messageHandler, false); //$NON-NLS-0$
 											window.document.body.removeChild(iframe);
 										}
 									}
