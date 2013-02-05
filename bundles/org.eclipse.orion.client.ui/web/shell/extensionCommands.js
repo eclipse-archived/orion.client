@@ -35,7 +35,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	var extensionCommandUtils  = {};
 	
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var orionHome = new URL(require.toUrl("."), window.location).href;
+	var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
 	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$

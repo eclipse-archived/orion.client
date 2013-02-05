@@ -31,7 +31,7 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "ori
 		var navLinks= serviceRegistry.getServiceReferences(serviceName); //$NON-NLS-0$
 		var params = PageUtil.matchResourceParameters(window.location.href);
 		// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-		var orionHome = new URL(require.toUrl("."), window.location).href; //$NON-NLS-0$
+		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1); //$NON-NLS-0$
 		var locationObject = {OrionHome: orionHome, Location: params.resource};
 		var infos = [];
 		for (var i=0; i<navLinks.length; i++) {
