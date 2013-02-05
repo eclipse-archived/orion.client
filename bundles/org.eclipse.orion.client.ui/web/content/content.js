@@ -33,7 +33,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		var fileMetadata;
-		var orionHome = new URL(require.toUrl("."), window.location).href;
+		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 		
 		/**
 		 * Utility method for saving file contents to a specified location

@@ -60,7 +60,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 			var pageParams = PageUtil.matchResourceParameters();
 			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 			var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-			var orionHome = new URL(require.toUrl("."), window.location).href;
+			var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
