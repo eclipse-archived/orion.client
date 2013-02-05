@@ -13,7 +13,7 @@
 /*global define*/
 /*jslint browser:true*/
 
-define(["orion/Deferred"], function(Deferred) {
+define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 
 	var orion = {};
 	orion.shellPage = {};
@@ -124,7 +124,12 @@ define(["orion/Deferred"], function(Deferred) {
 			},
 			appendText: function(text) {
 				var node = document.createElement("span"); //$NON-NLS-0$
-				node.textContent = text;
+				var segments = mUrlUtils.detectValidURL(text);
+				if(segments){
+					mUrlUtils.processURLSegments(node, segments);				
+				} else {
+					node.textContent = text;
+				}
 				this.tempRoot.appendChild(node);
 			},
 			write: function() {
