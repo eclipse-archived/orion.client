@@ -7,8 +7,8 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html). 
  * 
  ******************************************************************************/
-/*global define document window*/
-define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate"], function(require, Deferred, PageUtil, URITemplate) {
+/*global define document window URL*/
+define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate", "orion/URL-shim"], function(require, Deferred, PageUtil, URITemplate) {
 
 	/**
 	 * Read info from an <code>orion.page.*</code> service extension.
@@ -31,8 +31,8 @@ define(["require", "orion/Deferred", "orion/PageUtil", "orion/URITemplate"], fun
 		var navLinks= serviceRegistry.getServiceReferences(serviceName); //$NON-NLS-0$
 		var params = PageUtil.matchResourceParameters(window.location.href);
 		// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-		var hostName = window.location.protocol + "//" + window.location.host; //$NON-NLS-0$
-		var locationObject = {OrionHome: hostName, Location: params.resource};
+		var orionHome = new URL(require.toUrl("."), window.location).href; //$NON-NLS-0$
+		var locationObject = {OrionHome: orionHome, Location: params.resource};
 		var infos = [];
 		for (var i=0; i<navLinks.length; i++) {
 			var info = {};
