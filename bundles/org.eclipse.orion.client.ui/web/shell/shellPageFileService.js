@@ -337,7 +337,16 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/fileClient", 
 						delete self.currentRetrievals[key];
 					};
 					if (isDirectory) {
-						fileClient.createFolder(parentNode.Location, name).then(notifySuccess, notifyError);
+						if (parentNode.Projects) {
+							/* parent is top-level folder, so create project and answer its content folder */
+							fileClient.createProject(parentNode.Location, name).then(
+								function(project) {
+									fileClient.read(project.ContentLocation, true).then(notifySuccess, notifyError);
+								},
+								notifyError);
+						} else {
+							fileClient.createFolder(parentNode.Location, name).then(notifySuccess, notifyError);
+						}
 					} else {
 						fileClient.createFile(parentNode.Location, name).then(notifySuccess, notifyError);
 					}
