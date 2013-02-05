@@ -9,10 +9,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define orion */
+/*global window define orion URL*/
 /*browser:true*/
 
-define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil"],
+define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "orion/contentTypes", "orion/URITemplate", "orion/i18nUtil", "orion/URL-shim"],
 	function(require, Deferred, mCommands, mRegex, mContentTypes, URITemplate, i18nUtil){
 
 	/**
@@ -24,8 +24,7 @@ define(["require", "orion/Deferred", "orion/commands", "orion/editor/regex", "or
 	var extensionCommandUtils  = {};
 	
 	// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-	var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-	var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+	var orionHome = new URL(require.toUrl("."), window.location).href;
 	
 	extensionCommandUtils._cloneItemWithoutChildren = function clone(item){
 	    if (item === null || typeof(item) !== 'object') { //$NON-NLS-0$
