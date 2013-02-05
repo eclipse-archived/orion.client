@@ -119,8 +119,6 @@ define('orion/editor/edit', [
 					return new mContentAssist.ContentAssistMode(contentAssist, contentAssistWidget);
 				}
 			};
-			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
-			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
 		}
 	
 		// Canned highlighters for js, java, and css. Grammar-based highlighter for html
@@ -140,7 +138,7 @@ define('orion/editor/edit', [
 						case "java":
 						case "css":
 							this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
-							editor.setFoldingRulerVisible(options.showFoldingRuler == undefined || options.showFoldingRuler);
+							editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 							break;
 						case "html":
 							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
@@ -181,13 +179,15 @@ define('orion/editor/edit', [
 		if (!contents) { contents=""; }
 		
 		editor.installTextView();
-		editor.setLineNumberRulerVisible(options.showLinesRuler == undefined || options.showLinesRuler);
-		editor.setAnnotationRulerVisible(options.showAnnotationRuler == undefined || options.showFoldingRuler);
-		editor.setOverviewRulerVisible(options.showOverviewRuler == undefined || options.showOverviewRuler);
-		editor.setFoldingRulerVisible(options.showFoldingRuler == undefined || options.showFoldingRuler);
+		editor.setLineNumberRulerVisible(options.showLinesRuler === undefined || options.showLinesRuler);
+		editor.setAnnotationRulerVisible(options.showAnnotationRuler === undefined || options.showFoldingRuler);
+		editor.setOverviewRulerVisible(options.showOverviewRuler === undefined || options.showOverviewRuler);
+		editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 		editor.setInput(options.title, null, contents);
 		syntaxHighlighter.highlight(options.lang, editor);
 		if (contentAssist) {
+			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
+			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
 			contentAssist.addEventListener("Activating", function() {
 				if (/css$/.test(options.lang)) {
 					contentAssist.setProviders([cssContentAssistProvider]);
