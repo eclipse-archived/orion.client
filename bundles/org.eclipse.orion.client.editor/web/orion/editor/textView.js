@@ -4296,6 +4296,11 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			index = index === undefined || index < 0 || index > length ? length : index;
 			var cell = row.insertCell(index);
 			cell.vAlign = "top"; //$NON-NLS-0$
+			cell.style.verticalAlign = "top";
+			cell.style.borderWidth = "0px"; //$NON-NLS-0$
+			cell.style.margin = "0px"; //$NON-NLS-0$
+			cell.style.padding = "0px"; //$NON-NLS-0$
+			cell.style.outline = "none"; //$NON-NLS-0$
 			cell.appendChild(div);
 		},
 		_createView: function() {
@@ -4331,7 +4336,15 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			table.cellPadding = "0px"; //$NON-NLS-0$
 			table.cellSpacing = "0px"; //$NON-NLS-0$
 			table.border = "0px"; //$NON-NLS-0$
-			table.insertRow(0);
+			table.style.borderWidth = "0px"; //$NON-NLS-0$
+			table.style.margin = "0px"; //$NON-NLS-0$
+			table.style.padding = "0px"; //$NON-NLS-0$
+			table.style.outline = "none"; //$NON-NLS-0$
+			var tr = table.insertRow(0);
+			tr.style.borderWidth = "0px"; //$NON-NLS-0$
+			tr.style.margin = "0px"; //$NON-NLS-0$
+			tr.style.padding = "0px"; //$NON-NLS-0$
+			tr.style.outline = "none"; //$NON-NLS-0$
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4364,7 +4377,15 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			table.cellPadding = "0px"; //$NON-NLS-0$
 			table.cellSpacing = "0px"; //$NON-NLS-0$
 			table.border = "0px"; //$NON-NLS-0$
-			table.insertRow(0);
+			table.style.borderWidth = "0px"; //$NON-NLS-0$
+			table.style.margin = "0px"; //$NON-NLS-0$
+			table.style.padding = "0px"; //$NON-NLS-0$
+			table.style.outline = "none"; //$NON-NLS-0$
+			tr = table.insertRow(0);
+			tr.style.borderWidth = "0px"; //$NON-NLS-0$
+			tr.style.margin = "0px"; //$NON-NLS-0$
+			tr.style.padding = "0px"; //$NON-NLS-0$
+			tr.style.outline = "none"; //$NON-NLS-0$
 			rootDiv.appendChild(rightDiv);
 				
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
