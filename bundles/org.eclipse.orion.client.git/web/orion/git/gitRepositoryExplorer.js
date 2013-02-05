@@ -436,27 +436,27 @@ exports.GitRepositoryExplorer = (function() {
 				span = document.createElement("span");
 				span.id = "location"+i;
 				detailsView.appendChild(span);
-				
-				div = document.createElement("div");
-				div.style.paddingTop = "10px";
-				detailsView.appendChild(div);
 
-				span = document.createElement("span");
-				span.id = "repositoryState"+i;
-				span.style.paddingLeft = "10px";
-				detailsView.appendChild(span);
-				
-				span = document.createElement("span");
-				span.id = "workspaceState"+i;
-				span.style.paddingLeft = "10px";
-				detailsView.appendChild(span);
-				
-				span = document.createElement("span");
-				span.id = "commitsState"+i;
-				span.style.paddingLeft = "10px";
-				detailsView.appendChild(span);
-				
 				if (mode === "full"){
+					div = document.createElement("div");
+					div.style.paddingTop = "10px";
+					detailsView.appendChild(div);
+					
+					span = document.createElement("span");
+					span.id = "repositoryState"+i;
+					span.style.paddingLeft = "10px";
+					detailsView.appendChild(span);
+					
+					span = document.createElement("span");
+					span.id = "workspaceState"+i;
+					span.style.paddingLeft = "10px";
+					detailsView.appendChild(span);
+					
+					span = document.createElement("span");
+					span.id = "commitsState"+i;
+					span.style.paddingLeft = "10px";
+					detailsView.appendChild(span);
+					
 					var actionsArea = document.createElement("div");
 					actionsArea.className = "sectionTableItemActions";
 					actionsArea.id = "repositoryActionsArea";
@@ -1296,6 +1296,7 @@ exports.GitRepositoryExplorer = (function() {
 		detailsView.appendChild(keySpan);
 		
 		var valueSpan = document.createElement("span");
+		valueSpan.style.paddingLeft = "10px";
 		valueSpan.textContent = configEntry.Value;
 		detailsView.appendChild(valueSpan);
 		
