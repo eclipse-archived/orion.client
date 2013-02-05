@@ -41,11 +41,17 @@ define(['orion/Deferred'], function(Deferred) {
 	function makeResult(url, options, xhr, error) {
 		var response = typeof xhr.response !== 'undefined' ? xhr.response : xhr.responseText; //$NON-NLS-0$
 		var responseText = typeof response === 'string' ? response : null; //$NON-NLS-0$
+		var status;
+		try {
+			status = xhr.status;
+		} catch (e) {
+			status = 0;
+		}
 		var result = {
 			args: options,
 			response: response,
 			responseText: responseText,
-			status: xhr.status,
+			status: status,
 			url: url,
 			xhr: xhr
 		};
