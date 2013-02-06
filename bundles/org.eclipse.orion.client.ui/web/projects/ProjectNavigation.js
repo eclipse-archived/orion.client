@@ -33,8 +33,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.workspace = workspace;
 			
-			document.addEventListener( 'build', this.addDrives.bind(this), false);
-			
 			this.anchor.innerHTML = this.template;
 			
 			this.addWorkingSet( this );
@@ -62,12 +60,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		var template = '<div>' +
 							'<div id="configuration"></div>' +
 							'<div id="workingSet">' +
-							'<div>' +
-							'<div id="orionDrive">' +
+							'</div>' +
 							'<div id="drives">' +
-							'<div>' +
+							'</div>' +
 							'<div id="streams">' +
-							'<div>' +
+							'</div>' +
 						'</div>';
 						
 		ProjectNavigation.prototype.template = template;
@@ -76,7 +73,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			var self = this;
 			
-			this.explorer = new ProjectExplorer({							
+			this.drivesExplorer = new ProjectExplorer({							
 				selection: this.selection, 
 				serviceRegistry: this.serviceRegistry,
 				fileClient: this.fileClient, 
@@ -85,16 +82,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				
 					var renderer = new DriveTreeRenderer({
 						checkbox: false, 
-						cachePrefix: "Navigator"}, explorer, self.commandService, self.contentTypeService);
+						cachePrefix: "Drives"}, explorer, self.commandService, self.contentTypeService);
 						
 					return renderer;
 			}}); //$NON-NLS-0$
 			
-			// We need to run this code so that all of the file-based commands, including open-with commands are registered and can be shown in our navigator tree.
-			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.explorer );
-			
-			var myexplorer = this.explorer;
-			myexplorer.loadDriveList( this.workspace, drivenames );
+			this.drivesExplorer.loadDriveList( this.workspace, drivenames );
 		}
 		
 		ProjectNavigation.prototype.addDrivesTree = addDrivesTree;
@@ -128,9 +121,30 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.workingSetNode = this.anchor.firstChild.children[1];
 			
-			var workingSetContent = '<div id="workingset"></div>';
+			var workingSetContent = '<div id="WorkingSetContent"></div>';
 		
-			this.workingSetSection = this.createSection( this.workingSetNode, workingSetContent, 'workingset', 'Working Set', scope );
+			this.workingSetSection = this.createSection( this.workingSetNode, workingSetContent, 'workingSet', 'Working Set', scope );
+			
+			var self = this;
+			
+			this.workingSetExplorer = new ProjectExplorer({							
+				selection: this.selection, 
+				serviceRegistry: this.serviceRegistry,
+				fileClient: this.fileClient, 
+				parentId: "WorkingSetContent",   // content DOM id
+				rendererFactory: function(explorer) {  //$NON-NLS-0$
+				
+					var renderer = new DriveTreeRenderer({
+						checkbox: false, 
+						cachePrefix: "WorkingSet"}, explorer, self.commandService, self.contentTypeService);
+						
+					return renderer;
+			}}); //$NON-NLS-0$
+			
+			// TODO get the working sets from (wherever) and pass them in for filtering by the explorer
+			this.workingSetExplorer.loadWorkingSets( this.workspace, [] );
+
+			
 		}
 		
 		ProjectNavigation.prototype.addWorkingSet = addWorkingSet;
@@ -139,9 +153,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 			this.drivesNode = this.anchor.firstChild.children[2];
 			
-			var driveContent = '<div id="Drives"></div>';
+			var driveContent = '<div id="DriveContent"></div>';
 			
-			this.drivesSection = this.createSection( this.workingSetNode, driveContent, 'drives', "Drives", scope );
+			this.drivesSection = this.createSection( this.drivesNode, driveContent, 'drives', "Drives", scope );
 			
 			var drivenames = [];
 			
@@ -151,7 +165,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}
 			}
 			
-			this.addDrivesTree("Drives", drivenames );			
+			this.addDrivesTree("DriveContent", drivenames );			
 		}
 		
 		ProjectNavigation.prototype.addDrives = addDrives;
