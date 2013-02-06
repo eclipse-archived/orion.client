@@ -15,6 +15,7 @@ var pfs = require('promised-io/fs');
 var PromisedIO = require('promised-io');
 var Deferred = PromisedIO.Deferred;
 var path = require('path');
+var url = require('url');
 var api = require('./api');
 
 /*
@@ -91,6 +92,23 @@ var _safeFilePath = exports.safePath = function(workspaceDir, p) {
  */
 exports.safeFilePath = function(workspaceDir, filepath) {
 	return _safeFilePath(workspaceDir, path.join(workspaceDir, decodeURIComponent(filepath)));
+};
+
+/**
+ * @param {Object} debugMeta The meta data of the debug URL
+ * @param {String} hostName Optional If not defined use the debugMeta.hostname
+ * @returns {String} The debug URL enclosed with "[" and "]".
+ * The returned value is URL-decoded.
+ * @throws {Error} If rest is outside of the workspaceDir (and thus is unsafe)
+ */
+exports.generateDebugURL = function(debugMeta, hostName) {
+	var hName = hostName ? hostName : debugMeta.hostname;
+	return "[" + url.format({
+			protocol: debugMeta.protocal,
+			hostname: hName,
+			port:  debugMeta.port,
+			pathname: debugMeta.pathname
+		}) + "]";
 };
 
 /**
