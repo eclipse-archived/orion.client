@@ -15,11 +15,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 	
 	function(messages, require, lib, mCommands, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
 
-		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService ){
+		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager ){
 		
 			this.commandService = commandService;
 			
 			this.serviceRegistry = serviceRegistry;
+			
+			this.projectDataManager = projectDataManager;
 			
 			this.project = project;
 			
@@ -118,8 +120,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 					return renderer;
 			}}); //$NON-NLS-0$
 			
+			if( this.project ){
 			// TODO get the working sets from (wherever) and pass them in for filtering by the explorer
-			this.workingSetExplorer.loadWorkingSets( this.workspace, [this.project.workspace] );
+				this.workingSetExplorer.loadWorkingSets( this.workspace, this.project.workingsets );
+			}
 		}
 		
 		ProjectNavigation.prototype.addWorkingSet = addWorkingSet;
@@ -170,9 +174,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			this.drivesExplorer.loadDriveList( this.workspace, drivenames );			
 			// drive commands
 			var copyToWorkingSetCommand = new mCommands.Command({
-				name : "Copy to Working Set",
+
 				tooltip: "Copy the folder to the working set", //$NON-NLS-0$
 				id: "orion.copyToWorkingSet", //$NON-NLS-0$
+				imageClass: 'core-sprite-copy-folder',
 				visibleWhen: function(items) {  
 					items = Array.isArray(items) ? items : [items];
 					if (items.length === 0) {
@@ -186,8 +191,24 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 					return true;
 				},
 				callback: function(data) {
-					// TODO data.items contains the selected folders
-					window.alert("TODO:  copy " + data.items.length + " folders to the working set");
+					
+					if( !this.project.workingsets ){
+						this.project.workingsets = [];
+					}
+					
+					for( var item = 0; item < data.items.length; item++ ){		
+						this.project.workingsets.push( data.items[item].Location );
+					}
+					
+					var uniqueWorkingsets = this.project.workingsets.filter( 
+						function(element, position, self){
+							return self.indexOf(element) === position;
+						}
+					);
+					
+					this.project.workingsets = uniqueWorkingsets;
+					
+					this.projectDataManager.save( this.project, this.handleSavedProject.bind(this) );
 				}
 			});
 			this.commandService.addCommand(copyToWorkingSetCommand);
@@ -215,14 +236,16 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 		ProjectNavigation.prototype.addDrives = addDrives;
 		
 		function addStreams( scope ){
-		
 			this.streamsNode = this.anchor.firstChild.children[3];
-			
-			var streamsContent = '<div id="streams"></div>';
-			
+			var streamsContent = '<div id="streams"></div>';		
 			this.streamsSection = this.createSection( this.workingSetNode, streamsContent, 'streams', 'Streams', scope ); 
-	
 		}
+		
+		function handleSavedProject(){
+			this.workingSetExplorer.loadWorkingSets( this.workspace, this.project.workingsets );
+		}
+		
+		ProjectNavigation.prototype.handleSavedProject = handleSavedProject;
 		
 		ProjectNavigation.prototype.addStreams = addStreams;
 		

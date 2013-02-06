@@ -56,3 +56,9 @@
 	border-bottom-left-radius: 10px; 
 	transition:height 1s;
 }
+
+.treetable {
+	border-spacing: 0;
+	min-width:0;
+	width: 100%;
+}
