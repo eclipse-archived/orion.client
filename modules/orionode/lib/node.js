@@ -29,6 +29,10 @@ function getDecoratedAppJson(req, nodeRoot, appContext, app) {
 		host: req.headers.host,
 		pathname: requestUrl.pathname + '/' + app.pid
 	});
+	if(json.DebugMeta){
+		//Here we want to regenerate the debug URL to use the host name from the request.
+		json.DebugURL = fileUtil.generateDebugURL(json.DebugMeta, url.parse('http://' + req.headers.host).hostname);
+	}
 	return json;
 }
 

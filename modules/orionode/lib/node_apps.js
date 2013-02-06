@@ -63,8 +63,8 @@ App.prototype.toJson = function() {
 App.prototype.decorators = [
 	function debugDecorator(app, json) {
 		if (app.debug) {
-			//The debugURL property has to be enclosed by "[" and "]" so that it can be parsed as a link instead of plain text, on client side.
-			json.DebugURL = "[" + app.debug + "]";
+			json.DebugMeta = app.debug;
+			json.DebugURL = fileUtil.generateDebugURL(json.DebugMeta);
 		}
 	}
 ];
@@ -263,13 +263,13 @@ var AppContext = function(options) {
 		var resolvedPath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);
-		app.debug = url.format({
+		app.debug = /*url.format(*/{
 			protocol: 'http',//parsedRequestUrl.protocol,
 			// TODO this is bizarre. Can we host node-inspector on the same port as Orionode?
 			hostname: url.parse('http://' + headers.host).hostname,
 			port:  INSPECT_PORT,
 			pathname: url.resolve(parsedRequestUrl.pathname, '../../debug?port=' + port)
-		});
+		};
 		//Lazy spawn the node inspector procees for the first time when user wants to debug an app.
 		if(app && !inspector) {
 			var inspectorPath = require.resolve(PATH_TO_NODE_INSPECTOR);
