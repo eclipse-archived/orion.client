@@ -359,18 +359,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 		forceRemove: function(url){
 			var plugin = this.settings.pluginRegistry.getPlugin(url);
 			if (plugin) {
-				plugin.uninstall();
-				this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
-				this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
-					plugins.keys().some(function(key) {
-						if (_normalizeURL(key) === url) {
-							plugins.remove(key);
-							this.addRows(this);
-							return true;
-						}
-					});
-				}.bind(this)); // this will force a sync
-				this.addRows();
+				plugin.uninstall().then(function() {
+					this.statusService.setMessage(messages["Uninstalled "] + url, 5000, true);
+					var _self = this;
+					this.settings.preferences.getPreferences("/plugins").then(function(plugins) { //$NON-NLS-0$
+						plugins.keys().some(function(key) {
+							if (_normalizeURL(key) === url) {
+								plugins.remove(key);
+								_self.addRows(_self);
+								return true;
+							}
+						});
+					}); // this will force a sync
+				}.bind(this));
 			}
 		},
 		
