@@ -63,7 +63,8 @@ App.prototype.toJson = function() {
 App.prototype.decorators = [
 	function debugDecorator(app, json) {
 		if (app.debug) {
-			json.DebugURL = app.debug;
+			//The debugURL property has to be enclosed by "[" and "]" so that it can be parsed as a link instead of plain text, on client side.
+			json.DebugURL = "[" + app.debug + "]";
 		}
 	}
 ];
@@ -245,7 +246,6 @@ var AppContext = function(options) {
 	 */
 	this.startApp = function(modulePath, args, context, hidden) {
 		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
-		debugger;
 		modulePath = resolveModulePath(workspaceDir, cwdPath, modulePath);
 		var app = _startApp([modulePath].concat(args || []), cwdPath, hidden);
 		app.on('exit', function(code) {
@@ -264,7 +264,7 @@ var AppContext = function(options) {
 		var app = _startApp(["--debug-brk=" + port, resolvedPath].concat(args || []), cwdPath);
 		var parsedRequestUrl = url.parse(requestUrl);
 		app.debug = url.format({
-			protocol: parsedRequestUrl.protocol,
+			protocol: 'http',//parsedRequestUrl.protocol,
 			// TODO this is bizarre. Can we host node-inspector on the same port as Orionode?
 			hostname: url.parse('http://' + headers.host).hostname,
 			port:  INSPECT_PORT,

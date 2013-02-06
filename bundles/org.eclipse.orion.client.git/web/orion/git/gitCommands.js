@@ -9,12 +9,13 @@
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
 
+/*globals window document define confirm URL*/
+
 define(['i18n!git/nls/gitmessages', 'require', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/commands', 'orion/git/util', 'orion/compare/compareUtils', 'orion/git/gitPreferenceStorage', 
         'orion/git/widgets/ConfirmPushDialog', 'orion/git/widgets/RemotePrompterDialog', 'orion/git/widgets/ReviewRequestDialog', 'orion/git/widgets/CloneGitRepositoryDialog', 
-        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog'], 
-        function(messages, require, Deferred, i18nUtil, lib, mCommands, mGitUtil, mCompareUtils, GitPreferenceStorage, 
-        		mConfirmPush, mRemotePrompter, mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit,
-        		mCommit, mApplyPatch) {
+        'orion/git/widgets/GitCredentialsDialog', 'orion/git/widgets/OpenCommitDialog', 'orion/git/widgets/CommitDialog', 'orion/git/widgets/ApplyPatchDialog', 'orion/URL-shim'], 
+        function(messages, require, Deferred, i18nUtil, lib, mCommands, mGitUtil, mCompareUtils, GitPreferenceStorage, mConfirmPush, mRemotePrompter,
+        mReviewRequest, mCloneGitRepository, mGitCredentials, mOpenCommit, mCommit, mApplyPatch) {
 
 /**
  * @namespace The global container for eclipse APIs.
@@ -388,7 +389,7 @@ var exports = {};
 					}, displayErrorOnStatus);
 				};
 				
-				var repositoryLocation = (item.Repository != null) ? item.Repository.Location : item.CloneLocation;
+				var repositoryLocation = (item.Repository !== null) ? item.Repository.Location : item.CloneLocation;
 				if (data.parameters.valueFor("name") && !data.parameters.optionsRequested) { //$NON-NLS-0$
 					checkoutTagFunction(repositoryLocation, item.Name, data.parameters.valueFor("name")); //$NON-NLS-0$
 				}
@@ -426,7 +427,7 @@ var exports = {};
 					);
 				} else {
 					var branchLocation;
-					if (item.Repository != null) {
+					if (item.Repository !== null) {
 						branchLocation = item.Repository.BranchLocation;
 					} else {
 						branchLocation = item.parent.parent.BranchLocation;
@@ -748,7 +749,7 @@ var exports = {};
 				return mCompareUtils.generateCompareHref(data.items.DiffLocation, {});
 			},
 			visibleWhen : function(item) {
-				return item.Type === "Commit" && item.ContentLocation != null && !explorer.isDirectory; //$NON-NLS-0$
+				return item.Type === "Commit" && item.ContentLocation !== null && !explorer.isDirectory; //$NON-NLS-0$
 			}
 		});
 		commandService.addCommand(compareWithWorkingTree);
@@ -1028,7 +1029,7 @@ var exports = {};
 				progress.progress(gitService.doMerge(item.HeadLocation, item.Name, false), "Merging " + item.Name).then(function(result){
 					var display = {};
 
-					if (result.Result == "FAST_FORWARD" || result.Result == "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
+					if (result.Result === "FAST_FORWARD" || result.Result === "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = result.Result;
@@ -1111,7 +1112,7 @@ var exports = {};
 				progress.progress(gitService.doMerge(item.HeadLocation, item.Name, true), "Merging " + item.Name).then(function(result){
 					var display = [];
 
-					if (result.Result == "FAST_FORWARD_SQUASHED" || result.Result == "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
+					if (result.Result === "FAST_FORWARD_SQUASHED" || result.Result === "ALREADY_UP_TO_DATE"){ //$NON-NLS-1$ //$NON-NLS-0$
 						display.Severity = "Ok"; //$NON-NLS-0$
 						display.HTML = false;
 						display.Message = result.Result;
@@ -1183,14 +1184,14 @@ var exports = {};
 						var display = [];
 						var statusLocation = item.HeadLocation.replace("commit/HEAD", "status"); //$NON-NLS-1$ //$NON-NLS-0$
 	
-						if (jsonData.Result == "OK" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE" ) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						if (jsonData.Result === "OK" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE" ) { //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 							// operation succeeded
 							display.Severity = "Ok"; //$NON-NLS-0$
 							display.HTML = false;
 							display.Message = jsonData.Result;
 						}
 						// handle special cases
-						else if (jsonData.Result == "STOPPED") { //$NON-NLS-0$
+						else if (jsonData.Result === "STOPPED") { //$NON-NLS-0$
 							display.Severity = "Warning"; //$NON-NLS-0$
 							display.HTML = true;
 							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
@@ -1198,7 +1199,7 @@ var exports = {};
 								+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
 								+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 						}
-						else if (jsonData.Result == "FAILED_WRONG_REPOSITORY_STATE") { //$NON-NLS-0$
+						else if (jsonData.Result === "FAILED_WRONG_REPOSITORY_STATE") { //$NON-NLS-0$
 							display.Severity = "Error"; //$NON-NLS-0$
 							display.HTML = true;
 							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
@@ -1206,7 +1207,7 @@ var exports = {};
 								+ i18nUtil.formatMessage(". Go to ${0}.", "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 								+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 						}
-						else if (jsonData.Result == "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
+						else if (jsonData.Result === "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
 							display.Severity = "Error"; //$NON-NLS-0$
 							display.HTML = true;
 							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
@@ -1214,7 +1215,7 @@ var exports = {};
 								+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
 	   							+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
 						}
-						else if (jsonData.Result == "FAILED_PENDING_CHANGES") { //$NON-NLS-0$
+						else if (jsonData.Result === "FAILED_PENDING_CHANGES") { //$NON-NLS-0$
 							display.Severity = "Error"; //$NON-NLS-0$
 							display.HTML = true;
 							display.Message = "<span>" + jsonData.Result //$NON-NLS-0$
@@ -1386,7 +1387,7 @@ var exports = {};
 														commandInvocation.targetBranch = target;
 														handlePush(options, target.Location, "HEAD",target.Name, false);
 													}, function(err){
-														if(err.status == 409){ //when confing entry is already defined we have to edit it
+														if(err.status === 409){ //when confing entry is already defined we have to edit it
 															progress.progress(gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name), "Updating configuration property " + target.parent.Name).then(
 																function(){
 																	commandInvocation.targetBranch = target;
@@ -1581,7 +1582,7 @@ var exports = {};
 														commandInvocation.targetBranch = target;
 														handlePush(options, target.Location, "HEAD",target.Name, true);
 													}, function(err){
-														if(err.status == 409){ //when confing entry is already defined we have to edit it
+														if(err.status === 409){ //when confing entry is already defined we have to edit it
 															progress.progres(gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name), "Setting git configuration property " + target.parent.Name).then(
 																function(){
 																	commandInvocation.targetBranch = target;
@@ -1597,7 +1598,7 @@ var exports = {};
 										if (item.RemoteLocation.length === 1 && item.RemoteLocation[0].Children.length === 1) { //when we push next time - chance to switch saved remote
 											var dialog2 = dialog;
 											
-											dialog = new orion.git.widgets.ConfirmPushDialog({
+											dialog = new mConfirmPush.ConfirmPushDialog({
 												title: messages["Choose Branch"],
 												serviceRegistry: serviceRegistry,
 												gitClient: gitService,
@@ -1635,7 +1636,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html") + "#" + data.items.PreviousLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" || (item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
+				if(item.Type === "RemoteTrackingBranch" || (item.toRef !== null && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
 					return item.PreviousLocation !== undefined;
 				}
 				return false;
@@ -1651,7 +1652,7 @@ var exports = {};
 				return require.toUrl("git/git-log.html") + "#" + data.items.NextLocation; //$NON-NLS-1$ //$NON-NLS-0$
 			},
 			visibleWhen : function(item) {
-				if(item.Type === "RemoteTrackingBranch" ||(item.toRef != null && item.toRef.Type === "Branch") || item.RepositoryPath != null){ //$NON-NLS-1$ //$NON-NLS-0$
+				if(item.Type === "RemoteTrackingBranch" ||(item.toRef !== null && item.toRef.Type === "Branch") || item.RepositoryPath !== null){ //$NON-NLS-1$ //$NON-NLS-0$
 					return item.NextLocation !== undefined;
 				}
 				return false;
@@ -1683,7 +1684,7 @@ var exports = {};
 				return require.toUrl("git/git-repository.html") + "#" + data.items.NextLocation;
 			},
 			visibleWhen : function(item){
-				if(item.Type == "Tag"){
+				if(item.Type === "Tag"){
 					return item.NextLocation !== undefined;
 				}
 				return false;
@@ -1819,7 +1820,7 @@ var exports = {};
 							"Getting repository details " + item.Name).then(
 						function(clone) {
 							var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-							var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+							var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 							var url = sshCheck(clone.Children[0].GitUrl);
 							var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 							progress.progress(
@@ -1842,7 +1843,7 @@ var exports = {};
 					progress.progress(serviceRegistry.getService("orion.git.provider").getGitClone(item.CloneLocation),
 							"Getting git details " + item.Name).then(function(clone) {
 						var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-						var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+						var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 						var url = sshCheck(clone.Children[0].GitUrl);
 						var reviewRequestUrl = orionHome + "/git/reviewRequest.html#" + url + "_" + item.Name;
 						var dialog = new mReviewRequest.ReviewRequestDialog({ title : messages["Contribution Review Request"],
@@ -1877,7 +1878,7 @@ var exports = {};
 					// code
 					var statusLocation = item.Location.replace("commit/" + item.Name, "status"); //$NON-NLS-1$ //$NON-NLS-0$
 
-					if (jsonData.Result == "OK") { //$NON-NLS-0$
+					if (jsonData.Result === "OK") { //$NON-NLS-0$
 						// operation succeeded
 						display.Severity = "Ok"; //$NON-NLS-0$
 						if (jsonData.HeadUpdated) {
@@ -1889,13 +1890,13 @@ var exports = {};
 						}
 					}
 					// handle special cases
-					else if (jsonData.Result == "CONFLICTING") { //$NON-NLS-0$
+					else if (jsonData.Result === "CONFLICTING") { //$NON-NLS-0$
 						display.Severity = "Warning"; //$NON-NLS-0$
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result + messages[". Some conflicts occurred"] + //$NON-NLS-0$
 						+ i18nUtil.formatMessage(messages['. Go to ${0}.'], "<a href=\"" + require.toUrl(mGitUtil.statusUILocation) + "#"  //$NON-NLS-2$ //$NON-NLS-1$
 						+ statusLocation +"\">"+messages['Git Status page']+"</a>")+".</span>"; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-0$
-					} else if (jsonData.Result == "FAILED") { //$NON-NLS-0$
+					} else if (jsonData.Result === "FAILED") { //$NON-NLS-0$
 						display.Severity = "Error"; //$NON-NLS-0$
 						display.HTML = true;
 						display.Message = "<span>" + jsonData.Result;  //$NON-NLS-0$
@@ -2748,6 +2749,47 @@ var exports = {};
 		
 		// Rebase commands
 		
+		function _rebase(HeadLocation, action){
+			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
+			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
+			
+			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), "Rebasing git repository"); //$NON-NLS-0$ 
+			progressService.createProgressMonitor(
+				deferred,
+				action);
+			deferred.then(
+				function(jsonData){
+					if (jsonData.Result === "OK" || jsonData.Result === "ABORTED" || jsonData.Result === "FAST_FORWARD" || jsonData.Result === "UP_TO_DATE") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+						var display = [];
+						display.Severity = "Ok"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = jsonData.Result;
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						explorer.changedItem({});
+					}
+					
+					if (jsonData.Result === "STOPPED") { //$NON-NLS-0$
+						var display = [];
+						display.Severity = "Warning"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = jsonData.Result + messages['. Repository still contains conflicts.'];
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+						explorer.changedItem({});
+					} else if (jsonData.Result === "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
+						var display = [];
+						display.Severity = "Error"; //$NON-NLS-0$
+						display.HTML = false;
+						display.Message = jsonData.Result + messages['. Repository contains unmerged paths. Resolve conflicts first.'];
+						
+						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
+					}
+					
+				}, displayErrorOnStatus
+			);
+		}
+		
 		var rebaseContinueCommand = new mCommands.Command({
 			name: messages["Continue"],
 			tooltip: messages["Contibue Rebase"],
@@ -2758,7 +2800,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState.indexOf("REBASING") != -1; //$NON-NLS-0$
+				return item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
 			}
 		});
 		
@@ -2774,7 +2816,7 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState.indexOf("REBASING") != -1; //$NON-NLS-0$
+				return item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
 			}
 		});
 		
@@ -2790,53 +2832,14 @@ var exports = {};
 			},
 			
 			visibleWhen: function(item) {
-				return item.RepositoryState.indexOf("REBASING") != -1; //$NON-NLS-0$
+				return item.RepositoryState.indexOf("REBASING") !== -1; //$NON-NLS-0$
 			}
 		});
 		
 		commandService.addCommand(rebaseAbortCommand);	
 
 		
-		function _rebase(HeadLocation, action){
-			var progressService = serviceRegistry.getService("orion.page.message"); //$NON-NLS-0$
-			var progress = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
-			
-			var deferred = progress.progress(serviceRegistry.getService("orion.git.provider").doRebase(HeadLocation, "", action), "Rebasing git repository"); //$NON-NLS-0$ 
-			progressService.createProgressMonitor(
-				deferred,
-				action);
-			deferred.then(
-				function(jsonData){
-					if (jsonData.Result == "OK" || jsonData.Result == "ABORTED" || jsonData.Result == "FAST_FORWARD" || jsonData.Result == "UP_TO_DATE") { //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						var display = [];
-						display.Severity = "Ok"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = jsonData.Result;
-						
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-						explorer.changedItem({});
-					}
-					
-					if (jsonData.Result == "STOPPED") { //$NON-NLS-0$
-						var display = [];
-						display.Severity = "Warning"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = jsonData.Result + messages['. Repository still contains conflicts.'];
-						
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-						explorer.changedItem({});
-					} else if (jsonData.Result == "FAILED_UNMERGED_PATHS") { //$NON-NLS-0$
-						var display = [];
-						display.Severity = "Error"; //$NON-NLS-0$
-						display.HTML = false;
-						display.Message = jsonData.Result + messages['. Repository contains unmerged paths. Resolve conflicts first.'];
-						
-						serviceRegistry.getService("orion.page.message").setProgressResult(display); //$NON-NLS-0$
-					}
-					
-				}, displayErrorOnStatus
-			);
-		}
+
 	};
 
 }());

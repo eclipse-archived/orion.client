@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global window define */
+/*global window define document*/
 /*browser:true*/
 
 define(['i18n!orion/search/nls/messages', 'require', 'orion/bootstrap', 'orion/status', 'orion/progress','orion/dialogs',

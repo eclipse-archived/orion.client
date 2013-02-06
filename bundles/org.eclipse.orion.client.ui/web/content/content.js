@@ -9,7 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define orion window document */
+/*global define orion window document URL*/
 /*jslint browser:true*/
 
 /*
@@ -17,7 +17,7 @@
  */
 
 define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', 'orion/bootstrap', 'orion/status', 'orion/progress', 'orion/commands', 'orion/fileClient', 'orion/operationsClient',
-	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil'], 
+	        'orion/searchClient', 'orion/globalCommands', 'orion/URITemplate', 'orion/PageUtil', 'orion/URL-shim'], 
 			function(messages, require, lib, mBootstrap, mStatus, mProgress, mCommands, mFileClient, mOperationsClient, mSearchClient, 
 			mGlobalCommands, URITemplate, PageUtil) {
 
@@ -33,7 +33,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 		var searcher = new mSearchClient.Searcher({serviceRegistry: serviceRegistry, commandService: commandService, fileService: fileClient});
 		
 		var fileMetadata;
-		var hostName;
+		var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 		
 		/**
 		 * Utility method for saving file contents to a specified location
@@ -78,8 +78,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 			var params = PageUtil.matchResourceParameters(window.location.href);
 			var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
 			// TODO: should not be necessary, see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
-			hostName = nonHash.substring(0, nonHash.length - window.location.pathname.length);
-			var locationObject = {OrionHome: hostName, Location: params.resource};
+			var locationObject = {OrionHome: orionHome, Location: params.resource};
 			if (params.contentProvider) {
 				// Note that the shape of the "orion.page.content" extension is not in any shape or form that could be considered final.
 				// We've included it to enable experimentation. Please provide feedback on IRC or bugzilla.
@@ -104,10 +103,10 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 							info[propertyNames[j]] = contentProviders[i].getProperty(propertyNames[j]);
 						}
 						foundContent = true;
-						locationObject.ExitURL = hostName+"/content/exit.html"; //$NON-NLS-0$
+						locationObject.ExitURL = orionHome+"/content/exit.html"; //$NON-NLS-0$
 						if (info.saveToken) {
 							// we need to set up a SaveURL for the iframe to use.
-							locationObject.SaveURL = hostName+"/content/saveHook.html#" + params.resource + ",contentProvider=" + params.contentProvider + ","; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							locationObject.SaveURL = orionHome+"/content/saveHook.html#" + params.resource + ",contentProvider=" + params.contentProvider + ","; //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						}
 						
 						function makeIFrame() {
@@ -168,7 +167,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 		window.addEventListener("message", function(event) { //$NON-NLS-0$
 			// For potentially dangerous actions, such as save, we will force the content to be from our domain (internal
 			// save hook), which we know has given the user the change to look at the data before save.
-			if (hostName && fileMetadata && event.source.parent === window && event.origin === hostName ) {
+			if (orionHome && fileMetadata && event.source.parent === window && event.origin === new URL(window.location).origin ) {
 				if (typeof event.data === "string") { //$NON-NLS-0$
 				var data = JSON.parse(event.data);
 					if (data.shellService) {
@@ -176,7 +175,7 @@ define(['i18n!orion/content/nls/messages', 'require', 'orion/webui/littlelib', '
 							saveFileContents(fileClient, fileMetadata, {sourceLocation: data.sourceLocation}, function() {
 								if (window.confirm(messages["Content has been saved.  Click OK to go to the navigator, Cancel to keep editing."])) {
 									// go to the navigator
-									window.location.href = hostName + "/navigate/table.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$
+									window.location.href = orionHome + "/navigate/table.html#" + fileMetadata.Parents[0].ChildrenLocation; //$NON-NLS-0$
 								} else {
 									loadContent();
 								}

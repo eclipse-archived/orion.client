@@ -9,13 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define document window eclipse orion serviceRegistry:true widgets alert*/
+/*global define document window eclipse orion serviceRegistry:true widgets alert URL*/
 /*browser:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
-        'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes'], 
-		function(messages, mBootstrap, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
+        'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim'], 
+		function(require, messages, mBootstrap, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes) {
 
 	mBootstrap.startup().then(function(core) {
@@ -60,7 +60,7 @@ define(['i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/litt
 			var pageParams = PageUtil.matchResourceParameters();
 			// TODO working around https://bugs.eclipse.org/bugs/show_bug.cgi?id=373450
 			var nonHash = window.location.href.split('#')[0]; //$NON-NLS-0$
-			var orionHome = nonHash.substring(0, nonHash.length - window.location.pathname.length);
+			var orionHome = new URL(require.toUrl("."), window.location).href.slice(0,-1);
 
 			explorer.loadResourceList(pageParams.resource, false, function() {
 				mGlobalCommands.setPageTarget({task: "Navigator", target: explorer.treeRoot, 
