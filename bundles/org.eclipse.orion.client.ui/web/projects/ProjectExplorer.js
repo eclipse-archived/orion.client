@@ -11,8 +11,8 @@
 /*global define window orion document */
 /*jslint browser:true */
 
-define(['i18n!orion/widgets/nls/messages', 'orion/Deferred', 'orion/explorers/explorer-table', 'orion/webui/littlelib', 'orion/fileUtils', 'orion/explorers/explorer'], 
-function(messages, Deferred, mFileExplorer, lib, mFileUtils, mExplorer) {
+define(['i18n!orion/widgets/nls/messages', 'orion/Deferred', 'orion/explorers/explorer-table', 'orion/webui/littlelib'], 
+function(messages, Deferred, mFileExplorer, lib) {
 
 	function ProjectExplorer(){
 		mFileExplorer.FileExplorer.apply( this, arguments );
