@@ -42,23 +42,28 @@ function(messages, Deferred, mFileExplorer, lib) {
 	
 		var self = this;
 		this.workingSets = workingsets;
-		// Create a root that contains the folders from the workset.
+		// Create a root that will contain the folders from the working set.
 		var workingSetList = {};
 		workingSetList.Children = [];
-
-// KEEPING THIS FOR REFERENCE UNTIL THE WORKING SETS IS FUNCTIONIONG		
-//		workspace.Children.forEach(function(folder) {
-//			// TODO check the folder to see if it's in the working set.  If so, push it.
-//			workingSetList.Children.push(folder);
-//		});
 		
-		for( var w = 0; w < workingsets.length; w++ ){
-		self.fileClient.read(workingsets[w], true).then(function(folder) {
-				workingSetList.Children.push( folder.ChildrenLocation );	
+		// read the metadata for each working set folder location
+		var deferreds = [];
+		
+		// TODO a future optimization might be to first look in workspace.Children to see if we already have metadata.  For now, just request it.
+		workingsets.forEach(function(folderLink) {
+			deferreds.push(self.fileClient.read(folderLink, true));
+		});
+		
+		Deferred.all(deferreds, function(error) { return {failure: error}; }).then(function(foldersOrErrors) {
+			foldersOrErrors.forEach(function(folderOrError) {
+				if (folderOrError.failure) {
+					self.registry.getService("orion.page.message").setErrorMessage(folderOrError.failure);
+				} else {
+					workingSetList.Children.push(folderOrError);
+				}
 			});
-		}
-		
-		this.load(workingSetList, "Loading Working Sets...");	
+			self.load(workingSetList, "Loading Working Sets...");
+		});
 	};
 	
 	ProjectExplorer.prototype.loadDriveList = function( workspace, driveNames ) {
