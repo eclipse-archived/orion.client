@@ -11,25 +11,20 @@
 /*global __dirname console require describe it beforeEach*/
 var assert = require('assert');
 var mocha = require('mocha');
-var request = require('supertest');
 
 var connect = require('connect');
-var fileAPI = require('../lib/file');
 var testData = require('./support/test_data');
 var path = require('path');
 
 var PREFIX = '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 
-var app = connect();
-app.request = function() {
-	return request(app);
-};
-app.use(fileAPI({
-	root: PREFIX,
-	workspaceRoot: '/workspace',
-	workspaceDir: WORKSPACE
-}));
+var app = testData.createApp()
+			.use(require('../lib/file')({
+				root: PREFIX,
+				workspaceRoot: '/workspace',
+				workspaceDir: WORKSPACE
+			}));
 
 function byName(a, b) {
 	return String.prototype.localeCompare(a.Name, b.Name);
