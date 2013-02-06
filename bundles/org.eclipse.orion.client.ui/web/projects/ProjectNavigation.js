@@ -119,9 +119,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			}}); //$NON-NLS-0$
 			
 			// TODO get the working sets from (wherever) and pass them in for filtering by the explorer
-			this.workingSetExplorer.loadWorkingSets( this.workspace, [] );
-
-			
+			this.workingSetExplorer.loadWorkingSets( this.workspace, [this.project.workspace] );
 		}
 		
 		ProjectNavigation.prototype.addWorkingSet = addWorkingSet;

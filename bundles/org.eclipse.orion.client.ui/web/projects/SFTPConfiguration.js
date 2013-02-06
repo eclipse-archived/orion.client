@@ -34,6 +34,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 			this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
 			
+			this.projectDataManager.createWorkArea( this.projectData );
+			
 			this.driveWidget.show();
 
 			/* Set up drives */
