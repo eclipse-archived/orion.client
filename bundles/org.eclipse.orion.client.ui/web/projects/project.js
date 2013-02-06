@@ -63,8 +63,8 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				projectGrid = new ProjectGrid( mainPanel );
 	
 				this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
-
-				this.projectDataManager.getProjectData( showProjectGrid ); 
+				var projectDataManager = this.projectDataManager;
+				this.projectDataManager.startup(function() { projectDataManager.getProjectData( showProjectGrid ); }); 
 		});
 	}	
 );
