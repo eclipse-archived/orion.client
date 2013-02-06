@@ -4340,11 +4340,13 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			table.style.margin = "0px"; //$NON-NLS-0$
 			table.style.padding = "0px"; //$NON-NLS-0$
 			table.style.outline = "none"; //$NON-NLS-0$
+			table.style.lineHeight = "normal"; //$NON-NLS-0$
 			var tr = table.insertRow(0);
 			tr.style.borderWidth = "0px"; //$NON-NLS-0$
 			tr.style.margin = "0px"; //$NON-NLS-0$
 			tr.style.padding = "0px"; //$NON-NLS-0$
 			tr.style.outline = "none"; //$NON-NLS-0$
+			tr.style.lineHeight = "normal"; //$NON-NLS-0$
 			rootDiv.appendChild(leftDiv);
 
 			var viewDiv = util.createElement(document, "div"); //$NON-NLS-0$
@@ -4381,11 +4383,13 @@ define("orion/editor/textView", ['orion/editor/textModel', 'orion/editor/keyBind
 			table.style.margin = "0px"; //$NON-NLS-0$
 			table.style.padding = "0px"; //$NON-NLS-0$
 			table.style.outline = "none"; //$NON-NLS-0$
+			table.style.lineHeight = "normal"; //$NON-NLS-0$
 			tr = table.insertRow(0);
 			tr.style.borderWidth = "0px"; //$NON-NLS-0$
 			tr.style.margin = "0px"; //$NON-NLS-0$
 			tr.style.padding = "0px"; //$NON-NLS-0$
 			tr.style.outline = "none"; //$NON-NLS-0$
+			tr.style.lineHeight = "normal"; //$NON-NLS-0$
 			rootDiv.appendChild(rightDiv);
 				
 			var scrollDiv = util.createElement(document, "div"); //$NON-NLS-0$
