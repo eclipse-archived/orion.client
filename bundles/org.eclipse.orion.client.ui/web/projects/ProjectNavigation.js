@@ -11,9 +11,9 @@
 /*global orion window console define localStorage*/
 /*jslint browser:true*/
 
-define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
+define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 'orion/commands', 'orion/selection', 'orion/section', 'projects/DriveTreeRenderer', 'orion/Deferred', 'orion/fileCommands', 'projects/ProjectExplorer' ], 
 	
-	function(messages, require, mCommands, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
+	function(messages, require, lib, mCommands, mSelection, mSection, DriveTreeRenderer, Deferred, mFileCommands, ProjectExplorer ) {
 
 		function ProjectNavigation( project, workspace, anchor, serviceRegistry, commandService, progressService, fileClient, contentTypeService ){
 		
@@ -69,29 +69,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		ProjectNavigation.prototype.template = template;
 		
-		function addDrivesTree( parentNode, drivenames ){
-			
-			var self = this;
-			
-			this.drivesExplorer = new ProjectExplorer({							
-				selection: this.selection, 
-				serviceRegistry: this.serviceRegistry,
-				fileClient: this.fileClient, 
-				parentId: parentNode, 
-				rendererFactory: function(explorer) {  //$NON-NLS-0$
-				
-					var renderer = new DriveTreeRenderer({
-						checkbox: false, 
-						cachePrefix: "Drives"}, explorer, self.commandService, self.contentTypeService);
-						
-					return renderer;
-			}}); //$NON-NLS-0$
-			
-			this.drivesExplorer.loadDriveList( this.workspace, drivenames );
-		}
-		
-		ProjectNavigation.prototype.addDrivesTree = addDrivesTree;
-		
 		function createSection( node, content, id, title, scope ){
 		
 			var serviceRegistry = this.serviceRegistry;
@@ -126,9 +103,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.workingSetSection = this.createSection( this.workingSetNode, workingSetContent, 'workingSet', 'Working Set', scope );
 			
 			var self = this;
-			
+			this.workingSetSelection = new mSelection.Selection(this.serviceRegistry, "orion.workingSets.selection"); //$NON-NLS-0$
 			this.workingSetExplorer = new ProjectExplorer({							
-				selection: this.selection, 
+				selection: this.workingSetSelection, 
 				serviceRegistry: this.serviceRegistry,
 				fileClient: this.fileClient, 
 				parentId: "WorkingSetContent",   // content DOM id
@@ -150,7 +127,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		ProjectNavigation.prototype.addWorkingSet = addWorkingSet;
 		
 		function addDrives( scope ){
-		
+			var self = this;
+	
 			this.drivesNode = this.anchor.firstChild.children[2];
 			
 			var driveContent = '<div id="DriveContent"></div>';
@@ -165,7 +143,75 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}
 			}
 			
-			this.addDrivesTree("DriveContent", drivenames );			
+			this.drivesSelection = new mSelection.Selection(this.serviceRegistry, "orion.drives.selection"); //$NON-NLS-0$
+			this.commandService.registerSelectionService(this.drivesSection.selectionNode.id, this.drivesSelection);
+
+			var selectionId = this.drivesSection.selectionNode.id;
+			this.serviceRegistry.getService("orion.drives.selection").addEventListener("selectionChanged", function(event) { //$NON-NLS-1$ //$NON-NLS-0$
+				var selectionTools = lib.node(selectionId);
+				if (selectionTools) {
+					self.commandService.destroy(selectionTools);
+					self.commandService.renderCommands(selectionId, selectionTools, event.selections, self, "button"); //$NON-NLS-0$
+				}
+			});
+			
+			this.drivesExplorer = new ProjectExplorer({							
+				selection: this.drivesSelection, 
+				serviceRegistry: this.serviceRegistry,
+				fileClient: this.fileClient, 
+				parentId: "DriveContent",  //$NON-NLS-0$
+				rendererFactory: function(explorer) {  //$NON-NLS-0$
+				
+					var renderer = new DriveTreeRenderer({
+						checkbox: false, 
+						cachePrefix: "Drives"}, explorer, self.commandService, self.contentTypeService); //$NON-NLS-0$
+						
+					return renderer;
+			}}); //$NON-NLS-0$
+			
+			this.drivesExplorer.loadDriveList( this.workspace, drivenames );			
+			// drive commands
+			var copyToWorkingSetCommand = new mCommands.Command({
+				name : "Copy to Working Set",
+				tooltip: "Copy the folder to the working set", //$NON-NLS-0$
+				id: "orion.copyToWorkingSet", //$NON-NLS-0$
+				visibleWhen: function(items) {  
+					items = Array.isArray(items) ? items : [items];
+					if (items.length === 0) {
+						return false;
+					}
+					items.forEach(function(folder) {
+						if (!folder.Directory) {
+							return false;
+						}
+					});
+					return true;
+				},
+				callback: function(data) {
+					// TODO data.items contains the selected folders
+					window.alert("TODO:  copy " + data.items.length + " folders to the working set");
+				}
+			});
+			this.commandService.addCommand(copyToWorkingSetCommand);
+			this.commandService.registerCommandContribution(this.drivesSection.selectionNode.id, "orion.copyToWorkingSet", 200); //$NON-NLS-0$
+			
+			// create an actions menu
+			this.commandService.addCommandGroup(this.drivesSection.selectionNode.id, "orion.driveSelectionGroup", 100, "Actions"); 
+
+			// bring in the standard navigator commands
+			// Contribute the navigator commands that don't have to do with SFTP or other import/export since presumably drives handle that already.
+			mFileCommands.createFileCommands(this.serviceRegistry, this.commandService, this.drivesExplorer, this.fileClient);
+			mFileCommands.createAndPlaceFileCommandsExtension(this.serviceRegistry, this.commandService, this.drivesExplorer, this.drivesSection.actionsNode.id, this.drivesSection.selectionNode.id, "orion.driveSelectionGroup");  //$NON-NLS-0$
+			var menuid = this.drivesSection.selectionNode.id;
+			this.commandService.registerCommandContribution(menuid, "orion.makeFavorite", 1, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.renameResource", 2, "orion.driveSelectionGroup", false, new mCommands.CommandKeyBinding(113, false, false, false, false, "DriveContent", "Drives")); //$NON-NLS-4$  //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.copyFile", 3, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.moveFile", 4, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.deleteFile", 5, "orion.driveSelectionGroup", false, new mCommands.CommandKeyBinding(46, false, false, false, false, "DriveContent", "Drives")); //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.compareWithEachOther", 6, "orion.driveSelectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.compareWith", 7, "orion.driveSelectionGroup");  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution(menuid, "eclipse.downloadFile", 3, "orion.driveSelectionGroup"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+
 		}
 		
 		ProjectNavigation.prototype.addDrives = addDrives;
@@ -186,7 +232,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					
 		function addCommands(){
 		
-			var saveConfigCommand = new mCommands.Command({
+			// navigation overview commands
+			var configureCommand = new mCommands.Command({
 				name: 'Configure', //messages["Install"],
 				tooltip: 'Configure Project',
 				id: "orion.projectConfiguration", //$NON-NLS-0$
@@ -195,7 +242,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				}.bind(this)
 			});
 			
-			this.commandService.addCommand(saveConfigCommand);
+			this.commandService.addCommand(configureCommand);
 			this.commandService.registerCommandContribution("projectConfiguration", "orion.projectConfiguration", 1, /* not grouped */ null, false, /* no key binding yet */ null, null ); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			this.commandService.renderCommands("projectConfiguration", "projectConfiguration", this, this, "button"); //$NON-NLS-0$
 		}
