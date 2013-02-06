@@ -556,7 +556,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		return writer.write();
 	}
 
-	function processBlobResult(promise, result, output) {
+	function processBlobResult(promise, result, output, isProgress) {
 		var element, writer;
 		if (output) {
 			writer = new mResultWriters.FileBlobWriter(output, shellPageFileService);
@@ -574,7 +574,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		});
 		writer.write().then(
 			function() {
-				promise.resolve(element);
+				if (isProgress) {
+					promise.progress(element);
+				} else {
+					promise.resolve(element);
+				}
 			},
 			function(error) {
 				outputString(error).then(
@@ -590,7 +594,7 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		);
 	}
 
-	function processStringResult(promise, result, output) {
+	function processStringResult(promise, result, output, isProgress) {
 		var element, writer;
 		if (output) {
 			writer = new mResultWriters.FileStringWriter(output, shellPageFileService);
@@ -601,7 +605,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 
 		outputString(result.stringify(), writer).then(
 			function() {
-				promise.resolve(element);
+				if (isProgress) {
+					promise.progress(element);
+				} else {
+					promise.resolve(element);
+				}
 			},
 			function(error) {
 				outputString(error).then(
@@ -617,19 +625,19 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		);
 	}
 
-	function processResult(promise, result, output) {
+	function processResult(promise, result, output, isProgress) {
 		var type = result.getType();
 		if (type === "file") { //$NON-NLS-0$
 			// TODO generalize this to look up any custom type
-			fileType.processResult(promise, result, output);
+			fileType.processResult(promise, result, output, isProgress);
 			return;
 		}
 		/* handle built-in types */
 		if (type === "blob") { //$NON-NLS-0$
-			processBlobResult(promise, result, output);
+			processBlobResult(promise, result, output, isProgress);
 		} else {
 			/* either string or unknown type */
-			processStringResult(promise, result, output);
+			processStringResult(promise, result, output, isProgress);
 		}
 	}
 
@@ -713,9 +721,8 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 						resolveError(promise, error);
 					},
 					function(data) {
-						if (typeof promise.progress === "function") { //$NON-NLS-0$
-							promise.progress(data);
-						}
+						var commandResult = new CommandResult(data, returnType);
+						processResult(promise, commandResult, output, true);
 					}
 				);
 			});
