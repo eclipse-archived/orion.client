@@ -58,7 +58,7 @@ function(messages, Deferred, mFileExplorer, lib) {
 			foldersOrErrors.forEach(function(folderOrError) {
 				if (folderOrError.failure) {
 					self.registry.getService("orion.page.message").setErrorMessage(folderOrError.failure);
-				} else {
+				} else if (folderOrError.Directory) {
 					workingSetList.Children.push(folderOrError);
 				}
 			});

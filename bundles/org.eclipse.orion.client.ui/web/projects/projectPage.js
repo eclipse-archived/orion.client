@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global define document */
+/*global define document window */
 
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
 	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
@@ -34,7 +34,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			
 			var mainPanel = document.getElementById( 'SFTPConfiguration' );
 			
-			var configuration = new SFTPConfiguration( myproject, mainPanel, commandService, serviceRegistry, fileClient );	
+			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandService, serviceRegistry, fileClient );	
 		}
 		
 		function startProjectComponents( project, workspace, dataManager ){
@@ -44,6 +44,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			if(project){
 				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 			}
+			window.location.hash = '?project=' + project.name;
 			
 			myproject = project;
 			myworkspace = workspace;
@@ -92,7 +93,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			
 			projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);
 			
-			projectDataManager.getProject( projectName, startProjectComponents );
+			projectDataManager.startup(function() {	projectDataManager.getProject( projectName, startProjectComponents ); });
 		});
 	}	
 );
