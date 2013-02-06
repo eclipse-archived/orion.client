@@ -61,7 +61,57 @@ define('orion/editor/edit', [
 		}
 		return text;
 	}
+
+	/**	@private */	
+	function optionName(name) {
+		var prefix = "data-editor-";
+		if (name.substring(0, prefix.length) === prefix) {
+			var key = name.substring(prefix.length);
+			key = key.replace(/-([a-z])/ig, function(all, character) {
+				return character.toUpperCase();
+			});
+			return key;
+		}
+		return undefined;
+	}
 	
+	/**	@private */
+	function mergeOptions(parent, defaultOptions) {
+		var options = {};
+		for (var p in defaultOptions) {
+			if (defaultOptions.hasOwnProperty(p)) {
+				options[p] = defaultOptions[p];
+			}
+		}
+		for (var attr, j = 0, attrs = parent.attributes, l = attrs.length; j < l; j++) {
+			attr = attrs.item(j);
+			var key = optionName(attr.nodeName);
+			if (key) {
+				var value = attr.nodeValue;
+				if (value === "true" || value === "false") {
+					value = value === "true";
+				}
+				options[key] = value;
+			}
+		}
+		return options;
+	}
+	
+	/**	@private */
+	function getHeight(node) {
+		var document = node.ownerDocument;
+		var window = document.defaultView || document.parentWindow;
+		var height;
+		if (window.getComputedStyle) {
+			var style = window.getComputedStyle(node, null);
+			height = style.getPropertyValue("height"); //$NON-NLS-0$
+		} else if (node.currentStyle) {
+			height = node.currentStyle.height;
+		}
+		return parseInt(height, 10) || 0;
+	}
+	
+	var editAll;
 	/**
 	 * @class This object describes the options for <code>edit</code>.
 	 * @name orion.editor.EditOptions
@@ -94,6 +144,12 @@ define('orion/editor/edit', [
 		if (typeof(parent) === "string") { //$NON-NLS-0$
 			parent = (options.document || document).getElementById(parent);
 		}
+		if (!parent) {
+			if (options.className) {
+				return editAll(options);
+			}
+		}
+		options = mergeOptions(parent, options);
 		if (!parent) { throw "no parent"; } //$NON-NLS-0$
 	
 		var textViewFactory = function() {
@@ -196,9 +252,29 @@ define('orion/editor/edit', [
 				}
 			});
 		}
-		
+		/* The minimum height of the editor is 50px */
+		if (getHeight(parent) <= 50) {
+			var height = editor.getTextView().computeSize().height;
+			parent.style.height = height + "px";
+		}
 		return editor;
 	}
+	
+	editAll = function (defaultOptions) {
+		var elements = document.getElementsByClassName(defaultOptions.className);
+		var editors;
+		if (elements) {
+			editors = [];
+			defaultOptions.className = undefined;
+			for (var i = 0; i < elements.length; i++) {
+				var element = elements[i];
+				defaultOptions.parent = element;
+				var editor = edit(defaultOptions);
+				editors.push(editor);
+			}
+		}
+		return editors;
+	};
 	
 	return edit;
 });
