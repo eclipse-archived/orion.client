@@ -102,11 +102,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			});
 		}
 		
-				/* Create a folder workspace for a project */ 
+		/* Create a folder working folder for a project */ 
 		
-		function createWorkspace( project, callback ){
+		function createWorkArea( project, callback ){
 		
-			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			var loadedWorkspace = this.loadedWorkspace;
 			
 			var fileClient = this.fileClient;
 			
@@ -122,6 +122,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 						
 							var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
 							
+							/* If there is a folder*/
+							
 							fileClient.read( folders.Children[projectsIndex].ChildrenLocation, true ).then( function(folders){
 								
 								var workspacesIndex = projectDataManager.findInWorkspace( folders.Children, WORKSPACES_FOLDER );
@@ -130,7 +132,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 								
 									fileClient.createFolder( folderResult.Location, project.name ).then( function( outcome ){
 									
-										project.workspace = outcome.Name;
+										project.workspace = outcome.Location;
 									
 										projectDataManager.save( project );
 									});
@@ -151,7 +153,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 								
 								fileClient.createFolder( result.Location, project.name ).then( function( folderResult ){
 								
-									project.workspace = folderResult.Name;
+									project.workspace = folderResult.Location;
 								
 									projectDataManager.save( project );
 								});
@@ -303,6 +305,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 									fileClient.write( fileLocation, fileData );
 									
 									callback( true );
+									
 								} );
 							});
 						}
@@ -377,6 +380,35 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			});
 		}
 		
+			/* Returns true if there is a workspaces folder in the projectData folder */
+		
+		function checkForWorkspaces( callback ){
+		
+			var result = false;
+			
+			var loadedWorkspace = this.fileClient.loadWorkspace("");
+			
+			var fileClient = this.fileClient;
+			
+			var projectDataManager = this;
+			
+			Deferred.when( loadedWorkspace, function(workspace) {
+			
+				fileClient.read( workspace.ChildrenLocation, true ).then( function(folders){
+				
+					var projectsIndex = projectDataManager.findInWorkspace( folders.Children, PROJECTS_FOLDER );
+					
+					fileClient.read( folders.Children[projectsIndex].ChildrenLocation, true ).then( function(folders){
+						var workspacesIndex = projectDataManager.findInWorkspace( folders.Children, WORKSPACES_FOLDER );
+						
+						if( folders.Children[workspacesIndex] ){ result = true; }
+						
+						callback( result );
+					});
+				});
+			});
+		}
+		
 		ProjectDataManager.prototype.findInWorkspace = findInWorkspace;
 		ProjectDataManager.prototype.createProjectData = createProjectData;
 		ProjectDataManager.prototype.createProjectWorkspaces = createProjectWorkspaces;
@@ -387,6 +419,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		ProjectDataManager.prototype.removefromArray = removefromArray;
 		ProjectDataManager.prototype.removeProject = removeProject;
 		ProjectDataManager.prototype.constructor = ProjectDataManager;
+		ProjectDataManager.prototype.createWorkArea = createWorkArea;
+		ProjectDataManager.prototype.checkForWorkspaces = checkForWorkspaces;
 		
 		return ProjectDataManager;
 	}

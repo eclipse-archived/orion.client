@@ -45,10 +45,19 @@ function(messages, Deferred, mFileExplorer, lib) {
 		// Create a root that contains the folders from the workset.
 		var workingSetList = {};
 		workingSetList.Children = [];
-		workspace.Children.forEach(function(folder) {
-			// TODO check the folder to see if it's in the working set.  If so, push it.
-			workingSetList.Children.push(folder);
-		});
+
+// KEEPING THIS FOR REFERENCE UNTIL THE WORKING SETS IS FUNCTIONIONG		
+//		workspace.Children.forEach(function(folder) {
+//			// TODO check the folder to see if it's in the working set.  If so, push it.
+//			workingSetList.Children.push(folder);
+//		});
+		
+		for( var w = 0; w < workingsets.length; w++ ){
+		self.fileClient.read(workingsets[w], true).then(function(folder) {
+				workingSetList.Children.push( folder.ChildrenLocation );	
+			});
+		}
+		
 		this.load(workingSetList, "Loading Working Sets...");	
 	};
 	
