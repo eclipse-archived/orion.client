@@ -17,6 +17,7 @@
     "requirejs": "~2.1.2",
     "supertest": "*"
   },
+  "main": "index.js",
   "scripts": {
     "test": "mocha --reporter spec"
   },
