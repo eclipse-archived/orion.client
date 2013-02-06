@@ -226,7 +226,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 								}
 							}
 							
-							callback( project, workspace );
+							callback( project, workspace, projectDataManager );
 						} );
 					});
 				}

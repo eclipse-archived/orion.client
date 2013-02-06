@@ -122,3 +122,8 @@
    width: 16px;
 }
 
+.core-sprite-copy-folder {
+   background: url(../images/copy-folder.png) no-repeat top left;
+   height: 16px;
+   width: 16px;
+}
