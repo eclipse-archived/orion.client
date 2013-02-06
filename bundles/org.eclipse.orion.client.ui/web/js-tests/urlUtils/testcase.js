@@ -71,8 +71,16 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	
 	 // Test a string with bad URL enclosed by [] pair.
 	 
-	tests.testWithBadURLAndPair = function() {
+	tests.testWithBadURLAndPair1 = function() {
 		var result = mUrlUtils.detectValidURL("There is URL  [abc:123:a4b]  and it is valid"); //$NON-NLS-0$
+		assert.deepEqual(result, null);
+	};
+
+	
+	 // Test a string with bad URL enclosed by [] pair.
+	 
+	tests.testWithBadURLAndPair2 = function() {
+		var result = mUrlUtils.detectValidURL("There is URL  [abcde]  and it is valid"); //$NON-NLS-0$
 		assert.deepEqual(result, null);
 	};
 

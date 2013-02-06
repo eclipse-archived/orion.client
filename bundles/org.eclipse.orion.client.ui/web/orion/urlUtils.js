@@ -8,9 +8,9 @@
  *
  * Contributors: IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*global define window document*/
+/*global define window document URL*/
 
-define(['orion/PageUtil'], function(PageUtil) {
+define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
                 
     /**
      * Detect if the given text has any URL encloded by "[" and "]". Multiple occurences of the pattern "[url string]" and the non matched part are returned as an array of segments.
@@ -26,7 +26,7 @@ define(['orion/PageUtil'], function(PageUtil) {
 			//match[0]: the string enclosed by "[" and "]"
 			//match[1]: the string inside the pair of "[" and "]"
 			if(match.length === 2 && match[1].length >= 0){
-				if(PageUtil.validateURLScheme(match[1])) { //Check if it is a valid URL
+				if(new URL(match[1]).href && PageUtil.validateURLScheme(match[1])) { //Check if it is a valid URL
 					if(match.index > lastNonMatchIndex) { //We have to push a plain text segment first
 						matches.push({segmentStr: text.substring(lastNonMatchIndex, match.index), isValidURL: false});
 					}
