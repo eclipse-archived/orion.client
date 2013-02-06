@@ -1346,6 +1346,10 @@ var exports = {};
 						var remoteLocation = clone.Children[0].RemoteLocation;
 						var locationToChange = clone.Children[0].ConfigLocation;
 						
+						var handleError = function(error){
+							handleProgressServiceResponse(error, {}, serviceRegistry);
+						};
+						
 						exports.gatherSshCredentials(serviceRegistry, commandInvocation).then(
 							function(options) {
 								var result = new Deferred();
@@ -1381,19 +1385,33 @@ var exports = {};
 												else{
 													target = targetBranch;
 												}
-												var locationToUpdate = "/gitapi/config/" + "branch." + item.Name + ".remote"  + "/clone/file/" + parts[4];
-												progress.progress(gitService.addCloneConfigurationProperty(locationToChange,"branch." + item.Name + ".remote" ,target.parent.Name), "Adding git configuration property "+ item.Name).then(
+												var configKey = "branch." + item.Name + ".remote";
+												progress.progress(gitService.addCloneConfigurationProperty(locationToChange, configKey ,target.parent.Name), "Adding git configuration property "+ item.Name).then(
 													function(){
 														commandInvocation.targetBranch = target;
 														handlePush(options, target.Location, "HEAD",target.Name, false);
 													}, function(err){
 														if(err.status === 409){ //when confing entry is already defined we have to edit it
-															progress.progress(gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name), "Updating configuration property " + target.parent.Name).then(
-																function(){
-																	commandInvocation.targetBranch = target;
-																	handlePush(options, target.Location, "HEAD",target.Name, false);
+															gitService.getGitCloneConfig(locationToChange).then(function(config){
+																if(config.Children){
+																	for(var i=0; i<config.Children.length; i++){
+																		if(config.Children[i].Key===configKey){
+																			var locationToUpdate = config.Children[i].Location;
+																			progress.progress(gitService.editCloneConfigurationProperty(locationToUpdate,target.parent.Name), "Updating configuration property " + target.parent.Name).then(
+																					function(){
+																						commandInvocation.targetBranch = target;
+																						handlePush(options, target.Location, "HEAD",target.Name, false);
+																					},
+																					handleError
+																			);
+																			break;
+																		}
+																	}
 																}
-															);
+																
+															}, handleError);
+														} else {
+															handleError(erry);
 														}
 													}
 												);
