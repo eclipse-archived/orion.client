@@ -24,10 +24,7 @@ var orion = require('../');
 describe('orionode', function() {
 	var app;
 	beforeEach(function(done) {
-		app = connect();
-		app.request = function() {
-			return request(app);
-		};
+		app = testData.createApp();
 		testData.setUp(WORKSPACE, done);
 	});
 

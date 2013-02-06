@@ -12,11 +12,8 @@
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');
-
-/**
- * Creates a workspace directory with a few files and folders.
- * Uses POSIX shell commands, so on Windows this must be run from within a Cygwin or MinGW shell. CMD.EXE will not work.
- */
+var connect = require('connect');
+var request = require('supertest');
 
 function debug(msg) {
 	if (exports.DEBUG) {
@@ -46,14 +43,19 @@ function tearDown(dir, callback) {
 	], callback);
 }
 
-/*
+
+/**
+ * Creates a workspace directory with a few files and folders.
+ * Uses POSIX shell commands, so on Windows this must be run from within a Cygwin or MinGW shell. CMD.EXE will not work.
+ <pre>
    dir
    |---project/
    |-----fizz.txt
    |-----my folder/
    |-------buzz.txt
    |-------my subfolder/
-*/
+ </pre>
+ */
 function setUp(dir, callback) {
 	debug('Using directory: ' + dir);
 	function generateContent() {
@@ -85,6 +87,19 @@ function setUp(dir, callback) {
 	});
 }
 
+/**
+ * @returns A new connect app that has a #request() method. The #request method returns a supertest request
+ * for the app, equivalent to calling require('supertest')(app).
+ * This allows you to test the app in a convenient chain of calls like this:
+ * <code>createApp().request().get('/foobar.txt').expect(...)</code>
+ */
+function createApp() {
+	var app = connect();
+	app.request = request.bind(null, app);
+	return app;
+}
+
 exports.DEBUG = false;
+exports.createApp = createApp;
 exports.setUp = setUp;
 exports.tearDown = tearDown;
