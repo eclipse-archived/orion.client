@@ -235,11 +235,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 	 * @param {orion.commands.CommandService} commandService The command service to get commands from
 	 * @param {orion.explorer.Explorer} explorer The explorer view to add commands to
 	 * @param {orion.fileClient.FileClient} fileClient The file system client that the commands should use
-	 * @param {String} toolbarId The id of the toolbar to add commands to
 	 * @name orion.fileCommands#createFileCommands
 	 * @function
 	 */
-	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient, toolbarId) {
+	fileCommandUtils.createFileCommands = function(serviceRegistry, commandService, explorer, fileClient) {
 		progressService = serviceRegistry.getService("orion.page.progress"); //$NON-NLS-0$
 
 		function contains(arr, item) {
