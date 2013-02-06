@@ -12,8 +12,8 @@
 /*global define window */
 /*jslint regexp:false browser:true forin:true*/
 
-define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer'],
-		function(messages, require, lib, i18nUtil, mFileUtils, mExplorer){
+define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/webui/littlelib', 'orion/i18nUtil', 'orion/fileUtils', 'orion/explorers/explorer'],
+		function(messages, require, Deferred, lib, i18nUtil, mFileUtils, mExplorer){
 
 	/**
 	 * Tree model used by the FileExplorer
@@ -329,100 +329,103 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 		path = mFileUtils.makeRelative(path);
 		if (!force && path === this._lastPath) {
 			return;
-		}
-					
+		}			
 		this._lastPath = path;
+		var self = this;
+		if (force || (path !== this.treeRoot.Path)) {
+			this.load(this.fileClient.loadWorkspace(path), "Loading " + path, function() {
+				self.treeRoot.Path = path;
+				if (typeof postLoad === "function") { //$NON-NLS-0$
+					postLoad();
+				}
+			});
+		}
+	};
+	
+	/**
+	 * Load the explorer with the given root
+	 * @param {Object} root a root object or a deferred that will return the root of the FileModel
+	 * @param {String} progress a string progress message describing the fetch of the root
+	 */
+	FileExplorer.prototype.load = function(root, progressMessage, postLoad) {
 		var parent = lib.node(this.parentId);			
 
-		// we are refetching everything so clean up the root
-		this.treeRoot = {};
-
-		if (force || (path !== this.treeRoot.Path)) {
-			//the tree root object has changed so we need to load the new one
-			
-			// Progress indicator
-			var progress = lib.node("progress");  //$NON-NLS-0$
-			if(!progress){
-				progress = document.createElement("div"); //$NON-NLS-0$
-				progress.id = "progress"; //$NON-NLS-0$
-				lib.empty(parent);
-				parent.appendChild(progress);
-			}
+		// Progress indicator
+		var progress = lib.node("progress");  //$NON-NLS-0$
+		if(!progress){
+			progress = document.createElement("div"); //$NON-NLS-0$
+			progress.id = "progress"; //$NON-NLS-0$
+			lib.empty(parent);
+			parent.appendChild(progress);
+		}
+		lib.empty(progress);
+		
+		var progressTimeout = setTimeout(function() {
 			lib.empty(progress);
-			
-			var progressTimeout = setTimeout(function() {
-				lib.empty(progress);
-				var b = document.createElement("b"); //$NON-NLS-0$
-				progress.appendChild(document.createTextNode(messages["Loading "]));
-				b.appendChild(document.createTextNode(path));
-				progress.appendChild(b);
-				progress.appendChild(document.createTextNode("..."));
-			}, 500); // wait 500ms before displaying
-				
-			this.treeRoot.Path = path;
-			var self = this;
-			
-			(this.registry ? this.registry.getService("orion.page.progress").progress(this.fileClient.loadWorkspace(path), "Loading workspace " + path) : this.fileClient.loadWorkspace(path)).then(
-				function(loadedWorkspace) {
-					clearTimeout(progressTimeout);
-					//copy fields of resulting object into the tree root
-					for (var i in loadedWorkspace) {
-						self.treeRoot[i] = loadedWorkspace[i];
-					}
-					self.model = new FileModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
-					self.model.processParent(self.treeRoot, loadedWorkspace.Children);	
-					if (typeof postLoad === "function") { //$NON-NLS-0$
-						try {
-							postLoad();
-						} catch(e){
-							if (self.registry) {
-								self.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
-							}
-						}
-					}
-					if (self.dragAndDrop) {
-						if (self._hookedDrag) {
-							// rehook on the parent to indicate the new root location
+			progress.appendChild(document.createTextNode(progressMessage));
+		}, 500); // wait 500ms before displaying
+					
+		var self = this;
+		Deferred.when(root, 
+			function(root) {
+				self.treeRoot = {};
+				clearTimeout(progressTimeout);
+				// copy properties from root json to our object
+				for (var property in root) {
+					self.treeRoot[property] = root[property];
+				}
+				self.model = new FileModel(self.registry, self.treeRoot, self.fileClient, self.parentId, self.excludeFiles, self.excludeFolders);
+				self.model.processParent(self.treeRoot, root.Children);	
+				if (self.dragAndDrop) {
+					if (self._hookedDrag) {
+						// rehook on the parent to indicate the new root location
+						self._makeDropTarget(self.treeRoot, parent, true);
+					} else {
+						// uses two different techniques from Modernizr
+						// first ascertain that drag and drop in general is supported
+						var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
+						// then check that file transfer is actually supported, since this is what we will be doing.
+						// For example IE9 has drag and drop but not file transfer
+						supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
+						self._hookedDrag = true;
+						if (supportsDragAndDrop) {
 							self._makeDropTarget(self.treeRoot, parent, true);
 						} else {
-							// uses two different techniques from Modernizr
-							// first ascertain that drag and drop in general is supported
-							var supportsDragAndDrop = parent && (('draggable' in parent) || ('ondragstart' in parent && 'ondrop' in parent));  //$NON-NLS-2$  //$NON-NLS-1$  //$NON-NLS-0$ 
-							// then check that file transfer is actually supported, since this is what we will be doing.
-							// For example IE9 has drag and drop but not file transfer
-							supportsDragAndDrop = supportsDragAndDrop && !!(window.File && window.FileList && window.FileReader);
-							self._hookedDrag = true;
-							if (supportsDragAndDrop) {
-								self._makeDropTarget(self.treeRoot, parent, true);
-							} else {
-								self.dragAndDrop = null;
-								window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
-							}
+							self.dragAndDrop = null;
+							window.console.log("Local file drag and drop is not supported in this browser."); //$NON-NLS-0$
 						}
-					}
-
-					self.createTree(self.parentId, self.model, {setFocus: true, selectionPolicy: self.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
-					// We only need to hook drag and drop up once
-					if (typeof self.onchange === "function") { //$NON-NLS-0$
-						self.onchange(self.treeRoot);
-					}
-				},
-				function(error) {
-					clearTimeout(progressTimeout);
-					// Show an error message when a problem happens during getting the workspace
-					if (error.status && error.status !== 401){
-						try {
-							error = JSON.parse(error.responseText);
-						} catch(e) {
-						}
-						lib.empty(progress);
-						progress.appendChild(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message)); 
-					} else {
-						self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
 					}
 				}
-			);
-		}
+
+				self.createTree(self.parentId, self.model, {setFocus: true, selectionPolicy: self.renderer.selectionPolicy, onCollapse: function(model){if(self.getNavHandler()){self.getNavHandler().onCollapse(model);}}});
+				if (typeof postLoad === "function") { //$NON-NLS-0$
+					try {
+						postLoad();
+					} catch(e){
+						if (self.registry) {
+							self.registry.getService("orion.page.message").setErrorMessage(e);	 //$NON-NLS-0$
+						}
+					}
+				}				
+				if (typeof self.onchange === "function") { //$NON-NLS-0$
+					self.onchange(self.treeRoot);
+				}
+			},
+			function(error) {
+				clearTimeout(progressTimeout);
+				// Show an error message when a problem happens during getting the workspace
+				if (error.status && error.status !== 401){
+					try {
+						error = JSON.parse(error.responseText);
+					} catch(e) {
+					}
+					lib.empty(progress);
+					progress.appendChild(document.createTextNode(messages["Sorry, an error occurred: "] + error.Message)); 
+				} else {
+					self.registry.getService("orion.page.message").setProgressResult(error); //$NON-NLS-0$
+				}
+			}
+		);
 	};
 	/**
 	 * Clients can connect to this function to receive notification when the root item changes.
