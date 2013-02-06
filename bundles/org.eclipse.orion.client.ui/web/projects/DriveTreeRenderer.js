@@ -20,7 +20,9 @@ function(messages, require, mNavigatorRenderer) {
 	
 	DriveTreeRenderer.prototype = Object.create( mNavigatorRenderer.NavigatorRenderer.prototype ); 
 	
+	// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 	DriveTreeRenderer.prototype.folderLink = require.toUrl("navigate/table.html"); //$NON-NLS-0$
+	DriveTreeRenderer.prototype.oneColumn = true;
 	
 	return DriveTreeRenderer;
 });
