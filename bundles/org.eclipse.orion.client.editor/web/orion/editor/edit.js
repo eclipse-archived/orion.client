@@ -149,8 +149,8 @@ define('orion/editor/edit', [
 				return editAll(options);
 			}
 		}
-		options = mergeOptions(parent, options);
 		if (!parent) { throw "no parent"; } //$NON-NLS-0$
+		options = mergeOptions(parent, options);
 	
 		var textViewFactory = function() {
 			return new mTextView.TextView({
