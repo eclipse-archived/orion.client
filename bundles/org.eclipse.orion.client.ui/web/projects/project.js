@@ -12,11 +12,11 @@
  
 /*global define document */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
+define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'projects/ProjectTree', 'projects/ProjectGrid', 'projects/ProjectData', 'projects/ProjectDataManager'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
+	function( mBootstrap, mGlobalCommands, lib, mSelection, mCommands, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
 	
-		var projectGrid;
+		var projectGrid, mainPanel;
 	
 		function showProjectGrid( projectData ){
 			
@@ -26,7 +26,10 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				var orionProject = new ProjectData( projectData[project] );
 				projectList.push( orionProject );
 			}
-		
+			lib.empty(mainPanel);
+			
+			projectGrid = new ProjectGrid( mainPanel );
+
 			projectGrid.setProjectData( projectList );
 		}
 		
@@ -58,12 +61,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 				
 				var projectTree = new mProjectTree.ProjectTree( sidePanel );
 				
-				var mainPanel = document.getElementById( 'projectGrid' );
+				mainPanel = document.getElementById( 'projectGrid' );
 				
-				projectGrid = new ProjectGrid( mainPanel );
-	
 				this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
 				var projectDataManager = this.projectDataManager;
+				mainPanel.appendChild(document.createTextNode("Loading projects..."));
 				this.projectDataManager.startup(function() { projectDataManager.getProjectData( showProjectGrid ); }); 
 		});
 	}	
