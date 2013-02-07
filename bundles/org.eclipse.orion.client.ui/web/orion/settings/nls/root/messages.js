@@ -51,6 +51,7 @@ define({
 	"Username": "Username",
 	"Full Name": "Full Name",
 	"Email Address": "Email Address",
+	"Email Confirmed": "Email Confirmed",
 	"Account": "Account",
 	"Current Password": "Current Password",
 	"New Password": "New Password",
