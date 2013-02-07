@@ -102,8 +102,8 @@ define(['require', 'orion/webui/littlelib'], function(require, lib) {
 			this._dropdownNode.style.left = "";
 			var bounds = lib.bounds(this._dropdownNode);
 			var totalBounds = lib.bounds(this._boundingNode(this._triggerNode));
-			if (bounds.left + bounds.width > totalBounds.left + totalBounds.width) {
-				this._dropdownNode.style.left = (totalBounds.width - bounds.width - 2) + "px"; //$NON-NLS-0$
+			if (bounds.left + bounds.width > (totalBounds.left + totalBounds.width)) {
+				this._dropdownNode.style.right = 0;
 			}
 		},
 		
