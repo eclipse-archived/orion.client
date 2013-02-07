@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *******************************************************************************/
 
-/*global define*/
+/*global define window*/
 
 define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"],
 	function(messages, mShell, i18nUtil) {
@@ -35,7 +35,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			);
 
 			/* don't let initialization delay page rendering */
-			setTimeout(function() {
+			window.setTimeout(function() {
 				self._initServicesList();
 			}, 1);
 		}
