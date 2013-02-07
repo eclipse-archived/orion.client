@@ -10,7 +10,8 @@
     "sax": "~0.4.2",
     "promised-io": "~0.3.0",
     "socket.io": "~0.9.11",
-    "socket.io-client": "~0.9.11"
+    "socket.io-client": "~0.9.11",
+    "deferred-fs": "~0.1.0"
   },
   "devDependencies": {
     "mocha": "*",
