@@ -13,33 +13,35 @@
 define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
                 
     /**
-     * Detect if the given text has any URL encloded by "[" and "]". Multiple occurences of the pattern "[url string]" and the non matched part are returned as an array of segments.
+     * Detect if the given text contains URLs encoded by "[]()". Multiple occurences of the pattern "[displayString](url)" and the non-matched part are returned as an array of segments.
      * @param {String} text The given string to detect.
-	 * @returns {Array} An array containing all the segments of the given string. Each segment has the following 2 properties:
-	 *     segmentStr: String. The string in the segment.
-	 *     isValidURL: Boolean. The flag indicating if the segment is a valid URL.
+	 * @returns {Array} An array containing all the segments of the given string. Each segment has the following properties:
+	 *     segmentStr: String. The display string in the segment.
+	 *     urlStr: String. Only present if the segment is a valid URL.
 	 */
 	function detectValidURL(text) {
-		var regex = /\[([^\]]+)\]/g;
-		var match = regex.exec(text), matches=[], lastNonMatchIndex=0;
+		var regex = /\[([^\]]*)\]\(([^\)]+)\)/g;
+		var match = regex.exec(text), matches=[], lastNonMatchIndex = 0;
 		while (match) {
-			//match[0]: the string enclosed by "[" and "]"
-			//match[1]: the string inside the pair of "[" and "]"
-			if(match.length === 2 && match[1].length >= 0){
-				if(new URL(match[1]).href && PageUtil.validateURLScheme(match[1])) { //Check if it is a valid URL
-					if(match.index > lastNonMatchIndex) { //We have to push a plain text segment first
-						matches.push({segmentStr: text.substring(lastNonMatchIndex, match.index), isValidURL: false});
+			// match[0]: the string enclosed by the opening "[" and closing ")"
+			// match[1]: the string inside the pair of "[" and "]"
+			// match[2]: the string inside the pair of "(" and ")"
+			if (match.length === 3 && match[2].length > 0){
+				if (new URL(match[2]).href && PageUtil.validateURLScheme(match[2])) { //Check if it is a valid URL
+					if (match.index > lastNonMatchIndex) { //We have to push a plain text segment first
+						matches.push({segmentStr: text.substring(lastNonMatchIndex, match.index)});
 					}
-					matches.push({segmentStr: match[1], isValidURL: true});
+					matches.push({segmentStr: match[1].length > 0 ? match[1] : match[2], urlStr: match[2]});
 					lastNonMatchIndex = match.index + match[0].length;
 				}
 			}
 			match = regex.exec(text);
 		}
-		if(lastNonMatchIndex === 0) {
+		if (lastNonMatchIndex === 0) {
 			return null;
-		} else if( lastNonMatchIndex < (text.length - 1) ) {
-			matches.push({segmentStr: text.substring(lastNonMatchIndex), isValidURL: false});
+		}
+		if (lastNonMatchIndex < (text.length - 1)) {
+			matches.push({segmentStr: text.substring(lastNonMatchIndex)});
 		}
 		return matches;
 	}
@@ -47,19 +49,19 @@ define(['orion/PageUtil', "orion/URL-shim"], function(PageUtil) {
     /**
      * Render an array of string segments.
      * @param {dom node} parentNode The given parent dom node where the segements will be rendered.
-     * @param {Array} segements The given array containing all the segments. Each segment has the following 2 properties:
-	 *     segmentStr: String. The string in the segment.
-	 *     isValidURL: Boolean. The flag indicating if the segment is a valid URL.
+     * @param {Array} segements The given array containing all the segments. Each segment has the following properties:
+	 *     segmentStr: String. The display string in the segment.
+	 *     urlStr: String. Only present if the segment is a valid URL.
 	 */
 	function processURLSegments(parentNode, segments) {
 		segments.forEach(function(segment) {
-			if(segment.isValidURL){
-				var link = document.createElement('a');
-		        link.href = segment.segmentStr;
+			if (segment.urlStr){
+				var link = document.createElement("a"); //$NON-NLS-0$
+		        link.href = segment.urlStr;
 		        link.appendChild(document.createTextNode(segment.segmentStr));
 				parentNode.appendChild(link);
 			} else {
-				var plainText = document.createElement("span");
+				var plainText = document.createElement("span"); //$NON-NLS-0$
 				plainText.textContent = segment.segmentStr;
 				parentNode.appendChild(plainText);
 			}

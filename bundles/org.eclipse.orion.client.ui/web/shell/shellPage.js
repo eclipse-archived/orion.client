@@ -721,8 +721,10 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 						resolveError(promise, error);
 					},
 					function(data) {
-						var commandResult = new CommandResult(data, returnType);
-						processResult(promise, commandResult, output, true);
+						if (typeof promise.progress === "function") { //$NON-NLS-0$
+							var commandResult = new CommandResult(data, returnType);
+							processResult(promise, commandResult, output, true);
+						}
 					}
 				);
 			});
