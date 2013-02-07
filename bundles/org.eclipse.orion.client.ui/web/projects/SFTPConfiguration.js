@@ -78,14 +78,20 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 
 				}
 				
-				this.driveWidget.addRows();		
-				
+				this.driveWidget.addRows();					
 			}
 		}
 
 		function saveConfiguration(){
 			
-			var project = new ProjectData();
+			var project;
+			
+			if( this.projectData ){
+				project = this.projectData;
+			}else{
+				project = new ProjectData();
+			}
+			
 			project.name = this.getProjectName();
 			project.address = this.getProjectAddress();
 			project.drives = this.driveWidget.getJSONDrives();
@@ -94,34 +100,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 		}
 		
 		function deleteConfiguration(){
-		
-			var x;
+
 			var confirmation = window.confirm( "Are you sure you want to delete this project?" );
 			
-			if( confirmation === true ){
-				
-				console.log( 'delete' );		
-				this.projectDataManager.removeProject( this.getProjectName(), this.handleDeletion.bind( this ) );
-			
-			}else{
-
+			if( confirmation === true ){	
+				this.projectDataManager.removeProject( this.projectData.id, this.handleDeletion.bind( this ) );
 			}
 		}
 		
 		function handleDeletion(){
 		
 			var uriTemplate = "{OrionHome}/projects/project.html#";
-			
-			
 			var template = new URITemplate(uriTemplate);
 			var url = template.expand({
 				project: ''
 			});
 		
 			window.location = url;
-		
-			console.log( 'deleted' );
-		
 		}
 		
 		function handleFeedback( result ){

@@ -78,11 +78,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				
 				var uriTemplate = "{OrionHome}/projects/projectPage.html#?project={project}";
 				
-				var projectname = this.projectData[count].name;
+				var projectId = this.projectData[count].id;
 				
 				var template = new URITemplate(uriTemplate);
 				var url = template.expand({
-					project: projectname
+					project: projectId
 				});
 
 				var listItem = document.createElement('li');
@@ -98,9 +98,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				if( this.projectData[count].address ){
 				
 					/* iframe.sandbox = "allow-scripts allow-same-origin" */
-					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectname + '"><div class="iframeOverlay"></div><iframe src="' + this.projectData[count].address + '"height="' + h + 'px" width="' + w + 'px" scrolling="no"></iframe></a></div>';
+					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectId + '"><div class="iframeOverlay"></div><iframe src="' + this.projectData[count].address + '"height="' + h + 'px" width="' + w + 'px" scrolling="no"></iframe></a></div>';
 				}else{
-					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectname + '"><div class="iframeOverlay"></div><img src="../images/placeholder.png"></img></a></div>';
+					content = '<div class="tab"><a href="../../projects/projectPage.html#?project=' + projectId + '"><div class="iframeOverlay"></div><img src="../images/placeholder.png"></img></a></div>';
 				}
 				
 				listItem.innerHTML = content + '<div class="tileTitle">' + this.projectData[count].name + '</div><div class="tileDate">Last modified: ' + date + '</div>';
@@ -125,13 +125,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 			
 			for( var count = 0; count< this.projectData.length; count++ ){
 			
-				var projectname = this.projectData[count].name;
+				var projectId = this.projectData[count].id;
 				
 				var uriTemplate = "{OrionHome}/projects/projectPage.html#?project={project}";
 				
 				var template = new URITemplate(uriTemplate);
 				var url = template.expand({
-					project: projectname
+					project: projectId
 				});
 			
 				var row = document.createElement('tr');
@@ -140,7 +140,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/URITemplate' ],
 				
 				var date = this.projectData[count].date.getMonth() + 1 + "." + this.projectData[count].date.getDate() + "." + this.projectData[count].date.getFullYear();
 		
-				row.innerHTML = '<td><a href="../../projects/projectPage.html#?project=' + projectname + '">' + this.projectData[count].name + '</a></td><td>' + 
+				row.innerHTML = '<td><a href="../../projects/projectPage.html#?project=' + projectId + '">' + this.projectData[count].name + '</a></td><td>' + 
 				this.projectData[count].description + '</td><td>' + date + '</td>';
 		
 				this.listNode.firstChild.appendChild( row );

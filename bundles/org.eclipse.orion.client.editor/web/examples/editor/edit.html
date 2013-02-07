@@ -23,13 +23,13 @@ pre {
 </style>
 <!-- Note if running this standalone you will need to copy requirejs from bundles/org.eclipse.orion.client.core/web/ -->
 <script src="../../requirejs/require.js"></script>
-<script type="text/javascript">
+<script>
 	/*globals require*/
 	require({
-	  baseUrl: '../..',
-	  paths: {
-		  i18n: 'requirejs/i18n'
-	  }
+		baseUrl: '../..',
+		paths: {
+			i18n: 'requirejs/i18n'
+		}
 	});
 	require(["orion/editor/edit"], function(edit) {
 		edit({
