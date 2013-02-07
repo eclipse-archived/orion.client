@@ -17,6 +17,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 	function( mBootstrap, mGlobalCommands, lib, mSelection, mCommands, mFileClient, mSearchClient, mProjectTree, ProjectGrid, ProjectData, ProjectDataManager ){
 	
 		var projectGrid, mainPanel;
+		var projectMetaData;
 	
 		function showProjectGrid( projectData ){
 			
@@ -32,8 +33,6 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 
 			projectGrid.setProjectData( projectList );
 		}
-		
-		var projectMetaData;
 		
 		mBootstrap.startup().then(
 		
@@ -65,7 +64,7 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/webui/littlelib', 'ori
 				
 				this.projectDataManager = new ProjectDataManager( serviceRegistry, fileClient );
 				var projectDataManager = this.projectDataManager;
-				mainPanel.appendChild(document.createTextNode("Loading projects..."));
+				mainPanel.appendChild(document.createTextNode("Loading projects..."));	
 				this.projectDataManager.startup(function() { projectDataManager.getProjectData( showProjectGrid ); }); 
 		});
 	}	

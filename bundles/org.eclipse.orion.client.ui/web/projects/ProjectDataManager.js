@@ -18,6 +18,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		var PROJECTS_FOLDER = 'projectData';
 		var WORKSPACES_FOLDER = 'workspaces';
 		var PROJECTS_METADATA = 'project.json';
+		var WORKAREA = 'workspace';
 
 		function ProjectDataManager( serviceRegistry, fileClient ){
 			this.serviceRegistry = serviceRegistry;
@@ -26,6 +27,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 				// TODO this needs to be hooked into the status manager or else routed through the progress service
 				console.log(error);
 			};
+		}
+		
+		function generateId(){
+			var id = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+			return id;
 		}
 		
 		function _findInWorkspace( subtree, name ){
@@ -40,6 +46,26 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			}
 			
 			return element;
+		}
+		
+		function projectMaintainance( callback ){
+			
+			/* Moving from using project name as identifier to project id as identifier. 
+			   So - adding in an id for those projects without one. */
+			
+			var project;
+			var self = this;
+			
+			Deferred.when(this.projectsFile, function(file) {
+				self.projectsFile = file;
+				self.fileClient.read( file.Location ).then( function( content ){	
+					var projects = JSON.parse( content );
+					for( var p = 0; p < projects.length; p++ ){
+						projects[p].id = this.generateId();
+						self.save(project);
+					}
+				});
+			});
 		}
 		
 		function getProjectData( callback ){
@@ -57,7 +83,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 		
 		}
 		
-		function getProject( projectName, callback ){
+		function getProject( projectId, callback ){
 			var project;
 			var self = this;
 			Deferred.when(this.projectsFile, function(file) {
@@ -65,13 +91,14 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 				self.fileClient.read( file.Location ).then( function( content ){	
 					var projects = JSON.parse( content );
 					for( var p = 0; p < projects.length; p++ ){
-						if( projects[p].name === projectName ){
+						if( projects[p].id === projectId ){
 							project = projects[p];
 							break;
 						}
 					}
 					if (!project) {
 						project = { name: "Project " + (projects.length + 1), address: "", description: "", drives: [] };
+						project.id = self.generateId();
 						self.save(project);
 					}
 					if (project.workspace) {
@@ -79,7 +106,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 					} else {
 						Deferred.when(self.workspacesFolder, function(workspacesFolder) {
 							self.workspacesFolder = workspacesFolder;
-							self.fileClient.createFolder( workspacesFolder.Location, project.name ).then( function( file ){
+							self.fileClient.createFolder( workspacesFolder.Location, WORKAREA ).then( function( file ){
 								project.workspace = file.Location;
 								self.save( project );
 								callback(project, self.loadedWorkspace, self);
@@ -87,7 +114,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 							function(error) {
 								// handle the case where the workspace folder was there even though the project file had not been saved to indicate so.
 								if (error.status === 412) {
-									project.workspace = self.workspacesFolder.Location + project.name;
+									project.workspace = self.workspacesFolder.Location + WORKAREA;
 									self.save( project );
 									callback(project, self.loadedWorkspace, self);
 								} else {
@@ -113,7 +140,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 					var existingProject = false;
 					
 					for( var p = 0; p < projects.length; p++ ){
-						if( projects[p].name === projectData.name ){
+						if( projects[p].id === projectData.id ){
 							projects[p] = projectData;
 							existingProject = true;
 							break;
@@ -134,7 +161,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 						
 		}
 		
-		function removeProject( projectName, callback ){
+		function removeProject( projectId, callback ){
 			var self = this;
 			Deferred.when(this.projectsFile, function(file) {
 				self.projectsFile = file;
@@ -145,7 +172,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 					
 					for( var p = 0; p < projects.length; p++ ){
 					
-						if( projects[p].name === projectName ){
+						if( projects[p].id === projectId ){
 							index = p;
 							break;
 						}	
@@ -225,6 +252,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 			});
 		}
 		
+		ProjectDataManager.prototype.generateId = generateId;
+		ProjectDataManager.prototype.projectMaintainance = projectMaintainance;
 		ProjectDataManager.prototype._findInWorkspace = _findInWorkspace;
 		ProjectDataManager.prototype._removeFromArray = _removeFromArray;
 		ProjectDataManager.prototype.startup = startup;

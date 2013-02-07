@@ -27,13 +27,11 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 		var myproject;
 		var myworkspace;
 		var mainPanel;
+		var projectId;
 		
 		function addSubComponents( ){
-		
 			var sidePanel = document.getElementById( 'projectNavigation' );
-
-			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager );
-						
+			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager );		
 			lib.empty(mainPanel);
 			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandService, serviceRegistry, fileClient );	
 		}
@@ -45,7 +43,7 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 			if(project){
 				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 			}
-			window.location.hash = '?project=' + project.name;
+			window.location.hash = '?project=' + project.id;
 			
 			myproject = project;
 			myworkspace = workspace;
@@ -59,6 +57,10 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 			}else{
 				addSubComponents();
 			}
+		}
+		
+		function getProject(){	
+			projectDataManager.getProject( projectId, startProjectComponents ); 
 		}
 		
 		mBootstrap.startup().then(
@@ -87,7 +89,7 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 			
 			mGlobalCommands.generateBanner("orion-projects", serviceRegistry, commandService, preferences, searcher );			
 			
-			var projectName = PageUtil.matchResourceParameters();
+			projectId = PageUtil.matchResourceParameters();
 
 			/* Create the content */
 			
@@ -95,11 +97,11 @@ define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'ori
 			
 			mainPanel.appendChild(document.createTextNode("Loading project data..."));
 
-			projectName = projectName.resource.split('=')[1];
+			projectId = projectId.resource.split('=')[1];
 			
 			projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);
 			
-			projectDataManager.startup(function() {	projectDataManager.getProject( projectName, startProjectComponents ); });
+			projectDataManager.startup( getProject );
 		});
 	}	
 );
