@@ -60,6 +60,10 @@ define(['orion/objects', 'orion/webui/littlelib'], function(objects, lib) {
         postCreate: function(){
             this.mylabel.textContent = this.fieldlabel + ':'; //$NON-NLS-0$
             this.myfield.style.width = '20px';
+            
+            if( this.editmode && this.editmode === 'readonly' ){ //$NON-NLS-0$
+				this.myfield.setAttribute("disabled", "disabled"); //$NON-NLS-1$ //$NON-NLS-0$
+            }
         }
     });
     return LabeledCheckbox;

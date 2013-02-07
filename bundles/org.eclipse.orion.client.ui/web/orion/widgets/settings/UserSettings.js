@@ -85,7 +85,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.accountFields = [
 				new LabeledTextfield( {fieldlabel:messages['Username'], editmode:'readonly'}),
 				new LabeledTextfield( {fieldlabel:messages['Full Name']}),
-				new LabeledTextfield( {fieldlabel:messages['Email Address']})
+				new LabeledTextfield( {fieldlabel:messages['Email Address']}),
+				new LabeledCheckbox( {fieldlabel: messages['Email Confirmed'], editmode:'readonly'})
 			];
 			var accountSubsection = new Subsection( {sectionName: messages['Account'], parentNode: this.sections, children: this.accountFields} );
 			accountSubsection.show();
@@ -265,7 +266,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							var data = jsonData;
 							
 							var b = userService.updateUserInfo(jsonData.Location, userdata).then( function(args){
-								messageService.setProgressResult( messages['User profile data successfully updated.'] );
+								if(args){
+									messageService.setProgressResult(args);
+								}else{
+									messageService.setProgressResult( messages['User profile data successfully updated.'] );
+								}
 
 								// TODO: don't reach into User Menu internals for this. Should dispatch a service event instead, etc.
 //								if( userdata.Name ){
@@ -333,6 +338,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 							settingsWidget.accountFields[0].setValue( accountData.login );
 							settingsWidget.accountFields[1].setValue( accountData.Name );
 							settingsWidget.accountFields[2].setValue( accountData.email );
+							settingsWidget.accountFields[3].setChecked( accountData.emailConfirmed );
 							
 							if( accountData.GitMail ){
 								settingsWidget.gitFields[0].setValue( accountData.GitMail );
