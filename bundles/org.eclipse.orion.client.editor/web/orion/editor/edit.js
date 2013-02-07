@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*globals define window document */
+/*globals define */
 
 define('orion/editor/edit', [
 	
@@ -42,6 +42,8 @@ define('orion/editor/edit', [
 
 	/**	@private */
 	function getTextFromElement(element) {
+		var document = element.ownerDocument;
+		var window = document.defaultView || document.parentWindow;
 		if (!window.getSelection) {
 			return element.innerText || element.textContent;
 		}
@@ -76,13 +78,18 @@ define('orion/editor/edit', [
 	}
 	
 	/**	@private */
-	function mergeOptions(parent, defaultOptions) {
-		var options = {};
-		for (var p in defaultOptions) {
-			if (defaultOptions.hasOwnProperty(p)) {
-				options[p] = defaultOptions[p];
+	function merge(obj1, obj2) {
+		for (var p in obj2) {
+			if (obj2.hasOwnProperty(p)) {
+				obj1[p] = obj2[p];
 			}
 		}
+	}
+	
+	/**	@private */
+	function mergeOptions(parent, defaultOptions) {
+		var options = {};
+		merge(options, defaultOptions);
 		for (var attr, j = 0, attrs = parent.attributes, l = attrs.length; j < l; j++) {
 			attr = attrs.item(j);
 			var key = optionName(attr.nodeName);
@@ -111,7 +118,6 @@ define('orion/editor/edit', [
 		return parseInt(height, 10) || 0;
 	}
 	
-	var editAll;
 	/**
 	 * @class This object describes the options for <code>edit</code>.
 	 * @name orion.editor.EditOptions
@@ -146,7 +152,16 @@ define('orion/editor/edit', [
 		}
 		if (!parent) {
 			if (options.className) {
-				return editAll(options);
+				var parents = (options.document || document).getElementsByClassName(options.className);
+				if (parents) {
+					options.className = undefined;
+					var editors = [];
+					for (var i = 0; i < parents.length; i++) {
+						options.parent = parents[i];
+						editors.push(edit(options));
+					}
+					return editors;
+				}
 			}
 		}
 		if (!parent) { throw "no parent"; } //$NON-NLS-0$
@@ -259,22 +274,14 @@ define('orion/editor/edit', [
 		}
 		return editor;
 	}
-	
-	editAll = function (defaultOptions) {
-		var elements = document.getElementsByClassName(defaultOptions.className);
-		var editors;
-		if (elements) {
-			editors = [];
-			defaultOptions.className = undefined;
-			for (var i = 0; i < elements.length; i++) {
-				var element = elements[i];
-				defaultOptions.parent = element;
-				var editor = edit(defaultOptions);
-				editors.push(editor);
-			}
+
+	var editorNS = this.orion.editor;
+	if (editorNS) {
+		for (var i = 0; i < arguments.length; i++) {
+			merge(editorNS, arguments[i]);	
 		}
-		return editors;
-	};
+	}
 	
 	return edit;
 });
+
