@@ -32,7 +32,7 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	 * Test a string with no URL and no [] pair.
 	 */
 	tests.testNoURLNoPair = function() {
-		var result = mUrlUtils.detectValidURL("There is no URL");
+		var result = mUrlUtils.detectValidURL("There is no URL"); //$NON-NLS-0$
 		assert.equal(result, null);
 	};
 
@@ -40,7 +40,7 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	 * Test a string with URL but no [] pair.
 	 */
 	tests.testWithURLNoPair = function() {
-		var result = mUrlUtils.detectValidURL("There is URL  http://abc.com:8081/param=foo");
+		var result = mUrlUtils.detectValidURL("There is URL  http://abc.com:8081/param=foo"); //$NON-NLS-0$
 		assert.equal(result, null);
 	};
 
@@ -48,10 +48,10 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	 * Test a string with good URL enclosed by [] pair.
 	 */
 	tests.testWithURLAndPair = function() {
-		var result = mUrlUtils.detectValidURL("There is URL  [http://abc.com:8081/param=foo]  and it is valid");
-		var expectedResult = [{segmentStr: "There is URL  ", isValidURL: false},
-							  {segmentStr: "http://abc.com:8081/param=foo", isValidURL: true},
-							  {segmentStr: "  and it is valid", isValidURL: false}];
+		var result = mUrlUtils.detectValidURL("There is URL  [http://abc.com:8081/param=foo]  and it is valid"); //$NON-NLS-0$
+		var expectedResult = [{segmentStr: "There is URL  ", isValidURL: false}, //$NON-NLS-0$
+							  {segmentStr: "http://abc.com:8081/param=foo", isValidURL: true}, //$NON-NLS-0$
+							  {segmentStr: "  and it is valid", isValidURL: false}]; //$NON-NLS-0$
 		assert.deepEqual(result, expectedResult);
 	};
 
@@ -59,20 +59,28 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	 * Test a string with good URL enclosed by [] pair.
 	 */
 	tests.testWithTwoGoodURLAndPair = function() {
-		var result = mUrlUtils.detectValidURL("There is URL  [http://abc.com:8081/param=foo]   [http://abc.com:8082/param=foo] and they are valid");
-		var expectedResult = [{segmentStr: "There is URL  ", isValidURL: false},
-							  {segmentStr: "http://abc.com:8081/param=foo", isValidURL: true},
-							  {segmentStr: "   ", isValidURL: false},
-							  {segmentStr: "http://abc.com:8082/param=foo", isValidURL: true},
-							  {segmentStr: " and they are valid", isValidURL: false}];
+		var result = mUrlUtils.detectValidURL("There is URL  [http://abc.com:8081/param=foo]   [http://abc.com:8082/param=foo] and they are valid"); //$NON-NLS-0$
+		var expectedResult = [{segmentStr: "There is URL  ", isValidURL: false}, //$NON-NLS-0$
+							  {segmentStr: "http://abc.com:8081/param=foo", isValidURL: true}, //$NON-NLS-0$
+							  {segmentStr: "   ", isValidURL: false}, //$NON-NLS-0$
+							  {segmentStr: "http://abc.com:8082/param=foo", isValidURL: true}, //$NON-NLS-0$
+							  {segmentStr: " and they are valid", isValidURL: false}]; //$NON-NLS-0$
 		assert.deepEqual(result, expectedResult);
 	};
 
-	/*
+	
 	 // Test a string with bad URL enclosed by [] pair.
 	 
-	tests.testWithBadURLAndPair = function() {
-		var result = mUrlUtils.detectValidURL("There is URL  [//attacker.com:8081/param=foo]  and it is valid");
+	tests.testWithBadURLAndPair1 = function() {
+		var result = mUrlUtils.detectValidURL("There is URL  [abc:123:a4b]  and it is valid"); //$NON-NLS-0$
+		assert.deepEqual(result, null);
+	};
+
+	
+	 // Test a string with bad URL enclosed by [] pair.
+	 
+	tests.testWithBadURLAndPair2 = function() {
+		var result = mUrlUtils.detectValidURL("There is URL  [abcde]  and it is valid"); //$NON-NLS-0$
 		assert.deepEqual(result, null);
 	};
 
@@ -80,13 +88,12 @@ define(["orion/assert", "orion/urlUtils"], function(assert, mUrlUtils) {
 	// Test a string with bad URL and a good one enclosed by [] pair.
 	
 	tests.testWithGoodAndBadURLAndPair = function() {
-		var result = mUrlUtils.detectValidURL("There is bad URL  [//attacker.com:8081/param=foo]  and a good URL [https://abc.com:8081/param=foo] that is valid");
-		var expectedResult = [{segmentStr: "There is bad URL  [//attacker.com:8081/param=foo]  and a good URL ", isValidURL: false},
-							  {segmentStr: "http://abc.com:8081/param=foo", isValidURL: true},
-							  {segmentStr: " that is valid", isValidURL: false}];
+		var result = mUrlUtils.detectValidURL("There is bad URL  [abc:123:a4b]  and a good URL [https://abc.com:8081/param=foo] that is valid"); //$NON-NLS-0$
+		var expectedResult = [{segmentStr: "There is bad URL  [abc:123:a4b]  and a good URL ", isValidURL: false}, //$NON-NLS-0$
+							  {segmentStr: "https://abc.com:8081/param=foo", isValidURL: true}, //$NON-NLS-0$
+							  {segmentStr: " that is valid", isValidURL: false}]; //$NON-NLS-0$
 		assert.deepEqual(result, expectedResult);
 	};
-*/
 
 	return tests;
 });

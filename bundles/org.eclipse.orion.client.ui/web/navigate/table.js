@@ -106,7 +106,7 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 		refresh();
 							
 		// commands shared by navigators
-		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient, "pageActions", "selectionTools"); //$NON-NLS-1$ //$NON-NLS-0$
+		mFileCommands.createFileCommands(serviceRegistry, commandService, explorer, fileClient); 
 		
 		// define the command contributions - where things appear, first the groups
 		commandService.addCommandGroup("pageActions", "orion.new", 1000, messages["New"]); //$NON-NLS-1$ //$NON-NLS-0$

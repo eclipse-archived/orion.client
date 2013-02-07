@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
  
-/*global define document */
+/*global define document window */
 
 define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
 	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
@@ -23,22 +23,41 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		var progressService;
 		var contentTypeService;
 		var fileClient;
+		var projectDataManager;
+		var myproject;
+		var myworkspace;
 		
-		function startProjectComponents( project, workspace ){
+		function addSubComponents( ){
+			var sidePanel = document.getElementById( 'projectNavigation' );
+
+			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager );
+			
+			var mainPanel = document.getElementById( 'SFTPConfiguration' );
+			
+			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandService, serviceRegistry, fileClient );	
+		}
+		
+		function startProjectComponents( project, workspace, dataManager ){
 		
 			var titleArea = document.getElementById( 'titleArea');
 			
 			if(project){
 				titleArea.innerHTML = '<strong>Project: </strong>' + project.name;
 			}
-		
-			var sidePanel = document.getElementById( 'projectNavigation' );
-
-			var projectTree = new ProjectNavigation( project, workspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService );
+			window.location.hash = '?project=' + project.name;
 			
-			var mainPanel = document.getElementById( 'SFTPConfiguration' );
+			myproject = project;
+			myworkspace = workspace;
 			
-			var configuration = new SFTPConfiguration( project, mainPanel, commandService, serviceRegistry, fileClient );	
+			/* Check to make sure we have workingsets */
+			
+			if( project && !project.workingsets ){
+				project.workingsets = [];
+				project.workingsets.push( project.workspace );
+				dataManager.save( project, addSubComponents );
+			}else{
+				addSubComponents();
+			}
 		}
 		
 		mBootstrap.startup().then(
@@ -72,9 +91,9 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			/* Create the content */
 			projectName = projectName.resource.split('=')[1];
 			
-			var projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);
+			projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);
 			
-			projectDataManager.getProject( projectName, startProjectComponents );
+			projectDataManager.startup(function() {	projectDataManager.getProject( projectName, startProjectComponents ); });
 		});
 	}	
 );

@@ -12,7 +12,19 @@ A minimal, single-user deployment of [Eclipse Orion](http://www.eclipse.org/orio
 * Concatenation and minification of pages
 
 ## Usage
+### Running the server
 Run ```npm start orion``` or ```node [node_modules]/orion/server.js```.
+
+### Using Orion within a larger app
+Use ```require('orion')``` to get access to our startServer function, which is suitable for use within a larger [connect](https://github.com/senchalabs/connect/) project:
+
+```
+var orion = require('orion');
+var connect = require('connect');
+var myapp = connect()
+    .use(orion({ workspaceDir: '.myworkspace' }))
+/* .use( additional handlers ) */
+```
 
 For full instructions, see the [Getting Started guide](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node).
 

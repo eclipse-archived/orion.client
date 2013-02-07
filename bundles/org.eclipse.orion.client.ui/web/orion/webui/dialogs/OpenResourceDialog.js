@@ -93,7 +93,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 			}
 		}, false);
 		parent.addEventListener("keydown", function(evt) { //$NON-NLS-0$
-			var favlinks, links, text, currentFocus, favCurrentSelectionIndex, currentSelectionIndex;
+			var favlinks, links, searchFieldNode, currentFocus, favCurrentSelectionIndex, currentSelectionIndex;
 			var incrementFocus = function(currList, index, nextEntry) {
 				if (index < currList.length - 1) {
 					return currList[index+1];
@@ -121,23 +121,23 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 					} else if (currentSelectionIndex >= 0) {
 						incrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[0] : links[0]).focus();
 					} else if (links.length > 0 || favlinks.length > 0) {
-						// coming from the text box
+						// coming from the searchFieldNode
 						incrementFocus(favlinks, -1, links[0]).focus();
 					}   
 				} else {
 					if (favCurrentSelectionIndex >= 0) {
-						// jump to text box if index === 0
-						text = self._fileName.value; 
-						decrementFocus(favlinks, favCurrentSelectionIndex, text).focus();
+						// jump to searchFieldNode if index === 0
+						searchFieldNode = self.$fileName;
+						decrementFocus(favlinks, favCurrentSelectionIndex, searchFieldNode).focus();
 					} else if (currentSelectionIndex >= 0) {
-						// jump to text box if index === 0 and favlinks is empty
-						text = self._fileName.value;
-						decrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[favlinks.length-1] : text).focus();
+						// jump to searchFieldNode if index === 0 and favlinks is empty
+						searchFieldNode = self.$fileName;
+						decrementFocus(links, currentSelectionIndex, favlinks.length > 0 ? favlinks[favlinks.length-1] : searchFieldNode).focus();
 					} else if (links.length > 0) {
-						// coming from the text box go to end of list
+						// coming from the searchFieldNode go to end of list
 						links[links.length-1].focus();
 					} else if (favlinks.length > 0) {
-						// coming from the text box go to end of list
+						// coming from the searchFieldNode go to end of list
 						favlinks[favlinks.length-1].focus();
 					}
 				}

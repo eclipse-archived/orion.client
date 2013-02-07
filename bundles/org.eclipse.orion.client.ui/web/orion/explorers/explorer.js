@@ -459,7 +459,7 @@ exports.ExplorerRenderer = (function() {
 				check.id = this.getCheckBoxId(tableRow.id);
 				check.classList.add("core-sprite-check"); //$NON-NLS-0$
 				check.classList.add("selectionCheckmarkSprite"); //$NON-NLS-0$
-				check.itemId = tableRow.id;
+				check.rowId = tableRow.id;
 				if(this.getCheckedFunc){
 					check.checked = this.getCheckedFunc(item);
 					if (check.checked) {
@@ -496,7 +496,7 @@ exports.ExplorerRenderer = (function() {
 				checkBox.classList.remove("core-sprite-check_on"); //$NON-NLS-0$
 			}
 			if(this.onCheckedFunc){
-				this.onCheckedFunc(checkBox.itemId, checked, manually);
+				this.onCheckedFunc(checkBox.rowId, checked, manually);
 			}
 			if(this.explorer.getNavHandler() && setSelection){
 				this.explorer.getNavHandler().setSelection(this.explorer.getNavDict().getValue(tableRow.id).model, true);	

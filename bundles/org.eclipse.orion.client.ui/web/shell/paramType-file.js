@@ -153,7 +153,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 			/**
 			 * This function handles results of this custom type returned from commands.
 			 */
-			processResult: function(promise, result, output) {
+			processResult: function(promise, result, output, isProgress) {
 				var element = document.createElement("div"); //$NON-NLS-0$
 
 				var self = this;
@@ -167,10 +167,10 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						writer.appendText(string);
 						writer.appendNewline();
 						writer.write();
-						if (--waitCount === 0) {
-							promise.resolve(element);
-						} else {
+						if (--waitCount !== 0 || isProgress) {
 							promise.progress(element);
+						} else {
+							promise.resolve(element);
 						}
 					};
 					return this;
@@ -185,10 +185,10 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 						writer.appendText(string);
 						writer.appendNewline();
 						writer.write();
-						if (--waitCount === 0) {
-							promise.resolve(element);
-						} else {
+						if (--waitCount !== 0 || isProgress) {
 							promise.progress(element);
+						} else {
+							promise.resolve(element);
 						}
 					};
 					return this;

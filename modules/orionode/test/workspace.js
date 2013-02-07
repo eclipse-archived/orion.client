@@ -14,7 +14,6 @@ var mocha = require('mocha');
 var request = require('supertest');
 
 var connect = require('connect');
-var workspaceAPI = require('../lib/workspace');
 var testData = require('./support/test_data');
 var path = require('path');
 
@@ -22,20 +21,17 @@ var PREFIX = '/workspace', PREFIX_FILE = '/file';
 var WORKSPACE = path.join(__dirname, '.test_workspace');
 var DEFAULT_WORKSPACE_NAME = 'Orionode Workspace';
 
-var app = connect();
-app.request = function() {
-	return request(app);
-};
-app.use(workspaceAPI({
-	root: PREFIX,
-	fileRoot: PREFIX_FILE,
-	workspaceDir: WORKSPACE
-}));
-app.use(require('../lib/file')({
-	root: PREFIX_FILE,
-	workspaceRoot: PREFIX,
-	workspaceDir: WORKSPACE
-}));
+var app = testData.createApp()
+		.use(require('../lib/workspace')({
+			root: PREFIX,
+			fileRoot: PREFIX_FILE,
+			workspaceDir: WORKSPACE
+		}))
+		.use(require('../lib/file')({
+			root: PREFIX_FILE,
+			workspaceRoot: PREFIX,
+			workspaceDir: WORKSPACE
+		}));
 
 function byName(a, b) {
 	return String.prototype.localeCompare(a.Name, b.Name);

@@ -142,6 +142,11 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 	
 	// we are really only using the header for a spacer at this point.
 	NavigatorRenderer.prototype.getCellHeaderElement = function(col_no){
+		// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+		if (this.oneColumn && col_no !== 0) {
+			return null;
+		}
+
 		switch(col_no){
 		case 0:
 		case 1:
@@ -172,6 +177,8 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			if (item.Directory) {
 				// defined in ExplorerRenderer.  Sets up the expand/collapse behavior
 				var image = this.getExpandImage(tableRow, span);
+				
+				// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
 				link = createLink(this.folderLink || "", item, tableRow.id, this.commandService, this.contentTypeService);
 				span.appendChild(link); //$NON-NLS-0$
 				this.explorer._makeDropTarget(item, tableRow);
@@ -198,6 +205,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 			return col;
 		case 1:
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			if (this.oneColumn) {
+				return null;
+			}
 			var dateColumn = document.createElement('td'); //$NON-NLS-0$
 			if (item.LocalTimeStamp) {
 				var fileDate = new Date(item.LocalTimeStamp);
@@ -205,6 +216,10 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/Deferred', 'orion/
 			}
 			return dateColumn;
 		case 2:
+			// TODO see https://bugs.eclipse.org/bugs/show_bug.cgi?id=400121
+			if (this.oneColumn) {
+				return null;
+			}
 			var sizeColumn = document.createElement('td'); //$NON-NLS-0$
 			if (!item.Directory && typeof item.Length === "number") { //$NON-NLS-0$
 				var length = parseInt(item.Length, 10),
