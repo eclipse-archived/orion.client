@@ -275,7 +275,7 @@ define('orion/editor/edit', [
 		return editor;
 	}
 
-	var editorNS = this.orion.editor;
+	var editorNS = this.orion ? this.orion.editor : undefined;
 	if (editorNS) {
 		for (var i = 0; i < arguments.length; i++) {
 			merge(editorNS, arguments[i]);	
