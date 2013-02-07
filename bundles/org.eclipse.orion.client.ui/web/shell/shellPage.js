@@ -547,7 +547,16 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 
 	/* functions for handling contributed commands */
 
-	function outputString(string, writer) {
+	function outputString(object, writer) {
+		if (typeof(object) !== "string") { //$NON-NLS-0$
+			if (object.xhr && object.xhr.statusText) {
+				/* server error object */
+				object = object.xhr.statusText;
+			} else {
+				object = object.toString();
+			}
+		}
+		var string = object;
 		var segments = string.split("\n"); //$NON-NLS-0$
 		segments.forEach(function(segment) {
 			writer.appendText(segment);
@@ -581,13 +590,14 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 				}
 			},
 			function(error) {
-				outputString(error).then(
+				element = element || document.createElement("div"); //$NON-NLS-0$
+				writer = new mResultWriters.ShellStringWriter(element);
+				outputString(error, writer).then(
 					function() {
-						element = element || document.createElement("div"); //$NON-NLS-0$
-						promise.resolve(element);
+						promise.reject(element);
 					},
 					function(error) {
-						promise.resolve();
+						promise.reject();
 					}
 				);
 			}
@@ -612,13 +622,14 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 				}
 			},
 			function(error) {
-				outputString(error).then(
+				element = element || document.createElement("div"); //$NON-NLS-0$
+				writer = new mResultWriters.ShellStringWriter(element);
+				outputString(error, writer).then(
 					function() {
-						element = element || document.createElement("div"); //$NON-NLS-0$
-						promise.resolve(element);
+						promise.reject(element);
 					},
 					function(error) {
-						promise.resolve();
+						promise.reject();
 					}
 				);
 			}
