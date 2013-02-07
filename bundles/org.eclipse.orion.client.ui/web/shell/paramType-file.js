@@ -134,12 +134,15 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 	};
 
 	orion.shellPage.ParamTypeFile = (function() {
-		function ParamTypeFile(name, shellPageFileService) {
-			this.name = name;
+		function ParamTypeFile(shellPageFileService) {
 			this.shellPageFileService = shellPageFileService;
 		}
 
 		ParamTypeFile.prototype = {
+			getName: function() {
+				return "file"; //$NON-NLS-0$
+			},
+
 			/**
 			 * This function is invoked by the shell to query for the completion
 			 * status and predictions for an argument with this parameter type.

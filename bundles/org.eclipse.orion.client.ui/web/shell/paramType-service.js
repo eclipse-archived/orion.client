@@ -16,8 +16,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 	orion.shellPage = {};
 
 	orion.shellPage.ParamTypeService = (function() {
-		function ParamTypeService(name, pluginRegistry) {
-			this.name = name;
+		function ParamTypeService(pluginRegistry) {
 			this.pluginRegistry = pluginRegistry;
 
 			var self = this;
@@ -42,7 +41,7 @@ define(["i18n!orion/shell/nls/messages", "orion/widgets/Shell", "orion/i18nUtil"
 
 		ParamTypeService.prototype = {
 			getName: function() {
-				return this.name;
+				return "service"; //$NON-NLS-0$
 			},
 			/**
 			 * This function is invoked by the shell to query for the completion

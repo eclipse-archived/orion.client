@@ -64,7 +64,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * Clears the Shell's output area.
 			 */
 			clear: function() {
-				var outputDiv = document.getElementsByClassName("gcli-output")[0];
+				var outputDiv = document.getElementsByClassName("gcli-output")[0]; //$NON-NLS-0$
 				while (outputDiv.hasChildNodes()) {
 					outputDiv.removeChild(outputDiv.lastChild);
 				}				
@@ -90,11 +90,11 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * </p>
 			 * @name orion.shell.Parameter
 			 * 
-			 * @property {String} type the name of the parameter's type (must be the name of
-			 * either a built-in type or a custom type that has been registered with the Shell)
-			 * @property {String} [name] the parameter's name
-			 * @property {String} [description] the parameter's description
-			 * @property {Object} [defaultValue] the parameter's default value (specifying this
+			 * @property {String|Object} type the name of the parameter's type (must be either
+			 *     a built-in type or a custom type that has been registered with the Shell)
+			 * @property {String} name the parameter's name
+			 * @property {String} description the parameter's description
+			 * @property {Object} defaultValue the parameter's default value (specifying this
 			 * implies that the parameter is optional)
 			 */
 			/**
@@ -107,8 +107,11 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * 
 			 * @property {String} name the command's name
 			 * @property {Function} callback the function to call when the command is invoked
-			 * @property {orion.shell.Parameter[]} [parameters] the parameters accepted by the command
-			 * @property {String} [description] the command's description
+			 * @property {orion.shell.Parameter[]} parameters the parameters accepted by the command
+			 * @property {String} description the command's description
+			 * @property {String} returnType the type of value to be displayed when the command has
+			 *     completed, valid types are "string" (default) and "html" (a returned "html"
+			 *     value is a DOM node)
 			 */
 			/**
 			 * Registers a new command in the Shell.
@@ -135,7 +138,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 			 * </p>
 			 * @name orion.shell.ParameterType
 			 * 
-			 * @property {String} name the name of the parameter type
+			 * @property {Function} getName a function that returns the name of the parameter type
 			 * @property {Function} parse a function that returns completion suggestions
 			 * @property {Function} stringify a function that returns the string representation
 			 * for a given instance of its type
@@ -151,7 +154,7 @@ define(["i18n!orion/widgets/nls/messages", "orion/i18nUtil", "gcli/index", "gcli
 				}
 
 				NewType.prototype = Object.create(CustomType.prototype);
-				NewType.prototype.name = type.name;
+				NewType.prototype.name = type.getName();
 				NewType.prototype.parse = function(arg) {
 					var completion = type.parse(arg, this.typeSpec);
 					var status = mTypes.Status.VALID;
