@@ -36,7 +36,7 @@ define(['i18n!profile/nls/messages', 'orion/webui/dialog'], function(messages, d
 		this.messages = messages;
 		this.func = options.func || function() {};
 		this.registry = options.registry;
-		this.buttons = [{text: messages['Create'], callback: this.done.bind(this)}]; 
+		this.buttons = [{text: messages['Create'], isDefault: true, callback: this.done.bind(this)}]; 
 		this._initialize();
 	};
 	
