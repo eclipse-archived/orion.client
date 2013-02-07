@@ -125,7 +125,7 @@ define(['orion/Deferred', 'orion/urlUtils'], function(Deferred, mUrlUtils) {
 			appendText: function(text) {
 				var node = document.createElement("span"); //$NON-NLS-0$
 				var segments = mUrlUtils.detectValidURL(text);
-				if(segments){
+				if (segments) {
 					mUrlUtils.processURLSegments(node, segments);				
 				} else {
 					node.textContent = text;
