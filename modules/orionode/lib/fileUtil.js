@@ -102,12 +102,13 @@ exports.safeFilePath = function(workspaceDir, filepath) {
  */
 exports.generateDebugURL = function(debugMeta, hostName) {
 	var hName = hostName ? hostName : debugMeta.hostname;
-	return "[" + url.format({
+	var debugURL = url.format({
 			protocol: debugMeta.protocol,
 			hostname: hName,
 			port:  debugMeta.port,
 			pathname: debugMeta.pathname
-		}) + "]";
+		});
+	return "[" + debugURL + "](" + debugURL + ")";
 };
 
 /**

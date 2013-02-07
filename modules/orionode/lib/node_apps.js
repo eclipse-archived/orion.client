@@ -226,15 +226,15 @@ var AppContext = function(options) {
 	 */
 	this.startNPM = function(args, context) {
 		var npmPath = configParams.npm_path;
-		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
-		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
-		}	
-		var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
-		var app = _startApp([npmPath].concat(args || []), cwdPath);
-		app.on('exit', function(code) {
-			console.log('App # ' + app.pid + ' exited, code=' + code);
-		});
-		return app;
+		var app = null;
+		if(npmPath){
+			var cwdPath = _resolveCWD(fileRoot, workspaceDir, context.cwd);
+			app = _startApp([npmPath].concat(args || []), cwdPath);
+			app.on('exit', function(code) {
+				console.log('App # ' + app.pid + ' exited, code=' + code);
+			});
+		}
+		return {app: app, error: configParams.npm_error_message};
 	};
 	/**
 	 * @name orionode.AppContext#startApp
