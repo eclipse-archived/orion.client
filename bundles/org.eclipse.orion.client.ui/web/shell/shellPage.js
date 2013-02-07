@@ -813,11 +813,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		}
 
 		/* add the locally-defined types */
-		fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService); //$NON-NLS-0$
+		fileType = new mFileParamType.ParamTypeFile(shellPageFileService);
 		shell.registerType(fileType);
-		pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
+		pluginType = new mPluginParamType.ParamTypePlugin(pluginRegistry);
 		shell.registerType(pluginType);
-		var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
+		var serviceType = new mServiceParamType.ParamTypeService(pluginRegistry);
 		shell.registerType(serviceType);
 
 		/* add the locally-defined commands */

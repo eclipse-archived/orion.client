@@ -86,8 +86,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 	}());
 
 	orion.shellPage.ParamTypePlugin = (function() {
-		function ParamTypePlugin(name, pluginRegistry) {
-			this.name = name;
+		function ParamTypePlugin(pluginRegistry) {
 			this.pluginRegistry = pluginRegistry;
 
 			var self = this;
@@ -113,7 +112,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 
 		ParamTypePlugin.prototype = {
 			getName: function() {
-				return this.name;
+				return "plugin"; //$NON-NLS-0$
 			},
 			getPlugins: function() {
 				return this.plugins.slice(0);
