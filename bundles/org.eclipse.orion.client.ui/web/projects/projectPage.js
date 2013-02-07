@@ -12,10 +12,10 @@
  
 /*global define document window */
 
-define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
+define(['orion/bootstrap', 'orion/webui/littlelib', 'orion/globalCommands', 'orion/selection', 'orion/commands', 'orion/fileClient', 'orion/searchClient', 'orion/progress', 'orion/operationsClient', 'orion/contentTypes',
 	'projects/ProjectTree', 'projects/SFTPConfiguration', 'projects/ProjectNavigation', 'projects/ProjectData', 'projects/ProjectDataManager', 'orion/PageUtil'],
  
-	function( mBootstrap, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, SFTPConfiguration, ProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
+	function( mBootstrap, lib, mGlobalCommands, mSelection, mCommands, mFileClient, mSearchClient, mProgress, mOperationsClient, mContentTypes, mProjectTree, SFTPConfiguration, ProjectNavigation, mProjectData, ProjectDataManager, PageUtil ){
 		
 		var serviceRegistry;
 		var preferences;
@@ -26,14 +26,15 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 		var projectDataManager;
 		var myproject;
 		var myworkspace;
+		var mainPanel;
 		
 		function addSubComponents( ){
+		
 			var sidePanel = document.getElementById( 'projectNavigation' );
 
 			var projectTree = new ProjectNavigation( myproject, myworkspace, sidePanel, serviceRegistry, commandService, progressService, fileClient, contentTypeService, projectDataManager );
-			
-			var mainPanel = document.getElementById( 'SFTPConfiguration' );
-			
+						
+			lib.empty(mainPanel);
 			var configuration = new SFTPConfiguration( myproject, projectDataManager, mainPanel, commandService, serviceRegistry, fileClient );	
 		}
 		
@@ -89,6 +90,11 @@ define(['orion/bootstrap', 'orion/globalCommands', 'orion/selection', 'orion/com
 			var projectName = PageUtil.matchResourceParameters();
 
 			/* Create the content */
+			
+			mainPanel = document.getElementById( 'SFTPConfiguration' );
+			
+			mainPanel.appendChild(document.createTextNode("Loading project data..."));
+
 			projectName = projectName.resource.split('=')[1];
 			
 			projectDataManager = new ProjectDataManager(serviceRegistry, fileClient);

@@ -17,10 +17,12 @@ define(['orion/editor/i18n!orion/editor/nls/messages', 'orion/editor/nls/root/me
 	var result = {
 		root: root
 	};
-	Object.keys(bundle).forEach(function(key) {
-		if (typeof result[key] === 'undefined') {
-			result[key] = bundle[key];
+	for (var key in bundle) {
+		if (bundle.hasOwnProperty(key)) {
+			if (typeof result[key] === 'undefined') {
+				result[key] = bundle[key];
+			}
 		}
-	});
+	}
 	return result;
 });

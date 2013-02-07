@@ -7,7 +7,7 @@
  * License v1.0 (http://www.eclipse.org/org/documents/edl-v10.html).
  *******************************************************************************/
 
-/*global define localStorage*/
+/*global define document window localStorage*/
 
 define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orion/i18nUtil", "orion/Deferred"],
 	function(messages, require, mShell, i18nUtil, Deferred) {
@@ -26,9 +26,10 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			name: NAME_ALL,
 			getPluginLocations: function() {
 				var result = [];
+				var self = this;
 				this.plugins.forEach(function(current) {
 					var location = current.getLocation();
-					if (!urlsToExclude || !urlsToExclude[location]) {
+					if (!self.urlsToExclude || !self.urlsToExclude[location]) {
 						result.push(location);
 					}
 				});
@@ -85,8 +86,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 	}());
 
 	orion.shellPage.ParamTypePlugin = (function() {
-		function ParamTypePlugin(name, pluginRegistry) {
-			this.name = name;
+		function ParamTypePlugin(pluginRegistry) {
 			this.pluginRegistry = pluginRegistry;
 
 			var self = this;
@@ -104,7 +104,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 			});
 
 			/* don't let initialization delay rendering of the page */
-			setTimeout(function() {
+			window.setTimeout(function() {
 				self._computeDefaultPlugins();
 				self._initPluginsList();
 			}, 1);
@@ -112,7 +112,7 @@ define(["i18n!orion/shell/nls/messages", "require", "orion/widgets/Shell", "orio
 
 		ParamTypePlugin.prototype = {
 			getName: function() {
-				return this.name;
+				return "plugin"; //$NON-NLS-0$
 			},
 			getPlugins: function() {
 				return this.plugins.slice(0);

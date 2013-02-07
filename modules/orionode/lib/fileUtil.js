@@ -11,12 +11,11 @@
 /*global exports require*/
 var crypto = require('crypto');
 var fs = require('fs');
-var pfs = require('promised-io/fs');
-var PromisedIO = require('promised-io');
-var Deferred = PromisedIO.Deferred;
+var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
 var path = require('path');
 var url = require('url');
 var api = require('./api');
+var async = require('./async');
 
 /*
  * Utils for representing files as objects in the Orion File API
@@ -34,18 +33,18 @@ var api = require('./api');
 exports.getChildren = function(directory, parentLocation, excludes, callback) {
 	// If 'excludes' is omitted, the callback can be given as the 3rd argument
 	callback = excludes || callback;
-	pfs.readdir(directory).then(function(files) {
+	dfs.readdir(directory).then(function(files) {
 		// stat each file to find if it's a Directory -- ugh
 		var childStatPromises = files.map(function(file) {
 			if (Array.isArray(excludes) && excludes.indexOf(file) !== -1) {
 				return null; // omit
 			}
 			var filepath = path.join(directory, file);
-			return pfs.stat(filepath).then(function(stat) {
+			return dfs.stat(filepath).then(function(stat) {
 				return [filepath, stat];
 			});
 		}).filter(function(f) { return f; }); // skip omitted stuff
-		PromisedIO.all(childStatPromises).then(function(childStats) {
+		Deferred.all(childStatPromises).then(function(childStats) {
 			var children = childStats.map(function(cs) {
 				var childname = path.basename(cs[0]);
 				var isDirectory = cs[1].isDirectory();
@@ -103,12 +102,13 @@ exports.safeFilePath = function(workspaceDir, filepath) {
  */
 exports.generateDebugURL = function(debugMeta, hostName) {
 	var hName = hostName ? hostName : debugMeta.hostname;
-	return "[" + url.format({
+	var debugURL = url.format({
 			protocol: debugMeta.protocol,
 			hostname: hName,
 			port:  debugMeta.port,
 			pathname: debugMeta.pathname
-		}) + "]";
+		});
+	return "[" + debugURL + "](" + debugURL + ")";
 };
 
 /**
@@ -140,26 +140,26 @@ exports.rumRuff = function rumRuff(dirpath, callback) {
 	 * @param {String} dir
 	 */
 	processDir = function(stack, dir) {
-		return PromisedIO.all(pfs.readdir(dir).then(function(files) {
-			return PromisedIO.all(files.map(function(filename) {
+		return dfs.readdir(dir).then(function(files) {
+			return Deferred.all(files.map(function(filename) {
 				var fullpath = path.join(dir, filename);
-				return pfs.stat(fullpath).then(function(stat) {
+				return dfs.stat(fullpath).then(function(stat) {
 					if (stat.isDirectory()) {
 						stack.push(fullpath);
 						return new Deferred().resolve();
 					} else {
 //						console.log('unlink ' + fullpath);
-						return pfs.unlink(fullpath);
+						return dfs.unlink(fullpath);
 					}
 				});
 			}));
-		}));
+		});
 	};
 	rmdirs = function(dirlist) {
 //		console.log('about to remove: [' + dirlist.join(',') + ']');
-		return PromisedIO.all(dirlist.map(function(d) {
+		return Deferred.all(dirlist.map(function(d) {
 //			console.log('rmdir  ' + d);
-			return pfs.rmdir(d);
+			return dfs.rmdir(d);
 		}));
 	};
 	// recursively unlink files, then remove the (empty) dirs
@@ -195,10 +195,10 @@ function _copyDir(srcPath, destPath, callback) {
 	 * @param {Array} List of the mix of files and directories, in the top down order, that will be copied first for all folders then files.
 	 */
 	processDir = function(stack, dir, dirlist) {
-		return PromisedIO.all(pfs.readdir(dir.path).then(function(files) {
-			return PromisedIO.all(files.map(function(filename) {
+		return dfs.readdir(dir.path).then(function(files) {
+			return Deferred.all(files.map(function(filename) {
 				var fullpath = path.join(dir.path, filename);
-				return pfs.stat(fullpath).then(function(stat) {
+				return dfs.stat(fullpath).then(function(stat) {
 					if (stat.isDirectory()) {
 						stack.push({path: fullpath, dir: true});
 					} else {
@@ -207,18 +207,20 @@ function _copyDir(srcPath, destPath, callback) {
 					return new Deferred().resolve();
 				});
 			}));
-		}));
+		});
 	};
 	cpDir = function(dirlist) {
-		return PromisedIO.all(dirlist.map(function(d) {
+		return async.sequence(dirlist.map(function(d) {
 			if(d.dir){
 				var currentDestFolderPath = d.path.replace(srcPath, destPath);
-				return pfs.mkdir(currentDestFolderPath);
+				return function() {
+					return dfs.mkdir(currentDestFolderPath);
+				};
 			} else {
 				return function(){
 					var currentDestFolderPath = d.path.replace(srcPath, destPath);
-					var rs = pfs.createReadStream(d.path);
-					var ws = pfs.createWriteStream(currentDestFolderPath);
+					var rs = dfs.createReadStream(d.path);
+					var ws = dfs.createWriteStream(currentDestFolderPath);
 					rs.pipe(ws);
 				};
 			}

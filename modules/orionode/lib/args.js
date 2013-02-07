@@ -10,12 +10,12 @@
  *******************************************************************************/
 /*global console exports process require*/
 /*jslint regexp:false*/
+var async = require('../lib/async');
 var compat = require('./compat');
 var fs = require('fs');
 var path = require('path');
-var pfs = require('promised-io/fs');
-//var PromisedIO = require('promised-io');
-var Deferred = require('promised-io').Deferred;
+var dfs = require('deferred-fs'), Deferred = dfs.Deferred;
+var PATH_TO_NODE = process.execPath;
 
 /**
  * @param {Array} argv
@@ -77,6 +77,55 @@ exports.readPasswordFile = function(passwordFile, callback) {
 	}
 };
 
+function _checkNpmPath(config, callback){
+	var result = config, npm_path_guess_list = [];
+	if(result && result.npm_path){
+		var npmPath = result.npm_path;
+		if(npmPath.indexOf("./") === 0 || npmPath.indexOf("../") === 0){
+		    npmPath = path.dirname(PATH_TO_NODE) + "/" + npmPath;
+		}
+		npm_path_guess_list.push(npmPath);
+	}
+	if(!result){
+		result = {};
+	}
+	var found = null;
+	
+	npm_path_guess_list.push(path.dirname(PATH_TO_NODE) + "/" + "../lib/node_modules/npm/bin/npm-cli.js");
+	npm_path_guess_list.push(path.dirname(PATH_TO_NODE) + "/" + "./node_modules/npm/bin/npm-cli.js");
+    var promises = [];
+	npm_path_guess_list.forEach(function(guess) {
+		promises.push(function(){
+			if(!found){
+				return dfs.exists(guess).then(function(exists){
+					if(exists){
+						found = guess;
+					} 
+					return found;
+				});
+			} else {
+				return found;
+			}
+		});
+	});
+	async.sequence(promises).then(function(existingGuess){
+		if(!existingGuess){
+			result.npm_path = null;
+			var errorMessage = "Could not find npm in the following locations:\n";
+			npm_path_guess_list.forEach(function(guess) {
+				errorMessage = errorMessage + guess + "\n";
+			});
+			errorMessage = errorMessage + "Please add or modify the npm_path in the orion.conf file and restart the server.\n";
+			console.log(errorMessage);
+			errorMessage = errorMessage + "For details refer to [how to config npm path](http://wiki.eclipse.org/Orion/Getting_Started_with_Orion_node#Making_sure_Orionode_can_launch_npm)\n";
+			result.npm_error_message = errorMessage;
+		} else {
+			result.npm_path = existingGuess;
+		}
+		callback(result);
+	});
+}
+
 /**
  * @param {Function} callback Invoked as function(configObject), the configObject is null if the file couldn't be read.
  */
@@ -93,9 +142,9 @@ exports.readConfigFile = function(configFile, callback) {
 				var value = parsed[3] || ""; 
 				result[name] = value;
 			}
-			callback(result);
+			_checkNpmPath(result, callback);
 		});
 	} else {
-		callback(null);
+		_checkNpmPath(null, callback);
 	}
 };

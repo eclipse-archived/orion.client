@@ -547,7 +547,16 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 
 	/* functions for handling contributed commands */
 
-	function outputString(string, writer) {
+	function outputString(object, writer) {
+		if (typeof(object) !== "string") { //$NON-NLS-0$
+			if (object.xhr && object.xhr.statusText) {
+				/* server error object */
+				object = object.xhr.statusText;
+			} else {
+				object = object.toString();
+			}
+		}
+		var string = object;
 		var segments = string.split("\n"); //$NON-NLS-0$
 		segments.forEach(function(segment) {
 			writer.appendText(segment);
@@ -581,13 +590,14 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 				}
 			},
 			function(error) {
-				outputString(error).then(
+				element = element || document.createElement("div"); //$NON-NLS-0$
+				writer = new mResultWriters.ShellStringWriter(element);
+				outputString(error, writer).then(
 					function() {
-						element = element || document.createElement("div"); //$NON-NLS-0$
-						promise.resolve(element);
+						promise.reject(element);
 					},
 					function(error) {
-						promise.resolve();
+						promise.reject();
 					}
 				);
 			}
@@ -612,13 +622,14 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 				}
 			},
 			function(error) {
-				outputString(error).then(
+				element = element || document.createElement("div"); //$NON-NLS-0$
+				writer = new mResultWriters.ShellStringWriter(element);
+				outputString(error, writer).then(
 					function() {
-						element = element || document.createElement("div"); //$NON-NLS-0$
-						promise.resolve(element);
+						promise.reject(element);
 					},
 					function(error) {
-						promise.resolve();
+						promise.reject();
 					}
 				);
 			}
@@ -721,8 +732,10 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 						resolveError(promise, error);
 					},
 					function(data) {
-						var commandResult = new CommandResult(data, returnType);
-						processResult(promise, commandResult, output, true);
+						if (typeof promise.progress === "function") { //$NON-NLS-0$
+							var commandResult = new CommandResult(data, returnType);
+							processResult(promise, commandResult, output, true);
+						}
 					}
 				);
 			});
@@ -800,11 +813,11 @@ define(["i18n!orion/shell/nls/messages", "orion/bootstrap", "orion/commands", "o
 		}
 
 		/* add the locally-defined types */
-		fileType = new mFileParamType.ParamTypeFile("file", shellPageFileService); //$NON-NLS-0$
+		fileType = new mFileParamType.ParamTypeFile(shellPageFileService);
 		shell.registerType(fileType);
-		pluginType = new mPluginParamType.ParamTypePlugin("plugin", pluginRegistry); //$NON-NLS-0$
+		pluginType = new mPluginParamType.ParamTypePlugin(pluginRegistry);
 		shell.registerType(pluginType);
-		var serviceType = new mServiceParamType.ParamTypeService("service", pluginRegistry); //$NON-NLS-0$
+		var serviceType = new mServiceParamType.ParamTypeService(pluginRegistry);
 		shell.registerType(serviceType);
 
 		/* add the locally-defined commands */
