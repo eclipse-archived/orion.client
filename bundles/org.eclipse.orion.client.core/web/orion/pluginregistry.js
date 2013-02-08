@@ -137,10 +137,10 @@ define(["orion/Deferred", "orion/EventTarget"], function(Deferred, EventTarget){
 			var requestId = _currentMessageId++;
 			var d = new Deferred();
 			d.then(null, function(error) {
-				if (_state === "active" && error && error.canceled) {
+				if (_state === "active" && error instanceof Error && error.name === "Cancel") {
 					_internalRegistry.postMessage({
 						id: requestId,
-						cancel: error.message || "canceled"
+						cancel: error.message || "Cancel"
 					}, _channel);
 				}
 			});
