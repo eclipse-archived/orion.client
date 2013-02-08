@@ -19,7 +19,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 
 	tests["test subtest"] = {
 		"test sub1": function() {},
-		"test sub2": function() {}
+			"test sub2": function() {}
 	};
 
 	tests["test basic asynch"] = function() {
@@ -88,7 +88,7 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 	tests["test basic list"] = function() {
 		var listTests = {
 			"test 1": function() {},
-			"test obj": {
+				"test obj": {
 				"test2": function() {}
 			}
 		};
@@ -179,18 +179,18 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 			a.resolve();
 		});
 		test.cancel();
-		return a.promise;
+		return test;
 	};
-	
+
 	tests["test cancel parent"] = function() {
 		var parent = new Deferred();
-		
+
 		var test = parent.then(function() {
 			return assert.ok(false, "Expected an exception");
 		}, function() {
 			// expected
 		});
-		
+
 		var testCancel = test.cancel;
 		test.cancel = function() {
 			parent.cancel();
@@ -203,8 +203,8 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 			// expected
 		});
 	};
-	
-	tests["test cancel parent"] = function() {
+
+	tests["test cancel assumed"] = function() {
 		var assumed = new Deferred();
 		var a = new Deferred();
 		var test = a.then(function() {
@@ -220,8 +220,160 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		});
 	};
 
+	//promises a+ cancel tests
+	function fulfilled(value) {
+		return new Deferred().resolve(value);
+	}
+
+	function rejected(reason) {
+		return new Deferred().reject(reason);
+	}
+
+	function pending() {
+		var d = new Deferred();
+		return {
+			promise: d.promise,
+			fulfill: d.resolve,
+			reject: d.reject
+		};
+	}
+
+	function done() {}
 
 
+	var sentinel = {
+		sentinel: "sentinel"
+	}; // a sentinel fulfillment value to test for with strict equality
+	var dummy = {
+		dummy: "dummy"
+	}; // we fulfill or reject with this when we don't intend to test against it
+
+	function isCancellationError(error) {
+		return error instanceof Error && error.name === "Cancel";
+	}
+
+	tests["test Cancel.1: If the promise is not pending the 'cancel' call has no effect" + "\n" + "already-fulfilled"] = function() {
+		var promise = fulfilled(sentinel);
+		var result = promise.then(function(value) {
+			assert.strictEqual(value, sentinel);
+			done();
+		}, assert.fail);
+		promise.cancel();
+		return result;
+	};
+
+	tests["test Cancel.1: If the promise is not pending the 'cancel' call has no effect" + "\n" + "already-rejected"] = function() {
+		var promise = rejected(sentinel);
+		var result = promise.then(assert.fail, function(reason) {
+			assert.strictEqual(reason, sentinel);
+			done();
+		});
+		promise.cancel();
+		return result;
+	};
+
+
+	tests["test Cancel.2: If the promise is pending and waiting on another promise the 'cancel' call should instead propagate to this parent promise but MUST be done asynchronously after this call returns." + "\n" + "parent pending"] = function() {
+		var parentCancelled = false;
+		var tuple = pending();
+		var parent = tuple.promise;
+		parent.then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			parentCancelled = true;
+			throw reason;
+		});
+		var promise = parent.then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(parentCancelled);
+			done();
+		});
+		promise.cancel();
+		return promise;
+	};
+
+	tests["test Cancel.2: If the promise is pending and waiting on another promise the 'cancel' call should instead propagate to this parent promise but MUST be done asynchronously after this call returns" + "\n" + "grand parent pending"] = function() {
+		var grandparentCancelled = false;
+		var parentCancelled = false;
+		var uncleCancelled = false;
+
+		var tuple = pending();
+		var grandparent = tuple.promise;
+		var grandparentCancel = grandparent.cancel.bind(grandparent);
+		grandparent.cancel = function() {
+			grandparentCancel();
+			grandparentCancelled = true;
+		};
+
+		grandparent.then(null, function(reason) {
+			assert.ok(isCancellationError(reason));
+			uncleCancelled = true;
+			throw reason;
+		});
+
+		var parent = grandparent.then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			parentCancelled = true;
+			throw reason;
+		});
+
+		var promise = parent.then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(grandparentCancelled);
+			assert.ok(uncleCancelled);
+			assert.ok(parentCancelled);
+			done();
+		});
+		promise.cancel();
+		return promise;
+	};
+
+	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "simple"] = function() {
+		var promise = pending().promise;
+		var result = promise.then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			done();
+		});
+		promise.cancel();
+		return result;
+	};
+
+	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "then fulfilled assumption"] = function() {
+		var assumedCancelled = false;
+		var assumed = pending().promise;
+		var assumedCancel = assumed.cancel.bind(assumed);
+		assumed.cancel = function() {
+			assumedCancel();
+			assumedCancelled = true;
+		};
+		
+		var promise = fulfilled().then(function() {
+			return assumed;
+		}).then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(assumedCancelled);
+			done();
+		});
+		promise.cancel();
+		return promise;
+	};
+	
+	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "then rejected assumption"] = function() {
+		var assumedCancelled = false;
+		var assumed = pending().promise;
+		assumed.then(null, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assumedCancelled = true;
+		});
+		var promise = rejected().then(null, function() {
+			return assumed;
+		}).then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(assumedCancelled);
+			done();
+		});
+		promise.cancel();
+		return promise;
+	};
 
 	return tests;
 });
