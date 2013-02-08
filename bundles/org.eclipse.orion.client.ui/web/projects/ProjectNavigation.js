@@ -42,6 +42,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			this.addDrives( this );
 			
 			this.addCommands();	
+			
+			window.addEventListener( 'build', this.refreshDrives.bind( this ) );
 		}
 		
 		var workingSetNode;
@@ -127,6 +129,28 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 		}
 		
 		ProjectNavigation.prototype.addWorkingSet = addWorkingSet;
+		
+		function refreshDrives(){
+		
+			var self = this;
+		
+			this.projectDataManager.getProject( self.project.id, function( project, workspace, dataManager ){
+			
+				self.project = project;
+		
+				var drivenames = [];
+				
+				if( project ){
+					for( var p = 0; p < project.drives.length; p++ ){
+						drivenames.push( project.drives[p].drivename );
+					}
+				}
+			
+				self.drivesExplorer.loadDriveList( workspace, drivenames );	
+			});
+		}
+		
+		ProjectNavigation.prototype.refreshDrives = refreshDrives;
 		
 		function addDrives( scope ){
 			var self = this;

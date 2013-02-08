@@ -116,10 +116,10 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				}
 				var space = '\t\t\t';
 				return [
-					['PID','URL','Debug URL'].join(space),
-					['---','---','---------'].join(space)
+					['PID', 'Debug URL'].join(space),
+					['---', '---------'].join(space)
 				].concat(data.Apps.map(function(app) {
-					return [app.Id, app.Location, (app.DebugURL || '')].join(space);
+					return [app.Id, (app.DebugURL || '')].join(space);
 				}))
 				.join('\n');
 			});
