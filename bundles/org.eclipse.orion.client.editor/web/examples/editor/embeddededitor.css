@@ -1,4 +1,4 @@
-@import "../../orion/editor/editor.css";
+@import "./themes/default.css";
 
 body {
 	margin: 0;
@@ -16,22 +16,4 @@ a:hover {
 	cursor: hand;
 	text-decoration: underline;
 	color: #ffffff;
-}
-
-.contentassist {
-	display: none;
-	background-color: #ffffff;
-	padding: 2px;
-	top: 100px;
-	left: 100px;
-	border: 1px solid #cccccc;
-	z-index:10;
-	cursor: default;
-	overflow: auto;
-	height: 150px;
-	width: 200px;
-}
-
-.contentassist .selected {
-	background-color: #dddddd;
 }
