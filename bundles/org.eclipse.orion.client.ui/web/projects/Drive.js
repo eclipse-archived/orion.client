@@ -23,7 +23,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		var PASSWORD_INDEX = USERNAME_INDEX + 1;
 		var LAST_INDEX = PASSWORD_INDEX + 1;
 
-		function Drive( details, commandService, serviceRegistry ){
+		function Drive( details, commandService, serviceRegistry, identifier ){
 			
 			this.drivename = details.drivename;
 			this.address = details.address;
@@ -33,6 +33,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.username = details.username;
 			this.password = details.password;
 			this.responseHandler = new ProjectResponseHandler( 'informationPane' );
+	
 
 			this.commandService = commandService;
 			this.serviceRegistry = serviceRegistry;
@@ -43,10 +44,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.content = this.entryNode.firstChild.firstChild.children[1];
 			
-			this.setDriveName( this.drivename );
+
 			
-			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename );
-			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address );
+			this.driveNameDomId = 'Name' + String( identifier );
+			this.driveAddressDomId = 'Address' + String( identifier );
+			
+			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename, this.driveNameDomId );
+			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address, this.driveAddressDomId );
 //			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
 //			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
 //			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
@@ -63,6 +67,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.connectbutton = buttonArea.children[1];
 			
 			this.content.appendChild( buttonArea );
+			
+//						this.setDriveName( this.drivename );
 			
 			var elements = this.elements;
 			var registry = this.serviceRegistry;
@@ -128,6 +134,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.commandService.renderCommands('driveCommand', this.connectbutton, this, this, "button"); //$NON-NLS-0$
 		}
 		
+		var id;
+		Drive.prototype.id = id;
+		
 		var elements = [];
 		Drive.prototype.elements = elements;	
 	
@@ -141,47 +150,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 						
 		Drive.prototype.templateString = templateString;	
 		
-		function makeDriveElement( name, value, type ){
+		function makeDriveElement( name, value, id, type ){
+
 		
 			if( !type ){ type = "text"; }
 		
-			var element = document.createElement( 'div' );
+			var delement = document.createElement( 'div' );
 			
-			element.className = "setting-property";
+			delement.className = "setting-property";
 			
-			element.innerHTML = '<label>' + //$NON-NLS-0$
-//									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-//									'<input class="setting-control" type="' + type + '">' + //$NON-NLS-0$
+			delement.innerHTML = '<label>' + //$NON-NLS-0$
+									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+									'<input class="setting-control" type="' + type + '" value="' + value + '" id="' + id + '">' + //$NON-NLS-0$
 								'</label>';   //$NON-NLS-0$
-								
-			var label = document.createElement( 'label' );
-			
-			
-			var span = document.createElement( 'span' );
-			span.className = 'setting-label';
-			span.innerHTML = name;
-								
-			var input = document.createElement( 'input' );
-			input.className = 'setting-control';
-			input.type = type;
-			
-			label.appendChild( span );
-			label.appendChild( input );
-			
-			element.appendChild( label );
-								
-			input.value = value;
-//			element.firstChild.children[1].value = value;
-			
-			element.getLabel = function(){
-				return span.innerHTML;
-			};
-			
-			element.getValue = function(){
-				return input.value;
-			};
 							
-			return element;
+			return delement;
 		}
 		
 		Drive.prototype.makeDriveElement = makeDriveElement;
@@ -217,22 +200,41 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			});
 		}
 		
+		var driveAddressDomId;
+		var driveNameDomId;
+		
+		Drive.prototype.driveNameDomId = driveNameDomId;
+		Drive.prototype.driveAddressDomId = driveAddressDomId;
+		
+		function getDriveName(){
+			var drive = document.getElementById( this.driveNameDomId ).value;	
+			return drive;
+		}
+		
+		Drive.prototype.getDriveName = getDriveName;
+		
+		function getDriveAddress(){
+			return document.getElementById( this.driveAddressDomId ).value;
+		}
+		
+		Drive.prototype.getDriveAddress = getDriveAddress;
+		
 		function setDriveName( name ){
-			this.entryNode.firstChild.firstChild.firstChild.innerHTML = name;			
+			document.getElementById( this.driveNameDomId ).value = name;
 		}
 		
 		Drive.prototype.setDriveName = setDriveName;
 		
 		function setDriveAddress( address ){
-			this.entryNode.firstChild.firstChild.firstChild.innerHTML = name;
+			document.getElementById( this.driveAddressDomId ).value = address;
 		}
 		
 		Drive.prototype.setDriveAddress = setDriveAddress;
 
 		function toJSONData(){
 			
-			var jsonDrive = { 'drivename': this.elements[NAME_INDEX].getValue(), 
-							  'address': this.elements[ADDRESS_INDEX].getValue()
+			var jsonDrive = { 'drivename': this.getDriveName(), 
+							  'address': this.getDriveAddress()
 							  /*, 'path': elements[PATH_INDEX].getValue(),
 						      'port': elements[PORT_INDEX].getValue(),
 						      'username': elements[USERNAME_INDEX].getValue() */ };					
