@@ -12,32 +12,32 @@
  
 /*globals define */
 
-define('orion/editor/edit', [
+define('orion/editor/edit', [ //$NON-NLS-0$
 	
-	"orion/editor/textView", 
-	"orion/editor/textModel",
-	"orion/editor/projectionTextModel",
-	"orion/editor/eventTarget",
-	"orion/editor/keyBinding",
-	"orion/editor/rulers",
-	"orion/editor/annotations",
-	"orion/editor/tooltip",
-	"orion/editor/undoStack",
-	"orion/editor/textDND",
+	"orion/editor/textView", //$NON-NLS-0$
+	"orion/editor/textModel", //$NON-NLS-0$
+	"orion/editor/projectionTextModel", //$NON-NLS-0$
+	"orion/editor/eventTarget", //$NON-NLS-0$
+	"orion/editor/keyBinding", //$NON-NLS-0$
+	"orion/editor/rulers", //$NON-NLS-0$
+	"orion/editor/annotations", //$NON-NLS-0$
+	"orion/editor/tooltip", //$NON-NLS-0$
+	"orion/editor/undoStack", //$NON-NLS-0$
+	"orion/editor/textDND", //$NON-NLS-0$
 	
-	"orion/editor/editor",
-	"orion/editor/editorFeatures",
+	"orion/editor/editor", //$NON-NLS-0$
+	"orion/editor/editorFeatures", //$NON-NLS-0$
 	
-	"orion/editor/contentAssist",
-	"orion/editor/cssContentAssist",
-	"orion/editor/htmlContentAssist",
-	"orion/editor/jsTemplateContentAssist",
+	"orion/editor/contentAssist", //$NON-NLS-0$
+	"orion/editor/cssContentAssist", //$NON-NLS-0$
+	"orion/editor/htmlContentAssist", //$NON-NLS-0$
+	"orion/editor/jsTemplateContentAssist", //$NON-NLS-0$
 	
-	"orion/editor/AsyncStyler",
-	"orion/editor/mirror",
-	"orion/editor/textMateStyler",
-	"orion/editor/htmlGrammar",
-	"examples/editor/textStyler"
+	"orion/editor/AsyncStyler", //$NON-NLS-0$
+	"orion/editor/mirror", //$NON-NLS-0$
+	"orion/editor/textMateStyler", //$NON-NLS-0$
+	"orion/editor/htmlGrammar", //$NON-NLS-0$
+	"examples/editor/textStyler" //$NON-NLS-0$
 ], function(mTextView, mTextModel, mProjModel, mEventTarget, mKeyBinding, mRulers, mAnnotations, mTooltip, mUndoStack, mTextDND, mEditor, mEditorFeatures, mContentAssist, mCSSContentAssist, mHtmlContentAssist, mJSContentAssist, mAsyncStyler, mMirror, mTextMateStyler, mHtmlGrammar, mTextStyler) {
 
 	/**	@private */
@@ -66,7 +66,7 @@ define('orion/editor/edit', [
 
 	/**	@private */	
 	function optionName(name) {
-		var prefix = "data-editor-";
+		var prefix = "data-editor-"; //$NON-NLS-0$
 		if (name.substring(0, prefix.length) === prefix) {
 			var key = name.substring(prefix.length);
 			key = key.replace(/-([a-z])/ig, function(all, character) {
@@ -95,8 +95,8 @@ define('orion/editor/edit', [
 			var key = optionName(attr.nodeName);
 			if (key) {
 				var value = attr.nodeValue;
-				if (value === "true" || value === "false") {
-					value = value === "true";
+				if (value === "true" || value === "false") { //$NON-NLS-1$ //$NON-NLS-0$
+					value = value === "true"; //$NON-NLS-0$
 				}
 				options[key] = value;
 			}
@@ -146,7 +146,7 @@ define('orion/editor/edit', [
 	 */
 	function edit(options) {
 		var parent = options.parent;
-		if (!parent) { parent = "editor"; }
+		if (!parent) { parent = "editor"; } //$NON-NLS-0$
 		if (typeof(parent) === "string") { //$NON-NLS-0$
 			parent = (options.document || document).getElementById(parent);
 		}
@@ -205,13 +205,13 @@ define('orion/editor/edit', [
 					var textView = editor.getTextView();
 					var annotationModel = editor.getAnnotationModel();
 					switch(lang) {
-						case "js":
-						case "java":
-						case "css":
+						case "js": //$NON-NLS-0$
+						case "java": //$NON-NLS-0$
+						case "css": //$NON-NLS-0$
 							this.styler = new mTextStyler.TextStyler(textView, lang, annotationModel);
 							editor.setFoldingRulerVisible(options.showFoldingRuler === undefined || options.showFoldingRuler);
 							break;
-						case "html":
+						case "html": //$NON-NLS-0$
 							this.styler = new mTextMateStyler.TextMateStyler(textView, new mHtmlGrammar.HtmlGrammar());
 							break;
 					}
@@ -259,7 +259,7 @@ define('orion/editor/edit', [
 		if (contentAssist) {
 			var cssContentAssistProvider = new mCSSContentAssist.CssContentAssistProvider();
 			var jsTemplateContentAssistProvider = new mJSContentAssist.JSTemplateContentAssistProvider();
-			contentAssist.addEventListener("Activating", function() {
+			contentAssist.addEventListener("Activating", function() { //$NON-NLS-0$
 				if (/css$/.test(options.lang)) {
 					contentAssist.setProviders([cssContentAssistProvider]);
 				} else if (/js$/.test(options.lang)) {
@@ -270,7 +270,7 @@ define('orion/editor/edit', [
 		/* The minimum height of the editor is 50px */
 		if (getHeight(parent) <= 50) {
 			var height = editor.getTextView().computeSize().height;
-			parent.style.height = height + "px";
+			parent.style.height = height + "px"; //$NON-NLS-0$
 		}
 		return editor;
 	}
