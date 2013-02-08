@@ -131,6 +131,11 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 	text-decoration: line-through;
 }
 
+.invalid {
+	color: red;
+	font-weight: bold;
+}
+
 .keyword-control {
 	color: #7F0055;
 	font-weight: bold;
@@ -183,7 +188,7 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 }
 
 .entity-other-attribute-name {
-	color: #7f007f;
+	color: #3C802C;
 }
 
 .punctuation-definition-comment {
@@ -216,23 +221,3 @@ a.token_singleline_comment, a.token_multiline_comment, a.token_doc_comment {
 .cm-bracket { color: white; background-color: gray; }
 .cm-tag { color: #3f7f7f; }
 .cm-attribute { color: #7f007f; }
-
-
-/* ************************************************************************************************
- * htmlStyles.css
- * Styling for html syntax highlighting
- *
- *************************************************************************************************/
-
-.entity-other-attribute-name {
-	color: #3C802C;
-}
-
-.punctuation-definition-comment {
-	color: #3f5fbf;
-}
-
-.invalid {
-	color: red;
-	font-weight: bold;
-}

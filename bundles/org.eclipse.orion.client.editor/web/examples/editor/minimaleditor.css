@@ -1,4 +1,4 @@
-@import "../../orion/editor/editor.css";
+@import "./themes/default.css";
 
 body {
 	margin: 0;
