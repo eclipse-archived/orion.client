@@ -30,7 +30,8 @@ ensure_dir "$STAGING"
 
 # Copy bundles and modules to staging (we omit the other top-level junk like .git/)
 echo Copying $REPO to $STAGING
-cp -r "$REPO"/bundles "$STAGING"
+mkdir "$STAGING/bundles"
+cp -r "$REPO"/bundles "$STAGING/bundles"
 cp -r "$REPO"/modules "$STAGING"
 
 # Move orionode to top level
@@ -55,11 +56,11 @@ ensure_dir "$STAGING"/lib/orion.client
 cp -r "$STAGING"/bundles/ "$STAGING"/lib/orion.client/
 rm -rf "$STAGING"/bundles/
 
-echo Rewriting ORION_CLIENT path in server.js
+echo Rewriting ORION_CLIENT path in index.js
 # All we want to do is find the ORION_CLIENT line and replace '../../' with './lib/orion.client/' but unfortunately we are using sh and sed
 # Tried breaking it into parts but string quoting makes this fail:
 	#FIND="ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))"
 	#REPLACE="ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))"
-	# sed -e 's/${FIND2}/${REPLACE2}/' server.js > sjs.tmp && mv sjs.tmp server.js
-sed -e 's/ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))/ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))/' "$STAGING"/server.js > "$STAGING"/sjs.tmp && mv "$STAGING"/sjs.tmp "$STAGING"/server.js
+	# sed -e 's/${FIND2}/${REPLACE2}/' index.js > sjs.tmp && mv sjs.tmp index.js
+sed -e 's/ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))/ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))/' "$STAGING"/index.js > "$STAGING"/sjs.tmp && mv "$STAGING"/sjs.tmp "$STAGING"/index.js
 echo Done.
