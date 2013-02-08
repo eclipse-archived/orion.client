@@ -106,7 +106,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 					} else {
 						Deferred.when(self.workspacesFolder, function(workspacesFolder) {
 							self.workspacesFolder = workspacesFolder;
-							self.fileClient.createFolder( workspacesFolder.Location, WORKAREA ).then( function( file ){
+							self.fileClient.createFolder( workspacesFolder.Location, project.name ).then( function( file ){
 								project.workspace = file.Location;
 								self.save( project );
 								callback(project, self.loadedWorkspace, self);
@@ -114,7 +114,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/ProjectData', '
 							function(error) {
 								// handle the case where the workspace folder was there even though the project file had not been saved to indicate so.
 								if (error.status === 412) {
-									project.workspace = self.workspacesFolder.Location + WORKAREA;
+									project.workspace = self.workspacesFolder.Location + project.name;
 									self.save( project );
 									callback(project, self.loadedWorkspace, self);
 								} else {
