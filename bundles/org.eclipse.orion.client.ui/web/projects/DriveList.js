@@ -86,7 +86,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				tooltip: 'Adds a new drive configuration',
 				id: "orion.addDrive", //$NON-NLS-0$
 				callback: function(data) {
-					console.log( 'new drive' );
 					driveListContainer.newDriveAndShow();
 				}.bind(this)
 			});
@@ -116,13 +115,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			return JSONDrives;	
 		},
 		
-		addRows: function(referenceDrive){
+		addRows: function(){
 
 			var list = this.DriveList;
-		
-			if(referenceDrive){
-				list = referenceDrive.DriveList;
-			}
 
 			lib.empty( list );
 			var DriveList = this.driveElements;
@@ -130,9 +125,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.driveCount.textContent = DriveList.length;
 
 			for( var p = 0; p < DriveList.length; p++ ){
-				var entry = new Drive( DriveList[p], this.commandService, this.serviceRegistry );
+				var entry = DriveList[p];
 				list.appendChild( entry.entryNode );
-//				entry.show();
 			}
 		},
 				
@@ -144,7 +138,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			
 			if( !driveData ){ driveData = emptyDrive; }
 			
-			this.driveElements.push( new Drive( driveData, this.commandService, this.serviceRegistry ) );
+			var id = this.driveElements.length + 1;
+			
+			this.driveElements.push( new Drive( driveData, this.commandService, this.serviceRegistry,  id ) );
 		},
 		
 		newDriveAndShow: function(driveData){
