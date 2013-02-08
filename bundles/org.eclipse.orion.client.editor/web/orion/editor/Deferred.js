@@ -11,9 +11,9 @@
 /*global exports module define setTimeout*/
 
 (function(root, factory) { // UMD
-	if (typeof define === 'function' && define.amd) {
+	if (typeof define === "function" && define.amd) { //$NON-NLS-0$
 		define(factory);
-	} else if (typeof exports === 'object') {
+	} else if (typeof exports === "object") { //$NON-NLS-0$
 		module.exports = factory();
 	} else {
 		root.orion = root.orion || {};
@@ -76,15 +76,11 @@
 		};
 	}
 
-	function createCancelError(reason) {
-		var cancelError = typeof reason === "string" ? new Error(reason) : new Error();
-		if (typeof reason === "object") {
-			Object.keys(reason).forEach(function(key) {
-				cancelError[key] = reason[key];
-			});
-		}
-		cancelError.canceled = true;
-		cancelError.name = "OperationCanceled";
+	function noop() {}
+
+	function createCancelError() {
+		var cancelError = new Error("Cancel"); //$NON-NLS-0$
+		cancelError.name = "Cancel"; //$NON-NLS-0$
 		return cancelError;
 	}
 
@@ -158,11 +154,12 @@
 				var listener = head;
 				head = head.next;
 				var deferred = listener.deferred;
-				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ $NON-NLS-1$
-				if (typeof listener[methodName] === "function") {
+				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
+				if (typeof listener[methodName] === "function") { //$NON-NLS-0$
 					try {
 						var listenerResult = listener[methodName](result);
 						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
+							deferred.cancel = listenerResult.cancel || noop;
 							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
 						} else {
 							deferred.resolve(listenerResult);
@@ -177,16 +174,6 @@
 			head = tail = null;
 		}
 
-		function checkCompleted(strict) {
-			if (state) {
-				if (strict) {
-					throw new Error("already " + state); //$NON-NLS-0$
-				}
-				return true;
-			}
-			return false;
-		}
-
 		/**
 		 * Rejects this Deferred.
 		 * @name reject
@@ -196,7 +183,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.reject = function(error, strict) {
-			if (!checkCompleted(strict)) {
+			if (!state) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
 				if (head) {
@@ -215,7 +202,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.resolve = function(value, strict) {
-			if (!checkCompleted(strict)) {
+			if (!state) {
 				state = "resolved"; //$NON-NLS-0$
 				result = value;
 				if (head) {
@@ -234,7 +221,7 @@
 		 * @returns {orion.Promise}
 		 */
 		this.progress = function(update, strict) {
-			if (!checkCompleted(strict)) {
+			if (!state) {
 				var listener = head;
 				while (listener) {
 					if (listener.progress) {
@@ -253,9 +240,9 @@
 		 * @param {Object} reason The reason for canceling this Deferred.
 		 * @param {Boolean} [strict]
 		 */
-		this.cancel = function(reason, strict) {
-			if (!checkCompleted(strict)) {
-				_this.reject(createCancelError(reason));
+		this.cancel = function() {
+			if (!state) {
+				_this.reject(createCancelError());
 			}
 		};
 
@@ -267,33 +254,20 @@
 				progress: onProgress,
 				deferred: new Deferred()
 			};
+			var deferred = listener.deferred;
+			var thisCancel = this.cancel.bind(this);
+			deferred.cancel = function() {
+				enqueue(thisCancel, true);
+			};
+			var promise = deferred.promise;
+			promise.cancel = function(reason) {
+				deferred.cancel(reason); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
+			};
+
 			attach(listener);
 			if (state) {
 				enqueue(notify, true); //runAsync
 			}
-
-			var promise = listener.deferred.promise;
-			promise.cancel = function(reason) {
-				if (state) {
-					return;
-				}
-				detach(listener);
-				var deferred = listener.deferred;
-				if (typeof onReject === "function") { //$NON-NLS-0$
-					try {
-						var listenerResult = onReject(createCancelError(reason));
-						if (listenerResult && typeof listenerResult.then === "function") { //$NON-NLS-0$
-							listenerResult.then(noReturn(deferred.resolve), noReturn(deferred.reject), deferred.progress);
-						} else {
-							deferred.resolve(listenerResult);
-						}
-					} catch (e) {
-						deferred.reject(e);
-					}
-				} else {
-					deferred.cancel(reason);
-				}
-			};
 			return promise;
 		};
 
