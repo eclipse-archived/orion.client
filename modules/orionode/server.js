@@ -23,7 +23,7 @@ var config_params = {};
 argslib.createDirs([workspaceDir], function(dirs) {
 	var passwordFile = args.password || args.pwd;
 	argslib.readPasswordFile(passwordFile, function(password) {
-		argslib.readConfigFile("./orion.conf", function(configParams) {
+		argslib.readConfigFile(path.join(__dirname, 'orion.conf'), function(configParams) {
 			if(configParams){
 				config_params = configParams;
 			}
