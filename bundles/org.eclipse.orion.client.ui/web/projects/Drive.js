@@ -33,28 +33,21 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			this.username = details.username;
 			this.password = details.password;
 			this.responseHandler = new ProjectResponseHandler( 'informationPane' );
-	
 
 			this.commandService = commandService;
 			this.serviceRegistry = serviceRegistry;
 
 			this.entryNode = document.createElement( 'div' );
 			
-			this.entryNode.innerHTML = this.templateString;
-			
-			this.content = this.entryNode.firstChild.firstChild.children[1];
-			
-
-			
 			this.driveNameDomId = 'Name' + String( identifier );
 			this.driveAddressDomId = 'Address' + String( identifier );
+			this.titleNodeDomId = 'Title' + String( identifier );
+			
+			this.entryNode.innerHTML = this.getTemplateString();
+			this.content = this.entryNode.firstChild.firstChild.children[1];
 			
 			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename, this.driveNameDomId );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address, this.driveAddressDomId );
-//			this.elements[PATH_INDEX] = this.makeDriveElement( 'Path', this.path );
-//			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port );
-//			this.elements[USERNAME_INDEX] = this.makeDriveElement( 'Username', this.username );
-//			this.elements[PASSWORD_INDEX] = this.makeDriveElement( 'Password', this.password, "password" );
 			
 			for( var element = NAME_INDEX; element < this.elements.length; element++ ){
 				this.content.appendChild( this.elements[element] );
@@ -68,8 +61,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.content.appendChild( buttonArea );
 			
-//						this.setDriveName( this.drivename );
-			
 			var elements = this.elements;
 			var registry = this.serviceRegistry;
 			
@@ -82,14 +73,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				id: "orion.driveSave",
 				callback: function(data) {
 				
-					var drivename = elements[NAME_INDEX].getValue();
+					var drivename = thisDrive.getDriveName();
 				
-					this.setDriveName( drivename );
+					this.setDriveTitle( drivename );
 					
-					/* constuct the URL - example:
-			           sftp://oriontest:orion2012@planetorion.org/home/oriontest/sampledata */
-					
-					var url = 'sftp://:@' + elements[ADDRESS_INDEX].getValue();
+					var url = 'sftp://:@' + thisDrive.getDriveAddress();
 					
 					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
@@ -140,19 +128,23 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		var elements = [];
 		Drive.prototype.elements = elements;	
 	
-		var templateString = '<div style="overflow:hidden;">' + //$NON-NLS-0$
-								'<section class="setting-row" role="region" aria-labelledby="Navigation-header">' +
-									'<h3 class="setting-header" id="titleNode"></h3>' +
-									'<div class="setting-content">' +
-									'</div>' +
-								'</section>' +
-							'</div>'; //$NON-NLS-0$
+		function getTemplateString(){
+	
+			var templateString = '<div style="overflow:hidden;">' + //$NON-NLS-0$
+									'<section class="setting-row" role="region" aria-labelledby="Navigation-header">' +
+										'<h3 class="setting-header" id="' + this.titleNodeDomId + '">' + this.drivename + '</h3>' +
+										'<div class="setting-content">' +
+										'</div>' +
+									'</section>' +
+								'</div>'; //$NON-NLS-0$
+					
+			return templateString;
+		}
 						
-		Drive.prototype.templateString = templateString;	
+		Drive.prototype.getTemplateString = getTemplateString;	
 		
 		function makeDriveElement( name, value, id, type ){
 
-		
 			if( !type ){ type = "text"; }
 		
 			var delement = document.createElement( 'div' );
@@ -162,18 +154,19 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			delement.innerHTML = '<label>' + //$NON-NLS-0$
 									'<span class="setting-label">' + name + ':</span>' + //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 									'<input class="setting-control" type="' + type + '" value="' + value + '" id="' + id + '">' + //$NON-NLS-0$
-								'</label>';   //$NON-NLS-0$
-							
+								'</label>';   //$NON-NLS-0$						
 			return delement;
 		}
 		
 		Drive.prototype.makeDriveElement = makeDriveElement;
 		
-		
 		function disconnect(data){
+		
 			var fileClient = new mFileClient.FileClient( this.serviceRegistry );
 					
 			var loadedWorkspace = fileClient.loadWorkspace("");
+			
+			var self = this;
 		
 			Deferred.when( loadedWorkspace, function(workspace) {
 
@@ -181,16 +174,15 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				
 				fileClient.read( workspace.DriveLocation, true ).then( function(folders){
 					
-					var driveName = elements[NAME_INDEX].getValue();
-					
-					var responseHandler = this;
-					
+					var driveName = self.getDriveName();
+
 					for( var folder = 0; folder < folders.Children.length;folder++ ){
 					
 						if( folders.Children[folder].Name === driveName ){
 							for( var p =0; p< folders.Projects.length; p++ ){
 								if( folders.Children[folder].Id === folders.Projects[p].Id ){
-									fileClient.deleteFile( folders.Projects[p].Location, true ).then(responseHandler.handleSuccess.bind( responseHandler), responseHandler.handleError.bind( responseHandler ) );								
+									fileClient.deleteFile( folders.Projects[p].Location, true ).then(
+									self.handleSuccess.bind( self ), self.handleError.bind( self ) );	
 									break;
 								}
 							}
@@ -221,6 +213,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		function setDriveName( name ){
 			document.getElementById( this.driveNameDomId ).value = name;
+			this.setDriveTitle( name );
 		}
 		
 		Drive.prototype.setDriveName = setDriveName;
@@ -230,6 +223,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		}
 		
 		Drive.prototype.setDriveAddress = setDriveAddress;
+
+		function setDriveTitle( title ){
+			document.getElementById( this.titleNodeDomId ).innerHTML = title;
+		}
+		
+		Drive.prototype.setDriveTitle = setDriveTitle;
 
 		function toJSONData(){
 			
