@@ -65,4 +65,17 @@ echo Rewriting ORION_CLIENT path in index.js
 	#REPLACE="ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))"
 	# sed -e 's/${FIND2}/${REPLACE2}/' index.js > sjs.tmp && mv sjs.tmp index.js
 sed -e 's/ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))/ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))/' "$STAGING"/index.js > "$STAGING"/sjs.tmp && mv "$STAGING"/sjs.tmp "$STAGING"/index.js
+
+echo Sanity check: running server tests
+MOCHA="`which mocha`"
+if [ ! -f "$MOCHA" ] ; then
+    MOCHA="$REPO"/modules/orionode/node_modules/bin/mocha
+fi
+
+if [ ! -f "$MOCHA" ] ; then
+	echo "Could not find mocha. Can't run sanity check :("
+else
+	$MOCHA "$STAGING"/test/test-server
+fi
+
 echo Done.
