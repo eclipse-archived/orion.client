@@ -17,9 +17,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 	
 		var NAME_INDEX = 0;
 		var ADDRESS_INDEX = NAME_INDEX + 1;
-		var PATH_INDEX = ADDRESS_INDEX + 1;
-		var PORT_INDEX =  PATH_INDEX + 1;	
-		var USERNAME_INDEX = PORT_INDEX + 1;
+		var PORT_INDEX =  ADDRESS_INDEX + 1;
+		var PATH_INDEX = PORT_INDEX + 1;
+		var USERNAME_INDEX = PORT_INDEX + 1;	
 		var PASSWORD_INDEX = USERNAME_INDEX + 1;
 		var LAST_INDEX = PASSWORD_INDEX + 1;
 
@@ -41,6 +41,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.driveNameDomId = 'Name' + String( identifier );
 			this.driveAddressDomId = 'Address' + String( identifier );
+			this.drivePortDomId = 'Port' + String( identifier );
 			this.titleNodeDomId = 'Title' + String( identifier );
 			
 			this.entryNode.innerHTML = this.getTemplateString();
@@ -48,6 +49,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 			
 			this.elements[NAME_INDEX]  = this.makeDriveElement( 'Name', this.drivename, this.driveNameDomId );
 			this.elements[ADDRESS_INDEX] = this.makeDriveElement( 'Address', this.address, this.driveAddressDomId );
+			this.elements[PORT_INDEX] = this.makeDriveElement( 'Port', this.port, this.drivePortDomId );			
 			
 			for( var element = NAME_INDEX; element < this.elements.length; element++ ){
 				this.content.appendChild( this.elements[element] );
@@ -77,7 +79,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 				
 					this.setDriveTitle( drivename );
 					
-					var url = 'sftp://:@' + thisDrive.getDriveAddress();
+					var url = 'sftp://:@' + thisDrive.getDriveAddress() + ':' + thisDrive.getDrivePortNumber();
 					
 					var fileClient = new mFileClient.FileClient( this.serviceRegistry );			
 					
@@ -205,6 +207,13 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 		Drive.prototype.getDriveName = getDriveName;
 		
+		function getDrivePortNumber(){
+			var drive = document.getElementById( this.drivePortDomId ).value;	
+			return drive;
+		}
+		
+		Drive.prototype.getDrivePortNumber = getDrivePortNumber;
+		
 		function getDriveAddress(){
 			return document.getElementById( this.driveAddressDomId ).value;
 		}
@@ -217,6 +226,12 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		}
 		
 		Drive.prototype.setDriveName = setDriveName;
+		
+		function setDrivePortNumber( port ){
+			document.getElementById( this.drivePortDomId ).value = port;
+		}
+		
+		Drive.prototype.setDrivePortNumber = setDrivePortNumber;
 		
 		function setDriveAddress( address ){
 			document.getElementById( this.driveAddressDomId ).value = address;
@@ -233,10 +248,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		function toJSONData(){
 			
 			var jsonDrive = { 'drivename': this.getDriveName(), 
-							  'address': this.getDriveAddress()
-							  /*, 'path': elements[PATH_INDEX].getValue(),
-						      'port': elements[PORT_INDEX].getValue(),
-						      'username': elements[USERNAME_INDEX].getValue() */ };					
+							  'address': this.getDriveAddress(),
+						      'port': this.getDrivePortNumber() };	
+						      
 			return jsonDrive;
 		}
 		
