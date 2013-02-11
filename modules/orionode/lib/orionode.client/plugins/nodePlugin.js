@@ -14,6 +14,9 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 	function fromJson(xhrResult) {
 		return JSON.parse(xhrResult.response);
 	}
+	function linkify(url) {
+		return url && ('[' + url + '](' + url + ')');
+	}
 	function getSocketURL(path) {
 		var socketBaseUrl = new URL();
 		var location = window.location;
@@ -119,7 +122,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 					['PID', 'Debug URL'].join(space),
 					['---', '---------'].join(space)
 				].concat(data.Apps.map(function(app) {
-					return [app.Id, (app.DebugURL || '')].join(space);
+					return [app.Id, (linkify(app.DebugURL) || '')].join(space);
 				}))
 				.join('\n');
 			});
@@ -164,7 +167,7 @@ define(['orion/plugin', 'orion/xhr', 'orion/Deferred', 'orion/URL-shim', 'socket
 				});
 			};
 			sockProc.started = function(app) {
-				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + app.DebugURL + '\n');
+				sockProc.progress('Debugging app (PID: ' + app.Id + ')\nDebug URL: ' + linkify(app.DebugURL) + '\n');
 			};
 			sockProc.stopped = function(app) {
 				sockProc.progress('App stopped (PID: ' + app.Id + ')');
