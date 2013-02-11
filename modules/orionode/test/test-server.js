@@ -37,4 +37,24 @@ describe('orionode', function() {
 		.get('/file/project/fizz.txt')
 		.expect(200, 'hello world', done);
 	});
+
+	// Sanity check to ensure the orion client code is being mounted correctly
+	it('finds the orion.client code', function(done) {
+		app.use(orion({
+			workspaceDir: WORKSPACE
+		}))
+		.request()
+		.get('/navigate/table.html')
+		.expect(200)
+		.end(function(err, res) {
+			assert.ifError(err);
+			done();
+		});
+	});
+
+	// TODO: Ensure server respects command line args passed to it
+//	it('respects -w argument', function(done) {
+//		
+//	});
+
 });
