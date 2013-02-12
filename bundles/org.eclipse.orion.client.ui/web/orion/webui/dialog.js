@@ -143,7 +143,7 @@ define(['i18n!orion/widgets/nls/messages', 'require', 'orion/webui/littlelib', '
 				self.$lastFocusedElement = e.target;
 			}, true);
 			this._modalListener = function(e) { //$NON-NLS-0$
-				var preventFocus =	e.target.tabIndex < 0 || !lib.contains(self.$frame, e.target);
+				var preventFocus =	!lib.contains(self.$frame, e.target);
 				if (preventFocus) {
 					for (var i = 0; i<self.$$modalExclusions.length; i++) {
 						if (lib.contains(self.$$modalExclusions[i], e.target)) {
