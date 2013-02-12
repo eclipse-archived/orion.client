@@ -811,7 +811,7 @@ define(['i18n!orion/navigate/nls/messages', 'require', 'orion/webui/littlelib', 
 						var importOptions = {"OptionHeader":optionHeader,"Host":host,"Port":port,"Path":path,"UserName":user,"Passphrase":password}; //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 						var deferred = fileClient.remoteImport(item.ImportLocation, importOptions);
 						var ex = explorer;
-						progressService.showWhile(deferred, i18nUtil.formatMessage["Importing from ${0}"], host).then(
+						progressService.showWhile(deferred, i18nUtil.formatMessage(messages["Importing from ${0}"], host)).then(
 							function() { ex.changedItem.bind(ex)(this.treeRoot, true); },
 							errorHandler
 						);//refresh the root
