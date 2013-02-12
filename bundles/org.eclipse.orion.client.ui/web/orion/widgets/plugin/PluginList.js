@@ -31,7 +31,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 	
 	// This is temporary see Bug 368481 - Re-examine localStorage caching and lifecycle
-	var defaultPluginsStorage = localStorage.getItem("/orion/preferences/default/plugins");
+	var defaultPluginsStorage = localStorage.getItem("/orion/preferences/default/plugins"); //$NON-NLS-0$
 	if (defaultPluginsStorage) {
 		var pluginsPreference = JSON.parse(defaultPluginsStorage);
 		Object.keys(pluginsPreference).forEach(function(pluginURL) {
@@ -45,10 +45,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 	}
 	objects.mixin(PluginList.prototype, {
 		templateString: '' +  //$NON-NLS-0$
-						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper toolComposite">' +  /* pluginSectionHeader */
-							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */
-							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */
-							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */
+						'<div id="pluginSectionHeader" class="pluginSectionHeader sectionWrapper toolComposite">' +  /* pluginSectionHeader */ //$NON-NLS-0$
+							'<div class="sectionAnchor sectionTitle layoutLeft"></div>' + /* pluginTitle */ //$NON-NLS-0$
+							'<div class="sectionItemCount layoutLeft">0</div>' + /* pluginCount */ //$NON-NLS-0$
+							'<div id="pluginCommands" class="pluginCommands layoutRight sectionActions"></div>' + /* pluginCommands */ //$NON-NLS-0$
 						'</div>' + //$NON-NLS-0$
 
 				        '<div class="displaytable layoutBlock">' + //$NON-NLS-0$
@@ -133,7 +133,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 				}.bind(this)
 			});
 			this.commandService.addCommand(installPluginCommand);
-			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.installPlugin", 1, /* not grouped */ null, false, /* no key binding yet */ null, new mCommands.URLBinding("installPlugin", "url")); //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 			var reloadAllPluginsCommand = new mCommands.Command({
 				name: messages["Reload all"],
 				tooltip: messages["Reload all installed plugins"],
@@ -142,7 +142,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			});
 			this.commandService.addCommand(reloadAllPluginsCommand);
 			// register these with the toolbar
-			this.commandService.registerCommandContribution("pluginCommands", "orion.reloadAllPlugins", 2); //$NON-NLS-0$
+			this.commandService.registerCommandContribution("pluginCommands", "orion.reloadAllPlugins", 2); //$NON-NLS-1$ //$NON-NLS-0$
 
 			var createPluginCommand = new mCommands.Command({
 				name: messages['Create'],
@@ -156,11 +156,11 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 			this.commandService.addCommand(createPluginCommand);
 	
 			if( this.includeMaker === true ){
-				this.commandService.registerCommandContribution("pluginCommands", "orion.createPlugin", 2); //$NON-NLS-0$
+				this.commandService.registerCommandContribution("pluginCommands", "orion.createPlugin", 2); //$NON-NLS-1$ //$NON-NLS-0$
 			}
 			
 			// Render the commands in the heading, emptying any old ones.
-			this.commandService.renderCommands("pluginCommands", "pluginCommands", this, this, "button"); //$NON-NLS-0$
+			this.commandService.renderCommands("pluginCommands", "pluginCommands", this, this, "button"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
 		},
 		
 		addRows: function(referenceplugin){
