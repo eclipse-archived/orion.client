@@ -259,7 +259,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		function handleSuccess( result ){
 		
 			var evt = document.createEvent('Event');
-			evt.initEvent('build', true, true);
+			evt.initEvent('DriveEvent', true, true);
 			 
 			// elem is any element
 			this.entryNode.dispatchEvent(evt);
