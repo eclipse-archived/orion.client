@@ -357,6 +357,30 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		return promise;
 	};
 	
+	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "then chain-fulfilled assumption"] = function() {
+		var d = new Deferred();
+		setTimeout(d.reject,200);
+		var assumedCancelled = false;
+		var assumed = pending().promise;
+		var assumedCancel = assumed.cancel.bind(assumed);
+		assumed.cancel = function() {
+			assumedCancel();
+			assumedCancelled = true;
+		};
+
+		var promise = fulfilled().then(function() {
+			return fulfilled();
+		}).then(function() {
+			return assumed;
+		}).then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(assumedCancelled);
+			done(); d.resolve();
+		});
+		promise.cancel();
+		return d;
+	};
+	
 	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "then rejected assumption"] = function() {
 		var assumedCancelled = false;
 		var assumed = pending().promise;
@@ -374,6 +398,31 @@ define(["orion/assert", "orion/test", "orion/Deferred"], function(assert, mTest,
 		promise.cancel();
 		return promise;
 	};
+
+	tests["test Cancel.3: Otherwise the promise is rejected with a CancellationError." + "\n" + "then chain-rejected assumption"] = function() {
+		var d = new Deferred();
+		setTimeout(d.reject,200);
+		var assumedCancelled = false;
+		var assumed = pending().promise;
+		var assumedCancel = assumed.cancel.bind(assumed);
+		assumed.cancel = function() {
+			assumedCancel();
+			assumedCancelled = true;
+		};
+
+		var promise = rejected().then(null, function() {
+			return rejected();
+		}).then(null, function() {
+			return assumed;
+		}).then(assert.fail, function(reason) {
+			assert.ok(isCancellationError(reason));
+			assert.ok(assumedCancelled);
+			done(); d.resolve();
+		});
+		promise.cancel();
+		return d;
+	};
+
 
 	return tests;
 });
