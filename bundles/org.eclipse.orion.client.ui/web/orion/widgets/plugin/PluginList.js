@@ -199,8 +199,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			var pluginRegistry = this.settings.pluginRegistry;
 			var disablePluginCommand = new mCommands.Command({
-				name: "Disable",
-				tooltip: "Disable the plugin",
+				name: messages["Disable"],
+				tooltip: messages["DisableTooltip"],
 				id: "orion.disablePlugin", //$NON-NLS-0$
 				imageClass: "core-sprite-stop", //$NON-NLS-0$
 				visibleWhen: function(url) {  // we expect a URL
@@ -219,8 +219,8 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/Deferred', 'orion/
 
 			
 			var enablePluginCommand = new mCommands.Command({
-				name: "Enable",
-				tooltip: "Enable the plugin",
+				name: messages["Enable"],
+				tooltip: messages["EnableTooltip"],
 				id: "orion.enablePlugin", //$NON-NLS-0$
 				imageClass: "core-sprite-start", //$NON-NLS-0$
 				visibleWhen: function(url) {  // we expect a URL
