@@ -8,6 +8,7 @@
  * 
  * Contributors: IBM Corporation - initial API and implementation
  ******************************************************************************/
+/*global define console window*/
 
 define(['orion/treeModelIterator', 'orion/compare/compareUtils', 'orion/editor/annotations', 'orion/compare/jsdiffAdapter'], function(mTreeModelIterator, mCompareUtils, mAnnotations, mJSDiffAdapter){
 
@@ -205,6 +206,8 @@ exports.DiffTreeNavigator = (function() {
 		rangeStyle: {styleClass: "annotationRange emptyAddedWordDiffRight"} //$NON-NLS-0$
 	});
 	
+	var MAX_CHAR_DIFF_CHARS_PER_BLOCK = 5000;
+	
 	DiffTreeNavigator.prototype = /** @lends orion.DiffTreeNavigator.DiffTreeNavigator.prototype */ {
 		
 		initAll: function(charOrWordDiff, oldEditor, newEditor, oldDiffBlockFeeder, newDiffBlockFeeder, overviewRuler, curveRuler){
@@ -238,7 +241,8 @@ exports.DiffTreeNavigator = (function() {
 		},
 		
 		renderAnnotations: function(){
-			for(var i = 0; i < this.editorWrapper.length; i++){
+			var i;
+			for(i = 0; i < this.editorWrapper.length; i++){
 				this.editorWrapper[i].annoTypes = [];
 				this.editorWrapper[i].diffFeeder.getBlockAnnoTypes(this.editorWrapper[i].annoTypes);
 				this.editorWrapper[i].diffFeeder.getWordAnnoTypes(this.editorWrapper[i].annoTypes);
@@ -266,7 +270,7 @@ exports.DiffTreeNavigator = (function() {
 				return;
 			}
 			var adapter = new mJSDiffAdapter.JSDiffAdapter();
-			for(var i = 0; i < oldDiffBlocks.length; i++){
+			for(i = 0; i < oldDiffBlocks.length; i++){
 				var diffBlockModel = this.generatePairBlockAnnotations(this._root, i);
 				this._root.children.push(diffBlockModel);
 				var children = this.generatePairWordAnnotations(diffBlockModel, i, adapter);
@@ -379,8 +383,9 @@ exports.DiffTreeNavigator = (function() {
 				return -1;
 			}
 			var cursor = this.iterator.cursor();
-			if(!cursor)
+			if(!cursor) {
 				return -1;
+			}
 			if(cursor.type === "block"){ //$NON-NLS-0$
 				return cursor.index;
 			} else {
@@ -443,8 +448,9 @@ exports.DiffTreeNavigator = (function() {
 				return;
 			}
 			var cursor = this.iterator.cursor();
-			if(!cursor)
-				return
+			if(!cursor){
+				return;
+			}
 			var annoType0, annoType1;
 			var annoPosOld = {start: cursor.oldA.start, end: cursor.oldA.end};
 			var annoPosNew = {start: cursor.newA.start, end: cursor.newA.end};
@@ -490,7 +496,11 @@ exports.DiffTreeNavigator = (function() {
 			var charDiffMap = null;
 			var startOld = 0;
 			var startNew = 0;
-			if(textOld && textNew){
+			//If either side of the diff block has more than 5000 charactors, the char level diff on the js diff side becomes slow. It will accumulate the latency of comapre widget.
+			//Given that a diff block with moret than 5000 charactors has very less meaning of indicating all the char level diff, we are disabling the char diff.
+			//Only diff blocks with less than 5000 charactors on both side will get char level diff.
+			//See https://bugs.eclipse.org/bugs/show_bug.cgi?id=399500.
+			if(textOld && textNew && textOld.text && textNew.text && textOld.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK && textNew.text.length <= MAX_CHAR_DIFF_CHARS_PER_BLOCK){
 				charDiffMap = jsDiffAdapter.adaptCharDiff(textOld.text, textNew.text, this._charOrWordDiff === "word"); //$NON-NLS-0$
 				startNew = textNew.start;
 				startOld = textOld.start;
@@ -570,8 +580,9 @@ exports.DiffTreeNavigator = (function() {
 				blockIndex = 0;
 			}
 			var diffBlocks = this.getFeeder().getDiffBlocks();
-			if(diffBlocks.length === 0)
+			if(diffBlocks.length === 0) {
 				return;
+			}
 			this._setTextViewPosition(this.editorWrapper[0].editor.getTextView() , diffBlocks[blockIndex][0]);
 			if(this.editorWrapper[0].editor !== this.editorWrapper[1].editor){
 				var lineIndexL = mCompareUtils.lookUpLineIndex(this.getMapper(), 0, diffBlocks[blockIndex][1]);
@@ -705,11 +716,11 @@ exports.DiffBlockFeeder = (function() {
 				return -1;
 			}
 			var mapperIndex = this._diffBlocks[diffBlockIndex][1];
-			return 	(mapperIndex === -1) ? 0 :this._mapper[mapperIndex][this._mapperColumnIndex];
+			return (mapperIndex === -1) ? 0 :this._mapper[mapperIndex][this._mapperColumnIndex];
 		},
 		
 		getOverviewLineCount: function(){
-			return 	this._textModel.getLineCount();
+			return this._textModel.getLineCount();
 		},
 		
 		getLineNumber: function(lineIndex){
@@ -884,7 +895,7 @@ exports.inlineDiffBlockFeeder = (function() {
 			return -1;
 		}
 		var mapperIndex = this._diffBlocks[diffBlockIndex][1];
-		return 	this._mapper[mapperIndex][0] + this._mapper[mapperIndex][1];
+		return this._mapper[mapperIndex][0] + this._mapper[mapperIndex][1];
 	};
 	inlineDiffBlockFeeder.prototype.getLineNumber = function(lineIndex){
 		for(var i = 0; i < this._gapBlocks.length; i++){

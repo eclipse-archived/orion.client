@@ -43,6 +43,7 @@ define(['i18n!orion/widgets/nls/messages', 'orion/crawler/searchCrawler', 'orion
 
 	OpenResourceDialog.prototype._init = function(options) {
 		this.title = options.title || messages['Find File Named'];
+		this.modal = true;
 		this.messages = messages;
 		this._searcher = options.searcher;
 		this._progress = options.progress;

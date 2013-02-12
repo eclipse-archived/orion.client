@@ -38,8 +38,7 @@ function sequential_commands(cwd, commands, callback) {
 
 function tearDown(dir, callback) {
 	sequential_commands(dir, [
-		{ cmd: 'rm', args: ['-rf', 'project/*'] },
-		{ cmd: 'rmdir', args: ['project'] }
+		{ cmd: 'rm', args: ['-rf', 'project'] }
 	], callback);
 }
 
@@ -72,9 +71,9 @@ function setUp(dir, callback) {
 			{ cmd: 'mkdir', args: ['project'] },
 			{ cmd: 'mkdir', args: ['project/my folder'] },
 			{ cmd: 'mkdir', args: ['project/my folder/my subfolder'] },
-			{ cmd: 'sh',    args: ['-c', 'echo -n "hello world" > "project/fizz.txt"'] },
-			{ cmd: 'sh',    args: ['-c', 'echo -n "bzzzz"       > "project/my folder/buzz.txt"'] },
-			{ cmd: 'sh',    args: ['-c', 'echo -n "whoa"        > "project/my folder/my subfolder/quux.txt"'] }
+			{ cmd: 'bash',    args: ['-c', 'echo -n "hello world" > "project/fizz.txt"'] },
+			{ cmd: 'bash',    args: ['-c', 'echo -n "bzzzz"       > "project/my folder/buzz.txt"'] },
+			{ cmd: 'bash',    args: ['-c', 'echo -n "whoa"        > "project/my folder/my subfolder/quux.txt"'] }
 		], callback);
 	}
 	fs.exists(dir, function(exists) {
@@ -99,7 +98,7 @@ function createApp() {
 	return app;
 }
 
-exports.DEBUG = false;
+exports.DEBUG = process.env.DEBUG_TESTS || false;
 exports.createApp = createApp;
 exports.setUp = setUp;
 exports.tearDown = tearDown;
