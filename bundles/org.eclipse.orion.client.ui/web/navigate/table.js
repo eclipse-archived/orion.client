@@ -12,10 +12,10 @@
 /*global define document window eclipse orion serviceRegistry:true widgets alert URL*/
 /*browser:true*/
 
-define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
+define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion/Deferred', 'orion/i18nUtil', 'orion/webui/littlelib', 'orion/selection', 'orion/status', 'orion/progress', 'orion/dialogs',
         'orion/ssh/sshTools', 'orion/commands', 'orion/favorites', 'orion/tasks', 'orion/navoutliner', 'orion/searchClient', 'orion/fileClient', 'orion/operationsClient', 'orion/globalCommands',
         'orion/fileCommands', 'orion/explorers/explorer-table', 'orion/explorers/navigatorRenderer', 'orion/fileUtils', 'orion/PageUtil', 'orion/URITemplate', 'orion/contentTypes', 'orion/URL-shim'], 
-		function(require, messages, mBootstrap, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
+		function(require, messages, mBootstrap, Deferred, i18nUtil, lib, mSelection, mStatus, mProgress, mDialogs, mSsh, mCommands, mFavorites, mTasks, mNavOutliner,
 				mSearchClient, mFileClient, mOperationsClient, mGlobalCommands, mFileCommands, mExplorerTable, mNavigatorRenderer, mFileUtils, PageUtil, URITemplate, mContentTypes) {
 
 	mBootstrap.startup().then(function(core) {
@@ -71,9 +71,10 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 				if (isAtRoot && !gettingStartedNode) { 
 					// create a command that represents each "orion.core.content" extension point
 					var newContentContributions = serviceRegistry.getServiceReferences("orion.core.content"); //$NON-NLS-0$
-					var tasks = [];
-					for (var i=0; i<newContentContributions.length; i++) {
-						var contribution = newContentContributions[i];
+					var deferreds = [];
+					newContentContributions.forEach(function(contribution) {
+						var d = new Deferred();
+						deferreds.push(d);
 						var href, hrefContent, uriTemplate = null;
 						var id = contribution.getProperty("id"); //$NON-NLS-0$
 						var template = contribution.getProperty("uriTemplate"); //$NON-NLS-0$
@@ -86,18 +87,38 @@ define(['require', 'i18n!orion/navigate/nls/messages', 'orion/bootstrap', 'orion
 							uriTemplate = new URITemplate(template);
 							hrefContent = window.decodeURIComponent(uriTemplate.expand({OrionHome: orionHome}));
 						}
-						var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
-						wrappingCommand.contentDescription = contribution.getProperty("description"); //$NON-NLS-0$
-						commandService.addCommand(wrappingCommand);
-						tasks.push({commandId: id});
-					}
-					// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
-					// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
-					// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
-					new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
-						description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
-						tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false, //$NON-NLS-0$
-						descriptionProperty: "contentDescription"}); //$NON-NLS-0$
+						if(contribution.getProperty("nls")) {//$NON-NLS-0$
+							i18nUtil.getMessageBundle(contribution.getProperty("nls")).then(function(commandMessages){ //$NON-NLS-0$
+								var name = contribution.getProperty("nameKey") ? commandMessages[contribution.getProperty("nameKey")] : contribution.getProperty("name"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								var description = contribution.getProperty("descriptionKey") ? commandMessages[contribution.getProperty("descriptionKey")] : contribution.getProperty("description"); //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+								var wrappingCommand = mFileCommands.createNewContentCommand(id, name, href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
+								wrappingCommand.contentDescription = description; //$NON-NLS-0$
+								commandService.addCommand(wrappingCommand);
+								d.resolve(wrappingCommand);
+							});
+						} else {
+							var wrappingCommand = mFileCommands.createNewContentCommand(id, contribution.getProperty("name"), href, hrefContent, explorer, fileClient, progress); //$NON-NLS-0$
+							wrappingCommand.contentDescription = contribution.getProperty("description"); //$NON-NLS-0$
+							commandService.addCommand(wrappingCommand);
+							d.resolve(wrappingCommand);
+						}
+					});
+					Deferred.all(deferreds,  function(error) { return {error: error}; }).then(function(commandsOrErrors) {
+						var tasks = [];
+						commandsOrErrors.forEach(function(commandOrError) {
+							if (commandOrError.error) {
+							} else {
+								tasks.push({commandId: commandOrError.id});
+							}
+						});
+						// Add the getting started task list.  Keep it collapsed unless there is no workspace content.
+						// We want project creation commands to always be valid from the task list (even if the explorer root is not the workspace.)
+						// So the item we pass into the task list for validating commands is a fake object that pretends to be the workspace.
+						new mTasks.TaskList({parent: "gettingStarted", id: "gettingStartedTasks", title: messages["Create new content"],  //$NON-NLS-2$ //$NON-NLS-1$ //$NON-NLS-0$
+							description: messages["Click one of the tasks below to create an Orion folder.  You can upload, import, or generate files."],
+							tasks: tasks, serviceRegistry: serviceRegistry, commandService: commandService, item: {Location: "/workspace"}, handler: explorer, collapsed: false, //$NON-NLS-0$
+							descriptionProperty: "contentDescription"}); //$NON-NLS-0$
+					});
 				} else if (gettingStartedNode) {
 					lib.empty(gettingStartedNode.parentNode); 
 				}

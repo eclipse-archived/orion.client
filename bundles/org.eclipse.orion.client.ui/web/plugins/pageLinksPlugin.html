@@ -105,15 +105,17 @@
 
 		provider.registerService("orion.core.content", null, {
 			id: "orion.content.html5",
-			name: "Sample HTML5 Site",
-			description: 'Generate an HTML5 "Hello World" website, including JavaScript, HTML, and CSS files.',
+			nameKey: "Sample HTML5 Site",
+			nls: "orion/nls/messages",
+			descriptionKey: "Generate an HTML5 'Hello World' website, including JavaScript, HTML, and CSS files.",
 			contentURITemplate: htmlHelloWorld.href
 		});
 
 		provider.registerService("orion.core.content", null, {
 			id: "orion.content.plugin",
-			name: "Sample Orion Plugin",
-			description: "Generate a sample plugin for integrating with Orion.",
+			nameKey: "Sample Orion Plugin",
+			nls: "orion/nls/messages",
+			descriptionKey: "Generate a sample plugin for integrating with Orion.",
 			contentURITemplate: pluginHelloWorld.href
 		});
 

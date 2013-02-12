@@ -51,8 +51,9 @@ define(["orion/plugin", "orion/xhr", "orion/URL-shim", "domReady!"], function(Pl
 	
 	provider.registerService("orion.core.content", null, {
 		id: "orion.content.gitClone",
-		name: "Clone Git Repository",
-		description: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
+		nls: "git/nls/gitmessages",
+		nameKey: "Clone Git Repository",
+		descriptionKey: "Go to the Orion repositories page to provide a git repository URL. Once the repository is created, it will appear in the Navigator.",
 		uriTemplate: "{OrionHome}/git/git-repository.html#,cloneGitRepository=URL"
 	});
 

@@ -14,7 +14,7 @@
 
 (function() {
 	try {
-		if (typeof window.URL === "function" && new window.URL("http://www.w3.org").protocol === "http:") {
+		if (typeof window.URL === "function" && window.URL.length !== 0 && new window.URL("http://www.w3.org").protocol === "http:") {
 			return;
 		}
 	} catch (e) {
