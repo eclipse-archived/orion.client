@@ -78,6 +78,9 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 					var drivename = thisDrive.getDriveName();
 				
 					this.setDriveTitle( drivename );
+					var evt = document.createEvent('Event');
+					evt.initEvent('DriveEvent', true, true);
+					this.entryNode.dispatchEvent(evt);
 					
 					var url = 'sftp://:@' + thisDrive.getDriveAddress() + ':' + thisDrive.getDrivePortNumber();
 					
@@ -260,8 +263,6 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		
 			var evt = document.createEvent('Event');
 			evt.initEvent('DriveEvent', true, true);
-			 
-			// elem is any element
 			this.entryNode.dispatchEvent(evt);
 			
 			this.responseHandler.handleSuccess( 'OK' );
@@ -272,7 +273,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/commands', 'orion/
 		function handleError( result ){
 			var messageText = result.responseText;
 			var message = JSON.parse( messageText );
-			message = message.DetailedMessage;
+			message = 'Unable to connect';
 			this.responseHandler.handleError( message );
 		}
 		
