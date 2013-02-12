@@ -196,13 +196,13 @@
 			};
 			var deferred = listener.deferred;
 			var thisCancel = this.cancel.bind(this);
-			var parentCancel = function() {
+			var propagateCancel = function() {
 				enqueue(function() {
-					var cancel = deferred.cancel === parentCancel ? thisCancel : deferred.cancel;
+					var cancel = deferred.cancel === propagateCancel ? thisCancel : deferred.cancel;
 					cancel();
 				}, true);
 			};
-			deferred.cancel = parentCancel;
+			deferred.cancel = propagateCancel;
 			var promise = deferred.promise;
 			promise.cancel = function() {
 				deferred.cancel(); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
