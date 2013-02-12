@@ -28,18 +28,19 @@ STAGING=$2
 
 ensure_dir "$STAGING"
 
-# Copy bundles and modules to staging (we omit the other top-level junk like .git/)
-echo Copying $REPO to $STAGING
-mkdir "$STAGING/bundles"
-cp -r "$REPO"/bundles "$STAGING/bundles"
-cp -r "$REPO"/modules "$STAGING"
+# Copy bundles to staging
+echo Copying $REPO/bundles to $STAGING
+ensure_dir "$STAGING"/bundles
+cp -r "$REPO"/bundles/* "$STAGING"/bundles/
 
-# Move orionode to top level
-echo Promoting "$STAGING"/modules/orionode to $STAGING
-cp -r "$STAGING"/modules/orionode/* "$STAGING"
-# Copy the stuff starting with . (like .gitignore, which is important)
-cp -r "$STAGING"/modules/orionode/.[^.]* "$STAGING"
-rm -rf "$STAGING"/modules
+# Copy modules/orionode/* to staging, but omit unwanted node_modules
+echo Copying $REPO/modules/orionode to $STAGING
+for f in "$REPO"/modules/orionode/* ; do
+	cp -r "$f" "$STAGING"
+done
+# The * construct above omits things whose name begins with dot (.)
+# But we need .gitignore, it's important for npm, so copy it over.
+cp "$REPO"/modules/orionode/.gitignore $STAGING
 
 # unnecessary: these are ignored via .gitignore
 # delete .workspace/
@@ -53,7 +54,8 @@ rm -rf "$STAGING"/bundles/org.eclipse.orion.client.users
 
 # Move bundles/ into lib/orion.client/
 ensure_dir "$STAGING"/lib/orion.client
-cp -r "$STAGING"/bundles/ "$STAGING"/lib/orion.client/
+ensure_dir "$STAGING"/lib/orion.client/bundles
+cp -r "$STAGING"/bundles/* "$STAGING"/lib/orion.client/bundles
 rm -rf "$STAGING"/bundles/
 
 echo Rewriting ORION_CLIENT path in index.js
@@ -63,4 +65,17 @@ echo Rewriting ORION_CLIENT path in index.js
 	#REPLACE="ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))"
 	# sed -e 's/${FIND2}/${REPLACE2}/' index.js > sjs.tmp && mv sjs.tmp index.js
 sed -e 's/ORION_CLIENT = path.normalize(path.join(__dirname, '\''..\/..\/'\''))/ORION_CLIENT = path.normalize(path.join(__dirname, '\''.\/lib\/orion.client\/'\''))/' "$STAGING"/index.js > "$STAGING"/sjs.tmp && mv "$STAGING"/sjs.tmp "$STAGING"/index.js
+
+echo Sanity check: running server tests
+MOCHA="`which mocha`"
+if [ ! -f "$MOCHA" ] ; then
+    MOCHA="$REPO"/modules/orionode/node_modules/bin/mocha
+fi
+
+if [ ! -f "$MOCHA" ] ; then
+	echo "Could not find mocha. Can't run sanity check :("
+else
+	$MOCHA "$STAGING"/test/test-server
+fi
+
 echo Done.

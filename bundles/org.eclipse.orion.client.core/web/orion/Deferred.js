@@ -20,53 +20,28 @@
 		root.orion.Deferred = factory();
 	}
 }(this, function() {
-	var head, tail, remainingHead, remainingTail, running = false;
+	var syncQueue = [],
+		asyncQueue = [],
+		running = false;
 
-	function run(fn) {
-		while (fn) {
+	function run() {
+		var fn;
+		while ((fn = syncQueue.shift() || asyncQueue.shift())) { //empty the sync queue first!!
 			fn();
-			if (remainingHead) {
-				if (!head) {
-					head = remainingHead;
-				} else {
-					tail.next = remainingHead;
-				}
-				tail = remainingTail;
-			}
-			if (head) {
-				remainingHead = head.next;
-				remainingTail = tail;
-				fn = head.fn;
-				head = tail = null;
-			} else {
-				fn = null;
-			}
 		}
 		running = false;
 	}
 
-	function enqueue(fn, runAsync) {
-		if (running) {
-			if (!head) {
-				head = {
-					fn: fn,
-					next: null
-				};
-				tail = head;
+	function enqueue(fn, async) {
+		var queue = async ? asyncQueue : syncQueue;
+		queue.push(fn);
+		if (!running) {
+			running = true;
+			if (async) {
+				setTimeout(run, 0);
 			} else {
-				tail.next = {
-					fn: fn,
-					next: null
-				};
-				tail = tail.next;
+				run();
 			}
-			return;
-		}
-		running = true;
-		if (runAsync) {
-			setTimeout(run.bind(null, fn), 0);
-		} else {
-			run(fn);
 		}
 	}
 
@@ -115,44 +90,12 @@
 	 * interface to callers.</p>
 	 */
 	function Deferred() {
-		var result, state, head, tail, _this = this;
-
-		function attach(listener) {
-			if (head) {
-				tail.next = listener;
-			} else {
-				head = listener;
-			}
-			tail = listener;
-		}
-
-		function detach(listener) {
-			if (head === listener) {
-				head = listener.next || null;
-				if (head === null) {
-					tail = null;
-				}
-				return;
-			}
-			var current = head;
-			while (current.next) {
-				if (current.next === listener) {
-					if (listener.next) {
-						current.next = listener.next;
-					} else {
-						current.next = null;
-						tail = current;
-					}
-					return;
-				}
-				current = current.next;
-			}
-		}
+		var result, state, listeners = [],
+			_this = this;
 
 		function notify() {
-			while (head) {
-				var listener = head;
-				head = head.next;
+			var listener;
+			while ((listener = listeners.shift())) {
 				var deferred = listener.deferred;
 				var methodName = state === "resolved" ? "resolve" : "reject"; //$NON-NLS-0$ //$NON-NLS-1$ //$NON-NLS-2$
 				if (typeof listener[methodName] === "function") { //$NON-NLS-0$
@@ -171,7 +114,6 @@
 					deferred[methodName](result);
 				}
 			}
-			head = tail = null;
 		}
 
 		/**
@@ -186,7 +128,7 @@
 			if (!state) {
 				state = "rejected"; //$NON-NLS-0$
 				result = error;
-				if (head) {
+				if (listeners.length) {
 					enqueue(notify);
 				}
 			}
@@ -205,7 +147,7 @@
 			if (!state) {
 				state = "resolved"; //$NON-NLS-0$
 				result = value;
-				if (head) {
+				if (listeners.length) {
 					enqueue(notify);
 				}
 			}
@@ -222,13 +164,11 @@
 		 */
 		this.progress = function(update, strict) {
 			if (!state) {
-				var listener = head;
-				while (listener) {
+				listeners.forEach(function(listener) {
 					if (listener.progress) {
 						listener.progress(update);
 					}
-					listener = listener.next;
-				}
+				});
 			}
 			return _this.promise;
 		};
@@ -256,15 +196,19 @@
 			};
 			var deferred = listener.deferred;
 			var thisCancel = this.cancel.bind(this);
-			deferred.cancel = function() {
-				enqueue(thisCancel, true);
+			var propagateCancel = function() {
+				enqueue(function() {
+					var cancel = deferred.cancel === propagateCancel ? thisCancel : deferred.cancel;
+					cancel();
+				}, true);
 			};
+			deferred.cancel = propagateCancel;
 			var promise = deferred.promise;
-			promise.cancel = function(reason) {
-				deferred.cancel(reason); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
+			promise.cancel = function() {
+				deferred.cancel(); // require indirection since deferred.cancel will be assigned if a promise is returned by onResolve/onReject
 			};
 
-			attach(listener);
+			listeners.push(listener);
 			if (state) {
 				enqueue(notify, true); //runAsync
 			}
