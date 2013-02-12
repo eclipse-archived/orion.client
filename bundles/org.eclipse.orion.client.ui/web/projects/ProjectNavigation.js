@@ -43,7 +43,7 @@ define(['i18n!orion/settings/nls/messages', 'require', 'orion/webui/littlelib', 
 			
 			this.addCommands();	
 			
-			window.addEventListener( 'build', this.refreshDrives.bind( this ) );
+			window.addEventListener( 'DriveEvent', this.refreshDrives.bind( this ) );
 		}
 		
 		var workingSetNode;

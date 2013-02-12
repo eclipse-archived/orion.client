@@ -75,10 +75,10 @@ define(['i18n!orion/settings/nls/messages', 'require', 'projects/DriveList', 'or
 			
 				for( var d = 0; d < project.drives.length; d++ ){
 					this.driveWidget.newDriveAndShow( project.drives[d] );
-				}
-				
-//				this.driveWidget.addRows();					
+				}					
 			}
+			
+			window.addEventListener( 'DriveEvent', this.saveConfiguration.bind( this ) );
 		}
 
 		function saveConfiguration(){
